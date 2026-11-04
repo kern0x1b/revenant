@@ -270,14 +270,36 @@ function newest(pattern, marker)
     return found[#found]
 end
 
+function real_packages(names)
+    local found = {}
+    for _, name in ipairs(string.split(names or "", ",", {plain = true})) do
+        if name ~= "" then
+            table.insert(found, name)
+        end
+    end
+    return found
+end
+
+function recipe_version(name)
+    local recipe = path.join(checkout(), "packages", name:sub(1, 1), name, "xmake.lua")
+    local version = os.isfile(recipe) and io.readfile(recipe):match('add_versions%("([^"]+)"')
+    if not version then
+        raise("%s has no recipe in packages/, so the isolated build cannot take its sources from a revenant install", name)
+    end
+    return version
+end
+
 function build(folder, cache, options)
     folder = path.absolute(folder)
     local shared = options.shared or path.join(os.getenv("HOME"), "Git", "projects", "ios", "revenant", ".cache")
     local ci_backports = path.join(shared, "scratch", "rn-swift", "ci-backports", "libWebKitBackports.dylib")
-    local enriched = install_recipe(folder, path.absolute(cache), ENRICHED_MARKDOWN.name, ENRICHED_MARKDOWN.version)
+    local pkgdirs = {ENRICHED_MARKDOWN.name .. "=" .. install_recipe(folder, path.absolute(cache), ENRICHED_MARKDOWN.name, ENRICHED_MARKDOWN.version)}
+    for _, name in ipairs(real_packages(options.real)) do
+        table.insert(pkgdirs, name .. "=" .. install_recipe(folder, path.absolute(cache), name, recipe_version(name)))
+    end
     local env = build_environment({
         folder = folder, cache = path.absolute(cache), checkout = checkout(), real = options.real, pods = options.pods,
-        pkgdirs = ENRICHED_MARKDOWN.name .. "=" .. enriched,
+        pkgdirs = table.concat(pkgdirs, ","),
         engine = options.engine or newest(path.join(shared, "xmake-global", ".xmake", "packages", "w", "webkit-engine", "latest", "*"), path.join("frameworks", "JavaScriptCore.framework", "JavaScriptCore")),
         swiftui = options.swiftui or path.join(newest(path.join(shared, "xmake-global", ".xmake", "packages", "s", "swiftui", "latest", "*"), path.join("lib", "swift", "iphoneos")), "lib", "swift", "iphoneos"),
         backports = options.backports or (os.isfile(ci_backports) and ci_backports or nil)
