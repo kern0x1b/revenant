@@ -30,3 +30,12 @@ target("revenant-unlock")
     add_includedirs(DEVICE_SHARED)
     add_frameworks("CoreFoundation", "CoreGraphics", "Foundation", "UIKit")
     add_syslinks("objc")
+
+-- The read-only GLES2 timing probe (frameworks/Backports/tests/gpu_probe/q4probe.m). A plain binary, copied to the
+-- phone's /tmp and run there; nothing is installed.
+target("revenant-q4probe")
+    add_rules("@addon/revenant/apple-ios")
+    set_kind("binary")
+    add_files(path.join(os.projectdir(), "frameworks", "Backports", "tests", "gpu_probe", "q4probe.m"))
+    add_frameworks("CoreFoundation", "Foundation", "IOKit", "OpenGLES")
+    add_syslinks("objc")
