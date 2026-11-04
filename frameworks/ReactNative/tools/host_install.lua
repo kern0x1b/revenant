@@ -16,7 +16,8 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
   stop    ends the running process of the app of the id and of no other id: it finds the process by the launchd label of the app.]]
 
 LIBRARIES = {"libFoundationBackports", "libCoreTextBackports", "libUIKitBackports", "libUserNotificationsBackports", "libCoreGraphicsBackports",
-             "libGraphicsBackports", "libCoreFoundationBackports", "libSystemBackports", "libIOSurfaceBackports", "libWebKitBackports", "libMapKitBackports"}
+             "libGraphicsBackports", "libCoreFoundationBackports", "libSystemBackports", "libIOSurfaceBackports", "libWebKitBackports", "libMapKitBackports",
+             "libCoreLocationBackports", "libSecurityBackports", "libContactsBackports", "libLocalAuthenticationBackports"}
 
 function backports_libraries()
     return LIBRARIES
@@ -159,6 +160,11 @@ function stage(options)
         if #arguments > 0 then
             table.insert(arguments, file)
             os.vrunv("install_name_tool", arguments)
+        end
+    end
+    for _, file in ipairs(files) do
+        if os.iorunv("otool", {"-L", file}):find(OLD_PREFIX, 1, true) then
+            raise("%s still loads a backports library from %s: the library is not in LIBRARIES, so the device would load its own copy", file, OLD_PREFIX)
         end
     end
     local engine = path.join(frameworks, "JavaScriptCore.framework", "JavaScriptCore")
