@@ -517,7 +517,8 @@ package("swift-runtime")
             build_overlay("UIKit", {path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "UIKit.swift"),
                                     generated_from("UIKit", "UIKit_FoundationExtensions.swift"),
                                     path.join(revenant_overlay, "UIKit", "UIKitRevenant.swift"),
-                                    path.join(revenant_overlay, "UIKit", "UIKitPointer.swift")},
+                                    path.join(revenant_overlay, "UIKit", "UIKitPointer.swift"),
+                                    path.join(revenant_overlay, "UIKit", "UIKitSliderTrackConfiguration.swift")},
                           table.join(foundation_links, {"-lswiftQuartzCore", "-framework", "QuartzCore", "-framework", "UIKit"}), {initializers},
                           {module_cache = uikit_cache, extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
 

@@ -56,12 +56,6 @@ static inline id RevenantBox(id value) { return value; }
 @implementation UIScrollEdgeElementContainerInteraction
 @end
 
-@implementation UISliderTick
-@end
-
-@implementation UISliderTrackConfiguration
-@end
-
 @implementation UITabAccessory
 @end
 
@@ -127,7 +121,7 @@ static char RevenantRightEdgeEffectKey, RevenantBottomEdgeEffectKey;
 
 @implementation UISlider (RevenantUIKit26)
 
-static char RevenantSliderStyleKey, RevenantSliderTrackConfigurationKey;
+static char RevenantSliderStyleKey;
 
 - (NSInteger)sliderStyle
 {
@@ -136,15 +130,6 @@ static char RevenantSliderStyleKey, RevenantSliderTrackConfigurationKey;
 - (void)setSliderStyle:(NSInteger)style
 {
     objc_setAssociatedObject(self, &RevenantSliderStyleKey, [NSNumber numberWithInteger:style],
-                             OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-- (UISliderTrackConfiguration *)trackConfiguration
-{
-    return objc_getAssociatedObject(self, &RevenantSliderTrackConfigurationKey);
-}
-- (void)setTrackConfiguration:(UISliderTrackConfiguration *)configuration
-{
-    objc_setAssociatedObject(self, &RevenantSliderTrackConfigurationKey, configuration,
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 @end

@@ -665,6 +665,25 @@ and it exits with status 0. So the emulator needs no change for this trap; the t
 No device daemon was run to compare. The launch took a long boot under load: SpringBoard checked in 570 to 800 host
 seconds after boot at a load of about 100, so `launch` needs `-s` and `-t` raised on a busy machine.
 
+## UISlider track configuration on iOS 6: stored, not drawn or snapped
+
+`UISlider.trackConfiguration` (with `UISliderTrackConfiguration`, `UISliderTick` and the Swift type
+`UISlider.TrackConfiguration`) is backported as a model. The configuration, its ticks, the factories, the copy and
+the coding follow the system: measured on Apple's UIKit (the Mac Catalyst image of this Mac's macOS release, loaded
+with `dlopen` of `/System/iOSSupport/System/Library/Frameworks/UIKit.framework/UIKit`, not the iOS 26.2 device image). The counts of
+`configurationWithNumberOfTicks:` are 0 for 0 or fewer, 0.5 for one, and `k / (n - 1)` for `n` of two or more; ticks
+are copied and sorted by position, not clamped; the defaults are `allowsTickValuesOnly` YES, neutral 0, enabled
+range 0...1; setting a maximum below the minimum (or the reverse) is refused. A backport of the same calls gives the
+same output line for line. The slider keeps the configuration per instance and returns a copy, as the system does.
+
+The part that is not there: iOS 6's `UISlider` draws no tick marks and shows no tick titles or images, and it does
+not snap a value to a tick while `allowsTickValuesOnly` is YES, nor keep the value inside the enabled range while the
+thumb is dragged. So the configuration has no effect on the slider's drawing or its values on iOS 6. Telegram sets it
+for the discrete settings slider (`submodules/TelegramUI/Components/SliderComponent/Sources/SliderComponent.swift`),
+so those sliders show no ticks on iOS 6. The fix is a layer over the track: tick marks at `trackRectForBounds:` offsets,
+the titles and images as subviews, and a value snap in the value-changed action. Not started; estimate a few days with
+a device test.
+
 ## Emulate cases are not in `./xmakew test -P .`
 
 The emulate cases under `toolchain/tests/emulate/` (`install`, `launchd`, `output`, `pin-leak`, `baseline`, `fontapp`) run
