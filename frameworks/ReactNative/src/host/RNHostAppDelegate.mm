@@ -13,6 +13,68 @@
 
 #ifdef RN_HERMES
 #import <react/runtime/platform/ios/ReactCommon/RCTHermesInstance.h>
+#import <cxxreact/MessageQueueThread.h>
+#import <malloc/malloc.h>
+#include <algorithm>
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+#include <jsi/instrumentation.h>
+#endif
+
+#ifdef RN_HERMES
+// The Hermes runtime is created by RCTHermesInstance; this subclass keeps the runtime and the queue it runs on
+// so that the heartbeat can read the JS heap on the JS thread, where the runtime may be used.
+namespace {
+
+std::mutex RNHostProbeMutex;
+std::shared_ptr<facebook::react::MessageQueueThread> RNHostProbeQueue;
+facebook::jsi::Runtime *RNHostProbeRuntime = nullptr;
+
+void RNHostProbeAttach(facebook::jsi::Runtime &runtime, std::shared_ptr<facebook::react::MessageQueueThread> queue)
+{
+    std::lock_guard<std::mutex> lock(RNHostProbeMutex);
+    RNHostProbeRuntime = &runtime;
+    RNHostProbeQueue = std::move(queue);
+}
+
+void RNHostLogHeapStats()
+{
+    std::shared_ptr<facebook::react::MessageQueueThread> queue;
+    facebook::jsi::Runtime *runtime = nullptr;
+    {
+        std::lock_guard<std::mutex> lock(RNHostProbeMutex);
+        queue = RNHostProbeQueue;
+        runtime = RNHostProbeRuntime;
+    }
+    if (!queue || !runtime) {
+        return;
+    }
+    queue->runOnQueue([runtime] {
+        std::unordered_map<std::string, int64_t> info = runtime->instrumentation().getHeapInfo(false);
+        std::vector<std::pair<std::string, int64_t>> entries(info.begin(), info.end());
+        std::sort(entries.begin(), entries.end());
+        std::string line;
+        for (const auto &entry : entries) {
+            line += entry.first + "=" + std::to_string(entry.second) + " ";
+        }
+        NSLog(@"rn-host: js heap %s", line.c_str());
+    });
+}
+
+class RNHostHermesFactory : public facebook::react::RCTHermesInstance {
+public:
+    std::unique_ptr<facebook::react::JSRuntime> createJSRuntime(std::shared_ptr<facebook::react::MessageQueueThread> queue) noexcept override
+    {
+        std::unique_ptr<facebook::react::JSRuntime> runtime = RCTHermesInstance::createJSRuntime(queue);
+        RNHostProbeAttach(runtime->getRuntime(), queue);
+        return runtime;
+    }
+};
+
+} // namespace
 #endif
 
 #ifdef RN_EXPO
@@ -163,7 +225,7 @@ static void RNHostInstallSampler(void)
 #ifdef RN_HERMES
     if ([RNHostRuntime usesHermes]) {
         NSLog(@"rn-host: engine hermes");
-        return reinterpret_cast<JSRuntimeFactoryRef>(new facebook::react::RCTHermesInstance());
+        return reinterpret_cast<JSRuntimeFactoryRef>(new RNHostHermesFactory());
     }
 #endif
     NSLog(@"rn-host: engine jsc");
@@ -181,9 +243,25 @@ static void RNHostInstallSampler(void)
 #endif
 }
 
+static NSUInteger RNHostCountViews(UIView *view)
+{
+    NSUInteger count = 1;
+    for (UIView *subview in view.subviews) {
+        count += RNHostCountViews(subview);
+    }
+    return count;
+}
+
 - (void)logHeartbeat
 {
-    NSLog(@"rn-host: heartbeat rss %.1f MB, subviews %lu", [RNHostRuntime residentMegabytes], (unsigned long)self.window.rootViewController.view.subviews.count);
+    malloc_statistics_t malloced;
+    malloc_zone_statistics(malloc_default_zone(), &malloced);
+    NSLog(@"rn-host: heartbeat rss %.1f MB, subviews %lu, views %lu, malloc in use %.1f MB of %.1f MB",
+          [RNHostRuntime residentMegabytes], (unsigned long)self.window.rootViewController.view.subviews.count,
+          (unsigned long)RNHostCountViews(self.window), malloced.size_in_use / 1048576.0, malloced.size_allocated / 1048576.0);
+#ifdef RN_HERMES
+    RNHostLogHeapStats();
+#endif
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
