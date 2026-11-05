@@ -55,8 +55,8 @@ NSString *const BACKPORT_IMPL(WKWebsiteDataTypeServiceWorkerRegistrations) = @"W
 
 + (NSSet<NSString *> *)allWebsiteDataTypes
 {
-    return [NSSet setWithObjects:WKWebsiteDataTypeCookies, WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache, WKWebsiteDataTypeOfflineWebApplicationCache,
-            WKWebsiteDataTypeLocalStorage, WKWebsiteDataTypeSessionStorage, WKWebsiteDataTypeWebSQLDatabases, WKWebsiteDataTypeIndexedDBDatabases, nil];
+    return [NSSet setWithObjects:BACKPORT_IMPL(WKWebsiteDataTypeCookies), BACKPORT_IMPL(WKWebsiteDataTypeDiskCache), BACKPORT_IMPL(WKWebsiteDataTypeMemoryCache), BACKPORT_IMPL(WKWebsiteDataTypeOfflineWebApplicationCache),
+            BACKPORT_IMPL(WKWebsiteDataTypeLocalStorage), BACKPORT_IMPL(WKWebsiteDataTypeSessionStorage), BACKPORT_IMPL(WKWebsiteDataTypeWebSQLDatabases), BACKPORT_IMPL(WKWebsiteDataTypeIndexedDBDatabases), nil];
 }
 
 - (void)fetchDataRecordsOfTypes:(NSSet<NSString *> *)dataTypes completionHandler:(void (^)(NSArray<WKWebsiteDataRecord *> *))completionHandler
@@ -75,12 +75,12 @@ NSString *const BACKPORT_IMPL(WKWebsiteDataTypeServiceWorkerRegistrations) = @"W
 
 - (void)removeDataOfTypes:(NSSet<NSString *> *)dataTypes modifiedSince:(NSDate *)date completionHandler:(void (^)(void))completionHandler
 {
-    if ([dataTypes containsObject:WKWebsiteDataTypeCookies]) {
+    if ([dataTypes containsObject:BACKPORT_IMPL(WKWebsiteDataTypeCookies)]) {
         NSHTTPCookieStorage *storage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
         for (NSHTTPCookie *cookie in [storage.cookies copy])
             [storage deleteCookie:cookie];
     }
-    if ([dataTypes containsObject:WKWebsiteDataTypeDiskCache] || [dataTypes containsObject:WKWebsiteDataTypeMemoryCache])
+    if ([dataTypes containsObject:BACKPORT_IMPL(WKWebsiteDataTypeDiskCache)] || [dataTypes containsObject:BACKPORT_IMPL(WKWebsiteDataTypeMemoryCache)])
         [[NSURLCache sharedURLCache] removeCachedResponsesSinceDate:date];
     dispatch_async(dispatch_get_main_queue(), ^{
         completionHandler();

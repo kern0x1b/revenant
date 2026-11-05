@@ -27,7 +27,7 @@ NSString *const BACKPORT_IMPL(MTLCaptureErrorDomain) = @"MTLCaptureErrorDomain";
 - (BOOL)startCaptureWithDescriptor:(MTLCaptureDescriptor *)descriptor error:(NSError **)error
 {
     if (error)
-        *error = [NSError errorWithDomain:MTLCaptureErrorDomain code:MTLCaptureErrorNotSupported
+        *error = [NSError errorWithDomain:BACKPORT_IMPL(MTLCaptureErrorDomain) code:MTLCaptureErrorNotSupported
                                   userInfo:@{NSLocalizedDescriptionKey: @"this device runs Metal over OpenGL ES 2.0 and has no GPU trace capture backend"}];
     return NO;
 }

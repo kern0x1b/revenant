@@ -75,6 +75,30 @@ local function cmake_caches(folder)
                                    "-o", "-name", "*.pc", "-o", "-name", "cmake_install.cmake", ")"}))
 end
 
+local STATE = path.join("xmake-global", ".xmake", "cache")
+
+local function state_files(folder, roots)
+    local seen, found = {}, {}
+    local function add(file)
+        if not seen[file] then
+            seen[file] = true
+            table.insert(found, file)
+        end
+    end
+    for _, file in ipairs(cmake_caches(folder)) do
+        add(file)
+    end
+    local state = path.join(folder, STATE)
+    if os.isdir(state) then
+        for _, root in ipairs(roots) do
+            for _, file in ipairs(lines(os.iorunv("sh", {"-c", "grep -rIlF -e \"$1\" \"$2\" || true", "sh", root, state}))) do
+                add(file)
+            end
+        end
+    end
+    return found
+end
+
 local function target_of(link)
     return os.iorunv("readlink", {link}):trim()
 end
@@ -91,6 +115,16 @@ local function rewrite_file(file, roots, folder)
     os.vrunv("chmod", {"u+w", file})
     io.writefile(file, changed)
     return true
+end
+
+local function names_root(file, roots)
+    local text = io.readfile(file)
+    for _, root in ipairs(roots) do
+        if text:find(root, 1, true) then
+            return true
+        end
+    end
+    return false
 end
 
 local function is_empty(folder)
@@ -165,10 +199,10 @@ function clone(source, folder)
         end
     end
 
-    local cmake = 0
-    for _, file in ipairs(cmake_caches(folder)) do
+    local state = 0
+    for _, file in ipairs(state_files(folder, roots)) do
         if rewrite_file(file, roots, folder) then
-            cmake = cmake + 1
+            state = state + 1
         end
     end
 
@@ -179,11 +213,9 @@ function clone(source, folder)
             break
         end
     end
-    for _, file in ipairs(cmake_caches(folder)) do
-        for _, root in ipairs(roots) do
-            if not leftover and io.readfile(file):find(root, 1, true) then
-                leftover = file
-            end
+    for _, file in ipairs(state_files(folder, roots)) do
+        if not leftover and names_root(file, roots) then
+            leftover = file
         end
     end
     if leftover then
@@ -192,7 +224,7 @@ function clone(source, folder)
     end
 
     io.writefile(path.join(folder, MARKER), "source " .. roots[1] .. "\n")
-    return {folder = folder, source = roots[1], links = rewritten, dangling = dangling, stale = stale, cmake = cmake}
+    return {folder = folder, source = roots[1], links = rewritten, dangling = dangling, stale = stale, state = state}
 end
 
 function repair(folder)
@@ -207,7 +239,7 @@ function repair(folder)
     end
     local roots = roots_of(source)
     local count = 0
-    for _, file in ipairs(cmake_caches(folder)) do
+    for _, file in ipairs(state_files(folder, roots)) do
         if rewrite_file(file, roots, folder) then
             count = count + 1
         end
@@ -267,6 +299,9 @@ local function test_suite()
     os.mkdir(path.join(install, "lib", "pkgconfig"))
     io.writefile(path.join(install, "lib", "pkgconfig", "alpha.pc"), "Libs: -L" .. path.join(install, "lib") .. "\n")
     io.writefile(path.join(source, "note.txt"), "kept " .. source .. "\n")
+    local state_store = path.join(source, "xmake-global", ".xmake", "cache", "packages", "a", "alpha", "1.0")
+    os.mkdir(state_store)
+    io.writefile(path.join(state_store, "build.log"), "built in " .. install .. "\n")
     local sealed = path.join(store, "sealed")
     os.mkdir(sealed)
     io.writefile(path.join(sealed, "data"), "sealed")
@@ -278,7 +313,7 @@ local function test_suite()
     check(result.links == 4, "four absolute links into the source are rewritten, got " .. result.links)
     check(result.dangling == 1, "the link into the excluded folder dangles in the clone only, got " .. result.dangling)
     check(result.stale == 1, "the link to a path the source never had is stale, got " .. result.stale)
-    check(result.cmake == 3, "CMakeCache.txt, the package manifest and the pkg-config file are rewritten, got " .. result.cmake)
+    check(result.state == 4, "CMakeCache.txt, the package manifest, the pkg-config file and the text state build.log are rewritten, got " .. result.state)
 
     local cloned_store = path.join(absolute(folder), "xmake-global", ".xmake", "packages", "a", "alpha", "1.0")
     for _, link in ipairs(links(folder)) do
@@ -295,7 +330,10 @@ local function test_suite()
     check(not io.readfile(path.join(cloned_store, "manifest.txt")):find(source, 1, true), "the package manifest names no source path")
     check(io.readfile(path.join(cloned_store, "manifest.txt")):find(absolute(folder), 1, true) ~= nil, "the package manifest names the clone")
     check(not io.readfile(path.join(cloned_store, "install", "lib", "pkgconfig", "alpha.pc")):find(source, 1, true), "the pkg-config file names no source path")
-    check(io.readfile(path.join(absolute(folder), "note.txt")):find(source, 1, true) ~= nil, "a text file that is not a CMake cache is copied unchanged")
+    local cloned_build_log = path.join(absolute(folder), "xmake-global", ".xmake", "cache", "packages", "a", "alpha", "1.0", "build.log")
+    check(not io.readfile(cloned_build_log):find(source, 1, true), "the text state under xmake-global/.xmake/cache names no source path")
+    check(io.readfile(cloned_build_log):find(absolute(folder), 1, true) ~= nil, "the text state under xmake-global/.xmake/cache names the clone")
+    check(io.readfile(path.join(absolute(folder), "note.txt")):find(source, 1, true) ~= nil, "a text file outside the package state is copied unchanged")
     check(not os.isdir(path.join(folder, "devices")), "an excluded folder is left out of the clone")
     check(io.readfile(path.join(cloned_store, "sealed", "data")) == "sealed", "a read-only folder is cloned")
 
@@ -369,7 +407,7 @@ function main(...)
         print("cloned   %s", result.source)
         print("folder   %s", result.folder)
         print("links    %d rewritten: %d dangling only in the clone (into folders it leaves out), %d already dangling in the source", result.links, result.dangling, result.stale)
-        print("cmake    %d CMakeCache.txt rewritten", result.cmake)
+        print("state    %d files rewritten: CMake caches, package manifests and pkg-config files, and text under xmake-global/.xmake/cache", result.state)
         print("")
         print("REVENANT_CACHE=%s", result.folder)
     end

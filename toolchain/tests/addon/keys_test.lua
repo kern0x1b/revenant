@@ -21,9 +21,9 @@ local PUBLISHED = {
              {"icu", "afcda638ee6841afbc0a9fddcce9524c"}, {"libcxx", "d135008c0a4c466f9baf4825ca8437d9"},
              {"libpsl", "79fde8ff5a0549cc90bf81a9b5340ec0"}, {"libwebp", "93f0ba67d7174ba289c056a741c7e187"},
              {"libxml2", "8feda8a8932245fcafc195e757936aab"}, {"libxslt", "023054ef78144442b01b55da5cb5ef1c"},
-             {"openssl", "8efa8d7ace86468b9a4c70b4385d7b9b"}, {"webkit", "5aa6ad32df1e400ca5c39cdb9b870b58"},
+             {"openssl", "8efa8d7ace86468b9a4c70b4385d7b9b"}, {"webkit", "13265880ac98a9143f7086dd10688687"},
              {"woff2", "86cb725dc2bd4ae39d083a8a6e69de5d"}},
-     key = "4e14b210a5a9baf6f026d58a5535eabf"},
+     key = "1a5028df2bf1f1142752c150ff1959e3"},
 }
 
 local function package(row)

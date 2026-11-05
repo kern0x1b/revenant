@@ -26,14 +26,14 @@ __attribute__((constructor)) static void revenant_install_failure_description(vo
         NSDictionary *info = self_.userInfo;
         if (info[NSLocalizedDescriptionKey])
             return original(self_, selector);
-        if (info[NSLocalizedFailureErrorKey])
-            return revenant_failure_sentence(self_, info[NSLocalizedFailureErrorKey]);
+        if (info[BACKPORT_IMPL(NSLocalizedFailureErrorKey)])
+            return revenant_failure_sentence(self_, info[BACKPORT_IMPL(NSLocalizedFailureErrorKey)]);
         id (^provider)(NSError *, NSErrorUserInfoKey) = [NSError respondsToSelector:@selector(userInfoValueProviderForDomain:)] ? [NSError userInfoValueProviderForDomain:self_.domain] : nil;
         if (provider) {
             NSString *described = provider(self_, NSLocalizedDescriptionKey);
             if (described)
                 return described;
-            NSString *failure = provider(self_, NSLocalizedFailureErrorKey);
+            NSString *failure = provider(self_, BACKPORT_IMPL(NSLocalizedFailureErrorKey));
             if (failure)
                 return revenant_failure_sentence(self_, failure);
         }

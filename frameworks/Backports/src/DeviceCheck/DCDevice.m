@@ -5,7 +5,7 @@ NSErrorDomain const BACKPORT_IMPL(DCErrorDomain) = @"com.apple.devicecheck.error
 
 NSError *revenant_device_check_unsupported(void)
 {
-    return [NSError errorWithDomain:DCErrorDomain code:DCErrorFeatureUnsupported userInfo:nil];
+    return [NSError errorWithDomain:BACKPORT_IMPL(DCErrorDomain) code:DCErrorFeatureUnsupported userInfo:nil];
 }
 
 @implementation DCDevice

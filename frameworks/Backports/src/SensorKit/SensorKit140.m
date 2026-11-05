@@ -197,7 +197,7 @@ REVENANT_SENSORKIT_VALUE_STORE_IMPLEMENTATION
 @end
 
 @implementation SRKeyboardMetrics
-@dynamic duration, keyboardIdentifier, version, BACKPORT_IMPL(width), BACKPORT_IMPL(height);
+@dynamic duration, keyboardIdentifier, version, width, height;
 REVENANT_VALUE_PROPERTY(NSString *, keyboardIdentifier)
 REVENANT_VALUE_PROPERTY(NSString *, version)
 REVENANT_VALUE_PROPERTY(NSMeasurement *, width)

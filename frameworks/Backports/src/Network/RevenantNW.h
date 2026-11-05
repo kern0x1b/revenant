@@ -1,8 +1,8 @@
 #import <Foundation/Foundation.h>
 #import <Network/Network.h>
 #import <Security/Security.h>
-#import "../Security/RevenantSecProtocolOptions.h"
-#import "../Security/RevenantSecProtocolMetadata.h"
+#import "../TLS/RevenantSecProtocolOptions.h"
+#import "../TLS/RevenantSecProtocolMetadata.h"
 
 
 #pragma clang diagnostic push

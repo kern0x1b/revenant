@@ -22,7 +22,7 @@ static const char RevenantAnimationFrameRateRangeKey;
 - (CAFrameRateRange)preferredFrameRateRange
 {
     NSValue *boxed = objc_getAssociatedObject(self, &RevenantAnimationFrameRateRangeKey);
-    CAFrameRateRange range = CAFrameRateRangeDefault;
+    CAFrameRateRange range = BACKPORT_IMPL(CAFrameRateRangeDefault);
     if (boxed)
         [boxed getValue:&range];
     return range;

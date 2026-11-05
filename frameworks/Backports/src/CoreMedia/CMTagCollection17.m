@@ -415,12 +415,12 @@ CMTag BACKPORT_IMPL(CMTagCollectionApplyUntil)(CMTagCollectionRef tagCollection,
 {
     RevenantCMTagCollection *collection = revenant_to(tagCollection);
     if (!collection || !filter)
-        return kCMTagInvalid;
+        return BACKPORT_IMPL(kCMTagInvalid);
     const CMTag *tags = [collection revenant_tags];
     for (NSUInteger index = 0; index < collection.revenant_count; index++)
         if (filter(tags[index], context))
             return tags[index];
-    return kCMTagInvalid;
+    return BACKPORT_IMPL(kCMTagInvalid);
 }
 
 CFDictionaryRef BACKPORT_IMPL(CMTagCollectionCopyAsDictionary)(CMTagCollectionRef tagCollection, CFAllocatorRef allocator)
@@ -435,7 +435,7 @@ CFDictionaryRef BACKPORT_IMPL(CMTagCollectionCopyAsDictionary)(CMTagCollectionRe
         CFNumberRef category = CFNumberCreate(allocator, kCFNumberSInt32Type, &(int){(int)tags[index].category});
         CFNumberRef value = CFNumberCreate(allocator, kCFNumberSInt32Type, &(int){(int)tags[index].value});
         CFNumberRef flags = CFNumberCreate(allocator, kCFNumberSInt32Type, &(int){(int)tags[index].dataType});
-        const void *keys[] = {kCMTagCategoryKey, kCMTagValueKey, kCMTagDataTypeKey};
+        const void *keys[] = {BACKPORT_IMPL(kCMTagCategoryKey), BACKPORT_IMPL(kCMTagValueKey), BACKPORT_IMPL(kCMTagDataTypeKey)};
         const void *values[] = {category, value, flags};
         CFDictionaryRef entry = CFDictionaryCreate(allocator, keys, values, 3, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
         CFArrayAppendValue(list, entry);
@@ -467,9 +467,9 @@ OSStatus BACKPORT_IMPL(CMTagCollectionCreateFromDictionary)(CFDictionaryRef dict
             if (!entry || CFGetTypeID(entry) != CFDictionaryGetTypeID())
                 continue;
             int category = 0, value = 0, flags = 0;
-            CFNumberGetValue(CFDictionaryGetValue(entry, kCMTagCategoryKey), kCFNumberIntType, &category);
-            CFNumberGetValue(CFDictionaryGetValue(entry, kCMTagValueKey), kCFNumberIntType, &value);
-            CFNumberGetValue(CFDictionaryGetValue(entry, kCMTagDataTypeKey), kCFNumberIntType, &flags);
+            CFNumberGetValue(CFDictionaryGetValue(entry, BACKPORT_IMPL(kCMTagCategoryKey)), kCFNumberIntType, &category);
+            CFNumberGetValue(CFDictionaryGetValue(entry, BACKPORT_IMPL(kCMTagValueKey)), kCFNumberIntType, &value);
+            CFNumberGetValue(CFDictionaryGetValue(entry, BACKPORT_IMPL(kCMTagDataTypeKey)), kCFNumberIntType, &flags);
             CMTag tag = {(CMTagCategory)category, (CMTagDataType)flags, (uint32_t)value};
             [revenant_to(out) revenant_insert:tag];
         }

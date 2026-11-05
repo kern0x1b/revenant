@@ -88,7 +88,7 @@ function build_environment(options)
         REVENANT_PATH = options.checkout,
         REVENANT_CACHE = options.cache,
         REVENANT_PREBUILT = "kern0x1b/revenant",
-        REVENANT_PREBUILT_ONLY = "1"
+        REVENANT_PREBUILT_ONLY = os.getenv("REVENANT_PREBUILT_ONLY") or "1"
     }
     if options.real and options.real ~= "" then
         env.RN_EXPO_REAL = options.real

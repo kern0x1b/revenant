@@ -96,8 +96,8 @@ NSString *const BACKPORT_IMPL(WKWebExtensionDataTypeSynchronized) = @"synchroniz
     static NSSet *types;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        types = [NSSet setWithObjects:WKWebExtensionDataTypeLocal, WKWebExtensionDataTypeSession,
-                                       WKWebExtensionDataTypeSynchronized, nil];
+        types = [NSSet setWithObjects:BACKPORT_IMPL(WKWebExtensionDataTypeLocal), BACKPORT_IMPL(WKWebExtensionDataTypeSession),
+                                       BACKPORT_IMPL(WKWebExtensionDataTypeSynchronized), nil];
     });
     return types;
 }
@@ -169,7 +169,7 @@ NSString *const BACKPORT_IMPL(WKWebExtensionDataTypeSynchronized) = @"synchroniz
              completionHandler:(void (^)(WKWebExtensionDataRecord *dataRecord, NSError *error))completionHandler
 {
     if (completionHandler)
-        completionHandler(nil, [NSError errorWithDomain:WKWebExtensionDataRecordErrorDomain
+        completionHandler(nil, [NSError errorWithDomain:BACKPORT_IMPL(WKWebExtensionDataRecordErrorDomain)
                                                    code:1
                                                userInfo:@{NSLocalizedDescriptionKey: @"no context, so no data record"}]);
 }

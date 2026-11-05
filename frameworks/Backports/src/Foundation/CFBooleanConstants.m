@@ -11,6 +11,6 @@ __attribute__((constructor)) static void revenant_cfboolean_constants(void)
         .className = "RevenantCFBoolean",
     };
     CFTypeID typeID = _CFRuntimeRegisterClass(&booleanClass);
-    __kCFBooleanTrue = (const void *)CFRetain(_CFRuntimeCreateInstance(NULL, typeID, 0, NULL));
-    __kCFBooleanFalse = (const void *)CFRetain(_CFRuntimeCreateInstance(NULL, typeID, 0, NULL));
+    BACKPORT_IMPL(__kCFBooleanTrue) = (const void *)CFRetain(_CFRuntimeCreateInstance(NULL, typeID, 0, NULL));
+    BACKPORT_IMPL(__kCFBooleanFalse) = (const void *)CFRetain(_CFRuntimeCreateInstance(NULL, typeID, 0, NULL));
 }

@@ -11,6 +11,6 @@ REVENANT_IOKIT_EXPORT kern_return_t BACKPORT_IMPL(IOMainPort)(mach_port_t bootst
     if (mainPort == 0) {
         return KERN_INVALID_ARGUMENT;
     }
-    *mainPort = kIOMainPortDefault;
+    *mainPort = BACKPORT_IMPL(kIOMainPortDefault);
     return KERN_SUCCESS;
 }

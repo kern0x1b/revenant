@@ -13,7 +13,7 @@ static NSDictionary *revenant_open_options(NSString *source, id annotation)
     if (source)
         options[UIApplicationOpenURLOptionsSourceApplicationKey] = source;
     if (annotation)
-        options[UIApplicationOpenURLOptionsAnnotationKey] = annotation;
+        options[BACKPORT_IMPL(UIApplicationOpenURLOptionsAnnotationKey)] = annotation;
     options[UIApplicationOpenURLOptionsOpenInPlaceKey] = @NO;
     return options;
 }

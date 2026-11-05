@@ -1,0 +1,41 @@
+--- a/ios/GlassView.swift
++++ b/ios/GlassView.swift
+@@ -1,7 +1,7 @@
+ // Copyright 2022-present 650 Industries. All rights reserved.
+ 
+ import ExpoModulesCore
+-import React
++internal import React
+ 
+ public final class GlassView: ExpoView {
+   private var glassEffect: Any?
+@@ -144,17 +144,9 @@
+         finalBottomRight = bottomRightRadius ?? bottomEndRadius ?? radius ?? 0
+       }
+ 
+-      let topLeft = UICornerRadius(floatLiteral: finalTopLeft)
+-      let topRight = UICornerRadius(floatLiteral: finalTopRight)
+-      let bottomLeft = UICornerRadius(floatLiteral: finalBottomLeft)
+-      let bottomRight = UICornerRadius(floatLiteral: finalBottomRight)
+-
+-      glassEffectView.cornerConfiguration = .corners(
+-        topLeftRadius: topLeft,
+-        topRightRadius: topRight,
+-        bottomLeftRadius: bottomLeft,
+-        bottomRightRadius: bottomRight
+-      )
++      // revenant: the Swift overlay in swift-runtime 6.4 has no public UICornerRadius initializer, and this branch needs
++      // UIGlassEffect (iOS 26+), which no device this app runs on has. The radii are computed and left unapplied.
++      _ = (finalTopLeft, finalTopRight, finalBottomLeft, finalBottomRight)
+       #endif
+     }
+   }
+@@ -191,7 +183,7 @@
+           if let duration = animationDuration {
+             UIView.animate(withDuration: duration, animations: applyEffect)
+           } else {
+-            UIView.animate(animations: applyEffect)
++            UIView.animate(withDuration: 0.3, animations: applyEffect)
+           }
+         } else {
+           applyEffect()

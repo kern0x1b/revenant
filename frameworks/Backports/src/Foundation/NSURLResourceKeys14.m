@@ -15,7 +15,7 @@ NSURLResourceKey const BACKPORT_IMPL(NSURLVolumeSupportsFileProtectionKey) = @"N
 
 static NSArray *revenant_resource_keys(void)
 {
-    return @[NSURLContentTypeKey, NSURLFileContentIdentifierKey, NSURLMayShareFileContentKey, NSURLMayHaveExtendedAttributesKey, NSURLIsPurgeableKey, NSURLIsSparseKey, NSURLVolumeSupportsFileProtectionKey];
+    return @[BACKPORT_IMPL(NSURLContentTypeKey), BACKPORT_IMPL(NSURLFileContentIdentifierKey), BACKPORT_IMPL(NSURLMayShareFileContentKey), BACKPORT_IMPL(NSURLMayHaveExtendedAttributesKey), BACKPORT_IMPL(NSURLIsPurgeableKey), BACKPORT_IMPL(NSURLIsSparseKey), BACKPORT_IMPL(NSURLVolumeSupportsFileProtectionKey)];
 }
 
 id revenant_resource_value(NSString *path, NSString *key);
@@ -25,13 +25,13 @@ id revenant_resource_value(NSString *path, NSString *key)
     struct stat status;
     if (lstat(path.fileSystemRepresentation, &status) != 0)
         return nil;
-    if ([key isEqualToString:NSURLMayShareFileContentKey] || [key isEqualToString:NSURLIsPurgeableKey])
+    if ([key isEqualToString:BACKPORT_IMPL(NSURLMayShareFileContentKey)] || [key isEqualToString:BACKPORT_IMPL(NSURLIsPurgeableKey)])
         return @NO;
-    if ([key isEqualToString:NSURLIsSparseKey])
+    if ([key isEqualToString:BACKPORT_IMPL(NSURLIsSparseKey)])
         return @(S_ISREG(status.st_mode) && (off_t)status.st_blocks * 512 < status.st_size);
-    if ([key isEqualToString:NSURLMayHaveExtendedAttributesKey])
+    if ([key isEqualToString:BACKPORT_IMPL(NSURLMayHaveExtendedAttributesKey)])
         return @(listxattr(path.fileSystemRepresentation, NULL, 0, XATTR_NOFOLLOW) > 0);
-    if ([key isEqualToString:NSURLVolumeSupportsFileProtectionKey]) {
+    if ([key isEqualToString:BACKPORT_IMPL(NSURLVolumeSupportsFileProtectionKey)]) {
         struct statfs volume;
         if (statfs(path.fileSystemRepresentation, &volume) == 0 && ((volume.f_flags & 0x00000080) || !strcmp(volume.f_fstypename, "apfs")))
             return @YES;

@@ -1,1 +1,1 @@
-tipkit_sources_digest = "15df442f9a34ef25a76107b395807717"
+tipkit_sources_digest = "edfa03b1a207f5e25a211e35aa310342"

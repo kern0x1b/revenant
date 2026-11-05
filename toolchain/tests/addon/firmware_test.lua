@@ -199,7 +199,8 @@ function failures(opt)
     local json = import("core.base.json")
     json.savefile(path.join(folder, "home", "firmware", "catalog.json"), {sources = firmware.sources(), devices = {
         {identifier = "iPhone5,1", platform = "s5l8950x", firmwares = {{version = "9.8", build = "98A1", url = "https://example.invalid/a.ipsw", size = 1}}},
-        {identifier = "iPhone6,1", platform = "s5l8960x", firmwares = {{version = "9.8", build = "98A1", url = "https://example.invalid/b.ipsw", size = 2}}}
+        {identifier = "iPhone6,1", platform = "s5l8960x", firmwares = {{version = "9.8", build = "98A1", url = "https://example.invalid/b.ipsw", size = 2}}},
+        {identifier = "iPod7,1", platform = "t7000", firmwares = {{version = "12.0", build = "16A366", url = "https://example.invalid/c.ipsw", size = 3}}}
     }})
     local function rootfs(identifier, caches)
         local root = path.join(folder, "home", "firmware", "rootfs", identifier, "9.8_98A1")
@@ -223,6 +224,21 @@ function failures(opt)
     local held = firmware.kernelcache("iPhone5,1", "9.8")
     if held ~= kernel then
         table.insert(found, "a kernelcache already in the cache is returned without asking the firmware: " .. tostring(held))
+    end
+
+    local modern = path.join(folder, "modern")
+    io.writefile(path.join(modern, "System", "Library", "Caches", "com.apple.dyld", "dyld_shared_cache_arm64"), "the arm64 cache of iOS 12")
+    local arm64 = path.join(dyld.root(), "12.0", "dyld_shared_cache_arm64")
+    taken, refused = firmware.harvest(modern, "12.0", {identifier = "iPod7,1", build = "16A366"}, "arm64")
+    if not taken or table.concat(taken, " ") ~= "arm64" or io.readfile(arm64) ~= "the arm64 cache of iOS 12" then
+        table.insert(found, "an arm64 cache of iOS 12 is taken into its release: " .. tostring(refused))
+    end
+    if io.readfile(arm64 .. ".source") ~= "iPod7,1 16A366\n" then
+        table.insert(found, "an arm64 cache of iOS 12 records the device and build it came from")
+    end
+    local fetched, fetched_release = firmware.fetch("arm64", "12.0", {})
+    if fetched ~= arm64 or fetched_release ~= "12.0" then
+        table.insert(found, "a held arm64 cache of iOS 12 is returned without a download: " .. tostring(fetched) .. " " .. tostring(fetched_release))
     end
 
     os.setenv("REVENANT_CACHE", home or nil)

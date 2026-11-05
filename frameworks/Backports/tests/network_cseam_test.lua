@@ -16,7 +16,7 @@ function main()
     local modules = path.join(out, "modules")
     os.mkdir(modules)
     local network = table.join({"-emit-module", "-emit-module-path", path.join(modules, "Network.swiftmodule"), "-module-name", "Network",
-                                "-parse-as-library", "-D", "REVENANT_BACKPORT", "-I", path.join(src, "RevenantTLS"),
+                                "-parse-as-library", "-D", "REVENANT_BACKPORT", "-I", path.join(backports, "src", "TLS", "RevenantTLS"),
                                 "-I", path.join(src, "RevenantNetworkC"), "-Xcc", "-I" .. path.join(boringssl, "include")},
                                os.files(path.join(src, "*.swift")))
     swiftc(network)

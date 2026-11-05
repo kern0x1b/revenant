@@ -4,7 +4,7 @@
 #import <Security/SecProtocolMetadata.h>
 #import <CoreFoundation/CoreFoundation.h>
 #import <dispatch/dispatch.h>
-#import "RevenantSecProtocolMetadata.h"
+#import "../TLS/RevenantSecProtocolMetadata.h"
 
 const char * _Nullable BACKPORT_IMPL(sec_protocol_metadata_get_negotiated_protocol)(sec_protocol_metadata_t metadata)
 {

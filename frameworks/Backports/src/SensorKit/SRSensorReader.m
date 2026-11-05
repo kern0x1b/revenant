@@ -92,7 +92,7 @@ REVENANT_SENSORKIT_UNCREATABLE_NEW_AND_INIT(@"Use initWithSensor:")
 
 + (NSError *)storeUnavailableError
 {
-    return [NSError errorWithDomain:SRErrorDomain
+    return [NSError errorWithDomain:BACKPORT_IMPL(SRErrorDomain)
                                code:SRErrorDataInaccessible
                            userInfo:@{NSLocalizedDescriptionKey: @"This release collects no sensor data: there is no "
                                                                                  "SensorKit store to read a payload from."}];

@@ -61,9 +61,9 @@ static NSHTTPCookie *revenant_cookie_mark(NSHTTPCookie *cookie, NSString *policy
 
 + (NSHTTPCookie *)revenant_cookieWithProperties:(NSDictionary *)properties original:(NSHTTPCookie *(^)(NSDictionary *))original
 {
-    NSString *policy = revenant_cookie_policy(properties[NSHTTPCookieSameSitePolicy]);
+    NSString *policy = revenant_cookie_policy(properties[BACKPORT_IMPL(NSHTTPCookieSameSitePolicy)]);
     NSMutableDictionary *plain = [properties mutableCopy];
-    [plain removeObjectForKey:NSHTTPCookieSameSitePolicy];
+    [plain removeObjectForKey:BACKPORT_IMPL(NSHTTPCookieSameSitePolicy)];
     return revenant_cookie_mark(original(plain), policy);
 }
 
@@ -117,7 +117,7 @@ static NSHTTPCookie *revenant_cookie_mark(NSHTTPCookie *cookie, NSString *policy
     if (!policy)
         return original;
     NSMutableDictionary *merged = [original mutableCopy];
-    merged[NSHTTPCookieSameSitePolicy] = policy;
+    merged[BACKPORT_IMPL(NSHTTPCookieSameSitePolicy)] = policy;
     return merged;
 }
 

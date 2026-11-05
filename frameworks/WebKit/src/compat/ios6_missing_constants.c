@@ -38,6 +38,7 @@ const CFStringRef kCGTargetPixelFormat = CFSTR("kCGTargetPixelFormat");
 const CFStringRef kCTFontCSSFamilyCursive = CFSTR("kCTFontCSSFamilyCursive");
 const CFStringRef kCTFontCSSFamilyFantasy = CFSTR("kCTFontCSSFamilyFantasy");
 const CFStringRef kCTFontCSSFamilyMonospace = CFSTR("kCTFontCSSFamilyMonospace");
+const CFStringRef kCTFontVariationAxesAttribute = CFSTR("kCTFontVariationAxesAttribute");
 const CFStringRef kCTFontCSSFamilySansSerif = CFSTR("kCTFontCSSFamilySansSerif");
 const CFStringRef kCTFontCSSFamilySerif = CFSTR("kCTFontCSSFamilySerif");
 const CFStringRef kCTFontCSSWeightAttribute = CFSTR("kCTFontCSSWeightAttribute");

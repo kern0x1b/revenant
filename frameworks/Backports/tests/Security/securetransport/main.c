@@ -110,10 +110,42 @@ static int connectTo(unsigned short port)
     return descriptor;
 }
 
+#if defined(REVENANT_FIXTURE_IO_FUNCS)
+static unsigned reads;
+static unsigned writes;
+
+static OSStatus readDescriptor(SSLConnectionRef connection, void *data, size_t *length)
+{
+    reads++;
+    ssize_t count = read((int)(intptr_t)connection, data, *length);
+    *length = count > 0 ? (size_t)count : 0;
+    return count > 0 ? noErr : count == 0 ? errSSLClosedGraceful : errSSLClosedAbort;
+}
+
+static OSStatus writeDescriptor(SSLConnectionRef connection, const void *data, size_t *length)
+{
+    writes++;
+    size_t sent = 0;
+    while (sent < *length) {
+        ssize_t count = write((int)(intptr_t)connection, (const char *)data + sent, *length - sent);
+        if (count <= 0) {
+            *length = sent;
+            return errSSLClosedAbort;
+        }
+        sent += (size_t)count;
+    }
+    *length = sent;
+    return noErr;
+}
+#endif
+
 static SSLContextRef newClient(int descriptor, Boolean breaksOnServerAuth)
 {
     SSLContextRef context = SSLCreateContext(NULL, kSSLClientSide, kSSLStreamType);
     require(context != NULL, "SSLCreateContext returned NULL");
+#if defined(REVENANT_FIXTURE_IO_FUNCS)
+    check(SSLSetIOFuncs(context, readDescriptor, writeDescriptor), "SSLSetIOFuncs");
+#endif
     check(SSLSetConnection(context, (SSLConnectionRef)(intptr_t)descriptor), "SSLSetConnection");
     check(SSLSetPeerDomainName(context, "localhost", 9), "SSLSetPeerDomainName");
     if (breaksOnServerAuth)
@@ -185,8 +217,10 @@ int main(int argc, char **argv)
     SSLContextRef client = newClient(descriptor, true);
     OSStatus status = drive(client);
     printf("break on server auth status %d\n", (int)status);
+#if defined(REVENANT_FIXTURE_VENEER)
     size_t refused = 0;
     printf("write before server auth accepted status %d\n", (int)SSLWrite(client, "ping", 4, &refused));
+#endif
     SecTrustRef trust = NULL;
     check(SSLCopyPeerTrust(client, &trust), "SSLCopyPeerTrust");
     printf("anchored trust evaluation %s\n", evaluate(trust, anchors) ? "trusted" : "not trusted");
@@ -219,6 +253,17 @@ int main(int argc, char **argv)
     SSLClose(rejecting);
     SSLDisposeContext(rejecting);
     close(descriptor);
+
+    SSLContextRef probe = SSLCreateContext(NULL, kSSLClientSide, kSSLStreamType);
+    printf("client option status %d\n", (int)SSLSetSessionOption(probe, kSSLSessionOptionBreakOnClientAuth, true));
+    SSLDisposeContext(probe);
+    SSLContextRef server = SSLCreateContext(NULL, kSSLServerSide, kSSLStreamType);
+    printf("server context %s\n", server ? "created" : "refused");
+    if (server)
+        SSLDisposeContext(server);
+#if defined(REVENANT_FIXTURE_IO_FUNCS)
+    printf("io callbacks read %u write %u\n", reads, writes);
+#endif
 
     pthread_join(thread, NULL);
     return 0;

@@ -12,7 +12,7 @@ NSErrorUserInfoKey const BACKPORT_IMPL(NSMultipleUnderlyingErrorsKey) = @"NSMult
     id single = info[NSUnderlyingErrorKey];
     if ([single isKindOfClass:[NSError class]])
         [errors addObject:single];
-    id multiple = info[NSMultipleUnderlyingErrorsKey];
+    id multiple = info[BACKPORT_IMPL(NSMultipleUnderlyingErrorsKey)];
     if ([multiple isKindOfClass:[NSArray class]]) {
         for (id error in multiple) {
             if ([error isKindOfClass:[NSError class]])

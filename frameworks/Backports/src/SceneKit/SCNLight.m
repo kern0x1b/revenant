@@ -11,7 +11,7 @@ SCNLightType const BACKPORT_IMPL(SCNLightTypeSpot) = @"spot";
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _type = SCNLightTypeOmni;
+        _type = BACKPORT_IMPL(SCNLightTypeOmni);
         _color = [UIColor whiteColor];
         _intensity = 1000;
         _temperature = 6500;

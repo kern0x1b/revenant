@@ -10,7 +10,7 @@ The project is `frameworks/WebKit/`. `docs/guides/webkit/contributing.md` maps t
 ## Build
 
 - `./xmakew f -P . -p iphoneos -a armv7`, then `./xmakew -P .`: the engine packages, the tweaks and the Settings bundle.
-- `./xmakew deb -P .` writes `space.kern0x1b.rev_<version>_iphoneos-arm.deb` under `build/`. `version` is in `frameworks/WebKit/xmake.lua`.
+- `./xmakew deb -P .` writes `space.kern0x1b.rev_<version>_iphoneos-arm.deb` under `build/`: the compat dylib, TLS and the Settings pane. `./xmakew deb -P frameworks/WebKit/src/platform/safari` writes `space.kern0x1b.rev-safari_<version>_iphoneos-arm.deb` under that project's `build/`: the loader and the engine, which depends on the first. `version` is in `frameworks/WebKit/xmake.lua` and in the loader's `xmake.lua`.
 - `./xmakew build -P . RevWebViewHost` builds the standalone app, which uses the `prefixed` variant of `webkit-engine`. The phone uses `system`.
 - The engine is upstream WebKit at one commit plus `packages/w/webkit/patches/`. A change to the engine is a change to a patch: in a scratch clone at the base commit under `.cache/scratch/<task>/`, `git am` the series, make the change in its commit, `git format-patch` the series back into `packages/w/webkit/patches/`, and put the new sha256 in `packages/w/webkit/xmake.lua`. Never edit the fetched source in the package cache; the next fetch discards it.
 - A change to a WebCore header needs the whole `webkit-engine` rebuilt. A partial build loads and misbehaves with no crash log.
@@ -20,9 +20,9 @@ The project is `frameworks/WebKit/`. `docs/guides/webkit/contributing.md` maps t
 
 1. `cp frameworks/WebKit/tests/data/device.env.example device.env` at the top, then set `DEVICE_HOST`, `DEVICE_PORT` and, over USB, `DEVICE_UDID`. The file is gitignored.
 2. Claim the phone first: `./xmakew device claim` (see the `device-session` skill).
-3. `./xmakew device install -P .` builds and stages the substitution, writes the .deb, copies it to the phone and runs `dpkg -i`. It refuses a .deb whose app would replace an installed app with another bundle id.
+3. `./xmakew device install -P .`, then `./xmakew device install -P frameworks/WebKit/src/platform/safari`: each builds its package, copies it to the phone and runs `dpkg -i`; the root first, since the loader depends on it. Each refuses a .deb whose app would replace an installed app with another bundle id.
 
-| In the package | On the phone |
+| In which package | On the phone |
 | --- | --- |
 | loader and `RevSafari.plist` | `/Library/MobileSubstrate/DynamicLibraries/` |
 | compat and hooks | `/usr/lib/rev-safari-compat.dylib` |
@@ -31,8 +31,9 @@ The project is `frameworks/WebKit/`. `docs/guides/webkit/contributing.md` maps t
 | C++ runtime | `/usr/lib/librev-c++.1.dylib`, `/usr/lib/librev-c++abi.1.dylib` |
 | Settings pane | `/Library/PreferenceBundles/RevPrefs.bundle`, `/Library/PreferenceLoader/Preferences/RevWebKit.plist` |
 
+- The loader, the engine and the C++ runtime are in `space.kern0x1b.rev-safari`; the compat dylib, TLS and the Settings pane are in `space.kern0x1b.rev`.
 - The loader and the compat dylib are different files. Copying one over the other drops Safari to the system engine.
-- Installing keeps no backup. Keep the last good .deb, copy it out of `build/`, and to go back `scp` it to the phone as `/tmp/rev.deb` and run `./xmakew device -s 300 run "dpkg -i /tmp/rev.deb && rm -f /tmp/rev.deb"`.
+- Installing keeps no backup. Keep the last good .debs of both packages, copy them out of their projects' `build/`, and to go back `scp` each to the phone as `/tmp/rev.deb` and run `./xmakew device -s 300 run "dpkg -i /tmp/rev.deb && rm -f /tmp/rev.deb"`, the root first.
 - No respring is needed. The package's `postinst` kills MobileSafari and Preferences, and a respring re-locks the phone.
 - Settings pane changes: `./xmakew device run "killall Preferences; sleep 1; uiopen prefs:root=RevWebKit"`.
 
@@ -83,4 +84,4 @@ A SIGSEGV in `IMGSGX543GLDriver` after `malloc: mmap(size=...) failed (error cod
 
 A device that looks dead, or an ssh connection reset: see the `device-session` skill.
 
-Recovery: reinstall the last good .deb (see Deploy). If the phone is stuck, boot into safe mode by holding Volume Up during boot; MobileSubstrate is off there, so you can ssh in and revert. Screenshots and liveness checks: the `device` skill.
+Recovery: reinstall the last good .debs (see Deploy). If the phone is stuck, boot into safe mode by holding Volume Up during boot; MobileSubstrate is off there, so you can ssh in and revert. Screenshots and liveness checks: the `device` skill.

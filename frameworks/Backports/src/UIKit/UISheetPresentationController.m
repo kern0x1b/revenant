@@ -175,12 +175,12 @@ typedef NS_ENUM(NSInteger, RevenantDetentType) {
 
 + (instancetype)mediumDetent
 {
-    return [[self alloc] initWithRevenantType:RevenantDetentMedium identifier:UISheetPresentationControllerDetentIdentifierMedium resolver:nil];
+    return [[self alloc] initWithRevenantType:RevenantDetentMedium identifier:BACKPORT_IMPL(UISheetPresentationControllerDetentIdentifierMedium) resolver:nil];
 }
 
 + (instancetype)largeDetent
 {
-    return [[self alloc] initWithRevenantType:RevenantDetentLarge identifier:UISheetPresentationControllerDetentIdentifierLarge resolver:nil];
+    return [[self alloc] initWithRevenantType:RevenantDetentLarge identifier:BACKPORT_IMPL(UISheetPresentationControllerDetentIdentifierLarge) resolver:nil];
 }
 
 + (instancetype)revenant_customDetentWithIdentifier:(NSString *)identifier resolver:(CGFloat (^)(id context))resolver
@@ -509,7 +509,7 @@ typedef NS_ENUM(NSInteger, RevenantDetentType) {
 
 - (void)getTopCornerRadius:(CGFloat *)top bottomCornerRadius:(CGFloat *)bottom
 {
-    CGFloat automatic = UISheetPresentationControllerAutomaticDimension, display = revenant_sheet_display_corner_radius(_container.window);
+    CGFloat automatic = BACKPORT_IMPL(UISheetPresentationControllerAutomaticDimension), display = revenant_sheet_display_corner_radius(_container.window);
     CGFloat dismiss = revenant_sheet_corner_radius;
     CGFloat own = _root || _preferredCornerRadius == automatic ? revenant_sheet_corner_radius : _preferredCornerRadius;
     CGFloat childRadius = _child ? (_child.preferredCornerRadius == automatic ? revenant_sheet_corner_radius : _child.preferredCornerRadius) : own;
@@ -819,7 +819,7 @@ static void revenant_sheet_apply_stack(RevenantSheetLayoutInfo *node)
 - (instancetype)initWithPresentedViewController:(UIViewController *)presented presentingViewController:(UIViewController *)presenting
 {
     if ((self = [super initWithPresentedViewController:presented presentingViewController:presenting])) {
-        _preferredCornerRadius = UISheetPresentationControllerAutomaticDimension;
+        _preferredCornerRadius = BACKPORT_IMPL(UISheetPresentationControllerAutomaticDimension);
         _prefersScrollingExpandsWhenScrolledToEdge = YES;
         _detents = @[ [UISheetPresentationControllerDetent largeDetent] ];
         _layout = [[RevenantSheetLayoutInfo alloc] init];

@@ -45,7 +45,7 @@ static NSInteger const RevenantFileProviderUnavailable = -2001;
 + (void)getDomainsWithCompletionHandler:(void (^)(NSArray<NSFileProviderDomain *> *domains, NSError *_Nullable error))completionHandler
 {
     if (completionHandler) {
-        completionHandler(@[], [NSError errorWithDomain:NSFileProviderErrorDomain
+        completionHandler(@[], [NSError errorWithDomain:BACKPORT_IMPL(NSFileProviderErrorDomain)
                                                     code:RevenantFileProviderUnavailable
                                                 userInfo:@{NSLocalizedDescriptionKey: @"The application cannot be used right now."}]);
     }
@@ -119,7 +119,7 @@ static NSInteger const RevenantFileProviderUnavailable = -2001;
 
 + (NSError *)revenant_unavailable
 {
-    return [NSError errorWithDomain:NSFileProviderErrorDomain
+    return [NSError errorWithDomain:BACKPORT_IMPL(NSFileProviderErrorDomain)
                                code:RevenantFileProviderUnavailable
                            userInfo:@{NSLocalizedDescriptionKey: @"The application cannot be used right now."}];
 }

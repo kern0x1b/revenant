@@ -38,7 +38,16 @@ package("webkit")
         {"0022-WebKitLegacy-reinstate-the-WebKit1-API-iOS-links.patch", "5218580156f076c57a54fa7db2593de84345cc116dae13b9779261be468f08e7"},
         {"0023-Describe-the-iOS-6-port-in-one-page.patch", "07240ceb7b8206cba93b0e972282534e7706686c6ea1d2d93fc011059a519961"},
         {"0024-Keep-the-webkitglib-2.54-state-these-files-had-in-th.patch", "8061a88fd3852a8693aec123336b2fb8895984aad4ffba334aed517d624e864d"},
-        {"0025-Keep-the-compiler-the-build-was-configured-with.patch", "8d51fc600b929ccf8fd1d8870b6f3205151d0d027989218a337d7275acc30e27"}}
+        {"0025-Keep-the-compiler-the-build-was-configured-with.patch", "8d51fc600b929ccf8fd1d8870b6f3205151d0d027989218a337d7275acc30e27"},
+        {"0026-Take-the-XPC-declarations-the-SDK-already-has.patch", "115c06b90f9b580c9871957383130cb793d38468063ab07baa81d2463d1f26bb"},
+        {"0027-Leave-the-XPC-entitlement-checks-to-an-XPC-target.patch", "43b40060cf9ca97b4bcbc8f1c299619057a775f1e641e7b687041d8497bd8329"},
+        {"0028-Stage-the-WebKit1-headers-the-iOS-sources-import.patch", "6c99b3b29250f01386df1c17864479746000a716862c9acacc649c8a91f564b5"},
+        {"0029-Stage-the-WebCore-headers-the-iOS-sources-import-by-name.patch", "84df315e0d54d9be5efeaf8cf101f9e85b1308de24c707835ecdfc8be0491a46"},
+        {"0030-Leave-ARKit-to-the-iOS-releases-that-have-it.patch", "80f9115f81a20b3b739a7866f6f6f5991b672161183b3445b6beef13aeb94528"},
+        {"0031-Set-the-accessibility-importance-only-where-iOS-has-it.patch", "48ad029ea6f481c96983bff53afb225aa2da2084e6524aee77d37abf31bab31a"},
+        {"0032-Archive-the-engine-with-the-libtool-it-names.patch", "f4fdfbe2793069b53345bcb20a933e3436144f8cc3a2430989ddd49300a38bc9"},
+        {"0033-Cast-the-CoreLocation-authorization-status-the-SDK-types-as-AV.patch", "8889f0e87814fc95efbeb5e23c044aac76172ac75f58db85cb839bbe54a67b91"},
+        {"0034-Enable-Objective-C-before-the-compile-flags-are-mirrored.patch", "a8a9e4cbf9529a503270fa96427869236d3ed1a1d3065add4f98750710948444"}}
 
     local digests = {table.concat(tree, ",")}
     for _, patch in ipairs(patches) do
@@ -59,6 +68,7 @@ package("webkit")
     on_test(function (package)
         local src = package:installdir("src")
         for _, file in ipairs({"CMakeLists.txt", "PORTING-IOS6.md", "Source/cmake/OptionsIOS6.cmake",
+                               "Source/WTF/Scripts/generate-unified-source-bundles.py",
                                "Source/JavaScriptCore/llint/LowLevelInterpreter32_64.asm"}) do
             assert(os.isfile(path.join(src, file)), file .. " is not in the patched tree")
         end

@@ -71,7 +71,7 @@ NSString * const BACKPORT_IMPL(NFCISO15693TagResponseErrorKey) = @"ISO15693TagRe
 - (void)revenant_reportUnsupported
 {
     dispatch_async(_sessionQueue, ^{
-        NSError *error = [NSError errorWithDomain:NFCErrorDomain code:NFCReaderErrorUnsupportedFeature userInfo:nil];
+        NSError *error = [NSError errorWithDomain:BACKPORT_IMPL(NFCErrorDomain) code:NFCReaderErrorUnsupportedFeature userInfo:nil];
         id delegate = self.delegate;
         if ([delegate respondsToSelector:@selector(readerSession:didInvalidateWithError:)]) {
             [delegate readerSession:self didInvalidateWithError:error];

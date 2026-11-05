@@ -99,7 +99,7 @@ NSString * const BACKPORT_IMPL(AVKitErrorDomain) = @"AVKitErrorDomain";
     CALayer *layer = self.playerLayer;
     CALayer *superlayer = layer.superlayer;
     if (!superlayer || !self.isPictureInPicturePossible) {
-        NSError *error = [NSError errorWithDomain:AVKitErrorDomain code:-1001
+        NSError *error = [NSError errorWithDomain:BACKPORT_IMPL(AVKitErrorDomain) code:-1001
                                           userInfo:@{NSLocalizedDescriptionKey: @"Picture in Picture could not be started"}];
         if ([_revenantDelegate respondsToSelector:@selector(pictureInPictureController:failedToStartPictureInPictureWithError:)])
             [_revenantDelegate pictureInPictureController:self failedToStartPictureInPictureWithError:error];

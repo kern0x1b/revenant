@@ -8,8 +8,8 @@ NSString * const BACKPORT_IMPL(NSSecureUnarchiveFromDataTransformerName) = @"NSS
 + (void)load
 {
     @autoreleasepool {
-        if (![NSValueTransformer valueTransformerForName:NSSecureUnarchiveFromDataTransformerName])
-            [NSValueTransformer setValueTransformer:[[self alloc] init] forName:NSSecureUnarchiveFromDataTransformerName];
+        if (![NSValueTransformer valueTransformerForName:BACKPORT_IMPL(NSSecureUnarchiveFromDataTransformerName)])
+            [NSValueTransformer setValueTransformer:[[self alloc] init] forName:BACKPORT_IMPL(NSSecureUnarchiveFromDataTransformerName)];
     }
 }
 

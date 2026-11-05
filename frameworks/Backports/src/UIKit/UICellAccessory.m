@@ -352,7 +352,7 @@ UICellAccessoryPosition BACKPORT_IMPL(UICellAccessoryPositionAfterAccessoryOfCla
 
 - (CGFloat)revenant_defaultReservedWidth
 {
-    return UICellAccessoryStandardDimension;
+    return BACKPORT_IMPL(UICellAccessoryStandardDimension);
 }
 
 - (UICellAccessoryDisplayedState)revenant_defaultDisplayedState
@@ -462,7 +462,7 @@ UICellAccessoryPosition BACKPORT_IMPL(UICellAccessoryPositionAfterAccessoryOfCla
 
 - (CGFloat)revenant_width
 {
-    return _reservedLayoutWidth == UICellAccessoryStandardDimension ? [self revenant_naturalWidth] : _reservedLayoutWidth > 0 ? _reservedLayoutWidth : [self revenant_naturalWidth];
+    return _reservedLayoutWidth == BACKPORT_IMPL(UICellAccessoryStandardDimension) ? [self revenant_naturalWidth] : _reservedLayoutWidth > 0 ? _reservedLayoutWidth : [self revenant_naturalWidth];
 }
 
 - (RevenantAccessoryView *)revenant_baseViewOfKind:(NSInteger)kind size:(CGSize)size

@@ -63,8 +63,8 @@ NSString * const BACKPORT_IMPL(CNPostalAddressLocalizedPropertyNameAttribute) = 
         if (index > 0)
             [built appendAttributedString:[[NSAttributedString alloc] initWithString:@"\n" attributes:attributes]];
         NSMutableDictionary *runAttributes = [NSMutableDictionary dictionaryWithDictionary:attributes ?: @{}];
-        runAttributes[CNPostalAddressPropertyAttribute] = property;
-        runAttributes[CNPostalAddressLocalizedPropertyNameAttribute] = [CNContact localizedStringForKey:property];
+        runAttributes[BACKPORT_IMPL(CNPostalAddressPropertyAttribute)] = property;
+        runAttributes[BACKPORT_IMPL(CNPostalAddressLocalizedPropertyNameAttribute)] = [CNContact localizedStringForKey:property];
         [built appendAttributedString:[[NSAttributedString alloc] initWithString:text attributes:runAttributes]];
     }
     return built;

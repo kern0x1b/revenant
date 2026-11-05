@@ -1,9 +1,9 @@
 local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local backports = path.absolute(path.join(os.scriptdir(), ".."))
 local src = path.join(backports, "src", "Network")
-local security = path.join(backports, "src", "Security")
+local tls = path.join(backports, "src", "TLS")
 local fixture = path.join(backports, "tests", "Network", "tlsoptions", "main.swift")
-local securityObjects = {"SecProtocolOptions13_0.m", "SecProtocolMetadata13_0.m", "SecObjectWrappers12_0.m", "SecObjectWrappersIdentity12_0.m"}
+local tlsObjects = {"SecProtocolOptions13_0.m", "SecProtocolMetadata13_0.m", "SecObjectWrappers12_0.m", "SecObjectWrappersIdentity12_0.m"}
 
 local expected = table.concat({
     "verify-accept ready",
@@ -63,15 +63,15 @@ function main()
                        "-passout", "pass:revenant", "-keypbe", "PBE-SHA1-3DES", "-certpbe", "PBE-SHA1-3DES", "-macalg", "sha1"})
 
     local engine = path.join(out, "RevenantTLSEngine.o")
-    clang({"-c", "-fobjc-arc", "-Wno-deprecated-declarations", "-I" .. path.join(boringssl, "include"), path.join(src, "RevenantTLSEngine.m"), "-o", engine})
+    clang({"-c", "-fobjc-arc", "-Wno-deprecated-declarations", "-I" .. path.join(boringssl, "include"), path.join(tls, "RevenantTLSEngine.m"), "-o", engine})
     local objects = {engine}
-    for _, file in ipairs(securityObjects) do
+    for _, file in ipairs(tlsObjects) do
         local object = path.join(out, path.basename(file) .. ".o")
-        clang({"-c", "-fobjc-arc", "-Wno-deprecated-declarations", path.join(security, file), "-o", object})
+        clang({"-c", "-fobjc-arc", "-Wno-deprecated-declarations", path.join(tls, file), "-o", object})
         table.insert(objects, object)
     end
     local backport = path.join(out, "backport")
-    swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(src, "RevenantTLS"), "-I", path.join(src, "RevenantNetworkC"), "-Xcc", "-I" .. path.join(boringssl, "include")},
+    swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(tls, "RevenantTLS"), "-I", path.join(src, "RevenantNetworkC"), "-Xcc", "-I" .. path.join(boringssl, "include")},
                       os.files(path.join(src, "*.swift")),
                       {fixture},
                       objects,

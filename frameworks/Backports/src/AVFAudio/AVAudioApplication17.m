@@ -41,8 +41,8 @@ NSString * const BACKPORT_IMPL(AVAudioSessionPortContinuityMicrophone) = @"Conti
     if (_revenant_muteHandler) {
         _revenant_muteHandler(muted);
     }
-    [[NSNotificationCenter defaultCenter] postNotificationName:AVAudioApplicationInputMuteStateChangeNotification object:self
-                                                      userInfo:@{AVAudioApplicationMuteStateKey: @(muted ? 1 : 0)}];
+    [[NSNotificationCenter defaultCenter] postNotificationName:BACKPORT_IMPL(AVAudioApplicationInputMuteStateChangeNotification) object:self
+                                                      userInfo:@{BACKPORT_IMPL(AVAudioApplicationMuteStateKey): @(muted ? 1 : 0)}];
     return YES;
 }
 

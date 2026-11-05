@@ -43,9 +43,9 @@ RevenantSplitState *revenant_split_state(UISplitViewController *split)
         state = [[RevenantSplitState alloc] init];
         state->preferred = UISplitViewControllerDisplayModeAutomatic;
         state->notified = -1;
-        state->fraction = state->minimum = state->maximum = UISplitViewControllerAutomaticDimension;
-        state->preferredWidth = state->supplementaryFraction = state->supplementaryWidth = UISplitViewControllerAutomaticDimension;
-        state->supplementaryMinimum = state->supplementaryMaximum = UISplitViewControllerAutomaticDimension;
+        state->fraction = state->minimum = state->maximum = BACKPORT_IMPL(UISplitViewControllerAutomaticDimension);
+        state->preferredWidth = state->supplementaryFraction = state->supplementaryWidth = BACKPORT_IMPL(UISplitViewControllerAutomaticDimension);
+        state->supplementaryMinimum = state->supplementaryMaximum = BACKPORT_IMPL(UISplitViewControllerAutomaticDimension);
         RevenantSplitProxy *proxy = [[RevenantSplitProxy alloc] init];
         proxy->split = split;
         state->proxy = proxy;
@@ -72,14 +72,14 @@ static CGFloat revenant_split_width(UISplitViewController *split)
 {
     RevenantSplitState *state = revenant_split_state(split);
     CGFloat total = split.isViewLoaded ? split.view.bounds.size.width : [UIScreen mainScreen].bounds.size.width;
-    if (state->preferredWidth != UISplitViewControllerAutomaticDimension) {
-        CGFloat floor = state->minimum != UISplitViewControllerAutomaticDimension ? state->minimum : 0;
-        CGFloat ceiling = state->maximum != UISplitViewControllerAutomaticDimension ? state->maximum : CGFLOAT_MAX;
+    if (state->preferredWidth != BACKPORT_IMPL(UISplitViewControllerAutomaticDimension)) {
+        CGFloat floor = state->minimum != BACKPORT_IMPL(UISplitViewControllerAutomaticDimension) ? state->minimum : 0;
+        CGFloat ceiling = state->maximum != BACKPORT_IMPL(UISplitViewControllerAutomaticDimension) ? state->maximum : CGFLOAT_MAX;
         return MIN(MAX(state->preferredWidth, floor), MAX(ceiling, floor));
     }
-    CGFloat base = (state->fraction != UISplitViewControllerAutomaticDimension ? state->fraction : RevenantSplitDefaultFraction) * total;
-    CGFloat low = state->minimum != UISplitViewControllerAutomaticDimension ? state->minimum : RevenantSplitDefaultWidth;
-    CGFloat high = state->maximum != UISplitViewControllerAutomaticDimension ? state->maximum : MAX(RevenantSplitDefaultWidth, low);
+    CGFloat base = (state->fraction != BACKPORT_IMPL(UISplitViewControllerAutomaticDimension) ? state->fraction : RevenantSplitDefaultFraction) * total;
+    CGFloat low = state->minimum != BACKPORT_IMPL(UISplitViewControllerAutomaticDimension) ? state->minimum : RevenantSplitDefaultWidth;
+    CGFloat high = state->maximum != BACKPORT_IMPL(UISplitViewControllerAutomaticDimension) ? state->maximum : MAX(RevenantSplitDefaultWidth, low);
     high = MAX(high, low);
     return MIN(MAX(base, low), high);
 }

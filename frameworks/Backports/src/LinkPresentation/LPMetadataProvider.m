@@ -63,7 +63,7 @@ NSString *const BACKPORT_IMPL(LPErrorDomain) = @"LPErrorDomain";
     } else if ([error.domain isEqualToString:NSURLErrorDomain] && error.code == NSURLErrorTimedOut) {
         code = LPErrorMetadataFetchTimedOut;
     }
-    return [NSError errorWithDomain:LPErrorDomain code:code userInfo:error ? @{NSUnderlyingErrorKey: error} : nil];
+    return [NSError errorWithDomain:BACKPORT_IMPL(LPErrorDomain) code:code userInfo:error ? @{NSUnderlyingErrorKey: error} : nil];
 }
 
 - (void)finishPageWithData:(NSData *)data response:(NSURLResponse *)response error:(NSError *)error
@@ -119,7 +119,7 @@ NSString *const BACKPORT_IMPL(LPErrorDomain) = @"LPErrorDomain";
     _fetch = nil;
     if (_cancelled) {
         metadata = nil;
-        error = [NSError errorWithDomain:LPErrorDomain code:LPErrorMetadataFetchCancelled userInfo:nil];
+        error = [NSError errorWithDomain:BACKPORT_IMPL(LPErrorDomain) code:LPErrorMetadataFetchCancelled userInfo:nil];
     }
     if (completion) {
         completion(metadata, error);

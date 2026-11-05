@@ -16,7 +16,7 @@ if os.getenv("RN_EXPO") then
 end
 
 if os.getenv("RN_LINK_ALL") and os.getenv("RN_BACKPORTS") then
-    add_requireconfs("backports", {configs = {libraries = "FoundationBackports,CoreTextBackports,UIKitBackports,UserNotificationsBackports,CoreGraphicsBackports,GraphicsBackports,CoreFoundationBackports,SystemBackports,IOSurfaceBackports,WebKitBackports,MapKitBackports"}})
+    add_requireconfs("backports", {configs = {libraries = "FoundationBackports,CoreTextBackports,UIKitBackports,UserNotificationsBackports,CoreGraphicsBackports,GraphicsBackports,CoreFoundationBackports,SystemBackports,IOSurfaceBackports,WebKitBackports,MapKitBackports,CoreLocationBackports,SecurityBackports"}})
 end
 
 target("RNHost")

@@ -105,7 +105,7 @@ static BOOL revenant_glob(NSString *pattern, NSString *text)
 
 - (NSError *)revenant_error:(NSInteger)code
 {
-    return [NSError errorWithDomain:WKWebExtensionMatchPatternErrorDomain code:code userInfo:nil];
+    return [NSError errorWithDomain:BACKPORT_IMPL(WKWebExtensionMatchPatternErrorDomain) code:code userInfo:nil];
 }
 
 - (NSString *)string
