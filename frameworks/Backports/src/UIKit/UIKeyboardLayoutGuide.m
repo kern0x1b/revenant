@@ -1,8 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-// The guide spans from the top of the keyboard (the bottom of the safe area while no keyboard covers the view) to
-// the bottom of the view.
 @interface UIKeyboardLayoutGuide ()
 - (void)revenant_attachToView:(UIView *)view;
 @end
