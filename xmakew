@@ -29,6 +29,8 @@ case $cache in
 esac
 REVENANT_CACHE=$cache
 export REVENANT_CACHE
+GIT_CEILING_DIRECTORIES=$cache${GIT_CEILING_DIRECTORIES:+:$GIT_CEILING_DIRECTORIES}
+export GIT_CEILING_DIRECTORIES
 
 url=$(sed -n 's/^ *add_urls("\([^"]*\)").*/\1/p' "$recipe")
 commit=$(sed -n 's/^ *add_versions("[^"]*", *"\([0-9a-f]*\)").*/\1/p' "$recipe")
