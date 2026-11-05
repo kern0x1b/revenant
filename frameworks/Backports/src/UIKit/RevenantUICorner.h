@@ -1,5 +1,5 @@
-#ifndef REVENANT_UIKIT26_H
-#define REVENANT_UIKIT26_H
+#ifndef REVENANT_UICORNER_H
+#define REVENANT_UICORNER_H
 
 #import <UIKit/UIKit.h>
 
@@ -44,18 +44,6 @@ API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
                                    bottomLeftRadius:(nullable UICornerRadius *)bottomLeftRadius NS_SWIFT_NAME(uniformRightRadius(_:topLeftRadius:bottomLeftRadius:));
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
-@end
-
-#endif
-
-#if !__has_include(<UIKit/UISliderTrackConfiguration.h>)
-
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UISliderTick : NSObject <NSCopying>
-@end
-
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UISliderTrackConfiguration : NSObject <NSCopying>
 @end
 
 #endif

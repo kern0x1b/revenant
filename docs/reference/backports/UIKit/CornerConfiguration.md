@@ -9,9 +9,9 @@ system classes in charge where they exist.
 
 | File | Contents |
 | --- | --- |
-| `frameworks/Backports/src/UIKit/UIKit26_0.m` | the two classes, the factories, the concentric rule and the view's property |
+| `frameworks/Backports/src/UIKit/UICornerConfiguration.m` | the two classes, the factories, the concentric rule and the view's property |
 | `frameworks/Backports/src/UIKit/RevenantCornerPath.h`, `.c` | the radius fitting and the rounded path with four different radii |
-| `frameworks/Backports/src/UIKit/RevenantUIKit26.h` | the declarations of the two classes where the SDK has none |
+| `frameworks/Backports/src/UIKit/RevenantUICorner.h` | the declarations of the two classes where the SDK has none |
 | `toolchain/src/swift-runtime/overlay/UIKit/UIKitRevenant.swift` | the Swift spelling: `UICornerRadius`, `UICornerConfiguration` and the factories |
 | `frameworks/Backports/tests/UIKit/corner_path_test.m` | the host test of the geometry against an analytic oracle |
 

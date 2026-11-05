@@ -13,10 +13,6 @@
     CALayer *_fill;
 }
 
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 260000
-@dynamic supportsEyedropper, maximumLinearExposure;
-#endif
-
 - (instancetype)initWithFrame:(CGRect)frame
 {
     if ((self = [super initWithFrame:frame])) {

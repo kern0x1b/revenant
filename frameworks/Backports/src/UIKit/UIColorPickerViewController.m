@@ -121,10 +121,6 @@ static UIColor *revenant_grid_color(NSInteger column, NSInteger row)
     UISlider *_slider;
 }
 
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 260000
-@dynamic supportsEyedropper, maximumLinearExposure;
-#endif
-
 - (instancetype)init
 {
     if ((self = [super initWithNibName:nil bundle:nil])) {
