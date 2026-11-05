@@ -6,11 +6,6 @@
 #include <string.h>
 #include "../../src/Metal/RevenantMetal.h"
 
-// The render-pass path of the CoreVideo texture cache. A render encoder draws into a CoreVideo BGRA texture, and the
-// CPU reads the pixel buffer. A copy samples a CoreVideo texture through the clean texture coordinates that
-// CVMetalTextureGetCleanTexCoords returns, so a flipped texture comes out in the orientation of its pixel buffer. Each
-// comparison is exact and has a negative control that must differ.
-
 static const size_t kSize = 64;
 static NSMutableString *LOG;
 static NSUInteger FAILURES;
@@ -18,7 +13,6 @@ static NSUInteger FAILURES;
 static uint8_t outB(size_t x, size_t y) { return (uint8_t)((x * 2 + y * 9 + 23) % 256); }
 static uint8_t outG(size_t x, size_t y) { return (uint8_t)((x * 7 + y * 2 + 11) % 256); }
 static uint8_t outR(size_t x, size_t y) { return (uint8_t)((x * 3 + y * 5) % 256); }
-// The bytes the copy test writes into its source, in BGRA memory order.
 static uint8_t wrB(size_t x, size_t y) { return (uint8_t)(x * 5 + y * 7 + 3); }
 static uint8_t wrG(size_t x, size_t y) { return (uint8_t)(x * 2 + y * 11 + 9); }
 static uint8_t wrR(size_t x, size_t y) { return (uint8_t)(x * 13 + y * 4 + 21); }
@@ -30,7 +24,6 @@ static void check(NSString *name, BOOL ok)
     [LOG appendFormat:@"%@ %@\n", ok ? @"PASS" : @"FAIL", name];
 }
 
-// Counts the bytes of got that differ from expected, and returns the largest difference.
 static NSUInteger mismatches(const uint8_t *got, const uint8_t *expected, size_t count, int *largest)
 {
     NSUInteger bad = 0;
@@ -76,7 +69,6 @@ static id <MTLRenderPipelineState> pipeline(id <MTLDevice> device, id <MTLLibrar
     return [device newRenderPipelineStateWithDescriptor:descriptor error:error];
 }
 
-// Draws the full target with a state, from an optional source texture and clean coordinates, and waits for the GPU.
 static void draw(id <MTLDevice> device, id <MTLRenderPipelineState> state, id <MTLTexture> target,
     id <MTLTexture> source, id <MTLBuffer> coords)
 {
@@ -102,7 +94,6 @@ static void draw(id <MTLDevice> device, id <MTLRenderPipelineState> state, id <M
     [backport relinquish];
 }
 
-// The coordinates of a texture as the fragment shader takes them: lower left, lower right, upper right, upper left.
 static id <MTLBuffer> coordinates(id <MTLDevice> device, const float corners[8])
 {
     return [device newBufferWithBytes:corners length:8 * sizeof(float) options:MTLResourceStorageModeShared];
@@ -149,7 +140,6 @@ int main(int argc, char *argv[])
         uint8_t *expected = malloc(kSize * kSize * 4);
         int largest = 0;
 
-        // 1. A render pass writes into a CoreVideo BGRA texture, and the CPU reads the pixel buffer.
         CVPixelBufferRef target = newBuffer(kCVPixelFormatType_32BGRA, kSize);
         CVMetalTextureRef targetRef = NULL;
         status = CVMetalTextureCacheCreateTextureFromImage(kCFAllocatorDefault, cache, target, NULL,
@@ -178,7 +168,6 @@ int main(int argc, char *argv[])
             report(@"render pass against red and blue swapped (negative control)", mismatches(got, expected, kSize * kSize * 4, &largest), largest, YES);
         }
 
-        // 2. A copy samples a CoreVideo texture through its clean coordinates into a plain texture.
         CVPixelBufferRef source = newBuffer(kCVPixelFormatType_32BGRA, kSize);
         CVMetalTextureRef sourceRef = NULL;
         status = CVMetalTextureCacheCreateTextureFromImage(kCFAllocatorDefault, cache, source, NULL,
@@ -213,14 +202,12 @@ int main(int argc, char *argv[])
             [copied getBytes:got bytesPerRow:kSize * 4 fromRegion:MTLRegionMake2D(0, 0, kSize, kSize) mipmapLevel:0];
             report(@"copy through the clean coordinates keeps the buffer orientation, exact", mismatches(got, expected, kSize * kSize * 4, &largest), largest, NO);
 
-            // The negative control samples with the unflipped corners, which must turn the copy over.
             id <MTLTexture> unflippedCopy = [device newTextureWithDescriptor:descriptor];
             draw(device, copy, unflippedCopy, sourceTexture, coordinates(device, unflipped));
             [unflippedCopy getBytes:got bytesPerRow:kSize * 4 fromRegion:MTLRegionMake2D(0, 0, kSize, kSize) mipmapLevel:0];
             report(@"copy with the unflipped corners (negative control)", mismatches(got, expected, kSize * kSize * 4, &largest), largest, YES);
         }
 
-        // 3. Flush the cache, and the references are released.
         CVMetalTextureCacheFlush(cache, 0);
         check(@"flush after the render and copy", YES);
         if (targetRef)

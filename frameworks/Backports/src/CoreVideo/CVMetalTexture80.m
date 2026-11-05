@@ -5,10 +5,6 @@
 #import "../RevenantCFRuntime.h"
 #import "../Metal/RevenantMetal.h"
 
-// A CVMetalTextureCache is a CoreFoundation object over the OpenGL ES texture cache of the Metal device, and a
-// CVMetalTexture is one plane of a pixel buffer as a RevenantMetalTexture. Both are retained and released like the
-// other CoreVideo references; the GL texture itself is owned and released by RevenantMetalTexture.
-
 struct RevenantCVMetalTextureCacheState {
     void *device;
 };

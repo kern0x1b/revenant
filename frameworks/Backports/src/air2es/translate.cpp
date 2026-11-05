@@ -97,8 +97,6 @@ struct Address {
     uint64_t offset = 0;
     bool indexed = false;
     bool instanced = false;
-    // A dynamic index into an array member: the element it names is one of `selectCount` elements of `selectStride`
-    // bytes from `offset`, and `inner` is the offset within that element.
     Value *selector = nullptr;
     uint64_t selectCount = 0;
     uint64_t selectStride = 0;
@@ -109,7 +107,6 @@ struct Address {
 struct Local {
     std::string name;
     Type *type = nullptr;
-    // An element that a dynamic index chooses is a select over the constant elements, so it can be read but not written.
     bool selected = false;
 };
 
@@ -129,8 +126,8 @@ struct PlainFunction {
     const char *air;
     const char *glsl;
     unsigned arguments;
-    const char *tail = ""; // constant arguments after the operands
-    bool derivative = false; // needs GL_OES_standard_derivatives, in a fragment function only
+    const char *tail = "";
+    bool derivative = false;
 };
 
 const PlainFunction kPlainFunctions[] = {
@@ -220,7 +217,6 @@ std::string samplerJson(const GLESSampler &sampler)
            ", \"minFilter\": " + jsonQuote(sampler.minFilter) + ", \"magFilter\": " + jsonQuote(sampler.magFilter) + "}";
 }
 
-// float2x2, float3x3 and float4x4. Other matrix types are not read.
 bool matrixOf(const std::string &typeName, unsigned &columns)
 {
     if (typeName.size() != 8 || typeName.compare(0, 5, "float") != 0 || typeName[6] != 'x' || typeName[7] != typeName[5] ||
@@ -501,7 +497,6 @@ private:
 
     bool sampledBy(const Binding &texture, const std::string &json, const std::string &fields)
     {
-        // A sample coordinate is computed from the position and a size, which mediump rounds to 10 bits.
         highp_ = true;
         auto known = textures_.find(texture.name);
         if (known != textures_.end())
@@ -571,7 +566,6 @@ private:
         return isIndexOf(index, "air.vertex_id");
     }
 
-    // An i32 sign-extended to i64 that only addresses memory. The address reads the i32, as a widened index does.
     bool isAddressIndex(const SExtInst &extend)
     {
         if (!extend.getOperand(0)->getType()->isIntegerTy(32))
@@ -611,11 +605,9 @@ private:
             uint64_t &where = out.selector ? out.inner : out.offset;
             auto *constant = dyn_cast<ConstantInt>(index);
             if (!constant) {
-                // A dynamic index into an array member selects one of its elements, once per address.
                 auto *array = dyn_cast<ArrayType>(type);
                 if (!array || out.selector || out.indexed)
                     return false;
-                // An i32 index widened to i64 is that i32, as the vertex index is.
                 Value *selector = index;
                 if (auto *extend = dyn_cast<CastInst>(index);
                     extend && (extend->getOpcode() == Instruction::SExt || extend->getOpcode() == Instruction::ZExt) &&
@@ -674,8 +666,6 @@ private:
         return true;
     }
 
-    // The flip is read by the vertex and the fragment stage, which must declare it at one precision: a mediump fragment
-    // default against the vertex default of highp fails to link ("Uniform precision mismatch").
     void needFlip()
     {
         declare("uniform highp float revenant_flip;\n", "revenant_flip");
@@ -686,8 +676,6 @@ private:
         declare("uniform vec2 revenant_target;\n", "revenant_target");
     }
 
-    // A matrix member is one uniform mat. Its loads are columns or lanes of a column. Metal pads a column with three rows to
-    // four floats, so the column stride is four floats for 3 and 4 rows and two floats for 2 rows.
     bool accessMatrix(Binding &binding, const Member &field, uint64_t offset, Type *loaded, std::string &out, bool scoped)
     {
         unsigned columns = 0;
@@ -738,7 +726,6 @@ private:
         return true;
     }
 
-    // `scoped` names the uniform after its buffer, so members of different buffers that share a name stay apart.
     bool accessMember(Binding &binding, const Member &field, uint64_t offset, Type *loaded, std::string &out, bool scoped = false)
     {
         unsigned columns = 0;
@@ -890,8 +877,6 @@ private:
         return true;
     }
 
-    // A load through a dynamic index into an array member of a buffer. Each element is a uniform of its own, and a
-    // select chain over them picks the element the index names. The last element is the default, as for a table.
     bool selectMember(const Address &address, LoadInst &load, std::string &out)
     {
         Binding &binding = *address.binding;
@@ -970,8 +955,6 @@ private:
                 if (type.empty())
                     return refuse("a fragment input of a type this emitter does not hold");
                 if (type == "int") {
-                    // ES 1.00 has no integer varyings. A flat integer is the same at every fragment of its
-                    // primitive, so it travels as a float and is rounded back.
                     declare("varying float " + binding->name + ";\n", binding->name);
                     out = "int(floor(" + binding->name + " + 0.5))";
                     return true;
@@ -1366,8 +1349,6 @@ private:
         return true;
     }
 
-    // A switch becomes an if / else if chain on its value. Cases that share a target are one arm, and a case
-    // whose target is the default is left to the else, so each arm runs exactly one target.
     bool multiway(BasicBlock *block, SwitchInst &sw, BasicBlock *&join)
     {
         if (!rejoin(block, join))
@@ -1401,7 +1382,6 @@ private:
                 return false;
             depth_--;
         }
-        // The else is needed for the default's phi copies even when the default is the join itself.
         if (fallback != join || isa<PHINode>(join->front())) {
             statement("} else {\n");
             depth_++;
@@ -1529,12 +1509,6 @@ private:
         return true;
     }
 
-    // GLSL ES 1.00 has no integer bit operations. A constant mask clears a fixed set of bits, and bit b of x is
-    // floor(mod(x, 2^(b+1)) / 2^b), so the and is written in floats. The operand must be the result of an unsigned
-    // float-to-integer conversion: that integer is a float32 value, so the float arithmetic is exact for it. A
-    // negative operand is out of range for that conversion, and it takes the saturated value 0, because the device
-    // computes floor and mod of negative floats inexactly. The shader is declared highp in float and in int,
-    // because mediump holds integers only up to 2048.
     bool maskAnd(Instruction &instruction, BinaryOperator &binary)
     {
         if (!binary.getType()->isIntegerTy(32))
@@ -1573,7 +1547,6 @@ private:
         return true;
     }
 
-    // An operand bounded below 2^31: a constant, an unsigned float conversion, or an unsigned max of bounded operands.
     bool bounded(Value *value)
     {
         if (auto *constant = dyn_cast<ConstantInt>(value))
@@ -1587,7 +1560,6 @@ private:
         return name == "air.max.u.i32" && bounded(call->getArgOperand(0)) && bounded(call->getArgOperand(1));
     }
 
-    // A divisor that is provably non-zero: a non-zero constant, or an unsigned max with a non-zero operand.
     bool nonZero(Value *value)
     {
         if (auto *constant = dyn_cast<ConstantInt>(value))
@@ -1598,17 +1570,12 @@ private:
         return nonZero(call->getArgOperand(0)) || nonZero(call->getArgOperand(1));
     }
 
-    // An operand that is a constant at or above 2^23 cannot take the float quotient below, so it is refused.
     bool smallEnough(Value *value)
     {
         auto *constant = dyn_cast<ConstantInt>(value);
         return !constant || constant->getZExtValue() < (1u << 23);
     }
 
-    // An unsigned division of bounded integers. ES 1.00 has no integer %, and the device's integer / is off by one at
-    // exact multiples (220 / 11 gives 19), so the quotient is taken in float: (a + 0.5) / b rounds down to a / b for
-    // every a below 2^23, since the fraction of a / b is either 0 or at least 1/b away from the next integer. A remainder
-    // is a - b * quotient, which is exact for the same operands.
     bool unsignedDivide(Instruction &instruction, BinaryOperator &binary)
     {
         if (!binary.getType()->isIntegerTy(32))
@@ -1630,7 +1597,6 @@ private:
         return true;
     }
 
-    // A struct local is a GLSL struct with a field per member, and an array member is an array field.
     std::string structOf(Type *type)
     {
         auto *structure = cast<StructType>(type);
@@ -1649,9 +1615,6 @@ private:
         return name;
     }
 
-    // An element of a local is a local of its own, named by the local and the indices, so the loads and stores of it
-    // take the paths of any local. A struct field is named by its constant index, and an array element by a constant
-    // or a dynamic index. GLSL ES 1.00 has no i64, so an index that widens an i32 is that i32.
     bool localElement(GetElementPtrInst &gep, const Local &base)
     {
         auto *first = dyn_cast<ConstantInt>(gep.getOperand(1));
@@ -1679,8 +1642,6 @@ private:
                 if (isa<ConstantInt>(index)) {
                     name += "[" + text + "]";
                 } else {
-                    // Appendix A, section 5 allows only constant indexes, so a dynamic index that ends the path selects
-                    // among the constant elements, from the last one down to the first.
                     if (i + 1 != gep.getNumOperands() || selected || array->getNumElements() > 64 || array->getElementType()->isAggregateType())
                         return refuse("a dynamic index into a local that this emitter does not map");
                     std::string chain;
@@ -1735,7 +1696,6 @@ private:
             locals_.push_back(glsl + " " + local.name + dimension + ";\n");
             return true;
         }
-        // A pointer cast is an address, not a value. The loads and stores through it are checked where they are read.
         if (auto *cast = dyn_cast<BitCastInst>(&instruction); cast && cast->getType()->isPointerTy())
             return true;
         if (auto *store = dyn_cast<StoreInst>(&instruction)) {
@@ -1865,7 +1825,6 @@ private:
             const char *op = nullptr;
             CmpInst::Predicate predicate = compare->getPredicate();
             if (CmpInst::isFPPredicate(predicate) && !CmpInst::isOrdered(predicate)) {
-                // With nnan no operand is NaN, so an unordered predicate is the ordered one.
                 if (!compare->hasNoNaNs())
                     return refuse("an unordered comparison of floats that may be NaN");
                 switch (predicate) {
@@ -1897,7 +1856,6 @@ private:
                 return false;
             if (!local(instruction, name))
                 return false;
-            // GLSL ES 1.00 compares vectors only with functions, so a vector compares component by component.
             auto *vector = dyn_cast<FixedVectorType>(compare->getOperand(0)->getType());
             auto part = [&](const std::string &value, unsigned index) {
                 return vector ? "(" + value + ")." + std::string(1, "xyzw"[index]) : value;
@@ -1984,8 +1942,6 @@ private:
         return true;
     }
 
-    // A read at an integer position is a nearest fetch at the centre of that texel, which is the texel itself. The size
-    // comes from the host as for a size query, and the nearest sampler clamps to the edge, so the fetch stays inside.
     bool readTexture(CallInst &call)
     {
         if (stage_ != Stage::Kernel && stage_ != Stage::Fragment)
@@ -2019,7 +1975,6 @@ private:
         return true;
     }
 
-    // A thread position, or one of its lanes as `threadPosition.x` compiles to.
     const Binding *threadPositionOf(const Value *value)
     {
         if (auto *extract = dyn_cast<ExtractElementInst>(value))
@@ -2028,9 +1983,6 @@ private:
         return binding && binding->kind == "air.thread_position_in_grid" ? binding : nullptr;
     }
 
-    // A logical shift right by a constant of a thread position, or of one of its lanes, is an integer division by 2^k.
-    // The position is a non-negative integer below the size of the render target, so the division is exact in int
-    // arithmetic.
     bool shiftRight(Instruction &instruction, BinaryOperator &binary)
     {
         auto *constant = dyn_cast<Constant>(binary.getOperand(1));
@@ -2075,8 +2027,6 @@ private:
         return true;
     }
 
-    // A memset of a local array to zero is a store of zero into each element it covers. The zero is 0.0 for a float or
-    // a vector of floats, which is the zero bytes of the memset.
     bool zeroLocal(CallInst &call)
     {
         auto *fill = dyn_cast<ConstantInt>(call.getArgOperand(1));
@@ -2148,7 +2098,6 @@ private:
             return true;
         }
         if (maxUnsigned) {
-            // ES 1.00 has no integer max. The unsigned max is the signed one for operands below 2^31.
             if (args.size() != 2 || !local(call, name))
                 return refuse("a call to " + called + " with an argument count this emitter does not map");
             if (!bounded(call.getArgOperand(0)) || !bounded(call.getArgOperand(1)))

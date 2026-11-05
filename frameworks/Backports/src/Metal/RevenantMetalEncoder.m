@@ -320,7 +320,6 @@ static void uploadUniforms(const RevenantUniformPlan *plans, unsigned count, Rev
         const uint8_t *p = (const uint8_t *)buffer.bytes + offsets[u->buffer] + u->offset + u->instanceStride * instance;
         int n = u->components;
         if (u->columns) {
-            // Metal pads a column with three rows to four floats; GL takes the matrix as its columns, one after the other.
             GLfloat packed[16];
             int stride = n == 3 ? 4 : n;
             for (int c = 0; c < u->columns; c++)

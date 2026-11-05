@@ -6,10 +6,6 @@
 #include <string.h>
 #include "../../src/Metal/RevenantMetal.h"
 
-// The backport's CVMetalTextureCache on the Metal device: NV12 planes and a BGRA buffer bound as MTLTextures, read back
-// with getBytes, written with replaceRegion and read by the CPU from the pixel buffer. Each comparison is exact and has
-// a negative control that must differ, or a refusal that must hold.
-
 static const size_t kSize = 64;
 static NSMutableString *LOG;
 static NSUInteger FAILURES;
@@ -20,7 +16,6 @@ static uint8_t crAt(size_t x, size_t y) { return (uint8_t)(x * 11 + y * 17 + 40)
 static uint8_t outB(size_t x, size_t y) { return (uint8_t)((x * 2 + y * 9 + 23) % 256); }
 static uint8_t outG(size_t x, size_t y) { return (uint8_t)((x * 7 + y * 2 + 11) % 256); }
 static uint8_t outR(size_t x, size_t y) { return (uint8_t)((x * 3 + y * 5) % 256); }
-// The bytes the replaceRegion test writes, in BGRA memory order.
 static uint8_t wrB(size_t x, size_t y) { return (uint8_t)(x * 5 + y * 7 + 3); }
 static uint8_t wrG(size_t x, size_t y) { return (uint8_t)(x * 2 + y * 11 + 9); }
 static uint8_t wrR(size_t x, size_t y) { return (uint8_t)(x * 13 + y * 4 + 21); }
@@ -32,7 +27,6 @@ static void check(NSString *name, BOOL ok)
     [LOG appendFormat:@"%@ %@\n", ok ? @"PASS" : @"FAIL", name];
 }
 
-// Counts the bytes of got that differ from expected, and returns the largest difference.
 static NSUInteger mismatches(const uint8_t *got, const uint8_t *expected, size_t count, int *largest)
 {
     NSUInteger bad = 0;
@@ -91,7 +85,6 @@ int main(int argc, char *argv[])
         uint8_t *expected = malloc(kSize * kSize * 4);
         int largest = 0;
 
-        // NV12: the luma plane as R8Unorm and the chroma plane as RG8Unorm.
         CVPixelBufferRef nv12 = newBuffer(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange, kSize);
         if (nv12 && cache) {
             CVPixelBufferLockBaseAddress(nv12, 0);
@@ -151,7 +144,6 @@ int main(int argc, char *argv[])
             CVPixelBufferRelease(nv12);
         }
 
-        // BGRA: the CPU writes the buffer, the texture reads it, and replaceRegion writes it back for the CPU to read.
         CVPixelBufferRef bgra = newBuffer(kCVPixelFormatType_32BGRA, kSize);
         if (bgra && cache) {
             CVPixelBufferLockBaseAddress(bgra, 0);
@@ -229,8 +221,6 @@ int main(int argc, char *argv[])
             CVPixelBufferRelease(bgra);
         }
 
-        // IOSurface-backed texture through the device, the path the CoreVideo texture now shares with: the CPU writes
-        // the surface, the texture reads it back exactly.
         NSDictionary *surfaceProperties = @{ (__bridge NSString *)kIOSurfaceWidth: @(kSize), (__bridge NSString *)kIOSurfaceHeight: @(kSize),
                                              (__bridge NSString *)kIOSurfaceBytesPerElement: @4, (__bridge NSString *)kIOSurfacePixelFormat: @(0x42475241) };
         IOSurfaceRef surface = IOSurfaceCreate((__bridge CFDictionaryRef)surfaceProperties);

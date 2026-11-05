@@ -6,10 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Feasibility of the CoreVideo texture cache on the device: NV12 planes bound as GL_RED_EXT and GL_RG_EXT through
-// CVOpenGLESTextureCache, a BGRA buffer sampled after a CPU write, and a BGRA buffer written by the GPU and read by
-// the CPU. Each comparison is exact, and each has a negative control that must fail. Only system APIs are used.
-
 static const size_t kSize = 64;
 static NSMutableString *LOG;
 static NSUInteger FAILURES;
@@ -17,7 +13,6 @@ static NSUInteger FAILURES;
 static uint8_t yAt(size_t x, size_t y) { return (uint8_t)(x * 7 + y * 13); }
 static uint8_t cbAt(size_t x, size_t y) { return (uint8_t)(x * 5 + y * 3 + 9); }
 static uint8_t crAt(size_t x, size_t y) { return (uint8_t)(x * 11 + y * 17 + 40); }
-// The GPU-written pattern of the output test, as the shader computes it.
 static uint8_t outR(size_t x, size_t y) { return (uint8_t)((x * 3 + y * 5) % 256); }
 static uint8_t outG(size_t x, size_t y) { return (uint8_t)((x * 7 + y * 2 + 11) % 256); }
 static uint8_t outB(size_t x, size_t y) { return (uint8_t)((x * 2 + y * 9 + 23) % 256); }
@@ -79,7 +74,6 @@ static GLuint program(const char *fragment)
     return result;
 }
 
-// Draws the full target through the program, sampling unit 0 (the source texture) at each texel centre.
 static GLuint draw(GLuint shader, GLuint source, size_t w, size_t h, GLuint target)
 {
     GLuint framebuffer = 0;
@@ -113,7 +107,6 @@ static GLuint newTarget(size_t w, size_t h)
     return texture;
 }
 
-// Counts the bytes of got that differ from expected in the channels of mask (bit 0 red .. bit 3 alpha).
 static NSUInteger differences(const uint8_t *got, const uint8_t *expected, size_t count, unsigned mask, int *largest)
 {
     NSUInteger bad = 0;
@@ -141,7 +134,6 @@ static void report(NSString *name, NSUInteger bad, int largest, BOOL negativeCon
         negativeControl ? " (negative control: must differ)" : ""];
 }
 
-// Samples a CoreVideo texture of one plane into an RGBA target, and reads the target back.
 static BOOL sampleBuffer(CVOpenGLESTextureCacheRef cache, CVPixelBufferRef buffer, size_t plane, GLint internal,
     GLenum format, size_t w, size_t h, GLuint shader, uint8_t *got, NSString *name)
 {
@@ -208,7 +200,6 @@ int main(int argc, char *argv[])
         GLuint sample = program(kSample);
         GLuint write = program(kWrite);
 
-        // NV12: CPU writes the planes, the GPU samples them as R8 and RG8.
         CVPixelBufferRef nv12 = newBuffer(kCVPixelFormatType_420YpCbCr8BiPlanarFullRange, kSize);
         if (nv12) {
             CVPixelBufferLockBaseAddress(nv12, 0);
@@ -236,7 +227,6 @@ int main(int argc, char *argv[])
                         e[0] = yAt(x, y); e[1] = 0; e[2] = 0; e[3] = 255;
                     }
                 report(@"nv12 luma as R8, red channel", differences(got, expected, kSize * kSize, 0x1, &largest), largest, NO);
-                // Negative control: the chroma values must not match the luma plane.
                 for (size_t y = 0; y < kSize; y++)
                     for (size_t x = 0; x < kSize; x++) {
                         uint8_t *e = expected + (y * kSize + x) * 4;
@@ -252,7 +242,6 @@ int main(int argc, char *argv[])
                         e[0] = cbAt(x, y); e[1] = crAt(x, y); e[2] = 0; e[3] = 255;
                     }
                 report(@"nv12 chroma as RG8, red and green", differences(got, expected, half2 * half2, 0x3, &largest), largest, NO);
-                // Negative control: the green channel must not be the red channel.
                 for (size_t y = 0; y < half2; y++)
                     for (size_t x = 0; x < half2; x++) {
                         uint8_t *e = expected + (y * half2 + x) * 4;
@@ -265,7 +254,6 @@ int main(int argc, char *argv[])
             CVPixelBufferRelease(nv12);
         }
 
-        // BGRA written by the CPU, sampled by the GPU: the texel is in RGBA order.
         CVPixelBufferRef bgraIn = newBuffer(kCVPixelFormatType_32BGRA, kSize);
         if (bgraIn) {
             CVPixelBufferLockBaseAddress(bgraIn, 0);
@@ -298,7 +286,6 @@ int main(int argc, char *argv[])
             CVPixelBufferRelease(bgraIn);
         }
 
-        // BGRA written by the GPU through a texture of the buffer, read by the CPU: the output path.
         CVPixelBufferRef bgraOut = newBuffer(kCVPixelFormatType_32BGRA, kSize);
         if (bgraOut) {
             CVOpenGLESTextureRef texture = NULL;

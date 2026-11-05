@@ -147,9 +147,6 @@ typedef struct {
     GLfloat expected;
 } RevenantExactVertex;
 
-// Each set holds integers that a float-to-integer conversion can produce, so each is a float32 value.
-// The sets are: every integer from -2^19 up, the integers that straddle 2^24 (the even ones above it), and random
-// float truncations with the largest and smallest int32 values in front.
 static void revenant_exact_values(int32_t *values, int set)
 {
     uint32_t state = 2463534242u;
@@ -191,8 +188,6 @@ static void revenant_exact_fill(RevenantExactVertex *vertices, const int32_t *va
     }
 }
 
-// Runs a fragment shader over one point per pixel of a 1024x1024 target, each point carrying its integer and the
-// expected value, and counts the pixels the shader marks as equal (green) or not (red).
 static void revenant_exact(NSString *name, NSString *fragmentSource)
 {
     BOOL fragmentOK = NO, vertexOK = NO, linked = NO;
@@ -293,11 +288,6 @@ static void revenant_exact(NSString *name, NSString *fragmentSource)
     revenant_flush();
 }
 
-// The texture stage runs a translated fragment shader over a render target. The input texture holds a byte pattern
-// that the host computes, so each output pixel has one expected value: the texel at the same position, or at half the
-// position for map=half. The spec is "out=WxH in=NAME:WxH map=identity|half", or a value map of the list above, and the
-// uniforms NAME_size and <output>_size are set from it. A pixel that differs in any channel is a failure, and the first
-// failures are logged. identity and half must match exactly; a value map allows one byte.
 static const char *REVENANT_TEXTURE_VERTEX =
     "attribute vec2 a_position;\n"
     "void main() {\n"
@@ -309,9 +299,6 @@ static uint8_t revenant_texel(size_t x, size_t y, size_t channel)
     return (uint8_t)(x * 73 + y * 151 + channel * 47);
 }
 
-// The value maps check an intrinsic against the host's own computation of it, with a tolerance of one byte because the
-// device computes mediump. Each name is the fragment function of intrinsics.metal that it checks, and r8 and rg8 check
-// a plane read through a texture of that format. The output is clamped to [0, 1] and rounded to a byte.
 static double revenant_unit(size_t x, size_t y, size_t c)
 {
     return revenant_texel(x, y, c) / 255.0;
@@ -397,14 +384,11 @@ static void revenant_expect(const char *map, size_t x, size_t y, double out[4])
         unsigned p = revenant_texel(x, y, 0), q = revenant_texel(x, y, 1);
         out[0] = (double)(p % (q > 1 ? q : 1)) / 255.0;
     } else if (strcmp(map, "fwidth_f32") == 0) {
-        // fwidth of the ramp of intrinsics.metal: 0.75 / 64 per pixel, times 16 in the shader.
         out[0] = 16.0 * 0.75 / 64.0;
     } else if (strcmp(map, "switch_f32") == 0) {
         int branch = (int)floor(3.0 * v0 + 0.5);
         out[0] = branch == 0 ? v1 : branch == 1 ? v2 * 0.5 : branch == 2 ? 1.0 - v3 : 0.25;
     } else if (strcmp(map, "diag") == 0) {
-        // Derivatives of the texel value across the quad: the even and odd pixel of a row or column differ by the
-        // same signed step, so each pixel's dFdx is the odd minus the even neighbour in its row.
         out[0] = 0.5 + 0.5 * (revenant_unit(x | 1, y, 0) - revenant_unit(x & ~(size_t)1, y, 0));
         out[1] = 0.5 + 0.5 * (revenant_unit(x, y | 1, 0) - revenant_unit(x, y & ~(size_t)1, 0));
     } else if (strcmp(map, "r8") == 0) {
@@ -420,7 +404,6 @@ static BOOL revenant_identity(const char *map)
     return strcmp(map, "identity") == 0 || strcmp(map, "half") == 0;
 }
 
-// The integer maps are exact: a difference of one in their byte is a wrong quotient or remainder, not rounding.
 static BOOL revenant_integer(const char *map)
 {
     return strcmp(map, "max_u_i32") == 0 || strcmp(map, "udiv_u_i32") == 0 || strcmp(map, "urem_u_i32") == 0;
@@ -512,7 +495,6 @@ static void revenant_texture(NSString *name, NSString *fragmentSource, NSString 
         glUniform2f(glGetUniformLocation(program, uniform), isInput ? inW : outW, isInput ? inH : outH);
     }
 
-    // The render target lives on unit 1, so binding it does not replace the input on unit 0.
     GLuint framebuffer = 0, target = 0;
     glActiveTexture(GL_TEXTURE1);
     glGenTextures(1, &target);

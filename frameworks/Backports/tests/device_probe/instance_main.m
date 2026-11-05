@@ -81,8 +81,6 @@ static NSUInteger revenant_mismatches(id<MTLTexture> texture, const uint8_t expe
     return bad;
 }
 
-// The element draw binds the corners at 0, the quads at 1, the frame at 2 and the pick at 3. The quad of each instance
-// is its own element, so the instance count sets how many elements are read.
 static void revenant_element_draw(id<MTLDevice> device, id<MTLRenderPipelineState> pipeline, id<MTLTexture> target, NSUInteger instances, const float quads[24], const float frame[12], int pick)
 {
     MTLRenderPassDescriptor *pass = [MTLRenderPassDescriptor renderPassDescriptor];
@@ -114,8 +112,6 @@ static void revenant_element_checks(id<MTLDevice> device)
     if (!pipeline)
         return;
 
-    // Instance i has tint (1,0,0), (0,1,0), (0,0,1) in its x, y and z. The color of a column is (tint.x, gain[pick].y, tint.z),
-    // so gain[1].y = 1 is the only green, and the blue of column 2 comes from its own element.
     const float quads[24] = {0, 0, 0, 0, 1, 0, 0, 1,  0, 0, 0, 0, 0, 1, 0, 1,  0, 0, 0, 0, 0, 0, 1, 1};
     const float frame[12] = {0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1};
     const uint8_t lit[12] = {255, 255, 0, 255, 0, 255, 0, 255, 0, 255, 255, 255};
@@ -134,14 +130,11 @@ static void revenant_element_checks(id<MTLDevice> device)
     revenant_check(revenant_mismatches(target, first) == 0, @"a 1-instance draw reads element 0 only");
 }
 
-// The matrix frame as Metal lays it out: model and projection as column-major float4x4, then a float3x3 whose three columns
-// are each padded to four floats.
 static const float REVENANT_MATRIX_FRAME[44] = {
     1, 0, 2, 0,  0, 3, 0, 1,  4, 0, 1, 0,  0, 2, 0, 1,
     1, 1, 0, 0,  0, 2, 5, 1,  3, 0, 1, 0,  0, 0, 2, 1,
     1, 2, 0, 0,  0, 1, 3, 0,  2, 4, 1, 0};
 
-// The reference product of the shader, with the same column-major reading as Metal: out[r] = sum over c of m[c][r] * v[c].
 static void revenant_multiply(const float *m, const float *v, float *out)
 {
     for (int r = 0; r < 4; r++) {
@@ -151,7 +144,6 @@ static void revenant_multiply(const float *m, const float *v, float *out)
     }
 }
 
-// The bytes the matrix draw must write into each of its three pixels: the products x and y, model[3][1] and normal[2][1].
 static void revenant_matrix_expected(const float *frame, uint8_t expected[12])
 {
     float v[4] = {1, 2, 3, 1}, mv[4], p[4];
@@ -163,7 +155,6 @@ static void revenant_matrix_expected(const float *frame, uint8_t expected[12])
     memcpy(expected + 8, pixel, sizeof pixel);
 }
 
-// The same matrices stored transposed, which is the layout error the matrix check must catch.
 static void revenant_matrix_transposed(const float *frame, float *out)
 {
     memset(out, 0, 44 * sizeof(float));

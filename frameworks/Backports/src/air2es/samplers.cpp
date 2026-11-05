@@ -54,7 +54,6 @@ bool decodeSampler(uint64_t state, const std::vector<SamplerRow> &table, GLESSam
         if (row.state != state)
             continue;
         if (!wrapping(row.s, out.wrapS, refusal) || !wrapping(row.t, out.wrapT, refusal)) {
-            // A linear filter blends the edge texels with the zero border, and an emulation of that needs the texture size.
             if (refusal == kClampToZero && (std::string(row.min) == "linear" || std::string(row.mag) == "linear"))
                 refusal = "a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture";
             return false;
