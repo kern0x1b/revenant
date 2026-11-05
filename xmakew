@@ -161,7 +161,7 @@ case ${1:-} in
         "$prefix/bin/xmake" l -P "$root" "$root/tools/cache.lua" guard "$root" || exit 1
         status=0
         run_xmake "$@" || status=$?
-        "$prefix/bin/xmake" l -P "$root" "$root/tools/cache.lua" record "$root" || true
+        "$prefix/bin/xmake" l -P "$root" "$root/tools/cache.lua" record "$root" || echo "xmakew: the cache record did not finish" >&2
         exit $status
         ;;
 esac
