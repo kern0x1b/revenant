@@ -66,7 +66,7 @@ end
 
 local function package_frameworks(package, name)
     local carried = {}
-    for _, folder in ipairs(os.dirs(path.join(package:installdir("bundle"), "Frameworks", "*.framework"))) do
+    for _, folder in ipairs(os.dirs(path.join(package:installdir(), "bundle", "Frameworks", "*.framework"))) do
         local stem = path.basename(folder)
         local file = path.join(folder, stem)
         if os.isfile(file) and not os.islink(file) then
