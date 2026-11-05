@@ -3357,6 +3357,7 @@ enum MTLIndexTypeUInt16
 enum MTLIndexTypeUInt32
 enum MTLLibraryTypeExecutable
 enum MTLLoadActionClear
+enum MTLLoadActionLoad
 enum MTLMatrixLayoutColumnMajor
 enum MTLMatrixLayoutRowMajor
 enum MTLMutabilityDefault
@@ -3380,6 +3381,7 @@ enum MTLPrimitiveTopologyClassUnspecified
 enum MTLPrimitiveTypeLine
 enum MTLPrimitiveTypeLineStrip
 enum MTLPrimitiveTypePoint
+enum MTLPrimitiveTypeTriangle
 enum MTLPrimitiveTypeTriangleStrip
 enum MTLPurgeableStateKeepCurrent
 enum MTLPurgeableStateNonVolatile
@@ -3408,7 +3410,7 @@ enum MTLTextureType2D
 enum MTLTextureUsageRenderTarget
 enum MTLTextureUsageShaderRead
 enum MTLTextureUsageShaderWrite
-enum MTLTriangleFillModeFill
+enum MTLTriangleFillModeLines
 enum MTLVertexFormatChar
 enum MTLVertexFormatChar2
 enum MTLVertexFormatChar2Normalized
@@ -4705,10 +4707,12 @@ function RevenantMetal4SparseBufferUpdateRefusal
 function RevenantMetal4SparseTextureCopyRefusal
 function RevenantMetal4SparseTextureUpdateRefusal
 function RevenantMetalDecodeVertex
+function RevenantMetalDeviceHasExtension
 function RevenantMetalError
 function RevenantMetalFormatFromMDL
 function RevenantMetalNextDrawable
 function RevenantMetalSynchroniseSurfaceTextures
+function RevenantMetalTriangleEdges
 function RevenantMetalVertexFormat
 function RevenantMusicKitSignES256
 function RevenantNDEFRecordDecode
@@ -20322,7 +20326,7 @@ member MPSImageBilinearScale -encodeToCommandBuffer:sourceImage:destinationImage
 member MPSImageBilinearScale -encodeToCommandBuffer:sourceTexture:destinationTexture:
 member MPSImageBox -encodeToCommandBuffer:sourceImage:destinationImage:
 member MPSImageBox -initWithDevice:
-member MPSImageBox -initWithDevice:kernelHeight:kernelWidth:
+member MPSImageBox -initWithDevice:kernelWidth:kernelHeight:
 member MPSImageBox -kernelHeight
 member MPSImageBox -kernelWidth
 member MPSImageBox -revenant_makeTentWeights
@@ -20441,7 +20445,7 @@ member MPSImageStatisticsMinAndMax -initWithCoder:device:
 member MPSImageStatisticsMinAndMax -initWithDevice:
 member MPSImageSubtract +revenant_mps_operation
 member MPSImageSubtract -initWithDevice:
-member MPSImageTent -initWithDevice:kernelHeight:kernelWidth:
+member MPSImageTent -initWithDevice:kernelWidth:kernelHeight:
 member MPSImageThresholdBinary -RevenantMPSThreshold:
 member MPSImageThresholdBinary -initWithDevice:thresholdValue:linearGrayColorTransform:
 member MPSImageThresholdBinary -initWithDevice:thresholdValue:maximumValue:linearGrayColorTransform:
@@ -21148,7 +21152,7 @@ member MPSUnaryImageKernel -encodeToCommandBuffer:sourceTexture:destinationTextu
 member MPSUnaryImageKernel -initWithCoder:device:
 member MPSUnaryImageKernel -initWithDevice:
 member MPSUnaryImageKernel -offset
-member MPSUnaryImageKernel -revenant_mps_convolveRegionWithSource:destination:kernelWidth:kernelHeight:weights:bias:what:
+member MPSUnaryImageKernel -revenant_mps_convolveRegionWithCommandBuffer:source:destination:kernelWidth:kernelHeight:weights:bias:what:
 member MPSUnaryImageKernel -sourceRegionForDestinationSize:
 member MPSVector -data
 member MPSVector -dataType
@@ -26996,6 +27000,7 @@ member RevenantMetalCommandBuffer -commit
 member RevenantMetalCommandBuffer -computeCommandEncoder
 member RevenantMetalCommandBuffer -computeCommandEncoderWithDescriptor:
 member RevenantMetalCommandBuffer -computeCommandEncoderWithDispatchType:
+member RevenantMetalCommandBuffer -dealloc
 member RevenantMetalCommandBuffer -device
 member RevenantMetalCommandBuffer -enqueue
 member RevenantMetalCommandBuffer -error
@@ -27034,10 +27039,13 @@ member RevenantMetalComputeEncoder -label
 member RevenantMetalComputeEncoder -memoryBarrierWithScope:afterStages:beforeStages:
 member RevenantMetalComputeEncoder -popDebugGroup
 member RevenantMetalComputeEncoder -pushDebugGroup:
+member RevenantMetalComputeEncoder -revenantDispatchTranslatedGrid:
 member RevenantMetalComputeEncoder -revenantRunGroup:atGroup:atGroupPosition:threads:
 member RevenantMetalComputeEncoder -setBuffer:offset:atIndex:
 member RevenantMetalComputeEncoder -setBytes:length:atIndex:
 member RevenantMetalComputeEncoder -setComputePipelineState:
+member RevenantMetalComputeEncoder -setSamplerState:atIndex:
+member RevenantMetalComputeEncoder -setTexture:atIndex:
 member RevenantMetalComputeEncoder -setThreadgroupMemoryLength:atIndex:
 member RevenantMetalComputePipeline -device
 member RevenantMetalComputePipeline -initWithFunction:error:
@@ -27045,11 +27053,14 @@ member RevenantMetalComputePipeline -kernelName
 member RevenantMetalComputePipeline -label
 member RevenantMetalComputePipeline -maxThreadgroupsPerThreadgroup
 member RevenantMetalComputePipeline -maxTotalThreadsPerThreadgroup
+member RevenantMetalComputePipeline -revenantAnnounceCPURoute
 member RevenantMetalComputePipeline -revenantBlockBytes
 member RevenantMetalComputePipeline -revenantKernelFunction
+member RevenantMetalComputePipeline -revenantRenderPipeline
 member RevenantMetalComputePipeline -revenantSetBlockBytes:
 member RevenantMetalComputePipeline -revenantSetThreads:
 member RevenantMetalComputePipeline -revenantThreads
+member RevenantMetalComputePipeline -revenantTranslatedFunction
 member RevenantMetalComputePipeline -threadExecutionWidth
 member RevenantMetalComputePipeline -threadgroupMemoryLengthForIndex:
 member RevenantMetalDepthStencil -device
@@ -27119,10 +27130,12 @@ member RevenantMetalEncoder -endEncoding
 member RevenantMetalEncoder -initWithDescriptor:
 member RevenantMetalEncoder -insertDebugSignpost:
 member RevenantMetalEncoder -issue:first:count:indices:type:
+member RevenantMetalEncoder -issueEdgesOfPrimitive:stream:count:
 member RevenantMetalEncoder -label
 member RevenantMetalEncoder -popDebugGroup
 member RevenantMetalEncoder -prepareForVertexCount:
 member RevenantMetalEncoder -pushDebugGroup:
+member RevenantMetalEncoder -revenantArenaCopy:length:offset:
 member RevenantMetalEncoder -revenantCheckHeapOf:what:
 member RevenantMetalEncoder -revenantHeapNames
 member RevenantMetalEncoder -revenantUseHeaps:count:
@@ -27233,6 +27246,7 @@ member RevenantMetalLogContainer -logs
 member RevenantMetalObjectPayloadBinding -objectPayloadAlignment
 member RevenantMetalObjectPayloadBinding -objectPayloadDataSize
 member RevenantMetalObjectPayloadBinding -type
+member RevenantMetalPipeline +fullscreenWithFragment:error:
 member RevenantMetalPipeline -attributeForName:
 member RevenantMetalPipeline -buildPlan
 member RevenantMetalPipeline -dealloc
@@ -27273,6 +27287,7 @@ member RevenantMetalSharedEvent -setSignaledValue:
 member RevenantMetalSharedEvent -signaledValue
 member RevenantMetalSharedEvent -state
 member RevenantMetalSharedEvent -waitUntilSignaledValue:timeoutMS:
+member RevenantMetalTexture +revenantTextureFromImage:device:pixelFormat:width:height:plane:status:
 member RevenantMetalTexture -appliedCompare
 member RevenantMetalTexture -appliedSampler
 member RevenantMetalTexture -arrayLength
@@ -27292,6 +27307,7 @@ member RevenantMetalTexture -initScreenWithFramebuffer:width:height:pixelFormat:
 member RevenantMetalTexture -initWithDepthDescriptor:kind:
 member RevenantMetalTexture -initWithDescriptor:
 member RevenantMetalTexture -initWithDescriptor:iosurface:plane:
+member RevenantMetalTexture -initWithOpenGLESTexture:pixelFormat:width:height:usage:
 member RevenantMetalTexture -isFramebufferOnly
 member RevenantMetalTexture -label
 member RevenantMetalTexture -mipmapLevelCount
@@ -27306,6 +27322,7 @@ member RevenantMetalTexture -revenantChannels
 member RevenantMetalTexture -revenantGenerateMipmaps
 member RevenantMetalTexture -revenantIsColour
 member RevenantMetalTexture -revenantMarkSurfaceDirty
+member RevenantMetalTexture -revenantOpenGLESTexture
 member RevenantMetalTexture -revenantReadRegion:level:bytesPerRow:into:
 member RevenantMetalTexture -revenantRefreshSurface
 member RevenantMetalTexture -revenantRestoreAttachment:previous:
@@ -36103,6 +36120,8 @@ protocol_member MTLComputeCommandEncoder -dispatchThreadgroups:threadsPerThreadg
 protocol_member MTLComputeCommandEncoder -setBuffer:offset:atIndex:
 protocol_member MTLComputeCommandEncoder -setBytes:length:atIndex:
 protocol_member MTLComputeCommandEncoder -setComputePipelineState:
+protocol_member MTLComputeCommandEncoder -setSamplerState:atIndex:
+protocol_member MTLComputeCommandEncoder -setTexture:atIndex:
 protocol_member MTLComputeCommandEncoder -setThreadgroupMemoryLength:atIndex:
 protocol_member MTLComputePipelineState -device
 protocol_member MTLComputePipelineState -label
