@@ -2227,7 +2227,6 @@ class UICollectionViewDiffableDataSourceSectionSnapshotHandlers
 class UICollectionViewDropPlaceholder
 class UICollectionViewDropProposal
 class UICollectionViewFlowLayout
-class UICollectionViewFocusUpdateContext
 class UICollectionViewLayout
 class UICollectionViewLayoutAttributes
 class UICollectionViewLayoutInvalidationContext
@@ -2285,13 +2284,7 @@ class UIFeedbackGenerator
 class UIFieldBehavior
 class UIFindInteraction
 class UIFindSession
-class UIFocusAnimationCoordinator
-class UIFocusEffect
-class UIFocusGuide
-class UIFocusHaloEffect
-class UIFocusMovementHint
 class UIFocusSystem
-class UIFocusUpdateContext
 class UIFont
 class UIFontDescriptor
 class UIFontMetrics
@@ -2446,7 +2439,6 @@ class UITableViewCell
 class UITableViewDiffableDataSource
 class UITableViewDropPlaceholder
 class UITableViewDropProposal
-class UITableViewFocusUpdateContext
 class UITableViewHeaderFooterView
 class UITableViewPlaceholder
 class UITableViewRowAction
@@ -3819,7 +3811,6 @@ enum UIDropOperationMove
 enum UIEditingInteractionConfigurationDefault
 enum UIEventButtonMaskPrimary
 enum UIEventTypePresses
-enum UIFocusHeadingNone
 enum UIFontDescriptorTraitBold
 enum UIFontDescriptorTraitCondensed
 enum UIFontDescriptorTraitExpanded
@@ -30369,8 +30360,6 @@ member UICollectionViewFlowLayout -layoutAttributesForInteractivelyMovingItemAtI
 member UICollectionViewFlowLayout -sectionInsetReference
 member UICollectionViewFlowLayout -setEstimatedItemSize:
 member UICollectionViewFlowLayout -setSectionInsetReference:
-member UICollectionViewFocusUpdateContext -nextFocusedIndexPath
-member UICollectionViewFocusUpdateContext -previouslyFocusedIndexPath
 member UICollectionViewLayout +invalidationContextClass
 member UICollectionViewLayout -finalizeLayoutTransition
 member UICollectionViewLayout -indexPathsToDeleteForDecorationViewOfKind:
@@ -31233,47 +31222,8 @@ member UIFindSession -revenant_setBottomObstruction:
 member UIFindSession -searchResultDisplayStyle
 member UIFindSession -setSearchResultDisplayStyle:
 member UIFindSession -supportsReplacement
-member UIFocusAnimationCoordinator -addCoordinatedAnimations:completion:
-member UIFocusAnimationCoordinator -addCoordinatedFocusingAnimations:completion:
-member UIFocusAnimationCoordinator -addCoordinatedUnfocusingAnimations:completion:
-member UIFocusEffect +effect
-member UIFocusEffect -copyWithZone:
-member UIFocusGuide -enabled
-member UIFocusGuide -init
-member UIFocusGuide -initWithCoder:
-member UIFocusGuide -isEnabled
-member UIFocusGuide -preferredFocusedView
-member UIFocusGuide -revenant_setDefaults
-member UIFocusGuide -setEnabled:
-member UIFocusGuide -setPreferredFocusedView:
-member UIFocusHaloEffect +effectWithPath:
-member UIFocusHaloEffect +effectWithRect:
-member UIFocusHaloEffect +effectWithRoundedRect:cornerRadius:curve:
-member UIFocusHaloEffect +revenant_halo
-member UIFocusHaloEffect -containerView
-member UIFocusHaloEffect -position
-member UIFocusHaloEffect -referenceView
-member UIFocusHaloEffect -setContainerView:
-member UIFocusHaloEffect -setPosition:
-member UIFocusHaloEffect -setReferenceView:
-member UIFocusMovementHint -copyWithZone:
-member UIFocusMovementHint -initRevenantWithMovementDirection:perspectiveTransform:rotation:translation:interactionTransform:
-member UIFocusMovementHint -interactionTransform
-member UIFocusMovementHint -movementDirection
-member UIFocusMovementHint -perspectiveTransform
-member UIFocusMovementHint -rotation
-member UIFocusMovementHint -translation
 member UIFocusSystem +environment:containsEnvironment:
 member UIFocusSystem +focusSystemForEnvironment:
-member UIFocusSystem -focusedItem
-member UIFocusSystem -requestFocusUpdateToEnvironment:
-member UIFocusSystem -updateFocusIfNeeded
-member UIFocusUpdateContext -focusHeading
-member UIFocusUpdateContext -init
-member UIFocusUpdateContext -nextFocusedItem
-member UIFocusUpdateContext -nextFocusedView
-member UIFocusUpdateContext -previouslyFocusedItem
-member UIFocusUpdateContext -previouslyFocusedView
 member UIFont +fontWithDescriptor:size:
 member UIFont +monospacedDigitSystemFontOfSize:weight:
 member UIFont +monospacedSystemFontOfSize:weight:
@@ -33210,8 +33160,6 @@ member UITableViewDropPlaceholder -previewParametersProvider
 member UITableViewDropPlaceholder -setPreviewParametersProvider:
 member UITableViewDropProposal -initWithDropOperation:intent:
 member UITableViewDropProposal -intent
-member UITableViewFocusUpdateContext -nextFocusedIndexPath
-member UITableViewFocusUpdateContext -previouslyFocusedIndexPath
 member UITableViewHeaderFooterView -automaticallyUpdatesBackgroundConfiguration
 member UITableViewHeaderFooterView -automaticallyUpdatesContentConfiguration
 member UITableViewHeaderFooterView -backgroundConfiguration
@@ -36683,8 +36631,6 @@ type UIEdgeInsets
 type UIEditingInteractionConfiguration
 type UIEventButtonMask
 type UIFindSessionSearchResultDisplayStyle
-type UIFocusHaloEffectPosition
-type UIFocusHeading
 type UIFontDescriptorAttributeName
 type UIFontDescriptorFeatureKey
 type UIFontDescriptorSymbolicTraits

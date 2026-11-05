@@ -117,19 +117,3 @@
 }
 
 @end
-
-#pragma mark - Coordinated focus animations
-
-@implementation UIFocusAnimationCoordinator (RevenantIOS11FocusAnimations)
-
-- (void)addCoordinatedFocusingAnimations:(void (^)(void))animations completion:(void (^)(void))completion
-{
-    [self addCoordinatedAnimations:animations completion:completion];
-}
-
-- (void)addCoordinatedUnfocusingAnimations:(void (^)(void))animations completion:(void (^)(void))completion
-{
-    [self addCoordinatedAnimations:animations completion:completion];
-}
-
-@end

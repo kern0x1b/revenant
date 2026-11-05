@@ -20,17 +20,4 @@
     return NO;
 }
 
-- (id<UIFocusItem>)focusedItem
-{
-    return nil;
-}
-
-- (void)requestFocusUpdateToEnvironment:(id<UIFocusEnvironment>)environment
-{
-}
-
-- (void)updateFocusIfNeeded
-{
-}
-
 @end
