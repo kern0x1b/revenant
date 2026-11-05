@@ -35,6 +35,24 @@ static inline UIPointerShape *_Nullable revenant_pointer_shape_beam(CGFloat leng
     return shape ? (UIPointerShape *)[shape beamWithPreferredLength:length axis:axis] : nil;
 }
 
+static inline UICornerRadius *_Nullable revenant_corner_radius_fixed(CGFloat radius) NS_SWIFT_NAME(revenantCornerRadius(fixed:))
+{
+    Class cornerRadius = NSClassFromString(@"UICornerRadius");
+    return cornerRadius ? [cornerRadius fixedRadius:radius] : nil;
+}
+
+static inline UICornerRadius *_Nullable revenant_corner_radius_container_concentric(void) NS_SWIFT_NAME(revenantCornerRadiusContainerConcentric())
+{
+    Class cornerRadius = NSClassFromString(@"UICornerRadius");
+    return cornerRadius ? [cornerRadius containerConcentricRadius] : nil;
+}
+
+static inline UICornerRadius *_Nullable revenant_corner_radius_container_concentric_with_minimum(CGFloat minimum) NS_SWIFT_NAME(revenantCornerRadius(containerConcentricMinimum:))
+{
+    Class cornerRadius = NSClassFromString(@"UICornerRadius");
+    return cornerRadius ? [cornerRadius containerConcentricRadiusWithMinimum:minimum] : nil;
+}
+
 extern char OBJC_CLASS_$_UISliderTick __attribute__((weak_import));
 extern char OBJC_CLASS_$_UISliderTrackConfiguration __attribute__((weak_import));
 

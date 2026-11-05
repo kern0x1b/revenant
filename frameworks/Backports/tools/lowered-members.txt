@@ -4583,6 +4583,8 @@ function RevenantCodecBridgeMessage
 function RevenantCodecDecoded
 function RevenantCodecMessageBody
 function RevenantCodecParsed
+function RevenantCornerPathCreate
+function RevenantCornerRadiiFitted
 function RevenantCreatePhotoImage
 function RevenantCurrentFrame
 function RevenantCustomPronounRequiredKeys
@@ -31100,8 +31102,29 @@ member UIControl -toolTip
 member UIControl -toolTipInteraction
 member UICornerConfiguration +capsuleConfiguration
 member UICornerConfiguration +capsuleConfigurationWithMaximumRadius:
+member UICornerConfiguration +configurationWithRadius:
+member UICornerConfiguration +configurationWithTopLeftRadius:topRightRadius:bottomLeftRadius:bottomRightRadius:
+member UICornerConfiguration +configurationWithUniformBottomRadius:topLeftRadius:topRightRadius:
+member UICornerConfiguration +configurationWithUniformLeftRadius:topRightRadius:bottomRightRadius:
+member UICornerConfiguration +configurationWithUniformLeftRadius:uniformRightRadius:
+member UICornerConfiguration +configurationWithUniformRadius:
+member UICornerConfiguration +configurationWithUniformRightRadius:topLeftRadius:bottomLeftRadius:
+member UICornerConfiguration +configurationWithUniformTopRadius:bottomLeftRadius:bottomRightRadius:
+member UICornerConfiguration +configurationWithUniformTopRadius:uniformBottomRadius:
+member UICornerConfiguration +revenant_configurationWithRadii:groups:
 member UICornerConfiguration -copyWithZone:
-member UICornerConfiguration -initWithMaximumRadius:
+member UICornerConfiguration -description
+member UICornerConfiguration -hash
+member UICornerConfiguration -initRevenant
+member UICornerConfiguration -isEqual:
+member UICornerRadius +containerConcentricRadius
+member UICornerRadius +containerConcentricRadiusWithMinimum:
+member UICornerRadius +fixedRadius:
+member UICornerRadius -copyWithZone:
+member UICornerRadius -description
+member UICornerRadius -hash
+member UICornerRadius -initWithKind:value:
+member UICornerRadius -isEqual:
 member UICubicTimingParameters -_setAnimationCurve:
 member UICubicTimingParameters -animationCurve
 member UICubicTimingParameters -controlPoint1
@@ -34266,6 +34289,7 @@ member UIView -convertRect:toCoordinateSpace:
 member UIView -cornerConfiguration
 member UIView -directionalLayoutMargins
 member UIView -drawViewHierarchyInRect:afterScreenUpdates:
+member UIView -effectiveRadiusForCorner:
 member UIView -effectiveUserInterfaceLayoutDirection
 member UIView -firstBaselineAnchor
 member UIView -focusEffect
