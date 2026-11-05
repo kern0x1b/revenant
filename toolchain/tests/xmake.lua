@@ -17,7 +17,7 @@ add_requires("revenant@iphoneos-sdk 26.2", {alias = "iphoneos-sdk"})
 add_requires("revenant@llvm 23.1.3", {alias = "llvm", configs = {libraries = true}})
 add_requires("revenant@libsql 0.5.0", {alias = "libsql"})
 
-local light = {"assets_extract_test", "backports_link_test", "binding_test", "cache_test", "checkout_test", "cmake_debug_test", "compat_test", "deb_check_test", "descriptions_test", "device_guard_test", "digest_test", "emulator_boot_test", "emulator_run_test", "emulator_source_test", "firmware_test", "golden_generation_test", "host_load_test", "kernelcache_test", "process_wait_test", "requires_sources_test",
+local light = {"assets_extract_test", "backports_link_test", "binding_test", "cache_test", "checkout_test", "cmake_debug_test", "compat_test", "deb_check_test", "descriptions_test", "device_guard_test", "digest_test", "emulator_boot_test", "emulator_run_test", "emulator_source_test", "firmware_test", "golden_generation_test", "host_install_test", "host_load_test", "kernelcache_test", "process_wait_test", "requires_sources_test",
                "data_test", "keys_test", "locale_order_test", "lock_test", "nested_project_test", "os_log_fallback_test", "rust_test", "sdk_rule_test", "sdk_store_test", "sdkstubs_test", "sources_test", "swiftui_package_test", "coverage_test", "export_bundle_test", "touch_test", "app_assets_test", "isolate_test", "retention_test", "store_race_test", "store_test", "swift_flags_test", "swift_rule_test", "vfs_directory_test", "wrapper_test", "workspace_test"}
 
 local packaged = {"application_test", "architectures_test", "atomics_test", "backports_package_test", "blocks_test", "carried_test", "checks_test", "device_test",
