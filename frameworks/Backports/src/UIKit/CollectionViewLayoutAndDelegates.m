@@ -4,9 +4,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char RevenantHeadersPinKey;
-static const char RevenantFootersPinKey;
-
 @implementation UICollectionViewLayoutAttributes (RevenantBounds7)
 
 - (CGRect)bounds
@@ -19,32 +16,6 @@ static const char RevenantFootersPinKey;
     CGRect frame = self.frame;
     frame.size = bounds.size;
     self.frame = frame;
-}
-
-@end
-
-@implementation UICollectionViewFlowLayout (RevenantPinning9)
-
-- (BOOL)sectionHeadersPinToVisibleBounds
-{
-    return [objc_getAssociatedObject(self, &RevenantHeadersPinKey) boolValue];
-}
-
-- (void)setSectionHeadersPinToVisibleBounds:(BOOL)pins
-{
-    objc_setAssociatedObject(self, &RevenantHeadersPinKey, @(pins), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    [self invalidateLayout];
-}
-
-- (BOOL)sectionFootersPinToVisibleBounds
-{
-    return [objc_getAssociatedObject(self, &RevenantFootersPinKey) boolValue];
-}
-
-- (void)setSectionFootersPinToVisibleBounds:(BOOL)pins
-{
-    objc_setAssociatedObject(self, &RevenantFootersPinKey, @(pins), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    [self invalidateLayout];
 }
 
 @end

@@ -30366,12 +30366,8 @@ member UICollectionViewDropProposal -initWithDropOperation:intent:
 member UICollectionViewDropProposal -intent
 member UICollectionViewFlowLayout -estimatedItemSize
 member UICollectionViewFlowLayout -layoutAttributesForInteractivelyMovingItemAtIndexPath:withTargetPosition:
-member UICollectionViewFlowLayout -sectionFootersPinToVisibleBounds
-member UICollectionViewFlowLayout -sectionHeadersPinToVisibleBounds
 member UICollectionViewFlowLayout -sectionInsetReference
 member UICollectionViewFlowLayout -setEstimatedItemSize:
-member UICollectionViewFlowLayout -setSectionFootersPinToVisibleBounds:
-member UICollectionViewFlowLayout -setSectionHeadersPinToVisibleBounds:
 member UICollectionViewFlowLayout -setSectionInsetReference:
 member UICollectionViewFocusUpdateContext -nextFocusedIndexPath
 member UICollectionViewFocusUpdateContext -previouslyFocusedIndexPath
@@ -32603,7 +32599,6 @@ member UIScrollView +load
 member UIScrollView -accessibilityAttributedScrollStatusForScrollView:
 member UIScrollView -adjustedContentInset
 member UIScrollView -adjustedContentInsetDidChange
-member UIScrollView -allowsKeyboardScrolling
 member UIScrollView -automaticallyAdjustsScrollIndicatorInsets
 member UIScrollView -contentInsetAdjustmentBehavior
 member UIScrollView -contentLayoutGuide
@@ -32617,7 +32612,6 @@ member UIScrollView -revenant_makeGuide:
 member UIScrollView -revenant_setContentInset:
 member UIScrollView -revenant_updateLayoutGuides
 member UIScrollView -scrollAnimating
-member UIScrollView -setAllowsKeyboardScrolling:
 member UIScrollView -setAutomaticallyAdjustsScrollIndicatorInsets:
 member UIScrollView -setContentInsetAdjustmentBehavior:
 member UIScrollView -setHorizontalScrollIndicatorInsets:
