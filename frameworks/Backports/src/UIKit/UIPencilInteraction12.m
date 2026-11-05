@@ -12,7 +12,17 @@
     return UIPencilPreferredActionIgnore;
 }
 
++ (UIPencilPreferredAction)preferredSqueezeAction
+{
+    return UIPencilPreferredActionIgnore;
+}
+
 + (BOOL)prefersPencilOnlyDrawing
+{
+    return NO;
+}
+
++ (BOOL)prefersHoverToolPreview
 {
     return NO;
 }
@@ -21,6 +31,13 @@
 {
     if ((self = [super init]))
         _enabled = YES;
+    return self;
+}
+
+- (instancetype)initWithDelegate:(id<UIPencilInteractionDelegate>)delegate
+{
+    if ((self = [self init]))
+        _delegate = delegate;
     return self;
 }
 

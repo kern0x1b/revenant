@@ -47,6 +47,11 @@ static void revenant_scene_error(void (^handler)(NSError *), NSInteger code)
     revenant_scene_error(errorHandler, 0);
 }
 
+- (void)activateSceneSessionForRequest:(UISceneSessionActivationRequest *)request errorHandler:(void (^)(NSError *))errorHandler
+{
+    [self requestSceneSessionActivation:request.session userActivity:request.userActivity options:request.options errorHandler:errorHandler];
+}
+
 - (void)requestSceneSessionDestruction:(UISceneSession *)sceneSession options:(UISceneDestructionRequestOptions *)options errorHandler:(void (^)(NSError *))errorHandler
 {
     revenant_scene_error(errorHandler, 1);

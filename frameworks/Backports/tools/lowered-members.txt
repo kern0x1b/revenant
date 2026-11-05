@@ -2347,7 +2347,6 @@ class UIListSeparatorConfiguration
 class UILocalNotification
 class UIMenu
 class UIMenuController
-class UIMenuDisplayPreferences
 class UIMenuElement
 class UIMenuSystem
 class UIMotionEffect
@@ -2369,10 +2368,7 @@ class UIPasteConfiguration
 class UIPasteControl
 class UIPasteControlConfiguration
 class UIPasteboard
-class UIPencilHoverPose
 class UIPencilInteraction
-class UIPencilInteractionSqueeze
-class UIPencilInteractionTap
 class UIPercentDrivenInteractiveTransition
 class UIPickerView
 class UIPointerAccessory
@@ -2476,9 +2472,6 @@ class UITextInputAssistantItem
 class UITextInputContext
 class UITextInputPasswordRules
 class UITextInteraction
-class UITextItem
-class UITextItemMenuConfiguration
-class UITextItemMenuPreview
 class UITextPlaceholder
 class UITextSearchOptions
 class UITextSearchingFindSession
@@ -2533,9 +2526,6 @@ class UIWindowSceneDestructionRequestOptions
 class UIWindowSceneGeometry
 class UIWindowSceneGeometryPreferences
 class UIWindowSceneGeometryPreferencesIOS
-class UIWindowScenePlacement
-class UIWindowSceneProminentPlacement
-class UIWindowSceneStandardPlacement
 class UNCalendarNotificationTrigger
 class UNLocationNotificationTrigger
 class UNMutableNotificationContent
@@ -3928,7 +3918,6 @@ enum UISceneActivationStateUnattached
 enum UISceneCaptureStateActive
 enum UISceneCaptureStateInactive
 enum UISceneCaptureStateUnspecified
-enum UISceneErrorCodeMultipleScenesNotSupported
 enum UIScreenReferenceDisplayModeStatusNotSupported
 enum UIScrollViewContentInsetAdjustmentAlways
 enum UIScrollViewContentInsetAdjustmentAutomatic
@@ -3982,9 +3971,6 @@ enum UITextDragOptionsNone
 enum UITextDropActionInsert
 enum UITextDropEditabilityYes
 enum UITextFieldDidEndEditingReasonCommitted
-enum UITextItemContentTypeLink
-enum UITextItemContentTypeTag
-enum UITextItemContentTypeTextAttachment
 enum UITextSmartQuotesTypeYes
 enum UITimingCurveTypeBuiltin
 enum UITimingCurveTypeCubic
@@ -31932,11 +31918,9 @@ member UILabel +load
 member UILabel -adjustsFontForContentSizeCategory
 member UILabel -allowsDefaultTighteningForTruncation
 member UILabel -lineBreakStrategy
-member UILabel -preferredVibrancy
 member UILabel -setAdjustsFontForContentSizeCategory:
 member UILabel -setAllowsDefaultTighteningForTruncation:
 member UILabel -setLineBreakStrategy:
-member UILabel -setPreferredVibrancy:
 member UILargeContentViewerInteraction +isEnabled
 member UILargeContentViewerInteraction -delegate
 member UILargeContentViewerInteraction -didMoveToView:
@@ -32197,12 +32181,6 @@ member UIMenu -setPreferredElementSize:
 member UIMenuController -hideMenu
 member UIMenuController -hideMenuFromView:
 member UIMenuController -showMenuFromView:rect:
-member UIMenuDisplayPreferences +supportsSecureCoding
-member UIMenuDisplayPreferences -copyWithZone:
-member UIMenuDisplayPreferences -encodeWithCoder:
-member UIMenuDisplayPreferences -initWithCoder:
-member UIMenuDisplayPreferences -maximumNumberOfTitleLines
-member UIMenuDisplayPreferences -setMaximumNumberOfTitleLines:
 member UIMenuElement +supportsSecureCoding
 member UIMenuElement -copyWithZone:
 member UIMenuElement -encodeWithCoder:
@@ -32470,14 +32448,9 @@ member UIPasteboard -setItemProviders:localOnly:expirationDate:
 member UIPasteboard -setItems:options:
 member UIPasteboard -setObjects:
 member UIPasteboard -setObjects:localOnly:expirationDate:
-member UIPencilHoverPose -altitudeAngle
-member UIPencilHoverPose -azimuthAngle
-member UIPencilHoverPose -azimuthUnitVector
-member UIPencilHoverPose -initRevenantWithLocation:zOffset:azimuthAngle:altitudeAngle:rollAngle:
-member UIPencilHoverPose -location
-member UIPencilHoverPose -rollAngle
-member UIPencilHoverPose -zOffset
+member UIPencilInteraction +preferredSqueezeAction
 member UIPencilInteraction +preferredTapAction
+member UIPencilInteraction +prefersHoverToolPreview
 member UIPencilInteraction +prefersPencilOnlyDrawing
 member UIPencilInteraction -delegate
 member UIPencilInteraction -didMoveToView:
@@ -32489,13 +32462,6 @@ member UIPencilInteraction -setDelegate:
 member UIPencilInteraction -setEnabled:
 member UIPencilInteraction -view
 member UIPencilInteraction -willMoveToView:
-member UIPencilInteractionSqueeze -hoverPose
-member UIPencilInteractionSqueeze -initRevenantWithTimestamp:phase:hoverPose:
-member UIPencilInteractionSqueeze -phase
-member UIPencilInteractionSqueeze -timestamp
-member UIPencilInteractionTap -hoverPose
-member UIPencilInteractionTap -initRevenantWithTimestamp:hoverPose:
-member UIPencilInteractionTap -timestamp
 member UIPercentDrivenInteractiveTransition -cancelInteractiveTransition
 member UIPercentDrivenInteractiveTransition -completionCurve
 member UIPercentDrivenInteractiveTransition -completionSpeed
@@ -33711,16 +33677,6 @@ member UITextInteraction -textInput
 member UITextInteraction -textInteractionMode
 member UITextInteraction -view
 member UITextInteraction -willMoveToView:
-member UITextItem -contentType
-member UITextItem -initRevenantWithContentType:range:link:textAttachment:tagIdentifier:
-member UITextItem -link
-member UITextItem -range
-member UITextItem -tagIdentifier
-member UITextItem -textAttachment
-member UITextItemMenuConfiguration +configurationWithMenu:
-member UITextItemMenuConfiguration +configurationWithPreview:menu:
-member UITextItemMenuPreview +defaultPreview
-member UITextItemMenuPreview -initWithView:
 member UITextPlaceholder -rects
 member UITextSearchOptions -hash
 member UITextSearchOptions -isEqual:
@@ -34431,10 +34387,6 @@ member UIWindowSceneGeometry -interfaceOrientation
 member UIWindowSceneGeometry -interfaceOrientationLocked
 member UIWindowSceneGeometryPreferencesIOS -init
 member UIWindowSceneGeometryPreferencesIOS -initWithInterfaceOrientations:
-member UIWindowScenePlacement -copyWithZone:
-member UIWindowScenePlacement -initRevenantPlacement
-member UIWindowSceneProminentPlacement +prominentPlacement
-member UIWindowSceneStandardPlacement +standardPlacement
 member UNCalendarNotificationTrigger +triggerWithDateMatchingComponents:repeats:
 member UNCalendarNotificationTrigger -dateComponents
 member UNCalendarNotificationTrigger -description
@@ -37146,7 +37098,6 @@ type UIImpactFeedbackStyle
 type UIInputViewStyle
 type UIKeyModifierFlags
 type UIKeyboardHIDUsage
-type UILabelVibrancy
 type UILegibilityWeight
 type UIListContentTextAlignment
 type UIListContentTextTransform
@@ -37172,7 +37123,6 @@ type UIPageControlInteractionState
 type UIPasteControlDisplayMode
 type UIPasteboardDetectionPattern
 type UIPasteboardOption
-type UIPencilInteractionPhase
 type UIPencilPreferredAction
 type UIPointerAccessoryPosition
 type UIPreferredPresentationStyle
@@ -37224,7 +37174,6 @@ type UITableViewSeparatorInsetReference
 type UITextDropAction
 type UITextDropPerformer
 type UITextDropProgressMode
-type UITextItemContentType
 type UITextSearchMatchMethod
 type UITextViewBorderStyle
 type UITimingCurveType
