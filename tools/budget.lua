@@ -345,7 +345,7 @@ local function test_suite()
         os.sleep(200)
     end
     local released = held_slots(pool)
-    try { function () os.iorunv("sh", {"-c", string.format("pkill -f 'sleep %d$' || true", marker)}) end }
+    os.iorunv("sh", {"-c", string.format("pkill -f 'sleep %d$'; test $? -le 1", marker)})
     check("a holder killed with SIGKILL releases its tokens", released, 0)
 
     os.rm(base)
