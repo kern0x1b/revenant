@@ -13,6 +13,8 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Vision text recognition on iOS 6](explanation/backports/vision-text.md) | `VNRecognizeTextRequest` on Tesseract: the languages, the differences from Vision, the measurements, and the packaging |
 | [Open Backports members](explanation/backports-open-members.md) | the larger framework members that remain open |
 | [Backports gaps](explanation/backports-gaps.md) | the implemented members that do not do what the real API does, by Telegram use and size |
+| [Photos over AssetsLibrary](explanation/backports/photos-over-assetslibrary.md) | Telegram 13.0.0's Photos use against the AssetsLibrary-backed backport, and the status of each gap |
+| [The Network framework surface Telegram 13.0.0 uses](explanation/backports/network-framework-surface.md) | the `Network` members Telegram calls, what the backport must answer, and why Reachability cannot find `NWPathMonitor` yet |
 | [What iOS 6.1.3 can reach over TLS](explanation/backports/tls-reach-ios-6.md) | the firmware's SecureTransport versions and ciphers, the hosts it reaches, and the proposed BoringSSL fix |
 | [Metal on iOS 6](explanation/backports/metal-on-ios6.md) | the Metal render path and the fragment-pass compute that ship in v1 through air2es, the driver-level backlog for v2, the device findings, and the licence rules for both |
 | [Nested frameworks in the lowered overlay](explanation/backports/lowered-nested-frameworks.md) | why the overlay copies the headers of a framework nested in a mapped framework, such as MPSCore in MetalPerformanceShaders |
@@ -23,7 +25,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Metal v2: the GPU-driver reverse-engineering landscape](explanation/backports/metal-v2-driver-re-landscape.md) | the methods of Asahi, Mesa, Vita3K and related projects, read for method, and what they change for the SGX543 driver question |
 | [The Network framework surface Telegram uses](explanation/backports/network-framework-surface.md) | the Network framework members Telegram 13.0.0 calls and where the backport stands |
 | [Photos over AssetsLibrary](explanation/backports/photos-over-assetslibrary.md) | Telegram's use of Photos and where the backport stands |
-| [Below the driver: the SGX543 GL path on the iPhone 4S](explanation/metal/below-the-driver.md) | the stack from glDrawElements to the kernel, the in-process shader compiler, whether Apple's compiled shaders are reachable, and the ranked options below the driver |
+| [Below the driver: the SGX543 GL path on the iPhone 4S](explanation/backports/below-the-driver.md) | the stack from glDrawElements to the kernel, the in-process shader compiler, whether Apple's compiled shaders are reachable, and the ranked options below the driver |
 | [From a clean clone](guides/getting-started.md) | the steps from a clone to a green test run and a built Backports library |
 | [The machine: one cache, one clean](guides/machine.md) | where the build keeps its cache, and how to give it back |
 | [Prebuilt packages](guides/prebuilt.md) | packages built elsewhere, and how to use them |

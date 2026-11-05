@@ -4,8 +4,8 @@ Status: research, 2026-10-29, pass 2 for the coordinator. Pass 1 answered questi
 firmware, statically. Pass 2 takes the 4S kernelcache (section 2.1), reads the kernel extensions' names and strings,
 and answers question 2 in part. Nothing ran on a device, in CI, or in any build. No disassembly listing was read.
 Dossier items 37 and 38 are decided (section 2); the rest of this note is not a decision. It sits beside
-[Metal on iOS 6](../backports/metal-on-ios6.md) and
-[the GPU-driver landscape](../backports/metal-v2-driver-re-landscape.md), which it extends.
+[Metal on iOS 6](metal-on-ios6.md) and
+[the GPU-driver landscape](metal-v2-driver-re-landscape.md), which it extends.
 
 ## 1. The answer in brief
 
@@ -289,7 +289,8 @@ trace gate.
   mandatory. On 2026-10-29 the phone was held by the paseo-ios6 worker until 16:29:03. The probe ran after the hold cleared, in one
   claim of about 4 minutes, and released the phone (section 6.1).
 - **Timing.** `mach_absolute_time` around each call, over 20,000 draws per configuration, five repeats, median and
-  spread. Also `thread_info` CPU time, so that time blocked in IOKit is separated from CPU time.
+  spread. The first design also read `thread_info` CPU time, to separate time blocked in IOKit from CPU time; the first
+  run showed that reading is stale on this kernel (6.1), so the probe reports wall time only.
 - **Configurations.** C0 is a baseline draw with unchanged state. C1 switches between two programs per draw. C2 writes a
   uniform per draw. C3 alternates two textures on unit 0. C4 changes a vertex attribute pointer per draw. C5 toggles
   blend, depth and cull per draw. C6 is a draw with count 0, the call-overhead floor. C7 calls `glGetError` after each
@@ -309,8 +310,10 @@ trace gate.
 ### 6.1 What ran, and the numbers (2026-10-29, iPhone 4S, iOS 6.1.3)
 
 The probe is `frameworks/Backports/tests/gpu_probe/q4probe.m`, built as `revenant-q4probe`. It is a plain ARMv7 binary,
-run from `/tmp` on the phone, which is left there. It rebinds the IOConnect imports of its own process only, draws a
-6 by 6 pixel quad into a 256 by 256 texture, and reads one pixel to check the draw (64 128 191 255, GL error 0). The
+run from `/tmp` on the phone, which is left there. It rebinds the IOConnect imports of its own process only, on private
+copies of their pages, so no Apple code is patched, and it writes nothing to the phone except its stdout. Its counters
+are not locked, so calls from other threads may be missed or merged. It draws a 6 by 6 pixel quad into a 256 by 256
+texture, and reads one pixel to check the draw (64 128 191 255, GL error 0). The
 renderer reports `OpenGL ES 2.0 IMGSGX543-73.16.1` and `PowerVR SGX 543`. Only three of the C0 to C8 configurations
 ran, namely scenarios 1 to 3 below, and no sampler ran. Medians with p10 to p90 spreads, in wall time:
 
@@ -324,7 +327,8 @@ ran, namely scenarios 1 to 3 below, and no sampler ran. Medians with p10 to p90 
   988 µs, of which 910 µs is inside IOConnect. The frame takes 1,405 µs (p10 1,378, p90 1,463). Two IOConnect calls
   per frame: `IOConnectCallMethod` selector 0 at about 0.49 ms each, and `IOConnectCallStructMethod` selector 2 at about
   0.42 ms each. Both come from the `IOAccelerator` image. GLEngine and the driver make no IOConnect call themselves.
-- *Not measured.* The thread CPU fields the probe prints are invalid. `thread_info` accounting on this kernel is stale
+- *Not measured.* The first run printed thread CPU fields, which are invalid, so the probe no longer reads CPU time and
+  its output is wall time only. `thread_info` accounting on this kernel is stale
   between context switches: a `glFinish` reads 25 to 41 ms of CPU in under 1 ms of wall time. So the split of each
   IOConnect call into CPU work and waiting is unknown, and so is the split of the 2 to 24 µs draw path between GLEngine
   and the driver, because only one caller image appears.

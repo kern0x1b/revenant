@@ -5,7 +5,6 @@ local IV = "8a2c03ef8a0e45947780cdde01be40fb"
 local OTHER_KEY = string.rep("11", 32)
 local MACH_O = "\206\250\237\254"
 
--- literals encodes plain as an LZSS stream of literals only: each flag byte marks the bytes that follow it.
 local function literals(plain)
     local parts = {}
     for first = 1, #plain, 8 do
@@ -15,7 +14,6 @@ local function literals(plain)
     return table.concat(parts)
 end
 
--- container wraps a complzss stream with the header and the zero padding that Apple's files carry.
 local function container(complzss, plain, stream)
     local header = "complzss" .. string.pack(">I4I4I4I4", complzss.adler32(plain), #plain, #stream, 1)
     return header .. string.rep("\0", 384 - #header) .. stream
@@ -36,7 +34,6 @@ local function encrypt(bytes, key)
     return encrypted
 end
 
--- img3 wraps an encrypted DATA payload in an IMG3 file with a TYPE element before it, as Apple's kernelcaches do.
 local function img3(encrypted, size)
     local total = 20 + 32 + 12 + #encrypted
     return "3gmI" .. string.pack("<I4I4I4", total, total - 20, 0) .. "krnl"
@@ -84,12 +81,16 @@ function failures(opt)
         table.insert(found, "10000 bytes that wrap the 4096-byte window decode back to themselves")
     end
 
+    local function replace_byte(bytes, index, value)
+        return bytes:sub(1, index - 1) .. string.char(value) .. bytes:sub(index + 1)
+    end
+    local good = container(complzss, expected, stream)
     local refusals = {
         ["a container that is not complzss"] = "XXXXXXXX" .. string.rep("\0", 16) .. stream,
-        ["a container with a wrong Adler-32"] = container(complzss, expected, stream):gsub("^complzss.", "complzss\1"),
+        ["a container with a wrong Adler-32"] = replace_byte(good, 9, good:byte(9) ~ 0xFF),
         ["a stream that ends inside a match"] = container(complzss, expected, "\254\238"),
         ["a stream whose plain size is wrong"] = container(complzss, expected .. "!", stream),
-        ["padding that is not zero"] = (container(complzss, expected, stream):gsub("\0", "\1", 1)),
+        ["padding that is not zero"] = replace_byte(good, 25, 1),
     }
     for name, bytes in pairs(refusals) do
         if fixtures.refusal(function () complzss.unwrap(bytes) end) == nil then

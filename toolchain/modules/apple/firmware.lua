@@ -860,8 +860,6 @@ local function kernelcache_image(firmware)
     return file
 end
 
--- kernelcache_keys_in returns the key and IV that a Keys page of the Apple Wiki publishes for the kernelcache named
--- name, or nothing when the page names another file or publishes no pair.
 function kernelcache_keys_in(content, name)
     if content:match("|%s*Kernelcache%s*=%s*([%w%.]+)") ~= name then
         return nil
@@ -891,8 +889,6 @@ local function kernelcache_keys(firmware, name)
     raise("%s lists no key for %s of %s %s", KEYS, name, firmware.identifier, firmware.build)
 end
 
--- decode_kernelcache writes the Mach-O kernel that an IMG3 kernelcache holds: it decrypts the DATA payload with the
--- key and IV, decompresses the complzss container, and puts the result at output only once it is a Mach-O.
 function decode_kernelcache(image, key, iv, output)
     local payload, size = img3.data(io.readfile(image, {encoding = "binary"}))
     local container = img3.decrypt(payload, key, iv):sub(1, size)
@@ -910,8 +906,6 @@ function decode_kernelcache(image, key, iv, output)
     os.mv(partial, output)
 end
 
--- kernelcache returns the Mach-O kernel of the device's earliest release at or after minimum, decoded from its
--- kernelcache and kept beside it as kernel.macho.
 function kernelcache(identifier, minimum)
     local firmware = device_firmware(identifier, minimum)
     local kernel = path.join(kernelcache_folder(firmware), "kernel.macho")

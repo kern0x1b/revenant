@@ -51,7 +51,7 @@ Sizes: S is under a day; M is a few days, including a device test; L is a week o
 4. T12 `inheritedAnimationDuration` is always 0 (C, M).
 5. T11 `textInputMode` is nil (C, M).
 6. T18 `usesInterfaceType` is an approximation, and Telegram's cellular decision reads it (C, M).
-7. T13 `PHChange.hasMoves` was NO, and the moves were never enumerated (C, M); fixed in a191cfc96, see the T13 row.
+7. T13 `PHChange.hasMoves` was NO, and the moves were never enumerated (C, M); fixed, see the T13 row.
 8. T02 `addPresentedHandler:` never calls the block (E, S).
 9. T21 alternate icon: refused with `NSFeatureUnsupportedError` (F, L).
 10. T23 Sign in with Apple: completes with an error (F, L).
@@ -195,7 +195,7 @@ The refusals in `B/Security` (SecAccessControl, SecKey, SharedWebCredentials) ar
 - `B/BackgroundTasks/BGTaskScheduler.m:77-83`: the cancel methods are empty, which is consistent with nothing being stored.
 - `B/AVFoundation/AVAudioUnit.m:53-54`: the base `revenant_applyPendingParameters` is empty; the effect class at `:83-85` overrides it.
 - `B/Metal/RevenantMetalDevice.m:68-86`: `isLowPower`, `isHeadless`, `isRemovable` and `hasUnifiedMemory` are fixed per hardware. `supportsTextureSampleCount:` is computed.
-- `B/Photos/PHChange8.m`: insertions, removals, changes and moves are implemented (T13, a191cfc96).
+- `B/Photos/PHChange8.m`: insertions, removals, changes and moves are implemented (T13).
 - `B/Contacts/CNChangeHistory*`: the visitor dispatch is implemented.
 - The `willMoveToView:` and `traitCollectionDidChange:` hooks, and the `UIPresentationController` hooks, are empty defaults.
 - Metal debug markers and optimisation hints are no-ops with no observable effect.
