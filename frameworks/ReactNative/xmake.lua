@@ -16,13 +16,12 @@ target("react-native-inputs")
     end)
 target_end()
 
-if os.getenv("RN_DEPS_REPO") then
-    add_requires("revenant@folly 2024.11.18.00", {alias = "folly"})
-    add_requires("revenant@socketrocket 0.7.1", {alias = "socketrocket"})
-end
-
 local inputs = os.getenv("RN_INPUTS") or path.join(os.projectdir(), "build")
-if get_config("component") == "ReactNative" or os.isdir(os.getenv("RN_SRC") or path.join(inputs, "rn-src")) then
+if is_plat("iphoneos") and (get_config("component") == "ReactNative" or os.isdir(os.getenv("RN_SRC") or path.join(inputs, "rn-src"))) then
+    if os.getenv("RN_DEPS_REPO") then
+        add_requires("revenant@folly 2024.11.18.00", {alias = "folly"})
+        add_requires("revenant@socketrocket 0.7.1", {alias = "socketrocket"})
+    end
     includes("src/core")
     includes("src/expo")
     includes("tests")
