@@ -13,6 +13,10 @@ void revenant_ml_trainer_free(revenant_ml_trainer *trainer);
 int revenant_ml_trainer_step(revenant_ml_trainer *trainer, const float *inputs, const float *targets, size_t samples,
                            char *error, size_t error_size);
 
+void revenant_ml_trainer_order(const revenant_ml_trainer *trainer, long long epoch, size_t count, size_t *order);
+int revenant_ml_trainer_batch(revenant_ml_trainer *trainer, long long epoch, size_t first, const float *inputs,
+                              const float *targets, size_t count, char *error, size_t error_size);
+
 size_t revenant_ml_trainer_minibatch_size(const revenant_ml_trainer *trainer);
 long long revenant_ml_trainer_epochs(const revenant_ml_trainer *trainer);
 size_t revenant_ml_trainer_input_count(const revenant_ml_trainer *trainer);

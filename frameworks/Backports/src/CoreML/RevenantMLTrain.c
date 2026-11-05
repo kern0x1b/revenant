@@ -43,6 +43,12 @@ struct revenant_ml_trainer {
     size_t minibatch;
     long long epochs;
     long long steps;
+    int shuffle;
+    uint64_t seed;
+    size_t *order;
+    size_t order_count;
+    long long order_epoch;
+    float *batch_inputs, *batch_targets;
 };
 
 static void fail(char *error, size_t size, const char *what, const char *name)
@@ -98,7 +104,7 @@ static double number_parameter(const revenant_ml_node *parameter, const char *na
 static long long integer_parameter(const revenant_ml_node *parameter, const char *name, long long fallback)
 {
     const revenant_ml_node *value = child(parameter, name);
-    return value ? revenant_ml_int(child(value, "defaultValue"), fallback) : fallback;
+    return value ? revenant_ml_int64(child(value, "defaultValue"), fallback) : fallback;
 }
 
 static float *read_tensor(const revenant_ml_node *params, size_t expected, size_t *count)
@@ -147,6 +153,9 @@ void revenant_ml_trainer_free(revenant_ml_trainer *trainer)
         free_layer(&trainer->layers[i]);
     }
     free(trainer->layers);
+    free(trainer->order);
+    free(trainer->batch_inputs);
+    free(trainer->batch_targets);
     free(trainer);
 }
 
@@ -219,12 +228,9 @@ revenant_ml_trainer *revenant_ml_trainer_new(const revenant_ml_node *document, c
         free(trainer);
         return NULL;
     }
-    const revenant_ml_node *shuffle = child(update, "shuffle");
-    if (shuffle && revenant_ml_int(child(shuffle, "defaultValue"), 0) != 0) {
-        fail(error, error_size, "shuffled training is not implemented", NULL);
-        free(trainer);
-        return NULL;
-    }
+    trainer->shuffle = integer_parameter(update, "shuffle", 0) != 0;
+    trainer->seed = (uint64_t)integer_parameter(update, "seed", 0);
+    trainer->order_epoch = -1;
 
     if (!input_shape(document, &trainer->input_channels, &trainer->input_height, &trainer->input_width) ||
         !volume(trainer->input_channels, trainer->input_height, trainer->input_width, &trainer->input_count)) {
@@ -363,6 +369,22 @@ revenant_ml_trainer *revenant_ml_trainer_new(const revenant_ml_node *document, c
         fail(error, error_size, "the network has no layers to train", NULL);
         revenant_ml_trainer_free(trainer);
         return NULL;
+    }
+    if (trainer->shuffle) {
+        size_t input_values = 0, target_values = 0;
+        if (!product(trainer->minibatch, trainer->input_count, &input_values) ||
+            !product(trainer->minibatch, trainer->output_count, &target_values)) {
+            fail(error, error_size, "the mini-batch is too large for the trainer", NULL);
+            revenant_ml_trainer_free(trainer);
+            return NULL;
+        }
+        trainer->batch_inputs = malloc(sizeof(float) * input_values);
+        trainer->batch_targets = malloc(sizeof(float) * target_values);
+        if (!trainer->batch_inputs || !trainer->batch_targets) {
+            fail(error, error_size, "out of memory for the shuffled mini-batch", NULL);
+            revenant_ml_trainer_free(trainer);
+            return NULL;
+        }
     }
     return trainer;
 }
@@ -630,6 +652,73 @@ done:
     free(act);
     free(grad);
     return ok;
+}
+
+static uint64_t next_random(uint64_t *state)
+{
+    uint64_t z = (*state += 0x9e3779b97f4a7c15ull);
+    z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9ull;
+    z = (z ^ (z >> 27)) * 0x94d049bb133111ebull;
+    return z ^ (z >> 31);
+}
+
+static size_t random_below(uint64_t *state, size_t bound)
+{
+    uint64_t threshold = -(uint64_t)bound % bound;
+    uint64_t value = next_random(state);
+    while (value < threshold) {
+        value = next_random(state);
+    }
+    return (size_t)(value % bound);
+}
+
+void revenant_ml_trainer_order(const revenant_ml_trainer *trainer, long long epoch, size_t count, size_t *order)
+{
+    for (size_t i = 0; i < count; i++) {
+        order[i] = i;
+    }
+    if (!trainer->shuffle) {
+        return;
+    }
+    uint64_t state = trainer->seed ^ ((uint64_t)epoch * 0xd1b54a32d192ed03ull);
+    for (size_t i = count; i > 1; i--) {
+        size_t j = random_below(&state, i);
+        size_t held = order[i - 1];
+        order[i - 1] = order[j];
+        order[j] = held;
+    }
+}
+
+int revenant_ml_trainer_batch(revenant_ml_trainer *trainer, long long epoch, size_t first, const float *inputs,
+                              const float *targets, size_t count, char *error, size_t error_size)
+{
+    if (first >= count) {
+        return 1;
+    }
+    size_t samples = count - first < trainer->minibatch ? count - first : trainer->minibatch;
+    if (!trainer->shuffle) {
+        return revenant_ml_trainer_step(trainer, inputs + first * trainer->input_count,
+                                        targets + first * trainer->output_count, samples, error, error_size);
+    }
+    if (trainer->order_epoch != epoch || trainer->order_count != count) {
+        size_t *order = realloc(trainer->order, sizeof(size_t) * count);
+        if (!order) {
+            fail(error, error_size, "out of memory for the order of the epoch", NULL);
+            return 0;
+        }
+        trainer->order = order;
+        trainer->order_count = count;
+        trainer->order_epoch = epoch;
+        revenant_ml_trainer_order(trainer, epoch, count, order);
+    }
+    for (size_t s = 0; s < samples; s++) {
+        size_t row = trainer->order[first + s];
+        memcpy(trainer->batch_inputs + s * trainer->input_count, inputs + row * trainer->input_count,
+               sizeof(float) * trainer->input_count);
+        memcpy(trainer->batch_targets + s * trainer->output_count, targets + row * trainer->output_count,
+               sizeof(float) * trainer->output_count);
+    }
+    return revenant_ml_trainer_step(trainer, trainer->batch_inputs, trainer->batch_targets, samples, error, error_size);
 }
 
 static int store_tensor(const revenant_ml_node *params, const float *values, size_t count)

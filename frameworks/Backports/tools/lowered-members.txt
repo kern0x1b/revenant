@@ -5915,6 +5915,7 @@ function revenant_ml_get
 function revenant_ml_half_to_float
 function revenant_ml_input
 function revenant_ml_int
+function revenant_ml_int64
 function revenant_ml_int_at
 function revenant_ml_integer_of
 function revenant_ml_kind_is_classifier
@@ -5985,6 +5986,7 @@ function revenant_ml_tensor_make
 function revenant_ml_tensor_to_value
 function revenant_ml_tensor_zero
 function revenant_ml_text
+function revenant_ml_trainer_batch
 function revenant_ml_trainer_epochs
 function revenant_ml_trainer_free
 function revenant_ml_trainer_input_count
@@ -5993,6 +5995,7 @@ function revenant_ml_trainer_layer_kind
 function revenant_ml_trainer_layer_name
 function revenant_ml_trainer_minibatch_size
 function revenant_ml_trainer_new
+function revenant_ml_trainer_order
 function revenant_ml_trainer_output_count
 function revenant_ml_trainer_step
 function revenant_ml_trainer_store

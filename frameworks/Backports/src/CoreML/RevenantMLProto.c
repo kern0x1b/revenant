@@ -457,26 +457,31 @@ const revenant_ml_node *revenant_ml_oneof(const revenant_ml_node *node, const ch
     return want;
 }
 
-int revenant_ml_int(const revenant_ml_node *node, int64_t fallback)
+int64_t revenant_ml_int64(const revenant_ml_node *node, int64_t fallback)
 {
     if (node == NULL) {
-        return (int)fallback;
+        return fallback;
     }
     switch (node->field != NULL ? node->field->kind : REVENANT_ML_FIELD_NONE) {
     case REVENANT_ML_KIND_DOUBLE:
     case REVENANT_ML_KIND_FLOAT:
-        return (int)node->value.number;
+        return (int64_t)node->value.number;
     case REVENANT_ML_KIND_UINT64:
     case REVENANT_ML_KIND_FIXED64:
     case REVENANT_ML_KIND_UINT32:
     case REVENANT_ML_KIND_FIXED32:
     case REVENANT_ML_KIND_BOOL:
-        return (int)node->value.unsigned_integer;
+        return (int64_t)node->value.unsigned_integer;
     case REVENANT_ML_FIELD_NONE:
-        return (int)fallback;
+        return fallback;
     default:
-        return (int)node->value.integer;
+        return node->value.integer;
     }
+}
+
+int revenant_ml_int(const revenant_ml_node *node, int64_t fallback)
+{
+    return (int)revenant_ml_int64(node, fallback);
 }
 
 double revenant_ml_double(const revenant_ml_node *node, double fallback)
