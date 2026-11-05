@@ -7,12 +7,14 @@ static NSUInteger revenant_effect_count;
 
 @interface RevenantSymbolEffectRun : NSObject <CAAnimationDelegate>
 @property (nonatomic, weak) UIView *view;
+@property (nonatomic, strong) NSSymbolEffect *effect;
 @property (nonatomic, copy) UISymbolEffectCompletion completion;
 @end
 
 @implementation RevenantSymbolEffectRun
 
 @synthesize view = _view;
+@synthesize effect = _effect;
 @synthesize completion = _completion;
 
 - (void)animationDidStop:(CAAnimation *)animation finished:(BOOL)finished
@@ -20,7 +22,7 @@ static NSUInteger revenant_effect_count;
     UISymbolEffectCompletion completion = self.completion;
     self.completion = nil;
     if (completion)
-        completion([[UISymbolEffectCompletionContext alloc] initRevenantWithSender:self.view finished:finished]);
+        completion([[UISymbolEffectCompletionContext alloc] initRevenantWithSender:self.view effect:self.effect finished:finished]);
 }
 
 @end
@@ -50,12 +52,13 @@ static NSUInteger revenant_effect_count;
     if (!animation) {
         dispatch_async(dispatch_get_main_queue(), ^{
             if (completion)
-                completion([[UISymbolEffectCompletionContext alloc] initRevenantWithSender:self finished:NO]);
+                completion([[UISymbolEffectCompletionContext alloc] initRevenantWithSender:self effect:symbolEffect finished:NO]);
         });
         return;
     }
     RevenantSymbolEffectRun *run = [[RevenantSymbolEffectRun alloc] init];
     run.view = self;
+    run.effect = symbolEffect;
     run.completion = completion;
     animation.delegate = run;
     revenant_effect_count++;

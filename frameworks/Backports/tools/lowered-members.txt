@@ -28241,6 +28241,7 @@ member RevenantSwipeItem -title
 member RevenantSwipeItem -width
 member RevenantSymbolEffectRun -animationDidStop:finished:
 member RevenantSymbolEffectRun -completion
+member RevenantSymbolEffectRun -effect
 member RevenantSymbolEffectRun -view
 member RevenantSyncProtocol +answerForView:message:
 member RevenantSyncProtocol +canInitWithRequest:
@@ -33354,7 +33355,7 @@ member UISwitch -title
 member UISymbolEffectCompletionContext -contentTransition
 member UISymbolEffectCompletionContext -effect
 member UISymbolEffectCompletionContext -finished
-member UISymbolEffectCompletionContext -initRevenantWithSender:finished:
+member UISymbolEffectCompletionContext -initRevenantWithSender:effect:finished:
 member UISymbolEffectCompletionContext -isFinished
 member UISymbolEffectCompletionContext -sender
 member UITabBar -barStyle

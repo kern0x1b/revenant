@@ -26,7 +26,7 @@
 @end
 
 @interface UISymbolEffectCompletionContext (RevenantInit)
-- (instancetype)initRevenantWithSender:(id)sender finished:(BOOL)finished;
+- (instancetype)initRevenantWithSender:(id)sender effect:(NSSymbolEffect *)effect finished:(BOOL)finished;
 @end
 
 @implementation UITextItem {
@@ -227,13 +227,15 @@
 
 @implementation UISymbolEffectCompletionContext {
     __weak id _sender;
+    NSSymbolEffect *_effect;
     BOOL _finished;
 }
 
-- (instancetype)initRevenantWithSender:(id)sender finished:(BOOL)finished
+- (instancetype)initRevenantWithSender:(id)sender effect:(NSSymbolEffect *)effect finished:(BOOL)finished
 {
     if ((self = [super init])) {
         _sender = sender;
+        _effect = effect;
         _finished = finished;
     }
     return self;
@@ -256,7 +258,7 @@
 
 - (NSSymbolEffect *)effect
 {
-    return nil;
+    return _effect;
 }
 
 - (NSSymbolContentTransition *)contentTransition
