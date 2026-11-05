@@ -5,15 +5,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#if !__has_include(<UIKit/UIGlassEffect.h>)
-
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UIGlassEffect : NSObject <NSCopying>
-@end
-
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UIGlassContainerEffect : NSObject <NSCopying>
-@end
+#if !__has_include(<UIKit/UICornerConfiguration.h>)
 
 API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
 @interface UICornerRadius : NSObject <NSCopying>
@@ -54,17 +46,9 @@ API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
 + (instancetype)new NS_UNAVAILABLE;
 @end
 
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UIScrollEdgeEffect : NSObject <NSCopying>
-@end
+#endif
 
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UIScrollEdgeEffectStyle : NSObject <NSCopying>
-@end
-
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UIScrollEdgeElementContainerInteraction : NSObject
-@end
+#if !__has_include(<UIKit/UISliderTrackConfiguration.h>)
 
 API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
 @interface UISliderTick : NSObject <NSCopying>
@@ -72,54 +56,6 @@ API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
 
 API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
 @interface UISliderTrackConfiguration : NSObject <NSCopying>
-@end
-
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UITabAccessory : NSObject
-@end
-
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UIBarButtonItemBadge : NSObject <NSCopying>
-@end
-
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UIContextMenuSystem : NSObject
-@end
-
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UIMainMenuSystem : NSObject
-@end
-
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UIMainMenuSystemConfiguration : NSObject <NSCopying>
-@end
-
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UIMenuSystemFindElementGroupConfiguration : NSObject <NSCopying>
-@end
-
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UIDeferredMenuElementProvider : NSObject
-@end
-
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UISceneDestructionCondition : NSObject <NSCopying>
-@end
-
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UISceneWindowingControlStyle : NSObject
-@end
-
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UIBackgroundExtensionView : UIView
-@end
-
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UIViewLayoutRegion : NSObject <NSCopying>
-@end
-
-API_AVAILABLE(ios(26.0)) API_UNAVAILABLE(watchos)
-@interface UISymbolContentTransition : NSObject <NSCopying>
 @end
 
 #endif

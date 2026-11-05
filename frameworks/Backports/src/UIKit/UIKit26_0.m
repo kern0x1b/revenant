@@ -3,14 +3,6 @@
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 
-static inline id RevenantBox(id value) { return value; }
-
-@implementation UIGlassEffect
-@end
-
-@implementation UIGlassContainerEffect
-@end
-
 typedef NS_ENUM(NSInteger, RevenantCornerRadiusKind) {
     RevenantCornerRadiusFixed,
     RevenantCornerRadiusContainerConcentric,
@@ -237,78 +229,6 @@ enum { RevenantTopLeft, RevenantTopRight, RevenantBottomLeft, RevenantBottomRigh
 
 @end
 
-@implementation UIScrollEdgeEffect
-@end
-
-@implementation UIScrollEdgeEffectStyle
-@end
-
-@implementation UIScrollEdgeElementContainerInteraction
-@end
-
-@implementation UITabAccessory
-@end
-
-@implementation UIBarButtonItemBadge
-@end
-
-@implementation UIContextMenuSystem
-@end
-
-@implementation UIMainMenuSystem
-@end
-
-@implementation UIMainMenuSystemConfiguration
-@end
-
-@implementation UIMenuSystemFindElementGroupConfiguration
-@end
-
-@implementation UIDeferredMenuElementProvider
-@end
-
-@implementation UISceneDestructionCondition
-@end
-
-@implementation UISceneWindowingControlStyle
-@end
-
-@implementation UIBackgroundExtensionView
-@end
-
-@implementation UIViewLayoutRegion
-@end
-
-@implementation UISymbolContentTransition
-@end
-
-@implementation UIScrollView (RevenantUIKit26)
-
-static char RevenantTopEdgeEffectKey, RevenantLeftEdgeEffectKey;
-static char RevenantRightEdgeEffectKey, RevenantBottomEdgeEffectKey;
-
-- (UIScrollEdgeEffect *)topEdgeEffect { return objc_getAssociatedObject(self, &RevenantTopEdgeEffectKey); }
-- (void)setTopEdgeEffect:(UIScrollEdgeEffect *)effect
-{
-    objc_setAssociatedObject(self, &RevenantTopEdgeEffectKey, effect, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-- (UIScrollEdgeEffect *)leftEdgeEffect { return objc_getAssociatedObject(self, &RevenantLeftEdgeEffectKey); }
-- (void)setLeftEdgeEffect:(UIScrollEdgeEffect *)effect
-{
-    objc_setAssociatedObject(self, &RevenantLeftEdgeEffectKey, effect, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-- (UIScrollEdgeEffect *)rightEdgeEffect { return objc_getAssociatedObject(self, &RevenantRightEdgeEffectKey); }
-- (void)setRightEdgeEffect:(UIScrollEdgeEffect *)effect
-{
-    objc_setAssociatedObject(self, &RevenantRightEdgeEffectKey, effect, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-- (UIScrollEdgeEffect *)bottomEdgeEffect { return objc_getAssociatedObject(self, &RevenantBottomEdgeEffectKey); }
-- (void)setBottomEdgeEffect:(UIScrollEdgeEffect *)effect
-{
-    objc_setAssociatedObject(self, &RevenantBottomEdgeEffectKey, effect, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-@end
-
 @implementation UISlider (RevenantUIKit26)
 
 static char RevenantSliderStyleKey;
@@ -326,14 +246,9 @@ static char RevenantSliderStyleKey;
 
 @implementation UIBarButtonItem (RevenantUIKit26)
 
-static char RevenantBarItemBadgeKey, RevenantBarItemIdentifierKey;
+static char RevenantBarItemIdentifierKey;
 static char RevenantBarItemSharesBackgroundKey, RevenantBarItemHidesSharedBackgroundKey;
 
-- (UIBarButtonItemBadge *)badge { return objc_getAssociatedObject(self, &RevenantBarItemBadgeKey); }
-- (void)setBadge:(UIBarButtonItemBadge *)badge
-{
-    objc_setAssociatedObject(self, &RevenantBarItemBadgeKey, badge, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
 - (NSString *)identifier { return objc_getAssociatedObject(self, &RevenantBarItemIdentifierKey); }
 - (void)setIdentifier:(NSString *)identifier
 {
@@ -374,21 +289,6 @@ static char RevenantDeferredElementIdentifierKey;
 }
 
 - (NSString *)identifier { return objc_getAssociatedObject(self, &RevenantDeferredElementIdentifierKey); }
-@end
-
-@implementation UIScene (RevenantUIKit26)
-
-static char RevenantSceneDestructionConditionsKey;
-
-- (NSSet<UISceneDestructionCondition *> *)destructionConditions
-{
-    return objc_getAssociatedObject(self, &RevenantSceneDestructionConditionsKey);
-}
-- (void)setDestructionConditions:(NSSet<UISceneDestructionCondition *> *)conditions
-{
-    objc_setAssociatedObject(self, &RevenantSceneDestructionConditionsKey, [conditions copy],
-                             OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
 @end
 
 @implementation UISplitViewController (RevenantUIKit26)
@@ -466,22 +366,9 @@ static char RevenantPrefSecondaryKey, RevenantPrefSecondaryFractionKey;
 
 @implementation UITabBarController (RevenantUIKit26)
 
-static char RevenantTabBarBottomAccessoryKey, RevenantTabBarMinimizeBehaviorKey;
+static char RevenantTabBarMinimizeBehaviorKey;
 static char RevenantTabBarContentLayoutGuideKey;
 
-- (UITabAccessory *)bottomAccessory
-{
-    return objc_getAssociatedObject(self, &RevenantTabBarBottomAccessoryKey);
-}
-- (void)setBottomAccessory:(UITabAccessory *)accessory
-{
-    objc_setAssociatedObject(self, &RevenantTabBarBottomAccessoryKey, accessory,
-                             OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-- (void)setBottomAccessory:(UITabAccessory *)accessory animated:(BOOL)animated
-{
-    self.bottomAccessory = accessory;
-}
 - (NSInteger)tabBarMinimizeBehavior
 {
     return [(NSNumber *)objc_getAssociatedObject(self, &RevenantTabBarMinimizeBehaviorKey) integerValue];
@@ -1032,65 +919,4 @@ static char RevenantVCPrefersOrientationLockedKey, RevenantVCChildForOrientation
 
 @implementation UIBarButtonItemGroup (RevenantUIKit26)
 + (UIBarButtonItemGroup *)groupWithFixedSpace { return [[self alloc] init]; }
-@end
-
-@implementation UIResponder (RevenantUIKit26)
-- (id)providerForDeferredMenuElement:(id)element { return nil; }
-@end
-
-@implementation NSObject (RevenantUIKit26_EditActions)
-- (void)alignLeft:(id)sender { }
-- (void)alignCenter:(id)sender { }
-- (void)alignRight:(id)sender { }
-- (void)alignJustified:(id)sender { }
-- (void)newFromPasteboard:(id)sender { }
-- (void)performClose:(id)sender { }
-- (void)toggleInspector:(id)sender { }
-@end
-
-@implementation NSObject (RevenantUIKit26_SearchBarDelegate)
-- (BOOL)searchBar:(UISearchBar *)searchBar shouldChangeTextInRanges:(NSArray<NSValue *> *)ranges
-   replacementText:(NSString *)text
-{
-    return NO;
-}
-@end
-
-@implementation NSObject (RevenantUIKit26_SplitViewDelegate)
-- (void)splitViewController:(UISplitViewController *)controller didShowColumn:(id)column { }
-- (void)splitViewController:(UISplitViewController *)controller didHideColumn:(id)column { }
-@end
-
-@implementation NSObject (RevenantUIKit26_TextFieldDelegate)
-- (BOOL)textField:(UITextField *)field shouldChangeCharactersInRanges:(NSArray<NSValue *> *)ranges
-    replacementString:(NSString *)string
-{
-    return NO;
-}
-- (id)textField:(UITextField *)field
-    editMenuForCharactersInRanges:(NSArray<NSValue *> *)ranges suggestedActions:(id)actions
-{
-    return nil;
-}
-@end
-
-@implementation NSObject (RevenantUIKit26_TextViewDelegate)
-- (BOOL)textView:(UITextView *)view shouldChangeTextInRanges:(NSArray<NSValue *> *)ranges
-    replacementText:(NSString *)text
-{
-    return NO;
-}
-- (id)textView:(UITextView *)view
-    editMenuForTextInRanges:(NSArray<NSValue *> *)ranges suggestedActions:(id)actions
-{
-    return nil;
-}
-@end
-
-@implementation NSObject (RevenantUIKit26_WindowSceneDelegate)
-- (void)windowScene:(id)scene didUpdateEffectiveGeometry:(id)geometry { }
-- (UISceneWindowingControlStyle *)preferredWindowingControlStyleForScene:(id)scene
-{
-    return nil;
-}
 @end
