@@ -3,10 +3,7 @@
 
 @implementation UIHoverGestureRecognizer
 
-@dynamic zOffset, altitudeAngle;
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 170500
-@dynamic rollAngle;
-#endif
+@dynamic zOffset, altitudeAngle, rollAngle;
 
 - (instancetype)initWithTarget:(id)target action:(SEL)action
 {

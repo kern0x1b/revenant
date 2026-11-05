@@ -11,14 +11,7 @@ static NSString *RevenantAnimationDescription(NSInteger animationType)
     return @"Unknown text animation";
 }
 
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 180200
 NSString *BACKPORT_IMPL(UIWritingToolsCoordinatorTextAnimationDebugDescription)(UIWritingToolsCoordinatorTextAnimation animationType)
 {
     return RevenantAnimationDescription(animationType);
 }
-#else
-NSString *BACKPORT_IMPL(UIWritingToolsCoordinatorTextAnimationDebugDescription)(NSInteger animationType)
-{
-    return RevenantAnimationDescription(animationType);
-}
-#endif

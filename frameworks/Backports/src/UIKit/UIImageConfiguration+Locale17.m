@@ -2,15 +2,6 @@
 #import <objc/runtime.h>
 #import "RevenantSymbols.h"
 
-#if __IPHONE_OS_VERSION_MAX_ALLOWED < 170000
-
-@interface UIImageConfiguration (RevenantLocale17)
-@property (nonatomic, copy, nullable) NSLocale *locale;
-- (instancetype)configurationWithLocale:(nullable NSLocale *)locale;
-@end
-
-#endif
-
 @interface UIImageConfiguration (RevenantLocale17Equality)
 - (BOOL)isEqualToConfiguration:(UIImageConfiguration *)otherConfiguration;
 @end
