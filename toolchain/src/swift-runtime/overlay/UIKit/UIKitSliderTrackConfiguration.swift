@@ -1,9 +1,9 @@
 import UIKit
 import _SwiftRevenantUIKitOverlayShims
 
-@available(iOS 26.0, *)
-@available(tvOS, unavailable)
-@available(watchOS, unavailable)
+// The two classes are reached by name at run time (the shim header looks them up), and the ticks cross as untyped
+// objects: a message to the class, or an array or a cast to its type, would put a strong reference to the class symbol in
+// this library, which a program that does not link the Backports cannot load.
 extension UISlider {
     public struct TrackConfiguration: Hashable {
         public struct Tick: Hashable {
@@ -17,12 +17,15 @@ extension UISlider {
                 self.image = image
             }
 
-            fileprivate init(_ tick: __UISliderTick) {
-                self.init(position: tick.position, title: tick.title, image: tick.image)
+            fileprivate init(_ tick: Any) {
+                self.init(position: revenantSliderTickPosition(tick), title: revenantSliderTickTitle(tick), image: revenantSliderTickImage(tick))
             }
 
-            fileprivate var objectiveC: __UISliderTick {
-                sliderTrackObject(revenantSliderTick(position: position, title: title, image: image))
+            fileprivate var objectiveC: AnyObject {
+                guard let tick = revenantSliderTick(position: position, title: title, image: image) else {
+                    sliderTrackUnavailable()
+                }
+                return tick
             }
         }
 
@@ -39,19 +42,23 @@ extension UISlider {
         }
 
         public init(allowsTickValuesOnly: Bool = true, neutralValue: Float = 0, enabledRange: ClosedRange<Float> = 0...1, numberOfTicks: Int) {
-            let configuration: __UISliderTrackConfiguration = sliderTrackObject(revenantSliderTrackConfiguration(numberOfTicks: numberOfTicks))
+            guard let configuration = revenantSliderTrackConfiguration(numberOfTicks: numberOfTicks) else {
+                sliderTrackUnavailable()
+            }
             self.init(allowsTickValuesOnly: allowsTickValuesOnly, neutralValue: neutralValue, enabledRange: enabledRange,
-                      ticks: configuration.ticks.map { Tick($0) })
+                      ticks: revenantSliderTicks(of: configuration).map { Tick($0) })
         }
 
         fileprivate init(_ configuration: __UISliderTrackConfiguration) {
             self.init(allowsTickValuesOnly: configuration.allowsTickValuesOnly, neutralValue: configuration.neutralValue,
                       enabledRange: configuration.minimumEnabledValue...configuration.maximumEnabledValue,
-                      ticks: configuration.ticks.map { Tick($0) })
+                      ticks: revenantSliderTicks(of: configuration).map { Tick($0) })
         }
 
         fileprivate var objectiveC: __UISliderTrackConfiguration {
-            let configuration: __UISliderTrackConfiguration = sliderTrackObject(revenantSliderTrackConfiguration(ticks: ticks.map { $0.objectiveC }))
+            guard let configuration = revenantSliderTrackConfiguration(ticks: ticks.map { $0.objectiveC }) else {
+                sliderTrackUnavailable()
+            }
             configuration.allowsTickValuesOnly = allowsTickValuesOnly
             configuration.neutralValue = neutralValue
             if enabledRange.lowerBound > configuration.maximumEnabledValue {
@@ -66,14 +73,16 @@ extension UISlider {
     }
 
     public var trackConfiguration: TrackConfiguration? {
-        get { __trackConfiguration.map { TrackConfiguration($0) } }
+        get {
+            guard let configuration = __trackConfiguration else {
+                return nil
+            }
+            return TrackConfiguration(configuration)
+        }
         set { __trackConfiguration = newValue?.objectiveC }
     }
 }
 
-fileprivate func sliderTrackObject<Object: AnyObject>(_ object: Any?) -> Object {
-    guard let object = object as? Object else {
-        preconditionFailure("UISlider.TrackConfiguration is not on this iOS, and the Backports that provide it are not linked")
-    }
-    return object
+fileprivate func sliderTrackUnavailable() -> Never {
+    preconditionFailure("UISlider.TrackConfiguration is not on this iOS, and the Backports that provide it are not linked")
 }

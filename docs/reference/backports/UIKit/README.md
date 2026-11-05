@@ -38,6 +38,17 @@ linked (its `gsub` on `public enum UIPointerEffect`, which asserts that the mark
 declarations carry come from `the-overlay-of-uikit-says-which-release-its-types-came-with.patch`. Without the lowering, a program built for iOS 6
 cannot name the type; with it, the names compile where the UIKit backports are linked.
 
+**Classes the overlay reaches at run time.** `UICornerRadius`, `UISliderTick` and `UISliderTrackConfiguration` are
+implemented by the backports, and the lowered headers carry no release mark for them, so the Swift files name their
+types freely. They never name the classes themselves: a message to the class, an array of its instances or a cast to its
+type makes Swift emit a strong reference to `_OBJC_CLASS_$_<name>`, and iOS 6's UIKit does not export it, so the overlay
+library would not load in a program that does not link the backports. `RevenantUIKitOverlayShims.h` looks each class up
+with `NSClassFromString`; the slider's ticks cross as untyped objects with accessor functions. A program that builds one
+of them without the backports stops with a message that says so. `apple.runtime_guards` records no row for them, because
+the library imports no such symbol, weak or strong. To check a change to these files, compile them with `swiftc -wmo`
+against the lowered headers and read `nm -m` of the object: no `_OBJC_CLASS_$_UICornerRadius`, `_UISliderTick` or
+`_UISliderTrackConfiguration` may be undefined in it.
+
 **Not kept.** The earlier typecheck counts of the overlay (the number of rows that compiled, and the list of classes each
 waiting row was missing) came from a checklist, a registry and a typecheck script that are no longer in the tree, so they
 are not restated here.
