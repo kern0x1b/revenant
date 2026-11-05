@@ -71,6 +71,8 @@ local RECIPES = {
     {folder = "packages/l/libcxx", variable = "libcxx_sources_digest",
      inputs = {"packages/l/libcxx/xmake.lua", "packages/l/libcxx/patches/*.patch", "toolchain/modules/apple/shared_runtime.lua",
                "toolchain/src/apple-compat/src/*.c", "toolchain/src/apple-compat/src/*.h", "toolchain/src/apple-compat/include/revenant/*.h"}},
+    {folder = "packages/b/boringssl", variable = "boringssl_sources_digest",
+     inputs = {"packages/b/boringssl/xmake.lua", "packages/b/boringssl/patches/*.patch"}},
     {folder = "packages/s/swiftui", variable = "swiftui_sources_digest",
      inputs = {"packages/s/swiftui/xmake.lua", "frameworks/SwiftUI/xmake.lua", "frameworks/SwiftUI/src/*"}},
     {folder = "packages/a/appintents", variable = "appintents_sources_digest",

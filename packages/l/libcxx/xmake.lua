@@ -82,10 +82,25 @@ package("libcxx")
             "-DLLVM_ENABLE_RUNTIMES=libcxx;libcxxabi",
             "-DLIBCXXABI_REEXPORT_FROM_LIBCXX=" .. (semver.compare(deployment, "4.2") < 0 and "OFF" or "ON"),
             "-DLIBCXX_ENABLE_SHARED=ON", "-DLIBCXXABI_ENABLE_SHARED=ON",
-            "-DLIBCXX_ENABLE_STATIC=OFF", "-DLIBCXXABI_ENABLE_STATIC=OFF",
+            "-DLIBCXX_ENABLE_STATIC=ON", "-DLIBCXXABI_ENABLE_STATIC=ON",
             "-DLIBCXX_CXX_ABI=libcxxabi", "-DLIBCXXABI_USE_LLVM_UNWINDER=OFF",
             "-DLIBCXX_INCLUDE_BENCHMARKS=OFF", "-DLIBCXX_INCLUDE_TESTS=OFF", "-DLIBCXXABI_INCLUDE_TESTS=OFF"
         }, {sourcedir = "runtimes", system = "Darwin", cflags = {"-mllvm", "-hot-cold-split=false"}, cxxflags = cxxflags, shflags = shflags})
+        for _, archive in ipairs({"libc++.a", "libc++abi.a"}) do
+            if not os.isfile(path.join(package:installdir("lib"), archive)) then
+                raise("%s was not installed, and a Backports dylib links the runtime from it hidden", archive)
+            end
+        end
+        local static_abi = os.iorunv("xcrun", {"nm", "-gmU", path.join(package:installdir("lib"), "libc++abi.a")})
+        local static_defined = false
+        for line in static_abi:gmatch("[^\n]+") do
+            if line:match("%s__ZdlPv$") then
+                static_defined = true
+            end
+        end
+        if not static_defined then
+            raise("libc++abi.a defines no operator delete, which the TLS backport needs from the runtime")
+        end
         for _, library in ipairs({"libc++.1.0.dylib", "libc++abi.1.0.dylib"}) do
             local imported = {}
             for name in os.iorunv("xcrun", {"nm", "-u", path.join(package:installdir("lib"), library)}):gmatch("%S+") do
