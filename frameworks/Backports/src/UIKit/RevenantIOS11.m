@@ -1,5 +1,4 @@
 #import <UIKit/UIKit.h>
-#import <objc/runtime.h>
 
 #pragma mark - UIPasteConfiguration
 
@@ -168,81 +167,6 @@
     perCent = MAX(0, MIN(100, perCent));
     NSString *status = [NSString stringWithFormat:@"%ld%%", (long)perCent];
     return [[NSAttributedString alloc] initWithString:status];
-}
-
-@end
-
-@implementation UIPickerView (RevenantIOS11AccessibilityContent)
-
-- (NSAttributedString *)pickerView:(UIPickerView *)pickerView accessibilityAttributedLabelForComponent:(NSInteger)component
-{
-    return [[NSAttributedString alloc] initWithString:@""];
-}
-
-- (NSAttributedString *)pickerView:(UIPickerView *)pickerView accessibilityAttributedHintForComponent:(NSInteger)component
-{
-    return [[NSAttributedString alloc] initWithString:@""];
-}
-
-@end
-
-#pragma mark - UIPasteboard's item providers
-
-static char RevenantItemProvidersKey;
-static char RevenantItemProvidersExpiryKey;
-
-#pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
-
-@implementation UIPasteboard (RevenantIOS11ItemProviders)
-
-- (void)setItemProviders:(NSArray<NSItemProvider *> *)itemProviders
-   localOnly:(BOOL)localOnly
- expirationDate:(NSDate *)expirationDate
-{
-    (void)localOnly;
-    objc_setAssociatedObject(self, &RevenantItemProvidersKey, [itemProviders copy], OBJC_ASSOCIATION_COPY_NONATOMIC);
-    objc_setAssociatedObject(self, &RevenantItemProvidersExpiryKey, expirationDate, OBJC_ASSOCIATION_COPY_NONATOMIC);
-}
-
-- (NSArray<NSItemProvider *> *)itemProviders
-{
-    NSArray *held = objc_getAssociatedObject(self, &RevenantItemProvidersKey);
-    if (!held)
-        return nil;
-    NSDate *expiry = objc_getAssociatedObject(self, &RevenantItemProvidersExpiryKey);
-    if (expiry && [expiry timeIntervalSinceNow] <= 0)
-        return nil;
-    return held;
-}
-
-@end
-
-#pragma mark - UIBarItem's large content image
-
-static char RevenantLargeContentImageKey;
-static char RevenantLargeContentImageInsetsKey;
-
-@implementation UIBarItem (RevenantIOS11LargeContentImage)
-
-- (UIImage *)largeContentSizeImage
-{
-    return objc_getAssociatedObject(self, &RevenantLargeContentImageKey);
-}
-
-- (void)setLargeContentSizeImage:(UIImage *)largeContentSizeImage
-{
-    objc_setAssociatedObject(self, &RevenantLargeContentImageKey, largeContentSizeImage, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-- (UIEdgeInsets)largeContentSizeImageInsets
-{
-    NSValue *held = objc_getAssociatedObject(self, &RevenantLargeContentImageInsetsKey);
-    return held ? [held UIEdgeInsetsValue] : UIEdgeInsetsZero;
-}
-
-- (void)setLargeContentSizeImageInsets:(UIEdgeInsets)largeContentSizeImageInsets
-{
-    objc_setAssociatedObject(self, &RevenantLargeContentImageInsetsKey, [NSValue valueWithUIEdgeInsets:largeContentSizeImageInsets], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

@@ -2370,7 +2370,6 @@ class UIPasteControlConfiguration
 class UIPasteboard
 class UIPencilInteraction
 class UIPercentDrivenInteractiveTransition
-class UIPickerView
 class UIPointerAccessory
 class UIPointerEffect
 class UIPointerHighlightEffect
@@ -29951,10 +29950,6 @@ member UIBarButtonItemStateAppearance -setTitleTextAttributes:
 member UIBarButtonItemStateAppearance -titlePositionAdjustment
 member UIBarButtonItemStateAppearance -titleTextAttributes
 member UIBarItem +appearanceWhenContainedInInstancesOfClasses:
-member UIBarItem -largeContentSizeImage
-member UIBarItem -largeContentSizeImageInsets
-member UIBarItem -setLargeContentSizeImage:
-member UIBarItem -setLargeContentSizeImageInsets:
 member UIBlurEffect +effectWithStyle:
 member UIBlurEffect +supportsSecureCoding
 member UIBlurEffect -description
@@ -32431,10 +32426,8 @@ member UIPasteboard -hasColors
 member UIPasteboard -hasImages
 member UIPasteboard -hasStrings
 member UIPasteboard -hasURLs
-member UIPasteboard -itemProviders
 member UIPasteboard -revenantRecordOptions:
 member UIPasteboard -revenantRecordedOptionsForTest
-member UIPasteboard -setItemProviders:localOnly:expirationDate:
 member UIPasteboard -setItems:options:
 member UIPasteboard -setObjects:
 member UIPasteboard -setObjects:localOnly:expirationDate:
@@ -32471,8 +32464,6 @@ member UIPercentDrivenInteractiveTransition -startInteractiveTransition:
 member UIPercentDrivenInteractiveTransition -timingCurve
 member UIPercentDrivenInteractiveTransition -updateInteractiveTransition:
 member UIPercentDrivenInteractiveTransition -wantsInteractiveStart
-member UIPickerView -pickerView:accessibilityAttributedHintForComponent:
-member UIPickerView -pickerView:accessibilityAttributedLabelForComponent:
 member UIPointerAccessory +accessoryWithShape:position:
 member UIPointerAccessory +arrowAccessoryWithPosition:
 member UIPointerAccessory -copyWithZone:
