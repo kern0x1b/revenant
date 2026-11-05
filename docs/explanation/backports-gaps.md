@@ -247,9 +247,9 @@ Each call site of `revenant_say_once_for`, `revenant_menus_say_once` or `revenan
 | frameworks/Backports/src/Accessibility/RevenantChartDescriptors.m:636 | @"AXLiveAudioGraph.updateValue" |
 | frameworks/Backports/src/Accessibility/RevenantChartDescriptors.m:643 | @"AXLiveAudioGraph.stop" |
 | frameworks/Backports/src/HealthKit/RevenantHKStore.m:18 | (no literal) |
-| frameworks/Backports/src/JavaScriptCore/JSCAPI18.m:9 | @"JavaScriptCore.JSGlobalContextSetInspectable" |
-| frameworks/Backports/src/JavaScriptCore/JSCAPI8.m:18 | @"JavaScriptCore.JSGlobalContextCopyName" |
-| frameworks/Backports/src/JavaScriptCore/JSCAPI8.m:9 | @"JavaScriptCore.JSGlobalContextSetName" |
+| frameworks/Backports/src/JavaScriptCore/JSCAPI18.m:10 | @"JavaScriptCore.JSGlobalContextSetInspectable" |
+| frameworks/Backports/src/JavaScriptCore/JSCAPI8.m:10 | @"JavaScriptCore.JSGlobalContextSetName" |
+| frameworks/Backports/src/JavaScriptCore/JSCAPI8.m:19 | @"JavaScriptCore.JSGlobalContextCopyName" |
 | frameworks/Backports/src/MessageUI/MFMailComposeViewController11.m:14 | @"MFMailComposeViewController.insertCollaborationItemProvider:completionHandler:" |
 | frameworks/Backports/src/MessageUI/MFMessageComposeViewController7.m:111 | @"MFMessageComposeViewController.insertCollaborationItemProvider:" |
 | frameworks/Backports/src/NotificationCenter/NCWidgetController.m:22 | @"NCWidgetController.setHasContent:forWidgetWithBundleIdentifier:" |
@@ -276,9 +276,9 @@ Each call site of `revenant_say_once_for`, `revenant_menus_say_once` or `revenan
 | frameworks/Backports/src/UIKit/NSLayoutManager+Text7.m:102 | @"glyph-font-substitution" |
 | frameworks/Backports/src/UIKit/NSParagraphStyle+Text15.m:14 | @"default-hyphenation" |
 | frameworks/Backports/src/UIKit/RevenantBarAppearance.m:208 | (no literal) |
-| frameworks/Backports/src/UIKit/UIAccessibility13.m:34 | @"voice-control" |
-| frameworks/Backports/src/UIKit/UIApplication+Scenes.m:57 | @"scene-refresh" |
+| frameworks/Backports/src/UIKit/UIAccessibility13.m:35 | @"voice-control" |
 | frameworks/Backports/src/UIKit/UIApplication+Scenes.m:6 | (no literal) |
+| frameworks/Backports/src/UIKit/UIApplication+Scenes.m:62 | @"scene-refresh" |
 | frameworks/Backports/src/UIKit/UICollectionView+SelectionFocus14.m:17 | @"collection-selection-follows-focus" |
 | frameworks/Backports/src/UIKit/UIContextMenuInteraction.m:286 | @"sheet" |
 | frameworks/Backports/src/UIKit/UIEditMenuInteraction.m:34 | @"edit-menu" |
@@ -287,14 +287,13 @@ Each call site of `revenant_say_once_for`, `revenant_menus_say_once` or `revenan
 | frameworks/Backports/src/UIKit/UIHoverGestureRecognizer.m:14 | @"hover-recognizer" |
 | frameworks/Backports/src/UIKit/UIImage+Symbols.m:27 | @"symbol" |
 | frameworks/Backports/src/UIKit/UILabel+LineBreakStrategy14.m:19 | @"line-break-strategy" |
-| frameworks/Backports/src/UIKit/UILabel+Tightening9.m:16 | @"label-tightening" |
 | frameworks/Backports/src/UIKit/UIMenuSystem.m:41 | @"rebuild" |
 | frameworks/Backports/src/UIKit/UIMenuSystem.m:47 | @"revalidate" |
-| frameworks/Backports/src/UIKit/UINavigationItem+Groups16.m:30 | @"navigation-item-16" |
+| frameworks/Backports/src/UIKit/UINavigationItem+Groups16.m:27 | @"navigation-item-16" |
 | frameworks/Backports/src/UIKit/UIPanGestureRecognizer+ScrollTypes134.m:18 | @"scroll-types" |
-| frameworks/Backports/src/UIKit/UIPencilInteraction12.m:60 | @"pencil" |
+| frameworks/Backports/src/UIKit/UIPencilInteraction12.m:77 | @"pencil" |
 | frameworks/Backports/src/UIKit/UIPointerInteraction.m:56 | @"pointer-interaction" |
-| frameworks/Backports/src/UIKit/UIPointerLockState.m:55 | @"pointer-lock" |
+| frameworks/Backports/src/UIKit/UIPointerLockState.m:56 | @"pointer-lock" |
 | frameworks/Backports/src/UIKit/UIPrintInteractionController+Options7.m:21 | @"print-copies" |
 | frameworks/Backports/src/UIKit/UIPrintInteractionController+Options7.m:33 | @"print-paper" |
 | frameworks/Backports/src/UIKit/UIResponder+ItemsConfiguration.m:16 | @"items-configuration" |
@@ -304,30 +303,26 @@ Each call site of `revenant_say_once_for`, `revenant_menus_say_once` or `revenan
 | frameworks/Backports/src/UIKit/UISimpleTextPrintFormatter+Attributed7.m:61 | @"print-attributed" |
 | frameworks/Backports/src/UIKit/UISplitViewController+PrimaryEdge11.m:18 | @"split-primary-edge" |
 | frameworks/Backports/src/UIKit/UITabBar+Layout7.m:14 | @"tabbar-layout" |
-| frameworks/Backports/src/UIKit/UITabBar+Tint10.m:20 | @"tabbar-unselected" |
-| frameworks/Backports/src/UIKit/UITabBar+Tint10.m:36 | @"tabbaritem-badge" |
-| frameworks/Backports/src/UIKit/UITabBar+Tint10.m:48 | @"tabbaritem-badge" |
+| frameworks/Backports/src/UIKit/UITabBar+Tint10.m:19 | @"tabbar-unselected" |
+| frameworks/Backports/src/UIKit/UITabBar+Tint10.m:35 | @"tabbaritem-badge" |
 | frameworks/Backports/src/UIKit/UITableView+SelectionFocus14.m:17 | @"table-selection-follows-focus" |
-| frameworks/Backports/src/UIKit/UITableView+Updates11.m:77 | @"table-separator-reference" |
+| frameworks/Backports/src/UIKit/UITableView+Updates11.m:64 | @"table-separator-reference" |
 | frameworks/Backports/src/UIKit/UITextFormattingCoordinator.m:41 | @"font-panel" |
-| frameworks/Backports/src/UIKit/UITextInputAssistantItem.m:7 | @"input-assistant-groups" (removed with the T10 fix) |
 | frameworks/Backports/src/UIKit/UITextInputTraits11.m:12 | @"%@: the keyboard of iOS 6 makes no smart substitutions, so the value is kept and read back and typing is as before" |
 | frameworks/Backports/src/UIKit/UITextInputTraits11.m:51 | @"passwordRules" |
 | frameworks/Backports/src/UIKit/UITextView+TextKit7.m:180 | @"textview-link-attributes" |
 | frameworks/Backports/src/UIKit/UITextView+TextScaling13.m:18 | @"text-scaling" |
 | frameworks/Backports/src/UIKit/UIView+ContentSizeAdjusting.m:11 | @"content-size-adjusting" |
-| frameworks/Backports/src/UIKit/UIView+FocusGroup14.m:18 | @"focus-group" |
 | frameworks/Backports/src/UIKit/UIView+InvertColors.m:16 | @"invert-colors" |
-| frameworks/Backports/src/UIKit/UIView+iOS13.m:18 | @"dark-override" |
-| frameworks/Backports/src/UIKit/UIView+iOS13.m:34 | @"modify-animations" |
+| frameworks/Backports/src/UIKit/UIView+iOS13.m:41 | @"modify-animations" |
 | frameworks/Backports/src/UIKit/UIViewController+Previewing.m:8 | @"previewing" |
 | frameworks/Backports/src/UIKit/UIViewController+iOS13.m:22 | @"dark-override" |
-| frameworks/Backports/src/UIKit/UNLocationNotificationTrigger10.m:146 | @"region" |
-| frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:218 | (no literal) |
-| frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:324 | @"title" |
-| frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:326 | @"category" |
-| frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:516 | @"categories" |
-| frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:599 | @"present" |
+| frameworks/Backports/src/UserNotifications/UNLocationNotificationTrigger10.m:146 | @"region" |
+| frameworks/Backports/src/UserNotifications/UNUserNotificationCenter.m:211 | (no literal) |
+| frameworks/Backports/src/UserNotifications/UNUserNotificationCenter.m:311 | @"title" |
+| frameworks/Backports/src/UserNotifications/UNUserNotificationCenter.m:313 | @"category" |
+| frameworks/Backports/src/UserNotifications/UNUserNotificationCenter.m:506 | @"alert" |
+| frameworks/Backports/src/UserNotifications/UNUserNotificationCenter.m:665 | @"categories" |
 
 ## Expo modules: document picker delegates (expo-file-system 57.0.7)
 

@@ -1,33 +1,9 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
-static const char revenant_localization_key;
-static const char revenant_mirroring_key;
 static const char revenant_priority_key;
 
 @implementation UIKeyCommand (RevenantPriority)
-
-- (BOOL)allowsAutomaticLocalization
-{
-    NSNumber *kept = objc_getAssociatedObject(self, &revenant_localization_key);
-    return kept ? kept.boolValue : YES;
-}
-
-- (void)setAllowsAutomaticLocalization:(BOOL)allowsAutomaticLocalization
-{
-    objc_setAssociatedObject(self, &revenant_localization_key, @(allowsAutomaticLocalization), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-- (BOOL)allowsAutomaticMirroring
-{
-    NSNumber *kept = objc_getAssociatedObject(self, &revenant_mirroring_key);
-    return kept ? kept.boolValue : YES;
-}
-
-- (void)setAllowsAutomaticMirroring:(BOOL)allowsAutomaticMirroring
-{
-    objc_setAssociatedObject(self, &revenant_mirroring_key, @(allowsAutomaticMirroring), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
 
 - (BOOL)wantsPriorityOverSystemBehavior
 {

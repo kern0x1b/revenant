@@ -4,7 +4,6 @@
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
 static const char RevenantUnselectedTintKey;
-static const char RevenantBadgeColorKey;
 static const char RevenantBadgeAttributesKey;
 
 @implementation UITabBar (RevenantTint10)
@@ -24,18 +23,6 @@ static const char RevenantBadgeAttributesKey;
 @end
 
 @implementation UITabBarItem (RevenantBadge10)
-
-- (UIColor *)badgeColor
-{
-    return objc_getAssociatedObject(self, &RevenantBadgeColorKey);
-}
-
-- (void)setBadgeColor:(UIColor *)badgeColor
-{
-    if (badgeColor)
-        revenant_menus_say_once(@"tabbaritem-badge", @"UITabBarItem badge colour and text attributes: the iOS 6 tab bar draws its own red badge, so the values are kept and read back and the badge is drawn as before");
-    objc_setAssociatedObject(self, &RevenantBadgeColorKey, badgeColor, OBJC_ASSOCIATION_COPY_NONATOMIC);
-}
 
 - (NSDictionary<NSAttributedStringKey, id> *)badgeTextAttributesForState:(UIControlState)state
 {

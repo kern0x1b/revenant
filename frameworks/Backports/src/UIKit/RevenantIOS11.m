@@ -84,59 +84,6 @@
 
 @end
 
-#pragma mark - UIAccessibilityLocationDescriptor
-
-@implementation UIAccessibilityLocationDescriptor {
-    __weak UIView *_view;
-    CGPoint _point;
-    NSString *_name;
-    NSAttributedString *_attributedName;
-}
-
-- (instancetype)initWithName:(NSString *)name point:(CGPoint)point inView:(UIView *)view
-{
-    return [self initWithAttributedName:[[NSAttributedString alloc] initWithString:name ?: @""] point:point inView:view];
-}
-
-- (instancetype)initWithName:(NSString *)name view:(UIView *)view
-{
-    return [self initWithName:name point:CGPointZero inView:view];
-}
-
-- (instancetype)initWithAttributedName:(NSAttributedString *)attributedName point:(CGPoint)point inView:(UIView *)view
-{
-    self = [super init];
-    if (self) {
-        _attributedName = [attributedName copy];
-        _name = [_attributedName.string copy];
-        _point = point;
-        _view = view;
-    }
-    return self;
-}
-
-- (UIView *)view
-{
-    return _view;
-}
-
-- (CGPoint)point
-{
-    return _point;
-}
-
-- (NSString *)name
-{
-    return _name;
-}
-
-- (NSAttributedString *)attributedName
-{
-    return _attributedName;
-}
-
-@end
-
 #pragma mark - UIAccessibilityReadingContent, and the delegates that describe a component in text
 
 @implementation NSObject (RevenantIOS11AccessibilityContent)

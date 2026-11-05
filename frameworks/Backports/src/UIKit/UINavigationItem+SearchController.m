@@ -2,7 +2,6 @@
 #import <objc/runtime.h>
 
 static const void *RevenantSearchControllerKey = &RevenantSearchControllerKey;
-static const void *RevenantHidesSearchBarKey = &RevenantHidesSearchBarKey;
 
 @interface UISearchController (RevenantNavigationItem)
 - (void)revenant_setNavigationItem:(UINavigationItem *)item;
@@ -30,17 +29,6 @@ static const void *RevenantHidesSearchBarKey = &RevenantHidesSearchBarKey;
         [bar sizeToFit];
         self.titleView = bar;
     }
-}
-
-- (BOOL)hidesSearchBarWhenScrolling
-{
-    NSNumber *value = objc_getAssociatedObject(self, RevenantHidesSearchBarKey);
-    return value ? value.boolValue : YES;
-}
-
-- (void)setHidesSearchBarWhenScrolling:(BOOL)hides
-{
-    objc_setAssociatedObject(self, RevenantHidesSearchBarKey, @(hides), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

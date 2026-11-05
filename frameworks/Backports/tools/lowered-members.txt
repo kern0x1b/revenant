@@ -2177,7 +2177,6 @@ class UIAccessibilityCustomRotor
 class UIAccessibilityCustomRotorItemResult
 class UIAccessibilityCustomRotorSearchPredicate
 class UIAccessibilityElement
-class UIAccessibilityLocationDescriptor
 class UIAction
 class UIActivity
 class UIActivityItemsConfiguration
@@ -23249,8 +23248,6 @@ member NSItemProvider -loadInPlaceFileRepresentationForTypeIdentifier:completion
 member NSItemProvider -loadItemForTypeIdentifier:options:completionHandler:
 member NSItemProvider -loadObjectOfClass:completionHandler:
 member NSItemProvider -loadPreviewImageWithOptions:completionHandler:
-member NSItemProvider -preferredPresentationSize
-member NSItemProvider -preferredPresentationStyle
 member NSItemProvider -previewImageHandler
 member NSItemProvider -readableTypeIdentifiersForItemProvider
 member NSItemProvider -registerDataRepresentationForContentType:visibility:loadHandler:
@@ -23268,13 +23265,9 @@ member NSItemProvider -registeredTypeIdentifiersWithFileOptions:
 member NSItemProvider -revenant_representationConformingTo:
 member NSItemProvider -revenant_representationConformingTo:preferring:
 member NSItemProvider -revenant_representationForType:
-member NSItemProvider -setPreferredPresentationSize:
-member NSItemProvider -setPreferredPresentationStyle:
 member NSItemProvider -setPreviewImageHandler:
 member NSItemProvider -setSuggestedName:
-member NSItemProvider -setTeamData:
 member NSItemProvider -suggestedName
-member NSItemProvider -teamData
 member NSItemProvider -writableTypeIdentifiersForItemProvider
 member NSJSONSerialization +JSONObjectWithData:options:error:
 member NSJSONSerialization +JSONObjectWithStream:options:error:
@@ -23330,11 +23323,9 @@ member NSLayoutManager -CGGlyphAtIndex:isValidIndex:
 member NSLayoutManager -enumerateEnclosingRectsForGlyphRange:withinSelectedGlyphRange:inTextContainer:usingBlock:
 member NSLayoutManager -enumerateLineFragmentsForGlyphRange:usingBlock:
 member NSLayoutManager -getGlyphsInRange:glyphs:properties:characterIndexes:bidiLevels:
-member NSLayoutManager -limitsLayoutForSuspiciousContents
 member NSLayoutManager -processEditingForTextStorage:edited:range:changeInLength:invalidatedRange:
 member NSLayoutManager -propertyForGlyphAtIndex:
 member NSLayoutManager -setGlyphs:properties:characterIndexes:font:forGlyphRange:
-member NSLayoutManager -setLimitsLayoutForSuspiciousContents:
 member NSLayoutManager -setUsesDefaultHyphenation:
 member NSLayoutManager -showCGGlyphs:positions:count:font:textMatrix:attributes:inContext:
 member NSLayoutManager -truncatedGlyphRangeInLineFragmentForGlyphAtIndex:
@@ -23557,112 +23548,30 @@ member NSNumberFormatter -revenant_numberFormatterMinimumGroupingDigits
 member NSNumberFormatter -setFormattingContext:
 member NSNumberFormatter -setMinimumGroupingDigits:
 member NSNumberFormatter -stringFromNumber:
-member NSObject -accessibilityActivateBlock
-member NSObject -accessibilityActivationPointBlock
 member NSObject -accessibilityAssistiveTechnologyFocusedIdentifiers
 member NSObject -accessibilityAttributedContentForLineNumber:
 member NSObject -accessibilityAttributedHint
-member NSObject -accessibilityAttributedHintBlock
 member NSObject -accessibilityAttributedLabel
-member NSObject -accessibilityAttributedLabelBlock
 member NSObject -accessibilityAttributedPageContent
 member NSObject -accessibilityAttributedUserInputLabels
-member NSObject -accessibilityAttributedUserInputLabelsBlock
 member NSObject -accessibilityAttributedValue
-member NSObject -accessibilityAttributedValueBlock
-member NSObject -accessibilityContainerType
-member NSObject -accessibilityContainerTypeBlock
 member NSObject -accessibilityCustomActions
-member NSObject -accessibilityCustomActionsBlock
-member NSObject -accessibilityCustomRotors
-member NSObject -accessibilityCustomRotorsBlock
-member NSObject -accessibilityDecrementBlock
-member NSObject -accessibilityDirectTouchOptions
-member NSObject -accessibilityDragSourceDescriptors
-member NSObject -accessibilityDropPointDescriptors
-member NSObject -accessibilityElements
-member NSObject -accessibilityElementsBlock
-member NSObject -accessibilityElementsHiddenBlock
-member NSObject -accessibilityFrameBlock
-member NSObject -accessibilityHeaderElementsBlock
-member NSObject -accessibilityHintBlock
-member NSObject -accessibilityIdentifierBlock
-member NSObject -accessibilityIncrementBlock
-member NSObject -accessibilityLabelBlock
-member NSObject -accessibilityLanguageBlock
-member NSObject -accessibilityMagicTapBlock
-member NSObject -accessibilityNavigationStyle
-member NSObject -accessibilityNavigationStyleBlock
-member NSObject -accessibilityPath
-member NSObject -accessibilityPathBlock
-member NSObject -accessibilityPerformEscapeBlock
 member NSObject -accessibilityRespondsToUserInteraction
-member NSObject -accessibilityRespondsToUserInteractionBlock
-member NSObject -accessibilityShouldGroupAccessibilityChildrenBlock
 member NSObject -accessibilityTextualContext
-member NSObject -accessibilityTextualContextBlock
-member NSObject -accessibilityTraitsBlock
 member NSObject -accessibilityUserInputLabels
-member NSObject -accessibilityUserInputLabelsBlock
-member NSObject -accessibilityValueBlock
-member NSObject -accessibilityViewIsModalBlock
-member NSObject -automationElements
-member NSObject -automationElementsBlock
-member NSObject -isAccessibilityElementBlock
 member NSObject -prepareForInterfaceBuilder
 member NSObject -registerForTraitChanges:withAction:
 member NSObject -registerForTraitChanges:withHandler:
 member NSObject -registerForTraitChanges:withTarget:action:
 member NSObject -revenant_tellHome:object:block:
-member NSObject -setAccessibilityActivateBlock:
-member NSObject -setAccessibilityActivationPointBlock:
 member NSObject -setAccessibilityAttributedHint:
-member NSObject -setAccessibilityAttributedHintBlock:
 member NSObject -setAccessibilityAttributedLabel:
-member NSObject -setAccessibilityAttributedLabelBlock:
 member NSObject -setAccessibilityAttributedUserInputLabels:
-member NSObject -setAccessibilityAttributedUserInputLabelsBlock:
 member NSObject -setAccessibilityAttributedValue:
-member NSObject -setAccessibilityAttributedValueBlock:
-member NSObject -setAccessibilityContainerType:
-member NSObject -setAccessibilityContainerTypeBlock:
 member NSObject -setAccessibilityCustomActions:
-member NSObject -setAccessibilityCustomActionsBlock:
-member NSObject -setAccessibilityCustomRotors:
-member NSObject -setAccessibilityCustomRotorsBlock:
-member NSObject -setAccessibilityDecrementBlock:
-member NSObject -setAccessibilityDirectTouchOptions:
-member NSObject -setAccessibilityDragSourceDescriptors:
-member NSObject -setAccessibilityDropPointDescriptors:
-member NSObject -setAccessibilityElements:
-member NSObject -setAccessibilityElementsBlock:
-member NSObject -setAccessibilityElementsHiddenBlock:
-member NSObject -setAccessibilityFrameBlock:
-member NSObject -setAccessibilityHeaderElementsBlock:
-member NSObject -setAccessibilityHintBlock:
-member NSObject -setAccessibilityIdentifierBlock:
-member NSObject -setAccessibilityIncrementBlock:
-member NSObject -setAccessibilityLabelBlock:
-member NSObject -setAccessibilityLanguageBlock:
-member NSObject -setAccessibilityMagicTapBlock:
-member NSObject -setAccessibilityNavigationStyle:
-member NSObject -setAccessibilityNavigationStyleBlock:
-member NSObject -setAccessibilityPath:
-member NSObject -setAccessibilityPathBlock:
-member NSObject -setAccessibilityPerformEscapeBlock:
 member NSObject -setAccessibilityRespondsToUserInteraction:
-member NSObject -setAccessibilityRespondsToUserInteractionBlock:
-member NSObject -setAccessibilityShouldGroupAccessibilityChildrenBlock:
 member NSObject -setAccessibilityTextualContext:
-member NSObject -setAccessibilityTextualContextBlock:
-member NSObject -setAccessibilityTraitsBlock:
 member NSObject -setAccessibilityUserInputLabels:
-member NSObject -setAccessibilityUserInputLabelsBlock:
-member NSObject -setAccessibilityValueBlock:
-member NSObject -setAccessibilityViewIsModalBlock:
-member NSObject -setAutomationElements:
-member NSObject -setAutomationElementsBlock:
-member NSObject -setIsAccessibilityElementBlock:
 member NSObject -setSharedObservers:
 member NSObject -unregisterForTraitChanges:
 member NSOperation -isAsynchronous
@@ -29589,13 +29498,6 @@ member UIAccessibilityCustomRotorSearchPredicate -setCurrentItem:
 member UIAccessibilityCustomRotorSearchPredicate -setSearchDirection:
 member UIAccessibilityElement -accessibilityFrameInContainerSpace
 member UIAccessibilityElement -setAccessibilityFrameInContainerSpace:
-member UIAccessibilityLocationDescriptor -attributedName
-member UIAccessibilityLocationDescriptor -initWithAttributedName:point:inView:
-member UIAccessibilityLocationDescriptor -initWithName:point:inView:
-member UIAccessibilityLocationDescriptor -initWithName:view:
-member UIAccessibilityLocationDescriptor -name
-member UIAccessibilityLocationDescriptor -point
-member UIAccessibilityLocationDescriptor -view
 member UIAction +actionWithHandler:
 member UIAction +actionWithTitle:image:identifier:handler:
 member UIAction +supportsSecureCoding
@@ -29725,7 +29627,6 @@ member UIApplication -requestSceneSessionRefresh:
 member UIApplication -revenant_scene
 member UIApplication -revenant_sendEvent:
 member UIApplication -setAlternateIconName:completionHandler:
-member UIApplication -setMinimumBackgroundFetchInterval:
 member UIApplication -setShortcutItems:
 member UIApplication -shortcutItems
 member UIApplication -supportsAlternateIcons
@@ -29880,13 +29781,9 @@ member UIBarButtonItem -initWithPrimaryAction:menu:
 member UIBarButtonItem -initWithTitle:image:target:action:menu:
 member UIBarButtonItem -initWithTitle:menu:
 member UIBarButtonItem -menu
-member UIBarButtonItem -menuRepresentation
-member UIBarButtonItem -preferredMenuElementOrder
 member UIBarButtonItem -primaryAction
 member UIBarButtonItem -revenant_setButtonGroup:
 member UIBarButtonItem -setMenu:
-member UIBarButtonItem -setMenuRepresentation:
-member UIBarButtonItem -setPreferredMenuElementOrder:
 member UIBarButtonItem -setPrimaryAction:
 member UIBarButtonItemAppearance +supportsSecureCoding
 member UIBarButtonItemAppearance -configureWithDefaultForStyle:
@@ -29964,7 +29861,6 @@ member UIButton +systemButtonWithImage:target:action:
 member UIButton +systemButtonWithPrimaryAction:
 member UIButton -automaticallyUpdatesConfiguration
 member UIButton -behavioralStyle
-member UIButton -changesSelectionAsPrimaryAction
 member UIButton -configuration
 member UIButton -configurationUpdateHandler
 member UIButton -contextMenuInteraction:configurationForMenuAtLocation:
@@ -29977,11 +29873,9 @@ member UIButton -menu
 member UIButton -pointerInteractionEnabled
 member UIButton -pointerStyleProvider
 member UIButton -preferredBehavioralStyle
-member UIButton -preferredMenuElementOrder
 member UIButton -preferredSymbolConfigurationForImageInState:
 member UIButton -role
 member UIButton -setAutomaticallyUpdatesConfiguration:
-member UIButton -setChangesSelectionAsPrimaryAction:
 member UIButton -setConfiguration:
 member UIButton -setConfigurationUpdateHandler:
 member UIButton -setMenu:
@@ -29989,7 +29883,6 @@ member UIButton -setNeedsUpdateConfiguration
 member UIButton -setPointerInteractionEnabled:
 member UIButton -setPointerStyleProvider:
 member UIButton -setPreferredBehavioralStyle:
-member UIButton -setPreferredMenuElementOrder:
 member UIButton -setPreferredSymbolConfiguration:forImageInState:
 member UIButton -setRole:
 member UIButton -subtitleLabel
@@ -30326,7 +30219,6 @@ member UICollectionView -prefetchDataSource
 member UICollectionView -prefetchingEnabled
 member UICollectionView -reconfigureItemsAtIndexPaths:
 member UICollectionView -remembersLastFocusedIndexPath
-member UICollectionView -reorderingCadence
 member UICollectionView -revenant_canHandleDropSession:
 member UICollectionView -revenant_dragInteractions
 member UICollectionView -revenant_dragPreviewParametersForItemAtIndexPath:
@@ -30368,7 +30260,6 @@ member UICollectionView -setEditing:
 member UICollectionView -setPrefetchDataSource:
 member UICollectionView -setPrefetchingEnabled:
 member UICollectionView -setRemembersLastFocusedIndexPath:
-member UICollectionView -setReorderingCadence:
 member UICollectionView -setSelectionFollowsFocus:
 member UICollectionView -startInteractiveTransitionToCollectionViewLayout:completion:
 member UICollectionView -supplementaryViewForElementKind:atIndexPath:
@@ -30452,11 +30343,7 @@ member UICollectionViewCompositionalLayoutConfiguration -setContentInsetsReferen
 member UICollectionViewCompositionalLayoutConfiguration -setInterSectionSpacing:
 member UICollectionViewCompositionalLayoutConfiguration -setScrollDirection:
 member UICollectionViewController -collectionViewLayout
-member UICollectionViewController -installsStandardGestureForInteractiveMovement
 member UICollectionViewController -setCollectionViewLayout:
-member UICollectionViewController -setInstallsStandardGestureForInteractiveMovement:
-member UICollectionViewController -setUseLayoutToLayoutNavigationTransitions:
-member UICollectionViewController -useLayoutToLayoutNavigationTransitions
 member UICollectionViewDiffableDataSource -applySnapshot:animatingDifferences:
 member UICollectionViewDiffableDataSource -applySnapshot:animatingDifferences:completion:
 member UICollectionViewDiffableDataSource -applySnapshot:toSection:animatingDifferences:
@@ -30760,12 +30647,10 @@ member UICommand -performWithSender:target:
 member UICommand -presentationSourceItem
 member UICommand -propertyList
 member UICommand -revenant_performWithSender:target:
-member UICommand -selectedImage
 member UICommand -sender
 member UICommand -setAttributes:
 member UICommand -setDiscoverabilityTitle:
 member UICommand -setImage:
-member UICommand -setSelectedImage:
 member UICommand -setState:
 member UICommand -setTitle:
 member UICommand -state
@@ -30994,8 +30879,6 @@ member UICubicTimingParameters -springTimingParameters
 member UICubicTimingParameters -timingCurveType
 member UICubicTimingParameters -timingFunction
 member UIDatePicker -datePickerStyle
-member UIDatePicker -preferredDatePickerStyle
-member UIDatePicker -setPreferredDatePickerStyle:
 member UIDeferredMenuElement +elementWithProvider:
 member UIDeferredMenuElement +elementWithUncachedProvider:
 member UIDeferredMenuElement +supportsSecureCoding
@@ -31535,7 +31418,6 @@ member UIFontPickerViewControllerConfiguration -setDisplayUsingSystemFont:
 member UIFontPickerViewControllerConfiguration -setFilteredLanguagesPredicate:
 member UIFontPickerViewControllerConfiguration -setFilteredTraits:
 member UIFontPickerViewControllerConfiguration -setIncludeFaces:
-member UIGestureRecognizer -allowedPressTypes
 member UIGestureRecognizer -allowedTouchTypes
 member UIGestureRecognizer -buttonMask
 member UIGestureRecognizer -ignorePress:forEvent:
@@ -31546,7 +31428,6 @@ member UIGestureRecognizer -pressesCancelled:withEvent:
 member UIGestureRecognizer -pressesChanged:withEvent:
 member UIGestureRecognizer -pressesEnded:withEvent:
 member UIGestureRecognizer -requiresExclusiveTouchType
-member UIGestureRecognizer -setAllowedPressTypes:
 member UIGestureRecognizer -setAllowedTouchTypes:
 member UIGestureRecognizer -setName:
 member UIGestureRecognizer -setRequiresExclusiveTouchType:
@@ -31756,9 +31637,7 @@ member UIImageConfiguration -revenant_hasTraitsOfConfiguration:
 member UIImageConfiguration -revenant_isUnspecified
 member UIImageConfiguration -setLocale:
 member UIImageConfiguration -traitCollection
-member UIImagePickerController -imageExportPreset
 member UIImagePickerController -revenant_preferredModalPresentationStyle
-member UIImagePickerController -setImageExportPreset:
 member UIImagePickerController -setVideoExportPreset:
 member UIImagePickerController -videoExportPreset
 member UIImageReader +defaultReader
@@ -31833,10 +31712,8 @@ member UIIndirectScribbleInteraction -initWithDelegate:
 member UIIndirectScribbleInteraction -isHandlingWriting
 member UIIndirectScribbleInteraction -view
 member UIIndirectScribbleInteraction -willMoveToView:
-member UIInputView -allowsSelfSizing
 member UIInputView -initWithFrame:inputViewStyle:
 member UIInputView -inputViewStyle
-member UIInputView -setAllowsSelfSizing:
 member UIInputViewController -dismissKeyboard
 member UIInputViewController -hasDictationKey
 member UIInputViewController -hasFullAccess
@@ -31880,8 +31757,6 @@ member UIKeyCommand +commandWithTitle:image:action:input:modifierFlags:propertyL
 member UIKeyCommand +keyCommandWithInput:modifierFlags:action:
 member UIKeyCommand +keyCommandWithInput:modifierFlags:action:discoverabilityTitle:
 member UIKeyCommand +supportsSecureCoding
-member UIKeyCommand -allowsAutomaticLocalization
-member UIKeyCommand -allowsAutomaticMirroring
 member UIKeyCommand -copyWithZone:
 member UIKeyCommand -description
 member UIKeyCommand -discoverabilityTitle
@@ -31892,8 +31767,6 @@ member UIKeyCommand -initWithCoder:
 member UIKeyCommand -input
 member UIKeyCommand -isEqual:
 member UIKeyCommand -modifierFlags
-member UIKeyCommand -setAllowsAutomaticLocalization:
-member UIKeyCommand -setAllowsAutomaticMirroring:
 member UIKeyCommand -setDiscoverabilityTitle:
 member UIKeyCommand -setWantsPriorityOverSystemBehavior:
 member UIKeyCommand -wantsPriorityOverSystemBehavior
@@ -32222,7 +32095,6 @@ member UINavigationBar -compactScrollEdgeAppearance
 member UINavigationBar -currentNSToolbarSection
 member UINavigationBar -largeTitleTextAttributes
 member UINavigationBar -preferredBehavioralStyle
-member UINavigationBar -prefersLargeTitles
 member UINavigationBar -revenant_applyAppearances
 member UINavigationBar -revenant_otherChanged
 member UINavigationBar -revenant_refreshForced:
@@ -32236,7 +32108,6 @@ member UINavigationBar -setCompactAppearance:
 member UINavigationBar -setCompactScrollEdgeAppearance:
 member UINavigationBar -setLargeTitleTextAttributes:
 member UINavigationBar -setPreferredBehavioralStyle:
-member UINavigationBar -setPrefersLargeTitles:
 member UINavigationBar -setScrollEdgeAppearance:
 member UINavigationBar -setStandardAppearance:
 member UINavigationBar -standardAppearance
@@ -32291,15 +32162,10 @@ member UINavigationItem -backButtonDisplayMode
 member UINavigationItem -centerItemGroups
 member UINavigationItem -compactAppearance
 member UINavigationItem -compactScrollEdgeAppearance
-member UINavigationItem -customizationIdentifier
-member UINavigationItem -documentProperties
-member UINavigationItem -hidesSearchBarWhenScrolling
-member UINavigationItem -largeTitleDisplayMode
 member UINavigationItem -leadingItemGroups
 member UINavigationItem -overflowPresentationSource
 member UINavigationItem -pinnedTrailingGroup
 member UINavigationItem -preferredSearchBarPlacement
-member UINavigationItem -renameDelegate
 member UINavigationItem -revenant_appearanceChanged
 member UINavigationItem -revenant_applyTrailing
 member UINavigationItem -scrollEdgeAppearance
@@ -32311,14 +32177,9 @@ member UINavigationItem -setBackButtonDisplayMode:
 member UINavigationItem -setCenterItemGroups:
 member UINavigationItem -setCompactAppearance:
 member UINavigationItem -setCompactScrollEdgeAppearance:
-member UINavigationItem -setCustomizationIdentifier:
-member UINavigationItem -setDocumentProperties:
-member UINavigationItem -setHidesSearchBarWhenScrolling:
-member UINavigationItem -setLargeTitleDisplayMode:
 member UINavigationItem -setLeadingItemGroups:
 member UINavigationItem -setPinnedTrailingGroup:
 member UINavigationItem -setPreferredSearchBarPlacement:
-member UINavigationItem -setRenameDelegate:
 member UINavigationItem -setScrollEdgeAppearance:
 member UINavigationItem -setSearchController:
 member UINavigationItem -setStandardAppearance:
@@ -33292,8 +33153,6 @@ member UISwipeActionsConfiguration -actions
 member UISwipeActionsConfiguration -init
 member UISwipeActionsConfiguration -performsFirstActionWithFullSwipe
 member UISwipeActionsConfiguration -setPerformsFirstActionWithFullSwipe:
-member UISwitch -preferredStyle
-member UISwitch -setPreferredStyle:
 member UISwitch -setTitle:
 member UISwitch -style
 member UISwitch -title
@@ -33353,12 +33212,10 @@ member UITabBarAppearance -stackedLayoutAppearance
 member UITabBarController -childViewControllerForHomeIndicatorAutoHidden
 member UITabBarController -childViewControllerForScreenEdgesDeferringSystemGestures
 member UITabBarController -unwindForSegue:towardsViewController:
-member UITabBarItem -badgeColor
 member UITabBarItem -badgeTextAttributesForState:
 member UITabBarItem -initWithTitle:image:selectedImage:
 member UITabBarItem -revenant_appearanceChanged
 member UITabBarItem -scrollEdgeAppearance
-member UITabBarItem -setBadgeColor:
 member UITabBarItem -setBadgeTextAttributes:forState:
 member UITabBarItem -setScrollEdgeAppearance:
 member UITabBarItem -setStandardAppearance:
@@ -33418,7 +33275,6 @@ member UITableView -estimatedSectionHeaderHeight
 member UITableView -hasActiveDrag
 member UITableView -hasActiveDrop
 member UITableView -hasUncommittedUpdates
-member UITableView -insetsContentViewsToSafeArea
 member UITableView -isPrefetchingEnabled
 member UITableView -performBatchUpdates:completion:
 member UITableView -prefetchDataSource
@@ -33465,7 +33321,6 @@ member UITableView -setDropDelegate:
 member UITableView -setEstimatedRowHeight:
 member UITableView -setEstimatedSectionFooterHeight:
 member UITableView -setEstimatedSectionHeaderHeight:
-member UITableView -setInsetsContentViewsToSafeArea:
 member UITableView -setPrefetchDataSource:
 member UITableView -setPrefetchingEnabled:
 member UITableView -setRemembersLastFocusedIndexPath:
@@ -33484,7 +33339,6 @@ member UITableViewCell -contentConfiguration
 member UITableViewCell -defaultBackgroundConfiguration
 member UITableViewCell -defaultContentConfiguration
 member UITableViewCell -dragStateDidChange:
-member UITableViewCell -focusStyle
 member UITableViewCell -revenant_isInATableRow
 member UITableViewCell -revenant_layoutSeparator
 member UITableViewCell -revenant_tables
@@ -33494,12 +33348,9 @@ member UITableViewCell -setAutomaticallyUpdatesContentConfiguration:
 member UITableViewCell -setBackgroundConfiguration:
 member UITableViewCell -setConfigurationUpdateHandler:
 member UITableViewCell -setContentConfiguration:
-member UITableViewCell -setFocusStyle:
 member UITableViewCell -setNeedsUpdateConfiguration
 member UITableViewCell -setSeparatorInset:
-member UITableViewCell -setUserInteractionEnabledWhileDragging:
 member UITableViewCell -updateConfigurationUsingState:
-member UITableViewCell -userInteractionEnabledWhileDragging
 member UITableViewDiffableDataSource -applySnapshot:animatingDifferences:
 member UITableViewDiffableDataSource -applySnapshot:animatingDifferences:completion:
 member UITableViewDiffableDataSource -applySnapshotUsingReloadData:
@@ -34011,12 +33862,8 @@ member UIView -drawViewHierarchyInRect:afterScreenUpdates:
 member UIView -effectiveRadiusForCorner:
 member UIView -effectiveUserInterfaceLayoutDirection
 member UIView -firstBaselineAnchor
-member UIView -focusEffect
-member UIView -focusGroupIdentifier
-member UIView -focusGroupPriority
 member UIView -focused
 member UIView -heightAnchor
-member UIView -hoverStyle
 member UIView -insetsLayoutMarginsFromSafeArea
 member UIView -interactions
 member UIView -isFocused
@@ -34059,11 +33906,7 @@ member UIView -setAccessibilityIgnoresInvertColors:
 member UIView -setAnchorPoint:
 member UIView -setCornerConfiguration:
 member UIView -setDirectionalLayoutMargins:
-member UIView -setFocusEffect:
-member UIView -setFocusGroupIdentifier:
-member UIView -setFocusGroupPriority:
 member UIView -setFocused:
-member UIView -setHoverStyle:
 member UIView -setInsetsLayoutMarginsFromSafeArea:
 member UIView -setInteractions:
 member UIView -setLargeContentImage:
@@ -34155,7 +33998,6 @@ member UIViewController -contentUnavailableConfigurationState
 member UIViewController -edgesForExtendedLayout
 member UIViewController -extendedLayoutIncludesOpaqueBars
 member UIViewController -extensionContext
-member UIViewController -focusGroupIdentifier
 member UIViewController -isModalInPresentation
 member UIViewController -loadViewIfNeeded
 member UIViewController -modalInPresentation
@@ -34175,7 +34017,6 @@ member UIViewController -presentationController
 member UIViewController -previewActionItems
 member UIViewController -registerForPreviewingWithDelegate:sourceView:
 member UIViewController -removeKeyCommand:
-member UIViewController -restoresFocusAfterTransition
 member UIViewController -revenant_addedKeyCommands
 member UIViewController -revenant_environmentTraitCollection
 member UIViewController -revenant_preferredModalPresentationStyle
@@ -34187,7 +34028,6 @@ member UIViewController -setContentScrollView:forEdge:
 member UIViewController -setContentUnavailableConfiguration:
 member UIViewController -setEdgesForExtendedLayout:
 member UIViewController -setExtendedLayoutIncludesOpaqueBars:
-member UIViewController -setFocusGroupIdentifier:
 member UIViewController -setModalInPresentation:
 member UIViewController -setModalPresentationCapturesStatusBarAppearance:
 member UIViewController -setNeedsStatusBarAppearanceUpdate
@@ -34199,7 +34039,6 @@ member UIViewController -setNeedsUpdateOfSupportedInterfaceOrientations
 member UIViewController -setOverrideTraitCollection:forChildViewController:
 member UIViewController -setOverrideUserInterfaceStyle:
 member UIViewController -setPreferredContentSize:
-member UIViewController -setRestoresFocusAfterTransition:
 member UIViewController -setTransitioningDelegate:
 member UIViewController -setViewRespectsSystemMinimumLayoutMargins:
 member UIViewController -sheetPresentationController
@@ -34305,15 +34144,11 @@ member UIVisualEffectView -revenant_refresh
 member UIVisualEffectView -revenant_refuse:
 member UIVisualEffectView -revenant_removeBackdrop
 member UIVisualEffectView -setEffect:
-member UIWebView -allowsLinkPreview
-member UIWebView -allowsPictureInPictureMediaPlayback
 member UIWebView -gapBetweenPages
 member UIWebView -pageCount
 member UIWebView -pageLength
 member UIWebView -paginationBreakingMode
 member UIWebView -paginationMode
-member UIWebView -setAllowsLinkPreview:
-member UIWebView -setAllowsPictureInPictureMediaPlayback:
 member UIWebView -setGapBetweenPages:
 member UIWebView -setPageLength:
 member UIWebView -setPaginationBreakingMode:
@@ -36173,8 +36008,6 @@ protocol_member UIDynamicItem -center
 protocol_member UIDynamicItem -transform
 protocol_member UIFindInteractionDelegate -findInteraction:sessionForView:
 protocol_member UIFocusItem -canBecomeFocused
-protocol_member UIFocusItem -focusEffect
-protocol_member UIFocusItem -focusGroupPriority
 protocol_member UIFocusItem -frame
 protocol_member UIGestureRecognizerDelegate -gestureRecognizer:shouldReceiveTouch:
 protocol_member UIGestureRecognizerDelegate -gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:
@@ -36451,7 +36284,6 @@ type AVSpeechSynthesisVoiceQuality
 type AVVideoCompositionPerFrameHDRDisplayMetadataPolicy
 type AXChartDescriptorContentDirection
 type AXCustomContentImportance
-type AXCustomRotorsReturnBlock
 type AXFeatureOverrideSessionOptions
 type AXHearingDeviceEar
 type AXNumericDataAxisDescriptorScale
@@ -36965,13 +36797,10 @@ type SecKeyOperationType
 type SecKeychainRef
 type SecTrustResultType
 type UIAccessibilityAssistiveTechnologyIdentifier
-type UIAccessibilityContainerType
 type UIAccessibilityContrast
 type UIAccessibilityCustomRotorDirection
 type UIAccessibilityCustomSystemRotorType
-type UIAccessibilityDirectTouchOptions
 type UIAccessibilityHearingDeviceEar
-type UIAccessibilityNavigationStyle
 type UIAccessibilityNotifications
 type UIAccessibilityTextualContext
 type UIAccessibilityTraits
@@ -37022,7 +36851,6 @@ type UICollectionViewCellConfigurationUpdateHandler
 type UICollectionViewCellDragState
 type UICollectionViewDropIntent
 type UICollectionViewFlowLayoutSectionInsetReference
-type UICollectionViewReorderingCadence
 type UICollisionBehaviorMode
 type UIConfigurationStateCustomKey
 type UIContentInsetsReference
@@ -37064,7 +36892,6 @@ type UIGraphicsImageRendererFormatRange
 type UIGraphicsPDFDrawingActions
 type UIImageDynamicRange
 type UIImageOrientation
-type UIImagePickerControllerImageURLExportPreset
 type UIImageRenderingMode
 type UIImageSymbolScale
 type UIImageSymbolWeight
@@ -37085,7 +36912,6 @@ type UIModalPresentationStyle
 type UINSIntegerTrait
 type UINSToolbarItemPresentationSize
 type UINavigationBarNSToolbarSection
-type UINavigationItemLargeTitleDisplayMode
 type UINavigationItemSearchBarPlacement
 type UINavigationItemStyle
 type UINotificationFeedbackType
@@ -37099,7 +36925,6 @@ type UIPasteboardDetectionPattern
 type UIPasteboardOption
 type UIPencilPreferredAction
 type UIPointerAccessoryPosition
-type UIPreferredPresentationStyle
 type UIPressPhase
 type UIPressType
 type UIPreviewActionStyle
@@ -37139,7 +36964,6 @@ type UITabAccessoryEnvironment
 type UITabBarItemPositioning
 type UITableViewCellConfigurationUpdateHandler
 type UITableViewCellDragState
-type UITableViewCellFocusStyle
 type UITableViewDropIntent
 type UITableViewHeaderFooterViewConfigurationUpdateHandler
 type UITableViewRowActionStyle

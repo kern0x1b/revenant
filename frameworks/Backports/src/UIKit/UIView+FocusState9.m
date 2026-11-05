@@ -2,7 +2,6 @@
 #import <objc/runtime.h>
 
 static const char RevenantRemembersFocusKey;
-static const char RevenantCellFocusStyleKey;
 
 @implementation UITableView (RevenantFocusState9)
 
@@ -32,16 +31,3 @@ static const char RevenantCellFocusStyleKey;
 
 @end
 
-@implementation UITableViewCell (RevenantFocusState9)
-
-- (UITableViewCellFocusStyle)focusStyle
-{
-    return (UITableViewCellFocusStyle)[objc_getAssociatedObject(self, &RevenantCellFocusStyleKey) integerValue];
-}
-
-- (void)setFocusStyle:(UITableViewCellFocusStyle)focusStyle
-{
-    objc_setAssociatedObject(self, &RevenantCellFocusStyleKey, @(focusStyle), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-@end
