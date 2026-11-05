@@ -63,6 +63,12 @@ function failures(opt)
     if not refused:find("absent", 1, true) then
         table.insert(found, "a target that builds no library must be refused, naming it: " .. refused)
     end
+
+    local cache = os.getenv("REVENANT_CACHE")
+    local ceiling = os.getenv("GIT_CEILING_DIRECTORIES") or ""
+    if cache and not (":" .. ceiling .. ":"):find(":" .. cache .. ":", 1, true) then
+        table.insert(found, "the wrapper must put its cache in GIT_CEILING_DIRECTORIES, so git apply inside the cache does not find the checkout: got " .. ceiling)
+    end
     os.tryrm(folder)
     return found
 end

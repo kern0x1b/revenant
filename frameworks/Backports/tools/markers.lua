@@ -418,6 +418,108 @@ function rename_uses(text, names)
     return apply_edits(text, code_uses(text, names))
 end
 
+local function item_start(code, pos)
+    local start, brace, paren, container = 1, 0, 0, 0
+    local i = 1
+    while true do
+        local s = string.find(code, "[%(%){};@]", i)
+        if s == nil or s >= pos then
+            break
+        end
+        local c = string.sub(code, s, s)
+        if c == "(" then
+            paren = paren + 1
+        elseif c == ")" then
+            paren = paren - 1
+        elseif c == "{" then
+            brace = brace + 1
+        elseif c == "}" then
+            brace = brace - 1
+            if brace == 0 and paren == 0 and container == 0 then
+                start = s + 1
+            end
+        elseif c == ";" then
+            if paren == 0 and brace == 0 and container == 0 then
+                start = s + 1
+            end
+        else
+            local word = string.match(code, "^@(%a+)", s)
+            if word == "implementation" or word == "interface" or word == "protocol" then
+                if container == 0 then
+                    start = s
+                end
+                container = container + 1
+            elseif word == "end" then
+                container = container - 1
+                if container == 0 then
+                    start = s + 4
+                end
+            end
+        end
+        i = s + 1
+    end
+    return start
+end
+
+local function declared(text, name)
+    return string.find(text, "extern[^;]-%f[%w_]__revenant_fb_" .. name .. "[%[%]]*%s*;") ~= nil
+end
+
+local function same_length_names(code)
+    local out, pos = {}, 1
+    while true do
+        local s, e, name = string.find(code, "BACKPORT_IMPL%(%s*([%a_][%w_]*)%s*%)", pos)
+        if s == nil then
+            table.insert(out, string.sub(code, pos))
+            break
+        end
+        table.insert(out, string.sub(code, pos, s - 1))
+        table.insert(out, name .. string.rep(" ", e - s + 1 - #name))
+        pos = e + 1
+    end
+    return table.concat(out)
+end
+
+function forward_declarations(text)
+    local code = mask(text, true)
+    local names = marked(code)
+    local defs = scan_masked(strip_attributes(same_length_names(code)))
+    local edits, missing, done = {}, {}, {}
+    for _, def in ipairs(defs) do
+        if def.kind == "global" and names[def.name] and not done[def.name] and not declared(text, def.name) then
+            done[def.name] = true
+            local use, pos = nil, 1
+            while true do
+                local s, e = string.find(code, "BACKPORT_IMPL%(%s*" .. def.name .. "%s*%)", pos)
+                if s == nil or s >= def.first then
+                    break
+                end
+                if not in_extern(code, s) then
+                    use = s
+                    break
+                end
+                pos = e + 1
+            end
+            if use then
+                if def.type == nil then
+                    table.insert(missing, {name = def.name, line = line_of(text, def.first), reason = "its declaration has several declarators"})
+                else
+                    local start = item_start(code, use)
+                    local decl = "extern " .. def.type .. " __revenant_fb_" .. def.name .. (def.array and "[]" or "") .. ";"
+                    local after_line = start > 1 and string.sub(code, start - 1, start - 1) == "\n"
+                    table.insert(edits, {first = start, text = (after_line and "" or "\n") .. decl .. (after_line and "\n\n" or "\n")})
+                end
+            end
+        end
+    end
+    table.sort(edits, function (a, b) return a.first > b.first end)
+    local out = text
+    for _, edit in ipairs(edits) do
+        out = string.sub(out, 1, edit.first - 1) .. edit.text .. string.sub(out, edit.first)
+    end
+    return out, missing
+end
+
 function rewrite(text, renamable, sdk)
     local edits, renamed, kept, unhandled, globals = {}, {}, {}, {}, {}
     local function classify(name, kind, first, last)
@@ -459,7 +561,10 @@ function rewrite(text, renamable, sdk)
             table.insert(edits, use)
         end
     end
-    local out = apply_edits(text, edits)
+    local out, missing = forward_declarations(apply_edits(text, edits))
+    for _, entry in ipairs(missing) do
+        table.insert(unhandled, entry)
+    end
     local names = {}
     for name in pairs(renamed) do
         table.insert(names, name)
