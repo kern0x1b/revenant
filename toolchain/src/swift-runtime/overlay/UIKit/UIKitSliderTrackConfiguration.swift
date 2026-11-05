@@ -1,9 +1,6 @@
 import UIKit
 import _SwiftRevenantUIKitOverlayShims
 
-// The two classes are reached by name at run time (the shim header looks them up), and the ticks cross as untyped
-// objects: a message to the class, or an array or a cast to its type, would put a strong reference to the class symbol in
-// this library, which a program that does not link the Backports cannot load.
 extension UISlider {
     public struct TrackConfiguration: Hashable {
         public struct Tick: Hashable {
