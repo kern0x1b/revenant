@@ -78,7 +78,6 @@
 @private
     UIFontPickerViewControllerConfiguration *_configuration;
     __weak id<UIFontPickerViewControllerDelegate> _delegate;
-    id _selectedFontDescriptor;
 }
 
 - (instancetype)initWithConfiguration:(UIFontPickerViewControllerConfiguration *)configuration
@@ -106,16 +105,6 @@
 - (void)setDelegate:(id<UIFontPickerViewControllerDelegate>)delegate
 {
     _delegate = delegate;
-}
-
-- (UIFontDescriptor *)selectedFontDescriptor
-{
-    return _selectedFontDescriptor;
-}
-
-- (void)setSelectedFontDescriptor:(UIFontDescriptor *)selectedFontDescriptor
-{
-    _selectedFontDescriptor = selectedFontDescriptor;
 }
 
 - (NSString *)description

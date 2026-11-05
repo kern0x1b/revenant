@@ -283,7 +283,7 @@ Each call site of `revenant_say_once_for`, `revenant_menus_say_once` or `revenan
 | frameworks/Backports/src/UIKit/UIContextMenuInteraction.m:286 | @"sheet" |
 | frameworks/Backports/src/UIKit/UIEditMenuInteraction.m:34 | @"edit-menu" |
 | frameworks/Backports/src/UIKit/UIEditMenuInteraction.m:39 | @"edit-menu-present" |
-| frameworks/Backports/src/UIKit/UIFontPickerViewController.m:152 | @"font-picker" |
+| frameworks/Backports/src/UIKit/UIFontPickerViewController.m:141 | @"font-picker" |
 | frameworks/Backports/src/UIKit/UIHoverGestureRecognizer.m:14 | @"hover-recognizer" |
 | frameworks/Backports/src/UIKit/UIImage+Symbols.m:27 | @"symbol" |
 | frameworks/Backports/src/UIKit/UILabel+LineBreakStrategy14.m:19 | @"line-break-strategy" |

@@ -18,7 +18,6 @@
     UIColor *_backgroundColor;
     UIEdgeInsets _popoverLayoutMargins;
     Class _popoverBackgroundViewClass;
-    BOOL _canOverlapSourceViewRect;
     UIViewController *_presenting;
 }
 
@@ -73,16 +72,6 @@
 - (void)setSourceRect:(CGRect)sourceRect
 {
     _sourceRect = sourceRect;
-}
-
-- (BOOL)canOverlapSourceViewRect
-{
-    return _canOverlapSourceViewRect;
-}
-
-- (void)setCanOverlapSourceViewRect:(BOOL)canOverlapSourceViewRect
-{
-    _canOverlapSourceViewRect = canOverlapSourceViewRect;
 }
 
 - (UIBarButtonItem *)barButtonItem

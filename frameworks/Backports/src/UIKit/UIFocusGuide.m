@@ -3,14 +3,12 @@
 @implementation UIFocusGuide {
     BOOL _enabled;
     __weak UIView *_preferredFocusedView;
-    NSArray *_preferredFocusEnvironments;
 }
 
 - (void)revenant_setDefaults
 {
     _enabled = YES;
     _preferredFocusedView = nil;
-    _preferredFocusEnvironments = @[];
 }
 
 - (instancetype)init
@@ -45,16 +43,6 @@
 - (void)setPreferredFocusedView:(UIView *)preferredFocusedView
 {
     _preferredFocusedView = preferredFocusedView;
-}
-
-- (NSArray *)preferredFocusEnvironments
-{
-    return _preferredFocusEnvironments;
-}
-
-- (void)setPreferredFocusEnvironments:(NSArray *)preferredFocusEnvironments
-{
-    _preferredFocusEnvironments = [preferredFocusEnvironments copy];
 }
 
 @end

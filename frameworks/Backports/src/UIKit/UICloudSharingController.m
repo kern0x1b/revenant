@@ -10,7 +10,6 @@
     __weak id<UICloudSharingControllerDelegate> _delegate;
     CKShare *_share;
     id _preparationHandler;
-    UICloudSharingPermissionOptions _availablePermissions;
 }
 
 - (instancetype)initRevenantWithShare:(CKShare *)share preparationHandler:(id)preparationHandler
@@ -45,16 +44,6 @@
 - (CKShare *)share
 {
     return _share;
-}
-
-- (UICloudSharingPermissionOptions)availablePermissions
-{
-    return _availablePermissions;
-}
-
-- (void)setAvailablePermissions:(UICloudSharingPermissionOptions)availablePermissions
-{
-    _availablePermissions = availablePermissions;
 }
 
 - (void)viewDidLoad

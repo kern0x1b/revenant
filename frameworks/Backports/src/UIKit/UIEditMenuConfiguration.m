@@ -4,7 +4,6 @@
 @private
     id<NSCopying> _identifier;
     CGPoint _sourcePoint;
-    UIEditMenuArrowDirection _preferredArrowDirection;
 }
 
 + (instancetype)configurationWithIdentifier:(id<NSCopying>)identifier sourcePoint:(CGPoint)sourcePoint
@@ -28,16 +27,6 @@
 - (CGPoint)sourcePoint
 {
     return _sourcePoint;
-}
-
-- (UIEditMenuArrowDirection)preferredArrowDirection
-{
-    return _preferredArrowDirection;
-}
-
-- (void)setPreferredArrowDirection:(UIEditMenuArrowDirection)preferredArrowDirection
-{
-    _preferredArrowDirection = preferredArrowDirection;
 }
 
 @end

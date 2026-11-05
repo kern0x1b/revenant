@@ -68,7 +68,6 @@ static char revenant_placeholder_key;
     BOOL _showsSearchResultsController;
     __weak UINavigationItem *_navigationItem;
     UISearchControllerScopeBarActivation _scopeBarActivation;
-    BOOL _ignoresSearchSuggestionsForSearchBarPlacementStacked;
 }
 
 @dynamic automaticallyShowsScopeBar;
@@ -151,16 +150,6 @@ static char revenant_placeholder_key;
 {
     _scopeBarActivation = activation;
     [self revenant_updateVisibility];
-}
-
-- (BOOL)ignoresSearchSuggestionsForSearchBarPlacementStacked
-{
-    return _ignoresSearchSuggestionsForSearchBarPlacementStacked;
-}
-
-- (void)setIgnoresSearchSuggestionsForSearchBarPlacementStacked:(BOOL)ignores
-{
-    _ignoresSearchSuggestionsForSearchBarPlacementStacked = ignores;
 }
 
 - (BOOL)dimsBackgroundDuringPresentation

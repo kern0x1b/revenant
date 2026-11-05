@@ -6,7 +6,6 @@
     id _metadata;
     NSArray<UIDragItem *> *(^_dragItemsProvider)(id<UIDragSession>);
     UIActivityViewController *(^_activityViewControllerProvider)(void);
-    BOOL _wantsIconRepresentation;
 }
 
 - (instancetype)initWithURL:(NSURL *)url
@@ -55,16 +54,6 @@
 - (void)setActivityViewControllerProvider:(UIActivityViewController *(^)(void))activityViewControllerProvider
 {
     _activityViewControllerProvider = [activityViewControllerProvider copy];
-}
-
-- (BOOL)wantsIconRepresentation
-{
-    return _wantsIconRepresentation;
-}
-
-- (void)setWantsIconRepresentation:(BOOL)wantsIconRepresentation
-{
-    _wantsIconRepresentation = wantsIconRepresentation;
 }
 
 @end

@@ -58,7 +58,6 @@ static void revenant_remove_animations(CALayer *layer)
     CGFloat _duration;
     CGFloat _percentComplete;
     CGFloat _completionSpeed;
-    UIViewAnimationCurve _completionCurve;
     BOOL _wantsInteractiveStart;
     id _timingCurve;
     CADisplayLink *_link;
@@ -73,7 +72,6 @@ static void revenant_remove_animations(CALayer *layer)
     self = [super init];
     if (self) {
         _completionSpeed = 1;
-        _completionCurve = (UIViewAnimationCurve)7;
         _wantsInteractiveStart = YES;
     }
     return self;
@@ -97,16 +95,6 @@ static void revenant_remove_animations(CALayer *layer)
 - (void)setCompletionSpeed:(CGFloat)speed
 {
     _completionSpeed = speed;
-}
-
-- (UIViewAnimationCurve)completionCurve
-{
-    return _completionCurve;
-}
-
-- (void)setCompletionCurve:(UIViewAnimationCurve)curve
-{
-    _completionCurve = curve;
 }
 
 - (BOOL)wantsInteractiveStart

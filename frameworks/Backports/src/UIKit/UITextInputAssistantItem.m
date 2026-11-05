@@ -7,7 +7,6 @@
 @end
 
 @implementation UITextInputAssistantItem {
-    BOOL _allowsHidingShortcuts;
     NSArray<UIBarButtonItemGroup *> *_leadingBarButtonGroups;
     NSArray<UIBarButtonItemGroup *> *_trailingBarButtonGroups;
     __weak UIResponder *_owner;
@@ -18,21 +17,10 @@
 {
     self = [super init];
     if (self) {
-        _allowsHidingShortcuts = YES;
         _leadingBarButtonGroups = @[];
         _trailingBarButtonGroups = @[];
     }
     return self;
-}
-
-- (BOOL)allowsHidingShortcuts
-{
-    return _allowsHidingShortcuts;
-}
-
-- (void)setAllowsHidingShortcuts:(BOOL)allows
-{
-    _allowsHidingShortcuts = allows;
 }
 
 - (NSArray<UIBarButtonItemGroup *> *)leadingBarButtonGroups

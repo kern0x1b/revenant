@@ -52,7 +52,6 @@
     UISceneSessionRole _role;
     UISceneSession *_session;
     NSUserActivity *_userActivity;
-    UISceneActivationRequestOptions *_options;
 }
 
 + (instancetype)request
@@ -95,23 +94,12 @@
     _userActivity = userActivity;
 }
 
-- (UISceneActivationRequestOptions *)options
-{
-    return _options;
-}
-
-- (void)setOptions:(UISceneActivationRequestOptions *)options
-{
-    _options = [options copy];
-}
-
 - (id)copyWithZone:(NSZone *)zone
 {
     UISceneSessionActivationRequest *copy = [[[self class] allocWithZone:zone] init];
     copy->_role = _role;
     copy->_session = _session;
     copy->_userActivity = _userActivity;
-    copy->_options = [_options copy];
     return copy;
 }
 

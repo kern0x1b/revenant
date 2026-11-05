@@ -13,7 +13,6 @@
     UIActionHandler _handler;
     NSString *_subtitle;
     UIImage *_selectedImage;
-    UIActionRepeatBehavior _repeatBehavior;
 }
 
 @dynamic sender, presentationSourceItem;
@@ -166,7 +165,6 @@
     return text;
 }
 
-
 - (UIActionHandler)handler
 {
     return _handler;
@@ -195,16 +193,6 @@
 - (void)setSelectedImage:(UIImage *)selectedImage
 {
     _selectedImage = selectedImage;
-}
-
-- (UIActionRepeatBehavior)repeatBehavior
-{
-    return _repeatBehavior;
-}
-
-- (void)setRepeatBehavior:(UIActionRepeatBehavior)repeatBehavior
-{
-    _repeatBehavior = repeatBehavior;
 }
 
 @end

@@ -4,7 +4,6 @@
 @implementation UIAccessibilityCustomRotorSearchPredicate {
 @private
     UIAccessibilityCustomRotorItemResult *_currentItem;
-    UIAccessibilityCustomRotorDirection _searchDirection;
 }
 
 - (UIAccessibilityCustomRotorItemResult *)currentItem
@@ -15,16 +14,6 @@
 - (void)setCurrentItem:(UIAccessibilityCustomRotorItemResult *)currentItem
 {
     _currentItem = currentItem;
-}
-
-- (UIAccessibilityCustomRotorDirection)searchDirection
-{
-    return _searchDirection;
-}
-
-- (void)setSearchDirection:(UIAccessibilityCustomRotorDirection)searchDirection
-{
-    _searchDirection = searchDirection;
 }
 
 @end
