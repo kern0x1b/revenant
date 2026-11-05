@@ -2173,9 +2173,6 @@ class SRWristDetection
 class SRWristTemperature
 class SRWristTemperatureSession
 class UIAccessibilityCustomAction
-class UIAccessibilityCustomRotor
-class UIAccessibilityCustomRotorItemResult
-class UIAccessibilityCustomRotorSearchPredicate
 class UIAccessibilityElement
 class UIAction
 class UIActivity
@@ -2298,8 +2295,6 @@ class UIFocusUpdateContext
 class UIFont
 class UIFontDescriptor
 class UIFontMetrics
-class UIFontPickerViewController
-class UIFontPickerViewControllerConfiguration
 class UIGestureRecognizer
 class UIGraphicsImageRenderer
 class UIGraphicsImageRendererContext
@@ -3743,7 +3738,6 @@ enum SKUniformTypeTexture
 enum SRAuthorizationStatusDenied
 enum SRErrorDataInaccessible
 enum UIAccessibilityContrastHigh
-enum UIAccessibilityCustomSystemRotorTypeNone
 enum UIAccessibilityHearingDeviceEarNone
 enum UIActivityCategoryAction
 enum UIActivityIndicatorViewStyleLarge
@@ -29468,25 +29462,6 @@ member UIAccessibilityCustomAction -setName:
 member UIAccessibilityCustomAction -setSelector:
 member UIAccessibilityCustomAction -setTarget:
 member UIAccessibilityCustomAction -target
-member UIAccessibilityCustomRotor -attributedName
-member UIAccessibilityCustomRotor -init
-member UIAccessibilityCustomRotor -initWithAttributedName:itemSearchBlock:
-member UIAccessibilityCustomRotor -initWithName:itemSearchBlock:
-member UIAccessibilityCustomRotor -initWithSystemType:itemSearchBlock:
-member UIAccessibilityCustomRotor -itemSearchBlock
-member UIAccessibilityCustomRotor -name
-member UIAccessibilityCustomRotor -setAttributedName:
-member UIAccessibilityCustomRotor -setItemSearchBlock:
-member UIAccessibilityCustomRotor -setName:
-member UIAccessibilityCustomRotor -systemRotorType
-member UIAccessibilityCustomRotorItemResult -init
-member UIAccessibilityCustomRotorItemResult -initWithTargetElement:targetRange:
-member UIAccessibilityCustomRotorItemResult -setTargetElement:
-member UIAccessibilityCustomRotorItemResult -setTargetRange:
-member UIAccessibilityCustomRotorItemResult -targetElement
-member UIAccessibilityCustomRotorItemResult -targetRange
-member UIAccessibilityCustomRotorSearchPredicate -currentItem
-member UIAccessibilityCustomRotorSearchPredicate -setCurrentItem:
 member UIAccessibilityElement -accessibilityFrameInContainerSpace
 member UIAccessibilityElement -setAccessibilityFrameInContainerSpace:
 member UIAction +actionWithHandler:
@@ -30027,14 +30002,12 @@ member UICellAccessoryCustomView -init
 member UICellAccessoryCustomView -initWithCoder:
 member UICellAccessoryCustomView -initWithCustomView:placement:
 member UICellAccessoryCustomView -isEqual:
-member UICellAccessoryCustomView -maintainsFixedSize
 member UICellAccessoryCustomView -placement
 member UICellAccessoryCustomView -position
 member UICellAccessoryCustomView -revenant_hasDefaultPosition
 member UICellAccessoryCustomView -revenant_isLeading
 member UICellAccessoryCustomView -revenant_makeView
 member UICellAccessoryCustomView -revenant_order
-member UICellAccessoryCustomView -setMaintainsFixedSize:
 member UICellAccessoryCustomView -setPosition:
 member UICellAccessoryDelete +supportsSecureCoding
 member UICellAccessoryDelete -actionHandler
@@ -30126,7 +30099,6 @@ member UICellAccessoryReorder -revenant_order
 member UICellAccessoryReorder -setShowsVerticalSeparator:
 member UICellAccessoryReorder -showsVerticalSeparator
 member UICellConfigurationState +supportsSecureCoding
-member UICellConfigurationState -cellDragState
 member UICellConfigurationState -cellDropState
 member UICellConfigurationState -copyWithZone:
 member UICellConfigurationState -editing
@@ -30142,7 +30114,6 @@ member UICellConfigurationState -isReordering
 member UICellConfigurationState -isSwiped
 member UICellConfigurationState -reordering
 member UICellConfigurationState -revenant_descriptionTail
-member UICellConfigurationState -setCellDragState:
 member UICellConfigurationState -setCellDropState:
 member UICellConfigurationState -setEditing:
 member UICellConfigurationState -setExpanded:
@@ -30205,7 +30176,6 @@ member UICollectionView -isPrefetchingEnabled
 member UICollectionView -prefetchDataSource
 member UICollectionView -prefetchingEnabled
 member UICollectionView -reconfigureItemsAtIndexPaths:
-member UICollectionView -remembersLastFocusedIndexPath
 member UICollectionView -revenant_canHandleDropSession:
 member UICollectionView -revenant_dragInteractions
 member UICollectionView -revenant_dragPreviewParametersForItemAtIndexPath:
@@ -30246,7 +30216,6 @@ member UICollectionView -setDropDelegate:
 member UICollectionView -setEditing:
 member UICollectionView -setPrefetchDataSource:
 member UICollectionView -setPrefetchingEnabled:
-member UICollectionView -setRemembersLastFocusedIndexPath:
 member UICollectionView -setSelectionFollowsFocus:
 member UICollectionView -startInteractiveTransitionToCollectionViewLayout:completion:
 member UICollectionView -supplementaryViewForElementKind:atIndexPath:
@@ -30453,6 +30422,7 @@ member UICollectionViewListCell -layoutSubviews
 member UICollectionViewListCell -prepareForReuse
 member UICollectionViewListCell -revenant_inList
 member UICollectionViewListCell -revenant_isExpanded
+member UICollectionViewListCell -revenant_itemSeparatorsForConfiguration:
 member UICollectionViewListCell -revenant_ordered:
 member UICollectionViewListCell -revenant_setExpanded:animated:
 member UICollectionViewListCell -revenant_setExpansionHandler:
@@ -31357,26 +31327,6 @@ member UIFontMetrics -scaledFontForFont:maximumPointSize:
 member UIFontMetrics -scaledFontForFont:maximumPointSize:compatibleWithTraitCollection:
 member UIFontMetrics -scaledValueForValue:
 member UIFontMetrics -scaledValueForValue:compatibleWithTraitCollection:
-member UIFontPickerViewController -configuration
-member UIFontPickerViewController -delegate
-member UIFontPickerViewController -description
-member UIFontPickerViewController -initWithConfiguration:
-member UIFontPickerViewController -initWithNibName:bundle:
-member UIFontPickerViewController -loadView
-member UIFontPickerViewController -revenant_close
-member UIFontPickerViewController -setDelegate:
-member UIFontPickerViewController -viewDidAppear:
-member UIFontPickerViewControllerConfiguration +filterPredicateForFilteredLanguages:
-member UIFontPickerViewControllerConfiguration -copyWithZone:
-member UIFontPickerViewControllerConfiguration -description
-member UIFontPickerViewControllerConfiguration -displayUsingSystemFont
-member UIFontPickerViewControllerConfiguration -filteredLanguagesPredicate
-member UIFontPickerViewControllerConfiguration -filteredTraits
-member UIFontPickerViewControllerConfiguration -includeFaces
-member UIFontPickerViewControllerConfiguration -setDisplayUsingSystemFont:
-member UIFontPickerViewControllerConfiguration -setFilteredLanguagesPredicate:
-member UIFontPickerViewControllerConfiguration -setFilteredTraits:
-member UIFontPickerViewControllerConfiguration -setIncludeFaces:
 member UIGestureRecognizer -allowedTouchTypes
 member UIGestureRecognizer -buttonMask
 member UIGestureRecognizer -ignorePress:forEvent:
@@ -31607,13 +31557,9 @@ member UIImageReader -imageWithContentsOfFileURL:completion:
 member UIImageReader -imageWithData:
 member UIImageReader -imageWithData:completion:
 member UIImageReaderConfiguration -copyWithZone:
-member UIImageReaderConfiguration -pixelsPerInch
 member UIImageReaderConfiguration -preferredThumbnailSize
-member UIImageReaderConfiguration -prefersHighDynamicRange
 member UIImageReaderConfiguration -preparesImagesForDisplay
-member UIImageReaderConfiguration -setPixelsPerInch:
 member UIImageReaderConfiguration -setPreferredThumbnailSize:
-member UIImageReaderConfiguration -setPrefersHighDynamicRange:
 member UIImageReaderConfiguration -setPreparesImagesForDisplay:
 member UIImageSymbolConfiguration +configurationWithFont:
 member UIImageSymbolConfiguration +configurationWithFont:scale:
@@ -31912,9 +31858,7 @@ member UIListContentTextProperties -setFont:
 member UIListContentTextProperties -setLineBreakMode:
 member UIListContentTextProperties -setMinimumScaleFactor:
 member UIListContentTextProperties -setNumberOfLines:
-member UIListContentTextProperties -setShowsExpansionTextWhenTruncated:
 member UIListContentTextProperties -setTransform:
-member UIListContentTextProperties -showsExpansionTextWhenTruncated
 member UIListContentTextProperties -transform
 member UIListContentView -configuration
 member UIListContentView -encodeWithCoder:
@@ -31952,21 +31896,13 @@ member UIListSeparatorConfiguration -hash
 member UIListSeparatorConfiguration -initWithCoder:
 member UIListSeparatorConfiguration -initWithListAppearance:
 member UIListSeparatorConfiguration -isEqual:
-member UIListSeparatorConfiguration -multipleSelectionColor
-member UIListSeparatorConfiguration -revenant_decodeVisualEffectWithCoder:
-member UIListSeparatorConfiguration -revenant_encodeVisualEffectWithCoder:
-member UIListSeparatorConfiguration -revenant_takeVisualEffectFrom:
-member UIListSeparatorConfiguration -revenant_visualEffectIsEqualTo:
 member UIListSeparatorConfiguration -setBottomSeparatorInsets:
 member UIListSeparatorConfiguration -setBottomSeparatorVisibility:
 member UIListSeparatorConfiguration -setColor:
-member UIListSeparatorConfiguration -setMultipleSelectionColor:
 member UIListSeparatorConfiguration -setTopSeparatorInsets:
 member UIListSeparatorConfiguration -setTopSeparatorVisibility:
-member UIListSeparatorConfiguration -setVisualEffect:
 member UIListSeparatorConfiguration -topSeparatorInsets
 member UIListSeparatorConfiguration -topSeparatorVisibility
-member UIListSeparatorConfiguration -visualEffect
 member UILocalNotification -alertTitle
 member UILocalNotification -category
 member UILocalNotification -setAlertTitle:
@@ -32038,8 +31974,6 @@ member UIMutableUserNotificationAction -setParameters:
 member UIMutableUserNotificationAction -setTitle:
 member UIMutableUserNotificationCategory -setActions:forContext:
 member UIMutableUserNotificationCategory -setIdentifier:
-member UINavigationBar -backIndicatorImage
-member UINavigationBar -backIndicatorTransitionMaskImage
 member UINavigationBar -backgroundImageForBarPosition:barMetrics:
 member UINavigationBar -barPosition
 member UINavigationBar -barTintColor
@@ -32054,8 +31988,6 @@ member UINavigationBar -revenant_otherChanged
 member UINavigationBar -revenant_refreshForced:
 member UINavigationBar -revenant_standardChanged
 member UINavigationBar -scrollEdgeAppearance
-member UINavigationBar -setBackIndicatorImage:
-member UINavigationBar -setBackIndicatorTransitionMaskImage:
 member UINavigationBar -setBackgroundImage:forBarPosition:barMetrics:
 member UINavigationBar -setBarTintColor:
 member UINavigationBar -setCompactAppearance:
@@ -32149,7 +32081,6 @@ member UINotificationFeedbackGenerator -notificationOccurred:atLocation:
 member UIOpenURLContext -URL
 member UIOpenURLContext -initRevenantWithURL:options:
 member UIOpenURLContext -options
-member UIPageControl -allowsContinuousInteraction
 member UIPageControl -backgroundStyle
 member UIPageControl -currentPageIndicatorImageForPage:
 member UIPageControl -direction
@@ -32158,7 +32089,6 @@ member UIPageControl -interactionState
 member UIPageControl -preferredCurrentPageIndicatorImage
 member UIPageControl -preferredIndicatorImage
 member UIPageControl -progress
-member UIPageControl -setAllowsContinuousInteraction:
 member UIPageControl -setBackgroundStyle:
 member UIPageControl -setCurrentPageIndicatorImage:forPage:
 member UIPageControl -setDirection:
@@ -32675,7 +32605,6 @@ member UIScrollView -adjustedContentInset
 member UIScrollView -adjustedContentInsetDidChange
 member UIScrollView -allowsKeyboardScrolling
 member UIScrollView -automaticallyAdjustsScrollIndicatorInsets
-member UIScrollView -contentAlignmentPoint
 member UIScrollView -contentInsetAdjustmentBehavior
 member UIScrollView -contentLayoutGuide
 member UIScrollView -frameLayoutGuide
@@ -32690,17 +32619,12 @@ member UIScrollView -revenant_updateLayoutGuides
 member UIScrollView -scrollAnimating
 member UIScrollView -setAllowsKeyboardScrolling:
 member UIScrollView -setAutomaticallyAdjustsScrollIndicatorInsets:
-member UIScrollView -setContentAlignmentPoint:
 member UIScrollView -setContentInsetAdjustmentBehavior:
 member UIScrollView -setHorizontalScrollIndicatorInsets:
 member UIScrollView -setKeyboardDismissMode:
 member UIScrollView -setRefreshControl:
-member UIScrollView -setTransfersHorizontalScrollingToParent:
-member UIScrollView -setTransfersVerticalScrollingToParent:
 member UIScrollView -setVerticalScrollIndicatorInsets:
 member UIScrollView -stopScrollingAndZooming
-member UIScrollView -transfersHorizontalScrollingToParent
-member UIScrollView -transfersVerticalScrollingToParent
 member UIScrollView -verticalScrollIndicatorInsets
 member UIScrollView -withScrollIndicatorsShownForContentOffsetChanges:
 member UIScrollView -zoomAnimating
@@ -33201,7 +33125,6 @@ member UITableView -performBatchUpdates:completion:
 member UITableView -prefetchDataSource
 member UITableView -prefetchingEnabled
 member UITableView -reconfigureRowsAtIndexPaths:
-member UITableView -remembersLastFocusedIndexPath
 member UITableView -revenant_canHandleDropSession:
 member UITableView -revenant_dragInteractions
 member UITableView -revenant_dragPreviewParametersForRowAtIndexPath:
@@ -33230,7 +33153,6 @@ member UITableView -revenant_tellDropDelegateDidEnd:
 member UITableView -revenant_tellDropDelegateDidEnter:
 member UITableView -revenant_tellDropDelegateDidExit:
 member UITableView -sectionHeaderTopPadding
-member UITableView -sectionIndexBackgroundColor
 member UITableView -selectionFollowsFocus
 member UITableView -separatorEffect
 member UITableView -separatorInset
@@ -33244,9 +33166,7 @@ member UITableView -setEstimatedSectionFooterHeight:
 member UITableView -setEstimatedSectionHeaderHeight:
 member UITableView -setPrefetchDataSource:
 member UITableView -setPrefetchingEnabled:
-member UITableView -setRemembersLastFocusedIndexPath:
 member UITableView -setSectionHeaderTopPadding:
-member UITableView -setSectionIndexBackgroundColor:
 member UITableView -setSelectionFollowsFocus:
 member UITableView -setSeparatorEffect:
 member UITableView -setSeparatorInset:
@@ -36697,7 +36617,6 @@ type SecKeychainRef
 type SecTrustResultType
 type UIAccessibilityAssistiveTechnologyIdentifier
 type UIAccessibilityContrast
-type UIAccessibilityCustomSystemRotorType
 type UIAccessibilityHearingDeviceEar
 type UIAccessibilityNotifications
 type UIAccessibilityTextualContext
@@ -36736,7 +36655,6 @@ type UICalendarViewDecorationSize
 type UICellAccessoryDisplayedState
 type UICellAccessoryOutlineDisclosureStyle
 type UICellAccessoryPlacement
-type UICellConfigurationDragState
 type UICellConfigurationDropState
 type UICollectionLayoutListAppearance
 type UICollectionLayoutListFooterMode

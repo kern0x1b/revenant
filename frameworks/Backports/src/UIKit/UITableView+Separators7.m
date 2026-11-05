@@ -9,7 +9,6 @@ static const char RevenantTableSeparatorInsetKey;
 static const char RevenantCellSeparatorInsetKey;
 static const char RevenantTableSeparatorTakenKey;
 static const char RevenantTableSavedStyleKey;
-static const char RevenantSeparatorColorKey;
 static const char RevenantSeparatorEffectKey;
 static const char RevenantFollowsReadableKey;
 static const char RevenantSeparatorViewKey;
@@ -131,7 +130,7 @@ static const char RevenantSeparatorViewKey;
         [self addSubview:separator];
     }
     separator.frame = frame;
-    separator.color = objc_getAssociatedObject(table, &RevenantSeparatorColorKey) ?: table.separatorColor;
+    separator.color = table.separatorColor;
     separator.style = table.separatorStyle == UITableViewCellSeparatorStyleNone ? UITableViewCellSeparatorStyleSingleLine : table.separatorStyle;
     [separator setNeedsDisplay];
 }
@@ -158,16 +157,6 @@ static const char RevenantSeparatorViewKey;
     if (UIEdgeInsetsEqualToEdgeInsets(separatorInset, UIEdgeInsetsMake(0, 16, 0, 0)) && wasDefault)
         return;
     [self revenant_takeOverSeparators];
-}
-
-- (UIColor *)sectionIndexBackgroundColor
-{
-    return objc_getAssociatedObject(self, &RevenantSeparatorColorKey);
-}
-
-- (void)setSectionIndexBackgroundColor:(UIColor *)sectionIndexBackgroundColor
-{
-    objc_setAssociatedObject(self, &RevenantSeparatorColorKey, sectionIndexBackgroundColor, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (UIView *)separatorEffect

@@ -6,11 +6,9 @@ static UIColor *revenant_separator_colour(void)
     return revenant_semantic_color(RevenantSemanticColorSeparator);
 }
 
-static UIColor *revenant_multiple_selection_separator_colour(void)
+static BOOL revenant_same_insets(NSDirectionalEdgeInsets a, NSDirectionalEdgeInsets b)
 {
-    return [UIColor colorWithDynamicProvider:^UIColor *(UITraitCollection *traits) {
-        return revenant_separator_colour();
-    }];
+    return a.top == b.top && a.leading == b.leading && a.bottom == b.bottom && a.trailing == b.trailing;
 }
 
 @implementation UIListSeparatorConfiguration {
@@ -21,10 +19,7 @@ static UIColor *revenant_multiple_selection_separator_colour(void)
     NSDirectionalEdgeInsets _topInsets;
     NSDirectionalEdgeInsets _bottomInsets;
     UIColor *_color;
-    UIColor *_multipleSelectionColor;
 }
-
-@dynamic visualEffect;
 
 + (BOOL)supportsSecureCoding
 {
@@ -40,7 +35,6 @@ static UIColor *revenant_multiple_selection_separator_colour(void)
         _topInsets = UIListSeparatorAutomaticInsets;
         _bottomInsets = UIListSeparatorAutomaticInsets;
         _color = revenant_separator_colour();
-        _multipleSelectionColor = revenant_multiple_selection_separator_colour();
     }
     return self;
 }
@@ -55,8 +49,6 @@ static UIColor *revenant_multiple_selection_separator_colour(void)
 - (void)setBottomSeparatorInsets:(NSDirectionalEdgeInsets)insets { _bottomInsets = insets; }
 - (UIColor *)color { return _color; }
 - (void)setColor:(UIColor *)color { _color = color; }
-- (UIColor *)multipleSelectionColor { return _multipleSelectionColor; }
-- (void)setMultipleSelectionColor:(UIColor *)color { _multipleSelectionColor = color; }
 
 - (id)copyWithZone:(NSZone *)zone
 {
@@ -66,9 +58,6 @@ static UIColor *revenant_multiple_selection_separator_colour(void)
     copy.topSeparatorInsets = _topInsets;
     copy.bottomSeparatorInsets = _bottomInsets;
     copy.color = _color;
-    copy.multipleSelectionColor = _multipleSelectionColor;
-    if ([copy respondsToSelector:@selector(revenant_takeVisualEffectFrom:)])
-        [copy revenant_takeVisualEffectFrom:self];
     return copy;
 }
 
@@ -79,35 +68,18 @@ static UIColor *revenant_multiple_selection_separator_colour(void)
     if (![other isKindOfClass:[UIListSeparatorConfiguration class]])
         return NO;
     UIListSeparatorConfiguration *that = other;
-    if (_topVisibility != that->_topVisibility || _bottomVisibility != that->_bottomVisibility)
-        return NO;
-    const NSDirectionalEdgeInsets *top = &_topInsets, *topOther = &that->_topInsets;
-    if (top->leading != topOther->leading || top->top != topOther->top ||
-        top->bottom != topOther->bottom || top->trailing != topOther->trailing)
-        return NO;
-    const NSDirectionalEdgeInsets *bottom = &_bottomInsets, *bottomOther = &that->_bottomInsets;
-    if (bottom->leading != bottomOther->leading || bottom->top != bottomOther->top ||
-        bottom->bottom != bottomOther->bottom || bottom->trailing != bottomOther->trailing)
-        return NO;
-    if (_color != that->_color && ![_color isEqual:that->_color])
-        return NO;
-    if (_multipleSelectionColor != that->_multipleSelectionColor && ![_multipleSelectionColor isEqual:that->_multipleSelectionColor])
-        return NO;
-    if ([self respondsToSelector:@selector(revenant_visualEffectIsEqualTo:)])
-        return [self revenant_visualEffectIsEqualTo:that];
-    return YES;
+    return _topVisibility == that->_topVisibility && _bottomVisibility == that->_bottomVisibility
+        && revenant_same_insets(_topInsets, that->_topInsets) && revenant_same_insets(_bottomInsets, that->_bottomInsets)
+        && (_color == that->_color || [_color isEqual:that->_color]);
 }
 
 - (NSUInteger)hash
 {
     NSUInteger hash = (NSUInteger)_topVisibility;
     hash = hash * 31 + (NSUInteger)_bottomVisibility;
+    hash = hash * 31 + (NSUInteger)_topInsets.leading;
     hash = hash * 31 + (NSUInteger)_bottomInsets.leading;
-    hash = hash * 31 + (NSUInteger)_bottomInsets.top;
-    hash = hash * 31 + (NSUInteger)_bottomInsets.bottom;
-    hash = hash * 31 + (NSUInteger)_bottomInsets.trailing;
     hash = hash * 31 + _color.hash;
-    hash = hash * 31 + _multipleSelectionColor.hash;
     return hash;
 }
 
@@ -120,9 +92,6 @@ static UIColor *revenant_multiple_selection_separator_colour(void)
     [coder encodeObject:[NSValue valueWithBytes:&_bottomInsets objCType:@encode(NSDirectionalEdgeInsets)]
                 forKey:@"insets"];
     [coder encodeObject:_color forKey:@"color"];
-    [coder encodeObject:_multipleSelectionColor forKey:@"multiSelectColor"];
-    if ([self respondsToSelector:@selector(revenant_encodeVisualEffectWithCoder:)])
-        [self revenant_encodeVisualEffectWithCoder:coder];
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
@@ -139,11 +108,6 @@ static UIColor *revenant_multiple_selection_separator_colour(void)
         UIColor *color = [coder decodeObjectOfClass:[UIColor class] forKey:@"color"];
         if (color)
             _color = color;
-        UIColor *multiple = [coder decodeObjectOfClass:[UIColor class] forKey:@"multiSelectColor"];
-        if (multiple)
-            _multipleSelectionColor = multiple;
-        if ([self respondsToSelector:@selector(revenant_decodeVisualEffectWithCoder:)])
-            [self revenant_decodeVisualEffectWithCoder:coder];
     }
     return self;
 }

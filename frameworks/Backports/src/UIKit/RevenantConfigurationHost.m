@@ -18,6 +18,18 @@ static const char RevenantUpdateHandlerKey;
 - (void)revenant_applyConfiguration:(UIBackgroundConfiguration *)configuration inBounds:(CGRect)bounds tint:(UIColor *)tint
 {
     NSDirectionalEdgeInsets insets = configuration.backgroundInsets;
+    NSDirectionalRectEdge margined = configuration.edgesAddingLayoutMarginsToBackgroundInsets;
+    if (margined) {
+        UIEdgeInsets margins = self.superview.layoutMargins;
+        if (margined & NSDirectionalRectEdgeTop)
+            insets.top += margins.top;
+        if (margined & NSDirectionalRectEdgeLeading)
+            insets.leading += margins.left;
+        if (margined & NSDirectionalRectEdgeBottom)
+            insets.bottom += margins.bottom;
+        if (margined & NSDirectionalRectEdgeTrailing)
+            insets.trailing += margins.right;
+    }
     CGRect frame = CGRectMake(bounds.origin.x + insets.leading, bounds.origin.y + insets.top, bounds.size.width - insets.leading - insets.trailing, bounds.size.height - insets.top - insets.bottom);
     CGFloat outset = configuration.strokeWidth > 0 ? configuration.strokeOutset : 0;
     self.frame = CGRectInset(frame, -outset, -outset);

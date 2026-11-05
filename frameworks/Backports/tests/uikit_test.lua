@@ -97,7 +97,7 @@ local AREAS = {
         sources = {"RevenantWeak.m", "NSAttributedString+Attachments9.m", "NSObject+AccessibilityAssistive9.m", "NSTextContainer+Getter9.m", "UIBarButtonItemGroup+Getter9.m",
                    "UIStackView+Getter9.m", "UIEvent+Touches9.m", "UITouch+Force9.m", "UIGestureRecognizer+Presses9.m", "UIViewController+KeyCommands9.m",
                    "UIApplication+KeyCommands.m", "UIApplicationShortcutIcon+SystemImage13.m", "UIStoryboardUnwindSegueSource.m", "UIViewController+Unwind9.m",
-                   "UISearchContainerViewController.m", "UIDocument+Progress9.m", "UIImage+RightToLeft9.m", "UIView+FocusState9.m", "UILabel+Tightening9.m"},
+                   "UISearchContainerViewController.m", "UIDocument+Progress9.m", "UIImage+RightToLeft9.m", "UILabel+Tightening9.m"},
         members = {
             "-[NSAttributedString containsAttachmentsInRange:]", "-[NSObject accessibilityAssistiveTechnologyFocusedIdentifiers]",
             "-[NSTextContainer simpleRectangularTextContainer]", "-[UIBarButtonItemGroup displayingRepresentativeItem]",
@@ -114,7 +114,7 @@ local AREAS = {
             "-[UIViewController allowedChildViewControllersForUnwindingFromSource:]", "-[UIViewController unwindForSegue:towardsViewController:]",
             "@UISearchContainerViewController", "-[UISearchContainerViewController initWithSearchController:]", "-[UISearchContainerViewController searchController]",
             "-[UIDocument progress]", "-[UIImage flipsForRightToLeftLayoutDirection]", "-[UIImage imageFlippedForRightToLeftLayoutDirection]",
-            "-[UITableView remembersLastFocusedIndexPath]", "-[UICollectionView remembersLastFocusedIndexPath]", "-[UILabel allowsDefaultTighteningForTruncation]",
+            "-[UILabel allowsDefaultTighteningForTruncation]",
         },
     },
     {
@@ -217,8 +217,8 @@ local AREAS = {
         sources = {"UIImageReader.m", "UIImage+DynamicRange17.m", "UIBarButtonItemGroup+Creating16.m", "UIDocumentProperties.m", "UINavigationItem+Groups16.m",
                    "UIPageControl+Indicators14.m", "UIPageControlProgress.m", "UIViewController+ContentUnavailable17.m", "UIShape.m"},
         members = {
-            "@UIImageReaderConfiguration", "-[UIImageReaderConfiguration pixelsPerInch]", "-[UIImageReaderConfiguration preferredThumbnailSize]",
-            "-[UIImageReaderConfiguration prefersHighDynamicRange]", "-[UIImageReaderConfiguration preparesImagesForDisplay]", "@UIImageReader",
+            "@UIImageReaderConfiguration", "-[UIImageReaderConfiguration preferredThumbnailSize]",
+            "-[UIImageReaderConfiguration preparesImagesForDisplay]", "@UIImageReader",
             "+[UIImageReader readerWithConfiguration:]", "-[UIImageReader configuration]", "-[UIImageReader imageWithContentsOfFileURL:]",
             "-[UIImageReader imageWithData:]", "-[UIImageReader imageWithContentsOfFileURL:completion:]", "-[UIImageReader imageWithData:completion:]",
             "-[UIImage isHighDynamicRange]", "-[UIImage imageRestrictedToStandardDynamicRange]",
@@ -365,17 +365,6 @@ local AREAS = {
             "-[UIEditMenuInteraction presentEditMenuWithConfiguration:]", "-[UIEditMenuInteraction dismissMenu]", "-[UIEditMenuInteraction reloadVisibleMenu]",
             "-[UIEditMenuInteraction updateVisibleMenuPositionAnimated:]", "-[UIEditMenuInteraction locationInView:]",
         },
-    },
-    {
-        name = "iOS 13 font picker: the configuration and the picker",
-        sources = {"UIFontPickerViewController.m"},
-        members = {
-            "@UIFontPickerViewController", "@UIFontPickerViewControllerConfiguration", "-[UIFontPickerViewControllerConfiguration includeFaces]",
-            "-[UIFontPickerViewControllerConfiguration setIncludeFaces:]", "-[UIFontPickerViewControllerConfiguration displayUsingSystemFont]",
-            "-[UIFontPickerViewControllerConfiguration filteredTraits]", "-[UIFontPickerViewControllerConfiguration filteredLanguagesPredicate]",
-            "+[UIFontPickerViewControllerConfiguration filterPredicateForFilteredLanguages:]", "-[UIFontPickerViewController initWithConfiguration:]",
-            "-[UIFontPickerViewController configuration]", "-[UIFontPickerViewController delegate]", "-[UIFontPickerViewController setDelegate:]",
-            },
     },
     {
         name = "find interaction, find sessions and the text searching session",

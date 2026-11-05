@@ -2,20 +2,8 @@
 #import <ImageIO/ImageIO.h>
 
 @implementation UIImageReaderConfiguration {
-    BOOL _prefersHighDynamicRange;
     BOOL _preparesImagesForDisplay;
     CGSize _preferredThumbnailSize;
-    CGFloat _pixelsPerInch;
-}
-
-- (BOOL)prefersHighDynamicRange
-{
-    return _prefersHighDynamicRange;
-}
-
-- (void)setPrefersHighDynamicRange:(BOOL)prefersHighDynamicRange
-{
-    _prefersHighDynamicRange = prefersHighDynamicRange;
 }
 
 - (BOOL)preparesImagesForDisplay
@@ -38,23 +26,11 @@
     _preferredThumbnailSize = preferredThumbnailSize;
 }
 
-- (CGFloat)pixelsPerInch
-{
-    return _pixelsPerInch;
-}
-
-- (void)setPixelsPerInch:(CGFloat)pixelsPerInch
-{
-    _pixelsPerInch = pixelsPerInch;
-}
-
 - (id)copyWithZone:(NSZone *)zone
 {
     UIImageReaderConfiguration *copy = [[[self class] allocWithZone:zone] init];
-    copy->_prefersHighDynamicRange = _prefersHighDynamicRange;
     copy->_preparesImagesForDisplay = _preparesImagesForDisplay;
     copy->_preferredThumbnailSize = _preferredThumbnailSize;
-    copy->_pixelsPerInch = _pixelsPerInch;
     return copy;
 }
 

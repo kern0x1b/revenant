@@ -215,7 +215,6 @@ static NSString *const RevenantCustomKey = @"customStates";
 
 @implementation UICellConfigurationState {
 @private
-    UICellConfigurationDragState _dragState;
     UICellConfigurationDropState _dropState;
 }
 
@@ -232,7 +231,6 @@ static NSString *const RevenantCustomKey = @"customStates";
 - (id)copyWithZone:(NSZone *)zone
 {
     UICellConfigurationState *copy = [super copyWithZone:zone];
-    copy->_dragState = _dragState;
     copy->_dropState = _dropState;
     return copy;
 }
@@ -240,7 +238,6 @@ static NSString *const RevenantCustomKey = @"customStates";
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if ((self = [super initWithCoder:coder])) {
-        _dragState = (UICellConfigurationDragState)[coder decodeIntegerForKey:@"cellDragState"];
         _dropState = (UICellConfigurationDropState)[coder decodeIntegerForKey:@"cellDropState"];
     }
     return self;
@@ -249,7 +246,6 @@ static NSString *const RevenantCustomKey = @"customStates";
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];
-    [coder encodeInteger:_dragState forKey:@"cellDragState"];
     [coder encodeInteger:_dropState forKey:@"cellDropState"];
 }
 
@@ -293,16 +289,6 @@ static NSString *const RevenantCustomKey = @"customStates";
     [self revenant_setFlag:128 value:reordering];
 }
 
-- (UICellConfigurationDragState)cellDragState
-{
-    return _dragState;
-}
-
-- (void)setCellDragState:(UICellConfigurationDragState)cellDragState
-{
-    _dragState = cellDragState;
-}
-
 - (UICellConfigurationDropState)cellDropState
 {
     return _dropState;
@@ -320,12 +306,12 @@ static NSString *const RevenantCustomKey = @"customStates";
     if (![object isKindOfClass:[UICellConfigurationState class]] || ![super isEqual:object])
         return NO;
     UICellConfigurationState *other = object;
-    return ([self revenant_flags] & 240) == ([other revenant_flags] & 240) && _dragState == other->_dragState && _dropState == other->_dropState;
+    return ([self revenant_flags] & 240) == ([other revenant_flags] & 240) && _dropState == other->_dropState;
 }
 
 - (NSUInteger)hash
 {
-    return [super hash] ^ (([self revenant_flags] & 240) << 8) ^ ((NSUInteger)_dragState << 16) ^ ((NSUInteger)_dropState << 20);
+    return [super hash] ^ (([self revenant_flags] & 240) << 8) ^ ((NSUInteger)_dropState << 20);
 }
 
 - (NSString *)revenant_descriptionTail
@@ -339,10 +325,7 @@ static NSString *const RevenantCustomKey = @"customStates";
         [text appendString:@"; Swiped"];
     if ([self isReordering])
         [text appendString:@"; Reordering"];
-    static NSString *const drags[] = {nil, @"Lifting", @"Dragging"};
     static NSString *const drops[] = {nil, @"Not Targeted", @"Targeted"};
-    if (_dragState > 0 && _dragState < 3)
-        [text appendFormat:@"; cellDragState = %@", drags[_dragState]];
     if (_dropState > 0 && _dropState < 3)
         [text appendFormat:@"; cellDropState = %@", drops[_dropState]];
     return text;
