@@ -192,7 +192,9 @@ and it does not follow links.
 
 A package's key is its build hash: the platform, the architecture, its configs and the toolchain names.
 The large packages put a digest of the files that make their output into a readonly config, so the key
-changes exactly when those files do:
+changes exactly when those files do. Regenerate the digests as the last step before a commit: a digest is a
+function of its inputs at the time it runs, so an input edited afterwards (a source, a tool, or a generated list
+such as `frameworks/Backports/tools/lowered-members.txt`) leaves it stale, and `digest_test` fails. The packages that carry one:
 
 | Package | Digest config | Made from |
 | --- | --- | --- |
