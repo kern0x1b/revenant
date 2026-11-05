@@ -1,3 +1,5 @@
+import("macho")
+
 local PACKAGES = {
     Network = "network", CryptoKit = "cryptokit", RealityKit = "realitykit", RealityFoundation = "realityfoundation",
     Spatial = "spatial", CloudKit = "cloudkit", WeatherKit = "weatherkit", UniformTypeIdentifiers = "uniformtypeidentifiers",
@@ -60,4 +62,40 @@ function link_orders(backport_links, links)
         end
     end
     return orders
+end
+
+function weak_frameworks(images)
+    local names = {}
+    for _, image in ipairs(images) do
+        for index, library in ipairs(image.libraries) do
+            local name = library:match("^/System/Library/Frameworks/([^/]+)%.framework/")
+            if name and not image.library_strength[index] then
+                names[name] = true
+            end
+        end
+    end
+    return table.orderkeys(names)
+end
+
+function linked_images(target)
+    local files = {}
+    local package = target:pkg("backports")
+    if package then
+        local folder = path.join(package:installdir(), "share", "root", "usr", "lib", "revenant", "org.revenant.backports")
+        for _, name in ipairs(table.wrap(package:get("links"))) do
+            table.insert(files, path.join(folder, "lib" .. name .. ".dylib"))
+        end
+    end
+    for _, dependency in ipairs(target:orderdeps()) do
+        if dependency:name():endswith("Backports") and dependency:is_shared() then
+            table.insert(files, dependency:targetfile())
+        end
+    end
+    local images = {}
+    for _, file in ipairs(files) do
+        if os.isfile(file) then
+            table.insert(images, macho.images(macho.read(file))[1])
+        end
+    end
+    return images
 end

@@ -7,6 +7,12 @@ rule("app")
     end)
 
     before_link(function (target)
+        if #table.wrap(target:values("revenant.rebind")) > 0 then
+            local backports = import("@self.apple.backports")
+            for _, framework in ipairs(backports.weak_frameworks(backports.linked_images(target))) do
+                target:add("ldflags", "-Wl,-weak_framework," .. framework, {force = true})
+            end
+        end
         local package = target:pkg("backports")
         if not package then
             return
