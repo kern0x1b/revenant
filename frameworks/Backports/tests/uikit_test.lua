@@ -169,7 +169,7 @@ local AREAS = {
     },
     {
         name = "property-name accessors of properties with a getter=isX, from iOS 13 on",
-        sources = {"UIImage+Getter13.m", "UIStatusBarManager+Getter13.m", "UIViewController+Getter13.m", "UIWindowScene+Getter13.m", "UIButton+Getter13.m", "UIPointerInteraction+Getter13.m", "UICellAccessory+Getter14.m", "UICellConfigurationState+Getter14.m", "UICollectionView+Getter14.m", "UIControl+Getter14.m", "UIIndirectScribbleInteraction+Getter14.m", "UIPointerLockState+Getter14.m", "UIScribbleInteraction+Getter14.m", "UIViewConfigurationState+Getter14.m", "NSTextRange+Getter15.m", "NSTextSelection+Getter15.m", "UITableView+Getter15.m", "UIToolTipInteraction+Getter15.m", "NSTextList+Getter16.m", "UIBarButtonItemGroup+Getter16.m", "UIFindInteraction+Getter16.m", "UISceneWindowingBehaviors+Getter16.m", "UITextInputContext+Getter16.m", "UIContentUnavailableButtonProperties+Getter17.m", "UIContentUnavailableView+Getter17.m", "UIScrollView+Getter17.m", "UISceneSystemProtectionManager+Getter18.m", "UITab+Getter18.m", "UITabBarControllerSidebar+Getter18.m", "UIUpdateInfo+Getter18.m", "UIUpdateLink+Getter18.m", "UIWindowSceneGeometry+Getter26.m"},
+        sources = {"UIImage+Getter13.m", "UIStatusBarManager+Getter13.m", "UIViewController+Getter13.m", "UIWindowScene+Getter13.m", "UIButton+Getter13.m", "UIPointerInteraction+Getter13.m", "UICellAccessory+Getter14.m", "UICellConfigurationState+Getter14.m", "UICollectionView+Getter14.m", "UIControl+Getter14.m", "UIIndirectScribbleInteraction+Getter14.m", "UIPointerLockState+Getter14.m", "UIScribbleInteraction+Getter14.m", "UIViewConfigurationState+Getter14.m", "NSTextRange+Getter15.m", "NSTextSelection+Getter15.m", "UITableView+Getter15.m", "UIToolTipInteraction+Getter15.m", "NSTextList+Getter16.m", "UIBarButtonItemGroup+Getter16.m", "UIFindInteraction+Getter16.m", "UISceneWindowingBehaviors+Getter16.m", "UITextInputContext+Getter16.m", "UIContentUnavailableButtonProperties+Getter17.m", "UIContentUnavailableView+Getter17.m", "UIScrollView+Getter17.m", "UIWindowSceneGeometry+Getter26.m"},
         members = {
             "-[UIImage symbolImage]", "-[UIStatusBarManager statusBarHidden]", "-[UIViewController modalInPresentation]", 
             "-[UIWindowScene fullScreen]", "-[UIButton pointerInteractionEnabled]", "-[UIPointerInteraction enabled]", 
@@ -184,11 +184,7 @@ local AREAS = {
             "-[UISceneWindowingBehaviors miniaturizable]", "-[UITextInputContext dictationInputExpected]", 
             "-[UITextInputContext hardwareKeyboardInputExpected]", "-[UITextInputContext pencilInputExpected]", 
             "-[UIContentUnavailableButtonProperties enabled]", "-[UIContentUnavailableView scrollEnabled]", 
-            "-[UIScrollView scrollAnimating]", "-[UIScrollView zoomAnimating]", 
-            "-[UISceneSystemProtectionManager userAuthenticationEnabled]", "-[UITab hidden]", "-[UITab hiddenByDefault]", 
-            "-[UITabBarControllerSidebar hidden]", "-[UIUpdateInfo immediatePresentationExpected]", 
-            "-[UIUpdateInfo lowLatencyEventDispatchConfirmed]", "-[UIUpdateInfo performingLowLatencyPhases]", "-[UIUpdateLink enabled]", 
-            "-[UITab enabled]",
+            "-[UIScrollView scrollAnimating]", "-[UIScrollView zoomAnimating]",
             "-[UIWindowSceneGeometry interactivelyResizing]", "-[UIWindowSceneGeometry interfaceOrientationLocked]", 
         },
     },

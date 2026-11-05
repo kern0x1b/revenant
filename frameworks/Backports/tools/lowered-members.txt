@@ -1320,7 +1320,6 @@ class NFCReaderSession
 class NFCTagCommandConfiguration
 class NLLanguageRecognizer
 class NLTokenizer
-class NSAdaptiveImageGlyph
 class NSArray
 class NSAsynchronousFetchRequest
 class NSAsynchronousFetchResult
@@ -2181,7 +2180,6 @@ class UIAccessibilityElement
 class UIAccessibilityLocationDescriptor
 class UIAction
 class UIActivity
-class UIActivityCollaborationModeRestriction
 class UIActivityItemsConfiguration
 class UIActivityViewController
 class UIAlertAction
@@ -2203,7 +2201,6 @@ class UIButtonConfiguration
 class UICalendarSelection
 class UICalendarSelectionMultiDate
 class UICalendarSelectionSingleDate
-class UICalendarSelectionWeekOfYear
 class UICalendarView
 class UICalendarViewDecoration
 class UICanvasFeedbackGenerator
@@ -2259,8 +2256,6 @@ class UIContextMenuConfiguration
 class UIContextMenuInteraction
 class UIContextualAction
 class UIControl
-class UIConversationContext
-class UIConversationEntry
 class UICornerConfiguration
 class UICornerRadius
 class UICubicTimingParameters
@@ -2274,7 +2269,6 @@ class UIDocumentMenuViewController
 class UIDocumentPickerExtensionViewController
 class UIDocumentPickerViewController
 class UIDocumentProperties
-class UIDocumentViewControllerLaunchOptions
 class UIDragDropSession
 class UIDragInteraction
 class UIDragItem
@@ -2334,7 +2328,6 @@ class UIImageSymbolConfiguration
 class UIImageView
 class UIImpactFeedbackGenerator
 class UIIndirectScribbleInteraction
-class UIInputSuggestion
 class UIInputView
 class UIInputViewController
 class UIInterpolatingMotionEffect
@@ -2352,15 +2345,11 @@ class UIListContentTextProperties
 class UIListContentView
 class UIListSeparatorConfiguration
 class UILocalNotification
-class UIMailConversationContext
-class UIMailConversationEntry
 class UIMenu
 class UIMenuController
 class UIMenuDisplayPreferences
 class UIMenuElement
 class UIMenuSystem
-class UIMessageConversationContext
-class UIMessageConversationEntry
 class UIMotionEffect
 class UIMotionEffectGroup
 class UIMutableApplicationShortcutItem
@@ -2429,7 +2418,6 @@ class UISceneOpenURLOptions
 class UISceneSession
 class UISceneSessionActivationRequest
 class UISceneSizeRestrictions
-class UISceneSystemProtectionManager
 class UISceneWindowingBehaviors
 class UIScreen
 class UIScreenEdgePanGestureRecognizer
@@ -2441,12 +2429,10 @@ class UISearchContainerViewController
 class UISearchController
 class UISearchDisplayController
 class UISearchSuggestionItem
-class UISearchTab
 class UISearchTextField
 class UISearchToken
 class UISegmentedControl
 class UISelectionFeedbackGenerator
-class UIShadowProperties
 class UIShape
 class UIShapeResolutionContext
 class UISheetPresentationController
@@ -2455,7 +2441,6 @@ class UISimpleTextPrintFormatter
 class UISlider
 class UISliderTick
 class UISliderTrackConfiguration
-class UISmartReplySuggestion
 class UISnapBehavior
 class UISplitViewController
 class UISpringTimingParameters
@@ -2465,18 +2450,12 @@ class UIStoryboardUnwindSegueSource
 class UISwipeActionsConfiguration
 class UISwitch
 class UISymbolEffectCompletionContext
-class UITab
 class UITabBar
 class UITabBarAppearance
 class UITabBarController
-class UITabBarControllerSidebar
 class UITabBarItem
 class UITabBarItemAppearance
 class UITabBarItemStateAppearance
-class UITabGroup
-class UITabSidebarItem
-class UITabSidebarItemRequest
-class UITabSidebarScrollTarget
 class UITableView
 class UITableViewCell
 class UITableViewDiffableDataSource
@@ -2493,13 +2472,6 @@ class UITextDragPreviewRenderer
 class UITextDropProposal
 class UITextField
 class UITextFormattingCoordinator
-class UITextFormattingViewController
-class UITextFormattingViewControllerChangeValue
-class UITextFormattingViewControllerComponent
-class UITextFormattingViewControllerComponentGroup
-class UITextFormattingViewControllerConfiguration
-class UITextFormattingViewControllerFormattingDescriptor
-class UITextFormattingViewControllerFormattingStyle
 class UITextInputAssistantItem
 class UITextInputContext
 class UITextInputPasswordRules
@@ -2541,9 +2513,6 @@ class UITraitUserInterfaceIdiom
 class UITraitUserInterfaceLevel
 class UITraitUserInterfaceStyle
 class UITraitVerticalSizeClass
-class UIUpdateActionPhase
-class UIUpdateInfo
-class UIUpdateLink
 class UIUserNotificationAction
 class UIUserNotificationCategory
 class UIUserNotificationSettings
@@ -2551,7 +2520,6 @@ class UIVibrancyEffect
 class UIView
 class UIViewConfigurationState
 class UIViewController
-class UIViewControllerTransition
 class UIViewPropertyAnimator
 class UIVisualEffect
 class UIVisualEffectView
@@ -2568,13 +2536,6 @@ class UIWindowSceneGeometryPreferencesIOS
 class UIWindowScenePlacement
 class UIWindowSceneProminentPlacement
 class UIWindowSceneStandardPlacement
-class UIWritingToolsCoordinator
-class UIWritingToolsCoordinatorAnimationParameters
-class UIWritingToolsCoordinatorContext
-class UIZoomTransitionAlignmentRectContext
-class UIZoomTransitionInteractionContext
-class UIZoomTransitionOptions
-class UIZoomTransitionSourceViewProviderContext
 class UNCalendarNotificationTrigger
 class UNLocationNotificationTrigger
 class UNMutableNotificationContent
@@ -23653,8 +23614,6 @@ member NSObject -accessibilityPerformEscapeBlock
 member NSObject -accessibilityRespondsToUserInteraction
 member NSObject -accessibilityRespondsToUserInteractionBlock
 member NSObject -accessibilityShouldGroupAccessibilityChildrenBlock
-member NSObject -accessibilityTextInputResponder
-member NSObject -accessibilityTextInputResponderBlock
 member NSObject -accessibilityTextualContext
 member NSObject -accessibilityTextualContextBlock
 member NSObject -accessibilityTraitsBlock
@@ -23664,7 +23623,6 @@ member NSObject -accessibilityValueBlock
 member NSObject -accessibilityViewIsModalBlock
 member NSObject -automationElements
 member NSObject -automationElementsBlock
-member NSObject -conversationContext
 member NSObject -isAccessibilityElementBlock
 member NSObject -prepareForInterfaceBuilder
 member NSObject -registerForTraitChanges:withAction:
@@ -23710,8 +23668,6 @@ member NSObject -setAccessibilityPerformEscapeBlock:
 member NSObject -setAccessibilityRespondsToUserInteraction:
 member NSObject -setAccessibilityRespondsToUserInteractionBlock:
 member NSObject -setAccessibilityShouldGroupAccessibilityChildrenBlock:
-member NSObject -setAccessibilityTextInputResponder:
-member NSObject -setAccessibilityTextInputResponderBlock:
 member NSObject -setAccessibilityTextualContext:
 member NSObject -setAccessibilityTextualContextBlock:
 member NSObject -setAccessibilityTraitsBlock:
@@ -23721,7 +23677,6 @@ member NSObject -setAccessibilityValueBlock:
 member NSObject -setAccessibilityViewIsModalBlock:
 member NSObject -setAutomationElements:
 member NSObject -setAutomationElementsBlock:
-member NSObject -setConversationContext:
 member NSObject -setIsAccessibilityElementBlock:
 member NSObject -setSharedObservers:
 member NSObject -unregisterForTraitChanges:
@@ -32944,7 +32899,6 @@ member UISceneSizeRestrictions -minimumSize
 member UISceneSizeRestrictions -setAllowsFullScreen:
 member UISceneSizeRestrictions -setMaximumSize:
 member UISceneSizeRestrictions -setMinimumSize:
-member UISceneSystemProtectionManager -userAuthenticationEnabled
 member UISceneWindowingBehaviors -closable
 member UISceneWindowingBehaviors -isClosable
 member UISceneWindowingBehaviors -isMiniaturizable
@@ -33403,9 +33357,6 @@ member UISymbolEffectCompletionContext -finished
 member UISymbolEffectCompletionContext -initRevenantWithSender:finished:
 member UISymbolEffectCompletionContext -isFinished
 member UISymbolEffectCompletionContext -sender
-member UITab -enabled
-member UITab -hidden
-member UITab -hiddenByDefault
 member UITabBar -barStyle
 member UITabBar -barTintColor
 member UITabBar -isTranslucent
@@ -33456,7 +33407,6 @@ member UITabBarAppearance -stackedLayoutAppearance
 member UITabBarController -childViewControllerForHomeIndicatorAutoHidden
 member UITabBarController -childViewControllerForScreenEdgesDeferringSystemGestures
 member UITabBarController -unwindForSegue:towardsViewController:
-member UITabBarControllerSidebar -hidden
 member UITabBarItem -badgeColor
 member UITabBarItem -badgeTextAttributesForState:
 member UITabBarItem -initWithTitle:image:selectedImage:
@@ -33800,12 +33750,9 @@ member UITextView -setBorderStyle:
 member UITextView -setInteractionState:
 member UITextView -setLinkTextAttributes:
 member UITextView -setSelectable:
-member UITextView -setSubclassForWritingToolsCoordinator:
 member UITextView -setTextContainerInset:
 member UITextView -setTextContentType:
 member UITextView -setUsesStandardTextScaling:
-member UITextView -setWritingToolsCoordinator:
-member UITextView -subclassForWritingToolsCoordinator
 member UITextView -textContainer
 member UITextView -textContainerInset
 member UITextView -textContentType
@@ -33813,7 +33760,6 @@ member UITextView -textStorage
 member UITextView -usesStandardTextScaling
 member UITextView -willDismissEditMenuWithAnimator:
 member UITextView -willPresentEditMenuWithAnimator:
-member UITextView -writingToolsCoordinator
 member UIToolTipConfiguration +configurationWithToolTip:
 member UIToolTipConfiguration +configurationWithToolTip:inRect:
 member UIToolTipConfiguration -revenant_initWithToolTip:inRect:
@@ -34041,10 +33987,6 @@ member UITraitVerticalSizeClass +affectsColorAppearance
 member UITraitVerticalSizeClass +defaultValue
 member UITraitVerticalSizeClass +identifier
 member UITraitVerticalSizeClass +name
-member UIUpdateInfo -immediatePresentationExpected
-member UIUpdateInfo -lowLatencyEventDispatchConfirmed
-member UIUpdateInfo -performingLowLatencyPhases
-member UIUpdateLink -enabled
 member UIUserNotificationAction +supportsSecureCoding
 member UIUserNotificationAction -activationMode
 member UIUserNotificationAction -authenticationRequired
@@ -36587,7 +36529,6 @@ type AXFeatureOverrideSessionOptions
 type AXHearingDeviceEar
 type AXNumericDataAxisDescriptorScale
 type AXSettingsFeature
-type AXUITextInputReturnBlock
 type AudioComponentFlags
 type AudioComponentInstantiationOptions
 type BEEligibilityContext
