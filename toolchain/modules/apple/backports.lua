@@ -1,7 +1,8 @@
 local PACKAGES = {
     Network = "network", CryptoKit = "cryptokit", RealityKit = "realitykit", RealityFoundation = "realityfoundation",
     Spatial = "spatial", CloudKit = "cloudkit", WeatherKit = "weatherkit", UniformTypeIdentifiers = "uniformtypeidentifiers",
-    StoreKit = "storekit", AuthenticationServices = "authenticationservices"
+    StoreKit = "storekit", AuthenticationServices = "authenticationservices",
+    IOSurface = "iosurface"
 }
 
 local FOUNDATION = "backports"

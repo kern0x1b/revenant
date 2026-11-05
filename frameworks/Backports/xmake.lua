@@ -235,6 +235,14 @@ if is_plat("iphoneos") and not SELECTED then
         set_values("revenant.version", "1.0.0")
     target_end()
 
+    target("GLSyncProbe")
+        set_default(false)
+        add_rules("@addon/revenant/daemon")
+        add_files("tests/sync_probe/main.m")
+        add_frameworks("Foundation", "OpenGLES")
+        add_syslinks("objc")
+    target_end()
+
     target("BackportsQRMetadataProbe")
         set_kind("binary")
         set_default(false)
@@ -279,7 +287,7 @@ if is_plat("iphoneos") and not SELECTED then
                                   "src/UIKit/RevenantTightening.m", "src/UIKit/UITraitCollection.m", "src/UIKit/UITraitCollection+Appearance13.m",
                                   "src/UIKit/UITraitCollection+ForceTouch.m", "src/UIKit/UITraitCollection+UserInterfaceStyle.m", "src/UIKit/RevenantTraitObservers.m",
                                   "src/UIKit/UIImageConfiguration.m", "src/UIKit/UIView+TraitEnvironment.m", "src/UIKit/UIViewController+TraitEnvironment.m",
-                                  "src/UIKit/UIScreen+TraitEnvironment.m", "src/UIKit/UIColorDynamic.m", "src/UIKit/UIView+TintColor.m", "src/UIKit/UIContentSizeCategory.m", "src/Metal/*.m"}
+                                  "src/UIKit/UIScreen+TraitEnvironment.m", "src/UIKit/UIColorDynamic.m", "src/UIKit/UIView+TintColor.m", "src/UIKit/UIContentSizeCategory.m", "src/Metal/*.m", "src/Metal/*.c"}
 
     target("BackportsDeviceProbe")
         set_kind("binary")
@@ -294,6 +302,93 @@ if is_plat("iphoneos") and not SELECTED then
         set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.deviceprobe", "CFBundleDisplayName=BackportsDeviceProbe")
         set_values("revenant.control", "tests/device_probe/control")
         set_values("revenant.guarded_selectors", "modifyAnimationsWithRepeatCount:autoreverses:animations:")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
+    target("MetalDispatchProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/device_probe/dispatch_main.m", "src/Metal/*.m", "src/Metal/RevenantMetalLineEdges.c")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "OpenGLES")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.metaldispatchprobe", "CFBundleDisplayName=MetalDispatchProbe")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
+    target("MetalInstanceProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/device_probe/instance_main.m", "src/Metal/*.m", "src/Metal/RevenantMetalLineEdges.c")
+        add_mflags("-fobjc-arc")
+        add_deps("IOSurfaceBackports")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "OpenGLES", "CoreVideo")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.metalinstanceprobe", "CFBundleDisplayName=MetalInstanceProbe")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
+    target("Es2ProgramProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/device_probe/es2_main.m")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "OpenGLES")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.es2programprobe", "CFBundleDisplayName=Es2ProgramProbe")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
+    target("CVPlanesProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/device_probe/cvplanes_main.m")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "OpenGLES", "CoreVideo")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.cvplanesprobe", "CFBundleDisplayName=CVPlanesProbe")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
+    target("CVMetalProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/device_probe/cvmetal_main.m", "src/CoreVideo/CVMetalTexture80.m", "src/Metal/*.m", "src/Metal/RevenantMetalLineEdges.c")
+        add_mflags("-fobjc-arc")
+        add_deps("IOSurfaceBackports")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "OpenGLES", "CoreVideo")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.cvmetalprobe", "CFBundleDisplayName=CVMetalProbe")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
+    target("CVRenderProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/device_probe/cvrender_main.m", "src/CoreVideo/CVMetalTexture80.m", "src/Metal/*.m", "src/Metal/RevenantMetalLineEdges.c")
+        add_mflags("-fobjc-arc")
+        add_deps("IOSurfaceBackports")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "OpenGLES", "CoreVideo")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.cvrenderprobe", "CFBundleDisplayName=CVRenderProbe")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
+    target("MPSConvolveProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/device_probe/mps_convolve_main.m", "src/Metal/*.m", "src/Metal/RevenantMetalLineEdges.c", "src/MetalPerformanceShaders/*.m")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "OpenGLES")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.mpsconvolveprobe", "CFBundleDisplayName=MPSConvolveProbe")
         set_values("revenant.version", "1.0.0")
     target_end()
 
@@ -471,6 +566,13 @@ option("air2cpu", {default = false, showmenu = true,
 option("air2es", {default = false, showmenu = true,
     description = "Build air2es, the host tool that turns the AIR of a Metal render library into the OpenGL ES 2 folder (`<metallib>.es2/`) the Metal port loads. It reads LLVM IR, so it needs revenant@llvm with its libraries; the configure is not for iphoneos."})
 
+option("shader_harness", {default = false, showmenu = true,
+    description = "Build metal_shader_harness, which runs each shader of a metallib on the Mac's own Metal and its air2es GLSL on ANGLE, then compares the pixels. It needs the angle package, so REVENANT_ANGLE_CEF must name the Libraries folder of a Chromium Embedded Framework 144.0.15.0 bundle; the configure is not for iphoneos."})
+
+if not is_plat("iphoneos") and has_config("shader_harness") then
+    add_requires("revenant@angle 144.0.15.0", {alias = "angle", configs = {cef = os.getenv("REVENANT_ANGLE_CEF")}})
+end
+
 if not is_plat("iphoneos") and (has_config("air2cpu") or has_config("air2es")) then
     add_requires("revenant@llvm 23.1.3", {alias = "llvm", configs = {libraries = true}})
 end
@@ -507,6 +609,21 @@ if not is_plat("iphoneos") and has_config("air2es") then
         add_files(path.join(SRC, "air2es", "*.cpp"))
         add_packages("llvm")
         add_links("LLVM")
+    target_end()
+end
+
+if not is_plat("iphoneos") and has_config("shader_harness") then
+    target("metal_shader_harness")
+        set_kind("binary")
+        set_default(false)
+        add_files(path.join(os.scriptdir(), "tools", "shader_harness", "main.m"))
+        add_mflags("-fobjc-arc", "-Wno-deprecated-declarations")
+        add_frameworks("Foundation", "Metal")
+        add_packages("angle")
+        on_config(function (target)
+            local lib = path.join(target:pkg("angle"):installdir(), "lib")
+            target:add("defines", 'REVENANT_ANGLE_LIB="' .. lib .. '"')
+        end)
     target_end()
 end
 
@@ -666,7 +783,7 @@ if not is_plat("iphoneos") then
     
     host_tests("PassKit", {payment_network = {"PKPaymentNetworks8.m"}})
     host_tests("Intents", {message_types = {"RevenantIntents10.m", "coding/RevenantCoding.m"}, object = {"RevenantIntents120.m", "RevenantIntentsResolution.m", "coding/RevenantCoding.m"}, result = {"RevenantIntents120.m", "RevenantIntentsResolution.m", "coding/RevenantCoding.m"}}, nil, {"Foundation", "Intents"}, {defines = {"REVENANT_HOST_BUILD"}})
-    host_tests("Metal", {binary_archive = {"RevenantMetalBinaryArchive.m"}}, nil, {"Foundation", "Metal"}, {defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("Metal", {binary_archive = {"RevenantMetalBinaryArchive.m"}, line_edges = {"RevenantMetalLineEdges.c"}}, nil, {"Foundation", "Metal"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("MetalPerformanceShaders", {bilinear = {"RevenantMPSBilinear.c"}}, nil, {}, {extension = "c"})
     host_tests("CoreImage", {render_destination = {"CIRenderDestination11.m"}}, "Graphics", {"Foundation", "CoreImage", "CoreGraphics", "CoreVideo", "IOSurface", "Metal", "OpenGL"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("VideoToolbox", {conversion = {"VTCreateCGImage9_0.m", "VTConvertBiPlanar.c"}, hardware = {"VTIsHardwareDecodeSupported11_0.m"}}, nil, {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreGraphics", "Foundation"}, {defines = {"REVENANT_HOST_BUILD"}})

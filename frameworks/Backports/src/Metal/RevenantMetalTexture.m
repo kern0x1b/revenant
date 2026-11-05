@@ -10,6 +10,8 @@
 #define GL_HALF_FLOAT_LINEAR 0x8D62
 #endif
 
+static const NSUInteger RevenantMetalDepth16UnormPixelFormat = 250;
+
 typedef struct {
     GLint internal;
     GLenum format;
@@ -46,7 +48,7 @@ static BOOL formatFor(MTLPixelFormat pixelFormat, RevenantFormat *out)
     }
 }
 
-static BOOL RevenantMetalDeviceHasExtension(const char *required)
+BOOL RevenantMetalDeviceHasExtension(const char *required)
 {
     static char *extensions;
     static dispatch_once_t once;
@@ -99,6 +101,7 @@ static NSHashTable *RevenantMetalSurfaceTextures;
     GLuint _name;
     GLuint _framebuffer;
     IOSurfaceRef _iosurface;
+    CVOpenGLESTextureRef _surfaceTexture;
     uint32_t _seenSeed;
     BOOL _gpuDirty;
     BOOL _screen;
@@ -158,7 +161,7 @@ static int depthKind(MTLPixelFormat pixelFormat)
             if (kind == 2)
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_STENCIL_OES, (GLsizei)_width, (GLsizei)_height, 0, GL_DEPTH_STENCIL_OES, GL_UNSIGNED_INT_24_8_OES, NULL);
             else
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, (GLsizei)_width, (GLsizei)_height, 0, GL_DEPTH_COMPONENT, (NSUInteger)descriptor.pixelFormat == 250 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, NULL);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, (GLsizei)_width, (GLsizei)_height, 0, GL_DEPTH_COMPONENT, (NSUInteger)descriptor.pixelFormat == RevenantMetalDepth16UnormPixelFormat ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, NULL);
         }
         [device relinquish];
     }
@@ -282,6 +285,47 @@ static int depthKind(MTLPixelFormat pixelFormat)
     return self;
 }
 
++ (instancetype)revenantTextureFromImage:(CVImageBufferRef)image device:(RevenantMetalDevice *)device pixelFormat:(MTLPixelFormat)pixelFormat width:(size_t)width height:(size_t)height plane:(size_t)plane status:(CVReturn *)status
+{
+    RevenantFormat format;
+    if (!formatFor(pixelFormat, &format)) {
+        NSLog(@"Metal: pixel format %d has no OpenGL ES form for a CoreVideo texture on this backport", (int)pixelFormat);
+        *status = kCVReturnInvalidPixelFormat;
+        return nil;
+    }
+    [device acquire];
+    CVOpenGLESTextureCacheRef cache = [device textureCache];
+    CVOpenGLESTextureRef texture = NULL;
+    *status = cache ? CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, cache, image, NULL, GL_TEXTURE_2D, format.internal, (GLsizei)width, (GLsizei)height, format.format, format.type, plane, &texture) : kCVReturnError;
+    [device relinquish];
+    if (*status != kCVReturnSuccess)
+        return nil;
+    return [[self alloc] initWithOpenGLESTexture:texture pixelFormat:pixelFormat width:width height:height usage:MTLTextureUsageShaderRead | MTLTextureUsageRenderTarget];
+}
+
+- (instancetype)initWithOpenGLESTexture:(CVOpenGLESTextureRef)texture pixelFormat:(MTLPixelFormat)pixelFormat width:(NSUInteger)width height:(NSUInteger)height usage:(MTLTextureUsage)usage
+{
+    if ((self = [super init])) {
+        _surfaceTexture = texture;
+        _name = CVOpenGLESTextureGetName(texture);
+        _pixelFormat = pixelFormat;
+        _width = width;
+        _height = height;
+        _levels = 1;
+        _usage = usage;
+        _attachedLevel = NSNotFound;
+        RevenantMetalBindEpoch++;
+    } else {
+        CFRelease(texture);
+    }
+    return self;
+}
+
+- (CVOpenGLESTextureRef)revenantOpenGLESTexture
+{
+    return _surfaceTexture;
+}
+
 - (void)revenantUploadSurface
 {
     uint32_t seed = 0;
@@ -352,7 +396,14 @@ static int depthKind(MTLPixelFormat pixelFormat)
 {
     if (_iosurface)
         CFRelease(_iosurface);
-    if (!_screen && (_name || _renderbuffer)) {
+    if (_surfaceTexture) {
+        RevenantMetalDevice *device = [RevenantMetalDevice shared];
+        [device acquire];
+        if (_framebuffer)
+            glDeleteFramebuffers(1, &_framebuffer);
+        CFRelease(_surfaceTexture);
+        [device relinquish];
+    } else if (!_screen && (_name || _renderbuffer)) {
         RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
         if (_framebuffer)
@@ -562,28 +613,17 @@ static int depthKind(MTLPixelFormat pixelFormat)
     if (bytesPerRow < region.size.width * format.bytes)
         return NO;
     NSUInteger channels = format.channels;
-    NSUInteger width = region.size.width;
+    NSUInteger width = region.size.width, height = region.size.height;
     if (!channels)
         return NO;
-    if (channels == 4) {
-        RevenantMetalDevice *device = [RevenantMetalDevice shared];
-        [device acquire];
-        GLint previous;
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &previous);
-        NSUInteger attached = _attachedLevel;
-        glBindFramebuffer(GL_FRAMEBUFFER, [self framebufferAtLevel:level]);
-        glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        for (NSUInteger row = 0; row < region.size.height; row++)
-            glReadPixels((GLint)region.origin.x, (GLint)(region.origin.y + row), (GLsizei)width, 1,
-                         format.format == GL_BGRA_EXT ? GL_BGRA_EXT : GL_RGBA, GL_UNSIGNED_BYTE,
-                         (uint8_t *)pointer + row * bytesPerRow);
-        [self revenantRestoreAttachment:attached previous:previous];
-        [device relinquish];
-        return YES;
+    if (format.channel != 1) {
+        NSLog(@"Metal: getBytes of a texture of pixel format %d is refused: OpenGL ES 2.0 reads only 8-bit channels back, and this format has %lu-byte channels",
+              (int)_pixelFormat, (unsigned long)format.channel);
+        return NO;
     }
-    NSUInteger texel = format.channel * channels;
-    uint8_t *scratch = calloc(1, width * 4 * format.channel);
-    if (!scratch)
+    BOOL direct = channels == 4 && bytesPerRow == width * 4;
+    uint8_t *scratch = direct ? NULL : malloc(width * height * 4);
+    if (!direct && !scratch)
         return NO;
     RevenantMetalDevice *device = [RevenantMetalDevice shared];
     [device acquire];
@@ -592,15 +632,21 @@ static int depthKind(MTLPixelFormat pixelFormat)
     NSUInteger attached = _attachedLevel;
     glBindFramebuffer(GL_FRAMEBUFFER, [self framebufferAtLevel:level]);
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    for (NSUInteger row = 0; row < region.size.height; row++) {
-        glReadPixels((GLint)region.origin.x, (GLint)(region.origin.y + row), (GLsizei)width, 1, GL_RGBA, GL_UNSIGNED_BYTE, scratch);
-        const uint8_t *source = scratch + row * width * 4 * format.channel;
-        uint8_t *target = (uint8_t *)pointer + row * bytesPerRow;
-        memcpy(target, source, width * texel);
+    GLenum readFormat = format.format == GL_BGRA_EXT ? GL_BGRA_EXT : GL_RGBA;
+    if (direct) {
+        glReadPixels((GLint)region.origin.x, (GLint)region.origin.y, (GLsizei)width, (GLsizei)height, readFormat, GL_UNSIGNED_BYTE, pointer);
+    } else {
+        glReadPixels((GLint)region.origin.x, (GLint)region.origin.y, (GLsizei)width, (GLsizei)height, GL_RGBA, GL_UNSIGNED_BYTE, scratch);
+        for (NSUInteger row = 0; row < height; row++) {
+            const uint8_t *source = scratch + row * width * 4;
+            uint8_t *target = (uint8_t *)pointer + row * bytesPerRow;
+            for (NSUInteger x = 0; x < width; x++)
+                memcpy(target + x * channels, source + x * 4, channels);
+        }
+        free(scratch);
     }
     [self revenantRestoreAttachment:attached previous:previous];
     [device relinquish];
-    free(scratch);
     return YES;
 }
 

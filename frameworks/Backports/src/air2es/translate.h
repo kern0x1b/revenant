@@ -22,6 +22,16 @@ struct Translation {
 
 bool translateEntry(const Entry &entry, Translation &out, Refusal &refusal);
 
+bool dumpEntry(const Entry &entry, std::string &text, std::string &error);
+
+struct SamplerUse {
+    std::string entry;
+    std::string function;
+    uint64_t state = 0;
+};
+
+bool samplerStatesOf(const Entry &entry, std::vector<SamplerUse> &uses, std::string &error);
+
 std::string jsonQuote(const std::string &text);
 
 }

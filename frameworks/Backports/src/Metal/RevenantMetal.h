@@ -35,6 +35,7 @@ typedef struct {
     NSUInteger instanceStride;
     int scalar;
     int components;
+    int columns; // 0 for a vector or a scalar; the column count of a matrix, whose components are its rows
 } RevenantUniformPlan;
 
 typedef struct {
@@ -62,11 +63,17 @@ typedef struct {
     unsigned unit;
     BOOL depth;
     BOOL compare;
+    BOOL constant;
+    GLint minFilter;
+    GLint magFilter;
+    GLint wrapS;
+    GLint wrapT;
 } RevenantTexturePlan;
 
 typedef struct {
     GLint location;
     unsigned unit;
+    BOOL output;
 } RevenantSizePlan;
 
 typedef struct {
@@ -135,6 +142,9 @@ typedef struct {
 @property (nonatomic, readonly) NSUInteger height;
 - (instancetype)initWithDescriptor:(MTLTextureDescriptor *)descriptor;
 - (instancetype)initWithDescriptor:(MTLTextureDescriptor *)descriptor iosurface:(IOSurfaceRef)iosurface plane:(NSUInteger)plane;
++ (instancetype)revenantTextureFromImage:(CVImageBufferRef)image device:(RevenantMetalDevice *)device pixelFormat:(MTLPixelFormat)pixelFormat width:(size_t)width height:(size_t)height plane:(size_t)plane status:(CVReturn *)status;
+- (instancetype)initWithOpenGLESTexture:(CVOpenGLESTextureRef)texture pixelFormat:(MTLPixelFormat)pixelFormat width:(NSUInteger)width height:(NSUInteger)height usage:(MTLTextureUsage)usage;
+- (CVOpenGLESTextureRef)revenantOpenGLESTexture;
 - (instancetype)initScreenWithFramebuffer:(GLuint)framebuffer width:(NSUInteger)width height:(NSUInteger)height pixelFormat:(MTLPixelFormat)format;
 - (GLuint)renderTarget;
 @property (nonatomic, readonly) int attachmentKind;
@@ -199,6 +209,7 @@ extern const NSUInteger RevenantMetalHeapAlignment;
 @property (nonatomic, readonly) NSDictionary *fragmentReflection;
 @property (nonatomic, readonly) MTLRenderPipelineDescriptor *descriptor;
 - (instancetype)initWithDescriptor:(MTLRenderPipelineDescriptor *)descriptor error:(NSError **)error;
++ (instancetype)fullscreenWithFragment:(RevenantMetalFunction *)fragment error:(NSError **)error;
 - (GLint)locationForName:(NSString *)name;
 - (GLint)attributeForName:(NSString *)name;
 - (const RevenantPlan *)plan;
@@ -212,6 +223,9 @@ extern const NSUInteger RevenantMetalHeapAlignment;
 - (void)revenantSetThreads:(uint32_t)threads;
 - (void)revenantSetBlockBytes:(uint32_t)bytes;
 - (NSString *)kernelName;
+- (RevenantMetalFunction *)revenantTranslatedFunction;
+- (RevenantMetalPipeline *)revenantRenderPipeline;
+- (void)revenantAnnounceCPURoute;
 @end
 
 @interface RevenantMetalComputeEncoder : NSObject <MTLComputeCommandEncoder>
@@ -295,3 +309,4 @@ void RevenantIOSurfaceLayersRefresh(void);
 extern NSString *const RevenantMetalErrorDomain;
 NSError *RevenantMetalError(NSInteger code, NSString *message);
 id<CAMetalDrawable> RevenantMetalNextDrawable(CAMetalLayer *layer);
+BOOL RevenantMetalDeviceHasExtension(const char *required);

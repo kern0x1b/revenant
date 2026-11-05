@@ -1,0 +1,33 @@
+local swift = import("@addon.revenant.apple.swift", {anonymous = true})
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
+local backports = path.absolute(path.join(os.scriptdir(), ".."))
+local fixture = path.join(backports, "tests", "IOSurface", "import.swift")
+local overlay_source = path.join(backports, "src", "IOSurface", "IOSurface.swift")
+
+local function flags_for(module, runtime, sdk)
+    return swift.runtime_flags({architecture = "armv7", deployment = "6.0", sdk = sdk,
+                                resources = path.join(runtime, "lib", "swift"), module = module, optimize = "none"})
+end
+
+function main()
+    local runtime = os.getenv("REVENANT_SWIFT_RUNTIME")
+    local compiler = os.getenv("REVENANT_SWIFT_COMPILER")
+    assert(runtime and runtime ~= "", "REVENANT_SWIFT_RUNTIME is unset: run this through the swift_backports_tests target")
+    assert(compiler and compiler ~= "", "REVENANT_SWIFT_COMPILER is unset: run this through the swift_backports_tests target")
+    local sdk = workspace.sdk()
+    local out = workspace.run("backports-tests", "IOSurfaceSwift")
+    local modules = path.join(out, "modules")
+    os.mkdir(modules)
+    local emit = flags_for("IOSurface", runtime, sdk)
+    table.join2(emit, {"-emit-module", "-emit-module-path", path.join(modules, "IOSurface.swiftmodule"), overlay_source})
+    os.vrunv(compiler, emit)
+    local check = flags_for("IOSurfaceImport", runtime, sdk)
+    table.join2(check, {"-I", modules, "-typecheck", fixture})
+    os.vrunv(compiler, check)
+    local bare = flags_for("IOSurfaceImport", runtime, sdk)
+    table.join2(bare, {"-typecheck", fixture})
+    local log = path.join(out, "without-overlay.log")
+    local code = os.execv(compiler, bare, {try = true, stdout = log, stderr = log})
+    assert(code ~= 0, "the fixture typechecks without the overlay, so the test does not measure the overlay: " .. log)
+    assert(io.readfile(log):find("only available in iOS 11.0", 1, true), "the fixture fails without the overlay for another reason: " .. log)
+end

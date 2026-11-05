@@ -3,6 +3,19 @@
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 
+static RevenantMetalFunction *RevenantMetalCornerFunction(void)
+{
+    static RevenantMetalFunction *corners;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        NSString *source = @"#version 100\nattribute vec2 revenant_corner;\nvoid main() {\n    gl_Position = vec4(revenant_corner, 0.0, 1.0);\n}\n";
+        NSDictionary *attribute = @{@"name": @"revenant_corner", @"buffer": @0, @"offset": @0, @"stride": @8, @"components": @2, @"scalar": @"float"};
+        NSDictionary *reflection = @{@"usesVertexId": @NO, @"uniforms": @[], @"inputs": @[], @"attributes": @[attribute]};
+        corners = [[RevenantMetalFunction alloc] initWithName:@"revenant_corners" stage:@"vertex" source:source reflection:reflection];
+    });
+    return corners;
+}
+
 static GLuint compile(GLenum type, NSString *source, NSString **log)
 {
     GLuint shader = glCreateShader(type);
@@ -160,7 +173,7 @@ static RevenantUniformPlan *uniformPlans(RevenantMetalPipeline *pipeline, NSArra
         GLint location = [pipeline locationForName:u[@"name"]];
         if (location < 0)
             continue;
-        plans[n++] = (RevenantUniformPlan){location, (unsigned)[u[@"buffer"] unsignedIntegerValue], [u[@"offset"] unsignedIntegerValue], [u[@"instanceStride"] unsignedIntegerValue], scalarKind(u[@"scalar"]), [u[@"components"] intValue]};
+        plans[n++] = (RevenantUniformPlan){location, (unsigned)[u[@"buffer"] unsignedIntegerValue], [u[@"offset"] unsignedIntegerValue], [u[@"instanceStride"] unsignedIntegerValue], scalarKind(u[@"scalar"]), [u[@"components"] intValue], [u[@"columns"] intValue]};
     }
     *count = n;
     return plans;
@@ -309,15 +322,25 @@ static NSMutableDictionary *programs(void)
     _plan.textures = calloc(textures.count ? textures.count : 1, sizeof(RevenantTexturePlan));
     for (NSDictionary *t in textures) {
         GLint location = [self locationForName:t[@"name"]];
-        if (location >= 0)
-            _plan.textures[_plan.textureCount++] = (RevenantTexturePlan){location, (unsigned)[t[@"index"] unsignedIntegerValue], [t[@"depth"] boolValue], [t[@"compare"] boolValue]};
+        if (location < 0)
+            continue;
+        RevenantTexturePlan texture = {location, (unsigned)[t[@"index"] unsignedIntegerValue], [t[@"depth"] boolValue], [t[@"compare"] boolValue]};
+        NSDictionary *sampler = t[@"sampler"];
+        if (sampler) {
+            texture.constant = YES;
+            texture.minFilter = [sampler[@"minFilter"] isEqualToString:@"linear"] ? GL_LINEAR : GL_NEAREST;
+            texture.magFilter = [sampler[@"magFilter"] isEqualToString:@"linear"] ? GL_LINEAR : GL_NEAREST;
+            texture.wrapS = [sampler[@"wrapS"] isEqualToString:@"repeat"] ? GL_REPEAT : GL_CLAMP_TO_EDGE;
+            texture.wrapT = [sampler[@"wrapT"] isEqualToString:@"repeat"] ? GL_REPEAT : GL_CLAMP_TO_EDGE;
+        }
+        _plan.textures[_plan.textureCount++] = texture;
     }
     NSArray *sizes = _fragmentReflection[@"sizes"];
     _plan.sizes = calloc(sizes.count ? sizes.count : 1, sizeof(RevenantSizePlan));
     for (NSDictionary *size in sizes) {
         GLint location = [self locationForName:size[@"name"]];
         if (location >= 0)
-            _plan.sizes[_plan.sizeCount++] = (RevenantSizePlan){location, (unsigned)[size[@"texture"] unsignedIntegerValue]};
+            _plan.sizes[_plan.sizeCount++] = (RevenantSizePlan){location, (unsigned)[size[@"texture"] unsignedIntegerValue], [size[@"output"] boolValue]};
     }
     for (NSNumber *o in _fragmentReflection[@"outputs"]) {
         if (_plan.outputCount < 4 && o.unsignedIntValue < 4)
@@ -437,6 +460,15 @@ static NSMutableDictionary *programs(void)
 - (id<MTLDevice>)device
 {
     return [RevenantMetalDevice shared];
+}
+
++ (instancetype)fullscreenWithFragment:(RevenantMetalFunction *)fragment error:(NSError **)error
+{
+    MTLRenderPipelineDescriptor *descriptor = [[MTLRenderPipelineDescriptor alloc] init];
+    descriptor.vertexFunction = RevenantMetalCornerFunction();
+    descriptor.fragmentFunction = fragment;
+    descriptor.colorAttachments[0].writeMask = MTLColorWriteMaskAll;
+    return [[RevenantMetalPipeline alloc] initWithDescriptor:descriptor error:error];
 }
 
 @end
