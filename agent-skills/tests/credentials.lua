@@ -51,7 +51,7 @@ function leaked_paths(file, dir)
             secrets[#secrets + 1] = login[key]
         end
     end
-    local body = os.iorunv("/bin/sh", {"-c", 'find "$0" \\( -type f -o -type l \\) -print 2>/dev/null; true', dir})
+    local body = os.iorunv("/bin/sh", {"-c", 'find "$0" \\( -type f -o -type l \\) -print', dir})
     local paths = {}
     for path in string.gmatch(body, "[^\n]+") do
         paths[#paths + 1] = path
