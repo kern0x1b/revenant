@@ -29654,10 +29654,8 @@ member UIActivityItemsConfiguration -setPerItemMetadataProvider:
 member UIActivityItemsConfiguration -setPreviewProvider:
 member UIActivityItemsConfiguration -setSupportedInteractions:
 member UIActivityItemsConfiguration -supportedInteractions
-member UIActivityViewController -allowsProminentActivity
 member UIActivityViewController -completionWithItemsHandler
 member UIActivityViewController -initWithActivityItemsConfiguration:
-member UIActivityViewController -setAllowsProminentActivity:
 member UIActivityViewController -setCompletionWithItemsHandler:
 member UIAlertAction +actionWithTitle:style:handler:
 member UIAlertAction -copyWithZone:
@@ -29871,7 +29869,6 @@ member UIBarAppearance -shadowImage
 member UIBarButtonItem +fixedSpaceItemOfWidth:
 member UIBarButtonItem +flexibleSpaceItem
 member UIBarButtonItem -buttonGroup
-member UIBarButtonItem -changesSelectionAsPrimaryAction
 member UIBarButtonItem -creatingFixedGroup
 member UIBarButtonItem -creatingMovableGroupWithCustomizationIdentifier:
 member UIBarButtonItem -creatingOptionalGroupWithCustomizationIdentifier:inDefaultCustomization:
@@ -29888,7 +29885,6 @@ member UIBarButtonItem -menuRepresentation
 member UIBarButtonItem -preferredMenuElementOrder
 member UIBarButtonItem -primaryAction
 member UIBarButtonItem -revenant_setButtonGroup:
-member UIBarButtonItem -setChangesSelectionAsPrimaryAction:
 member UIBarButtonItem -setMenu:
 member UIBarButtonItem -setMenuRepresentation:
 member UIBarButtonItem -setPreferredMenuElementOrder:
@@ -30311,8 +30307,6 @@ member UICollectionLayoutListConfiguration -showsSeparators
 member UICollectionLayoutListConfiguration -trailingSwipeActionsConfigurationProvider
 member UICollectionReusableView -preferredLayoutAttributesFittingAttributes:
 member UICollectionView +load
-member UICollectionView -allowsFocus
-member UICollectionView -allowsFocusDuringEditing
 member UICollectionView -allowsMultipleSelectionDuringEditing
 member UICollectionView -allowsSelectionDuringEditing
 member UICollectionView -beginInteractiveMovementForItemAtIndexPath:
@@ -30369,8 +30363,6 @@ member UICollectionView -revenant_tellDropDelegateDidEnd:
 member UICollectionView -revenant_tellDropDelegateDidEnter:
 member UICollectionView -revenant_tellDropDelegateDidExit:
 member UICollectionView -selectionFollowsFocus
-member UICollectionView -setAllowsFocus:
-member UICollectionView -setAllowsFocusDuringEditing:
 member UICollectionView -setAllowsMultipleSelectionDuringEditing:
 member UICollectionView -setAllowsSelectionDuringEditing:
 member UICollectionView -setCollectionViewLayout:animated:completion:
@@ -31008,9 +31000,7 @@ member UICubicTimingParameters -timingCurveType
 member UICubicTimingParameters -timingFunction
 member UIDatePicker -datePickerStyle
 member UIDatePicker -preferredDatePickerStyle
-member UIDatePicker -roundsToMinuteInterval
 member UIDatePicker -setPreferredDatePickerStyle:
-member UIDatePicker -setRoundsToMinuteInterval:
 member UIDeferredMenuElement +elementWithProvider:
 member UIDeferredMenuElement +elementWithUncachedProvider:
 member UIDeferredMenuElement +supportsSecureCoding
@@ -32665,10 +32655,8 @@ member UIPreviewTarget -initWithContainer:center:transform:
 member UIPreviewTarget -isEqual:
 member UIPreviewTarget -transform
 member UIPrintInteractionController -setShowsNumberOfCopies:
-member UIPrintInteractionController -setShowsPaperOrientation:
 member UIPrintInteractionController -setShowsPaperSelectionForLoadedPapers:
 member UIPrintInteractionController -showsNumberOfCopies
-member UIPrintInteractionController -showsPaperOrientation
 member UIPrintInteractionController -showsPaperSelectionForLoadedPapers
 member UIPrintPageRenderer -currentRenderingQualityForRequestedRenderingQuality:
 member UIPrintServiceExtension -printerDestinationsForPrintInfo:
@@ -33428,8 +33416,6 @@ member UITabBarItemStateAppearance -setTitlePositionAdjustment:
 member UITabBarItemStateAppearance -setTitleTextAttributes:
 member UITabBarItemStateAppearance -titlePositionAdjustment
 member UITabBarItemStateAppearance -titleTextAttributes
-member UITableView -allowsFocus
-member UITableView -allowsFocusDuringEditing
 member UITableView -cellLayoutMarginsFollowReadableWidth
 member UITableView -contextMenuInteraction
 member UITableView -dragDelegate
@@ -33481,8 +33467,6 @@ member UITableView -selectionFollowsFocus
 member UITableView -separatorEffect
 member UITableView -separatorInset
 member UITableView -separatorInsetReference
-member UITableView -setAllowsFocus:
-member UITableView -setAllowsFocusDuringEditing:
 member UITableView -setCellLayoutMarginsFollowReadableWidth:
 member UITableView -setDragDelegate:
 member UITableView -setDragInteractionEnabled:
@@ -34343,7 +34327,6 @@ member UIWebView -setGapBetweenPages:
 member UIWebView -setPageLength:
 member UIWebView -setPaginationBreakingMode:
 member UIWebView -setPaginationMode:
-member UIWindow -canBecomeKeyWindow
 member UIWindow -initWithWindowScene:
 member UIWindow -safeAreaAspectFitLayoutGuide
 member UIWindow -setWindowScene:

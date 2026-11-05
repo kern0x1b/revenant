@@ -89,6 +89,11 @@
     return [UIScreen mainScreen];
 }
 
+- (UIFocusSystem *)focusSystem
+{
+    return nil;
+}
+
 - (UIInterfaceOrientation)interfaceOrientation
 {
     return [UIApplication sharedApplication].statusBarOrientation;
