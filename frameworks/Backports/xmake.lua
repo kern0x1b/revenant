@@ -129,6 +129,26 @@ if is_plat("iphoneos") then
                     end
                 end)
             end
+            if library.name == "TLSBackports" then
+                after_build(function (target)
+                    local file = target:targetfile()
+                    for line in os.iorunv("nm", {"-gU", file}):gmatch("[^\n]+") do
+                        local name = line:match("(%S+)$") or ""
+                        if name:find("^__Z") or name:find("^___?cxa_") then
+                            raise("%s exports %s: the C++ runtime is linked into it hidden, so no runtime name may be exported", file, name)
+                        end
+                    end
+                    for line in os.iorunv("nm", {"-u", file}):gmatch("[^\n]+") do
+                        local name = line:match("(%S+)$") or ""
+                        if name:find("^__Z") or name:find("^___?cxa_") then
+                            raise("%s still imports %s from the C++ runtime; the hidden link should have resolved it", file, name)
+                        end
+                    end
+                    if os.iorunv("otool", {"-L", file}):find("libc++", 1, true) then
+                        raise("%s still depends on libc++, a second copy of the runtime beside the host's", file)
+                    end
+                end)
+            end
             if library.name == "PhotosBackports" then
                 after_build(function (target)
                     local load = os.iorunv("otool", {"-l", target:targetfile()})
@@ -150,6 +170,8 @@ if is_plat("iphoneos") then
             for _, name in ipairs(library.archives) do
                 if backports_is_target(name) then
                     add_deps(name)
+                elseif library.name == "TLSBackports" and name == "boringssl" then
+                    add_packages(name, {links = {"ssl", "crypto"}})
                 else
                     add_packages(name)
                 end
@@ -185,6 +207,13 @@ if is_plat("iphoneos") then
                               table.concat(table.wrap(target:get("packages")), ","))
                     end
                     target:add("cflags", "-I" .. boringssl:installdir() .. "/include")
+                    local listed = path.join(boringssl:installdir(), "share", "revenant", "runtime-archives")
+                    if not os.isfile(listed) then
+                        raise("%s is missing: the BoringSSL package did not record the C++ runtime archives it needs", listed)
+                    end
+                    for archive in io.readfile(listed):gmatch("[^\n]+") do
+                        target:add("shflags", "-Wl,-load_hidden," .. archive, {force = true})
+                    end
                 end)
             end
     end

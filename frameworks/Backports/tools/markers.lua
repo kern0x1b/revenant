@@ -307,12 +307,45 @@ local function scan_masked(m)
     return defs
 end
 
+local function object_macros(text)
+    local found = {}
+    for name, body in string.gmatch(text, "#[ \t]*define[ \t]+([%a_][%w_]*)[ \t]+([^\n]*)") do
+        body = (string.gsub(body, "//.*$", ""))
+        body = (string.gsub(body, "^%s+", ""))
+        body = (string.gsub(body, "%s+$", ""))
+        local attributes = string.find(body, "__attribute__", 1, true) ~= nil
+            and not string.find((string.gsub(body, "__attribute__%s*%b()", "")), "%S")
+        found[name] = {body = body, attributes = attributes}
+    end
+    return found
+end
+
+local function expand_attribute_macros(code, objects)
+    for name, macro in pairs(objects) do
+        if macro.attributes then
+            code = string.gsub(code, "%f[%w_]" .. name .. "%f[^%w_]", blank)
+        end
+    end
+    return code
+end
+
+local function macro_in_type(type, objects)
+    for word in string.gmatch(type, "[%a_][%w_]*") do
+        local macro = objects[word]
+        if macro ~= nil and not macro.attributes then
+            return word
+        end
+    end
+    return nil
+end
+
 function scan(text)
-    return scan_masked(strip_attributes(mask(text, true)))
+    return scan_masked(strip_attributes(expand_attribute_macros(mask(text, true), object_macros(text))))
 end
 
 local function macros(text)
     local found = {}
+    local objects = object_macros(text)
     local pos = 1
     while true do
         local s, e, name, params = string.find(text, "#[ \t]*define[ \t]+([%a_][%w_]*)%(([^%)]*)%)", pos)
@@ -340,7 +373,7 @@ local function macros(text)
                 table.insert(names, param)
             end
             local body = string.sub(text, e + 1, bend)
-            local defs = scan_masked(strip_attributes(mask(body, false)))
+            local defs = scan_masked(strip_attributes(expand_attribute_macros(mask(body, false), objects)))
             table.insert(found, {name = name, params = names, first = e + 1, defs = defs})
         end
         pos = e + 1
@@ -483,7 +516,8 @@ end
 function forward_declarations(text)
     local code = mask(text, true)
     local names = marked(code)
-    local defs = scan_masked(strip_attributes(same_length_names(code)))
+    local objects = object_macros(text)
+    local defs = scan_masked(strip_attributes(expand_attribute_macros(same_length_names(code), objects)))
     local edits, missing, done = {}, {}, {}
     for _, def in ipairs(defs) do
         if def.kind == "global" and names[def.name] and not done[def.name] and not declared(text, def.name) then
@@ -503,6 +537,8 @@ function forward_declarations(text)
             if use then
                 if def.type == nil then
                     table.insert(missing, {name = def.name, line = line_of(text, def.first), reason = "its declaration has several declarators"})
+                elseif macro_in_type(def.type, objects) then
+                    table.insert(missing, {name = def.name, line = line_of(text, def.first), reason = "its declaration starts with the macro " .. macro_in_type(def.type, objects) .. ", whose body is not attributes alone"})
                 else
                     local start = item_start(code, use)
                     local decl = "extern " .. def.type .. " __revenant_fb_" .. def.name .. (def.array and "[]" or "") .. ";"
@@ -576,10 +612,15 @@ end
 function marked_definitions(text)
     local names = marked(text)
     local unmarked = (string.gsub(text, "BACKPORT_IMPL%(%s*([%a_][%w_]*)%s*%)", "%1"))
+    local objects = object_macros(text)
     local found = {}
     local function take(defs)
         for _, def in ipairs(defs) do
             if names[def.name] and found[def.name] == nil then
+                local macro = def.type and macro_in_type(def.type, objects)
+                if macro then
+                    raise("%s: its declaration starts with the macro %s, whose body is not attributes alone, so its type cannot be read from the declaration", def.name, macro)
+                end
                 found[def.name] = {kind = def.kind, type = def.type, array = def.array}
             end
         end
