@@ -396,6 +396,13 @@ local AREAS = {
         },
     },
     {
+        name = "self sizing of the input view, which react-native-keyboard-controller sets on iOS 9 and later",
+        sources = {"UIInputView+Style7.m"},
+        members = {
+            "-[UIInputView allowsSelfSizing]", "-[UIInputView setAllowsSelfSizing:]",
+        },
+    },
+    {
         name = "find in page on WKWebView: the find interaction and the page search session",
         library = "WebKit",
         sources = {"WKWebView.m", "RevenantWebFind.m"},

@@ -31563,8 +31563,10 @@ member UIIndirectScribbleInteraction -initWithDelegate:
 member UIIndirectScribbleInteraction -isHandlingWriting
 member UIIndirectScribbleInteraction -view
 member UIIndirectScribbleInteraction -willMoveToView:
+member UIInputView -allowsSelfSizing
 member UIInputView -initWithFrame:inputViewStyle:
 member UIInputView -inputViewStyle
+member UIInputView -setAllowsSelfSizing:
 member UIInputViewController -dismissKeyboard
 member UIInputViewController -hasFullAccess
 member UIInputViewController -inputView
