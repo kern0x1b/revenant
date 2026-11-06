@@ -93,6 +93,21 @@ local MEMBERS = {
         },
     },
     {
+        member = "NSURLSessionWebSocketMessage",
+        header = {
+            name = "Foundation",
+            directory = {"System", "Library", "Frameworks", "Foundation.framework", "Headers"},
+            file = "NSURLSession.h",
+            find = "@interface NSURLSessionWebSocketMessage : NSObject",
+            replace = "__attribute__((weak_import))\n@interface NSURLSessionWebSocketMessage : NSObject",
+        },
+        overlay = {
+            file = {"stdlib", "public", "Darwin", "Foundation", "URLSession.swift"},
+            find = "@available(...)\nextension URLSessionWebSocketTask {",
+            replace = "extension URLSessionWebSocketTask {",
+        },
+    },
+    {
         member = "kCFISO8601DateFormatWithFractionalSeconds",
         header = {
             name = "CoreFoundation",

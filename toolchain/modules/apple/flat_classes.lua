@@ -24,7 +24,7 @@ local STUBBED = {
     },
 }
 
-local EXPORTED = {NSDimension = true, NSISO8601DateFormatter = true, NSMeasurement = true, NSURLComponents = true, NSURLQueryItem = true, UIPointerEffect = true, UIPointerShape = true, UIPointerStyle = true}
+local EXPORTED = {NSDimension = true, NSISO8601DateFormatter = true, NSMeasurement = true, NSURLComponents = true, NSURLQueryItem = true, NSURLSessionWebSocketMessage = true, UIPointerEffect = true, UIPointerShape = true, UIPointerStyle = true}
 
 local function symbol_of(entry, name)
     if entry.functions then

@@ -25,6 +25,10 @@ function main()
     assert(interface:find("@interface NSURLComponents", 1, true) and not interface:find("ios(7.0), watchos(2.0), tvos(9.0))\n@interface NSURLComponents", 1, true), "NSURLComponents keeps its iOS 7 gate: its alias exports the class, so the reference is strong and the gate is lowered")
     local iso = io.readfile(path.join(frameworks, "Foundation.framework", "Headers", "NSISO8601DateFormatter.h"))
     assert(iso:find("__attribute__((weak_import))\n@interface NSISO8601DateFormatter", 1, true) and not iso:find("ios(10.0", 1, true), "NSISO8601DateFormatter keeps its iOS 10 gate or loses its weak import: libswiftFoundation imports the class weakly, so a strong lowered reference would fail to load where no provider exports it")
+    local session = io.readfile(path.join(frameworks, "Foundation.framework", "Headers", "NSURLSession.h"))
+    local message = session:find("@interface NSURLSessionWebSocketMessage", 1, true)
+    local before = message and session:sub(math.max(message - 200, 1), message - 1) or ""
+    assert(message and before:find("__attribute__((weak_import))\n", 1, true) and not before:find("ios(13.0", 1, true), "NSURLSessionWebSocketMessage keeps its iOS 13 gate or loses its weak import: the Foundation overlay creates it in an extension of URLSessionWebSocketTask that the lowering opens to the deployment target, and libswiftFoundation imports the class weakly")
     local activity = io.readfile(path.join(frameworks, "Foundation.framework", "Headers", "NSUserActivity.h"))
     assert(activity:find("\n\n@interface NSUserActivity : NSObject\n", 1, true), "NSUserActivity keeps its iOS 8 gate: Swift at deployment target 6.0 cannot name the class, and the Spotlight extension of AppIntents needs it")
     for _, declaration in ipairs({"@property (nullable, copy) NSURL *referrerURL ;", "@property (nullable, copy) NSString* targetContentIdentifier ;", "@property (copy, nullable) NSUserActivityPersistentIdentifier persistentIdentifier"}) do
