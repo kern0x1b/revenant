@@ -103,8 +103,7 @@ static void revenant_pass_on(NSProgress *parent, SEL selector)
 + (void)load
 {
     Class progress = [NSProgress class];
-    BOOL ours = NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_6_0;
-    if (!ours && [NSProgress instancesRespondToSelector:@selector(addChild:withPendingUnitCount:)])
+    if ([NSProgress instancesRespondToSelector:@selector(addChild:withPendingUnitCount:)])
         return;
     for (NSValue *value in @[[NSValue valueWithPointer:@selector(cancel)], [NSValue valueWithPointer:@selector(pause)]]) {
         SEL selector = [value pointerValue];

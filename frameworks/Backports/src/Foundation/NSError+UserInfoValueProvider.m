@@ -79,18 +79,25 @@ static id revenant_provided(NSError *error, NSErrorUserInfoKey key)
 
 @end
 
+static NSErrorUserInfoKey revenant_user_info_key(NSString *name)
+{
+    if ([name isEqualToString:@"localizedDescription"])
+        return NSLocalizedDescriptionKey;
+    if ([name isEqualToString:@"localizedFailureReason"])
+        return NSLocalizedFailureReasonErrorKey;
+    if ([name isEqualToString:@"localizedRecoverySuggestion"])
+        return NSLocalizedRecoverySuggestionErrorKey;
+    if ([name isEqualToString:@"localizedRecoveryOptions"])
+        return NSLocalizedRecoveryOptionsErrorKey;
+    if ([name isEqualToString:@"recoveryAttempter"])
+        return NSRecoveryAttempterErrorKey;
+    return NSHelpAnchorErrorKey;
+}
+
 void revenant_install_user_info_value_provider(Class cls)
 {
-    NSDictionary *keys = @{
-        @"localizedDescription": NSLocalizedDescriptionKey,
-        @"localizedFailureReason": NSLocalizedFailureReasonErrorKey,
-        @"localizedRecoverySuggestion": NSLocalizedRecoverySuggestionErrorKey,
-        @"localizedRecoveryOptions": NSLocalizedRecoveryOptionsErrorKey,
-        @"recoveryAttempter": NSRecoveryAttempterErrorKey,
-        @"helpAnchor": NSHelpAnchorErrorKey,
-    };
-    for (NSString *name in keys) {
-        NSErrorUserInfoKey key = keys[name];
+    NSArray *names = @[@"localizedDescription", @"localizedFailureReason", @"localizedRecoverySuggestion", @"localizedRecoveryOptions", @"recoveryAttempter", @"helpAnchor"];
+    for (NSString *name in names) {
         SEL selector = NSSelectorFromString(name);
         Method method = class_getInstanceMethod(cls, selector);
         if (!method)
@@ -98,14 +105,17 @@ void revenant_install_user_info_value_provider(Class cls)
         id (*original)(id, SEL) = (id (*)(id, SEL))method_getImplementation(method);
         BOOL description = [name isEqualToString:@"localizedDescription"];
         class_replaceMethod(cls, selector, imp_implementationWithBlock(^id(NSError *self_) {
-            id value = revenant_provided(self_, key);
+            id value = revenant_provided(self_, revenant_user_info_key(name));
             if (value)
                 return value;
-            if (description && ![self_.userInfo objectForKey:NSLocalizedFailureReasonErrorKey]) {
-                NSString *reason = revenant_provided(self_, NSLocalizedFailureReasonErrorKey);
-                if (reason) {
-                    NSError *composed = [NSError errorWithDomain:self_.domain code:self_.code userInfo:@{NSLocalizedFailureReasonErrorKey: reason}];
-                    return original(composed, selector);
+            if (description) {
+                NSErrorUserInfoKey failureKey = revenant_user_info_key(@"localizedFailureReason");
+                if (![self_.userInfo objectForKey:failureKey]) {
+                    NSString *reason = revenant_provided(self_, failureKey);
+                    if (reason) {
+                        NSError *composed = [NSError errorWithDomain:self_.domain code:self_.code userInfo:@{failureKey: reason}];
+                        return original(composed, selector);
+                    }
                 }
             }
             return original(self_, selector);
