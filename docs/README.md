@@ -13,12 +13,19 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Vision text recognition on iOS 6](explanation/backports/vision-text.md) | `VNRecognizeTextRequest` on Tesseract: the languages, the differences from Vision, the measurements, and the packaging |
 | [Open Backports members](explanation/backports-open-members.md) | the larger framework members that remain open |
 | [Backports gaps](explanation/backports-gaps.md) | the implemented members that do not do what the real API does, by Telegram use and size |
+| [Photos over AssetsLibrary](explanation/backports/photos-over-assetslibrary.md) | Telegram 13.0.0's Photos use against the AssetsLibrary-backed backport, and the status of each gap |
+| [The Network framework surface Telegram 13.0.0 uses](explanation/backports/network-framework-surface.md) | the `Network` members Telegram calls, what the backport must answer, and why Reachability cannot find `NWPathMonitor` yet |
 | [What iOS 6.1.3 can reach over TLS](explanation/backports/tls-reach-ios-6.md) | the firmware's SecureTransport versions and ciphers, the hosts it reaches, and the proposed BoringSSL fix |
-| [Metal on iOS 6](explanation/backports/metal-on-ios6.md) | the Metal render path that ships in v1 through air2es, the compute backlog for v2, the device findings, and the licence rules for both |
+| [Metal on iOS 6](explanation/backports/metal-on-ios6.md) | the Metal render path and the fragment-pass compute that ship in v1 through air2es, the driver-level backlog for v2, the device findings, and the licence rules for both |
 | [Nested frameworks in the lowered overlay](explanation/backports/lowered-nested-frameworks.md) | why the overlay copies the headers of a framework nested in a mapped framework, such as MPSCore in MetalPerformanceShaders |
+| [AIR from Apple's Metal compiler: the metal-toolchain package](explanation/backports/metal-air-prebuilt.md) | the local package that would give AIR for Telegram's shaders, the official download it needs, and what it is blocked on (Xcode) |
+| [air2es kernels: the kernel lowering](explanation/backports/air2es-kernels.md) | how a Metal kernel becomes an ES 1.00 fragment pass, its named refusals, the measured Telegram kernel, and what is still open |
+| [air2es on iOS Metal sources: per-shader verdicts](explanation/backports/air2es-ios-verdicts.md) | the verdict for each entry point of the measured Metal corpus, the changes measured against it, and the refusal groups still open |
+| [enhanceGenerateLUT on ES 2: design](explanation/backports/air2es-enhance-lut-design.md) | how the Telegram enhance kernel that builds the contrast LUT could be expressed as ES 2 passes, what was measured, what is only planned, and why it stays refused until the owner decides |
 | [Metal v2: the GPU-driver reverse-engineering landscape](explanation/backports/metal-v2-driver-re-landscape.md) | the methods of Asahi, Mesa, Vita3K and related projects, read for method, and what they change for the SGX543 driver question |
 | [The Network framework surface Telegram uses](explanation/backports/network-framework-surface.md) | the Network framework members Telegram 13.0.0 calls and where the backport stands |
 | [Photos over AssetsLibrary](explanation/backports/photos-over-assetslibrary.md) | Telegram's use of Photos and where the backport stands |
+| [Below the driver: the SGX543 GL path on the iPhone 4S](explanation/backports/below-the-driver.md) | the stack from glDrawElements to the kernel, the in-process shader compiler, whether Apple's compiled shaders are reachable, and the ranked options below the driver |
 | [From a clean clone](guides/getting-started.md) | the steps from a clone to a green test run and a built Backports library |
 | [The machine: one cache, one clean](guides/machine.md) | where the build keeps its cache, and how to give it back |
 | [Prebuilt packages](guides/prebuilt.md) | packages built elsewhere, and how to use them |
@@ -163,6 +170,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [TipKit: reuse](reference/backports/TipKit/TipKit/Reuse.md) | what TipKit was compared against, and why |
 | [UIKit](reference/backports/UIKit/README.md) | the UIKit Swift overlay: the surface's Swift constants and cases |
 | [UIKit: CASpringAnimation](reference/backports/UIKit/CASpringAnimation.md) | the iOS 9 spring class on iOS 6, its curve and its keyframe delivery |
+| [UIKit: UICornerConfiguration](reference/backports/UIKit/CornerConfiguration.md) | per-corner radii, concentric corners and how a view is clipped to them on iOS 6 |
 | [WeatherKit: CompassDirection](reference/backports/WeatherKit/CompassDirection.md) | `Wind.CompassDirection`, measured |
 | [WeatherKit: WeatherCondition](reference/backports/WeatherKit/WeatherCondition.md) | `WeatherCondition`, measured |
 | [WidgetKit](reference/backports/WidgetKit/README.md) | the package `revenant@widgetkit` |

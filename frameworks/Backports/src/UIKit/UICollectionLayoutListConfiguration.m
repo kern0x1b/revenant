@@ -184,6 +184,8 @@ static const CGFloat RevenantListRowEstimate = 44;
         side = 12.987012987012987;
     } else if (sidebarPlain)
         side = 12.987012987012987;
+    if (configuration.headerTopPadding != CGFLOAT_MAX)
+        top = configuration.headerTopPadding;
     section.contentInsets = NSDirectionalEdgeInsetsMake(top, side, bottom, side);
     section.contentInsetsReference = UIContentInsetsReferenceNone;
     BOOL pinned = plain || sidebarPlain;

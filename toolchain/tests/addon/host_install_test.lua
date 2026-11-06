@@ -36,6 +36,16 @@ function failures(opt)
        table.concat(install.change_arguments(mapkit, install.backports_libraries()), " ") ~= "-change /usr/lib/revenant/org.revenant.backports/libMapKitBackports.dylib @executable_path/Frameworks/libMapKitBackports.dylib" then
         table.insert(found, "the MapKit backports library is packed and retargeted with the host")
     end
+    local folder = path.join(os.tmpdir(), "host-install-libraries")
+    os.tryrm(folder)
+    os.mkdir(folder)
+    for _, name in ipairs({"libTLSBackports.dylib", "libMapKitBackports.dylib", "README.txt"}) do
+        io.writefile(path.join(folder, name), "")
+    end
+    if table.concat(install.backports_libraries(folder), " ") ~= "libMapKitBackports libTLSBackports" then
+        table.insert(found, "a folder's backports libraries are the lib*Backports.dylib files it holds, sorted")
+    end
+    os.tryrm(folder)
 
     local command = install.install_command("holder", "org.revenant.rnhost.iso")
     if not command:find("rm -rf /var/stash/holder/iso/iso.app /Applications/iso.app", 1, true) or not command:find("tar xzf /var/tmp/iso.tgz -C unpack", 1, true) or not command:find("mv unpack/*.app iso.app", 1, true) or

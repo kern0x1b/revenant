@@ -4,11 +4,6 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char RevenantHeadersPinKey;
-static const char RevenantFootersPinKey;
-static const char RevenantUseLayoutToLayoutKey;
-static const char RevenantInstallsGestureKey;
-
 @implementation UICollectionViewLayoutAttributes (RevenantBounds7)
 
 - (CGRect)bounds
@@ -25,32 +20,6 @@ static const char RevenantInstallsGestureKey;
 
 @end
 
-@implementation UICollectionViewFlowLayout (RevenantPinning9)
-
-- (BOOL)sectionHeadersPinToVisibleBounds
-{
-    return [objc_getAssociatedObject(self, &RevenantHeadersPinKey) boolValue];
-}
-
-- (void)setSectionHeadersPinToVisibleBounds:(BOOL)pins
-{
-    objc_setAssociatedObject(self, &RevenantHeadersPinKey, @(pins), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    [self invalidateLayout];
-}
-
-- (BOOL)sectionFootersPinToVisibleBounds
-{
-    return [objc_getAssociatedObject(self, &RevenantFootersPinKey) boolValue];
-}
-
-- (void)setSectionFootersPinToVisibleBounds:(BOOL)pins
-{
-    objc_setAssociatedObject(self, &RevenantFootersPinKey, @(pins), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    [self invalidateLayout];
-}
-
-@end
-
 @implementation UICollectionViewController (RevenantController7)
 
 - (UICollectionViewLayout *)collectionViewLayout
@@ -61,27 +30,6 @@ static const char RevenantInstallsGestureKey;
 - (void)setCollectionViewLayout:(UICollectionViewLayout *)collectionViewLayout
 {
     self.collectionView.collectionViewLayout = collectionViewLayout;
-}
-
-- (BOOL)useLayoutToLayoutNavigationTransitions
-{
-    return [objc_getAssociatedObject(self, &RevenantUseLayoutToLayoutKey) boolValue];
-}
-
-- (void)setUseLayoutToLayoutNavigationTransitions:(BOOL)uses
-{
-    objc_setAssociatedObject(self, &RevenantUseLayoutToLayoutKey, @(uses), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-- (BOOL)installsStandardGestureForInteractiveMovement
-{
-    NSNumber *stored = objc_getAssociatedObject(self, &RevenantInstallsGestureKey);
-    return stored ? stored.boolValue : YES;
-}
-
-- (void)setInstallsStandardGestureForInteractiveMovement:(BOOL)installs
-{
-    objc_setAssociatedObject(self, &RevenantInstallsGestureKey, @(installs), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

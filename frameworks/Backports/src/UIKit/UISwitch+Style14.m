@@ -3,7 +3,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char revenant_preferred_key, revenant_title_key, revenant_title_label_key;
+static const char revenant_title_key, revenant_title_label_key;
 static const CGFloat revenant_title_gap = 8;
 
 @implementation UISwitch (RevenantStyle14)
@@ -11,16 +11,6 @@ static const CGFloat revenant_title_gap = 8;
 - (UISwitchStyle)style
 {
     return UISwitchStyleSliding;
-}
-
-- (UISwitchStyle)preferredStyle
-{
-    return (UISwitchStyle)[objc_getAssociatedObject(self, &revenant_preferred_key) integerValue];
-}
-
-- (void)setPreferredStyle:(UISwitchStyle)preferredStyle
-{
-    objc_setAssociatedObject(self, &revenant_preferred_key, @(preferredStyle), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (NSString *)title

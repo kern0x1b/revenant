@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 
+#include "samplers.h"
 #include "llvm/Bitcode/BitcodeReader.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DataLayout.h"
@@ -19,6 +20,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Support/Error.h"
 #include "llvm/Support/MemoryBuffer.h"
+#include "llvm/Support/raw_ostream.h"
 
 using namespace llvm;
 
@@ -85,6 +87,7 @@ struct Binding {
     uint64_t index = 0;
     uint64_t stride = 0;
     bool indexedByVertex = false;
+    bool indexedByInstance = false;
     std::vector<Member> members;
     Argument *argument = nullptr;
 };
@@ -93,6 +96,18 @@ struct Address {
     Binding *binding = nullptr;
     uint64_t offset = 0;
     bool indexed = false;
+    bool instanced = false;
+    Value *selector = nullptr;
+    uint64_t selectCount = 0;
+    uint64_t selectStride = 0;
+    Type *selectType = nullptr;
+    uint64_t inner = 0;
+};
+
+struct Local {
+    std::string name;
+    Type *type = nullptr;
+    bool selected = false;
 };
 
 struct Output {
@@ -102,9 +117,114 @@ struct Output {
 };
 
 const char *const kArgumentKinds[] = {"air.buffer", "air.texture", "air.sampler", "air.vertex_id",
-                                      "air.position", "air.fragment_input"};
+                                      "air.position", "air.fragment_input", "air.thread_position_in_grid",
+                                      "air.point_coord", "air.instance_id"};
 
 const char *const kLanes[] = {"x", "y", "z", "w"};
+
+struct PlainFunction {
+    const char *air;
+    const char *glsl;
+    unsigned arguments;
+    const char *tail = "";
+    bool derivative = false;
+};
+
+const PlainFunction kPlainFunctions[] = {
+    {"air.fast_sin.f32", "sin", 1},
+    {"air.fast_cos.f32", "cos", 1},
+    {"air.fast_fabs.f32", "abs", 1},
+    {"air.fast_fabs.v2f32", "abs", 1},
+    {"air.fast_fabs.v3f32", "abs", 1},
+    {"air.fast_floor.v2f32", "floor", 1},
+    {"air.fast_fract.f32", "fract", 1},
+    {"air.fast_fract.v3f32", "fract", 1},
+    {"air.fast_rsqrt.f32", "inversesqrt", 1},
+    {"air.fast_sqrt.f32", "sqrt", 1},
+    {"air.fast_fmax.f32", "max", 2},
+    {"air.fast_fmax.v2f32", "max", 2},
+    {"air.fast_fmin.f32", "min", 2},
+    {"air.fast_pow.f32", "pow", 2},
+    {"air.dot.v2f32", "dot", 2},
+    {"air.dot.v3f32", "dot", 2},
+    {"air.all.v2i1", "all", 1},
+    {"air.fast_clamp.f32", "clamp", 3},
+    {"air.fast_clamp.v2f32", "clamp", 3},
+    {"air.fast_clamp.v3f32", "clamp", 3},
+    {"air.mix.f32", "mix", 3},
+    {"air.mix.v3f32", "mix", 3},
+    {"air.mix.v4f16", "mix", 3},
+    {"air.fmin.f16", "min", 2},
+    {"air.fmax.f16", "max", 2},
+    {"air.fract.f16", "fract", 1},
+    {"air.fast_saturate.f32", "clamp", 1, ", 0.0, 1.0"},
+    {"air.fast_saturate.v2f32", "clamp", 1, ", 0.0, 1.0"},
+    {"air.fast_saturate.v3f32", "clamp", 1, ", 0.0, 1.0"},
+    {"air.fabs.v3f16", "abs", 1},
+    {"air.dot.v2f16", "dot", 2},
+    {"air.mix.v2f32", "mix", 3},
+    {"air.tan.f16", "tan", 1},
+    {"air.sqrt.f16", "sqrt", 1},
+    {"air.clamp.v3f16", "clamp", 3},
+    {"air.mix.v3f16", "mix", 3},
+    {"air.sin.f16", "sin", 1},
+    {"air.cos.f16", "cos", 1},
+    {"air.fmin.v3f16", "min", 2},
+    {"air.fast_fmax.v3f32", "max", 2},
+    {"air.fast_pow.v3f32", "pow", 2},
+    {"air.fast_floor.f32", "floor", 1},
+    {"air.fast_exp.f32", "exp", 1},
+    {"air.fast_tan.f32", "tan", 1},
+    {"air.fwidth.f32", "fwidth", 1, "", true},
+};
+
+const PlainFunction *plainFunction(const std::string &name)
+{
+    for (const PlainFunction &function : kPlainFunctions)
+        if (name == function.air)
+            return &function;
+    return nullptr;
+}
+
+bool paddedVectorOf(Type *narrow, Type *wide)
+{
+    auto *from = dyn_cast<FixedVectorType>(narrow);
+    auto *to = dyn_cast<FixedVectorType>(wide);
+    return from && to && from->getNumElements() == 3 && to->getNumElements() == 4 &&
+           from->getElementType() == to->getElementType();
+}
+
+bool samplerStateOf(const GlobalVariable &global, uint64_t &state)
+{
+    const NamedMDNode *states = global.getParent()->getNamedMetadata("air.sampler_states");
+    if (!states)
+        return false;
+    bool listed = false;
+    for (const MDNode *entry : states->operands())
+        for (const MDOperand &operand : entry->operands())
+            if (auto *value = dyn_cast<ConstantAsMetadata>(operand.get()); value && value->getValue() == &global)
+                listed = true;
+    auto *initializer = dyn_cast_or_null<ConstantInt>(global.getInitializer());
+    if (!listed || !initializer)
+        return false;
+    state = initializer->getZExtValue();
+    return true;
+}
+
+std::string samplerJson(const GLESSampler &sampler)
+{
+    return "{\"wrapS\": " + jsonQuote(sampler.wrapS) + ", \"wrapT\": " + jsonQuote(sampler.wrapT) +
+           ", \"minFilter\": " + jsonQuote(sampler.minFilter) + ", \"magFilter\": " + jsonQuote(sampler.magFilter) + "}";
+}
+
+bool matrixOf(const std::string &typeName, unsigned &columns)
+{
+    if (typeName.size() != 8 || typeName.compare(0, 5, "float") != 0 || typeName[6] != 'x' || typeName[7] != typeName[5] ||
+        typeName[5] < '2' || typeName[5] > '4')
+        return false;
+    columns = (unsigned)(typeName[5] - '0');
+    return true;
+}
 
 bool scalarOf(const std::string &typeName, std::string &scalar, unsigned &components)
 {
@@ -160,6 +280,21 @@ std::string glslType(Type *type)
     return "";
 }
 
+std::string colorOf(Type *type, const std::string &text)
+{
+    unsigned lanes = type->isVectorTy() ? cast<FixedVectorType>(type)->getNumElements() : 1;
+    switch (lanes) {
+    case 1:
+        return "vec4(" + text + ", 0.0, 0.0, 1.0)";
+    case 2:
+        return "vec4(" + text + ", 0.0, 1.0)";
+    case 3:
+        return "vec4(" + text + ", 1.0)";
+    default:
+        return text;
+    }
+}
+
 std::string floatLiteral(double value)
 {
     char text[64];
@@ -209,6 +344,8 @@ public:
             if (!number)
                 return refuse("an argument without its position");
             TagMap tags = parseTags(node, 1);
+            if (tags.count("air.threadgroup"))
+                return refuse("threadgroup memory, which one fragment pass cannot hold; it needs a multi-pass design");
             Binding binding;
             for (const char *kind : kArgumentKinds)
                 if (tags.count(kind)) {
@@ -217,19 +354,29 @@ public:
                 }
             if (binding.kind.empty())
                 return refuse("an argument of a kind this emitter does not read");
+            if (binding.kind == "air.texture" && tags.count("air.write"))
+                binding.kind = "air.write_texture";
             tagString(tags, "air.arg_name", binding.name);
             tagInteger(tags, "air.location_index", binding.index);
             tagInteger(tags, "air.arg_type_size", binding.stride);
             std::string typeName;
             tagString(tags, "air.arg_type_name", typeName);
+            if (binding.kind == "air.texture" && typeName.compare(0, 11, "texturecube") == 0)
+                binding.kind = "air.texture_cube";
             auto info = tags.find("air.struct_type_info");
             if (info != tags.end() && !info->second.empty()) {
                 auto *fields = dyn_cast_or_null<MDNode>(info->second[0]);
                 if (!fields || !readMembers(fields, binding.members))
                     return refuse("a struct member this emitter does not read in " + binding.name);
             }
-            if (binding.kind == "air.buffer" && binding.members.empty())
-                binding.members.push_back(Member{binding.name, 0, binding.stride, typeName});
+            if (binding.kind == "air.buffer" && binding.members.empty()) {
+                std::string scalar;
+                unsigned components = 0;
+                uint64_t size = binding.stride;
+                if (scalarOf(typeName, scalar, components))
+                    size = components * scalarBytes(scalar);
+                binding.members.push_back(Member{binding.name, 0, size, typeName});
+            }
             bindings_.push_back(binding);
             argumentNumbers_.push_back((unsigned)number->getZExtValue());
         }
@@ -252,17 +399,31 @@ public:
                 if (auto *gep = dyn_cast<GetElementPtrInst>(&instruction))
                     if (!gep->hasAllConstantIndices()) {
                         Address address;
-                        if (resolve(gep, address) && address.indexed)
-                            address.binding->indexedByVertex = true;
+                        if (resolve(gep, address)) {
+                            if (address.indexed)
+                                address.binding->indexedByVertex = true;
+                            if (address.instanced)
+                                address.binding->indexedByInstance = true;
+                        }
                     }
         for (size_t slot = 0; slot < bindings_.size(); slot++) {
             const Binding &binding = bindings_[slot];
+            if (stage_ == Stage::Kernel && (binding.kind == "air.vertex_id" || binding.kind == "air.position" ||
+                                            binding.kind == "air.fragment_input"))
+                return refuse(binding.kind + " in a kernel, which has no vertex or fragment input");
+            if ((binding.kind == "air.write_texture" || binding.kind == "air.thread_position_in_grid") &&
+                stage_ != Stage::Kernel)
+                return refuse(binding.kind + " outside a kernel");
             if (binding.kind == "air.vertex_id" && stage_ != Stage::Vertex)
                 return refuse("a vertex id in a fragment function");
             if (binding.kind == "air.position" && stage_ != Stage::Fragment)
                 return refuse("a position argument in a vertex function");
             if (binding.kind == "air.fragment_input" && stage_ != Stage::Fragment)
                 return refuse("a fragment input in a vertex function");
+            if (binding.kind == "air.point_coord" && stage_ != Stage::Fragment)
+                return refuse("a point coordinate outside a fragment function");
+            if (binding.kind == "air.instance_id" && stage_ != Stage::Vertex)
+                return refuse("an instance id outside a vertex function");
         }
         for (size_t slot = 0; slot < bindings_.size(); slot++)
             if (bindings_[slot].kind == "air.position" && !bindings_[slot].argument->use_empty()) {
@@ -274,18 +435,34 @@ public:
                 statement("position.y = revenant_flip > 0.0 ? revenant_target.y - gl_FragCoord.y : gl_FragCoord.y;\n");
                 break;
             }
+        for (size_t slot = 0; slot < bindings_.size(); slot++)
+            if (bindings_[slot].kind == "air.thread_position_in_grid" && !bindings_[slot].argument->use_empty()) {
+                if (!declareLocal("ivec2 gid;\n", "gid"))
+                    return false;
+                statement("gid = ivec2(floor(gl_FragCoord.xy));\n");
+                break;
+            }
+        if (stage_ == Stage::Kernel && !declareLocal("bool revenant_written = false;\n", "revenant_written"))
+            return false;
         if (!region(&function_.getEntryBlock(), nullptr))
             return false;
         if (!returned_)
             return refuse("a function that never returns");
+        if (stage_ == Stage::Kernel) {
+            if (output_.empty())
+                return refuse("a kernel that writes no texture");
+            statement("if (!revenant_written) discard;\n");
+        }
         std::string body;
         for (const std::string &line : locals_)
             body += "    " + line;
         for (const std::string &line : statements_)
             body += line;
         source = "#version 100\n";
-        if (stage_ == Stage::Fragment)
-            source += "precision mediump float;\n";
+        if (derivatives_)
+            source += "#extension GL_OES_standard_derivatives : enable\n";
+        if (stage_ != Stage::Vertex)
+            source += highp_ ? "precision highp float;\nprecision highp int;\n" : "precision mediump float;\n";
         source += join(declarations_, "") + "void main() {\n" + body + "}\n";
         reflection = this->reflection();
         return true;
@@ -297,6 +474,39 @@ private:
         if (refusal_.empty())
             refusal_ = reason;
         return false;
+    }
+
+    bool samplerOf(const Value *operand, std::string &json)
+    {
+        Binding *bound = bindingOf(operand);
+        if (bound && bound->kind == "air.sampler") {
+            json.clear();
+            return true;
+        }
+        uint64_t state = 0;
+        auto *global = dyn_cast<GlobalVariable>(operand);
+        if (!global || !samplerStateOf(*global, state))
+            return refuse("a sample with a sampler this emitter cannot read");
+        GLESSampler sampler;
+        std::string reason;
+        if (!decodeSampler(state, samplerTable(), sampler, reason))
+            return refuse("a sample with " + reason);
+        json = samplerJson(sampler);
+        return true;
+    }
+
+    bool sampledBy(const Binding &texture, const std::string &json, const std::string &fields)
+    {
+        highp_ = true;
+        auto known = textures_.find(texture.name);
+        if (known != textures_.end())
+            return known->second == json || refuse("a texture sampled with two different samplers");
+        textures_[texture.name] = json;
+        std::string line = "{\"name\": " + jsonQuote(texture.name) + ", \"index\": " + std::to_string(texture.index) + fields;
+        if (!json.empty())
+            line += ", \"sampler\": " + json;
+        textureLines_.push_back(line + "}");
+        return true;
     }
 
     bool readMembers(const MDNode *fields, std::vector<Member> &members)
@@ -315,6 +525,8 @@ private:
 
     Binding *bindingOf(const Value *value)
     {
+        while (auto *cast = dyn_cast<BitCastInst>(value))
+            value = cast->getOperand(0);
         auto inlined = inlineBindings_.find(value);
         if (inlined != inlineBindings_.end())
             return inlined->second;
@@ -322,12 +534,23 @@ private:
         return found == argumentSlot_.end() ? nullptr : &bindings_[found->second];
     }
 
+    const Local *localOf(const Value *pointer)
+    {
+        while (auto *cast = dyn_cast<BitCastInst>(pointer))
+            pointer = cast->getOperand(0);
+        auto inlined = inlineLocals_.find(pointer);
+        if (inlined != inlineLocals_.end())
+            return inlined->second;
+        auto found = localPointers_.find(pointer);
+        return found == localPointers_.end() ? nullptr : &found->second;
+    }
+
     uint64_t allocSize(Type *type)
     {
         return layout_.getTypeAllocSize(type).getFixedValue();
     }
 
-    bool isVertexIndex(const Value *index)
+    bool isIndexOf(const Value *index, const char *kind)
     {
         const Value *source = index;
         if (auto *extend = dyn_cast<ZExtInst>(index))
@@ -335,11 +558,28 @@ private:
         else if (auto *extend = dyn_cast<SExtInst>(index))
             source = extend->getOperand(0);
         const Binding *binding = bindingOf(source);
-        return binding && binding->kind == "air.vertex_id";
+        return binding && binding->kind == kind;
+    }
+
+    bool isVertexIndex(const Value *index)
+    {
+        return isIndexOf(index, "air.vertex_id");
+    }
+
+    bool isAddressIndex(const SExtInst &extend)
+    {
+        if (!extend.getOperand(0)->getType()->isIntegerTy(32))
+            return false;
+        for (const User *user : extend.users())
+            if (!isa<GetElementPtrInst>(user))
+                return false;
+        return true;
     }
 
     bool resolve(const Value *pointer, Address &out)
     {
+        while (auto *cast = dyn_cast<BitCastInst>(pointer))
+            pointer = cast->getOperand(0);
         if (const auto *argument = dyn_cast<Argument>(pointer)) {
             Binding *binding = bindingOf(argument);
             if (!binding || binding->kind != "air.buffer")
@@ -352,27 +592,48 @@ private:
             return false;
         Type *type = gep->getSourceElementType();
         for (unsigned i = 0; i < gep->getNumIndices(); i++) {
-            const Value *index = gep->getOperand(i + 1);
+            Value *index = gep->getOperand(i + 1);
             if (i == 0 && !isa<ConstantInt>(index)) {
-                if (!isVertexIndex(index) || allocSize(type) != out.binding->stride)
+                bool vertex = isVertexIndex(index);
+                bool instance = !vertex && isIndexOf(index, "air.instance_id");
+                if (!(vertex || instance) || allocSize(type) != out.binding->stride)
                     return false;
-                out.indexed = true;
+                out.indexed = vertex;
+                out.instanced = instance;
                 continue;
             }
+            uint64_t &where = out.selector ? out.inner : out.offset;
             auto *constant = dyn_cast<ConstantInt>(index);
-            if (!constant)
-                return false;
+            if (!constant) {
+                auto *array = dyn_cast<ArrayType>(type);
+                if (!array || out.selector || out.indexed)
+                    return false;
+                Value *selector = index;
+                if (auto *extend = dyn_cast<CastInst>(index);
+                    extend && (extend->getOpcode() == Instruction::SExt || extend->getOpcode() == Instruction::ZExt) &&
+                    extend->getOperand(0)->getType()->isIntegerTy(32))
+                    selector = extend->getOperand(0);
+                out.selector = selector;
+                out.selectCount = array->getNumElements();
+                out.selectStride = allocSize(array->getElementType());
+                out.selectType = array->getElementType();
+                type = array->getElementType();
+                continue;
+            }
             uint64_t element = constant->getZExtValue();
             if (i == 0) {
                 out.offset += element * allocSize(type);
             } else if (auto *structure = dyn_cast<StructType>(type)) {
                 if (element >= structure->getNumElements())
                     return false;
-                out.offset += layout_.getStructLayout(structure)->getElementOffset((unsigned)element).getFixedValue();
+                where += layout_.getStructLayout(structure)->getElementOffset((unsigned)element).getFixedValue();
                 type = structure->getElementType((unsigned)element);
             } else if (auto *array = dyn_cast<ArrayType>(type)) {
-                out.offset += element * allocSize(array->getElementType());
+                where += element * allocSize(array->getElementType());
                 type = array->getElementType();
+            } else if (auto *vector = dyn_cast<FixedVectorType>(type)) {
+                where += element * allocSize(vector->getElementType());
+                type = vector->getElementType();
             } else {
                 return false;
             }
@@ -407,7 +668,7 @@ private:
 
     void needFlip()
     {
-        declare("uniform float revenant_flip;\n", "revenant_flip");
+        declare("uniform highp float revenant_flip;\n", "revenant_flip");
     }
 
     void needTarget()
@@ -415,8 +676,61 @@ private:
         declare("uniform vec2 revenant_target;\n", "revenant_target");
     }
 
-    bool accessMember(Binding &binding, const Member &field, uint64_t offset, Type *loaded, std::string &out)
+    bool accessMatrix(Binding &binding, const Member &field, uint64_t offset, Type *loaded, std::string &out, bool scoped)
     {
+        unsigned columns = 0;
+        matrixOf(field.type, columns);
+        unsigned rows = columns;
+        uint64_t stride = (rows == 3 ? 4 : rows) * 4;
+        if (field.size != columns * stride)
+            return refuse("a matrix whose size does not match its type in " + binding.name);
+        if (binding.indexedByVertex)
+            return refuse("a matrix vertex attribute in " + binding.name);
+        std::string name = scoped ? binding.name + "_" + field.name : field.name;
+        bool fresh = !declared_.count(name);
+        declare("uniform mat" + std::to_string(columns) + " " + name + ";\n", name);
+        if (fresh)
+            uniformLines_.push_back("{\"name\": " + jsonQuote(name) + ", \"buffer\": " + std::to_string(binding.index) +
+                                    ", \"offset\": " + std::to_string(field.offset) + ", \"instanceStride\": " +
+                                    std::to_string(binding.indexedByInstance ? binding.stride : 0) +
+                                    ", \"scalar\": \"float\", \"components\": " + std::to_string(rows) +
+                                    ", \"columns\": " + std::to_string(columns) + "}");
+        uint64_t within = offset - field.offset;
+        uint64_t column = within / stride;
+        uint64_t rest = within % stride;
+        if (column >= columns || rest % 4 != 0)
+            return refuse("a load of " + name + " that this emitter does not map to a column");
+        uint64_t lane = rest / 4;
+        std::string part = name + "[" + std::to_string(column) + "]";
+        if (!loaded->isVectorTy()) {
+            if (lane >= rows)
+                return refuse("a load of " + name + " that this emitter does not map to a component");
+            out = part + "[" + std::to_string(lane) + "]";
+            return true;
+        }
+        unsigned count = cast<FixedVectorType>(loaded)->getNumElements();
+        if (lane == 0 && count == rows) {
+            out = part;
+            return true;
+        }
+        if (lane == 0 && count == 4 && rows == 3) {
+            out = glslType(loaded) + "(" + part + ", 0.0)";
+            return true;
+        }
+        if (lane + count > rows)
+            return refuse("a vector load of " + name + " that this emitter does not map to lanes");
+        std::string list;
+        for (unsigned i = 0; i < count; i++)
+            list += (i ? ", " : "") + part + "[" + std::to_string(lane + i) + "]";
+        out = glslType(loaded) + "(" + list + ")";
+        return true;
+    }
+
+    bool accessMember(Binding &binding, const Member &field, uint64_t offset, Type *loaded, std::string &out, bool scoped = false)
+    {
+        unsigned columns = 0;
+        if (matrixOf(field.type, columns))
+            return accessMatrix(binding, field, offset, loaded, out, scoped);
         std::string scalar;
         unsigned components = 0;
         if (!scalarOf(field.type, scalar, components))
@@ -431,7 +745,7 @@ private:
         bool real = attribute || scalar == "float" || scalar == "half";
         std::string suffix = std::to_string(components);
         std::string glsl = real ? (components == 1 ? "float" : "vec" + suffix) : (components == 1 ? "int" : "ivec" + suffix);
-        std::string name = attribute ? "a_" + field.name : field.name;
+        std::string name = attribute ? "a_" + field.name : scoped ? binding.name + "_" + field.name : field.name;
         bool fresh = !declared_.count(name);
         declare((attribute ? "attribute " : "uniform ") + glsl + " " + name + ";\n", name);
         if (fresh) {
@@ -441,7 +755,8 @@ private:
             if (attribute)
                 attributeLines_.push_back("{" + common + ", \"stride\": " + std::to_string(binding.stride) + tail);
             else
-                uniformLines_.push_back("{" + common + ", \"instanceStride\": 0" + tail);
+                uniformLines_.push_back("{" + common + ", \"instanceStride\": " +
+                                        std::to_string(binding.indexedByInstance ? binding.stride : 0) + tail);
         }
         uint64_t within = offset - field.offset;
         if (components == 1) {
@@ -457,6 +772,11 @@ private:
             return true;
         }
         unsigned count = cast<FixedVectorType>(loaded)->getNumElements();
+        bool packedFloat3 = within == 0 && components == 3 && count == 4 && scalar == "float";
+        if (packedFloat3 && !memberAt(binding, field.offset + field.size)) {
+            out = glslType(loaded) + "(" + name + ", 0.0)";
+            return true;
+        }
         if (within % width != 0 || within / width + count > components)
             return refuse("a vector load of " + name + " that this emitter does not map to lanes");
         unsigned first = (unsigned)(within / width);
@@ -509,6 +829,17 @@ private:
     {
         if (auto *gep = dyn_cast<GetElementPtrInst>(load->getPointerOperand()); gep && isa<GlobalVariable>(gep->getPointerOperand()))
             return tableLoad(gep, load->getType(), out);
+        if (const Local *slot = localOf(load->getPointerOperand())) {
+            bool padded = paddedVectorOf(slot->type, load->getType());
+            if (slot->type != load->getType() && !padded)
+                return refuse("a load of a local at another type");
+            std::string temp;
+            if (!local(*load, temp))
+                return false;
+            statement(temp + " = " + (padded ? glslType(load->getType()) + "(" + slot->name + ", 0.0)" : slot->name) + ";\n");
+            out = temp;
+            return true;
+        }
         Address address;
         if (!resolve(load->getPointerOperand(), address) || !address.binding)
             return refuse("a load from an address this emitter does not read");
@@ -516,10 +847,64 @@ private:
             return refuse("a load from " + address.binding->kind);
         if (address.indexed != address.binding->indexedByVertex)
             return refuse("a buffer read both per vertex and at a fixed place: " + address.binding->name);
+        if (address.instanced != address.binding->indexedByInstance)
+            return refuse("a buffer read both per instance and at a fixed place: " + address.binding->name);
+        if (address.selector)
+            return selectMember(address, *load, out);
         const Member *field = memberAt(*address.binding, address.offset);
         if (!field)
             return refuse("a load outside the members of " + address.binding->name);
-        return accessMember(*address.binding, *field, address.offset, load->getType(), out);
+        return accessMember(*address.binding, *field, address.offset, load->getType(), out, address.binding->indexedByInstance);
+    }
+
+    bool metalNameOf(Type *type, std::string &name)
+    {
+        unsigned count = 1;
+        if (auto *vector = dyn_cast<FixedVectorType>(type)) {
+            count = vector->getNumElements();
+            type = vector->getElementType();
+        }
+        std::string scalar;
+        if (type->isFloatTy())
+            scalar = "float";
+        else if (type->isHalfTy())
+            scalar = "half";
+        else if (type->isIntegerTy(32))
+            scalar = "int";
+        else
+            return false;
+        name = count == 1 ? scalar : scalar + std::to_string(count);
+        return true;
+    }
+
+    bool selectMember(const Address &address, LoadInst &load, std::string &out)
+    {
+        Binding &binding = *address.binding;
+        const Member *field = memberAt(binding, address.offset);
+        if (!field)
+            return refuse("a load outside the members of " + binding.name);
+        if (address.selectCount == 0 || address.selectCount > 64)
+            return refuse("an array member of " + binding.name + " with " + std::to_string(address.selectCount) + " elements");
+        std::string type;
+        if (!metalNameOf(address.selectType, type))
+            return refuse("an array member of a type this emitter does not hold in " + binding.name);
+        std::string selector;
+        if (!expression(address.selector, selector))
+            return false;
+        std::string chain;
+        for (uint64_t k = address.selectCount; k-- > 0;) {
+            Member element{field->name + "_" + std::to_string(k), address.offset + k * address.selectStride, address.selectStride, type};
+            std::string value;
+            if (!accessMember(binding, element, element.offset + address.inner, load.getType(), value, true))
+                return false;
+            chain = chain.empty() ? value : "((" + selector + " == " + std::to_string(k) + ") ? " + value + " : " + chain + ")";
+        }
+        std::string temp;
+        if (!local(load, temp))
+            return false;
+        statement(temp + " = " + chain + ";\n");
+        out = temp;
+        return true;
     }
 
     bool expression(Value *value, std::string &out)
@@ -552,10 +937,30 @@ private:
                 out = "position";
                 return true;
             }
+            if (binding->kind == "air.thread_position_in_grid") {
+                out = "gid";
+                return true;
+            }
+            if (binding->kind == "air.point_coord") {
+                out = "gl_PointCoord";
+                return true;
+            }
+            if (binding->kind == "air.instance_id") {
+                declare("uniform float revenant_instance;\n", "revenant_instance");
+                out = "int(revenant_instance)";
+                return true;
+            }
             if (binding->kind == "air.fragment_input") {
                 std::string type = glslType(argument->getType());
                 if (type.empty())
                     return refuse("a fragment input of a type this emitter does not hold");
+                if (type == "int") {
+                    declare("varying float " + binding->name + ";\n", binding->name);
+                    out = "int(floor(" + binding->name + " + 0.5))";
+                    return true;
+                }
+                if (type == "bool" || type.rfind("ivec", 0) == 0 || type.rfind("bvec", 0) == 0)
+                    return refuse("an integer or bool fragment input, which ES 1.00 has no varying for");
                 declare("varying " + type + " " + binding->name + ";\n", binding->name);
                 out = binding->name;
                 return true;
@@ -618,6 +1023,19 @@ private:
         BasicBlock *exit = nullptr;
         int64_t first = 0;
         int64_t last = 0;
+    };
+
+    struct Cycle {
+        PHINode *index = nullptr;
+        BasicBlock *exit = nullptr;
+        int64_t first = 0;
+        int64_t last = 0;
+    };
+
+    struct ActiveLoop {
+        BasicBlock *header = nullptr;
+        BasicBlock *exit = nullptr;
+        std::set<const BasicBlock *> body;
     };
 
     struct Frame {
@@ -799,8 +1217,104 @@ private:
         return true;
     }
 
+    bool cycleOf(BasicBlock *header, Cycle &cycle)
+    {
+        auto *branch = dyn_cast<BranchInst>(header->getTerminator());
+        if (!branch || !branch->isConditional())
+            return false;
+        for (unsigned i = 0; i < 2; i++) {
+            BasicBlock *latch = branch->getSuccessor(i);
+            BasicBlock *exit = branch->getSuccessor(1 - i);
+            auto *back = dyn_cast<BranchInst>(latch->getTerminator());
+            if (latch == header || !back || !back->isConditional())
+                continue;
+            bool backFirst = back->getSuccessor(0) == header;
+            bool backSecond = back->getSuccessor(1) == header;
+            if (backFirst == backSecond || back->getSuccessor(backFirst ? 1 : 0) != exit)
+                continue;
+            bool exitOnTrue = !backFirst;
+            auto *test = dyn_cast<ICmpInst>(back->getCondition());
+            if (!test || test->getPredicate() != (exitOnTrue ? ICmpInst::ICMP_EQ : ICmpInst::ICMP_NE))
+                return false;
+            auto *bound = dyn_cast<ConstantInt>(test->getOperand(1));
+            auto *next = dyn_cast<BinaryOperator>(test->getOperand(0));
+            if (!bound || !next || next->getParent() != latch || next->getOpcode() != Instruction::Add)
+                return false;
+            auto *step = dyn_cast<ConstantInt>(next->getOperand(1));
+            auto *index = dyn_cast<PHINode>(next->getOperand(0));
+            if (!step || !step->isOne() || !index || index->getParent() != header || index->getNumIncomingValues() != 2)
+                return false;
+            if (index->getIncomingValueForBlock(latch) != next)
+                return false;
+            Value *start = nullptr;
+            for (unsigned j = 0; j < 2; j++)
+                if (index->getIncomingBlock(j) != latch)
+                    start = index->getIncomingValue(j);
+            auto *first = dyn_cast_or_null<ConstantInt>(start);
+            if (!first || first->getSExtValue() >= bound->getSExtValue())
+                return false;
+            for (User *user : next->users())
+                if (user != index && user != test)
+                    return false;
+            for (User *user : test->users())
+                if (user != back)
+                    return false;
+            cycle.index = index;
+            cycle.exit = exit;
+            cycle.first = first->getSExtValue();
+            cycle.last = bound->getSExtValue();
+            return true;
+        }
+        return false;
+    }
+
+    bool insideLoop(const BasicBlock *block)
+    {
+        if (loops_.empty())
+            return true;
+        const ActiveLoop &loop = loops_.back();
+        return block == loop.header || block == loop.exit || loop.body.count(block) > 0;
+    }
+
+    bool emitCountedCycle(BasicBlock *header, const Cycle &cycle)
+    {
+        std::string index = "t" + std::to_string(counter_++);
+        statement("for (int " + index + " = " + std::to_string(cycle.first) + "; " + index + " < " +
+                  std::to_string(cycle.last) + "; " + index + "++) {\n");
+        depth_++;
+        ActiveLoop loop{header, cycle.exit, {}};
+        std::vector<const BasicBlock *> pending = {header};
+        while (!pending.empty()) {
+            const Instruction *terminator = pending.back()->getTerminator();
+            pending.pop_back();
+            for (unsigned i = 0; i < terminator->getNumSuccessors(); i++) {
+                const BasicBlock *next = terminator->getSuccessor(i);
+                if (next != header && next != cycle.exit && loop.body.insert(next).second)
+                    pending.push_back(next);
+            }
+        }
+        loops_.push_back(loop);
+        bool emitted = region(header, nullptr);
+        loops_.pop_back();
+        depth_--;
+        statement("}\n");
+        return emitted;
+    }
+
+    bool leave(BasicBlock *from, BasicBlock *to)
+    {
+        if (!edgeCopies(from, to))
+            return false;
+        statement("break;\n");
+        return true;
+    }
+
     bool side(BasicBlock *from, BasicBlock *to, BasicBlock *join)
     {
+        if (!loops_.empty() && to == loops_.back().exit)
+            return leave(from, to);
+        if (!insideLoop(to))
+            return refuse("a branch that leaves a loop somewhere other than its exit");
         return edgeCopies(from, to) && region(to, join);
     }
 
@@ -818,12 +1332,82 @@ private:
             return true;
         }
         returned_ = true;
+        if (stage_ == Stage::Kernel && !ret.getReturnValue())
+            return true;
         return emitReturn(ret);
+    }
+
+    bool rejoin(BasicBlock *block, BasicBlock *&join)
+    {
+        join = postDominator(block);
+        if (!join)
+            return refuse("a branch that never rejoins");
+        if (!loops_.empty() && join == loops_.back().exit)
+            join = loops_.back().header;
+        if (!insideLoop(join))
+            return refuse("a branch that rejoins outside its loop");
+        return true;
+    }
+
+    bool multiway(BasicBlock *block, SwitchInst &sw, BasicBlock *&join)
+    {
+        if (!rejoin(block, join))
+            return false;
+        std::string value;
+        if (!expression(sw.getCondition(), value))
+            return false;
+        BasicBlock *fallback = sw.getDefaultDest();
+        std::vector<std::pair<BasicBlock *, std::string>> arms;
+        for (auto &kase : sw.cases()) {
+            BasicBlock *target = kase.getCaseSuccessor();
+            if (target == fallback)
+                continue;
+            std::string test = value + " == " + std::to_string(kase.getCaseValue()->getSExtValue());
+            auto arm = arms.begin();
+            while (arm != arms.end() && arm->first != target)
+                arm++;
+            if (arm == arms.end())
+                arms.push_back({target, test});
+            else
+                arm->second += " || " + test;
+        }
+        if (arms.empty())
+            return side(block, fallback, join);
+        bool first = true;
+        for (auto &arm : arms) {
+            statement(std::string(first ? "if (" : "} else if (") + arm.second + ") {\n");
+            first = false;
+            depth_++;
+            if (!side(block, arm.first, join))
+                return false;
+            depth_--;
+        }
+        if (fallback != join || isa<PHINode>(join->front())) {
+            statement("} else {\n");
+            depth_++;
+            if (!side(block, fallback, join))
+                return false;
+            depth_--;
+        }
+        statement("}\n");
+        return true;
     }
 
     bool region(BasicBlock *block, BasicBlock *stop)
     {
+        bool entering = true;
         while (block && block != stop) {
+            bool iterating = !loops_.empty() && block == loops_.back().header;
+            if (iterating && !entering)
+                return true;
+            entering = false;
+            Cycle cycle;
+            if (!iterating && cycleOf(block, cycle)) {
+                if (!emitCountedCycle(block, cycle))
+                    return false;
+                block = cycle.exit;
+                continue;
+            }
             if (!visited_.insert(block).second)
                 return refuse("control flow that reaches one block twice");
             Loop loop;
@@ -842,18 +1426,29 @@ private:
             Instruction *terminator = block->getTerminator();
             if (auto *ret = dyn_cast<ReturnInst>(terminator))
                 return finish(*ret);
+            if (auto *sw = dyn_cast<SwitchInst>(terminator)) {
+                BasicBlock *join = nullptr;
+                if (!multiway(block, *sw, join))
+                    return false;
+                block = join;
+                continue;
+            }
             auto *branch = dyn_cast<BranchInst>(terminator);
             if (!branch)
                 return refuse("a terminator this emitter does not structure");
             if (branch->isUnconditional()) {
+                if (!loops_.empty() && branch->getSuccessor(0) == loops_.back().exit)
+                    return leave(block, branch->getSuccessor(0));
+                if (!insideLoop(branch->getSuccessor(0)))
+                    return refuse("a branch that leaves a loop somewhere other than its exit");
                 if (!edgeCopies(block, branch->getSuccessor(0)))
                     return false;
                 block = branch->getSuccessor(0);
                 continue;
             }
-            BasicBlock *join = postDominator(block);
-            if (!join)
-                return refuse("a branch that never rejoins");
+            BasicBlock *join = nullptr;
+            if (!rejoin(block, join))
+                return false;
             std::string condition;
             if (!expression(branch->getCondition(), condition))
                 return false;
@@ -887,6 +1482,10 @@ private:
                 inlineBindings_[formal] = binding;
                 continue;
             }
+            if (const Local *slot = localOf(actual)) {
+                inlineLocals_[formal] = slot;
+                continue;
+            }
             std::string text;
             if (!expression(actual, text))
                 return false;
@@ -910,6 +1509,167 @@ private:
         return true;
     }
 
+    bool maskAnd(Instruction &instruction, BinaryOperator &binary)
+    {
+        if (!binary.getType()->isIntegerTy(32))
+            return refuse("a bitwise and of integers other than 32 bits");
+        Value *operand = binary.getOperand(0);
+        auto *mask = dyn_cast<ConstantInt>(binary.getOperand(1));
+        if (!mask) {
+            operand = binary.getOperand(1);
+            mask = dyn_cast<ConstantInt>(binary.getOperand(0));
+        }
+        if (!mask)
+            return refuse("a bitwise and with no constant mask");
+        auto *convert = dyn_cast<CallInst>(operand);
+        if (!convert || !convert->getCalledFunction() ||
+            !convert->getCalledFunction()->getName().starts_with("air.convert.u.i32.f."))
+            return refuse("a bitwise and of an integer that is not an unsigned float conversion");
+        uint64_t bits = mask->getZExtValue();
+        if (!(bits & 0x80000000u))
+            return refuse("a bitwise and that clears the sign bit");
+        std::string source, name;
+        if (!expression(operand, source))
+            return false;
+        std::string clamped = "max(float(" + source + "), 0.0)";
+        std::string value = clamped;
+        for (unsigned bit = 0; bit < 31; ++bit) {
+            if (bits & (uint64_t(1) << bit))
+                continue;
+            std::string weight = std::to_string(uint64_t(1) << bit) + ".0";
+            std::string period = std::to_string(uint64_t(1) << (bit + 1)) + ".0";
+            value += " - " + weight + " * floor(mod(" + clamped + ", " + period + ") / " + weight + ")";
+        }
+        if (!local(instruction, name))
+            return false;
+        highp_ = true;
+        statement(name + " = int(" + value + ");\n");
+        return true;
+    }
+
+    bool bounded(Value *value)
+    {
+        if (auto *constant = dyn_cast<ConstantInt>(value))
+            return constant->getZExtValue() < 0x80000000u;
+        auto *call = dyn_cast<CallInst>(value);
+        if (!call || !call->getCalledFunction())
+            return false;
+        auto name = call->getCalledFunction()->getName();
+        if (name.starts_with("air.convert.u.i32.f."))
+            return true;
+        return name == "air.max.u.i32" && bounded(call->getArgOperand(0)) && bounded(call->getArgOperand(1));
+    }
+
+    bool nonZero(Value *value)
+    {
+        if (auto *constant = dyn_cast<ConstantInt>(value))
+            return !constant->isZero();
+        auto *call = dyn_cast<CallInst>(value);
+        if (!call || !call->getCalledFunction() || call->getCalledFunction()->getName() != "air.max.u.i32")
+            return false;
+        return nonZero(call->getArgOperand(0)) || nonZero(call->getArgOperand(1));
+    }
+
+    bool smallEnough(Value *value)
+    {
+        auto *constant = dyn_cast<ConstantInt>(value);
+        return !constant || constant->getZExtValue() < (1u << 23);
+    }
+
+    bool unsignedDivide(Instruction &instruction, BinaryOperator &binary)
+    {
+        if (!binary.getType()->isIntegerTy(32))
+            return refuse("an unsigned division of integers other than 32 bits");
+        if (!bounded(binary.getOperand(0)) || !bounded(binary.getOperand(1)) || !nonZero(binary.getOperand(1)))
+            return refuse("an unsigned division that is not of bounded integers with a non-zero divisor");
+        if (!smallEnough(binary.getOperand(0)) || !smallEnough(binary.getOperand(1)))
+            return refuse("an unsigned division of a constant at or above 2^23");
+        std::string left, right, name;
+        if (!expression(binary.getOperand(0), left) || !expression(binary.getOperand(1), right))
+            return false;
+        if (!local(instruction, name))
+            return false;
+        std::string quotient = "int((float(" + left + ") + 0.5) / float(" + right + "))";
+        if (binary.getOpcode() == Instruction::UDiv)
+            statement(name + " = " + quotient + ";\n");
+        else
+            statement(name + " = (" + left + " - " + right + " * " + quotient + ");\n");
+        return true;
+    }
+
+    std::string structOf(Type *type)
+    {
+        auto *structure = cast<StructType>(type);
+        std::string fields;
+        for (unsigned i = 0; i < structure->getNumElements(); i++) {
+            Type *member = structure->getElementType(i);
+            Type *element = member->isArrayTy() ? member->getArrayElementType() : member;
+            std::string glsl = glslType(element);
+            if (glsl.empty() || element->isStructTy() || element->isArrayTy())
+                return "";
+            std::string dimension = member->isArrayTy() ? "[" + std::to_string(cast<ArrayType>(member)->getNumElements()) + "]" : "";
+            fields += "    " + glsl + " f" + std::to_string(i) + dimension + ";\n";
+        }
+        std::string name = "S" + std::to_string(counter_++);
+        declare("struct " + name + " {\n" + fields + "};\n", name);
+        return name;
+    }
+
+    bool localElement(GetElementPtrInst &gep, const Local &base)
+    {
+        auto *first = dyn_cast<ConstantInt>(gep.getOperand(1));
+        if (!first || !first->isZero() || gep.getSourceElementType() != base.type)
+            return refuse("an element of a local at a depth this emitter does not map");
+        std::string name = base.name;
+        Type *type = base.type;
+        bool selected = false;
+        for (unsigned i = 2; i < gep.getNumOperands(); i++) {
+            Value *index = gep.getOperand(i);
+            if (auto *structure = dyn_cast<StructType>(type)) {
+                auto *field = dyn_cast<ConstantInt>(index);
+                if (!field || field->getZExtValue() >= structure->getNumElements())
+                    return refuse("a struct field this emitter does not map");
+                name += ".f" + std::to_string(field->getZExtValue());
+                type = structure->getElementType((unsigned)field->getZExtValue());
+            } else if (auto *array = dyn_cast<ArrayType>(type)) {
+                if (auto *extend = dyn_cast<ZExtInst>(index); extend && extend->getOperand(0)->getType()->isIntegerTy(32))
+                    index = extend->getOperand(0);
+                else if (auto *extend = dyn_cast<SExtInst>(index); extend && extend->getOperand(0)->getType()->isIntegerTy(32))
+                    index = extend->getOperand(0);
+                std::string text;
+                if (!expression(index, text))
+                    return false;
+                if (isa<ConstantInt>(index)) {
+                    name += "[" + text + "]";
+                } else {
+                    if (i + 1 != gep.getNumOperands() || selected || array->getNumElements() > 64 || array->getElementType()->isAggregateType())
+                        return refuse("a dynamic index into a local that this emitter does not map");
+                    std::string chain;
+                    for (uint64_t k = array->getNumElements(); k-- > 0;) {
+                        std::string element = name + "[" + std::to_string(k) + "]";
+                        chain = chain.empty() ? element : "((" + text + " == " + std::to_string(k) + ") ? " + element + " : " + chain + ")";
+                    }
+                    name = chain;
+                    selected = true;
+                }
+                type = array->getElementType();
+            } else if (auto *vector = dyn_cast<FixedVectorType>(type)) {
+                auto *lane = dyn_cast<ConstantInt>(index);
+                if (!lane || lane->getZExtValue() >= std::min<uint64_t>(vector->getNumElements(), 4))
+                    return refuse("a vector lane this emitter does not map");
+                name += std::string(".") + "xyzw"[lane->getZExtValue()];
+                type = vector->getElementType();
+            } else {
+                return refuse("an element of a local at a depth this emitter does not map");
+            }
+        }
+        Local &element = localPointers_[&gep];
+        element.name = name;
+        element.type = type;
+        element.selected = selected;
+        return true;
+    }
+
     bool local(Instruction &instruction, std::string &name)
     {
         std::string type = glslType(instruction.getType());
@@ -923,15 +1683,45 @@ private:
 
     bool emit(Instruction &instruction)
     {
+        if (auto *slot = dyn_cast<AllocaInst>(&instruction)) {
+            Type *type = slot->getAllocatedType();
+            Type *element = type->isArrayTy() ? type->getArrayElementType() : type;
+            std::string glsl = type->isStructTy() ? structOf(type) : glslType(element);
+            if (glsl.empty() || (type->isArrayTy() && (element->isStructTy() || element->isArrayTy())))
+                return refuse("a local of a type this emitter does not hold as a variable");
+            Local &local = localPointers_[slot];
+            local.name = "v" + std::to_string(counter_++);
+            local.type = type;
+            std::string dimension = type->isArrayTy() ? "[" + std::to_string(cast<ArrayType>(type)->getNumElements()) + "]" : "";
+            locals_.push_back(glsl + " " + local.name + dimension + ";\n");
+            return true;
+        }
+        if (auto *cast = dyn_cast<BitCastInst>(&instruction); cast && cast->getType()->isPointerTy())
+            return true;
+        if (auto *store = dyn_cast<StoreInst>(&instruction)) {
+            const Local *slot = localOf(store->getPointerOperand());
+            bool narrowed = slot && paddedVectorOf(slot->type, store->getValueOperand()->getType());
+            if (!slot || slot->selected || (slot->type != store->getValueOperand()->getType() && !narrowed))
+                return refuse("a store to an address this emitter does not write as a local");
+            std::string text;
+            if (!expression(store->getValueOperand(), text))
+                return false;
+            statement(slot->name + " = " + (narrowed ? glslType(slot->type) + "(" + text + ")" : text) + ";\n");
+            return true;
+        }
         if (auto *gep = dyn_cast<GetElementPtrInst>(&instruction)) {
             if (isa<GlobalVariable>(gep->getPointerOperand()))
                 return true;
+            if (const Local *base = localOf(gep->getPointerOperand()); base && (base->type->isArrayTy() || base->type->isStructTy()))
+                return localElement(*gep, *base);
             Address address;
             if (!resolve(gep, address))
                 return refuse("an address this emitter does not read");
             return true;
         }
         if (auto *extend = dyn_cast<ZExtInst>(&instruction); extend && isVertexIndex(extend))
+            return true;
+        if (auto *extend = dyn_cast<SExtInst>(&instruction); extend && isAddressIndex(*extend))
             return true;
         if (auto *insert = dyn_cast<InsertValueInst>(&instruction)) {
             if (insert->getNumIndices() != 1)
@@ -1009,6 +1799,12 @@ private:
             return true;
         }
         if (auto *binary = dyn_cast<BinaryOperator>(&instruction)) {
+            if (binary->getOpcode() == Instruction::And)
+                return maskAnd(instruction, *binary);
+            if (binary->getOpcode() == Instruction::LShr)
+                return shiftRight(instruction, *binary);
+            if (binary->getOpcode() == Instruction::UDiv || binary->getOpcode() == Instruction::URem)
+                return unsignedDivide(instruction, *binary);
             const char *op = nullptr;
             switch (binary->getOpcode()) {
             case Instruction::FAdd: case Instruction::Add: op = "+"; break;
@@ -1027,13 +1823,32 @@ private:
         }
         if (auto *compare = dyn_cast<CmpInst>(&instruction)) {
             const char *op = nullptr;
-            switch (compare->getPredicate()) {
+            CmpInst::Predicate predicate = compare->getPredicate();
+            if (CmpInst::isFPPredicate(predicate) && !CmpInst::isOrdered(predicate)) {
+                if (!compare->hasNoNaNs())
+                    return refuse("an unordered comparison of floats that may be NaN");
+                switch (predicate) {
+                case CmpInst::FCMP_UEQ: predicate = CmpInst::FCMP_OEQ; break;
+                case CmpInst::FCMP_UNE: predicate = CmpInst::FCMP_ONE; break;
+                case CmpInst::FCMP_ULT: predicate = CmpInst::FCMP_OLT; break;
+                case CmpInst::FCMP_UGT: predicate = CmpInst::FCMP_OGT; break;
+                case CmpInst::FCMP_ULE: predicate = CmpInst::FCMP_OLE; break;
+                case CmpInst::FCMP_UGE: predicate = CmpInst::FCMP_OGE; break;
+                default: return refuse("a comparison this emitter does not map");
+                }
+            }
+            switch (predicate) {
             case CmpInst::ICMP_EQ: case CmpInst::FCMP_OEQ: op = "=="; break;
             case CmpInst::ICMP_NE: op = "!="; break;
-            case CmpInst::FCMP_OLT: op = "<"; break;
-            case CmpInst::FCMP_OGT: op = ">"; break;
-            case CmpInst::FCMP_OLE: op = "<="; break;
-            case CmpInst::FCMP_OGE: op = ">="; break;
+            case CmpInst::FCMP_ONE: op = "!="; break;
+            case CmpInst::FCMP_OLT: case CmpInst::ICMP_SLT: op = "<"; break;
+            case CmpInst::FCMP_OGT: case CmpInst::ICMP_SGT: op = ">"; break;
+            case CmpInst::FCMP_OLE: case CmpInst::ICMP_SLE: op = "<="; break;
+            case CmpInst::FCMP_OGE: case CmpInst::ICMP_SGE: op = ">="; break;
+            case CmpInst::ICMP_ULT: case CmpInst::ICMP_ULE: case CmpInst::ICMP_UGT: case CmpInst::ICMP_UGE:
+                if (!compare->getOperand(0)->getType()->getScalarType()->isIntegerTy(32))
+                    return refuse("an unsigned comparison of integers other than 32 bits");
+                break;
             default: return refuse("a comparison this emitter does not map");
             }
             std::string left, right, name;
@@ -1041,7 +1856,32 @@ private:
                 return false;
             if (!local(instruction, name))
                 return false;
-            statement(name + " = (" + left + " " + op + " " + right + ");\n");
+            auto *vector = dyn_cast<FixedVectorType>(compare->getOperand(0)->getType());
+            auto part = [&](const std::string &value, unsigned index) {
+                return vector ? "(" + value + ")." + std::string(1, "xyzw"[index]) : value;
+            };
+            auto below = [](const std::string &a, const std::string &b) {
+                return "(((" + a + " < 0) != (" + b + " < 0)) ? (" + a + " >= 0) : (" + a + " < " + b + "))";
+            };
+            auto element = [&](unsigned index) {
+                std::string a = part(left, index), b = part(right, index);
+                if (op)
+                    return "(" + a + " " + op + " " + b + ")";
+                switch (compare->getPredicate()) {
+                case CmpInst::ICMP_ULT: return below(a, b);
+                case CmpInst::ICMP_UGT: return below(b, a);
+                case CmpInst::ICMP_ULE: return "!" + below(b, a);
+                default: return "!" + below(a, b);
+                }
+            };
+            if (!vector) {
+                statement(name + " = " + element(0) + ";\n");
+                return true;
+            }
+            std::string list;
+            for (unsigned index = 0; index < vector->getNumElements(); ++index)
+                list += (list.empty() ? "" : ", ") + element(index);
+            statement(name + " = " + glslType(compare->getType()) + "(" + list + ");\n");
             return true;
         }
         if (auto *select = dyn_cast<SelectInst>(&instruction)) {
@@ -1077,26 +1917,173 @@ private:
         return refuse(std::string("an instruction this emitter does not translate: ") + instruction.getOpcodeName());
     }
 
+    bool writeTexture(CallInst &call)
+    {
+        if (call.arg_size() != 5)
+            return refuse("a write with an argument count this emitter does not map");
+        Binding *texture = bindingOf(call.getArgOperand(0));
+        if (!texture || texture->kind != "air.write_texture")
+            return refuse("a write to something other than the output texture argument");
+        if (!output_.empty() && output_ != texture->name)
+            return refuse("a kernel that writes more than one texture");
+        Binding *coordinate = bindingOf(call.getArgOperand(1));
+        if (!coordinate || coordinate->kind != "air.thread_position_in_grid")
+            return refuse("a write at a coordinate other than the thread position");
+        auto *level = dyn_cast<ConstantInt>(call.getArgOperand(3));
+        if (!level || !level->isZero())
+            return refuse("a write at a level other than 0");
+        std::string value;
+        if (!expression(call.getArgOperand(2), value))
+            return false;
+        output_ = texture->name;
+        outputIndex_ = texture->index;
+        statement("gl_FragColor = " + value + ";\n");
+        statement("revenant_written = true;\n");
+        return true;
+    }
+
+    bool readTexture(CallInst &call)
+    {
+        if (stage_ != Stage::Kernel && stage_ != Stage::Fragment)
+            return refuse("a read of a texture in a vertex shader, which OpenGL ES 2 does not sample");
+        if (call.arg_size() != 4)
+            return refuse("a read with an argument count this emitter does not map");
+        Binding *texture = bindingOf(call.getArgOperand(0));
+        if (!texture || texture->kind != "air.texture")
+            return refuse("a read of something other than a texture argument");
+        auto *level = dyn_cast<ConstantInt>(call.getArgOperand(2));
+        if (!level || !level->isZero())
+            return refuse("a read at a level other than 0");
+        std::string position;
+        if (!expression(call.getArgOperand(1), position))
+            return false;
+        std::string size = texture->name + "_size";
+        bool fresh = !declared_.count(size);
+        declare("uniform vec2 " + size + ";\n", size);
+        if (fresh)
+            sizes_.push_back("{\"name\": " + jsonQuote(size) + ", \"texture\": " + std::to_string(texture->index) + "}");
+        declare("uniform sampler2D " + texture->name + ";\n", texture->name);
+        GLESSampler nearest;
+        nearest.wrapS = nearest.wrapT = "clamp_to_edge";
+        nearest.minFilter = nearest.magFilter = "nearest";
+        if (!sampledBy(*texture, samplerJson(nearest), ", \"depth\": false, \"compare\": false"))
+            return false;
+        std::string name;
+        if (!local(call, name))
+            return false;
+        statement(name + " = texture2D(" + texture->name + ", (vec2(" + position + ") + vec2(0.5)) / " + size + ");\n");
+        return true;
+    }
+
+    const Binding *threadPositionOf(const Value *value)
+    {
+        if (auto *extract = dyn_cast<ExtractElementInst>(value))
+            value = extract->getVectorOperand();
+        const Binding *binding = bindingOf(value);
+        return binding && binding->kind == "air.thread_position_in_grid" ? binding : nullptr;
+    }
+
+    bool shiftRight(Instruction &instruction, BinaryOperator &binary)
+    {
+        auto *constant = dyn_cast<Constant>(binary.getOperand(1));
+        auto *amount = constant ? dyn_cast_or_null<ConstantInt>(constant->getSplatValue()) : nullptr;
+        if (!amount || amount->getZExtValue() >= 31 || !threadPositionOf(binary.getOperand(0)))
+            return refuse("a logical shift right other than of a thread position or its lane by a constant");
+        std::string left, name;
+        if (!expression(binary.getOperand(0), left) || !local(instruction, name))
+            return false;
+        std::string divisor = std::to_string(uint64_t(1) << amount->getZExtValue());
+        if (instruction.getType()->isVectorTy())
+            divisor = glslType(instruction.getType()) + "(" + divisor + ")";
+        statement(name + " = (" + left + " / " + divisor + ");\n");
+        return true;
+    }
+
+    bool sampleCube(CallInst &call)
+    {
+        if (call.arg_size() != 6)
+            return refuse("a cube sample with an argument count this emitter does not map");
+        Binding *texture = bindingOf(call.getArgOperand(0));
+        if (!texture || texture->kind != "air.texture_cube")
+            return refuse("a cube sample of something other than a cube texture argument");
+        std::string sampler;
+        if (!samplerOf(call.getArgOperand(1), sampler))
+            return false;
+        auto *flag = dyn_cast<ConstantInt>(call.getArgOperand(3));
+        auto *bias = dyn_cast<ConstantFP>(call.getArgOperand(4));
+        auto *offset = dyn_cast<ConstantInt>(call.getArgOperand(5));
+        if (!flag || !flag->isZero() || !bias || !bias->isZero() || !offset || !offset->isZero())
+            return refuse("a cube sample with a flag, bias or offset this emitter does not map");
+        std::string coordinates;
+        if (!expression(call.getArgOperand(2), coordinates))
+            return false;
+        declare("uniform samplerCube " + texture->name + ";\n", texture->name);
+        if (!sampledBy(*texture, sampler, ", \"depth\": false, \"compare\": false, \"cube\": true"))
+            return false;
+        std::string name;
+        if (!local(call, name))
+            return false;
+        statement(name + " = textureCube(" + texture->name + ", " + coordinates + ");\n");
+        return true;
+    }
+
+    bool zeroLocal(CallInst &call)
+    {
+        auto *fill = dyn_cast<ConstantInt>(call.getArgOperand(1));
+        auto *length = dyn_cast<ConstantInt>(call.getArgOperand(2));
+        const Local *base = localOf(call.getArgOperand(0));
+        if (!fill || !fill->isZero() || !length || !base || !base->type->isArrayTy())
+            return refuse("a memset this emitter does not map");
+        Type *element = base->type->getArrayElementType();
+        bool floats = element->isFloatingPointTy() || (element->isVectorTy() && cast<VectorType>(element)->getElementType()->isFloatingPointTy());
+        uint64_t size = allocSize(element);
+        uint64_t covered = size ? length->getZExtValue() / size : 0;
+        if (!floats || !size || length->getZExtValue() % size || covered > cast<ArrayType>(base->type)->getNumElements())
+            return refuse("a memset of a local that this emitter does not map");
+        std::string zero = element->isVectorTy() ? glslType(element) + "(0.0)" : "0.0";
+        for (uint64_t i = 0; i < covered; i++)
+            statement(base->name + "[" + std::to_string(i) + "] = " + zero + ";\n");
+        return true;
+    }
+
     bool emitCall(CallInst &call)
     {
         Function *callee = call.getCalledFunction();
         std::string called = callee ? callee->getName().str() : "";
         if (called.rfind("llvm.lifetime.", 0) == 0)
             return true;
+        if (called.rfind("llvm.memset.", 0) == 0)
+            return zeroLocal(call);
         if (callee && !callee->isDeclaration())
             return inlineCall(call, *callee);
+        if (called.rfind("air.wg.barrier", 0) == 0)
+            return refuse("a threadgroup barrier, which one fragment pass cannot run; it needs a pass boundary");
+        if (called.rfind("air.atomic", 0) == 0)
+            return refuse("an atomic operation, which one fragment pass cannot run; it needs a multi-pass design");
+        if (called == "air.discard_fragment") {
+            if (stage_ != Stage::Fragment || call.arg_size() != 0)
+                return refuse("a discard outside a fragment function");
+            statement("discard;\n");
+            return true;
+        }
+        if (called == "air.write_texture_2d.v4f32" || called == "air.write_texture_2d.v4f16")
+            return writeTexture(call);
+        if (called == "air.read_texture_2d.v4f16")
+            return readTexture(call);
+        if (called == "air.sample_texture_cube.v4f32")
+            return sampleCube(call);
         bool sample = called == "air.sample_texture_2d.v4f32" || called == "air.sample_texture_2d.v4f16";
         bool width = called == "air.get_width_texture_2d";
+        bool height = called == "air.get_height_texture_2d";
         bool convert = called.rfind("air.convert.", 0) == 0;
-        bool unary = called == "air.fast_sin.f32" || called == "air.fast_cos.f32" || called == "air.fast_fabs.f32" ||
-                     called == "air.fast_floor.v2f32" || called == "air.fast_fract.f32";
-        bool ternaryFunction = called == "air.dot.v3f32" || called == "air.mix.v3f32" || called == "air.fast_clamp.v3f32";
+        const PlainFunction *plain = plainFunction(called);
         bool fmod = called == "air.fast_fmod.f32" || called == "air.fast_fmod.v2f32";
-        if (!sample && !width && !convert && !unary && !ternaryFunction && !fmod)
+        bool maxUnsigned = called == "air.max.u.i32";
+        if (!sample && !width && !height && !convert && !plain && !fmod && !maxUnsigned)
             return refuse("a call to " + (called.empty() ? std::string("an indirect target") : called));
         std::vector<std::string> args;
         for (unsigned i = 0; i < call.arg_size(); i++) {
-            if (width || (sample && i != 2))
+            if (width || height || (sample && i != 2))
                 continue;
             std::string text;
             if (!expression(call.getArgOperand(i), text))
@@ -1110,12 +2097,12 @@ private:
             statement(name + " = " + glslType(call.getType()) + "(" + args[0] + ");\n");
             return true;
         }
-        if (unary) {
-            std::string function = called == "air.fast_sin.f32" ? "sin" : called == "air.fast_cos.f32" ? "cos"
-                                 : called == "air.fast_fabs.f32" ? "abs" : called == "air.fast_fract.f32" ? "fract" : "floor";
-            if (args.size() != 1 || !local(call, name))
+        if (maxUnsigned) {
+            if (args.size() != 2 || !local(call, name))
                 return refuse("a call to " + called + " with an argument count this emitter does not map");
-            statement(name + " = " + function + "(" + args[0] + ");\n");
+            if (!bounded(call.getArgOperand(0)) || !bounded(call.getArgOperand(1)))
+                return refuse("an unsigned max of an operand that is not bounded below 2^31");
+            statement(name + " = (" + args[0] + " > " + args[1] + ") ? " + args[0] + " : " + args[1] + ";\n");
             return true;
         }
         if (fmod) {
@@ -1130,27 +2117,35 @@ private:
                                   quotient + ")));\n");
             return true;
         }
-        if (ternaryFunction) {
-            std::string function = called == "air.dot.v3f32" ? "dot" : called == "air.mix.v3f32" ? "mix" : "clamp";
-            if (args.size() != (called == "air.dot.v3f32" ? 2u : 3u) || !local(call, name))
+        if (plain) {
+            if (args.size() != plain->arguments || !local(call, name))
                 return refuse("a call to " + called + " with an argument count this emitter does not map");
-            statement(name + " = " + function + "(" + join(args) + ");\n");
+            if (plain->derivative) {
+                if (stage_ != Stage::Fragment)
+                    return refuse("a derivative outside a fragment function");
+                derivatives_ = true;
+            }
+            statement(name + " = " + plain->glsl + "(" + join(args) + plain->tail + ");\n");
             return true;
         }
-        if (width) {
+        if (width || height) {
             if (call.arg_size() != 2)
-                return refuse("a width with an argument count this emitter does not map");
+                return refuse("a size with an argument count this emitter does not map");
             Binding *texture = bindingOf(call.getArgOperand(0));
-            if (!texture || texture->kind != "air.texture")
-                return refuse("a width of something other than a texture");
+            if (!texture || (texture->kind != "air.texture" && texture->kind != "air.write_texture"))
+                return refuse("a size of something other than a texture");
             std::string size = texture->name + "_size";
+            highp_ = true;
             bool fresh = !declared_.count(size);
             declare("uniform vec2 " + size + ";\n", size);
-            if (fresh)
-                sizes_.push_back("{\"name\": " + jsonQuote(size) + ", \"texture\": " + std::to_string(texture->index) + "}");
+            if (fresh) {
+                bool output = texture->kind == "air.write_texture";
+                sizes_.push_back("{\"name\": " + jsonQuote(size) + ", \"texture\": " + std::to_string(texture->index) +
+                                 (output ? ", \"output\": true" : "") + "}");
+            }
             if (!local(call, name))
                 return false;
-            statement(name + " = int(" + size + ".x);\n");
+            statement(name + " = int(" + size + (width ? ".x" : ".y") + ");\n");
             return true;
         }
         if (call.arg_size() != 8)
@@ -1158,9 +2153,9 @@ private:
         Binding *texture = bindingOf(call.getArgOperand(0));
         if (!texture || texture->kind != "air.texture")
             return refuse("a sample of something other than a texture argument");
-        Binding *sampler = bindingOf(call.getArgOperand(1));
-        if (!sampler || sampler->kind != "air.sampler")
-            return refuse("a sample with a sampler built into the shader, which the library carries no state for");
+        std::string sampler;
+        if (!samplerOf(call.getArgOperand(1), sampler))
+            return false;
         auto *normalized = dyn_cast<ConstantInt>(call.getArgOperand(3));
         auto *hasLevel = dyn_cast<ConstantInt>(call.getArgOperand(5));
         auto *level = dyn_cast<ConstantFP>(call.getArgOperand(6));
@@ -1170,11 +2165,8 @@ private:
         if (args.size() != 1)
             return refuse("a sample with an argument count this emitter does not map");
         declare("uniform sampler2D " + texture->name + ";\n", texture->name);
-        if (!textures_.count(texture->name)) {
-            textures_.insert(texture->name);
-            textureLines_.push_back("{\"name\": " + jsonQuote(texture->name) + ", \"index\": " + std::to_string(texture->index) +
-                                    ", \"depth\": false, \"compare\": false}");
-        }
+        if (!sampledBy(*texture, sampler, ", \"depth\": false, \"compare\": false"))
+            return false;
         if (!local(call, name))
             return false;
         statement(name + " = texture2D(" + texture->name + ", " + args[0] + ");\n");
@@ -1215,14 +2207,21 @@ private:
                 std::string type = glslType(fields[k]->getType());
                 if (output.name.empty() || type.empty())
                     return refuse("a vertex output without a name or of a type this emitter does not hold");
+                if (type == "bool" || type.rfind("ivec", 0) == 0 || type.rfind("bvec", 0) == 0)
+                    return refuse("an integer or bool vertex output, which ES 1.00 has no varying for");
                 if (!expression(fields[k], text))
                     return false;
-                declare("varying " + type + " " + output.name + ";\n", output.name);
-                statement(output.name + " = " + text + ";\n");
+                if (type == "int") {
+                    declare("varying float " + output.name + ";\n", output.name);
+                    statement(output.name + " = float(" + text + ");\n");
+                } else {
+                    declare("varying " + type + " " + output.name + ";\n", output.name);
+                    statement(output.name + " = " + text + ";\n");
+                }
             } else if (output.kind == "air.render_target" && stage_ == Stage::Fragment && output.index == 0) {
                 if (!expression(fields[k], text))
                     return false;
-                statement("gl_FragColor = " + text + ";\n");
+                statement("gl_FragColor = " + colorOf(fields[k]->getType(), text) + ";\n");
             } else {
                 return refuse("an output of kind " + output.kind + " in a " +
                               (stage_ == Stage::Vertex ? "vertex" : "fragment") + " function");
@@ -1249,6 +2248,8 @@ private:
             out += ", \"textures\": [" + join(textureLines_) + "]";
             out += ", \"sizes\": [" + join(sizes_) + "]";
             out += ", \"outputs\": [" + join(outputs) + "]";
+            if (stage_ == Stage::Kernel)
+                out += ", \"outputTexture\": {\"name\": " + jsonQuote(output_) + ", \"index\": " + std::to_string(outputIndex_) + "}";
             out += ", \"fetches\": []";
         }
         return out + ", \"constants\": []}";
@@ -1265,7 +2266,7 @@ private:
     std::map<const Value *, std::vector<Value *>> aggregates_;
     std::map<const Value *, std::string> names_;
     std::set<std::string> declared_;
-    std::set<std::string> textures_;
+    std::map<std::string, std::string> textures_;
     std::vector<std::string> declarations_;
     std::vector<std::string> locals_;
     std::vector<std::string> statements_;
@@ -1276,7 +2277,14 @@ private:
     unsigned counter_ = 0;
     unsigned depth_ = 0;
     bool returned_ = false;
+    bool highp_ = false;
+    bool derivatives_ = false;
+    std::string output_;
+    uint64_t outputIndex_ = 0;
+    std::map<const Value *, Local> localPointers_;
+    std::map<const Value *, const Local *> inlineLocals_;
     std::set<const BasicBlock *> visited_;
+    std::vector<ActiveLoop> loops_;
     std::map<const Function *, BlockSets> postDominators_;
     std::map<const Value *, Binding *> inlineBindings_;
     std::map<const Value *, std::string> inlineValues_;
@@ -1303,15 +2311,57 @@ std::string jsonQuote(const std::string &text)
     return out + "\"";
 }
 
+std::unique_ptr<Module> parseEntry(const Entry &entry, LLVMContext &context, std::string &error)
+{
+    auto buffer = MemoryBuffer::getMemBuffer(StringRef((const char *)entry.bitcode.data(), entry.bitcode.size()), entry.name, false);
+    Expected<std::unique_ptr<Module>> parsed = parseBitcodeFile(buffer->getMemBufferRef(), context);
+    if (!parsed) {
+        error = "its bitcode does not read: " + toString(parsed.takeError());
+        return nullptr;
+    }
+    return std::move(*parsed);
+}
+
+bool dumpEntry(const Entry &entry, std::string &text, std::string &error)
+{
+    LLVMContext context;
+    std::unique_ptr<Module> module = parseEntry(entry, context, error);
+    if (!module)
+        return false;
+    raw_string_ostream stream(text);
+    module->print(stream, nullptr);
+    return true;
+}
+
+bool samplerStatesOf(const Entry &entry, std::vector<SamplerUse> &uses, std::string &error)
+{
+    LLVMContext context;
+    std::unique_ptr<Module> module = parseEntry(entry, context, error);
+    if (!module)
+        return false;
+    for (const Function &function : *module)
+        for (const BasicBlock &block : function)
+            for (const Instruction &instruction : block)
+                for (const Use &use : instruction.operands()) {
+                    uint64_t state = 0;
+                    auto *global = dyn_cast<GlobalVariable>(use.get());
+                    if (!global || !samplerStateOf(*global, state))
+                        continue;
+                    SamplerUse found{entry.name, function.getName().str(), state};
+                    bool seen = false;
+                    for (const SamplerUse &known : uses)
+                        seen = seen || (known.function == found.function && known.state == found.state);
+                    if (!seen)
+                        uses.push_back(found);
+                }
+    return true;
+}
+
 bool translateEntry(const Entry &entry, Translation &out, Refusal &refusal)
 {
     out.name = entry.name;
     out.stage = entry.stage;
     refusal.name = entry.name;
-    if (entry.stage == Stage::Kernel) {
-        refusal.reason = "a kernel, which belongs to air2cpu";
-        return false;
-    }
     LLVMContext context;
     auto buffer = MemoryBuffer::getMemBuffer(StringRef((const char *)entry.bitcode.data(), entry.bitcode.size()), entry.name, false);
     Expected<std::unique_ptr<Module>> parsed = parseBitcodeFile(buffer->getMemBufferRef(), context);
@@ -1320,7 +2370,7 @@ bool translateEntry(const Entry &entry, Translation &out, Refusal &refusal)
         return false;
     }
     std::unique_ptr<Module> module = std::move(*parsed);
-    const char *marker = entry.stage == Stage::Vertex ? "air.vertex" : "air.fragment";
+    const char *marker = entry.stage == Stage::Vertex ? "air.vertex" : entry.stage == Stage::Kernel ? "air.kernel" : "air.fragment";
     NamedMDNode *named = module->getNamedMetadata(marker);
     if (!named || named->getNumOperands() != 1) {
         refusal.reason = std::string("its module does not name it a ") + marker + " function";

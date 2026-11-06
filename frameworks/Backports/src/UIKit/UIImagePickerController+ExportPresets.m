@@ -3,20 +3,9 @@
 
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
-static const char RevenantImageExportPresetKey;
 static const char RevenantVideoExportPresetKey;
 
 @implementation UIImagePickerController (RevenantExportPresets)
-
-- (UIImagePickerControllerImageURLExportPreset)imageExportPreset
-{
-    return (UIImagePickerControllerImageURLExportPreset)[objc_getAssociatedObject(self, &RevenantImageExportPresetKey) integerValue];
-}
-
-- (void)setImageExportPreset:(UIImagePickerControllerImageURLExportPreset)imageExportPreset
-{
-    objc_setAssociatedObject(self, &RevenantImageExportPresetKey, @(imageExportPreset), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
 
 - (NSString *)videoExportPreset
 {

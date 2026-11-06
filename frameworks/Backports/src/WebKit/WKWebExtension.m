@@ -20,6 +20,8 @@ WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionUnlimitedSt
 WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionWebNavigation) = @"webNavigation";
 WKWebExtensionPermission const BACKPORT_IMPL(WKWebExtensionPermissionWebRequest) = @"webRequest";
 
+extern NSString *const __revenant_fb_WKWebExtensionErrorDomain;
+
 @implementation WKWebExtension {
     NSDictionary<NSString *, id> *_manifest;
     NSArray<NSError *> *_errors;

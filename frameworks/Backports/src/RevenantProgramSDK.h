@@ -26,11 +26,6 @@ static inline uint32_t revenant_program_sdk_on_platform(uint32_t platform)
     return 0;
 }
 
-static inline uint32_t revenant_program_sdk(void)
-{
-    return revenant_program_sdk_on_platform(PLATFORM_IOS);
-}
-
 static inline BOOL revenant_program_linked_on_or_after(double version, uint32_t platform)
 {
     uint32_t sdk = revenant_program_sdk_on_platform(platform);

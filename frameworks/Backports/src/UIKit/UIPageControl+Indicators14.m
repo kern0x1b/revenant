@@ -4,7 +4,7 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static const char revenant_images_key, revenant_preferred_key, revenant_continuous_key, revenant_background_key, revenant_layers_key;
+static const char revenant_images_key, revenant_preferred_key, revenant_background_key, revenant_layers_key;
 static const char revenant_current_images_key, revenant_preferred_current_key, revenant_direction_key;
 
 static IMP revenant_release_layout;
@@ -157,16 +157,6 @@ __attribute__((constructor)) static void revenant_install_indicator_layout(void)
     [self setNeedsLayout];
 }
 
-- (BOOL)allowsContinuousInteraction
-{
-    NSNumber *held = objc_getAssociatedObject(self, &revenant_continuous_key);
-    return held ? held.boolValue : YES;
-}
-
-- (void)setAllowsContinuousInteraction:(BOOL)allowsContinuousInteraction
-{
-    objc_setAssociatedObject(self, &revenant_continuous_key, @(allowsContinuousInteraction), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
 
 - (UIPageControlBackgroundStyle)backgroundStyle
 {

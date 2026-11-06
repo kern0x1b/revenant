@@ -51,7 +51,7 @@ Sizes: S is under a day; M is a few days, including a device test; L is a week o
 4. T12 `inheritedAnimationDuration` is always 0 (C, M).
 5. T11 `textInputMode` is nil (C, M).
 6. T18 `usesInterfaceType` is an approximation, and Telegram's cellular decision reads it (C, M).
-7. T13 `PHChange.hasMoves` was NO, and the moves were never enumerated (C, M); fixed in a191cfc96, see the T13 row.
+7. T13 `PHChange.hasMoves` was NO, and the moves were never enumerated (C, M); fixed, see the T13 row.
 8. T02 `addPresentedHandler:` never calls the block (E, S).
 9. T21 alternate icon: refused with `NSFeatureUnsupportedError` (F, L).
 10. T23 Sign in with Apple: completes with an error (F, L).
@@ -124,7 +124,7 @@ Sorted by size: S, then M, then L.
 | N16 | B/AVFoundation/AVAudioUnit.m:46-50 | `-loadAudioUnitPresetAtURL:error:` | returns NO with `kAudio_UnimplementedError` (NSOSStatusErrorDomain) | loads a preset file into the unit (AVAudioUnit) | no (0 files) | F | M | fixed: the preset plist is read (`RevenantAudioUnitReadPreset`, B/AVFoundation/RevenantAudioUnitPreset.m), and its dictionary is set as the unit's `kAudioUnitProperty_ClassInfo` (`RevenantAudioUnitApplyPreset`). A unit the engine has not attached yet keeps the preset and applies it when the engine attaches it (AVAudioUnit.m). Read errors are the file system's and the plist parser's; a set the unit refuses is an NSOSStatusErrorDomain error with its status. Verified: host test `AVFoundationBackports_audio_preset_test` on macOS (Apple's delay unit: a 1.5 s delay time written to a preset file and applied to a new unit reads back 1.5 s; a missing file and a non-dictionary plist are refused; the negative run fails as designed). The iOS 6 build compiles AVAudioUnit.m and the helper for armv7. Not run on the phone, and the attach-time apply is not exercised by any run yet |
 | N17 | B/Network/NWListener.swift:40-41; B/Network/NWConnection.swift:133 | `NWListener` start; `NWConnection` server side | ENOTSUP when TLS has no server identity | the TLS error the identity check reports (Network, NWListener); the exact error is not verified | no; submodules/TelegramCore/Sources/Network/NetworkFrameworkTcpConnectionInterface.swift:140-147 uses `NWParameters(tls: nil)` | F | M | server-side SecureTransport on iOS 6 takes an identity; ENOTSUP is invented |
 | N18 | B/Metal/RevenantMetalDrawable.m:49-57 | `-presentAtTime:`, `-presentAfterMinimumDuration:` | present now; the time is ignored | present at the time, and not before the minimum duration (MTLDrawable) | no (presentAtTime is not used) | E | M | fixed for `presentAtTime:`: the present runs on the main queue at the time, and never before it (device probe run 3: 3 PASS checks). `presentAfterMinimumDuration:` is fixed too: the layer keeps the time of its last presentation (an associated object set by `present`), and the drawable presents at that time plus the duration. Device probe on iPhone4,1 (iOS 6.1.3): it does not present at once after a previous presentation, and it presents no earlier than the duration after it (2 PASS) |
-| N26 | O/UIKit/UIKitRevenant.swift:55-57 (`corners(topLeftRadius:...)`); the SDK's `corners(radius:)` and per-corner factories are unbacked in B/UIKit/UIKit26_0.m | `UICornerConfiguration.corners(topLeftRadius:topRightRadius:bottomLeftRadius:bottomRightRadius:)` traps (`preconditionFailure`); `corners(radius:)` has no member on iOS 6 | per-corner radii of a view's corner configuration (UICornerConfiguration, configurationWithTopLeftRadius:topRightRadius:bottomLeftRadius:bottomRightRadius:, UICornerConfiguration.h:26) | yes, submodules/TelegramUI/Components/GlassBackgroundComponent/Sources/GlassBackgroundComponent.swift:427 calls the per-corner form only inside `if #available(iOS 26.0, *)`, with a CAShapeLayer fallback below; prototypes/ContextMenuMorph/Sources/App.swift:83 calls `corners(radius:)` | F | M | open: unbacked. The overlay declares the per-corner form so iOS 26-guarded code compiles on iOS 6, and it traps if called there. `configurationWithRadius:` (`corners(radius:)`) and the per-corner factory are not in the lowered member list, so iOS 6 does not see them. Per-corner radii need a CAShapeLayer mask on the view's layer, in B/UIKit/UIKit26_0.m. Paseo-app and Expo were not searched in this change |
+| N26 | O/UIKit/UIKitRevenant.swift (`corners(topLeftRadius:...)`); B/UIKit/UICornerConfiguration.m (`UICornerConfiguration`, `UICornerRadius`) | was: `UICornerConfiguration.corners(topLeftRadius:topRightRadius:bottomLeftRadius:bottomRightRadius:)` trapped (`preconditionFailure`); `corners(radius:)` had no member on iOS 6 | per-corner radii of a view's corner configuration (UICornerConfiguration, configurationWithTopLeftRadius:topRightRadius:bottomLeftRadius:bottomRightRadius:, UICornerConfiguration.h:26) | yes, submodules/TelegramUI/Components/GlassBackgroundComponent/Sources/GlassBackgroundComponent.swift:427 calls the per-corner form only inside `if #available(iOS 26.0, *)`, with a CAShapeLayer fallback below; prototypes/ContextMenuMorph/Sources/App.swift:83 calls `corners(radius:)` | F | M | fixed: every factory, the concentric radius, `UIView.cornerConfiguration` and `effectiveRadiusForCorner:` are implemented (per-corner radii by a CAShapeLayer mask with CSS-style radius fitting, in B/UIKit/RevenantCornerPath.c; the geometry is tested against an analytic oracle in tests/UIKit/corner_path_test.m), the members are in the lowered member list, and the overlay carries no release mark. Behaviour and limits: docs/reference/backports/UIKit/CornerConfiguration.md. Paseo-app and Expo were not searched in this change |
 | N19 | B/UIKit/UIContextMenuInteraction.m:19, 233; B/UIKit/UIControl+Menus14.m:167-186 | `previewViewController` (nil); `willMoveToView:` (empty); the delegate callbacks (nil or empty) | no menu is ever presented | presents the context menu and its preview (UIContextMenuInteraction, iOS 13) | no (prototype doc only) | C | L | deferred: depends on UIMenu, which is another worker's (UIMenuElement is skipped in this brief) |
 | N20 | B/UIKit/UIEditMenuInteraction.m:26, 42, 46, 50; B/UIKit/UITextView+EditMenu16.m:10, 14; B/UIKit/UITextField+EditMenu16.m:10, 14 | `dismissMenu`, `reloadVisibleMenu`, `updateVisibleMenuPositionAnimated:`, the will-present and will-dismiss callbacks | empty; no menu appears | shows the edit menu over the text (UIEditMenuInteraction, iOS 16) | no (docs only) | E | L | deferred: depends on UIMenu, skipped in this brief |
 | N21 | B/UIKit/UIFieldBehavior.m:528-537 | `-childBehaviors` (empty array); `-addChildBehavior:`, `-removeChildBehavior:` | empty | field behaviours with child behaviours (UIFieldBehavior, iOS 9) | no (0 files) | C | L | open: needs a dynamics engine behind the behaviour; not done |
@@ -195,7 +195,7 @@ The refusals in `B/Security` (SecAccessControl, SecKey, SharedWebCredentials) ar
 - `B/BackgroundTasks/BGTaskScheduler.m:77-83`: the cancel methods are empty, which is consistent with nothing being stored.
 - `B/AVFoundation/AVAudioUnit.m:53-54`: the base `revenant_applyPendingParameters` is empty; the effect class at `:83-85` overrides it.
 - `B/Metal/RevenantMetalDevice.m:68-86`: `isLowPower`, `isHeadless`, `isRemovable` and `hasUnifiedMemory` are fixed per hardware. `supportsTextureSampleCount:` is computed.
-- `B/Photos/PHChange8.m`: insertions, removals, changes and moves are implemented (T13, a191cfc96).
+- `B/Photos/PHChange8.m`: insertions, removals, changes and moves are implemented (T13).
 - `B/Contacts/CNChangeHistory*`: the visitor dispatch is implemented.
 - The `willMoveToView:` and `traitCollectionDidChange:` hooks, and the `UIPresentationController` hooks, are empty defaults.
 - Metal debug markers and optimisation hints are no-ops with no observable effect.
@@ -247,9 +247,9 @@ Each call site of `revenant_say_once_for`, `revenant_menus_say_once` or `revenan
 | frameworks/Backports/src/Accessibility/RevenantChartDescriptors.m:636 | @"AXLiveAudioGraph.updateValue" |
 | frameworks/Backports/src/Accessibility/RevenantChartDescriptors.m:643 | @"AXLiveAudioGraph.stop" |
 | frameworks/Backports/src/HealthKit/RevenantHKStore.m:18 | (no literal) |
-| frameworks/Backports/src/JavaScriptCore/JSCAPI18.m:9 | @"JavaScriptCore.JSGlobalContextSetInspectable" |
-| frameworks/Backports/src/JavaScriptCore/JSCAPI8.m:18 | @"JavaScriptCore.JSGlobalContextCopyName" |
-| frameworks/Backports/src/JavaScriptCore/JSCAPI8.m:9 | @"JavaScriptCore.JSGlobalContextSetName" |
+| frameworks/Backports/src/JavaScriptCore/JSCAPI18.m:10 | @"JavaScriptCore.JSGlobalContextSetInspectable" |
+| frameworks/Backports/src/JavaScriptCore/JSCAPI8.m:10 | @"JavaScriptCore.JSGlobalContextSetName" |
+| frameworks/Backports/src/JavaScriptCore/JSCAPI8.m:19 | @"JavaScriptCore.JSGlobalContextCopyName" |
 | frameworks/Backports/src/MessageUI/MFMailComposeViewController11.m:14 | @"MFMailComposeViewController.insertCollaborationItemProvider:completionHandler:" |
 | frameworks/Backports/src/MessageUI/MFMessageComposeViewController7.m:111 | @"MFMessageComposeViewController.insertCollaborationItemProvider:" |
 | frameworks/Backports/src/NotificationCenter/NCWidgetController.m:22 | @"NCWidgetController.setHasContent:forWidgetWithBundleIdentifier:" |
@@ -276,25 +276,23 @@ Each call site of `revenant_say_once_for`, `revenant_menus_say_once` or `revenan
 | frameworks/Backports/src/UIKit/NSLayoutManager+Text7.m:102 | @"glyph-font-substitution" |
 | frameworks/Backports/src/UIKit/NSParagraphStyle+Text15.m:14 | @"default-hyphenation" |
 | frameworks/Backports/src/UIKit/RevenantBarAppearance.m:208 | (no literal) |
-| frameworks/Backports/src/UIKit/UIAccessibility13.m:34 | @"voice-control" |
-| frameworks/Backports/src/UIKit/UIApplication+Scenes.m:57 | @"scene-refresh" |
+| frameworks/Backports/src/UIKit/UIAccessibility13.m:35 | @"voice-control" |
 | frameworks/Backports/src/UIKit/UIApplication+Scenes.m:6 | (no literal) |
+| frameworks/Backports/src/UIKit/UIApplication+Scenes.m:62 | @"scene-refresh" |
 | frameworks/Backports/src/UIKit/UICollectionView+SelectionFocus14.m:17 | @"collection-selection-follows-focus" |
 | frameworks/Backports/src/UIKit/UIContextMenuInteraction.m:286 | @"sheet" |
 | frameworks/Backports/src/UIKit/UIEditMenuInteraction.m:34 | @"edit-menu" |
 | frameworks/Backports/src/UIKit/UIEditMenuInteraction.m:39 | @"edit-menu-present" |
-| frameworks/Backports/src/UIKit/UIFontPickerViewController.m:152 | @"font-picker" |
 | frameworks/Backports/src/UIKit/UIHoverGestureRecognizer.m:14 | @"hover-recognizer" |
 | frameworks/Backports/src/UIKit/UIImage+Symbols.m:27 | @"symbol" |
 | frameworks/Backports/src/UIKit/UILabel+LineBreakStrategy14.m:19 | @"line-break-strategy" |
-| frameworks/Backports/src/UIKit/UILabel+Tightening9.m:16 | @"label-tightening" |
 | frameworks/Backports/src/UIKit/UIMenuSystem.m:41 | @"rebuild" |
 | frameworks/Backports/src/UIKit/UIMenuSystem.m:47 | @"revalidate" |
-| frameworks/Backports/src/UIKit/UINavigationItem+Groups16.m:30 | @"navigation-item-16" |
+| frameworks/Backports/src/UIKit/UINavigationItem+Groups16.m:27 | @"navigation-item-16" |
 | frameworks/Backports/src/UIKit/UIPanGestureRecognizer+ScrollTypes134.m:18 | @"scroll-types" |
-| frameworks/Backports/src/UIKit/UIPencilInteraction12.m:60 | @"pencil" |
+| frameworks/Backports/src/UIKit/UIPencilInteraction12.m:77 | @"pencil" |
 | frameworks/Backports/src/UIKit/UIPointerInteraction.m:56 | @"pointer-interaction" |
-| frameworks/Backports/src/UIKit/UIPointerLockState.m:55 | @"pointer-lock" |
+| frameworks/Backports/src/UIKit/UIPointerLockState.m:56 | @"pointer-lock" |
 | frameworks/Backports/src/UIKit/UIPrintInteractionController+Options7.m:21 | @"print-copies" |
 | frameworks/Backports/src/UIKit/UIPrintInteractionController+Options7.m:33 | @"print-paper" |
 | frameworks/Backports/src/UIKit/UIResponder+ItemsConfiguration.m:16 | @"items-configuration" |
@@ -304,30 +302,26 @@ Each call site of `revenant_say_once_for`, `revenant_menus_say_once` or `revenan
 | frameworks/Backports/src/UIKit/UISimpleTextPrintFormatter+Attributed7.m:61 | @"print-attributed" |
 | frameworks/Backports/src/UIKit/UISplitViewController+PrimaryEdge11.m:18 | @"split-primary-edge" |
 | frameworks/Backports/src/UIKit/UITabBar+Layout7.m:14 | @"tabbar-layout" |
-| frameworks/Backports/src/UIKit/UITabBar+Tint10.m:20 | @"tabbar-unselected" |
-| frameworks/Backports/src/UIKit/UITabBar+Tint10.m:36 | @"tabbaritem-badge" |
-| frameworks/Backports/src/UIKit/UITabBar+Tint10.m:48 | @"tabbaritem-badge" |
+| frameworks/Backports/src/UIKit/UITabBar+Tint10.m:19 | @"tabbar-unselected" |
+| frameworks/Backports/src/UIKit/UITabBar+Tint10.m:35 | @"tabbaritem-badge" |
 | frameworks/Backports/src/UIKit/UITableView+SelectionFocus14.m:17 | @"table-selection-follows-focus" |
-| frameworks/Backports/src/UIKit/UITableView+Updates11.m:77 | @"table-separator-reference" |
+| frameworks/Backports/src/UIKit/UITableView+Updates11.m:64 | @"table-separator-reference" |
 | frameworks/Backports/src/UIKit/UITextFormattingCoordinator.m:41 | @"font-panel" |
-| frameworks/Backports/src/UIKit/UITextInputAssistantItem.m:7 | @"input-assistant-groups" (removed with the T10 fix) |
 | frameworks/Backports/src/UIKit/UITextInputTraits11.m:12 | @"%@: the keyboard of iOS 6 makes no smart substitutions, so the value is kept and read back and typing is as before" |
 | frameworks/Backports/src/UIKit/UITextInputTraits11.m:51 | @"passwordRules" |
 | frameworks/Backports/src/UIKit/UITextView+TextKit7.m:180 | @"textview-link-attributes" |
 | frameworks/Backports/src/UIKit/UITextView+TextScaling13.m:18 | @"text-scaling" |
 | frameworks/Backports/src/UIKit/UIView+ContentSizeAdjusting.m:11 | @"content-size-adjusting" |
-| frameworks/Backports/src/UIKit/UIView+FocusGroup14.m:18 | @"focus-group" |
 | frameworks/Backports/src/UIKit/UIView+InvertColors.m:16 | @"invert-colors" |
-| frameworks/Backports/src/UIKit/UIView+iOS13.m:18 | @"dark-override" |
-| frameworks/Backports/src/UIKit/UIView+iOS13.m:34 | @"modify-animations" |
+| frameworks/Backports/src/UIKit/UIView+iOS13.m:41 | @"modify-animations" |
 | frameworks/Backports/src/UIKit/UIViewController+Previewing.m:8 | @"previewing" |
 | frameworks/Backports/src/UIKit/UIViewController+iOS13.m:22 | @"dark-override" |
-| frameworks/Backports/src/UIKit/UNLocationNotificationTrigger10.m:146 | @"region" |
-| frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:218 | (no literal) |
-| frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:324 | @"title" |
-| frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:326 | @"category" |
-| frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:516 | @"categories" |
-| frameworks/Backports/src/UIKit/UNUserNotificationCenter.m:599 | @"present" |
+| frameworks/Backports/src/UserNotifications/UNLocationNotificationTrigger10.m:146 | @"region" |
+| frameworks/Backports/src/UserNotifications/UNUserNotificationCenter.m:211 | (no literal) |
+| frameworks/Backports/src/UserNotifications/UNUserNotificationCenter.m:311 | @"title" |
+| frameworks/Backports/src/UserNotifications/UNUserNotificationCenter.m:313 | @"category" |
+| frameworks/Backports/src/UserNotifications/UNUserNotificationCenter.m:506 | @"alert" |
+| frameworks/Backports/src/UserNotifications/UNUserNotificationCenter.m:665 | @"categories" |
 
 ## Expo modules: document picker delegates (expo-file-system 57.0.7)
 

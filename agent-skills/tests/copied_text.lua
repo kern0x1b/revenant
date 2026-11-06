@@ -29,7 +29,7 @@ local function files_under(root, skip)
         prune[#prune + 1] = "-name " .. name
     end
     local expr = 'find "$0" \\( -type d \\( ' .. table.concat(prune, " -o ") .. ' \\) \\) -prune -o '
-        .. '\\( -type f -o -type l \\) -print 2>/dev/null; true'
+        .. '\\( -type f -o -type l \\) -print'
     local body = os.iorunv("/bin/sh", {"-c", expr, root})
     local list = {}
     for line in string.gmatch(body, "[^\n]+") do

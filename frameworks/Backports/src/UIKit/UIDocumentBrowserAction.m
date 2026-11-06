@@ -14,7 +14,6 @@ NSString *const BACKPORT_IMPL(UIDocumentBrowserErrorDomain) = @"UIDocumentBrowse
     void (^_handler)(NSArray<NSURL *> *);
     UIImage *_image;
     NSArray<NSString *> *_supportedContentTypes;
-    BOOL _supportsMultipleItems;
 }
 
 - (instancetype)initWithIdentifier:(NSString *)identifier localizedTitle:(NSString *)localizedTitle availability:(UIDocumentBrowserActionAvailability)availability handler:(void (^)(NSArray<NSURL *> *))handler
@@ -62,16 +61,6 @@ NSString *const BACKPORT_IMPL(UIDocumentBrowserErrorDomain) = @"UIDocumentBrowse
 - (void)setSupportedContentTypes:(NSArray<NSString *> *)supportedContentTypes
 {
     _supportedContentTypes = [supportedContentTypes copy] ?: @[];
-}
-
-- (BOOL)supportsMultipleItems
-{
-    return _supportsMultipleItems;
-}
-
-- (void)setSupportsMultipleItems:(BOOL)supportsMultipleItems
-{
-    _supportsMultipleItems = supportsMultipleItems;
 }
 
 - (void (^)(NSArray<NSURL *> *))revenant_handler

@@ -288,7 +288,6 @@ static void revenant_install_cell_hook(void);
     UICollectionViewLayoutInvalidationContext *context = [[[[self class] invalidationContextClass] alloc] init];
     if (originalAttributes.representedElementCategory == UICollectionElementCategoryCell && originalAttributes.indexPath)
         [context invalidateItemsAtIndexPaths:@[originalAttributes.indexPath]];
-    context.contentSizeAdjustment = CGSizeMake(preferredAttributes.size.width - originalAttributes.size.width, preferredAttributes.size.height - originalAttributes.size.height);
     return context;
 }
 

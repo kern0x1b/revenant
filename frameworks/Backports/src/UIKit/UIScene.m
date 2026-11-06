@@ -6,7 +6,6 @@
     UISceneActivationState _activationState;
     NSString *_title;
     NSString *_subtitle;
-    UISceneActivationConditions *_activationConditions;
 }
 
 - (instancetype)initWithSession:(UISceneSession *)session connectionOptions:(UISceneConnectionOptions *)connectionOptions
@@ -14,7 +13,6 @@
     if ((self = [super init])) {
         _session = session;
         _activationState = UISceneActivationStateUnattached;
-        _activationConditions = [[UISceneActivationConditions alloc] init];
         [session revenant_setScene:self];
     }
     return self;
@@ -63,16 +61,6 @@
 - (void)setSubtitle:(NSString *)subtitle
 {
     _subtitle = subtitle ?: @"";
-}
-
-- (UISceneActivationConditions *)activationConditions
-{
-    return _activationConditions;
-}
-
-- (void)setActivationConditions:(UISceneActivationConditions *)activationConditions
-{
-    _activationConditions = activationConditions;
 }
 
 - (void)openURL:(NSURL *)url options:(UISceneOpenExternalURLOptions *)options completionHandler:(void (^)(BOOL))completion

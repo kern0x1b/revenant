@@ -17,10 +17,21 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
 
 LIBRARIES = {"libFoundationBackports", "libCoreTextBackports", "libUIKitBackports", "libUserNotificationsBackports", "libCoreGraphicsBackports",
              "libGraphicsBackports", "libCoreFoundationBackports", "libSystemBackports", "libIOSurfaceBackports", "libWebKitBackports", "libMapKitBackports",
-             "libCoreLocationBackports", "libSecurityBackports", "libContactsBackports", "libLocalAuthenticationBackports"}
+             "libCoreLocationBackports", "libSecurityBackports", "libContactsBackports", "libLocalAuthenticationBackports", "libTLSBackports"}
 
-function backports_libraries()
-    return LIBRARIES
+function backports_libraries(folder)
+    if not folder then
+        return LIBRARIES
+    end
+    local found = {}
+    for _, file in ipairs(os.files(path.join(path.absolute(folder), "lib*Backports.dylib"))) do
+        table.insert(found, path.basename(file))
+    end
+    if #found == 0 then
+        raise("no lib*Backports.dylib in %s, so the host would carry no backports library", folder)
+    end
+    table.sort(found)
+    return found
 end
 
 local OLD_PREFIX = "/usr/lib/revenant/org.revenant.backports"
@@ -139,7 +150,8 @@ function stage(options)
     local ldid = os.iorunv("sh", {"-c", "ls \"$1\"/xmake-global/.xmake/packages/l/ldid/*/*/bin/ldid | head -1", "sh", os.getenv("REVENANT_CACHE") or ""}):trim()
     local frameworks = path.join(target, "Frameworks")
     os.mkdir(frameworks)
-    for _, name in ipairs(LIBRARIES) do
+    local libraries = backports_libraries(options.backports)
+    for _, name in ipairs(libraries) do
         local library = path.join(frameworks, name .. ".dylib")
         os.vrunv("cp", {path.join(path.absolute(options.backports), name .. ".dylib"), library})
         os.vrunv("chmod", {"755", library})
@@ -152,11 +164,11 @@ function stage(options)
         os.vrunv("plutil", {"-replace", "CFBundleExecutable", "-string", executable, path.join(target, "Info.plist")})
     end
     local files = {path.join(target, executable)}
-    for _, name in ipairs(LIBRARIES) do
+    for _, name in ipairs(libraries) do
         table.insert(files, path.join(frameworks, name .. ".dylib"))
     end
     for _, file in ipairs(files) do
-        local arguments = change_arguments(os.iorunv("otool", {"-L", file}), LIBRARIES)
+        local arguments = change_arguments(os.iorunv("otool", {"-L", file}), libraries)
         if #arguments > 0 then
             table.insert(arguments, file)
             os.vrunv("install_name_tool", arguments)

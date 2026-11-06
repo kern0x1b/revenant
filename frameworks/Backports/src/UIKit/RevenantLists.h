@@ -199,10 +199,3 @@ UICollectionView *revenant_owning_collection_view(UIView *view);
 - (void)revenant_setExpansionHandler:(void (^)(void))handler;
 - (void)revenant_toggleExpansion;
 @end
-
-@interface UIListSeparatorConfiguration (RevenantVisualEffect15)
-- (void)revenant_takeVisualEffectFrom:(UIListSeparatorConfiguration *)other;
-- (BOOL)revenant_visualEffectIsEqualTo:(UIListSeparatorConfiguration *)other;
-- (void)revenant_encodeVisualEffectWithCoder:(NSCoder *)coder;
-- (void)revenant_decodeVisualEffectWithCoder:(NSCoder *)coder;
-@end

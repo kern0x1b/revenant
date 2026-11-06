@@ -4,10 +4,8 @@
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
 static const char RevenantTableUpdatesKey;
-static const char RevenantTableSafeAreaKey;
 static const char RevenantTableSeparatorReferenceKey;
 static const char RevenantCollectionUpdatesKey;
-static const char RevenantCollectionCadenceKey;
 
 static void revenant_count_updates(id view, const void *key, NSInteger delta)
 {
@@ -55,17 +53,6 @@ static void revenant_count_updates(id view, const void *key, NSInteger delta)
     return [objc_getAssociatedObject(self, &RevenantTableUpdatesKey) integerValue] > 0;
 }
 
-- (BOOL)insetsContentViewsToSafeArea
-{
-    NSNumber *stored = objc_getAssociatedObject(self, &RevenantTableSafeAreaKey);
-    return stored ? stored.boolValue : YES;
-}
-
-- (void)setInsetsContentViewsToSafeArea:(BOOL)insetsContentViewsToSafeArea
-{
-    objc_setAssociatedObject(self, &RevenantTableSafeAreaKey, @(insetsContentViewsToSafeArea), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
 - (UITableViewSeparatorInsetReference)separatorInsetReference
 {
     return (UITableViewSeparatorInsetReference)[objc_getAssociatedObject(self, &RevenantTableSeparatorReferenceKey) integerValue];
@@ -85,16 +72,6 @@ static void revenant_count_updates(id view, const void *key, NSInteger delta)
 - (BOOL)hasUncommittedUpdates
 {
     return [objc_getAssociatedObject(self, &RevenantCollectionUpdatesKey) integerValue] > 0;
-}
-
-- (UICollectionViewReorderingCadence)reorderingCadence
-{
-    return (UICollectionViewReorderingCadence)[objc_getAssociatedObject(self, &RevenantCollectionCadenceKey) integerValue];
-}
-
-- (void)setReorderingCadence:(UICollectionViewReorderingCadence)reorderingCadence
-{
-    objc_setAssociatedObject(self, &RevenantCollectionCadenceKey, @(reorderingCadence), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

@@ -7,6 +7,9 @@ package("boringssl")
         add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
     end
 
+    includes(path.join(os.scriptdir(), "port", "digest.lua"))
+    add_configs("recipe", {description = "The digest of this recipe and its patches, so a changed file list (such as the runtime archives the TLS backport reads) is a different package.", default = boringssl_sources_digest, type = "string", readonly = true})
+
     add_urls("https://github.com/google/boringssl.git")
     add_versions("2024.03.06", "cf6865731655cf49f473732aa87e0804f6011a25")
     add_patches("2024.03.06", "patches/0001-target-h-keep-apple-arm32-asm.patch", "24f496e7b803a7a1e4a582f572bd117b33963e9834adfb6c0d3234e885c8bf4d")
@@ -15,6 +18,7 @@ package("boringssl")
     add_links("ssl", "crypto")
     if is_plat("iphoneos") then
         add_deps("revenant@libcxx", {alias = "libcxx"})
+        add_deps("revenant@apple-compat", {alias = "apple-compat"})
     end
 
     on_install("iphoneos", "macosx", function (package)
@@ -42,6 +46,39 @@ package("boringssl")
                 {deps = {"libcxx"}, targets = {"crypto", "ssl"}, install = false, licenses = "LICENSE"})
             os.cp(path.join(builddir, "libcrypto.a"), package:installdir("lib"))
             os.cp(path.join(builddir, "libssl.a"), package:installdir("lib"))
+            local function runtime_imports(archive)
+                local defined = {}
+                for line in os.iorunv("xcrun", {"nm", "-gU", archive}):gmatch("[^\n]+") do
+                    local name = line:match("(%S+)$")
+                    if name and not name:endswith(":") then
+                        defined[name] = true
+                    end
+                end
+                local imported = {}
+                for line in os.iorunv("xcrun", {"nm", "-u", archive}):gmatch("[^\n]+") do
+                    local name = line:match("(%S+)$")
+                    if name and not name:endswith(":") and not defined[name] and (name:startswith("__Z") or name:find("^___?cxa_")) then
+                        imported[name] = true
+                    end
+                end
+                return imported
+            end
+            local imported = {}
+            for _, archive in ipairs({"libcrypto.a", "libssl.a"}) do
+                for name in pairs(runtime_imports(path.join(package:installdir("lib"), archive))) do
+                    imported[name] = true
+                end
+            end
+            local names = table.orderkeys(imported)
+            if #names ~= 1 or names[1] ~= "__ZdlPv" then
+                raise("BoringSSL's archives import %s from the C++ runtime, and the TLS backport links only operator delete (__ZdlPv) from it: revise the TLS link before this import is accepted", table.concat(names, ", "))
+            end
+            local runtime = package:dep("libcxx")
+            local compat = package:dep("apple-compat")
+            os.mkdir(package:installdir("share", "revenant"))
+            io.writefile(path.join(package:installdir("share", "revenant"), "runtime-archives"),
+                         runtime:installdir("lib", "libc++.a") .. "\n" .. runtime:installdir("lib", "libc++abi.a") .. "\n"
+                         .. compat:installdir("lib", "libapple-compat.a") .. "\n")
         else
             local builddir = path.absolute("build_revenant")
             import("package.tools.cmake").build(package, configs, {builddir = builddir})

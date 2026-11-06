@@ -12,7 +12,6 @@
     UIViewController *_presentedOwner;
     UIViewController *_presentingViewController;
     __weak id<UIAdaptivePresentationControllerDelegate> _delegate;
-    UITraitCollection *_overrideTraitCollection;
     UIView *_containerView;
 }
 
@@ -44,16 +43,6 @@
 - (void)setDelegate:(id<UIAdaptivePresentationControllerDelegate>)delegate
 {
     _delegate = delegate;
-}
-
-- (UITraitCollection *)overrideTraitCollection
-{
-    return _overrideTraitCollection;
-}
-
-- (void)setOverrideTraitCollection:(UITraitCollection *)collection
-{
-    _overrideTraitCollection = collection;
 }
 
 - (UIModalPresentationStyle)presentationStyle

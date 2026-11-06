@@ -1,18 +1,55 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 
+@interface UIKeyboardLayoutGuide ()
+- (void)revenant_attachToView:(UIView *)view;
+@end
+
 @implementation UIKeyboardLayoutGuide {
-    BOOL _followsUndockedKeyboard;
+    __weak UIView *_view;
+    NSLayoutConstraint *_keyboardTop;
+    id _observer;
 }
 
-- (BOOL)followsUndockedKeyboard
+- (void)revenant_attachToView:(UIView *)view
 {
-    return _followsUndockedKeyboard;
+    _view = view;
+    _keyboardTop = [self.topAnchor constraintEqualToAnchor:view.bottomAnchor];
+    _keyboardTop.priority = UILayoutPriorityDefaultHigh;
+    [NSLayoutConstraint activateConstraints:@[
+        [self.topAnchor constraintLessThanOrEqualToAnchor:view.safeAreaLayoutGuide.bottomAnchor],
+        _keyboardTop,
+        [self.bottomAnchor constraintEqualToAnchor:view.bottomAnchor],
+        [self.leadingAnchor constraintEqualToAnchor:view.leadingAnchor],
+        [self.trailingAnchor constraintEqualToAnchor:view.trailingAnchor]]];
+    __weak UIKeyboardLayoutGuide *weakSelf = self;
+    _observer = [[NSNotificationCenter defaultCenter] addObserverForName:UIKeyboardWillChangeFrameNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *notification) {
+        [weakSelf revenant_keyboardWillChangeFrame:notification];
+    }];
 }
 
-- (void)setFollowsUndockedKeyboard:(BOOL)followsUndockedKeyboard
+- (void)revenant_keyboardWillChangeFrame:(NSNotification *)notification
 {
-    _followsUndockedKeyboard = followsUndockedKeyboard;
+    UIView *view = _view;
+    UIWindow *window = view.window;
+    if (!window)
+        return;
+    NSDictionary *info = notification.userInfo;
+    CGRect frame = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+    CGRect keyboard = [view convertRect:[window convertRect:frame fromWindow:nil] fromView:window];
+    CGFloat overlap = MAX(0, CGRectGetMaxY(view.bounds) - MAX(CGRectGetMinY(keyboard), CGRectGetMinY(view.bounds)));
+    UIViewAnimationCurve curve = (UIViewAnimationCurve)[[info objectForKey:UIKeyboardAnimationCurveUserInfoKey] integerValue];
+    NSTimeInterval duration = [[info objectForKey:UIKeyboardAnimationDurationUserInfoKey] doubleValue];
+    [UIView animateWithDuration:duration delay:0 options:(UIViewAnimationOptions)(curve << 16) | UIViewAnimationOptionBeginFromCurrentState animations:^{
+        self->_keyboardTop.constant = -overlap;
+        [view layoutIfNeeded];
+    } completion:nil];
+}
+
+- (void)dealloc
+{
+    if (_observer)
+        [[NSNotificationCenter defaultCenter] removeObserver:_observer];
 }
 
 @end
@@ -27,11 +64,7 @@ static char revenant_keyboard_guide_key;
     if (!guide) {
         guide = [[UIKeyboardLayoutGuide alloc] init];
         [self addLayoutGuide:guide];
-        [NSLayoutConstraint activateConstraints:@[
-            [guide.topAnchor constraintEqualToAnchor:self.safeAreaLayoutGuide.bottomAnchor],
-            [guide.leadingAnchor constraintEqualToAnchor:self.leadingAnchor],
-            [guide.trailingAnchor constraintEqualToAnchor:self.trailingAnchor],
-            [guide.heightAnchor constraintEqualToConstant:0]]];
+        [guide revenant_attachToView:self];
         objc_setAssociatedObject(self, &revenant_keyboard_guide_key, guide, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return guide;

@@ -1048,7 +1048,6 @@ UICellAccessoryPosition BACKPORT_IMPL(UICellAccessoryPositionAfterAccessoryOfCla
 @private
     UIView *_customView;
     UICellAccessoryPlacement _placement;
-    BOOL _maintainsFixedSize;
     UICellAccessoryPosition _position;
 }
 
@@ -1076,7 +1075,6 @@ UICellAccessoryPosition BACKPORT_IMPL(UICellAccessoryPositionAfterAccessoryOfCla
 {
     UIView *view = [coder decodeObjectOfClass:[UIView class] forKey:@"customView"] ?: [[UIView alloc] init];
     if ((self = [self initWithCustomView:view placement:(UICellAccessoryPlacement)[coder decodeIntegerForKey:@"placement"]])) {
-        _maintainsFixedSize = [coder decodeBoolForKey:@"maintainsFixedSize"];
         [self setDisplayedState:(UICellAccessoryDisplayedState)[coder decodeIntegerForKey:@"displayedState"]];
         [self setHidden:[coder decodeBoolForKey:@"hidden"]];
         if ([coder containsValueForKey:@"reservedLayoutWidth"])
@@ -1091,7 +1089,6 @@ UICellAccessoryPosition BACKPORT_IMPL(UICellAccessoryPositionAfterAccessoryOfCla
     [super encodeWithCoder:coder];
     [coder encodeObject:_customView forKey:@"customView"];
     [coder encodeInteger:_placement forKey:@"placement"];
-    [coder encodeBool:_maintainsFixedSize forKey:@"maintainsFixedSize"];
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -1099,7 +1096,6 @@ UICellAccessoryPosition BACKPORT_IMPL(UICellAccessoryPositionAfterAccessoryOfCla
     UICellAccessoryCustomView *copy = [super copyWithZone:zone];
     copy->_customView = _customView;
     copy->_placement = _placement;
-    copy->_maintainsFixedSize = _maintainsFixedSize;
     copy->_position = [_position copy];
     return copy;
 }
@@ -1112,16 +1108,6 @@ UICellAccessoryPosition BACKPORT_IMPL(UICellAccessoryPositionAfterAccessoryOfCla
 - (UICellAccessoryPlacement)placement
 {
     return _placement;
-}
-
-- (BOOL)maintainsFixedSize
-{
-    return _maintainsFixedSize;
-}
-
-- (void)setMaintainsFixedSize:(BOOL)maintainsFixedSize
-{
-    _maintainsFixedSize = maintainsFixedSize;
 }
 
 - (UICellAccessoryPosition)position
@@ -1153,7 +1139,7 @@ UICellAccessoryPosition BACKPORT_IMPL(UICellAccessoryPositionAfterAccessoryOfCla
 - (BOOL)isEqual:(id)object
 {
     UICellAccessoryCustomView *other = object;
-    return [super isEqual:object] && _customView == other->_customView && _placement == other->_placement && _maintainsFixedSize == other->_maintainsFixedSize && _position == other->_position;
+    return [super isEqual:object] && _customView == other->_customView && _placement == other->_placement && _position == other->_position;
 }
 
 - (UIView *)revenant_makeView

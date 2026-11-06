@@ -54,20 +54,17 @@ static void (*revenant_flow_original)(id, SEL);
     void (*original)(id, SEL) = ([self isKindOfClass:[UICollectionViewFlowLayout class]] && revenant_flow_original) ? revenant_flow_original : revenant_layout_original;
     original(self, @selector(invalidateLayout));
     objc_setAssociatedObject(self, &revenant_invalidating_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    CGPoint shift = context.contentOffsetAdjustment;
+    UICollectionView *collectionView = self.collectionView;
+    if (collectionView && !CGPointEqualToPoint(shift, CGPointZero)) {
+        CGPoint offset = collectionView.contentOffset;
+        collectionView.contentOffset = CGPointMake(offset.x + shift.x, offset.y + shift.y);
+    }
 }
 
 - (UICollectionViewLayoutInvalidationContext *)invalidationContextForBoundsChange:(CGRect)newBounds
 {
     return [[[[self class] invalidationContextClass] alloc] init];
-}
-
-@end
-
-@implementation UICollectionViewFlowLayout (RevenantInvalidation7)
-
-+ (Class)invalidationContextClass
-{
-    return [UICollectionViewFlowLayoutInvalidationContext class];
 }
 
 @end

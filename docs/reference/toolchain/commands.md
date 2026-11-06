@@ -94,9 +94,21 @@ A boot that never ran the command, whose reports show a daemon was killed, is ex
 | `rootfs RELEASE` | With `-d`: unpacks the whole root filesystem of the device's earliest firmware not older than the release, into `.cache/firmware/rootfs/<device>/<version>_<build>/`. From iOS 16 the SystemOS cryptex is included. |
 | `classes RELEASE` | Writes the release's Objective-C inventory as JSON beside its cache, with `-o` to choose the path. |
 | `extract RELEASE` | With `-l`: takes one library out of the shared cache as a Mach-O of its own, to be read, not run. |
+| `kernelcache RELEASE` | With `-d`: decodes the kernelcache of the device's earliest firmware not older than the release into `.cache/firmware/kernelcache/<device>/<version>_<build>/kernel.macho`, beside the kernelcache it came from (see below). |
 | `list` | Lists what is held. |
 
 `-a` is one of `armv6`, `armv7`, `armv7s`, `arm64` and `arm64e`; the default is the configured architecture. Firmware and caches are downloaded from Apple's servers and from the catalogue kept in `.cache/firmware/catalog.json`. Only the system image is downloaded.
+
+### kernelcache
+
+The firmware archive holds one `kernelcache.release.*` member. An existing `kernel.macho` is returned as it is, and a `kernelcache.release.*` already held beside it is decoded without a download. Otherwise the member is read out of the archive by its range, and decoded in four steps, each checked before the next:
+
+1. The IMG3 container. Its header is 20 bytes: `3gmI`, the total size, the data size and an identifier, all little-endian. Elements follow it. An element is a four-byte tag stored reversed, a total size and a data size, then the payload. The total size counts the 12-byte element header and the padding that rounds the payload up to 16 bytes. The `ATAD` element (DATA) is the one decoded.
+2. The DATA payload is decrypted with AES-CBC by the system `openssl`, with the key and IV that the Keys page of the Apple Wiki publishes for the build's kernelcache. The page is found by its build and device, and must name that kernelcache file. A 128-bit key is 32 hex digits and a 256-bit key is 64.
+3. The decrypted bytes must be a `complzss` container. Its header is 24 bytes: the magic `complzss`, then the Adler-32 of the plain bytes, the plain size, the packed size and the version, which is 1, all big-endian. Zero padding follows, and the packed stream ends at the end of the file. The stream is LZSS with a 4096-byte window, first written at offset 4078 and filled with spaces. Flag bytes are read least significant bit first: a set bit is a literal byte, a clear bit is a two-byte match whose low twelve bits are the window offset and whose high nibble plus three is the length. The plain size and the Adler-32 must match the header.
+4. The plain bytes must be a Mach-O file. They are written to `kernel.macho` only then; a failure at any step removes the partial output.
+
+The catalogue lookup, the archive range reads and the Keys page need the network. The decryption, the decompression and the Mach-O check do not, and `./xmakew test -P . 'toolchain_light/kernelcache_test'` runs them on constructed containers, including a refusal for a wrong key.
 
 ## Environment
 

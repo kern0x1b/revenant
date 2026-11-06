@@ -23,5 +23,5 @@ typedef NS_ENUM(NSInteger, RevenantSymbolEffectDirection) {
 @end
 
 @interface UISymbolEffectCompletionContext (RevenantInit)
-- (instancetype)initRevenantWithSender:(id)sender finished:(BOOL)finished;
+- (instancetype)initRevenantWithSender:(id)sender effect:(NSSymbolEffect *)effect finished:(BOOL)finished;
 @end

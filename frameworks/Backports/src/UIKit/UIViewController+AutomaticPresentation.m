@@ -40,7 +40,7 @@ static UIModalPresentationStyle revenant_automatic_style(UIViewController *contr
 
 + (void)load
 {
-    if ([UIViewController instancesRespondToSelector:@selector(isModalInPresentation)] || revenant_program_sdk() < 0x000d0000)
+    if ([UIViewController instancesRespondToSelector:@selector(isModalInPresentation)] || !revenant_program_linked_on_or_after(13, PLATFORM_IOS))
         return;
     Class controller = [UIViewController class];
     SEL setter = @selector(setModalPresentationStyle:);

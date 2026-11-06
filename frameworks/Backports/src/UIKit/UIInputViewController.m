@@ -152,7 +152,6 @@ static NSString *revenant_nil_if_empty(NSString *text)
 @implementation UIInputViewController {
     RevenantTextDocumentProxy *_documentProxy;
     NSString *_primaryLanguage;
-    BOOL _hasDictationKey;
 }
 
 @dynamic needsInputModeSwitchKey;
@@ -187,16 +186,6 @@ static NSString *revenant_nil_if_empty(NSString *text)
 - (void)setPrimaryLanguage:(NSString *)primaryLanguage
 {
     _primaryLanguage = [primaryLanguage copy];
-}
-
-- (BOOL)hasDictationKey
-{
-    return _hasDictationKey;
-}
-
-- (void)setHasDictationKey:(BOOL)hasDictationKey
-{
-    _hasDictationKey = hasDictationKey;
 }
 
 - (BOOL)hasFullAccess

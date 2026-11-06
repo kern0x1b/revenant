@@ -30,12 +30,6 @@
     NSString *_sourceApplication;
     id _annotation;
     BOOL _openInPlace;
-    UIEventAttribution *_eventAttribution;
-}
-
-- (UIEventAttribution *)eventAttribution
-{
-    return _eventAttribution;
 }
 
 - (instancetype)initRevenantWithSourceApplication:(NSString *)sourceApplication annotation:(id)annotation openInPlace:(BOOL)openInPlace
@@ -225,7 +219,6 @@
     UISceneSessionRole _role;
     UISceneConfiguration *_configuration;
     NSString *_persistentIdentifier;
-    NSUserActivity *_stateRestorationActivity;
     NSDictionary *_userInfo;
 }
 
@@ -283,16 +276,6 @@
     return _persistentIdentifier;
 }
 
-- (NSUserActivity *)stateRestorationActivity
-{
-    return _stateRestorationActivity;
-}
-
-- (void)setStateRestorationActivity:(NSUserActivity *)stateRestorationActivity
-{
-    _stateRestorationActivity = stateRestorationActivity;
-}
-
 - (NSDictionary *)userInfo
 {
     return _userInfo;
@@ -308,7 +291,6 @@
 @implementation UISceneSizeRestrictions {
     CGSize _minimumSize;
     CGSize _maximumSize;
-    BOOL _allowsFullScreen;
 }
 
 - (CGSize)minimumSize
@@ -331,143 +313,10 @@
     _maximumSize = maximumSize;
 }
 
-- (BOOL)allowsFullScreen
-{
-    return _allowsFullScreen;
-}
-
-- (void)setAllowsFullScreen:(BOOL)allowsFullScreen
-{
-    _allowsFullScreen = allowsFullScreen;
-}
-
-@end
-
-@implementation UISceneActivationConditions {
-    NSPredicate *_canActivate;
-    NSPredicate *_prefersToActivate;
-}
-
-+ (BOOL)supportsSecureCoding
-{
-    return YES;
-}
-
-- (instancetype)init
-{
-    if ((self = [super init])) {
-        _canActivate = [NSPredicate predicateWithValue:YES];
-        _prefersToActivate = [NSPredicate predicateWithValue:NO];
-    }
-    return self;
-}
-
-- (instancetype)initWithCoder:(NSCoder *)coder
-{
-    if ((self = [super init])) {
-        _canActivate = [NSPredicate predicateWithValue:YES];
-        _prefersToActivate = [NSPredicate predicateWithValue:NO];
-        NSPredicate *can = [coder decodeObjectOfClass:[NSPredicate class] forKey:@"canActivate"];
-        NSPredicate *prefers = [coder decodeObjectOfClass:[NSPredicate class] forKey:@"prefersToActivate"];
-        if (can)
-            _canActivate = can;
-        if (prefers)
-            _prefersToActivate = prefers;
-    }
-    return self;
-}
-
-- (void)encodeWithCoder:(NSCoder *)coder
-{
-    [coder encodeObject:_canActivate forKey:@"canActivate"];
-    [coder encodeObject:_prefersToActivate forKey:@"prefersToActivate"];
-}
-
-- (NSPredicate *)canActivateForTargetContentIdentifierPredicate
-{
-    return _canActivate;
-}
-
-- (void)setCanActivateForTargetContentIdentifierPredicate:(NSPredicate *)predicate
-{
-    _canActivate = [predicate copy];
-}
-
-- (NSPredicate *)prefersToActivateForTargetContentIdentifierPredicate
-{
-    return _prefersToActivate;
-}
-
-- (void)setPrefersToActivateForTargetContentIdentifierPredicate:(NSPredicate *)predicate
-{
-    _prefersToActivate = [predicate copy];
-}
-
-@end
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmismatched-parameter-types"
-#pragma clang diagnostic ignored "-Wmismatched-return-types"
-@implementation UISceneActivationRequestOptions {
-    UIScene *_requestingScene;
-    NSInteger _collectionJoinBehavior;
-}
-
-- (NSInteger)collectionJoinBehavior
-{
-    return _collectionJoinBehavior;
-}
-
-- (void)setCollectionJoinBehavior:(NSInteger)collectionJoinBehavior
-{
-    _collectionJoinBehavior = collectionJoinBehavior;
-}
-
-- (UIScene *)requestingScene
-{
-    return _requestingScene;
-}
-
-- (void)setRequestingScene:(UIScene *)requestingScene
-{
-    _requestingScene = requestingScene;
-}
-
-#pragma clang diagnostic pop
-@end
-
-@implementation UISceneDestructionRequestOptions
-@end
-
-@implementation UIWindowSceneDestructionRequestOptions {
-    UIWindowSceneDismissalAnimation _windowDismissalAnimation;
-}
-
-- (UIWindowSceneDismissalAnimation)windowDismissalAnimation
-{
-    return _windowDismissalAnimation;
-}
-
-- (void)setWindowDismissalAnimation:(UIWindowSceneDismissalAnimation)windowDismissalAnimation
-{
-    _windowDismissalAnimation = windowDismissalAnimation;
-}
-
 @end
 
 @implementation UISceneOpenExternalURLOptions {
     BOOL _universalLinksOnly;
-    UIEventAttribution *_eventAttribution;
-}
-
-- (UIEventAttribution *)eventAttribution
-{
-    return _eventAttribution;
-}
-
-- (void)setEventAttribution:(UIEventAttribution *)eventAttribution
-{
-    _eventAttribution = [eventAttribution copy];
 }
 
 - (BOOL)universalLinksOnly

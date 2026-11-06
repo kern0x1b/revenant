@@ -91,7 +91,7 @@ local function state_files(folder, roots)
     local state = path.join(folder, STATE)
     if os.isdir(state) then
         for _, root in ipairs(roots) do
-            for _, file in ipairs(lines(os.iorunv("sh", {"-c", "grep -rIlF -e \"$1\" \"$2\" || true", "sh", root, state}))) do
+            for _, file in ipairs(lines(os.iorunv("sh", {"-c", "grep -rIlF -e \"$1\" \"$2\"; test $? -le 1", "sh", root, state}))) do
                 add(file)
             end
         end

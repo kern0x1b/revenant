@@ -219,6 +219,13 @@ function failures(opt)
         table.insert(found, "the libraries of a held cache come from the firmware of any architecture that carries it: " .. tostring(errors))
     end
 
+    local kernel = path.join(folder, "home", "firmware", "kernelcache", "iPhone5,1", "9.8_98A1", "kernel.macho")
+    io.writefile(kernel, "the kernel of a 32-bit device")
+    local held = firmware.kernelcache("iPhone5,1", "9.8")
+    if held ~= kernel then
+        table.insert(found, "a kernelcache already in the cache is returned without asking the firmware: " .. tostring(held))
+    end
+
     local modern = path.join(folder, "modern")
     io.writefile(path.join(modern, "System", "Library", "Caches", "com.apple.dyld", "dyld_shared_cache_arm64"), "the arm64 cache of iOS 12")
     local arm64 = path.join(dyld.root(), "12.0", "dyld_shared_cache_arm64")

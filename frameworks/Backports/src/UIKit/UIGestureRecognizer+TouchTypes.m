@@ -3,7 +3,6 @@
 
 static char revenant_touch_types_key;
 static char revenant_exclusive_key;
-static char revenant_press_types_key;
 
 static NSArray *revenant_unique(NSArray *types)
 {
@@ -32,16 +31,6 @@ static NSArray *revenant_unique(NSArray *types)
 - (void)setRequiresExclusiveTouchType:(BOOL)requires
 {
     objc_setAssociatedObject(self, &revenant_exclusive_key, @(requires), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-- (NSArray<NSNumber *> *)allowedPressTypes
-{
-    return objc_getAssociatedObject(self, &revenant_press_types_key) ?: @[];
-}
-
-- (void)setAllowedPressTypes:(NSArray<NSNumber *> *)types
-{
-    objc_setAssociatedObject(self, &revenant_press_types_key, revenant_unique(types), OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
 @end

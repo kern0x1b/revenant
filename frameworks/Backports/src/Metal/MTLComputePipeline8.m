@@ -11,6 +11,9 @@
     uint32_t _threads;
     uint32_t _blockBytes;
     NSString *_kernel;
+    RevenantMetalFunction *_translated;
+    RevenantMetalPipeline *_render;
+    BOOL _announcedCPURoute;
 }
 
 @synthesize label;
@@ -18,6 +21,13 @@
 - (instancetype)initWithFunction:(id<MTLFunction>)function error:(NSError **)error
 {
     NSString *name = function.name;
+    if ([function isKindOfClass:[RevenantMetalFunction class]] && [[(RevenantMetalFunction *)function stage] isEqualToString:@"kernel"] && [(RevenantMetalFunction *)function source]) {
+        if ((self = [super init])) {
+            _kernel = name;
+            _translated = (RevenantMetalFunction *)function;
+        }
+        return self;
+    }
     struct KernelEntry { const char *name; void *function; uint32_t buffers; uint32_t block; uint32_t reserved; };
     static const struct KernelEntry *table;
     static unsigned count;
@@ -104,6 +114,37 @@
 - (NSString *)kernelName
 {
     return _kernel;
+}
+
+- (RevenantMetalFunction *)revenantTranslatedFunction
+{
+    return _translated;
+}
+
+- (RevenantMetalPipeline *)revenantRenderPipeline
+{
+    if (_render)
+        return _render;
+    for (NSDictionary *texture in _translated.reflection[@"textures"]) {
+        if ([texture[@"cube"] boolValue]) {
+            NSLog(@"Metal: %@ samples a cube texture, which the GL dispatch does not bind yet, so the dispatch is not run", _kernel ?: @"the kernel");
+            return nil;
+        }
+    }
+    NSError *error = nil;
+    _render = [RevenantMetalPipeline fullscreenWithFragment:_translated error:&error];
+    if (!_render)
+        NSLog(@"Metal: %@ does not link as a render pass, so the dispatch is not run: %@", _kernel ?: @"the kernel", error.localizedDescription);
+    return _render;
+}
+
+- (void)revenantAnnounceCPURoute
+{
+    if (_announcedCPURoute)
+        return;
+    _announcedCPURoute = YES;
+    NSLog(@"Metal: %@ runs on the air2cpu CPU route, with one CPU thread per kernel instance and not on the GPU. This is known debt, registered in docs/explanation/backports/metal-on-ios6.md section 3, item 8",
+          _kernel ?: @"the kernel");
 }
 
 @end

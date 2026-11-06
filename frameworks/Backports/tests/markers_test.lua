@@ -106,5 +106,64 @@ const char *tag(void) { return "kUse"; }
     end
     assert(defined == 0, "a marked @dynamic name must define no global")
 
+    local LATE = [==[
+int late_user(void) { return kLate; }
+int kLate = 2;
+int kTwice(void) { return kLate; }
+]==]
+    local late_out, late_renamed = markers.rewrite(LATE, set_of({"kLate"}), set_of({"kLate"}))
+    assert(list_of(set_of(late_renamed)) == "kLate", "kLate must be renamed once")
+    assert(late_out == "\nextern int __revenant_fb_kLate;\nint late_user(void) { return BACKPORT_IMPL(kLate); }\nint BACKPORT_IMPL(kLate) = 2;\nint kTwice(void) { return BACKPORT_IMPL(kLate); }\n",
+        "a use before the definition needs a declaration of the renamed name, got " .. late_out)
+    assert(markers.rewrite(late_out, set_of({"kLate"}), set_of({"kLate"})) == late_out, "the declaration must not be added twice")
+
+    local LATE_ARRAY = "int late_arr(void) { return kArr[0]; }\nint kArr[2] = {1, 2};\n"
+    local array_out = markers.rewrite(LATE_ARRAY, set_of({"kArr"}), set_of({"kArr"}))
+    assert(string.find(array_out, "\nextern int __revenant_fb_kArr[];\nint late_arr", 1, true), "an array needs an array declaration, got " .. array_out)
+
+    local LATE_CLASS = "@implementation Baz\n- (int)m { return kImpl; }\n@end\nint kImpl = 1;\n"
+    local class_out = markers.rewrite(LATE_CLASS, set_of({"kImpl"}), set_of({"kImpl"}))
+    assert(string.find(class_out, "\nextern int __revenant_fb_kImpl;\n@implementation Baz", 1, true), "the declaration goes before the class, got " .. class_out)
+
+    local ordered = "int kDone = 1;\nint use_done(void) { return kDone; }\n"
+    local ordered_out = markers.rewrite(ordered, set_of({"kDone"}), set_of({"kDone"}))
+    assert(not string.find(ordered_out, "extern", 1, true), "a use after the definition needs no declaration, got " .. ordered_out)
+
+    local EXPORT = [==[
+#define REVENANT_EXPORT __attribute__((visibility("default")))
+REVENANT_EXPORT const mach_port_t BACKPORT_IMPL(kPort) = 0;
+REVENANT_EXPORT int BACKPORT_IMPL(kCount);
+REVENANT_EXPORT int BACKPORT_IMPL(CFExported)(int a) { return a; }
+]==]
+    local export_defs = markers.marked_definitions(EXPORT)
+    assert(export_defs.kPort.kind == "global" and export_defs.kPort.type == "const mach_port_t",
+        "an attributes-alone macro must leave the type of its global, got " .. tostring(export_defs.kPort.type))
+    assert(export_defs.kCount.type == "int", "kCount must be an int global, got " .. tostring(export_defs.kCount.type))
+    assert(export_defs.CFExported.kind == "function", "an exported function must still be a function")
+
+    local OBJECT_MACRO = "#define KEEP_CONST const\nKEEP_CONST mach_port_t BACKPORT_IMPL(kBad) = 0;\n"
+    local message
+    try {
+        function () markers.marked_definitions(OBJECT_MACRO) end,
+        catch { function (errors) message = tostring(errors) end }
+    }
+    assert(message and string.find(message, "kBad", 1, true) and string.find(message, "KEEP_CONST", 1, true),
+        "a marked global typed past a macro that is not attributes alone must raise, got " .. tostring(message))
+    local plain = 0
+    for _ in pairs(markers.marked_definitions("#define KEEP_CONST const\nKEEP_CONST mach_port_t kPlain = 0;\n")) do
+        plain = plain + 1
+    end
+    assert(plain == 0, "a global without a marker is not read, whatever its macros")
+
+    local EXPORT_LATE = [==[
+#define REVENANT_EXPORT __attribute__((visibility("default")))
+int late_port(void) { return kLatePort; }
+REVENANT_EXPORT const int kLatePort = 2;
+]==]
+    local late_export, late_export_renamed = markers.rewrite(EXPORT_LATE, set_of({"kLatePort"}), set_of({"kLatePort"}))
+    assert(list_of(set_of(late_export_renamed)) == "kLatePort", "kLatePort must be renamed once")
+    assert(string.find(late_export, "extern const int __revenant_fb_kLatePort;", 1, true),
+        "a forward declaration takes the type without the macro, got " .. late_export)
+
     print("markers tests passed: 9 definitions renamed, a prototype, a string, a comment, an extern and a variadic left alone; @dynamic and @synthesize names left alone")
 end

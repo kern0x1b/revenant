@@ -50,6 +50,7 @@ const revenant_ml_node *revenant_ml_get(const revenant_ml_node *node, const char
 const revenant_ml_node *revenant_ml_oneof(const revenant_ml_node *node, const char *name);
 
 int revenant_ml_int(const revenant_ml_node *node, int64_t fallback);
+int64_t revenant_ml_int64(const revenant_ml_node *node, int64_t fallback);
 double revenant_ml_double(const revenant_ml_node *node, double fallback);
 const char *revenant_ml_text(const revenant_ml_node *node, char *out, size_t size);
 const char *revenant_ml_type(const revenant_ml_node *node);

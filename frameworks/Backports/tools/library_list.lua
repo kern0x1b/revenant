@@ -71,7 +71,7 @@ local LIBRARIES = {
     {name = "StoreKitBackports", folder = "StoreKit", frameworks = {"StoreKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreGraphicsBackports", folder = "CoreGraphics", frameworks = {"CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"apple-compat"}, system = {}},
     {name = "AddressBookUIBackports", folder = "AddressBookUI", frameworks = {"AddressBookUI", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "CoreVideoBackports", folder = "CoreVideo", frameworks = {"CoreVideo", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"apple-compat"}, system = {}},
+    {name = "CoreVideoBackports", folder = "CoreVideo", frameworks = {"CoreVideo", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports", "MetalBackports"}, archives = {"apple-compat"}, system = {}},
     {name = "CoreMotionBackports", folder = "CoreMotion", frameworks = {"CoreMotion", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "ReplayKitBackports", folder = "ReplayKit", frameworks = {"ReplayKit", "UIKit", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "SpeechBackports", folder = "Speech", frameworks = {"Speech", "AVFoundation", "Foundation"}, libraries = {"AVFoundationBackports", "FoundationBackports"}, archives = {}, system = {}},

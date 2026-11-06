@@ -1,1 +1,1 @@
-spatial_sources_digest = "c584412639295965f9b661ef6db98fa6"
+spatial_sources_digest = "0649e0e115c739379f23205d143debb1"

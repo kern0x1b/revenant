@@ -31,7 +31,6 @@ extension UITraitChangeObservable {
     }
 }
 
-@available(iOS 26.0, *)
 extension UIView {
     public var cornerConfiguration: UICornerConfiguration {
         get { __cornerConfiguration }
@@ -39,22 +38,97 @@ extension UIView {
     }
 }
 
+public struct UICornerRadius: Equatable, Hashable, ExpressibleByFloatLiteral, ExpressibleByIntegerLiteral, CustomStringConvertible {
+    fileprivate enum Kind: Hashable {
+        case fixed(Double)
+        case containerConcentric(minimum: CGFloat?)
+    }
 
-@available(iOS 26.0, *)
-public struct UICornerRadius: Equatable, Hashable {
-    private let fixedValue: Double
+    fileprivate let kind: Kind
 
     public static func fixed(_ radius: Double) -> UICornerRadius {
-        UICornerRadius(fixedValue: radius)
+        UICornerRadius(kind: .fixed(radius))
+    }
+
+    public static func containerConcentric(minimum: CGFloat? = nil) -> UICornerRadius {
+        UICornerRadius(kind: .containerConcentric(minimum: minimum))
+    }
+
+    public init(floatLiteral value: Double) {
+        self.init(kind: .fixed(value))
+    }
+
+    public init(integerLiteral value: Int) {
+        self.init(kind: .fixed(Double(value)))
+    }
+
+    fileprivate init(kind: Kind) {
+        self.kind = kind
+    }
+
+    public var description: String {
+        switch kind {
+        case let .fixed(radius):
+            return "fixed(\(radius))"
+        case let .containerConcentric(minimum):
+            return minimum.map { "containerConcentric(minimum: \($0))" } ?? "containerConcentric()"
+        }
+    }
+
+    fileprivate var objectiveC: __UICornerRadius {
+        let radius: __UICornerRadius?
+        switch kind {
+        case let .fixed(value):
+            radius = revenantCornerRadius(fixed: CGFloat(value))
+        case let .containerConcentric(minimum?):
+            radius = revenantCornerRadius(containerConcentricMinimum: minimum)
+        case .containerConcentric(nil):
+            radius = revenantCornerRadiusContainerConcentric()
+        }
+        guard let radius else {
+            preconditionFailure("UICornerRadius is not on this iOS, and the Backports that provide it are not linked")
+        }
+        return radius
     }
 }
 
-@available(iOS 26.0, *)
 public typealias UICornerConfiguration = __UICornerConfiguration
 
-@available(iOS 26.0, *)
 extension UICornerConfiguration {
-    public static func corners(topLeftRadius: UICornerRadius, topRightRadius: UICornerRadius, bottomLeftRadius: UICornerRadius, bottomRightRadius: UICornerRadius) -> UICornerConfiguration {
-        preconditionFailure("UICornerConfiguration.corners(...) has no backing: per-corner radii need CAShapeLayer-mask backing")
+    public static func corners(radius: UICornerRadius) -> UICornerConfiguration {
+        corners(radius: radius.objectiveC)
+    }
+
+    public static func corners(topLeftRadius: UICornerRadius?, topRightRadius: UICornerRadius?, bottomLeftRadius: UICornerRadius?, bottomRightRadius: UICornerRadius?) -> UICornerConfiguration {
+        corners(topLeftRadius: topLeftRadius?.objectiveC, topRightRadius: topRightRadius?.objectiveC,
+                bottomLeftRadius: bottomLeftRadius?.objectiveC, bottomRightRadius: bottomRightRadius?.objectiveC)
+    }
+
+    public static func uniformCorners(radius: UICornerRadius) -> UICornerConfiguration {
+        uniformCorners(radius: radius.objectiveC)
+    }
+
+    public static func uniformEdges(topRadius: UICornerRadius, bottomRadius: UICornerRadius) -> UICornerConfiguration {
+        uniformEdges(topRadius: topRadius.objectiveC, bottomRadius: bottomRadius.objectiveC)
+    }
+
+    public static func uniformEdges(leftRadius: UICornerRadius, rightRadius: UICornerRadius) -> UICornerConfiguration {
+        uniformEdges(leftRadius: leftRadius.objectiveC, rightRadius: rightRadius.objectiveC)
+    }
+
+    public static func uniformTopRadius(_ topRadius: UICornerRadius, bottomLeftRadius: UICornerRadius? = nil, bottomRightRadius: UICornerRadius? = nil) -> UICornerConfiguration {
+        uniformTopRadius(topRadius.objectiveC, bottomLeftRadius: bottomLeftRadius?.objectiveC, bottomRightRadius: bottomRightRadius?.objectiveC)
+    }
+
+    public static func uniformBottomRadius(_ bottomRadius: UICornerRadius, topLeftRadius: UICornerRadius? = nil, topRightRadius: UICornerRadius? = nil) -> UICornerConfiguration {
+        uniformBottomRadius(bottomRadius.objectiveC, topLeftRadius: topLeftRadius?.objectiveC, topRightRadius: topRightRadius?.objectiveC)
+    }
+
+    public static func uniformLeftRadius(_ leftRadius: UICornerRadius, topRightRadius: UICornerRadius? = nil, bottomRightRadius: UICornerRadius? = nil) -> UICornerConfiguration {
+        uniformLeftRadius(leftRadius.objectiveC, topRightRadius: topRightRadius?.objectiveC, bottomRightRadius: bottomRightRadius?.objectiveC)
+    }
+
+    public static func uniformRightRadius(_ rightRadius: UICornerRadius, topLeftRadius: UICornerRadius? = nil, bottomLeftRadius: UICornerRadius? = nil) -> UICornerConfiguration {
+        uniformRightRadius(rightRadius.objectiveC, topLeftRadius: topLeftRadius?.objectiveC, bottomLeftRadius: bottomLeftRadius?.objectiveC)
     }
 }

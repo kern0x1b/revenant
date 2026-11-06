@@ -281,10 +281,8 @@
             if ([self revenant_ml_isCancelling]) {
                 return;
             }
-            size_t samples = _count - first < minibatch ? _count - first : minibatch;
             char message[512] = "";
-            if (!revenant_ml_trainer_step(_trainer, _inputs + first * _inputCount, _targets + first * _outputCount,
-                                        samples, message, sizeof message)) {
+            if (!revenant_ml_trainer_batch(_trainer, epoch, first, _inputs, _targets, _count, message, sizeof message)) {
                 [self revenant_ml_setState:MLTaskStateFailed error:[self revenant_ml_failure:message]];
                 return;
             }

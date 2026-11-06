@@ -9,6 +9,12 @@
 @implementation RevenantRowSeparatorView
 @end
 
+static BOOL revenant_automatic_insets(NSDirectionalEdgeInsets insets)
+{
+    return insets.top == UIListSeparatorAutomaticInsets.top && insets.leading == UIListSeparatorAutomaticInsets.leading
+        && insets.bottom == UIListSeparatorAutomaticInsets.bottom && insets.trailing == UIListSeparatorAutomaticInsets.trailing;
+}
+
 @interface RevenantVerticalSeparatorView : UIView
 @end
 
@@ -24,6 +30,7 @@
     NSMutableArray *_accessoryViews;
     UILayoutGuide *_separatorGuide;
     RevenantRowSeparatorView *_separator;
+    RevenantRowSeparatorView *_topSeparator;
     CGRect _separatorFrame;
     RevenantVerticalSeparatorView *_reorderSeparator;
     BOOL _expanded;
@@ -293,19 +300,54 @@
     CGFloat textLeading = [content isKindOfClass:[UIListContentView class]] ? contentStart + [(UIListContentView *)content revenant_textLeading] : margins.left + indent;
     _separatorFrame = CGRectMake(textLeading, bounds.size.height - 1 / scale, MAX(bounds.size.width - margins.right - textLeading, 0), 1 / scale);
     UICollectionLayoutListConfiguration *configuration = [self revenant_layoutListConfiguration];
-    if (configuration && [configuration revenant_showsSeparators]) {
+    UIListSeparatorConfiguration *separators = configuration ? [self revenant_itemSeparatorsForConfiguration:configuration] : nil;
+    UIListSeparatorVisibility bottom = separators.bottomSeparatorVisibility;
+    BOOL bottomShown = separators && (bottom == UIListSeparatorVisibilityVisible || (bottom == UIListSeparatorVisibilityAutomatic && [configuration revenant_showsSeparators]));
+    BOOL topShown = separators.topSeparatorVisibility == UIListSeparatorVisibilityVisible;
+    CGFloat thickness = 1 / scale;
+    NSDirectionalEdgeInsets bottomInsets = separators.bottomSeparatorInsets, topInsets = separators.topSeparatorInsets;
+    CGRect bottomFrame = revenant_automatic_insets(bottomInsets) ? _separatorFrame
+        : CGRectMake(bottomInsets.leading, bounds.size.height - thickness, MAX(bounds.size.width - bottomInsets.leading - bottomInsets.trailing, 0), thickness);
+    CGRect topFrame = revenant_automatic_insets(topInsets) ? CGRectMake(_separatorFrame.origin.x, 0, _separatorFrame.size.width, thickness)
+        : CGRectMake(topInsets.leading, 0, MAX(bounds.size.width - topInsets.leading - topInsets.trailing, 0), thickness);
+    if (bottomShown) {
         if (!_separator) {
             _separator = [[RevenantRowSeparatorView alloc] init];
             _separator.userInteractionEnabled = NO;
             [self addSubview:_separator];
         }
-        _separator.backgroundColor = revenant_semantic_color(RevenantSemanticColorSeparator);
-        _separator.frame = _separatorFrame;
+        _separator.backgroundColor = separators.color;
+        _separator.frame = bottomFrame;
     } else {
         [_separator removeFromSuperview];
         _separator = nil;
     }
+    if (topShown) {
+        if (!_topSeparator) {
+            _topSeparator = [[RevenantRowSeparatorView alloc] init];
+            _topSeparator.userInteractionEnabled = NO;
+            [self addSubview:_topSeparator];
+        }
+        _topSeparator.backgroundColor = separators.color;
+        _topSeparator.frame = topFrame;
+    } else {
+        [_topSeparator removeFromSuperview];
+        _topSeparator = nil;
+    }
     [_separatorGuide revenant_pinFrame:_separatorFrame inView:self];
+}
+
+- (UIListSeparatorConfiguration *)revenant_itemSeparatorsForConfiguration:(UICollectionLayoutListConfiguration *)configuration
+{
+    UIListSeparatorConfiguration *separators = configuration.separatorConfiguration;
+    UICollectionLayoutListItemSeparatorHandler handler = configuration.itemSeparatorHandler;
+    if (!handler)
+        return separators;
+    UIView *owner = self.superview;
+    while (owner && ![owner isKindOfClass:[UICollectionView class]])
+        owner = owner.superview;
+    NSIndexPath *path = [(UICollectionView *)owner indexPathForCell:self];
+    return (path ? handler(path, separators) : nil) ?: separators;
 }
 
 @end

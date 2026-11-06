@@ -27,7 +27,6 @@ static NSDictionary *revenant_add_kind(NSDictionary *existing, NSString *kind, N
     NSDictionary *_supplementary;
     NSDictionary *_decoration;
     CGPoint _contentOffsetAdjustment;
-    CGSize _contentSizeAdjustment;
     NSArray *_previousMovingIndexPaths;
     NSArray *_targetMovingIndexPaths;
     CGPoint _interactiveMovementTarget;
@@ -83,16 +82,6 @@ static NSDictionary *revenant_add_kind(NSDictionary *existing, NSString *kind, N
     _contentOffsetAdjustment = value;
 }
 
-- (CGSize)contentSizeAdjustment
-{
-    return _contentSizeAdjustment;
-}
-
-- (void)setContentSizeAdjustment:(CGSize)value
-{
-    _contentSizeAdjustment = value;
-}
-
 - (NSArray<NSIndexPath *> *)previousIndexPathsForInteractivelyMovingItems
 {
     return _previousMovingIndexPaths;
@@ -115,43 +104,6 @@ static NSDictionary *revenant_add_kind(NSDictionary *existing, NSString *kind, N
     _previousMovingIndexPaths = previous;
     _targetMovingIndexPaths = target;
     _interactiveMovementTarget = position;
-}
-
-@end
-
-@implementation UICollectionViewFlowLayoutInvalidationContext {
-@private
-    BOOL _invalidateFlowLayoutDelegateMetrics;
-    BOOL _invalidateFlowLayoutAttributes;
-}
-
-- (instancetype)init
-{
-    if ((self = [super init])) {
-        _invalidateFlowLayoutDelegateMetrics = YES;
-        _invalidateFlowLayoutAttributes = YES;
-    }
-    return self;
-}
-
-- (BOOL)invalidateFlowLayoutDelegateMetrics
-{
-    return _invalidateFlowLayoutDelegateMetrics;
-}
-
-- (void)setInvalidateFlowLayoutDelegateMetrics:(BOOL)value
-{
-    _invalidateFlowLayoutDelegateMetrics = value;
-}
-
-- (BOOL)invalidateFlowLayoutAttributes
-{
-    return _invalidateFlowLayoutAttributes;
-}
-
-- (void)setInvalidateFlowLayoutAttributes:(BOOL)value
-{
-    _invalidateFlowLayoutAttributes = value;
 }
 
 @end

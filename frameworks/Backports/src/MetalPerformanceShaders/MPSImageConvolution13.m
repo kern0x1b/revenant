@@ -1,13 +1,96 @@
 #import "RevenantMPS.h"
 #import "RevenantMPSImage.h"
+#import "../Metal/RevenantMetal.h"
 
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
 #pragma clang diagnostic ignored "-Wobjc-designated-initializers"
 
-static void RevenantMPSConvolveRegion(MPSImage *source, MPSImage *destination, MTLRegion read,
+static NSString *RevenantMPSConvolutionShader(NSUInteger kernelWidth, NSUInteger kernelHeight, const float *weights,
+                                            double bias, NSUInteger width, NSUInteger height)
+{
+    NSMutableString *shader = [NSMutableString stringWithString:@"precision highp float;\nuniform sampler2D source;\nvoid main() {\n    vec2 at = floor(gl_FragCoord.xy);\n"];
+    [shader appendFormat:@"    vec4 total = vec4(%.9e);\n", bias];
+    for (NSUInteger ky = 0; ky < kernelHeight; ky++)
+        for (NSUInteger kx = 0; kx < kernelWidth; kx++) {
+            float weight = weights[ky * kernelWidth + kx];
+            if (weight == 0.0f)
+                continue;
+            double dx = (double)kx - (double)(kernelWidth / 2), dy = (double)ky - (double)(kernelHeight / 2);
+            [shader appendFormat:@"    if (at.x + (%.1f) >= 0.0 && at.x + (%.1f) < %lu.0 && at.y + (%.1f) >= 0.0 && at.y + (%.1f) < %lu.0)\n"
+                                 @"        total += vec4(%.9e) * texture2D(source, (at + vec2(%.1f, %.1f)) / vec2(%lu.0, %lu.0));\n",
+                                 dx, dx, (unsigned long)width, dy, dy, (unsigned long)height,
+                                 weight, dx + 0.5, dy + 0.5, (unsigned long)width, (unsigned long)height];
+        }
+    [shader appendString:@"    gl_FragColor = total;\n}\n"];
+    return shader;
+}
+
+static BOOL RevenantMPSConvolveOnGPU(id<MTLCommandBuffer> commandBuffer, MPSImage *source, MPSImage *destination,
+                                   MTLRegion read, NSUInteger kernelWidth, NSUInteger kernelHeight,
+                                   const float *weights, double bias)
+{
+    id<MTLTexture> input = source.texture;
+    id<MTLTexture> output = destination.texture;
+    if (!commandBuffer || !input || !output || source.featureChannels != 4 || destination.featureChannels != 4 ||
+        source.numberOfImages != 1 || destination.numberOfImages != 1 ||
+        input.pixelFormat != MTLPixelFormatRGBA8Unorm || output.pixelFormat != MTLPixelFormatRGBA8Unorm)
+        return NO;
+    static NSMutableDictionary *pipelines;
+    static id<MTLSamplerState> nearest;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        pipelines = [NSMutableDictionary dictionary];
+        MTLSamplerDescriptor *descriptor = [[MTLSamplerDescriptor alloc] init];
+        descriptor.minFilter = MTLSamplerMinMagFilterNearest;
+        descriptor.magFilter = MTLSamplerMinMagFilterNearest;
+        descriptor.sAddressMode = MTLSamplerAddressModeClampToEdge;
+        descriptor.tAddressMode = MTLSamplerAddressModeClampToEdge;
+        nearest = [input.device newSamplerStateWithDescriptor:descriptor];
+    });
+    NSString *shader = RevenantMPSConvolutionShader(kernelWidth, kernelHeight, weights, bias, input.width, input.height);
+    RevenantMetalPipeline *pipeline = pipelines[shader];
+    if (!pipeline) {
+        NSDictionary *reflection = @{@"usesVertexId": @NO, @"uniforms": @[], @"inputs": @[],
+                                     @"textures": @[@{@"name": @"source", @"index": @0}], @"outputs": @[@0]};
+        RevenantMetalFunction *fragment = [[RevenantMetalFunction alloc] initWithName:@"revenant_mps_convolution" stage:@"fragment" source:shader reflection:reflection];
+        NSError *error = nil;
+        pipeline = [RevenantMetalPipeline fullscreenWithFragment:fragment error:&error];
+        if (!pipeline) {
+            NSLog(@"Metal: the convolution shader does not link on the GPU route, so the CPU route runs: %@", error.localizedDescription);
+            return NO;
+        }
+        pipelines[shader] = pipeline;
+    }
+    MTLRenderPassDescriptor *pass = [MTLRenderPassDescriptor renderPassDescriptor];
+    pass.colorAttachments[0].texture = output;
+    pass.colorAttachments[0].loadAction = MTLLoadActionLoad;
+    pass.colorAttachments[0].storeAction = MTLStoreActionStore;
+    id<MTLRenderCommandEncoder> encoder = [commandBuffer renderCommandEncoderWithDescriptor:pass];
+    [encoder setRenderPipelineState:pipeline];
+    [encoder setFragmentTexture:input atIndex:0];
+    [encoder setFragmentSamplerState:nearest atIndex:0];
+    static const float corners[8] = {-1, -1, 1, -1, -1, 1, 1, 1};
+    [encoder setVertexBytes:corners length:sizeof corners atIndex:0];
+    [encoder setViewport:(MTLViewport){0, 0, (double)output.width, (double)output.height, 0, 1}];
+    [encoder setScissorRect:(MTLScissorRect){read.origin.x, read.origin.y, read.size.width, read.size.height}];
+    [encoder drawPrimitives:MTLPrimitiveTypeTriangleStrip vertexStart:0 vertexCount:4];
+    [encoder endEncoding];
+    return YES;
+}
+
+static void RevenantMPSConvolveRegion(id<MTLCommandBuffer> commandBuffer, MPSImage *source, MPSImage *destination, MTLRegion read,
                                     NSUInteger kernelWidth, NSUInteger kernelHeight, const float *weights,
                                     double bias, NSString *what)
 {
+    if (kernelWidth && kernelHeight && RevenantMPSConvolveOnGPU(commandBuffer, source, destination, read, kernelWidth, kernelHeight, weights, bias))
+        return;
+    if (RevenantMPSImageFeatureChannelSize(source.featureChannelFormat) != 1 || RevenantMPSImageFeatureChannelSize(destination.featureChannelFormat) != 1) {
+        RevenantMPSRefuse(@"%@: the image has more than 8 bits per channel, and this device's OpenGL ES 2.0 reads back only 8-bit channels, so nothing was written", what);
+        return;
+    }
+    if (kernelWidth && kernelHeight)
+        NSLog(@"Metal: %@ runs on the CPU route, because the GPU route takes only single-slice 4-channel RGBA8 images and this destination is pixel format %lu, so this is known debt (docs/explanation/backports/metal-on-ios6.md section 3, item 10)",
+              what, (unsigned long)destination.pixelFormat);
     RevenantMPSImageLayout in = RevenantMPSImageLayoutOf(source);
     RevenantMPSImageLayout out = RevenantMPSImageLayoutOf(destination);
     if (!kernelWidth || !kernelHeight) {
@@ -53,24 +136,26 @@ static void RevenantMPSConvolveRegion(MPSImage *source, MPSImage *destination, M
 }
 
 @interface MPSUnaryImageKernel (RevenantMPSConvolution)
-- (void)revenant_mps_convolveRegionWithSource:(MPSImage *)source
-                                destination:(MPSImage *)destination
-                                 kernelWidth:(NSUInteger)kernelWidth
-                                kernelHeight:(NSUInteger)kernelHeight
-                                    weights:(const float *)weights
-                                        bias:(double)bias
-                                        what:(NSString *)what;
+- (void)revenant_mps_convolveRegionWithCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
+                                              source:(MPSImage *)source
+                                         destination:(MPSImage *)destination
+                                         kernelWidth:(NSUInteger)kernelWidth
+                                        kernelHeight:(NSUInteger)kernelHeight
+                                             weights:(const float *)weights
+                                                bias:(double)bias
+                                                what:(NSString *)what;
 @end
 
 @implementation MPSUnaryImageKernel (RevenantMPSConvolution)
 
-- (void)revenant_mps_convolveRegionWithSource:(MPSImage *)source
-                                destination:(MPSImage *)destination
-                                 kernelWidth:(NSUInteger)kernelWidth
-                                kernelHeight:(NSUInteger)kernelHeight
-                                    weights:(const float *)weights
-                                        bias:(double)bias
-                                        what:(NSString *)what
+- (void)revenant_mps_convolveRegionWithCommandBuffer:(id<MTLCommandBuffer>)commandBuffer
+                                              source:(MPSImage *)source
+                                         destination:(MPSImage *)destination
+                                         kernelWidth:(NSUInteger)kernelWidth
+                                        kernelHeight:(NSUInteger)kernelHeight
+                                             weights:(const float *)weights
+                                                bias:(double)bias
+                                                what:(NSString *)what
 {
     if (self.edgeMode != MPSImageEdgeModeZero) {
         RevenantMPSRefuse(@"%@: edgeMode %lu is not MPSImageEdgeModeZero, the only mode this port implements"
@@ -78,7 +163,7 @@ static void RevenantMPSConvolveRegion(MPSImage *source, MPSImage *destination, M
                         what, (unsigned long)self.edgeMode);
         return;
     }
-    RevenantMPSConvolveRegion(source, destination,
+    RevenantMPSConvolveRegion(commandBuffer, source, destination,
                             RevenantMPSImageResolvedRegion(destination, self.clipRect),
                             kernelWidth, kernelHeight, weights, bias, what);
 }
@@ -154,7 +239,7 @@ static void RevenantMPSConvolveRegion(MPSImage *source, MPSImage *destination, M
                         @" was written", what, (unsigned long)self.edgeMode);
         return;
     }
-    RevenantMPSConvolveRegion(sourceImage, destinationImage,
+    RevenantMPSConvolveRegion(commandBuffer, sourceImage, destinationImage,
                             RevenantMPSImageResolvedRegion(destinationImage, self.clipRect),
                             _kernelWidth, _kernelHeight, (const float *)_weights.bytes, (double)_bias, what);
 }
@@ -169,8 +254,8 @@ static void RevenantMPSConvolveRegion(MPSImage *source, MPSImage *destination, M
 @synthesize kernelWidth = _kernelWidth;
 @synthesize kernelHeight = _kernelHeight;
 
-- (instancetype)initWithDevice:(id<MTLDevice>)device kernelHeight:(NSUInteger)kernelHeight
-                    kernelWidth:(NSUInteger)kernelWidth
+- (instancetype)initWithDevice:(id<MTLDevice>)device kernelWidth:(NSUInteger)kernelWidth
+                    kernelHeight:(NSUInteger)kernelHeight
 {
     if ((self = [super initWithDevice:device])) {
         if (!kernelWidth || !kernelHeight || !(kernelWidth % 2) || !(kernelHeight % 2)) {
@@ -212,7 +297,7 @@ static void RevenantMPSConvolveRegion(MPSImage *source, MPSImage *destination, M
                         @" so nothing was written", what, (unsigned long)self.edgeMode);
         return;
     }
-    RevenantMPSConvolveRegion(sourceImage, destinationImage,
+    RevenantMPSConvolveRegion(commandBuffer, sourceImage, destinationImage,
                             RevenantMPSImageResolvedRegion(destinationImage, self.clipRect),
                             _kernelWidth, _kernelHeight, (const float *)_weights.bytes, 0.0, what);
 }
@@ -225,10 +310,10 @@ static void RevenantMPSConvolveRegion(MPSImage *source, MPSImage *destination, M
 
 @implementation MPSImageTent
 
-- (instancetype)initWithDevice:(id<MTLDevice>)device kernelHeight:(NSUInteger)kernelHeight
-                    kernelWidth:(NSUInteger)kernelWidth
+- (instancetype)initWithDevice:(id<MTLDevice>)device kernelWidth:(NSUInteger)kernelWidth
+                    kernelHeight:(NSUInteger)kernelHeight
 {
-    if ((self = [super initWithDevice:device kernelHeight:kernelHeight kernelWidth:kernelWidth]))
+    if ((self = [super initWithDevice:device kernelWidth:kernelWidth kernelHeight:kernelHeight]))
         [self revenant_makeTentWeights];
     return self;
 }

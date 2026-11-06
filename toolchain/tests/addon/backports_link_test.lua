@@ -87,6 +87,14 @@ function failures(opt)
         end
     end
 
+    local weak = backports.weak_frameworks({{
+        libraries = {"/System/Library/Frameworks/UserNotifications.framework/UserNotifications", "/System/Library/Frameworks/UIKit.framework/UIKit", "/usr/lib/libSystem.B.dylib"},
+        library_strength = {false, true, true},
+    }})
+    if table.concat(weak, " ") ~= "UserNotifications" then
+        table.insert(found, "a program weak-links the frameworks a Backports library weak-links, and no strong one: got " .. table.concat(weak, " "))
+    end
+
     os.tryrm(folder)
     return found
 end

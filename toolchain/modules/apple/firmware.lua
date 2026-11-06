@@ -2,6 +2,8 @@ import("core.base.json")
 import("utils.progress")
 import("dyld")
 import("macho")
+import("complzss")
+import("img3")
 import("cache", {rootdir = path.join(os.scriptdir(), "..")})
 
 PLATFORMS = {
@@ -827,4 +829,92 @@ function rootfs(identifier, minimum, opt)
               firmware.identifier, firmware.build, folder)
     end
     return folder, firmware
+end
+
+local function kernelcache_folder(firmware)
+    return path.join(home(), "firmware", "kernelcache", firmware.identifier, firmware.version .. "_" .. firmware.build)
+end
+
+local function kernelcache_image(firmware)
+    local held = os.files(path.join(kernelcache_folder(firmware), "kernelcache.release.*"))
+    if #held == 1 then
+        return held[1]
+    end
+    local members = zip_members(firmware.url)
+    local names = {}
+    for name in pairs(members) do
+        if name:match("^kernelcache%.release%.%w+$") then
+            table.insert(names, name)
+        end
+    end
+    if #names ~= 1 then
+        raise("the firmware of %s %s holds %d kernelcache.release files, not one", firmware.identifier, firmware.build, #names)
+    end
+    local folder = kernelcache_folder(firmware)
+    local file = path.join(folder, names[1])
+    if not os.isfile(file) then
+        cache.reserve(members[names[1]].uncompressed, "the kernelcache of " .. firmware.identifier .. " " .. firmware.version)
+        os.mkdir(folder)
+        fetch_member(firmware.url, members[names[1]], file)
+    end
+    return file
+end
+
+function kernelcache_keys_in(content, name)
+    if content:match("|%s*Kernelcache%s*=%s*([%w%.]+)") ~= name then
+        return nil
+    end
+    local key = content:match("|%s*KernelcacheKey%s*=%s*(%x+)")
+    local iv = content:match("|%s*KernelcacheIV%s*=%s*(%x+)")
+    if key and iv then
+        return key, iv
+    end
+    return nil
+end
+
+local function kernelcache_keys(firmware, name)
+    local search = fetch_json(KEYS .. "?action=query&list=search&srnamespace=2304&format=json&srsearch=" ..
+                              ("intitle:%s intitle:%s"):format(firmware.build, firmware.identifier):gsub(" ", "+"))
+    for _, hit in ipairs(search.query and search.query.search or {}) do
+        if hit.title:find(" " .. firmware.build .. " ", 1, true) and hit.title:find(firmware.identifier, 1, true) then
+            local page = fetch_json(KEYS .. "?action=query&prop=revisions&rvprop=content&rvslots=main&format=json&titles=" .. hit.title:gsub(" ", "_"))
+            for _, found in pairs(page.query.pages) do
+                local key, iv = kernelcache_keys_in(found.revisions[1].slots.main["*"], name)
+                if key then
+                    return key, iv
+                end
+            end
+        end
+    end
+    raise("%s lists no key for %s of %s %s", KEYS, name, firmware.identifier, firmware.build)
+end
+
+function decode_kernelcache(image, key, iv, output)
+    local payload, size = img3.data(io.readfile(image, {encoding = "binary"}))
+    local container = img3.decrypt(payload, key, iv):sub(1, size)
+    if container:sub(1, 8) ~= "complzss" then
+        raise("%s decrypts to bytes that start %q and not complzss, so the published key or IV does not fit it",
+              image, container:sub(1, 8))
+    end
+    local bytes = complzss.unwrap(container)
+    local partial = output .. ".partial"
+    io.writefile(partial, bytes, {encoding = "binary"})
+    if not macho.is_macho(partial) then
+        os.tryrm(partial)
+        raise("%s decodes to bytes that are not a Mach-O file", image)
+    end
+    os.mv(partial, output)
+end
+
+function kernelcache(identifier, minimum)
+    local firmware = device_firmware(identifier, minimum)
+    local kernel = path.join(kernelcache_folder(firmware), "kernel.macho")
+    if os.isfile(kernel) then
+        return kernel, firmware
+    end
+    local image = kernelcache_image(firmware)
+    local key, iv = kernelcache_keys(firmware, path.filename(image))
+    cprint("${bright}decrypting and decompressing${clear} %s of %s %s", path.filename(image), firmware.identifier, firmware.build)
+    decode_kernelcache(image, key, iv, kernel)
+    return kernel, firmware
 end

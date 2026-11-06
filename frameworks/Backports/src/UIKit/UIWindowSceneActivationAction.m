@@ -5,7 +5,7 @@ static NSString *const revenantOpenInNewWindowTitle = @"Open in New Window";
 static void revenant_requestWindow(UIWindowSceneActivationActionConfigurationProvider configurationProvider, UIAction *alternateAction, UIAction *action)
 {
     UIWindowSceneActivationConfiguration *configuration = configurationProvider ? configurationProvider((UIWindowSceneActivationAction *)action) : nil;
-    [[UIApplication sharedApplication] requestSceneSessionActivation:nil userActivity:configuration.userActivity options:configuration.options errorHandler:^(NSError *error) {
+    [[UIApplication sharedApplication] requestSceneSessionActivation:nil userActivity:configuration.userActivity options:nil errorHandler:^(NSError *error) {
         [alternateAction performWithSender:action target:nil];
     }];
 }

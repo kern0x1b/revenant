@@ -69,8 +69,6 @@
 @end
 
 static const void *RevenantCustomActionsKey = &RevenantCustomActionsKey;
-static const void *RevenantElementsKey = &RevenantElementsKey;
-static const void *RevenantNavigationStyleKey = &RevenantNavigationStyleKey;
 
 static IMP RevenantCustomActionsGetter;
 static IMP RevenantCustomActionsSetter;
@@ -89,26 +87,6 @@ static void RevenantReassertCustomActions(void);
 {
     RevenantReassertCustomActions();
     objc_setAssociatedObject(self, RevenantCustomActionsKey, [actions copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-- (NSArray *)accessibilityElements
-{
-    return objc_getAssociatedObject(self, RevenantElementsKey);
-}
-
-- (void)setAccessibilityElements:(NSArray *)elements
-{
-    objc_setAssociatedObject(self, RevenantElementsKey, [elements copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-- (UIAccessibilityNavigationStyle)accessibilityNavigationStyle
-{
-    return (UIAccessibilityNavigationStyle)[objc_getAssociatedObject(self, RevenantNavigationStyleKey) integerValue];
-}
-
-- (void)setAccessibilityNavigationStyle:(UIAccessibilityNavigationStyle)style
-{
-    objc_setAssociatedObject(self, RevenantNavigationStyleKey, @(style), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @end

@@ -3,8 +3,6 @@
 @implementation UIWindowSceneActivationConfiguration {
 @private
     NSUserActivity *_userActivity;
-    UIWindowSceneActivationRequestOptions *_options;
-    UITargetedPreview *_preview;
 }
 
 - (instancetype)initWithUserActivity:(NSUserActivity *)userActivity
@@ -18,26 +16,6 @@
 - (NSUserActivity *)userActivity
 {
     return _userActivity;
-}
-
-- (UIWindowSceneActivationRequestOptions *)options
-{
-    return _options;
-}
-
-- (void)setOptions:(UIWindowSceneActivationRequestOptions *)options
-{
-    _options = options;
-}
-
-- (UITargetedPreview *)preview
-{
-    return _preview;
-}
-
-- (void)setPreview:(UITargetedPreview *)preview
-{
-    _preview = preview;
 }
 
 @end

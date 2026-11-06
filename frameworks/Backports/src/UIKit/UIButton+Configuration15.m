@@ -9,7 +9,6 @@ extern void revenant_request_update(UIView *view);
 
 static const void *RevenantButtonConfigurationKey = &RevenantButtonConfigurationKey;
 static const void *RevenantButtonAutoUpdateKey = &RevenantButtonAutoUpdateKey;
-static const void *RevenantButtonPrimaryActionKey = &RevenantButtonPrimaryActionKey;
 static const void *RevenantButtonSubtitleLabelKey = &RevenantButtonSubtitleLabelKey;
 
 @implementation UIButton (RevenantConfiguration15)
@@ -65,16 +64,6 @@ static const void *RevenantButtonSubtitleLabelKey = &RevenantButtonSubtitleLabel
     UIButtonConfigurationUpdateHandler handler = revenant_host_update_handler(self);
     if (handler)
         handler(self);
-}
-
-- (BOOL)changesSelectionAsPrimaryAction
-{
-    return [objc_getAssociatedObject(self, RevenantButtonPrimaryActionKey) boolValue];
-}
-
-- (void)setChangesSelectionAsPrimaryAction:(BOOL)changesSelectionAsPrimaryAction
-{
-    objc_setAssociatedObject(self, RevenantButtonPrimaryActionKey, @(changesSelectionAsPrimaryAction), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (UILabel *)subtitleLabel

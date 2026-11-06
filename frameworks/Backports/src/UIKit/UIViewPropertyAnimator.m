@@ -50,7 +50,6 @@
     BOOL _reversed;
     BOOL _interruptible;
     BOOL _userInteractionEnabled;
-    BOOL _manualHitTestingEnabled;
     BOOL _scrubsLinearly;
     BOOL _pausesOnCompletion;
     BOOL _blocksWaiting;
@@ -140,7 +139,6 @@
         [self addAnimations:animations];
 }
 
-
 #pragma mark - Driving the layers
 
 static double revenant_curve_at(id <UITimingCurveProvider> parameters, double fraction)
@@ -179,7 +177,6 @@ static NSMapTable *revenant_animation_keys(void)
         });
     return keys;
 }
-
 
 #pragma mark - What the animation was asked for
 
@@ -261,16 +258,6 @@ static NSMapTable *revenant_animation_keys(void)
 - (void)setUserInteractionEnabled:(BOOL)enabled
 {
     _userInteractionEnabled = enabled;
-}
-
-- (BOOL)isManualHitTestingEnabled
-{
-    return _manualHitTestingEnabled;
-}
-
-- (void)setManualHitTestingEnabled:(BOOL)enabled
-{
-    _manualHitTestingEnabled = enabled;
 }
 
 #pragma mark - The blocks
@@ -427,7 +414,6 @@ static NSMapTable *revenant_animation_keys(void)
     if (wasRunning)
         [self revenant_resume];
 }
-
 
 #pragma mark - The private half
 

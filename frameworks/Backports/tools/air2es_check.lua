@@ -2,7 +2,7 @@ local limits = import("air2es_limits", {rootdir = os.scriptdir()})
 local json = import("core.base.json")
 
 local BYTES = {float = 4, i32 = 4, half = 2, i16 = 2, i8 = 1}
-local SPECIAL = {revenant_flip = true, revenant_target = true}
+local SPECIAL = {revenant_flip = true, revenant_target = true, revenant_instance = true}
 
 local function shape(glsl)
     if glsl == "float" then
@@ -22,7 +22,10 @@ local function shape(glsl)
     return nil, nil
 end
 
-local function compatible(glsl, scalar, components, attribute)
+local function compatible(glsl, scalar, components, attribute, columns)
+    if columns then
+        return not attribute and scalar == "float" and glsl == string.format("mat%d", columns) and components == columns
+    end
     local kind, count = shape(glsl)
     if not kind or count ~= components then
         return false
@@ -78,15 +81,16 @@ local function reflectionProblems(stage, source, reflection)
     local uniforms = listOf(reflection, "uniforms", fail)
     for _, entry in ipairs(uniforms) do
         if type(entry.name) ~= "string" or not isInteger(entry.buffer) or not isInteger(entry.offset) or
-           not isInteger(entry.instanceStride) or not BYTES[entry.scalar] or not isComponents(entry.components) then
+           not isInteger(entry.instanceStride) or not BYTES[entry.scalar] or not isComponents(entry.components) or
+           (entry.columns ~= nil and (not isComponents(entry.columns) or entry.columns < 2 or entry.columns ~= entry.components)) then
             fail("a uniform entry with a missing or malformed field")
         else
             local item = declared[entry.name]
             if not item or item.qualifier ~= "uniform" then
                 fail("uniform " .. entry.name .. " is reflected but not declared in the source")
-            elseif not compatible(item.glsl, entry.scalar, entry.components, false) then
+            elseif not compatible(item.glsl, entry.scalar, entry.components, false, entry.columns) then
                 fail("uniform " .. entry.name .. " is declared " .. item.glsl .. " but reflected as " ..
-                     entry.scalar .. " x" .. entry.components)
+                     entry.scalar .. " x" .. entry.components .. (entry.columns and (" columns " .. entry.columns) or ""))
             end
             seen[entry.name] = true
         end
@@ -134,28 +138,34 @@ local function reflectionProblems(stage, source, reflection)
                 fail("a texture entry with a missing or malformed field")
             else
                 local item = declared[entry.name]
-                if not item or item.glsl ~= "sampler2D" then
-                    fail("texture " .. entry.name .. " is reflected but not declared as sampler2D")
+                local expected = entry.cube == true and "samplerCube" or "sampler2D"
+                if not item or item.glsl ~= expected then
+                    fail("texture " .. entry.name .. " is reflected but not declared as " .. expected)
                 end
                 textureByIndex[entry.index] = entry.name
                 textureNamed[entry.name] = true
             end
         end
         for _, item in ipairs(declarations(source)) do
-            if item.glsl == "sampler2D" and not textureNamed[item.name] then
+            if (item.glsl == "sampler2D" or item.glsl == "samplerCube") and not textureNamed[item.name] then
                 fail("sampler " .. item.name .. " is declared but missing from reflection")
             end
         end
         for _, entry in ipairs(listOf(reflection, "sizes", fail)) do
             local item = type(entry.name) == "string" and declared[entry.name]
-            if not item or item.glsl ~= "vec2" or not isInteger(entry.texture) or not textureByIndex[entry.texture] then
+            local output = entry.output == true and type(reflection.outputTexture) == "table" and entry.texture == reflection.outputTexture.index
+            if not item or item.glsl ~= "vec2" or not isInteger(entry.texture) or not (output or textureByIndex[entry.texture]) then
                 fail("a size entry that names no declared vec2 or an unknown texture")
             else
                 sizes[entry.name] = true
             end
         end
         local outputs = listOf(reflection, "outputs", fail)
-        if #outputs == 0 then
+        if stage == "kernel" then
+            if type(reflection.outputTexture) ~= "table" then
+                fail("a kernel with no outputTexture")
+            end
+        elseif #outputs == 0 then
             fail("a fragment function with no outputs")
         end
         for _, output in ipairs(outputs) do
@@ -169,7 +179,7 @@ local function reflectionProblems(stage, source, reflection)
         listOf(reflection, "fetches", fail)
     end
     for _, item in ipairs(declarations(source)) do
-        local special = SPECIAL[item.name] or sizes[item.name] or item.glsl == "sampler2D" or item.qualifier ~= "uniform"
+        local special = SPECIAL[item.name] or sizes[item.name] or item.glsl == "sampler2D" or item.glsl == "samplerCube" or item.qualifier ~= "uniform"
         if not special and not seen[item.name] then
             fail("uniform " .. item.name .. " is declared but missing from reflection")
         end
@@ -225,7 +235,7 @@ function main(folder, glslang)
         local problems = {}
         local label = tostring(entry.name) .. " (" .. tostring(entry.stage) .. ")"
         local valid = type(entry.name) == "string" and not names[entry.name] and
-            (entry.stage == "vertex" or entry.stage == "fragment")
+            (entry.stage == "vertex" or entry.stage == "fragment" or entry.stage == "kernel")
         if not valid then
             table.insert(problems, "a function entry with a bad or repeated name or stage")
         else

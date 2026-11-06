@@ -78,7 +78,6 @@ static const char RevenantPageProgressKey;
 @implementation UIPageControlTimerProgress {
     NSTimeInterval _preferredDuration;
     NSMutableDictionary<NSNumber *, NSNumber *> *_durations;
-    BOOL _resetsToInitialPageAfterEnd;
     BOOL _running;
     NSTimer *_timer;
     NSDate *_lastTick;
@@ -107,16 +106,6 @@ static const char RevenantPageProgressKey;
 - (void)setDelegate:(id<UIPageControlTimerProgressDelegate>)delegate
 {
     [super setDelegate:delegate];
-}
-
-- (BOOL)resetsToInitialPageAfterEnd
-{
-    return _resetsToInitialPageAfterEnd;
-}
-
-- (void)setResetsToInitialPageAfterEnd:(BOOL)resetsToInitialPageAfterEnd
-{
-    _resetsToInitialPageAfterEnd = resetsToInitialPageAfterEnd;
 }
 
 - (BOOL)isRunning

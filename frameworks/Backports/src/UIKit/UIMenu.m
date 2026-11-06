@@ -18,8 +18,6 @@ static void revenant_collect_selected(NSArray<UIMenuElement *> *elements, NSMuta
     NSString *_identifier;
     UIMenuOptions _options;
     NSArray<UIMenuElement *> *_children;
-    id _forcedAutomaticSelectionDelegate;
-    BOOL _forceAutomaticSelection;
     UIMenuElementSize _preferredElementSize;
 }
 
@@ -168,28 +166,6 @@ static void revenant_collect_selected(NSArray<UIMenuElement *> *elements, NSMuta
     }
     [text appendFormat:@"; children = <NSArray: %p>>", _children];
     return text;
-}
-
-
-- (id)forcedAutomaticSelectionDelegate
-{
-    return _forcedAutomaticSelectionDelegate;
-}
-
-- (void)setForcedAutomaticSelectionDelegate:(id)forcedAutomaticSelectionDelegate
-{
-    _forcedAutomaticSelectionDelegate = forcedAutomaticSelectionDelegate;
-}
-
-
-- (BOOL)forceAutomaticSelection
-{
-    return _forceAutomaticSelection;
-}
-
-- (void)setForceAutomaticSelection:(BOOL)forceAutomaticSelection
-{
-    _forceAutomaticSelection = forceAutomaticSelection;
 }
 
 @end
