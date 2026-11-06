@@ -1,0 +1,14 @@
+--- a/cctools-port/cctools/ld64/src/ld/parsers/macho_relocatable_file.cpp
++++ b/cctools-port/cctools/ld64/src/ld/parsers/macho_relocatable_file.cpp
+@@ -7724,8 +7724,9 @@
+ 					Atom<arm>* targetAtom = parser.findAtomByAddressOrLocalTargetOfStub(sreloc->r_value(), &offsetInTarget);
+ 					// check for addend encoded in the section content
+                     int64_t addend = (int32_t)contentValue - (int32_t)(sreloc->r_value() - nextRelocValue);
+-					if ( targetAtom->isThumb() )
+-						addend &= -2; // remove thumb bit
++					int64_t thumbMarker = (int32_t)contentValue - (int32_t)(sreloc->r_value() - srcAddr);
++					if ( targetAtom->isThumb() && (thumbMarker == 1) )
++						addend -= 1;
+ 					// if reference to LSDA, add group subordinate fixup
+ 					if ( targetAtom->contentType() == ld::Atom::typeLSDA ) {
+ 						Parser<arm>::SourceLocation	src2;

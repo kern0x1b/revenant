@@ -47,6 +47,7 @@ package("ld64")
         os.vrunv("patch", {"-p2", "-i", path.join(package:scriptdir(), "patches", "inlined-text-stub-before-search-paths.patch")})
         os.vrunv("patch", {"-p2", "-i", path.join(package:scriptdir(), "patches", "ordinal-for-dylib-that-only-a-reexport-reaches.patch")})
         os.vrunv("patch", {"-p2", "-i", path.join(package:scriptdir(), "patches", "link-snapshot-beside-the-output.patch")})
+        os.vrunv("patch", {"-p2", "-i", path.join(package:scriptdir(), "patches", "thumb-sectdiff-addend.patch")})
 
         local tapi_version = "1600.0.11.8"
         local tapi_build = path.absolute("tapi-build")
