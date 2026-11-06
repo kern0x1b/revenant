@@ -3,6 +3,14 @@ local sdkfiles = import("sdk", {rootdir = os.scriptdir(), anonymous = true})
 local SWIFT_FUNCTION = {Func = true, Constructor = true, Accessor = true, Subscript = true}
 local SWIFT_METADATA = {Struct = true, Class = true, Enum = true}
 
+function src_only_image(images, name, folder, framework_exists)
+    if images[name] ~= nil then
+        return images[name]
+    end
+    assert(framework_exists, name .. " is implemented in src/" .. folder .. ", but no SDK image exports it and src/" .. folder .. " is not an SDK framework")
+    return sdkfiles.framework_image(folder)
+end
+
 function owns_module(module, symbol)
     local prefix = string.format("$s%d%s", #module, module)
     return string.sub(symbol, 1, #prefix) == prefix
@@ -697,8 +705,8 @@ function write(skeleton, frameworks, implemented, images, markers, definitions)
         local folder = markers[name]
         local definition = definitions[name]
         assert(definition ~= nil, name .. " is implemented in src, but no definition of it was found")
-        local image = images[name]
-        assert(image ~= nil, name .. " is implemented in src, but no SDK image exports it")
+        local framework_exists = os.isdir(sdkfiles.framework_root(sdkfiles.sdk_folder(), folder))
+        local image = src_only_image(images, name, folder, framework_exists)
         local out = output(folder)
         import_of(out, imports_of[folder] or "")
         if definition.kind == "function" then
