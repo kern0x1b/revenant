@@ -6,7 +6,7 @@ option("rn-bundle")
     set_default(path.join(here, "test-bundle.js"))
 option_end()
 
-local RN_JSC_FRAMEWORK = (not os.getenv("RN_LINK_ALL")) and (not os.getenv("RN_JSC_BUNDLE")) and (not os.getenv("RN_WEBKIT")) and "JavaScriptCore" or nil
+local RN_JSC_FRAMEWORK = (not os.getenv("RN_LINK_ALL")) and (not os.getenv("RN_HERMES")) and (not os.getenv("RN_JSC_BUNDLE")) and (not os.getenv("RN_WEBKIT")) and "JavaScriptCore" or nil
 local RN_SOURCE = os.getenv("RN_SRC") or path.join(os.projectdir(), "build", "ref", "paseo", "node_modules", "react-native")
 if os.getenv("RN_HERMES") then
     add_requires("revenant@hermes", {alias = "hermes"})
@@ -22,7 +22,10 @@ end
 target("RNHost")
     add_rules("@addon/revenant/app")
     add_packages("libcxx")
-    add_deps("rn-jsc", "rn-yoga")
+    add_deps("rn-yoga")
+    if not os.getenv("RN_HERMES") then
+        add_deps("rn-jsc")
+    end
     if os.getenv("RN_HERMES") then
         add_packages("hermes")
         local rc = path.join(RN_SOURCE, "ReactCommon")

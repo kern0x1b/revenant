@@ -5,9 +5,30 @@ React Native 0.86.3 runs JavaScriptCore by default. This guide covers Hermes bes
 ## What is selected where
 
 - The package is `packages/h/hermes`, Hermes 250829098.0.17, the line React Native 0.86.3 ships. Its `hermesvm` is linked; JSI is react-native's own, which the host already links.
-- The host build selects Hermes with `RN_HERMES=1`. It adds `RCTHermesInstance` and `HermesInstance`, the runtime factory React Native's bridgeless path uses, and the inspector chrome sources the target delegate needs.
-- The engine of a run is the `engine=` key of the host's configuration file: `engine=hermes` or `engine=jsc`. Both engines are in one binary, so the switch is at run time; the build flag only decides whether Hermes is linked.
-- The bundle is Hermes bytecode made by the `hermesc` of the same package (`build_host_hermesc/bin/hermesc`), so the bytecode version matches the engine. JavaScriptCore reads the source bundle.
+- `RN_HERMES=1` makes the host Hermes-only. It adds `RCTHermesInstance` and `HermesInstance`, the runtime factory React Native's bridgeless path uses, and the inspector chrome sources the target delegate needs. It removes everything JavaScriptCore: no `rn-jsc` dependency (so no `librn-jsc.a`, not even through `-all_load`), no JavaScriptCore framework, no `rn-jsc-engine` package, and the JSC-only sources (`RCTJscInstance`, the JSC sampler, `makeJSCRuntime`) are compiled out with `#ifndef RN_HERMES`.
+- The engine of a Hermes-only host is fixed at build time. Its configuration file may say `engine=hermes` or leave the key out; `engine=jsc`, or any other value, makes the app fail at start with an error that names the build. `RNHostAppDelegate` raises it in `createJSRuntimeFactory`, and `RNHostRuntime` returns it from `evaluateBundleAtPath`.
+- A host built without `RN_HERMES` is the JavaScriptCore build. It has no Hermes instance, so its `engine=` key cannot select Hermes.
+- Worklets and Expo follow the same switch. Under `RN_HERMES` the Worklets package is built from its unpatched sources, whose UI runtime is `makeHermesRuntime`, and `expo-jsi-probe` creates its runtime with `makeHermesRuntime`. Without the flag they keep the JavaScriptCore patch.
+- The bundle is Hermes bytecode made by the `hermesc` of the same package (`build_host_hermesc/bin/hermesc`), so the bytecode version matches the engine. The JavaScriptCore build reads the source bundle.
+
+## Hermes-only build
+
+`RN_HERMES=1` decides the engine of the whole host binary at build time. The two builds differ in these parts:
+
+| Part | `RN_HERMES=1` (Hermes-only) | no flag (JavaScriptCore build) |
+|---|---|---|
+| Engine library | `hermesvm`, package `hermes` | `rn-jsc` (`librn-jsc.a`), the JavaScriptCore framework or the `rn-jsc-engine` package |
+| Worklets runtime (`WorkletRuntime.cpp`) | `makeHermesRuntime`, unpatched sources | `makeJSCRuntime`, from `worklets-jsc.patch` |
+| Expo runtime (`expo/JSIUtils.cpp`) | `makeHermesRuntime` | `makeJSCRuntime` |
+| Host runtime factory | `RNHostHermesFactory`, a `RCTHermesInstance` | `RCTJscInstance` |
+| JSC sampler (`RNHostInstallSampler`) | not compiled | compiled |
+| `engine=` in the host's configuration | `hermes` or absent; any other value fails at start | not read: the runtime is JavaScriptCore |
+
+`isolate.lua build` sets `RN_LINK_ALL=1` for the full app stack (`rn-core`, `rn-appdelegate`, the Pods, `-all_load`). That flag is not the JSC switch: under `RN_HERMES` it still links the same stack, minus `rn-jsc`.
+
+With `RN_HERMES=1`, `isolate.lua` sets no `RN_JSC_ENGINE`, and it adds the `react-native-worklets` recipe install to `RN_PKG_DIRS`, so the copy builds the unpatched Worklets sources (recipe revision `1-hermes`).
+
+Checked on 2026-11-07 with `RN_HERMES=1 isolate.lua build --target RNHost` (armv7, 100,618,580 bytes): `nm -u` has no undefined C JavaScriptCore symbol (`_JS*`) and no `facebook::jsc` or `makeJSCRuntime` reference; the linkmap has no `rn-jsc` or `librn-jsc` input, no JavaScriptCore framework, and it links `libhermesvm.a`, with `makeHermesRuntime` taken from the Hermes package. Before the change the same build on main failed to link with 59 undefined JavaScriptCore C symbols, so the byte count has no pre-change baseline.
 
 ## Build
 
@@ -19,7 +40,7 @@ RN_HERMES=1 REVENANT_CACHE=$PWD/.cache-private ./xmakew l -P . frameworks/ReactN
 
 `isolate.lua build` links the copy's `build/rn-src` to the react-native install of the cache on every run. A link left to an install that xmake replaced dangles, and the build then fails on the React Native headers (the archive step reports `ar: no archive members specified`).
 
-The host sources that select the engine are in `frameworks/ReactNative/src/host`: `RNHostRuntime` reads `engine=` and loads the bytecode, `RNHostAppDelegate` returns `RCTHermesInstance` from the runtime factory when the engine is Hermes, and `RNHostTouch` logs the time each injected touch begins. The package is declared at file scope (`add_requires("revenant@hermes", {alias = "hermes"})`) and used by the target (`add_packages("hermes")`); xmake drops a package name that is only used by the target without that declaration.
+The host sources that select the engine are in `frameworks/ReactNative/src/host`: `RNHostRuntime` checks `engine=` (`engineRefusal`) and loads the bytecode, `RNHostAppDelegate` returns the Hermes runtime factory (`RNHostHermesFactory`, a subclass of `RCTHermesInstance`) under `RN_HERMES` and `RCTJscInstance` otherwise, and `RNHostTouch` logs the time each injected touch begins. The package is declared at file scope (`add_requires("revenant@hermes", {alias = "hermes"})`) and used by the targets that need it (`add_packages("hermes")` in the host, in `expo-jsi-probe` and in the core Pods target); xmake drops a package name that is only used by the target without that declaration.
 
 ## Bytecode
 
@@ -41,7 +62,9 @@ React Native keeps the engine's own `Promise` only when `HermesInternal.hasPromi
 
 The bridgeless path of the full app was not checked directly; it reads the same flag.
 
-## Measured on the iPhone 4S
+## Measured on the iPhone 4S (two-engine binary, history)
+
+These runs used the host binary of the time, which linked both JavaScriptCore and Hermes and chose one with `engine=`. A Hermes-only build has no JavaScriptCore to switch to, so the JSC rows cannot be reproduced from it; the Hermes rows describe the Hermes engine itself.
 
 All runs use the 24 MB application bundle. The Hermes run uses the bytecode of 31.87 MB.
 
@@ -57,7 +80,9 @@ The JSC run with the manifest was not measured; the touch latency of both engine
 
 The memory numbers are one run per configuration; the first screen of the app with its workspace is the last row.
 
-## Engine benchmark on the iPhone 4S
+## Engine benchmark on the iPhone 4S (two-engine binary, history)
+
+The tables in this section compare the two engines in the two-engine binary; a Hermes-only build runs the Hermes rows only.
 
 `frameworks/ReactNative/tests/bench` is a self-contained bench app: a 500-row list, a counter with `setState`, a looping animation, Promise and async chains, a JSON round trip, and an FPS log every second. `build.js` builds it with Metro (`node frameworks/ReactNative/tests/bench/build.js <work folder> <bundle.js> [default|hermes-stable]`); the Hermes bundle is `hermesc -O -emit-binary`. `./xmakew l -P . frameworks/ReactNative/tests/bench/measure.lua prepare BUNDLE_ID bundle.js bundle.hbc` copies the two bundles into the application folder of the host BUNDLE_ID, root-owned: the JavaScript bundle for JavaScriptCore and the Hermes bytecode of `hermesc`. `./xmakew l -P . frameworks/ReactNative/tests/bench/measure.lua run ENGINE RUN BUNDLE_ID [WAIT]` then runs one configuration on the claimed phone: it stops the host by its bundle id, selects the engine in the host's `rnhost.conf`, relaunches it, makes five taps on the counter and one swipe on the list, and writes the screenshot, the host log and the injector's answers to `.cache/scratch/rn-bench/runs/ENGINE-RUN`. `... measure.lua summarize RUNFOLDER...` prints the metrics of the runs. The taps go to the touch injector of the host (`RNHostTouch.m`, see [driving a host by touch](touch.md)); no `killall` is used, so other hosts on the phone keep running.
 
@@ -76,9 +101,9 @@ A fourth Hermes run made with `measure.lua` after the table (`hermes-9`) gave 0.
 - One Hermes launch, made right after `killall` of the previous instance, aborted in `startSurface` before the bench mounted (`Global was not installed`); the next launch of the same configuration ran cleanly, and none of the six measured runs had that abort. The cause is not identified.
 - `frameworks/ReactNative/tools/touch.lua`, the tool for a single manual touch, is in this branch; its contract is in [driving a host by touch](touch.md).
 
-### Measured again on 2026-11-03
+### Measured again on 2026-11-03 (two-engine binary, history)
 
-The same bench bundles (`build.js` with `default` for JavaScriptCore and `hermes-stable` plus `hermesc -O` for Hermes) were run on the iPhone 4S with `measure.lua run`, three runs per engine, from a host built with `RN_HERMES=1` and the Hermes 250829098.0.17 package. JavaScriptCore runs waited 60 s for the mount, Hermes 40 s.
+The host of this run was the two-engine binary, so `engine=jsc` ran in it; the JavaScriptCore rows are not reproducible from a Hermes-only build. The same bench bundles (`build.js` with `default` for JavaScriptCore and `hermes-stable` plus `hermesc -O` for Hermes) were run on the iPhone 4S with `measure.lua run`, three runs per engine, from a host built with `RN_HERMES=1` and the Hermes 250829098.0.17 package. JavaScriptCore runs waited 60 s for the mount, Hermes 40 s.
 
 | Engine | Startup, react start to bench mounted, per run | Tap to JS commit, median of 5, per run | Mean of the three medians | fps, mean / lowest one-second window, per run | RSS, highest heartbeat, per run |
 |---|---|---|---|---|---|

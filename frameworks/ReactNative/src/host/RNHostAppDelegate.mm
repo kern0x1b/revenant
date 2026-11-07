@@ -9,7 +9,9 @@
 #import <RCTAppDependencyProvider.h>
 #import <React/RCTLog.h>
 #import <react/runtime/JSRuntimeFactoryCAPI.h>
+#ifndef RN_HERMES
 #import <react/runtime/platform/ios/ReactCommon/RCTJscInstance.h>
+#endif
 
 #ifdef RN_HERMES
 #import <react/runtime/platform/ios/ReactCommon/RCTHermesInstance.h>
@@ -81,6 +83,7 @@ public:
 #import <ReactCommon/RCTHost.h>
 #import <react/renderer/runtimescheduler/RuntimeSchedulerBinding.h>
 
+#ifndef RN_HERMES
 extern "C" {
 typedef const struct OpaqueJSContext *RNHostJSContext;
 typedef const struct OpaqueJSContextGroup *RNHostJSGroup;
@@ -159,6 +162,7 @@ static void RNHostInstallSampler(void)
     JSContextGroupSetExecutionTimeLimit(JSContextGetGroup(RNJscRuntimeContext()), interval / 1000.0, RNHostSampleStack, NULL);
     NSLog(@"rn-host: JS sampler every %.0f ms", interval);
 }
+#endif
 
 @protocol RNHostExpoAppContext <NSObject>
 - (void)setRuntime:(void *)runtimePointer scheduler:(void *)scheduler dispatch:(const void *)dispatch;
@@ -185,7 +189,9 @@ static void RNHostInstallSampler(void)
                   dispatch:schedulerHandle ? reinterpret_cast<const void *>(&expo::dispatchOnReactScheduler) : nullptr];
     [appContext setHostWrapper:[[EXHostWrapper alloc] initWithHost:host]];
     [appContext registerNativeModules];
+#ifndef RN_HERMES
     RNHostInstallSampler();
+#endif
     NSLog(@"rn-host: expo app context installed, rss %.1f MB", [RNHostRuntime residentMegabytes]);
 }
 
@@ -244,13 +250,15 @@ static void RNHostRegisterExpoSubscribers(void)
 - (JSRuntimeFactoryRef)createJSRuntimeFactory
 {
 #ifdef RN_HERMES
-    if ([RNHostRuntime usesHermes]) {
-        NSLog(@"rn-host: engine hermes");
-        return reinterpret_cast<JSRuntimeFactoryRef>(new RNHostHermesFactory());
+    if (NSString *refusal = [RNHostRuntime engineRefusal]) {
+        [NSException raise:@"RNHostEngine" format:@"%@", refusal];
     }
-#endif
+    NSLog(@"rn-host: engine hermes");
+    return reinterpret_cast<JSRuntimeFactoryRef>(new RNHostHermesFactory());
+#else
     NSLog(@"rn-host: engine jsc");
     return reinterpret_cast<JSRuntimeFactoryRef>(new facebook::react::RCTJscInstance());
+#endif
 }
 
 @end

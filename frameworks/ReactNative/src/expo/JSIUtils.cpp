@@ -1,12 +1,20 @@
 #include "JSIUtils.h"
 
+#ifdef RN_HERMES
+#include <hermes/hermes.h>
+#else
 // iOS 6 port: the engine is JavaScriptCore (ReactCommon/jsc over the prefixed JSC C API), not Hermes.
 #include <jsc/JSCRuntime.h>
+#endif
 
 namespace expo {
 
 jsi::Runtime* createHermesRuntime() {
+#ifdef RN_HERMES
+  std::unique_ptr<jsi::Runtime> runtimePtr = facebook::hermes::makeHermesRuntime();
+#else
   std::unique_ptr<jsi::Runtime> runtimePtr = facebook::jsc::makeJSCRuntime();
+#endif
   jsi::Runtime *runtime = runtimePtr.release();
 
   // `setImmediate` isn't defined by JSC either; inject it as the Hermes version did.

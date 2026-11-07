@@ -2,7 +2,9 @@
 #import "RNHostHostFunctions.h"
 #import "RNHostFiles.h"
 
+#ifndef RN_HERMES
 #include <JSCRuntime.h>
+#endif
 #include <jsi/jsi.h>
 #ifdef RN_HERMES
 #include <hermes/hermes.h>
@@ -61,14 +63,13 @@ std::shared_ptr<const facebook::jsi::Buffer> RNHostLoadBuffer(NSData *data, bool
     return std::make_shared<facebook::jsi::StringBuffer>(source);
 }
 
-std::unique_ptr<facebook::jsi::Runtime> RNHostMakeRuntime(bool hermes)
+std::unique_ptr<facebook::jsi::Runtime> RNHostMakeRuntime()
 {
 #ifdef RN_HERMES
-    if (hermes) {
-        return facebook::hermes::makeHermesRuntime();
-    }
-#endif
+    return facebook::hermes::makeHermesRuntime();
+#else
     return facebook::jsc::makeJSCRuntime();
+#endif
 }
 
 NSError *RNHostError(NSString *message)
@@ -470,10 +471,21 @@ static NSString *RNHostViewChain(UIView *view, UIView *root)
 + (BOOL)usesHermes
 {
 #ifdef RN_HERMES
-    return [[RNHostConfig()[@"engine"] lowercaseString] isEqualToString:@"hermes"];
+    return [self engineRefusal] == nil;
 #else
     return NO;
 #endif
+}
+
++ (NSString *)engineRefusal
+{
+#ifdef RN_HERMES
+    NSString *engine = RNHostConfig()[@"engine"];
+    if (engine.length && ![engine.lowercaseString isEqualToString:@"hermes"]) {
+        return [NSString stringWithFormat:@"engine=%@ is not built into this Hermes-only host: set engine=hermes in the host's configuration", engine];
+    }
+#endif
+    return nil;
 }
 
 + (void)applyEnvironment
@@ -490,6 +502,11 @@ static NSString *RNHostViewChain(UIView *view, UIView *root)
 + (NSString *)evaluateBundleAtPath:(NSString *)path error:(NSError **)error
 {
     [self applyEnvironment];
+    if (NSString *refusal = [self engineRefusal]) {
+        NSLog(@"rn-host: %@", refusal);
+        if (error) *error = RNHostError(refusal);
+        return nil;
+    }
 
     NSLog(@"rn-host: rss at start %.1f MB", RNHostResidentMegabytes());
     uint64_t t0 = mach_absolute_time();
@@ -506,7 +523,7 @@ static NSString *RNHostViewChain(UIView *view, UIView *root)
     bool hermes = [self usesHermes];
     bool bytecode = hermes && RNHostIsHermesBytecode(data);
     NSLog(@"rn-host: engine %@, bundle %@", hermes ? @"hermes" : @"jsc", bytecode ? @"bytecode" : @"source");
-    std::unique_ptr<facebook::jsi::Runtime> runtime = RNHostMakeRuntime(hermes);
+    std::unique_ptr<facebook::jsi::Runtime> runtime = RNHostMakeRuntime();
     RNHostInstallHostFunctions(*runtime);
     uint64_t t2 = mach_absolute_time();
     NSLog(@"rn-host: runtime created in %.0f ms, rss %.1f MB", RNHostMilliseconds(t2 - t1), RNHostResidentMegabytes());

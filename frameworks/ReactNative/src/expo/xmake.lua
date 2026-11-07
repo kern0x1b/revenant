@@ -162,6 +162,9 @@ target("expo-jsi-probe")
     set_values("swift.module", "ExpoModulesJSI")
     add_packages("swift-runtime", "libcxx")
     add_packages("folly")
+    if os.getenv("RN_HERMES") then
+        add_packages("hermes")
+    end
     local rn = react_native()
     local rc = path.join(rn, "ReactCommon")
     local pkg = path.join(os.projectdir(), "build", "ref", "paseo", "node_modules", "expo-modules-jsi", "apple")
@@ -176,6 +179,9 @@ target("expo-jsi-probe")
     add_includedirs(incs)
     add_includedirs(swinc)
     local flags = {"-faligned-allocation", "-DFOLLY_MOBILE=1", "-DFOLLY_USE_LIBCPP=1", "-DFOLLY_CFG_NO_COROUTINES=1"}
+    if os.getenv("RN_HERMES") then
+        table.insert(flags, "-DRN_HERMES=1")
+    end
     add_cxxflags(flags, {force = true})
     local sw = {"-swift-version", "6", "-cxx-interoperability-mode=default", "@" .. path.join(os.projectdir(), "build", "expo-jsi", "features.rsp"), "-Xcc", "-fmodule-map-file=" .. modmap}
     for _, d in ipairs(incs) do

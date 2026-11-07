@@ -98,7 +98,8 @@ function build_environment(options)
         RN_STUBS = "1",
         RN_PODS_MORE = options.pods,
         RN_WEBKIT_BACKPORTS = options.backports,
-        RN_JSC_ENGINE = options.engine,
+        RN_JSC_ENGINE = (not options.hermes) and options.engine or nil,
+        RN_HERMES = options.hermes and "1" or nil,
         RN_DEPS_REPO = "1",
         RN_BACKPORTS = "1",
         RN_LINK_ALL = "1",
@@ -298,8 +299,12 @@ function build(folder, cache, options)
     for _, name in ipairs(real_packages(options.real)) do
         table.insert(pkgdirs, name .. "=" .. install_recipe(folder, path.absolute(cache), name, recipe_version(name)))
     end
+    local hermes = os.getenv("RN_HERMES") and true or nil
+    if hermes then
+        table.insert(pkgdirs, "react-native-worklets=" .. install_recipe(folder, path.absolute(cache), "react-native-worklets", recipe_version("react-native-worklets")))
+    end
     local env = build_environment({
-        folder = folder, cache = path.absolute(cache), checkout = checkout(), real = options.real, pods = options.pods or table.concat(read_app_manifest(folder).pods or {}, ","),
+        folder = folder, cache = path.absolute(cache), checkout = checkout(), real = options.real, hermes = hermes, pods = options.pods or table.concat(read_app_manifest(folder).pods or {}, ","),
         pkgdirs = table.concat(pkgdirs, ","),
         engine = options.engine or newest(path.join(shared, "xmake-global", ".xmake", "packages", "w", "webkit-engine", "latest", "*"), path.join("frameworks", "JavaScriptCore.framework", "JavaScriptCore")),
         swiftui = options.swiftui or path.join(newest(path.join(shared, "xmake-global", ".xmake", "packages", "s", "swiftui", "latest", "*"), path.join("lib", "swift", "iphoneos")), "lib", "swift", "iphoneos"),

@@ -5,6 +5,8 @@ thread, while the host runs the Paseo bundle on JavaScriptCore. It was a local p
 (`rn-spike/host-app` in paseo-app at e6522b0, removed since) and is not part of the committed packages. The explanation of what the numbers mean is in
 [Where JavaScriptCore spends the start](../../explanation/react-native/jsc-startup.md).
 
+The sampler is JavaScriptCore-only. In the host sources, `RNHostInstallSampler` and the JSC declarations it uses are compiled out with `#ifndef RN_HERMES` in `frameworks/ReactNative/src/host/RNHostAppDelegate.mm`, so a host built with `RN_HERMES=1` (see [Hermes as a React Native engine on iOS 6](../../guides/react-native/use-hermes.md)) has no sampler and no JavaScriptCore runtime context to read. The run below is a JavaScriptCore build.
+
 ## Setup
 
 | Item | Value |

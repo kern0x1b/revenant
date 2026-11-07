@@ -61,6 +61,14 @@ function failures(opt)
         table.insert(found, "--pkgdirs must reach RN_PKG_DIRS")
     end
 
+    local hermes_env = isolate.build_environment({folder = "/f", engine = "/e", hermes = true})
+    if hermes_env.RN_JSC_ENGINE ~= nil or hermes_env.RN_HERMES ~= "1" then
+        table.insert(found, "a Hermes build must not take the JavaScriptCore engine, and must set RN_HERMES")
+    end
+    if isolate.build_environment({folder = "/f", engine = "/e"}).RN_JSC_ENGINE ~= "/e" then
+        table.insert(found, "a JavaScriptCore build must keep its engine")
+    end
+
     local base = os.iorunv("mktemp", {"-d"}):trim()
     local project = path.join(base, "project")
     local folder = path.join(base, "copy")

@@ -117,7 +117,10 @@ target("rn-core")
     if os.getenv("RN_DEPS_REPO") then
         add_packages("folly", "socketrocket")
     end
-    add_deps("rn-jsi", "rn-jsc", "rn-yoga")
+    add_deps("rn-jsi", "rn-yoga")
+    if not os.getenv("RN_HERMES") then
+        add_deps("rn-jsc")
+    end
     local function skip(f)
         return f:find("/tests/", 1, true) or f:find("android", 1, true) or f:find("/hermes/", 1, true) or f:find("Test", 1, true)
             or f:find("/benchmarks/", 1, true) or f:find("/fuzzers/", 1, true) or (f:find("/platform/cxx/", 1, true) and os.isdir(path.join(f:sub(1, f:find("/platform/cxx/", 1, true) - 1), "platform", "ios")))
@@ -127,6 +130,7 @@ target("rn-core")
             or f:find("/Libraries/AppDelegate/", 1, true) or (f:find("/RCTSwiftUI", 1, true) and not f:find("RCTSwiftUIContainerViewWrapper.m", 1, true)) or f:find("/Libraries/Wrapper/", 1, true)
             or f:find("/FantomForcedCloneCommitHook.cpp", 1, true)
             or f:find("RCTHermesInstance", 1, true) or f:find("MacOSSwitchShadowNode", 1, true) or f:find("/test_utils/", 1, true)
+            or (os.getenv("RN_HERMES") and f:find("RCTJscInstance", 1, true))
     end
     for _, f in ipairs(os.files(path.join(rc, "**.cpp"))) do
         if not skip(f) then add_files(f) end
@@ -168,7 +172,10 @@ target("rn-appdelegate")
     if os.getenv("RN_DEPS_REPO") then
         add_packages("folly", "socketrocket")
     end
-    add_deps("rn-jsi", "rn-jsc", "rn-yoga")
+    add_deps("rn-jsi", "rn-yoga")
+    if not os.getenv("RN_HERMES") then
+        add_deps("rn-jsc")
+    end
     for _, name in ipairs({"RCTReactNativeFactory", "RCTRootViewFactory", "RCTDefaultReactNativeFactoryDelegate", "RCTAppSetupUtils"}) do
         add_files(path.join(rn, "Libraries", "AppDelegate", name .. ".mm"))
     end
@@ -196,6 +203,9 @@ target("rn-pods-objc")
     add_packages("libcxx")
     if os.getenv("RN_DEPS_REPO") then
         add_packages("folly", "socketrocket")
+    end
+    if os.getenv("RN_HERMES") then
+        add_packages("hermes")
     end
     local gen = generated
     local added = {}
@@ -234,7 +244,7 @@ target("rn-pods-objc")
                     for _, f in ipairs(os.files(path.join(base, ext))) do
                         local key = f:lower()
                         local rel = path.relative(f, root)
-                        if not added[key] and not test_path(rel) and not rel:find("Example") and not f:find("WorkletHermesRuntime") and not f:find("react-native-screens/ios/gamma/", 1, true) and not f:find("UIImage+ImageEffects", 1, true) then
+                        if not added[key] and not test_path(rel) and not rel:find("Example") and (os.getenv("RN_HERMES") or not f:find("WorkletHermesRuntime")) and not f:find("react-native-screens/ios/gamma/", 1, true) and not f:find("UIImage+ImageEffects", 1, true) then
                             added[key] = true
                             add_files(f)
                         end
