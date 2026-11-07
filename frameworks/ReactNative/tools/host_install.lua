@@ -446,6 +446,17 @@ function crash_reports(listing, executable)
     return names
 end
 
+function screenshot_remote(name)
+    return "/tmp/diagnostics-" .. name .. ".png"
+end
+
+function screenshot_removal(remote)
+    if not remote:match("^/tmp/diagnostics%-[^/]+%.png$") then
+        raise("%s is not a diagnostics screenshot, so it is not removed", remote)
+    end
+    return "rm -f " .. remote
+end
+
 function diagnostics(options)
     if not options["bundle-id"] then
         raise("diagnostics needs \"--bundle-id\"")
@@ -480,11 +491,14 @@ function diagnostics(options)
         fetch(path.join(CRASH_FOLDER, report), path.join("crash", report))
     end
     fetch(run_folder(id) .. "/rnhost.log", "rnhost.log")
-    local shot = "/tmp/diagnostics-" .. app_name(id) .. ".png"
+    local shot = screenshot_remote(app_name(id))
     if try { function () device.run(settings, "/usr/libexec/revenant-shot " .. shot); return true end } then
         fetch(shot, "screen.png")
     else
         table.insert(lines, "no screenshot: revenant-shot failed")
+    end
+    if not try { function () device.run(settings, screenshot_removal(shot)); return true end } then
+        table.insert(lines, "the screenshot " .. shot .. " is still on the phone")
     end
     io.writefile(path.join(output, "diagnostics.txt"), table.concat(lines, "\n") .. "\n")
     print("diagnostics of " .. id .. " in " .. output)

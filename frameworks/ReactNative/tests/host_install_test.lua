@@ -127,4 +127,12 @@ function main()
     expect("a load command to a system library is left alone",
         #host.version_fixes(system, library) == 0 and refusal(function () host.check_load_versions("RNHost", system, library) end) == nil,
         "the system library's load command was changed or refused")
+
+    expect("diagnostics removes the screenshot it took from the phone",
+        host.screenshot_removal(host.screenshot_remote("worklets-probe")) == "rm -f /tmp/diagnostics-worklets-probe.png",
+        "got " .. host.screenshot_removal(host.screenshot_remote("worklets-probe")))
+    expect("diagnostics removes nothing but its own screenshot",
+        refusal(function () host.screenshot_removal("/tmp/screenshot.png") end) ~= nil
+            and refusal(function () host.screenshot_removal("/tmp/diagnostics-../../var/x.png") end) ~= nil,
+        "a path outside the diagnostics screenshots was accepted")
 end
