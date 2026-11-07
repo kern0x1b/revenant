@@ -45,8 +45,6 @@ local function expo_dir(package)
     return path.join(ref, "node_modules", package)
 end
 
--- the same packages tools/inputs.lua selects (expo_packages): the coverage rows the application
--- installs, or with --real (RN_EXPO_REAL) the spike's parity base plus that list; keep the two equal
 local EXPO_PARITY_BASE = {"expo-asset", "expo-constants", "expo", "expo-crypto", "expo-keep-awake", "expo-linking", "expo-system-ui", "expo-application", "expo-glass-effect", "expo-localization"}
 
 local function modules(text)
@@ -143,7 +141,6 @@ local LOCAL_COPIES = {
     ["expo-glass-effect"] = "GlassView.swift",
     ["expo-localization"] = "LocalizationModule.swift",
 }
--- text is read by the caller: xmake's sandbox gives io only to callbacks, not to top-level helpers
 local function stub_registry(text)
     local names, owners = {}, {}
     for object in text:gmatch("{([^{}]-)}") do

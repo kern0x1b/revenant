@@ -1,4 +1,3 @@
--- an outer project that does not include the revenant root has no "component" option: get_config gives nil
 local component = get_config("component") or ""
 if component ~= "" and component ~= "ReactNative" then
     return

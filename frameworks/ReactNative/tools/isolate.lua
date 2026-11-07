@@ -58,11 +58,15 @@ function read_app_manifest(folder)
 end
 
 function host_bundle_id(folder, given)
-    local id = given
-    if not id then
-        local name = path.filename(folder):lower():gsub("[^a-z0-9%-]", "-")
-        id = "org.revenant.rnhost." .. name
+    if given then
+        return given
     end
+    local name = path.filename(folder):lower():gsub("[^a-z0-9%-]", "-")
+    return "org.revenant.rnhost." .. name
+end
+
+function write_bundle_id(folder, given)
+    local id = host_bundle_id(folder, given)
     local manifest = read_app_manifest(folder)
     manifest.bundleId = id
     os.mkdir(path.directory(app_manifest_file(folder)))
@@ -172,7 +176,7 @@ function copy_project(project, folder, bundle_id)
             relinked = relinked + 1
         end
     end
-    local id = host_bundle_id(folder, bundle_id)
+    local id = write_bundle_id(folder, bundle_id)
     return {rewritten = rewritten, relinked = relinked, bundle_id = id}
 end
 

@@ -158,7 +158,6 @@ check("--real replaces the default with the parity list on top of the base", tab
 check("expo_real marks the packages that the mode builds as real", expo_real(context({}))["expo-font"] and not expo_real(context({}))["expo-audio"]
     and expo_real(context({real = "expo-audio"}))["expo-audio"])
 
--- src/expo/xmake.lua selects the Expo packages itself (it cannot import this tool): its parity base must be this one
 local xmake_base = {}
 for name in (io.readfile(path.join(os.scriptdir(), "..", "src", "expo", "xmake.lua")):match("local EXPO_PARITY_BASE = (%b{})") or ""):gmatch('"([^"]+)"') do
     table.insert(xmake_base, name)
