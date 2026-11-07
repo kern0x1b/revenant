@@ -15,8 +15,11 @@ if os.getenv("RN_EXPO") then
     add_requires("revenant@swift-crypto", {alias = "swift-crypto"})
 end
 
+local BACKPORTS_LIBRARIES = "FoundationBackports,CoreTextBackports,UIKitBackports,UserNotificationsBackports,CoreGraphicsBackports,GraphicsBackports,CoreFoundationBackports,SystemBackports,IOSurfaceBackports,WebKitBackports,MapKitBackports,CoreLocationBackports,SecurityBackports"
+local RETARGETED_BY_STAGE = {UserNotificationsBackports = true, ContactsBackports = true, LocalAuthenticationBackports = true}
+
 if os.getenv("RN_LINK_ALL") and os.getenv("RN_BACKPORTS") then
-    add_requireconfs("backports", {configs = {libraries = "FoundationBackports,CoreTextBackports,UIKitBackports,UserNotificationsBackports,CoreGraphicsBackports,GraphicsBackports,CoreFoundationBackports,SystemBackports,IOSurfaceBackports,WebKitBackports,MapKitBackports,CoreLocationBackports,SecurityBackports"}})
+    add_requireconfs("backports", {configs = {libraries = BACKPORTS_LIBRARIES}})
 end
 
 target("RNHost")
@@ -63,6 +66,18 @@ target("RNHost")
     if os.getenv("RN_LINK_ALL") then
         if os.getenv("RN_BACKPORTS") then
             add_packages("backports")
+            on_load(function (target)
+                local package = target:pkg("backports")
+                local links = {}
+                for _, name in ipairs(table.wrap(package:get("links"))) do
+                    if RETARGETED_BY_STAGE[name] then
+                        target:add("ldflags", "-Wl,-weak_framework," .. name:match("^(.+)Backports$"), {force = true})
+                    else
+                        table.insert(links, name)
+                    end
+                end
+                package:set("links", links)
+            end)
         end
         add_deps("rn-core", "rn-appdelegate")
         if os.getenv("RN_WEBKIT_BACKPORTS") then

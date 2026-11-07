@@ -132,6 +132,115 @@ function framework_retargets(otool_text, imports_text, exports, library_names)
     return arguments, notes
 end
 
+function duplicate_install_names(otool_text)
+    local count, duplicates = {}, {}
+    for line in otool_text:gmatch("[^\n]+") do
+        local name = line:match("^%s+(%S+) %(")
+        if name then
+            count[name] = (count[name] or 0) + 1
+            if count[name] == 2 then
+                table.insert(duplicates, name)
+            end
+        end
+    end
+    return duplicates
+end
+
+function check_install_names(file, otool_text)
+    local duplicates = duplicate_install_names(otool_text)
+    if #duplicates > 0 then
+        raise("%s has two load commands for %s after the retarget, so dyld would load that library twice: link each backports library once in src/host/xmake.lua (a framework the device lacks is linked only by its weak SDK import, which the retarget renames)",
+            file, table.concat(duplicates, ", "))
+    end
+end
+
+local LC_ID_DYLIB = 0x0D
+local DYLIB_LOAD_COMMANDS = {[0x0C] = true, [0x1F] = true, [0x23] = true, [0x80000018] = true}
+
+function word_at(data, position)
+    local a, b, c, d = data:byte(position, position + 3)
+    return a + b * 256 + c * 65536 + d * 16777216
+end
+
+function word_bytes(value)
+    return string.char(value % 256, math.floor(value / 256) % 256, math.floor(value / 65536) % 256, math.floor(value / 16777216) % 256)
+end
+
+function version_text(value)
+    return string.format("%d.%d.%d", math.floor(value / 65536), math.floor(value / 256) % 256, value % 256)
+end
+
+function dylib_records(data)
+    if word_at(data, 1) ~= 0xFEEDFACE then
+        raise("the file is not a 32-bit little-endian Mach-O")
+    end
+    local records = {}
+    local position = 29
+    for _ = 1, word_at(data, 17) do
+        local command = word_at(data, position)
+        if command == LC_ID_DYLIB or DYLIB_LOAD_COMMANDS[command] then
+            local start = position + word_at(data, position + 8)
+            table.insert(records, {
+                id = command == LC_ID_DYLIB,
+                name = data:sub(start, data:find("\0", start, true) - 1),
+                current = word_at(data, position + 16),
+                compatibility = word_at(data, position + 20),
+                current_at = position + 16,
+                compatibility_at = position + 20,
+            })
+        end
+        position = position + word_at(data, position + 4)
+    end
+    return records
+end
+
+function image_versions(data)
+    for _, record in ipairs(dylib_records(data)) do
+        if record.id then
+            return {current = record.current, compatibility = record.compatibility}
+        end
+    end
+    return nil
+end
+
+function version_fixes(data, images)
+    local fixes = {}
+    for _, record in ipairs(dylib_records(data)) do
+        local image = not record.id and images[record.name]
+        if image then
+            if record.current ~= image.current then
+                table.insert(fixes, {position = record.current_at, value = image.current})
+            end
+            if record.compatibility ~= image.compatibility then
+                table.insert(fixes, {position = record.compatibility_at, value = image.compatibility})
+            end
+        end
+    end
+    return fixes
+end
+
+function apply_version_fixes(data, fixes)
+    table.sort(fixes, function (a, b) return a.position < b.position end)
+    local pieces, last = {}, 1
+    for _, fix in ipairs(fixes) do
+        table.insert(pieces, data:sub(last, fix.position - 1))
+        table.insert(pieces, word_bytes(fix.value))
+        last = fix.position + 4
+    end
+    table.insert(pieces, data:sub(last))
+    return table.concat(pieces)
+end
+
+function check_load_versions(file, data, images)
+    for _, record in ipairs(dylib_records(data)) do
+        local image = not record.id and images[record.name]
+        if image and record.compatibility > image.current then
+            raise("%s loads %s with compatibility version %s, above that library's current version %s: dyld refuses such a library, so its symbols would not resolve",
+                file, record.name, version_text(record.compatibility), version_text(image.current))
+        end
+    end
+end
+
 function signing_arguments(entitlements, index, file)
     if index == 1 then
         return {"-S" .. entitlements, file}
@@ -223,6 +332,10 @@ function stage(options)
     for _, name in ipairs(libraries) do
         table.insert(files, path.join(frameworks, name .. ".dylib"))
     end
+    local engine = path.join(frameworks, "JavaScriptCore.framework", "JavaScriptCore")
+    if os.isfile(engine) then
+        table.insert(files, engine)
+    end
     for _, file in ipairs(files) do
         local arguments = change_arguments(os.iorunv("otool", {"-L", file}), libraries)
         if #arguments > 0 then
@@ -242,14 +355,26 @@ function stage(options)
         table.insert(retargets, files[1])
         os.vrunv("install_name_tool", retargets)
     end
-    for _, file in ipairs(files) do
-        if os.iorunv("otool", {"-L", file}):find(OLD_PREFIX, 1, true) then
-            raise("%s still loads a backports library from %s: the library is not in LIBRARIES, so the device would load its own copy", file, OLD_PREFIX)
+    local images = {}
+    for index = 2, #files do
+        local versions = image_versions(io.readfile(files[index], {encoding = "binary"}))
+        if versions then
+            images["@executable_path/" .. path.relative(files[index], target)] = versions
         end
     end
-    local engine = path.join(frameworks, "JavaScriptCore.framework", "JavaScriptCore")
-    if os.isfile(engine) then
-        table.insert(files, engine)
+    for _, file in ipairs(files) do
+        local otool = os.iorunv("otool", {"-L", file})
+        if otool:find(OLD_PREFIX, 1, true) then
+            raise("%s still loads a backports library from %s: the library is not in LIBRARIES, so the device would load its own copy", file, OLD_PREFIX)
+        end
+        check_install_names(file, otool)
+        local data = io.readfile(file, {encoding = "binary"})
+        local fixes = version_fixes(data, images)
+        if #fixes > 0 then
+            data = apply_version_fixes(data, fixes)
+            io.writefile(file, data, {encoding = "binary"})
+        end
+        check_load_versions(file, data, images)
     end
     if ldid ~= "" then
         local entitlements = path.join(os.scriptdir(), "data", "rnhost.entitlements")
