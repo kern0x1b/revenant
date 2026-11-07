@@ -3,14 +3,14 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua 
   copy   makes a private copy of the host project in <folder>: the hand-made inputs of its build/ with every absolute path rewritten to
          the folder, build/ref linked read only, and the react-native package with all its patches installed into the private cache
          and linked as build/rn-src. The path of <folder> must not contain "test" or "Example". The copy's app gets its own bundle id,
-         --bundle-id or org.revenant.rnhost.<folder name>, so that installs of different workers do not overwrite each other.
+         --bundle-id or org.revenant.rnhost.<folder name>, written as bundleId into the copy's build/app-manifest/host.json, so that installs of different workers do not overwrite each other.
   build  builds the host (or another target, for example expo-jsi-probe) from that copy with this checkout's toolchain. Expo packages
-         named in --real and community libraries named in --pods are built as real modules; the rest are the stubs of the host.
+         named in --real and community libraries named in --pods, or in the pods of the app manifest, are built as real modules; the rest are the stubs of the host.
          The react-native-enriched-markdown sources are the installed package of its recipe (packages/r, patches included), not the application's node_modules copy.]]
 
 local INPUTS = {"app-assets", "app-components", "app-manifest", "codegen", "expo-core", "expo-jsi", "expo-pods", "expo-src", "keyboard", "lib-headers", "nitro", "rn-codegen", "rn-headers", "screens", "unistyles"}
 
-local DEFAULT_PODS = "react-native-worklets:rnworklets,react-native-webview:RNCWebViewSpec,react-native-reanimated:rnreanimated,react-native-gesture-handler:rngesturehandler_codegen,react-native-safe-area-context:safeareacontext,react-native-screens:rnscreens,react-native-svg:rnsvg,react-native-keyboard-controller:RNKC,@mattermost/react-native-paste-input:PasteTextInputSpecs,@react-native-masked-view/masked-view,react-native-enriched-markdown"
+local json = import("core.base.json")
 
 local PATCH_MARKERS = {
     {"React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputUtils.mm", 'attributedString.string ?: @""'},
@@ -43,16 +43,31 @@ function folder_is_valid(folder)
     return not (folder:find("[Tt]est") or folder:find("Example"))
 end
 
-local HOST_BUNDLE_ID = "space.kern0x1b.paseo-ios6.rnhost"
-
 local ENRICHED_MARKDOWN = {name = "react-native-enriched-markdown", version = "1.2.0-nightly-20261014-766fc0e67"}
 
-function host_bundle_id(folder, given)
-    if given then
-        return given
+function app_manifest_file(folder)
+    return path.join(folder, "build", "app-manifest", "host.json")
+end
+
+function read_app_manifest(folder)
+    local file = app_manifest_file(folder)
+    if not os.isfile(file) then
+        return {}
     end
-    local name = path.filename(folder):lower():gsub("[^a-z0-9%-]", "-")
-    return "org.revenant.rnhost." .. name
+    return json.decode(io.readfile(file))
+end
+
+function host_bundle_id(folder, given)
+    local id = given
+    if not id then
+        local name = path.filename(folder):lower():gsub("[^a-z0-9%-]", "-")
+        id = "org.revenant.rnhost." .. name
+    end
+    local manifest = read_app_manifest(folder)
+    manifest.bundleId = id
+    os.mkdir(path.directory(app_manifest_file(folder)))
+    io.writefile(app_manifest_file(folder), json.encode(manifest))
+    return id
 end
 
 function patched_sources(candidates, read, key)
@@ -77,7 +92,7 @@ function build_environment(options)
         RN_HEADERS = path.join(options.folder, "build", "rn-headers"),
         RN_SWIFT_I = options.swiftui,
         RN_STUBS = "1",
-        RN_PODS_MORE = options.pods or DEFAULT_PODS,
+        RN_PODS_MORE = options.pods,
         RN_WEBKIT_BACKPORTS = options.backports,
         RN_JSC_ENGINE = options.engine,
         RN_DEPS_REPO = "1",
@@ -118,16 +133,6 @@ function copy_project(project, folder, bundle_id)
     end
     os.mkdir(folder)
     os.vrunv("rsync", {"-a", "--exclude", "build", "--exclude", "*.log", project .. "/", folder .. "/"})
-    local host = path.absolute(path.join(os.scriptdir(), "..", "src", "host"))
-    local target = path.join(folder, "rn-spike", "host-app")
-    if os.isdir(target) and os.isdir(host) then
-        os.vrunv("rsync", {"-a", host .. "/", target .. "/"})
-    end
-    local expo = path.absolute(path.join(os.scriptdir(), "..", "src", "expo"))
-    local expo_target = path.join(folder, "rn-spike", "expo")
-    if os.isdir(expo_target) and os.isdir(expo) then
-        os.vrunv("rsync", {"-a", "--exclude", "xmake.lua", expo .. "/", expo_target .. "/"})
-    end
     os.mkdir(path.join(folder, "build"))
     for _, item in ipairs(INPUTS) do
         if os.exists(path.join(project, "build", item)) then
@@ -168,14 +173,6 @@ function copy_project(project, folder, bundle_id)
         end
     end
     local id = host_bundle_id(folder, bundle_id)
-    local manifest = path.join(folder, "rn-spike", "host-app", "xmake.lua")
-    if os.isfile(manifest) then
-        local text = io.readfile(manifest)
-        local changed = replace(text, "CFBundleIdentifier=" .. HOST_BUNDLE_ID, "CFBundleIdentifier=" .. id)
-        if changed ~= text then
-            io.writefile(manifest, changed)
-        end
-    end
     return {rewritten = rewritten, relinked = relinked, bundle_id = id}
 end
 
@@ -298,7 +295,7 @@ function build(folder, cache, options)
         table.insert(pkgdirs, name .. "=" .. install_recipe(folder, path.absolute(cache), name, recipe_version(name)))
     end
     local env = build_environment({
-        folder = folder, cache = path.absolute(cache), checkout = checkout(), real = options.real, pods = options.pods,
+        folder = folder, cache = path.absolute(cache), checkout = checkout(), real = options.real, pods = options.pods or table.concat(read_app_manifest(folder).pods or {}, ","),
         pkgdirs = table.concat(pkgdirs, ","),
         engine = options.engine or newest(path.join(shared, "xmake-global", ".xmake", "packages", "w", "webkit-engine", "latest", "*"), path.join("frameworks", "JavaScriptCore.framework", "JavaScriptCore")),
         swiftui = options.swiftui or path.join(newest(path.join(shared, "xmake-global", ".xmake", "packages", "s", "swiftui", "latest", "*"), path.join("lib", "swift", "iphoneos")), "lib", "swift", "iphoneos"),
