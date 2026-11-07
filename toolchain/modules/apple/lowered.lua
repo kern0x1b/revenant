@@ -607,6 +607,26 @@ local MEMBERS = {
             replace = "    WKMediaCaptureTypeCameraAndMicrophone,\n};",
         },
     },
+    {
+        member = "UNNotificationPresentationOptions",
+        header = {
+            name = "UserNotifications",
+            directory = {"System", "Library", "Frameworks", "UserNotifications.framework", "Headers"},
+            file = "UNUserNotificationCenter.h",
+            find = "typedef NS_OPTIONS(NSUInteger, UNNotificationPresentationOptions) {\n    UNNotificationPresentationOptionBadge   = (1 << 0),\n    UNNotificationPresentationOptionSound   = (1 << 1),\n    UNNotificationPresentationOptionAlert API_DEPRECATED_WITH_REPLACEMENT(\"UNNotificationPresentationOptionList | UNNotificationPresentationOptionBanner\", macos(10.14, 11.0), ios(10.0, 14.0), watchos(3.0, 7.0), tvos(10.0, 14.0)) = (1 << 2),\n    UNNotificationPresentationOptionList API_AVAILABLE(macos(11.0), ios(14.0), watchos(7.0), tvos(14.0)) = (1 << 3),\n    UNNotificationPresentationOptionBanner API_AVAILABLE(macos(11.0), ios(14.0), watchos(7.0), tvos(14.0)) = (1 << 4),\n} API_AVAILABLE(macos(10.14), ios(10.0), watchos(3.0), tvos(10.0));",
+            replace = "typedef enum __attribute__((flag_enum, enum_extensibility(open))) UNNotificationPresentationOptions : NSUInteger UNNotificationPresentationOptions;\nenum UNNotificationPresentationOptions : NSUInteger {\n    UNNotificationPresentationOptionBadge   = (1 << 0),\n    UNNotificationPresentationOptionSound   = (1 << 1),\n    UNNotificationPresentationOptionAlert   = (1 << 2),\n    UNNotificationPresentationOptionList    = (1 << 3),\n    UNNotificationPresentationOptionBanner  = (1 << 4),\n};",
+        },
+    },
+    {
+        member = "UNNotificationPresentationOptionNone",
+        header = {
+            name = "UserNotifications",
+            directory = {"System", "Library", "Frameworks", "UserNotifications.framework", "Headers"},
+            file = "UNUserNotificationCenter.h",
+            find = "UNNotificationPresentationOptionNone NS_SWIFT_UNAVAILABLE(\"Use [] instead.\") API_AVAILABLE(macos(10.14), ios(10.0), watchos(3.0), tvos(10.0)) = 0;",
+            replace = "UNNotificationPresentationOptionNone NS_SWIFT_UNAVAILABLE(\"Use [] instead.\") API_AVAILABLE(macos(10.14), ios(10.0), watchos(3.0), tvos(10.0)) = (UNNotificationPresentationOptions)0;",
+        },
+    },
 }
 
 local MODULE_DIR = os.scriptdir()
@@ -1886,6 +1906,16 @@ local function member_headers(sdk)
         end
     end
     return changed
+end
+
+function member_header_text(text, file)
+    for _, entry in ipairs(MEMBERS) do
+        local header = entry.header
+        if header and header.file == file then
+            text = replaced(text, header, "the iPhoneOS SDK header " .. file, entry.member)
+        end
+    end
+    return text
 end
 
 local function names_of(set)

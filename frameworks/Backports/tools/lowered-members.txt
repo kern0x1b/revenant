@@ -36755,7 +36755,6 @@ type UNAuthorizationStatus
 type UNNotificationActionOptions
 type UNNotificationCategoryOptions
 type UNNotificationInterruptionLevel
-type UNNotificationPresentationOptions
 type UNNotificationSetting
 type UNShowPreviewsSetting
 type VNElementType
