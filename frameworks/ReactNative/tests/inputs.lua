@@ -4,6 +4,7 @@ local make_rn_codegen, selected, renderer_platform_dirs, compare = tool.make_rn_
 local byte_less = tool.byte_less
 local xml_text, splash_options = tool.xml_text, tool.splash_options
 local expo_packages, expo_real, expo_subscribers = tool.expo_packages, tool.expo_real, tool.expo_subscribers
+local expo_classes, stub_entries, component_provider, app_optional_components = tool.expo_classes, tool.stub_entries, tool.component_provider, tool.app_optional_components
 
 local DATA = path.join(os.scriptdir(), "data")
 
@@ -91,7 +92,7 @@ local count = 0
 for _ in pairs(everything) do
     count = count + 1
 end
-check("selected chooses every input when none is named", count == 14 and everything["rn-src"] and everything["app-assets"], count)
+check("selected chooses every input when none is named", count == 15 and everything["rn-src"] and everything["app-assets"] and everything["app-components"], count)
 
 local ordered = {"EXJSI", "EXJavaScript", "ExpoModulesCore", "_private", "a", "b", "é"}
 local order_ok = true
@@ -171,6 +172,61 @@ end
 local subscribers = expo_subscribers(subscriber_ctx)
 check("the app delegate subscribers come from the apple section of the packages that are built", #subscribers == 1
     and subscribers[1] == "      NotificationsAppDelegateSubscriber.self,", table.concat(subscribers, "|"))
+
+local stub_app = fresh("stub-classes")
+local stub_ctx = {options = {}, app = path.join(stub_app, "ref", "packages", "app"), ref = path.join(stub_app, "ref")}
+local expo_dir_stub = path.join(stub_app, "ref", "node_modules", "expo")
+os.mkdir(expo_dir_stub)
+io.writefile(path.join(expo_dir_stub, "expo-module.config.json"), '{"apple": {"modules": []}}')
+local stub_names = {}
+for _, line in ipairs(expo_classes(stub_ctx)) do
+    local name = line:match("%(module: (%w+)%.self")
+    if name and name:startswith("Stub") then
+        table.insert(stub_names, name)
+    end
+end
+local json_names = {}
+for _, stub in ipairs(stub_entries()) do
+    table.insert(json_names, stub.name)
+end
+check("the stub classes of the provider are the entries of stubs.json", same_list(stub_names, json_names), table.concat(stub_names, ",") .. " vs " .. table.concat(json_names, ","))
+
+local swift_stubs = io.readfile(path.join(os.scriptdir(), "..", "src", "expo", "StubModules.swift"))
+local declared = true
+for _, name in ipairs(json_names) do
+    if not swift_stubs:find("public final class " .. name .. ":", 1, true) then
+        declared = false
+    end
+end
+check("every stub in stubs.json is a class of src/expo/StubModules.swift", declared)
+
+local provider_text = table.concat({
+    "  thirdPartyComponents = @{",
+    '    @"RNSVGPath": NSClassFromString(@"RNSVGPath"), // react-native-svg',
+    "    };",
+    '#import "RCTThirdPartyComponentsProvider.h"',
+    ""
+}, "\n")
+local provided = component_provider(provider_text, {"RNCWebView", "RNSVGPath"})
+check("the provider is a dictionary of optional components with the macro", provided:find('RNHOST_ADD(@"RNSVGPath", @"RNSVGPath")', 1, true)
+    and provided:find('[@"RNCWebView,RNSVGPath" componentsSeparatedByString:@","]', 1, true)
+    and provided:find("    thirdPartyComponents = mutableComponents;", 1, true)
+    and not provided:find("@{", 1, true), provided)
+check("the provider imports RCTLog after the header", provided:find('#import "RCTThirdPartyComponentsProvider.h"\n#import <React/RCTLog.h>\n', 1, true) ~= nil, provided)
+check("an empty list keeps the provider of the spike", component_provider(provider_text, {}):find('[@"" componentsSeparatedByString:@","]', 1, true) ~= nil)
+
+local manifest_app = fresh("app-manifest")
+io.writefile(path.join(manifest_app, "host.json"), '{"optionalComponents": ["RNCWebView", "RNSVGPath"]}')
+check("the app manifest gives the optional components", same_list(app_optional_components({project = manifest_app}), {"RNCWebView", "RNSVGPath"}))
+check("a missing app manifest gives no optional components", #app_optional_components({project = fresh("no-manifest")}) == 0)
+local bad_manifest = fresh("bad-manifest")
+io.writefile(path.join(bad_manifest, "host.json"), '{"optionalComponents": ["A\\"B"]}')
+local refused = false
+try {
+    function () app_optional_components({project = bad_manifest}) end,
+    catch { function () refused = true end }
+}
+check("a component name with a quote is refused", refused)
 
 if failures > 0 then
     raise("%d react-native inputs test(s) failed", failures)

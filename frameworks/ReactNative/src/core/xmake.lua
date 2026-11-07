@@ -176,7 +176,7 @@ target("rn-appdelegate")
     for _, name in ipairs({"RCTModulesConformingToProtocolsProvider", "RCTUnstableModulesRequiringMainQueueSetupProvider", "RCTModuleProviders"}) do
         add_files(path.join(generated, "ReactCodegen", name .. ".mm"))
     end
-    add_files(path.join(inputs, "rn-spike-gen", "RCTThirdPartyComponentsProvider.mm"))
+    add_files(path.join(inputs, "app-components", "RCTThirdPartyComponentsProvider.mm"))
     add_includedirs(path.join(generated, "ReactCodegen"))
     add_frameworks("QuartzCore", "CoreGraphics", "UIKit", "Foundation")
     rn_includes()

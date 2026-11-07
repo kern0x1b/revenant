@@ -4,7 +4,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/inputs.lua m
            the application's node_modules: codegen (the application's codegen), rn-codegen (its component specs), rn-src (the
            react-native package with all its patches). <project> is the folder of the host; it holds ref/paseo, the application,
            or a link to it. The inputs are: codegen, rn-codegen, rn-headers, lib-headers, expo-core, expo-jsi, expo-pods, expo-src,
-           nitro, unistyles, keyboard, screens, app-assets. --only makes the named ones. The Expo inputs take the packages that
+           nitro, unistyles, keyboard, screens, app-assets, app-components. --only makes the named ones. app-components takes the optionalComponents of the application's host.json (--manifest FILE, default <project>/host.json) and needs codegen. The Expo inputs take the packages that
            coverage.json marks real or partial and that the application's node_modules has; --real replaces them with the parity list of the spike (RN_EXPO_REAL).
   compare  checks each input of <built> against <reference>: the same file names, the same link targets and the same SHA-256
            of every file, after the absolute path of <built> is read as the path of <reference>. It prints every difference
@@ -13,7 +13,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/inputs.lua m
 local app_config = import("app_config", {rootdir = os.scriptdir(), anonymous = true})
 local json = import("core.base.json")
 
-local INPUTS = {"codegen", "rn-codegen", "rn-src", "rn-headers", "lib-headers", "expo-jsi", "expo-pods", "expo-core", "expo-src", "nitro", "unistyles", "keyboard", "screens", "app-assets"}
+local INPUTS = {"codegen", "rn-codegen", "rn-src", "rn-headers", "lib-headers", "expo-jsi", "expo-pods", "expo-core", "expo-src", "nitro", "unistyles", "keyboard", "screens", "app-assets", "app-components"}
 
 local AGGREGATORS = {"Package.swift", "ReactAppDependencyProvider", "ReactCodegen/ReactCodegen.podspec"}
 
@@ -712,13 +712,9 @@ local EXPO_REWRITE = {
     ["FileSystemFileHandle.swift"] = {package = "expo-file-system", replace = {{"@available(iOS 14, tvOS 14, *)\n", ""}}}
 }
 
-local STUB_OWNERS = {
-    StubFileSystemModule = "expo-file-system", StubHapticsModule = "expo-haptics",
-    StubAudioModule = "expo-audio", StubSharingModule = "expo-sharing", StubDocumentPickerModule = "expo-document-picker",
-    StubImagePickerModule = "expo-image-picker", StubCameraModule = "expo-camera", StubSQLiteModule = "expo-sqlite", StubImageManipulatorModule = "expo-image-manipulator"
-}
-
-local STUB_MODULES = {"StubAudioModule", "StubDocumentPickerModule", "StubHapticsModule", "StubImagePickerModule", "StubSharingModule", "StubFileSystemModule", "StubTwoWayAudioModule", "StubHardwareKeyboardModule", "StubCameraModule", "StubImageManipulatorModule", "StubSQLiteModule"}
+function stub_entries()
+    return json.decode(io.readfile(path.join(checkout(), "frameworks", "ReactNative", "src", "stubs.json"))).stubs
+end
 
 function expo_skipped(file)
     for _, name in ipairs(EXPO_SKIP_FILES) do
@@ -777,10 +773,9 @@ function expo_classes(ctx)
             end
         end
     end
-    for _, name in ipairs(STUB_MODULES) do
-        local owner = STUB_OWNERS[name]
-        if not (owner and real[owner]) then
-            table.insert(classes, string.format("      (module: %s.self, name: nil),", name))
+    for _, stub in ipairs(stub_entries()) do
+        if not (stub.owner and real[stub.owner]) then
+            table.insert(classes, string.format("      (module: %s.self, name: nil),", stub.name))
         end
     end
     return classes
@@ -1017,8 +1012,67 @@ function make_rn_headers(ctx)
     end
 end
 
+function app_optional_components(options)
+    local file = options.manifest or path.join(options.project, "host.json")
+    if not os.isfile(file) then
+        return {}
+    end
+    local names = json.decode(io.readfile(file)).optionalComponents or {}
+    for _, name in ipairs(names) do
+        if type(name) ~= "string" or name == "" or name:find('[",]') then
+            raise("%s: optionalComponents takes component names, not %s", file, tostring(name))
+        end
+    end
+    return names
+end
+
+local PROVIDER_OPEN = "thirdPartyComponents = @{"
+local PROVIDER_CLOSE = "    };"
+local PROVIDER_IMPORT = '#import "RCTThirdPartyComponentsProvider.h"'
+
+function component_provider(text, optional)
+    if text:sub(-1) ~= "\n" then
+        text = text .. "\n"
+    end
+    local lines = {}
+    for line in text:gmatch("([^\n]*)\n") do
+        table.insert(lines, line)
+    end
+    local header = table.concat({
+        "NSMutableDictionary *mutableComponents = [NSMutableDictionary dictionary];",
+        '    NSSet *optionalComponents = [NSSet setWithArray:[@"' .. table.concat(optional, ",") .. '" componentsSeparatedByString:@","]];',
+        '#define RNHOST_ADD(key, name) { Class c = NSClassFromString(name); if (c) { mutableComponents[key] = c; } else if (![optionalComponents containsObject:key]) { NSLog(@"rn-host: MISSING COMPONENT %@: the class %@ is not linked into this host", key, name); RCTLogError(@"Fabric component %@ is not linked into this host (class %@ is missing), so views of it do not render", key, name); } }'
+    }, "\n")
+    local out = {}
+    for _, line in ipairs(lines) do
+        if line:find(PROVIDER_OPEN, 1, true) then
+            line = plain_replace(line, PROVIDER_OPEN, header)
+        end
+        line = line:gsub('@"([^"]+)": NSClassFromString%(@"([^"]+)"%),', 'RNHOST_ADD(@"%1", @"%2")', 1)
+        if line == PROVIDER_CLOSE then
+            line = "    thirdPartyComponents = mutableComponents;"
+        end
+        table.insert(out, line)
+        if line == PROVIDER_IMPORT then
+            table.insert(out, "#import <React/RCTLog.h>")
+        end
+    end
+    return table.concat(out, "\n") .. "\n"
+end
+
+function make_app_components(ctx)
+    local out = path.join(ctx.build, "app-components")
+    fresh_directory(out)
+    local source = path.join(ctx.build, "codegen", "build", "generated", "ios", "ReactCodegen", "RCTThirdPartyComponentsProvider.mm")
+    if not os.isfile(source) then
+        raise("%s is missing: make codegen first", source)
+    end
+    io.writefile(path.join(out, "RCTThirdPartyComponentsProvider.mm"), component_provider(io.readfile(source), app_optional_components(ctx.options)))
+end
+
 local MAKERS = {
     codegen = make_codegen,
+    ["app-components"] = make_app_components,
     ["rn-headers"] = make_rn_headers,
     ["expo-src"] = make_expo_src,
     ["expo-core"] = make_expo_core,

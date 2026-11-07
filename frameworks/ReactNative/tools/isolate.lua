@@ -8,7 +8,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua 
          named in --real and community libraries named in --pods are built as real modules; the rest are the stubs of the host.
          The react-native-enriched-markdown sources are the installed package of its recipe (packages/r, patches included), not the application's node_modules copy.]]
 
-local INPUTS = {"app-assets", "codegen", "expo-core", "expo-jsi", "expo-pods", "expo-src", "keyboard", "lib-headers", "nitro", "rn-codegen", "rn-headers", "rn-spike-gen", "screens", "unistyles"}
+local INPUTS = {"app-assets", "app-components", "codegen", "expo-core", "expo-jsi", "expo-pods", "expo-src", "keyboard", "lib-headers", "nitro", "rn-codegen", "rn-headers", "screens", "unistyles"}
 
 local DEFAULT_PODS = "react-native-worklets:rnworklets,react-native-webview:RNCWebViewSpec,react-native-reanimated:rnreanimated,react-native-gesture-handler:rngesturehandler_codegen,react-native-safe-area-context:safeareacontext,react-native-screens:rnscreens,react-native-svg:rnsvg,react-native-keyboard-controller:RNKC,@mattermost/react-native-paste-input:PasteTextInputSpecs,@react-native-masked-view/masked-view,react-native-enriched-markdown"
 
@@ -307,7 +307,6 @@ function build(folder, cache, options)
     local log = options.log or path.join(folder, "build", "isolated.log")
     install_react_native(folder, path.absolute(cache))
     os.cd(folder)
-    os.vrunv("sh", {"rn-spike/tools/patch-provider.sh"})
     local xmakew = path.join(checkout(), "xmakew")
     local configured = command_status({"-c", "\"$1\" f -c -y -P \"$2\" > \"$3\" 2>&1", "sh", xmakew, folder, log}, {envs = env})
     local built = configured
