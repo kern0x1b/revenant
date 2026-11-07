@@ -1,6 +1,6 @@
 # React Native patches: spike against packages
 
-The spike (`paseo-app/rn-spike/patches/`) kept copies of the iOS 6 patches. The packages in
+The spike (`paseo-app/rn-spike/patches/`, removed from paseo-app in 5321a86; its last state is at e6522b0) kept copies of the iOS 6 patches. The packages in
 `packages/` hold the same patches as recipe inputs, with sha256 values checked by the package manager. This
 table records, file by file, whether the two sets agree and which one the spike build actually uses.
 
@@ -18,6 +18,6 @@ table records, file by file, whether the two sets agree and which one the spike 
 | `expo-fabric-view-swift-base.patch` | `packages/e/expo-modules-core/patches/expo-fabric-view-swift-base.patch` | Same hunks; path prefix only. |
 | `expo-viewmodulewrapper-ios6.patch` | `packages/e/expo-modules-core/patches/expo-viewmodulewrapper-ios6.patch` | Package newer: adds an `NSLog` error line and blank lines. The spike's `build/ref/paseo/node_modules/expo-modules-core/ios/Fabric/ExpoFabricViewObjC.mm` contains the `NSLog`, so the spike builds the package version. |
 
-The spike's own `patches/` directory is therefore stale. The spike builds from `build/rn-src` and `build/ref`, which
+The spike's own `patches/` directory was therefore stale, and it is removed. The spike builds from `build/rn-src` and `build/ref`, which
 already carry the package set. Every sha256 in the recipes matches its file in `packages/`. No spike patch is missing
 from a package, so nothing was copied into a package.

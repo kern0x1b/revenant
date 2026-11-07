@@ -1,35 +1,40 @@
 # Building the React Native host in your own folder
 
-The host build lives in the spike project (`paseo-app/rn-spike`) until it becomes a component of this repository. Two scripts
-there make a build that shares no path with anyone else's, so several workers can build at once: `isolate.sh` copies the project
-and `build-isolated.sh` builds from the copy.
+The host is built by `frameworks/ReactNative/tools/isolate.lua` from the application project (`paseo-app`, whose root `xmake.lua`
+includes the host). `isolate.lua` makes a build that shares no path with anyone else's, so several workers can build at once:
+`copy` makes the copy and `build` builds from it. The spike's scripts `isolate.sh` and `build-isolated.sh` were removed from
+paseo-app (5321a86); their last state is at e6522b0.
 
 ## 1. Make the copy
 
 ```sh
-sh paseo-app/rn-spike/tools/isolate.sh <folder> <your revenant worktree> <your private cache>
+./xmakew l -P . frameworks/ReactNative/tools/isolate.lua copy <project> <folder> --cache <your private cache> [--bundle-id <id>]
 ```
 
+`<project>` is the application project, whose `build/` holds the inputs that [`inputs.lua make`](build-inputs.md) made.
+
 The folder is new, and its path must not contain `test` or `Example` (the pod source filter used to read the whole path). The
-script copies the hand-made inputs of `build/` with their absolute paths rewritten to the folder, links `build/ref` (the
+command copies the hand-made inputs of `build/` with their absolute paths rewritten to the folder, links `build/ref` (the
 application's `node_modules`, read only) and installs the `react-native` package with all its patches into the private cache.
 `build/rn-src` links to those patched sources and `build/rn-headers` is relinked to them, so nothing is read from another
 worker's tree. The sources are the install the recipe reports for this build, not another recipe's install that happens to
 carry the same patches.
 
-The private cache is made with `./xmakew l -P . tools/private_cache.lua <folder>`. A cache made before the manifests were
-rewritten is repaired with `./xmakew l -P . tools/private_cache.lua --repair <folder>`; without it the Swift compile does not
+The private cache is made with `./xmakew l -P . tools/private_cache.lua <your private cache>`. A cache made before the manifests were
+rewritten is repaired with `./xmakew l -P . tools/private_cache.lua --repair <your private cache>`; without it the Swift compile does not
 find the package modules such as Combine.
 
 ## 2. Build
 
 ```sh
-sh <folder>/rn-spike/tools/build-isolated.sh <your revenant worktree> <your private cache> [RNHost|expo-jsi-probe]
+./xmakew l -P . frameworks/ReactNative/tools/isolate.lua build <folder> --cache <your private cache> [--target RNHost] [--real a,b] [--pods pkg:module,...] [--jobs N] [--log file]
 ```
 
 The build is made against the stubs of the Expo modules. A module you are porting is built as real by naming it:
-`REAL=expo-battery` for Expo packages (comma separated), `PODS="react-native-pager-view:RNCViewPager"` for community libraries
-(`package:codegenModule`). The log is `<folder>/build/isolated.log`; the script prints the errors it holds. The sources of a
+`--real expo-battery` for Expo packages (comma separated), `--pods react-native-pager-view:RNCViewPager` for community libraries
+(`package:codegenModule`). The community pods named in the application's manifest (`build/app-manifest/host.json`, made from
+`rn-spike/host.json`) are built as real without `--pods`; `--pods` replaces that list. The command prints the exit code, the log
+path and the errors it holds. The log is `<folder>/build/isolated.log` unless `--log` names another file. The sources of a
 module come from its package in `packages/`, never from another worker's folder.
 
 A module whose own dependencies are not packages yet (`ZXingObjC` for expo-camera, `SDWebImageWebPCoder` for
@@ -46,9 +51,10 @@ constant` means the shared clang module cache holds a `jsi` module built without
 The phone has one `/Applications` and one `/var/tmp`. A build installed under the same bundle id replaces the one a colleague is
 measuring, and a measurement made on a replaced app measures the wrong thing.
 
-`isolate.lua copy` therefore gives the copy its own bundle id: `--bundle-id`, or `org.revenant.rnhost.<the folder's name>` with
-anything but lower case letters, digits and dashes made a dash. It is printed when the copy is made, and it is the id the build
-puts into `CFBundleIdentifier`.
+`isolate.lua copy` therefore gives the copy its own bundle id, in this order: `--bundle-id`, then the `bundleId` of the
+application's manifest, then `org.revenant.rnhost.<the folder's name>` with anything but lower case letters, digits and dashes made
+a dash. The id is printed when the copy is made, written as `bundleId` into the copy's `build/app-manifest/host.json`, and it is the
+id the build puts into `CFBundleIdentifier`.
 
 * Install and launch your app by that id and by a folder of your own, `/var/stash/<claim holder>/<last part of the id>.app`; never
   remove an app whose id is not yours.
@@ -65,5 +71,5 @@ puts into `CFBundleIdentifier`.
   one that no longer starts with the lines already run runs from its first line.
 * The host writes its output to `/var/tmp/<last part of the id>/` (the log, `rnhost.cmd.out`, `rnhost.stack`, `rnhost.prof.out`,
   `rnhost.jsprof.out`). That folder belongs to the app's user, mode 700, and nothing the host writes there is read back.
-* The spike host still reads `/var/tmp/rnhost.*` and `/var/tmp/real.js`. It must move to this host before a window is shared with it:
-  two workers who share those paths must not run in the same window.
+* Two copies with the same bundle id share one `.app` and one `/var/tmp/<last part of the id>/`. The default id comes from the
+  folder's name, so give a second folder of that name its own `--bundle-id`.

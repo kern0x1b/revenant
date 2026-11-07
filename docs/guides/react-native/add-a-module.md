@@ -23,9 +23,9 @@ at once, which a patch does not.
 
 ## 3. Build it as the real module
 
-Until the host build is a component of this repository, it lives in the spike (`paseo-app/rn-spike`), and you build it in your
+The host is built from the application project in your
 own folder as [the isolated build](isolated-build.md) says. A module is added to its build
-with `RN_EXPO_REAL=<package>` (Expo packages) or the `PODS` list of the build script (community libraries). Build, and collect all
+with `--real <package>` (Expo packages) or `--pods <package>:<module>` on `isolate.lua build` (community libraries). Build, and collect all
 errors of the module at once, not one by one. Each error is one of:
 
 | Error | Close it with |
@@ -43,9 +43,9 @@ answers as the platform would without the service (an unavailable result, not a 
 ## 4. Check it on the phone
 
 The check is a probe: a small Expo application that calls the module and prints what it got. Export it with
-`frameworks/ReactNative/tools/export_bundle.lua`, and put it on the claimed phone as `/var/tmp/real.js` with the host built with the
-module. The probe prints one line per call with the prefix `CHECK`, which shows in `/var/tmp/rnhost.log` (enabled by
-`touch /var/tmp/rnhost.log.on`):
+`frameworks/ReactNative/tools/export_bundle.lua`, and deploy it to the claimed phone with `host_install.lua deploy --bundle FILE` on the host built with the
+module. The probe prints one line per call with the prefix `CHECK`, which shows in `/var/tmp/<last part of the id>/rnhost.log` (enabled by
+an empty `rnhost.log.on` in the app folder):
 
 ```js
 import { requireNativeModule } from "expo-modules-core";
