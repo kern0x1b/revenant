@@ -98,11 +98,12 @@ function framework_retargets(otool_text, imports_text, exports, library_names)
             end
         end
     end
+    local absent = {UserNotifications = true, Contacts = true, LocalAuthentication = true}
     local arguments, notes = {}, {}
     for _, name in ipairs(library_names) do
         local framework = name:match("^lib(.+)Backports$")
         local old = framework and sdk .. framework .. ".framework/" .. framework
-        if old and imports[framework] and otool_text:find(old .. " ", 1, true) then
+        if old and absent[framework] and imports[framework] and otool_text:find(old .. " ", 1, true) then
             local defined = {}
             for line in (exports[name] or ""):gmatch("[^\n]+") do
                 defined[line:match("(%S+)$")] = true
