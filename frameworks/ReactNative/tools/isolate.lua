@@ -68,6 +68,22 @@ end
 
 local ENRICHED_MARKDOWN = {name = "react-native-enriched-markdown", version = "1.2.0-nightly-20261014-766fc0e67"}
 
+local DEFAULT_PATCHED = {"expo-clipboard"}
+
+function default_patched(folder, real)
+    if real and real ~= "" then
+        return {}
+    end
+    local ref = path.join(folder, "build", "ref", "paseo")
+    local found = {}
+    for _, name in ipairs(DEFAULT_PATCHED) do
+        if os.isdir(path.join(ref, "packages", "app", "node_modules", name)) or os.isdir(path.join(ref, "node_modules", name)) then
+            table.insert(found, name)
+        end
+    end
+    return found
+end
+
 function app_manifest_file(folder)
     return path.join(folder, "build", "app-manifest", "host.json")
 end
@@ -321,6 +337,9 @@ function build(folder, cache, options)
     local ci_backports = path.join(shared, "scratch", "rn-swift", "ci-backports", "libWebKitBackports.dylib")
     local pkgdirs = {ENRICHED_MARKDOWN.name .. "=" .. install_recipe(folder, path.absolute(cache), ENRICHED_MARKDOWN.name, ENRICHED_MARKDOWN.version)}
     for _, name in ipairs(real_packages(options.real)) do
+        table.insert(pkgdirs, name .. "=" .. install_recipe(folder, path.absolute(cache), name, recipe_version(name)))
+    end
+    for _, name in ipairs(default_patched(folder, options.real)) do
         table.insert(pkgdirs, name .. "=" .. install_recipe(folder, path.absolute(cache), name, recipe_version(name)))
     end
     local hermes = os.getenv("RN_HERMES") and true or nil

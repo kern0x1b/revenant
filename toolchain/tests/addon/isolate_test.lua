@@ -158,6 +158,21 @@ function failures(opt)
     if not refused or refused:find("xmake.lua", 1, true) == nil or refused:find("nothing is built", 1, true) == nil then
         table.insert(found, "build refuses a folder that is no copy before it runs xmake, and names the missing file")
     end
+    local defaults = path.join(copies, "defaults")
+    os.mkdir(path.join(defaults, "build", "ref", "paseo", "node_modules", "expo-clipboard"))
+    local picked = isolate.default_patched(defaults, nil)
+    if #picked ~= 1 or picked[1] ~= "expo-clipboard" then
+        table.insert(found, "the default path builds expo-clipboard from its patched recipe when the application has the package")
+    end
+    if #isolate.default_patched(defaults, "expo-battery") ~= 0 then
+        table.insert(found, "--real replaces the default packages, so the default path adds no recipe")
+    end
+    if #isolate.default_patched(whole, nil) ~= 0 then
+        table.insert(found, "a copy whose application lacks expo-clipboard takes no default recipe")
+    end
+    if isolate.recipe_version("expo-clipboard") ~= "57.0.2" then
+        table.insert(found, "the recipe the default path installs is expo-clipboard 57.0.2, the version of the application")
+    end
     os.vrunv("rm", {"-rf", copies})
     return found
 end

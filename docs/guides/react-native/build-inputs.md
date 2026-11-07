@@ -26,6 +26,7 @@ The Expo inputs (`expo-pods`, `expo-src`, `expo-core`) take one list of packages
 - Without `--real`, the packages are `expo` and the Expo SDK packages that `frameworks/ReactNative/src/coverage.json` marks
   `real` or `partial` and that have native code. `expo-modules-core` is left out, because `expo-core` builds it. Stubs, missing
   packages and js-only packages are not in the list. This is the default: 18 packages at the time of writing.
+  The default path builds `expo-clipboard` from its patched recipe (`packages/e/expo-clipboard`, through `RN_PKG_DIRS`) whenever the application has the package: the sources in its node_modules call an iOS 11 API (`loadObject(ofClass:)`) and do not compile for iOS 6. The other packages come from node_modules as before.
 - With `--real`, the list is the spike's configuration (`RN_EXPO_REAL`) on top of its base. The parity comparison below uses it:
 
 ```sh
