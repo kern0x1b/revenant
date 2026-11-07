@@ -24,17 +24,6 @@ local function coverage_rows(text)
     return rows
 end
 
-local function modules(text)
-    local expo, real = {}, {}
-    for _, row in ipairs(coverage_rows(text)) do
-        if row.native and (row.id == "expo" or row.id:startswith("expo-")) and EXPO_BUILT[row.status] and row.id ~= "expo-modules-core" then
-            table.insert(expo, row.id)
-            real[row.id] = true
-        end
-    end
-    return expo, real
-end
-
 local PKG_DIRS = {}
 for _, pair in ipairs(string.split(os.getenv("RN_PKG_DIRS") or "", ",", {plain = true})) do
     local name, dir = pair:match("^([^=]+)=(.+)$")
@@ -54,6 +43,36 @@ local function expo_dir(package)
         end
     end
     return path.join(ref, "node_modules", package)
+end
+
+-- the same packages tools/inputs.lua selects (expo_packages): the coverage rows the application
+-- installs, or with --real (RN_EXPO_REAL) the spike's parity base plus that list; keep the two equal
+local EXPO_PARITY_BASE = {"expo-asset", "expo-constants", "expo", "expo-crypto", "expo-keep-awake", "expo-linking", "expo-system-ui", "expo-application", "expo-glass-effect", "expo-localization"}
+
+local function modules(text)
+    local candidates = {}
+    if os.getenv("RN_EXPO_REAL") then
+        candidates = table.copy(EXPO_PARITY_BASE)
+        for _, package in ipairs(string.split(os.getenv("RN_EXPO_REAL"), ",", {plain = true})) do
+            if package ~= "" then
+                table.insert(candidates, package)
+            end
+        end
+    else
+        for _, row in ipairs(coverage_rows(text)) do
+            if row.native and (row.id == "expo" or row.id:startswith("expo-")) and EXPO_BUILT[row.status] and row.id ~= "expo-modules-core" then
+                table.insert(candidates, row.id)
+            end
+        end
+    end
+    local expo, real = {}, {}
+    for _, package in ipairs(candidates) do
+        if not real[package] and os.isdir(expo_dir(package)) then
+            table.insert(expo, package)
+            real[package] = true
+        end
+    end
+    return expo, real
 end
 
 local function react_native()
@@ -124,9 +143,10 @@ local LOCAL_COPIES = {
     ["expo-glass-effect"] = "GlassView.swift",
     ["expo-localization"] = "LocalizationModule.swift",
 }
-local function stub_registry()
+-- text is read by the caller: xmake's sandbox gives io only to callbacks, not to top-level helpers
+local function stub_registry(text)
     local names, owners = {}, {}
-    for object in io.readfile(path.join(SOURCES, "stubs.json")):gmatch("{([^{}]-)}") do
+    for object in text:gmatch("{([^{}]-)}") do
         if object:match('"file":%s*"([^"]*)"') == "src/expo/StubModules.swift" then
             local name = object:match('"name":%s*"([^"]*)"')
             table.insert(names, name)
@@ -322,7 +342,7 @@ target("expo-app-modules")
     add_files(provider, path.join(SOURCES, "expo", "InsecureMD5Shim.swift"), path.join(SOURCES, "expo", "RevenantFontBackport.swift"))
     on_load(function (target)
         local expo, real = modules(io.readfile(COVERAGE))
-        local STUB_NAMES, STUB_OWNERS = stub_registry()
+        local STUB_NAMES, STUB_OWNERS = stub_registry(io.readfile(path.join(SOURCES, "stubs.json")))
         local seen, duplicates = {}, {}
         for _, package in ipairs(expo) do
             for _, f in ipairs(os.files(path.join(expo_dir(package), "ios", EXPO_ONLY[package] or "", "**.swift"))) do

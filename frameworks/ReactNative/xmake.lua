@@ -1,4 +1,6 @@
-if get_config("component") ~= "" and get_config("component") ~= "ReactNative" then
+-- an outer project that does not include the revenant root has no "component" option: get_config gives nil
+local component = get_config("component") or ""
+if component ~= "" and component ~= "ReactNative" then
     return
 end
 
@@ -17,7 +19,7 @@ target("react-native-inputs")
 target_end()
 
 local inputs = os.getenv("RN_INPUTS") or path.join(os.projectdir(), "build")
-if is_plat("iphoneos") and (get_config("component") == "ReactNative" or os.isdir(os.getenv("RN_SRC") or path.join(inputs, "rn-src"))) then
+if is_plat("iphoneos") and (component == "ReactNative" or os.isdir(os.getenv("RN_SRC") or path.join(inputs, "rn-src"))) then
     if os.getenv("RN_DEPS_REPO") then
         add_requires("revenant@folly 2024.11.18.00", {alias = "folly"})
         add_requires("revenant@socketrocket 0.7.1", {alias = "socketrocket"})

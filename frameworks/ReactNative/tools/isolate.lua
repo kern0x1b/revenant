@@ -305,7 +305,7 @@ function build(folder, cache, options)
     install_react_native(folder, path.absolute(cache))
     os.cd(folder)
     local xmakew = path.join(checkout(), "xmakew")
-    local configured = command_status({"-c", "\"$1\" f -c -y -P \"$2\" > \"$3\" 2>&1", "sh", xmakew, folder, log}, {envs = env})
+    local configured = command_status({"-c", "\"$1\" f -c -y -p iphoneos -a armv7 -P \"$2\" > \"$3\" 2>&1", "sh", xmakew, folder, log}, {envs = env})
     local built = configured
     if configured == 0 then
         built = command_status({"-c", "\"$1\" build -P \"$2\" -j \"$5\" -y -v \"$3\" >> \"$4\" 2>&1", "sh", xmakew, folder, options.target or "RNHost", log, options.jobs or "4"}, {envs = env})
