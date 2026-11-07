@@ -1,9 +1,12 @@
 local here = os.scriptdir()
+local json = import("core.base.json")
+local MANIFEST = path.join(os.projectdir(), "build", "app-manifest", "host.json")
+local manifest = os.isfile(MANIFEST) and json.decode(io.readfile(MANIFEST)) or {}
 
 option("rn-bundle")
     set_showmenu(true)
-    set_description("Metro bundle (.js) to copy into the app; default is the committed test bundle")
-    set_default(path.join(here, "test-bundle.js"))
+    set_description("Metro bundle (.js) to copy into the app; default is the bundle of the app manifest, else the committed test bundle")
+    set_default(manifest.bundle and path.join(os.projectdir(), manifest.bundle) or path.join(here, "test-bundle.js"))
 option_end()
 
 local RN_JSC_FRAMEWORK = (not os.getenv("RN_LINK_ALL")) and (not os.getenv("RN_JSC_BUNDLE")) and (not os.getenv("RN_WEBKIT")) and "JavaScriptCore" or nil
@@ -114,11 +117,11 @@ target("RNHost")
     add_mxflags("-fobjc-arc", {force = true})
     set_languages("c++20")
     set_optimize("fastest")
-    local app_assets = os.getenv("RN_APP_ASSETS")
+    local app_assets = manifest.appAssets and path.join(os.projectdir(), manifest.appAssets)
     set_values("app.plist-file", app_assets and path.relative(path.join(app_assets, "Info.plist"), os.scriptdir()) or "Info.plist")
-    set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.paseo-ios6.rnhost")
+    set_values("app.plist", "CFBundleIdentifier=" .. (manifest.bundleId or "org.revenant.rnhost"))
     if not app_assets then
-        add_values("app.plist", "CFBundleDisplayName=RNHost")
+        add_values("app.plist", "CFBundleDisplayName=" .. (manifest.displayName or "RNHost"))
     else
         for _, file in ipairs(os.files(path.join(app_assets, "*.png"))) do
             add_values("app.resources", path.relative(file, os.scriptdir()))
@@ -137,9 +140,9 @@ target("RNHost")
         add_values("app.frameworks", "cryptokit", "swift-crypto", "uniformtypeidentifiers")
         set_values("revenant.waive.thumb-interworking", "libswiftDarwin.dylib is checked a second time after it was stripped, because the runtime libraries reach the app both through swift-runtime and through the cryptokit package; the unstripped copies pass the check")
     end
-    set_values("revenant.control", path.join(os.projectdir(), "packaging", "control-rnhost"))
+    set_values("revenant.control", path.join(os.projectdir(), manifest.controlFile or path.join("packaging", "control-rnhost")))
     if os.getenv("RN_BACKPORTS") then
         set_values("revenant.rebind", "RNHost")
     end
-    set_values("revenant.waive.weak-imports", "UIAccessibilityPriority*, UIAccessibilitySpeechAttributeAnnouncementPriority: RCTAccessibilityManager.mm:335 inside @available(iOS 17.0); UITextContentType{Birthdate*,CreditCard*}: RCTTextInputUtils.mm:228 and RCTBaseTextInputView.mm:316 inside @available(iOS 17.0); UITextContentType{DateTime,FlightNumber,ShipmentTrackingNumber}: same files inside @available(iOS 15.0); UITextContentTypeCellular*: same files inside @available(iOS 17.4); UIMenuAutoFill: RCTUITextField.mm:189 and RCTUITextView.mm:318 inside @available(iOS 17.0); preadv, pwritev: folly SysUio.cpp takes the address only inside __builtin_available(iOS 14.0) and otherwise uses preadv_fallback/pwritev_fallback; UIContentSizeCategoryDidChangeNotification, UIContentSizeCategoryNewValueKey, UIApplicationLaunchOptionsUserActivityDictionaryKey, UIApplicationLaunchOptionsUserActivityTypeKey: each use is behind an address-of != NULL test added by rn-spike/patches/ios6-weak-guards.patch")
+    set_values("revenant.waive.weak-imports", "UIAccessibilityPriority*, UIAccessibilitySpeechAttributeAnnouncementPriority: RCTAccessibilityManager.mm:335 inside @available(iOS 17.0); UITextContentType{Birthdate*,CreditCard*}: RCTTextInputUtils.mm:228 and RCTBaseTextInputView.mm:316 inside @available(iOS 17.0); UITextContentType{DateTime,FlightNumber,ShipmentTrackingNumber}: same files inside @available(iOS 15.0); UITextContentTypeCellular*: same files inside @available(iOS 17.4); UIMenuAutoFill: RCTUITextField.mm:189 and RCTUITextView.mm:318 inside @available(iOS 17.0); preadv, pwritev: folly SysUio.cpp takes the address only inside __builtin_available(iOS 14.0) and otherwise uses preadv_fallback/pwritev_fallback; UIContentSizeCategoryDidChangeNotification, UIContentSizeCategoryNewValueKey, UIApplicationLaunchOptionsUserActivityDictionaryKey, UIApplicationLaunchOptionsUserActivityTypeKey: each use is behind an address-of != NULL test added by packages/r/react-native/patches/ios6-weak-guards.patch")
     set_values("revenant.version", "0.1.0")

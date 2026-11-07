@@ -5,6 +5,7 @@ local byte_less = tool.byte_less
 local xml_text, splash_options = tool.xml_text, tool.splash_options
 local expo_packages, expo_real, expo_subscribers = tool.expo_packages, tool.expo_real, tool.expo_subscribers
 local expo_classes, stub_entries, component_provider, app_optional_components = tool.expo_classes, tool.stub_entries, tool.component_provider, tool.app_optional_components
+local make_app_manifest = tool.make_app_manifest
 
 local DATA = path.join(os.scriptdir(), "data")
 
@@ -92,7 +93,7 @@ local count = 0
 for _ in pairs(everything) do
     count = count + 1
 end
-check("selected chooses every input when none is named", count == 15 and everything["rn-src"] and everything["app-assets"] and everything["app-components"], count)
+check("selected chooses every input when none is named", count == 16 and everything["rn-src"] and everything["app-assets"] and everything["app-components"] and everything["app-manifest"], count)
 
 local ordered = {"EXJSI", "EXJavaScript", "ExpoModulesCore", "_private", "a", "b", "é"}
 local order_ok = true
@@ -221,6 +222,14 @@ check("the app manifest gives the optional components", same_list(app_optional_c
 check("a missing app manifest gives no optional components", #app_optional_components({project = fresh("no-manifest")}) == 0)
 local bad_manifest = fresh("bad-manifest")
 io.writefile(path.join(bad_manifest, "host.json"), '{"optionalComponents": ["A\\"B"]}')
+local json = import("core.base.json")
+local manifest_root = fresh("app-manifest-input")
+io.writefile(path.join(manifest_root, "host.json"), '{"bundleId": "org.example.app", "optionalComponents": ["RNCWebView"]}')
+os.mkdir(path.join(manifest_root, "build"))
+make_app_manifest({build = path.join(manifest_root, "build"), options = {project = manifest_root}})
+local written = json.decode(io.readfile(path.join(manifest_root, "build", "app-manifest", "host.json")))
+check("the app-manifest input carries the application's manifest", written.bundleId == "org.example.app" and written.optionalComponents[1] == "RNCWebView", io.readfile(path.join(manifest_root, "build", "app-manifest", "host.json")))
+
 local refused = false
 try {
     function () app_optional_components({project = bad_manifest}) end,
