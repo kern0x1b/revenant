@@ -218,7 +218,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "A stub (stubs.json): player, recorder and playlist class shells whose functions report the call and do nothing. The package is at packages/e/expo-audio, unpatched, and not built. Post-iOS 6 uses in the sources: MPRemoteCommandCenter (MediaController.swift, iOS 7.1), AVAudioEngine (AudioStream.swift, iOS 8; Backports has AVFAudio), AVAudioSession preferred input (AudioUtils.swift, iOS 7). AVAudioPlayer, AVAudioRecorder and AVAudioSession exist on iOS 6. The real module fails on MPRemoteCommandCenter (iOS 7.1) and other post-iOS 6 API."
+   "note": "Does not build for iOS 6: MediaController.swift:9 uses MPRemoteCommandCenter, which is iOS 7.1 or newer (build log of expo-audio 57.0.5). A stub (stubs.json): player, recorder and playlist class shells whose functions report the call and do nothing. The package is at packages/e/expo-audio, unpatched, and not built. Post-iOS 6 uses in the sources: MPRemoteCommandCenter (MediaController.swift, iOS 7.1), AVAudioEngine (AudioStream.swift, iOS 8; Backports has AVFAudio), AVAudioSession preferred input (AudioUtils.swift, iOS 7). AVAudioPlayer, AVAudioRecorder and AVAudioSession exist on iOS 6. The real module fails on MPRemoteCommandCenter (iOS 7.1) and other post-iOS 6 API."
   },
   {
    "id": "expo-auth-session",
@@ -407,7 +407,7 @@
    "native": true,
    "status": "missing",
    "verified": "none",
-   "note": "Source patched, not built: packages/e/expo-file-system, expo-file-system 57.0.7 from its npm tarball, with patches/file-system-ios6.patch. The five iOS 14 class gates are removed by the patch (not staged copies). The six URL file-handle initialisers (iOS 13: three in FileSystemFileHandle, two in FileSystemFile, one in the legacy module) are replaced by the path initialisers FileHandle(forReadingAtPath:) and its siblings (iOS 2); FileSystemFileHandle's offset, seekToEnd, read, write and close go to NSFileHandle members that Backports lower. Open: Backports has no +fileHandleForWritingToURL:error: (NSURLSession.m calls it on the resume path); DispatchSource.makeFileSystemObjectSource (watcher) and the UIAdaptivePresentationControllerDelegate conformance (FilePickingUtils) are not checked. Not compiled, not run on the phone."
+   "note": "Does not build for iOS 6 unpatched: the file handle uses FileHandle read, offset and seekToEnd (iOS 13), the watcher uses activate() (iOS 10) and the legacy module uses volumeAvailableCapacityForImportantUsage (iOS 11) (build log of expo-file-system 57.0.7). Source patched, not built: packages/e/expo-file-system, expo-file-system 57.0.7 from its npm tarball, with patches/file-system-ios6.patch. The five iOS 14 class gates are removed by the patch (not staged copies). The six URL file-handle initialisers (iOS 13: three in FileSystemFileHandle, two in FileSystemFile, one in the legacy module) are replaced by the path initialisers FileHandle(forReadingAtPath:) and its siblings (iOS 2); FileSystemFileHandle's offset, seekToEnd, read, write and close go to NSFileHandle members that Backports lower. Open: Backports has no +fileHandleForWritingToURL:error: (NSURLSession.m calls it on the resume path); DispatchSource.makeFileSystemObjectSource (watcher) and the UIAdaptivePresentationControllerDelegate conformance (FilePickingUtils) are not checked. Not compiled, not run on the phone."
   },
   {
    "id": "expo-font",
@@ -488,7 +488,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "Not built; the package is at packages/e/expo-image-picker, unpatched. The Photos types it uses are in the Backports: PHPickerViewController (iOS 14) presents UIImagePickerController, which iOS 6 has, so picking is single-select; PHAssetResourceManager, UTType and NSItemProvider file loading are backported too. Multi-select is the part iOS 6 cannot do: UIImagePickerController picks one item, and it stays partial once built."
+   "note": "Does not build for iOS 6: the Swift compile fails because PHPickerResult and PHPickerViewControllerDelegate are not in scope and MissingCurrentViewControllerException is declared twice (build log of expo-image-picker 57.0.20). Not built; the package is at packages/e/expo-image-picker, unpatched. The Photos types it uses are in the Backports: PHPickerViewController (iOS 14) presents UIImagePickerController, which iOS 6 has, so picking is single-select; PHAssetResourceManager, UTType and NSItemProvider file loading are backported too. Multi-select is the part iOS 6 cannot do: UIImagePickerController picks one item, and it stays partial once built."
   },
   {
    "id": "expo-intent-launcher",
@@ -785,7 +785,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "Not built; package packages/e/expo-sqlite (57.0.4, unpatched). It vendors the SQLite amalgamation (vendor/sqlite3/sqlite3.c), which the default build uses; the optional libSQL mode (expo.sqlite.useLibSQL) is branch work/libsql. Measured: SQLite 3.50.3 amalgamation, 1912 Swift lines with no availability checks; the podspec's iOS 16.4 minimum is a deployment setting. Its podspec flags are in ExpoSQLite.podspec and are not yet compiled for armv7 iOS 6. Blocked on ExpoModulesCore, which the tree does not package."
+   "note": "Does not build for iOS 6 as packaged: SQLiteModuleLibSQL.swift imports the libsql module, which this build does not provide (no such module 'libsql', build log of expo-sqlite 57.0.4). Not built; package packages/e/expo-sqlite (57.0.4, unpatched). It vendors the SQLite amalgamation (vendor/sqlite3/sqlite3.c), which the default build uses; the optional libSQL mode (expo.sqlite.useLibSQL) is branch work/libsql. Measured: SQLite 3.50.3 amalgamation, 1912 Swift lines with no availability checks; the podspec's iOS 16.4 minimum is a deployment setting. Its podspec flags are in ExpoSQLite.podspec and are not yet compiled for armv7 iOS 6. Blocked on ExpoModulesCore, which the tree does not package."
   },
   {
    "id": "expo-status-bar",
