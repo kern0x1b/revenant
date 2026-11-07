@@ -66,8 +66,8 @@ function host_bundle_id(folder, given)
 end
 
 function write_bundle_id(folder, given)
-    local id = host_bundle_id(folder, given)
     local manifest = read_app_manifest(folder)
+    local id = given or manifest.bundleId or host_bundle_id(folder)
     manifest.bundleId = id
     os.mkdir(path.directory(app_manifest_file(folder)))
     io.writefile(app_manifest_file(folder), json.encode(manifest))

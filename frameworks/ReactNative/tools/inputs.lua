@@ -1013,9 +1013,16 @@ function make_rn_headers(ctx)
 end
 
 function app_manifest(options)
-    local file = options.manifest or path.join(options.project, "host.json")
-    if not os.isfile(file) then
-        return {}
+    local file = options.manifest
+    if file then
+        if not os.isfile(file) then
+            raise("the app manifest %s does not exist: give the application's host.json to --manifest", file)
+        end
+    else
+        file = path.join(options.project, "host.json")
+        if not os.isfile(file) then
+            raise("%s has no host.json: give the application's manifest to --manifest", options.project)
+        end
     end
     return json.decode(io.readfile(file))
 end
