@@ -59,10 +59,6 @@ target("RNHost")
     if os.getenv("RN_JSC_ENGINE") then
         add_packages("rn-jsc-engine")
         add_ldflags("-Wl,-rpath,@executable_path/Frameworks", {force = true})
-        on_load(function (target)
-            local engine = target:pkg("rn-jsc-engine"):installdir()
-            target:add("ldflags", path.join(engine, "bundle", "Frameworks", "JavaScriptCore.framework", "JavaScriptCore"), {force = true})
-        end)
     end
     if os.getenv("RN_LINK_ALL") then
         if os.getenv("RN_BACKPORTS") then
@@ -129,16 +125,28 @@ target("RNHost")
     add_mxflags("-fobjc-arc", {force = true})
     set_languages("c++20")
     set_optimize("fastest")
-    local app_assets = os.getenv("RN_APP_ASSETS")
-    set_values("app.plist-file", app_assets and path.relative(path.join(app_assets, "Info.plist"), os.scriptdir()) or "Info.plist")
-    set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.paseo-ios6.rnhost")
-    if not app_assets then
-        add_values("app.plist", "CFBundleDisplayName=RNHost")
-    else
-        for _, file in ipairs(os.files(path.join(app_assets, "*.png"))) do
-            add_values("app.resources", path.relative(file, os.scriptdir()))
+    on_load(function (target)
+        if os.getenv("RN_JSC_ENGINE") then
+            local engine = target:pkg("rn-jsc-engine"):installdir()
+            target:add("ldflags", path.join(engine, "bundle", "Frameworks", "JavaScriptCore.framework", "JavaScriptCore"), {force = true})
         end
-    end
+        local file = path.join(os.projectdir(), "build", "app-manifest", "host.json")
+        local text = os.isfile(file) and io.readfile(file) or ""
+        local function key(name)
+            return text:match('"' .. name .. '"%s*:%s*"([^"]*)"')
+        end
+        local app_assets = key("appAssets") and path.join(os.projectdir(), key("appAssets"))
+        target:set("values", "app.plist-file", app_assets and path.relative(path.join(app_assets, "Info.plist"), os.scriptdir()) or "Info.plist")
+        target:add("values", "app.plist", "CFBundleIdentifier=" .. (key("bundleId") or "org.revenant.rnhost"))
+        if not app_assets then
+            target:add("values", "app.plist", "CFBundleDisplayName=" .. (key("displayName") or "RNHost"))
+        else
+            for _, file in ipairs(os.files(path.join(app_assets, "*.png"))) do
+                target:add("values", "app.resources", path.relative(file, os.scriptdir()))
+            end
+        end
+        target:set("values", "revenant.control", path.join(os.projectdir(), key("controlFile") or path.join("packaging", "control-rnhost")))
+    end)
     add_values("app.resources", path.relative(get_config("rn-bundle"), os.scriptdir()))
     set_values("app.frameworks", "libcxx")
     if os.getenv("RN_WEBKIT") then
@@ -152,9 +160,8 @@ target("RNHost")
         add_values("app.frameworks", "cryptokit", "swift-crypto", "uniformtypeidentifiers")
         set_values("revenant.waive.thumb-interworking", "libswiftDarwin.dylib is checked a second time after it was stripped, because the runtime libraries reach the app both through swift-runtime and through the cryptokit package; the unstripped copies pass the check")
     end
-    set_values("revenant.control", path.join(os.projectdir(), "packaging", "control-rnhost"))
     if os.getenv("RN_BACKPORTS") then
         set_values("revenant.rebind", "RNHost")
     end
-    set_values("revenant.waive.weak-imports", "UIAccessibilityPriority*, UIAccessibilitySpeechAttributeAnnouncementPriority: RCTAccessibilityManager.mm:335 inside @available(iOS 17.0); UITextContentType{Birthdate*,CreditCard*}: RCTTextInputUtils.mm:228 and RCTBaseTextInputView.mm:316 inside @available(iOS 17.0); UITextContentType{DateTime,FlightNumber,ShipmentTrackingNumber}: same files inside @available(iOS 15.0); UITextContentTypeCellular*: same files inside @available(iOS 17.4); UIMenuAutoFill: RCTUITextField.mm:189 and RCTUITextView.mm:318 inside @available(iOS 17.0); preadv, pwritev: folly SysUio.cpp takes the address only inside __builtin_available(iOS 14.0) and otherwise uses preadv_fallback/pwritev_fallback; UIContentSizeCategoryDidChangeNotification, UIContentSizeCategoryNewValueKey, UIApplicationLaunchOptionsUserActivityDictionaryKey, UIApplicationLaunchOptionsUserActivityTypeKey: each use is behind an address-of != NULL test added by rn-spike/patches/ios6-weak-guards.patch")
+    set_values("revenant.waive.weak-imports", "UIAccessibilityPriority*, UIAccessibilitySpeechAttributeAnnouncementPriority: RCTAccessibilityManager.mm:335 inside @available(iOS 17.0); UITextContentType{Birthdate*,CreditCard*}: RCTTextInputUtils.mm:228 and RCTBaseTextInputView.mm:316 inside @available(iOS 17.0); UITextContentType{DateTime,FlightNumber,ShipmentTrackingNumber}: same files inside @available(iOS 15.0); UITextContentTypeCellular*: same files inside @available(iOS 17.4); UIMenuAutoFill: RCTUITextField.mm:189 and RCTUITextView.mm:318 inside @available(iOS 17.0); preadv, pwritev: folly SysUio.cpp takes the address only inside __builtin_available(iOS 14.0) and otherwise uses preadv_fallback/pwritev_fallback; UIContentSizeCategoryDidChangeNotification, UIContentSizeCategoryNewValueKey, UIApplicationLaunchOptionsUserActivityDictionaryKey, UIApplicationLaunchOptionsUserActivityTypeKey: each use is behind an address-of != NULL test added by packages/r/react-native/patches/ios6-weak-guards.patch")
     set_values("revenant.version", "0.1.0")

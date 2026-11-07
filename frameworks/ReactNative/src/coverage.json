@@ -632,7 +632,7 @@
    "native": true,
    "status": "partial",
    "verified": "phone",
-   "note": "Core builds and the app runs on it. Its URL argument conversion is patched in the package (url-convert-ios6.patch: iOS 15 and lower parse with URL(string:), not URLComponents), verified on the phone through expo-sharing. Not yet carried as a package: the host build is the spike's, and its expo-core targets read this package through RN_PKG_DIRS only with the path fix that the paseo-app spike still lacks (its rn-spike/xmake.lua has the reference path). SwiftUI-only Swift files and the FontUtils module are skipped, and the iOS 14 gates in FileSystem are rewritten in staged copies; each is a gap to close in the package."
+   "note": "Core builds and the app runs on it. Its URL argument conversion is patched in the package (url-convert-ios6.patch: iOS 15 and lower parse with URL(string:), not URLComponents), verified on the phone through expo-sharing. Not yet carried as a package: the host build is `isolate.lua`'s, and its expo-core targets read this package through RN_PKG_DIRS, which `isolate.lua build` sets for each package named in `--real`. SwiftUI-only Swift files and the FontUtils module are skipped, and the iOS 14 gates in FileSystem are rewritten in staged copies; each is a gap to close in the package."
   },
   {
    "id": "expo-navigation-bar",

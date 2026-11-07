@@ -13,7 +13,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/inputs.lua m
 local app_config = import("app_config", {rootdir = os.scriptdir(), anonymous = true})
 local json = import("core.base.json")
 
-local INPUTS = {"codegen", "rn-codegen", "rn-src", "rn-headers", "lib-headers", "expo-jsi", "expo-pods", "expo-core", "expo-src", "nitro", "unistyles", "keyboard", "screens", "app-assets", "app-components"}
+local INPUTS = {"codegen", "rn-codegen", "rn-src", "rn-headers", "lib-headers", "expo-jsi", "expo-pods", "expo-core", "expo-src", "nitro", "unistyles", "keyboard", "screens", "app-assets", "app-components", "app-manifest"}
 
 local AGGREGATORS = {"Package.swift", "ReactAppDependencyProvider", "ReactCodegen/ReactCodegen.podspec"}
 
@@ -1012,18 +1012,35 @@ function make_rn_headers(ctx)
     end
 end
 
-function app_optional_components(options)
-    local file = options.manifest or path.join(options.project, "host.json")
-    if not os.isfile(file) then
-        return {}
+function app_manifest(options)
+    local file = options.manifest
+    if file then
+        if not os.isfile(file) then
+            raise("the app manifest %s does not exist: give the application's host.json to --manifest", file)
+        end
+    else
+        file = path.join(options.project, "host.json")
+        if not os.isfile(file) then
+            raise("%s has no host.json: give the application's manifest to --manifest", options.project)
+        end
     end
-    local names = json.decode(io.readfile(file)).optionalComponents or {}
+    return json.decode(io.readfile(file))
+end
+
+function app_optional_components(options)
+    local names = app_manifest(options).optionalComponents or {}
     for _, name in ipairs(names) do
         if type(name) ~= "string" or name == "" or name:find('[",]') then
-            raise("%s: optionalComponents takes component names, not %s", file, tostring(name))
+            raise("optionalComponents of the app manifest takes component names, not %s", tostring(name))
         end
     end
     return names
+end
+
+function make_app_manifest(ctx)
+    local out = path.join(ctx.build, "app-manifest")
+    fresh_directory(out)
+    io.writefile(path.join(out, "host.json"), json.encode(app_manifest(ctx.options)))
 end
 
 local PROVIDER_OPEN = "thirdPartyComponents = @{"
@@ -1073,6 +1090,7 @@ end
 local MAKERS = {
     codegen = make_codegen,
     ["app-components"] = make_app_components,
+    ["app-manifest"] = make_app_manifest,
     ["rn-headers"] = make_rn_headers,
     ["expo-src"] = make_expo_src,
     ["expo-core"] = make_expo_core,

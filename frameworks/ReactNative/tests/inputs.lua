@@ -5,6 +5,7 @@ local byte_less = tool.byte_less
 local xml_text, splash_options = tool.xml_text, tool.splash_options
 local expo_packages, expo_real, expo_subscribers = tool.expo_packages, tool.expo_real, tool.expo_subscribers
 local expo_classes, stub_entries, component_provider, app_optional_components = tool.expo_classes, tool.stub_entries, tool.component_provider, tool.app_optional_components
+local make_app_manifest = tool.make_app_manifest
 
 local DATA = path.join(os.scriptdir(), "data")
 
@@ -92,7 +93,7 @@ local count = 0
 for _ in pairs(everything) do
     count = count + 1
 end
-check("selected chooses every input when none is named", count == 15 and everything["rn-src"] and everything["app-assets"] and everything["app-components"], count)
+check("selected chooses every input when none is named", count == 16 and everything["rn-src"] and everything["app-assets"] and everything["app-components"] and everything["app-manifest"], count)
 
 local ordered = {"EXJSI", "EXJavaScript", "ExpoModulesCore", "_private", "a", "b", "é"}
 local order_ok = true
@@ -157,6 +158,14 @@ check("--real replaces the default with the parity list on top of the base", tab
 check("expo_real marks the packages that the mode builds as real", expo_real(context({}))["expo-font"] and not expo_real(context({}))["expo-audio"]
     and expo_real(context({real = "expo-audio"}))["expo-audio"])
 
+local xmake_base = {}
+for name in (io.readfile(path.join(os.scriptdir(), "..", "src", "expo", "xmake.lua")):match("local EXPO_PARITY_BASE = (%b{})") or ""):gmatch('"([^"]+)"') do
+    table.insert(xmake_base, name)
+end
+local generator_base = expo_packages(context({real = ""}))
+check("the parity base in src/expo/xmake.lua is the one of tools/inputs.lua", #xmake_base > 0 and same_list(xmake_base, generator_base),
+    table.concat(xmake_base, ",") .. " vs " .. table.concat(generator_base, ","))
+
 local subscribers_app = fresh("expo-subscribers")
 local subscriber_ctx = {options = {real = "expo-notifications"}, app = path.join(subscribers_app, "ref", "packages", "app"), ref = path.join(subscribers_app, "ref")}
 for _, package in ipairs(expo_packages(subscriber_ctx)) do
@@ -218,9 +227,21 @@ check("an empty list keeps the provider of the spike", component_provider(provid
 local manifest_app = fresh("app-manifest")
 io.writefile(path.join(manifest_app, "host.json"), '{"optionalComponents": ["RNCWebView", "RNSVGPath"]}')
 check("the app manifest gives the optional components", same_list(app_optional_components({project = manifest_app}), {"RNCWebView", "RNSVGPath"}))
-check("a missing app manifest gives no optional components", #app_optional_components({project = fresh("no-manifest")}) == 0)
+check("a project without host.json is an error, not an empty manifest", fails(function () app_optional_components({project = fresh("no-manifest")}) end))
+check("a named manifest that does not exist is an error", fails(function () app_optional_components({project = manifest_app, manifest = path.join(manifest_app, "missing.json")}) end))
+local named_manifest = fresh("named-manifest")
+io.writefile(path.join(named_manifest, "elsewhere.json"), '{"optionalComponents": ["RNSVGPath"]}')
+check("the named manifest is read instead of the project's host.json", same_list(app_optional_components({project = fresh("no-manifest-2"), manifest = path.join(named_manifest, "elsewhere.json")}), {"RNSVGPath"}))
 local bad_manifest = fresh("bad-manifest")
 io.writefile(path.join(bad_manifest, "host.json"), '{"optionalComponents": ["A\\"B"]}')
+local json = import("core.base.json")
+local manifest_root = fresh("app-manifest-input")
+io.writefile(path.join(manifest_root, "host.json"), '{"bundleId": "org.example.app", "optionalComponents": ["RNCWebView"]}')
+os.mkdir(path.join(manifest_root, "build"))
+make_app_manifest({build = path.join(manifest_root, "build"), options = {project = manifest_root}})
+local written = json.decode(io.readfile(path.join(manifest_root, "build", "app-manifest", "host.json")))
+check("the app-manifest input carries the application's manifest", written.bundleId == "org.example.app" and written.optionalComponents[1] == "RNCWebView", io.readfile(path.join(manifest_root, "build", "app-manifest", "host.json")))
+
 local refused = false
 try {
     function () app_optional_components({project = bad_manifest}) end,

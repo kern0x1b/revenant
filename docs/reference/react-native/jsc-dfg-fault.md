@@ -80,5 +80,5 @@ is small: these are single runs per row, not a rate.
 - Until then, `JSC_useDFGJIT=false` avoids the fault in these runs. Its cost on the steady state is not measured here.
 
 The same injector is documented in [Driving a host by touch](../../guides/react-native/touch.md), which describes the
-revenant copy that reads `/var/tmp/rnhost.cmd`. The spike host of the isolated build reads the application folder's
+revenant copy that reads `/var/tmp/rnhost.cmd`. The host of the isolated build (`src/host`) reads the application folder's
 `rnhost.cmd` instead, so the two copies differ, and the guide does not describe the one used here.

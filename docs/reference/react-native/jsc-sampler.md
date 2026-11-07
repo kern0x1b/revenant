@@ -1,8 +1,8 @@
 # JavaScriptCore startup sampler: method, format and numbers
 
 The sampler is a native thread inside the React Native host that records the program counter and the frame chain of every
-thread, while the host runs the Paseo bundle on JavaScriptCore. It is a local patch of the spike host
-(`rn-spike/host-app`) and is not part of the committed packages. The explanation of what the numbers mean is in
+thread, while the host runs the Paseo bundle on JavaScriptCore. It was a local patch of the spike host
+(`rn-spike/host-app` in paseo-app at e6522b0, removed since) and is not part of the committed packages. The explanation of what the numbers mean is in
 [Where JavaScriptCore spends the start](../../explanation/react-native/jsc-startup.md).
 
 ## Setup
@@ -139,8 +139,8 @@ worklist.
 
 ## Reproducing the run
 
-1. Add a sampler that follows the method above to the spike host: start it from `main` when `rnhost.samp` exists, and add
-   its file to the host target's `add_files` in `xmake.lua`. Then build the host with `engine=jsc` (`isolate.lua build`,
+1. Add a sampler that follows the method above to the host in your isolated copy: start it from `main` when `rnhost.samp` exists, and add
+   its file to the host target's `add_files` in `xmake.lua`. Then build the host (`isolate.lua build`, whose JavaScriptCore is the `webkit-engine` prebuilt by default,
    see [Isolated host build](../../guides/react-native/isolated-build.md)).
 2. Stage and deploy the host with the bundle, then create `rnhost.samp` in its application folder with the window in
    seconds, for example `40`.

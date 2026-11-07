@@ -166,6 +166,10 @@ REVENANT_CACHE=<worktree>/.cache-boot ./xmakew l -P . tools/private_cache.lua <w
 rm -rf -- <worktree>/.cache-boot
 ```
 
+The boot folder keeps only what that run wrote (an `xmake/` folder and a `.scratch-swept` marker), and nothing reads it
+afterwards. Run the `rm` even when the clone fails: a leftover folder is git-ignored (`/.cache-boot/`), so it stays out of commits,
+but it still takes space.
+
 The clone takes the whole of `.cache` except five folders that hold this machine's state: `budget` (the token pool, which a private run takes its tokens from and does not copy), `devices` (which run holds which
 device), `emulator-slots` (the locks that bound how many emulators run at once), `scratch` (the scratch of the tasks running
 in the shared cache) and `sizes` (the measured sizes of the cache's paths, keyed by source path, which would be wrong for the

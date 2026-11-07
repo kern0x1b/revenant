@@ -33,6 +33,22 @@ function failures(opt)
         table.insert(found, "the install with all patches must be the one picked, got " .. tostring(picked))
     end
 
+    local manifest_folder = path.join(os.tmpdir(), "iso-bundle-id-test", "iso-with-manifest")
+    local plain_folder = path.join(os.tmpdir(), "iso-bundle-id-test", "iso-plain")
+    os.tryrm(path.directory(manifest_folder))
+    os.mkdir(path.join(manifest_folder, "build", "app-manifest"))
+    os.mkdir(path.join(plain_folder, "build"))
+    io.writefile(path.join(manifest_folder, "build", "app-manifest", "host.json"), '{"bundleId":"org.example.manifest","pods":["a:b"]}')
+    if isolate.write_bundle_id(manifest_folder, nil) ~= "org.example.manifest" then
+        table.insert(found, "without --bundle-id a copy keeps the bundleId of its manifest")
+    end
+    if isolate.write_bundle_id(manifest_folder, "org.example.given") ~= "org.example.given" or not io.readfile(path.join(manifest_folder, "build", "app-manifest", "host.json")):find('"bundleId":"org.example.given"', 1, true) then
+        table.insert(found, "--bundle-id must win over the manifest and be written into it")
+    end
+    if isolate.write_bundle_id(plain_folder, nil) ~= "org.revenant.rnhost.iso-plain" then
+        table.insert(found, "a folder without a manifest takes the bundle id of its name")
+    end
+
     local env = isolate.build_environment({folder = "/f", cache = "/k", checkout = "/w", engine = "/e", swiftui = "/s", backports = "/b", real = ""})
     if env.RN_EXPO_REAL ~= nil or env.RN_SRC ~= "/f/build/rn-src" or env.REVENANT_CACHE ~= "/k" or env.REVENANT_PREBUILT_ONLY ~= "1" then
         table.insert(found, "the environment must name the folder's own sources and cache, and an empty --real must set no RN_EXPO_REAL")

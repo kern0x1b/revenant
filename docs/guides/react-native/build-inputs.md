@@ -1,7 +1,7 @@
 # Making the build inputs of the React Native host
 
 The host build reads a folder of inputs, `build/`, that used to be made by hand and by scripts of the spike project
-(`paseo-app/rn-spike`). `frameworks/ReactNative/tools/inputs.lua` makes them from the revenant packages `react-native`,
+(`paseo-app/rn-spike`, removed from paseo-app in f30412e and 5321a86; its last state is at e6522b0). `frameworks/ReactNative/tools/inputs.lua` makes them from the revenant packages `react-native`,
 `react-native-codegen`, `react-native-nitro-modules`, `expo-*` and the application's `node_modules`. One command makes all of
 them.
 
@@ -48,16 +48,20 @@ the reference path before the hash is taken, so a folder made elsewhere is compa
 more string on the built side.
 
 The spike's build read its packages from the shared cache of the checkout, and a worktree's build reads its private cache. The
-store paths in `expo-jsi` (`libcxx.rsp`) are then rewritten to the shared cache:
+store paths in `expo-jsi` (`libcxx.rsp`) are then rewritten to the shared cache. `<reference build>` is a folder of inputs made for
+the same application, such as the spike's `build/` at paseo-app e6522b0:
 
 ```sh
-./xmakew l -P . frameworks/ReactNative/tools/inputs.lua compare paseo-app/build <project>/build --only expo-jsi \
+./xmakew l -P . frameworks/ReactNative/tools/inputs.lua compare <reference build> <project>/build --only expo-jsi \
     --rewrite "<worktree>/.cache-private=<checkout>/.cache"
 ```
 
 The comparison exits with an error when an input differs, and prints `same (N entries)` for each input that does not.
 
 ## Status
+
+The notes compare each input with the spike's `build/` at paseo-app e6522b0, which is no longer in the repository; they record what
+matched then.
 
 | Input | State |
 | --- | --- |
