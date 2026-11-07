@@ -48,4 +48,22 @@ function main()
     arguments, notes = host.framework_retargets(linked:gsub("UserNotifications", "Other"), weak, defined, {"libUserNotificationsBackports"})
     expect("a framework the executable does not link is left alone", #arguments == 0 and #notes == 0,
         "got " .. table.concat(arguments, " ") .. " notes " .. table.concat(notes, "; "))
+
+    local listing = "RNHost-probe_2026-11-07-170000_iPhone.crash\nRNHost-other_2026-11-07.crash\nRNHost-probe_2026-11-06.plist\n"
+        .. "RNHost-probe2_2026-11-05.crash\nnotes.txt\n\n  RNHost-probe_2026-11-08.ips  \n"
+    local reports = host.crash_reports(listing, "RNHost-probe")
+    expect("diagnostics takes the crash reports of its own executable only, in name order",
+        table.concat(reports, ",") == "RNHost-probe_2026-11-06.plist,RNHost-probe_2026-11-07-170000_iPhone.crash,RNHost-probe_2026-11-08.ips",
+        "got " .. table.concat(reports, ","))
+    expect("a listing without crash reports gives none", #host.crash_reports("", "RNHost-probe") == 0, "got a report")
+
+    local plist = path.join(os.tmpdir(), "host-install-test-" .. os.getpid() .. ".plist")
+    io.writefile(plist, '<?xml version="1.0" encoding="UTF-8"?>\n<plist version="1.0"><dict>\n'
+        .. '<key>CFBundleShortVersionString</key>\n<string>0.1.0</string>\n<key>CFBundleVersion</key>\n<string>42</string>\n</dict></plist>\n')
+    local short = host.plist_value(plist, "CFBundleShortVersionString")
+    local build = host.plist_value(plist, "CFBundleVersion")
+    local absent = host.plist_value(plist, "CFBundleIdentifier")
+    os.rm(plist)
+    expect("diagnostics reads a key of a plist, and a missing key gives nothing", short == "0.1.0" and build == "42" and absent == nil,
+        "got " .. tostring(short) .. " " .. tostring(build) .. " " .. tostring(absent))
 end

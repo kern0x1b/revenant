@@ -2,7 +2,8 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua deploy --archive FILE --bundle-id ID [--bundle FILE] [--conf KEY=VALUE,...]
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua launch --bundle-id ID
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stop --bundle-id ID
-  stage   makes DIR/<app name>.app and DIR/host.tgz from a built host: it adds the manifest folder (EXConstants.bundle from app_config.lua),
+       ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua diagnostics --bundle-id ID [--output DIR]
+  stage  makes DIR/<app name>.app and DIR/host.tgz from a built host: it adds the manifest folder (EXConstants.bundle from app_config.lua),
           the backports libraries in DIR of --backports, retargets the library references from /usr/lib/revenant/org.revenant.backports
           to @executable_path/Frameworks, and signs every Mach-O file with ldid. With --bundle-id it refuses a built app whose
           CFBundleIdentifier is another id (rebuild it from a copy made with isolate.lua copy --bundle-id), and it renames the
@@ -13,7 +14,11 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
           Both files are root-owned and read-only for everything else, which is what the host checks before it reads them. The
           host's output goes to /var/tmp/<last part of the id>/, a folder of the app's user. It removes nothing of another bundle id.
   launch  wakes the phone and has SpringBoard start the app of the id.
-  stop    ends the running process of the app of the id and of no other id: it finds the process by the launchd label of the app.]]
+  stop    ends the running process of the app of the id and of no other id: it finds the process by the launchd label of the app.
+  diagnostics  copies what the phone keeps of the app of the id into DIR (build/diagnostics/<last part of the id> by default): the app's
+          version, the iOS version, the launchd state, the crash reports of RNHost-<last part of the id> (in crash/), the host's
+          rnhost.log and a screenshot (screen.png), with a summary in diagnostics.txt. It changes nothing on the phone except one
+          screenshot file in /tmp.]]
 
 LIBRARIES = {"libFoundationBackports", "libCoreTextBackports", "libUIKitBackports", "libUserNotificationsBackports", "libCoreGraphicsBackports",
              "libGraphicsBackports", "libCoreFoundationBackports", "libSystemBackports", "libIOSurfaceBackports", "libWebKitBackports", "libMapKitBackports",
@@ -296,6 +301,70 @@ function stop(options)
     device.run(settings, stop_command(options["bundle-id"]))
 end
 
+local CRASH_FOLDER = "/var/mobile/Library/Logs/CrashReporter"
+local SYSTEM_VERSION = "/System/Library/CoreServices/SystemVersion.plist"
+
+function plist_value(file, key)
+    return try { function () return os.iorunv("plutil", {"-extract", key, "raw", "-o", "-", file}):trim() end }
+end
+
+function crash_reports(listing, executable)
+    local names = {}
+    for line in (listing or ""):gmatch("[^\n]+") do
+        local name = line:trim()
+        local after = name:sub(#executable + 1, #executable + 1)
+        if name:sub(1, #executable) == executable and (after == "_" or after == ".") and (name:endswith(".crash") or name:endswith(".plist") or name:endswith(".ips")) then
+            table.insert(names, name)
+        end
+    end
+    table.sort(names)
+    return names
+end
+
+function diagnostics(options)
+    if not options["bundle-id"] then
+        raise("diagnostics needs \"--bundle-id\"")
+    end
+    local device, settings, holder = phone()
+    local id = options["bundle-id"]
+    local output = path.absolute(options.output or path.join("build", "diagnostics", app_name(id)))
+    os.mkdir(path.join(output, "crash"))
+    local lines = {}
+    local function fetch(remote, file)
+        local local_file = path.join(output, file)
+        if device.fetch(settings, remote, local_file) then
+            return local_file
+        end
+        table.insert(lines, "missing " .. remote)
+    end
+    local info = fetch(app_folder(holder, id) .. "/Info.plist", "app-Info.plist")
+    if info then
+        table.insert(lines, "bundle " .. (plist_value(info, "CFBundleIdentifier") or "?"))
+        table.insert(lines, "app version " .. (plist_value(info, "CFBundleShortVersionString") or "?") .. " build " .. (plist_value(info, "CFBundleVersion") or "?"))
+    end
+    local system = fetch(SYSTEM_VERSION, "system-version.plist")
+    if system then
+        table.insert(lines, "ios " .. (plist_value(system, "ProductVersion") or "?") .. " build " .. (plist_value(system, "ProductBuildVersion") or "?"))
+    end
+    local state = device.run(settings, "launchctl list | grep 'UIKitApplication:" .. id .. "\\[' ; true", {capture = true}):trim()
+    table.insert(lines, "launchctl " .. (state ~= "" and state or "not running"))
+    local listing = device.run(settings, "ls -1 " .. CRASH_FOLDER .. " 2>/dev/null ; true", {capture = true})
+    local reports = crash_reports(listing, executable_name(id))
+    table.insert(lines, #reports .. " crash reports of " .. executable_name(id))
+    for _, report in ipairs(reports) do
+        fetch(path.join(CRASH_FOLDER, report), path.join("crash", report))
+    end
+    fetch(run_folder(id) .. "/rnhost.log", "rnhost.log")
+    local shot = "/tmp/diagnostics-" .. app_name(id) .. ".png"
+    if try { function () device.run(settings, "/usr/libexec/revenant-shot " .. shot); return true end } then
+        fetch(shot, "screen.png")
+    else
+        table.insert(lines, "no screenshot: revenant-shot failed")
+    end
+    io.writefile(path.join(output, "diagnostics.txt"), table.concat(lines, "\n") .. "\n")
+    print("diagnostics of " .. id .. " in " .. output)
+end
+
 function main(...)
     local shared = import("@addon.revenant.member", {anonymous = true})
     local options, words = shared.arguments({...}, {app = "value", backports = "value", manifest = "value", output = "value", archive = "value",
@@ -311,6 +380,8 @@ function main(...)
         launch(options)
     elseif command == "stop" then
         stop(options)
+    elseif command == "diagnostics" then
+        diagnostics(options)
     else
         print(USAGE)
     end
