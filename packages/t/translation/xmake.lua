@@ -1,6 +1,6 @@
 package("translation")
     set_homepage("https://github.com/kern0x1b/revenant/tree/main/frameworks/Backports")
-    set_description("The Translation framework's Swift module for armv7 iOS 6 as one dylib a port writes `import Translation` for: translationPresentation(isPresented:text:), declared for iOS 17.4 and later and compile-only, so it presents no translation sheet.")
+    set_description("The Translation framework's Swift module for armv7 iOS 6 as one dylib a port writes `import Translation` for: translationPresentation(isPresented:text:attachmentAnchor:arrowEdge:replacementAction:), declared as the SDK declares it for iOS 17.4 and later; the OS has no translation service, so it presents nothing and clears the binding.")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
     add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", type = "string"})
