@@ -79,6 +79,11 @@ local AREAS = {
         },
     },
     {
+        name = "iOS 8 accessibility container elements",
+        sources = {"NSObject+AccessibilityElements8.m"},
+        members = {"-[NSObject accessibilityElements]", "-[NSObject setAccessibilityElements:]"},
+    },
+    {
         name = "iOS 8 and 9 members of existing classes",
         sources = {"RevenantWeak.m", "NSLayoutConstraint+Getter8.m", "NSObject+InterfaceBuilder8.m", "UIAlertAction+Getter8.m", "UIApplication+Getter8.m",
                    "UIDocument+UserActivity8.m", "UIImage+Asset8.m", "UIImageAsset.m", "UILocalNotification+Category8.m", "UISearchController+Getter8.m",

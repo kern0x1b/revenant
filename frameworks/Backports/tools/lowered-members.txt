@@ -23534,6 +23534,7 @@ member NSObject -accessibilityAttributedPageContent
 member NSObject -accessibilityAttributedUserInputLabels
 member NSObject -accessibilityAttributedValue
 member NSObject -accessibilityCustomActions
+member NSObject -accessibilityElements
 member NSObject -accessibilityRespondsToUserInteraction
 member NSObject -accessibilityTextualContext
 member NSObject -accessibilityUserInputLabels
@@ -23547,6 +23548,7 @@ member NSObject -setAccessibilityAttributedLabel:
 member NSObject -setAccessibilityAttributedUserInputLabels:
 member NSObject -setAccessibilityAttributedValue:
 member NSObject -setAccessibilityCustomActions:
+member NSObject -setAccessibilityElements:
 member NSObject -setAccessibilityRespondsToUserInteraction:
 member NSObject -setAccessibilityTextualContext:
 member NSObject -setAccessibilityUserInputLabels:

@@ -1,8 +1,10 @@
 local lowered = import("@addon.revenant.apple.lowered", {anonymous = true})
 local swift = import("@addon.revenant.apple.swift", {anonymous = true})
 local workspace = import("@addon.revenant.workspace", {anonymous = true})
+local sdkfiles = import("sdk", {rootdir = path.absolute(path.join(os.scriptdir(), "..", "tools")), anonymous = true})
 local backports = path.absolute(path.join(os.scriptdir(), ".."))
 local fixture = path.join(backports, "tests", "uikit_availability", "main.swift")
+local container = path.join(backports, "tests", "uikit_availability", "Container")
 
 function main()
     local runtime = os.getenv("REVENANT_SWIFT_RUNTIME")
@@ -11,9 +13,12 @@ function main()
     assert(compiler and compiler ~= "", "REVENANT_SWIFT_COMPILER is unset: run this through the swift_backports_tests target")
     local sdk = workspace.sdk()
     local out = workspace.run("backports-tests", "UIKitAvailability")
+    os.vrunv(compiler, {"-typecheck", "-target", "arm64-apple-ios" .. sdkfiles.sdk_version(sdk), "-sdk", sdk, "-I", container,
+                        "-module-cache-path", path.join(out, "sdk-modules"), "-module-name", "UIKitAvailabilitySDK",
+                        "-parse-as-library", "-swift-version", "5", fixture})
     local vfs = lowered.overlay(sdk, path.join(out, "overlay"))
     local flags = swift.runtime_flags({architecture = "armv7", deployment = "6.0", sdk = sdk,
                                        resources = path.join(runtime, "lib", "swift"), module = "UIKitAvailability", optimize = "none"})
-    table.join2(flags, {"-vfsoverlay", vfs, "-module-cache-path", path.join(out, "modules"), "-typecheck", fixture})
+    table.join2(flags, {"-vfsoverlay", vfs, "-I", container, "-module-cache-path", path.join(out, "modules"), "-swift-version", "5", "-typecheck", fixture})
     os.vrunv(compiler, flags)
 end
