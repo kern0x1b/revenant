@@ -43,6 +43,29 @@ function folder_is_valid(folder)
     return not (folder:find("[Tt]est") or folder:find("Example"))
 end
 
+function input_names()
+    return INPUTS
+end
+
+function missing_input(folder)
+    if not os.isfile(path.join(folder, "xmake.lua")) then
+        return "xmake.lua"
+    end
+    for _, item in ipairs(INPUTS) do
+        if not os.exists(path.join(folder, "build", item)) then
+            return path.join("build", item)
+        end
+    end
+    return nil
+end
+
+function check_copy(folder)
+    local missing = missing_input(folder)
+    if missing then
+        raise("%s is not a complete copy made by copy: %s is missing, so nothing is built", folder, missing)
+    end
+end
+
 local ENRICHED_MARKDOWN = {name = "react-native-enriched-markdown", version = "1.2.0-nightly-20261014-766fc0e67"}
 
 function app_manifest_file(folder)
@@ -293,6 +316,7 @@ end
 
 function build(folder, cache, options)
     folder = path.absolute(folder)
+    check_copy(folder)
     local shared = options.shared or path.join(os.getenv("HOME"), "Git", "projects", "ios", "revenant", ".cache")
     local ci_backports = path.join(shared, "scratch", "rn-swift", "ci-backports", "libWebKitBackports.dylib")
     local pkgdirs = {ENRICHED_MARKDOWN.name .. "=" .. install_recipe(folder, path.absolute(cache), ENRICHED_MARKDOWN.name, ENRICHED_MARKDOWN.version)}

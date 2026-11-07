@@ -130,5 +130,34 @@ function failures(opt)
         table.insert(found, "a command's status is 0 when it succeeds and 1 when it fails, never nil")
     end
     os.vrunv("rm", {"-rf", rnbase})
+
+    local copies = os.iorunv("mktemp", {"-d"}):trim()
+    local bare = path.join(copies, "bare")
+    os.mkdir(bare)
+    if isolate.missing_input(bare) ~= "xmake.lua" then
+        table.insert(found, "a folder without xmake.lua is no copy, and the missing file is named")
+    end
+    local whole = path.join(copies, "whole")
+    os.mkdir(path.join(whole, "build"))
+    io.writefile(path.join(whole, "xmake.lua"), "-- whole\n")
+    for _, item in ipairs(isolate.input_names()) do
+        os.mkdir(path.join(whole, "build", item))
+    end
+    if isolate.missing_input(whole) ~= nil then
+        table.insert(found, "a copy with every input is complete")
+    end
+    os.vrunv("rm", {"-rf", path.join(whole, "build", "nitro")})
+    if isolate.missing_input(whole) ~= path.join("build", "nitro") then
+        table.insert(found, "a copy without one input names that input")
+    end
+    local refused
+    try {
+        function () isolate.build(bare, path.join(copies, "cache"), {}) end,
+        catch { function (errors) refused = tostring(errors) end }
+    }
+    if not refused or refused:find("xmake.lua", 1, true) == nil or refused:find("nothing is built", 1, true) == nil then
+        table.insert(found, "build refuses a folder that is no copy before it runs xmake, and names the missing file")
+    end
+    os.vrunv("rm", {"-rf", copies})
     return found
 end
