@@ -265,20 +265,26 @@ static void revenant_add_properties(Class cls, const struct revenant_list *list)
     }
 }
 
+static int revenant_has_ivars(Class cls)
+{
+    unsigned count = 0;
+    Ivar *ivars = class_copyIvarList(cls, &count);
+    free(ivars);
+    return count != 0;
+}
+
 static void revenant_reparent(Class proxy, Class release)
 {
-    Class *words = (Class *)(void *)proxy;
-    Class *meta = (Class *)(void *)object_getClass((id)proxy);
-    Class superclass = words[1], metasuperclass = meta[1];
-    words[1] = release;
-    meta[1] = object_getClass((id)release);
-    objc_lookUpClass(class_getName(proxy));
-    if (class_getSuperclass(proxy) == release && class_getInstanceSize(proxy) == class_getInstanceSize(release))
-        return;
-    words[1] = superclass;
-    meta[1] = metasuperclass;
-    asl_log(NULL, NULL, ASL_LEVEL_ERR, "backports: %s was laid out before the library's loader ran, so it stays a subclass of NSObject and a subclass of %s does not inherit %s",
-            class_getName(proxy), class_getName(release), class_getName(release));
+    if (!revenant_has_ivars(proxy)) {
+        objc_lookUpClass(class_getName(proxy));
+        Class superclass = class_getSuperclass(proxy);
+        class_setSuperclass(proxy, release);
+        if (class_getSuperclass(proxy) == release && class_getInstanceSize(proxy) == class_getInstanceSize(release))
+            return;
+        class_setSuperclass(proxy, superclass);
+    }
+    asl_log(NULL, NULL, ASL_LEVEL_ERR, "backports: %s stays a subclass of its own superclass, because it declares instance variables or its instance size differs from %s, so a subclass of %s does not inherit %s",
+            class_getName(proxy), class_getName(release), class_getName(release), class_getName(release));
 }
 
 static unsigned revenant_method_count(Class cls)
