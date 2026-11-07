@@ -17,6 +17,23 @@ local function refusal(check)
     return message
 end
 
+local function word(value)
+    return string.char(value % 256, math.floor(value / 256) % 256, math.floor(value / 65536) % 256, math.floor(value / 16777216) % 256)
+end
+
+local function dylib_command(command, name, current, compatibility)
+    local text = name .. "\0"
+    while #text % 4 ~= 0 do
+        text = text .. "\0"
+    end
+    return word(command) .. word(24 + #text) .. word(24) .. word(2) .. word(current) .. word(compatibility) .. text
+end
+
+local function macho(commands)
+    local body = table.concat(commands)
+    return word(0xFEEDFACE) .. word(12) .. word(9) .. word(6) .. word(#commands) .. word(#body) .. word(0) .. body
+end
+
 function main()
     local value = os.iorunv("plutil", {"-extract", "aps-environment", "raw", "-o", "-", ENTITLEMENTS}):trim()
     expect("the host entitlements declare aps-environment", value == "development", "aps-environment is " .. value)
@@ -67,4 +84,29 @@ function main()
     expect("two load commands for one library fail the stage with the library named",
         refused ~= nil and refused:find("RNHost has two load commands for " .. sdk, 1, true) ~= nil,
         "message " .. tostring(refused))
+
+    local bundled = "@executable_path/Frameworks/libUserNotificationsBackports.dylib"
+    local executable = macho({dylib_command(0x80000018, bundled, 65536, 65536)})
+    local library = {[bundled] = {current = 0, compatibility = 0}}
+    local fixes = host.version_fixes(executable, library)
+    local synced = host.apply_version_fixes(executable, fixes)
+    local record = host.dylib_records(synced)[1]
+    expect("a load command takes the versions of the bundled library it points to",
+        #fixes == 2 and record.name == bundled and record.compatibility == 0 and record.current == 0,
+        "got " .. #fixes .. " fixes, compatibility " .. tostring(record.compatibility) .. ", current " .. tostring(record.current))
+    expect("a load command with the library's versions passes the version check",
+        refusal(function () host.check_load_versions("RNHost", synced, library) end) == nil,
+        "the check refused it: " .. tostring(refusal(function () host.check_load_versions("RNHost", synced, library) end)))
+
+    local above = {[bundled] = {current = 65536, compatibility = 131072}}
+    local raised = host.apply_version_fixes(executable, host.version_fixes(executable, above))
+    local message = refusal(function () host.check_load_versions("RNHost", raised, above) end)
+    expect("a bundled library whose compatibility version is above its current version fails the stage with both named",
+        message ~= nil and message:find("RNHost loads " .. bundled, 1, true) ~= nil and message:find("2.0.0", 1, true) ~= nil and message:find("1.0.0", 1, true) ~= nil,
+        "message " .. tostring(message))
+
+    local system = macho({dylib_command(0x0C, "/usr/lib/libSystem.B.dylib", 65536, 65536)})
+    expect("a load command to a system library is left alone",
+        #host.version_fixes(system, library) == 0 and refusal(function () host.check_load_versions("RNHost", system, library) end) == nil,
+        "the system library's load command was changed or refused")
 end
