@@ -135,4 +135,56 @@ function main()
         refusal(function () host.screenshot_removal("/tmp/screenshot.png") end) ~= nil
             and refusal(function () host.screenshot_removal("/tmp/diagnostics-../../var/x.png") end) ~= nil,
         "a path outside the diagnostics screenshots was accepted")
+
+    local base = os.iorunv("mktemp", {"-d"}):trim()
+    local names = {"libFoundationBackports", "libCoreTextBackports", "libUIKitBackports", "libUserNotificationsBackports", "libCoreGraphicsBackports",
+                   "libGraphicsBackports", "libCoreFoundationBackports", "libSystemBackports", "libIOSurfaceBackports", "libWebKitBackports", "libMapKitBackports",
+                   "libCoreLocationBackports", "libSecurityBackports", "libContactsBackports", "libLocalAuthenticationBackports", "libTLSBackports"}
+    local partial = path.join(base, "partial")
+    os.mkdir(partial)
+    for _, name in ipairs(names) do
+        if name ~= "libSecurityBackports" and name ~= "libTLSBackports" then
+            io.writefile(path.join(partial, name .. ".dylib"), "")
+        end
+    end
+    expect("a folder's Backports libraries are read as they are", #host.backports_libraries(partial) == 14,
+        "got " .. #host.backports_libraries(partial))
+
+    local otool = "\t/usr/lib/revenant/org.revenant.backports/libMapKitBackports.dylib (compatibility version 1.0.0, current version 1.0.0)\n"
+        .. "\t/usr/lib/revenant/org.revenant.backports/libTLSBackports.dylib (compatibility version 1.0.0, current version 1.0.0)\n"
+        .. "\t/System/Library/Frameworks/UIKit.framework/UIKit (compatibility version 1.0.0, current version 1.0.0)\n"
+    local lacking = host.missing_backports(otool, {"libMapKitBackports"})
+    expect("stage names each Backports library the host loads and the folder lacks",
+        #lacking == 1 and lacking[1] == "libTLSBackports", "got " .. table.concat(lacking, ", "))
+    expect("a host whose Backports libraries the folder carries lacks none",
+        #host.missing_backports(otool, {"libMapKitBackports", "libTLSBackports"}) == 0, "a library was named")
+
+    local layout = path.join("share", "root", "usr", "lib", "revenant", "org.revenant.backports")
+    local store = path.join(base, "store")
+    local older, newer = path.join(base, "generation-a"), path.join(base, "generation-b")
+    local key, other = "a800f513dca84e78a72a5c1eb2da98e9", "d50b2a6f3c1e4b7a9d8e0f123456789a"
+    os.mkdir(path.join(older, layout))
+    os.mkdir(path.join(newer, layout))
+    for _, name in ipairs(names) do
+        io.writefile(path.join(older, layout, name .. ".dylib"), "")
+    end
+    io.writefile(path.join(newer, layout, "libFoundationBackports.dylib"), "")
+    os.mkdir(store)
+    os.vrunv("ln", {"-s", older, path.join(store, key)})
+    os.vrunv("ln", {"-s", newer, path.join(store, other)})
+    os.vrunv("touch", {"-t", "203001010000", newer})
+    expect("a store generation is named by its key, not by the newest modification",
+        host.backports_generation(store, key) == path.join(store, key, layout)
+            and #host.backports_libraries(host.backports_generation(store, key)) == 16,
+        "got " .. host.backports_generation(store, key))
+    expect("the generation of another key is read on its own, with the libraries it carries",
+        #host.backports_libraries(host.backports_generation(store, other)) == 1,
+        "got " .. #host.backports_libraries(host.backports_generation(store, other)))
+    expect("a key that no generation has is refused",
+        refusal(function () host.backports_generation(store, "0123456789abcdef0123456789abcdef") end) ~= nil,
+        "a missing key was accepted")
+    expect("a key that is not hexadecimal is refused, so no path leaves the store",
+        refusal(function () host.backports_generation(store, "../generation-a") end) ~= nil,
+        "a path outside the store was accepted")
+    os.vrunv("rm", {"-rf", base})
 end

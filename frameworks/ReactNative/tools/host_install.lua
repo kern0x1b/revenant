@@ -1,10 +1,11 @@
-local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stage --app BUILT.app --backports DIR --manifest DIR --output DIR [--bundle-id ID]
+local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stage --app BUILT.app --backports DIR|STORE [--key BUILDHASH] --manifest DIR --output DIR [--bundle-id ID]
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua deploy --archive FILE --bundle-id ID [--bundle FILE] [--conf KEY=VALUE,...]
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua launch --bundle-id ID
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stop --bundle-id ID
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua diagnostics --bundle-id ID [--output DIR]
   stage  makes DIR/<app name>.app and DIR/host.tgz from a built host: it adds the manifest folder (EXConstants.bundle from app_config.lua),
-          the backports libraries in DIR of --backports, retargets the library references from /usr/lib/revenant/org.revenant.backports
+          the backports libraries in DIR of --backports (with --key, the generation of that store which the key names; no other
+          generation is picked), refusing a built host that loads a library DIR lacks and naming each one, retargets the library references from /usr/lib/revenant/org.revenant.backports
           to @executable_path/Frameworks, and signs every Mach-O file with ldid. With --bundle-id it refuses a built app whose
           CFBundleIdentifier is another id (rebuild it from a copy made with isolate.lua copy --bundle-id), and it renames the
           executable to RNHost-<last part of the id> (and CFBundleExecutable with it), so that no two installed hosts share a process name.
@@ -24,12 +25,26 @@ LIBRARIES = {"libFoundationBackports", "libCoreTextBackports", "libUIKitBackport
              "libGraphicsBackports", "libCoreFoundationBackports", "libSystemBackports", "libIOSurfaceBackports", "libWebKitBackports", "libMapKitBackports",
              "libCoreLocationBackports", "libSecurityBackports", "libContactsBackports", "libLocalAuthenticationBackports", "libTLSBackports"}
 
+local BACKPORTS_SUBDIR = path.join("share", "root", "usr", "lib", "revenant", "org.revenant.backports")
+
+function backports_generation(store, key)
+    if not key:match("^%x+$") then
+        raise("--key must be the buildhash of the backports package, in hexadecimal, not %s", key)
+    end
+    local generation = path.join(path.absolute(store), key)
+    if not os.isdir(generation) then
+        raise("%s holds no generation for key %s", store, key)
+    end
+    return path.join(generation, BACKPORTS_SUBDIR)
+end
+
 function backports_libraries(folder)
     if not folder then
         return LIBRARIES
     end
+    local directory = path.absolute(folder)
     local found = {}
-    for _, file in ipairs(os.files(path.join(path.absolute(folder), "lib*Backports.dylib"))) do
+    for _, file in ipairs(os.files(path.join(directory, "lib*Backports.dylib"))) do
         table.insert(found, path.basename(file))
     end
     if #found == 0 then
@@ -37,6 +52,20 @@ function backports_libraries(folder)
     end
     table.sort(found)
     return found
+end
+
+function missing_backports(otool_text, libraries)
+    local have, missing = {}, {}
+    for _, name in ipairs(libraries) do
+        have[name] = true
+    end
+    for line in otool_text:gmatch("[^\n]+") do
+        local name = line:find("/usr/lib/revenant/org.revenant.backports/", 1, true) and line:match("org%.revenant%.backports/([^/%s]+)%.dylib")
+        if name and not have[name] and not table.contains(missing, name) then
+            table.insert(missing, name)
+        end
+    end
+    return missing
 end
 
 local OLD_PREFIX = "/usr/lib/revenant/org.revenant.backports"
@@ -306,6 +335,12 @@ function stage(options)
             raise(problem)
         end
     end
+    local backports_folder = options.key and backports_generation(options.backports, options.key) or options.backports
+    local libraries = backports_libraries(backports_folder)
+    local lacking = missing_backports(os.iorunv("otool", {"-L", path.join(built, path.basename(built))}), libraries)
+    if #lacking > 0 then
+        raise("%s loads Backports libraries that %s does not carry: %s, so the device would load its own copies", built, backports_folder, table.concat(lacking, ", "))
+    end
     local output = path.absolute(options.output)
     local target = path.join(output, path.filename(built))
     os.tryrm(output)
@@ -315,10 +350,9 @@ function stage(options)
     local ldid = os.iorunv("sh", {"-c", "ls \"$1\"/xmake-global/.xmake/packages/l/ldid/*/*/bin/ldid | head -1", "sh", os.getenv("REVENANT_CACHE") or ""}):trim()
     local frameworks = path.join(target, "Frameworks")
     os.mkdir(frameworks)
-    local libraries = backports_libraries(options.backports)
     for _, name in ipairs(libraries) do
         local library = path.join(frameworks, name .. ".dylib")
-        os.vrunv("cp", {path.join(path.absolute(options.backports), name .. ".dylib"), library})
+        os.vrunv("cp", {path.join(path.absolute(backports_folder), name .. ".dylib"), library})
         os.vrunv("chmod", {"755", library})
         os.vrunv("install_name_tool", {"-id", NEW_PREFIX .. "/" .. name .. ".dylib", library})
     end
@@ -506,7 +540,7 @@ end
 
 function main(...)
     local shared = import("@addon.revenant.member", {anonymous = true})
-    local options, words = shared.arguments({...}, {app = "value", backports = "value", manifest = "value", output = "value", archive = "value",
+    local options, words = shared.arguments({...}, {app = "value", backports = "value", key = "value", manifest = "value", output = "value", archive = "value",
                                                     ["bundle-id"] = "value", bundle = "value", conf = "value", help = "switch"})
     local command = words[1]
     if options.help then
