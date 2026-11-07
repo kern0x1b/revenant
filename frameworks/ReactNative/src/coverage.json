@@ -488,7 +488,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "Does not build for iOS 6: the Swift compile fails because PHPickerResult and PHPickerViewControllerDelegate are not in scope and MissingCurrentViewControllerException is declared twice (build log of expo-image-picker 57.0.20). Not built; the package is at packages/e/expo-image-picker, unpatched. The Photos types it uses are in the Backports: PHPickerViewController (iOS 14) presents UIImagePickerController, which iOS 6 has, so picking is single-select; PHAssetResourceManager, UTType and NSItemProvider file loading are backported too. Multi-select is the part iOS 6 cannot do: UIImagePickerController picks one item, and it stays partial once built."
+   "note": "Does not build for iOS 6: the Swift compile fails because PHPickerResult and PHPickerViewControllerDelegate are not in scope and MissingCurrentViewControllerException is declared twice (build log of expo-image-picker 57.0.20). Not built; the package is at packages/e/expo-image-picker, unpatched. Backports has the Objective-C classes of those Photos types (src/Photos), and PHPickerViewController14 presents UIImagePickerController, which iOS 6 has, so picking is single-select; the Swift compile of ImagePickerHandler.swift still does not see PHPickerResult or PHPickerViewControllerDelegate, so the package does not build yet. PHAssetResourceManager, UTType and NSItemProvider file loading are backported too. Multi-select is the part iOS 6 cannot do: UIImagePickerController picks one item, and it stays partial once built."
   },
   {
    "id": "expo-intent-launcher",
