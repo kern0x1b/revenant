@@ -11,6 +11,12 @@ local function expect(name, condition, detail)
     print(name .. ": passes")
 end
 
+local function refusal(check)
+    local message
+    try { check, catch { function (errors) message = tostring(errors) end } }
+    return message
+end
+
 function main()
     local value = os.iorunv("plutil", {"-extract", "aps-environment", "raw", "-o", "-", ENTITLEMENTS}):trim()
     expect("the host entitlements declare aps-environment", value == "development", "aps-environment is " .. value)
@@ -48,4 +54,17 @@ function main()
     arguments, notes = host.framework_retargets(linked:gsub("UserNotifications", "Other"), weak, defined, {"libUserNotificationsBackports"})
     expect("a framework the executable does not link is left alone", #arguments == 0 and #notes == 0,
         "got " .. table.concat(arguments, " ") .. " notes " .. table.concat(notes, "; "))
+
+    local repeated = host.duplicate_install_names(linked .. linked)
+    expect("a library loaded by two load commands is found", #repeated == 1 and repeated[1] == sdk,
+        "got " .. table.concat(repeated, ", "))
+    expect("a library loaded once is not reported", #host.duplicate_install_names(linked) == 0,
+        "got " .. table.concat(host.duplicate_install_names(linked), ", "))
+
+    local refused = refusal(function () host.check_install_names("RNHost", linked) end)
+    expect("a single load command passes the stage check", refused == nil, "the check refused one load command: " .. tostring(refused))
+    refused = refusal(function () host.check_install_names("RNHost", linked .. linked) end)
+    expect("two load commands for one library fail the stage with the library named",
+        refused ~= nil and refused:find("RNHost has two load commands for " .. sdk, 1, true) ~= nil,
+        "message " .. tostring(refused))
 end

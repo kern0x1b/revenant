@@ -127,6 +127,28 @@ function framework_retargets(otool_text, imports_text, exports, library_names)
     return arguments, notes
 end
 
+function duplicate_install_names(otool_text)
+    local count, duplicates = {}, {}
+    for line in otool_text:gmatch("[^\n]+") do
+        local name = line:match("^%s+(%S+) %(")
+        if name then
+            count[name] = (count[name] or 0) + 1
+            if count[name] == 2 then
+                table.insert(duplicates, name)
+            end
+        end
+    end
+    return duplicates
+end
+
+function check_install_names(file, otool_text)
+    local duplicates = duplicate_install_names(otool_text)
+    if #duplicates > 0 then
+        raise("%s has two load commands for %s after the retarget, so dyld would load that library twice: link each backports library once in src/host/xmake.lua (a framework the device lacks is linked only by its weak SDK import, which the retarget renames)",
+            file, table.concat(duplicates, ", "))
+    end
+end
+
 function signing_arguments(entitlements, index, file)
     if index == 1 then
         return {"-S" .. entitlements, file}
@@ -238,9 +260,11 @@ function stage(options)
         os.vrunv("install_name_tool", retargets)
     end
     for _, file in ipairs(files) do
-        if os.iorunv("otool", {"-L", file}):find(OLD_PREFIX, 1, true) then
+        local otool = os.iorunv("otool", {"-L", file})
+        if otool:find(OLD_PREFIX, 1, true) then
             raise("%s still loads a backports library from %s: the library is not in LIBRARIES, so the device would load its own copy", file, OLD_PREFIX)
         end
+        check_install_names(file, otool)
     end
     local engine = path.join(frameworks, "JavaScriptCore.framework", "JavaScriptCore")
     if os.isfile(engine) then
