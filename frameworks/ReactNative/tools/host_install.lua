@@ -83,6 +83,13 @@ function change_arguments(otool_text, library_names)
     return arguments
 end
 
+function signing_arguments(entitlements, index, file)
+    if index == 1 then
+        return {"-S" .. entitlements, file}
+    end
+    return {"-S", file}
+end
+
 function install_command(holder, bundle_id)
     local stash = stash_folder(holder, bundle_id)
     local name = app_name(bundle_id)
@@ -184,8 +191,9 @@ function stage(options)
         table.insert(files, engine)
     end
     if ldid ~= "" then
-        for _, file in ipairs(files) do
-            os.vrunv(ldid, {"-S", file})
+        local entitlements = path.join(os.scriptdir(), "data", "rnhost.entitlements")
+        for index, file in ipairs(files) do
+            os.vrunv(ldid, signing_arguments(entitlements, index, file))
         end
     end
     local archive = path.join(output, "host.tgz")
