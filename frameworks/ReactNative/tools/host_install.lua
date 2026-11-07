@@ -83,6 +83,49 @@ function change_arguments(otool_text, library_names)
     return arguments
 end
 
+function framework_retargets(otool_text, imports_text, exports, library_names)
+    local sdk = "/System/Library/Frameworks/"
+    local imports = {}
+    local seen = {}
+    for line in imports_text:gmatch("[^\n]+") do
+        local symbol, framework = line:match("(_%S+) %(from ([^)]+)%)")
+        if symbol then
+            seen[framework] = seen[framework] or {}
+            if not seen[framework][symbol] then
+                seen[framework][symbol] = true
+                imports[framework] = imports[framework] or {}
+                table.insert(imports[framework], symbol)
+            end
+        end
+    end
+    local arguments, notes = {}, {}
+    for _, name in ipairs(library_names) do
+        local framework = name:match("^lib(.+)Backports$")
+        local old = framework and sdk .. framework .. ".framework/" .. framework
+        if old and imports[framework] and otool_text:find(old .. " ", 1, true) then
+            local defined = {}
+            for line in (exports[name] or ""):gmatch("[^\n]+") do
+                defined[line:match("(%S+)$")] = true
+            end
+            local missing = {}
+            for _, symbol in ipairs(imports[framework]) do
+                if not defined[symbol] then
+                    table.insert(missing, symbol)
+                end
+            end
+            if #missing == 0 then
+                table.insert(arguments, "-change")
+                table.insert(arguments, old)
+                table.insert(arguments, NEW_PREFIX .. "/" .. name .. ".dylib")
+            else
+                table.insert(notes, string.format("%s stays on the device's framework: %s does not export %d of the %d symbols the host imports from it, e.g. %s",
+                    framework, name, #missing, #imports[framework], missing[1]))
+            end
+        end
+    end
+    return arguments, notes
+end
+
 function signing_arguments(entitlements, index, file)
     if index == 1 then
         return {"-S" .. entitlements, file}
@@ -180,6 +223,18 @@ function stage(options)
             table.insert(arguments, file)
             os.vrunv("install_name_tool", arguments)
         end
+    end
+    local exports = {}
+    for _, name in ipairs(libraries) do
+        exports[name] = os.iorunv("nm", {"-gU", "-arch", "armv7", path.join(frameworks, name .. ".dylib")})
+    end
+    local retargets, notes = framework_retargets(os.iorunv("otool", {"-L", files[1]}), os.iorunv("nm", {"-m", "-arch", "armv7", files[1]}), exports, libraries)
+    for _, note in ipairs(notes) do
+        print(note)
+    end
+    if #retargets > 0 then
+        table.insert(retargets, files[1])
+        os.vrunv("install_name_tool", retargets)
     end
     for _, file in ipairs(files) do
         if os.iorunv("otool", {"-L", file}):find(OLD_PREFIX, 1, true) then
