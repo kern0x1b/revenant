@@ -227,6 +227,7 @@ local STEPS = {
     {name = "ci errors test", run = function () return lua("tools/ci_errors.lua", "test") end},
     {name = "ci replay test", run = function () return lua("tools/ci_swiftc_replay.lua", "test") end},
     {name = "light suites", run = function () return lua("toolchain/tests/light_suites.lua") end},
+    {name = "host install test", run = function () return lua("frameworks/ReactNative/tests/host_install_test.lua") end},
 }
 
 local function test_suite()
