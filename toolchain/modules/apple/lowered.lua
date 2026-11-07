@@ -702,9 +702,36 @@ function global_of(line)
     return nil
 end
 
+local function marked_names(text)
+    local called, named = {}, {}
+    for name, open in text:gmatch("BACKPORT_IMPL%(%s*([%a_][%w_]*)%s*%)%s*(%(?)") do
+        if open == "(" then
+            called[name] = true
+        else
+            named[name] = true
+        end
+    end
+    return called, named
+end
+
+local function scan_markers(text, found)
+    local called, named = marked_names(text)
+    for name in pairs(called) do
+        found.functions[name] = true
+        found.globals[name] = nil
+    end
+    for name in pairs(named) do
+        if not found.functions[name] then
+            found.globals[name] = true
+        end
+    end
+end
+
 local function scan_source(file, found)
     local container, pending = nil, nil
-    for line in io.readfile(file):gmatch("[^\n]*") do
+    local source = io.readfile(file)
+    scan_markers(source, found)
+    for line in source:gmatch("[^\n]*") do
         line = string.gsub(line, "BACKPORT_IMPL%(%s*([%a_][%w_]*)%s*%)", "%1")
         local class = line:match("^@implementation%s+REVENANT_ALIAS_CLASS%(([%w_]+)%)") or line:match("^@implementation%s+([%w_]+)")
         if class then
@@ -2173,7 +2200,16 @@ function constants_defined_in(src)
     for _, folder in ipairs(os.dirs(path.join(src, "*"))) do
         for _, pattern in ipairs({"**.m", "**.mm", "**.c", "**.h"}) do
             for _, file in ipairs(os.files(path.join(folder, pattern))) do
-                for line in io.readfile(file):gmatch("[^\n]*") do
+                local source = io.readfile(file)
+                if pattern ~= "**.h" then
+                    local called, named = marked_names(source)
+                    for name in pairs(named) do
+                        if not called[name] then
+                            defined[name] = true
+                        end
+                    end
+                end
+                for line in source:gmatch("[^\n]*") do
                     line = string.gsub(line, "BACKPORT_IMPL%(%s*([%a_][%w_]*)%s*%)", "%1")
                     local name = line:match("const%s+[%w_%*]+%s+([%a_][%w_]*)%s*=") or line:match("const%s+([%a_][%w_]*)%s*=")
                         or line:match("const%s+[%w_]+%s*%*%s*([%a_][%w_]*)%s*=")
