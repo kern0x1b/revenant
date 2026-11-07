@@ -462,4 +462,37 @@ function main()
     }, "\n"))
     local clock_ok, clock_compiling = compiles(sdk, vfs, clock_probe, path.join(probes, "timebase.log"))
     assert(clock_ok, "the lowered CoreMedia headers do not declare CMTimebaseCopySource for iOS 6.0:\n" .. clock_compiling)
+
+    local marked_probe = path.join(probes, "marked.m")
+    io.writefile(marked_probe, table.concat({
+        "#import <CoreMedia/CoreMedia.h>",
+        "#import <VideoToolbox/VideoToolbox.h>",
+        "#import <AVFoundation/AVFoundation.h>",
+        "#import <GameController/GameController.h>",
+        "#import <SceneKit/SceneKit.h>",
+        "#import <SensorKit/SensorKit.h>",
+        "#import <Vision/Vision.h>",
+        "",
+        "OSStatus revenantMarkedFunctions(CMClockRef clock, CMTimebaseRef *timebase, CMTimeRange range, VTMultiPassStorageRef *storage)",
+        "{",
+        "    OSStatus status = CMTimebaseCreateWithSourceClock(kCFAllocatorDefault, clock, timebase);",
+        "    (void)CMTimebaseCopySource(*timebase);",
+        "    (void)VTMultiPassStorageGetTypeID();",
+        "    status |= VTMultiPassStorageCreate(kCFAllocatorDefault, NULL, range, NULL, storage);",
+        "    return status | VTMultiPassStorageClose(*storage);",
+        "}",
+        "",
+        "void revenantMarkedGlobals(void)",
+        "{",
+        "    (void)kVTHDRPerFrameMetadataGenerationHDRFormatType_DolbyVision;",
+        "    (void)AVCaptureReactionTypeHeart;",
+        "    (void)GCInputDirectionPad;",
+        "    (void)SCNMatrix4Identity;",
+        "    (void)SRErrorDomain;",
+        "    (void)VNVisionVersionNumber;",
+        "}",
+        "",
+    }, "\n"))
+    local marked_ok, marked_compiling = compiles(sdk, vfs, marked_probe, path.join(probes, "marked.log"))
+    assert(marked_ok, "a function or global that Backports implement as BACKPORT_IMPL keeps its SDK availability in the lowered headers, whatever shape its definition has (an attribute before the return type, a typed global without const, a multi-line initialiser, a definition inside an implementation):\n" .. marked_compiling)
 end
