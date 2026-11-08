@@ -44,8 +44,8 @@ extension NLTokenizer {
     }
 }
 
+@available(iOS 17.0, *)
 extension NLContextualEmbeddingResult {
-    @available(iOS 17.0, *)
     @nonobjc public func tokenVector(at index: String.Index) -> ([Double], Range<String.Index>)? {
         var tokenRange = NSRange(location: 0, length: 0)
         guard let vector = __tokenVector(at: index.utf16Offset(in: string), tokenRange: &tokenRange) else {
@@ -54,7 +54,6 @@ extension NLContextualEmbeddingResult {
         return (doubles(vector), Range(tokenRange, in: string)!)
     }
 
-    @available(iOS 17.0, *)
     @nonobjc public func enumerateTokenVectors(in range: Range<String.Index>, using block: ([Double], Range<String.Index>) -> Bool) {
         let string = self.string
         __enumerateTokenVectors(in: NSRange(range, in: string)) { vector, tokenRange, stop in
@@ -65,8 +64,8 @@ extension NLContextualEmbeddingResult {
     }
 }
 
+@available(iOS 12.0, *)
 extension NLTagger {
-    @available(iOS 12.0, *)
     @nonobjc public func tokenRange(at index: String.Index, unit: NLTokenUnit) -> Range<String.Index> {
         let string = required(self.string)
         return Range(__tokenRange(at: index.utf16Offset(in: string), unit: unit), in: string)!
@@ -78,7 +77,6 @@ extension NLTagger {
         return Range(__tokenRange(for: NSRange(range, in: string), unit: unit), in: string)!
     }
 
-    @available(iOS 12.0, *)
     @nonobjc public func tag(at index: String.Index, unit: NLTokenUnit, scheme: NLTagScheme) -> (NLTag?, Range<String.Index>) {
         let string = required(self.string)
         var tokenRange = NSRange(location: 0, length: 0)
@@ -98,7 +96,6 @@ extension NLTagger {
         return (result, Range(tokenRange, in: string)!)
     }
 
-    @available(iOS 12.0, *)
     @nonobjc public func enumerateTags(in range: Range<String.Index>, unit: NLTokenUnit, scheme: NLTagScheme, options: NLTagger.Options = [], using block: (NLTag?, Range<String.Index>) -> Bool) {
         let string = required(self.string)
         __enumerateTags(in: NSRange(range, in: string), unit: unit, scheme: scheme, options: options) { tag, tokenRange, stop in
@@ -108,7 +105,6 @@ extension NLTagger {
         }
     }
 
-    @available(iOS 12.0, *)
     @nonobjc public func tags(in range: Range<String.Index>, unit: NLTokenUnit, scheme: NLTagScheme, options: NLTagger.Options = []) -> [(NLTag?, Range<String.Index>)] {
         var result: [(NLTag?, Range<String.Index>)] = []
         enumerateTags(in: range, unit: unit, scheme: scheme, options: options) { tag, tokenRange in
@@ -118,36 +114,32 @@ extension NLTagger {
         return result
     }
 
-    @available(iOS 12.0, *)
     @nonobjc public func setLanguage(_ language: NLLanguage, range: Range<String.Index>) {
         __setLanguage(language, range: NSRange(range, in: required(self.string)))
     }
 
-    @available(iOS 12.0, *)
     @nonobjc public func setOrthography(_ orthography: NSOrthography, range: Range<String.Index>) {
         __setOrthography(orthography, range: NSRange(range, in: required(self.string)))
     }
 }
 
+@available(iOS 14.0, *)
 extension NLModel {
-    @available(iOS 14.0, *)
     @nonobjc public func predictedLabelHypotheses(for string: String, maximumCount maxCount: Int) -> [String: Double] {
         return __predictedLabelHypotheses(for: string, maximumCount: maxCount).mapValues { $0.doubleValue }
     }
 
-    @available(iOS 14.0, *)
     @nonobjc public func predictedLabelHypotheses(forTokens tokens: [String], maximumCount maxCount: Int) -> [[String: Double]] {
         return __predictedLabelHypotheses(forTokens: tokens, maximumCount: maxCount).map { $0.mapValues { $0.doubleValue } }
     }
 }
 
+@available(iOS 13.0, *)
 extension NLEmbedding {
-    @available(iOS 13.0, *)
     @nonobjc public func distance(between firstString: String, and secondString: String, distanceType: NLDistanceType = .cosine) -> NLDistance {
         return __distanceBetweenString(firstString, andString: secondString, distanceType: distanceType)
     }
 
-    @available(iOS 13.0, *)
     @nonobjc public func enumerateNeighbors(for string: String, maximumCount maxCount: Int, distanceType: NLDistanceType = .cosine, using block: (String, NLDistance) -> Bool) {
         __enumerateNeighbors(for: string, maximumCount: maxCount, distanceType: distanceType) { neighbor, distance, stop in
             if !block(neighbor, distance) {
@@ -156,7 +148,6 @@ extension NLEmbedding {
         }
     }
 
-    @available(iOS 13.0, *)
     @nonobjc public func neighbors(for string: String, maximumCount maxCount: Int, distanceType: NLDistanceType = .cosine) -> [(String, NLDistance)] {
         var result: [(String, NLDistance)] = []
         enumerateNeighbors(for: string, maximumCount: maxCount, distanceType: distanceType) { neighbor, distance in
@@ -166,7 +157,6 @@ extension NLEmbedding {
         return result
     }
 
-    @available(iOS 13.0, *)
     @nonobjc public func enumerateNeighbors(for vector: [Double], maximumCount maxCount: Int, distanceType: NLDistanceType = .cosine, using block: (String, NLDistance) -> Bool) {
         __enumerateNeighbors(forVector: numbers(vector), maximumCount: maxCount, distanceType: distanceType) { neighbor, distance, stop in
             if !block(neighbor, distance) {
@@ -175,7 +165,6 @@ extension NLEmbedding {
         }
     }
 
-    @available(iOS 13.0, *)
     @nonobjc public func neighbors(for vector: [Double], maximumCount maxCount: Int, distanceType: NLDistanceType = .cosine) -> [(String, NLDistance)] {
         var result: [(String, NLDistance)] = []
         enumerateNeighbors(for: vector, maximumCount: maxCount, distanceType: distanceType) { neighbor, distance in
@@ -185,14 +174,12 @@ extension NLEmbedding {
         return result
     }
 
-    @available(iOS 13.0, *)
     @nonobjc public func vector(for string: String) -> [Double]? {
         return __vector(for: string).map(doubles)
     }
 
-    @available(iOS 13.0, *)
     @nonobjc public class func write(_ dictionary: [String: [Double]], language: NLLanguage?, revision: Int, to url: URL) throws {
-        try __writeEmbeddingForDictionary(dictionary.mapValues(numbers), language: language, revision: revision, toURL: url)
+        try __write(for: dictionary.mapValues(numbers), language: language, revision: revision, to: url)
     }
 }
 
