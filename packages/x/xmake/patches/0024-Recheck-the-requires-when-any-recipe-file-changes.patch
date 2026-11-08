@@ -1,0 +1,56 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: revenant <revenant@example.invalid>
+Date: Sun, 8 Nov 2026 00:30:00 +0200
+Subject: [PATCH] Recheck the requires when any file of a recipe folder changes, or of the recipe folder of what it depends on
+
+A recipe takes values from its own folder, not only from its xmake.lua and its patches: revenant's recipes include port/digest.lua, which holds the digest of every input of the package and is a config of it, so a changed input is a different package. The requirement kept the sha256 of xmake.lua and the patches only, so a checkout that moved only a digest left the configure a no-op: the packages stayed at the build they were installed with, and a package installed on its own afterwards, such as the Swift runtime, was registered beside records of its dependents that still carried the runtime they were built against.
+
+The requirement now records every file of the recipe folder of a package loaded from a repository, and does the same for each package it depends on, so a configure rechecks the requires when one differs, appears or is gone. A package defined in the project's own xmake.lua has no folder of its own and keeps xmake.lua and its patches.
+
+Changes-build-output: no
+---
+ .../action/require/impl/register_packages.lua      | 23 +++++++++++++++++------
+ 1 file changed, 17 insertions(+), 6 deletions(-)
+
+diff --git a/xmake/modules/private/action/require/impl/register_packages.lua b/xmake/modules/private/action/require/impl/register_packages.lua
+index e340006..3488995 100644
+--- a/xmake/modules/private/action/require/impl/register_packages.lua
++++ b/xmake/modules/private/action/require/impl/register_packages.lua
+@@ -97,13 +97,11 @@
+     end
+ end
+
+-function _register_required_package_sources(instance, required_package)
+-    if instance:is_system() or instance:is_thirdparty() then
+-        return
+-    end
++function _recipe_files(instance, files)
+     local scriptdir = instance:scriptdir()
+-    local files = {}
+-    if scriptdir then
++    if scriptdir and instance:repo() then
++        table.join2(files, os.files(path.join(scriptdir, "**")))
++    elseif scriptdir then
+         table.insert(files, path.join(scriptdir, "xmake.lua"))
+     end
+     for _, patch in ipairs(instance:patches() or {}) do
+@@ -113,6 +111,19 @@
+         end
+         table.insert(files, file)
+     end
++end
++
++function _register_required_package_sources(instance, required_package)
++    if instance:is_system() or instance:is_thirdparty() then
++        return
++    end
++    local files = {}
++    _recipe_files(instance, files)
++    for _, dep in ipairs(instance:orderdeps()) do
++        if not dep:is_system() and not dep:is_thirdparty() then
++            _recipe_files(dep, files)
++        end
++    end
+     local sources = {}
+     for _, file in ipairs(files) do
+         if os.isfile(file) then
