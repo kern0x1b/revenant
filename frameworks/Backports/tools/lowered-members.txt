@@ -146,6 +146,7 @@ class AVCaptureMultiCamSession
 class AVCaptureOutput
 class AVCapturePhoto
 class AVCapturePhotoBracketSettings
+class AVCapturePhotoOutput
 class AVCapturePhotoSettings
 class AVCaptureResolvedPhotoSettings
 class AVCaptureSession
@@ -190,6 +191,8 @@ class AVMetricPlayerItemSeekEvent
 class AVMetricPlayerItemStallEvent
 class AVMetricPlayerItemVariantSwitchEvent
 class AVMetricPlayerItemVariantSwitchStartEvent
+class AVMovie
+class AVMovieTrack
 class AVMusicEvent
 class AVMusicUserEvent
 class AVMutableComposition
@@ -1847,8 +1850,6 @@ class RevenantMetricSnapshot
 class RevenantMetricValue
 class RevenantMonitoredRequest
 class RevenantMovement
-class RevenantMovie
-class RevenantMovieTrack
 class RevenantNWAdvertiseDescriptor
 class RevenantNWBrowseDescriptor
 class RevenantNWBrowseResult
@@ -1904,7 +1905,6 @@ class RevenantParagraphStyle9
 class RevenantPasscodePrompt
 class RevenantPendingLayout
 class RevenantPersonNameParts
-class RevenantPhotoOutput
 class RevenantPhotosAvailability
 class RevenantPhotosBlock
 class RevenantPhotosImageCache
@@ -4010,6 +4010,7 @@ enum UNShowPreviewsSettingWhenAuthenticated
 enum VNErrorUnsupportedRequest
 enum VNErrorUnsupportedRevision
 enum WKAudiovisualMediaTypeAll
+enum WKAudiovisualMediaTypeNone
 enum WKContentModeRecommended
 enum WKErrorContentRuleListStoreCompileFailed
 enum WKErrorContentRuleListStoreLookUpFailed
@@ -4128,6 +4129,70 @@ enum nw_error_domain_wifi_aware
 enum tls_protocol_version_DTLSv10
 enum tls_protocol_version_TLSv10
 enum tls_protocol_version_TLSv11
+enum_type AAAttributionErrorCode
+enum_type APActivationPayloadErrorCode
+enum_type ASAuthorizationError
+enum_type ASCredentialIdentityStoreErrorCode
+enum_type ASWebAuthenticationSessionErrorCode
+enum_type AVAudio3DMixingRenderingAlgorithm
+enum_type AVAudio3DMixingSourceMode
+enum_type AVCaptureColorSpace
+enum_type BGTaskSchedulerErrorCode
+enum_type CBManagerState
+enum_type CKErrorCode
+enum_type CLRegionState
+enum_type CMTagCollectionError
+enum_type CMTaggedBufferGroupError
+enum_type CNErrorCode
+enum_type CSIndexErrorCode
+enum_type CSSearchQueryErrorCode
+enum_type CXErrorCodeCallDirectoryManagerError
+enum_type CXErrorCodeIncomingCallError
+enum_type CXErrorCodeNotificationServiceExtensionError
+enum_type CXErrorCodeRequestTransactionError
+enum_type DCError
+enum_type HKErrorCode
+enum_type HMErrorCode
+enum_type INRecurrenceFrequency
+enum_type MKErrorCode
+enum_type MPSPurgeableState
+enum_type MTLBinaryArchiveError
+enum_type MTLCaptureError
+enum_type MTLLoadAction
+enum_type MTLStencilOperation
+enum_type MTLTensorDataType
+enum_type MTLVertexStepFunction
+enum_type NFCReaderError
+enum_type NSAttributedStringMarkdownInterpretedSyntax
+enum_type NSGrammaticalNumber
+enum_type NSGrammaticalPartOfSpeech
+enum_type NSLayoutAttribute
+enum_type NSLayoutFormatOptions
+enum_type NSNumberFormatterStyle
+enum_type NSTextContentManagerEnumerationOptions
+enum_type NSURLSessionDelayedRequestDisposition
+enum_type NSURLSessionResponseDisposition
+enum_type PHAssetSourceType
+enum_type PHPhotosError
+enum_type SCNHitTestSearchMode
+enum_type SFAuthenticationError
+enum_type SRErrorCode
+enum_type UIActivityIndicatorViewStyle
+enum_type UIDatePickerMode
+enum_type UIEventType
+enum_type UILabelVibrancy
+enum_type UITableViewCellSelectionStyle
+enum_type UITableViewStyle
+enum_type UITextDragOptions
+enum_type UITextDropEditability
+enum_type UITextFieldDidEndEditingReason
+enum_type UITextSmartQuotesType
+enum_type UIViewAnimatingState
+enum_type UNErrorCode
+enum_type VNErrorCode
+enum_type WKErrorCode
+enum_type WKWebExtensionError
+enum_type WKWebExtensionMatchPatternError
 function AVCaptionDimensionMake
 function AVCaptionPointMake
 function AVCaptionSizeMake
@@ -7243,8 +7308,12 @@ global AVVideoCodecTypeHEVC
 global AVVideoCodecTypeHEVCWithAlpha
 global AVVideoCodecTypeJPEG
 global AVVideoCodecTypeJPEGXL
+global AVVideoColorPrimariesKey
 global AVVideoColorPrimaries_ITU_R_2020
+global AVVideoColorPrimaries_ITU_R_709_2
 global AVVideoColorPrimaries_P3_D65
+global AVVideoColorPrimaries_SMPTE_C
+global AVVideoColorPropertiesKey
 global AVVideoCompositionPerFrameHDRDisplayMetadataPolicyGenerate
 global AVVideoCompositionPerFrameHDRDisplayMetadataPolicyPropagate
 global AVVideoDecompressionPropertiesKey
@@ -7259,11 +7328,16 @@ global AVVideoProfileLevelH264MainAutoLevel
 global AVVideoRangeHLG
 global AVVideoRangePQ
 global AVVideoRangeSDR
+global AVVideoTransferFunctionKey
 global AVVideoTransferFunction_IEC_sRGB
 global AVVideoTransferFunction_ITU_R_2100_HLG
+global AVVideoTransferFunction_ITU_R_709_2
 global AVVideoTransferFunction_Linear
 global AVVideoTransferFunction_SMPTE_ST_2084_PQ
+global AVVideoYCbCrMatrixKey
 global AVVideoYCbCrMatrix_ITU_R_2020
+global AVVideoYCbCrMatrix_ITU_R_601_4
+global AVVideoYCbCrMatrix_ITU_R_709_2
 global AXAnimatedImagesEnabledDidChangeNotification
 global AXPrefersActionSliderAlternativeDidChangeNotification
 global AXPrefersHorizontalTextLayoutDidChangeNotification
@@ -12046,6 +12120,7 @@ member AVCaptureDevice -displayVideoZoomFactorMultiplier
 member AVCaptureDevice -dynamicAspectRatio
 member AVCaptureDevice -dynamicDimensions
 member AVCaptureDevice -exposureRectOfInterest
+member AVCaptureDevice -exposureTargetBias
 member AVCaptureDevice -focusRectOfInterest
 member AVCaptureDevice -isAutoVideoFrameRateEnabled
 member AVCaptureDevice -isBackgroundReplacementActive
@@ -12056,8 +12131,10 @@ member AVCaptureDevice -isFollowingExternalSyncDevice
 member AVCaptureDevice -isRampingVideoZoom
 member AVCaptureDevice -isVideoFrameDurationLocked
 member AVCaptureDevice -maxAvailableVideoZoomFactor
+member AVCaptureDevice -maxExposureTargetBias
 member AVCaptureDevice -minAvailableVideoZoomFactor
 member AVCaptureDevice -minExposureRectOfInterestSize
+member AVCaptureDevice -minExposureTargetBias
 member AVCaptureDevice -minFocusRectOfInterestSize
 member AVCaptureDevice -minSupportedExternalSyncFrameDuration
 member AVCaptureDevice -minSupportedLockedVideoFrameDuration
@@ -12124,9 +12201,11 @@ member AVCaptureDeviceInput -setActiveLockedVideoFrameDuration:
 member AVCaptureDeviceInput -setCinematicVideoCaptureEnabled:
 member AVCaptureDeviceInput -setMultichannelAudioMode:
 member AVCaptureDeviceInput -setSimulatedAperture:
+member AVCaptureDeviceInput -setVideoMinFrameDurationOverride:
 member AVCaptureDeviceInput -setWindNoiseRemovalEnabled:
 member AVCaptureDeviceInput -simulatedAperture
 member AVCaptureDeviceInput -unfollowExternalSyncDevice
+member AVCaptureDeviceInput -videoMinFrameDurationOverride
 member AVCaptureManualExposureBracketedStillImageSettings +manualExposureSettingsWithExposureDuration:ISO:
 member AVCaptureManualExposureBracketedStillImageSettings -ISO
 member AVCaptureManualExposureBracketedStillImageSettings -description
@@ -12166,6 +12245,82 @@ member AVCapturePhotoBracketSettings -bracketedSettings
 member AVCapturePhotoBracketSettings -copyWithZone:
 member AVCapturePhotoBracketSettings -isLensStabilizationEnabled
 member AVCapturePhotoBracketSettings -setLensStabilizationEnabled:
+member AVCapturePhotoOutput +DNGPhotoDataRepresentationForRawSampleBuffer:previewPhotoSampleBuffer:
+member AVCapturePhotoOutput +JPEGPhotoDataRepresentationForJPEGSampleBuffer:previewPhotoSampleBuffer:
+member AVCapturePhotoOutput +isAppleProRAWPixelFormat:
+member AVCapturePhotoOutput +isBayerRAWPixelFormat:
+member AVCapturePhotoOutput -availableLivePhotoVideoCodecTypes
+member AVCapturePhotoOutput -availablePhotoCodecTypes
+member AVCapturePhotoOutput -availablePhotoFileTypes
+member AVCapturePhotoOutput -availablePhotoPixelFormatTypes
+member AVCapturePhotoOutput -availableRawPhotoFileTypes
+member AVCapturePhotoOutput -availableRawPhotoPixelFormatTypes
+member AVCapturePhotoOutput -availableSemanticSegmentationMatteTypes
+member AVCapturePhotoOutput -capturePhotoWithSettings:delegate:
+member AVCapturePhotoOutput -dealloc
+member AVCapturePhotoOutput -enabledSemanticSegmentationMatteTypes
+member AVCapturePhotoOutput -init
+member AVCapturePhotoOutput -isAppleProRAWEnabled
+member AVCapturePhotoOutput -isAppleProRAWSupported
+member AVCapturePhotoOutput -isAutoRedEyeReductionSupported
+member AVCapturePhotoOutput -isCameraCalibrationDataDeliverySupported
+member AVCapturePhotoOutput -isContentAwareDistortionCorrectionEnabled
+member AVCapturePhotoOutput -isContentAwareDistortionCorrectionSupported
+member AVCapturePhotoOutput -isDepthDataDeliveryEnabled
+member AVCapturePhotoOutput -isDepthDataDeliverySupported
+member AVCapturePhotoOutput -isDualCameraDualPhotoDeliveryEnabled
+member AVCapturePhotoOutput -isDualCameraDualPhotoDeliverySupported
+member AVCapturePhotoOutput -isDualCameraFusionSupported
+member AVCapturePhotoOutput -isFlashScene
+member AVCapturePhotoOutput -isHighResolutionCaptureEnabled
+member AVCapturePhotoOutput -isLensStabilizationDuringBracketedCaptureSupported
+member AVCapturePhotoOutput -isLivePhotoAutoTrimmingEnabled
+member AVCapturePhotoOutput -isLivePhotoCaptureEnabled
+member AVCapturePhotoOutput -isLivePhotoCaptureSupported
+member AVCapturePhotoOutput -isLivePhotoCaptureSuspended
+member AVCapturePhotoOutput -isPortraitEffectsMatteDeliveryEnabled
+member AVCapturePhotoOutput -isPortraitEffectsMatteDeliverySupported
+member AVCapturePhotoOutput -isStillImageStabilizationScene
+member AVCapturePhotoOutput -isStillImageStabilizationSupported
+member AVCapturePhotoOutput -isVirtualDeviceConstituentPhotoDeliveryEnabled
+member AVCapturePhotoOutput -isVirtualDeviceConstituentPhotoDeliverySupported
+member AVCapturePhotoOutput -isVirtualDeviceFusionSupported
+member AVCapturePhotoOutput -maxBracketedCapturePhotoCount
+member AVCapturePhotoOutput -maxPhotoDimensions
+member AVCapturePhotoOutput -maxPhotoQualityPrioritization
+member AVCapturePhotoOutput -photoSettingsForSceneMonitoring
+member AVCapturePhotoOutput -preparedPhotoSettingsArray
+member AVCapturePhotoOutput -preservesLivePhotoCaptureSuspendedOnSessionStop
+member AVCapturePhotoOutput -revenant_applyBracket:toCamera:
+member AVCapturePhotoOutput -revenant_captureOne:bracket:index:expected:first:last:connection:delegate:completed:
+member AVCapturePhotoOutput -revenant_checkBracket:
+member AVCapturePhotoOutput -revenant_checkSettings:connection:
+member AVCapturePhotoOutput -revenant_firePrepareHandler
+member AVCapturePhotoOutput -revenant_giveBackCameraFlashMode
+member AVCapturePhotoOutput -revenant_setBias:ofCamera:
+member AVCapturePhotoOutput -revenant_setExposure:gain:ofCamera:
+member AVCapturePhotoOutput -revenant_setFlashMode:ofCamera:
+member AVCapturePhotoOutput -revenant_videoConnection
+member AVCapturePhotoOutput -setAppleProRAWEnabled:
+member AVCapturePhotoOutput -setContentAwareDistortionCorrectionEnabled:
+member AVCapturePhotoOutput -setDepthDataDeliveryEnabled:
+member AVCapturePhotoOutput -setDualCameraDualPhotoDeliveryEnabled:
+member AVCapturePhotoOutput -setEnabledSemanticSegmentationMatteTypes:
+member AVCapturePhotoOutput -setHighResolutionCaptureEnabled:
+member AVCapturePhotoOutput -setLivePhotoAutoTrimmingEnabled:
+member AVCapturePhotoOutput -setLivePhotoCaptureEnabled:
+member AVCapturePhotoOutput -setLivePhotoCaptureSuspended:
+member AVCapturePhotoOutput -setMaxPhotoDimensions:
+member AVCapturePhotoOutput -setMaxPhotoQualityPrioritization:
+member AVCapturePhotoOutput -setPhotoSettingsForSceneMonitoring:
+member AVCapturePhotoOutput -setPortraitEffectsMatteDeliveryEnabled:
+member AVCapturePhotoOutput -setPreparedPhotoSettingsArray:completionHandler:
+member AVCapturePhotoOutput -setPreservesLivePhotoCaptureSuspendedOnSessionStop:
+member AVCapturePhotoOutput -setVirtualDeviceConstituentPhotoDeliveryEnabled:
+member AVCapturePhotoOutput -supportedFlashModes
+member AVCapturePhotoOutput -supportedPhotoCodecTypesForFileType:
+member AVCapturePhotoOutput -supportedPhotoPixelFormatTypesForFileType:
+member AVCapturePhotoOutput -supportedRawPhotoPixelFormatTypesForFileType:
 member AVCapturePhotoSettings +photoSettings
 member AVCapturePhotoSettings +photoSettingsFromPhotoSettings:
 member AVCapturePhotoSettings +photoSettingsWithFormat:
@@ -12298,7 +12453,9 @@ member AVCaptureSynchronizedSampleBufferData -droppedReason
 member AVCaptureSynchronizedSampleBufferData -initWithRevenantSampleBuffer:dropped:reason:
 member AVCaptureSynchronizedSampleBufferData -sampleBuffer
 member AVCaptureSynchronizedSampleBufferData -sampleBufferWasDropped
+member AVCaptureVideoDataOutput -availableVideoCodecTypesForAssetWriterWithOutputFileType:
 member AVCaptureVideoDataOutput -recommendedVideoSettingsForAssetWriterWithOutputFileType:
+member AVCaptureVideoDataOutput -recommendedVideoSettingsForVideoCodecType:assetWriterOutputFileType:
 member AVCaptureVideoPreviewLayer -isDeferredStartEnabled
 member AVCaptureVideoPreviewLayer -isDeferredStartSupported
 member AVCaptureVideoPreviewLayer -isPreviewing
@@ -12567,6 +12724,84 @@ member AVMetricPlayerItemVariantSwitchEvent -toVariant
 member AVMetricPlayerItemVariantSwitchStartEvent -fromVariant
 member AVMetricPlayerItemVariantSwitchStartEvent -loadedTimeRanges
 member AVMetricPlayerItemVariantSwitchStartEvent -toVariant
+member AVMovie +movieTypes
+member AVMovie +movieWithData:options:
+member AVMovie +movieWithURL:options:
+member AVMovie -URL
+member AVMovie -availableChapterLocales
+member AVMovie -availableMediaCharacteristicsWithMediaSelectionOptions
+member AVMovie -availableMetadataFormats
+member AVMovie -canContainMovieFragments
+member AVMovie -cancelLoading
+member AVMovie -chapterMetadataGroupsBestMatchingPreferredLanguages:
+member AVMovie -chapterMetadataGroupsWithTitleLocale:containingItemsWithCommonKeys:
+member AVMovie -commonMetadata
+member AVMovie -containsMovieFragments
+member AVMovie -copyWithZone:
+member AVMovie -creationDate
+member AVMovie -data
+member AVMovie -dealloc
+member AVMovie -defaultMediaDataStorage
+member AVMovie -duration
+member AVMovie -hasProtectedContent
+member AVMovie -initWithData:options:
+member AVMovie -initWithURL:options:
+member AVMovie -isCompatibleWithFileType:
+member AVMovie -isCompatibleWithSavedPhotosAlbum
+member AVMovie -isComposable
+member AVMovie -isExportable
+member AVMovie -isPlayable
+member AVMovie -isReadable
+member AVMovie -loadValuesAsynchronouslyForKeys:completionHandler:
+member AVMovie -lyrics
+member AVMovie -mediaSelectionGroupForMediaCharacteristic:
+member AVMovie -metadataForFormat:
+member AVMovie -naturalSize
+member AVMovie -preferredRate
+member AVMovie -preferredTransform
+member AVMovie -preferredVolume
+member AVMovie -providesPreciseDurationAndTiming
+member AVMovie -referenceRestrictions
+member AVMovie -revenantFileURL
+member AVMovie -revenantTracks
+member AVMovie -statusOfValueForKey:error:
+member AVMovie -trackGroups
+member AVMovie -trackWithTrackID:
+member AVMovie -tracks
+member AVMovie -tracksWithMediaCharacteristic:
+member AVMovie -tracksWithMediaType:
+member AVMovieTrack -alternateGroupID
+member AVMovieTrack -asset
+member AVMovieTrack -availableMetadataFormats
+member AVMovieTrack -commonMetadata
+member AVMovieTrack -estimatedDataRate
+member AVMovieTrack -extendedLanguageTag
+member AVMovieTrack -formatDescriptions
+member AVMovieTrack -hasMediaCharacteristic:
+member AVMovieTrack -initWithAssetTrack:movie:
+member AVMovieTrack -isEnabled
+member AVMovieTrack -isPlayable
+member AVMovieTrack -isSelfContained
+member AVMovieTrack -languageCode
+member AVMovieTrack -loadValuesAsynchronouslyForKeys:completionHandler:
+member AVMovieTrack -mediaDataStorage
+member AVMovieTrack -mediaDecodeTimeRange
+member AVMovieTrack -mediaPresentationTimeRange
+member AVMovieTrack -mediaType
+member AVMovieTrack -metadataForFormat:
+member AVMovieTrack -naturalSize
+member AVMovieTrack -naturalTimeScale
+member AVMovieTrack -nominalFrameRate
+member AVMovieTrack -preferredTransform
+member AVMovieTrack -preferredVolume
+member AVMovieTrack -revenantHeader:
+member AVMovieTrack -samplePresentationTimeForTrackTime:
+member AVMovieTrack -segmentForTrackTime:
+member AVMovieTrack -segments
+member AVMovieTrack -statusOfValueForKey:error:
+member AVMovieTrack -timeRange
+member AVMovieTrack -totalSampleDataLength
+member AVMovieTrack -trackID
 member AVMusicUserEvent -initWithData:
 member AVMusicUserEvent -sizeInBytes
 member AVMutableComposition +compositionWithURLAssetInitializationOptions:
@@ -13835,7 +14070,9 @@ member CLGeocoder -reverseGeocodeLocation:preferredLocale:completionHandler:
 member CLLocation -floor
 member CLLocationManager +isMonitoringAvailableForClass:
 member CLLocationManager +isRangingAvailable
+member CLLocationManager -accuracyAuthorization
 member CLLocationManager -allowsBackgroundLocationUpdates
+member CLLocationManager -authorizationStatus
 member CLLocationManager -rangedRegions
 member CLLocationManager -requestAlwaysAuthorization
 member CLLocationManager -requestLocation
@@ -27180,84 +27417,6 @@ member RevenantMovement -proxy
 member RevenantMovement -scroller
 member RevenantMovement -update
 member RevenantMovement -view
-member RevenantMovie +movieTypes
-member RevenantMovie +movieWithData:options:
-member RevenantMovie +movieWithURL:options:
-member RevenantMovie -URL
-member RevenantMovie -availableChapterLocales
-member RevenantMovie -availableMediaCharacteristicsWithMediaSelectionOptions
-member RevenantMovie -availableMetadataFormats
-member RevenantMovie -canContainMovieFragments
-member RevenantMovie -cancelLoading
-member RevenantMovie -chapterMetadataGroupsBestMatchingPreferredLanguages:
-member RevenantMovie -chapterMetadataGroupsWithTitleLocale:containingItemsWithCommonKeys:
-member RevenantMovie -commonMetadata
-member RevenantMovie -containsMovieFragments
-member RevenantMovie -copyWithZone:
-member RevenantMovie -creationDate
-member RevenantMovie -data
-member RevenantMovie -dealloc
-member RevenantMovie -defaultMediaDataStorage
-member RevenantMovie -duration
-member RevenantMovie -hasProtectedContent
-member RevenantMovie -initWithData:options:
-member RevenantMovie -initWithURL:options:
-member RevenantMovie -isCompatibleWithFileType:
-member RevenantMovie -isCompatibleWithSavedPhotosAlbum
-member RevenantMovie -isComposable
-member RevenantMovie -isExportable
-member RevenantMovie -isPlayable
-member RevenantMovie -isReadable
-member RevenantMovie -loadValuesAsynchronouslyForKeys:completionHandler:
-member RevenantMovie -lyrics
-member RevenantMovie -mediaSelectionGroupForMediaCharacteristic:
-member RevenantMovie -metadataForFormat:
-member RevenantMovie -naturalSize
-member RevenantMovie -preferredRate
-member RevenantMovie -preferredTransform
-member RevenantMovie -preferredVolume
-member RevenantMovie -providesPreciseDurationAndTiming
-member RevenantMovie -referenceRestrictions
-member RevenantMovie -revenantFileURL
-member RevenantMovie -revenantTracks
-member RevenantMovie -statusOfValueForKey:error:
-member RevenantMovie -trackGroups
-member RevenantMovie -trackWithTrackID:
-member RevenantMovie -tracks
-member RevenantMovie -tracksWithMediaCharacteristic:
-member RevenantMovie -tracksWithMediaType:
-member RevenantMovieTrack -alternateGroupID
-member RevenantMovieTrack -asset
-member RevenantMovieTrack -availableMetadataFormats
-member RevenantMovieTrack -commonMetadata
-member RevenantMovieTrack -estimatedDataRate
-member RevenantMovieTrack -extendedLanguageTag
-member RevenantMovieTrack -formatDescriptions
-member RevenantMovieTrack -hasMediaCharacteristic:
-member RevenantMovieTrack -initWithAssetTrack:movie:
-member RevenantMovieTrack -isEnabled
-member RevenantMovieTrack -isPlayable
-member RevenantMovieTrack -isSelfContained
-member RevenantMovieTrack -languageCode
-member RevenantMovieTrack -loadValuesAsynchronouslyForKeys:completionHandler:
-member RevenantMovieTrack -mediaDataStorage
-member RevenantMovieTrack -mediaDecodeTimeRange
-member RevenantMovieTrack -mediaPresentationTimeRange
-member RevenantMovieTrack -mediaType
-member RevenantMovieTrack -metadataForFormat:
-member RevenantMovieTrack -naturalSize
-member RevenantMovieTrack -naturalTimeScale
-member RevenantMovieTrack -nominalFrameRate
-member RevenantMovieTrack -preferredTransform
-member RevenantMovieTrack -preferredVolume
-member RevenantMovieTrack -revenantHeader:
-member RevenantMovieTrack -samplePresentationTimeForTrackTime:
-member RevenantMovieTrack -segmentForTrackTime:
-member RevenantMovieTrack -segments
-member RevenantMovieTrack -statusOfValueForKey:error:
-member RevenantMovieTrack -timeRange
-member RevenantMovieTrack -totalSampleDataLength
-member RevenantMovieTrack -trackID
 member RevenantNWBrowserLookup -close
 member RevenantNaturalAlignmentInstaller +load
 member RevenantNavigationBarHider -keyboardWillHide:
@@ -27367,82 +27526,6 @@ member RevenantPendingLayout -layout
 member RevenantPersonNameParts -composite
 member RevenantPersonNameParts -delimiter
 member RevenantPersonNameParts -familyFirst
-member RevenantPhotoOutput +DNGPhotoDataRepresentationForRawSampleBuffer:previewPhotoSampleBuffer:
-member RevenantPhotoOutput +JPEGPhotoDataRepresentationForJPEGSampleBuffer:previewPhotoSampleBuffer:
-member RevenantPhotoOutput +isAppleProRAWPixelFormat:
-member RevenantPhotoOutput +isBayerRAWPixelFormat:
-member RevenantPhotoOutput -availableLivePhotoVideoCodecTypes
-member RevenantPhotoOutput -availablePhotoCodecTypes
-member RevenantPhotoOutput -availablePhotoFileTypes
-member RevenantPhotoOutput -availablePhotoPixelFormatTypes
-member RevenantPhotoOutput -availableRawPhotoFileTypes
-member RevenantPhotoOutput -availableRawPhotoPixelFormatTypes
-member RevenantPhotoOutput -availableSemanticSegmentationMatteTypes
-member RevenantPhotoOutput -capturePhotoWithSettings:delegate:
-member RevenantPhotoOutput -dealloc
-member RevenantPhotoOutput -enabledSemanticSegmentationMatteTypes
-member RevenantPhotoOutput -init
-member RevenantPhotoOutput -isAppleProRAWEnabled
-member RevenantPhotoOutput -isAppleProRAWSupported
-member RevenantPhotoOutput -isAutoRedEyeReductionSupported
-member RevenantPhotoOutput -isCameraCalibrationDataDeliverySupported
-member RevenantPhotoOutput -isContentAwareDistortionCorrectionEnabled
-member RevenantPhotoOutput -isContentAwareDistortionCorrectionSupported
-member RevenantPhotoOutput -isDepthDataDeliveryEnabled
-member RevenantPhotoOutput -isDepthDataDeliverySupported
-member RevenantPhotoOutput -isDualCameraDualPhotoDeliveryEnabled
-member RevenantPhotoOutput -isDualCameraDualPhotoDeliverySupported
-member RevenantPhotoOutput -isDualCameraFusionSupported
-member RevenantPhotoOutput -isFlashScene
-member RevenantPhotoOutput -isHighResolutionCaptureEnabled
-member RevenantPhotoOutput -isLensStabilizationDuringBracketedCaptureSupported
-member RevenantPhotoOutput -isLivePhotoAutoTrimmingEnabled
-member RevenantPhotoOutput -isLivePhotoCaptureEnabled
-member RevenantPhotoOutput -isLivePhotoCaptureSupported
-member RevenantPhotoOutput -isLivePhotoCaptureSuspended
-member RevenantPhotoOutput -isPortraitEffectsMatteDeliveryEnabled
-member RevenantPhotoOutput -isPortraitEffectsMatteDeliverySupported
-member RevenantPhotoOutput -isStillImageStabilizationScene
-member RevenantPhotoOutput -isStillImageStabilizationSupported
-member RevenantPhotoOutput -isVirtualDeviceConstituentPhotoDeliveryEnabled
-member RevenantPhotoOutput -isVirtualDeviceConstituentPhotoDeliverySupported
-member RevenantPhotoOutput -isVirtualDeviceFusionSupported
-member RevenantPhotoOutput -maxBracketedCapturePhotoCount
-member RevenantPhotoOutput -maxPhotoDimensions
-member RevenantPhotoOutput -maxPhotoQualityPrioritization
-member RevenantPhotoOutput -photoSettingsForSceneMonitoring
-member RevenantPhotoOutput -preparedPhotoSettingsArray
-member RevenantPhotoOutput -preservesLivePhotoCaptureSuspendedOnSessionStop
-member RevenantPhotoOutput -revenant_applyBracket:toCamera:
-member RevenantPhotoOutput -revenant_captureOne:bracket:index:expected:first:last:connection:delegate:completed:
-member RevenantPhotoOutput -revenant_checkBracket:
-member RevenantPhotoOutput -revenant_checkSettings:connection:
-member RevenantPhotoOutput -revenant_firePrepareHandler
-member RevenantPhotoOutput -revenant_giveBackCameraFlashMode
-member RevenantPhotoOutput -revenant_setBias:ofCamera:
-member RevenantPhotoOutput -revenant_setExposure:gain:ofCamera:
-member RevenantPhotoOutput -revenant_setFlashMode:ofCamera:
-member RevenantPhotoOutput -revenant_videoConnection
-member RevenantPhotoOutput -setAppleProRAWEnabled:
-member RevenantPhotoOutput -setContentAwareDistortionCorrectionEnabled:
-member RevenantPhotoOutput -setDepthDataDeliveryEnabled:
-member RevenantPhotoOutput -setDualCameraDualPhotoDeliveryEnabled:
-member RevenantPhotoOutput -setEnabledSemanticSegmentationMatteTypes:
-member RevenantPhotoOutput -setHighResolutionCaptureEnabled:
-member RevenantPhotoOutput -setLivePhotoAutoTrimmingEnabled:
-member RevenantPhotoOutput -setLivePhotoCaptureEnabled:
-member RevenantPhotoOutput -setLivePhotoCaptureSuspended:
-member RevenantPhotoOutput -setMaxPhotoDimensions:
-member RevenantPhotoOutput -setMaxPhotoQualityPrioritization:
-member RevenantPhotoOutput -setPhotoSettingsForSceneMonitoring:
-member RevenantPhotoOutput -setPortraitEffectsMatteDeliveryEnabled:
-member RevenantPhotoOutput -setPreparedPhotoSettingsArray:completionHandler:
-member RevenantPhotoOutput -setPreservesLivePhotoCaptureSuspendedOnSessionStop:
-member RevenantPhotoOutput -setVirtualDeviceConstituentPhotoDeliveryEnabled:
-member RevenantPhotoOutput -supportedFlashModes
-member RevenantPhotoOutput -supportedPhotoCodecTypesForFileType:
-member RevenantPhotoOutput -supportedPhotoPixelFormatTypesForFileType:
-member RevenantPhotoOutput -supportedRawPhotoPixelFormatTypesForFileType:
 member RevenantPhotosAvailability -observers
 member RevenantPhotosBlock -run
 member RevenantPhotosImageCache -capacity
@@ -34989,9 +35072,12 @@ member WKWebViewConfiguration -encodeWithCoder:
 member WKWebViewConfiguration -ignoresViewportScaleLimits
 member WKWebViewConfiguration -init
 member WKWebViewConfiguration -initWithCoder:
+member WKWebViewConfiguration -mediaPlaybackAllowsAirPlay
+member WKWebViewConfiguration -mediaPlaybackRequiresUserAction
 member WKWebViewConfiguration -mediaTypesRequiringUserActionForPlayback
 member WKWebViewConfiguration -preferences
 member WKWebViewConfiguration -processPool
+member WKWebViewConfiguration -requiresUserActionForMediaPlayback
 member WKWebViewConfiguration -revenant_bindURLSchemeHandlersToWebView:
 member WKWebViewConfiguration -selectionGranularity
 member WKWebViewConfiguration -setAllowsAirPlayForMediaPlayback:
@@ -35001,9 +35087,12 @@ member WKWebViewConfiguration -setApplicationNameForUserAgent:
 member WKWebViewConfiguration -setDataDetectorTypes:
 member WKWebViewConfiguration -setDefaultWebpagePreferences:
 member WKWebViewConfiguration -setIgnoresViewportScaleLimits:
+member WKWebViewConfiguration -setMediaPlaybackAllowsAirPlay:
+member WKWebViewConfiguration -setMediaPlaybackRequiresUserAction:
 member WKWebViewConfiguration -setMediaTypesRequiringUserActionForPlayback:
 member WKWebViewConfiguration -setPreferences:
 member WKWebViewConfiguration -setProcessPool:
+member WKWebViewConfiguration -setRequiresUserActionForMediaPlayback:
 member WKWebViewConfiguration -setSelectionGranularity:
 member WKWebViewConfiguration -setSuppressesIncrementalRendering:
 member WKWebViewConfiguration -setURLSchemeHandler:forURLScheme:

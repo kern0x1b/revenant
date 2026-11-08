@@ -64,6 +64,8 @@ void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager 
     (void)[[LAContext alloc] init];
     (void)[UIGraphicsImageRenderer class];
     (void)[manager allowsBackgroundLocationUpdates];
+    (void)[manager authorizationStatus];
+    (void)[manager accuracyAuthorization];
     (void)UIApplicationUserDidTakeScreenshotNotification;
     NSSet<UIScene *> *scenes = [[UIApplication sharedApplication] connectedScenes];
     (void)scenes;
@@ -85,6 +87,17 @@ void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager 
     CAFrameRateRange frameRates = CAFrameRateRangeMake(30.0f, 120.0f, 120.0f);
     (void)frameRates;
     (void)[UIPointerShape shapeWithRoundedRect:CGRectZero cornerRadius:8.0];
+    AVCaptureDevice *camera = nil;
+    (void)(camera.exposureTargetBias + camera.minExposureTargetBias + camera.maxExposureTargetBias);
+    AVCaptureDeviceInput *cameraInput = nil;
+    cameraInput.videoMinFrameDurationOverride = kCMTimeInvalid;
+    AVCaptureVideoDataOutput *videoOutput = nil;
+    (void)[videoOutput recommendedVideoSettingsForVideoCodecType:AVVideoCodecTypeH264 assetWriterOutputFileType:AVFileTypeMPEG4];
+    (void)@[AVVideoColorPropertiesKey, AVVideoColorPrimariesKey, AVVideoColorPrimaries_ITU_R_709_2, AVVideoTransferFunctionKey,
+            AVVideoTransferFunction_ITU_R_709_2, AVVideoYCbCrMatrixKey, AVVideoYCbCrMatrix_ITU_R_709_2];
+    AVCapturePhotoSettings *photoSettings = [AVCapturePhotoSettings photoSettings];
+    (void)photoSettings.availablePreviewPhotoPixelFormatTypes;
+    (void)[AVCapturePhotoOutput class];
 }
 ]=]
 

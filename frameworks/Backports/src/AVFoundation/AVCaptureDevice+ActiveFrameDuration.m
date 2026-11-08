@@ -7,6 +7,7 @@
 
 static const char RevenantActiveMinFrameDurationKey;
 static const char RevenantActiveMaxFrameDurationKey;
+static const char RevenantInputMinFrameDurationOverrideKey;
 
 static CMTime revenant_default_min_frame_duration(AVCaptureDevice *device)
 {
@@ -35,8 +36,9 @@ static void revenant_apply_frame_durations(AVCaptureSession *session)
             AVCaptureInputPort *port = connection.inputPorts.firstObject;
             if (![port.mediaType isEqualToString:AVMediaTypeVideo] || ![port.input isKindOfClass:[AVCaptureDeviceInput class]])
                 continue;
-            AVCaptureDevice *device = ((AVCaptureDeviceInput *)port.input).device;
-            NSValue *min = objc_getAssociatedObject(device, &RevenantActiveMinFrameDurationKey);
+            AVCaptureDeviceInput *input = (AVCaptureDeviceInput *)port.input;
+            AVCaptureDevice *device = input.device;
+            NSValue *min = objc_getAssociatedObject(input, &RevenantInputMinFrameDurationOverrideKey) ?: objc_getAssociatedObject(device, &RevenantActiveMinFrameDurationKey);
             NSValue *max = objc_getAssociatedObject(device, &RevenantActiveMaxFrameDurationKey);
             if (min && connection.isVideoMinFrameDurationSupported)
                 connection.videoMinFrameDuration = min.CMTimeValue;
@@ -93,6 +95,23 @@ static void revenant_apply_frame_durations(AVCaptureSession *session)
                                      userInfo:nil];
     objc_setAssociatedObject(self, &RevenantActiveMaxFrameDurationKey, CMTIME_IS_VALID(activeVideoMaxFrameDuration) ? [NSValue valueWithCMTime:activeVideoMaxFrameDuration] : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     for (AVCaptureSession *session in [self revenant_captureSessions])
+        revenant_apply_frame_durations(session);
+}
+
+@end
+
+@implementation AVCaptureDeviceInput (RevenantMinFrameDurationOverride)
+
+- (CMTime)videoMinFrameDurationOverride
+{
+    NSValue *stored = objc_getAssociatedObject(self, &RevenantInputMinFrameDurationOverrideKey);
+    return stored ? stored.CMTimeValue : kCMTimeInvalid;
+}
+
+- (void)setVideoMinFrameDurationOverride:(CMTime)videoMinFrameDurationOverride
+{
+    objc_setAssociatedObject(self, &RevenantInputMinFrameDurationOverrideKey, CMTIME_IS_VALID(videoMinFrameDurationOverride) ? [NSValue valueWithCMTime:videoMinFrameDurationOverride] : nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    for (AVCaptureSession *session in [self.device revenant_captureSessions])
         revenant_apply_frame_durations(session);
 }
 

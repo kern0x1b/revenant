@@ -26,6 +26,21 @@
     }
 }
 
+- (float)exposureTargetBias
+{
+    return [self autoExposureBias];
+}
+
+- (float)minExposureTargetBias
+{
+    return -8.0f;
+}
+
+- (float)maxExposureTargetBias
+{
+    return 8.0f;
+}
+
 @end
 
 @implementation AVCaptureVideoPreviewLayer (RevenantSessionWithNoConnection8)

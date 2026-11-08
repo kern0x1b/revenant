@@ -236,6 +236,36 @@ NSString *const BACKPORT_IMPL(WKErrorDomain) = @"WKErrorDomain";
     _mediaTypesRequiringUserActionForPlayback = types;
 }
 
+- (BOOL)mediaPlaybackRequiresUserAction
+{
+    return _mediaTypesRequiringUserActionForPlayback != WKAudiovisualMediaTypeNone;
+}
+
+- (void)setMediaPlaybackRequiresUserAction:(BOOL)requires
+{
+    _mediaTypesRequiringUserActionForPlayback = requires ? WKAudiovisualMediaTypeAll : WKAudiovisualMediaTypeNone;
+}
+
+- (BOOL)requiresUserActionForMediaPlayback
+{
+    return _mediaTypesRequiringUserActionForPlayback != WKAudiovisualMediaTypeNone;
+}
+
+- (void)setRequiresUserActionForMediaPlayback:(BOOL)requires
+{
+    _mediaTypesRequiringUserActionForPlayback = requires ? WKAudiovisualMediaTypeAll : WKAudiovisualMediaTypeNone;
+}
+
+- (BOOL)mediaPlaybackAllowsAirPlay
+{
+    return _allowsAirPlayForMediaPlayback;
+}
+
+- (void)setMediaPlaybackAllowsAirPlay:(BOOL)allows
+{
+    _allowsAirPlayForMediaPlayback = allows;
+}
+
 - (WKDataDetectorTypes)dataDetectorTypes
 {
     return _dataDetectorTypes;
