@@ -333,7 +333,7 @@ overlay("swiftCloudKit", "CloudKit", {})
 
 overlay("swiftWeatherKit", "WeatherKit", {})
 
-overlay("swiftUniformTypeIdentifiers", "UniformTypeIdentifiers", {underlying = true, frameworks = {"MobileCoreServices"}})
+overlay("swiftUniformTypeIdentifiers", "UniformTypeIdentifiers", {underlying = true, frameworks = {"MobileCoreServices"}, stub = "uti_stub"})
 
 overlay("swiftCryptoKit", "CryptoKit", {packages = {"swift-crypto"}})
 

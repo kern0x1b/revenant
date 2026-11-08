@@ -115,14 +115,21 @@ if is_plat("iphoneos") then
             if library.name == "SecurityBackports" then
                 add_files(os.files(path.join(SRC, "Security", "SecureTransport", "*.m")))
             end
-            if library.name == "TLSBackports" then
+            if library.name == "TLSBackports" or library.name == "UIKitBackports" then
                 after_build(function (target)
                     local exported = os.iorunv("nm", {"-gU", target:targetfile()})
-                    for _, stub in ipairs(import("network_stub", {rootdir = path.join(os.scriptdir(), "src", "Swift"), anonymous = true}).stub()) do
-                        if stub.library == library.name then
-                            for _, symbol in ipairs(stub.symbols) do
-                                if not exported:find(" " .. symbol .. "\n", 1, true) then
-                                    raise("%s does not export %s, so the link stub generated for swiftNetwork would not resolve it", target:targetfile(), symbol)
+                    for _, module in ipairs({"network_stub", "uti_stub"}) do
+                        for _, stub in ipairs(import(module, {rootdir = path.join(os.scriptdir(), "src", "Swift"), anonymous = true}).stub()) do
+                            if stub.library == library.name then
+                                for _, symbol in ipairs(stub.symbols) do
+                                    if not exported:find(" " .. symbol .. "\n", 1, true) then
+                                        raise("%s does not export %s, so the link stub generated from %s would not resolve it", target:targetfile(), symbol, module)
+                                    end
+                                end
+                                for _, class in ipairs(stub.objcClasses) do
+                                    if not exported:find(" _OBJC_CLASS_$_" .. class .. "\n", 1, true) then
+                                        raise("%s does not export the class %s, so the link stub generated from %s would not resolve it", target:targetfile(), class, module)
+                                    end
                                 end
                             end
                         end

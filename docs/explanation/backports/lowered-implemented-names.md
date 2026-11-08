@@ -86,13 +86,24 @@ lowered headers. The reference is made with `+typeWithIdentifier:`, which return
 `swiftUniformTypeIdentifiers` is built the same way, because it compiles the same folder. `Bridging.swift` is not in the
 host test `uti_test.lua`, which compiles the other four files without the Objective-C class.
 
+The class is defined by `libUIKitBackports.dylib`, so the dylib overlay now refers to `_OBJC_CLASS_$_UTType` and must bind it
+at link time, as `swiftNetwork` binds the TLS entry points: `src/Swift/uti_stub.lua` lists the class and the overlay passes
+`stub = "uti_stub"`, which generates a `libUIKitBackports.tbd` carrying the install name
+`/usr/lib/revenant/org.revenant.backports/libUIKitBackports.dylib`. Without the stub the link of
+`libswiftUniformTypeIdentifiers.dylib` stopped at the undefined class. The `UIKitBackports` target checks after it is built
+that it exports `_OBJC_CLASS_$_UTType`, as the `TLSBackports` target checks its stub symbols, so a rename of the class stops
+that build and not a consumer's link. A port that links `libswiftUniformTypeIdentifiers.dylib` therefore loads
+`libUIKitBackports.dylib` with it, which the Backports package `org.revenant.backports` carries in the folder of that install name.
+
 Checked: the real Bazel parameters of `LegacyMediaPickerUI` replayed through `swiftc` end in the crash (signal 11) with the
 module as it was, and in exit 0 with this one, with the seven objects written. `uti_swift_test.lua` compiles a file made of the picker's two
 initialisers, the browser's initialiser and `contentTypesForRecentDocuments` to an object against the lowered SDK at armv7
 iOS 6.0, and compiles the same file against a module built without `Bridging.swift`, which must stop with `Array<UTType>`
 in the log (it stops in the getter). Of the SDK's `SwiftBridge` classes this is the only one whose Swift side an overlay of
 ours declares: Foundation's come from the runtime's overlay, and `INMediaDestination`, `INShortcut` and the `PencilKit`
-classes have no struct here. Not run: the bridge on a device or in the emulator, since no image is booted here.
+classes have no struct here. The object of `swiftUniformTypeIdentifiers` linked with the generated stub as an armv7 dylib
+with `ld`: the class binds to `libUIKitBackports`, and the same link without the stub leaves it to a dynamic lookup. Not
+run: the bridge on a device or in the emulator, since no image is booted here.
 
 ## SceneKit, Vision and CoreML have a module too
 
