@@ -118,7 +118,7 @@ swift_target("TipKit", "static")
     end)
 
 swift_target("UniformTypeIdentifiers", "static")
-    add_values("swift.flags", "-module-link-name", "UniformTypeIdentifiers")
+    add_values("swift.flags", "-module-link-name", "UniformTypeIdentifiers", table.unpack(UNDERLYING))
     add_frameworks("Foundation", "CoreFoundation", "MobileCoreServices")
     on_load(function (target)
         target:add("files", path.join(SRC, "UniformTypeIdentifiers", "*.swift"))
@@ -333,7 +333,7 @@ overlay("swiftCloudKit", "CloudKit", {})
 
 overlay("swiftWeatherKit", "WeatherKit", {})
 
-overlay("swiftUniformTypeIdentifiers", "UniformTypeIdentifiers", {frameworks = {"MobileCoreServices"}})
+overlay("swiftUniformTypeIdentifiers", "UniformTypeIdentifiers", {underlying = true, frameworks = {"MobileCoreServices"}})
 
 overlay("swiftCryptoKit", "CryptoKit", {packages = {"swift-crypto"}})
 
@@ -348,10 +348,10 @@ overlay("swiftTranslation", "Translation", {concurrency = true, packages = {"swi
 target("swift_backports_tests")
     set_kind("phony")
     set_default(false)
-    add_tests("oslock", "uikittraits", "uikitpointer", "uikitavailability", "availability", "metallowering", "translation", "iosurfaceswift", "coremlswift", "frameworkoverlay", "cxxinterop")
+    add_tests("oslock", "uikittraits", "uikitpointer", "uikitavailability", "availability", "metallowering", "translation", "iosurfaceswift", "coremlswift", "utiswift", "frameworkoverlay", "cxxinterop")
     on_test(function (target, opt)
         import("core.project.project")
-        local scripts = {oslock = "os_lock_test.lua", uikittraits = "uikit_traits_test.lua", uikitpointer = "uikit_pointer_test.lua", uikitavailability = "uikit_availability_test.lua", availability = "availability_test.lua", metallowering = "metal_lowering_test.lua", translation = "translation_test.lua", iosurfaceswift = "iosurface_swift_test.lua", coremlswift = "coreml_swift_test.lua", frameworkoverlay = "framework_overlay_test.lua"}
+        local scripts = {oslock = "os_lock_test.lua", uikittraits = "uikit_traits_test.lua", uikitpointer = "uikit_pointer_test.lua", uikitavailability = "uikit_availability_test.lua", availability = "availability_test.lua", metallowering = "metal_lowering_test.lua", translation = "translation_test.lua", iosurfaceswift = "iosurface_swift_test.lua", coremlswift = "coreml_swift_test.lua", utiswift = "uti_swift_test.lua", frameworkoverlay = "framework_overlay_test.lua"}
         local name = path.filename(opt.name)
         if name == "cxxinterop" then
             local interoperable = {}

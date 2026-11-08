@@ -66,6 +66,34 @@ modules, `UTType.utf8PlainText` fails with "type 'UTType' has no member" and `IO
 ShareExtensionContext, SaveToCameraRoll and MetalEngine sources use typechecks without a change to those lines. That is
 a check of the lines, not a build of the targets.
 
+### `UTType` is bridged to the Objective-C class
+
+The SDK's `UniformTypeIdentifiers.apinotes` names the Objective-C class `UTType` `UTTypeReference` in Swift and gives it
+`SwiftBridge: UTType`, so a header's `NSArray<UTType *>` or `UTType *` is imported as `[UTType]` or `UTType` of the
+struct, and Swift hands it to Objective-C only through the struct's `_ObjectiveCBridgeable` conformance. The overlay's
+struct had none. swift-frontend 6.4 did not diagnose that: with the class in view, IR generation of a call to
+`UIDocumentPickerViewController(forOpeningContentTypes:asCopy:)` crashed in clang's `ARMABIInfo::computeInfo` while it
+expanded the signature `(Array<UTType>, ObjCBool, ...)`, which is the exit 11 of Telegram's
+`LegacyICloudFilePicker.swift:71` in `LegacyMediaPickerUI`. Without the class in view, which is the case of a file that
+imports only the overlay, the initialiser was not imported at all and the call failed with "incorrect argument label".
+
+`frameworks/Backports/src/UniformTypeIdentifiers/Bridging.swift` adds the conformance over `UTTypeReference`, which is the
+Backports' own `UTType` class (`src/UIKit/UTType.m`), and the overlay is built with `-import-underlying-module` as the
+`SceneKit`, `Vision` and `CoreML` modules are, so a consumer that imports the module sees the class and the
+`UIDocumentPickerViewController`, `UIDocumentBrowserViewController` and `contentTypesForRecentDocuments` declarations of the
+lowered headers. The reference is made with `+typeWithIdentifier:`, which returns `nil` for the empty identifier only, so
+`UTType(importedAs: "")`, the one struct without a reference, stops at the `!` of the bridge. The dylib overlay
+`swiftUniformTypeIdentifiers` is built the same way, because it compiles the same folder. `Bridging.swift` is not in the
+host test `uti_test.lua`, which compiles the other four files without the Objective-C class.
+
+Checked: the real Bazel parameters of `LegacyMediaPickerUI` replayed through `swiftc` end in the crash (signal 11) with the
+module as it was, and in exit 0 with this one, with the seven objects written. `uti_swift_test.lua` compiles a file made of the picker's two
+initialisers, the browser's initialiser and `contentTypesForRecentDocuments` to an object against the lowered SDK at armv7
+iOS 6.0, and compiles the same file against a module built without `Bridging.swift`, which must stop with `Array<UTType>`
+in the log (it stops in the getter). Of the SDK's `SwiftBridge` classes this is the only one whose Swift side an overlay of
+ours declares: Foundation's come from the runtime's overlay, and `INMediaDestination`, `INShortcut` and the `PencilKit`
+classes have no struct here. Not run: the bridge on a device or in the emulator, since no image is booted here.
+
 ## SceneKit, Vision and CoreML have a module too
 
 `SceneKit`, `Vision` and `CoreML` (with `TabularData`, `CreateMLComponents` and `CreateML`, which its Swift side needs) are
