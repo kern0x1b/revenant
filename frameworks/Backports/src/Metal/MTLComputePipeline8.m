@@ -8,7 +8,6 @@
 
 @implementation RevenantMetalComputePipeline {
     void *_function;
-    uint32_t _threads;
     uint32_t _blockBytes;
     NSString *_kernel;
     RevenantMetalFunction *_translated;
@@ -76,24 +75,14 @@
     return _blockBytes;
 }
 
-- (uint32_t)revenantThreads
-{
-    return _threads;
-}
-
-- (void)revenantSetThreads:(uint32_t)threads
-{
-    _threads = threads;
-}
-
 - (NSUInteger)maxTotalThreadsPerThreadgroup
 {
-    return _threads;
+    return RevenantMetalMaxThreadsPerThreadgroup;
 }
 
 - (NSUInteger)threadExecutionWidth
 {
-    return _threads;
+    return RevenantMetalThreadExecutionWidth;
 }
 
 - (NSUInteger)maxThreadgroupsPerThreadgroup

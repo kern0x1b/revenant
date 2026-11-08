@@ -828,9 +828,10 @@ if not is_plat("iphoneos") then
     
     host_tests("PassKit", {payment_network = {"PKPaymentNetworks8.m"}})
     host_tests("Intents", {message_types = {"RevenantIntents10.m", "coding/RevenantCoding.m"}, object = {"RevenantIntents120.m", "RevenantIntentsResolution.m", "coding/RevenantCoding.m"}, result = {"RevenantIntents120.m", "RevenantIntentsResolution.m", "coding/RevenantCoding.m"}}, nil, {"Foundation", "Intents"}, {defines = {"REVENANT_HOST_BUILD"}})
-    host_tests("Metal", {binary_archive = {"RevenantMetalBinaryArchive.m"}, line_edges = {"RevenantMetalLineEdges.c"}}, nil, {"Foundation", "Metal"}, {defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("Metal", {binary_archive = {"RevenantMetalBinaryArchive.m"}, line_edges = {"RevenantMetalLineEdges.c"}, grid = {}}, nil, {"Foundation", "Metal"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("MetalPerformanceShaders", {bilinear = {"RevenantMPSBilinear.c"}}, nil, {}, {extension = "c"})
     host_tests("CoreImage", {render_destination = {"CIRenderDestination11.m"}}, "Graphics", {"Foundation", "CoreImage", "CoreGraphics", "CoreVideo", "IOSurface", "Metal", "OpenGL"}, {defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("CoreImage", {orientation = {}}, "Graphics", {"Foundation", "CoreImage", "CoreGraphics"})
     host_tests("VideoToolbox", {conversion = {"VTCreateCGImage9_0.m", "VTConvertBiPlanar.c"}, hardware = {"VTIsHardwareDecodeSupported11_0.m"}}, nil, {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreGraphics", "Foundation"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("VideoToolbox", {hevc = {"VTDecompressionSession8_0.m", "VTSession8_0.m", "VTDecompressionSessionHEVC.m", "VTDecodeHEVC.c", "VTConvertBiPlanar.c", "VTInterleave.c", "VTSystem.c"}}, nil, {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreGraphics", "CoreFoundation", "Foundation"}, {defines = {"REVENANT_HOST_BUILD", "REVENANT_VT_FIXTURE_DIR=\"" .. path.join(os.scriptdir(), "tests", "data", "VideoToolbox") .. "\""}, packages = {"ffmpeg"}, syslinks = {"iconv"}})
     host_tests("LinkPresentation", {metadata = {"RevenantLinkPresentation.m", "RevenantLinkFetch.m", "LPLinkMetadata.m", "LPMetadataProvider.m"}}, nil, {"Foundation", "LinkPresentation"}, {defines = {"REVENANT_HOST_BUILD"}})

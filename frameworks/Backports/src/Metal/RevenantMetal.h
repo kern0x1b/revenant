@@ -7,6 +7,8 @@
 #import <OpenGLES/ES2/glext.h>
 #include "../air2cpu-abi.h"
 
+enum { RevenantMetalThreadExecutionWidth = 32, RevenantMetalMaxThreadsPerThreadgroup = 128 };
+
 @class RevenantMetalTexture;
 @class RevenantMetalSampler;
 @class RevenantMetalHeap;
@@ -219,8 +221,6 @@ extern const NSUInteger RevenantMetalHeapAlignment;
 - (instancetype)initWithFunction:(id<MTLFunction>)function error:(NSError **)error;
 - (void *)revenantKernelFunction;
 - (uint32_t)revenantBlockBytes;
-- (uint32_t)revenantThreads;
-- (void)revenantSetThreads:(uint32_t)threads;
 - (void)revenantSetBlockBytes:(uint32_t)bytes;
 - (NSString *)kernelName;
 - (RevenantMetalFunction *)revenantTranslatedFunction;

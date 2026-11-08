@@ -44,6 +44,8 @@ local ACCEPTANCE = [=[
 #import <UniformTypeIdentifiers/UniformTypeIdentifiers.h>
 #import <Metal/Metal.h>
 #import <Accelerate/Accelerate.h>
+#import <CoreImage/CoreImage.h>
+#import <ImageIO/ImageIO.h>
 
 void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager *manager)
 {
@@ -85,6 +87,16 @@ void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager 
     CAFrameRateRange frameRates = CAFrameRateRangeMake(30.0f, 120.0f, 120.0f);
     (void)frameRates;
     (void)[UIPointerShape shapeWithRoundedRect:CGRectZero cornerRadius:8.0];
+    CGMutablePathRef rounded = CGPathCreateMutable();
+    CGPathAddRoundedRect(rounded, NULL, CGRectMake(0, 0, 10, 10), 2, 2);
+    CGPathRef created = CGPathCreateWithRoundedRect(CGRectMake(0, 0, 10, 10), 2, 2, NULL);
+    CGPathRelease(created);
+    CGPathRelease(rounded);
+    CIImage *image = nil;
+    (void)[image imageByApplyingOrientation:1];
+    (void)[image imageTransformForOrientation:1];
+    (void)[image imageByApplyingCGOrientation:kCGImagePropertyOrientationUp];
+    (void)[image imageTransformForCGOrientation:kCGImagePropertyOrientationUp];
 }
 ]=]
 

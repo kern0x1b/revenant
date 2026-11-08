@@ -177,7 +177,24 @@ target("IOSurface")
         target:add("files", path.join(SRC, "IOSurface", "*.swift"))
     end)
 
-local function createml(name, folder, deps, flags, gap)
+local function framework_overlay(name)
+    target(name)
+        set_kind("static")
+        set_default(false)
+        add_rules("@addon/revenant/swift")
+        add_values("swift.flags", "-module-link-name", name, "-Xfrontend", "-import-underlying-module")
+        set_values("swift.cxx_interop", "off")
+        set_optimize("fastest")
+        on_load(function (target)
+            target:add("files", path.join(SRC, name, "*.swift"))
+        end)
+    target_end()
+end
+
+framework_overlay("SceneKit")
+framework_overlay("Vision")
+
+local function createml(name, folder, deps, flags)
     target(name)
         set_kind("static")
         set_default(false)
@@ -193,17 +210,13 @@ local function createml(name, folder, deps, flags, gap)
         on_config(function (target)
             add_flags(target, flags or {})
         end)
-        if gap then
-            open_gap(name, gap)
-        end
     target_end()
 end
 
 createml("TabularData", "TabularData", {}, {})
-createml("CoreML", "CoreML", {}, {"-import-objc-header", path.join(SRC, "CoreML", "RevenantCoreML.h")},
-         "ShapedArray.swift names MLMultiArrayDataType, which the SDK's CoreML declares for iOS 11 and later only")
-createml("CreateMLComponents", "CreateMLComponents", {"TabularData", "CoreML"}, {}, "it needs CoreML, an open gap")
-createml("CreateML", "CreateML", {"CreateMLComponents", "TabularData", "CoreML"}, {}, "it needs CreateMLComponents and CoreML, open gaps")
+createml("CoreML", "CoreML", {}, {"-Xfrontend", "-import-underlying-module", "-import-objc-header", path.join(SRC, "CoreML", "RevenantCoreML.h")})
+createml("CreateMLComponents", "CreateMLComponents", {"TabularData", "CoreML"}, {})
+createml("CreateML", "CreateML", {"CreateMLComponents", "TabularData", "CoreML"}, {})
 
 target("MusicKit")
     set_kind("static")
@@ -376,10 +389,10 @@ overlay("swiftTranslation", "Translation", {concurrency = true, packages = {"swi
 target("swift_backports_tests")
     set_kind("phony")
     set_default(false)
-    add_tests("oslock", "uikittraits", "uikitpointer", "uikitavailability", "availability", "metallowering", "translation", "iosurfaceswift")
+    add_tests("oslock", "uikittraits", "uikitpointer", "uikitavailability", "availability", "metallowering", "translation", "iosurfaceswift", "coremlswift", "frameworkoverlay")
     on_test(function (target, opt)
         import("core.project.project")
-        local scripts = {oslock = "os_lock_test.lua", uikittraits = "uikit_traits_test.lua", uikitpointer = "uikit_pointer_test.lua", uikitavailability = "uikit_availability_test.lua", availability = "availability_test.lua", metallowering = "metal_lowering_test.lua", translation = "translation_test.lua", iosurfaceswift = "iosurface_swift_test.lua"}
+        local scripts = {oslock = "os_lock_test.lua", uikittraits = "uikit_traits_test.lua", uikitpointer = "uikit_pointer_test.lua", uikitavailability = "uikit_availability_test.lua", availability = "availability_test.lua", metallowering = "metal_lowering_test.lua", translation = "translation_test.lua", iosurfaceswift = "iosurface_swift_test.lua", coremlswift = "coreml_swift_test.lua", frameworkoverlay = "framework_overlay_test.lua"}
         local name = path.filename(opt.name)
         local root = path.join(SRC, "..", "..", "..")
         local runtime = project.required_package("swift-runtime"):installdir()
