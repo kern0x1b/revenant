@@ -277,6 +277,20 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
     _percentEncodedHost = [percentEncodedHost copy];
     revenant_url_set_host_text(self, nil);
 }
+
+- (NSString *)encodedHost
+{
+    return self.revenantHostText ?: _percentEncodedHost;
+}
+
+- (void)setEncodedHost:(NSString *)encodedHost
+{
+    if (encodedHost)
+        revenant_url_require(revenant_url_valid(RevenantURLHost, encodedHost), self, _cmd, @"encodedHost");
+    _percentEncodedHost = [encodedHost copy];
+    revenant_url_set_host_text(self, nil);
+}
+
 - (NSString *)revenantHostText
 {
     return objc_getAssociatedObject(self, &revenant_host_text_key);

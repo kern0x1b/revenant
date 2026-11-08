@@ -1,89 +1,116 @@
 #import <Foundation/Foundation.h>
-#import <objc/runtime.h>
 
-extern BOOL revenant_url_parse(NSString *string, NSRange *ranges);
-extern BOOL revenant_url_valid(int part, NSString *string);
-extern NSString *revenant_url_compose(NSURLComponents *components, NSRange *ranges);
-
-static char RevenantURLComponentsRawKey;
-
-static NSString *revenant_escaped(NSString *text)
+static NSCharacterSet *revenant_written_characters(void)
 {
-    NSMutableString *out = [NSMutableString stringWithCapacity:text.length];
-    NSCharacterSet *allowed = [NSCharacterSet URLUserAllowedCharacterSet];
+    static NSCharacterSet *allowed;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        allowed = [NSCharacterSet characterSetWithCharactersInString:
+                   @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%"];
+    });
+    return allowed;
+}
+
+static BOOL revenant_readable(NSString *text)
+{
+    NSCharacterSet *allowed = revenant_written_characters();
     for (NSUInteger index = 0; index < text.length; index++) {
-        unichar character = [text characterAtIndex:index];
-        if (character < 128 && [allowed characterIsMember:character]) {
-            [out appendFormat:@"%C", character];
-            continue;
-        }
-        [out appendFormat:@"%%%02X", character];
+        if (![allowed characterIsMember:[text characterAtIndex:index]])
+            return NO;
     }
-    return out;
+    return YES;
 }
 
 static NSString *revenant_whole_escaped(NSString *text)
 {
-    NSMutableString *out = [NSMutableString stringWithCapacity:text.length];
-    for (NSUInteger index = 0; index < text.length; index++) {
-        unichar character = [text characterAtIndex:index];
-        if ((character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') ||
-            (character >= '0' && character <= '9') || character == '-' || character == '.' ||
-            character == '_' || character == '~' || character == ':' || character == '/' ||
-            character == '?' || character == '#' || character == '[' || character == ']' ||
-            character == '@' || character == '!' || character == '$' || character == '&' ||
-            character == '\'' || character == '(' || character == ')' || character == '*' ||
-            character == '+' || character == ',' || character == ';' || character == '=' || character == '%') {
-            [out appendFormat:@"%C", character];
-            continue;
-        }
-        [out appendFormat:@"%%%02X", character];
+    NSCharacterSet *allowed = revenant_written_characters();
+    NSData *bytes = [text dataUsingEncoding:NSUTF8StringEncoding allowLossyConversion:YES];
+    const unsigned char *raw = bytes.bytes;
+    NSMutableString *out = [NSMutableString stringWithCapacity:bytes.length];
+    for (NSUInteger index = 0; index < bytes.length; index++) {
+        if (raw[index] < 128 && [allowed characterIsMember:raw[index]])
+            [out appendFormat:@"%c", raw[index]];
+        else
+            [out appendFormat:@"%%%02X", raw[index]];
     }
     return out;
+}
+
+static BOOL revenant_scheme_character(unichar character, BOOL first)
+{
+    if ((character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z'))
+        return YES;
+    return !first && ((character >= '0' && character <= '9') || character == '+' || character == '-' || character == '.');
+}
+
+static NSRange revenant_host_range(NSString *text)
+{
+    NSUInteger length = text.length;
+    NSUInteger after = 0;
+    NSUInteger scan = 0;
+    while (scan < length && revenant_scheme_character([text characterAtIndex:scan], scan == 0))
+        scan++;
+    if (scan > 0 && scan < length && [text characterAtIndex:scan] == ':')
+        after = scan + 1;
+    if (after + 2 > length || [text characterAtIndex:after] != '/' || [text characterAtIndex:after + 1] != '/')
+        return NSMakeRange(NSNotFound, 0);
+    NSUInteger authority = after + 2;
+    NSUInteger end = authority;
+    while (end < length) {
+        unichar character = [text characterAtIndex:end];
+        if (character == '/' || character == '?' || character == '#')
+            break;
+        end++;
+    }
+    NSUInteger start = authority;
+    for (NSUInteger index = authority; index < end; index++) {
+        if ([text characterAtIndex:index] == '@')
+            start = index + 1;
+    }
+    NSUInteger stop = end;
+    if (start < end && [text characterAtIndex:start] == '[') {
+        for (NSUInteger index = start; index < end; index++) {
+            if ([text characterAtIndex:index] == ']') {
+                stop = index + 1;
+                break;
+            }
+        }
+    } else {
+        for (NSUInteger index = end; index > start; index--) {
+            if ([text characterAtIndex:index - 1] == ':') {
+                stop = index - 1;
+                break;
+            }
+        }
+    }
+    return NSMakeRange(start, stop - start);
+}
+
+static NSString *revenant_encoded_invalid(NSString *text)
+{
+    NSRange host = revenant_host_range(text);
+    if (host.location == NSNotFound)
+        return revenant_whole_escaped(text);
+    NSString *head = [text substringToIndex:host.location];
+    NSString *tail = [text substringFromIndex:NSMaxRange(host)];
+    return [@[revenant_whole_escaped(head), [text substringWithRange:host], revenant_whole_escaped(tail)] componentsJoinedByString:@""];
 }
 
 @implementation NSURLComponents (RevenantEncoding)
 
 + (NSURLComponents *)componentsWithString:(NSString *)string encodingInvalidCharacters:(BOOL)encoding
 {
-    NSURLComponents *components = encoding ? [self componentsWithString:revenant_whole_escaped(string)] : [self componentsWithString:string];
-    if (components)
-        objc_setAssociatedObject(components, &RevenantURLComponentsRawKey, [string copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    return components;
+    return [[self alloc] initWithString:string encodingInvalidCharacters:encoding];
 }
 
 - (instancetype)initWithString:(NSString *)string encodingInvalidCharacters:(BOOL)encoding
 {
-    NSURLComponents *components = encoding ? [[NSURLComponents alloc] initWithString:revenant_whole_escaped(string)]
-                                           : [[NSURLComponents alloc] initWithString:string];
-    if (components && components != self)
-        objc_setAssociatedObject(components, &RevenantURLComponentsRawKey, [string copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    if (components)
-        objc_setAssociatedObject(self, &RevenantURLComponentsRawKey, [string copy], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    return components == self ? self : components;
-}
-
-- (NSString *)encodedHost
-{
-    NSString *host = self.host;
-    if (!host)
+    if (encoding)
+        return [self initWithString:revenant_encoded_invalid(string)];
+    if (!revenant_readable(string))
         return nil;
-    NSString *raw = objc_getAssociatedObject(self, &RevenantURLComponentsRawKey);
-    if (raw) {
-        NSRange schemeRange = [raw rangeOfString:@"://"];
-        if (schemeRange.location != NSNotFound) {
-            NSString *rest = [raw substringFromIndex:NSMaxRange(schemeRange)];
-            NSRange at = [rest rangeOfString:@"@"];
-            if (at.location != NSNotFound)
-                rest = [rest substringFromIndex:NSMaxRange(at)];
-            NSRange end = [rest rangeOfCharacterFromSet:[NSCharacterSet characterSetWithRange:NSMakeRange(':', 1)].invertedSet];
-            if (end.location != NSNotFound)
-                rest = [rest substringToIndex:end.location];
-            if (rest.length)
-                return rest;
-        }
-    }
-    return revenant_escaped(host);
+    self = [self initWithString:string];
+    return [self.string isEqualToString:string] ? self : nil;
 }
 
 @end

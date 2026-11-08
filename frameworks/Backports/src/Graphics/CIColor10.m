@@ -3,35 +3,57 @@
 
 #pragma clang diagnostic ignored "-Wobjc-missing-property-synthesis"
 
-static CGColorRef RevenantCIColorInSpace(CGFloat red, CGFloat green, CGFloat blue, CGFloat alpha, CGColorSpaceRef space)
+static CGColorSpaceRef revenant_device_rgb(void)
 {
-    if (!space)
+    static CGColorSpaceRef space;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
         space = CGColorSpaceCreateDeviceRGB();
-    return CGColorCreate(space, (CGFloat[]){red, green, blue, alpha});
+    });
+    return space;
+}
+
+static CGColorRef revenant_cg_color(CGFloat red, CGFloat green, CGFloat blue, CGFloat alpha, CGColorSpaceRef space)
+{
+    return CGColorCreate(space ?: revenant_device_rgb(), (CGFloat[]){red, green, blue, alpha});
+}
+
+static CIColor *revenant_ci_color(Class cls, CGFloat red, CGFloat green, CGFloat blue, CGFloat alpha, CGColorSpaceRef space)
+{
+    CGColorRef color = revenant_cg_color(red, green, blue, alpha, space);
+    CIColor *result = [cls colorWithCGColor:color];
+    CGColorRelease(color);
+    return result;
 }
 
 @implementation CIColor (RevenantColorSpace)
 
 + (instancetype)colorWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue colorSpace:(CGColorSpaceRef)colorSpace
 {
-    return [self colorWithCGColor:RevenantCIColorInSpace(red, green, blue, 1, colorSpace)];
+    return revenant_ci_color(self, red, green, blue, 1, colorSpace);
 }
 
 + (instancetype)colorWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha
                    colorSpace:(CGColorSpaceRef)colorSpace
 {
-    return [self colorWithCGColor:RevenantCIColorInSpace(red, green, blue, alpha, colorSpace)];
+    return revenant_ci_color(self, red, green, blue, alpha, colorSpace);
 }
 
 - (instancetype)initWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue colorSpace:(CGColorSpaceRef)colorSpace
 {
-    return [self initWithCGColor:RevenantCIColorInSpace(red, green, blue, 1, colorSpace)];
+    CGColorRef color = revenant_cg_color(red, green, blue, 1, colorSpace);
+    self = [self initWithCGColor:color];
+    CGColorRelease(color);
+    return self;
 }
 
 - (instancetype)initWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha
                   colorSpace:(CGColorSpaceRef)colorSpace
 {
-    return [self initWithCGColor:RevenantCIColorInSpace(red, green, blue, alpha, colorSpace)];
+    CGColorRef color = revenant_cg_color(red, green, blue, alpha, colorSpace);
+    self = [self initWithCGColor:color];
+    CGColorRelease(color);
+    return self;
 }
 
 - (instancetype)initWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue
@@ -43,24 +65,104 @@ static CGColorRef RevenantCIColorInSpace(CGFloat red, CGFloat green, CGFloat blu
 
 @implementation CIColor (RevenantNamedColors)
 
-#define RevenantNamedColor(name, r, g, b, a)                                                                                \
-    + (CIColor *)name                                                                                                     \
-    {                                                                                                                     \
-        static CIColor *color;                                                                                            \
-        if (!color)                                                                                                       \
-            color = [CIColor colorWithRed:r green:g blue:b alpha:a colorSpace:CGColorSpaceCreateDeviceRGB()];                 \
-        return color;                                                                                                     \
-    }
++ (CIColor *)blackColor
+{
+    static CIColor *color;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        color = revenant_ci_color([CIColor class], 0, 0, 0, 1, NULL);
+    });
+    return color;
+}
 
-RevenantNamedColor(blackColor, 0, 0, 0, 1)
-RevenantNamedColor(whiteColor, 1, 1, 1, 1)
-RevenantNamedColor(grayColor, 0.5, 0.5, 0.5, 1)
-RevenantNamedColor(redColor, 1, 0, 0, 1)
-RevenantNamedColor(greenColor, 0, 1, 0, 1)
-RevenantNamedColor(blueColor, 0, 0, 1, 1)
-RevenantNamedColor(cyanColor, 0, 1, 1, 1)
-RevenantNamedColor(magentaColor, 1, 0, 1, 1)
-RevenantNamedColor(yellowColor, 1, 1, 0, 1)
-RevenantNamedColor(clearColor, 0, 0, 0, 0)
++ (CIColor *)whiteColor
+{
+    static CIColor *color;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        color = revenant_ci_color([CIColor class], 1, 1, 1, 1, NULL);
+    });
+    return color;
+}
+
++ (CIColor *)grayColor
+{
+    static CIColor *color;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        color = revenant_ci_color([CIColor class], 0.5, 0.5, 0.5, 1, NULL);
+    });
+    return color;
+}
+
++ (CIColor *)redColor
+{
+    static CIColor *color;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        color = revenant_ci_color([CIColor class], 1, 0, 0, 1, NULL);
+    });
+    return color;
+}
+
++ (CIColor *)greenColor
+{
+    static CIColor *color;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        color = revenant_ci_color([CIColor class], 0, 1, 0, 1, NULL);
+    });
+    return color;
+}
+
++ (CIColor *)blueColor
+{
+    static CIColor *color;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        color = revenant_ci_color([CIColor class], 0, 0, 1, 1, NULL);
+    });
+    return color;
+}
+
++ (CIColor *)cyanColor
+{
+    static CIColor *color;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        color = revenant_ci_color([CIColor class], 0, 1, 1, 1, NULL);
+    });
+    return color;
+}
+
++ (CIColor *)magentaColor
+{
+    static CIColor *color;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        color = revenant_ci_color([CIColor class], 1, 0, 1, 1, NULL);
+    });
+    return color;
+}
+
++ (CIColor *)yellowColor
+{
+    static CIColor *color;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        color = revenant_ci_color([CIColor class], 1, 1, 0, 1, NULL);
+    });
+    return color;
+}
+
++ (CIColor *)clearColor
+{
+    static CIColor *color;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        color = revenant_ci_color([CIColor class], 0, 0, 0, 0, NULL);
+    });
+    return color;
+}
 
 @end

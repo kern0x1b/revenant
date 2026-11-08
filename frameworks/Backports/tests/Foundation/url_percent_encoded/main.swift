@@ -63,3 +63,27 @@ for path in paths {
     print("file\t" + show(path) + "\trelative\t" + locations(URL(filePath: path, relativeTo: base)))
     print("file\t" + show(path) + "\trelativeDirectory\t" + locations(URL(filePath: path, directoryHint: .isDirectory, relativeTo: base)))
 }
+
+let directories: [(String, URL)] = [
+    ("home", URL.homeDirectory),
+    ("temporary", URL.temporaryDirectory),
+    ("caches", URL.cachesDirectory),
+    ("applicationSupport", URL.applicationSupportDirectory),
+    ("library", URL.libraryDirectory),
+    ("documents", URL.documentsDirectory),
+    ("desktop", URL.desktopDirectory),
+    ("downloads", URL.downloadsDirectory),
+    ("movies", URL.moviesDirectory),
+    ("music", URL.musicDirectory),
+    ("pictures", URL.picturesDirectory),
+    ("sharedPublic", URL.sharedPublicDirectory),
+    ("application", URL.applicationDirectory),
+    ("user", URL.userDirectory),
+    ("current", URL.currentDirectory()),
+]
+for (name, url) in directories {
+    print("directory\t" + name + "\t" + locations(url))
+}
+for user in [NSUserName(), "root", "revenant-no-such-user"] {
+    print("directory\thome(forUser: " + user + ")\t" + (URL.homeDirectory(forUser: user).map(locations) ?? "nil"))
+}

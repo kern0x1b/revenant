@@ -23,9 +23,14 @@ int main(int argc, const char **argv)
             } else {
                 row = [@[field(components.scheme), field(components.percentEncodedUser), field(components.percentEncodedPassword),
                          field(components.percentEncodedHost), field(components.port.stringValue), field(components.percentEncodedPath),
-                         field(components.percentEncodedQuery), field(components.percentEncodedFragment), field(components.string)]
+                         field(components.percentEncodedQuery), field(components.percentEncodedFragment), field(components.string),
+                         field(components.encodedHost)]
                        componentsJoinedByString:@"\t"];
             }
+            NSURLComponents *encoded = [NSURLComponents componentsWithString:input encodingInvalidCharacters:YES];
+            NSString *encodedRow = encoded ? [@[field(encoded.string), field(encoded.encodedHost), field(encoded.percentEncodedPath)] componentsJoinedByString:@"\t"] : @"nil";
+            NSURLComponents *strict = [NSURLComponents componentsWithString:input encodingInvalidCharacters:NO];
+            row = [row stringByAppendingFormat:@"\tencoding:%@\tstrict:%@", encodedRow, strict ? field(strict.string) : @"nil"];
             printf("%lu\t%s\n", (unsigned long)index, row.UTF8String);
             index++;
         }

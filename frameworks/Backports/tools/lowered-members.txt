@@ -158,6 +158,7 @@ class AVCaptureSynchronizedSampleBufferData
 class AVCaptureVideoDataOutput
 class AVCaptureVideoPreviewLayer
 class AVComposition
+class AVCompositionTrack
 class AVContentKey
 class AVContentKeyRequest
 class AVContentKeyResponse
@@ -1768,6 +1769,7 @@ class RevenantInflectedRun
 class RevenantInputViewController8
 class RevenantIntentsUIHostedViewController
 class RevenantItemProxy
+class RevenantItemVolume
 class RevenantJSONReader
 class RevenantKeyCommandInstaller
 class RevenantKeyInputView
@@ -1913,6 +1915,8 @@ class RevenantPhotosStore
 class RevenantPhotosThread
 class RevenantPhotosTransaction
 class RevenantPictureInPictureWindow
+class RevenantPlayerVolume
+class RevenantPlayerVolumeInstaller
 class RevenantPopoverState
 class RevenantPostOrderEnumerator
 class RevenantPostOrderInstaller
@@ -11626,6 +11630,7 @@ member AVAssetImageGenerator -generateCGImageAsynchronouslyForTime:completionHan
 member AVAssetTrack -loadMetadataForFormat:completionHandler:
 member AVAssetTrack -loadSamplePresentationTimeForTrackTime:completionHandler:
 member AVAssetTrack -loadSegmentForTrackTime:completionHandler:
+member AVAssetTrack -minFrameDuration
 member AVAssetWriter -preferredOutputSegmentInterval
 member AVAssetWriter -setPreferredOutputSegmentInterval:
 member AVAssetWriterInput -canPerformMultiplePasses
@@ -12467,6 +12472,7 @@ member AVComposition -loadTrackWithTrackID:completionHandler:
 member AVComposition -loadTracksWithMediaCharacteristic:completionHandler:
 member AVComposition -loadTracksWithMediaType:completionHandler:
 member AVComposition -setURLAssetInitializationOptions:
+member AVCompositionTrack -minFrameDuration
 member AVContentKey +revenant_contentKeyWithSpecifier:keyData:initializationVector:
 member AVContentKey -contentKeySpecifier
 member AVContentKey -externalContentProtectionStatus
@@ -12860,14 +12866,18 @@ member AVPlaybackSpeed -localizedNumericName
 member AVPlaybackSpeed -rate
 member AVPlayer -automaticallyWaitsToMinimizeStalling
 member AVPlayer -defaultRate
+member AVPlayer -isMuted
 member AVPlayer -playImmediatelyAtRate:
 member AVPlayer -preventsDisplaySleepDuringVideoPlayback
 member AVPlayer -setAutomaticallyWaitsToMinimizeStalling:
 member AVPlayer -setDefaultRate:
+member AVPlayer -setMuted:
 member AVPlayer -setPreventsDisplaySleepDuringVideoPlayback:
 member AVPlayer -setSourceClock:
+member AVPlayer -setVolume:
 member AVPlayer -sourceClock
 member AVPlayer -timeControlStatus
+member AVPlayer -volume
 member AVPlayerItem +playerItemWithAsset:automaticallyLoadedAssetKeys:
 member AVPlayerItem -automaticallyLoadedAssetKeys
 member AVPlayerItem -initWithAsset:automaticallyLoadedAssetKeys:
@@ -13338,18 +13348,33 @@ member CIAztecCodeDescriptor -errorCorrectedPayload
 member CIAztecCodeDescriptor -initWithCoder:
 member CIAztecCodeDescriptor -initWithPayload:isCompact:layerCount:dataCodewordCount:
 member CIBarcodeDescriptor +supportsSecureCoding
+member CIColor +blackColor
+member CIColor +blueColor
+member CIColor +clearColor
 member CIColor +colorWithRed:green:blue:alpha:colorSpace:
 member CIColor +colorWithRed:green:blue:colorSpace:
+member CIColor +cyanColor
+member CIColor +grayColor
+member CIColor +greenColor
+member CIColor +magentaColor
+member CIColor +redColor
+member CIColor +whiteColor
+member CIColor +yellowColor
 member CIColor -initWithRed:green:blue:
 member CIColor -initWithRed:green:blue:alpha:colorSpace:
 member CIColor -initWithRed:green:blue:colorSpace:
 member CIContext +contextWithCGContext:options:
+member CIContext +contextWithMTLCommandQueue:
+member CIContext +contextWithMTLCommandQueue:options:
+member CIContext +contextWithMTLDevice:
+member CIContext +contextWithMTLDevice:options:
 member CIContext -JPEGRepresentationOfImage:colorSpace:options:
 member CIContext -PNGRepresentationOfImage:format:colorSpace:options:
 member CIContext -TIFFRepresentationOfImage:format:colorSpace:options:
 member CIContext -clearCaches
 member CIContext -createCGImage:fromRect:format:colorSpace:deferred:
 member CIContext -prepareRender:fromRect:toDestination:atPoint:error:
+member CIContext -render:toMTLTexture:commandBuffer:bounds:colorSpace:
 member CIContext -revenant_representationOfImage:format:colorSpace:type:
 member CIContext -revenant_writeRepresentationOfImage:toURL:format:colorSpace:type:error:
 member CIContext -startTaskToRender:fromRect:toDestination:atPoint:error:
@@ -13382,6 +13407,7 @@ member CIImage +grayImage
 member CIImage +greenImage
 member CIImage +imageWithCVImageBuffer:
 member CIImage +imageWithCVImageBuffer:options:
+member CIImage +imageWithMTLTexture:options:
 member CIImage +magentaImage
 member CIImage +redImage
 member CIImage +whiteImage
@@ -13400,6 +13426,8 @@ member CIImage -imageBySamplingLinear
 member CIImage -imageTransformForCGOrientation:
 member CIImage -initWithCVImageBuffer:
 member CIImage -initWithCVImageBuffer:options:
+member CIImage -initWithMTLTexture:options:
+member CIImage -metalTexture
 member CIImage -revenant_imageOfColor:
 member CIImageAccumulator +imageAccumulatorWithExtent:format:
 member CIImageAccumulator +imageAccumulatorWithExtent:format:colorSpace:
@@ -24481,6 +24509,7 @@ member NSURLComponents -rangeOfUser
 member NSURLComponents -revenantHostText
 member NSURLComponents -revenantPortText
 member NSURLComponents -scheme
+member NSURLComponents -setEncodedHost:
 member NSURLComponents -setFragment:
 member NSURLComponents -setHost:
 member NSURLComponents -setPassword:
@@ -26675,6 +26704,9 @@ member RevenantIntentsUIHostedViewController -revenant_parametersOfInteraction:
 member RevenantIntentsUIHostedViewController -viewDidLayoutSubviews
 member RevenantItemProxy -initWithItem:
 member RevenantItemProxy -revenant_tapped:
+member RevenantItemVolume -base
+member RevenantItemVolume -gain
+member RevenantItemVolume -ours
 member RevenantJSONReader -advance
 member RevenantJSONReader -buffer
 member RevenantJSONReader -fail:
@@ -27585,6 +27617,14 @@ member RevenantPhotosTransaction -refuseWithReason:
 member RevenantPictureInPictureWindow -revenantController
 member RevenantPictureInPictureWindow -revenant_close:
 member RevenantPictureInPictureWindow -revenant_pan:
+member RevenantPlayerVolume -dealloc
+member RevenantPlayerVolume -gain
+member RevenantPlayerVolume -init
+member RevenantPlayerVolume -items
+member RevenantPlayerVolume -muted
+member RevenantPlayerVolume -player
+member RevenantPlayerVolume -volume
+member RevenantPlayerVolumeInstaller +load
 member RevenantPopoverState -popover
 member RevenantPopoverState -popoverController:willRepositionPopoverToRect:inView:
 member RevenantPopoverState -popoverControllerDidDismissPopover:
@@ -35310,6 +35350,8 @@ protocol RevenantMPSCommandBufferDebugging
 protocol RevenantMPSCommitAndContinuing
 protocol RevenantMPSImageThresholdHooks
 protocol RevenantMPSNDArrayAxisKernel
+protocol RevenantMetalDeviceContext
+protocol RevenantMetalTextureName
 protocol RevenantOverlayView
 protocol RevenantPhotosChange
 protocol RevenantPolicyListener
