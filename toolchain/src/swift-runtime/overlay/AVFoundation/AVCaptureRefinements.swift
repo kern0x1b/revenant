@@ -40,16 +40,19 @@ extension AVCaptureDevice.Format {
     return __supportedVideoZoomFactorsForDepthDataDelivery.map { CGFloat($0.doubleValue) }
   }
 
+  @available(iOS 17.2, *)
   @nonobjc
   public var supportedVideoZoomRangesForDepthDataDelivery: [ClosedRange<CGFloat>] {
     return __supportedVideoZoomRangesForDepthDataDelivery.map { $0.minZoomFactor...$0.maxZoomFactor }
   }
 
+  @available(iOS 18.0, *)
   @nonobjc
   public var systemRecommendedVideoZoomRange: ClosedRange<CGFloat>? {
     return __systemRecommendedVideoZoomRange.map { $0.minZoomFactor...$0.maxZoomFactor }
   }
 
+  @available(iOS 18.0, *)
   @nonobjc
   public var systemRecommendedExposureBiasRange: ClosedRange<Float>? {
     return __systemRecommendedExposureBiasRange.map { $0.minExposureBias...$0.maxExposureBias }

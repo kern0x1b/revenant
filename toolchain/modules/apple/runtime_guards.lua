@@ -1,6 +1,9 @@
 import("compat")
 
 GUARDS = {
+    ["libswiftAVFoundation.dylib"] = {
+        ["_OBJC_CLASS_$_AVZoomRange"] = "toolchain/src/swift-runtime/overlay/AVFoundation/AVCaptureRefinements.swift:46 and :52 (the zoom-range accessors are gated by the availability attributes at :43 and :49, which a caller must pass before it reads them)",
+    },
     ["libswiftCore.dylib"] = {
         ["__dyld_is_objc_constant"] = "stdlib/public/stubs/FoundationHelpers.mm:124 @ swiftlang/swift b8189d766d86ad7fc8106787d6ce9e402f38dd72",
         ["__objc_realizeClassFromSwift"] = "packages/s/swift-runtime/patches/realize-a-pure-objc-class-before-objc-realize-class-from-swift.patch (tests the symbol at its use in swift_updatePureObjCClassMetadata)",
