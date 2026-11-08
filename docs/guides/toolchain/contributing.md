@@ -60,6 +60,16 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
   chain from the network, up to building LLVM. A build's own output that must survive (a crash log) goes to a file
   of its own: `./xmakew build -P . ... > ".cache/scratch/<task>/build.log" 2>&1`.
 
+- **Installing one package of a project on its own after the checkout moved.** Wrong: `./xmakew require -P . revenant@swift-runtime`
+  and then `./xmakew require -P . revenant@backports` as the first steps after a merge that moved only recipe digests.
+  Right: `./xmakew f -P . -p iphoneos -a armv7 ...` first. Reason: a required package is registered with the
+  environment of every package it depends on, so installing the runtime alone leaves the records of its dependents
+  (`combine`, `swiftui`, `swift-crypto`) naming the runtime they were built against, and the next command stops with
+  `links 2 builds of swift-runtime`, two builds that differ in the recipe digest only. The configure rechecks the
+  requires when any file of the recipe folder of a required package, or of a package it depends on, differs from the one
+  it was installed from (`port/digest.lua` is one such file), and then installs each package against the current
+  build; with no changed file it does nothing.
+
 - **Device-side binaries.** Wrong: building a device binary, even a throwaway probe, with the host's `cc` or `clang`.
   Right: a `target()` using `@addon/revenant/daemon` (or `app`, `tweak`), built by the `apple-ios` toolchain like any
   port. Reason: a Mach-O built for the wrong target dies with `Bad system call: 12` (SIGSYS) before its own code runs
