@@ -439,6 +439,7 @@ package("swift-runtime")
             local presentation_intent = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "PresentationIntent.swift")
             local locale_language = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "LocaleLanguage.swift")
             local url_session_web_socket_task = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "URLSessionWebSocketTask.swift")
+            local url_percent_encoded = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "URLPercentEncoded.swift")
             local values = expand(path.join(foundation, "NSValue.swift.gyb"), path.join(generated, "NSValue.swift"))
             local foundation_objects = {}
             for _, file in ipairs({"DataThunks.m", "BundleLookup.mm"}) do
@@ -463,7 +464,7 @@ package("swift-runtime")
                 "PersonNameComponents.swift", "PlistEncoder.swift", "Pointers+DataProtocol.swift",
                 "Progress.swift", "ReferenceConvertible.swift", "Scanner.swift", "String.swift", "TimeZone.swift",
                 "URL.swift", "URLCache.swift", "URLComponents.swift", "URLRequest.swift", "URLSession.swift",
-                "UUID.swift"}), {presentation_intent, locale_language, url_session_web_socket_task}),
+                "UUID.swift"}), {presentation_intent, locale_language, url_session_web_socket_task, url_percent_encoded}),
                           table.join(flat_flags, {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation", "-lswiftCoreGraphics",
                            "-framework", "Foundation", "-framework", "CoreFoundation"}), foundation_objects,
                           {concurrency = true, module_cache = foundation_cache,
