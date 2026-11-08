@@ -193,6 +193,8 @@ end
 
 framework_overlay("SceneKit")
 framework_overlay("Vision")
+framework_overlay("NaturalLanguage")
+framework_overlay("PassKit")
 
 local function createml(name, folder, deps, flags)
     target(name)
