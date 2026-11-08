@@ -48,6 +48,12 @@ static BOOL formatFor(MTLPixelFormat pixelFormat, RevenantFormat *out)
     }
 }
 
+NSUInteger RevenantMetalTexelBytes(MTLPixelFormat pixelFormat)
+{
+    RevenantFormat format;
+    return formatFor(pixelFormat, &format) ? format.bytes : 0;
+}
+
 BOOL RevenantMetalDeviceHasExtension(const char *required)
 {
     static char *extensions;
@@ -527,6 +533,27 @@ static int depthKind(MTLPixelFormat pixelFormat)
     [self revenantReadRegion:region level:level bytesPerRow:bytesPerRow into:pointer];
 }
 
+- (BOOL)revenantAcceptsSlice:(NSUInteger)slice region:(MTLRegion)region operation:(const char *)operation
+{
+    if (slice == 0 && region.size.depth == 1)
+        return YES;
+    NSLog(@"Metal: %s of slice %lu and depth %lu is refused: a texture of this device is one 2D image, so only slice 0 of depth 1 exists",
+          operation, (unsigned long)slice, (unsigned long)region.size.depth);
+    return NO;
+}
+
+- (void)replaceRegion:(MTLRegion)region mipmapLevel:(NSUInteger)level slice:(NSUInteger)slice withBytes:(const void *)pointer bytesPerRow:(NSUInteger)bytesPerRow bytesPerImage:(NSUInteger)bytesPerImage
+{
+    if ([self revenantAcceptsSlice:slice region:region operation:"replaceRegion"])
+        [self revenantWriteRegion:region level:level bytes:pointer bytesPerRow:bytesPerRow];
+}
+
+- (void)getBytes:(void *)pointer bytesPerRow:(NSUInteger)bytesPerRow bytesPerImage:(NSUInteger)bytesPerImage fromRegion:(MTLRegion)region mipmapLevel:(NSUInteger)level slice:(NSUInteger)slice
+{
+    if ([self revenantAcceptsSlice:slice region:region operation:"getBytes"])
+        [self revenantReadRegion:region level:level bytesPerRow:bytesPerRow into:pointer];
+}
+
 - (NSUInteger)revenantStorageSize
 {
     RevenantFormat format;
@@ -633,13 +660,15 @@ static int depthKind(MTLPixelFormat pixelFormat)
     glBindFramebuffer(GL_FRAMEBUFFER, [self framebufferAtLevel:level]);
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
     GLenum readFormat = format.format == GL_BGRA_EXT ? GL_BGRA_EXT : GL_RGBA;
-    if (direct) {
-        glReadPixels((GLint)region.origin.x, (GLint)region.origin.y, (GLsizei)width, (GLsizei)height, readFormat, GL_UNSIGNED_BYTE, pointer);
-    } else {
-        glReadPixels((GLint)region.origin.x, (GLint)region.origin.y, (GLsizei)width, (GLsizei)height, GL_RGBA, GL_UNSIGNED_BYTE, scratch);
+    glReadPixels((GLint)region.origin.x, (GLint)region.origin.y, (GLsizei)width, (GLsizei)height, readFormat, GL_UNSIGNED_BYTE, direct ? pointer : scratch);
+    if (!direct) {
         for (NSUInteger row = 0; row < height; row++) {
             const uint8_t *source = scratch + row * width * 4;
             uint8_t *target = (uint8_t *)pointer + row * bytesPerRow;
+            if (channels == 4) {
+                memcpy(target, source, width * 4);
+                continue;
+            }
             for (NSUInteger x = 0; x < width; x++)
                 memcpy(target + x * channels, source + x * 4, channels);
         }

@@ -51,3 +51,15 @@ func ioSurfaceKeys() -> [CFString] {
 func computePipeline(device: MTLDevice, descriptor: MTLComputePipelineDescriptor) -> MTLComputePipelineState? {
     return try? device.makeComputePipelineState(descriptor: descriptor, options: [], reflection: nil)
 }
+
+func alignUp(size: Int, align: Int) -> Int {
+    precondition(((align - 1) & align) == 0, "Align must be a power of two")
+    let alignmentMask = align - 1
+    return (size + alignmentMask) & ~alignmentMask
+}
+
+func linearRowBytes(device: MTLDevice, width: Int) -> Int {
+    let bytesPerPixel = 4
+    let pixelRowAlignment = device.minimumLinearTextureAlignment(for: .bgra8Unorm)
+    return alignUp(size: width * bytesPerPixel, align: pixelRowAlignment)
+}

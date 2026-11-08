@@ -310,3 +310,4 @@ extern NSString *const RevenantMetalErrorDomain;
 NSError *RevenantMetalError(NSInteger code, NSString *message);
 id<CAMetalDrawable> RevenantMetalNextDrawable(CAMetalLayer *layer);
 BOOL RevenantMetalDeviceHasExtension(const char *required);
+NSUInteger RevenantMetalTexelBytes(MTLPixelFormat pixelFormat);

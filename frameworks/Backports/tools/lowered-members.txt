@@ -4690,6 +4690,7 @@ function RevenantMetalError
 function RevenantMetalFormatFromMDL
 function RevenantMetalNextDrawable
 function RevenantMetalSynchroniseSurfaceTextures
+function RevenantMetalTexelBytes
 function RevenantMetalTriangleEdges
 function RevenantMetalVertexFormat
 function RevenantMusicKitSignES256
@@ -27155,6 +27156,7 @@ member RevenantMetalDevice -isHeadless
 member RevenantMetalDevice -isLowPower
 member RevenantMetalDevice -isRemovable
 member RevenantMetalDevice -maxThreadsPerThreadgroup
+member RevenantMetalDevice -minimumLinearTextureAlignmentForPixelFormat:
 member RevenantMetalDevice -name
 member RevenantMetalDevice -newBinaryArchiveWithDescriptor:error:
 member RevenantMetalDevice -newBufferWithBytes:length:options:
@@ -27378,6 +27380,7 @@ member RevenantMetalTexture -depth
 member RevenantMetalTexture -device
 member RevenantMetalTexture -framebuffer
 member RevenantMetalTexture -framebufferAtLevel:
+member RevenantMetalTexture -getBytes:bytesPerRow:bytesPerImage:fromRegion:mipmapLevel:slice:
 member RevenantMetalTexture -getBytes:bytesPerRow:fromRegion:mipmapLevel:
 member RevenantMetalTexture -heap
 member RevenantMetalTexture -heapOffset
@@ -27394,8 +27397,10 @@ member RevenantMetalTexture -name
 member RevenantMetalTexture -pixelFormat
 member RevenantMetalTexture -renderTarget
 member RevenantMetalTexture -renderbuffer
+member RevenantMetalTexture -replaceRegion:mipmapLevel:slice:withBytes:bytesPerRow:bytesPerImage:
 member RevenantMetalTexture -replaceRegion:mipmapLevel:withBytes:bytesPerRow:
 member RevenantMetalTexture -resourceOptions
+member RevenantMetalTexture -revenantAcceptsSlice:region:operation:
 member RevenantMetalTexture -revenantCanFilter
 member RevenantMetalTexture -revenantChannels
 member RevenantMetalTexture -revenantGenerateMipmaps
@@ -35663,6 +35668,7 @@ protocol_member MTLDevice -isHeadless
 protocol_member MTLDevice -isLowPower
 protocol_member MTLDevice -isRemovable
 protocol_member MTLDevice -maxThreadsPerThreadgroup
+protocol_member MTLDevice -minimumLinearTextureAlignmentForPixelFormat:
 protocol_member MTLDevice -name
 protocol_member MTLDevice -newBinaryArchiveWithDescriptor:error:
 protocol_member MTLDevice -newBufferWithBytes:length:options:
@@ -35798,11 +35804,13 @@ protocol_member MTLSharedEvent -signaledValue
 protocol_member MTLSharedEvent -waitUntilSignaledValue:timeoutMS:
 protocol_member MTLTexture -arrayLength
 protocol_member MTLTexture -depth
+protocol_member MTLTexture -getBytes:bytesPerRow:bytesPerImage:fromRegion:mipmapLevel:slice:
 protocol_member MTLTexture -getBytes:bytesPerRow:fromRegion:mipmapLevel:
 protocol_member MTLTexture -height
 protocol_member MTLTexture -isFramebufferOnly
 protocol_member MTLTexture -mipmapLevelCount
 protocol_member MTLTexture -pixelFormat
+protocol_member MTLTexture -replaceRegion:mipmapLevel:slice:withBytes:bytesPerRow:bytesPerImage:
 protocol_member MTLTexture -replaceRegion:mipmapLevel:withBytes:bytesPerRow:
 protocol_member MTLTexture -sampleCount
 protocol_member MTLTexture -textureType

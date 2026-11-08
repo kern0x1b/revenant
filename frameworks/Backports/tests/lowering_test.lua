@@ -56,6 +56,7 @@ void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager 
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     (void)[device newCommandQueue];
     (void)[device newBufferWithLength:16 options:0];
+    (void)[device minimumLinearTextureAlignmentForPixelFormat:MTLPixelFormatBGRA8Unorm];
     (void)[text stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet alphanumericCharacterSet]];
     (void)[text stringByRemovingPercentEncoding];
     (void)[files containerURLForSecurityApplicationGroupIdentifier:@"group"];
