@@ -2124,6 +2124,10 @@ local function identifiers_in(src)
     return used
 end
 
+function classes_implemented_in(src)
+    return union_of(implemented_in(src)).classes
+end
+
 function members_of(src, sdk, intros)
     local folders = implemented_in(src)
     local set = union_of(folders)
