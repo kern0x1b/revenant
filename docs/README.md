@@ -164,6 +164,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [CreateML: date parsing](reference/backports/CreateML/TabularData/DateParsing.md) | date reading in TabularData, measured, and what is carried |
 | [Foundation: URL](reference/backports/Foundation/URL.md) | the percent-encoded accessors and the file path initialiser of iOS 16 `URL`, and the host oracle they are measured against |
 | [Metal: dispatchThreads](reference/backports/Metal/DispatchThreads.md) | compute dispatch by threads per grid, the edge group, and the pipeline limits |
+| [Metal: linear texture alignment](reference/backports/Metal/LinearTextureAlignment.md) | the row alignment a device reports per pixel format, the padded-row readback fix, and the slice forms of getBytes and replaceRegion |
 | [MusicKit](reference/backports/MusicKit/README.md) | MusicKit for a legacy Apple platform |
 | [NaturalLanguage](reference/backports/NaturalLanguage/README.md) | the Swift forms of the recognizer, tokenizer, tagger, model and embedding members, and their refined Objective-C names |
 | [PassKit](reference/backports/PassKit/README.md) | the `capability3DS`, `capabilityEMV`, `capabilityCredit` and `capabilityDebit` aliases of `PKMerchantCapability` |
