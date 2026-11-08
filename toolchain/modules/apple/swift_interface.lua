@@ -1,6 +1,8 @@
+local byteorder = import("byteorder", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
+
 function sdk_interface(sdk, module)
     local files = os.files(path.join(sdk, "usr", "lib", "swift", module .. ".swiftmodule", "*-apple-ios.swiftinterface"))
-    table.sort(files, function (a, b) return path.basename(a) < path.basename(b) end)
+    byteorder.sort(files)
     return files[1]
 end
 
