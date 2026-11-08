@@ -51,14 +51,20 @@ local function stub_text(stub)
     return table.concat(lines, "\n") .. "\n"
 end
 
-target("AppIntents")
-    set_kind("static")
-    set_default(false)
-    add_rules("@addon/revenant/swift")
+local UNDERLYING = {"-Xfrontend", "-import-underlying-module"}
+
+local function swift_target(name, kind)
+    target(name)
+        set_kind(kind)
+        set_default(false)
+        add_rules("@addon/revenant/swift")
+        set_values("swift.cxx_interop", "off")
+        set_optimize("fastest")
+end
+
+swift_target("AppIntents", "static")
     add_values("swift.flags", "-module-link-name", "AppIntents")
-    set_values("swift.cxx_interop", "off")
     add_frameworks("Foundation", "CoreFoundation")
-    set_optimize("fastest")
     on_load(function (target)
         target:add("files", path.join(SRC, "AppIntents", "*.swift"))
     end)
@@ -79,15 +85,10 @@ target("AppIntents")
         add_flags(target, flags)
     end)
 
-target("ActivityKit")
-    set_kind("static")
-    set_default(false)
-    add_rules("@addon/revenant/swift")
+swift_target("ActivityKit", "static")
     add_values("swift.flags", "-module-link-name", "ActivityKit")
-    set_values("swift.cxx_interop", "off")
     add_deps("AppIntents")
     add_frameworks("Foundation", "CoreFoundation")
-    set_optimize("fastest")
     on_load(function (target)
         target:add("files", path.join(SRC, "ActivityKit", "*.swift"))
     end)
@@ -100,15 +101,10 @@ target("ActivityKit")
         end
     end)
 
-target("TipKit")
-    set_kind("static")
-    set_default(false)
-    add_rules("@addon/revenant/swift")
+swift_target("TipKit", "static")
     add_values("swift.flags", "-module-link-name", "TipKit")
-    set_values("swift.cxx_interop", "off")
     add_deps("AppIntents")
     add_frameworks("Foundation", "CoreFoundation")
-    set_optimize("fastest")
     on_load(function (target)
         target:add("files", path.join(SRC, "TipKit", "*.swift"))
     end)
@@ -121,26 +117,16 @@ target("TipKit")
         end
     end)
 
-target("UniformTypeIdentifiers")
-    set_kind("static")
-    set_default(false)
-    add_rules("@addon/revenant/swift")
+swift_target("UniformTypeIdentifiers", "static")
     add_values("swift.flags", "-module-link-name", "UniformTypeIdentifiers")
-    set_values("swift.cxx_interop", "off")
     add_frameworks("Foundation", "CoreFoundation", "MobileCoreServices")
-    set_optimize("fastest")
     on_load(function (target)
         target:add("files", path.join(SRC, "UniformTypeIdentifiers", "*.swift"))
     end)
 
-target("Translation")
-    set_kind("static")
-    set_default(false)
-    add_rules("@addon/revenant/swift")
+swift_target("Translation", "static")
     add_packages("swiftui")
     add_values("swift.flags", "-module-link-name", "Translation")
-    set_values("swift.cxx_interop", "off")
-    set_optimize("fastest")
     on_load(function (target)
         target:add("files", path.join(SRC, "Translation", "*.swift"))
     end)
@@ -153,38 +139,23 @@ local function open_gap(name, cause)
     end)
 end
 
-target("WidgetKit")
-    set_kind("static")
-    set_default(false)
-    add_rules("@addon/revenant/swift")
+swift_target("WidgetKit", "static")
     add_values("swift.flags", "-module-link-name", "WidgetKit")
-    set_values("swift.cxx_interop", "off")
     add_deps("AppIntents", "ActivityKit")
     add_frameworks("Foundation", "CoreFoundation")
-    set_optimize("fastest")
     on_load(function (target)
         target:add("files", path.join(SRC, "WidgetKit", "*.swift"))
     end)
 
-target("IOSurface")
-    set_kind("static")
-    set_default(false)
-    add_rules("@addon/revenant/swift")
+swift_target("IOSurface", "static")
     add_values("swift.flags", "-module-link-name", "IOSurface")
-    set_values("swift.cxx_interop", "off")
-    set_optimize("fastest")
     on_load(function (target)
         target:add("files", path.join(SRC, "IOSurface", "*.swift"))
     end)
 
 local function framework_overlay(name)
-    target(name)
-        set_kind("static")
-        set_default(false)
-        add_rules("@addon/revenant/swift")
-        add_values("swift.flags", "-module-link-name", name, "-Xfrontend", "-import-underlying-module")
-        set_values("swift.cxx_interop", "off")
-        set_optimize("fastest")
+    swift_target(name, "static")
+        add_values("swift.flags", "-module-link-name", name, table.unpack(UNDERLYING))
         on_load(function (target)
             target:add("files", path.join(SRC, name, "*.swift"))
         end)
@@ -195,15 +166,11 @@ framework_overlay("SceneKit")
 framework_overlay("Vision")
 
 local function createml(name, folder, deps, flags)
-    target(name)
-        set_kind("static")
-        set_default(false)
-        add_rules("@addon/revenant/swift")
+    swift_target(name, "static")
         if #deps > 0 then
             add_deps(table.unpack(deps))
         end
         add_frameworks("Accelerate", "Foundation", "CoreFoundation")
-        set_optimize("fastest")
         on_load(function (target)
             target:add("files", path.join(SRC, folder, "*.swift"))
         end)
@@ -214,17 +181,13 @@ local function createml(name, folder, deps, flags)
 end
 
 createml("TabularData", "TabularData", {}, {})
-createml("CoreML", "CoreML", {}, {"-Xfrontend", "-import-underlying-module", "-import-objc-header", path.join(SRC, "CoreML", "RevenantCoreML.h")})
+createml("CoreML", "CoreML", {}, table.join(UNDERLYING, {"-import-objc-header", path.join(SRC, "CoreML", "RevenantCoreML.h")}))
 createml("CreateMLComponents", "CreateMLComponents", {"TabularData", "CoreML"}, {})
 createml("CreateML", "CreateML", {"CreateMLComponents", "TabularData", "CoreML"}, {})
 
-target("MusicKit")
-    set_kind("static")
-    set_default(false)
-    add_rules("@addon/revenant/swift")
+swift_target("MusicKit", "static")
     add_packages("micro-ecc")
     add_frameworks("Foundation", "CoreGraphics")
-    set_optimize("fastest")
     on_load(function (target)
         target:add("files", path.join(SRC, "MusicKit", "*.swift"))
         target:add("files", path.join(SRC, "MusicKit", "RevenantC.c"))
@@ -237,12 +200,8 @@ target("MusicKit")
     open_gap("MusicKit", "Catalog.swift uses URLComponents, which needs iOS 7, and URLQueryItem, which needs iOS 8")
     target_end()
 
-target("SwiftData")
-    set_kind("static")
-    set_default(false)
-    add_rules("@addon/revenant/swift")
+swift_target("SwiftData", "static")
     add_frameworks("CoreData", "Foundation", "CoreFoundation")
-    set_optimize("fastest")
     on_load(function (target)
         target:add("files", path.join(SRC, "SwiftData", "*.swift"))
     end)
@@ -273,13 +232,8 @@ local function generate_spatial(spatial, folder)
 end
 
 local function overlay(name, folder, opt)
-    target(name)
-        set_kind("shared")
-        set_default(false)
-        add_rules("@addon/revenant/swift")
-        set_optimize("fastest")
+    swift_target(name, "shared")
         set_values("swift.module", name:sub(#"swift" + 1))
-        set_values("swift.cxx_interop", "off")
         add_shflags("-dynamiclib", "-install_name", "@rpath/lib" .. name .. ".dylib", "-Wl,-dead_strip_dylibs", {force = true})
         if opt.generate then
             add_packages("swift")
@@ -339,6 +293,9 @@ local function overlay(name, folder, opt)
             if not opt.concurrency then
                 table.join2(flags, {"-Xfrontend", "-disable-implicit-concurrency-module-import"})
             end
+            if opt.underlying then
+                table.join2(flags, UNDERLYING)
+            end
             table.join2(flags, table.wrap(opt.flags))
             if opt.scenekit then
                 table.join2(flags, scenekit_flags(target, {semver = import("core.base.semver"),
@@ -382,18 +339,31 @@ overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Securi
 
 overlay("swiftStoreKit", "StoreKit", {concurrency = true, frameworks = {"UIKit", "Foundation"}})
 
-overlay("swiftAuthenticationServices", "AuthenticationServices/Updater", {concurrency = true, frameworks = {"Foundation"}})
+overlay("swiftAuthenticationServices", "AuthenticationServices/Updater", {concurrency = true, underlying = true, frameworks = {"Foundation"}})
 
 overlay("swiftTranslation", "Translation", {concurrency = true, packages = {"swiftui"}})
 
 target("swift_backports_tests")
     set_kind("phony")
     set_default(false)
-    add_tests("oslock", "uikittraits", "uikitpointer", "uikitavailability", "availability", "metallowering", "translation", "iosurfaceswift", "coremlswift", "frameworkoverlay")
+    add_tests("oslock", "uikittraits", "uikitpointer", "uikitavailability", "availability", "metallowering", "translation", "iosurfaceswift", "coremlswift", "frameworkoverlay", "cxxinterop")
     on_test(function (target, opt)
         import("core.project.project")
         local scripts = {oslock = "os_lock_test.lua", uikittraits = "uikit_traits_test.lua", uikitpointer = "uikit_pointer_test.lua", uikitavailability = "uikit_availability_test.lua", availability = "availability_test.lua", metallowering = "metal_lowering_test.lua", translation = "translation_test.lua", iosurfaceswift = "iosurface_swift_test.lua", coremlswift = "coreml_swift_test.lua", frameworkoverlay = "framework_overlay_test.lua"}
         local name = path.filename(opt.name)
+        if name == "cxxinterop" then
+            local interoperable = {}
+            for _, swift in pairs(project.targets()) do
+                if swift ~= target and swift:scriptdir() == SWIFT_DIR and table.wrap(swift:values("swift.cxx_interop"))[1] ~= "off" then
+                    table.insert(interoperable, swift:name())
+                end
+            end
+            table.sort(interoperable)
+            if #interoperable > 0 then
+                opt.errors = "built with C++ interoperability, which no module of a program for iOS 6 imports: " .. table.concat(interoperable, ", ")
+            end
+            return #interoperable == 0
+        end
         local root = path.join(SRC, "..", "..", "..")
         local runtime = project.required_package("swift-runtime"):installdir()
         local compiler = path.join(project.required_package("swift"):installdir(), "bin", "swiftc")

@@ -11,7 +11,7 @@ local OVERLAYS = {
     {name = "Vision", folder = "Vision", fixture = path.join("Vision", "overlay.swift"), flags = UNDERLYING,
      without = "has no member 'boundingBox'"},
     {name = "AuthenticationServices", folder = path.join("AuthenticationServices", "Updater"), fixture = path.join("AuthenticationServices", "updater.swift"),
-     flags = {"-module-link-name", "swiftAuthenticationServices", "-Xfrontend", "-disable-implicit-string-processing-module-import"},
+     flags = table.join(UNDERLYING, {"-module-link-name", "swiftAuthenticationServices", "-Xfrontend", "-disable-implicit-string-processing-module-import"}),
      without = "cannot find 'ASCredentialUpdater' in scope"},
 }
 

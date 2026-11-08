@@ -38,4 +38,12 @@ extension MLModel {
             }
         }
     }
+
+    public func prediction(from input: any MLFeatureProvider, options: MLPredictionOptions = MLPredictionOptions()) async throws -> any MLFeatureProvider {
+        try await withCheckedThrowingContinuation { continuation in
+            __prediction(fromFeatures: input, options: options) { output, error in
+                continuation.resume(with: loaded(output, error))
+            }
+        }
+    }
 }
