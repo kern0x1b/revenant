@@ -427,7 +427,8 @@ package("swift-runtime")
             local lowered_include = lowered.include_directory(path.absolute("lowered"))
             local graphics = expand(path.join(overlays, "stdlib", "public", "Darwin", "CoreGraphics", "CGFloat.swift.gyb"),
                                     path.join(generated, "CGFloat.swift"))
-            build_overlay("CoreGraphics", table.join({graphics}, overlay_sources_of("CoreGraphics", {"CoreGraphics.swift", "Geometry.swift"})),
+            local transform_members = path.join(revenant_overlay, "CoreGraphics", "CGAffineTransformMembers.swift")
+            build_overlay("CoreGraphics", table.join({graphics, transform_members}, overlay_sources_of("CoreGraphics", {"CoreGraphics.swift", "Geometry.swift"})),
                           {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftCoreFoundation",
                            "-framework", "CoreGraphics", "-framework", "CoreFoundation"},
                           nil, {module_cache = coregraphics_cache, extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
@@ -440,6 +441,8 @@ package("swift-runtime")
             local locale_language = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "LocaleLanguage.swift")
             local url_session_web_socket_task = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "URLSessionWebSocketTask.swift")
             local url_percent_encoded = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "URLPercentEncoded.swift")
+            local url_components_encoded = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "URLComponentsEncoded.swift")
+            local url_directories = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "URLDirectories.swift")
             local values = expand(path.join(foundation, "NSValue.swift.gyb"), path.join(generated, "NSValue.swift"))
             local foundation_objects = {}
             for _, file in ipairs({"DataThunks.m", "BundleLookup.mm"}) do
@@ -464,7 +467,7 @@ package("swift-runtime")
                 "PersonNameComponents.swift", "PlistEncoder.swift", "Pointers+DataProtocol.swift",
                 "Progress.swift", "ReferenceConvertible.swift", "Scanner.swift", "String.swift", "TimeZone.swift",
                 "URL.swift", "URLCache.swift", "URLComponents.swift", "URLRequest.swift", "URLSession.swift",
-                "UUID.swift"}), {presentation_intent, locale_language, url_session_web_socket_task, url_percent_encoded}),
+                "UUID.swift"}), {presentation_intent, locale_language, url_session_web_socket_task, url_percent_encoded, url_components_encoded, url_directories}),
                           table.join(flat_flags, {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation", "-lswiftCoreGraphics",
                            "-framework", "Foundation", "-framework", "CoreFoundation"}), foundation_objects,
                           {concurrency = true, module_cache = foundation_cache,
