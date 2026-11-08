@@ -56,12 +56,3 @@ diff --git a/stdlib/public/Darwin/CoreGraphics/CoreGraphics.swift b/stdlib/publi
    }
  }
  
-@@ -623,6 +622,8 @@
- 
- extension CGMutablePath {
- 
-+  /* A call iOS 7 brought, on a runtime a port may take to a release before it: the port asks for it where it is. */
-+  @available(iOS 7.0, macOS 10.9, tvOS 9.0, watchOS 2.0, *)
-   public func addRoundedRect(in rect: CGRect, cornerWidth: CGFloat,
-    cornerHeight: CGFloat, transform: CGAffineTransform = .identity) {
-     self.__addRoundedRect(transform: [transform], rect: rect,
