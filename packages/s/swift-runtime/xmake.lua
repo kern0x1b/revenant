@@ -66,6 +66,7 @@ package("swift-runtime")
 
     on_install("iphoneos", function (package)
         local swift = import("@addon.revenant.apple.swift", {anonymous = true})
+        local interfaces = import("@addon.revenant.apple.swift_interface", {anonymous = true})
         local gyb = import("@addon.revenant.gyb.template", {anonymous = true})
         local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
         local compat = import("@addon.revenant.apple.compat", {anonymous = true})
@@ -479,7 +480,8 @@ package("swift-runtime")
             local lowered_cc = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}
             local coremedia = path.join(uikit, "stdlib", "public", "Darwin", "CoreMedia")
             build_overlay("CoreMedia", {path.join(coremedia, "CMTime.swift"), path.join(coremedia, "CMTimeRange.swift"),
-                                        path.join(revenant_overlay, "CoreMedia", "CMTimeHashable.swift")},
+                                        path.join(revenant_overlay, "CoreMedia", "CMTimeHashable.swift"),
+                                        path.join(revenant_overlay, "CoreMedia", "CMAttachmentBearer.swift")},
                           {"-framework", "CoreMedia"}, nil, {module_cache = coremedia_cache, extra_flags = lowered_cc})
             local photos_cache = path.join(generated, "module-cache-photos")
             os.mkdir(photos_cache)
@@ -495,10 +497,18 @@ package("swift-runtime")
             os.mkdir(avfoundation_cache)
             local avfoundation = path.join(uikit, "stdlib", "public", "Darwin", "AVFoundation")
             local avfoundation_nsvalue = expand(path.join(avfoundation, "NSValue.swift.gyb"), path.join(generated, "AVFoundation-NSValue.swift"))
+            local notification_names = interfaces.interface_blocks(interfaces.sdk_interface(toolchain:config("sdkdir"), "AVFoundation"),
+                                                                   "extension Foundation.NSNotification.Name {")
+            assert(#notification_names > 0, "the AVFoundation interface of the SDK at " .. toolchain:config("sdkdir") ..
+                   " carries no extension of Foundation.NSNotification.Name, and the notification names its headers rename would be lost")
+            local avfoundation_notifications = path.join(generated, "AVFoundation-NotificationNames.swift")
+            io.writefile(avfoundation_notifications, "import Foundation\n\n" .. table.concat(notification_names, "\n") .. "\n")
             build_overlay("AVFoundation", {avfoundation_nsvalue, path.join(avfoundation, "AVCaptureDevice.swift"),
                                            path.join(avfoundation, "AVCapturePhotoOutput.swift"),
                                            path.join(avfoundation, "AVCaptureVideoDataOutput.swift"),
-                                           path.join(avfoundation, "AVMetadataObject.swift")},
+                                           path.join(avfoundation, "AVMetadataObject.swift"),
+                                           path.join(revenant_overlay, "AVFoundation", "AVCaptureRefinements.swift"),
+                                           avfoundation_notifications},
                           table.join(foundation_links, {"-lswiftCoreMedia", "-framework", "AVFoundation"}), nil,
                           {module_cache = avfoundation_cache, extra_flags = lowered_cc})
             local mediaplayer_cache = path.join(generated, "module-cache-mediaplayer")

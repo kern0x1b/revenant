@@ -1,0 +1,147 @@
+diff --git a/stdlib/public/Darwin/Dispatch/Dispatch.swift b/stdlib/public/Darwin/Dispatch/Dispatch.swift
+--- a/stdlib/public/Darwin/Dispatch/Dispatch.swift
++++ b/stdlib/public/Darwin/Dispatch/Dispatch.swift
+@@ -15,28 +15,28 @@
+ 
+ /// dispatch_assert
+ 
+-@available(macOS 10.12, iOS 10.0, tvOS 10.0, watchOS 3.0, *)
++@available(macOS 10.12, *)
+ public enum DispatchPredicate {
+ 	case onQueue(DispatchQueue)
+ 	case onQueueAsBarrier(DispatchQueue)
+ 	case notOnQueue(DispatchQueue)
+ }
+ 
+-@available(macOS 10.12, iOS 10.0, tvOS 10.0, watchOS 3.0, *)
++@available(macOS 10.12, *)
+ public func _dispatchPreconditionTest(_ condition: DispatchPredicate) -> Bool {
+ 	switch condition {
+ 	case .onQueue(let q):
+-		__dispatch_assert_queue(q)
++		_swift_dispatch_assert_queue(q)
+ 	case .onQueueAsBarrier(let q):
+-		__dispatch_assert_queue_barrier(q)
++		_swift_dispatch_assert_queue_barrier(q)
+ 	case .notOnQueue(let q):
+-		__dispatch_assert_queue_not(q)
++		_swift_dispatch_assert_queue_not(q)
+ 	}
+ 	return true
+ }
+ 
+ @_transparent
+-@available(macOS 10.12, iOS 10.0, tvOS 10.0, watchOS 3.0, *)
++@available(macOS 10.12, *)
+ public func dispatchPrecondition(condition: @autoclosure () -> DispatchPredicate) {
+ 	// precondition is able to determine release-vs-debug asserts where the overlay
+ 	// cannot, so formulating this into a call that we can call with precondition()
+diff --git a/stdlib/public/Darwin/Dispatch/Queue.swift b/stdlib/public/Darwin/Dispatch/Queue.swift
+--- a/stdlib/public/Darwin/Dispatch/Queue.swift
++++ b/stdlib/public/Darwin/Dispatch/Queue.swift
+@@ -30,7 +30,7 @@
+ 
+ 		public static let concurrent = Attributes(rawValue: 1<<1)
+ 
+-		@available(macOS 10.12, iOS 10.0, tvOS 10.0, watchOS 3.0, *)
++		@available(macOS 10.12, *)
+ 		public static let initiallyInactive = Attributes(rawValue: 1<<2)
+ 
+ 		fileprivate func _attr() -> __OS_dispatch_queue_attr? {
+@@ -39,10 +39,8 @@
+ 			if self.contains(.concurrent) {
+ 				attr = _swift_dispatch_queue_concurrent()
+ 			}
+-			if #available(macOS 10.12, iOS 10.0, tvOS 10.0, watchOS 3.0, *) {
+-				if self.contains(.initiallyInactive) {
+-					attr = __dispatch_queue_attr_make_initially_inactive(attr)
+-				}
++			if self.contains(.initiallyInactive) {
++				attr = _swift_dispatch_queue_attr_make_initially_inactive(attr)
+ 			}
+ 			return attr
+ 		}
+@@ -86,18 +84,14 @@
+ 	public enum AutoreleaseFrequency {
+ 		case inherit
+ 
+-		@available(macOS 10.12, iOS 10.0, tvOS 10.0, watchOS 3.0, *)
++		@available(macOS 10.12, *)
+ 		case workItem
+ 
+-		@available(macOS 10.12, iOS 10.0, tvOS 10.0, watchOS 3.0, *)
++		@available(macOS 10.12, *)
+ 		case never
+ 
+ 		internal func _attr(attr: __OS_dispatch_queue_attr?) -> __OS_dispatch_queue_attr? {
+-			if #available(macOS 10.12, iOS 10.0, tvOS 10.0, watchOS 3.0, *) {
+-				return __dispatch_queue_attr_make_with_autorelease_frequency(attr, self._rawValue)
+-			} else {
+-				return attr
+-			}
++			return _swift_dispatch_queue_attr_make_with_autorelease_frequency(attr, self._rawValue)
+ 		}
+ 
+ 		internal var _rawValue: __dispatch_autorelease_frequency_t {
+diff --git a/stdlib/public/Darwin/Dispatch/Source.swift b/stdlib/public/Darwin/Dispatch/Source.swift
+--- a/stdlib/public/Darwin/Dispatch/Source.swift
++++ b/stdlib/public/Darwin/Dispatch/Source.swift
+@@ -259,9 +259,9 @@
+ 		_swift_dispatch_source_set_registration_handler(self as! DispatchSource, handler._block)
+ 	}
+ 
+-	@available(macOS 10.12, iOS 10.0, tvOS 10.0, watchOS 3.0, *)
++	@available(macOS 10.12, *)
+ 	public func activate() {
+-		(self as! DispatchSource).activate()
++		_swift_dispatch_activate(self as! DispatchSource)
+ 	}
+ 
+ 	public func cancel() {
+diff --git a/stdlib/public/SwiftShims/DispatchOverlayShims.h b/stdlib/public/SwiftShims/DispatchOverlayShims.h
+--- a/stdlib/public/SwiftShims/DispatchOverlayShims.h
++++ b/stdlib/public/SwiftShims/DispatchOverlayShims.h
+@@ -62,6 +62,43 @@
+   return revenant_dispatch_get_global_queue(identifier, flags);
+ }
+ 
++void revenant_dispatch_assert_queue(dispatch_queue_t queue) __asm("_dispatch_assert_queue$V2");
++void revenant_assert_queue_barrier(dispatch_queue_t queue) __asm("_dispatch_assert_queue_barrier");
++void revenant_assert_queue_not(dispatch_queue_t queue) __asm("_dispatch_assert_queue_not$V2");
++dispatch_queue_attr_t _Nullable revenant_queue_attr_make_initially_inactive(dispatch_queue_attr_t _Nullable attr) __asm("_dispatch_queue_attr_make_initially_inactive");
++dispatch_queue_attr_t _Nullable revenant_queue_attr_make_with_autorelease_frequency(dispatch_queue_attr_t _Nullable attr, dispatch_autorelease_frequency_t frequency) __asm("_dispatch_queue_attr_make_with_autorelease_frequency");
++void revenant_dispatch_activate(dispatch_object_t object) __asm("_dispatch_activate");
++
++static inline void
++_swift_dispatch_assert_queue(dispatch_queue_t queue) {
++  revenant_dispatch_assert_queue(queue);
++}
++
++static inline void
++_swift_dispatch_assert_queue_barrier(dispatch_queue_t queue) {
++  revenant_assert_queue_barrier(queue);
++}
++
++static inline void
++_swift_dispatch_assert_queue_not(dispatch_queue_t queue) {
++  revenant_assert_queue_not(queue);
++}
++
++static inline dispatch_queue_attr_t _Nullable
++_swift_dispatch_queue_attr_make_initially_inactive(dispatch_queue_attr_t _Nullable attr) {
++  return revenant_queue_attr_make_initially_inactive(attr);
++}
++
++static inline dispatch_queue_attr_t _Nullable
++_swift_dispatch_queue_attr_make_with_autorelease_frequency(dispatch_queue_attr_t _Nullable attr, dispatch_autorelease_frequency_t frequency) {
++  return revenant_queue_attr_make_with_autorelease_frequency(attr, frequency);
++}
++
++static inline void
++_swift_dispatch_activate(dispatch_source_t source) {
++  revenant_dispatch_activate(source);
++}
++
+ static inline dispatch_queue_t
+ _swift_dispatch_get_main_queue(void) {
+   return dispatch_get_main_queue();
