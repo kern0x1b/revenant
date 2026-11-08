@@ -486,7 +486,8 @@ package("swift-runtime")
             build_overlay("CoreMedia", {path.join(coremedia, "CMTime.swift"), path.join(coremedia, "CMTimeRange.swift"),
                                         path.join(revenant_overlay, "CoreMedia", "CMTimeHashable.swift"),
                                         path.join(revenant_overlay, "CoreMedia", "CMAttachmentBearer.swift")},
-                          {"-framework", "CoreMedia"}, nil, {module_cache = coremedia_cache, extra_flags = lowered_cc})
+                          table.join(foundation_links, {"-framework", "CoreMedia"}), nil,
+                          {module_cache = coremedia_cache, extra_flags = lowered_cc})
             local photos_cache = path.join(generated, "module-cache-photos")
             os.mkdir(photos_cache)
             local photos = path.join(uikit, "stdlib", "public", "Darwin", "Photos")
