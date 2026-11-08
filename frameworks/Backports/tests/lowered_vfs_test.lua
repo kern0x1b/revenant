@@ -139,6 +139,27 @@ function main()
     assert(enum:find("PHFakeModeLater API_AVAILABLE(macos(10.12), ios(9), tvos(10)) = 2", 1, true), "the enum's constant with its own availability lost it")
     assert(enum:sub(1, enum:find("typedef", 1, true) - 1):match(".*(API_AVAILABLE_%u+)") == "API_AVAILABLE_END", "the enum must sit outside the region, so the region closes before it")
     assert(enum:match("NS_SWIFT_NAME%(PHFake%.Mode%);(.*)$"):find("API_AVAILABLE_BEGIN", 1, true), "the region must reopen after the enum")
+    local typed = lowered.lower_header(table.concat({
+        "API_AVAILABLE_BEGIN(macos(10.11), ios(8), tvos(10))",
+        "typedef NS_OPTIONS(NSUInteger, PHFakeSource) {",
+        "    PHFakeSourceNone = 0,",
+        "    PHFakeSourceLibrary = (1UL << 0),",
+        "} API_AVAILABLE(ios(9));",
+        "typedef NS_ENUM(NSInteger, PHFakeKind) {",
+        "    PHFakeKindOne = 1,",
+        "};",
+        "API_AVAILABLE_END",
+        ""
+    }, "\n"), {globals = {PHFakeSourceNone = true, PHFakeSourceLibrary = true, PHFakeKindOne = true}, functions = {}, classes = {}, protocols = {},
+        protocol_members = {}, types = {}, enum_types = {PHFakeSource = true, PHFakeKind = true}})
+    local source = typed:match("typedef NS_OPTIONS%(NSUInteger, PHFakeSource%) %b{}[^;]*;")
+    assert(source, "the enum with a trailing availability did not lower to a declaration")
+    assert(not source:find("API_AVAILABLE", 1, true), "the trailing availability of the enum type stayed, or a region opens or closes inside the declaration")
+    assert(typed:sub(1, typed:find("typedef", 1, true) - 1):match(".*(API_AVAILABLE_%u+)") == "API_AVAILABLE_END", "the enum type with a trailing availability must sit outside the region, so the region closes before it")
+    local _, typed_begins = typed:gsub("API_AVAILABLE_BEGIN", "")
+    local _, typed_ends = typed:gsub("API_AVAILABLE_END", "")
+    assert(typed_begins == typed_ends, "lowering enum types left " .. typed_begins .. " API_AVAILABLE_BEGIN against " .. typed_ends .. " API_AVAILABLE_END")
+    assert(typed:match("typedef NS_ENUM%(NSInteger, PHFakeKind%) %b{};"), "an enum type without a trailing availability was changed")
     local nested = {}
     for _, file in ipairs(os.files(path.join(out, "System", "Library", "Frameworks", "**.h"))) do
         local depth = 0

@@ -727,13 +727,29 @@ local function scan_markers(text, found)
     end
 end
 
-local function scan_source(file, found)
+local function runtime_names_in(text, renamed)
+    local named
+    for line in text:gmatch("[^\n]*") do
+        local attribute = line:match("^__attribute__%(%(objc_runtime_name%(\"([%w_]+)\"%)%)%)")
+        named = attribute or named
+        local declared = line:match("^@interface%s+([%w_]+)%s*[:<{]") or line:match("^@interface%s+([%w_]+)%s*$")
+        if declared and named then
+            renamed[declared] = named
+        end
+        if declared or not (attribute or line:match("^%s*$")) then
+            named = nil
+        end
+    end
+end
+
+local function scan_source(file, found, renamed)
     local container, pending = nil, nil
     local source = io.readfile(file)
     scan_markers(source, found)
     for line in source:gmatch("[^\n]*") do
         line = string.gsub(line, "BACKPORT_IMPL%(%s*([%a_][%w_]*)%s*%)", "%1")
         local class = line:match("^@implementation%s+REVENANT_ALIAS_CLASS%(([%w_]+)%)") or line:match("^@implementation%s+([%w_]+)")
+        class = class and renamed[class] or class
         if class then
             container = class
             found.classes[class] = found.classes[class] or {}
@@ -778,9 +794,15 @@ local function implemented_in(src)
     local folders = {}
     for _, folder in ipairs(os.dirs(path.join(src, "*"))) do
         local found = {classes = {}, functions = {}, globals = {}, protocols = {}}
+        local renamed = {}
+        for _, pattern in ipairs({"**.m", "**.mm", "**.h"}) do
+            for _, file in ipairs(os.files(path.join(folder, pattern))) do
+                runtime_names_in(io.readfile(file), renamed)
+            end
+        end
         for _, pattern in ipairs({"**.m", "**.mm", "**.c"}) do
             for _, file in ipairs(os.files(path.join(folder, pattern))) do
-                scan_source(file, found)
+                scan_source(file, found, renamed)
             end
         end
         for _, pattern in ipairs({"**.m", "**.mm", "**.h"}) do
@@ -1198,7 +1220,7 @@ local function enum_body_at(text, at)
         return nil
     end
     local close = matching_brace(text, open)
-    if at > close then
+    if at > stop then
         return nil
     end
     local head = text:sub(start, open - 1):gsub("%s+", " ")
@@ -1468,6 +1490,20 @@ local function lowering_of(text, implemented, declarations)
             if declaration.annotated and declaration.name and implemented.types[declaration.name] then
                 for _, piece in ipairs(pieces_of(text, declaration.start, declaration.stop)) do
                     lower(piece[1], piece[2])
+                end
+            end
+        end
+    end
+    if implemented.enum_types then
+        for _, declaration in ipairs(declarations or typedef_declarations(text)) do
+            if declaration.name and implemented.enum_types[declaration.name] then
+                local closing = text:sub(declaration.start, declaration.stop):match("^.*()}")
+                if closing then
+                    for _, piece in ipairs(pieces_of(text, declaration.start + closing, declaration.stop)) do
+                        if #availability(text:sub(piece[1], piece[2])) > 0 then
+                            lower(piece[1], piece[2])
+                        end
+                    end
                 end
             end
         end
@@ -1840,12 +1876,15 @@ function serialize(set, header)
     for name in pairs(set.types or {}) do
         table.insert(lines, "type " .. name)
     end
+    for name in pairs(set.enum_types or {}) do
+        table.insert(lines, "enum_type " .. name)
+    end
     byteorder.sort(lines)
     return (header or MEMBERS_HEADER) .. table.concat(lines, "\n") .. "\n"
 end
 
 function parse(text)
-    local set = {classes = {}, functions = {}, globals = {}, enums = {}, protocols = {}, protocol_members = {}, types = {}}
+    local set = {classes = {}, functions = {}, globals = {}, enums = {}, protocols = {}, protocol_members = {}, types = {}, enum_types = {}}
     for line in text:gmatch("[^\n]+") do
         if not line:find("^#") then
             local kind, first, second = line:match("^(%S+) (%S+) ?(%S*)$")
@@ -1869,6 +1908,8 @@ function parse(text)
                 set.protocol_members[first][second] = true
             elseif kind == "type" then
                 set.types[first] = true
+            elseif kind == "enum_type" then
+                set.enum_types[first] = true
             else
                 raise("the lowered member list has an unknown line: %s", line)
             end
@@ -1947,7 +1988,7 @@ end
 
 local function names_of(set)
     local names = {classes = set.classes or {}, protocols = set.protocols or {}, words = {}}
-    for _, field in ipairs({"globals", "functions", "types"}) do
+    for _, field in ipairs({"globals", "functions", "types", "enum_types"}) do
         for name in pairs(set[field] or {}) do
             names.words[name] = true
         end
@@ -1974,9 +2015,9 @@ local function mentions(text, names)
     return false
 end
 
-local function lowered_types(sdk, set)
+local function lowered_types(sdk, set, enumerators)
     local changed = member_headers(sdk)
-    local declared, queue, queued = {}, {}, {}
+    local declared, queue, queued, enumerated = {}, {}, {}, {}
     local function enqueue(name)
         if not queued["$" .. name] then
             queued["$" .. name] = true
@@ -1997,6 +2038,14 @@ local function lowered_types(sdk, set)
             if declaration.name then
                 declared[declaration.name] = declared[declaration.name] or {}
                 table.insert(declared[declaration.name], declaration)
+                if declaration.annotated then
+                    for word in pairs(declaration.words) do
+                        if enumerators[word:sub(2)] then
+                            enumerated[declaration.name] = true
+                            break
+                        end
+                    end
+                end
             end
         end
     end
@@ -2015,7 +2064,13 @@ local function lowered_types(sdk, set)
             end
         end
     end
-    return types
+    local enum_types = {}
+    for name in pairs(enumerated) do
+        if not types[name] then
+            enum_types[name] = true
+        end
+    end
+    return types, enum_types
 end
 
 local function identifiers_in(src)
@@ -2053,7 +2108,7 @@ function members_of(src, sdk, intros)
     for name in pairs(status.backed) do
         set.protocol_members[name] = status.members[name]
     end
-    set.types = lowered_types(sdk, merge_sets(set, read_device_members()))
+    set.types, set.enum_types = lowered_types(sdk, merge_sets(set, read_device_members()), set.enums)
     return set
 end
 
@@ -2080,7 +2135,7 @@ function read_device_members(file)
 end
 
 function merge_sets(a, b)
-    local out = {classes = {}, functions = {}, globals = {}, protocols = {}, protocol_members = {}, types = {}}
+    local out = {classes = {}, functions = {}, globals = {}, protocols = {}, protocol_members = {}, types = {}, enum_types = {}}
     for _, set in ipairs({a, b}) do
         for class, members in pairs(set.classes or {}) do
             out.classes[class] = out.classes[class] or {}
@@ -2105,6 +2160,9 @@ function merge_sets(a, b)
         end
         for name in pairs(set.types or {}) do
             out.types[name] = true
+        end
+        for name in pairs(set.enum_types or {}) do
+            out.enum_types[name] = true
         end
     end
     return out
