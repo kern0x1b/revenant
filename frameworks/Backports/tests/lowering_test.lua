@@ -325,6 +325,45 @@ function main()
     local device_lowered = lowered.lower_header(device_sample, device)
     assert(count(device_lowered, "AVAILABLE") == 2 and not device_lowered:find("addInput:(id)input API_AVAILABLE", 1, true),
            "a device member loses its later availability, and the members the release lacks keep it:\n" .. device_lowered)
+    local gated_sample = table.concat({
+        "@interface SampleGated : NSObject",
+        "@property (nonatomic) BOOL waits",
+        "#if SAMPLE_ISOLATED",
+        "SAMPLE_NONISOLATED",
+        "#endif",
+        "API_AVAILABLE(macos(10.12), ios(10.0));",
+        "@property (nonatomic) float other API_AVAILABLE(ios(10.0));",
+        "@end",
+        "",
+    }, "\n")
+    local gated_lowered = lowered.lower_header(gated_sample, {classes = {SampleGated = {["-waits"] = true, ["-setWaits:"] = true}}})
+    assert(count(gated_lowered, "API_AVAILABLE") == 1 and gated_lowered:find("#if SAMPLE_ISOLATED\nSAMPLE_NONISOLATED\n#endif\n;", 1, true)
+           and gated_lowered:find("float other API_AVAILABLE(ios(10.0))", 1, true),
+           "a property whose availability macro follows a preprocessor conditional is named after its own identifier, so a backported one loses the availability and its neighbour keeps it:\n" .. gated_lowered)
+    local branched_sample = table.concat({
+        "@interface SampleBranched : NSObject",
+        "@property (nonatomic, readonly) double span",
+        "#if __swift__",
+        " API_UNAVAILABLE(visionos);",
+        "#else",
+        "API_AVAILABLE(macos(10.10), ios(7.0), visionos(1.0));",
+        "#endif",
+        "@property (nonatomic, readonly) double kept API_AVAILABLE(ios(7.0));",
+        "- (void)stretch",
+        "#if __swift__",
+        " API_UNAVAILABLE(visionos);",
+        "#else",
+        "API_AVAILABLE(ios(7.0));",
+        "#endif",
+        "- (void)untouched API_AVAILABLE(ios(7.0));",
+        "@end",
+        "",
+    }, "\n")
+    local branched_lowered = lowered.lower_header(branched_sample, {classes = {SampleBranched = {["-span"] = true, ["-stretch"] = true}}})
+    assert(count(branched_lowered, "API_AVAILABLE") == 2 and branched_lowered:find("double kept API_AVAILABLE(ios(7.0))", 1, true)
+           and branched_lowered:find("untouched API_AVAILABLE(ios(7.0))", 1, true)
+           and branched_lowered:find("#else\n;\n#endif\n@property", 1, true) and branched_lowered:find("#else\n;\n#endif\n- (void)untouched", 1, true),
+           "a declaration whose availability is in the #else branch of a conditional loses it there, and the declarations around it keep theirs:\n" .. branched_lowered)
     local protocol_sdk = path.join(out, "protocol-sdk")
     local protocol_src = path.join(out, "protocol-src")
     local protocol_header = path.join(protocol_sdk, "System", "Library", "Frameworks", "Sample.framework", "Headers", "SampleEnvironment.h")

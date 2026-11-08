@@ -119,3 +119,44 @@ is only available in iOS 7.0 or newer".
 The lowering also took the `@end` at the front of a doc comment's `@endcode` for the end of an `@interface` or `@protocol`,
 so the members after the first doc-commented one kept their availability (`MLModel`'s compile call was one).
 `block_end_of` ends a block only at the word `@end` (`lowered_doc_comment_test.lua`).
+
+## A declaration whose availability is behind a preprocessor conditional
+
+Two shapes of the SDK's own headers kept an implemented member's availability, and each failed a Telegram line that the
+backport covered.
+
+- `@property (nonatomic) BOOL automaticallyWaitsToMinimizeStalling`, then `#if AVF_DEPLOYING_TO_2022_RELEASES_AND_LATER`,
+  `NS_SWIFT_NONISOLATED`, `#endif`, then `API_AVAILABLE(...)` (`AVPlayer`). `property_name` named the property after the last identifier of the
+  declaration, and the conditional's lines put the macro there, so the property was recorded under the wrong name, lost no
+  availability, and its neighbour was lowered by mistake. `property_name` drops the directive lines first.
+- `@property (nonatomic, readonly) CMTime minFrameDuration`, then `#if __swift__`, `API_UNAVAILABLE(visionos);`, `#else`,
+  `API_AVAILABLE(ios(7.0), ...);`, `#endif` (`AVAssetTrack.minFrameDuration`). The declaration was taken to end at the first
+  `;`, inside the `#if` branch, so the `API_AVAILABLE` of the `#else` branch stayed. `declaration_end` reads on to the
+  `#endif` that closes a conditional opened inside the declaration. It is used for the members of an `@interface` and an
+  `@protocol` in `lowering_of`; `device_members_in` still ends at the first `;`.
+
+`lowering_test.lua` has a sample of each (`SampleGated`, `SampleBranched`) and fails without the fix. Checked on the
+SDK: of the 3988 headers the second change alters one, `AVAssetTrack.h`, by one line.
+
+A member that a class implements is lowered where that class declares it. A subclass that declares it again keeps its
+own availability: `AVCompositionTrack (SynchronousTrackInterface)` redeclares `minFrameDuration` for Swift, and Swift
+resolved `compositionTrack.minFrameDuration` to the redeclaration, "only available in iOS 7.0 or newer", although
+`AVAssetTrack` had the member. A class that redeclares a member needs an `@implementation` of its own for it
+(`AVAssetTrackFrameDuration7.m` has one for `AVCompositionTrack`, which is a real implementation and not a forwarder:
+a composition track has no samples of its own to read). The SDK headers hold one more case, `AVMutableMovieTrack`,
+which Telegram does not use.
+
+### Not fixed: a word that only a comment contains
+
+`lowering_of` lowers the statement around every occurrence of an implemented C function or global, and it counts an
+occurrence inside a comment. A header comment that names one of them lowers the declaration beside it although nothing
+implements that declaration. Measured on the SDK: skipping comment occurrences changes 140 headers by 324 lines, all of
+them declarations that regain their availability, among them `AVAudioSession.secondaryAudioShouldBeSilencedHint`
+(iOS 8), `MKDirections.Request.requestsAlternateRoutes` (iOS 7), `AVCaptureInput.Port.sourceDevicePosition` and
+`sourceDeviceType` (iOS 13), `UITableView.fillerRowHeight` and `selfSizingInvalidation`, `CIContext.workingFormat` and the
+`AVError` codes after `AVErrorFailedToParse`. Telegram 13.0.0 uses three of them without a guard:
+`ManagedAudioSession.swift:623` (`secondaryAudioShouldBeSilencedHint`), `LocationUtils.swift:154` (`requestsAlternateRoutes`)
+and the `RTCAudioSession.mm` line that reads the same hint. Each compiles today only because the lowering removed an
+availability that nothing implements, and would be a compile error after the change (reasoned: on an iOS 6 device the
+selector is not there, so the call would raise "unrecognized selector" if it ran; no device run). The change is
+therefore not made here: it needs those three names implemented or guarded first.

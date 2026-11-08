@@ -928,6 +928,29 @@ local function statement_end(text, at)
     return stop or text:find("\n", at, true) or #text
 end
 
+local function declaration_end(text, at)
+    local stop = statement_end(text, at)
+    local depth, scan = 0, at
+    while true do
+        local mark, _, word = text:find("\n%s*#%s*(%a+)", scan)
+        if not mark then
+            return stop
+        end
+        if depth == 0 and mark > stop then
+            return stop
+        end
+        if word:find("^if") then
+            depth = depth + 1
+        elseif word == "endif" and depth > 0 then
+            depth = depth - 1
+            if depth == 0 and mark > stop then
+                return directive_end(text, mark + 1)
+            end
+        end
+        scan = mark + 1
+    end
+end
+
 local function trimmed_of_markers(text, start, stop, markers)
     markers = markers or {begin = {API_AVAILABLE_BEGIN = false}, ends = {API_AVAILABLE_END = true}}
     local moved = start
@@ -1057,7 +1080,7 @@ local function property_sign(declaration)
 end
 
 local function property_name(declaration)
-    local text = declaration:gsub("%b()", "")
+    local text = declaration:gsub("\n%s*#[^\n]*", ""):gsub("%b()", "")
     local name = nil
     for word in text:gmatch("[%a_][%w_]*") do
         if word ~= "property" and not word:match("^[%u%d_]+$") then
@@ -1376,7 +1399,7 @@ local function lowering_of(text, implemented, declarations)
                 if not mark or mark > block_end then
                     break
                 end
-                local declared_end = statement_end(text, mark + 1)
+                local declared_end = declaration_end(text, mark + 1)
                 local declaration = text:sub(mark + 1, declared_end)
                 local selector = selector_of(declaration)
                 if selector and members[declaration:match("^([%-%+])") .. selector] then
@@ -1399,7 +1422,7 @@ local function lowering_of(text, implemented, declarations)
                 if not mark or mark > block_end then
                     break
                 end
-                local declared_end = statement_end(text, mark + 1)
+                local declared_end = declaration_end(text, mark + 1)
                 local declaration = text:sub(mark + 1, declared_end)
                 local name = property_name(declaration)
                 local getter = property_getter(declaration) or name
@@ -1434,7 +1457,7 @@ local function lowering_of(text, implemented, declarations)
                 if not mark or mark > block_end then
                     break
                 end
-                local declared_end = statement_end(text, mark + 1)
+                local declared_end = declaration_end(text, mark + 1)
                 local declaration = text:sub(mark + 1, declared_end)
                 local selector = selector_of(declaration)
                 if selector and members[declaration:match("^([%-%+])") .. selector] then
@@ -1450,7 +1473,7 @@ local function lowering_of(text, implemented, declarations)
                 if not mark or mark > block_end then
                     break
                 end
-                local declared_end = statement_end(text, mark + 1)
+                local declared_end = declaration_end(text, mark + 1)
                 local declaration = text:sub(mark + 1, declared_end)
                 local property = property_name(declaration)
                 local getter = property_getter(declaration) or property
