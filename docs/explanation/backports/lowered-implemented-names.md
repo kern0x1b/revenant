@@ -22,7 +22,10 @@ of the names above at armv7 iOS 6.0 against the lowered headers with `-Werror=un
 A class whose source gives it the run-time name of an SDK class, `__attribute__((objc_runtime_name("AVCapturePhotoOutput")))`
 on an `@interface` of the port's own, is recorded under the SDK's name, since the headers declare the SDK's class and the
 lowering looks the class up by that name. The scan reads the attribute in every `.m`, `.mm` and `.h` of the framework's
-source folder, so the attribute and the `@implementation` need not be in one file.
+source folder, so the attribute and the `@implementation` need not be in one file. The attribute also gives the compiled
+class the SDK's name for its `_OBJC_CLASS_$_` and `_OBJC_METACLASS_$_` symbols, so the library exports the class under
+that name and not under the port's own. `lowered_exports_test.lua` asks the same scan, `classes_implemented_in`, which
+classes the sources implement, so it counts such a class under the SDK's name too; it runs in `tools/prepush.lua`.
 
 ## An enum type is lowered with its cases
 

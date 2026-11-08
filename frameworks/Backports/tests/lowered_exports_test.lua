@@ -4,19 +4,7 @@ local workspace = import("@addon.revenant.workspace", {anonymous = true})
 function main()
     local src = path.absolute(path.join(os.scriptdir(), "..", "src"))
     local members = lowered.read_members()
-    local defined, implemented = lowered.constants_defined_in(src), {}
-    for _, folder in ipairs(os.dirs(path.join(src, "*"))) do
-        for _, pattern in ipairs({"**.m", "**.mm", "**.c", "**.h"}) do
-            for _, file in ipairs(os.files(path.join(folder, pattern))) do
-                for line in io.readfile(file):gmatch("[^\n]*") do
-                    local class = line:match("^@implementation%s+REVENANT_ALIAS_CLASS%(([%w_]+)%)") or line:match("^@implementation%s+([%w_]+)")
-                    if class then
-                        implemented[class] = true
-                    end
-                end
-            end
-        end
-    end
+    local defined, implemented = lowered.constants_defined_in(src), lowered.classes_implemented_in(src)
     local enums = members.enums or {}
     local problems = {}
     for name in pairs(members.globals) do
