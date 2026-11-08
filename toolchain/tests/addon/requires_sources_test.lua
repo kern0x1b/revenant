@@ -23,12 +23,41 @@ package("fakeplain")
     end)
 ]]
 
+local PORTED = [[
+package("fakeport")
+    set_kind("library")
+    set_description("requires sources test, with the digest of its sources in its port folder and a dependency")
+    add_urls("file://%s")
+    add_versions("1.0", "%s")
+    includes(path.join(os.scriptdir(), "port", "digest.lua"))
+    add_configs("sources", {description = "The digest of this recipe.", default = fakeport_digest, type = "string", readonly = true})
+    add_deps("fakedep")
+    on_install(function (package)
+        os.cp("a.txt", package:installdir())
+        io.writefile(path.join(package:installdir(), "digest.txt"), "fakeport:" .. package:config("sources"))
+    end)
+]]
+
+local DEPENDED = [[
+package("fakedep")
+    set_kind("library")
+    set_description("requires sources test, the dependency of a package whose digest is in its port folder")
+    add_urls("file://%s")
+    add_versions("1.0", "%s")
+    includes(path.join(os.scriptdir(), "port", "digest.lua"))
+    add_configs("sources", {description = "The digest of this recipe.", default = fakedep_digest, type = "string", readonly = true})
+    on_install(function (package)
+        os.cp("a.txt", package:installdir())
+        io.writefile(path.join(package:installdir(), "digest.txt"), "fakedep:" .. package:config("sources"))
+    end)
+]]
+
 local PROJECT = [[
 add_repositories("expo %s")
-add_requires("fakefix 1.0", "fakeplain 1.0")
+add_requires("fakefix 1.0", "fakeplain 1.0", "fakeport 1.0")
 target("t")
     set_kind("phony")
-    add_packages("fakefix", "fakeplain")
+    add_packages("fakefix", "fakeplain", "fakeport")
 ]]
 
 local function patch(content)
@@ -74,6 +103,18 @@ function failures(opt)
         io.writefile(path.join(recipedir, "xmake.lua"), string.format(RECIPE, repository, commit, hash.sha256(patchfile)))
     end
 
+    local portdir = path.join(repo, "packages", "f", "fakeport")
+    local depdir = path.join(repo, "packages", "f", "fakedep")
+    os.mkdir(path.join(portdir, "port"))
+    os.mkdir(path.join(depdir, "port"))
+    io.writefile(path.join(portdir, "xmake.lua"), string.format(PORTED, repository, commit))
+    io.writefile(path.join(depdir, "xmake.lua"), string.format(DEPENDED, repository, commit))
+
+    local function publish_digests(own, dependency)
+        io.writefile(path.join(portdir, "port", "digest.lua"), string.format("fakeport_digest = \"%s\"\n", own))
+        io.writefile(path.join(depdir, "port", "digest.lua"), string.format("fakedep_digest = \"%s\"\n", dependency))
+    end
+
     local function configure()
         os.vrunv(os.programfile(), {"f", "-y", "-P", project}, {curdir = project, envs = {XMAKE_GLOBALDIR = global, XMAKE_ADDONS_SOURCEDIRS = "{}"}})
     end
@@ -87,16 +128,41 @@ function failures(opt)
         return false
     end
 
+    local function installed_digest(name, value)
+        for _, file in ipairs(os.files(path.join(global, "**", "digest.txt"))) do
+            if not file:find("/source/", 1, true) and io.readfile(file):trim() == name .. ":" .. value then
+                return true
+            end
+        end
+        return false
+    end
+
     publish("patched-1")
+    publish_digests("port-1", "dependency-1")
     configure()
     if not installed_with("patched-1") then
         table.insert(found, "the first configure installs the package with the patch it names")
+    end
+    if not installed_digest("fakeport", "port-1") or not installed_digest("fakedep", "dependency-1") then
+        table.insert(found, "the first configure installs the packages with the digests their port folders name")
     end
 
     publish("patched-2")
     configure()
     if not installed_with("patched-2") then
         table.insert(found, "a changed patch is installed by the next configure, without cleaning the configuration")
+    end
+
+    publish_digests("port-2", "dependency-1")
+    configure()
+    if not installed_digest("fakeport", "port-2") then
+        table.insert(found, "a changed file of the port folder of a required package is installed by the next configure, without cleaning the configuration")
+    end
+
+    publish_digests("port-2", "dependency-2")
+    configure()
+    if not installed_digest("fakedep", "dependency-2") then
+        table.insert(found, "a changed file of the port folder of a package a required package depends on is installed by the next configure, without cleaning the configuration")
     end
 
     configure()
