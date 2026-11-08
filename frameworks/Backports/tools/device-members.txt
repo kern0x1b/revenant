@@ -28,11 +28,13 @@ class AVSampleBufferDisplayLayer
 class AVURLAsset
 class AVVideoComposition
 class CASpringAnimation
+class CIImage
 class CLLocation
 class CPListItem
 class CTCall
 class CTCallCenter
 class CTSubscriber
+class EKEvent
 class GKAchievement
 class ICCameraDevice
 class ICCameraFile
@@ -40,6 +42,7 @@ class ICCameraFolder
 class ICCameraItem
 class ICDevice
 class ICDeviceBrowser
+class MKDirectionsRequest
 class MKMultiPoint
 class MKPointAnnotation
 class MKPolygon
@@ -135,6 +138,9 @@ member AVSampleBufferDisplayLayer -isReadyForMoreMediaData
 member AVSampleBufferDisplayLayer -requestMediaDataWhenReadyOnQueue:usingBlock:
 member AVSampleBufferDisplayLayer -stopRequestingMediaData
 member AVURLAsset -assetCache
+member CIImage -imageByApplyingOrientation:
+member CIImage -imageTransformForOrientation:
+member CIImage -initWithCGImageSource:index:options:
 member CLLocation -courseAccuracy
 member CLLocation -speedAccuracy
 member CTCall -callID
@@ -144,6 +150,7 @@ member CTCall -setCallState:
 member CTCallCenter -currentCalls
 member CTCallCenter -setCurrentCalls:
 member CTSubscriber -carrierToken
+member EKEvent -occurrenceDate
 member GKAchievement -player
 member GKAchievement -setPlayer:
 member ICCameraDevice -contentCatalogPercentCompleted
@@ -205,6 +212,8 @@ member ICDeviceBrowser -devices
 member ICDeviceBrowser -init
 member ICDeviceBrowser -start
 member ICDeviceBrowser -stop
+member MKDirectionsRequest -setDestination:
+member MKDirectionsRequest -setSource:
 member MPMediaEntity -persistentID
 member MPMediaItem -albumArtist
 member MPMediaItem -albumTitle

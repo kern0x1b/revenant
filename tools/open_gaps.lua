@@ -57,13 +57,6 @@ function main()
             gaps[name] = true
         end
     end
-    for _, args in ipairs(calls(swift, "createml")) do
-        local gap = args[5] and args[5]:match("%S")
-        local name = literal(args[1])
-        if gap and name then
-            gaps[name] = true
-        end
-    end
     local names = table.orderkeys(gaps)
     if #names == 0 then
         table.insert(errors, "frameworks/Backports/src/Swift/xmake.lua declares no open gap, so this check reads nothing")

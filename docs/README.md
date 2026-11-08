@@ -18,7 +18,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [What iOS 6.1.3 can reach over TLS](explanation/backports/tls-reach-ios-6.md) | the firmware's SecureTransport versions and ciphers, the hosts it reaches, and the proposed BoringSSL fix |
 | [Metal on iOS 6](explanation/backports/metal-on-ios6.md) | the Metal render path and the fragment-pass compute that ship in v1 through air2es, the driver-level backlog for v2, the device findings, and the licence rules for both |
 | [Nested frameworks in the lowered overlay](explanation/backports/lowered-nested-frameworks.md) | why the overlay copies the headers of a framework nested in a mapped framework, such as MPSCore in MetalPerformanceShaders |
-| [What the lowering takes as implemented](explanation/backports/lowered-implemented-names.md) | how a name reaches the lowered member list through `BACKPORT_IMPL`, which definitions the line scan misses, and the Swift overlay modules (`UniformTypeIdentifiers`, `IOSurface`) that a consumer must put on its search path |
+| [What the lowering takes as implemented](explanation/backports/lowered-implemented-names.md) | how a name reaches the lowered member list through `BACKPORT_IMPL`, which definitions the line scan misses, the Swift overlay modules (`UniformTypeIdentifiers`, `IOSurface`, `SceneKit`, `Vision`, `CoreML`) that a consumer must put on its search path, and why a name the release exports is lowered and not backported |
 | [AIR from Apple's Metal compiler: the metal-toolchain package](explanation/backports/metal-air-prebuilt.md) | the local package that would give AIR for Telegram's shaders, the official download it needs, and what it is blocked on (Xcode) |
 | [air2es kernels: the kernel lowering](explanation/backports/air2es-kernels.md) | how a Metal kernel becomes an ES 1.00 fragment pass, its named refusals, the measured Telegram kernel, and what is still open |
 | [air2es on iOS Metal sources: per-shader verdicts](explanation/backports/air2es-ios-verdicts.md) | the verdict for each entry point of the measured Metal corpus, the changes measured against it, and the refusal groups still open |
@@ -153,15 +153,20 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [AppIntents: unplaced rows](reference/backports/AppIntents/AppIntents/Unplaced.md) | the 291 unplaced rows, grouped by type |
 | [AppIntentsMacros](reference/backports/AppIntentsMacros/README.md) | the macro plugins of AppIntents and TipKit; the package that would ship them, `revenant@appintents-macros`, does not exist yet |
 | [AuthenticationServices: errors](reference/backports/AuthenticationServices/Errors.md) | the error structs, measured |
+| [AuthenticationServices: ASCredentialUpdater](reference/backports/AuthenticationServices/CredentialUpdater.md) | the reporting methods on iOS 6, the error they throw, and the dylib a consumer takes |
 | [CloudKit: CKError](reference/backports/CloudKit/CKError.md) | `CKError`, measured |
 | [CloudKit: CKRecord](reference/backports/CloudKit/CKRecord.md) | `CKRecord`, not yet visible to Swift on armv7 and iOS 6.1.3 |
+| [CoreImage: orientation](reference/backports/CoreImage/README.md) | the CGImagePropertyOrientation forms of CIImage on iOS 6, and the EXIF forms the release already has |
+| [CoreML](reference/backports/CoreML/README.md) | `MLModel` load and compile in Swift, and the module a consumer builds |
 | [CreateML](reference/backports/CreateML/README.md) | CreateML and CreateMLComponents on the port's armv7 releases: what is there, what is not, and the protobuf codec |
 | [CreateML: CSV reading](reference/backports/CreateML/TabularData/CSVReading.md) | CSV reading in TabularData, measured, and what is carried |
 | [CreateML: CSV writing](reference/backports/CreateML/TabularData/CSVWriting.md) | CSV writing in TabularData, measured, and what is carried |
 | [CreateML: date parsing](reference/backports/CreateML/TabularData/DateParsing.md) | date reading in TabularData, measured, and what is carried |
+| [Metal: dispatchThreads](reference/backports/Metal/DispatchThreads.md) | compute dispatch by threads per grid, the edge group, and the pipeline limits |
 | [MusicKit](reference/backports/MusicKit/README.md) | MusicKit for a legacy Apple platform |
 | [RealityFoundation: audio](reference/backports/RealityFoundation/Audio.md) | `Audio.swift`: deleted, and what brings it back |
 | [RealityFoundation: SceneKit](reference/backports/RealityFoundation/SceneKit.md) | RealityFoundation and RealityKit below iOS 8.0 |
+| [SceneKit](reference/backports/SceneKit/README.md) | the particle system's data model, the Swift module, and what the renderer does not draw |
 | [Spatial](reference/backports/Spatial/README.md) | what is built here, and what is measured |
 | [Spatial: sources](reference/backports/Spatial/Sources.md) | the files, the Float twin generated from the Double text, and the reasons behind the matrix and geometry code |
 | [SwiftData](reference/backports/SwiftData/README.md) | the package `revenant@swift-data` |
@@ -172,6 +177,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [UIKit](reference/backports/UIKit/README.md) | the UIKit Swift overlay: the surface's Swift constants and cases |
 | [UIKit: CASpringAnimation](reference/backports/UIKit/CASpringAnimation.md) | the iOS 9 spring class on iOS 6, its curve and its keyframe delivery |
 | [UIKit: UICornerConfiguration](reference/backports/UIKit/CornerConfiguration.md) | per-corner radii, concentric corners and how a view is clipped to them on iOS 6 |
+| [Vision](reference/backports/Vision/README.md) | the Swift forms of the landmark, recognised-text and contour accessors, and the missing landmark detector |
 | [WeatherKit: CompassDirection](reference/backports/WeatherKit/CompassDirection.md) | `Wind.CompassDirection`, measured |
 | [WeatherKit: WeatherCondition](reference/backports/WeatherKit/WeatherCondition.md) | `WeatherCondition`, measured |
 | [WidgetKit](reference/backports/WidgetKit/README.md) | the package `revenant@widgetkit` |

@@ -1,5 +1,6 @@
 #import "RevenantMetal.h"
 #import "RevenantMetalDebugGroups.h"
+#import "RevenantMetalGrid.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -176,45 +177,72 @@ static void *RevenantMetalRunOneThread(void *argument)
     [_pipeline revenantSetBlockBytes:_blockBytes];
 }
 
-- (void)dispatchThreadgroups:(MTLSize)groups threadsPerThreadgroup:(MTLSize)threads
+- (BOOL)revenantCanDispatchWithThreadsPerThreadgroup:(MTLSize)threads
 {
     if (!_pipeline) {
         NSLog(@"Metal: a compute dispatch with no pipeline state: there is no kernel to run, so nothing is");
-        return;
+        return NO;
     }
     if ([_pipeline revenantBlockBytes] && !_blockBytes) {
         NSLog(@"Metal: %@ declares a threadgroup block and -setThreadgroupMemoryLength:atIndex: has not said how long it is, so this dispatch is refused rather than given a block of a guessed size",
               [_pipeline kernelName] ?: @"the kernel");
-        return;
+        return NO;
     }
     if (threads.width == 0 || threads.height == 0 || threads.depth == 0) {
         NSLog(@"Metal: a dispatch of %lux%lux%lu threads per group has an empty dimension, and there is no thread to run",
               (unsigned long)threads.width, (unsigned long)threads.height, (unsigned long)threads.depth);
+        return NO;
+    }
+    return YES;
+}
+
+- (void)revenantRunGroups:(MTLSize)groups threadsPerThreadgroup:(MTLSize)threads grid:(const MTLSize *)grid
+{
+    uint32_t group = 0;
+    for (uint32_t z = 0; z < (uint32_t)groups.depth; z++) {
+        for (uint32_t y = 0; y < (uint32_t)groups.height; y++) {
+            for (uint32_t x = 0; x < (uint32_t)groups.width; x++, group++) {
+                MTLSize size = threads;
+                if (grid) {
+                    size = MTLSizeMake(RevenantMetalGroupExtent(grid->width, threads.width, x),
+                                       RevenantMetalGroupExtent(grid->height, threads.height, y),
+                                       RevenantMetalGroupExtent(grid->depth, threads.depth, z));
+                }
+                uint32_t each = (uint32_t)(size.width * size.height * size.depth);
+                [self revenantRunGroup:each atGroup:group atGroupPosition:(revenant_v4i){x, y, z, 0} threads:size];
+            }
+        }
+    }
+}
+
+- (void)dispatchThreadgroups:(MTLSize)groups threadsPerThreadgroup:(MTLSize)threads
+{
+    if (![self revenantCanDispatchWithThreadsPerThreadgroup:threads]) {
         return;
     }
     if ([_pipeline revenantTranslatedFunction]) {
         [self revenantDispatchTranslatedGrid:MTLSizeMake(groups.width * threads.width, groups.height * threads.height, groups.depth * threads.depth)];
         return;
     }
-    uint32_t each = (uint32_t)(threads.width * threads.height * threads.depth);
-    [_pipeline revenantSetThreads:each];
-    uint32_t group = 0;
-    for (uint32_t z = 0; z < (uint32_t)groups.depth; z++)
-        for (uint32_t y = 0; y < (uint32_t)groups.height; y++)
-            for (uint32_t x = 0; x < (uint32_t)groups.width; x++, group++)
-                [self revenantRunGroup:each atGroup:group atGroupPosition:(revenant_v4i){x, y, z, 0} threads:threads];
+    [self revenantRunGroups:groups threadsPerThreadgroup:threads grid:NULL];
 }
 
-- (void)dispatchThreads:(MTLSize)threadsPerThreadgroup threadsPerGrid:(MTLSize)threadsPerGrid
+- (void)dispatchThreads:(MTLSize)threadsPerGrid threadsPerThreadgroup:(MTLSize)threadsPerThreadgroup
 {
+    if (![self revenantCanDispatchWithThreadsPerThreadgroup:threadsPerThreadgroup]) {
+        return;
+    }
+    if (threadsPerGrid.width == 0 || threadsPerGrid.height == 0 || threadsPerGrid.depth == 0) {
+        return;
+    }
     if ([_pipeline revenantTranslatedFunction]) {
         [self revenantDispatchTranslatedGrid:threadsPerGrid];
         return;
     }
-    uint32_t each = (uint32_t)threadsPerThreadgroup.width;
-    uint32_t wide = each ? each : 1;
-    MTLSize groups = MTLSizeMake((uint32_t)threadsPerGrid.width / wide, threadsPerGrid.height, threadsPerGrid.depth);
-    [self dispatchThreadgroups:groups threadsPerThreadgroup:threadsPerThreadgroup];
+    MTLSize groups = MTLSizeMake(RevenantMetalGroupCount(threadsPerGrid.width, threadsPerThreadgroup.width),
+                                 RevenantMetalGroupCount(threadsPerGrid.height, threadsPerThreadgroup.height),
+                                 RevenantMetalGroupCount(threadsPerGrid.depth, threadsPerThreadgroup.depth));
+    [self revenantRunGroups:groups threadsPerThreadgroup:threadsPerThreadgroup grid:&threadsPerGrid];
 }
 
 - (void)revenantDispatchTranslatedGrid:(MTLSize)grid

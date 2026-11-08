@@ -1,15 +1,18 @@
 # CreateML and CreateMLComponents, for the port's armv7 releases
 
 Four Swift modules and the CoreML overlay they need, in `frameworks/Backports/src/`, which
-`packages/c/createml/xmake.lua` would build for armv7 against the `revenant@swift-runtime` a port
-carries. It does not build them today: the recipe refuses on load, because the CoreML overlay's
-`ShapedArray.swift` names `MLMultiArrayDataType`, which the SDK declares for iOS 11 and later. What
-follows was checked against the sources in `frameworks/Backports/src/`.
+`packages/c/createml/xmake.lua` builds for armv7 against the `revenant@swift-runtime` a port carries.
+The CoreML overlay is a Swift module named `CoreML`, and the Swift compiler does not resolve the SDK's own
+`CoreML` module from inside it unless it is told to import the underlying module, so the `CoreML` target passes
+`-Xfrontend -import-underlying-module`; the sources of that overlay carry no `import CoreML`. An earlier recipe
+refused on load because `ShapedArray.swift` could not find `MLMultiArrayDataType` ("cannot find type"), which the SDK
+declares without a gate: the missing flag was the cause, and the gap was never in the SDK. What follows was checked
+against the sources in `frameworks/Backports/src/`.
 
 | Module | Holds |
 | --- | --- |
 | `TabularData` | `DataFrame`, `ColumnID`, `Column`, `ColumnSlice`, `DiscontiguousColumnSlice`, `AnyColumn`; the CSV reader with `CSVType`, `CSVReadingOptions` and `CSVReadingError` ([reading](TabularData/CSVReading.md)); its date readings and the `ParseStrategy` a caller adds ([dates](TabularData/DateParsing.md)); the CSV writer with `CSVWritingOptions` and `CSVWritingError` ([writing](TabularData/CSVWriting.md)) |
-| `CoreML` | the shaped-array overlay: `MLShapedArray`, `MLShapedArraySlice`, `MLShapedArrayScalar`; the protobuf wire codec (`Codec.swift`), the model messages (`ModelWriter.swift`), and the Core ML schema they use, vendored in `frameworks/Backports/src/CoreML/proto/` |
+| `CoreML` | the loading members the SDK's Swift overlay adds to `MLModel`: `load(contentsOf:configuration:completionHandler:)` with a `Result`, its `async` form, and `compileModel(at:)` in both forms, over the refined Objective-C class methods the Backports image implements (`tests/coreml_swift_test.lua`); the shaped-array overlay: `MLShapedArray`, `MLShapedArraySlice`, `MLShapedArrayScalar`; the protobuf wire codec (`Codec.swift`), the model messages (`ModelWriter.swift`), and the Core ML schema they use, vendored in `frameworks/Backports/src/CoreML/proto/` |
 | `CreateMLComponents` | the estimators and their models: linear and logistic regression (`LinearRegressor`, `LogisticRegressionClassifier`, over `Float` and `Double`), decision trees, ensembles and boosted trees; the transformers `StandardScaler`, `MinMaxScaler`, `MaxAbsScaler`, `RobustScaler`, `OneHotEncoder`, `OrdinalEncoder`, `NumericImputer` and `LinearTransformer`; the preprocessing wrappers around an estimator; the metrics; and the arithmetic under them |
 | `CreateML` | `MLDataTable` (with its CSV and JSON text), `MLDataColumn`, `MLLinearRegressor`, and the six tabular estimators: decision trees, random forests and boosted trees, each as a regressor and a classifier, with their models, metrics and the training data split and validation types |
 

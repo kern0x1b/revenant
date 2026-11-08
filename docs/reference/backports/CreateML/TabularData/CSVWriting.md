@@ -40,6 +40,5 @@ declarations are the SDK's, as the spec rows give them
   protocol. The port's are on `DataFrame` itself, so a caller written against the protocol does not compile.
 - The JSON writer (`jsonRepresentation(options:)`, `writeJSON(to:options:)`, `JSONWritingOptions`).
 - Device verification: none yet. The TabularData sources compile for `armv7-apple-ios6.1.3` with the port's
-  compiler, at the flags the package passes; the package's own xmake build has not run, because
-  `revenant@createml` refuses on load while the CoreML overlay is an open gap, and no run on a device or
-  in the emulator has been made.
+  compiler, at the flags the package passes, and the four modules emit their Swift modules for
+  `armv7-apple-ios6.0` against the lowered SDK; no run on a device or in the emulator has been made.

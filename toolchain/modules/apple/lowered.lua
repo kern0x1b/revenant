@@ -377,6 +377,16 @@ local MEMBERS = {
         },
     },
     {
+        member = "CGPathAddRoundedRect",
+        header = {
+            name = "CoreGraphics",
+            directory = {"System", "Library", "Frameworks", "CoreGraphics.framework", "Headers"},
+            file = "CGPath.h",
+            find = "CGFloat cornerWidth, CGFloat cornerHeight)\n    API_AVAILABLE(...);",
+            replace = "CGFloat cornerWidth, CGFloat cornerHeight);",
+        },
+    },
+    {
         member = "NSBaselineOffsetAttributeName",
         header = {
             name = "UIKit",
@@ -1159,14 +1169,18 @@ local function constant_end(text, at)
     return #text
 end
 
+local function block_end_of(text, from)
+    return text:find("@end%f[^%w_]", from) or #text
+end
+
 local function class_spans(text)
     local spans = {}
     for position in text:gmatch("()@interface%f[^%w_]") do
-        table.insert(spans, {start = position, stop = text:find("@end", position, true) or #text})
+        table.insert(spans, {start = position, stop = block_end_of(text, position)})
     end
     for position in text:gmatch("()@protocol%f[^%w_]") do
         if not text:match("^[^;\n]*;", position) then
-            table.insert(spans, {start = position, stop = text:find("@end", position, true) or #text})
+            table.insert(spans, {start = position, stop = block_end_of(text, position)})
         end
     end
     return spans
@@ -1355,7 +1369,7 @@ local function lowering_of(text, implemented, declarations)
                     lower(piece[1], piece[2])
                 end
             end
-            local block_end = text:find("@end", stop, true) or #text
+            local block_end = block_end_of(text, stop)
             local at = stop
             while true do
                 local mark = text:find("\n[%-%+]%s*%(", at)
@@ -1378,7 +1392,7 @@ local function lowering_of(text, implemented, declarations)
         local members = implemented.classes[class]
         if members and not in_comment(spans, position) then
             local _, stop = text:find("@interface%s+" .. class .. "%f[^%w_]", position)
-            local block_end = text:find("@end", stop, true) or #text
+            local block_end = block_end_of(text, stop)
             local at = stop
             while true do
                 local mark = text:find("\n@property", at, true)
@@ -1406,7 +1420,7 @@ local function lowering_of(text, implemented, declarations)
             if not start then
                 break
             end
-            local block_end = text:find("@end", stop, true) or #text
+            local block_end = block_end_of(text, stop)
             local first = statement_start(text, start, true, true)
             if first then
                 for _, piece in ipairs(pieces_of(text, first, text:find("\n", stop, true) or #text)) do
@@ -1659,7 +1673,7 @@ local function protocol_blocks(sdk, names)
             while position do
                 local name = text:match("^@protocol%s+([%w_]+)[%s<]", position)
                 if name and names[name] and not blocks[name] then
-                    blocks[name] = text:sub(position, text:find("@end", position, true) or #text)
+                    blocks[name] = text:sub(position, block_end_of(text, position))
                 end
                 position = text:find("@protocol", position + 1, true)
             end
@@ -2198,6 +2212,12 @@ function ios_later(text)
     for found_major, found_minor in text:gmatch("__IPHONE_(%d+)_(%d+)") do
         major, minor = tonumber(found_major), tonumber(found_minor)
     end
+    for found_major, found_minor in text:gmatch("NS_AVAILABLE%s*%(%s*[%w_]+%s*,%s*(%d+)_(%d+)") do
+        major, minor = tonumber(found_major), tonumber(found_minor)
+    end
+    for found_major, found_minor in text:gmatch("NS_AVAILABLE_IOS%s*%(%s*(%d+)_(%d+)") do
+        major, minor = tonumber(found_major), tonumber(found_minor)
+    end
     return major ~= nil and (major > 6 or (major == 6 and minor > 0))
 end
 
@@ -2307,7 +2327,7 @@ function device_members_in(text, released, cache)
         local keys = released_keys(released, class, cache)
         if keys then
             local _, stop = text:find("@interface%s+" .. class .. "%f[^%w_]", position)
-            local block_end = text:find("@end", stop, true) or #text
+            local block_end = block_end_of(text, stop)
             local lead = statement_start(text, position, true) or position
             if ios_later(text:sub(lead, text:find("\n", stop, true) or #text)) then
                 set.classes[class] = set.classes[class] or {}
@@ -2973,7 +2993,7 @@ function lower_swift_text(text, names, types, keep)
     keep = keep or {}
     local kept, pending, scope = {}, nil, nil
     for index, line in ipairs(lines) do
-        local major = line:match("^%s*@available%(.*iOS%s+(%d+)")
+        local major = line:match("^%s*@available%(.*iOS%s+(%d+)") or line:match("^%s*@available%(.*iOS%s*,%s*introduced:%s*(%d+)")
         if major and tonumber(major) >= 7 and not keep[index] then
             pending = #kept + 1
         elseif pending and (lowered_by(line, names, types, scope) or operator_extension(lines, index, names) or implemented_extension(lines, index, names, types)) then
@@ -3006,9 +3026,13 @@ function swift_overlays(root, set)
             io.writefile(file, replaced(io.readfile(file), lowering, "the Swift overlay " .. file, entry.member))
         end
     end
+    lower_swift_overlay_folder(root, "Foundation", set)
+end
+
+function lower_swift_overlay_folder(root, folder, set)
     set = set or read_all_members()
     local names, types = swift_names(set), set.types or {}
-    for _, file in ipairs(os.files(path.join(root, "stdlib", "public", "Darwin", "Foundation", "*.swift"))) do
+    for _, file in ipairs(os.files(path.join(root, "stdlib", "public", "Darwin", folder, "*.swift"))) do
         local text = io.readfile(file)
         local lowered = lower_swift_text(text, names, types, guarded_lines(file))
         if lowered ~= text then

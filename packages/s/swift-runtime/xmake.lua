@@ -289,6 +289,8 @@ package("swift-runtime")
         os.mkdir(uikit_cache)
         local quartzcore_cache = path.join(generated, "module-cache-lowered-quartzcore")
         os.mkdir(quartzcore_cache)
+        local coregraphics_cache = path.join(generated, "module-cache-lowered-coregraphics")
+        os.mkdir(coregraphics_cache)
 
         local function build_overlay(name, overlay_sources, links, objects, opt)
             local module = path.join(install, name .. ".swiftmodule")
@@ -348,6 +350,7 @@ package("swift-runtime")
             for _, patch in ipairs(uikit_patches) do
                 os.vrunv("patch", {"-p1", "-i", patch}, {curdir = uikit})
             end
+            import("@addon.revenant.apple.lowered", {anonymous = true}).lower_swift_overlay_folder(uikit, "AVFoundation")
             os.vcp(path.join(uikit, "stdlib", "public", "SwiftShims", "UIKitOverlayShims.h"), installed_shims .. "/")
             if not io.readfile(shim_modules):find("_SwiftUIKitOverlayShims", 1, true) then
                 io.writefile(shim_modules, io.readfile(shim_modules) ..
@@ -417,11 +420,17 @@ package("swift-runtime")
                           {"-lswiftDarwin", "-lswiftObjectiveC"}, {dispatch_object})
             build_overlay("CoreFoundation", overlay_sources_of("CoreFoundation", {"CoreFoundation.swift"}),
                           {"-lswiftDarwin", "-framework", "CoreFoundation"})
+            local lowered = import("@addon.revenant.apple.lowered", {anonymous = true})
+            local lowered_headers = lowered.overlay(toolchain:config("sdkdir"), path.absolute("lowered"), nil, {}, nil, triple)
+            local flat = import("@addon.revenant.apple.flat_classes", {anonymous = true})
+            local flat_flags = flat.link_flags(flat.stub_directory(toolchain:config("sdkdir"), path.join(generated, "flat-stubs")))
+            local lowered_include = lowered.include_directory(path.absolute("lowered"))
             local graphics = expand(path.join(overlays, "stdlib", "public", "Darwin", "CoreGraphics", "CGFloat.swift.gyb"),
                                     path.join(generated, "CGFloat.swift"))
             build_overlay("CoreGraphics", table.join({graphics}, overlay_sources_of("CoreGraphics", {"CoreGraphics.swift", "Geometry.swift"})),
                           {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftCoreFoundation",
-                           "-framework", "CoreGraphics", "-framework", "CoreFoundation"})
+                           "-framework", "CoreGraphics", "-framework", "CoreFoundation"},
+                          nil, {module_cache = coregraphics_cache, extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
             build_overlay("os", {path.join(revenant_overlay, "os", "os.swift")},
                           {"-Xlinker", "-U", "-Xlinker", "_revenant_os_log_named", "-Xlinker", "-U", "-Xlinker", "_revenant_os_log_send",
                            "-Xlinker", "-U", "-Xlinker", "_revenant_os_log_type_enabled"})
@@ -430,11 +439,6 @@ package("swift-runtime")
             local presentation_intent = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "PresentationIntent.swift")
             local locale_language = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "LocaleLanguage.swift")
             local url_session_web_socket_task = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "URLSessionWebSocketTask.swift")
-            local lowered = import("@addon.revenant.apple.lowered", {anonymous = true})
-            local lowered_headers = lowered.overlay(toolchain:config("sdkdir"), path.absolute("lowered"), nil, {}, nil, triple)
-            local flat = import("@addon.revenant.apple.flat_classes", {anonymous = true})
-            local flat_flags = flat.link_flags(flat.stub_directory(toolchain:config("sdkdir"), path.join(generated, "flat-stubs")))
-            local lowered_include = lowered.include_directory(path.absolute("lowered"))
             local values = expand(path.join(foundation, "NSValue.swift.gyb"), path.join(generated, "NSValue.swift"))
             local foundation_objects = {}
             for _, file in ipairs({"DataThunks.m", "BundleLookup.mm"}) do

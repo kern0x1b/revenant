@@ -11,7 +11,6 @@ GUARDS = {
         ["_objc_setHook_lazyClassNamer"] = "stdlib/public/runtime/Metadata.cpp:3844 @ swiftlang/swift b8189d766d86ad7fc8106787d6ce9e402f38dd72",
     },
     ["libswiftCoreGraphics.dylib"] = {
-        ["_CGPathAddRoundedRect"] = "patch packages/s/swift-runtime/patches/overlays/the-overlay-of-core-graphics-calls-what-the-sdk-still-has.patch:64",
         ["_kCGColorSpaceSRGB"] = "stdlib/public/Darwin/CoreGraphics/CoreGraphics.swift:80 @ swiftlang/swift 282fe25d1757ff9974ade028d92111acdae6876a (swift-5.4.3-RELEASE)",
     },
     ["libswiftDispatch.dylib"] = {

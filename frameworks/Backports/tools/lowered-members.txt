@@ -13386,6 +13386,7 @@ member CIImage +magentaImage
 member CIImage +redImage
 member CIImage +whiteImage
 member CIImage +yellowImage
+member CIImage -imageByApplyingCGOrientation:
 member CIImage -imageByApplyingFilter:
 member CIImage -imageByApplyingFilter:withInputParameters:
 member CIImage -imageByApplyingGaussianBlurWithSigma:
@@ -13396,6 +13397,7 @@ member CIImage -imageByCompositingOverImage:
 member CIImage -imageByInsertingIntermediate
 member CIImage -imageByInsertingIntermediate:
 member CIImage -imageBySamplingLinear
+member CIImage -imageTransformForCGOrientation:
 member CIImage -initWithCVImageBuffer:
 member CIImage -initWithCVImageBuffer:options:
 member CIImage -revenant_imageOfColor:
@@ -27076,7 +27078,7 @@ member RevenantMetalCommandBuffer -waitUntilCompleted
 member RevenantMetalCommandBuffer -waitUntilScheduled
 member RevenantMetalComputeEncoder -device
 member RevenantMetalComputeEncoder -dispatchThreadgroups:threadsPerThreadgroup:
-member RevenantMetalComputeEncoder -dispatchThreads:threadsPerGrid:
+member RevenantMetalComputeEncoder -dispatchThreads:threadsPerThreadgroup:
 member RevenantMetalComputeEncoder -endEncoding
 member RevenantMetalComputeEncoder -init
 member RevenantMetalComputeEncoder -insertDebugSignpost:
@@ -27084,8 +27086,10 @@ member RevenantMetalComputeEncoder -label
 member RevenantMetalComputeEncoder -memoryBarrierWithScope:afterStages:beforeStages:
 member RevenantMetalComputeEncoder -popDebugGroup
 member RevenantMetalComputeEncoder -pushDebugGroup:
+member RevenantMetalComputeEncoder -revenantCanDispatchWithThreadsPerThreadgroup:
 member RevenantMetalComputeEncoder -revenantDispatchTranslatedGrid:
 member RevenantMetalComputeEncoder -revenantRunGroup:atGroup:atGroupPosition:threads:
+member RevenantMetalComputeEncoder -revenantRunGroups:threadsPerThreadgroup:grid:
 member RevenantMetalComputeEncoder -setBuffer:offset:atIndex:
 member RevenantMetalComputeEncoder -setBytes:length:atIndex:
 member RevenantMetalComputeEncoder -setComputePipelineState:
@@ -27103,8 +27107,6 @@ member RevenantMetalComputePipeline -revenantBlockBytes
 member RevenantMetalComputePipeline -revenantKernelFunction
 member RevenantMetalComputePipeline -revenantRenderPipeline
 member RevenantMetalComputePipeline -revenantSetBlockBytes:
-member RevenantMetalComputePipeline -revenantSetThreads:
-member RevenantMetalComputePipeline -revenantThreads
 member RevenantMetalComputePipeline -revenantTranslatedFunction
 member RevenantMetalComputePipeline -threadExecutionWidth
 member RevenantMetalComputePipeline -threadgroupMemoryLengthForIndex:
@@ -28980,39 +28982,81 @@ member SCNParticlePropertyController -inputOrigin
 member SCNParticlePropertyController -inputProperty
 member SCNParticlePropertyController -inputScale
 member SCNParticleSystem +particleSystem
+member SCNParticleSystem +particleSystemNamed:inDirectory:
 member SCNParticleSystem +supportsSecureCoding
 member SCNParticleSystem -acceleration
+member SCNParticleSystem -addModifierForProperties:atStage:withBlock:
 member SCNParticleSystem -affectedByGravity
 member SCNParticleSystem -affectedByPhysicsFields
+member SCNParticleSystem -birthDirection
+member SCNParticleSystem -birthLocation
 member SCNParticleSystem -birthRate
+member SCNParticleSystem -birthRateVariation
+member SCNParticleSystem -blackPassEnabled
 member SCNParticleSystem -blendMode
+member SCNParticleSystem -colliderNodes
 member SCNParticleSystem -copyWithZone:
+member SCNParticleSystem -dampingFactor
 member SCNParticleSystem -emissionDuration
+member SCNParticleSystem -emissionDurationVariation
 member SCNParticleSystem -emitterShape
 member SCNParticleSystem -emittingDirection
 member SCNParticleSystem -encodeWithCoder:
+member SCNParticleSystem -fresnelExponent
+member SCNParticleSystem -handleEvent:forProperties:withBlock:
+member SCNParticleSystem -idleDuration
+member SCNParticleSystem -idleDurationVariation
+member SCNParticleSystem -imageSequenceAnimationMode
+member SCNParticleSystem -imageSequenceColumnCount
+member SCNParticleSystem -imageSequenceFrameRate
+member SCNParticleSystem -imageSequenceFrameRateVariation
+member SCNParticleSystem -imageSequenceInitialFrame
+member SCNParticleSystem -imageSequenceInitialFrameVariation
+member SCNParticleSystem -imageSequenceRowCount
 member SCNParticleSystem -init
 member SCNParticleSystem -initWithCoder:
 member SCNParticleSystem -lightingEnabled
+member SCNParticleSystem -local
 member SCNParticleSystem -loops
+member SCNParticleSystem -orientationDirection
 member SCNParticleSystem -orientationMode
+member SCNParticleSystem -particleAngle
 member SCNParticleSystem -particleAngleVariation
 member SCNParticleSystem -particleAngularVelocity
+member SCNParticleSystem -particleAngularVelocityVariation
+member SCNParticleSystem -particleBounce
+member SCNParticleSystem -particleBounceVariation
+member SCNParticleSystem -particleCharge
+member SCNParticleSystem -particleChargeVariation
 member SCNParticleSystem -particleColor
 member SCNParticleSystem -particleColorVariation
+member SCNParticleSystem -particleDiesOnCollision
+member SCNParticleSystem -particleFriction
+member SCNParticleSystem -particleFrictionVariation
 member SCNParticleSystem -particleImage
+member SCNParticleSystem -particleIntensity
+member SCNParticleSystem -particleIntensityVariation
 member SCNParticleSystem -particleLifeSpan
 member SCNParticleSystem -particleLifeSpanVariation
+member SCNParticleSystem -particleMass
+member SCNParticleSystem -particleMassVariation
 member SCNParticleSystem -particleSize
 member SCNParticleSystem -particleSizeVariation
 member SCNParticleSystem -particleVelocity
 member SCNParticleSystem -particleVelocityVariation
 member SCNParticleSystem -propertyControllers
+member SCNParticleSystem -removeAllModifiers
+member SCNParticleSystem -removeModifiersOfStage:
+member SCNParticleSystem -reset
 member SCNParticleSystem -sortingMode
 member SCNParticleSystem -speedFactor
 member SCNParticleSystem -spreadingAngle
 member SCNParticleSystem -stretchFactor
+member SCNParticleSystem -systemSpawnedOnCollision
+member SCNParticleSystem -systemSpawnedOnDying
+member SCNParticleSystem -systemSpawnedOnLiving
 member SCNParticleSystem -warmupDuration
+member SCNParticleSystem -writesToDepthBuffer
 member SCNPhysicsField +radialGravityField
 member SCNPhysicsField +supportsSecureCoding
 member SCNPhysicsField -active
@@ -35559,6 +35603,7 @@ protocol_member MTLCommandQueue -device
 protocol_member MTLCommandQueue -insertDebugCaptureBoundary
 protocol_member MTLCommandQueue -label
 protocol_member MTLComputeCommandEncoder -dispatchThreadgroups:threadsPerThreadgroup:
+protocol_member MTLComputeCommandEncoder -dispatchThreads:threadsPerThreadgroup:
 protocol_member MTLComputeCommandEncoder -setBuffer:offset:atIndex:
 protocol_member MTLComputeCommandEncoder -setBytes:length:atIndex:
 protocol_member MTLComputeCommandEncoder -setComputePipelineState:
@@ -36647,8 +36692,13 @@ type SCNFilterMode
 type SCNGeometryPrimitiveType
 type SCNLightAreaType
 type SCNMovabilityHint
+type SCNParticleBirthDirection
+type SCNParticleBirthLocation
 type SCNParticleBlendMode
+type SCNParticleEvent
+type SCNParticleImageSequenceAnimationMode
 type SCNParticleInputMode
+type SCNParticleModifierStage
 type SCNParticleOrientationMode
 type SCNParticleSortingMode
 type SCNPhysicsFieldScope
