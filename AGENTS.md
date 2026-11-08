@@ -98,7 +98,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   patches on `llvm` and `swift`.
 - Before every push, a worker runs `./xmakew l -P . tools/prepush.lua`: the cheap host checks that CI would otherwise
   find only after its macOS jobs have run (comments, layout, docs commands, open gaps, credentials, copied text, recipe
-  digests, lowered members, negative-test shape). It takes about 15 seconds with the caches warm and must print
-  `prepush: 13 checks passed`; `./xmakew l -P . tools/prepush.lua test` tests the tool itself.
+  digests, lowered members, lowered exports, negative-test shape). It takes about 15 seconds with the caches warm and must print
+  `prepush: 16 checks passed`; `./xmakew l -P . tools/prepush.lua test` tests the tool itself.
 - Before handing a change over: `./xmakew test -P .`, then that component's gate (the backports gate is gone until
   `./xmakew test -P .` replaces it; for the emulator, the skill `emulator-session`).

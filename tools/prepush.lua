@@ -223,6 +223,7 @@ local STEPS = {
     {name = "copied_text", run = function () return lua("agent-skills/tests/copied_text.lua", "test") end},
     {name = "recipe digests", cache = false, run = digests_stable},
     {name = "lowered members", run = function () return lua("frameworks/Backports/tests/lowered_members_test.lua") end},
+    {name = "lowered exports", run = function () return lua("frameworks/Backports/tests/lowered_exports_test.lua") end},
     {name = "negative shape", run = negative_shape},
     {name = "ci errors test", run = function () return lua("tools/ci_errors.lua", "test") end},
     {name = "ci replay test", run = function () return lua("tools/ci_swiftc_replay.lua", "test") end},
