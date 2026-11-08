@@ -583,3 +583,16 @@ The probe's three sources are kept byte-for-byte from commit 15f69b10d, as a dis
 Their targets are `MetalDeviceTrace`, `MetalDeviceProbe` and `MetalQueueProbe` in `frameworks/Backports/xmake.lua`. All three
 are `set_default(false)` and sit inside the `iphoneos` branch, so a default or host build does not compile them. Building
 or running them waits for the decision in section 5.2. The sources carry no comments, as ADR 0006 requires.
+
+## 8. CoreImage over the GL-backed Metal device
+
+`CIContext(mtlDevice:options:)` and `CIImage(mtlTexture:options:)` run on iOS 6 without a Metal driver: the context renders with
+CoreImage's own CPU path (`render:toBitmap:`) and writes the result into the destination texture with `replaceRegion:`, and the
+texture is a `RevenantMetalTexture` backed by GL. The reference is `docs/reference/backports/CoreImage/README.md` and crutch C54 in
+`docs/reference/backports/crutches.md`.
+
+Measured on the iPhone 4S (iOS 6.1.3, 2026-11-08) with the permanent `CIMetalProbe` target
+(`frameworks/Backports/tests/device_probe/ci_metal_main.m`): 11 of 11 checks. This is the first run of Metal-typed code on that
+device that goes beyond the GL probes above; it does not change the verdict in section 1, because it covers the CoreImage entry
+points only and no compute or render pipeline. A texture of 4 by 2 or 8 by 2 texels does not read back what was written, a defect
+of the texture backport or the driver that the probe avoids and that is not diagnosed.

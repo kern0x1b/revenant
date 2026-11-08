@@ -366,6 +366,36 @@ whose removal has not landed. A removed entry stays below, with the commit that 
 - Cost per frame on an iPhone 4S (an estimate from the byte counts, not a measurement): a full-screen 960 by 640 BGRA surface is 2.46 MB. A refreshed layer adds one copy of that into the `CFData` and one read by Core Animation when it uploads the image, so about 5 to 7 MB of memory traffic per refreshed full-screen layer per commit, on top of the readback in C50. An unchanged layer adds only the seed read. The time is not estimated here: it depends on the A5's memory bandwidth, which has not been measured.
 - Removed by: none for iOS 6. A Core Animation that shows an IOSurface from CPU memory would make the swizzle and the copy unnecessary; this is not known for iOS 6 and has not been checked.
 
+### C52. AVPlayer volume and mute are an audio mix on each item, kept in place by swizzled player methods
+
+- Stands in for: the player-level gain of iOS 7's `AVPlayer.volume` and `isMuted`. The iOS 6 player has only the private `_setVolume:`, which moves the volume of the whole device. `frameworks/Backports/src/AVFoundation/AVPlayerVolume7.m` stores the state on the player and applies it as an `AVAudioMix` with one input per audio track of each item, and `+load` replaces `replaceCurrentItemWithPlayerItem:` on `AVPlayer` and `insertItem:afterItem:`, `removeItem:`, `removeAllItems` and `advanceToNextItem` on `AVQueuePlayer` with blocks that call the original and then re-apply or release the mix.
+- Why it cannot be avoided: the player's own methods have no link-time override on iOS 6, and an app's items must follow the player's volume without the app touching an audio mix.
+- Widens: while the volume is below 1 or the player is muted, every item of the player carries an audio mix the app did not set. An app that reads `item.audioMix` sees ours, and one that sets it later has its mix scaled by the volume at the next application. An item with no audio track the system lists gets no gain.
+- Measurement: iPhone 4S, iOS 6.1.3, 2026-11-08, 14 of 14 checks of `tests/AVFoundation/player_volume_test.m` (also 14 of 14 on the host): the gain on the item's audio track follows the volume and mute, ramps of the app's mix are scaled, and items that leave a player or outlive it are given their own mix back. The checks read the mix's gain, not the sound.
+- Removed by: none for iOS 6 short of a public player-level gain, which the 6.0 inventory does not show.
+
+### C53. AVAssetTrack.minFrameDuration is the shortest sample duration, read from one pass over the track
+
+- Stands in for: the stored minimum frame duration of an iOS 7 track. `frameworks/Backports/src/AVFoundation/AVAssetTrackFrameDuration7.m` reads every sample of the track once with a passthrough `AVAssetReader`, keeps the shortest positive duration and caches it on the track.
+- A composition track (`AVCompositionTrack`, which the SDK redeclares for Swift, so it needs its own implementation) takes the shortest frame of the source tracks of its non-empty segments, each scaled by the segment's time mapping; that answer is not cached.
+- Gaps: the first call on a track costs a pass over its samples, on the thread that asks; a track that cannot be read (no asset, reader failure) gives `kCMTimeInvalid`; a composition track costs one pass per distinct source track on every call.
+- A track counts as visual when its media type is video or it has the visual characteristic: on the iPhone 4S a composition video track answers NO to `hasMediaCharacteristic:AVMediaCharacteristicVisual`, because it carries no format description, while its media type is video (the first device run of the composition checks failed on it with an invalid time).
+- Measurement: 9 of 9 checks of `tests/AVFoundation/track_frame_duration_test.m` on the host and on an iPhone 4S (iOS 6.1.3, 2026-11-08), on a 320 by 240 clip with unequal frame durations, played by a composition track, with an empty segment, stretched to twice its length, and as an audio track. The time of the pass on a long clip was not measured.
+- Removed by: none for iOS 6; the system does not store the value.
+
+### C54. CIContext and CIImage take a Metal device and texture of the GL-backed Metal backport and render through memory
+
+- Stands in for: `+[CIContext contextWithMTLDevice:options:]`, `-[CIImage initWithMTLTexture:options:]` and `-[CIContext render:toMTLTexture:commandBuffer:bounds:colorSpace:]`. `frameworks/Backports/src/Graphics/CIContextMetal9.m` and `CIImageMetalTexture9.m` use the device's `EAGLContext` and the texture's GL name, and a render into a texture is `render:toBitmap:` followed by `replaceRegion:`.
+- Gaps: one copy through memory per render; the `commandBuffer` argument is ignored; only the backport's own device and 2D textures in BGRA8 and RGBA8 (RGBA16F and RGBA32F as render targets) work; the colour management of a bridged render with the default colour spaces was not measured.
+- Measurement: iPhone 4S, iOS 6.1.3, 2026-11-08, `CIMetalProbe` 11 of 11. A texture of 4 by 2 or 8 by 2 texels does not read back what was written, a defect of the texture backport or the driver that the probe avoids.
+- Removed by: a Metal texture that CoreImage reads directly, which iOS 6 does not offer.
+
+### C55. encodingInvalidCharacters: escapes by one character set outside the host, and NSURL follows NSURLComponents
+
+- Stands in for: the per-component escaping of iOS 17's `NSURLComponents` and `NSURL` `encodingInvalidCharacters:`. `frameworks/Backports/src/Foundation/NSURLComponents+Encoding17.m` finds the host of the string, escapes everything outside it with one set (the characters RFC 3986 allows anywhere stay, the rest and every non-ASCII byte become `%XX`) and leaves the host to the components parser, which converts a non-ASCII host to punycode and rejects an ASCII character that a host cannot hold. With `NO` the string must come out of `NSURLComponents.string` unchanged. `NSURL+Encoding17.m` takes the string `NSURLComponents` gives and parses it as a URL.
+- Measurement: `tests/url_components_oracle_test.lua` compares the `NSURLComponents` forms (`encodedHost`, both values of the flag) against macOS for all 705 lines of `tests/url_components/corpus.txt`: no differences. A one-off run of the `NSURL` form against macOS on the same corpus differed on 14 lines: `1http://x/`, `1a:b` and `a_b:c` (macOS accepts them as URL strings, this does not), the three lines with a second colon in the user information (`user:pa:ss@`, `u:p:x@`, `a:b:c@`, which macOS keeps and this escapes) and eight lines with a stray percent sign (`%%41`, `a%4%41` and the like, which macOS escapes alone and this escapes with the escape that follows).
+- Removed by: an `NSURL` form that applies the components' per-part rules instead of parsing their output.
+
 ## Removed
 
 ### C1. Member list generated from a stand-in SDK install
