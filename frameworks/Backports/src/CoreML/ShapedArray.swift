@@ -156,6 +156,45 @@ public struct MLShapedArray<Scalar: MLShapedArrayScalar>: @unchecked Sendable {
     }
 }
 
+extension MLShapedArray {
+    public init(_ multiArray: MLMultiArray) {
+        guard multiArray.dataType == Scalar.multiArrayDataType else {
+            preconditionFailure("a multi array of data type " + String(describing: multiArray.dataType.rawValue) +
+                                " is not a shaped array of " + String(describing: Scalar.self))
+        }
+        let shape = multiArray.shape.map { $0.intValue }
+        let sourceStrides = multiArray.strides.map { $0.intValue }
+        let count = MLShapedArray.count(of: shape)
+        let source = multiArray.dataPointer.assumingMemoryBound(to: Scalar.self)
+        let values = [Scalar](unsafeUninitializedCapacity: count) { buffer, initialized in
+            if count > 0 {
+                if sourceStrides == MLShapedArray.strides(for: shape) {
+                    buffer.baseAddress!.initialize(from: source, count: count)
+                } else {
+                    var position = [Int](repeating: 0, count: shape.count)
+                    var offset = 0
+                    for element in 0..<count {
+                        (buffer.baseAddress! + element).initialize(to: source[offset])
+                        var dimension = shape.count - 1
+                        while dimension >= 0 {
+                            position[dimension] += 1
+                            offset += sourceStrides[dimension]
+                            if position[dimension] < shape[dimension] {
+                                break
+                            }
+                            offset -= sourceStrides[dimension] * shape[dimension]
+                            position[dimension] = 0
+                            dimension -= 1
+                        }
+                    }
+                }
+            }
+            initialized = count
+        }
+        self.init(scalars: values, shape: shape)
+    }
+}
+
 public struct MLShapedArraySlice<Scalar: MLShapedArrayScalar>: @unchecked Sendable {
     public let shape: [Int]
     public let strides: [Int]

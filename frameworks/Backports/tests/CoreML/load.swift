@@ -34,3 +34,19 @@ func openDirectly(url: URL, configuration: MLModelConfiguration) throws -> MLMod
 func shape(of array: MLShapedArray<Float>) -> [Int] {
     return array.shape
 }
+
+func shapedArray(of output: MLMultiArray) -> MLShapedArray<Float> {
+    return MLShapedArray<Float>(output)
+}
+
+func predictSynchronously(model: MLModel, input: MLFeatureProvider, options: MLPredictionOptions) throws -> MLFeatureProvider {
+    return try model.prediction(from: input, options: options)
+}
+
+func predictAsynchronously(model: MLModel, input: MLFeatureProvider, options: MLPredictionOptions = MLPredictionOptions()) async throws -> MLFeatureProvider {
+    return try await model.prediction(from: input, options: options)
+}
+
+func firstValue(of observation: MLMultiArray?) -> Double {
+    return observation?[0].doubleValue ?? 0
+}

@@ -71,8 +71,19 @@ at armv7, so a module that carries the name must be compiled with `-Xfrontend -i
 do not import it; the targets in `frameworks/Backports/src/Swift/xmake.lua` pass the flag. A consumer builds the targets
 `SceneKit`, `Vision` and `CoreML` of the `Swift` component, passes their module folders with `-I`, and adds them to the
 modules it links. `AuthenticationServices` is a dylib overlay, `swiftAuthenticationServices`, taken from the
-`revenant@authenticationservices` package. What each carries is in `docs/reference/backports/SceneKit/README.md`,
-`Vision/README.md`, `CoreML/README.md` and `AuthenticationServices/CredentialUpdater.md`.
+`revenant@authenticationservices` package, and it carries the SDK framework's name too, so it passes the flag as well: its
+module holds only `ASCredentialUpdater`, and without the flag it replaced the SDK's module for every file that imports
+`AuthenticationServices`, so Telegram's `PasskeysScreen.swift` found no `ASAuthorizationController`, `ASAuthorization`,
+`ASPresentationAnchor` or `ASAuthorizationPlatformPublicKeyCredentialProvider`. What each carries is in
+`docs/reference/backports/SceneKit/README.md`, `Vision/README.md`, `CoreML/README.md` and
+`AuthenticationServices/CredentialUpdater.md`.
+
+Every Swift target of the `Swift` component is made by one function of `frameworks/Backports/src/Swift/xmake.lua`,
+`swift_target`, which sets the kind, the swift rule, the optimisation and `swift.cxx_interop` to `off`, and the flag for the
+underlying module is one list, `UNDERLYING`, that the framework overlays, the CoreML module and the dylib overlay all
+take. The `CoreML` target had been written beside the others without the `off`, so its module was built with C++
+interoperability, and a program that imports it without the interoperability (every Telegram module) stopped with "module
+'CoreML' was built with C++ interoperability enabled, but current compilation does not enable C++ interoperability".
 
 ## A name the device already exports is lowered, not backported
 

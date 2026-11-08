@@ -15,7 +15,7 @@ local OVERLAYS = {
     {name = "PassKit", folder = "PassKit", fixture = path.join("PassKit", "overlay.swift"), flags = UNDERLYING,
      without = "has no case 'capability3DS'"},
     {name = "AuthenticationServices", folder = path.join("AuthenticationServices", "Updater"), fixture = path.join("AuthenticationServices", "updater.swift"),
-     flags = {"-module-link-name", "swiftAuthenticationServices", "-Xfrontend", "-disable-implicit-string-processing-module-import"},
+     flags = table.join(UNDERLYING, {"-module-link-name", "swiftAuthenticationServices", "-Xfrontend", "-disable-implicit-string-processing-module-import"}),
      without = "cannot find 'ASCredentialUpdater' in scope"},
 }
 

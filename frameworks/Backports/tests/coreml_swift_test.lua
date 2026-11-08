@@ -27,9 +27,7 @@ function main()
     local emit = flags_for("CoreML", runtime, sdk, vfs, include)
     table.join2(emit, {"-Xfrontend", "-import-underlying-module", "-import-objc-header", path.join(sources, "RevenantCoreML.h"),
                        "-emit-module", "-emit-module-path", path.join(modules, "CoreML.swiftmodule")})
-    for _, file in ipairs({"Codec.swift", "ModelWriter.swift", "ShapedArray.swift", "MLModelLoad.swift"}) do
-        table.insert(emit, path.join(sources, file))
-    end
+    table.join2(emit, os.files(path.join(sources, "*.swift")))
     os.vrunv(compiler, emit)
     local check = flags_for("CoreMLLoad", runtime, sdk, vfs, include)
     table.join2(check, {"-I", modules, "-typecheck", "-parse-as-library", fixture})
