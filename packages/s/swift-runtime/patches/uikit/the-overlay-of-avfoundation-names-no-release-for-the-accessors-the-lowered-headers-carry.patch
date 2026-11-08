@@ -21,88 +21,22 @@ index c7519a2fc..ca67c990e 100644
    public var supportedColorSpaces: [AVCaptureColorSpace] {
      return __supportedColorSpaces.map { AVCaptureColorSpace(rawValue: $0.intValue)! }
 diff --git a/stdlib/public/Darwin/AVFoundation/AVCapturePhotoOutput.swift b/stdlib/public/Darwin/AVFoundation/AVCapturePhotoOutput.swift
-index 70cac6251..32b92ff82 100644
+index 70cac6251..f7c3f9146 100644
 --- a/stdlib/public/Darwin/AVFoundation/AVCapturePhotoOutput.swift
 +++ b/stdlib/public/Darwin/AVFoundation/AVCapturePhotoOutput.swift
-@@ -16,62 +16,52 @@ import Foundation
+@@ -16,7 +16,6 @@ import Foundation
  
  #if os(iOS)
  
 -@available(iOS, introduced: 10.0)
  extension AVCapturePhotoOutput {
    @available(swift, obsoleted: 4.0)
--  @available(iOS, introduced: 10.0)
-   @nonobjc
-   public var supportedFlashModes: [NSNumber] {
-     return __supportedFlashModes
-   }
-   
-   @available(swift, introduced: 4.0)
--  @available(iOS, introduced: 10.0)
-   @nonobjc
-   public var supportedFlashModes: [AVCaptureDevice.FlashMode] {
-     return __supportedFlashModes.map { AVCaptureDevice.FlashMode(rawValue: $0.intValue)! }
-   }
-   
-   @available(swift, obsoleted: 4.0)
--  @available(iOS, introduced: 10.0)
-   @nonobjc
-   public var availablePhotoPixelFormatTypes: [NSNumber] {
-     return __availablePhotoPixelFormatTypes
-   }
-   
-   @available(swift, introduced: 4.0)
--  @available(iOS, introduced: 10.0)
-   @nonobjc
-   public var availablePhotoPixelFormatTypes: [OSType] {
-     return __availablePhotoPixelFormatTypes.map { $0.uint32Value } as [OSType]
-   }
-   
-   @available(swift, obsoleted: 4.0)
--  @available(iOS, introduced: 10.0)
-   @nonobjc
-   public var availableRawPhotoPixelFormatTypes: [NSNumber] {
-     return __availableRawPhotoPixelFormatTypes
-   }
-   
-   @available(swift, introduced: 4.0)
--  @available(iOS, introduced: 10.0)
-   @nonobjc
-   public var availableRawPhotoPixelFormatTypes: [OSType] {
-     return __availableRawPhotoPixelFormatTypes.map { $0.uint32Value } as [OSType]
+   @available(iOS, introduced: 10.0)
+@@ -61,7 +60,6 @@ extension AVCapturePhotoOutput {
    }
  }
  
 -@available(iOS, introduced: 10.0)
  extension AVCapturePhotoSettings {
    @available(swift, obsoleted: 4.0)
--  @available(iOS, introduced: 10.0)
-   @nonobjc
-   public var availablePreviewPhotoPixelFormatTypes: [NSNumber] {
-     return __availablePreviewPhotoPixelFormatTypes
-   }
- 
-   @available(swift, introduced: 4.0)
--  @available(iOS, introduced: 10.0)
-   @nonobjc
-   public var availablePreviewPhotoPixelFormatTypes: [OSType] {
-     return __availablePreviewPhotoPixelFormatTypes.map { $0.uint32Value } as [OSType]
-diff --git a/stdlib/public/Darwin/AVFoundation/AVMetadataObject.swift b/stdlib/public/Darwin/AVFoundation/AVMetadataObject.swift
-index d884fcdef..331030658 100644
---- a/stdlib/public/Darwin/AVFoundation/AVMetadataObject.swift
-+++ b/stdlib/public/Darwin/AVFoundation/AVMetadataObject.swift
-@@ -19,14 +19,12 @@ import CoreGraphics
-   
- extension AVMetadataMachineReadableCodeObject {
-   @available(swift, obsoleted: 4.0)
--  @available(iOS, introduced: 7.0)
-   @nonobjc
-   public var corners: [Any]! {
-     return __corners
-   }
-   
-   @available(swift, introduced: 4.0)
--  @available(iOS, introduced: 7.0)
-   @nonobjc
-   public var corners: [CGPoint] {
-     return __corners.map { CGPoint(dictionaryRepresentation: $0 as CFDictionary)! }
+   @available(iOS, introduced: 10.0)
