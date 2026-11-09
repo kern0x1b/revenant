@@ -64,12 +64,12 @@ The Backports libraries the binary links, `libFoundationBackports.dylib`, `libCo
 `libSystemBackports.dylib`, come from the same build, because the binary binds to the classes that build exports:
 
 ```
-./xmakew device claim
-./xmakew device run 'mkdir -p /var/tmp/combine-helpers'
+./xmakew device -P . claim
+./xmakew device -P . run 'mkdir /var/tmp/combine-helpers'
 ./xmakew l -P . frameworks/SwiftUI/tools/device.lua copy build/iphoneos/armv7/release/CombineHelpersTests /var/tmp/combine-helpers/CombineHelpersTests
-./xmakew device run 'cd /var/tmp/combine-helpers && DYLD_LIBRARY_PATH=/var/tmp/combine-helpers ./CombineHelpersTests'
-./xmakew device run 'rm -rf /var/tmp/combine-helpers'
-./xmakew device release
+./xmakew device -P . run 'cd /var/tmp/combine-helpers && DYLD_LIBRARY_PATH=/var/tmp/combine-helpers ./CombineHelpersTests'
+./xmakew device -P . run 'rm /var/tmp/combine-helpers/* && rmdir /var/tmp/combine-helpers'
+./xmakew device -P . release
 ```
 
 after the dylibs (`otool -L` of the binary lists them) are copied the same way. The run ends with
