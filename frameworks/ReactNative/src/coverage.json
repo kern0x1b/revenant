@@ -434,7 +434,7 @@
    "native": true,
    "status": "partial",
    "verified": "build",
-   "note": "Built from a local copy of GlassView.swift in src/expo, which replaces the package's file. The same three changes are the recipe patch packages/e/expo-glass-effect/patches/glassview-ios6.patch (57.0.4); the component still uses the copy until its sources come through RN_PKG_DIRS from the recipe install. The effect is an iOS 26 one, so on iOS 6 it is never installed and the view draws no glass. Compiled; not exercised."
+   "note": "Built from a local copy of GlassView.swift in src/expo, which replaces the package's file. The same two changes (the React import as the module's internal import, the animation with an explicit duration) are the recipe patch packages/e/expo-glass-effect/patches/glassview-ios6.patch (57.0.4), and the patched upstream file is byte-identical with the copy; the component still uses the copy until its sources come through RN_PKG_DIRS from the recipe install. The effect is an iOS 26 one, so the file keeps upstream's four `#available(iOS 26.0, tvOS 26.0, macOS 26.0, *)` checks of the UIGlassEffect and corner configuration API, and on iOS 6 the first of them makes `isGlassEffectAvailable` false, so the effect is never installed and the view draws no glass. Compiled; not exercised."
   },
   {
    "id": "expo-google-app-auth",
