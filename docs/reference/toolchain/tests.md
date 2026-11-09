@@ -8,7 +8,7 @@ reference says what runs where.
 
 | Target | Tests | Needs | Declared |
 | --- | --- | --- | --- |
-| `toolchain_light` | 50 suites of `tests/addon/` that need no package builds | the repository | always |
+| `toolchain_light` | 51 suites of `tests/addon/` that need no package builds | the repository | always |
 | `toolchain_packages` | 31 suites of `tests/addon/` that compile with `ld64`, `ldid`, `iphoneos-sdk` and `llvm` | the prebuilt packages, `REVENANT_PREBUILT=kern0x1b/revenant` | always |
 | `toolchain_device` | eleven suites: `callkit_screen_test`, `compat_device_test`, `emulator_test`, `launchd_home_test`, `overlay_enums_test`, `port_test`, `swift_cxx_test`, `swift_cxx_thread_local_test`, `swift_test`, `swift_underlying_module_test` and `tweak_test` | the packages, firmware data and device or emulator state each suite needs (`overlay_enums_test` needs the installed `swift-runtime` for iphoneos and compares each of its overlay modules with the SDK's enumerations) | only with `./xmakew f -P . --tests=device` |
 | `recompiler_corpus` | the six host suites `jumptable`, `tsdscan`, `tsdguard`, `int128`, `weakimport` and `lse` | the prebuilt packages | always |
@@ -51,7 +51,7 @@ yet. Each `tests/emulate/<case>/` runs with `./xmakew l -P . toolchain/tests/emu
 its probe line), `baseline` (a UIKit string, and a CoreText line, run and frame, drawn with and without `NSBaselineOffsetAttributeName`
 lands at two heights, and their line metrics and frame origins are read with and without it; the run says whether the system
 honours the attribute and what the CoreText backport does with it), `output` (a program's stdout and stderr reach the host, through a run that ends and through one
-that hangs), `fontapp` (an app that UIApplicationMain launches through SpringBoard gets its system font and prints `FONT-APP-DONE`), `classpair` (a Swift program makes five subclasses of a Swift class with `objc_allocateClassPair`, and each line says `OK` when the Swift metatype it gets is the class object, not its Objective-C wrapper; the run fails on a `WRONG`, an `ERROR` or a missing line), and `pin-leak` (a guest pins a folder from 600 short-lived threads, more than the emulator's host descriptor
+that hangs), `fontapp` (an app that UIApplicationMain launches through SpringBoard gets its system font and prints `FONT-APP-DONE`), `classpair` (a Swift program makes five subclasses of a Swift class with `objc_allocateClassPair`, and each line says `OK` when the Swift metatype it gets is the class object, not its Objective-C wrapper; the run fails on a `WRONG`, an `ERROR` or a missing line), `nsdata` (a Swift program reads an NSData by position inside the data and past both ends of it, between two runs of a sentinel byte; each line says `OK` when the answer outside is 0 and not the sentinel, which is what the overlay's fallback for a release before iOS 7 must answer; `nsdata_fallback_test` compares the same fallback lines of the patch with and without their bounds check on the host), and `pin-leak` (a guest pins a folder from 600 short-lived threads, more than the emulator's host descriptor
 limit, and keeps working; the case runs the emulate command under a limit of 512 descriptors itself). Their scratch folders
 are `.cache/scratch/<task>/emulate-<case>/`, where `<task>` is the checkout's folder.
 
