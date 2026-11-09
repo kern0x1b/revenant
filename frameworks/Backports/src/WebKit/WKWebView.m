@@ -36,6 +36,16 @@ static NSError *exceptionError(NSString *message, id line, id column)
     return [NSError errorWithDomain:WKErrorDomain code:WKErrorJavaScriptExceptionOccurred userInfo:@{@"WKJavaScriptExceptionMessage": message ?: @"", @"WKJavaScriptExceptionLineNumber": line ?: @0, @"WKJavaScriptExceptionColumnNumber": column ?: @0, NSLocalizedDescriptionKey: @"A JavaScript exception occurred"}];
 }
 
+static void noteContentWorld(WKContentWorld *contentWorld)
+{
+    static dispatch_once_t once;
+    if (contentWorld == [WKContentWorld pageWorld])
+        return;
+    dispatch_once(&once, ^{
+        NSLog(@"[WebKit] The engine has one JavaScript world, so a script asked to run in a client or named content world runs in the page world: the page can see and change what it defines.");
+    });
+}
+
 static NSError *unsupportedResultError(void)
 {
     return webKitError(WKErrorJavaScriptResultTypeIsUnsupported, @"JavaScript execution returned a result of an unsupported type");
@@ -666,6 +676,7 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
 
 - (void)evaluateJavaScript:(NSString *)javaScriptString inFrame:(WKFrameInfo *)frame inContentWorld:(WKContentWorld *)contentWorld completionHandler:(void (^)(id, NSError *))completionHandler
 {
+    noteContentWorld(contentWorld);
     if (frame && ![frame isMainFrame]) {
         if (completionHandler) {
             void (^handler)(id, NSError *) = [completionHandler copy];
@@ -732,6 +743,7 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
 
 - (void)callAsyncJavaScript:(NSString *)functionBody arguments:(NSDictionary<NSString *, id> *)arguments inFrame:(WKFrameInfo *)frame inContentWorld:(WKContentWorld *)contentWorld completionHandler:(void (^)(id, NSError *))completionHandler
 {
+    noteContentWorld(contentWorld);
     void (^handler)(id, NSError *) = [completionHandler copy];
     void (^fail)(NSError *) = ^(NSError *error) {
         if (handler) {
