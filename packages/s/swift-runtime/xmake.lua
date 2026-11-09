@@ -550,6 +550,11 @@ package("swift-runtime")
                                     path.join(revenant_overlay, "UIKit", "UIKitSliderTrackConfiguration.swift")},
                           table.join(foundation_links, {"-lswiftQuartzCore", "-framework", "QuartzCore", "-framework", "UIKit"}), {initializers},
                           {module_cache = uikit_cache, extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
+            local photosui_cache = path.join(generated, "module-cache-photosui")
+            os.mkdir(photosui_cache)
+            build_overlay("PhotosUI", {path.join(revenant_overlay, "PhotosUI", "PhotosUI.swift")},
+                          table.join(foundation_links, {"-lswiftPhotos", "-lswiftUIKit", "-framework", "UIKit", "-Xlinker", "-weak_framework", "-Xlinker", "PhotosUI"}), nil,
+                          {module_cache = photosui_cache, extra_flags = lowered_cc})
 
             local coredata = path.join(uikit, "stdlib", "public", "Darwin", "CoreData")
             local conformances = path.join(generated, "CoreData.mm.o")

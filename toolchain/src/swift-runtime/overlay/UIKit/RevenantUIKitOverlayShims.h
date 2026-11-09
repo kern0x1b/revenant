@@ -11,11 +11,11 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface UICommand (RevenantOverlayInitializers)
-- (instancetype)initRevenantWithTitle:(NSString *)title image:(nullable UIImage *)image action:(SEL)action propertyList:(nullable id)propertyList alternates:(NSArray<UICommandAlternate *> *)alternates NS_SWIFT_NAME(init(revenantTitle:image:action:propertyList:alternates:));
+- (instancetype)initRevenantWithTitle:(NSString *)title image:(nullable UIImage *)image action:(SEL)action propertyList:(nullable id)propertyList alternates:(NSArray *)alternates NS_SWIFT_NAME(init(revenantTitle:image:action:propertyList:alternates:));
 @end
 
 @interface UIKeyCommand (RevenantOverlayInitializers)
-- (instancetype)initRevenantWithTitle:(NSString *)title image:(nullable UIImage *)image action:(SEL)action input:(NSString *)input modifierFlags:(UIKeyModifierFlags)modifierFlags propertyList:(nullable id)propertyList alternates:(NSArray<UICommandAlternate *> *)alternates NS_SWIFT_NAME(init(revenantTitle:image:action:input:modifierFlags:propertyList:alternates:));
+- (instancetype)initRevenantWithTitle:(NSString *)title image:(nullable UIImage *)image action:(SEL)action input:(NSString *)input modifierFlags:(UIKeyModifierFlags)modifierFlags propertyList:(nullable id)propertyList alternates:(NSArray *)alternates NS_SWIFT_NAME(init(revenantTitle:image:action:input:modifierFlags:propertyList:alternates:));
 @end
 
 @interface UIMenu (RevenantOverlayInitializers)

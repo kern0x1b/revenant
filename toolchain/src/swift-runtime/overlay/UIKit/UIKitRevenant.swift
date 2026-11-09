@@ -41,7 +41,8 @@ extension UICommand {
     public convenience init(title: String = "", image: UIImage? = nil, action: Selector, propertyList: Any? = nil,
                             alternates: [UICommandAlternate] = [], discoverabilityTitle: String? = nil,
                             attributes: UIMenuElement.Attributes = [], state: UIMenuElement.State = .off) {
-        self.init(revenantTitle: title, image: image, action: action, propertyList: propertyList, alternates: alternates)
+        self.init(revenantTitle: title, image: image, action: action, propertyList: propertyList,
+                  alternates: alternates.map { $0 as AnyObject })
         self.discoverabilityTitle = discoverabilityTitle
         self.attributes = attributes
         self.state = state
@@ -51,7 +52,8 @@ extension UICommand {
     public convenience init(title: String = "", subtitle: String? = nil, image: UIImage? = nil, action: Selector,
                             propertyList: Any? = nil, alternates: [UICommandAlternate] = [], discoverabilityTitle: String? = nil,
                             attributes: UIMenuElement.Attributes = [], state: UIMenuElement.State = .off) {
-        self.init(revenantTitle: title, image: image, action: action, propertyList: propertyList, alternates: alternates)
+        self.init(revenantTitle: title, image: image, action: action, propertyList: propertyList,
+                  alternates: alternates.map { $0 as AnyObject })
         self.subtitle = subtitle
         self.discoverabilityTitle = discoverabilityTitle
         self.attributes = attributes
@@ -62,7 +64,8 @@ extension UICommand {
                             action: Selector, propertyList: Any? = nil, alternates: [UICommandAlternate] = [],
                             discoverabilityTitle: String? = nil, attributes: UIMenuElement.Attributes = [],
                             state: UIMenuElement.State = .off) {
-        self.init(revenantTitle: title, image: image, action: action, propertyList: propertyList, alternates: alternates)
+        self.init(revenantTitle: title, image: image, action: action, propertyList: propertyList,
+                  alternates: alternates.map { $0 as AnyObject })
         self.subtitle = subtitle
         self.revenantSelectedImage = selectedImage
         self.discoverabilityTitle = discoverabilityTitle
@@ -77,7 +80,8 @@ extension UIKeyCommand {
                             alternates: [UICommandAlternate] = [], discoverabilityTitle: String? = nil,
                             attributes: UIMenuElement.Attributes = [], state: UIMenuElement.State = .off) {
         self.init(revenantTitle: title, image: image, action: action, input: input, modifierFlags: modifierFlags,
-                  propertyList: propertyList, alternates: alternates)
+                  propertyList: propertyList,
+                  alternates: alternates.map { $0 as AnyObject })
         self.discoverabilityTitle = discoverabilityTitle
         self.attributes = attributes
         self.state = state

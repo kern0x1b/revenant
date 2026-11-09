@@ -1,3 +1,4 @@
+@_exported import CallKit
 import Foundation
 
 extension CXProviderConfiguration {
