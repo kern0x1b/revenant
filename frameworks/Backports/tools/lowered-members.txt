@@ -4297,6 +4297,7 @@ enum_type HKErrorCode
 enum_type HMErrorCode
 enum_type INRecurrenceFrequency
 enum_type MKErrorCode
+enum_type MPErrorCode
 enum_type MPSPurgeableState
 enum_type MTLBinaryArchiveError
 enum_type MTLCaptureError
@@ -20192,6 +20193,7 @@ member MPRemoteCommandCenter -stopCommand
 member MPRemoteCommandCenter -togglePlayPauseCommand
 member MPRemoteCommandEvent -command
 member MPRemoteCommandEvent -initWithCommand:
+member MPRemoteCommandEvent -timestamp
 member MPSBinaryImageKernel -clipRect
 member MPSBinaryImageKernel -encodeToCommandBuffer:inPlacePrimaryTexture:secondaryTexture:fallbackCopyAllocator:
 member MPSBinaryImageKernel -encodeToCommandBuffer:inPlaceSecondaryTexture:primaryTexture:fallbackCopyAllocator:
@@ -30369,6 +30371,7 @@ member UIApplication -registeredForRemoteNotifications
 member UIApplication -requestSceneSessionActivation:userActivity:options:errorHandler:
 member UIApplication -requestSceneSessionDestruction:options:errorHandler:
 member UIApplication -requestSceneSessionRefresh:
+member UIApplication -revenant_dispatchRemoteControlEvent:
 member UIApplication -revenant_scene
 member UIApplication -revenant_sendEvent:
 member UIApplication -setAlternateIconName:completionHandler:
@@ -35958,6 +35961,7 @@ protocol MLBatchProvider
 protocol MLComputeDeviceProtocol
 protocol MLFeatureProvider
 protocol MLWritable
+protocol MPMediaPlayback
 protocol MPPlayableContentDataSource
 protocol MPPlayableContentDelegate
 protocol MPSCNNBatchNormalizationDataSource
@@ -37371,6 +37375,15 @@ type MLMultiArrayDataType
 type MLMultiArrayShapeConstraintType
 type MLTaskState
 type MLUpdateProgressEvent
+type MPChangeLanguageOptionSetting
+type MPMediaLibraryAuthorizationStatus
+type MPMediaPlaylistAttribute
+type MPMediaType
+type MPNowPlayingInfoLanguageOptionType
+type MPNowPlayingInfoMediaType
+type MPNowPlayingPlaybackState
+type MPRemoteCommandHandlerStatus
+type MPRepeatType
 type MPSAliasingStrategy
 type MPSAlphaType
 type MPSCNNBinaryConvolutionFlags
@@ -37395,6 +37408,8 @@ type MPSNNPaddingMethod
 type MPSNNRegularizationType
 type MPSRNNSequenceDirection
 type MPSStateResourceType
+type MPSeekCommandEventType
+type MPShuffleType
 type MTKTextureLoaderArrayCallback
 type MTL4AlphaToCoverageState
 type MTL4AlphaToOneState

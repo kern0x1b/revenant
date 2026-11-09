@@ -1,6 +1,6 @@
 package("storekit")
     set_homepage("https://github.com/kern0x1b/revenant/tree/main/frameworks/Backports")
-    set_description("The StoreKit Swift overlay as one dylib a port writes `import StoreKit` for, built against the revenant@swift-runtime a port carries: AppStore.showManageSubscriptions(in:), which opens the App Store subscriptions page through openURL")
+    set_description("The StoreKit Swift overlay as one dylib a port writes `import StoreKit` for, built against the revenant@swift-runtime a port carries: AppStore.showManageSubscriptions(in:), which opens the Settings pane for iTunes and App Stores through openURL, where iOS 6 keeps the Apple ID and its subscriptions")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
     add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", type = "string"})
