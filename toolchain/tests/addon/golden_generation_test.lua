@@ -170,6 +170,8 @@ end
 function failures(opt)
     local found = {}
     local folder = fixtures.scratch()
+    local machine_cache = os.getenv("REVENANT_CACHE")
+    os.setenv("REVENANT_CACHE", path.join(folder, "cache"))
     local emulator = import("emulator", {rootdir = opt.modules, anonymous = true})
     local generations = import("generations", {rootdir = opt.modules, anonymous = true})
     local root = path.join(folder, "emulator")
@@ -327,6 +329,7 @@ function failures(opt)
         table.insert(found, "a sweep leaves the lock file of a generation that has no folder")
     end
 
+    os.setenv("REVENANT_CACHE", machine_cache)
     os.tryrm(folder)
     return found
 end
