@@ -4297,6 +4297,7 @@ enum_type HKErrorCode
 enum_type HMErrorCode
 enum_type INRecurrenceFrequency
 enum_type MKErrorCode
+enum_type MPErrorCode
 enum_type MPSPurgeableState
 enum_type MTLBinaryArchiveError
 enum_type MTLCaptureError
@@ -35958,6 +35959,7 @@ protocol MLBatchProvider
 protocol MLComputeDeviceProtocol
 protocol MLFeatureProvider
 protocol MLWritable
+protocol MPMediaPlayback
 protocol MPPlayableContentDataSource
 protocol MPPlayableContentDelegate
 protocol MPSCNNBatchNormalizationDataSource
@@ -37371,6 +37373,15 @@ type MLMultiArrayDataType
 type MLMultiArrayShapeConstraintType
 type MLTaskState
 type MLUpdateProgressEvent
+type MPChangeLanguageOptionSetting
+type MPMediaLibraryAuthorizationStatus
+type MPMediaPlaylistAttribute
+type MPMediaType
+type MPNowPlayingInfoLanguageOptionType
+type MPNowPlayingInfoMediaType
+type MPNowPlayingPlaybackState
+type MPRemoteCommandHandlerStatus
+type MPRepeatType
 type MPSAliasingStrategy
 type MPSAlphaType
 type MPSCNNBinaryConvolutionFlags
@@ -37395,6 +37406,8 @@ type MPSNNPaddingMethod
 type MPSNNRegularizationType
 type MPSRNNSequenceDirection
 type MPSStateResourceType
+type MPSeekCommandEventType
+type MPShuffleType
 type MTKTextureLoaderArrayCallback
 type MTL4AlphaToCoverageState
 type MTL4AlphaToOneState

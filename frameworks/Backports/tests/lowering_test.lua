@@ -131,6 +131,26 @@ void revenantProbe(NSURL *url)
 }
 ]=]
 
+local REMOTE_COMMANDS = [=[
+#import <MediaPlayer/MediaPlayer.h>
+
+MPRemoteCommandHandlerStatus revenantRemoteCommands(void)
+{
+    MPRemoteCommandCenter *center = [MPRemoteCommandCenter sharedCommandCenter];
+    id token = [center.playCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent *event) {
+        return MPRemoteCommandHandlerStatusSuccess;
+    }];
+    [center.playCommand removeTarget:token];
+    center.changePlaybackPositionCommand.enabled = YES;
+    [center.changePlaybackPositionCommand addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent *event) {
+        MPChangePlaybackPositionCommandEvent *seek = (MPChangePlaybackPositionCommandEvent *)event;
+        return seek.positionTime > 0 ? MPRemoteCommandHandlerStatusSuccess : MPRemoteCommandHandlerStatusNoActionableNowPlayingItem;
+    }];
+    center.skipForwardCommand.preferredIntervals = @[@15];
+    return MPRemoteCommandHandlerStatusCommandFailed;
+}
+]=]
+
 local function compiles(sdk, vfs, source, log)
     local cache = path.join(path.directory(log), "module-cache")
     os.mkdir(cache)
@@ -163,6 +183,34 @@ function main()
     io.writefile(acceptance, ACCEPTANCE)
     local accepted, accepting = compiles(sdk, vfs, acceptance, path.join(probes, "acceptance.log"))
     assert(accepted, "the lowered SDK headers do not compile the acceptance members at iOS 6.0:\n" .. accepting)
+
+    local remote = path.join(probes, "remote.m")
+    io.writefile(remote, REMOTE_COMMANDS)
+    local remote_ok, remote_compiling = compiles(sdk, vfs, remote, path.join(probes, "remote.log"))
+    assert(remote_ok, "the lowered MediaPlayer headers do not compile the remote command center at iOS 6.0, where MP_API is the framework's own availability macro:\n" .. remote_compiling)
+
+    local markers = lowered.region_markers(sdk)
+    assert(markers.annotations.MP_API and markers.annotations.CK_SWIFT_AVAILABILITY,
+           "a macro that the SDK defines as an API_AVAILABLE(__VA_ARGS__) wrapper is an availability annotation, whatever its name")
+    local framework_api = table.concat({
+        "MP_API(ios(7.1), macos(10.12.2))",
+        "@interface SampleCenter : NSObject",
+        "@property (nonatomic) id lead MP_API(ios(9.0));",
+        "@property (nonatomic) id kept MP_API(ios(9.0));",
+        "@end",
+        "typedef NS_ENUM(NSInteger, SampleStatus) {",
+        "    SampleStatusOK = 0,",
+        "} MP_API(ios(7.1));",
+        "",
+    }, "\n")
+    local framework_set = {classes = {SampleCenter = {["-lead"] = true}}, functions = {}, globals = {}, protocols = {}, markers = markers}
+    local framework_lowered = lowered.lower_header(framework_api, framework_set)
+    assert(count(framework_lowered, "MP_API") == 2 and framework_lowered:find("kept MP_API(ios(9.0))", 1, true)
+           and framework_lowered:find("} MP_API(ios(7.1));", 1, true),
+           "the class and the member that Backports implement lose the framework's availability macro, and nothing else does:\n" .. framework_lowered)
+    local unannotated = lowered.lower_header(framework_api, {classes = framework_set.classes, functions = {}, globals = {}, protocols = {},
+                                                              markers = {begin = markers.begin, ends = markers.ends}})
+    assert(count(unannotated, "MP_API") == 4, "without the SDK's annotation macros the lowering cannot see MP_API:\n" .. unannotated)
 
     local fixture_members = lowered.members_of(path.join(os.scriptdir(), "data", "src"), sdk)
     local synthesized = fixture_members.classes.FXProperties or {}
