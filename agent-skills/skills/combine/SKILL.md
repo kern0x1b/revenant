@@ -47,7 +47,9 @@ add_packages("combine")
 - Combine is linked statically: `libCombine.a` and `libCombineHelpers.a` (its C++ locking helper,
   built against the runtime's libc++), plus the Foundation and CoreFoundation frameworks (recipe
   `:24`, `:30-33`, `:58-79`). It adds nothing to `Frameworks/`; the app carries the runtime as
-  any Swift app does (skill `xmake-swift` §4).
+  any Swift app does (skill `xmake-swift` §4). A link that names no archive, as a Bazel link does,
+  still finds both: the module records `-lCombine`, and the C module's map records `-lCombineHelpers`,
+  so the package's `lib` folder on `-L` is all it needs.
 - The first configure after adding it may build Combine in the store: let it finish (skill `build`).
 
 ## 2. What `import Combine` gives
