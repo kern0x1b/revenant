@@ -209,6 +209,45 @@ function main()
     local swift_lowered = lowered.lower_swift_text(swift, names)
     assert(count(swift_lowered, "@available") == 1 and swift_lowered:find("@available(macOS 10.9, iOS 7.0, *)\n  public var unrelated", 1, true),
            "the Swift overlay must lower the availability of the members Backports implements and keep the others:\n" .. swift_lowered)
+    local calendar = table.concat({
+        "public struct Calendar {",
+        "    @available(iOS 8.0, *)",
+        "    public func dateComponents(in timeZone: TimeZone, from date: Date) -> DateComponents {",
+        "    }",
+        "    @available(iOS 8.0, *)",
+        "    public func nextDate(after date: Date, matching components: DateComponents, matchingPolicy: MatchingPolicy) -> Date? {",
+        "    }",
+        "    @available(iOS 8.0, *)",
+        "    public func compare(_ date1: Date, to date2: Date, toGranularity component: Component) -> ComparisonResult {",
+        "    }",
+        "    @available(iOS 8.0, *)",
+        "    public func enumerateDates(startingAfter start: Date, matching components: DateComponents) {",
+        "    }",
+        "    @available(iOS 8.0, *)",
+        "    public func unrelated(after date: Date) -> Date? {",
+        "    }",
+        "}",
+        "public struct DateComponents {",
+        "    @available(macOS 10.9, iOS 8.0, *)",
+        "    public mutating func setValue(_ value: Int?, for component: Calendar.Component) {",
+        "    }",
+        "    @available(macOS 10.9, iOS 8.0, *)",
+        "    public mutating func unrelated(_ value: Int?) {",
+        "    }",
+        "}",
+        "",
+    }, "\n")
+    local calendar_names = lowered.swift_names({classes = {
+        NSCalendar = {["-componentsInTimeZone:fromDate:"] = true, ["-nextDateAfterDate:matchingComponents:options:"] = true,
+                      ["-compareDate:toDate:toUnitGranularity:"] = true,
+                      ["-enumerateDatesStartingAfterDate:matchingComponents:options:usingBlock:"] = true},
+        NSDateComponents = {["-setValue:forComponent:"] = true}}, functions = {}})
+    local calendar_lowered = lowered.lower_swift_text(calendar, calendar_names)
+    assert(count(calendar_lowered, "@available") == 2 and calendar_lowered:find("@available(iOS 8.0, *)\n    public func unrelated", 1, true) and
+           calendar_lowered:find("@available(macOS 10.9, iOS 8.0, *)\n    public mutating func unrelated", 1, true),
+           "the Calendar methods that the overlay names differently from the selectors they call, and the mutating method of DateComponents, must lose the iOS 8 gate when Backports implement the selector, and the others keep it:\n" .. calendar_lowered)
+    local calendar_kept = lowered.lower_swift_text(calendar, lowered.swift_names({classes = {NSCalendar = {}, NSDateComponents = {}}, functions = {}}))
+    assert(count(calendar_kept, "@available") == 7, "a selector that Backports does not implement must keep the gate of the Swift method that calls it:\n" .. calendar_kept)
     local lowering = lowered.lower_header(sample, members)
     assert(count(lowering, "AVAILABLE") == 1, "only the member that Backports does not implement may keep its availability:\n" .. lowering)
     assert(not lowering:find("MTLCreateSystemDefaultDevice(void) API_AVAILABLE", 1, true), "the implemented C function kept its availability:\n" .. lowering)

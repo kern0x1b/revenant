@@ -39,3 +39,30 @@ print("literals", ("en" as Locale.LanguageCode).identifier, ("Cyrl" as Locale.Sc
 print("systems", Locale.MeasurementSystem.metric == .metric, Locale.MeasurementSystem.us != .uk)
 let overlong = Locale.Language(languageCode: Locale.LanguageCode(String(repeating: "q", count: 300)))
 print("overlong", overlong.languageCode?.identifier.count ?? -1, overlong.script?.identifier ?? "nil", overlong.region?.identifier ?? "nil")
+
+for identifier in identifiers {
+    let language = Locale.Language(identifier: identifier)
+    print("identifier", identifier, language.maximalIdentifier, language.minimalIdentifier)
+}
+let partial: [Locale.Language] = [
+    Locale.Language(languageCode: nil, script: "Hant", region: nil),
+    Locale.Language(languageCode: nil, script: nil, region: "JP"),
+    Locale.Language(languageCode: "zh", script: nil, region: "SG"),
+    Locale.Language(languageCode: nil, script: nil, region: nil),
+    Locale.Language(languageCode: "und", script: "Arab", region: nil),
+    overlong,
+]
+for language in partial {
+    print("partial", language.languageCode?.identifier ?? "nil", language.script?.identifier ?? "nil", language.region?.identifier ?? "nil", language.maximalIdentifier, language.minimalIdentifier)
+}
+let equivalents = [("en", "en-US"), ("en-US", "en-Latn-US"), ("zh-Hant", "zh-TW"), ("zh-Hant-TW", "zh-Hant"), ("en-GB", "en-AU"), ("en", "fr"), ("sr", "sr-Cyrl"), ("sr", "sr-Latn"), ("pt", "pt-PT"), ("pt-BR", "pt-PT"), ("en-US", "en-CA"), ("", "")]
+for (first, second) in equivalents {
+    print("equivalent", first, second, Locale.Language(identifier: first).isEquivalent(to: Locale.Language(identifier: second)))
+}
+for identifier in ["zh-Hant-TW", "en", "und", "", "en_US_POSIX", "fr-CA-u-ca-gregory", "sr-Latn-RS"] {
+    let parsed = Locale.Language.Components(identifier: identifier)
+    print("parsed", identifier, parsed.languageCode?.identifier ?? "nil", parsed.script?.identifier ?? "nil", parsed.region?.identifier ?? "nil")
+    let taken = Locale.Language.Components(language: Locale.Language(identifier: identifier))
+    print("taken", identifier, taken.languageCode?.identifier ?? "nil", taken.script?.identifier ?? "nil", taken.region?.identifier ?? "nil")
+}
+
