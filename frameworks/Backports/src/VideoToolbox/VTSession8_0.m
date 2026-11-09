@@ -1,7 +1,7 @@
 #include "../revenant_impl.h"
 #if defined(REVENANT_HOST_BUILD)
-#define VTSessionSetProperty RevenantVTSessionSetProperty
-#define VTSessionCopyProperty RevenantVTSessionCopyProperty
+#define VTSessionSetProperty __revenant_fb_VTSessionSetProperty
+#define VTSessionCopyProperty __revenant_fb_VTSessionCopyProperty
 #endif
 
 #import <CoreFoundation/CoreFoundation.h>
