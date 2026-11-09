@@ -55,7 +55,7 @@ function main()
     local notifications = subset.backports_subset(every, "UserNotificationsUIBackports,UIKitBackports")
     expect(found, "UserNotificationsUIBackports with UIKitBackports installs the same packages as UIKitBackports alone",
         names_of(subset.backports_requires(notifications)), {"apple-compat", "box2d"})
-    local with_notifications = table.join(uikit_names, {"UserNotificationsUIBackports"})
+    local with_notifications = table.join(uikit_names, {"UserNotificationsBackports", "UserNotificationsUIBackports"})
     table.sort(with_notifications)
     expect(found, "UserNotificationsUIBackports with UIKitBackports selects UIKitBackports's libraries and itself",
         names_of(notifications), with_notifications)
@@ -73,8 +73,8 @@ function main()
     end
     table.sort(full)
     expect(found, "the full table requires every package the hand-written list required, and apple-compat",
-        full, {"apple-compat", "boringssl", "box2d", "ffmpeg-hevc", "ggml", "leptonica", "libcxx", "lz4", "lzfse",
-               "micro-ecc", "monocypher", "suitesparse-ordering", "tessdata", "tesseract", "xz", "zlib", "zxing-cpp"})
+        full, {"apple-compat", "boringssl", "box2d", "ffmpeg-hevc", "ggml", "glslang", "leptonica", "libcxx", "lz4", "lzfse",
+               "micro-ecc", "monocypher", "spirv-cross", "suitesparse-ordering", "tessdata", "tesseract", "xz", "zlib", "zxing-cpp"})
     for _, row in ipairs(subset.backports_requires(every)) do
         if not row.requirement:startswith("revenant@") then
             table.insert(found, row.name .. " is not required from revenant: " .. row.requirement)
