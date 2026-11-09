@@ -215,7 +215,8 @@ below it, and the sources of Telegram stay as they are.
   system's languages, which iOS 6 does not have.
 - `BrowserMarkdown.swift:1212`: `NSAttributedString(markdown:options:baseURL:)`. The parser is Backports
   (`NSAttributedStringMarkdown15.m`) and the Swift side (`AttributedString`, `MarkdownParsingOptions`) is in the overlay.
-  `attributed_string_markdown_test.lua` compares the runs and the presentation intents with the host's for the same input.
+  `attributed_string_markdown_test.lua` compares the Swift side with the host's, but on the host that side calls the host's
+  own parser, so it does not test the Backports parser; `MarkdownDumpProbe` on a device does (see below).
 - `LocationUtils.swift:153`: `MKDirectionsRequest.transportType`, with `requestsAlternateRoutes`, `departureDate` and
   `arrivalDate`, kept per request. `MapRequestProbe` runs 14 checks on an iPhone 4S, iOS 6.1.3, and all pass.
 - `WebAppController.swift:2827`: `CMDeviceMotion.heading`. The geometry is checked on the host against poses built from
@@ -233,8 +234,19 @@ A method whose signature names `DateInterval` is lowered only when `DateInterval
   paths' tag of the frame and the geometry are checked, and the heading a moving phone reports is not.
 - `NSAttributedString(markdown:)` on a device: `MarkdownDumpProbe` (`tests/device_probe/markdown_dump_main.m`) prints the
   runs and the presentation intents of 20 strings in three syntax modes, to be compared line for line with
-  `markdown_dump.expected`, which is the host Foundation's output of the same program. It has been built for armv7 and
-  has not run: the phone was not attached when it was tried.
+  `markdown_dump.expected`, which is the host Foundation's output of the same program. It ran on an iPhone 4S, iOS 6.1.3,
+  and found two things. The probe itself crashed on a null weak import, because it compiled the parser without the
+  source that defines the four attribute-name constants (`NSPresentationIntentAttributeName` and three more, which iOS 6
+  does not export); it now defines them. The parser crashed with an `NSRangeException` on `***both*** _under_ __strong__
+  *nested **inside** em*`: it attached an attribute over the length of the source span, not over the text it had
+  appended, and the markers it removes make the two differ. That is fixed. What remains is that the parser is partial. It
+  agrees with the host on 15 of 60 cases, and the full syntax, the one Telegram's `BrowserMarkdown` uses (`options: .init()`),
+  differs on 11 of 20 strings: no `NSListItemDelimiter` attribute, table alignments always left, no `NSAlternateDescription`
+  for a link or image title, a backslash hard break and a two-space break not split into `\n` runs with
+  `NSInlinePresentationIntent` 128, inline HTML not marked with 256, Setext headings read as text and a rule, an ordered
+  list not starting at its own number, a nested list not inside its parent item's intent chain, bare URLs not linked, and
+  adjacent or nested emphasis misread. Nothing in the Swift host test reaches this parser (it calls the host's), so the
+  probe is the only check, and a parser that follows CommonMark is the next piece of work for this name.
 - The UIMenu initializers, the CallKit, CoreMedia and PhotosUI overlays and `INStartCallIntent` were typechecked
   together with Telegram's lines and built in the runtime. They have not run on a device.
 - Nothing here draws a menu subtitle or a selected image, and no Live Photo, slow-motion or time-lapse asset exists on
