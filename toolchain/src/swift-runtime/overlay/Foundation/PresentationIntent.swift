@@ -42,6 +42,8 @@ public struct PresentationIntent: Hashable, Codable, CustomDebugStringConvertibl
         case tableHeaderRow
         case tableRow(rowIndex: Int)
         case tableCell(columnIndex: Int)
+        @available(*, unavailable)
+        case _nonfrozen
 
         public var debugDescription: String {
             switch self {
