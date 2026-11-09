@@ -184,9 +184,96 @@ as a protocol like `PDFDocumentDelegate`.
 Not provided: `usePageViewController:withViewOptions:`, `pageOverlayViewProvider`, `inMarkupMode`,
 `enableDataDetectors`, `areaOfInterestForPoint:`, the iOS 16 find interaction (`findInteraction`,
 `isFindInteractionEnabled`; Telegram's use is behind a condition that is always false and takes the
-`beginFindString` path), selecting text by touch, and `PDFThumbnailView`. `PDFDocument` cannot be edited: `insertPage`,
-`PDFPage(image:)` and writing a changed document are not implemented, so a `PDFDocument()` stays empty. Telegram's
-document scanner builds such a document, and it also needs VisionKit, which iOS 6 does not have.
+`beginFindString` path), selecting text by touch, and `PDFThumbnailView`.
+
+## PDFKit: building, editing and writing a document
+
+Telegram's document scanner builds a `PDFDocument()`, adds a `PDFPage(image:)` per scanned page and sends
+`dataRepresentation()`. `PDFPage(image:)` and `initWithImage:options:` (`RevenantPDFImage.m`) render a one-page PDF with the
+`mediaBox`, `rotation`, `upscaleIfSmaller` and `compressionQuality` options of the SDK. A smaller image is not enlarged
+unless asked, and an enlarged one fills the width and leaves bands above and below, as on the host. `PDFDocument` gained
+`insertPage:atIndex:`, `removePageAtIndex:`, `exchangePageAtIndex:withPageAtIndex:`, `dataRepresentation`,
+`dataRepresentationWithOptions:`, `writeToURL:` and `writeToFile:` with and without options, `copy`, `documentRef`,
+`version` and typed `documentAttributes`; `PDFPage` gained `setBounds:forBox:` and a writable `rotation`. The owner and user
+password options write an AES-128 encrypted file with the permissions the option names.
+
+A document that nobody has changed returns the bytes it was opened from. A changed one is assembled by
+`RevenantPDFAssemble` (`RevenantPDFObjects.m`: an object writer with a cross-reference table, deflated streams and the
+encryption dictionary), which copies each page's content and resources out of the `CGPDF` objects
+(`RevenantPDFCopy.m`) and writes the pages it was given, in order. A page that is in two documents is one page object, as on
+the host. Not done: the write options `PDFDocumentBurnInAnnotationsOption`, `PDFDocumentSaveTextFromOCROption`,
+`PDFDocumentSaveImagesAsJPEGOption` and `PDFDocumentOptimizeImagesForScreenOption` are ignored; the outline of a document
+is not written again after an edit; the writer sets no `Producer` of its own, where the host writes Quartz's.
+
+Checked: `tests/PDFKit/writer_test.m` has 140 checks that read the output back with Core Graphics and compare it with the host
+PDFKit (and the same run with every expectation inverted must fail); `PDFWriterProbe`
+(`tests/device_probe/pdfwriter_main.m`) runs 45 checks on an iPhone 4S (iOS 6.1.3, armv7) and had no failure: page images,
+the options, insert, remove and exchange, a password round trip, copy, and the sampled pixels of an upscaled page. Writing
+a PDF with the page images of a scan was not timed apart from the scan below.
+
+Before the probe could load `libPDFKitBackports.dylib`, the skeleton had to change. A global whose type is a typedef of a
+qualified type (`PDFAnnotationKey` is `NSString *const`) was emitted as a `const` placeholder, which the linker put in
+`__TEXT,__const`, and the load-time copy from the system image then wrote into read-only memory: the library died with a
+bus error before `main`. The placeholder is now declared by a typedef of the type in the facts and `__typeof_unqual__` of
+that typedef (`tools/skeleton.lua`), so it is writable whatever the typedef hides. `tests/forwarders_test.lua` has a global
+typed by a const pointer typedef, loads the generated library and reads it. This was a defect of every device load of a
+library with such a global, not only of PDFKit.
+
+## VisionKit: the document camera
+
+`VNDocumentCameraViewController` is a camera screen (`src/VisionKit/VNDocumentCameraViewController.m`). An
+`AVCaptureSession` with the photo preset feeds a live preview, a video data output of 420f frames and a still image output.
+A live frame (the rear camera delivers it landscape: 852 by 640 on an iPhone 4S) is reduced to the luminance of at most 320
+points on the long side and turned a quarter turn to portrait; `RevenantVisionDetectRectangles`, the detector of the Vision
+backport, searches it every 0.12 s on a queue of its own. `RevenantDocumentTracker` (`RevenantDocumentLive.c`) follows the
+candidate nearest the last one, outlines it on the preview, and in the automatic mode takes the picture when the page has
+held still for 1.2 s; the `Auto`/`Manual` button turns that off, and the shutter takes the picture in either mode. The flash
+button cycles off, auto and on. A picture is a JPEG from the still output: `RevenantDocumentPageFromJPEG`
+(`RevenantDocumentScan.m`) decodes it at up to twice the size of the page it will make, runs the detector again with the live
+outline as a hint, maps the quadrilateral on a rectangle with `RevenantDocumentWarp.c` (a projective transform sampled
+bilinearly; the coordinates are interpolated in fixed point, to 1/256 of a pixel, across spans of 8 pixels, so the A5 does
+not divide per pixel) and encodes a JPEG of at most 2048 points on the long side. A picture without a page in it becomes
+the whole frame. The page just taken shows as a thumbnail beside the shutter and `Save` carries the count; `Retake` drops
+the last page, and `Cancel` asks before it discards any pages.
+
+`VNDocumentCameraScan` returns `title` (`Scan yyyy-MM-dd HH.mm`), `pageCount` and `imageOfPageAtIndex:`, with the images
+decoded on demand and a page beyond the count answering nil. When the delegate has no
+`documentCameraViewControllerDidCancel:` or `documentCameraViewController:didFailWithError:`, and Telegram implements
+neither, the controller dismisses itself in those two cases, since nobody else would; `Save` does the same when the
+delegate has no `documentCameraViewController:didFinishWithScan:`. A device without a camera answers `isSupported` with NO
+and, when presented, fails with `NSFeatureUnsupportedError`; any other start-up failure carries the AVFoundation error.
+
+`VisionKitLoadProbe` (`tests/device_probe/visionkit_load_main.m`) loads the built `libVisionKitBackports.dylib` with its
+three Backports dependencies on the iPhone 4S, finds both classes, builds a scan from two JPEG pages and reads them back
+(10 checks, no failure). Replaying the compile of Telegram's `TelegramUI` module with `swiftc -typecheck` (the Bazel
+parameters of the discovery build, the lowered SDK rebuilt from this branch) gives no diagnostic; the same replay with the
+lowered SDK of the build before this work gives one, `'init(image:)' is only available in iOS 11.0 or newer` at
+`ChatControllerOpenDocumentScanner.swift:42`. That is a typecheck of one module against the modules the discovery build had
+already produced, not a link or a run of Telegram.
+
+Measured on an iPhone 4S (`VisionKitProbe`, `tests/device_probe/visionkit_main.m`, 25 checks, no failure; the screen
+was read from a screenshot):
+
+| step | time |
+| --- | --- |
+| a live frame, turned, reduced to 213 by 284 and searched | 32 ms |
+| first live frame after the presentation | 1.26 s |
+| a 3264 by 2448 still encoded (the probe's rendered page) | 480 ms |
+| that still to a 1497 by 1997 page, found within 0.0020 of the frame | 1.66 s |
+| a capture from the shutter to the page of a room | 3.8 s |
+| a page held still, from the first sight to the page | 4.1 s |
+| the longest pause of the main thread during 40 s of live view | 103 ms (the 100 ms timer) |
+
+The first version took 2.9 s for the page of the probe and 6.0 s from the shutter; the fixed-point warp and a luminance
+pass that samples instead of summing every pixel brought them to the figures above. The decode of a real photo is
+about 1.6 s of the capture time; asking the still output for BGRA buffers instead of JPEG would spare it, and has not been
+done.
+
+Not provided: the review screen of the real framework (corner handles, rotate, crop, filters), any localization of the
+strings, landscape, and a choice of camera. The detection was measured on rendered pages and on injected outlines, and the
+camera was pointed at a desk, not at paper in a lit room; how well the detector finds a real sheet, and what the A5's
+autofocus does at arm's length, is not measured. The probe's page of the room is whatever rectangle the detector found
+there. The outline, the layout and the scan delivery were seen on the device; nothing was tried on an iPad 2.
 
 ## Foundation, MapKit and CoreMotion: the names the Swift sources of Telegram call
 

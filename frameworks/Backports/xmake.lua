@@ -578,6 +578,18 @@ if is_plat("iphoneos") and not SELECTED then
         add_syslinks("objc")
     target_end()
 
+    target("VisionKitLoadProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/daemon")
+        add_files("tests/device_probe/visionkit_load_main.m")
+        add_deps("VisionKitBackports")
+        add_includedirs("tests/Foundation", "src/VisionKit")
+        add_mflags("-fobjc-arc", "-Wno-unguarded-availability", "-Wno-unguarded-availability-new")
+        add_frameworks("Foundation", "UIKit", "CoreGraphics", "ImageIO")
+        add_syslinks("objc")
+    target_end()
+
     target("VisionKitProbe")
         set_kind("binary")
         set_default(false)

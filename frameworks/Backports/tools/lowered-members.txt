@@ -1746,6 +1746,7 @@ class RevenantDataDeallocation
 class RevenantDeferral
 class RevenantDisplayLinkRate
 class RevenantDocumentMenuOption
+class RevenantDocumentPage
 class RevenantDocumentProgress9
 class RevenantDragDropBox
 class RevenantDragSession
@@ -4718,7 +4719,16 @@ function RevenantCurrentFrame
 function RevenantCustomPronounRequiredKeys
 function RevenantCustomPronounSupportedLanguage
 function RevenantDataTypeFromScalar
+function RevenantDocumentFindQuad
+function RevenantDocumentLuminance
+function RevenantDocumentLuminanceRGBA
 function RevenantDocumentOutputSize
+function RevenantDocumentPageFromJPEG
+function RevenantDocumentQuadArea
+function RevenantDocumentQuadDistance
+function RevenantDocumentTrackerCaptured
+function RevenantDocumentTrackerReset
+function RevenantDocumentTrackerUpdate
 function RevenantDocumentWarp
 function RevenantGKBufferedCorners
 function RevenantGKCellCeiling
@@ -26998,6 +27008,11 @@ member RevenantDeferral -pending
 member RevenantDocumentMenuOption -handler
 member RevenantDocumentMenuOption -order
 member RevenantDocumentMenuOption -title
+member RevenantDocumentPage -detected
+member RevenantDocumentPage -height
+member RevenantDocumentPage -jpeg
+member RevenantDocumentPage -quad
+member RevenantDocumentPage -width
 member RevenantDocumentProgress9 +load
 member RevenantDragSession -allowsMoveOperation
 member RevenantDragSession -canLoadObjectsOfClass:
@@ -35337,10 +35352,45 @@ member VNDetectedPoint -confidence
 member VNDetectedPoint -encodeWithCoder:
 member VNDetectedPoint -initWithCoder:
 member VNDocumentCameraScan -imageOfPageAtIndex:
+member VNDocumentCameraScan -initWithRevenantPages:title:
 member VNDocumentCameraScan -pageCount
 member VNDocumentCameraScan -title
 member VNDocumentCameraViewController +isSupported
+member VNDocumentCameraViewController -alertView:clickedButtonAtIndex:
+member VNDocumentCameraViewController -barButton:action:
+member VNDocumentCameraViewController -cancel
+member VNDocumentCameraViewController -capture
+member VNDocumentCameraViewController -captureOutput:didOutputSampleBuffer:fromConnection:
+member VNDocumentCameraViewController -configureSession:
+member VNDocumentCameraViewController -cycleFlash
+member VNDocumentCameraViewController -dealloc
+member VNDocumentCameraViewController -defaultTitle
+member VNDocumentCameraViewController -delegate
+member VNDocumentCameraViewController -failWithError:
+member VNDocumentCameraViewController -finishCancelled
+member VNDocumentCameraViewController -flashPreview
+member VNDocumentCameraViewController -init
+member VNDocumentCameraViewController -liveFrameWithSize:quad:
+member VNDocumentCameraViewController -pageReady:thumbnail:error:
+member VNDocumentCameraViewController -preferredInterfaceOrientationForPresentation
+member VNDocumentCameraViewController -retake
+member VNDocumentCameraViewController -save
+member VNDocumentCameraViewController -sessionFailed:
+member VNDocumentCameraViewController -shouldAutorotate
+member VNDocumentCameraViewController -showQuad:
+member VNDocumentCameraViewController -shutterDown
+member VNDocumentCameraViewController -shutterUp
+member VNDocumentCameraViewController -stopSession
+member VNDocumentCameraViewController -supportedInterfaceOrientations
+member VNDocumentCameraViewController -toggleMode
+member VNDocumentCameraViewController -unavailableError:
+member VNDocumentCameraViewController -updateControls
+member VNDocumentCameraViewController -updateHintFound:ready:
 member VNDocumentCameraViewController -viewDidAppear:
+member VNDocumentCameraViewController -viewDidDisappear:
+member VNDocumentCameraViewController -viewDidLayoutSubviews
+member VNDocumentCameraViewController -viewDidLoad
+member VNDocumentCameraViewController -viewWillAppear:
 member VNFaceLandmarkRegion +new
 member VNFaceLandmarkRegion2D -pointsInImageOfSize:
 member VNFaceObservation +faceObservationWithRequestRevision:boundingBox:roll:yaw:
