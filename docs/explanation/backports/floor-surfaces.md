@@ -252,8 +252,9 @@ A method whose signature names `DateInterval` is lowered only when `DateInterval
   host on 15 of 60 cases, so the parser is now `RevenantMarkdownParser.m`, a port of cmark-gfm 0.29, checked on the host
   by `tests/markdown_parser_oracle_test.lua` against the host's own parser on the corpus, on every `<!--` string up to
   seven characters and on random sources. Matching the host meant copying what is a defect of cmark-gfm 0.29 or of
-  Apple's fork, and these are kept on purpose, so a later "fix" shows up as a failing test: a `^[text](attributes)`
-  group is read, its attributes dropped, a `[label]` after it swallowed and no link made; `^[x]: text` is a reference
+  Apple's fork, and these are kept on purpose, so a later "fix" shows up as a failing test: an attribute group
+  (`^[`, text, `]` and parenthesised attributes) is read, its attributes dropped, a bracketed label after it swallowed
+  and no link made; `^[x]: text` is a reference
   definition that consumes the line; a reference definition keeps the title it read before a failed rewind; a link
   title is the longest one the host's regular expression scans; an email autolink attempt shares its state with the
   next attempt in the same text and the rewind of the next starts at the end of the scanned region; a table whose

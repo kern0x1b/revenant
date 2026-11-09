@@ -12,6 +12,7 @@
 @end
 
 @implementation RevenantMarkdownTree
+@synthesize root = _root;
 @end
 
 static const NSInteger RVMTabStop = 4;
@@ -2296,14 +2297,12 @@ static BOOL RVMHTMLBlockEnds(NSInteger type, NSString *line, NSInteger from)
 - (BOOL)resolveReferencesIn:(RevenantMarkdownNode *)block
 {
     NSString *text = block->content;
-    NSUInteger consumed = 0;
     RVMInlineParser *inlines = [[RVMInlineParser alloc] initWithPool:_pool references:_references inlineOnly:NO];
     while (RVMStartsReference(text)) {
         NSUInteger used = 0;
         if (![inlines parseReferenceIn:text consumed:&used] || used == 0)
             break;
         text = [text substringFromIndex:used];
-        consumed += used;
     }
     block->content = [text mutableCopy];
     return !RVMIsBlank(block->content);
