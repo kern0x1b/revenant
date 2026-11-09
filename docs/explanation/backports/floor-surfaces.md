@@ -99,6 +99,95 @@ with its designated initializer, `contacts`, `callRecordFilter`, `callRecordToCa
 `destinationType` and `callCapability`, secure coding, copying, equality and hash, and the `Unknown` constants of its
 three enums.
 
+## WebKit: async functions, frames, worlds and web archives
+
+`WKWebView` here is a `UIView` over the prefixed WebKitLegacy engine, which evaluates a script synchronously and has no
+promise-aware entry. Telegram's `BrowserWebContent` reaches four members that the engine does not offer by name, and
+each is implemented over what it does offer (`src/WebKit/WKWebView.m`, `RevenantScriptCodec.m`, `WebKit.swift`):
+
+- `callAsyncJavaScript(_:arguments:in:in:completionHandler:)`, in the `Result` form and in the `async throws` form
+  (`WebKit.swift` over the refined `__callAsyncJavaScript`). The body runs as the body of an async function whose
+  parameters are the keys of `arguments`. The page reports the settled promise over the same `revenant-wkbridge://`
+  channel that `WKScriptMessageHandler` uses, as envelope kind 8 with the call's id, the nonce of the view and the
+  result; the completion handler is kept by id and runs once. A rejection or an exception arrives as
+  `WKErrorJavaScriptExceptionOccurred`, a result that cannot cross the bridge as `WKErrorJavaScriptResultTypeIsUnsupported`,
+  and a body or argument that is not a string, number, boolean, `NSNull`, date, array or dictionary of those as
+  `WKErrorUnknown` with a description of what is accepted. A call still waiting when the view is deallocated fails with `WKErrorWebViewInvalidated`, and one
+  waiting when the page commits a new navigation with `WKErrorJavaScriptInvalidFrameTarget`.
+- `evaluateJavaScript(_:in:in:completionHandler:)`, in both forms, over the same helpers as the plain
+  `evaluateJavaScript`.
+- `createWebArchiveData(completionHandler:)`, over `WebDataSource.webArchive.data` of the main frame.
+- `UIContextMenuConfiguration(identifier:previewProvider:_:)` is a Swift initializer of the UIKit overlay, over the
+  refined `__identifier:previewProvider:actionProvider:`; Telegram's `BrowserWebContent` builds the context menu of a web element with it.
+
+What the engine cannot do, and the port does not pretend to do:
+
+- It has one JavaScript world. A call that asks for a content world other than the page world runs in the page world, and
+  the first such call logs that it did. A script that relies on isolation (a name it must not see from the page, a
+  variable the page must not see) is not isolated here. Isolation needs the engine's `WebScriptWorld` or a second
+  JavaScriptCore context bound to the same frame, which the legacy engine does not expose.
+- Only the main frame can be targeted. A `WKFrameInfo` of another frame fails with
+  `WKErrorJavaScriptInvalidFrameTarget`.
+- `createPDF`, `WKPDFConfiguration` and `find(_:configuration:)` are not implemented. Telegram does not call them.
+
+Telegram's build lists the Swift overlay modules that a compile must find. `WebKit` and `ContactsUI` are new entries
+beside `UniformTypeIdentifiers` and `IOSurface`; without the `WebKit` module `createWebArchiveData` and the `Result`
+form of `callAsyncJavaScript` do not exist for Swift (checked: "has no member 'createWebArchiveData'").
+
+## ContactsUI: the access picker
+
+`View.contactAccessPicker(isPresented:completionHandler:)` is iOS 18 SwiftUI. Telegram's `ContactsControllerNode`
+hosts it in `ContactAccessPickerHostingView`, to let a person who gave limited contacts access add more contacts. iOS 6
+has no limited access: `ABAddressBook` authorisation is all or nothing, so there is no set of contacts to extend and no
+picker that could do it. The overlay (`src/ContactsUI/ContactsUI.swift`, a SwiftUI target) declares the modifier with
+`@available(iOS 18.0, *)` and, when `isPresented` becomes true, writes to the standard error and the log that the access
+level cannot be extended, sets `isPresented` back to false and does not call the completion handler, since no contact
+identifier was chosen. A call site that guards on the iOS version never reaches it on iOS 6.
+
+## ContactsHelper and the change history visitor
+
+Telegram's `ContactsHelper` module did not build because the signature of `CNChangeHistoryEvent acceptEventVisitor:`
+names a protocol the SDK marks iOS 13. The cause was in the lowering, not in the header or in Telegram; see "A protocol
+that the signature of an implemented member names is lowered with it" in
+[What the lowering takes as implemented](lowered-implemented-names.md).
+
+## PDFKit: PDFView
+
+`PDFView` was an `NSObject` with the navigation methods; Telegram's `BrowserPdfContent` needs a view. It is now a
+`UIView` (`src/PDFKit/PDFView11.m`, declared in the private header `RevenantPDFView.h`) over the model classes of the
+backport. Inside is a `UIScrollView` subclass, which `BrowserPdfContent` finds among `subviews` and takes the delegate of,
+so nothing inside depends on the scroll view's delegate. Its content is the `documentView`, and the visible pages (and
+half a screen around them) are page views taken from a pool. A page view draws through a `CATiledLayer` of 512 point tiles
+without the fade, calls `drawPage:toContext:` (which draws the page with `displayBox`, and which a subclass may replace)
+and then draws the highlights and `drawPagePost:toContext:`.
+
+The layout is `RevenantPDFLayout` (`RevenantPDFLayout.m`, which needs Foundation and Core Graphics only and has a host
+test): single page, single page continuous, two-up and two-up continuous; vertical and horizontal; `displaysAsBook`,
+`displaysRTL`, `displaysPageBreaks` and `pageBreakMargins` (default `{4.75, 4, 4.75, 4}`, zero without page breaks);
+`scaleFactorForSizeToFit` as fit width in the continuous modes and best fit otherwise. Defaults follow the SDK header:
+continuous single page, vertical, a 50 percent grey background, `displayBox` crop box, shadows on, `autoScales` off,
+minimum 0.1 and maximum 100 (the SDK header says assigning either turns `autoScales` off, and it does). The pinch and the
+double tap zoom about the touch point; a tap on an annotation runs its action or goes to its destination, posting
+`PDFViewAnnotationWillHitNotification` and `PDFViewAnnotationHitNotification`; a link is handed to
+`PDFViewWillClickOnLink:withURL:` or opened; `PDFViewPageChangedNotification`, `PDFViewScaleChangedNotification`,
+`PDFViewVisiblePagesChangedNotification` and the others post when the value they name changes. `currentPage` is the page
+at the middle of the view, the left page of a two-up row. History (`goBack`, `goForward`) records every `goTo` call.
+`highlightedSelections` and `currentSelection` draw their lines in the colour of the selection.
+
+`PDFDocument` gained what the view and Telegram use: `beginFindString:withOptions:` and `cancelFindString` (one page per
+turn of the main queue, posting the begin, match and end notifications and calling the delegate), `delegate`, `isFinding`
+and `indexForPage:`; its page cache is now keyed by index, which fixes the sparse access that `pageAtIndex:` of a
+later page followed by an earlier one used to get wrong. `PDFPage` gained `transformForBox:` and `drawWithBox:toContext:`,
+and serialises the drawing and the text scan of a page, since tiles draw on several threads. `PDFViewDelegate` is emitted
+as a protocol like `PDFDocumentDelegate`.
+
+Not provided: `usePageViewController:withViewOptions:`, `pageOverlayViewProvider`, `inMarkupMode`,
+`enableDataDetectors`, `areaOfInterestForPoint:`, the iOS 16 find interaction (`findInteraction`,
+`isFindInteractionEnabled`; Telegram's use is behind a condition that is always false and takes the
+`beginFindString` path), selecting text by touch, and `PDFThumbnailView`. `PDFDocument` cannot be edited: `insertPage`,
+`PDFPage(image:)` and writing a changed document are not implemented, so a `PDFDocument()` stays empty. Telegram's
+document scanner builds such a document, and it also needs VisionKit, which iOS 6 does not have.
+
 ## What is not verified
 
 - The UIMenu initializers, the CallKit, CoreMedia and PhotosUI overlays and `INStartCallIntent` were typechecked
@@ -106,3 +195,12 @@ three enums.
 - Nothing here draws a menu subtitle or a selected image, and no Live Photo, slow-motion or time-lapse asset exists on
   iOS 6.1.3, so those subtypes stay clear.
 - `AVAudioPlayer`'s hint is measured on one device and one release.
+- The WebKit members above compile and typecheck at armv7 against the lowered SDK, and the codec, the error mapping and
+  the overlay have host tests. The engine is not built here, so `callAsyncJavaScript` and `createWebArchiveData` have not
+  run in a page, and that `RevWebDataSource` answers `webArchive` is read from its header, not observed.
+- `PDFView` has a host test for its layout (47 checks) and has been compiled for armv7. `PDFViewProbe`
+  (`tests/device_probe/pdfview_main.m`) runs 32 checks on a device: the generated document, the find, the defaults, the
+  automatic scale, the navigation and its history, the conversions, the limits of the scale, the two-up row and the
+  drawing of a page. It compiles at armv7 against the lowered SDK, but it has not been built or run: a device build of
+  the Backports needs `webkit-engine`, `swift-runtime` and the other packages of its target, which have no prebuilt
+  here. The tiles, the scrolling, the pinch and the tap handling are therefore not exercised anywhere yet.

@@ -77,6 +77,18 @@ is lowered when a conforming class implements it and either the protocol is one 
 type or defines) or the SDK marks the member later than the floor; a member that an earlier release already declares is
 not touched through a protocol that `src/` never names.
 
+## A protocol that the signature of an implemented member names is lowered with it
+
+The lowering already followed the typedefs that the signature of a lowered statement names, and a typedef whose
+availability is later than the floor is lowered with it. A protocol was left out. `CNChangeHistoryEvent` is implemented
+in `src/`, its `acceptEventVisitor:` is lowered, and the parameter is `id<CNChangeHistoryEventVisitor>`, a protocol the
+SDK marks iOS 13. Telegram's `ContactsHelper` header declares a function over that parameter, and the module did not
+build: "only available on iOS 13.0 or newer". An annotated protocol, by its own macro or through an availability region,
+that a lowered statement names is now lowered with it, and the methods of such a protocol keep their own availability,
+so a protocol that is named does not make its unimplemented methods callable. `signature_types` runs the same pass over
+header texts, and `lowering_test.lua` probes it without the SDK. The change added 154 protocols to
+`frameworks/Backports/tools/lowered-members.txt` (the message of its commit says 127; 154 is the count).
+
 ## Swift names that only the SDK's interface declares
 
 The Swift overlays that the port builds from the open-source sources lack what the SDK's own overlay added later. Two
