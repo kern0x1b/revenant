@@ -179,6 +179,7 @@ static void revenant_require(BOOL condition, NSString *what)
     copy->_discoverabilityTitle = [_discoverabilityTitle copy];
     copy->_attributes = _attributes;
     copy->_state = _state;
+    [self revenant_carryElementTo:copy];
     return copy;
 }
 

@@ -48,7 +48,7 @@ static void revenant_collect_selected(NSArray<UIMenuElement *> *elements, NSMuta
         _identifier = identifier ? [identifier copy] : [@"com.apple.menu.dynamic." stringByAppendingString:[NSUUID UUID].UUIDString];
         _options = options;
         _children = children ? [children copy] : @[];
-        _preferredElementSize = -1;
+        _preferredElementSize = UIMenuElementSizeAutomatic;
     }
     return self;
 }
@@ -61,7 +61,7 @@ static void revenant_collect_selected(NSArray<UIMenuElement *> *elements, NSMuta
         _options = (UIMenuOptions)[coder decodeIntegerForKey:@"options"];
         NSArray *children = [coder decodeObjectOfClasses:[NSSet setWithObjects:[NSArray class], [UIMenuElement class], nil] forKey:@"children"];
         _children = children ? [children copy] : @[];
-        _preferredElementSize = [coder containsValueForKey:@"preferredElementSize"] ? (UIMenuElementSize)[coder decodeIntegerForKey:@"preferredElementSize"] : -1;
+        _preferredElementSize = [coder containsValueForKey:@"preferredElementSize"] ? (UIMenuElementSize)[coder decodeIntegerForKey:@"preferredElementSize"] : UIMenuElementSizeAutomatic;
     }
     return self;
 }
@@ -89,7 +89,7 @@ static void revenant_collect_selected(NSArray<UIMenuElement *> *elements, NSMuta
 - (void)revenant_carryTo:(UIMenu *)menu
 {
     menu.preferredElementSize = _preferredElementSize;
-    menu.subtitle = self.subtitle;
+    [self revenant_carryElementTo:menu];
 }
 
 - (UIMenuElementSize)preferredElementSize

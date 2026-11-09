@@ -71,10 +71,17 @@ static NSString *revenant_modifier_text(NSInteger flags)
 + (instancetype)commandWithTitle:(NSString *)title image:(UIImage *)image action:(SEL)action input:(NSString *)input modifierFlags:(UIKeyModifierFlags)modifierFlags propertyList:(id)propertyList
                       alternates:(NSArray<UICommandAlternate *> *)alternates
 {
-    UIKeyCommand *command = [[self alloc] initRevenantWithTitle:title image:image action:action propertyList:propertyList alternates:alternates];
-    command->_input = [input copy];
-    command->_modifierFlags = modifierFlags;
-    return command;
+    return [[self alloc] initRevenantWithTitle:title image:image action:action input:input modifierFlags:modifierFlags propertyList:propertyList alternates:alternates];
+}
+
+- (instancetype)initRevenantWithTitle:(NSString *)title image:(UIImage *)image action:(SEL)action input:(NSString *)input modifierFlags:(UIKeyModifierFlags)modifierFlags
+                         propertyList:(id)propertyList alternates:(NSArray *)alternates
+{
+    if ((self = [self initRevenantWithTitle:title image:image action:action propertyList:propertyList alternates:alternates])) {
+        _input = [input copy];
+        _modifierFlags = modifierFlags;
+    }
+    return self;
 }
 
 + (instancetype)keyCommandWithInput:(NSString *)input modifierFlags:(UIKeyModifierFlags)modifierFlags action:(SEL)action
@@ -108,6 +115,36 @@ static NSString *revenant_modifier_text(NSInteger flags)
 - (void)setDiscoverabilityTitle:(NSString *)discoverabilityTitle
 {
     [super setDiscoverabilityTitle:discoverabilityTitle];
+}
+
+- (id)propertyList
+{
+    return [super propertyList];
+}
+
+- (NSArray<UICommandAlternate *> *)alternates
+{
+    return [super alternates];
+}
+
+- (UIMenuElementAttributes)attributes
+{
+    return [super attributes];
+}
+
+- (void)setAttributes:(UIMenuElementAttributes)attributes
+{
+    [super setAttributes:attributes];
+}
+
+- (UIMenuElementState)state
+{
+    return [super state];
+}
+
+- (void)setState:(UIMenuElementState)state
+{
+    [super setState:state];
 }
 
 - (id)copyWithZone:(NSZone *)zone

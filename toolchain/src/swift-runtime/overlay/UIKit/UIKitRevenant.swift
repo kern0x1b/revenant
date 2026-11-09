@@ -2,6 +2,7 @@ import UIKit
 import _SwiftRevenantUIKitOverlayShims
 
 extension UIAction {
+    @_disfavoredOverload
     public convenience init(title: String = "", image: UIImage? = nil, identifier: UIAction.Identifier? = nil,
                             discoverabilityTitle: String? = nil, attributes: UIMenuElement.Attributes = [],
                             state: UIMenuElement.State = .off, handler: @escaping UIActionHandler) {
@@ -10,13 +11,103 @@ extension UIAction {
         self.attributes = attributes
         self.state = state
     }
+
+    @_disfavoredOverload
+    public convenience init(title: String = "", subtitle: String? = nil, image: UIImage? = nil, identifier: UIAction.Identifier? = nil,
+                            discoverabilityTitle: String? = nil, attributes: UIMenuElement.Attributes = [],
+                            state: UIMenuElement.State = .off, handler: @escaping UIActionHandler) {
+        self.init(revenantTitle: title, image: image, identifier: identifier?.rawValue, handler: handler)
+        self.subtitle = subtitle
+        self.discoverabilityTitle = discoverabilityTitle
+        self.attributes = attributes
+        self.state = state
+    }
+
+    public convenience init(title: String = "", subtitle: String? = nil, image: UIImage? = nil, selectedImage: UIImage? = nil,
+                            identifier: UIAction.Identifier? = nil, discoverabilityTitle: String? = nil,
+                            attributes: UIMenuElement.Attributes = [], state: UIMenuElement.State = .off,
+                            handler: @escaping UIActionHandler) {
+        self.init(revenantTitle: title, image: image, identifier: identifier?.rawValue, handler: handler)
+        self.subtitle = subtitle
+        self.revenantSelectedImage = selectedImage
+        self.discoverabilityTitle = discoverabilityTitle
+        self.attributes = attributes
+        self.state = state
+    }
+}
+
+extension UICommand {
+    @_disfavoredOverload
+    public convenience init(title: String = "", image: UIImage? = nil, action: Selector, propertyList: Any? = nil,
+                            alternates: [UICommandAlternate] = [], discoverabilityTitle: String? = nil,
+                            attributes: UIMenuElement.Attributes = [], state: UIMenuElement.State = .off) {
+        self.init(revenantTitle: title, image: image, action: action, propertyList: propertyList, alternates: alternates)
+        self.discoverabilityTitle = discoverabilityTitle
+        self.attributes = attributes
+        self.state = state
+    }
+
+    @_disfavoredOverload
+    public convenience init(title: String = "", subtitle: String? = nil, image: UIImage? = nil, action: Selector,
+                            propertyList: Any? = nil, alternates: [UICommandAlternate] = [], discoverabilityTitle: String? = nil,
+                            attributes: UIMenuElement.Attributes = [], state: UIMenuElement.State = .off) {
+        self.init(revenantTitle: title, image: image, action: action, propertyList: propertyList, alternates: alternates)
+        self.subtitle = subtitle
+        self.discoverabilityTitle = discoverabilityTitle
+        self.attributes = attributes
+        self.state = state
+    }
+
+    public convenience init(title: String = "", subtitle: String? = nil, image: UIImage? = nil, selectedImage: UIImage? = nil,
+                            action: Selector, propertyList: Any? = nil, alternates: [UICommandAlternate] = [],
+                            discoverabilityTitle: String? = nil, attributes: UIMenuElement.Attributes = [],
+                            state: UIMenuElement.State = .off) {
+        self.init(revenantTitle: title, image: image, action: action, propertyList: propertyList, alternates: alternates)
+        self.subtitle = subtitle
+        self.revenantSelectedImage = selectedImage
+        self.discoverabilityTitle = discoverabilityTitle
+        self.attributes = attributes
+        self.state = state
+    }
+}
+
+extension UIKeyCommand {
+    public convenience init(title: String = "", image: UIImage? = nil, action: Selector, input: String,
+                            modifierFlags: UIKeyModifierFlags = [], propertyList: Any? = nil,
+                            alternates: [UICommandAlternate] = [], discoverabilityTitle: String? = nil,
+                            attributes: UIMenuElement.Attributes = [], state: UIMenuElement.State = .off) {
+        self.init(revenantTitle: title, image: image, action: action, input: input, modifierFlags: modifierFlags,
+                  propertyList: propertyList, alternates: alternates)
+        self.discoverabilityTitle = discoverabilityTitle
+        self.attributes = attributes
+        self.state = state
+    }
 }
 
 extension UIMenu {
+    @_disfavoredOverload
     public convenience init(title: String = "", image: UIImage? = nil, identifier: UIMenu.Identifier? = nil,
                             options: UIMenu.Options = [], children: [UIMenuElement] = []) {
         let objects: [AnyObject] = children.map { $0 as AnyObject }
         self.init(revenantTitle: title, image: image, identifier: identifier?.rawValue, options: options, children: objects)
+    }
+
+    @_disfavoredOverload
+    public convenience init(title: String = "", subtitle: String? = nil, image: UIImage? = nil,
+                            identifier: UIMenu.Identifier? = nil, options: UIMenu.Options = [],
+                            children: [UIMenuElement] = []) {
+        let objects: [AnyObject] = children.map { $0 as AnyObject }
+        self.init(revenantTitle: title, image: image, identifier: identifier?.rawValue, options: options, children: objects)
+        self.subtitle = subtitle
+    }
+
+    public convenience init(title: String = "", subtitle: String? = nil, image: UIImage? = nil,
+                            identifier: UIMenu.Identifier? = nil, options: UIMenu.Options = [],
+                            preferredElementSize: UIMenu.ElementSize = .automatic, children: [UIMenuElement] = []) {
+        let objects: [AnyObject] = children.map { $0 as AnyObject }
+        self.init(revenantTitle: title, image: image, identifier: identifier?.rawValue, options: options, children: objects)
+        self.subtitle = subtitle
+        self.preferredElementSize = preferredElementSize
     }
 }
 

@@ -752,9 +752,58 @@ local function runtime_names_in(text, renamed)
     end
 end
 
+local function expanded_class_macros(source)
+    local lines, macros, kept = {}, {}, {}
+    for line in source:gmatch("[^\n]*") do
+        table.insert(lines, line)
+    end
+    local index = 1
+    while index <= #lines do
+        local name, parameter = lines[index]:match("^#define%s+([%a_][%w_]*)%(%s*([%a_][%w_]*)%s*%)")
+        if name then
+            local body, last = {}, index
+            while lines[last]:match("\\%s*$") and last < #lines do
+                last = last + 1
+            end
+            for position = index, last do
+                table.insert(body, (lines[position]:gsub("\\%s*$", "")))
+            end
+            local text = table.concat(body, "\n"):gsub("^#define%s+[%a_][%w_]*%(%s*[%a_][%w_]*%s*%)", "", 1)
+            if text:find("@implementation%s+" .. parameter .. "%f[^%w_]") then
+                macros[name] = {parameter = parameter, body = text}
+                index = last + 1
+            else
+                table.insert(kept, lines[index])
+                index = index + 1
+            end
+        else
+            table.insert(kept, lines[index])
+            index = index + 1
+        end
+    end
+    local defined = false
+    for _ in pairs(macros) do
+        defined = true
+    end
+    if not defined then
+        return source
+    end
+    local expanded = {}
+    for _, line in ipairs(kept) do
+        local name, argument = line:match("^([%a_][%w_]*)%(%s*([%a_][%w_]*)%s*%)%s*$")
+        local macro = name and macros[name]
+        if macro then
+            table.insert(expanded, (macro.body:gsub("%f[%w_]" .. macro.parameter .. "%f[^%w_]", argument)))
+        else
+            table.insert(expanded, line)
+        end
+    end
+    return table.concat(expanded, "\n")
+end
+
 local function scan_source(file, found, renamed)
     local container, pending = nil, nil
-    local source = io.readfile(file)
+    local source = expanded_class_macros(io.readfile(file))
     scan_markers(source, found)
     for line in source:gmatch("[^\n]*") do
         line = string.gsub(line, "BACKPORT_IMPL%(%s*([%a_][%w_]*)%s*%)", "%1")
@@ -1294,6 +1343,12 @@ local function enumerators_in(text, body)
     return found
 end
 
+local function enumerator_alias(text, enumerator)
+    local initializer = text:sub(enumerator.start + #enumerator.name, constant_end(text, enumerator.start))
+    initializer = initializer:gsub("//[^\n]*", ""):gsub("/%*.-%*/", "")
+    return initializer:match("^%s*=%s*([%a_][%w_]*)%s*$")
+end
+
 local function adopts_lowered_protocol(text, stop, implemented)
     local line = text:sub(stop + 1, text:find("\n", stop, true) or #text)
     for word in line:gmatch("[%a_][%w_]*") do
@@ -1584,14 +1639,30 @@ local function lowering_of(text, implemented, declarations)
                     end
                     table.insert(splits, {start = body.start, stop = body.start - 1, before = "\n" .. region.end_text .. "\n"})
                     table.insert(splits, {start = body.stop + 1, stop = body.stop, after = "\n" .. region.begin_text .. "\n"})
-                    for _, enumerator in ipairs(enumerators_in(text, body)) do
-                        local backported = false
+                    local listed = enumerators_in(text, body)
+                    local lowered_names = {}
+                    for _, enumerator in ipairs(listed) do
                         for _, range in ipairs(inside) do
                             if enumerator.start >= range.start and enumerator.start <= range.stop then
-                                backported = true
+                                enumerator.backported = true
+                                lowered_names[enumerator.name] = true
                             end
                         end
-                        if not backported and #availability(text:sub(enumerator.start, constant_end(text, enumerator.start))) == 0 then
+                    end
+                    local grown = true
+                    while grown do
+                        grown = false
+                        for _, enumerator in ipairs(listed) do
+                            local target = not enumerator.backported and enumerator_alias(text, enumerator)
+                            if target and lowered_names[target] then
+                                enumerator.backported = true
+                                lowered_names[enumerator.name] = true
+                                grown = true
+                            end
+                        end
+                    end
+                    for _, enumerator in ipairs(listed) do
+                        if not enumerator.backported and #availability(text:sub(enumerator.start, constant_end(text, enumerator.start))) == 0 then
                             local at = enumerator.start + #enumerator.name
                             table.insert(splits, {start = at, stop = at - 1, before = " API_AVAILABLE" .. gate})
                         end
@@ -1667,7 +1738,7 @@ local function method_keys(block)
         local declaration = block:sub(mark + 1, stop or #block)
         local selector = selector_of(declaration)
         if selector then
-            table.insert(keys, {key = declaration:match("^([%-%+])") .. selector, selector = selector})
+            table.insert(keys, {key = declaration:match("^([%-%+])") .. selector, selector = selector, later = ios_later(declaration)})
         end
         at = mark + 1
     end
@@ -1681,7 +1752,7 @@ local function method_keys(block)
         local name = property_name(declaration)
         if name then
             local getter = property_getter(declaration) or name
-            table.insert(keys, {key = property_sign(declaration) .. getter, selector = getter})
+            table.insert(keys, {key = property_sign(declaration) .. getter, selector = getter, later = ios_later(declaration)})
         end
         at = mark + 1
     end
@@ -1842,6 +1913,16 @@ function protocol_status(src, sdk, folders)
     for name in pairs(defined) do
         candidates[name] = true
     end
+    local conformance = conformance_of(sdk, src)
+    local conformed = {}
+    for _, found in pairs(folders) do
+        for class in pairs(found.classes) do
+            for name in pairs(protocols_of(conformance, class)) do
+                conformed[name] = true
+                candidates[name] = true
+            end
+        end
+    end
     local blocks = protocol_blocks(sdk, candidates)
     local methods = {}
     for name in pairs(candidates) do
@@ -1855,13 +1936,14 @@ function protocol_status(src, sdk, folders)
             end
         end
     end
-    local covered = covered_of(conformance_of(sdk, src))
+    local covered = covered_of(conformance)
     local status = {backed = {}, uncalled = {}, members = {}}
     for name in pairs(candidates) do
         local members, implements = {}, false
+        local named = adopted[name] or typed[name] or defined[name]
         for _, method in ipairs(methods[name]) do
             for class in pairs(implementers[method.key] or {}) do
-                if covered[name] and covered[name][class] then
+                if covered[name] and covered[name][class] and (named or method.later) then
                     members[method.key] = true
                     implements = true
                     break

@@ -21,6 +21,7 @@ NSString *revenant_menu_attributes_text(NSUInteger attributes)
     NSString *_title;
     UIImage *_image;
     NSString *_subtitle;
+    UIImage *_selectedImage;
 }
 
 + (BOOL)supportsSecureCoding
@@ -75,6 +76,22 @@ NSString *revenant_menu_attributes_text(NSUInteger attributes)
 - (void)setSubtitle:(NSString *)subtitle
 {
     _subtitle = [subtitle copy];
+}
+
+- (UIImage *)selectedImage
+{
+    return _selectedImage;
+}
+
+- (void)setSelectedImage:(UIImage *)selectedImage
+{
+    _selectedImage = selectedImage;
+}
+
+- (void)revenant_carryElementTo:(UIMenuElement *)element
+{
+    element.subtitle = _subtitle;
+    element.selectedImage = _selectedImage;
 }
 
 - (void)revenant_setTitle:(NSString *)title

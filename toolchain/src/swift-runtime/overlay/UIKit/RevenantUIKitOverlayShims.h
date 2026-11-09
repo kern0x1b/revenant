@@ -2,8 +2,20 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@interface UIMenuElement (RevenantOverlayProperties)
+@property (nonatomic, nullable, strong, getter=selectedImage, setter=setSelectedImage:) UIImage *revenantSelectedImage;
+@end
+
 @interface UIAction (RevenantOverlayInitializers)
 - (instancetype)initRevenantWithTitle:(NSString *)title image:(nullable UIImage *)image identifier:(nullable NSString *)identifier handler:(UIActionHandler)handler NS_SWIFT_NAME(init(revenantTitle:image:identifier:handler:));
+@end
+
+@interface UICommand (RevenantOverlayInitializers)
+- (instancetype)initRevenantWithTitle:(NSString *)title image:(nullable UIImage *)image action:(SEL)action propertyList:(nullable id)propertyList alternates:(NSArray<UICommandAlternate *> *)alternates NS_SWIFT_NAME(init(revenantTitle:image:action:propertyList:alternates:));
+@end
+
+@interface UIKeyCommand (RevenantOverlayInitializers)
+- (instancetype)initRevenantWithTitle:(NSString *)title image:(nullable UIImage *)image action:(SEL)action input:(NSString *)input modifierFlags:(UIKeyModifierFlags)modifierFlags propertyList:(nullable id)propertyList alternates:(NSArray<UICommandAlternate *> *)alternates NS_SWIFT_NAME(init(revenantTitle:image:action:input:modifierFlags:propertyList:alternates:));
 @end
 
 @interface UIMenu (RevenantOverlayInitializers)

@@ -489,7 +489,8 @@ package("swift-runtime")
             local coremedia = path.join(uikit, "stdlib", "public", "Darwin", "CoreMedia")
             build_overlay("CoreMedia", {path.join(coremedia, "CMTime.swift"), path.join(coremedia, "CMTimeRange.swift"),
                                         path.join(revenant_overlay, "CoreMedia", "CMTimeHashable.swift"),
-                                        path.join(revenant_overlay, "CoreMedia", "CMAttachmentBearer.swift")},
+                                        path.join(revenant_overlay, "CoreMedia", "CMAttachmentBearer.swift"),
+                                        path.join(revenant_overlay, "CoreMedia", "CMSampleBuffer.swift")},
                           table.join(foundation_links, {"-framework", "CoreMedia"}), nil,
                           {module_cache = coremedia_cache, extra_flags = lowered_cc})
             local photos_cache = path.join(generated, "module-cache-photos")
@@ -531,6 +532,11 @@ package("swift-runtime")
             local coreaudio = path.join(uikit, "stdlib", "public", "Darwin", "CoreAudio")
             build_overlay("CoreAudio", {path.join(coreaudio, "CoreAudio.swift")}, {"-framework", "CoreAudio"}, nil,
                           {module_cache = coreaudio_cache, extra_flags = lowered_cc})
+            local callkit_cache = path.join(generated, "module-cache-callkit")
+            os.mkdir(callkit_cache)
+            build_overlay("CallKit", {path.join(revenant_overlay, "CallKit", "CXProviderConfiguration.swift")},
+                          table.join(foundation_links, {"-Xlinker", "-weak_framework", "-Xlinker", "CallKit"}), nil,
+                          {module_cache = callkit_cache, extra_flags = lowered_cc})
             local initializers = path.join(generated, "DesignatedInitializers.mm.o")
             os.vrunv(toolchain:tool("cc"), table.join({"-target", triple, "-miphoneos-version-min=" .. minimum, "-isysroot",
                      toolchain:config("sdkdir"), "-Os", "-c", path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "DesignatedInitializers.mm"),

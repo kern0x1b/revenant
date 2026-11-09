@@ -479,21 +479,28 @@ function main()
     assert(photos_enum:find("PHImageContentModeAspectFit API_AVAILABLE(", 1, true) and not photos_enum:find("PHImageContentModeAspectFill API_AVAILABLE", 1, true)
            and photos_enum:find("PHImageContentModeDefault API_AVAILABLE(", 1, true),
            "the constant Backports do not define keeps the region's availability, and the lowered constants lose it:\n" .. photos_enum)
+    local aliased = lowered.lower_header(io.readfile(photos_source), {markers = lowered.region_markers(sdk), classes = {}, functions = {},
+                                                                       globals = {PHImageContentModeAspectFit = true}, protocols = {}})
+    local aliased_enum = aliased:match("typedef NS_ENUM%(NSInteger, PHImageContentMode%) %b{}")
+    assert(aliased_enum and not aliased_enum:find("PHImageContentModeAspectFit API_AVAILABLE", 1, true)
+           and not aliased_enum:find("PHImageContentModeDefault API_AVAILABLE", 1, true)
+           and aliased_enum:find("PHImageContentModeAspectFill API_AVAILABLE(", 1, true),
+           "a constant that only names a lowered constant is lowered with it, and a constant that names nothing lowered keeps its availability:\n" .. aliased_enum)
     local photos_probe = path.join(probes, "photos.m")
     io.writefile(photos_probe, table.concat({
         "#import <Photos/PhotosTypes.h>",
         "",
         "NSInteger revenantPhotosProbe(void)",
         "{",
-        "    return PHImageContentModeAspectFill;",
+        "    return PHImageContentModeAspectFill + PHImageContentModeAspectFit + PHImageContentModeDefault;",
         "}",
         "",
     }, "\n"))
     local photos_ok, photos_compiling = compiles(sdk, vfs, photos_probe, path.join(probes, "photos.log"))
     assert(photos_ok, "the lowered PhotosTypes.h does not compile at iOS 6.0:\n" .. photos_compiling)
     local photos_overlay = io.readfile(path.join(out, "overlay", "System", "Library", "Frameworks", "Photos.framework", "Headers", "PhotosTypes.h"))
-    assert(photos_overlay:find("PHImageContentModeDefault API_AVAILABLE(", 1, true),
-           "PHImageContentModeDefault is not implemented by Backports, so the overlay keeps its availability")
+    assert(not photos_overlay:find("PHImageContentModeDefault API_AVAILABLE", 1, true),
+           "PHImageContentModeDefault names PHImageContentModeAspectFit, which Backports implement, so the overlay lowers it too")
 
     local webview_probe = path.join(probes, "webview.m")
     io.writefile(webview_probe, table.concat({

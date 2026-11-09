@@ -22,6 +22,9 @@ NSString *revenant_menu_attributes_text(NSUInteger attributes);
 - (instancetype)initRevenantWithTitle:(NSString *)title image:(UIImage *)image;
 - (void)revenant_setTitle:(NSString *)title;
 - (void)revenant_setImage:(UIImage *)image;
+- (UIImage *)selectedImage;
+- (void)setSelectedImage:(UIImage *)selectedImage;
+- (void)revenant_carryElementTo:(UIMenuElement *)element;
 @end
 
 typedef NS_ENUM(NSInteger, UIActionRepeatBehavior) {
@@ -37,6 +40,11 @@ typedef NS_ENUM(NSInteger, UIActionRepeatBehavior) {
 @interface UICommand (RevenantMenus)
 - (instancetype)initRevenantWithTitle:(NSString *)title image:(UIImage *)image action:(SEL)action propertyList:(id)propertyList alternates:(NSArray *)alternates;
 - (void)revenant_performWithSender:(id)sender target:(id)target;
+@end
+
+@interface UIKeyCommand (RevenantMenus)
+- (instancetype)initRevenantWithTitle:(NSString *)title image:(UIImage *)image action:(SEL)action input:(NSString *)input modifierFlags:(UIKeyModifierFlags)modifierFlags
+                         propertyList:(id)propertyList alternates:(NSArray *)alternates;
 @end
 
 @interface UIMenu (RevenantMenus)
@@ -56,6 +64,12 @@ typedef NS_ENUM(NSInteger, UIActionRepeatBehavior) {
 - (UIMenu *)revenant_visibleMenu;
 - (void)revenant_replaceVisibleMenu:(UIMenu *)menu;
 - (void)revenant_beginAtLocation:(CGPoint)location;
+@end
+
+
+@interface RevenantMenuBuilder : NSObject <UIMenuBuilder>
+- (instancetype)initWithSystem:(UIMenuSystem *)system menus:(NSArray<UIMenuElement *> *)menus;
+@property (nonatomic, readonly) UIMenu *root;
 @end
 
 

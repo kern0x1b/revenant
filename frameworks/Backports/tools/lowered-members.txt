@@ -108,6 +108,7 @@ class AVAudioMixingDestination
 class AVAudioNode
 class AVAudioOutputNode
 class AVAudioPCMBuffer
+class AVAudioPlayer
 class AVAudioPlayerNode
 class AVAudioSession
 class AVAudioSessionCapability
@@ -168,7 +169,10 @@ class AVDateRangeMetadataGroup
 class AVDepthData
 class AVMediaSelection
 class AVMetadataBodyObject
+class AVMetadataCatBodyObject
+class AVMetadataDogBodyObject
 class AVMetadataGroup
+class AVMetadataHumanBodyObject
 class AVMetadataItem
 class AVMetadataItemFilter
 class AVMetadataItemValueRequest
@@ -354,7 +358,6 @@ class CKSyncEngineWillFetchRecordZoneChangesEvent
 class CKSyncEngineWillSendChangesEvent
 class CKUserIdentity
 class CKUserIdentityLookupInfo
-class CLASS
 class CLBeacon
 class CLBeaconRegion
 class CLCircularRegion
@@ -1813,6 +1816,7 @@ class RevenantMapKitDelegate
 class RevenantMapPreviewCard
 class RevenantMapViewState
 class RevenantMarkdownParser
+class RevenantMenuBuilder
 class RevenantMenuHost
 class RevenantMenuTrigger
 class RevenantMeshBufferZoneState
@@ -2647,7 +2651,6 @@ class WKWebViewConfiguration
 class WKWebpagePreferences
 class WKWebsiteDataStore
 class WKWindowFeatures
-class cls
 enum AAAttributionErrorCodePlatformNotSupported
 enum APActivationPayloadErrorCodeDisallowed
 enum ARHitTestResultTypeEstimatedVerticalPlane
@@ -3858,6 +3861,7 @@ enum UIListEnvironmentUnspecified
 enum UIMenuElementAttributesDestructive
 enum UIMenuElementAttributesDisabled
 enum UIMenuElementAttributesHidden
+enum UIMenuElementSizeAutomatic
 enum UIMenuElementStateMixed
 enum UIMenuElementStateOn
 enum UIMenuOptionsDestructive
@@ -4139,7 +4143,6 @@ enum_type ASAuthorizationError
 enum_type ASCredentialIdentityStoreErrorCode
 enum_type ASWebAuthenticationSessionErrorCode
 enum_type AVAudio3DMixingRenderingAlgorithm
-enum_type AVAudio3DMixingSourceMode
 enum_type AVCaptureColorSpace
 enum_type BGTaskSchedulerErrorCode
 enum_type CBManagerState
@@ -4190,7 +4193,6 @@ enum_type UITableViewStyle
 enum_type UITextDragOptions
 enum_type UITextDropEditability
 enum_type UITextFieldDidEndEditingReason
-enum_type UITextSmartQuotesType
 enum_type UIViewAnimatingState
 enum_type UNErrorCode
 enum_type VNErrorCode
@@ -11879,16 +11881,20 @@ member AVAudioPCMBuffer -mutableCopyWithZone:
 member AVAudioPCMBuffer -revenant_syncFrameLength
 member AVAudioPCMBuffer -setFrameLength:
 member AVAudioPCMBuffer -stride
+member AVAudioPlayer -initWithContentsOfURL:fileTypeHint:error:
+member AVAudioPlayer -initWithData:fileTypeHint:error:
 member AVAudioPlayerNode -isPlaying
 member AVAudioPlayerNode -pause
 member AVAudioPlayerNode -play
 member AVAudioPlayerNode -scheduleBuffer:atTime:options:completionHandler:
 member AVAudioPlayerNode -scheduleBuffer:completionHandler:
 member AVAudioPlayerNode -stop
+member AVAudioSession -allowHapticsAndSystemSoundsDuringRecording
 member AVAudioSession -availableInputs
 member AVAudioSession -preferredInput
 member AVAudioSession -recordPermission
 member AVAudioSession -requestRecordPermission:
+member AVAudioSession -setAllowHapticsAndSystemSoundsDuringRecording:error:
 member AVAudioSession -setCategory:mode:options:error:
 member AVAudioSession -setPreferredInput:error:
 member AVAudioSessionCapability -initWithRevenantSupported:
@@ -12586,6 +12592,8 @@ member AVMetadataBodyObject -revenantYawAngle
 member AVMetadataBodyObject -revenant_initWithBodyID:objectID:faceID:rollAngle:yawAngle:
 member AVMetadataBodyObject -rollAngle
 member AVMetadataBodyObject -yawAngle
+member AVMetadataCatBodyObject -revenant_initWithObjectID:faceID:rollAngle:yawAngle:
+member AVMetadataDogBodyObject -revenant_initWithObjectID:faceID:rollAngle:yawAngle:
 member AVMetadataGroup -classifyingLabel
 member AVMetadataGroup -copyWithZone:
 member AVMetadataGroup -hash
@@ -12596,6 +12604,7 @@ member AVMetadataGroup -revenantTimeRange
 member AVMetadataGroup -revenant_initWithItems:timeRange:
 member AVMetadataGroup -timeRange
 member AVMetadataGroup -uniqueID
+member AVMetadataHumanBodyObject -revenant_initWithObjectID:faceID:rollAngle:yawAngle:
 member AVMetadataItem +identifierForKey:keySpace:
 member AVMetadataItem +keyForIdentifier:
 member AVMetadataItem +keySpaceForIdentifier:
@@ -14054,14 +14063,6 @@ member CKUserIdentityLookupInfo -description
 member CKUserIdentityLookupInfo -initWithEmailAddress:
 member CKUserIdentityLookupInfo -initWithPhoneNumber:
 member CKUserIdentityLookupInfo -initWithUserRecordID:
-member CLASS -passwordRules
-member CLASS -setPasswordRules:
-member CLASS -setSmartDashesType:
-member CLASS -setSmartInsertDeleteType:
-member CLASS -setSmartQuotesType:
-member CLASS -smartDashesType
-member CLASS -smartInsertDeleteType
-member CLASS -smartQuotesType
 member CLBeacon +supportsSecureCoding
 member CLBeacon -accuracy
 member CLBeacon -copyWithZone:
@@ -26970,6 +26971,35 @@ member RevenantMarkdownParser -parseLines:from:to:parent:item:
 member RevenantMarkdownParser -parseMarkerIn:index:plain:limit:intent:
 member RevenantMarkdownParser -targetIn:
 member RevenantMarkdownParser -urlFor:
+member RevenantMenuBuilder -actionForIdentifier:
+member RevenantMenuBuilder -commandForAction:propertyList:
+member RevenantMenuBuilder -initWithSystem:menus:
+member RevenantMenuBuilder -insertChildMenu:atEndOfMenuForIdentifier:
+member RevenantMenuBuilder -insertChildMenu:atStartOfMenuForIdentifier:
+member RevenantMenuBuilder -insertElements:afterActionForIdentifier:
+member RevenantMenuBuilder -insertElements:afterCommandForAction:propertyList:
+member RevenantMenuBuilder -insertElements:afterMenuForIdentifier:
+member RevenantMenuBuilder -insertElements:atEndOfMenuForIdentifier:
+member RevenantMenuBuilder -insertElements:atStartOfMenuForIdentifier:
+member RevenantMenuBuilder -insertElements:beforeActionForIdentifier:
+member RevenantMenuBuilder -insertElements:beforeCommandForAction:propertyList:
+member RevenantMenuBuilder -insertElements:beforeMenuForIdentifier:
+member RevenantMenuBuilder -insertSiblingMenu:afterMenuForIdentifier:
+member RevenantMenuBuilder -insertSiblingMenu:beforeMenuForIdentifier:
+member RevenantMenuBuilder -menuForIdentifier:
+member RevenantMenuBuilder -removeActionForIdentifier:
+member RevenantMenuBuilder -removeCommandForAction:propertyList:
+member RevenantMenuBuilder -removeMenuForIdentifier:
+member RevenantMenuBuilder -replaceActionForIdentifier:withElements:
+member RevenantMenuBuilder -replaceChildrenOfMenuForIdentifier:fromChildrenBlock:
+member RevenantMenuBuilder -replaceCommandForAction:propertyList:withElements:
+member RevenantMenuBuilder -replaceMenuForIdentifier:withElements:
+member RevenantMenuBuilder -replaceMenuForIdentifier:withMenu:
+member RevenantMenuBuilder -revenant_insert:atStart:ofMenu:
+member RevenantMenuBuilder -revenant_insert:before:matching:
+member RevenantMenuBuilder -revenant_rewrite:with:
+member RevenantMenuBuilder -root
+member RevenantMenuBuilder -system
 member RevenantMenuHost +live
 member RevenantMenuHost -contextMenuInteraction:configurationForMenuAtLocation:
 member RevenantMenuHost -contextMenuInteraction:willEndForConfiguration:animator:
@@ -29679,10 +29709,8 @@ member UIAction -setHandler:
 member UIAction -setImage:
 member UIAction -setSelectedImage:
 member UIAction -setState:
-member UIAction -setSubtitle:
 member UIAction -setTitle:
 member UIAction -state
-member UIAction -subtitle
 member UIAction -title
 member UIActivity +activityCategory
 member UIActivityItemsConfiguration +activityItemsConfigurationWithItemProviders:
@@ -31806,18 +31834,25 @@ member UIKeyCommand +commandWithTitle:image:action:input:modifierFlags:propertyL
 member UIKeyCommand +keyCommandWithInput:modifierFlags:action:
 member UIKeyCommand +keyCommandWithInput:modifierFlags:action:discoverabilityTitle:
 member UIKeyCommand +supportsSecureCoding
+member UIKeyCommand -alternates
+member UIKeyCommand -attributes
 member UIKeyCommand -copyWithZone:
 member UIKeyCommand -description
 member UIKeyCommand -discoverabilityTitle
 member UIKeyCommand -encodeWithCoder:
 member UIKeyCommand -hash
 member UIKeyCommand -init
+member UIKeyCommand -initRevenantWithTitle:image:action:input:modifierFlags:propertyList:alternates:
 member UIKeyCommand -initWithCoder:
 member UIKeyCommand -input
 member UIKeyCommand -isEqual:
 member UIKeyCommand -modifierFlags
+member UIKeyCommand -propertyList
+member UIKeyCommand -setAttributes:
 member UIKeyCommand -setDiscoverabilityTitle:
+member UIKeyCommand -setState:
 member UIKeyCommand -setWantsPriorityOverSystemBehavior:
+member UIKeyCommand -state
 member UIKeyCommand -wantsPriorityOverSystemBehavior
 member UIKeyboardLayoutGuide -dealloc
 member UIKeyboardLayoutGuide -revenant_attachToView:
@@ -32081,8 +32116,11 @@ member UIMenuElement -encodeWithCoder:
 member UIMenuElement -image
 member UIMenuElement -initRevenantWithTitle:image:
 member UIMenuElement -initWithCoder:
+member UIMenuElement -revenant_carryElementTo:
 member UIMenuElement -revenant_setImage:
 member UIMenuElement -revenant_setTitle:
+member UIMenuElement -selectedImage
+member UIMenuElement -setSelectedImage:
 member UIMenuElement -setSubtitle:
 member UIMenuElement -subtitle
 member UIMenuElement -title
@@ -32775,13 +32813,21 @@ member UIScrollView -zoomAnimating
 member UISearchBar -backgroundImageForBarPosition:barMetrics:
 member UISearchBar -barPosition
 member UISearchBar -barTintColor
+member UISearchBar -passwordRules
 member UISearchBar -searchBarStyle
 member UISearchBar -searchTextField
 member UISearchBar -setBackgroundImage:forBarPosition:barMetrics:
 member UISearchBar -setBarTintColor:
+member UISearchBar -setPasswordRules:
 member UISearchBar -setSearchBarStyle:
 member UISearchBar -setShowsScopeBar:animated:
+member UISearchBar -setSmartDashesType:
+member UISearchBar -setSmartInsertDeleteType:
+member UISearchBar -setSmartQuotesType:
 member UISearchBar -setTextContentType:
+member UISearchBar -smartDashesType
+member UISearchBar -smartInsertDeleteType
+member UISearchBar -smartQuotesType
 member UISearchBar -textContentType
 member UISearchContainerViewController -initWithSearchController:
 member UISearchContainerViewController -searchController
@@ -33418,11 +33464,19 @@ member UITextField -adjustsFontForContentSizeCategory
 member UITextField -defaultTextAttributes
 member UITextField -editMenuForTextRange:suggestedActions:
 member UITextField -interactionState
+member UITextField -passwordRules
 member UITextField -replaceRange:withAttributedText:
 member UITextField -setAdjustsFontForContentSizeCategory:
 member UITextField -setDefaultTextAttributes:
 member UITextField -setInteractionState:
+member UITextField -setPasswordRules:
+member UITextField -setSmartDashesType:
+member UITextField -setSmartInsertDeleteType:
+member UITextField -setSmartQuotesType:
 member UITextField -setTextContentType:
+member UITextField -smartDashesType
+member UITextField -smartInsertDeleteType
+member UITextField -smartQuotesType
 member UITextField -textContentType
 member UITextField -willDismissEditMenuWithAnimator:
 member UITextField -willPresentEditMenuWithAnimator:
@@ -33496,6 +33550,7 @@ member UITextView -interactionState
 member UITextView -isSelectable
 member UITextView -layoutManager
 member UITextView -linkTextAttributes
+member UITextView -passwordRules
 member UITextView -replaceRange:withAttributedText:
 member UITextView -revenant_textDragDelegateAdaptor
 member UITextView -revenant_textDropDelegateAdaptor
@@ -33504,10 +33559,17 @@ member UITextView -setAdjustsFontForContentSizeCategory:
 member UITextView -setBorderStyle:
 member UITextView -setInteractionState:
 member UITextView -setLinkTextAttributes:
+member UITextView -setPasswordRules:
 member UITextView -setSelectable:
+member UITextView -setSmartDashesType:
+member UITextView -setSmartInsertDeleteType:
+member UITextView -setSmartQuotesType:
 member UITextView -setTextContainerInset:
 member UITextView -setTextContentType:
 member UITextView -setUsesStandardTextScaling:
+member UITextView -smartDashesType
+member UITextView -smartInsertDeleteType
+member UITextView -smartQuotesType
 member UITextView -textContainer
 member UITextView -textContainerInset
 member UITextView -textContentType
@@ -35216,10 +35278,10 @@ member WKWindowFeatures -toolbarsVisibility
 member WKWindowFeatures -width
 member WKWindowFeatures -x
 member WKWindowFeatures -y
-member cls -revenant_initWithObjectID:faceID:rollAngle:yawAngle:
 protocol ARAnchorCopying
 protocol ARTrackable
 protocol AVAsynchronousKeyValueLoading
+protocol AVAudio3DMixing
 protocol AVAudioMixing
 protocol AVCaptureAudioDataOutputSampleBufferDelegate
 protocol AVCaptureMetadataOutputObjectsDelegate
@@ -35269,6 +35331,7 @@ protocol MPSImageAllocator
 protocol MPSNDArrayAllocator
 protocol MTL4BinaryFunction
 protocol MTL4CommandQueue
+protocol MTLAllocation
 protocol MTLBinaryArchive
 protocol MTLBinding
 protocol MTLBlitCommandEncoder
@@ -35297,6 +35360,7 @@ protocol MTLSharedEvent
 protocol MTLTexture
 protocol MTLTextureBinding
 protocol MTLThreadgroupBinding
+protocol NFCReaderSession
 protocol NSCoding
 protocol NSCollectionLayoutContainer
 protocol NSCollectionLayoutEnvironment
@@ -35317,6 +35381,7 @@ protocol NSURLSessionDataDelegate
 protocol NSURLSessionDelegate
 protocol NSURLSessionDownloadDelegate
 protocol NSURLSessionTaskDelegate
+protocol NSXPCProxyCreating
 protocol OS_nw_browser
 protocol OS_nw_connection
 protocol OS_nw_connection_group
@@ -35368,6 +35433,7 @@ protocol RevenantVoiceServicesListing
 protocol RevenantVoiceServicesSpeaking
 protocol RevenantWebKitScriptHost
 protocol RevenantWebView
+protocol SCNAnimatable
 protocol SCNSceneRenderer
 protocol SFSafariViewControllerDelegate
 protocol UIActionSheetDelegate
@@ -35375,6 +35441,7 @@ protocol UIActivityItemSource
 protocol UIActivityItemsConfigurationProviding
 protocol UIActivityItemsConfigurationReading
 protocol UIAlertViewDelegate
+protocol UIAppearance
 protocol UICGFloatTraitDefinition
 protocol UICollectionViewDataSource
 protocol UICollectionViewDelegate
@@ -35404,6 +35471,8 @@ protocol UIInteraction
 protocol UIKeyInput
 protocol UILargeContentViewerItem
 protocol UILayoutSupport
+protocol UIMenuBuilder
+protocol UIMenuLeaf
 protocol UIMutableTraits
 protocol UINSIntegerTraitDefinition
 protocol UINavigationControllerDelegate
@@ -35427,6 +35496,7 @@ protocol UITextDocumentProxy
 protocol UITextDragRequest
 protocol UITextDropRequest
 protocol UITextInput
+protocol UITextInputTraits
 protocol UITimingCurveProvider
 protocol UITraitChangeObservable
 protocol UITraitChangeRegistration
@@ -35449,6 +35519,8 @@ protocol_member ARAnchorCopying -initWithAnchor:
 protocol_member ARTrackable -isTracked
 protocol_member AVAsynchronousKeyValueLoading -loadValuesAsynchronouslyForKeys:completionHandler:
 protocol_member AVAsynchronousKeyValueLoading -statusOfValueForKey:error:
+protocol_member AVAudio3DMixing -pointSourceInHeadMode
+protocol_member AVAudio3DMixing -sourceMode
 protocol_member AVAudioMixing -destinationForMixer:bus:
 protocol_member AVAudioMixing -volume
 protocol_member AVCaptureAudioDataOutputSampleBufferDelegate -captureOutput:didOutputSampleBuffer:fromConnection:
@@ -35569,6 +35641,7 @@ protocol_member MTL4CommandQueue -updateBufferMappings:heap:operations:count:
 protocol_member MTL4CommandQueue -updateTextureMappings:heap:operations:count:
 protocol_member MTL4CommandQueue -waitForDrawable:
 protocol_member MTL4CommandQueue -waitForEvent:value:
+protocol_member MTLAllocation -allocatedSize
 protocol_member MTLBinaryArchive -addComputePipelineFunctionsWithDescriptor:error:
 protocol_member MTLBinaryArchive -addRenderPipelineFunctionsWithDescriptor:error:
 protocol_member MTLBinaryArchive -device
@@ -35822,6 +35895,10 @@ protocol_member MTLTextureBinding -textureDataType
 protocol_member MTLTextureBinding -textureType
 protocol_member MTLThreadgroupBinding -threadgroupMemoryAlignment
 protocol_member MTLThreadgroupBinding -threadgroupMemoryDataSize
+protocol_member NFCReaderSession -alertMessage
+protocol_member NFCReaderSession -beginSession
+protocol_member NFCReaderSession -invalidateSession
+protocol_member NFCReaderSession -isReady
 protocol_member NSCoding -encodeWithCoder:
 protocol_member NSCoding -initWithCoder:
 protocol_member NSCollectionLayoutContainer -contentInsets
@@ -35871,6 +35948,11 @@ protocol_member NSURLProtocolClient -URLProtocol:didReceiveAuthenticationChallen
 protocol_member NSURLProtocolClient -URLProtocol:didReceiveResponse:cacheStoragePolicy:
 protocol_member NSURLProtocolClient -URLProtocol:wasRedirectedToRequest:redirectResponse:
 protocol_member NSURLProtocolClient -URLProtocolDidFinishLoading:
+protocol_member NSXPCProxyCreating -synchronousRemoteObjectProxyWithErrorHandler:
+protocol_member SCNAnimatable -animationForKey:
+protocol_member SCNAnimatable -isAnimationForKeyPaused:
+protocol_member SCNAnimatable -pauseAnimationForKey:
+protocol_member SCNAnimatable -resumeAnimationForKey:
 protocol_member SCNSceneRenderer -audioEngine
 protocol_member SCNSceneRenderer -audioEnvironmentNode
 protocol_member SCNSceneRenderer -audioListener
@@ -35924,6 +36006,7 @@ protocol_member UIAlertViewDelegate -alertView:didDismissWithButtonIndex:
 protocol_member UIAlertViewDelegate -alertView:willDismissWithButtonIndex:
 protocol_member UIAlertViewDelegate -alertViewShouldEnableFirstOtherButton:
 protocol_member UIAlertViewDelegate -didPresentAlertView:
+protocol_member UIAppearance +appearanceWhenContainedInInstancesOfClasses:
 protocol_member UICGFloatTraitDefinition +defaultValue
 protocol_member UICollectionViewDataSource -collectionView:canMoveItemAtIndexPath:
 protocol_member UICollectionViewDataSource -collectionView:cellForItemAtIndexPath:
@@ -36003,6 +36086,32 @@ protocol_member UILayoutSupport -bottomAnchor
 protocol_member UILayoutSupport -heightAnchor
 protocol_member UILayoutSupport -length
 protocol_member UILayoutSupport -topAnchor
+protocol_member UIMenuBuilder -actionForIdentifier:
+protocol_member UIMenuBuilder -commandForAction:propertyList:
+protocol_member UIMenuBuilder -insertChildMenu:atEndOfMenuForIdentifier:
+protocol_member UIMenuBuilder -insertChildMenu:atStartOfMenuForIdentifier:
+protocol_member UIMenuBuilder -insertElements:afterActionForIdentifier:
+protocol_member UIMenuBuilder -insertElements:afterCommandForAction:propertyList:
+protocol_member UIMenuBuilder -insertElements:afterMenuForIdentifier:
+protocol_member UIMenuBuilder -insertElements:atEndOfMenuForIdentifier:
+protocol_member UIMenuBuilder -insertElements:atStartOfMenuForIdentifier:
+protocol_member UIMenuBuilder -insertElements:beforeActionForIdentifier:
+protocol_member UIMenuBuilder -insertElements:beforeCommandForAction:propertyList:
+protocol_member UIMenuBuilder -insertElements:beforeMenuForIdentifier:
+protocol_member UIMenuBuilder -insertSiblingMenu:afterMenuForIdentifier:
+protocol_member UIMenuBuilder -insertSiblingMenu:beforeMenuForIdentifier:
+protocol_member UIMenuBuilder -menuForIdentifier:
+protocol_member UIMenuBuilder -removeActionForIdentifier:
+protocol_member UIMenuBuilder -removeCommandForAction:propertyList:
+protocol_member UIMenuBuilder -removeMenuForIdentifier:
+protocol_member UIMenuBuilder -replaceActionForIdentifier:withElements:
+protocol_member UIMenuBuilder -replaceChildrenOfMenuForIdentifier:fromChildrenBlock:
+protocol_member UIMenuBuilder -replaceCommandForAction:propertyList:withElements:
+protocol_member UIMenuBuilder -replaceMenuForIdentifier:withElements:
+protocol_member UIMenuBuilder -replaceMenuForIdentifier:withMenu:
+protocol_member UIMenuBuilder -system
+protocol_member UIMenuLeaf -presentationSourceItem
+protocol_member UIMenuLeaf -selectedImage
 protocol_member UIMutableTraits -displayScale
 protocol_member UIMutableTraits -objectForTrait:
 protocol_member UIMutableTraits -preferredContentSizeCategory
@@ -36079,6 +36188,11 @@ protocol_member UITextInput -editMenuForTextRange:suggestedActions:
 protocol_member UITextInput -replaceRange:withAttributedText:
 protocol_member UITextInput -willDismissEditMenuWithAnimator:
 protocol_member UITextInput -willPresentEditMenuWithAnimator:
+protocol_member UITextInputTraits -passwordRules
+protocol_member UITextInputTraits -smartDashesType
+protocol_member UITextInputTraits -smartInsertDeleteType
+protocol_member UITextInputTraits -smartQuotesType
+protocol_member UITextInputTraits -textContentType
 protocol_member UITimingCurveProvider -cubicTimingParameters
 protocol_member UITimingCurveProvider -springTimingParameters
 protocol_member UITimingCurveProvider -timingCurveType
@@ -36199,6 +36313,7 @@ type AVAssetPlaybackConfigurationOption
 type AVAssetSegmentType
 type AVAssetWriterInputMediaDataLocation
 type AVAudio3DMixingPointSourceInHeadMode
+type AVAudio3DMixingSourceMode
 type AVAudioCommonFormat
 type AVAudioConverterInputStatus
 type AVAudioConverterOutputStatus
@@ -36939,6 +37054,9 @@ type UITableViewRowActionStyle
 type UITableViewSelfSizingInvalidation
 type UITableViewSeparatorInsetReference
 type UITextSearchMatchMethod
+type UITextSmartDashesType
+type UITextSmartInsertDeleteType
+type UITextSmartQuotesType
 type UITextViewBorderStyle
 type UITimingCurveType
 type UITouchProperties

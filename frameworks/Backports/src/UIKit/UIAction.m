@@ -11,8 +11,6 @@
     UIMenuElementAttributes _attributes;
     UIMenuElementState _state;
     UIActionHandler _handler;
-    NSString *_subtitle;
-    UIImage *_selectedImage;
 }
 
 @dynamic sender, presentationSourceItem;
@@ -66,6 +64,7 @@
     copy->_discoverabilityTitle = [_discoverabilityTitle copy];
     copy->_attributes = _attributes;
     copy->_state = _state;
+    [self revenant_carryElementTo:copy];
     return copy;
 }
 
@@ -165,6 +164,16 @@
     return text;
 }
 
+- (UIImage *)selectedImage
+{
+    return [super selectedImage];
+}
+
+- (void)setSelectedImage:(UIImage *)selectedImage
+{
+    [super setSelectedImage:selectedImage];
+}
+
 - (UIActionHandler)handler
 {
     return _handler;
@@ -173,26 +182,6 @@
 - (void)setHandler:(UIActionHandler)handler
 {
     _handler = [handler copy];
-}
-
-- (NSString *)subtitle
-{
-    return _subtitle;
-}
-
-- (void)setSubtitle:(NSString *)subtitle
-{
-    _subtitle = [subtitle copy];
-}
-
-- (UIImage *)selectedImage
-{
-    return _selectedImage;
-}
-
-- (void)setSelectedImage:(UIImage *)selectedImage
-{
-    _selectedImage = selectedImage;
 }
 
 @end
