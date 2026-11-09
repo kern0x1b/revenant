@@ -18,6 +18,8 @@ local OVERLAYS = {
      without = "has no member 'createWebArchiveData'"},
     {name = "ContactsUI", folder = "ContactsUI", fixture = path.join("ContactsUI", "overlay.swift"), flags = UNDERLYING, packages = true,
      without = "has no member 'contactAccessPicker'"},
+    {name = "Intents", folder = "Intents", fixture = path.join("Intents", "overlay.swift"), flags = UNDERLYING,
+     without = "has no member 'setImage'"},
     {name = "AuthenticationServices", folder = path.join("AuthenticationServices", "Updater"), fixture = path.join("AuthenticationServices", "updater.swift"),
      flags = table.join(UNDERLYING, {"-module-link-name", "swiftAuthenticationServices", "-Xfrontend", "-disable-implicit-string-processing-module-import"}),
      without = "cannot find 'ASCredentialUpdater' in scope"},

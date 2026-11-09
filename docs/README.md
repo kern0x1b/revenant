@@ -164,6 +164,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [CreateML: CSV writing](reference/backports/CreateML/TabularData/CSVWriting.md) | CSV writing in TabularData, measured, and what is carried |
 | [CreateML: date parsing](reference/backports/CreateML/TabularData/DateParsing.md) | date reading in TabularData, measured, and what is carried |
 | [Foundation: URL](reference/backports/Foundation/URL.md) | the percent-encoded accessors and the file path initialiser of iOS 16 `URL`, and the host oracle they are measured against |
+| [Intents](reference/backports/Intents/README.md) | the responses, message and call intents and resolution results Telegram's extensions name, the Swift module for the key path forms, and what is measured on a device |
 | [Metal: dispatchThreads](reference/backports/Metal/DispatchThreads.md) | compute dispatch by threads per grid, the edge group, and the pipeline limits |
 | [Metal: linear texture alignment](reference/backports/Metal/LinearTextureAlignment.md) | the row alignment a device reports per pixel format, the padded-row readback fix, and the slice forms of getBytes and replaceRegion |
 | [MusicKit](reference/backports/MusicKit/README.md) | MusicKit for a legacy Apple platform |
@@ -171,6 +172,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [PassKit](reference/backports/PassKit/README.md) | the `capability3DS`, `capabilityEMV`, `capabilityCredit` and `capabilityDebit` aliases of `PKMerchantCapability` |
 | [RealityFoundation: audio](reference/backports/RealityFoundation/Audio.md) | `Audio.swift`: deleted, and what brings it back |
 | [RealityFoundation: SceneKit](reference/backports/RealityFoundation/SceneKit.md) | RealityFoundation and RealityKit below iOS 8.0 |
+| [SafariServices](reference/backports/SafariServices/README.md) | `SSReadingList` on top of Safari's Reading List, measured on an iPhone 4S |
 | [SceneKit](reference/backports/SceneKit/README.md) | the particle system's data model, the Swift module, and what the renderer does not draw |
 | [Spatial](reference/backports/Spatial/README.md) | what is built here, and what is measured |
 | [Spatial: sources](reference/backports/Spatial/Sources.md) | the files, the Float twin generated from the Double text, and the reasons behind the matrix and geometry code |
