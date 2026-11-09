@@ -6344,8 +6344,10 @@ function revenant_url_host_text
 function revenant_url_host_unicode
 function revenant_url_integer
 function revenant_url_nsurl
+function revenant_url_object
 function revenant_url_parse
 function revenant_url_ranges
+function revenant_url_reference
 function revenant_url_standard
 function revenant_url_valid
 function revenant_uttype_catalogue_add

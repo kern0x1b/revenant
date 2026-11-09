@@ -45,7 +45,9 @@ and an ASCII character that a host cannot hold gives nil. With `NO` a stray `%`,
 with `YES` they are escaped (an existing `%XX` stays). The port is read as swift-foundation reads it: digits, or for `addressbook` the text up to the path.
 `NSURLComponents.string` returns the string the parser accepted until a setter changes the components. `NSURL+Encoding17.m` runs the layer of the NSURL initialiser
 (`revenant_url_nsurl`), which is a different algorithm over the same masks: a user information with a colon, a scheme that is not valid is read as a relative path,
-and a host with `[` is rejected.
+a host with `[` is rejected, and a non-ASCII host of a web scheme is converted by ICU with its output taken as it comes (a no-break space becomes a space, a
+fullwidth `@` an `@`), the ASCII characters as written being the ones that are checked. The object is made with `CFURLCreateWithBytes`, the one system call that
+accepts a host with a space; `revenant_url_reference(string, base)` is the form with a base URL that the markdown backport uses.
 
 ## URL's directory properties
 
@@ -60,8 +62,9 @@ and user directories), `NSHomeDirectory`, `NSTemporaryDirectory` or the current 
 Measured on the host: `url_components_oracle_test.lua` runs the backport's `NSURLComponents` and `NSURL` and macOS's on the 705 lines of `tests/url_components/corpus.txt` and
 on 60000 lines from `tests/url_components/fuzz.lua` (three seeds of 20000) and compares `encodedHost`, both values of `encodingInvalidCharacters:` and the earlier
 accessors, and the URL string of the `NSURL` form: no differences, and its negative control (every line changed) differs on 672 and 675. Measured on an iPhone 4S
-(iOS 6.1.3, `UrlDumpProbe`): 705 corpus lines, 0 differences in either form; 4000 generated lines, 0 differences in the components and 66 in the `NSURL` form,
-all from the iOS 6 system `NSURL` (it escapes `#` as `%23` in a URL without an authority, and `[` and `]` in an addressbook port). `url_percent_encoded_test.lua` also compares the directory properties and `homeDirectory(forUser:)` for the current user, `root` and a
+(iOS 6.1.3, `UrlDumpProbe`): 705 corpus lines, 0 differences in either form; 4000 generated lines, 0 differences in the components and 80 in the `NSURL` form,
+every one equal to the host's once the percent escapes are decoded: the iOS 6 `NSURL` escapes a space, `|`, `[`, `]` and `%` in a host or port, and holds the `#`
+of a URL without an authority as `%23` (C56). `url_percent_encoded_test.lua` also compares the directory properties and `homeDirectory(forUser:)` for the current user, `root` and a
 name that does not exist (18 lines, identical to the host's). `lowering_test.lua` and the Telegram replay below check that the Swift members typecheck.
 
 Measured on the Telegram sources: with the rebuilt `swift-runtime` and the lowered headers of this change, the real Bazel arguments of `//submodules/ListMessageItem`
