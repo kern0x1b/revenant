@@ -308,16 +308,30 @@ below it, and the sources of Telegram stay as they are.
   SDK's Foundation is built with library evolution, so its enums are not frozen and the `default` is reachable for a
   case a later release adds. The overlay is not built that way, so its enum was exhaustive and the compiler reported
   "default will never be executed", an error under the `-warnings-as-errors` of the Telegram build. The case list is the
-  SDK's (twelve cases, same labels). `PresentationIntent.Kind` now has one more case, `_nonfrozen`, marked
-  `@available(*, unavailable)`: no code can name or build it and no switch has to cover it, and the compiler counts it
-  among the cases, so a `default` and an `@unknown default` compile without a diagnostic and a switch that lists the
-  twelve cases needs neither. Any other public enum of the overlay that the SDK does not freeze has the same fault and
-  the same remedy; `swiftc -typecheck` does not show it, because the diagnostic comes from SIL generation, so a replay
-  that looks for it must use `-emit-sil`.
+  SDK's (twelve cases, same labels). Library evolution is not the remedy on iOS 6: a resilient layout makes a client's
+  class need `_objc_realizeClassFromSwift`, which only iOS 12 has (the runtime notes in the packages reference). The
+  overlays mark the enumerations the SDK does not freeze with `@nonexhaustive` instead: 70 of the 79 enumerations the
+  overlays share with the SDK (the other nine are frozen there, and stay exhaustive here). `toolchain/tests/addon/
+  overlay_enums_test.lua` finds them by comparing each overlay module with the SDK's through `swift-api-digester`, and
+  compiles a client of every one: a switch without a default is diagnosed as the SDK's is, and `@unknown default` is
+  clean. The attribute is read by the type checker, not by SIL generation, which decides whether a `default` is
+  reachable from the resilience of the enumeration's module alone (`EnumDecl::isEffectivelyExhaustive`); so a `default`
+  after every case still draws "default will never be executed", and `swiftc -typecheck` does not show it, because the
+  diagnostic comes from SIL generation, so a replay that looks for it must use `-emit-sil`. Until the compiler honours
+  the attribute there, `PresentationIntent.Kind` has one more case, `_nonfrozen`, marked `@available(*, unavailable)`:
+  no code can name or build it and no switch has to cover it, and SIL generation counts it among the cases, so a
+  `default` compiles without a diagnostic.
 - `LocationUtils.swift:153`: `MKDirectionsRequest.transportType`, with `requestsAlternateRoutes`, `departureDate` and
   `arrivalDate`, kept per request. `MapRequestProbe` runs 14 checks on an iPhone 4S, iOS 6.1.3, and all pass.
 - `WebAppController.swift:2827`: `CMDeviceMotion.heading`. The geometry is checked on the host against poses built from
   known headings, tilts and rolls, and `MotionHeadingProbe` runs 13 checks on an iPhone 4S, iOS 6.1.3, all passing.
+
+Two more findings came out of the comparison of the overlays with the SDK's enumerations.
+`Locale.MeasurementSystem` is a structure in the SDK (`metric`, `us` and `uk` are static values of a string identifier,
+compared without case), and the overlay's was an enumeration, which no SDK program can switch over as one; the overlay
+has the SDK's structure now, and `locale_language_test.lua` compares it with the host's. `OSLogPrivacy` is a frozen
+structure in the SDK and an enumeration of four cases in the overlay, whose `mask:` forms are missing; no client can
+switch over the SDK's, so it was left as it is and is a gap of its own.
 
 A change that is not Telegram's: the lowering of the Calendar methods was by name, so the two overloads that return a
 `DateInterval` lost their iOS 10 gate with the iOS 8 methods of the same name, and the runtime did not build from source.
