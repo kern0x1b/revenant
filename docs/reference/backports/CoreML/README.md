@@ -29,6 +29,22 @@ A target that imports CoreML builds the `CoreML` target of the `Swift` component
 `TabularData`, `CreateMLComponents` and `CreateML` are built the same way; the CreateML gap is closed (see
 `docs/reference/backports/CreateML/README.md`).
 
+The module is built with `-module-link-name CoreML`, as every static target of the component is, so an object that imports
+it asks the linker for `-lCoreML`. The consumer's link puts the folder of `libCoreML.a` on `-L` and names no library for
+it. Without the entry, `MLModel.load(contentsOf:configuration:completionHandler:)` was undefined at the link of an app
+that calls it, although the archive defines it.
+
+The classes behind the module (`MLModel`, `MLFeatureValue`, `MLModelConfiguration`, `MLPredictionOptions`) are in
+`libCoreMLBackports.dylib`, which the link names with the other Backports libraries. The engine that runs a model is C
+code of `src/CoreML` (`RevenantMLModel.c`, `RevenantMLPredict.c`, `RevenantMLLayers.c`). `revenant_ml_model_read` takes the
+program from the `coremldata.bin` of a bundle, as a `CoreML.Specification.Model` message, and a bundle without that file or
+with a message it cannot run fails with an error that reaches the completion handler as `.failure`.
+
+Not checked: a bundle that Apple's `coremlc` compiled. Telegram's `u2netp.mlmodelc` is one: the app downloads it as a zip
+from the channel `stickersbackgroundseparation` at run time, and the repository holds no `.mlmodelc` fixture. Whether
+that bundle keeps its network in `coremldata.bin` is therefore not known here, and nothing in `src/CoreML` reads another
+file of a bundle.
+
 ## Checked
 
 `frameworks/Backports/tests/coreml_swift_test.lua` builds the module for armv7 iOS 6.0 and typechecks

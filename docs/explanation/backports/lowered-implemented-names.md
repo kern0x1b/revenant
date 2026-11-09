@@ -178,6 +178,27 @@ take. The `CoreML` target had been written beside the others without the `off`, 
 interoperability, and a program that imports it without the interoperability (every Telegram module) stopped with "module
 'CoreML' was built with C++ interoperability enabled, but current compilation does not enable C++ interoperability".
 
+`swift_target` also gives every static target `-module-link-name <target name>`. The flag is what makes a program that
+imports the module link the archive: the importing object records `-l<name>` as an autolink entry, and `ld` takes the
+archive from the `-L` folder. The nine static targets that wrote the flag by hand had it, and `createml`, which builds
+`TabularData`, `CoreML`, `CreateMLComponents` and `CreateML`, did not. A Telegram object that imported `CoreML` therefore
+carried `-framework CoreML` (from `-import-underlying-module`) and no `-lCoreML`, `libCoreML.a` was never opened, and the
+armv7 link of the app stopped with one undefined symbol, `static (extension in CoreML):__C.MLModel.load(contentsOf:configuration:completionHandler:)`
+from `libImageObjectSeparation.a`. The archive defined it all along: no CoreML runtime was missing, the engine in
+`src/CoreML` (`RevenantML*.c`) is the one that serves the call. The `linkname` test of `swift_backports_tests` fails for a
+static target of the component whose `swift.flags` do not name it.
+
+Checked on armv7 iOS 6.0 against the lowered SDK: an object that imports `CoreML` lists no `-lCoreML` before the change to
+`swift_target` and lists it after. Telegram's own `libImageObjectSeparation.a`, linked with ld64 as a dylib together with
+the rebuilt `libVision.a`, the Swift runtime, libSystem and the CoreML and Vision Backports dylibs, leaves 57 distinct
+undefined symbols without `-lCoreML` and 56 with it. The one that goes is
+`MLModel.load(contentsOf:configuration:completionHandler:)`; the others are symbols of Telegram's other modules and
+`___isPlatformVersionAtLeast`, which `libapple-compat.a` supplies in the app link and this ad hoc link did not carry.
+`libCoreML.a` alone links against the runtime, libSystem and `libCoreMLBackports.dylib` with nothing undefined, and all 18
+static targets of the component build after the change. The archive of an app compiled before the change keeps its
+objects without the entry, so the importing module is compiled again against the new `CoreML.swiftmodule` to autolink.
+Not run: the app's own link (the Telegram build), a device, or a model.
+
 ## A name the device already exports is lowered, not backported
 
 A backport of a name the release already has would replace the release's own, so the first question for a name is whether
