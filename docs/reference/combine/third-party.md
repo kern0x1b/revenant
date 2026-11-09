@@ -45,6 +45,7 @@ claim over Sergej Jaskiewicz's work. The patches are ours, and they are:
   `Publishers.CollectByTime` with `Publishers.TimeGroupingStrategy` and
   `collect(_:options:)`, the equality and hashing Apple's own interface declares
   in the open, and `Publishers.MapError`'s labelled initializer;
-- the gyb helpers `MapKeyPath`'s template uses, defined in the template.
+- the gyb helpers `MapKeyPath`'s template uses, defined in the template;
+- the C module's map naming the archive that defines its functions, `link "CombineHelpers"`.
 
 Copyright (c) 2026 kern0x1b

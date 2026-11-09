@@ -11,7 +11,7 @@ beside the runtime and libcxx, and writes `import Combine`.
 | --- | --- |
 | Upstream | [OpenCombine](https://github.com/OpenCombine/OpenCombine), MIT — the reimplementation of Apple's Combine |
 | Pinned commit | `1c6f02c7ed8140c0ba7a783aaddb6e0685a0037b` (OpenCombine's `HEAD`; its `0.14.0` tag is `8576f0d579b27020beccbccc3ea6844f3ddfc2c2`), version `2026.10.19` |
-| Our patches | `packages/c/combine/patches/`, applied in order: the three modules made one named `Combine`, the iOS 6 adaptations, and what OpenCombine lacks and Apple declares (below) |
+| Our patches | `packages/c/combine/patches/`, applied in order: the three modules made one named `Combine`, the iOS 6 adaptations, what OpenCombine lacks and Apple declares, and the helper archive named in the C module's map (below) |
 | The licence | the upstream's `LICENSE`, installed with the package under `licenses/LICENSE`: MIT License, Copyright (c) 2019 Sergej Jaskiewicz |
 | Our terms | the patches claim no new licence over Sergej Jaskiewicz's work, and the upstream's copyright and permission notice travel with the code unchanged |
 
@@ -33,6 +33,26 @@ no target in the repository asks for that mode, because the recipe builds the mo
 `frameworks/Combine` component compiles upstream's own tests out of the tree the recipe
 installs either way.
 
+## How a link finds the archives
+
+`libCombine.a` is one object, and it calls the lock and identifier functions of the C++ helper:
+`opencombine_unfair_lock_*`, `opencombine_unfair_recursive_lock_*`, `opencombine_stop_in_debugger`
+and `opencombine_next_combine_identifier`, defined in `libCombineHelpers.a`. The C module's map
+names its archive with `link "CombineHelpers"` (patch `0010`), so the compiler records
+`-lCombineHelpers` in `Combine.o` itself, and the `-module-link-name Combine` the recipe passes makes
+every Swift object that imports Combine record `-lCombine`. A link that names no archive, as
+Telegram's Bazel link does, needs only the package's `lib` folder on its `-L` path: ld64 loads
+`libCombine.a` because an object references it, reads `-lCombineHelpers` from that member, and
+finds `libCombineHelpers.a` in the same folder. Without the `link` line the helper archive is
+never asked for, and the link ends with the ten `_opencombine_*` symbols undefined. With the line
+and a folder that lacks the archive, ld64 warns
+`Could not find or use auto-linked library 'CombineHelpers'` before it reports the same symbols.
+
+A target that takes the package with `add_packages("combine")` also lists both archives, so it
+does not show whether the autolink records are right. `CombineHelpers/autolink` in
+`frameworks/Combine` links a target that does not take the package, for that reason
+([build and test](../../guides/combine/build-and-test.md)).
+
 ## The patches
 
 | Patch | Carries |
@@ -46,6 +66,7 @@ installs either way.
 | `0007` | `Publishers.TimeGroupingStrategy`, `Publishers.CollectByTime`, `collect(_:options:)` |
 | `0008` | the `==`, `hash(into:)` and `hashValue` Apple's interface declares in the open, and `Publishers.MapError`'s labelled initializer |
 | `0009` | `MapKeyPath`'s gyb helpers defined in its template, so Revenant's gyb expands it |
+| `0010` | the C module's map names its archive, `link "CombineHelpers"`, so a link that takes its archives from the objects' records finds the helper |
 
 ## What is measured
 

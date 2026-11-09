@@ -14,7 +14,15 @@ From the top of revenant:
 ./xmakew test -P . CombineGenerated
 ```
 
-The build, the emulator run and the gyb check are in [build and test](../../docs/guides/combine/build-and-test.md). The folder's layout is in the [contributor guide](../../docs/guides/combine/contributing.md), and every document is in [the index](../../docs/README.md).
+The C helper's locks and the link of a program that names no Combine archive are checked on their own, in the component's configuration:
+
+```bash
+./xmakew f -P . -p iphoneos -a armv7 --component=Combine -y
+./xmakew build -P . CombineHelpersTests
+./xmakew test -P . 'CombineHelpers/*'
+```
+
+The build, the emulator and device runs, the gyb check and the helper checks are in [build and test](../../docs/guides/combine/build-and-test.md). The folder's layout is in the [contributor guide](../../docs/guides/combine/contributing.md), and every document is in [the index](../../docs/README.md).
 
 ## License
 
