@@ -348,7 +348,7 @@ overlay("swiftCryptoKit", "CryptoKit", {packages = {"swift-crypto"}})
 
 overlay("swiftNetwork", "Network", {frameworks = {"SystemConfiguration", "Security"}, cmodule = {"../TLS/RevenantTLS", "RevenantNetworkC"}, stub = "network_stub"})
 
-overlay("swiftStoreKit", "StoreKit", {concurrency = true, frameworks = {"UIKit", "Foundation"}})
+overlay("swiftStoreKit", "StoreKit", {concurrency = true, underlying = true, frameworks = {"UIKit", "Foundation"}})
 
 overlay("swiftAuthenticationServices", "AuthenticationServices/Updater", {concurrency = true, underlying = true, frameworks = {"Foundation"}})
 

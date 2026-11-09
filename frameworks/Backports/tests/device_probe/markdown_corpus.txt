@@ -1,0 +1,763 @@
+plain text
+# Title\n\nParagraph with *emphasis*, **strong**, `code`, ~~gone~~ and a [link](https://example.com/a?b=1).\n
+- one\n- two\n  - nested\n\n1. first\n2. second\n
+> quote\n\n```swift\nlet x = 1\n```\n\n---\n
+| a | b |\n|---|:-:|\n| 1 | 2 |\n
+![alt text](pic.png "title") and [relative](docs/a.md)
+line one\nline two  \nhard\\\nbreak
+<b>html</b> and <span>inline</span>
+multi   space  \n\n\n  indented
+caf\u00E9 \uD83D\uDE00 **\u4E2D\u6587** \u05E9\u05DC\u05D5\u05DD
+Setext\n======\n\nSub\n---\n\ntext
+3. three\n4. four\n\n- [ ] task\n- [x] done
+## Heading with `code` and *em*\n\n### Third\n\n#### Fourth\n##### Fifth\n###### Sixth
+<https://autolink.example> and https://bare.example and [titled](http://t.example "Title")
+***both*** _under_ __strong__ *nested **inside** em*
+escaped \\*stars\\* and \\# hash and a trailing backslash\\
+    indented code block\n    second line\n\nparagraph
+1. a\n   - b\n     1. c\n\n> - quoted list\n> > deeper
+| Name | Qty | Note |\n|:-----|----:|:----:|\n| *x* | 1 | `y` |\n| z | 22 | [l](http://l.example) |
+```\nno hint\n```\n\n~~~python\ntilde\n~~~
+TGMDMATH0TGMD and inline TGMDMATH12TGMD formula
+- [ ] open task\n- [x] closed task\n- plain item
+* star item\n* second\n\n+ plus item\n+ second plus
+1) paren one\n2) paren two\n\n10. ten\n11. eleven
+- a\n\n- b\n\n- c
+- item one\n\n  second paragraph of item\n- item two
+- item\n  ```js\n  code()\n  ```\n- next
+> level one\n> > level two\n> > > level three\n> back to one
+> quote with **bold** and a [link](http://q.example)\n>\n> second paragraph\n> - list in quote
+<div>block html</div>\n\nafter block
+<div>\nmulti\nline\n</div>
+text with <br> break and <br/> self closing
+<!-- a comment --> visible
+Term &amp; entity &lt;tag&gt; &#35; &#x41; &copy; &bogus;
+www.example.com and http://plain.example/path?a=1&b=2 and user@example.com
+[ref link][id] and [collapsed][] and [shortcut]\n\n[id]: http://ref.example "Ref Title"\n[collapsed]: http://c.example\n[shortcut]: http://s.example
+[^1] footnote reference\n\n[^1]: the note
+![](empty-alt.png) and ![a *b* c](img.png "t") and ![ref][r]\n\n[r]: http://r.example/i.png
+![data](data:image/png;base64,AAAA) and [link](#anchor) and [mail](mailto:a@b.example)
+[link with title 'single'](http://x.example 'single') and [paren](http://y.example (paren))
+[empty]() and [angle](<http://a b.example/c d>) and [nested [brackets]](http://n.example)
+[link](http://x.example "unclosed
+*a*b and a*b*c and snake_case_word and _a_b and __a__b
+**bold**text and *it*alic and ***bi*** and ***a** b* and ***a* b**
+* not emphasis * and ** not strong ** and _ not _
+~single~ and ~~double~~ and ~~~triple~~~ and ~~a~b~~
+~~strike **bold** *em* `code` [link](http://s.example)~~
+`code` and ``double `tick` code`` and ` leading and trailing ` and `` ` ``
+`unclosed code and ```three``` and ` `
+line one  \nline two\\\nline three
+trailing spaces at end
+\\  \n
+  leading spaces\n    four spaces after para
+text\n    continuation indented
+# H1 #\n## H2 ##   \n### H3 \\#\n#hashtag no space\n####### seven
+#\n##\n# \n##
+Setext one\n===\n\nSetext two\n---\n\n- list\n---\n\nMulti line\nsetext\n===
+***\n---\n___\n- - -\n* * *\n_ _ _
+---\ntext\n---
+- foo\n***\n- bar
+Foo\n***\nbar
+1. one\n1. one again\n1. and again\n\n0. zero\n0. zero
+2. start at two\n3. three\n\n- break\n\n5. five
+- one\n- two\n\n\n- three after two blanks
+- outer\n  - mid\n    - inner\n      - deepest
+1. outer\n   1. inner\n      1. deepest\n2. next
+- a\n - b\n  - c\n   - d\n    - e
+10. ten\n    - sub\n11. eleven
+-\n- empty item above\n-
+-
+1.
+* item\n\n      indented code in item
+> ```\n> fenced in quote\n> ```
+```\nunclosed fence
+```js\ncode with `backticks`\n```\n~~~\ntilde\n~~~
+````\n```\nnested fence\n```\n````
+``` swift extra info\ncode\n```
+    code\n\n    more code after blank\n\n  not code
+        eight spaces\n    four spaces
+\tcode with tab\n\tsecond
+- item\n\n\tcode in item after tab
+| a | b |\n|---|---|
+| a | b |\n|---|---|\n| 1 | 2 |\n| 3 |\n| 4 | 5 | 6 |
+a | b\n--|--\n1 | 2
+| left | center | right |\n|:--|:-:|--:|\n| l | c | r |
+| esc \\| pipe | `code \\| pipe` |\n|---|---|\n| x \\| y | z |
+| a |\n|---|\n| **b** |\n\nafter table
+|a|b|\n|-|-|\n|1|2|\ntext after without blank
+not a table | with pipe\nnext line
+| a | b |\n| - | - |\n\n| c | d |\n|---|---|
+Table:\n\n| h |\n|---|\n| |\n|  |
+a<b and a>b and 1 < 2 > 0
+<a href="x">link html</a> and <img src="y"> and </closing>
+<span class="x">span</span> <em>em html</em> <custom-tag attr='1'>c</custom-tag>
+<?php echo 1; ?> and <![CDATA[x]]> and <!DOCTYPE html>
+<pre>\npre block\n</pre>\n\ntext
+<script>\nalert(1)\n</script>
+<table><tr><td>cell</td></tr></table>\n\nafter
+a\n<div>\nb
+Hello\n<!-- comment\nspanning -->\nworld
+<details>\n<summary>S</summary>\n\nBody **bold**\n\n</details>
+\\# not heading and \\- not list and 1\\. not ordered
+\\* \\_ \\` \\[ \\] \\( \\) \\< \\> \\! \\| \\~ \\\\
+a\\\nb
+a\\ b
+&nbsp;&nbsp; and &amp;amp; and &#0; and &#xD800; and &#9999999;
+foo&#10;bar
+[link](http://x.example/a b) and [link](<http://x.example/a b>)
+[link](/uri "title with \\" quote") and [a](b\\)c)
+[a](b(c)d) and [a](b(c) and [a](b)c)
+https://example.com/a_b_c and https://example.com/(paren) and https://example.com/a.
+<http://a.example/b?c=d> <mailto:x@y.example> <x@y.example> <not a link>
+http://a.example, http://b.example; (http://c.example) "http://d.example"
+www.a.example/path and WWW.UPPER.example and xwww.example.com
+http://a.example/path_(wiki) and http://a.example/b?x=1&y=2#frag
+ftp://old.example and file:///tmp/x and mailto:z@y.example
+Hello, **world**!  How's _it_ going?
+**unterminated bold and *unterminated em and `unterminated code
+*em **strong inside** em*
+**strong *em inside* strong**
+_em __strong__ em_ and __strong _em_ strong__
+*a **b *c* d** e*
+*foo**bar**baz* and **foo*bar*baz**
+__foo_ bar_ and _foo __bar_ baz__
+*(*foo*)* and **(**foo**)**
+foo*bar* and foo_bar_ and 5*6*7
+**a**b**c** and __a__b__c__
+*em*\n*em on next line*
+**bold across\nlines** and *em across\nlines*
+[link **bold** and *em* and `code`](http://l.example)
+[![img in link](i.png)](http://l.example)
+[link](http://a.example) [link2](http://b.example) adjacent
+*[link in em](http://l.example)* and **[link in strong](http://l.example)**
+[**bold link**](http://l.example)[plain after](http://m.example)
+![img *with em*](i.png "T") ![x](<i 1.png>)
+![a][b] ![c][] ![d]\n\n[b]: i.png 'B'\n[c]: j.png\n[d]: k.png (D)
+[a]: /url\n\n[a]
+[A]: /url "t"\n[a]
+[foo]: /url "title"\n\n[foo] and [Foo] and [FOO] and [bar]
+[foo]\n\n[foo]: /url
+[foo][bar]\n\n[bar]: /url2
+[foo]:\n/url\n"title"
+[foo]: <>\n\n[foo]
+Foo\n[bar]: /url\n\n[bar]
+[a]: /u\n[b]: /v\ntext after defs
+> [a]: /u\n\n[a]
+- [a]: /u\n\n[a]
+text [^note] ref\n\n[^note]: Footnote *text*.\n    more
+Line with trailing backslash\\
+only backslash \\
+\\\\ and \\\\\\ and \\\\\\\\
+\u00DCn\u00EFc\u00F6d\u00E9 \u30C6\u30B9\u30C8 \uD83D\uDE00 \uD83C\uDDE9\uD83C\uDDEA \uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67 e\u0301
+RTL \u05E9\u05DC\u05D5\u05DD \u05E2\u05D5\u05DC\u05DD and mixed English \u05E2\u05D1\u05E8\u05D9\u05EA
+tab\tseparated\ttext\n\n\ttabbed paragraph?
+non-breaking\u00a0space and zero-width\u200bjoiner
+line one\r\nline two\r\n\r\npara two
+mac\rline\rendings
+\n\n\nleading blank lines
+trailing blank lines\n\n\n
+   \n\t\n
+a\n\n\n\nb
+- a\n- b\n\n  c\n- d
+1. a\n\n   b\n2. c
+- a\n  b\n  c
+- a\nb\nc
+> a\nb\nc
+> a\n\nb
+>a\n>b
+>   indented quote
+> - a\n> - b\n>\n> text
+- > quote in list\n  > more
+1. > quote\n   > more
+- # heading in list\n- ## second
+- ---\n- ***
+- | a |\n  |---|\n  | b |
+> | a |\n> |---|\n> | b |
+# heading with *em* and [link](http://h.example) and `code`
+## heading\nparagraph directly after
+paragraph\n# heading directly after\nparagraph
+paragraph\n```\ncode directly after\n```\nparagraph
+paragraph\n> quote directly after
+paragraph\n- list directly after
+paragraph\n2. not a list start\n1. but this is
+paragraph\n    still paragraph
+paragraph\n---\nparagraph
+paragraph\n***\nparagraph
+paragraph\n| a |\n|---|\n| b |
+paragraph\n<div>html</div>
+paragraph\n<span>inline</span>
+# Title\n\nSome *text* here.\n\n## Section\n\n- item **one**\n- item [two](http://t.example)\n\n```swift\nlet a = 1\n```\n\n> note\n\n| h1 | h2 |\n|----|----|\n| c1 | c2 |
+TGMDMATH0TGMD
+Inline TGMDMATH0TGMD formula and TGMDMATH1TGMD again
+TGMDMATH1TGMD\n\nTGMDMATH2TGMD
+- [ ] todo\n- [x] done\n- [X] Done
+1. [ ] first\n2. [x] second
+> - [ ] quoted task\n> - [x] quoted done
+- [ ] \n- [x]\n- [ ]text
+* [ ] star task\n+ [x] plus task
+- item\n  - [ ] nested task\n    - [x] deeper
+| a | b |\n|:-:|--:|\n| TGMDMATH0TGMD | x |
+| Left | Center | Right |\n|:-----|:------:|------:|\n| a | b | c |\n| `x|y` | \\| | **z** |
+|a|b|\n|-|-|\n|1|2|\n\nafter
+| a | b |\n|---|---|\n| 1 |
+| a | b |\n|---|---|\n| 1 | 2 | 3 |
+a<br>b
+a<br/>b
+a<br />b
+<details><summary>Sum</summary>\n\nbody text\n\n</details>
+<details>\n<summary>S</summary>\nbody\n</details>
+<img src="x.png" alt="y">
+<a href="https://x.example">t</a> and <b>bold</b> and <i>it</i>
+<!-- hidden comment -->\n\nvisible
+text <!-- inline comment --> text
+<div align="center">\n\n# Title\n\n</div>
+<kbd>Ctrl</kbd>+<kbd>C</kbd>
+H<sub>2</sub>O and x<sup>2</sup>
+<table><tr><td>x</td></tr></table>
+<p>para <em>em</em></p>
+![img](https://x.example/y.png "cap")
+![](y.png)
+![alt *emph*](y.png 'single')
+[![badge](https://b.example/b.svg)](https://x.example)
+[link](https://x.example "title")
+[link](https://x.example 'title')
+[link](https://x.example (title))
+[a](https://x.example/a_(b))
+[a](<b c>)
+[a](../b.md#c)
+[a](#slug)
+[a]( spaced )
+[a](  )
+<https://x.example>
+<mailto:a@b.example>
+https://bare.example/path?q=1&r=2#frag
+www.example.com/path
+foo@bar.example
+Visit https://x.example. Then (https://y.example/a_(b)) and https://z.example/path,
+---\ntitle: x\ntags: [a, b]\n---\n\n# Heading
+Setext One\n==========\n\nSetext Two\n----------
+***bold italic***
+**bold *nested italic* bold**
+*italic **nested bold** italic*
+~~del~~ and ~single~ and ~~~triple~~~
+`code` and ``co`de`` and ` spaced `
+```rust\nfn main() {}\n```
+~~~\ntilde fence\n~~~
+```\nno info\n```
+    indented code\n    second line
+text\n\n    code after text
+Hard  \nbreak and soft\nbreak and back\\\nslash
+- a\n  - b\n    - c\n      - d
+3. three\n4. four\n5. five
+1) paren one\n2) paren two
+- a\n* b\n+ c
+1. one\n\n   para in item\n\n2. two
+- loose\n\n- items
+> quote\n> - list in quote\n>   continued\n>\n> > nested quote
+Footnote[^1] text\n\n[^1]: the note
+Term\n: Definition
+\\*escaped\\* \\_under\\_ \\# \\[x\\]
+&amp; &lt; &gt; &copy; &#35; &#x1F600; &nbsp; &bogus;
+Trailing spaces   \n
+# Heading with trailing hashes ##
+## Heading **bold** `code` [link](u)
+###### Six\n####### Seven
+***\n---\n___
+- - -\n* * *
+- a\n\n  b\n- c
+Line one\nLine two\nLine three
+Mixed \u4E2D\u6587 and emoji \uD83D\uDE00 and RTL \u05E9\u05DC\u05D5\u05DD
+[ref]: https://x.example "Ref Title"\n\nUse [ref] and [ref][] and [text][ref] and [missing]
+[Ref Case]: /u\n\n[ref case] and [REF CASE]
+[a]: /one\n[a]: /two\n\n[a]
+<span style="color:red">red</span> text
+Line with <unknown-tag attr="v"> inside
+a * b * c and a _ b _ c and 2 * 3 = 6
+snake_case_word and **bold**text and __init__
+1\\. not a list
+- [link](u) - [other](v)
+^[]()
+a^[b](c)d
+^[b](c)
+^[b]
+^[b][r]
+^[](c)
+^[b]()
+^[b](c d)
+^[b](c:d)
+x ^[b *c*](d: 1) y
+^[b](http://x)
+^[b] (c)
+^[b](c
+^[b](c\nd)
+^[b](c(d)e)
+^[b](c(d)
+^[b](c)d)
+^[b](c\\)d)
+^[b]("x)")
+^[b](a "t")
+^[b](<c>)
+^[a [b](u) c](d)
+^[a ^[b](x) c](d)
+^[a][b](c)
+^[[b]](c)
+^[b]](c)
+^[b\\](c)
+*^[b](c)*
+^*[b](c)
+^^[b](c)
+\\^[b](c)
+^[b](c)(d)
+^[b](c)[d]
+^[b `x](c)`
+^[b <a](c)>
+^ [b](c)
+^[`](c)`
+^[a][b]
+^[a][b]x
+^[a][](c)
+^[a][b](c)\n\n[b]: /u
+[a]: /u\n\n^[a]
+[a]: /u\n\n^[a][]
+[b]: /u\n\n^[a][b](c)
+^[2 apples](inflect: true)
+^[a](c)^[b](d)
+[x ^[b](c) y](u)
+^[a][b][c](d)
+^[a]\n[b]
+^[a][b\nc]
+^[a][b[]
+^[a]  [b]
+^[see http://x.example/y](d)
+^[a@b.cc](d)
+^[www.x.example](d)
+^[see www.x.example/p](d)
+![a ^[b](c)](d)
+^[**b](c)**
+**^[b**](c)
+^[~~b](c)~~
+~~^[b~~](c)
+^[a](b)\n^[c](d)
+^[a](b) ^[c](d)
+> ^[a](b)
+# ^[a](b)
+- ^[a](b)
+| a |\n|---|\n| ^[b](c) |
+^[b](c))
+^[b]((c)
+^[b](c\\)
+^[b](\\(c)
+^[
+^[]
+^[b](c)](d)
+[^[b](c)](d)
+[^[b]](c)
+[a ^[b] c](d)
+^[x]: /u
+^[x]: /u\n\n[x]
+^[x]: /u\n\n[^x]
+^[x]: /u\n\n[x]: /v\n\n[x]
+^[x]:
+^[x]: /u "t"
+^[x]: /u\n^[y]: /v\n\n[y]
+^[x]:l more words
+^[x]: more words here
+^[x]: a\nb\nc
+^[x]:  \nfoo
+^[x]:\nfoo
+^[x]: <a b>
+^[x]: /u\n"t"
+^[x]: /u "t" x
+^[x]: /u foo\nbar
+^[x]: /u foo\nbar\nbaz
+^[x]:\t/u
+foo\n^[x]: /u
+- ^[x]: /u
+> ^[x]: /u
+    ^[x]: /u
+^[]: /u
+^[ ]: /u
+^[x\\]]: /u
+^[x[]: /u
+^[x]:"
+^[f]:l
+^[x]:t
+^[x]:/
+[f]:l\n\n""
+[f]:\n\n"\n
+[y]:l\n\n""
+[ ]: /u\n\n[ ]
+[ ]: /u
+[x]:\n/u
+[x]:\n\n/u
+[x]: /u\n\n"t"
+[x]: /u\n"t"\n\n[x]
+[a]:l\n(")[a]
+[a]: l\n"t" x\n\n[a]
+[a]: l\n"t" x [a]
+[a]: l\n'z'[a]
+[a]: l\n(z)\n[a]
+[a]: l "t" x\n[a]
+[a]: l "t" x\n\n[a]
+__~_~_
+__~_~_x
+___~_~_
+__~_
+__!_!_
+__*_*_
+__"_"_
+__(_)_
+*~*~*
+_~_~_
+~_~_
+__~_~
+**~*~*
+***~*~*
+*a **b* c**
+__a_b_
+~~~a~~ b~
+__~_~_ __~_~_
+__~_~_\n__~_~_
+[__~_~_](u)
+[__](u)~_~_
+**~**~**
+**~*~**
+~**~**~**
+~*~*~*~
+|\n-|\nc||\n-|-
+-|\nc||\n-|-
+|\nc||\n-|-
+x\n-|\nc||\n-|-
+|\nx\nc||\n-|-
+a|b|c\n-|-\nc|d\n-|-
+a|b|c\n-|-\nc|d|e\n-|-|-
+a|b|c\nd|e|f\n-|-\ng|h\n-|-
+a|b|c\n|-|-|\nc|d\n-|-
+a|b|c\n-|-\nx\nc|d\n-|-
+a|b|c\n-|-\n\nc|d\n-|-
+a|b|c\n-|-\n> q\nc|d\n-|-
+a|b|c\n-|-\nc|d\n-|-\n-|-
+a|b|c\n -|-\nc|d\n-|-
+a|b|c\n-\nc|d\n-|-
+a|b|c\n-|-|\nc|d|e\n-|-|-
+-|-\nc|d\n-|-
+a|b\nc|d\n-|-
+a|\nc|d\n-|-
+a\nb|c\n-|-
+|a\nb|c\n-|-
+a|b\nc\n-|
+a|b|c\nd|e\n-|-
+a|b|c\nd\n-
+a|b|c\nd|e\n-|-|-
+a|b\nd|e|f\n-|-|-
+|\n|\nc||\n-|-
+a|b\n|\nc||\n-|-
+a|b|c\nd\ne|f\n-|-
+a|b|c\nd|e|f\ng|h\n-|-
+a|b\n|-\n|-
+a|b\n-|-
+a|b\n|-|-
+a|b\n-|-|
+a|\n-|
+a||\n-|-
+|a|\n|-|
+|a||\n|-|-|
+a|b\n-|
+c||\n-|-
+x\nc||\n-|-
+[](i "\")
+[a](i "\")
+[a](i "\"")
+[a](i "\"x\"")
+[a](i "\\")
+[a](i "\\"")
+[a](i "x\"y" z)
+[a](i 'x\'y')
+[a](i 'x\')
+[a](i (x\)y))
+[a](i (x\))
+[a](i (x(y))
+[a](i (x\(y))
+[a](i "x" "y")
+[a](i "\"x" "y")
+[a](i "x\" "y")
+[a](i "x\"")
+[a](i "x\"\"")
+[a]: u "t\"
+[a]: u "t\"\n\n[a]
+[a]: u "t\" x
+[a]: u (t\)
+[a]: u (t\))\n\n[a]
+[a]: u 't\'x'\n\n[a]
+[a]: u "t\"x"\n\n[a]
+[a]: u "t\"x\n\n[a]
+^[l]()@.a
+^[l]()@.e
+^[l](x)@.a
+x^[l](x)@.a
+l^[m](x)@.a
+*^[l]()*@.a
+[x]:"\na||\n-|-
+[x]: /u\na|b\n-|-
+[x]: /u\na|b\n-|-\n\n[x]
+[x]: /u\n"t"\na|b\n-|-\n\n[x]
+[x]: /u\n"t"\na|b\n-|-
+[x]: <u>\na|b\n-|-
+[x]: <u>\na|b\n-|-\n\n[x]
+[x]: u\n[y]: v\na|b\n-|-\n\n[x] [y]
+[x]:\nu\na|b\n-|-\n\n[x]
+[x]: u "t" x\na|b\n-|-
+[x]: u 't'\na|b\n-|-\n\n[x]
+[x]: u (t)\na|b\n-|-\n\n[x]
+[x]: u\n(t)\na|b\n-|-\n\n[x]
+foo\n[x]: u\na|b\n-|-\n\n[x]
+[x]: u\nfoo\na|b\n-|-\n\n[x]
+^[x]: u\na|b\n-|-\n\n[x]
+^[x]: u\na|b\n-|-
+[x]: u\n\na|b\n-|-\n\n[x]
+a@b
+.a@b
+x .a@b
+a@.a@b
+a.a@b
+-a@b
+a@b.c
+b@c@d.e
+a@b@c.d
+a@@b.c
+@a@b.c
+a@.b
+a@b.
+a@b.c.
+a@.a.b
+.a@.b
+a@x.a@y.b
+a@a@a
+a@.a@
+a@..a@b
+a@1.a@b
+a@-.a@b
+aa@.a@b
+a@.a@b.c
+a@.a@bb
++a@.a@b
+a@_.a@b
+a_@.a@b
+a@.A@b
+a@.1@b
+a@.a-@b
+a@.-@b
+a@.a@b-
+a@.a@b_
+a@.a@b.
+a@.a@b-b
+a@b.c@d
+a@b@c@d
+a@.x@.y@z
+a@.x@y@z
+a@.x@.y@z.w
+q a@.a@b z
+a@.a@b c@d
+a@.a@b c@.d@e
+a@b c@d
+a@.a b@c
+a@.a\nb@c
+a@x.y@b
+a@.a@b@c
+a@.a@@b
+mailto:a@.a@b
+xmpp:a@.a/b@c
+a@.a@b\n\nc@d
+*a@.a@b* c@d
+mailto:a@b.c d@e.f
+mailto:a@.a@b c@d.e
+xmpp:a@b.c/d e@f.g
+xmpp:a@.a/b@c d@e.f
+mailto:a@b mailto:c@d.e
+mailto:a@.a b@c.d
+mailto: a@.a@b
+<!--<!--->
+<!--<!---->
+<!---<!--->
+<!--a<!--->
+<!-- a -- <!-- b -->
+<!--x<![CDATA[y]]>
+<![CDATA[]]]>
+<![CDATA[a]]b]]>
+<ao:&mp;>
+<scheme:a&amp;b>
+xmpp:@ d@.f
+mailto:@ d@.f
+mailto:a@ d@.f
+mailto:a@b d@.f
+mailto:a@b@c d@.f
+mailto:a@.b@c d@.f
+mailto:a@.b@ d@.f
+mailto:a@b.c@d
+mailto:a@b@c.d
+mailto:a@b.c@d e@f.g
+mailto:a@ b@c.d
+mailto:a@ b.c@d
+mailto:a@.b c@.d
+mailto:a@!x@y.z
+mailto:a@ x@@y.z
+mailto:a@.
+mailto:a@.x y@z.w
+mailto:@@a@b.c
+xmpp:a@b/c@d
+xmpp:a@b/c d@e.f
+xmpp:a@b@c/d e@f.g
+http://a/b\u00A0c
+http://\u00A0
+http://a\u00E9b
+http://\u00E9.example/x
+www.\u00E9.example/x
+http://a\u0001b
+http://a\u007fb
+x@mailto:@.z
+a@mailto:@.c
+x@mailto:a@.z
+x@xmpp:@.z
+x@xmpp:a@.z
+b@1.@.e
+b@1.a@.e
+b@1@.e
+b@1..@.e
+b@a.@.e
+a@.@.e
+a@1.@.e
+y@b mailto:a@.z
+x@.mailto:a@b.c
+q:mailto:a@b.c
+xmailto:a@b.c
+mailto:mailto:a@b.c
+*\uFEFFa*
+x\n\uFEFFa
+x *\uFEFFa* y
+`\uFEFFa`
+` \uFEFFa`
+[\uFEFFa](u)
+[x](u "\uFEFFa")
+[x](u '\uFEFFa')
+[x](u (\uFEFFa))
+![\uFEFFa](u)
+![x](<\uFEFFu>)
+# \uFEFFa
+- \uFEFFa
+> \uFEFFa
+**\uFEFF**
+\uFEFF\uFEFFa
+a *\uFEFF\uFEFFb*
+<b\uFEFF>
+x <\uFEFFb>
+<\uFEFFb>
+<!-- \uFEFF -->
+&amp;\uFEFFa
+**a**\uFEFFb
+**a** \uFEFFb
+a\n\uFEFF\nb
+a  \n\uFEFFb
+a\\\n\uFEFFb
+```\n\uFEFFa\n```
+    \uFEFFa
+| \uFEFFa | b |\n|---|---|\n| \uFEFFc | d |
+[a]: \uFEFFu
+[a]: u "\uFEFFt"\n\n[a]
+~~\uFEFFa~~
+\uFEFFwww.a.b
+x\uFEFFwww.a.b
+<http://a>\uFEFFb
+<\uFEFFa@b.c>
+[x](<\uFEFFa@b.c>)
+[x](\uFEFFmailto:a@b.c)
+^[\uFEFFa](b)
+^[a](\uFEFFb)
+\uFEFFa
+\uFEFF\uFEFF\uFEFFa
+x \uFEFFwww.a.b
+\uFEFF*a*
+a\u0000b
+\u0000
+*\u0000*
+[a\u0000](b\u0000)
+\uFEFF# a
+\uFEFF- a
+\uFEFF[a]: b\n[a]
+x\u0000
+\r\u0301
+\n\u0301
+\r\u0301a
+x\r\u0301
+\r\r\u0301
+\u0301
+<!-- a -->\u0301
+<!-- a -->\u0301\nb
+<?x?>\u0301\nb
+<!X>\u0301\nb
+<![CDATA[a]]>\u0301\nb
+<script>a</script>\u0301\nb
+<pre>a</PRE>\u0301\nb
+<pre>a</\u017Fcript>\nb
+<pre>a</pr\u0345e>\nb
+&\u0301amp;
+&amp\u0301;
+\\\u0301*a*
+\\\u0301
+a&\u0301b
+|:\u0301-|\n|-|
+| a |\n|:\u0301--|\n| b |
+| a |\n|--:\u0301|\n| b |
+|a|\n|:--:|\n|b|
+a\r\u0301b
+a\r\n\u0301b
+a\u0301\r\nb
+*a*\u0301
+**a**\u0301b
+\u0301**a**
+a ~~b~~\u0301
+[a]\u0301(b)
+a@b.c\u0301
+`a`\u0301
+`\u0301a`
+\u0301`a`
+```\u0301a\nb\n```
+~~~ a\u0301\nb\n~~~
+# a\u0301
+#\u0301 a
+- \u0301a
+-\u0301 a
+1.\u0301 a
+>\u0301 a
+\u0301> a
+a\n===\u0301
+a\n---\u0301
+***\u0301
+- - -\u0301
+[a]: b\u0301\n[a]
+[a]:\u0301 b\n[a]
+[a]: b "c\u0301"\n[a]
+&#x1F600;\u0301
+&#128512;
+&#0;
+&#xD800;
+&#x110000;
+\u2028a
+a\u2028b
+a\u2029b
+a\u0085b
+\u0085
+a\u00ADb
+a\u200Bb
+\u200B*a*
+*\u200B*
+**\u200B**
+*\u3000a*
+a\u3000*b*
+a*\u00A0b*
+a*\u0301b*
+*\u0301a*
+[a](<b\u0301>)
+<a@b.c\u0301>
+[a](b\u0301)
+[a](b)\u0301

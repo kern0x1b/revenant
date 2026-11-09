@@ -884,7 +884,7 @@ local function introduced_after_device_release(text)
     return semver.compare(major .. "." .. (minor ~= "" and minor or "0"), DEVICE_RELEASE) > 0
 end
 
-local function availability(text)
+local function availability(text, annotations)
     local found, position = {}, 1
     while true do
         local start, stop, name = text:find("([%u_][%u%d_]*)%s*%(", position)
@@ -892,7 +892,7 @@ local function availability(text)
             return found
         end
         local open, close = text:find("%b()", stop)
-        local available = name:find("AVAILABLE", 1, true) and not name:find("UNAVAILABLE", 1, true)
+        local available = (name:find("AVAILABLE", 1, true) and not name:find("UNAVAILABLE", 1, true)) or (annotations and annotations[name])
         local since = name:find("DEPRECATED", 1, true) and close and introduced_after_device_release(text:sub(stop, close))
         if (available or since) and open == stop then
             table.insert(found, {start = start, stop = close})
@@ -903,9 +903,9 @@ local function availability(text)
     end
 end
 
-local function without_availability(text)
+local function without_availability(text, annotations)
     local pieces, position = {}, 1
-    for _, macro in ipairs(availability(text)) do
+    for _, macro in ipairs(availability(text, annotations)) do
         table.insert(pieces, text:sub(position, macro.start - 1))
         position = macro.stop + 1
     end
@@ -1172,7 +1172,7 @@ local NOT_TYPE_NAMES = {typedef = true, void = true, id = true, int = true, char
     bool = true, endif = true, int8_t = true, int16_t = true, int32_t = true, int64_t = true, uint8_t = true,
     uint16_t = true, uint32_t = true, uint64_t = true}
 
-local function typedef_declarations(text)
+local function typedef_declarations(text, annotations)
     local found, position = {}, 1
     while true do
         local start = text:find("%f[%w_]typedef%f[^%w_]", position)
@@ -1182,7 +1182,7 @@ local function typedef_declarations(text)
         local stop = statement_close(text, start)
         local statement = (text:sub(start, stop):gsub("\n%s*#[^\n]*", "\n"))
         local body = (statement:gsub("%b{}", ""))
-        local name = body:match("%(%^%s*([%a_][%w_]*)%s*%)") or declared_name(without_availability(body))
+        local name = body:match("%(%^%s*([%a_][%w_]*)%s*%)") or declared_name(without_availability(body, annotations))
         if name and (NOT_TYPE_NAMES[name] or name:find("^__")) then
             name = nil
         end
@@ -1191,12 +1191,12 @@ local function typedef_declarations(text)
         for word in statement:gmatch("%f[%w_]([%a_][%w_]*)") do
             words["$" .. word] = true
         end
-        table.insert(found, {start = lead, stop = stop, name = name, annotated = #availability(text:sub(lead, stop)) > 0, words = words})
+        table.insert(found, {start = lead, stop = stop, name = name, annotated = #availability(text:sub(lead, stop), annotations) > 0, words = words})
         position = stop + 1
     end
 end
 
-local function apply_ranges(text, merged)
+local function apply_ranges(text, merged, annotations)
     local edits = {}
     for _, range in ipairs(merged) do
         local segment = text:sub(range.start, range.stop)
@@ -1211,8 +1211,8 @@ local function apply_ranges(text, merged)
             if segment:find("API_AVAILABLE_BEGIN", 1, true) then
                 raise("a backported declaration spans the start of an availability region: %s", excerpt)
             end
-            lowered = without_availability(segment)
-            if #availability(lowered) > 0 then
+            lowered = without_availability(segment, annotations)
+            if #availability(lowered, annotations) > 0 then
                 raise("an availability macro of a backported declaration cannot be lowered: %s", excerpt)
             end
             lowered = (range.before or "") .. lowered .. (range.after or "")
@@ -1430,6 +1430,7 @@ local function lowering_of(text, implemented, declarations)
     end
     local ranges = {}
     local markers = implemented.markers
+    local annotations = markers and markers.annotations
     local function lower(start, stop, remove)
         if not remove then
             start, stop = trimmed_of_markers(text, start, stop, markers)
@@ -1580,7 +1581,7 @@ local function lowering_of(text, implemented, declarations)
         end
     end
     if implemented.types then
-        for _, declaration in ipairs(declarations or typedef_declarations(text)) do
+        for _, declaration in ipairs(declarations or typedef_declarations(text, annotations)) do
             if declaration.annotated and declaration.name and implemented.types[declaration.name] then
                 for _, piece in ipairs(pieces_of(text, declaration.start, declaration.stop)) do
                     lower(piece[1], piece[2])
@@ -1589,12 +1590,12 @@ local function lowering_of(text, implemented, declarations)
         end
     end
     if implemented.enum_types then
-        for _, declaration in ipairs(declarations or typedef_declarations(text)) do
+        for _, declaration in ipairs(declarations or typedef_declarations(text, annotations)) do
             if declaration.name and implemented.enum_types[declaration.name] then
                 local closing = text:sub(declaration.start, declaration.stop):match("^.*()}")
                 if closing then
                     for _, piece in ipairs(pieces_of(text, declaration.start + closing, declaration.stop)) do
-                        if #availability(text:sub(piece[1], piece[2])) > 0 then
+                        if #availability(text:sub(piece[1], piece[2]), annotations) > 0 then
                             lower(piece[1], piece[2])
                         end
                     end
@@ -1664,7 +1665,7 @@ local function lowering_of(text, implemented, declarations)
                         end
                     end
                     for _, enumerator in ipairs(listed) do
-                        if not enumerator.backported and #availability(text:sub(enumerator.start, constant_end(text, enumerator.start))) == 0 then
+                        if not enumerator.backported and #availability(text:sub(enumerator.start, constant_end(text, enumerator.start)), annotations) == 0 then
                             local at = enumerator.start + #enumerator.name
                             table.insert(splits, {start = at, stop = at - 1, before = " API_AVAILABLE" .. gate})
                         end
@@ -1683,7 +1684,7 @@ local function lowering_of(text, implemented, declarations)
             uses["$" .. word] = true
         end
     end
-    return apply_ranges(text, merged), uses
+    return apply_ranges(text, merged, annotations), uses
 end
 
 function lower_header(text, implemented)
@@ -2069,7 +2070,7 @@ function region_markers(sdk)
     if markers_cache[sdk] then
         return markers_cache[sdk]
     end
-    local markers = {begin = {API_AVAILABLE_BEGIN = false}, ends = {API_AVAILABLE_END = true}}
+    local markers = {begin = {API_AVAILABLE_BEGIN = false}, ends = {API_AVAILABLE_END = true}, annotations = {}}
     for _, file in ipairs(framework_headers(sdk)) do
         local text = io.readfile(file)
         if text:find("API_AVAILABLE_", 1, true) then
@@ -2078,6 +2079,13 @@ function region_markers(sdk)
             end
             for name in text:gmatch("#%s*define%s+([%w_]+)%s+API_AVAILABLE_END%f[^%w_]") do
                 markers.ends[name] = true
+            end
+        end
+        if text:find("API_AVAILABLE(__VA_ARGS__)", 1, true) then
+            for name, body in text:gmatch("#%s*define%s+([%u_][%u%d_]*)%(%.%.%.%)[ \t]+([^\n]*)") do
+                if body:find("%f[%w_]_*API_AVAILABLE%(__VA_ARGS__%)") then
+                    markers.annotations[name] = true
+                end
             end
         end
     end
@@ -2136,7 +2144,7 @@ local function mentions(text, names)
     return false
 end
 
-local function annotated_protocols(text, found)
+local function annotated_protocols(text, found, annotations)
     if not text:find("@protocol", 1, true) then
         return
     end
@@ -2154,7 +2162,7 @@ local function annotated_protocols(text, found)
         end
         local name = text:match("^@protocol%s+([%w_]+)", start)
         local first = statement_start(text, start, true, true)
-        local annotated = first ~= nil and #availability(text:sub(first, text:find("\n", stop, true) or #text)) > 0
+        local annotated = first ~= nil and #availability(text:sub(first, text:find("\n", stop, true) or #text), annotations) > 0
         for _, region in ipairs(regions) do
             annotated = annotated or (start > region.stop and start < region.ends_start)
         end
@@ -2174,9 +2182,10 @@ local function types_across(each_header, set, enumerators)
         end
     end
     local names = names_of(set)
+    local annotations = set.markers and set.markers.annotations
     each_header(function (text)
-        local declarations = typedef_declarations(text)
-        annotated_protocols(text, annotated)
+        local declarations = typedef_declarations(text, annotations)
+        annotated_protocols(text, annotated, annotations)
         if mentions(text, names) then
             local _, used = lowering_of(text, set, declarations)
             for key in pairs(used) do
@@ -2227,6 +2236,7 @@ end
 
 local function lowered_types(sdk, set, enumerators)
     local changed = member_headers(sdk)
+    set.markers = set.markers or region_markers(sdk)
     return types_across(function (visit)
         for _, file in ipairs(framework_headers(sdk)) do
             visit(changed[file] or io.readfile(file))

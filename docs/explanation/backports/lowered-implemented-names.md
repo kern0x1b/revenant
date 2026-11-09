@@ -265,3 +265,36 @@ and the `RTCAudioSession.mm` line that reads the same hint. `requestsAlternateRo
 lowering removed an availability that nothing implements, and would be a compile error after the change (reasoned: on an iOS 6 device the
 selector is not there, so the call would raise "unrecognized selector" if it ran; no device run). The change is
 therefore not made here: it needs those three names implemented or guarded first.
+
+## A framework's own availability macro
+
+The lowering removes an availability annotation by recognising the macro: a name that holds `AVAILABLE`, or a `DEPRECATED`
+macro that names a release later than the device's. MediaPlayer annotates with neither, `MP_API(ios(7.1), tvos(7.1),
+macos(10.12.2), watchos(5.0))`, which `MediaPlayerDefines.h` defines as `__API_AVAILABLE(__VA_ARGS__) _MP_VISIBLE`. The
+class, member and enum-type lines of `lowered-members.txt` named `MPRemoteCommandCenter`, `MPRemoteCommand`,
+`MPRemoteCommandEvent`, `MPChangePlaybackPositionCommandEvent` and the status codes, but no header changed, because the
+annotation was never seen as one: Telegram's `MediaManager.swift` stopped at "'MPRemoteCommandCenter' is only available in iOS
+7.1 or newer" (nine errors) although the command center is implemented. Only `MP_DEPRECATED`, which the deprecation rule
+catches, was ever lowered in that framework, so the same gap held for `MPNowPlayingInfoCenter.playbackState` and the
+`MPMediaItem` members.
+
+`region_markers(sdk)` now also reads every function-like macro that an SDK header defines as a wrapper of
+`API_AVAILABLE(__VA_ARGS__)` or `__API_AVAILABLE(__VA_ARGS__)`, whatever its name, and keeps the names in
+`markers.annotations`. `lowering_of`, the typedef scan and the protocol scan take that set, and `lowered_types` reads the
+markers of the SDK as the overlay build does, so the types that a lowered signature names are found through the macro too.
+On the 26.2 SDK the set holds 15 names (`MP_API`, `CK_SWIFT_AVAILABILITY`, `CT_AVAILABLE`, `CX_CLASS_AVAILABLE`,
+`FPUI_AVAILABLE`, `MTR_AVAILABLE`, the AVKit, ML Compute and Metal Performance Shaders wrappers); the two that lack
+`AVAILABLE` are `MP_API` and `CK_SWIFT_AVAILABILITY`, and `CK_SWIFT_AVAILABILITY` changes no header, because no implemented
+CloudKit name is annotated with it.
+
+Measured on the 26.2 SDK: `lowered-members.txt` gains 13 lines (`MPErrorCode` as an enum type, `MPMediaPlayback` as a
+protocol and eleven MediaPlayer types, among them `MPRemoteCommandHandlerStatus`, `MPSeekCommandEventType` and
+`MPNowPlayingPlaybackState`), and the overlay maps 18 more MediaPlayer headers and changes `MPVolumeView.h`. No other header
+of the 1992 that the overlay mapped before differs. The real Bazel parameters of Telegram's `TelegramUI` module, replayed
+through `swiftc -typecheck` with the overlay built for the SDK path of that build, end with the nine `MPRemoteCommand*` errors
+gone and nothing new. A replay whose overlay is built for a different SDK path maps nothing, because the overlay names the
+SDK's headers by their path, and then fails earlier, at the first module that imports a header whose class is gated.
+
+`lowering_test.lua` checks that `MP_API` is in the annotation set, that a class and a member that Backports implement lose
+the macro and an unimplemented neighbour keeps it, that the lowering without the set does not see it, and it compiles a probe
+of the remote command center at armv7 iOS 6.0 against the lowered headers.

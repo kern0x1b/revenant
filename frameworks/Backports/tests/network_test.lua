@@ -1,3 +1,4 @@
+local aliases = import("host_alias", {rootdir = path.join(os.scriptdir(), "..", "tools"), anonymous = true})
 local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local backports = path.absolute(path.join(os.scriptdir(), ".."))
 local src = path.join(backports, "src", "Network")
@@ -44,8 +45,9 @@ local function backport_program(source, files, output)
     local boringssl = workspace.package_of("boringssl", true)
     assert(os.isfile(path.join(boringssl, "include", "openssl", "err.h")), "the macOS BoringSSL install has no headers: " .. boringssl)
     local objects = native_objects(path.directory(output), boringssl)
+    local renamed = aliases.swift_flags(table.imap(tlsObjects, function (_, file) return path.join(tls, file) end))
     swiftc(table.join({"-D", "REVENANT_BACKPORT", "-I", path.join(tls, "RevenantTLS"), "-I", path.join(src, "RevenantNetworkC"), "-Xcc", "-I" .. path.join(boringssl, "include")},
-                      files, objects, {source, path.join(boringssl, "lib", "libssl.a"), path.join(boringssl, "lib", "libcrypto.a"), "-lc++", "-o", output}))
+                      files, objects, renamed, {source, path.join(boringssl, "lib", "libssl.a"), path.join(boringssl, "lib", "libcrypto.a"), "-lc++", "-o", output}))
     return output
 end
 

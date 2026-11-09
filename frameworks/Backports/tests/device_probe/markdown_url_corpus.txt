@@ -1,0 +1,30 @@
+www.a.b\u0301 c
+http://a\u00A0
+http://a\u00A0b
+http://a\u00A0 b
+www.\u00A0
+ftp://e\u00A0
+www.a\u00A0
+www.a\u00A0b
+http://a.b\u00A0c
+x http://a\u00A0
+http://a\u2003b
+http://a\u3000b
+http://a\u0085b
+http://a\u200Bb
+http://a.\u00E9
+<http://a\u00A0b>
+.mailto:a@b.c
+[t](<http://a|>)
+[t](<http://a[>)
+<http://a]b>
+<http://].com>
+[t](<http://h.com:'>)
+[t](<http://[::1>)
+[t](-a:b)
+[t](<+a:b>)
+[t](<http://a\u4E2D>)
+www.a.b\uFEFF
+<\uFEFFhttp://a>
+http://a.b\u0301
+<http://a\u0301>

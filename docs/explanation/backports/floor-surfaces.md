@@ -217,6 +217,16 @@ below it, and the sources of Telegram stay as they are.
   (`NSAttributedStringMarkdown15.m`) and the Swift side (`AttributedString`, `MarkdownParsingOptions`) is in the overlay.
   `attributed_string_markdown_test.lua` compares the Swift side with the host's, but on the host that side calls the host's
   own parser, so it does not test the Backports parser; `MarkdownDumpProbe` on a device does (see below).
+- `BrowserMarkdown.swift:2481`: a `switch` over `PresentationIntent.Kind` with a `default` after all twelve cases. The
+  SDK's Foundation is built with library evolution, so its enums are not frozen and the `default` is reachable for a
+  case a later release adds. The overlay is not built that way, so its enum was exhaustive and the compiler reported
+  "default will never be executed", an error under the `-warnings-as-errors` of the Telegram build. The case list is the
+  SDK's (twelve cases, same labels). `PresentationIntent.Kind` now has one more case, `_nonfrozen`, marked
+  `@available(*, unavailable)`: no code can name or build it and no switch has to cover it, and the compiler counts it
+  among the cases, so a `default` and an `@unknown default` compile without a diagnostic and a switch that lists the
+  twelve cases needs neither. Any other public enum of the overlay that the SDK does not freeze has the same fault and
+  the same remedy; `swiftc -typecheck` does not show it, because the diagnostic comes from SIL generation, so a replay
+  that looks for it must use `-emit-sil`.
 - `LocationUtils.swift:153`: `MKDirectionsRequest.transportType`, with `requestsAlternateRoutes`, `departureDate` and
   `arrivalDate`, kept per request. `MapRequestProbe` runs 14 checks on an iPhone 4S, iOS 6.1.3, and all pass.
 - `WebAppController.swift:2827`: `CMDeviceMotion.heading`. The geometry is checked on the host against poses built from
@@ -232,21 +242,38 @@ A method whose signature names `DateInterval` is lowered only when `DateInterval
 - A live heading in a north reference frame. `CMDeviceMotion` takes `xMagneticNorthZVertical` and
   `xTrueNorthZVertical` only after the phone has been moved to calibrate (CMErrorDomain 101 otherwise), so the delivery
   paths' tag of the frame and the geometry are checked, and the heading a moving phone reports is not.
-- `NSAttributedString(markdown:)` on a device: `MarkdownDumpProbe` (`tests/device_probe/markdown_dump_main.m`) prints the
-  runs and the presentation intents of 20 strings in three syntax modes, to be compared line for line with
-  `markdown_dump.expected`, which is the host Foundation's output of the same program. It ran on an iPhone 4S, iOS 6.1.3,
-  and found two things. The probe itself crashed on a null weak import, because it compiled the parser without the
-  source that defines the four attribute-name constants (`NSPresentationIntentAttributeName` and three more, which iOS 6
-  does not export); it now defines them. The parser crashed with an `NSRangeException` on `***both*** _under_ __strong__
-  *nested **inside** em*`: it attached an attribute over the length of the source span, not over the text it had
-  appended, and the markers it removes make the two differ. That is fixed. What remains is that the parser is partial. It
-  agrees with the host on 15 of 60 cases, and the full syntax, the one Telegram's `BrowserMarkdown` uses (`options: .init()`),
-  differs on 11 of 20 strings: no `NSListItemDelimiter` attribute, table alignments always left, no `NSAlternateDescription`
-  for a link or image title, a backslash hard break and a two-space break not split into `\n` runs with
-  `NSInlinePresentationIntent` 128, inline HTML not marked with 256, Setext headings read as text and a rule, an ordered
-  list not starting at its own number, a nested list not inside its parent item's intent chain, bare URLs not linked, and
-  adjacent or nested emphasis misread. Nothing in the Swift host test reaches this parser (it calls the host's), so the
-  probe is the only check, and a parser that follows CommonMark is the next piece of work for this name.
+- `NSAttributedString(markdown:)` on a device is verified, with one exception below. `MarkdownDumpProbe`
+  (`tests/device_probe/markdown_dump_main.m`) prints the runs and the presentation intents of every string in
+  `markdown_corpus.txt` (763 strings, each in three syntax modes) to be compared line for line with
+  `markdown_dump.expected`, the host Foundation's output of the same program. On an iPhone 4S, iOS 6.1.3, the two are
+  identical. The first run, on 20 strings, found that the probe crashed on a null weak import (it compiled the parser
+  without the source that defines the four attribute-name constants iOS 6 does not export) and that the parser
+  crashed with an `NSRangeException` on nested emphasis; both are fixed. It also found that the parser agreed with the
+  host on 15 of 60 cases, so the parser is now `RevenantMarkdownParser.m`, a port of cmark-gfm 0.29, checked on the host
+  by `tests/markdown_parser_oracle_test.lua` against the host's own parser on the corpus, on every `<!--` string up to
+  seven characters and on random sources. Matching the host meant copying what is a defect of cmark-gfm 0.29 or of
+  Apple's fork, and these are kept on purpose, so a later "fix" shows up as a failing test: an attribute group
+  (`^[`, text, `]` and parenthesised attributes) is read, its attributes dropped, a bracketed label after it swallowed
+  and no link made; `^[x]: text` is a reference
+  definition that consumes the line; a reference definition keeps the title it read before a failed rewind; a link
+  title is the longest one the host's regular expression scans; an email autolink attempt shares its state with the
+  next attempt in the same text and the rewind of the next starts at the end of the scanned region; a table whose
+  start fails keeps the rest of its paragraph from forming one, and a paragraph before a table header takes no
+  reference definitions; the emphasis opener limit is kept per delimiter position; once a `<!--` fails to close, no
+  later `<!` construct is read as HTML; CDATA follows the host's regular expression; the text of a `<...>` autolink is
+  unescaped; one leading U+FEFF is dropped from the string of every node (the host's UTF-8 to string conversion), besides
+  the one skipped at the start of the document, and a NUL becomes U+FFFD in every syntax. The parser searches and
+  splits strings literally: a non-literal replace did not see a carriage return followed by a combining mark, which the
+  host reads as a line end. The exception is the URL object: iOS 6's `NSURL` rejects what the host keeps and
+  does not map hosts through IDNA, so 30 strings in `markdown_url_corpus.txt` (183 differing lines of
+  `markdown_url_dump.expected`) have the same text and runs but a different `NSLink`, or none: a no-break space,
+  U+2003, U+3000, U+0085 or U+200B in a bare URL, a non-ASCII character or a combining mark in a host (the host
+  gives `xn--` labels, the device a percent-encoded host), an ASCII character the host refuses in a host or port
+  (`|`, `[`, `]`, `'`, an unclosed `[::1`), a scheme that does not start with a letter (`-a:b`, `+a:b`, `.mailto:a@b.c`
+  are relative references on the host), and a leading U+FEFF in a host. The parser is not involved: both sides read
+  the same destination. Closing it needs the `NSURL` backport (`URLWithString:encodingInvalidCharacters:`) to follow the
+  host's rules for the authority and the scheme. A sample of 1500 link destinations made of such characters differed
+  on 186 (12 percent), all of them this kind; the destinations of real documents are almost always ASCII and valid.
 - The UIMenu initializers, the CallKit, CoreMedia and PhotosUI overlays and `INStartCallIntent` were typechecked
   together with Telegram's lines and built in the runtime. They have not run on a device.
 - Nothing here draws a menu subtitle or a selected image, and no Live Photo, slow-motion or time-lapse asset exists on

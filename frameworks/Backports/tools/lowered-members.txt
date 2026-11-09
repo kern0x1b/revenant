@@ -1657,6 +1657,11 @@ class RPBroadcastSampleHandler
 class RPPreviewViewController
 class RPScreenRecorder
 class RPSystemBroadcastPickerView
+class RVMBlockParser
+class RVMBracket
+class RVMDelimiter
+class RVMInlineParser
+class RVMReferences
 class RevenantARTracker
 class RevenantARValue
 class RevenantAUParameterImpl
@@ -1837,7 +1842,9 @@ class RevenantMapKit
 class RevenantMapKitDelegate
 class RevenantMapPreviewCard
 class RevenantMapViewState
-class RevenantMarkdownParser
+class RevenantMarkdownEmitter
+class RevenantMarkdownNode
+class RevenantMarkdownTree
 class RevenantMenuBuilder
 class RevenantMenuHost
 class RevenantMenuTrigger
@@ -3557,7 +3564,6 @@ enum NSActivityIdleSystemSleepDisabled
 enum NSAttributedStringFormattingApplyReplacementIndexAttribute
 enum NSAttributedStringFormattingInsertArgumentAttributesWithoutMerging
 enum NSAttributedStringMarkdownInterpretedSyntaxFull
-enum NSAttributedStringMarkdownInterpretedSyntaxInlineOnlyPreservingWhitespace
 enum NSBatchDeleteResultTypeCount
 enum NSBatchDeleteResultTypeObjectIDs
 enum NSCalendarMatchLast
@@ -4304,6 +4310,7 @@ enum_type HKErrorCode
 enum_type HMErrorCode
 enum_type INRecurrenceFrequency
 enum_type MKErrorCode
+enum_type MPErrorCode
 enum_type MPSPurgeableState
 enum_type MTLBinaryArchiveError
 enum_type MTLCaptureError
@@ -4827,6 +4834,9 @@ function RevenantMPSImageUsable
 function RevenantMPSImageWriteRegion
 function RevenantMPSTemporaryImageDefaultAllocator
 function RevenantMakeBinding
+function RevenantMarkdownEntityNamed
+function RevenantMarkdownParseDocument
+function RevenantMarkdownParseInlineOnly
 function RevenantMetal4SparseBufferCopyRefusal
 function RevenantMetal4SparseBufferUpdateRefusal
 function RevenantMetal4SparseTextureCopyRefusal
@@ -20215,6 +20225,7 @@ member MPRemoteCommandCenter -stopCommand
 member MPRemoteCommandCenter -togglePlayPauseCommand
 member MPRemoteCommandEvent -command
 member MPRemoteCommandEvent -initWithCommand:
+member MPRemoteCommandEvent -timestamp
 member MPSBinaryImageKernel -clipRect
 member MPSBinaryImageKernel -encodeToCommandBuffer:inPlacePrimaryTexture:secondaryTexture:fallbackCopyAllocator:
 member MPSBinaryImageKernel -encodeToCommandBuffer:inPlaceSecondaryTexture:primaryTexture:fallbackCopyAllocator:
@@ -26403,6 +26414,84 @@ member RPScreenRecorder -stopRecordingWithHandler:
 member RPSystemBroadcastPickerView -initWithCoder:
 member RPSystemBroadcastPickerView -initWithFrame:
 member RPSystemBroadcastPickerView -setUpPicker
+member RVMBlockParser -addChild:under:
+member RVMBlockParser -addLineTo:
+member RVMBlockParser -addTextToContainer:lastMatched:
+member RVMBlockParser -advance:columns:
+member RVMBlockParser -atxHeadingLevelAt:matched:
+member RVMBlockParser -blockQuotePrefix
+member RVMBlockParser -checkOpenBlocks:shouldContinue:
+member RVMBlockParser -chopHeading:
+member RVMBlockParser -closeFenceLength
+member RVMBlockParser -codeBlockPrefix:shouldContinue:
+member RVMBlockParser -finalize:
+member RVMBlockParser -findFirstNonspace
+member RVMBlockParser -htmlBlockPrefix:
+member RVMBlockParser -incorporateLine:
+member RVMBlockParser -initWithPool:references:
+member RVMBlockParser -itemPrefix:
+member RVMBlockParser -lastChildIsOpen:
+member RVMBlockParser -openFenceLengthAt:fenceChar:
+member RVMBlockParser -openListItem:matched:under:
+member RVMBlockParser -openNewBlocks:allMatched:
+member RVMBlockParser -parse:
+member RVMBlockParser -parseInlinesIn:
+member RVMBlockParser -parseListMarkerAt:interruptsParagraph:into:matched:
+member RVMBlockParser -resolveReferencesIn:
+member RVMBlockParser -setLastLineBlank:value:
+member RVMBlockParser -setextLevelAt:
+member RVMBlockParser -tableRowMatchesLine
+member RVMBlockParser -thematicBreakAt:
+member RVMBlockParser -tryOpenTableHeader:
+member RVMBlockParser -tryOpenTableRow:
+member RVMInlineParser -autolinkDelimiter:end:
+member RVMInlineParser -autolinkEmailsIn:
+member RVMInlineParser -autolinkEmailsInText:
+member RVMInlineParser -checkDomain:size:allowShort:
+member RVMInlineParser -closeCaret:
+member RVMInlineParser -codePointAfter:
+member RVMInlineParser -codePointBefore:
+member RVMInlineParser -consolidate:
+member RVMInlineParser -handleAutolink:parent:
+member RVMInlineParser -handleBackslash
+member RVMInlineParser -handleBackticksInto:
+member RVMInlineParser -handleCloseBracket
+member RVMInlineParser -handleDelimiter:
+member RVMInlineParser -handleEntity
+member RVMInlineParser -handleNewline
+member RVMInlineParser -handlePointyBrace
+member RVMInlineParser -handleTilde
+member RVMInlineParser -inBracket
+member RVMInlineParser -initWithPool:references:inlineOnly:
+member RVMInlineParser -insertEmphasisOpener:closer:
+member RVMInlineParser -insertStrikethroughOpener:closer:
+member RVMInlineParser -isSafeScheme:size:
+member RVMInlineParser -isSpecial:
+member RVMInlineParser -linkNodeText:url:
+member RVMInlineParser -load:
+member RVMInlineParser -makeAutolinkText:url:
+member RVMInlineParser -matchURLIn:
+member RVMInlineParser -matchWWWIn:
+member RVMInlineParser -parse:into:
+member RVMInlineParser -parseOneInto:
+member RVMInlineParser -parseReferenceIn:consumed:
+member RVMInlineParser -peek
+member RVMInlineParser -peekAt:
+member RVMInlineParser -popBracket
+member RVMInlineParser -processEmphasisBottom:
+member RVMInlineParser -pushBracket:image:
+member RVMInlineParser -pushBracket:image:caret:
+member RVMInlineParser -pushDelimiter:canOpen:canClose:node:
+member RVMInlineParser -removeDelimiter:
+member RVMInlineParser -scanAttributeGroupAt:
+member RVMInlineParser -scanDelimiters:canOpen:canClose:left:right:
+member RVMInlineParser -scanLinkLabel:
+member RVMInlineParser -scanLinkTitleAt:
+member RVMInlineParser -scanLinkURLAt:result:consumed:
+member RVMInlineParser -textFrom:to:
+member RVMInlineParser -textNode:
+member RVMInlineParser -unput:from:
+member RVMReferences -init
 member RevenantARTracker +cameraIntrinsicsForResolution:
 member RevenantARTracker +captureDeviceForPosition:
 member RevenantARTracker +hasFrontCamera
@@ -27475,19 +27564,19 @@ member RevenantMapViewState -showsScale
 member RevenantMapViewState -showsTraffic
 member RevenantMapViewState -showsUserTrackingButton
 member RevenantMapViewState -tracking
-member RevenantMarkdownParser -appendInline:from:to:intent:span:extra:
-member RevenantMarkdownParser -blockAttributes:span:extra:
-member RevenantMarkdownParser -carriesIntents
-member RevenantMarkdownParser -initWithOptions:baseURL:
-member RevenantMarkdownParser -keepsSourceSpacing
-member RevenantMarkdownParser -linesOf:
-member RevenantMarkdownParser -nextIdentity
-member RevenantMarkdownParser -parse:
-member RevenantMarkdownParser -parseInlines:from:to:intent:
-member RevenantMarkdownParser -parseLines:from:to:parent:item:
-member RevenantMarkdownParser -parseMarkerIn:index:plain:limit:intent:
-member RevenantMarkdownParser -targetIn:
-member RevenantMarkdownParser -urlFor:
+member RevenantMarkdownEmitter -append:base:mask:extra:
+member RevenantMarkdownEmitter -baseFor:delimiter:
+member RevenantMarkdownEmitter -carriesIntents
+member RevenantMarkdownEmitter -emit:
+member RevenantMarkdownEmitter -emitBlocks:intent:delimiter:
+member RevenantMarkdownEmitter -emitInlines:base:mask:extra:
+member RevenantMarkdownEmitter -emitSpan:flag:base:extra:
+member RevenantMarkdownEmitter -flatten:into:
+member RevenantMarkdownEmitter -initWithOptions:baseURL:
+member RevenantMarkdownEmitter -nextIdentity
+member RevenantMarkdownEmitter -resolve:
+member RevenantMarkdownEmitter -urlFor:
+member RevenantMarkdownTree -root
 member RevenantMenuBuilder -actionForIdentifier:
 member RevenantMenuBuilder -commandForAction:propertyList:
 member RevenantMenuBuilder -initWithSystem:menus:
@@ -30465,6 +30554,7 @@ member UIApplication -registeredForRemoteNotifications
 member UIApplication -requestSceneSessionActivation:userActivity:options:errorHandler:
 member UIApplication -requestSceneSessionDestruction:options:errorHandler:
 member UIApplication -requestSceneSessionRefresh:
+member UIApplication -revenant_dispatchRemoteControlEvent:
 member UIApplication -revenant_scene
 member UIApplication -revenant_sendEvent:
 member UIApplication -setAlternateIconName:completionHandler:
@@ -36054,6 +36144,7 @@ protocol MLBatchProvider
 protocol MLComputeDeviceProtocol
 protocol MLFeatureProvider
 protocol MLWritable
+protocol MPMediaPlayback
 protocol MPPlayableContentDataSource
 protocol MPPlayableContentDelegate
 protocol MPSCNNBatchNormalizationDataSource
@@ -37467,6 +37558,15 @@ type MLMultiArrayDataType
 type MLMultiArrayShapeConstraintType
 type MLTaskState
 type MLUpdateProgressEvent
+type MPChangeLanguageOptionSetting
+type MPMediaLibraryAuthorizationStatus
+type MPMediaPlaylistAttribute
+type MPMediaType
+type MPNowPlayingInfoLanguageOptionType
+type MPNowPlayingInfoMediaType
+type MPNowPlayingPlaybackState
+type MPRemoteCommandHandlerStatus
+type MPRepeatType
 type MPSAliasingStrategy
 type MPSAlphaType
 type MPSCNNBinaryConvolutionFlags
@@ -37491,6 +37591,8 @@ type MPSNNPaddingMethod
 type MPSNNRegularizationType
 type MPSRNNSequenceDirection
 type MPSStateResourceType
+type MPSeekCommandEventType
+type MPShuffleType
 type MTKTextureLoaderArrayCallback
 type MTL4AlphaToCoverageState
 type MTL4AlphaToOneState

@@ -1,0 +1,279 @@
+== full 0
+length=10
+  0,8 www.a.b́ {NSLink=url(http://www.a.xn--b-xbb); NSPresentationIntent=intent(0#1)}
+  8,2  c {NSPresentationIntent=intent(0#1)}
+== full 1
+length=9
+  0,9 http://a  {NSLink=url(http://a ); NSPresentationIntent=intent(0#1)}
+== full 2
+length=10
+  0,10 http://a b {NSLink=url(http://a b); NSPresentationIntent=intent(0#1)}
+== full 3
+length=11
+  0,9 http://a  {NSLink=url(http://a ); NSPresentationIntent=intent(0#1)}
+  9,2  b {NSPresentationIntent=intent(0#1)}
+== full 4
+length=5
+  0,5 www.  {NSLink=url(http://www. ); NSPresentationIntent=intent(0#1)}
+== full 5
+length=8
+  0,8 ftp://e  {NSLink=url(ftp://e ); NSPresentationIntent=intent(0#1)}
+== full 6
+length=6
+  0,6 www.a  {NSLink=url(http://www.a ); NSPresentationIntent=intent(0#1)}
+== full 7
+length=7
+  0,7 www.a b {NSLink=url(http://www.a b); NSPresentationIntent=intent(0#1)}
+== full 8
+length=12
+  0,12 http://a.b c {NSLink=url(http://a.b c); NSPresentationIntent=intent(0#1)}
+== full 9
+length=11
+  0,2 x  {NSPresentationIntent=intent(0#1)}
+  2,9 http://a  {NSLink=url(http://a ); NSPresentationIntent=intent(0#1)}
+== full 10
+length=10
+  0,10 http://a b {NSLink=url(http://a b); NSPresentationIntent=intent(0#1)}
+== full 11
+length=10
+  0,10 http://a　b {NSLink=url(http://a b); NSPresentationIntent=intent(0#1)}
+== full 12
+length=10
+  0,10 http://ab {NSPresentationIntent=intent(0#1)}
+== full 13
+length=10
+  0,10 http://a​b {NSLink=url(http://ab); NSPresentationIntent=intent(0#1)}
+== full 14
+length=10
+  0,10 http://a.é {NSLink=url(http://a.xn--9ca); NSPresentationIntent=intent(0#1)}
+== full 15
+length=10
+  0,10 http://a b {NSLink=url(http://a b); NSPresentationIntent=intent(0#1)}
+== full 16
+length=13
+  0,13 .mailto:a@b.c {NSLink=url(https://base.example/docs/.mailto:a@b.c); NSPresentationIntent=intent(0#1)}
+== full 17
+length=1
+  0,1 t {NSPresentationIntent=intent(0#1)}
+== full 18
+length=1
+  0,1 t {NSPresentationIntent=intent(0#1)}
+== full 19
+length=10
+  0,10 http://a]b {NSPresentationIntent=intent(0#1)}
+== full 20
+length=12
+  0,12 http://].com {NSPresentationIntent=intent(0#1)}
+== full 21
+length=1
+  0,1 t {NSPresentationIntent=intent(0#1)}
+== full 22
+length=1
+  0,1 t {NSPresentationIntent=intent(0#1)}
+== full 23
+length=1
+  0,1 t {NSLink=url(https://base.example/docs/-a:b); NSPresentationIntent=intent(0#1)}
+== full 24
+length=1
+  0,1 t {NSLink=url(https://base.example/docs/+a:b); NSPresentationIntent=intent(0#1)}
+== full 25
+length=1
+  0,1 t {NSLink=url(http://xn--a-lq6a); NSPresentationIntent=intent(0#1)}
+== full 26
+length=8
+  0,8 www.a.b﻿ {NSLink=url(http://www.a.b); NSPresentationIntent=intent(0#1)}
+== full 27
+length=11
+  0,11 <﻿http://a> {NSPresentationIntent=intent(0#1)}
+== full 28
+length=11
+  0,11 http://a.b́ {NSLink=url(http://a.xn--b-xbb); NSPresentationIntent=intent(0#1)}
+== full 29
+length=9
+  0,9 http://á {NSLink=url(http://xn--1ca); NSPresentationIntent=intent(0#1)}
+== inline 0
+length=10
+  0,8 www.a.b́ {NSLink=url(http://www.a.xn--b-xbb)}
+  8,2  c {}
+== inline 1
+length=9
+  0,9 http://a  {NSLink=url(http://a )}
+== inline 2
+length=10
+  0,10 http://a b {NSLink=url(http://a b)}
+== inline 3
+length=11
+  0,9 http://a  {NSLink=url(http://a )}
+  9,2  b {}
+== inline 4
+length=5
+  0,5 www.  {NSLink=url(http://www. )}
+== inline 5
+length=8
+  0,8 ftp://e  {NSLink=url(ftp://e )}
+== inline 6
+length=6
+  0,6 www.a  {NSLink=url(http://www.a )}
+== inline 7
+length=7
+  0,7 www.a b {NSLink=url(http://www.a b)}
+== inline 8
+length=12
+  0,12 http://a.b c {NSLink=url(http://a.b c)}
+== inline 9
+length=11
+  0,2 x  {}
+  2,9 http://a  {NSLink=url(http://a )}
+== inline 10
+length=10
+  0,10 http://a b {NSLink=url(http://a b)}
+== inline 11
+length=10
+  0,10 http://a　b {NSLink=url(http://a b)}
+== inline 12
+length=10
+  0,10 http://ab {}
+== inline 13
+length=10
+  0,10 http://a​b {NSLink=url(http://ab)}
+== inline 14
+length=10
+  0,10 http://a.é {NSLink=url(http://a.xn--9ca)}
+== inline 15
+length=10
+  0,10 http://a b {NSLink=url(http://a b)}
+== inline 16
+length=13
+  0,13 .mailto:a@b.c {NSLink=url(https://base.example/docs/.mailto:a@b.c)}
+== inline 17
+length=1
+  0,1 t {}
+== inline 18
+length=1
+  0,1 t {}
+== inline 19
+length=10
+  0,10 http://a]b {}
+== inline 20
+length=12
+  0,12 http://].com {}
+== inline 21
+length=1
+  0,1 t {}
+== inline 22
+length=1
+  0,1 t {}
+== inline 23
+length=1
+  0,1 t {NSLink=url(https://base.example/docs/-a:b)}
+== inline 24
+length=1
+  0,1 t {NSLink=url(https://base.example/docs/+a:b)}
+== inline 25
+length=1
+  0,1 t {NSLink=url(http://xn--a-lq6a)}
+== inline 26
+length=8
+  0,8 www.a.b﻿ {NSLink=url(http://www.a.b)}
+== inline 27
+length=11
+  0,11 <﻿http://a> {}
+== inline 28
+length=11
+  0,11 http://a.b́ {NSLink=url(http://a.xn--b-xbb)}
+== inline 29
+length=9
+  0,9 http://á {NSLink=url(http://xn--1ca)}
+== inlinePreserving 0
+length=10
+  0,8 www.a.b́ {NSLink=url(http://www.a.xn--b-xbb)}
+  8,2  c {}
+== inlinePreserving 1
+length=9
+  0,9 http://a  {NSLink=url(http://a )}
+== inlinePreserving 2
+length=10
+  0,10 http://a b {NSLink=url(http://a b)}
+== inlinePreserving 3
+length=11
+  0,9 http://a  {NSLink=url(http://a )}
+  9,2  b {}
+== inlinePreserving 4
+length=5
+  0,5 www.  {NSLink=url(http://www. )}
+== inlinePreserving 5
+length=8
+  0,8 ftp://e  {NSLink=url(ftp://e )}
+== inlinePreserving 6
+length=6
+  0,6 www.a  {NSLink=url(http://www.a )}
+== inlinePreserving 7
+length=7
+  0,7 www.a b {NSLink=url(http://www.a b)}
+== inlinePreserving 8
+length=12
+  0,12 http://a.b c {NSLink=url(http://a.b c)}
+== inlinePreserving 9
+length=11
+  0,2 x  {}
+  2,9 http://a  {NSLink=url(http://a )}
+== inlinePreserving 10
+length=10
+  0,10 http://a b {NSLink=url(http://a b)}
+== inlinePreserving 11
+length=10
+  0,10 http://a　b {NSLink=url(http://a b)}
+== inlinePreserving 12
+length=10
+  0,10 http://ab {}
+== inlinePreserving 13
+length=10
+  0,10 http://a​b {NSLink=url(http://ab)}
+== inlinePreserving 14
+length=10
+  0,10 http://a.é {NSLink=url(http://a.xn--9ca)}
+== inlinePreserving 15
+length=10
+  0,10 http://a b {NSLink=url(http://a b)}
+== inlinePreserving 16
+length=13
+  0,13 .mailto:a@b.c {NSLink=url(https://base.example/docs/.mailto:a@b.c)}
+== inlinePreserving 17
+length=1
+  0,1 t {}
+== inlinePreserving 18
+length=1
+  0,1 t {}
+== inlinePreserving 19
+length=10
+  0,10 http://a]b {}
+== inlinePreserving 20
+length=12
+  0,12 http://].com {}
+== inlinePreserving 21
+length=1
+  0,1 t {}
+== inlinePreserving 22
+length=1
+  0,1 t {}
+== inlinePreserving 23
+length=1
+  0,1 t {NSLink=url(https://base.example/docs/-a:b)}
+== inlinePreserving 24
+length=1
+  0,1 t {NSLink=url(https://base.example/docs/+a:b)}
+== inlinePreserving 25
+length=1
+  0,1 t {NSLink=url(http://xn--a-lq6a)}
+== inlinePreserving 26
+length=8
+  0,8 www.a.b﻿ {NSLink=url(http://www.a.b)}
+== inlinePreserving 27
+length=11
+  0,11 <﻿http://a> {}
+== inlinePreserving 28
+length=11
+  0,11 http://a.b́ {NSLink=url(http://a.xn--b-xbb)}
+== inlinePreserving 29
+length=9
+  0,9 http://á {NSLink=url(http://xn--1ca)}
