@@ -213,6 +213,17 @@ The lowering also took the `@end` at the front of a doc comment's `@endcode` for
 so the members after the first doc-commented one kept their availability (`MLModel`'s compile call was one).
 `block_end_of` ends a block only at the word `@end` (`lowered_doc_comment_test.lua`).
 
+The overlay's Swift methods are matched to implemented selectors by the name the overlay gives them. `swift_base` guesses
+the name from the selector; `SWIFT_OVERLAY_NAMES` names the seven `Calendar` methods that the guess misses
+(`dateComponents(in:from:)`, `nextDate(after:matching:matchingPolicy:...)` and the others), and `lowered_by` also reads
+`public mutating func`. The match is by name, so an overload that shares a lowered name takes the lowering with it, and
+that is wrong when its signature names a type that is still gated: `dateIntervalOfWeekend(containing:)` and
+`nextWeekend(startingAfter:direction:)` return a `DateInterval`, which is iOS 10, and lost their gate with the iOS 8
+overloads of the same name, so the runtime stopped building at "'DateInterval' is only available in iOS 10.0 or newer".
+A method whose signature names `DateInterval` is not lowered unless `DateInterval` is implemented
+(`names_unlowered_type`; `lowering_test.lua` has the three weekend overloads and fails without it). The unit test sees only the
+samples it holds, so a build of the runtime from source is what confirms a change to this lowering.
+
 ## A declaration whose availability is behind a preprocessor conditional
 
 Two shapes of the SDK's own headers kept an implemented member's availability, and each failed a Telegram line that the
@@ -249,7 +260,8 @@ them declarations that regain their availability, among them `AVAudioSession.sec
 `sourceDeviceType` (iOS 13), `UITableView.fillerRowHeight` and `selfSizingInvalidation`, `CIContext.workingFormat` and the
 `AVError` codes after `AVErrorFailedToParse`. Telegram 13.0.0 uses three of them without a guard:
 `ManagedAudioSession.swift:623` (`secondaryAudioShouldBeSilencedHint`), `LocationUtils.swift:154` (`requestsAlternateRoutes`)
-and the `RTCAudioSession.mm` line that reads the same hint. Each compiles today only because the lowering removed an
-availability that nothing implements, and would be a compile error after the change (reasoned: on an iOS 6 device the
+and the `RTCAudioSession.mm` line that reads the same hint. `requestsAlternateRoutes` is implemented now
+(`MKDirectionsRequest7.m`), so that line no longer depends on the comment. The other two compile today only because the
+lowering removed an availability that nothing implements, and would be a compile error after the change (reasoned: on an iOS 6 device the
 selector is not there, so the call would raise "unrecognized selector" if it ran; no device run). The change is
 therefore not made here: it needs those three names implemented or guarded first.

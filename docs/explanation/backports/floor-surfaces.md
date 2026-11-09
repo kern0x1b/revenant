@@ -188,8 +188,53 @@ Not provided: `usePageViewController:withViewOptions:`, `pageOverlayViewProvider
 `PDFPage(image:)` and writing a changed document are not implemented, so a `PDFDocument()` stays empty. Telegram's
 document scanner builds such a document, and it also needs VisionKit, which iOS 6 does not have.
 
+## Foundation, MapKit and CoreMotion: the names the Swift sources of Telegram call
+
+The armv7 build of Telegram 13.0.0 stopped on these lines. Each is the Swift view of a name that the port now implements
+below it, and the sources of Telegram stay as they are.
+
+- `DateSuggestion.swift:46, 51, 57, 136`: `Calendar.dateComponents(in:from:)` and `Calendar.nextDate(after:matching:matchingPolicy:repeatedTimePolicy:direction:)`.
+  The overlay's methods call `-componentsInTimeZone:fromDate:` and `-nextDateAfterDate:matchingComponents:options:`, which
+  Backports implement, and the overlay named them differently from the selectors, so the lowering could not see it
+  (`SWIFT_OVERLAY_NAMES` in `lowered.lua` now pairs them). `nextDateAfterDate:matchingComponents:options:` is the system
+  search and not an approximation: from the start it walks to the next period whose value matches the coarsest
+  component given, and resolves a missing day of the month, a time inside a spring gap and a repeated autumn hour by the
+  matching policy and by First and Last counted in the direction of the search. `calendar_match_test.m` compares it with
+  the host's answer in 23960 cases (21 component shapes, ten option sets, six zones, twenty instants around their
+  transitions) and the answers agree to the second. Two answers of the host are not reproduced because they are defects of
+  the host and not rules: a backward weekday-ordinal search returns nil, and a backward day-of-month search that starts
+  on a day with a repeated hour returns a date 28 years early. Components the walk does not model (era, week year,
+  nanosecond, day of year, a quarter outside the Gregorian calendar) take the older, simpler path, which answers the same
+  for them as before.
+- `MediaPickerGridItem.swift:483`: `Date.formatted(date:time:)`. The overlay has `Date.FormatStyle` with its date and time
+  styles. The pattern is asked from ICU's `udatpg_*` with the locale and its calendar, and the exports are in the
+  iOS 6.0 libicucore (read from its dyld cache). `date_format_style_test.lua` compares the output with the host's.
+- `WalletCurrencyListContextItem.swift:77`: `Locale.Language.maximalIdentifier`, built on `uloc_addLikelySubtags`.
+  `minimalIdentifier`, `isEquivalent(to:)` and the two `Components` initializers came with it. `parent`,
+  `hasCommonParent(with:)` and `systemLanguages` are not provided: they come from CLDR parent tables and the list of the
+  system's languages, which iOS 6 does not have.
+- `BrowserMarkdown.swift:1212`: `NSAttributedString(markdown:options:baseURL:)`. The parser is Backports
+  (`NSAttributedStringMarkdown15.m`) and the Swift side (`AttributedString`, `MarkdownParsingOptions`) is in the overlay.
+  `attributed_string_markdown_test.lua` compares the runs and the presentation intents with the host's for the same input.
+- `LocationUtils.swift:153`: `MKDirectionsRequest.transportType`, with `requestsAlternateRoutes`, `departureDate` and
+  `arrivalDate`, kept per request. `MapRequestProbe` runs 14 checks on an iPhone 4S, iOS 6.1.3, and all pass.
+- `WebAppController.swift:2827`: `CMDeviceMotion.heading`. The geometry is checked on the host against poses built from
+  known headings, tilts and rolls, and `MotionHeadingProbe` runs 13 checks on an iPhone 4S, iOS 6.1.3, all passing.
+
+A change that is not Telegram's: the lowering of the Calendar methods was by name, so the two overloads that return a
+`DateInterval` lost their iOS 10 gate with the iOS 8 methods of the same name, and the runtime did not build from source.
+A method whose signature names `DateInterval` is lowered only when `DateInterval` itself is implemented
+(`names_unlowered_type` in `lowered.lua`; `lowering_test.lua` has the three overloads).
+
 ## What is not verified
 
+- A live heading in a north reference frame. `CMDeviceMotion` takes `xMagneticNorthZVertical` and
+  `xTrueNorthZVertical` only after the phone has been moved to calibrate (CMErrorDomain 101 otherwise), so the delivery
+  paths' tag of the frame and the geometry are checked, and the heading a moving phone reports is not.
+- `NSAttributedString(markdown:)` on a device: `MarkdownDumpProbe` (`tests/device_probe/markdown_dump_main.m`) prints the
+  runs and the presentation intents of 20 strings in three syntax modes, to be compared line for line with
+  `markdown_dump.expected`, which is the host Foundation's output of the same program. It has been built for armv7 and
+  has not run: the phone was not attached when it was tried.
 - The UIMenu initializers, the CallKit, CoreMedia and PhotosUI overlays and `INStartCallIntent` were typechecked
   together with Telegram's lines and built in the runtime. They have not run on a device.
 - Nothing here draws a menu subtitle or a selected image, and no Live Photo, slow-motion or time-lapse asset exists on
