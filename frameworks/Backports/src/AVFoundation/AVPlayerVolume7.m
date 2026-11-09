@@ -1,21 +1,22 @@
 #import <AVFoundation/AVFoundation.h>
-#import <CoreMedia/CoreMedia.h>
 #import <objc/runtime.h>
 
 static const char revenant_player_volume_key;
 static const char revenant_item_volume_key;
 
+@interface AVPlayerItem (RevenantVolumeAdjustment)
+- (float)volumeAdjustment;
+- (void)setVolumeAdjustment:(float)volumeAdjustment;
+@end
+
 @interface RevenantPlayerVolume : NSObject
-@property (nonatomic, weak) AVPlayer *player;
 @property (nonatomic) float volume;
 @property (nonatomic) BOOL muted;
 @property (nonatomic, readonly) NSHashTable *items;
 @end
 
 @interface RevenantItemVolume : NSObject
-@property (nonatomic, strong) AVAudioMix *base;
-@property (nonatomic, strong) AVAudioMix *ours;
-@property (nonatomic) float gain;
+@property (nonatomic) float base;
 @end
 
 static void revenant_release_item(AVPlayerItem *item)
@@ -23,14 +24,12 @@ static void revenant_release_item(AVPlayerItem *item)
     RevenantItemVolume *record = objc_getAssociatedObject(item, &revenant_item_volume_key);
     if (!record)
         return;
-    if (record.ours && item.audioMix == record.ours)
-        item.audioMix = record.base;
+    item.volumeAdjustment = record.base;
     objc_setAssociatedObject(item, &revenant_item_volume_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 @implementation RevenantPlayerVolume
 
-@synthesize player = _player;
 @synthesize volume = _volume;
 @synthesize muted = _muted;
 @synthesize items = _items;
@@ -61,8 +60,6 @@ static void revenant_release_item(AVPlayerItem *item)
 @implementation RevenantItemVolume
 
 @synthesize base = _base;
-@synthesize ours = _ours;
-@synthesize gain = _gain;
 
 @end
 
@@ -75,92 +72,23 @@ static NSArray *revenant_player_items(AVPlayer *player)
     return player.currentItem ? @[player.currentItem] : @[];
 }
 
-static AVAudioMix *revenant_scaled_mix(AVAudioMix *base, NSArray *tracks, float gain)
-{
-    NSMutableArray *parameters = [NSMutableArray arrayWithCapacity:tracks.count];
-    for (AVAssetTrack *track in tracks) {
-        AVAudioMixInputParameters *source = nil;
-        for (AVAudioMixInputParameters *candidate in base.inputParameters) {
-            if (candidate.trackID == track.trackID) {
-                source = candidate;
-                break;
-            }
-        }
-        AVMutableAudioMixInputParameters *scaled = [AVMutableAudioMixInputParameters audioMixInputParametersWithTrack:track];
-        BOOL anchored = NO;
-        if (source) {
-            scaled.audioTapProcessor = source.audioTapProcessor;
-            CMTime cursor = kCMTimeZero;
-            float start = 0.0f;
-            float end = 0.0f;
-            CMTimeRange range = kCMTimeRangeZero;
-            while ([source getVolumeRampForTime:cursor startVolume:&start endVolume:&end timeRange:&range]) {
-                if (!anchored && CMTimeCompare(range.start, kCMTimeZero) > 0)
-                    [scaled setVolume:gain atTime:kCMTimeZero];
-                anchored = YES;
-                if (CMTIME_IS_NUMERIC(range.duration))
-                    [scaled setVolumeRampFromStartVolume:start * gain toEndVolume:end * gain timeRange:range];
-                else
-                    [scaled setVolume:start * gain atTime:range.start];
-                CMTime next = CMTimeRangeGetEnd(range);
-                if (!CMTIME_IS_NUMERIC(next) || CMTimeCompare(next, cursor) <= 0)
-                    break;
-                cursor = next;
-            }
-        }
-        if (!anchored)
-            [scaled setVolume:gain atTime:kCMTimeZero];
-        [parameters addObject:scaled];
-    }
-    AVMutableAudioMix *mix = [AVMutableAudioMix audioMix];
-    mix.inputParameters = parameters;
-    return mix;
-}
-
-static void revenant_install(RevenantPlayerVolume *state, AVPlayerItem *item)
+static void revenant_apply_item(RevenantPlayerVolume *state, AVPlayerItem *item)
 {
     float gain = state.gain;
     RevenantItemVolume *record = objc_getAssociatedObject(item, &revenant_item_volume_key);
-    if (!record && gain == 1.0f)
-        return;
     if (!record) {
+        if (gain == 1.0f)
+            return;
         record = [RevenantItemVolume new];
+        record.base = item.volumeAdjustment;
         objc_setAssociatedObject(item, &revenant_item_volume_key, record, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
-    AVAudioMix *current = item.audioMix;
-    BOOL owned = record.ours && current == record.ours;
-    if (!owned)
-        record.base = current;
     if (gain == 1.0f) {
-        if (owned)
-            item.audioMix = record.base;
-        objc_setAssociatedObject(item, &revenant_item_volume_key, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        revenant_release_item(item);
         return;
     }
-    if (owned && record.gain == gain)
-        return;
-    NSArray *tracks = [item.asset tracksWithMediaType:AVMediaTypeAudio];
-    if (tracks.count == 0)
-        return;
-    item.audioMix = revenant_scaled_mix(record.base, tracks, gain);
-    record.ours = item.audioMix;
-    record.gain = gain;
+    item.volumeAdjustment = record.base * gain;
     [state.items addObject:item];
-}
-
-static void revenant_apply_item(RevenantPlayerVolume *state, AVPlayerItem *item)
-{
-    AVAsset *asset = item.asset;
-    if (state.gain == 1.0f || [asset statusOfValueForKey:@"tracks" error:NULL] == AVKeyValueStatusLoaded) {
-        revenant_install(state, item);
-        return;
-    }
-    [asset loadValuesAsynchronouslyForKeys:@[@"tracks"] completionHandler:^{
-        dispatch_async(dispatch_get_main_queue(), ^{
-            if ([revenant_player_items(state.player) containsObject:item])
-                revenant_install(state, item);
-        });
-    }];
 }
 
 static void revenant_apply_player(AVPlayer *player)
@@ -186,7 +114,6 @@ static RevenantPlayerVolume *revenant_player_state(AVPlayer *player)
     RevenantPlayerVolume *state = objc_getAssociatedObject(player, &revenant_player_volume_key);
     if (!state) {
         state = [RevenantPlayerVolume new];
-        state.player = player;
         objc_setAssociatedObject(player, &revenant_player_volume_key, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     return state;

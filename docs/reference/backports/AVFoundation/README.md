@@ -60,35 +60,32 @@ Measured on the device (2026-11-08, `frameworks/Backports/tests/AVFoundation/pla
 
 - `AVPlayer` has the private `_volume` and `_setVolume:`. Calling them changes the volume of the whole device, the one the hardware buttons set (the
   measurement moved the device's volume and the probe put it back). The backport does not use them: an app that mutes its player would mute the phone.
-- `AVPlayerItem` has `audioMix` and `AVMutableAudioMixInputParameters` has `setVolume:atTime:` and `setVolumeRampFromStartVolume:toEndVolume:timeRange:`.
-  A gain set that way applies to that item's audio track only.
-- `item.audioMix` returns the same object on every read until it is set again, and the setter stores a copy, so the object read back after a set is not
-  the one passed in. The backport therefore records what the getter returns after it sets, and recognises its own mix by that object.
+- `AVPlayerItem` has the private `volumeAdjustment` and `setVolumeAdjustment:` (in the shared caches of 6.0 and 6.1.3 alike; the item's `kFigPlaybackItemProperty_Volume`).
+  A gain set that way applies to that item only, as a linear factor: on the phone's microphone a factor of 0.5, 0.25 and 0.1 reads the same as an audio mix
+  with that volume (within 0.4 dB), 0 reads the ambient level, 2 reads louder than 1, and the factor multiplies with the gain of an audio mix. It changes
+  while the item plays. An audio tap (`MTAudioProcessingTap`) sees the sound before either gain.
 - `AVAssetTrack` has no `minFrameDuration` and `AVAssetTrack.asset` is a weak reference, so a track does not keep its asset alive.
 - `AVAssetReader` with a track output and `outputSettings:nil` hands out the compressed samples with their durations.
 
 ## Volume and mute
 
 `frameworks/Backports/src/AVFoundation/AVPlayerVolume7.m` keeps the player's volume and mute state in an associated object, so `volume` reads back as
-set (clamped to 0 to 1, default 1) and `isMuted` is independent of it. The gain applied is 0 while muted and the volume otherwise. It reaches the sound as an
-`AVAudioMix` on each of the player's items: one `AVMutableAudioMixInputParameters` per audio track of the item's asset, with the gain from time zero.
+set (clamped to 0 to 1, default 1) and `isMuted` is independent of it. The gain applied is 0 while muted and the volume otherwise. It reaches the sound as
+the `volumeAdjustment` of each item the player holds: the item's own value at the time the player first touched it, times the gain.
 
-- An audio mix that the app set on the item first is not lost: the backport remembers it as the base and builds the item's mix from it, copying each
-  input's audio tap processor and scaling each volume ramp by the gain. A ramp with an indefinite duration becomes a `setVolume:atTime:` step, because the
-  ramp setter raises for a range that has no numeric end. If the app sets an audio mix later, the next application of the volume takes that one as the new
-  base. Full volume gives the app's mix back as it was, and with no mix of the app's the item's mix returns to nil.
-- The mix is applied when the volume or mute changes, when `replaceCurrentItemWithPlayerItem:` runs, and on a queue player when an item is inserted. An
-  item whose audio tracks are not yet loaded gets the gain when they load, asynchronously on the main queue, if it is still the player's.
+- The app's audio mix is never replaced, scaled or read, and no track has to be loaded: the gain is set at once, on items whose tracks have not loaded too.
+- The gain is applied when the volume or mute changes, when `replaceCurrentItemWithPlayerItem:` runs, and on a queue player when an item is inserted, to every
+  item the player holds. At full volume the item gets its own value back and the record is dropped.
 - `+load` replaces `replaceCurrentItemWithPlayerItem:` on `AVPlayer` and `insertItem:afterItem:`, `removeItem:`, `removeAllItems` and
-  `advanceToNextItem` on `AVQueuePlayer` (`class_replaceMethod` with a block that calls the original first; the crutch is C52). A removed item gets its own mix back, and a player
+  `advanceToNextItem` on `AVQueuePlayer` (`class_replaceMethod` with a block that calls the original first; the crutch is C52). A removed item gets its own value back, and a player
   that is released gives back every item that is left, so an item that outlives a muted player is not left muted.
 
-Limits, reasoned: an item whose asset has no audio track the system can enumerate (a live HLS stream before its tracks appear) gets no gain until it has
-tracks; the gain is in the audio mix, so it applies to the player's output as rendered and not to an audio tap that the app installs after the backport's
-parameters (the tap processor of the app's own parameters is carried over). The player's rate and `AVAudioSession` are untouched.
+Limits, reasoned: an item that the app takes out of one player and puts into another is given its own value on removal and takes the new player's gain on
+insertion; the player's rate and `AVAudioSession` are untouched.
 
-Checked: host 14 of 14 and device 14 of 14 (`player_volume_test.m`, the claims above in the order of the file); the host run's `--negative` mode fails.
-The test measures the gain the item's audio mix carries, not the loudness of the sound: nothing was heard or recorded from the speaker.
+Checked: host 14 of 14 and device 14 of 14 (`player_volume_test.m`, the claims above in the order of the file); the host run's `--negative` mode fails. On the
+host the test supplies `volumeAdjustment` itself, because macOS has no such member. The sound was measured on the phone with `PlayerSignalProbe` (a tone from the
+speaker read by the phone's microphone): the backport's volume and mute change the level as the numbers in C52 show.
 
 ## minFrameDuration
 

@@ -27331,8 +27331,6 @@ member RevenantIntentsUIHostedViewController -viewDidLayoutSubviews
 member RevenantItemProxy -initWithItem:
 member RevenantItemProxy -revenant_tapped:
 member RevenantItemVolume -base
-member RevenantItemVolume -gain
-member RevenantItemVolume -ours
 member RevenantJSONReader -advance
 member RevenantJSONReader -buffer
 member RevenantJSONReader -fail:
@@ -28366,7 +28364,6 @@ member RevenantPlayerVolume -gain
 member RevenantPlayerVolume -init
 member RevenantPlayerVolume -items
 member RevenantPlayerVolume -muted
-member RevenantPlayerVolume -player
 member RevenantPlayerVolume -volume
 member RevenantPlayerVolumeInstaller +load
 member RevenantPopoverState -popover
