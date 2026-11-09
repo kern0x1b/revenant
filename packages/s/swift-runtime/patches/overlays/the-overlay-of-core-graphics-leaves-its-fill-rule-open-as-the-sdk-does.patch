@@ -1,0 +1,11 @@
+diff --git a/stdlib/public/Darwin/CoreGraphics/CoreGraphics.swift b/stdlib/public/Darwin/CoreGraphics/CoreGraphics.swift
+--- a/stdlib/public/Darwin/CoreGraphics/CoreGraphics.swift
++++ b/stdlib/public/Darwin/CoreGraphics/CoreGraphics.swift
+@@ -574,6 +574,7 @@ extension CGContext {
+ //===----------------------------------------------------------------------===//
+ 
+ // TODO: Make this a nested type (CGPath.FillRule)
++@nonexhaustive
+ public enum CGPathFillRule: Int {
+   /// Nonzero winding number fill rule.
+   /// 

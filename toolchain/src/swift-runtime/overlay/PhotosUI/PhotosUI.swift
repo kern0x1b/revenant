@@ -48,12 +48,14 @@ public struct PHPickerFilter: Equatable, Hashable {
 }
 
 public struct PHPickerConfiguration: Equatable, Hashable {
+    @nonexhaustive
     public enum AssetRepresentationMode {
         case automatic
         case current
         case compatible
     }
 
+    @nonexhaustive
     public enum Selection {
         case `default`
         case ordered

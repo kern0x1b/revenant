@@ -229,17 +229,44 @@ extension Locale {
         }
     }
 
-    public enum MeasurementSystem: Hashable, Sendable, CustomDebugStringConvertible {
-        case metric
-        case uk
-        case us
+    public struct MeasurementSystem: Hashable, Codable, Sendable, ExpressibleByStringLiteral, CustomDebugStringConvertible {
+        public var identifier: String
+
+        public static let metric = MeasurementSystem("metric")
+        public static let us = MeasurementSystem("ussystem")
+        public static let uk = MeasurementSystem("uksystem")
+
+        public static var measurementSystems: [MeasurementSystem] {
+            return [.metric, .us, .uk]
+        }
+
+        public init(_ identifier: String) {
+            self.identifier = identifier
+        }
+
+        public init(stringLiteral value: String) {
+            self.identifier = value
+        }
+
+        public init(from decoder: any Decoder) throws {
+            self.identifier = try decoder.singleValueContainer().decode(String.self)
+        }
 
         public var debugDescription: String {
-            switch self {
-            case .metric: return "metric"
-            case .uk: return "uksystem"
-            case .us: return "ussystem"
-            }
+            return identifier
+        }
+
+        public static func == (lhs: MeasurementSystem, rhs: MeasurementSystem) -> Bool {
+            return lhs.identifier.lowercased() == rhs.identifier.lowercased()
+        }
+
+        public func hash(into hasher: inout Hasher) {
+            hasher.combine(identifier.lowercased())
+        }
+
+        public func encode(to encoder: any Encoder) throws {
+            var container = encoder.singleValueContainer()
+            try container.encode(identifier)
         }
     }
 

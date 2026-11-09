@@ -21,12 +21,4 @@ func sortedUnknown(_ kind: backport.PresentationIntent.Kind) -> Int {
     }
 }
 
-func covered(_ kind: backport.PresentationIntent.Kind) -> Int {
-    switch kind {
-    case .paragraph, .header, .orderedList, .unorderedList, .listItem: return 0
-    case .codeBlock, .blockQuote, .thematicBreak: return 1
-    case .table, .tableHeaderRow, .tableRow, .tableCell: return 2
-    }
-}
-
-print(sorted(.paragraph), sortedUnknown(.thematicBreak), covered(.tableCell(columnIndex: 0)))
+print(sorted(.paragraph), sortedUnknown(.thematicBreak))

@@ -1,0 +1,71 @@
+diff --git a/stdlib/public/Darwin/Dispatch/Data.swift b/stdlib/public/Darwin/Dispatch/Data.swift
+--- a/stdlib/public/Darwin/Dispatch/Data.swift
++++ b/stdlib/public/Darwin/Dispatch/Data.swift
+@@ -20,6 +20,7 @@ public struct DispatchData : RandomAccessCollection, _ObjectiveCBridgeable {
+ 
+ 	public static let empty: DispatchData = DispatchData(data: _swift_dispatch_data_empty())
+ 
++	@nonexhaustive
+ 	public enum Deallocator {
+ 		/// Use `free`
+ 		case free
+diff --git a/stdlib/public/Darwin/Dispatch/Dispatch.swift b/stdlib/public/Darwin/Dispatch/Dispatch.swift
+--- a/stdlib/public/Darwin/Dispatch/Dispatch.swift
++++ b/stdlib/public/Darwin/Dispatch/Dispatch.swift
+@@ -16,6 +16,7 @@
+ /// dispatch_assert
+ 
+ @available(macOS 10.12, *)
++@nonexhaustive
+ public enum DispatchPredicate {
+ 	case onQueue(DispatchQueue)
+ 	case onQueueAsBarrier(DispatchQueue)
+@@ -69,6 +70,7 @@ public struct DispatchQoS : Equatable {
+ 
+ 	public static let unspecified = DispatchQoS(qosClass: .unspecified, relativePriority: 0)
+ 
++	@nonexhaustive
+ 	public enum QoSClass {
+ 		@available(macOS 10.10, *)
+ 		case background
+diff --git a/stdlib/public/Darwin/Dispatch/IO.swift b/stdlib/public/Darwin/Dispatch/IO.swift
+--- a/stdlib/public/Darwin/Dispatch/IO.swift
++++ b/stdlib/public/Darwin/Dispatch/IO.swift
+@@ -12,6 +12,7 @@
+ 
+ extension DispatchIO {
+ 
++	@nonexhaustive
+ 	public enum StreamType : UInt  {
+ 		case stream = 0
+ 		case random = 1
+diff --git a/stdlib/public/Darwin/Dispatch/Queue.swift b/stdlib/public/Darwin/Dispatch/Queue.swift
+--- a/stdlib/public/Darwin/Dispatch/Queue.swift
++++ b/stdlib/public/Darwin/Dispatch/Queue.swift
+@@ -46,6 +46,7 @@ extension DispatchQueue {
+ 		}
+ 	}
+ 
++	@nonexhaustive
+ 	public enum GlobalQueuePriority {
+ 		@available(macOS, deprecated: 10.10, message: "Use qos attributes instead")
+ 		@available(iOS, deprecated: 8.0, message: "Use qos attributes instead")
+@@ -81,6 +82,7 @@ extension DispatchQueue {
+ 		}
+ 	}
+ 
++	@nonexhaustive
+ 	public enum AutoreleaseFrequency {
+ 		case inherit
+ 
+diff --git a/stdlib/public/Darwin/Dispatch/Time.swift b/stdlib/public/Darwin/Dispatch/Time.swift
+--- a/stdlib/public/Darwin/Dispatch/Time.swift
++++ b/stdlib/public/Darwin/Dispatch/Time.swift
+@@ -158,6 +158,7 @@ private func toInt64Clamped(_ value: Double) -> Int64 {
+ ///		let t1 = DispatchTimeInterval.seconds(Int.max)
+ ///		let t2 = DispatchTimeInterval.milliseconds(Int.max)
+ ///		let result = t1 == t2   // true
++@nonexhaustive
+ public enum DispatchTimeInterval : Equatable {
+ 	case seconds(Int)
+ 	case milliseconds(Int)

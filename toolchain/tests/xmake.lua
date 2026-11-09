@@ -23,7 +23,7 @@ local packaged = {"application_test", "architectures_test", "atomics_test", "bac
                   "debian_test", "dyld_test", "flat_classes_test", "gdb_test", "lowered_import_test", "lowered_link_test", "lowered_options_test", "macho_test", "objc_bool_test", "objc_test", "operators_test",
                   "optimisation_test", "order_file_test", "overlay_cache_test", "platform_libraries_test", "rebind_test", "shared_runtime_test", "thumb_sectdiff_test", "tls_test", "toolchain_check_test", "vision_text_test", "weak_test", "webkit_engine_package_test"}
 
-local device = {"callkit_screen_test", "compat_device_test", "emulator_test", "launchd_home_test", "port_test", "swift_cxx_test", "swift_cxx_thread_local_test", "swift_test", "swift_underlying_module_test", "tweak_test"}
+local device = {"callkit_screen_test", "compat_device_test", "emulator_test", "launchd_home_test", "overlay_enums_test", "port_test", "swift_cxx_test", "swift_cxx_thread_local_test", "swift_test", "swift_underlying_module_test", "tweak_test"}
 
 if get_config("tests") == "device" then
     add_requires("revenant@swift 6.4.0", {alias = "swift", system = false})

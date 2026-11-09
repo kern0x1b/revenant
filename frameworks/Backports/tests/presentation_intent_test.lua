@@ -3,6 +3,7 @@ local backports = path.absolute(path.join(os.scriptdir(), ".."))
 local source = path.absolute(path.join(backports, "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "PresentationIntent.swift"))
 local fixture = path.join(backports, "tests", "Foundation", "presentation_intent", "main.swift")
 local client = path.join(backports, "tests", "Foundation", "presentation_intent", "nonfrozen.swift")
+local exhaustive = path.join(backports, "tests", "Foundation", "presentation_intent", "exhaustive.swift")
 
 local function swiftc(args)
     os.vrunv("xcrun", table.join({"swiftc", "-O"}, args))
@@ -24,4 +25,9 @@ function main()
     os.mkdir(module)
     swiftc({"-parse-as-library", "-emit-module", "-module-name", "backport", "-emit-module-path", path.join(module, "backport.swiftmodule"), source})
     os.vrunv("xcrun", {"swiftc", "-emit-sil", "-o", path.join(out, "client.sil"), "-I", module, "-warnings-as-errors", client})
+    local log = path.join(out, "exhaustive.log")
+    local code = os.execv("xcrun", {"swiftc", "-emit-sil", "-o", path.join(out, "exhaustive.sil"), "-I", module, "-warnings-as-errors", exhaustive},
+                          {try = true, stdout = log, stderr = log})
+    assert(code ~= 0, "a switch over PresentationIntent.Kind without a default compiled cleanly, so the enumeration is exhaustive and differs from the SDK's: " .. log)
+    assert(io.readfile(log):find("may have additional unknown values", 1, true), "the switch without a default failed for another reason: " .. log)
 end
