@@ -250,6 +250,12 @@ static id revenant_command(id owner, Class cls, id __strong *storage)
 
 - (void)revenant_sendEvent:(UIEvent *)event
 {
+    [self revenant_dispatchRemoteControlEvent:event];
+    [self revenant_sendEvent:event];
+}
+
+- (void)revenant_dispatchRemoteControlEvent:(UIEvent *)event
+{
     if (event.type == UIEventTypeRemoteControl) {
         MPRemoteCommandCenter *center = [MPRemoteCommandCenter sharedCommandCenter];
         MPRemoteCommand *command = nil;
@@ -292,7 +298,6 @@ static id revenant_command(id owner, Class cls, id __strong *storage)
             [command revenant_dispatch:commandEvent];
         }
     }
-    [self revenant_sendEvent:event];
 }
 
 @end

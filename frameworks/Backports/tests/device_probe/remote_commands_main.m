@@ -50,9 +50,13 @@ static RevenantRemoteEvent *revenant_event(UIEventType type, UIEventSubtype subt
     return event;
 }
 
+@interface UIApplication (RevenantRemoteCommandProbe)
+- (void)revenant_dispatchRemoteControlEvent:(UIEvent *)event;
+@end
+
 static void revenant_send(UIEventSubtype subtype)
 {
-    [[UIApplication sharedApplication] sendEvent:revenant_event(UIEventTypeRemoteControl, subtype)];
+    [[UIApplication sharedApplication] revenant_dispatchRemoteControlEvent:revenant_event(UIEventTypeRemoteControl, subtype)];
 }
 
 @interface RevenantRecorder : NSObject
@@ -73,7 +77,7 @@ static void revenant_send(UIEventSubtype subtype)
 - (void)receiveAgain:(MPRemoteCommandEvent *)event { [self.events addObject:event]; }
 @end
 
-@interface RevenantResponder : UIResponder
+@interface RevenantResponder : UIView
 @property (nonatomic) NSUInteger remoteControlEvents;
 @end
 
@@ -310,27 +314,13 @@ static void revenant_send(UIEventSubtype subtype)
     revenant_send(UIEventSubtypeRemoteControlPlay);
     revenant_check(others.events.count == 0, @"a play event reaches no other command");
     revenant_send(UIEventSubtypeNone);
-    [[UIApplication sharedApplication] sendEvent:revenant_event(UIEventTypeMotion, UIEventSubtypeMotionShake)];
+    [[UIApplication sharedApplication] revenant_dispatchRemoteControlEvent:revenant_event(UIEventTypeMotion, UIEventSubtypeMotionShake)];
     revenant_check(others.events.count == 0, @"an event with no remote command and a shake reach no command");
     for (MPRemoteCommand *command in @[center.pauseCommand, center.stopCommand, center.nextTrackCommand, center.seekForwardCommand,
                                        center.skipForwardCommand, center.changePlaybackPositionCommand, center.ratingCommand,
                                        center.likeCommand, center.changeRepeatModeCommand, center.changeShuffleModeCommand,
                                        center.changePlaybackRateCommand])
         [command removeTarget:others];
-}
-
-- (void)revenantResponder:(MPRemoteCommandCenter *)center
-{
-    RevenantResponder *responder = [[RevenantResponder alloc] init];
-    BOOL first = [responder becomeFirstResponder];
-    RevenantRecorder *recorder = [[RevenantRecorder alloc] init];
-    [center.playCommand addTarget:recorder action:@selector(receive:)];
-    revenant_send(UIEventSubtypeRemoteControlPlay);
-    revenant_line(@"INFO responder first %d remoteControlReceivedWithEvent %lu commands %lu", first,
-                  (unsigned long)responder.remoteControlEvents, (unsigned long)recorder.events.count);
-    revenant_check(recorder.events.count == 1, @"the command receives the event while a first responder exists");
-    [center.playCommand removeTarget:recorder];
-    [responder resignFirstResponder];
 }
 
 - (void)revenantReal:(MPRemoteCommandCenter *)center
@@ -365,14 +355,20 @@ static void revenant_send(UIEventSubtype subtype)
         [real addObject:event];
         return MPRemoteCommandHandlerStatusSuccess;
     }];
+    RevenantResponder *responder = [[RevenantResponder alloc] initWithFrame:CGRectMake(0, 0, 10, 10)];
+    [self.window.rootViewController.view addSubview:responder];
+    BOOL first = [responder becomeFirstResponder];
     revenant_wait(1.0);
     BOOL sent = send(2, nil);
     NSTimeInterval deadline = [[NSProcessInfo processInfo] systemUptime] + 5.0;
     while (real.count == 0 && [[NSProcessInfo processInfo] systemUptime] < deadline)
         revenant_wait(0.1);
-    revenant_line(@"INFO MediaRemote toggle command sent %d, targets called %lu", sent, (unsigned long)real.count);
+    revenant_line(@"INFO MediaRemote toggle command sent %d, targets called %lu, first responder %d got %lu remoteControlReceivedWithEvent:",
+                  sent, (unsigned long)real.count, first, (unsigned long)responder.remoteControlEvents);
     revenant_check(real.count == 1 && real[0].command == center.togglePlayPauseCommand,
                    @"a MediaRemote toggle play and pause command reaches the toggle target");
+    revenant_check(first && responder.remoteControlEvents == 1,
+                   @"the same event still reaches the first responder through the system's own handling");
     [real removeAllObjects];
     send(4, nil);
     deadline = [[NSProcessInfo processInfo] systemUptime] + 5.0;
@@ -382,6 +378,8 @@ static void revenant_send(UIEventSubtype subtype)
                    @"a MediaRemote next track command reaches the next track target");
     [center.togglePlayPauseCommand removeTarget:toggle];
     [center.nextTrackCommand removeTarget:next];
+    [responder resignFirstResponder];
+    [responder removeFromSuperview];
     [self.player stop];
     [session setActive:NO error:NULL];
 }
@@ -395,7 +393,6 @@ static void revenant_send(UIEventSubtype subtype)
     [self revenantStorage:center];
     [self revenantDispatch:center];
     [self revenantTargets:center];
-    [self revenantResponder:center];
     [self revenantReal:center];
     revenant_line(@"DONE failures %lu", (unsigned long)REVENANT_FAILURES);
     exit(REVENANT_FAILURES ? 1 : 0);
