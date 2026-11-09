@@ -10,7 +10,7 @@
 
 - (instancetype)initWithString:(NSString *)string encodingInvalidCharacters:(BOOL)encoding
 {
-    NSString *written = revenant_url_standard(string, encoding, YES);
+    NSString *written = revenant_url_nsurl(string, encoding);
     return written ? [self initWithString:written] : nil;
 }
 

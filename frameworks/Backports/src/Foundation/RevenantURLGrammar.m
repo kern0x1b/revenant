@@ -75,7 +75,7 @@ static BOOL revenant_url_valid_scheme(const unichar *characters, NSUInteger star
     return YES;
 }
 
-static BOOL revenant_url_valid_host(const unichar *characters, NSUInteger start, NSUInteger end, BOOL international)
+static BOOL revenant_url_valid_host(const unichar *characters, NSUInteger start, NSUInteger end)
 {
     if (start >= end)
         return YES;
@@ -86,7 +86,7 @@ static BOOL revenant_url_valid_host(const unichar *characters, NSUInteger start,
                 if (!revenant_url_escape_valid(characters, index, end))
                     return NO;
                 index += 2;
-            } else if (!revenant_url_alphanumeric(character) && !revenant_url_in(character, "-._~!$&'()*+,;=") && !(international && character >= 128)) {
+            } else if (!revenant_url_alphanumeric(character) && !revenant_url_in(character, "-._~!$&'()*+,;=")) {
                 return NO;
             }
         }
@@ -130,7 +130,7 @@ BOOL revenant_url_valid(RevenantURLPart part, NSString *string)
         valid = revenant_url_valid_scheme(characters, 0, length);
         break;
     case RevenantURLHost:
-        valid = revenant_url_valid_host(characters, 0, length, NO);
+        valid = revenant_url_valid_host(characters, 0, length);
         break;
     case RevenantURLPath:
         valid = revenant_url_valid_run(characters, 0, length, "/:@", YES);

@@ -4,7 +4,8 @@ local BACKPORTS = path.absolute(path.join(TESTS, ".."))
 local SRC = path.join(BACKPORTS, "src", "Foundation")
 local DUMP = path.join(TESTS, "url_components", "dump.m")
 local CORPUS = path.join(TESTS, "url_components", "corpus.txt")
-local FUZZ_COUNT = 4000
+local FUZZ_COUNT = 20000
+local FUZZ_SEEDS = {20261109, 424242, 9001}
 
 local function clang()
     return os.iorunv("xcrun", {"--sdk", "macosx", "--find", "clang"}):trim()
@@ -100,16 +101,6 @@ function main()
     local corpus_components = compare(oracle, backport, urls, false)
     local corpus_urls = compare(oracle, backport, urls, true)
 
-    local generated = fuzz.lines(FUZZ_COUNT, 20261109)
-    local fuzz_file = path.join(work, "fuzz.txt")
-    io.writefile(fuzz_file, table.concat(generated, "\n") .. "\n")
-    local fuzz_urls = corpus_of(fuzz_file)
-    local fuzz_oracle = dump(oracle_program, fuzz_file)
-    local fuzz_backport = dump(backport_program, fuzz_file)
-    local fuzz_components = compare(fuzz_oracle, fuzz_backport, fuzz_urls, false)
-    local fuzz_nsurl = compare(fuzz_oracle, fuzz_backport, fuzz_urls, true)
-    print(string.format("components: corpus %d of %d differ, generated %d of %d differ; NSURL: corpus %d differ, generated %d differ",
-        #corpus_components, #urls, #fuzz_components, #fuzz_urls, #corpus_urls, #fuzz_nsurl))
     local complaints = {}
     local function complain(title, differing)
         local complaint = explain(title, differing)
@@ -118,9 +109,24 @@ function main()
         end
     end
     complain("NSURLComponents on the corpus", corpus_components)
-    complain("NSURLComponents on the generated URLs", fuzz_components)
     complain("NSURL on the corpus", corpus_urls)
-    complain("NSURL on the generated URLs", fuzz_nsurl)
+    local generated_total, generated_components, generated_urls = 0, 0, 0
+    for _, seed in ipairs(FUZZ_SEEDS) do
+        local fuzz_file = path.join(work, "fuzz" .. seed .. ".txt")
+        io.writefile(fuzz_file, table.concat(fuzz.lines(FUZZ_COUNT, seed), "\n") .. "\n")
+        local fuzz_urls = corpus_of(fuzz_file)
+        local fuzz_oracle = dump(oracle_program, fuzz_file)
+        local fuzz_backport = dump(backport_program, fuzz_file)
+        local fuzz_components = compare(fuzz_oracle, fuzz_backport, fuzz_urls, false)
+        local fuzz_nsurl = compare(fuzz_oracle, fuzz_backport, fuzz_urls, true)
+        generated_total = generated_total + #fuzz_urls
+        generated_components = generated_components + #fuzz_components
+        generated_urls = generated_urls + #fuzz_nsurl
+        complain("NSURLComponents on the generated URLs of seed " .. seed, fuzz_components)
+        complain("NSURL on the generated URLs of seed " .. seed, fuzz_nsurl)
+    end
+    print(string.format("NSURLComponents: corpus %d of %d differ, generated %d of %d differ; NSURL: corpus %d differ, generated %d differ",
+        #corpus_components, #urls, generated_components, generated_total, #corpus_urls, generated_urls))
     assert(#complaints == 0, table.concat(complaints, "\n"))
 
     local mutated = path.join(work, "mutated.txt")
@@ -131,8 +137,9 @@ function main()
     io.writefile(mutated, table.concat(changed, "\n") .. "\n")
     local damaged = dump(backport_program, mutated)
     local detected = compare(oracle, damaged, urls, false)
-    assert(#detected > 0, "the negative control passed: every changed URL compared equal to macOS, so the comparison proves nothing")
+    local detected_urls = compare(oracle, damaged, urls, true)
+    assert(#detected > 0 and #detected_urls > 0, "the negative control passed: every changed URL compared equal to macOS, so the comparison proves nothing")
 
     os.tryrm(work)
-    print(string.format("URL_COMPONENTS_ORACLE_TEST passed (%d corpus and %d generated URLs agree with macOS, negative control detected %d)", #urls, #fuzz_urls, #detected))
+    print(string.format("URL_COMPONENTS_ORACLE_TEST passed (%d corpus and %d generated URLs agree with macOS, negative control detected %d and %d)", #urls, generated_total, #detected, #detected_urls))
 end

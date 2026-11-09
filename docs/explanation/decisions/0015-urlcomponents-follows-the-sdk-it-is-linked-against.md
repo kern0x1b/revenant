@@ -22,8 +22,9 @@ The backport parses as macOS does, which is the oracle the test checks against:
   one, is written as the escapes of its UTF-8 bytes. A component with a `%` that starts no valid escape has each `%`
   written as `%25`. The sets are read from the oracle, one ASCII character at a time, in
   `frameworks/Backports/tests/url_components/corpus.txt`.
-- A host label with a non-ASCII character is mapped (compatibility forms, lowercase) and written in punycode in the
-  string. `percentEncodedHost` holds the Unicode form, escaped, so `xn--` labels read back as their Unicode.
+- A host label with a non-ASCII character is mapped by ICU's UTS 46 (`uidna_nameToASCII`, found with `dlopen` and
+  `dlsym` in `/usr/lib/libicucore.dylib`, which iOS 6.1.3 has) and written in punycode in the string.
+  `percentEncodedHost` holds the Unicode form, escaped, so `xn--` labels read back as their Unicode.
 - The port keeps the digits the URL spelled (`0080`), and an empty port keeps its colon in the string.
 - A colon in the first segment of a relative path is written as `%3A` by the `path` setter, not by the composer, so a
   parsed `:x/y` keeps its colon.
@@ -31,9 +32,10 @@ The backport parses as macOS does, which is the oracle the test checks against:
 
 ## Consequences
 
-- The test compares all 705 corpus URLs with macOS and passes with an empty list of divergences.
-- The punycode mapping is compatibility plus lowercase, not the full UTS #46 table. A label that depends on the table
-  for its mapping is the first place a difference would show, and the corpus has none.
+- The test compares all 705 corpus URLs and 60000 generated URLs with macOS, for the components and for the `NSURL`
+  form of `encodingInvalidCharacters:`, and passes with an empty list of divergences.
+- The parser is the RFC 3986 parser of swift-foundation (`RevenantURLParser.m`), not a set of per-character rules read
+  from the oracle; the sets are its allowed-character masks.
 - The grammar is lenient on purpose. A test that expects a rejection of a URL macOS accepts is wrong for an app linked
   against the 26.2 SDK, and should be changed to the macOS answer.
 - The backport does not select the parser by the app's SDK version. Apple's lenient parser is the one the modern class

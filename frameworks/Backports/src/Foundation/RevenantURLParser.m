@@ -15,6 +15,14 @@ static const RevenantMask revenant_mask_zone = {0x47fffffe87fffffeULL, 0x03ff600
 static const RevenantMask revenant_mask_path = {0x47fffffe87ffffffULL, 0x2fffffd200000000ULL};
 static const RevenantMask revenant_mask_first_segment = {0x47fffffe87ffffffULL, 0x2bffffd200000000ULL};
 static const RevenantMask revenant_mask_query = {0x47fffffe87ffffffULL, 0xafffffd200000000ULL};
+static const RevenantMask revenant_mask_reserved = {0x47fffffeafffffffULL, 0xafffffda00000000ULL};
+
+enum {
+    RevenantParseEmptyScheme = 1 << 0,
+    RevenantParseNoHeuristics = 1 << 1,
+    RevenantParsePortValid = 1 << 2,
+    RevenantParseExactCase = 1 << 3
+};
 
 static BOOL revenant_mask_has(RevenantMask mask, uint8_t byte)
 {
@@ -176,12 +184,6 @@ static void revenant_percent_encode(RevenantBuffer *out, const uint8_t *bytes, R
     }
 }
 
-static BOOL revenant_spans_equal(const uint8_t *bytes, RevenantSpan span, const char *text)
-{
-    long length = (long)strlen(text);
-    return revenant_span_length(span) == length && memcmp(bytes + span.start, text, (size_t)length) == 0;
-}
-
 static BOOL revenant_valid_scheme_span(const uint8_t *bytes, RevenantSpan span, BOOL allowEmpty)
 {
     if (revenant_span_length(span) == 0)
@@ -191,7 +193,22 @@ static BOOL revenant_valid_scheme_span(const uint8_t *bytes, RevenantSpan span, 
     return revenant_valid_run(bytes, span, revenant_mask_scheme, NO);
 }
 
-static BOOL revenant_valid_port_span(const uint8_t *bytes, RevenantSpan port, RevenantSpan scheme)
+static BOOL revenant_span_named(const uint8_t *bytes, RevenantSpan span, const char *name, BOOL exactCase)
+{
+    long length = (long)strlen(name);
+    if (revenant_span_length(span) != length)
+        return NO;
+    for (long offset = 0; offset < length; offset++) {
+        uint8_t byte = bytes[span.start + offset];
+        if (!exactCase && byte >= 'A' && byte <= 'Z')
+            byte += 32;
+        if (byte != (uint8_t)name[offset])
+            return NO;
+    }
+    return YES;
+}
+
+static BOOL revenant_valid_port_span(const uint8_t *bytes, RevenantSpan port, RevenantSpan scheme, unsigned options)
 {
     BOOL digits = YES;
     for (long index = port.start; index < port.end; index++) {
@@ -200,7 +217,9 @@ static BOOL revenant_valid_port_span(const uint8_t *bytes, RevenantSpan port, Re
     }
     if (digits)
         return YES;
-    return revenant_present(scheme) && revenant_spans_equal(bytes, scheme, "addressbook");
+    if (!revenant_present(scheme) || !revenant_span_named(bytes, scheme, "addressbook", (options & RevenantParseExactCase) != 0))
+        return NO;
+    return (options & RevenantParsePortValid) == 0 || revenant_valid_run(bytes, port, revenant_mask_reserved, YES);
 }
 
 static long revenant_find(const uint8_t *bytes, long start, long end, uint8_t target)
@@ -221,7 +240,7 @@ static long revenant_find_last(const uint8_t *bytes, long start, long end, uint8
     return -1;
 }
 
-static BOOL revenant_parse_authority(const uint8_t *bytes, long start, long end, RevenantInfo *info, BOOL allowEmptyScheme)
+static BOOL revenant_parse_authority(const uint8_t *bytes, long start, long end, RevenantInfo *info, unsigned options)
 {
     long hostStart = start;
     long hostEnd = end;
@@ -249,7 +268,7 @@ static BOOL revenant_parse_authority(const uint8_t *bytes, long start, long end,
         long colon = revenant_find(bytes, hostStart, end, ':');
         if (colon >= 0) {
             hostEnd = colon;
-            if (colon + 1 != end || allowEmptyScheme)
+            if (colon + 1 != end || (options & RevenantParseEmptyScheme))
                 info->port = (RevenantSpan){colon + 1, end};
         }
     }
@@ -257,8 +276,10 @@ static BOOL revenant_parse_authority(const uint8_t *bytes, long start, long end,
     return YES;
 }
 
-static BOOL revenant_parse_bytes(const uint8_t *bytes, long length, BOOL allowEmptyScheme, RevenantInfo *info)
+static BOOL revenant_parse_bytes(const uint8_t *bytes, long length, unsigned options, RevenantInfo *info)
 {
+    BOOL allowEmptyScheme = (options & RevenantParseEmptyScheme) != 0;
+    BOOL heuristics = (options & RevenantParseNoHeuristics) == 0;
     memset(info, 0, sizeof(*info));
     info->scheme = info->user = info->password = info->host = info->port = info->path = info->query = info->fragment = revenant_absent;
     if (length == 0) {
@@ -280,7 +301,7 @@ static BOOL revenant_parse_bytes(const uint8_t *bytes, long length, BOOL allowEm
                 }
             }
             break;
-        } else if (byte == '/' || byte == '?' || byte == '#' || byte == '[' || byte == ']' || byte == '@') {
+        } else if (byte == '/' || byte == '?' || byte == '#' || (heuristics && (byte == '[' || byte == ']' || byte == '@'))) {
             index = 0;
             break;
         }
@@ -298,10 +319,111 @@ static BOOL revenant_parse_bytes(const uint8_t *bytes, long length, BOOL allowEm
         if (index == authorityStart) {
             info->host = (RevenantSpan){authorityStart, index};
         } else {
-            if (!revenant_parse_authority(bytes, authorityStart, index, info, allowEmptyScheme))
+            if (!revenant_parse_authority(bytes, authorityStart, index, info, options))
                 return NO;
-            if (revenant_present(info->port) && !revenant_valid_port_span(bytes, info->port, info->scheme))
+            if (revenant_present(info->port) && !revenant_valid_port_span(bytes, info->port, info->scheme, options))
                 return NO;
+        }
+    }
+    long pathStart = index;
+    while (index != length && bytes[index] != '?' && bytes[index] != '#')
+        index++;
+    info->path = (RevenantSpan){pathStart, index};
+    if (index == length)
+        return YES;
+    if (bytes[index] == '?') {
+        long queryStart = index + 1;
+        long pound = revenant_find(bytes, queryStart, length, '#');
+        if (pound >= 0) {
+            info->query = (RevenantSpan){queryStart, pound};
+            info->fragment = (RevenantSpan){pound + 1, length};
+        } else {
+            info->query = (RevenantSpan){queryStart, length};
+        }
+    } else {
+        info->fragment = (RevenantSpan){index + 1, length};
+    }
+    return YES;
+}
+
+static BOOL revenant_parse_compatibility(const uint8_t *bytes, long length, RevenantInfo *info)
+{
+    memset(info, 0, sizeof(*info));
+    info->scheme = info->user = info->password = info->host = info->port = info->path = info->query = info->fragment = revenant_absent;
+    if (length == 0) {
+        info->path = (RevenantSpan){0, 0};
+        return YES;
+    }
+    long index = 0;
+    if ((bytes[0] >= 'A' && bytes[0] <= 'Z') || (bytes[0] >= 'a' && bytes[0] <= 'z')) {
+        index = 1;
+        while (index != length) {
+            if (bytes[index] == ':') {
+                info->scheme = (RevenantSpan){0, index};
+                index++;
+                if (index == length) {
+                    info->path = (RevenantSpan){length, length};
+                    return YES;
+                }
+                break;
+            } else if (!revenant_mask_has(revenant_mask_scheme, bytes[index])) {
+                index = 0;
+                break;
+            }
+            index++;
+        }
+    } else if (bytes[0] == ':') {
+        info->scheme = (RevenantSpan){0, 0};
+        index = 1;
+    }
+    if (index == length) {
+        info->path = (RevenantSpan){0, length};
+        return YES;
+    }
+    if (index + 1 < length && bytes[index] == '/' && bytes[index + 1] == '/') {
+        index += 2;
+        long authorityStart = index;
+        while (index != length && bytes[index] != '/' && bytes[index] != '?' && bytes[index] != '#')
+            index++;
+        if (index == authorityStart) {
+            info->host = (RevenantSpan){authorityStart, index};
+        } else {
+            long hostStart = authorityStart;
+            long hostEnd = index;
+            long at = revenant_find_last(bytes, authorityStart, index, '@');
+            if (at >= 0) {
+                long colon = revenant_find(bytes, authorityStart, at, ':');
+                if (colon >= 0) {
+                    info->user = (RevenantSpan){authorityStart, colon};
+                    info->password = (RevenantSpan){colon + 1, at};
+                } else {
+                    info->user = (RevenantSpan){authorityStart, at};
+                }
+                hostStart = at + 1;
+            }
+            long close = hostStart != index && bytes[hostStart] == '[' ? revenant_find(bytes, hostStart, index, ']') : -1;
+            if (close >= 0) {
+                info->ipLiteral = YES;
+                hostEnd = close + 1;
+                if (hostEnd != index) {
+                    if (bytes[hostEnd] != ':')
+                        return NO;
+                    info->port = (RevenantSpan){hostEnd + 1, index};
+                }
+            } else {
+                long colon = revenant_find(bytes, hostStart, index, ':');
+                if (colon >= 0) {
+                    hostEnd = colon;
+                    info->port = (RevenantSpan){colon + 1, index};
+                }
+            }
+            info->host = (RevenantSpan){hostStart, hostEnd};
+            if (revenant_present(info->port)) {
+                for (long digit = info->port.start; digit < info->port.end; digit++) {
+                    if (bytes[digit] < '0' || bytes[digit] > '9')
+                        return NO;
+                }
+            }
         }
     }
     long pathStart = index;
@@ -357,12 +479,12 @@ typedef NS_OPTIONS(unsigned, RevenantInvalid) {
     RevenantInvalidFragment = 1 << 5
 };
 
-static RevenantInvalid revenant_invalid_components(const uint8_t *bytes, const RevenantInfo *info)
+static RevenantInvalid revenant_invalid_components(const uint8_t *bytes, const RevenantInfo *info, RevenantMask userinfo)
 {
     RevenantInvalid invalid = 0;
-    if (revenant_present(info->user) && !revenant_valid_run(bytes, info->user, revenant_mask_user, YES))
+    if (revenant_present(info->user) && !revenant_valid_run(bytes, info->user, userinfo, YES))
         invalid |= RevenantInvalidUser;
-    if (revenant_present(info->password) && !revenant_valid_run(bytes, info->password, revenant_mask_user, YES))
+    if (revenant_present(info->password) && !revenant_valid_run(bytes, info->password, userinfo, YES))
         invalid |= RevenantInvalidPassword;
     if (revenant_present(info->host) && !revenant_valid_host_span(bytes, info->host))
         invalid |= RevenantInvalidHost;
@@ -449,6 +571,17 @@ static NSData *revenant_idna_encode(const uint8_t *bytes, RevenantSpan host)
     return text ? revenant_utf8(revenant_idna_convert(text, YES) ?: @"") : nil;
 }
 
+static BOOL revenant_scheme_listed(const uint8_t *bytes, RevenantSpan scheme, const char *const *names, size_t count)
+{
+    if (!revenant_present(scheme))
+        return NO;
+    for (size_t index = 0; index < count; index++) {
+        if (revenant_span_named(bytes, scheme, names[index], NO))
+            return YES;
+    }
+    return NO;
+}
+
 static BOOL revenant_percent_encodes_host(const uint8_t *bytes, RevenantSpan host, RevenantSpan scheme)
 {
     static const char *const names[] = {"tel", "telemergencycall", "telprompt", "callto", "facetime", "facetime-prompt", "facetime-audio", "facetime-audio-prompt", "imap", "pop",
@@ -457,23 +590,7 @@ static BOOL revenant_percent_encodes_host(const uint8_t *bytes, RevenantSpan hos
         return YES;
     if (revenant_looks_like_literal(bytes, host))
         return YES;
-    if (!revenant_present(scheme))
-        return NO;
-    long length = revenant_span_length(scheme);
-    for (size_t index = 0; index < sizeof(names) / sizeof(names[0]); index++) {
-        if ((long)strlen(names[index]) != length)
-            continue;
-        BOOL match = YES;
-        for (long offset = 0; offset < length && match; offset++) {
-            uint8_t byte = bytes[scheme.start + offset];
-            if (byte >= 'A' && byte <= 'Z')
-                byte += 32;
-            match = byte == (uint8_t)names[index][offset];
-        }
-        if (match)
-            return YES;
-    }
-    return NO;
+    return revenant_scheme_listed(bytes, scheme, names, sizeof(names) / sizeof(names[0]));
 }
 
 static BOOL revenant_encode_host(RevenantBuffer *out, const uint8_t *bytes, RevenantSpan host, BOOL skipEncoded)
@@ -543,17 +660,18 @@ static BOOL revenant_swift_integer(const uint8_t *bytes, RevenantSpan span, long
     return YES;
 }
 
-NSString *revenant_url_standard(NSString *string, BOOL encoding, BOOL allowEmptyScheme)
+NSString *revenant_url_standard(NSString *string, BOOL encoding, BOOL nsurl)
 {
+    unsigned options = nsurl ? RevenantParseEmptyScheme | RevenantParsePortValid : 0;
     if (![string isKindOfClass:[NSString class]])
         return nil;
     NSData *data = revenant_utf8(string);
     const uint8_t *bytes = data.bytes;
     long length = (long)data.length;
     RevenantInfo info;
-    if (!revenant_parse_bytes(bytes, length, allowEmptyScheme, &info))
+    if (!revenant_parse_bytes(bytes, length, options, &info))
         return nil;
-    RevenantInvalid invalid = revenant_invalid_components(bytes, &info);
+    RevenantInvalid invalid = revenant_invalid_components(bytes, &info, revenant_mask_user);
     if (invalid == 0)
         return string;
     if (!encoding)
@@ -632,7 +750,7 @@ NSString *revenant_url_standard(NSString *string, BOOL encoding, BOOL allowEmpty
                 revenant_buffer_append_span(&out, bytes, info.fragment);
         }
         RevenantInfo reparsed;
-        if (revenant_parse_bytes(out.bytes, out.length, allowEmptyScheme, &reparsed))
+        if (revenant_parse_bytes(out.bytes, out.length, options, &reparsed))
             result = [[NSString alloc] initWithBytes:out.bytes length:(NSUInteger)out.length encoding:NSUTF8StringEncoding];
     }
     free(out.bytes);
@@ -643,11 +761,22 @@ BOOL revenant_url_ranges(NSString *string, NSRange *ranges)
 {
     NSData *data = revenant_utf8(string);
     RevenantInfo info;
-    if (data.length != string.length || !revenant_parse_bytes(data.bytes, (long)data.length, NO, &info))
+    if (!revenant_parse_bytes(data.bytes, (long)data.length, 0, &info))
         return NO;
+    const uint8_t *bytes = data.bytes;
+    long *units = malloc(((size_t)data.length + 1) * sizeof(long));
+    long unit = 0;
+    for (long offset = 0; offset <= (long)data.length; offset++) {
+        units[offset] = unit;
+        if (offset == (long)data.length)
+            break;
+        if ((bytes[offset] & 0xC0) != 0x80)
+            unit += bytes[offset] >= 0xF0 ? 2 : 1;
+    }
     RevenantSpan spans[] = {info.scheme, info.user, info.password, info.host, info.port, info.path, info.query, info.fragment};
     for (size_t index = 0; index < sizeof(spans) / sizeof(spans[0]); index++)
-        ranges[index] = revenant_present(spans[index]) ? NSMakeRange((NSUInteger)spans[index].start, (NSUInteger)revenant_span_length(spans[index])) : NSMakeRange(NSNotFound, 0);
+        ranges[index] = revenant_present(spans[index]) ? NSMakeRange((NSUInteger)units[spans[index].start], (NSUInteger)(units[spans[index].end] - units[spans[index].start])) : NSMakeRange(NSNotFound, 0);
+    free(units);
     return YES;
 }
 
@@ -658,4 +787,111 @@ NSNumber *revenant_url_integer(NSString *text)
     if (!revenant_swift_integer(data.bytes, (RevenantSpan){0, (long)data.length}, &value))
         return nil;
     return [NSNumber numberWithLongLong:value];
+}
+
+static BOOL revenant_special_scheme(const uint8_t *bytes, RevenantSpan scheme)
+{
+    static const char *const names[] = {"http", "https", "ftp", "ws", "wss", "file"};
+    return revenant_scheme_listed(bytes, scheme, names, sizeof(names) / sizeof(names[0]));
+}
+
+static NSString *revenant_url_nsurl_relative(NSString *string, const uint8_t *bytes, long length)
+{
+    RevenantInfo info;
+    if (!revenant_parse_compatibility(bytes, length, &info))
+        return nil;
+    RevenantInvalid invalid = revenant_invalid_components(bytes, &info, revenant_mask_host_future);
+    if (invalid & (RevenantInvalidUser | RevenantInvalidPassword | RevenantInvalidHost | RevenantInvalidPath))
+        return nil;
+    if (invalid == 0)
+        return string;
+    RevenantBuffer out = {NULL, 0, 0};
+    revenant_buffer_append(&out, bytes, info.path.end);
+    if (revenant_present(info.query)) {
+        revenant_buffer_append_byte(&out, '?');
+        revenant_percent_encode(&out, bytes, info.query, revenant_mask_query, YES);
+    }
+    if (revenant_present(info.fragment)) {
+        revenant_buffer_append_byte(&out, '#');
+        revenant_percent_encode(&out, bytes, info.fragment, revenant_mask_query, YES);
+    }
+    NSString *result = [[NSString alloc] initWithBytes:out.bytes length:(NSUInteger)out.length encoding:NSUTF8StringEncoding];
+    free(out.bytes);
+    return result;
+}
+
+NSString *revenant_url_nsurl(NSString *string, BOOL encoding)
+{
+    if (![string isKindOfClass:[NSString class]])
+        return nil;
+    if (!encoding)
+        return revenant_url_standard(string, NO, YES);
+    NSData *data = revenant_utf8(string);
+    const uint8_t *bytes = data.bytes;
+    long length = (long)data.length;
+    RevenantInfo info;
+    if (!revenant_parse_bytes(bytes, length, RevenantParseEmptyScheme | RevenantParseNoHeuristics | RevenantParseExactCase, &info))
+        return revenant_url_nsurl_relative(string, bytes, length);
+    RevenantInvalid invalid = revenant_invalid_components(bytes, &info, revenant_mask_host_future);
+    if (invalid == 0)
+        return string;
+    RevenantBuffer out = {NULL, 0, 0};
+    NSString *result = nil;
+    BOOL failed = NO;
+    if (revenant_present(info.scheme)) {
+        revenant_buffer_append_span(&out, bytes, info.scheme);
+        revenant_buffer_append_byte(&out, ':');
+    }
+    BOOL authority = revenant_present(info.user) || revenant_present(info.password) || revenant_present(info.host) || revenant_present(info.port);
+    if (authority)
+        revenant_buffer_append_text(&out, "//");
+    if (revenant_present(info.user)) {
+        revenant_percent_encode(&out, bytes, info.user, revenant_mask_host_future, YES);
+        if (revenant_present(info.password)) {
+            revenant_buffer_append_byte(&out, ':');
+            revenant_percent_encode(&out, bytes, info.password, revenant_mask_host_future, YES);
+        }
+        revenant_buffer_append_byte(&out, '@');
+    }
+    if (revenant_present(info.host)) {
+        if (!(invalid & RevenantInvalidHost)) {
+            revenant_buffer_append_span(&out, bytes, info.host);
+        } else if (info.ipLiteral) {
+            RevenantBuffer host = {NULL, 0, 0};
+            failed = !revenant_encode_host(&host, bytes, info.host, NO) || !revenant_valid_host_span(host.bytes, (RevenantSpan){0, host.length});
+            if (!failed)
+                revenant_buffer_append(&out, host.bytes, host.length);
+            free(host.bytes);
+        } else if (bytes[info.host.start] == '[') {
+            failed = YES;
+        } else if (revenant_special_scheme(bytes, info.scheme) && revenant_idna()) {
+            NSData *ascii = revenant_idna_encode(bytes, info.host);
+            RevenantSpan span = {0, (long)ascii.length};
+            failed = !ascii.length || !revenant_valid_host_span(ascii.bytes, span) || memchr(ascii.bytes, '%', ascii.length) != NULL;
+            if (!failed)
+                revenant_buffer_append(&out, ascii.bytes, (long)ascii.length);
+        } else {
+            revenant_percent_encode(&out, bytes, info.host, revenant_mask_host, YES);
+        }
+    }
+    if (!failed && revenant_present(info.port)) {
+        revenant_buffer_append_byte(&out, ':');
+        revenant_percent_encode(&out, bytes, info.port, revenant_mask_reserved, YES);
+    }
+    if (!failed) {
+        revenant_percent_encode(&out, bytes, info.path, revenant_mask_path, YES);
+        if (revenant_present(info.query)) {
+            revenant_buffer_append_byte(&out, '?');
+            revenant_percent_encode(&out, bytes, info.query, revenant_mask_query, YES);
+        }
+        if (revenant_present(info.fragment)) {
+            revenant_buffer_append_byte(&out, '#');
+            revenant_percent_encode(&out, bytes, info.fragment, revenant_mask_query, YES);
+        }
+        RevenantInfo reparsed;
+        if (revenant_parse_bytes(out.bytes, out.length, RevenantParseEmptyScheme | RevenantParseNoHeuristics | RevenantParseExactCase, &reparsed))
+            result = [[NSString alloc] initWithBytes:out.bytes length:(NSUInteger)out.length encoding:NSUTF8StringEncoding];
+    }
+    free(out.bytes);
+    return result;
 }

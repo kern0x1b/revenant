@@ -1,8 +1,21 @@
 #import <Foundation/Foundation.h>
 
+#ifdef REVENANT_HOST_BUILD
+#import "RevenantURLParser.h"
+#endif
+
 static NSString *field(NSString *value)
 {
     return value ? value : @"(nil)";
+}
+
+static NSString *url_string(NSString *input, BOOL encoding)
+{
+#ifdef REVENANT_HOST_BUILD
+    return revenant_url_nsurl(input, encoding);
+#else
+    return [NSURL URLWithString:input encodingInvalidCharacters:encoding].absoluteString;
+#endif
 }
 
 int main(int argc, const char **argv)
@@ -31,9 +44,9 @@ int main(int argc, const char **argv)
             NSString *encodedRow = encoded ? [@[field(encoded.string), field(encoded.encodedHost), field(encoded.percentEncodedPath)] componentsJoinedByString:@"\t"] : @"nil";
             NSURLComponents *strict = [NSURLComponents componentsWithString:input encodingInvalidCharacters:NO];
             row = [row stringByAppendingFormat:@"\tencoding:%@\tstrict:%@", encodedRow, strict ? field(strict.string) : @"nil"];
-            NSURL *lenientURL = [NSURL URLWithString:input encodingInvalidCharacters:YES];
-            NSURL *strictURL = [NSURL URLWithString:input encodingInvalidCharacters:NO];
-            row = [row stringByAppendingFormat:@"\turl:%@\turlstrict:%@", lenientURL ? field(lenientURL.absoluteString) : @"nil", strictURL ? field(strictURL.absoluteString) : @"nil"];
+            NSString *lenientURL = url_string(input, YES);
+            NSString *strictURL = url_string(input, NO);
+            row = [row stringByAppendingFormat:@"\turl:%@\turlstrict:%@", lenientURL ? field(lenientURL) : @"nil", strictURL ? field(strictURL) : @"nil"];
             printf("%lu\t%s\n", (unsigned long)index, row.UTF8String);
             index++;
         }
