@@ -1925,16 +1925,23 @@ class RevenantOperationScheduler
 class RevenantOrientationWatcher
 class RevenantOrthogonalController
 class RevenantOverrides
+class RevenantPDFCopier
+class RevenantPDFEncryption
 class RevenantPDFFontMetrics
 class RevenantPDFHighlight
 class RevenantPDFLayout
+class RevenantPDFName
+class RevenantPDFPageEntry
 class RevenantPDFPageRender
 class RevenantPDFPageText
 class RevenantPDFPageView
+class RevenantPDFReference
 class RevenantPDFScrollView
 class RevenantPDFSelectionSpan
+class RevenantPDFStream
 class RevenantPDFTextRun
 class RevenantPDFTileLayer
+class RevenantPDFWriter
 class RevenantPagination
 class RevenantParagraphStyle9
 class RevenantPasscodePrompt
@@ -4704,6 +4711,8 @@ function RevenantCurrentFrame
 function RevenantCustomPronounRequiredKeys
 function RevenantCustomPronounSupportedLanguage
 function RevenantDataTypeFromScalar
+function RevenantDocumentOutputSize
+function RevenantDocumentWarp
 function RevenantGKBufferedCorners
 function RevenantGKCellCeiling
 function RevenantGKCellFloor
@@ -4851,6 +4860,15 @@ function RevenantNWListenerGetNewConnectionLimit
 function RevenantNWListenerSetNewConnectionGroup
 function RevenantNWListenerSetNewConnectionLimit
 function RevenantOriginOf
+function RevenantPDFAddImage
+function RevenantPDFAssemble
+function RevenantPDFBlankPageData
+function RevenantPDFDateFromString
+function RevenantPDFDateString
+function RevenantPDFDeflate
+function RevenantPDFImagePageData
+function RevenantPDFPermissionBits
+function RevenantPDFPlaceImage
 function RevenantPassKitNoHardwareError
 function RevenantPasscodeCurrentStyle
 function RevenantPasscodeIsValid
@@ -9207,6 +9225,10 @@ global PDFDocumentSaveTextFromOCROption
 global PDFDocumentSubjectAttribute
 global PDFDocumentTitleAttribute
 global PDFDocumentUserPasswordOption
+global PDFPageImageInitializationOptionCompressionQuality
+global PDFPageImageInitializationOptionMediaBox
+global PDFPageImageInitializationOptionRotation
+global PDFPageImageInitializationOptionUpscaleIfSmaller
 global PDFThumbnailViewDocumentEditedNotification
 global PDFViewAnnotationHitNotification
 global PDFViewAnnotationWillHitNotification
@@ -9265,6 +9287,7 @@ global RevenantGKSearchScoreKey
 global RevenantHomeKitHomeOrderKey
 global RevenantMetalErrorDomain
 global RevenantMetalHeapAlignment
+global RevenantPDFDefaultImageQuality
 global RevenantSpotlightSharedRoot
 global RevenantWebActionNavigationTypeKey
 global RevenantWebEngineErrorDomain
@@ -25605,29 +25628,53 @@ member PDFDocument +revenant_documentWithCGPDFDocument:
 member PDFDocument -allowsCopying
 member PDFDocument -beginFindString:withOptions:
 member PDFDocument -cancelFindString
+member PDFDocument -copyWithZone:
 member PDFDocument -dataRepresentation
+member PDFDocument -dataRepresentationWithOptions:
+member PDFDocument -dealloc
 member PDFDocument -delegate
 member PDFDocument -documentAttribute:
 member PDFDocument -documentAttributes
+member PDFDocument -documentRef
 member PDFDocument -documentURL
+member PDFDocument -exchangePageAtIndex:withPageAtIndex:
 member PDFDocument -findString:fromSelection:withOptions:
 member PDFDocument -findString:withOptions:
 member PDFDocument -indexForPage:
 member PDFDocument -init
 member PDFDocument -initWithData:
 member PDFDocument -initWithURL:
+member PDFDocument -insertPage:atIndex:
 member PDFDocument -isEncrypted
 member PDFDocument -isFinding
 member PDFDocument -isLocked
+member PDFDocument -majorVersion
+member PDFDocument -minorVersion
 member PDFDocument -outlineRoot
 member PDFDocument -pageAtIndex:
+member PDFDocument -pageClass
 member PDFDocument -pageCount
+member PDFDocument -removePageAtIndex:
 member PDFDocument -revenant_CGPDFDocument
+member PDFDocument -revenant_assembleWithOwner:user:permissions:notify:
+member PDFDocument -revenant_entries
 member PDFDocument -revenant_findOnPage:string:options:token:
+member PDFDocument -revenant_infoDictionary
+member PDFDocument -revenant_loadEntries
+member PDFDocument -revenant_markModified
 member PDFDocument -revenant_notify:selector:userInfo:
+member PDFDocument -revenant_pageDidChange
+member PDFDocument -revenant_post:pageIndex:
 member PDFDocument -revenant_readAttributes
+member PDFDocument -revenant_renumberFrom:
 member PDFDocument -revenant_setUpWithData:
+member PDFDocument -revenant_versionPart:
+member PDFDocument -setDocumentAttributes:
 member PDFDocument -unlockWithPassword:
+member PDFDocument -writeToFile:
+member PDFDocument -writeToFile:withOptions:
+member PDFDocument -writeToURL:
+member PDFDocument -writeToURL:withOptions:
 member PDFOutline -action
 member PDFOutline -childAtIndex:
 member PDFOutline -destination
@@ -25644,19 +25691,32 @@ member PDFOutline -revenant_title
 member PDFPage -annotationCount
 member PDFPage -annotations
 member PDFPage -boundsForBox:
+member PDFPage -copyWithZone:
 member PDFPage -cropBox
+member PDFPage -dataRepresentation
 member PDFPage -dealloc
 member PDFPage -document
 member PDFPage -drawWithBox:toContext:
+member PDFPage -init
 member PDFPage -initWithCGPDFPage:document:index:
+member PDFPage -initWithCGPDFPage:owner:document:index:
+member PDFPage -initWithImage:
+member PDFPage -initWithImage:options:
+member PDFPage -initWithPageData:
 member PDFPage -label
 member PDFPage -mediaBox
 member PDFPage -numberOfCharacters
 member PDFPage -pageIndex
+member PDFPage -pageRef
 member PDFPage -revenant_CGPDFPage
+member PDFPage -revenant_boxes
 member PDFPage -revenant_buildAnnotations
+member PDFPage -revenant_replaceWithBoxes:
+member PDFPage -revenant_setDocument:index:
 member PDFPage -revenant_textLayout
 member PDFPage -rotation
+member PDFPage -setBounds:forBox:
+member PDFPage -setRotation:
 member PDFPage -string
 member PDFPage -transformForBox:
 member PDFSelection -addSelection:
@@ -28016,6 +28076,20 @@ member RevenantOverrides -revenant_overriddenTraits
 member RevenantOverrides -revenant_overridden_definition:kind:
 member RevenantOverrides -valueForCGFloatTrait:
 member RevenantOverrides -valueForNSIntegerTrait:
+member RevenantPDFCopier -collectEntriesOf:into:skipping:
+member RevenantPDFCopier -convertArray:
+member RevenantPDFCopier -convertValue:
+member RevenantPDFCopier -copyPage:intoReference:parent:boxes:
+member RevenantPDFCopier -failed
+member RevenantPDFCopier -inheritedValue:from:
+member RevenantPDFCopier -initWithWriter:
+member RevenantPDFCopier -referenceForDictionary:
+member RevenantPDFCopier -referenceForStream:
+member RevenantPDFCopier -registerPage:reference:
+member RevenantPDFEncryption -dictionary
+member RevenantPDFEncryption -documentID
+member RevenantPDFEncryption -encrypt:object:
+member RevenantPDFEncryption -initWithOwnerPassword:userPassword:permissions:documentID:
 member RevenantPDFFontMetrics +metricsWithFontDictionary:size:
 member RevenantPDFFontMetrics -advanceForCode:
 member RevenantPDFFontMetrics -dealloc
@@ -28043,6 +28117,14 @@ member RevenantPDFLayout -pagesSharingRowWithPageAtIndex:
 member RevenantPDFLayout -rowGap
 member RevenantPDFLayout -rowsConsidered:
 member RevenantPDFLayout -vertical
+member RevenantPDFName +name:
+member RevenantPDFName -copyWithZone:
+member RevenantPDFName -hash
+member RevenantPDFName -isEqual:
+member RevenantPDFName -value
+member RevenantPDFPageEntry +entryWithPage:boxes:
+member RevenantPDFPageEntry -boxes
+member RevenantPDFPageEntry -page
 member RevenantPDFPageRender -box
 member RevenantPDFPageRender -generation
 member RevenantPDFPageRender -highlights
@@ -28065,11 +28147,17 @@ member RevenantPDFPageView -drawRect:
 member RevenantPDFPageView -initWithFrame:
 member RevenantPDFPageView -owner
 member RevenantPDFPageView -render
+member RevenantPDFReference +referenceWithNumber:
+member RevenantPDFReference -number
 member RevenantPDFScrollView -layoutSubviews
 member RevenantPDFScrollView -owner
 member RevenantPDFSelectionSpan -page
 member RevenantPDFSelectionSpan -range
 member RevenantPDFSelectionSpan -textRange
+member RevenantPDFStream +deflatedStreamWithDictionary:data:
+member RevenantPDFStream +streamWithDictionary:data:
+member RevenantPDFStream -data
+member RevenantPDFStream -dictionary
 member RevenantPDFTextRun -dealloc
 member RevenantPDFTextRun -fontName
 member RevenantPDFTextRun -offset
@@ -28079,6 +28167,14 @@ member RevenantPDFTextRun -size
 member RevenantPDFTextRun -x
 member RevenantPDFTextRun -y
 member RevenantPDFTileLayer +fadeDuration
+member RevenantPDFWriter -add:
+member RevenantPDFWriter -addCatalogWithPages:kids:
+member RevenantPDFWriter -dataWithRoot:info:
+member RevenantPDFWriter -init
+member RevenantPDFWriter -initEncryptedWithOwnerPassword:userPassword:permissions:
+member RevenantPDFWriter -objectCount
+member RevenantPDFWriter -reserve
+member RevenantPDFWriter -setObject:forReference:
 member RevenantPagination -forwardingTargetForSelector:
 member RevenantPagination -respondsToSelector:
 member RevenantPagination -webViewDidFinishLoad:

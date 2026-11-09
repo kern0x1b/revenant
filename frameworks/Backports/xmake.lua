@@ -551,6 +551,18 @@ if is_plat("iphoneos") and not SELECTED then
         add_syslinks("objc")
     target_end()
 
+    target("PDFWriterProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/daemon")
+        add_files("tests/device_probe/pdfwriter_main.m")
+        add_deps("PDFKitBackports")
+        add_includedirs("tests/Foundation", "src/PDFKit")
+        add_mflags("-fobjc-arc")
+        add_frameworks("Foundation", "UIKit", "CoreGraphics", "QuartzCore", "ImageIO")
+        add_syslinks("objc")
+    target_end()
+
     target("MetalLinearProbe")
         set_kind("binary")
         set_default(false)

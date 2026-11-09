@@ -571,8 +571,9 @@ local function objc_source(model, umbrella, alias)
         table.insert(lines, string.format("static Protocol *revenant_protocols[%d] __attribute__((used));", #model.protocols))
     end
     for _, global in ipairs(model.globals) do
-        table.insert(lines, string.format('__attribute__((weak, visibility("default"))) %s __asm__(%s) = {0};',
-            declarator(storage_type(global.type), "revenant_global_" .. global.name), quoted("_" .. global.name)))
+        table.insert(lines, string.format("typedef %s;", declarator(storage_type(global.type), "revenant_type_" .. global.name)))
+        table.insert(lines, string.format('__attribute__((weak, visibility("default"))) __typeof_unqual__(revenant_type_%s) revenant_global_%s __asm__(%s) = {0};',
+            global.name, global.name, quoted("_" .. global.name)))
         if global.fallback then
             table.insert(lines, string.format("extern %s;", declarator(storage_type(global.type), "__revenant_fb_" .. global.name)))
         end
