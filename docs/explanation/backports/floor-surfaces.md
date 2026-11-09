@@ -338,6 +338,27 @@ A change that is not Telegram's: the lowering of the Calendar methods was by nam
 A method whose signature names `DateInterval` is lowered only when `DateInterval` itself is implemented
 (`names_unlowered_type` in `lowered.lua`; `lowering_test.lua` has the three overloads).
 
+## Version numbers in availability attributes
+
+An `@available(iOS N, *)` on a Backports shim is the SDK's own attribute repeated, so that a program is accepted or
+refused for the same reason as against the SDK; a number written for any other reason would be a choice of ours. The six
+`iOS 26.0` of `src/Translation/TranslationSession.swift` (`TranslationError.alreadyCancelled` and `notInstalled`,
+`TranslationSession.canRequestDownloads`, `isReady`, `cancel()` and `init(installedSource:target:)`) were compared with
+`Translation.swiftinterface` of the iOS 26.2 SDK, and each is `@available(iOS 26.0, macOS 26.0, *)` there; the file's
+`iOS 17.4` and `iOS 18.0` are the same kind of fact. They stay as numbers: the `-define-availability` names exist only
+in the build of the runtime (`availability(source)` in `modules/apple/swift.lua`), the Backports Swift modules are not
+compiled with any, and a name defined once in the flags would only move the same number out of sight.
+
+`frameworks/ReactNative/src/expo/GlassView.swift` is upstream's `GlassView.swift` of expo-glass-effect 57.0.4 with two
+changes, which are the recipe patch `glassview-ios6.patch` (the patched upstream file is byte-identical with it). Its four
+`#available(iOS 26.0, tvOS 26.0, macOS 26.0, *)` guard `UIGlassEffect` and the corner configuration, which the SDK
+declares at iOS 26.0; an unguarded `UIGlassEffect(style:)` at the iOS 6.0 target is refused with "'UIGlassEffect' is only
+available in iOS 26.0 or newer", with the lowered overlay as without it. On iOS 6 the check in `isGlassEffectAvailable` is false,
+which ends every path before the class lookup that follows it. The copy once replaced the
+per-corner radii by `_ = (...)`, on the ground that the overlay had no public `UICornerRadius` initializer. The overlay
+has it (`UIKitRevenant.swift`), and `tests/availability/glass_corner_radii.swift` typechecks upstream's lines at iOS 6.0
+against the overlay, so they are upstream's again.
+
 ## What is not verified
 
 - A live heading in a north reference frame. `CMDeviceMotion` takes `xMagneticNorthZVertical` and

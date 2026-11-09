@@ -14,6 +14,7 @@ local FAMILIES = {
     {fixture = "photos_picker.swift", lowered = true},
     {fixture = "floor_surfaces.swift", lowered = true},
     {fixture = "symbol_effects.swift", lowered = true},
+    {fixture = "glass_corner_radii.swift", lowered = true},
     {fixture = "dispatch.swift", lowered = false},
     {fixture = "locale_language.swift", lowered = false, sources = {"Foundation/LocaleLanguage.swift"}},
     {fixture = "attributed_string_markdown.swift", lowered = false, sources = {"Foundation/AttributedStringMarkdown.swift"}},

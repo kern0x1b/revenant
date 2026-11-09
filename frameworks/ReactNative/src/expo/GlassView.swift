@@ -144,9 +144,17 @@ public final class GlassView: ExpoView {
         finalBottomRight = bottomRightRadius ?? bottomEndRadius ?? radius ?? 0
       }
 
-      // local copy: the Swift overlay in swift-runtime 6.4 has no public UICornerRadius initializer, and this branch needs
-      // UIGlassEffect (iOS 26+), which no device this app runs on has. The radii are computed and left unapplied.
-      _ = (finalTopLeft, finalTopRight, finalBottomLeft, finalBottomRight)
+      let topLeft = UICornerRadius(floatLiteral: finalTopLeft)
+      let topRight = UICornerRadius(floatLiteral: finalTopRight)
+      let bottomLeft = UICornerRadius(floatLiteral: finalBottomLeft)
+      let bottomRight = UICornerRadius(floatLiteral: finalBottomRight)
+
+      glassEffectView.cornerConfiguration = .corners(
+        topLeftRadius: topLeft,
+        topRightRadius: topRight,
+        bottomLeftRadius: bottomLeft,
+        bottomRightRadius: bottomRight
+      )
       #endif
     }
   }
