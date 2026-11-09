@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Mon, 9 Nov 2026 19:04:09 +0100
+Subject: [PATCH 10/10] Name the helper archive in the C module map
+
+COpenCombineHelpers is the module that declares the lock and identifier
+functions the Combine module calls, and the archive that defines them is
+libCombineHelpers.a. The module map named no library, so a Swift object
+that imports Combine recorded -lCombine and nothing for the helpers. A
+link that takes its archives from those records then ends with
+_opencombine_unfair_lock_*, _opencombine_unfair_recursive_lock_*,
+_opencombine_stop_in_debugger and _opencombine_next_combine_identifier
+undefined. The link directive makes the module name its own archive, and
+the compiler records it with the module.
+---
+ Sources/COpenCombineHelpers/include/module.modulemap | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Sources/COpenCombineHelpers/include/module.modulemap b/Sources/COpenCombineHelpers/include/module.modulemap
+index 2a823a2..bf39104 100644
+--- a/Sources/COpenCombineHelpers/include/module.modulemap
++++ b/Sources/COpenCombineHelpers/include/module.modulemap
+@@ -1,3 +1,4 @@
+ module COpenCombineHelpers {
+   header "COpenCombineHelpers.h"
++  link "CombineHelpers"
+ }
+-- 
+2.54.0 (Apple Git-157)
+

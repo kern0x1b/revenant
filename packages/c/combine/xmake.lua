@@ -16,7 +16,8 @@ package("combine")
         {"0006-Add-Publishers.CombineLatest-CombineLatest3-and-Comb.patch", "1420d2bd07449bb7fe3638720547bab99a6cba6104308a88d7dec03a7cba6429"},
         {"0007-Add-Publishers.CollectByTime-and-collect-_-options.patch", "c66201096cc7726a1415209c6c18623749a657aa3243619500123d2821eb384c"},
         {"0008-Declare-the-equality-and-hashing-Apple-s-interface-d.patch", "13adba858fe05dbc7083f3a19adac2588b2367813cddc0e723a6e5dbec103ce2"},
-        {"0009-Define-MapKeyPath-s-gyb-helpers-in-its-template.patch", "9372ec43676530f8a7476550e623a9b35eaff5852aad56a9f9df5e1dc3b2cc22"}}
+        {"0009-Define-MapKeyPath-s-gyb-helpers-in-its-template.patch", "9372ec43676530f8a7476550e623a9b35eaff5852aad56a9f9df5e1dc3b2cc22"},
+        {"0010-Name-the-helper-archive-in-the-C-module-map.patch", "764a9ad1623f564dedebce78e6f393817203c4f96c11a82c431b9992d41fd935"}}
 
     local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}
     for _, patch in ipairs(patches) do
