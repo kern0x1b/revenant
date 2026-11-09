@@ -1,6 +1,6 @@
 #include "../revenant_impl.h"
 #if defined(REVENANT_HOST_BUILD)
-#define VTCreateCGImageFromCVPixelBuffer RevenantVTCreateCGImageFromCVPixelBuffer
+#define VTCreateCGImageFromCVPixelBuffer __revenant_fb_VTCreateCGImageFromCVPixelBuffer
 #endif
 
 #import <CoreFoundation/CoreFoundation.h>

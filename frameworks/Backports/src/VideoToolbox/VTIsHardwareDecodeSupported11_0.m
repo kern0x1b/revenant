@@ -1,6 +1,6 @@
 #include "../revenant_impl.h"
 #if defined(REVENANT_HOST_BUILD)
-#define VTIsHardwareDecodeSupported RevenantVTIsHardwareDecodeSupported
+#define VTIsHardwareDecodeSupported __revenant_fb_VTIsHardwareDecodeSupported
 #endif
 
 #import <CoreMedia/CoreMedia.h>

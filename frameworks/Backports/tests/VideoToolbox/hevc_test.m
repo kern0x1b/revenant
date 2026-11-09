@@ -7,10 +7,10 @@
 #import "VTDecompressionSessionHEVC.h"
 #import "VTInterleave.h"
 
-extern OSStatus RevenantVTDecompressionSessionDecodeFrame(VTDecompressionSessionRef session, CMSampleBufferRef sampleBuffer, VTDecodeFrameFlags decodeFlags, void *sourceFrameRefCon, VTDecodeInfoFlags *infoFlagsOut);
-extern OSStatus RevenantVTDecompressionSessionFinishDelayedFrames(VTDecompressionSessionRef session);
-extern OSStatus RevenantVTDecompressionSessionWaitForAsynchronousFrames(VTDecompressionSessionRef session);
-extern void RevenantVTDecompressionSessionInvalidate(VTDecompressionSessionRef session);
+extern OSStatus __revenant_fb_VTDecompressionSessionDecodeFrame(VTDecompressionSessionRef session, CMSampleBufferRef sampleBuffer, VTDecodeFrameFlags decodeFlags, void *sourceFrameRefCon, VTDecodeInfoFlags *infoFlagsOut);
+extern OSStatus __revenant_fb_VTDecompressionSessionFinishDelayedFrames(VTDecompressionSessionRef session);
+extern OSStatus __revenant_fb_VTDecompressionSessionWaitForAsynchronousFrames(VTDecompressionSessionRef session);
+extern void __revenant_fb_VTDecompressionSessionInvalidate(VTDecompressionSessionRef session);
 
 @interface RevenantTestSample : NSObject
 @property (nonatomic, strong) NSData *data;
@@ -202,7 +202,7 @@ static NSArray<RevenantTestFrame *> *RevenantDecodeWithBackport(RevenantTestClip
         CMSampleBufferRef buffer = RevenantSampleOf(format, clip, sample);
         if (!buffer)
             continue;
-        const OSStatus decoded = RevenantVTDecompressionSessionDecodeFrame(session, buffer, flags, NULL, NULL);
+        const OSStatus decoded = __revenant_fb_VTDecompressionSessionDecodeFrame(session, buffer, flags, NULL, NULL);
         CFRelease(buffer);
         if (decoded != noErr) {
             RevenantTestFrame *failure = [[RevenantTestFrame alloc] init];
@@ -211,8 +211,8 @@ static NSArray<RevenantTestFrame *> *RevenantDecodeWithBackport(RevenantTestClip
             [frames addObject:failure];
         }
     }
-    RevenantVTDecompressionSessionFinishDelayedFrames(session);
-    RevenantVTDecompressionSessionInvalidate(session);
+    __revenant_fb_VTDecompressionSessionFinishDelayedFrames(session);
+    __revenant_fb_VTDecompressionSessionInvalidate(session);
     CFRelease(session);
     return frames;
 }
@@ -282,7 +282,7 @@ static void RevenantCheckRejectsBadConfiguration(RevenantTestClip *clip)
     const OSStatus status = format ? RevenantVTSoftwareSessionCreate(format, NULL, output, &session) : kVTParameterErr;
     RevenantExpect(status != noErr, @"a configuration whose version is not 1 is rejected", [NSString stringWithFormat:@"created with status %d", (int)status]);
     if (status == noErr && session) {
-        RevenantVTDecompressionSessionInvalidate(session);
+        __revenant_fb_VTDecompressionSessionInvalidate(session);
         CFRelease(session);
     }
     if (format)
@@ -340,10 +340,10 @@ static void RevenantCheckReentrancy(RevenantTestClip *clip)
         if (callbacks > 1)
             return;
         CMSampleBufferRef buffer = RevenantSampleOf(format, clip, clip.samples[1]);
-        reentrantDecode = RevenantVTDecompressionSessionDecodeFrame(session, buffer, 0, NULL, NULL);
+        reentrantDecode = __revenant_fb_VTDecompressionSessionDecodeFrame(session, buffer, 0, NULL, NULL);
         CFRelease(buffer);
-        reentrantFinish = RevenantVTDecompressionSessionFinishDelayedFrames(session);
-        RevenantVTDecompressionSessionInvalidate(session);
+        reentrantFinish = __revenant_fb_VTDecompressionSessionFinishDelayedFrames(session);
+        __revenant_fb_VTDecompressionSessionInvalidate(session);
     };
     const OSStatus status = RevenantVTSoftwareSessionCreate(format, NULL, output, &session);
     RevenantExpect(status == noErr, @"the software session for the re-entrancy check is created", [NSString stringWithFormat:@"status %d", (int)status]);
@@ -351,12 +351,12 @@ static void RevenantCheckReentrancy(RevenantTestClip *clip)
         for (RevenantTestSample *sample in clip.samples) {
             CMSampleBufferRef buffer = RevenantSampleOf(format, clip, sample);
             if (buffer) {
-                RevenantVTDecompressionSessionDecodeFrame(session, buffer, 0, NULL, NULL);
+                __revenant_fb_VTDecompressionSessionDecodeFrame(session, buffer, 0, NULL, NULL);
                 CFRelease(buffer);
             }
         }
-        RevenantVTDecompressionSessionFinishDelayedFrames(session);
-        RevenantVTDecompressionSessionInvalidate(session);
+        __revenant_fb_VTDecompressionSessionFinishDelayedFrames(session);
+        __revenant_fb_VTDecompressionSessionInvalidate(session);
         CFRelease(session);
         RevenantExpect(reentrantDecode == kVTVideoDecoderNotAvailableNowErr, @"a decode from inside an output callback is refused while the decoder is busy", [NSString stringWithFormat:@"status %d", (int)reentrantDecode]);
         RevenantExpect(reentrantFinish == kVTVideoDecoderNotAvailableNowErr, @"a finish from inside an output callback is refused while the decoder is busy", [NSString stringWithFormat:@"status %d", (int)reentrantFinish]);
@@ -381,7 +381,7 @@ static void RevenantCheckCallbackWaitsForAnotherThread(RevenantTestClip *clip)
             return;
         dispatch_semaphore_t done = dispatch_semaphore_create(0);
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            otherStatus = RevenantVTDecompressionSessionFinishDelayedFrames(session);
+            otherStatus = __revenant_fb_VTDecompressionSessionFinishDelayedFrames(session);
             dispatch_semaphore_signal(done);
         });
         returned = dispatch_semaphore_wait(done, dispatch_time(DISPATCH_TIME_NOW, 10 * NSEC_PER_SEC)) == 0;
@@ -392,12 +392,12 @@ static void RevenantCheckCallbackWaitsForAnotherThread(RevenantTestClip *clip)
         for (NSUInteger index = 0; index < clip.samples.count; index++) {
             CMSampleBufferRef buffer = RevenantSampleOf(format, clip, clip.samples[index]);
             if (buffer) {
-                RevenantVTDecompressionSessionDecodeFrame(session, buffer, kVTDecodeFrame_EnableTemporalProcessing, (void *)(intptr_t)index, NULL);
+                __revenant_fb_VTDecompressionSessionDecodeFrame(session, buffer, kVTDecodeFrame_EnableTemporalProcessing, (void *)(intptr_t)index, NULL);
                 CFRelease(buffer);
             }
         }
-        RevenantVTDecompressionSessionFinishDelayedFrames(session);
-        RevenantVTDecompressionSessionInvalidate(session);
+        __revenant_fb_VTDecompressionSessionFinishDelayedFrames(session);
+        __revenant_fb_VTDecompressionSessionInvalidate(session);
         CFRelease(session);
     }
     OSStatus plainStatus = noErr;
@@ -456,7 +456,7 @@ static RevenantEmissionTrace *RevenantTraceEmission(RevenantTestClip *clip, CMVi
         CMSampleBufferRef buffer = RevenantSampleOf(format, clip, clip.samples[index]);
         if (buffer) {
             if (backport)
-                RevenantVTDecompressionSessionDecodeFrame(session, buffer, flags, NULL, NULL);
+                __revenant_fb_VTDecompressionSessionDecodeFrame(session, buffer, flags, NULL, NULL);
             else
                 VTDecompressionSessionDecodeFrame(session, buffer, flags, NULL, NULL);
             CFRelease(buffer);
@@ -465,15 +465,15 @@ static RevenantEmissionTrace *RevenantTraceEmission(RevenantTestClip *clip, CMVi
         if (index == waitAt) {
             const NSUInteger before = RevenantEmittedCount(frames);
             if (backport)
-                RevenantVTDecompressionSessionWaitForAsynchronousFrames(session);
+                __revenant_fb_VTDecompressionSessionWaitForAsynchronousFrames(session);
             else
                 VTDecompressionSessionWaitForAsynchronousFrames(session);
             trace.flushedByWait = RevenantEmittedCount(frames) - before;
         }
     }
     if (backport) {
-        RevenantVTDecompressionSessionFinishDelayedFrames(session);
-        RevenantVTDecompressionSessionInvalidate(session);
+        __revenant_fb_VTDecompressionSessionFinishDelayedFrames(session);
+        __revenant_fb_VTDecompressionSessionInvalidate(session);
     } else {
         VTDecompressionSessionFinishDelayedFrames(session);
         VTDecompressionSessionInvalidate(session);

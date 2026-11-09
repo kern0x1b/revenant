@@ -10,7 +10,7 @@
 #import <time.h>
 #import "VTConvertBiPlanar.h"
 
-extern OSStatus RevenantVTCreateCGImageFromCVPixelBuffer(CVPixelBufferRef pixelBuffer, CFDictionaryRef options, CGImageRef *imageOut);
+extern OSStatus __revenant_fb_VTCreateCGImageFromCVPixelBuffer(CVPixelBufferRef pixelBuffer, CFDictionaryRef options, CGImageRef *imageOut);
 
 static uint32_t revenant_state = 2463534242u;
 
@@ -98,7 +98,7 @@ static void revenant_compare_frame(OSType format, BOOL bt709, int tolerance)
     CVPixelBufferRef backportFrame = revenant_frame(format, bt709);
     CGImageRef hostImage = NULL, backportImage = NULL;
     const OSStatus hostStatus = VTCreateCGImageFromCVPixelBuffer(hostFrame, NULL, &hostImage);
-    const OSStatus backportStatus = RevenantVTCreateCGImageFromCVPixelBuffer(backportFrame, NULL, &backportImage);
+    const OSStatus backportStatus = __revenant_fb_VTCreateCGImageFromCVPixelBuffer(backportFrame, NULL, &backportImage);
     revenant_check(hostStatus == noErr && backportStatus == noErr && hostImage && backportImage, [[NSString stringWithFormat:@"the frame converts: %@", name] UTF8String], [NSString stringWithFormat:@"host %d backport %d", (int)hostStatus, (int)backportStatus]);
     if (hostImage && backportImage) {
         revenant_check(CGImageGetWidth(hostImage) == CGImageGetWidth(backportImage) && CGImageGetHeight(hostImage) == CGImageGetHeight(backportImage) && CGImageGetBitmapInfo(hostImage) == CGImageGetBitmapInfo(backportImage), [[NSString stringWithFormat:@"the image geometry and bitmap info match: %@", name] UTF8String], [NSString stringWithFormat:@"host %zux%zu info %u backport %zux%zu info %u", CGImageGetWidth(hostImage), CGImageGetHeight(hostImage), (unsigned)CGImageGetBitmapInfo(hostImage), CGImageGetWidth(backportImage), CGImageGetHeight(backportImage), (unsigned)CGImageGetBitmapInfo(backportImage)]);
@@ -172,8 +172,8 @@ static void revenant_benchmark(void)
 int main(int argc, char **argv)
 {
     revenant_read_arguments(argc, argv);
-    revenant_check((dlsym(RTLD_DEFAULT, "RevenantVTCreateCGImageFromCVPixelBuffer") != NULL) != revenant_negative, "VTCreateCGImageFromCVPixelBuffer implementation is present", @"RevenantVTCreateCGImageFromCVPixelBuffer");
-    if (dlsym(RTLD_DEFAULT, "RevenantVTCreateCGImageFromCVPixelBuffer") == NULL)
+    revenant_check((dlsym(RTLD_DEFAULT, "__revenant_fb_VTCreateCGImageFromCVPixelBuffer") != NULL) != revenant_negative, "VTCreateCGImageFromCVPixelBuffer implementation is present", @"__revenant_fb_VTCreateCGImageFromCVPixelBuffer");
+    if (dlsym(RTLD_DEFAULT, "__revenant_fb_VTCreateCGImageFromCVPixelBuffer") == NULL)
         return revenant_finish();
 
     for (int fullRange = 0; fullRange < 2; fullRange++) {
@@ -188,13 +188,13 @@ int main(int argc, char **argv)
     CVPixelBufferRef tenBit = NULL;
     CVPixelBufferCreate(kCFAllocatorDefault, 32, 16, kCVPixelFormatType_420YpCbCr10BiPlanarVideoRange, NULL, &tenBit);
     CGImageRef backportTenBit = NULL;
-    const OSStatus backportTenBitStatus = RevenantVTCreateCGImageFromCVPixelBuffer(tenBit, NULL, &backportTenBit);
+    const OSStatus backportTenBitStatus = __revenant_fb_VTCreateCGImageFromCVPixelBuffer(tenBit, NULL, &backportTenBit);
     revenant_check(backportTenBitStatus == kVTPixelTransferNotSupportedErr && backportTenBit == NULL, "the backport refuses a 10-bit format it does not convert", [NSString stringWithFormat:@"backport %d", (int)backportTenBitStatus]);
     if (backportTenBit) CGImageRelease(backportTenBit);
     CVPixelBufferRelease(tenBit);
 
     CGImageRef nilImage = NULL;
-    revenant_check(RevenantVTCreateCGImageFromCVPixelBuffer(NULL, NULL, &nilImage) == kVTParameterErr && nilImage == NULL, "a NULL buffer is a parameter error", @"kVTParameterErr");
+    revenant_check(__revenant_fb_VTCreateCGImageFromCVPixelBuffer(NULL, NULL, &nilImage) == kVTParameterErr && nilImage == NULL, "a NULL buffer is a parameter error", @"kVTParameterErr");
 
 #if defined(__ARM_NEON)
     const size_t neonWidths[] = {1, 15, 16, 17, 37, 1920};
