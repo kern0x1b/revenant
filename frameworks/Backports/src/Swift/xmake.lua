@@ -60,10 +60,12 @@ local function swift_target(name, kind)
         add_rules("@addon/revenant/swift")
         set_values("swift.cxx_interop", "off")
         set_optimize("fastest")
+        if kind == "static" then
+            add_values("swift.flags", "-module-link-name", name)
+        end
 end
 
 swift_target("AppIntents", "static")
-    add_values("swift.flags", "-module-link-name", "AppIntents")
     add_frameworks("Foundation", "CoreFoundation")
     on_load(function (target)
         target:add("files", path.join(SRC, "AppIntents", "*.swift"))
@@ -86,7 +88,6 @@ swift_target("AppIntents", "static")
     end)
 
 swift_target("ActivityKit", "static")
-    add_values("swift.flags", "-module-link-name", "ActivityKit")
     add_deps("AppIntents")
     add_frameworks("Foundation", "CoreFoundation")
     on_load(function (target)
@@ -102,7 +103,6 @@ swift_target("ActivityKit", "static")
     end)
 
 swift_target("TipKit", "static")
-    add_values("swift.flags", "-module-link-name", "TipKit")
     add_deps("AppIntents")
     add_frameworks("Foundation", "CoreFoundation")
     on_load(function (target)
@@ -118,7 +118,7 @@ swift_target("TipKit", "static")
     end)
 
 swift_target("UniformTypeIdentifiers", "static")
-    add_values("swift.flags", "-module-link-name", "UniformTypeIdentifiers", table.unpack(UNDERLYING))
+    add_values("swift.flags", table.unpack(UNDERLYING))
     add_frameworks("Foundation", "CoreFoundation", "MobileCoreServices")
     on_load(function (target)
         target:add("files", path.join(SRC, "UniformTypeIdentifiers", "*.swift"))
@@ -126,14 +126,13 @@ swift_target("UniformTypeIdentifiers", "static")
 
 swift_target("Translation", "static")
     add_packages("swiftui")
-    add_values("swift.flags", "-module-link-name", "Translation")
     on_load(function (target)
         target:add("files", path.join(SRC, "Translation", "*.swift"))
     end)
 
 swift_target("ContactsUI", "static")
     add_packages("swiftui")
-    add_values("swift.flags", "-module-link-name", "ContactsUI", table.unpack(UNDERLYING))
+    add_values("swift.flags", table.unpack(UNDERLYING))
     on_load(function (target)
         target:add("files", path.join(SRC, "ContactsUI", "*.swift"))
     end)
@@ -147,7 +146,6 @@ local function open_gap(name, cause)
 end
 
 swift_target("WidgetKit", "static")
-    add_values("swift.flags", "-module-link-name", "WidgetKit")
     add_deps("AppIntents", "ActivityKit")
     add_frameworks("Foundation", "CoreFoundation")
     on_load(function (target)
@@ -155,14 +153,13 @@ swift_target("WidgetKit", "static")
     end)
 
 swift_target("IOSurface", "static")
-    add_values("swift.flags", "-module-link-name", "IOSurface")
     on_load(function (target)
         target:add("files", path.join(SRC, "IOSurface", "*.swift"))
     end)
 
 local function framework_overlay(name)
     swift_target(name, "static")
-        add_values("swift.flags", "-module-link-name", name, table.unpack(UNDERLYING))
+        add_values("swift.flags", table.unpack(UNDERLYING))
         on_load(function (target)
             target:add("files", path.join(SRC, name, "*.swift"))
         end)
@@ -357,7 +354,7 @@ overlay("swiftTranslation", "Translation", {concurrency = true, packages = {"swi
 target("swift_backports_tests")
     set_kind("phony")
     set_default(false)
-    add_tests("oslock", "uikittraits", "uikitpointer", "uikitavailability", "availability", "metallowering", "translation", "iosurfaceswift", "coremlswift", "utiswift", "frameworkoverlay", "cxxinterop")
+    add_tests("oslock", "uikittraits", "uikitpointer", "uikitavailability", "availability", "metallowering", "translation", "iosurfaceswift", "coremlswift", "utiswift", "frameworkoverlay", "cxxinterop", "linkname")
     on_test(function (target, opt)
         import("core.project.project")
         local scripts = {oslock = "os_lock_test.lua", uikittraits = "uikit_traits_test.lua", uikitpointer = "uikit_pointer_test.lua", uikitavailability = "uikit_availability_test.lua", availability = "availability_test.lua", metallowering = "metal_lowering_test.lua", translation = "translation_test.lua", iosurfaceswift = "iosurface_swift_test.lua", coremlswift = "coreml_swift_test.lua", utiswift = "uti_swift_test.lua", frameworkoverlay = "framework_overlay_test.lua"}
@@ -374,6 +371,26 @@ target("swift_backports_tests")
                 opt.errors = "built with C++ interoperability, which no module of a program for iOS 6 imports: " .. table.concat(interoperable, ", ")
             end
             return #interoperable == 0
+        end
+        if name == "linkname" then
+            local unnamed = {}
+            for _, swift in pairs(project.targets()) do
+                if swift:scriptdir() == SWIFT_DIR and swift:kind() == "static" then
+                    local flags = table.wrap(swift:values("swift.flags"))
+                    local named = false
+                    for index, flag in ipairs(flags) do
+                        named = named or (flag == "-module-link-name" and flags[index + 1] == swift:name())
+                    end
+                    if not named then
+                        table.insert(unnamed, swift:name())
+                    end
+                end
+            end
+            table.sort(unnamed)
+            if #unnamed > 0 then
+                opt.errors = "built without -module-link-name, so a program that imports the module does not link its archive: " .. table.concat(unnamed, ", ")
+            end
+            return #unnamed == 0
         end
         local root = path.join(SRC, "..", "..", "..")
         local runtime = project.required_package("swift-runtime"):installdir()
