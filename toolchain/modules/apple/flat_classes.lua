@@ -2,7 +2,8 @@ local STUBBED = {
     {
         framework = "Foundation",
         classes = {
-            "NSDateInterval", "NSDimension", "NSISO8601DateFormatter", "NSMeasurement", "NSOrderedCollectionChange",
+            "NSAttributedStringMarkdownParsingOptions", "NSAttributedStringMarkdownSourcePosition", "NSDateInterval",
+            "NSDimension", "NSISO8601DateFormatter", "NSMeasurement", "NSOrderedCollectionChange",
             "NSOrderedCollectionDifference", "NSPersonNameComponents", "NSPresentationIntent", "NSURLComponents",
             "NSURLQueryItem", "NSURLSessionWebSocketMessage", "NSUnitConverterLinear",
         },
@@ -24,7 +25,7 @@ local STUBBED = {
     },
 }
 
-local EXPORTED = {NSDimension = true, NSISO8601DateFormatter = true, NSMeasurement = true, NSURLComponents = true, NSURLQueryItem = true, NSURLSessionWebSocketMessage = true, UIPointerEffect = true, UIPointerShape = true, UIPointerStyle = true}
+local EXPORTED = {NSAttributedStringMarkdownParsingOptions = true, NSAttributedStringMarkdownSourcePosition = true, NSDimension = true, NSISO8601DateFormatter = true, NSMeasurement = true, NSURLComponents = true, NSURLQueryItem = true, NSURLSessionWebSocketMessage = true, UIPointerEffect = true, UIPointerShape = true, UIPointerStyle = true}
 
 local function symbol_of(entry, name)
     if entry.functions then
