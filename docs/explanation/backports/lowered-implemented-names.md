@@ -197,7 +197,18 @@ undefined symbols without `-lCoreML` and 56 with it. The one that goes is
 `libCoreML.a` alone links against the runtime, libSystem and `libCoreMLBackports.dylib` with nothing undefined, and all 18
 static targets of the component build after the change. The archive of an app compiled before the change keeps its
 objects without the entry, so the importing module is compiled again against the new `CoreML.swiftmodule` to autolink.
-Not run: the app's own link (the Telegram build), a device, or a model.
+Measured on an iPhone 4S with iOS 6.1.3: a program that imports `CoreML`, linked with `libCoreML.a` and the
+`libCoreMLBackports.dylib` that the Backports gate builds, writes a one-layer model specification with `ModelWriter`,
+compiles it with `MLModel.compileModel(at:)` and with the completion-handler form, loads the bundle with
+`MLModel.load(contentsOf:configuration:completionHandler:)`, predicts with `prediction(from:)` and gets `0.5 * 2 + 0.25 * 4 +
+1 = 3.0`, and loads a bundle that is not there and receives `.failure` with a `com.apple.CoreML` error. Ten runs in a row
+passed. The class must bind to the Backports dylib: when the link names the SDK's `CoreML` framework (weak, as the SDK has
+no such framework on iOS 6.0) before `-lCoreMLBackports`, `ld` binds `MLModel` to the framework, the class is nil on the
+device, `compileModel(at:)` throws `nilError` and no completion handler is ever called. The app's link names the Backports
+libraries before the weak frameworks and leaves out the frameworks that revenant provides.
+Not run: the app's own link (the Telegram build), a model that Apple's `coremlc` compiled. A program of the same source
+compiled with `-Osize` trapped in its own optimized completion closure on armv7 and passed with `-O` and `-Onone`; its cause
+was not traced.
 
 ## A name the device already exports is lowered, not backported
 

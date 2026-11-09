@@ -35,7 +35,8 @@ it. Without the entry, `MLModel.load(contentsOf:configuration:completionHandler:
 that calls it, although the archive defines it.
 
 The classes behind the module (`MLModel`, `MLFeatureValue`, `MLModelConfiguration`, `MLPredictionOptions`) are in
-`libCoreMLBackports.dylib`, which the link names with the other Backports libraries. The engine that runs a model is C
+`libCoreMLBackports.dylib`, which the link names with the other Backports libraries and before any `CoreML` framework, so
+that `MLModel` binds to the dylib (bound to the framework, which iOS 6.0 lacks, the class is nil). The engine that runs a model is C
 code of `src/CoreML` (`RevenantMLModel.c`, `RevenantMLPredict.c`, `RevenantMLLayers.c`). `revenant_ml_model_read` takes the
 program from the `coremldata.bin` of a bundle, as a `CoreML.Specification.Model` message, and a bundle without that file or
 with a message it cannot run fails with an error that reaches the completion handler as `.failure`.
@@ -51,4 +52,7 @@ file of a bundle.
 `frameworks/Backports/tests/CoreML/load.swift`, the lines of Telegram's `U2netp.swift` that load and compile, and the lines
 of `AgeNet.swift` that make a shaped array of a model output and predict synchronously and asynchronously.
 
-Not measured on a device: a load of a real model.
+Measured on an iPhone 4S with iOS 6.1.3 (see `docs/explanation/backports/lowered-implemented-names.md`): a model written by
+`ModelWriter` is compiled, loaded and predicted through the Swift forms, and a load of a missing bundle ends in `.failure`.
+
+Not measured on a device: a load of a model that Apple's `coremlc` compiled.
