@@ -37,10 +37,15 @@ reads `components.encodedHost` under `#available(iOS 16.0, *)` in three places, 
 `NSURLComponents` property through the struct's own handle, and the two initialisers call the Objective-C ones. The Objective-C side is in
 `frameworks/Backports/src/Foundation`: `NSURLComponents.m` gives `encodedHost` (the host as the components hold it: the IDNA form of an international host,
 the percent-encoded text otherwise) and a setter that validates the host the way `setPercentEncodedHost:` does, and `NSURLComponents+Encoding17.m` gives the
-initialisers. With `encodingInvalidCharacters:YES` every character that is not allowed in a URL, and every non-ASCII byte, outside the host becomes
-`%XX`, and the host goes to the components parser as written, so an international host becomes punycode and an ASCII character that a host cannot hold gives nil, as
-on the host. With `NO` the string must come out of `NSURLComponents.string` unchanged, which rejects a stray `%`, a `#` in a fragment and a second colon in
-the user information. `NSURL+Encoding17.m` takes the string of the components and parses it (C55 records where it differs).
+initialisers. Both initialisers run `RevenantURLParser.m`, which is the RFC 3986 parser of swift-foundation: `RFC3986Parser.parse` with the allowed-character masks of the
+components for `encodingInvalidCharacters:YES`, with its `compatibilityParse` fallback (the heuristics of the old parser) for `NO`. The scheme decides how the
+host is written: the schemes that the Foundation of iOS 17 lists (`tel`, `facetime`, `imap`, `addressbook` and the others) keep a percent-encoded host, every other
+scheme converts a non-ASCII host through ICU's UTS 46 (`uidna_nameToASCII`, read with `dlopen` and `dlsym` from `/usr/lib/libicucore.dylib`, present on iOS 6.1.3),
+and an ASCII character that a host cannot hold gives nil. With `NO` a stray `%`, a `#` in a fragment and a second colon in the user information are rejected;
+with `YES` they are escaped (an existing `%XX` stays). The port is read as swift-foundation reads it: digits, or for `addressbook` the text up to the path.
+`NSURLComponents.string` returns the string the parser accepted until a setter changes the components. `NSURL+Encoding17.m` runs the layer of the NSURL initialiser
+(`revenant_url_nsurl`), which is a different algorithm over the same masks: a user information with a colon, a scheme that is not valid is read as a relative path,
+and a host with `[` is rejected.
 
 ## URL's directory properties
 
@@ -52,9 +57,11 @@ and user directories), `NSHomeDirectory`, `NSTemporaryDirectory` or the current 
 
 ## Checked
 
-Measured on the host: `url_components_oracle_test.lua` runs the backport's `NSURLComponents` and macOS's on the 705 lines of `tests/url_components/corpus.txt` and
-compares `encodedHost`, both values of `encodingInvalidCharacters:` and the earlier accessors: no differences, and its negative control (every line
-changed) differs on 672. `url_percent_encoded_test.lua` also compares the directory properties and `homeDirectory(forUser:)` for the current user, `root` and a
+Measured on the host: `url_components_oracle_test.lua` runs the backport's `NSURLComponents` and `NSURL` and macOS's on the 705 lines of `tests/url_components/corpus.txt` and
+on 60000 lines from `tests/url_components/fuzz.lua` (three seeds of 20000) and compares `encodedHost`, both values of `encodingInvalidCharacters:` and the earlier
+accessors, and the URL string of the `NSURL` form: no differences, and its negative control (every line changed) differs on 672 and 675. Measured on an iPhone 4S
+(iOS 6.1.3, `UrlDumpProbe`): 705 corpus lines, 0 differences in either form; 4000 generated lines, 0 differences in the components and 66 in the `NSURL` form,
+all from the iOS 6 system `NSURL` (it escapes `#` as `%23` in a URL without an authority, and `[` and `]` in an addressbook port). `url_percent_encoded_test.lua` also compares the directory properties and `homeDirectory(forUser:)` for the current user, `root` and a
 name that does not exist (18 lines, identical to the host's). `lowering_test.lua` and the Telegram replay below check that the Swift members typecheck.
 
 Measured on the Telegram sources: with the rebuilt `swift-runtime` and the lowered headers of this change, the real Bazel arguments of `//submodules/ListMessageItem`

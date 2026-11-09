@@ -473,6 +473,17 @@ if is_plat("iphoneos") and not SELECTED then
         add_syslinks("objc")
     target_end()
 
+    target("SurfaceSurveyProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/daemon")
+        add_files("tests/device_probe/surface_survey_main.m")
+        add_includedirs("tests/Foundation")
+        add_mflags("-fobjc-arc", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability")
+        add_frameworks("Foundation", "CoreGraphics", "QuartzCore", "OpenGLES", "CoreVideo", "CoreImage")
+        add_syslinks("objc")
+    target_end()
+
     target("AudioPlayerHintProbe")
         set_kind("binary")
         set_default(false)
@@ -501,10 +512,22 @@ if is_plat("iphoneos") and not SELECTED then
         add_rules("@addon/revenant/daemon")
         add_files("tests/device_probe/markdown_dump_main.m", "src/Foundation/NSAttributedStringMarkdown15.m", "src/Foundation/RevenantMarkdownParser.m", "src/Foundation/RevenantMarkdownEntities.m",
                   "src/Foundation/NSAttributedStringMarkdownSourcePosition.m", "src/Foundation/NSPresentationIntent15.m", "src/Foundation/NSURL+Encoding17.m",
-                  "src/Foundation/NSURLComponents+Encoding17.m", "src/Foundation/NSURLComponents.m", "src/Foundation/RevenantURLGrammar.m",
+                  "src/Foundation/NSURLComponents+Encoding17.m", "src/Foundation/NSURLComponents.m", "src/Foundation/RevenantURLGrammar.m", "src/Foundation/RevenantURLParser.m",
                   "src/Foundation/NSCharacterSet+URLUtilities.m", "src/Foundation/NSString+URLUtilities.m", "src/Foundation/NSURLComponents+String.m")
         add_mflags("-fobjc-arc", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability")
         add_frameworks("Foundation", "UIKit", "CoreGraphics")
+        add_syslinks("objc")
+    target_end()
+
+    target("UrlDumpProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/daemon")
+        add_files("tests/url_components/dump.m", "src/Foundation/NSURL+Encoding17.m", "src/Foundation/NSURLComponents+Encoding17.m", "src/Foundation/NSURLComponents.m",
+                  "src/Foundation/RevenantURLGrammar.m", "src/Foundation/RevenantURLParser.m", "src/Foundation/NSCharacterSet+URLUtilities.m",
+                  "src/Foundation/NSString+URLUtilities.m", "src/Foundation/NSURLComponents+String.m")
+        add_mflags("-fobjc-arc", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability")
+        add_frameworks("Foundation")
         add_syslinks("objc")
     target_end()
 

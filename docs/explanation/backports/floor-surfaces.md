@@ -366,14 +366,16 @@ A method whose signature names `DateInterval` is lowered only when `DateInterval
   the one skipped at the start of the document, and a NUL becomes U+FFFD in every syntax. The parser searches and
   splits strings literally: a non-literal replace did not see a carriage return followed by a combining mark, which the
   host reads as a line end. The exception is the URL object: iOS 6's `NSURL` rejects what the host keeps and
-  does not map hosts through IDNA, so 30 strings in `markdown_url_corpus.txt` (183 differing lines of
-  `markdown_url_dump.expected`) have the same text and runs but a different `NSLink`, or none: a no-break space,
+  does not map hosts through IDNA, so 30 strings in `markdown_url_corpus.txt` (87 of the 279 lines
+  of the device's output differ from `markdown_url_dump.expected`, measured on an iPhone 4S on 2026-11-09) have the same text and runs but a different `NSLink`, or none: a no-break space,
   U+2003, U+3000, U+0085 or U+200B in a bare URL, a non-ASCII character or a combining mark in a host (the host
   gives `xn--` labels, the device a percent-encoded host), an ASCII character the host refuses in a host or port
   (`|`, `[`, `]`, `'`, an unclosed `[::1`), a scheme that does not start with a letter (`-a:b`, `+a:b`, `.mailto:a@b.c`
   are relative references on the host), and a leading U+FEFF in a host. The parser is not involved: both sides read
-  the same destination. Closing it needs the `NSURL` backport (`URLWithString:encodingInvalidCharacters:`) to follow the
-  host's rules for the authority and the scheme. A sample of 1500 link destinations made of such characters differed
+  the same destination. The `NSURL` backport (`URLWithString:encodingInvalidCharacters:`) follows macOS's `NSURL` (C55),
+  and the parser tries it only when the device's own `NSURL` refuses the string; the host's markdown keeps what no
+  `NSURL` holds (a space or a no-break space in a host, a scheme that does not start with a letter read as a relative
+  reference), so the differences stay. A sample of 1500 link destinations made of such characters differed
   on 186 (12 percent), all of them this kind; the destinations of real documents are almost always ASCII and valid.
 - The UIMenu initializers, the CallKit, CoreMedia and PhotosUI overlays and `INStartCallIntent` were typechecked
   together with Telegram's lines and built in the runtime. They have not run on a device.

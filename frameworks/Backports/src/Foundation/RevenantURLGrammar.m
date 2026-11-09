@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import "RevenantURLParser.h"
 
 typedef NS_ENUM(NSUInteger, RevenantURLPart) {
     RevenantURLScheme,
@@ -22,6 +23,7 @@ NSString *revenant_url_compose(NSURLComponents *components, NSRange *ranges);
 @interface NSURLComponents (RevenantRawText)
 - (NSString *)revenantPortText;
 - (NSString *)revenantHostText;
+- (NSString *)revenantParsedString;
 @end
 
 static BOOL revenant_url_alphanumeric(unichar character)
@@ -42,21 +44,6 @@ static BOOL revenant_url_hex(unichar character)
 static BOOL revenant_url_escape_valid(const unichar *characters, NSUInteger index, NSUInteger end)
 {
     return characters[index] == '%' && index + 2 < end && revenant_url_hex(characters[index + 1]) && revenant_url_hex(characters[index + 2]);
-}
-
-static NSUInteger revenant_url_find(const unichar *characters, NSUInteger start, NSUInteger end, const char *delimiters)
-{
-    while (start < end && !revenant_url_in(characters[start], delimiters))
-        start++;
-    return start;
-}
-
-static NSUInteger revenant_url_find_last(const unichar *characters, NSUInteger start, NSUInteger end, unichar target)
-{
-    NSUInteger index = end;
-    while (index > start && characters[index - 1] != target)
-        index--;
-    return index > start ? index - 1 : end;
 }
 
 static BOOL revenant_url_valid_run(const unichar *characters, NSUInteger start, NSUInteger end, const char *delimiters, BOOL subdelimiters)
@@ -88,7 +75,7 @@ static BOOL revenant_url_valid_scheme(const unichar *characters, NSUInteger star
     return YES;
 }
 
-static BOOL revenant_url_valid_host(const unichar *characters, NSUInteger start, NSUInteger end, BOOL international)
+static BOOL revenant_url_valid_host(const unichar *characters, NSUInteger start, NSUInteger end)
 {
     if (start >= end)
         return YES;
@@ -99,7 +86,7 @@ static BOOL revenant_url_valid_host(const unichar *characters, NSUInteger start,
                 if (!revenant_url_escape_valid(characters, index, end))
                     return NO;
                 index += 2;
-            } else if (!revenant_url_alphanumeric(character) && !revenant_url_in(character, "-._~!$&'()*+,;=") && !(international && character >= 128)) {
+            } else if (!revenant_url_alphanumeric(character) && !revenant_url_in(character, "-._~!$&'()*+,;=")) {
                 return NO;
             }
         }
@@ -128,72 +115,9 @@ static unichar *revenant_url_characters(NSString *string)
     return characters;
 }
 
-static BOOL revenant_url_parse_characters(const unichar *characters, NSUInteger length, NSRange *ranges)
-{
-    for (NSUInteger part = 0; part < RevenantURLPartCount; part++)
-        ranges[part] = NSMakeRange(NSNotFound, 0);
-    NSUInteger index = 0;
-    NSUInteger delimiter = revenant_url_find(characters, 0, length, ":/?#");
-    if (delimiter > 0 && delimiter < length && characters[delimiter] == ':') {
-        if (!revenant_url_valid_scheme(characters, 0, delimiter))
-            return NO;
-        ranges[RevenantURLScheme] = NSMakeRange(0, delimiter);
-        index = delimiter + 1;
-    }
-    if (length - index >= 2 && characters[index] == '/' && characters[index + 1] == '/') {
-        NSUInteger authority = index + 2;
-        NSUInteger authorityEnd = revenant_url_find(characters, authority, length, "/?#");
-        NSUInteger hostStart = authority;
-        NSUInteger at = revenant_url_find_last(characters, authority, authorityEnd, '@');
-        if (at < authorityEnd) {
-            NSUInteger colon = revenant_url_find(characters, authority, at, ":");
-            ranges[RevenantURLUser] = NSMakeRange(authority, colon - authority);
-            if (colon < at)
-                ranges[RevenantURLPassword] = NSMakeRange(colon + 1, at - colon - 1);
-            hostStart = at + 1;
-        }
-        NSUInteger hostEnd;
-        if (hostStart < authorityEnd && characters[hostStart] == '[') {
-            NSUInteger close = revenant_url_find(characters, hostStart, authorityEnd, "]");
-            if (close == authorityEnd)
-                return NO;
-            hostEnd = close + 1;
-            if (hostEnd < authorityEnd && characters[hostEnd] != ':')
-                return NO;
-        } else {
-            hostEnd = revenant_url_find(characters, hostStart, authorityEnd, ":");
-        }
-        if (!revenant_url_valid_host(characters, hostStart, hostEnd, YES))
-            return NO;
-        ranges[RevenantURLHost] = NSMakeRange(hostStart, hostEnd - hostStart);
-        if (hostEnd < authorityEnd) {
-            for (NSUInteger digit = hostEnd + 1; digit < authorityEnd; digit++) {
-                if (characters[digit] < '0' || characters[digit] > '9')
-                    return NO;
-            }
-            ranges[RevenantURLPort] = NSMakeRange(hostEnd + 1, authorityEnd - hostEnd - 1);
-        }
-        index = authorityEnd;
-    }
-    NSUInteger pathEnd = revenant_url_find(characters, index, length, "?#");
-    ranges[RevenantURLPath] = NSMakeRange(index, pathEnd - index);
-    index = pathEnd;
-    if (index < length && characters[index] == '?') {
-        NSUInteger queryEnd = revenant_url_find(characters, index + 1, length, "#");
-        ranges[RevenantURLQuery] = NSMakeRange(index + 1, queryEnd - index - 1);
-        index = queryEnd;
-    }
-    if (index < length)
-        ranges[RevenantURLFragment] = NSMakeRange(index + 1, length - index - 1);
-    return YES;
-}
-
 BOOL revenant_url_parse(NSString *string, NSRange *ranges)
 {
-    unichar *characters = revenant_url_characters(string);
-    BOOL parsed = revenant_url_parse_characters(characters, string.length, ranges);
-    free(characters);
-    return parsed;
+    return revenant_url_ranges(string, ranges);
 }
 
 BOOL revenant_url_valid(RevenantURLPart part, NSString *string)
@@ -206,7 +130,7 @@ BOOL revenant_url_valid(RevenantURLPart part, NSString *string)
         valid = revenant_url_valid_scheme(characters, 0, length);
         break;
     case RevenantURLHost:
-        valid = revenant_url_valid_host(characters, 0, length, NO);
+        valid = revenant_url_valid_host(characters, 0, length);
         break;
     case RevenantURLPath:
         valid = revenant_url_valid_run(characters, 0, length, "/:@", YES);
@@ -308,209 +232,24 @@ NSString *revenant_url_component(NSString *string, NSRange range, RevenantURLPar
     return result;
 }
 
-static uint32_t *revenant_url_code_points(NSString *text, NSUInteger *count)
-{
-    NSUInteger length = text.length;
-    uint32_t *points = malloc((length ? length : 1) * sizeof(uint32_t));
-    NSUInteger n = 0;
-    for (NSUInteger index = 0; index < length; index++) {
-        unichar character = [text characterAtIndex:index];
-        if (character >= 0xD800 && character < 0xDC00 && index + 1 < length) {
-            unichar low = [text characterAtIndex:index + 1];
-            if (low >= 0xDC00 && low < 0xE000) {
-                points[n++] = 0x10000 + ((character - 0xD800) << 10) + (low - 0xDC00);
-                index++;
-                continue;
-            }
-        }
-        points[n++] = character;
-    }
-    *count = n;
-    return points;
-}
-
-static uint32_t revenant_punycode_adapt(uint32_t delta, uint32_t points, BOOL first)
-{
-    delta = first ? delta / 700 : delta / 2;
-    delta += delta / points;
-    uint32_t k = 0;
-    while (delta > 455) {
-        delta /= 35;
-        k += 36;
-    }
-    return k + (36 * delta) / (delta + 38);
-}
-
-static NSString *revenant_punycode(const uint32_t *points, NSUInteger count)
-{
-    NSMutableString *output = [NSMutableString string];
-    NSUInteger basic = 0;
-    for (NSUInteger index = 0; index < count; index++) {
-        if (points[index] < 128) {
-            [output appendFormat:@"%C", (unichar)points[index]];
-            basic++;
-        }
-    }
-    if (basic)
-        [output appendString:@"-"];
-    uint32_t n = 128, delta = 0, bias = 72;
-    NSUInteger handled = basic;
-    while (handled < count) {
-        uint32_t next = UINT32_MAX;
-        for (NSUInteger index = 0; index < count; index++) {
-            if (points[index] >= n && points[index] < next)
-                next = points[index];
-        }
-        delta += (next - n) * (uint32_t)(handled + 1);
-        n = next;
-        for (NSUInteger index = 0; index < count; index++) {
-            if (points[index] < n)
-                delta++;
-            if (points[index] != n)
-                continue;
-            uint32_t q = delta;
-            for (uint32_t k = 36;; k += 36) {
-                uint32_t t = k <= bias ? 1 : (k >= bias + 26 ? 26 : k - bias);
-                if (q < t)
-                    break;
-                uint32_t digit = t + (q - t) % (36 - t);
-                [output appendFormat:@"%C", (unichar)(digit < 26 ? 'a' + digit : '0' + (digit - 26))];
-                q = (q - t) / (36 - t);
-            }
-            [output appendFormat:@"%C", (unichar)(q < 26 ? 'a' + q : '0' + (q - 26))];
-            bias = revenant_punycode_adapt(delta, (uint32_t)handled + 1, handled == basic);
-            delta = 0;
-            handled++;
-        }
-        delta++;
-        n++;
-    }
-    return output;
-}
-
-static NSString *revenant_url_label(NSString *label)
-{
-    NSString *decoded = label;
-    BOOL international = NO;
-    for (NSUInteger index = 0; index < decoded.length; index++) {
-        if ([decoded characterAtIndex:index] >= 128)
-            international = YES;
-    }
-    if (!international)
-        return label;
-    NSString *mapped = [[decoded precomposedStringWithCompatibilityMapping] lowercaseString];
-    NSUInteger count;
-    uint32_t *points = revenant_url_code_points(mapped, &count);
-    BOOL ascii = YES;
-    for (NSUInteger index = 0; index < count; index++) {
-        if (points[index] >= 128)
-            ascii = NO;
-    }
-    NSString *result = ascii ? mapped : [@"xn--" stringByAppendingString:revenant_punycode(points, count)];
-    free(points);
-    return result;
-}
-
 NSString *revenant_url_host_text(NSString *string, NSRange range)
 {
-    if (range.location == NSNotFound)
-        return nil;
-    NSMutableArray *labels = [NSMutableArray array];
-    for (NSString *label in [[string substringWithRange:range] componentsSeparatedByString:@"."])
-        [labels addObject:revenant_url_label(label)];
-    return [labels componentsJoinedByString:@"."];
-}
-
-static NSString *revenant_punycode_decode(NSString *text)
-{
-    NSUInteger length = text.length;
-    uint32_t *points = malloc((length + 1) * sizeof(uint32_t));
-    NSUInteger count = 0;
-    NSUInteger index = 0;
-    NSRange dash = [text rangeOfString:@"-" options:NSBackwardsSearch];
-    if (dash.location != NSNotFound) {
-        for (NSUInteger basic = 0; basic < dash.location; basic++) {
-            unichar character = [text characterAtIndex:basic];
-            if (character >= 128) {
-                free(points);
-                return nil;
-            }
-            points[count++] = character;
-        }
-        index = dash.location + 1;
-    }
-    uint32_t n = 128, i = 0, bias = 72;
-    while (index < length) {
-        uint32_t previous = i, weight = 1;
-        for (uint32_t k = 36;; k += 36) {
-            if (index >= length) {
-                free(points);
-                return nil;
-            }
-            unichar character = [text characterAtIndex:index++];
-            uint32_t digit;
-            if (character >= '0' && character <= '9')
-                digit = character - '0' + 26;
-            else if (character >= 'a' && character <= 'z')
-                digit = character - 'a';
-            else if (character >= 'A' && character <= 'Z')
-                digit = character - 'A';
-            else {
-                free(points);
-                return nil;
-            }
-            i += digit * weight;
-            uint32_t t = k <= bias ? 1 : (k >= bias + 26 ? 26 : k - bias);
-            if (digit < t)
-                break;
-            weight *= 36 - t;
-        }
-        bias = revenant_punycode_adapt(i - previous, (uint32_t)count + 1, previous == 0);
-        n += i / ((uint32_t)count + 1);
-        i %= (uint32_t)count + 1;
-        memmove(points + i + 1, points + i, (count - i) * sizeof(uint32_t));
-        points[i++] = n;
-        count++;
-    }
-    NSMutableString *result = [NSMutableString string];
-    for (NSUInteger point = 0; point < count; point++) {
-        if (points[point] >= 0x10000) {
-            uint32_t offset = points[point] - 0x10000;
-            [result appendFormat:@"%C%C", (unichar)(0xD800 + (offset >> 10)), (unichar)(0xDC00 + (offset & 0x3FF))];
-        } else {
-            [result appendFormat:@"%C", (unichar)points[point]];
-        }
-    }
-    free(points);
-    return result;
+    return range.location == NSNotFound ? nil : [string substringWithRange:range];
 }
 
 NSString *revenant_url_host_escaped(NSString *host)
 {
     if (!host)
         return nil;
-    NSMutableArray *labels = [NSMutableArray array];
-    for (NSString *label in [host componentsSeparatedByString:@"."]) {
-        NSString *decoded = nil;
-        if (label.length > 4 && [[label substringToIndex:4] caseInsensitiveCompare:@"xn--"] == NSOrderedSame)
-            decoded = revenant_punycode_decode([label substringFromIndex:4]);
-        if (!decoded) {
-            [labels addObject:label];
-            continue;
-        }
-        NSMutableString *escaped = [NSMutableString string];
-        NSUInteger count;
-        uint32_t *points = revenant_url_code_points(decoded, &count);
-        for (NSUInteger point = 0; point < count; point++) {
-            if (points[point] < 128)
-                [escaped appendFormat:@"%C", (unichar)points[point]];
-            else
-                revenant_url_utf8(points[point], escaped);
-        }
-        free(points);
-        [labels addObject:escaped];
-    }
-    return [labels componentsJoinedByString:@"."];
+    if (!host.length || [host rangeOfString:@"%"].location != NSNotFound || [host hasPrefix:@"["])
+        return host;
+    NSString *decoded = revenant_url_host_unicode(host);
+    if (!decoded)
+        return nil;
+    unichar *characters = revenant_url_characters(decoded);
+    NSString *escaped = revenant_url_escape(characters, 0, decoded.length, "");
+    free(characters);
+    return escaped;
 }
 
 static void revenant_url_append(NSMutableString *result, NSString *text, NSRange *ranges, RevenantURLPart part)

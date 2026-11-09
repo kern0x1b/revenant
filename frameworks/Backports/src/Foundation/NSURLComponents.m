@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import "../revenant_alias.h"
+#import "RevenantURLParser.h"
 
 typedef NS_ENUM(NSUInteger, RevenantURLPart) {
     RevenantURLScheme,
@@ -31,10 +32,16 @@ static NSString *revenant_url_path_escaping_colon(NSString *path)
 
 static const char revenant_port_text_key;
 static const char revenant_host_text_key;
+static const char revenant_parsed_string_key;
 
 static void revenant_url_set_port_text(id components, NSString *text)
 {
     objc_setAssociatedObject(components, &revenant_port_text_key, text, OBJC_ASSOCIATION_COPY_NONATOMIC);
+}
+
+static void revenant_url_set_parsed(id components, NSString *text)
+{
+    objc_setAssociatedObject(components, &revenant_parsed_string_key, text, OBJC_ASSOCIATION_COPY_NONATOMIC);
 }
 
 static void revenant_url_set_host_text(id components, NSString *text)
@@ -45,20 +52,6 @@ static void revenant_url_set_host_text(id components, NSString *text)
 static NSString *revenant_url_substring(NSString *string, NSRange range)
 {
     return range.location == NSNotFound ? nil : [string substringWithRange:range];
-}
-
-static NSNumber *revenant_url_port(NSString *digits)
-{
-    if (!digits.length)
-        return nil;
-    unsigned long long value = 0;
-    for (NSUInteger index = 0; index < digits.length; index++) {
-        unsigned long long digit = [digits characterAtIndex:index] - '0';
-        if (value > (LLONG_MAX - digit) / 10)
-            return nil;
-        value = value * 10 + digit;
-    }
-    return [NSNumber numberWithLongLong:(long long)value];
 }
 
 static void revenant_url_require(BOOL valid, id components, SEL selector, NSString *what)
@@ -102,20 +95,24 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
     return [self initWithString:source.relativeString];
 }
 
-- (instancetype)initWithString:(NSString *)URLString
+- (instancetype)initWithString:(NSString *)source
 {
+    NSString *URLString = revenant_url_standard(source, YES, NO);
     NSRange ranges[RevenantURLPartCount];
-    if (![URLString isKindOfClass:[NSString class]] || !revenant_url_parse(URLString, ranges))
+    if (!URLString || !revenant_url_parse(URLString, ranges))
         return nil;
     if ((self = [self init])) {
         _scheme = revenant_url_substring(URLString, ranges[RevenantURLScheme]);
         _percentEncodedUser = revenant_url_component(URLString, ranges[RevenantURLUser], RevenantURLUser);
         _percentEncodedPassword = revenant_url_component(URLString, ranges[RevenantURLPassword], RevenantURLPassword);
         _percentEncodedHost = revenant_url_component(URLString, ranges[RevenantURLHost], RevenantURLHost);
-        revenant_url_set_host_text(self, revenant_url_host_text(URLString, ranges[RevenantURLHost]));
         NSString *portText = revenant_url_substring(URLString, ranges[RevenantURLPort]);
+        _port = revenant_url_integer(portText);
+        if (!_percentEncodedHost && (_port || _percentEncodedUser))
+            _percentEncodedHost = @"";
+        revenant_url_set_host_text(self, revenant_url_host_text(URLString, ranges[RevenantURLHost]));
         revenant_url_set_port_text(self, portText);
-        _port = revenant_url_port(portText);
+        revenant_url_set_parsed(self, URLString);
         _percentEncodedPath = revenant_url_component(URLString, ranges[RevenantURLPath], RevenantURLPath);
         _percentEncodedQuery = revenant_url_component(URLString, ranges[RevenantURLQuery], RevenantURLQuery);
         _percentEncodedFragment = revenant_url_component(URLString, ranges[RevenantURLFragment], RevenantURLFragment);
@@ -133,6 +130,7 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
     copy->_port = _port;
     revenant_url_set_port_text(copy, self.revenantPortText);
     revenant_url_set_host_text(copy, self.revenantHostText);
+    revenant_url_set_parsed(copy, self.revenantParsedString);
     copy->_percentEncodedPath = _percentEncodedPath;
     copy->_percentEncodedQuery = _percentEncodedQuery;
     copy->_percentEncodedFragment = _percentEncodedFragment;
@@ -158,6 +156,7 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
 
 - (void)setScheme:(NSString *)scheme
 {
+    revenant_url_set_parsed(self, nil);
     if (scheme)
         revenant_url_require(revenant_url_valid(RevenantURLScheme, scheme), self, _cmd, @"scheme");
     _scheme = [scheme copy];
@@ -170,6 +169,7 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
 
 - (void)setUser:(NSString *)user
 {
+    revenant_url_set_parsed(self, nil);
     _percentEncodedUser = [user stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLUserAllowedCharacterSet]];
 }
 
@@ -180,6 +180,7 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
 
 - (void)setPassword:(NSString *)password
 {
+    revenant_url_set_parsed(self, nil);
     _percentEncodedPassword = [password stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLPasswordAllowedCharacterSet]];
 }
 
@@ -190,6 +191,7 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
 
 - (void)setHost:(NSString *)host
 {
+    revenant_url_set_parsed(self, nil);
     _percentEncodedHost = [host stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
     revenant_url_set_host_text(self, nil);
 }
@@ -201,6 +203,7 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
 
 - (void)setPort:(NSNumber *)port
 {
+    revenant_url_set_parsed(self, nil);
     if (port && port.longLongValue < 0)
         [NSException raise:NSInvalidArgumentException format:@"*** -[%@ %@]: negative port number", [self class], NSStringFromSelector(_cmd)];
     _port = port ? [NSNumber numberWithLongLong:port.longLongValue] : nil;
@@ -218,6 +221,7 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
 
 - (void)setPath:(NSString *)path
 {
+    revenant_url_set_parsed(self, nil);
     _percentEncodedPath = revenant_url_path_escaping_colon([path stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLPathAllowedCharacterSet]]);
 }
 
@@ -228,6 +232,7 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
 
 - (void)setQuery:(NSString *)query
 {
+    revenant_url_set_parsed(self, nil);
     _percentEncodedQuery = [query stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
 }
 
@@ -238,6 +243,7 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
 
 - (void)setFragment:(NSString *)fragment
 {
+    revenant_url_set_parsed(self, nil);
     _percentEncodedFragment = [fragment stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLFragmentAllowedCharacterSet]];
 }
 
@@ -248,6 +254,7 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
 
 - (void)setPercentEncodedUser:(NSString *)percentEncodedUser
 {
+    revenant_url_set_parsed(self, nil);
     if (percentEncodedUser)
         revenant_url_require(revenant_url_valid(RevenantURLUser, percentEncodedUser), self, _cmd, @"percentEncodedUser");
     _percentEncodedUser = [percentEncodedUser copy];
@@ -260,6 +267,7 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
 
 - (void)setPercentEncodedPassword:(NSString *)percentEncodedPassword
 {
+    revenant_url_set_parsed(self, nil);
     if (percentEncodedPassword)
         revenant_url_require(revenant_url_valid(RevenantURLPassword, percentEncodedPassword), self, _cmd, @"percentEncodedPassword");
     _percentEncodedPassword = [percentEncodedPassword copy];
@@ -272,6 +280,7 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
 
 - (void)setPercentEncodedHost:(NSString *)percentEncodedHost
 {
+    revenant_url_set_parsed(self, nil);
     if (percentEncodedHost)
         revenant_url_require(revenant_url_valid(RevenantURLHost, percentEncodedHost), self, _cmd, @"percentEncodedHost");
     _percentEncodedHost = [percentEncodedHost copy];
@@ -285,10 +294,16 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
 
 - (void)setEncodedHost:(NSString *)encodedHost
 {
+    revenant_url_set_parsed(self, nil);
     if (encodedHost)
         revenant_url_require(revenant_url_valid(RevenantURLHost, encodedHost), self, _cmd, @"encodedHost");
     _percentEncodedHost = [encodedHost copy];
     revenant_url_set_host_text(self, nil);
+}
+
+- (NSString *)revenantParsedString
+{
+    return objc_getAssociatedObject(self, &revenant_parsed_string_key);
 }
 
 - (NSString *)revenantHostText
@@ -303,6 +318,7 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
 
 - (void)setPercentEncodedPath:(NSString *)percentEncodedPath
 {
+    revenant_url_set_parsed(self, nil);
     if (percentEncodedPath)
         revenant_url_require(revenant_url_valid(RevenantURLPath, percentEncodedPath), self, _cmd, @"percentEncodedPath");
     _percentEncodedPath = [percentEncodedPath copy];
@@ -315,6 +331,7 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
 
 - (void)setPercentEncodedQuery:(NSString *)percentEncodedQuery
 {
+    revenant_url_set_parsed(self, nil);
     if (percentEncodedQuery)
         revenant_url_require(revenant_url_valid(RevenantURLQuery, percentEncodedQuery), self, _cmd, @"percentEncodedQuery");
     _percentEncodedQuery = [percentEncodedQuery copy];
@@ -327,6 +344,7 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
 
 - (void)setPercentEncodedFragment:(NSString *)percentEncodedFragment
 {
+    revenant_url_set_parsed(self, nil);
     if (percentEncodedFragment)
         revenant_url_require(revenant_url_valid(RevenantURLFragment, percentEncodedFragment), self, _cmd, @"percentEncodedFragment");
     _percentEncodedFragment = [percentEncodedFragment copy];
