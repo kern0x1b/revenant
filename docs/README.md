@@ -132,6 +132,8 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [OpenGL ES 3 on iOS 6](reference/backports/opengles-es3.md) | the ES3 entry points on the ES2 driver: what is forwarded, emulated and refused, and why no ES3 EAGL context yet |
 | [AVFoundation: QR codes on iOS 6](reference/backports/AVFoundation/README.md) | the metadata output's QR path, what the iOS 6.0 cache shows, and what is still to measure on a device |
 | [Photos on iOS 6](reference/backports/Photos/README.md) | the AssetsLibrary-backed PhotoKit surface, cache bound, and unsupported operations |
+| [MediaPlayer on iOS 6: the remote command center](reference/backports/MediaPlayer/README.md) | which remote control events reach which command, what iOS 6 never sends, and what the iPhone 4S probe measured |
+| [StoreKit on iOS 6: manage subscriptions](reference/backports/StoreKit/README.md) | the overlay over the SDK's module, why the call opens the Settings pane, and what was not measured |
 | [Security on iOS 6](reference/backports/Security/README.md) | the access-control rules, Secure Enclave and shared-credential answers measured on macOS, and what the iOS 6 keychain did |
 | [UIKit feedback generators on iOS 6](reference/backports/UIKit/FeedbackGenerators.md) | the impact, notification and selection generators as vibration patterns through AudioServices, by motor presence, and what is not measured |
 | [UserNotifications: attachments on iOS 6](reference/backports/UserNotifications/Attachments.md) | what `UNNotificationAttachment` validates and keeps, and what iOS 6 does not show |
