@@ -2,6 +2,10 @@
 
 #include <math.h>
 
+#define SPAN 8
+#define LARGEST_SIDE 16384
+#define COORDINATE_LIMIT 16384.0f
+
 typedef struct {
     double a, b, c, d, e, f, g, h;
 } Projection;
@@ -87,50 +91,83 @@ RevenantDocumentSize RevenantDocumentOutputSize(const RevenantDocumentPoint quad
     return size;
 }
 
+typedef struct {
+    float a, b, c, d, e, f, g, h;
+} Coefficients;
+
+static float limited(float value)
+{
+    return value < -COORDINATE_LIMIT ? -COORDINATE_LIMIT : (value > COORDINATE_LIMIT ? COORDINATE_LIMIT : value);
+}
+
+static void project(const Coefficients *k, float u, float v, float *sx, float *sy)
+{
+    float w = k->g * u + k->h * v + 1.0f;
+    if (w < 1e-6f)
+        w = 1e-6f;
+    float inverse = 1.0f / w;
+    *sx = limited((k->a * u + k->b * v + k->c) * inverse - 0.5f);
+    *sy = limited((k->d * u + k->e * v + k->f) * inverse - 0.5f);
+}
+
+static int32_t clamped(int32_t value, int32_t last)
+{
+    return value < 0 ? 0 : (value > last ? last : value);
+}
+
 int RevenantDocumentWarp(const uint8_t *source, size_t source_width, size_t source_height, size_t source_row_bytes,
                          const RevenantDocumentPoint quad[4], uint8_t *output, size_t output_width, size_t output_height,
                          size_t output_row_bytes)
 {
     if (source == NULL || output == NULL || quad == NULL || source_width == 0 || source_height == 0 || output_width == 0 ||
-        output_height == 0 || source_row_bytes < source_width * 4 || output_row_bytes < output_width * 4)
+        output_height == 0 || source_row_bytes < source_width * 4 || output_row_bytes < output_width * 4 ||
+        source_width > LARGEST_SIDE || source_height > LARGEST_SIDE)
         return 0;
     Projection projection;
     if (!make_projection(quad, &projection))
         return 0;
-    const float a = (float)projection.a, b = (float)projection.b, c = (float)projection.c;
-    const float d = (float)projection.d, e = (float)projection.e, f = (float)projection.f;
-    const float g = (float)projection.g, h = (float)projection.h;
-    const float last_x = (float)(source_width - 1);
-    const float last_y = (float)(source_height - 1);
+    const Coefficients k = {(float)projection.a, (float)projection.b, (float)projection.c, (float)projection.d,
+                            (float)projection.e, (float)projection.f, (float)projection.g, (float)projection.h};
+    const int32_t last_x = (int32_t)(source_width - 1) << 8;
+    const int32_t last_y = (int32_t)(source_height - 1) << 8;
     const float step_u = 1.0f / (float)output_width;
     const float step_v = 1.0f / (float)output_height;
     for (size_t y = 0; y < output_height; ++y) {
         const float v = ((float)y + 0.5f) * step_v;
         uint8_t *out = output + y * output_row_bytes;
-        for (size_t x = 0; x < output_width; ++x, out += 4) {
-            const float u = ((float)x + 0.5f) * step_u;
-            float w = g * u + h * v + 1.0f;
-            if (w < 1e-6f)
-                w = 1e-6f;
-            float sx = (a * u + b * v + c) / w - 0.5f;
-            float sy = (d * u + e * v + f) / w - 0.5f;
-            sx = sx < 0 ? 0 : (sx > last_x ? last_x : sx);
-            sy = sy < 0 ? 0 : (sy > last_y ? last_y : sy);
-            const size_t ix = (size_t)sx;
-            const size_t iy = (size_t)sy;
-            const size_t jx = ix + 1 < source_width ? ix + 1 : ix;
-            const size_t jy = iy + 1 < source_height ? iy + 1 : iy;
-            const float fx = sx - (float)ix;
-            const float fy = sy - (float)iy;
-            const uint8_t *top = source + iy * source_row_bytes;
-            const uint8_t *bottom = source + jy * source_row_bytes;
-            const uint8_t *p00 = top + ix * 4, *p10 = top + jx * 4;
-            const uint8_t *p01 = bottom + ix * 4, *p11 = bottom + jx * 4;
-            for (int channel = 0; channel < 4; ++channel) {
-                const float upper = (float)p00[channel] + ((float)p10[channel] - (float)p00[channel]) * fx;
-                const float lower = (float)p01[channel] + ((float)p11[channel] - (float)p01[channel]) * fx;
-                out[channel] = (uint8_t)(upper + (lower - upper) * fy + 0.5f);
+        float start_x, start_y;
+        project(&k, 0.5f * step_u, v, &start_x, &start_y);
+        for (size_t x0 = 0; x0 < output_width;) {
+            size_t x1 = x0 + SPAN < output_width ? x0 + SPAN : output_width;
+            const float count = (float)(x1 - x0);
+            float end_x, end_y;
+            project(&k, ((float)x1 + 0.5f) * step_u, v, &end_x, &end_y);
+            int32_t position_x = (int32_t)(start_x * 65536.0f);
+            int32_t position_y = (int32_t)(start_y * 65536.0f);
+            const int32_t delta_x = (int32_t)((end_x - start_x) * 65536.0f / count);
+            const int32_t delta_y = (int32_t)((end_y - start_y) * 65536.0f / count);
+            for (size_t x = x0; x < x1; ++x, out += 4, position_x += delta_x, position_y += delta_y) {
+                const int32_t qx = clamped((position_x + 128) >> 8, last_x);
+                const int32_t qy = clamped((position_y + 128) >> 8, last_y);
+                const size_t ix = (size_t)(qx >> 8);
+                const size_t iy = (size_t)(qy >> 8);
+                const int32_t fx = qx & 255;
+                const int32_t fy = qy & 255;
+                const size_t jx = ix + 1 < source_width ? ix + 1 : ix;
+                const size_t jy = iy + 1 < source_height ? iy + 1 : iy;
+                const uint8_t *top = source + iy * source_row_bytes;
+                const uint8_t *bottom = source + jy * source_row_bytes;
+                const uint8_t *p00 = top + ix * 4, *p10 = top + jx * 4;
+                const uint8_t *p01 = bottom + ix * 4, *p11 = bottom + jx * 4;
+                for (int channel = 0; channel < 4; ++channel) {
+                    const int32_t upper = p00[channel] * (256 - fx) + p10[channel] * fx;
+                    const int32_t lower = p01[channel] * (256 - fx) + p11[channel] * fx;
+                    out[channel] = (uint8_t)((upper * (256 - fy) + lower * fy + 32768) >> 16);
+                }
             }
+            start_x = end_x;
+            start_y = end_y;
+            x0 = x1;
         }
     }
     return 1;

@@ -102,6 +102,66 @@ static void test_perspective(void)
     free(output);
 }
 
+static void reference_warp(const uint8_t *source, size_t source_width, size_t source_height, const RevenantDocumentPoint q[4], uint8_t *output,
+                           size_t output_width, size_t output_height)
+{
+    double x0 = q[0].x, y0 = q[0].y, x1 = q[1].x, y1 = q[1].y, x2 = q[2].x, y2 = q[2].y, x3 = q[3].x, y3 = q[3].y;
+    double sx = x0 - x1 + x2 - x3, sy = y0 - y1 + y2 - y3;
+    double dx1 = x1 - x2, dx2 = x3 - x2, dy1 = y1 - y2, dy2 = y3 - y2;
+    double determinant = dx1 * dy2 - dx2 * dy1;
+    double g = (sx * dy2 - dx2 * sy) / determinant, h = (dx1 * sy - sx * dy1) / determinant;
+    double a = x1 - x0 + g * x1, b = x3 - x0 + h * x3, c = x0, d = y1 - y0 + g * y1, e = y3 - y0 + h * y3, f = y0;
+    for (size_t y = 0; y < output_height; ++y) {
+        for (size_t x = 0; x < output_width; ++x) {
+            double u = ((double)x + 0.5) / (double)output_width, v = ((double)y + 0.5) / (double)output_height;
+            double w = g * u + h * v + 1.0;
+            double px = (a * u + b * v + c) / w - 0.5, py = (d * u + e * v + f) / w - 0.5;
+            px = px < 0 ? 0 : (px > (double)(source_width - 1) ? (double)(source_width - 1) : px);
+            py = py < 0 ? 0 : (py > (double)(source_height - 1) ? (double)(source_height - 1) : py);
+            size_t ix = (size_t)px, iy = (size_t)py;
+            size_t jx = ix + 1 < source_width ? ix + 1 : ix, jy = iy + 1 < source_height ? iy + 1 : iy;
+            double fx = px - (double)ix, fy = py - (double)iy;
+            for (int channel = 0; channel < 4; ++channel) {
+                double upper = source[iy * source_width * 4 + ix * 4 + channel] * (1 - fx) + source[iy * source_width * 4 + jx * 4 + channel] * fx;
+                double lower = source[jy * source_width * 4 + ix * 4 + channel] * (1 - fx) + source[jy * source_width * 4 + jx * 4 + channel] * fx;
+                output[y * output_width * 4 + x * 4 + channel] = (uint8_t)(upper * (1 - fy) + lower * fy + 0.5);
+            }
+        }
+    }
+}
+
+static void test_against_reference(void)
+{
+    size_t width = 640, height = 480;
+    uint8_t *source = make_pattern(width, height, width * 4);
+    RevenantDocumentPoint quad[4] = {point(70, 30), point(600, 80), point(560, 450), point(30, 400)};
+    size_t out_width = 301, out_height = 233;
+    uint8_t *output = calloc(out_width * out_height * 4, 1);
+    uint8_t *reference = calloc(out_width * out_height * 4, 1);
+    check(RevenantDocumentWarp(source, width, height, width * 4, quad, output, out_width, out_height, out_width * 4) == 1, "a wide perspective warp succeeds");
+    reference_warp(source, width, height, quad, reference, out_width, out_height);
+    int worst = 0;
+    for (size_t i = 0; i < out_width * out_height * 4; ++i) {
+        int difference = abs((int)output[i] - (int)reference[i]);
+        if (difference > worst)
+            worst = difference;
+    }
+    printf("measured: the worst channel differs by %d from the exact per pixel projection\n", worst);
+    check(worst <= 2, "the span interpolation stays within two levels of the exact projection");
+    free(source);
+    free(output);
+    free(reference);
+}
+
+static void test_limits(void)
+{
+    uint8_t source[16] = {0};
+    uint8_t output[16] = {0};
+    RevenantDocumentPoint good[4] = {point(0, 0), point(4, 0), point(4, 4), point(0, 4)};
+    check(RevenantDocumentWarp(source, 16385, 1, 16385 * 4, good, output, 2, 2, 8) == 0, "a source wider than the limit is refused");
+    check(RevenantDocumentWarp(source, 1, 16385, 4, good, output, 2, 2, 8) == 0, "a source taller than the limit is refused");
+}
+
 static void test_rotation(void)
 {
     size_t width = 40, height = 20;
@@ -162,6 +222,8 @@ int main(int argc, char **argv)
     test_identity();
     test_sizes();
     test_perspective();
+    test_against_reference();
+    test_limits();
     test_rotation();
     test_clamping_and_strides();
     test_rejects();
