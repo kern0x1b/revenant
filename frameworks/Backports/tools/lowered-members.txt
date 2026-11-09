@@ -32120,6 +32120,7 @@ member UIEventAttributionView -initWithCoder:
 member UIEventAttributionView -initWithFrame:
 member UIFeedbackGenerator +feedbackGeneratorForView:
 member UIFeedbackGenerator -_revenantPlayIntensity:milliseconds:count:
+member UIFeedbackGenerator -init
 member UIFeedbackGenerator -initWithBoundView:
 member UIFeedbackGenerator -prepare
 member UIFeedbackGenerator -revenant_boundView
