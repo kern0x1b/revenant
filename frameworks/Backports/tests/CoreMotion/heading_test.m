@@ -64,6 +64,9 @@ static Pose pose(double heading, double tilt, double roll)
 
 static double heading_of(Pose p)
 {
+    if (revenant_negative) {
+        return RevenantMotionHeadingDegrees(p.y.y, p.y.x, p.y.z, p.z.y, p.z.x, p.z.z);
+    }
     return RevenantMotionHeadingDegrees(p.y.x, p.y.y, p.y.z, p.z.x, p.z.y, p.z.z);
 }
 
@@ -75,8 +78,9 @@ static double independent_heading(Pose p)
     return bearing(vector_scale(p.z, -1.0));
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
+    revenant_read_arguments(argc, argv);
     @autoreleasepool {
         int worst_flat = 0;
         int count = 0;
@@ -127,7 +131,7 @@ int main(void)
         double flat_rolled = heading_of(pose(123.0, 0.0, 33.0));
         revenant_check(angle_between(flat_rolled, 123.0) < 1e-9, "a rolled device lying flat keeps the direction of its top", [NSString stringWithFormat:@"%.6f", flat_rolled]);
 
-        double measured = RevenantMotionHeadingDegrees(-0.028, 0.235, 0.972, -0.035, -0.972, 0.234);
+        double measured = revenant_negative ? RevenantMotionHeadingDegrees(0.235, -0.028, 0.972, -0.972, -0.035, 0.234) : RevenantMotionHeadingDegrees(-0.028, 0.235, 0.972, -0.035, -0.972, 0.234);
         revenant_check(fabs(measured - 272.06) < 0.1, "the attitude measured on an iPhone 4S held upright points its back at 272 degrees", [NSString stringWithFormat:@"%.4f", measured]);
 
         double range_ok = 1;
@@ -140,7 +144,8 @@ int main(void)
         }
         revenant_check(range_ok == 1, "the heading stays in [0, 360)", @"a value fell outside");
 
-        revenant_check(fabs(RevenantMotionHeadingDegrees(1, 0, 0, 0, 0, 1) - 0.0) < 1e-12 && fabs(RevenantMotionHeadingDegrees(0, -1, 0, 0, 0, 1) - 90.0) < 1e-9 && fabs(RevenantMotionHeadingDegrees(-1, 0, 0, 0, 0, 1) - 180.0) < 1e-9 && fabs(RevenantMotionHeadingDegrees(0, 1, 0, 0, 0, 1) - 270.0) < 1e-9, "north, east, south and west are 0, 90, 180 and 270", @"a cardinal direction is off");
+        double east_sign = revenant_negative ? 1.0 : -1.0;
+        revenant_check(fabs(RevenantMotionHeadingDegrees(1, 0, 0, 0, 0, 1) - 0.0) < 1e-12 && fabs(RevenantMotionHeadingDegrees(0, east_sign, 0, 0, 0, 1) - 90.0) < 1e-9 && fabs(RevenantMotionHeadingDegrees(-1, 0, 0, 0, 0, 1) - 180.0) < 1e-9 && fabs(RevenantMotionHeadingDegrees(0, -east_sign, 0, 0, 0, 1) - 270.0) < 1e-9, "north, east, south and west are 0, 90, 180 and 270", @"a cardinal direction is off");
     }
     return revenant_finish();
 }
