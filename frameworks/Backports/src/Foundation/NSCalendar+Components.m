@@ -240,6 +240,341 @@ static NSDate *revenant_add_unit(NSCalendar *calendar, NSCalendarUnit unit, NSIn
     return [calendar dateByAddingComponents:components toDate:date options:options];
 }
 
+typedef NS_ENUM(NSInteger, RevenantMatchPolicy) {
+    RevenantMatchPolicyStrict,
+    RevenantMatchPolicyNextTime,
+    RevenantMatchPolicyNextTimePreserving,
+    RevenantMatchPolicyPreviousTimePreserving,
+};
+
+static const NSCalendarUnit revenant_chain_units[] = {NSCalendarUnitYear, NSCalendarUnitMonth, NSCalendarUnitDay, NSCalendarUnitHour, NSCalendarUnitMinute, NSCalendarUnitSecond};
+static const NSCalendarUnit revenant_chain_mask = NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay | NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond;
+static const NSInteger revenant_match_iterations = 5000;
+
+static NSDate *revenant_period_start(NSCalendar *calendar, NSCalendarUnit period, NSDate *date)
+{
+    if (period == NSCalendarUnitSecond)
+        return [NSDate dateWithTimeIntervalSinceReferenceDate:floor(date.timeIntervalSinceReferenceDate)];
+    if (period == NSCalendarUnitMinute) {
+        NSInteger second = [calendar components:NSCalendarUnitSecond fromDate:date].second;
+        return [NSDate dateWithTimeIntervalSinceReferenceDate:floor(date.timeIntervalSinceReferenceDate) - second];
+    }
+    NSDate *start = nil;
+    return [calendar rangeOfUnit:period startDate:&start interval:NULL forDate:date] ? start : nil;
+}
+
+static NSDate *revenant_step(NSCalendar *calendar, NSDate *date, NSCalendarUnit unit, NSInteger count)
+{
+    if (!date)
+        return nil;
+    if (unit == NSCalendarUnitSecond)
+        return [date dateByAddingTimeInterval:count];
+    if (unit == NSCalendarUnitMinute)
+        return [date dateByAddingTimeInterval:count * 60.0];
+    return revenant_add_unit(calendar, unit, count, date, 0);
+}
+
+static NSCalendarUnit revenant_finest_given(NSCalendarUnit given)
+{
+    static const NSCalendarUnit order[] = {NSCalendarUnitSecond, NSCalendarUnitMinute, NSCalendarUnitHour, NSCalendarUnitDay, NSCalendarUnitWeekday, NSCalendarUnitWeekdayOrdinal,
+                                           NSCalendarUnitWeekOfMonth, NSCalendarUnitWeekOfYear, NSCalendarUnitMonth, NSCalendarUnitQuarter, NSCalendarUnitYear};
+    for (size_t index = 0; index < sizeof order / sizeof *order; index++) {
+        if (given & order[index])
+            return order[index];
+    }
+    return 0;
+}
+
+static NSCalendarUnit revenant_candidate_period(NSCalendarUnit finest)
+{
+    switch (finest) {
+    case NSCalendarUnitSecond:
+    case NSCalendarUnitMinute:
+    case NSCalendarUnitHour:
+    case NSCalendarUnitYear:
+        return finest;
+    case NSCalendarUnitMonth:
+    case NSCalendarUnitQuarter:
+        return NSCalendarUnitMonth;
+    default:
+        return NSCalendarUnitDay;
+    }
+}
+
+static NSDate *revenant_with_time(NSCalendar *calendar, NSDate *day, NSInteger hour, NSInteger minute, NSInteger second)
+{
+    NSDateComponents *components = [calendar components:NSCalendarUnitEra | NSCalendarUnitYear | NSCalendarUnitMonth | NSCalendarUnitDay fromDate:day];
+    components.hour = hour;
+    components.minute = minute;
+    components.second = second;
+    return [calendar dateFromComponents:components];
+}
+
+static BOOL revenant_same_wall_time(NSCalendar *calendar, NSDate *first, NSDate *second)
+{
+    NSDateComponents *one = [calendar components:revenant_chain_mask fromDate:first];
+    NSDateComponents *two = [calendar components:revenant_chain_mask fromDate:second];
+    return one.year == two.year && one.month == two.month && one.day == two.day && one.hour == two.hour && one.minute == two.minute && one.second == two.second;
+}
+
+static double revenant_wall_time(NSCalendar *calendar, NSDate *date)
+{
+    return date.timeIntervalSinceReferenceDate + [calendar.timeZone secondsFromGMTForDate:date];
+}
+
+static NSArray<NSDate *> *revenant_occurrences(NSCalendar *calendar, NSDate *date)
+{
+    NSMutableArray<NSDate *> *occurrences = [NSMutableArray arrayWithObject:date];
+    static const NSTimeInterval shifts[] = {-3600, -1800, 1800, 3600};
+    for (size_t index = 0; index < sizeof shifts / sizeof *shifts; index++) {
+        NSDate *other = [date dateByAddingTimeInterval:shifts[index]];
+        if (revenant_same_wall_time(calendar, date, other))
+            [occurrences addObject:other];
+    }
+    return [occurrences sortedArrayUsingSelector:@selector(compare:)];
+}
+
+static NSDate *revenant_pick_occurrence(NSCalendar *calendar, NSDate *date, BOOL forward, NSDate *threshold, NSCalendarOptions options, BOOL wall)
+{
+    if (!wall) {
+        NSComparisonResult order = [date compare:threshold];
+        return order == (forward ? NSOrderedDescending : NSOrderedAscending) ? date : nil;
+    }
+    // First and Last count in the direction of the search: scanning back, the first occurrence met is the later one.
+    // A repeated wall time equal to the start's is behind it, unless Last asks for the other occurrence beyond it.
+    BOOL last = (options & NSCalendarMatchLast) != 0;
+    double thresholdValue = revenant_wall_time(calendar, threshold);
+    NSArray<NSDate *> *occurrences = revenant_occurrences(calendar, date);
+    NSDate *chosen = nil;
+    for (NSDate *candidate in forward ? occurrences : [[occurrences reverseObjectEnumerator] allObjects]) {
+        double value = revenant_wall_time(calendar, candidate);
+        BOOL beyondWall = forward ? value > thresholdValue : value < thresholdValue;
+        BOOL beyondAbsolute = [candidate compare:threshold] == (forward ? NSOrderedDescending : NSOrderedAscending);
+        if (!beyondWall && !(last && value == thresholdValue && beyondAbsolute))
+            continue;
+        if (!chosen || last)
+            chosen = candidate;
+    }
+    return chosen;
+}
+
+static NSDate *revenant_occurrence_beside(NSCalendar *calendar, NSDate *date, NSDate *cursor, BOOL forward)
+{
+    NSArray<NSDate *> *occurrences = revenant_occurrences(calendar, date);
+    for (NSDate *candidate in forward ? occurrences : [[occurrences reverseObjectEnumerator] allObjects]) {
+        if ([candidate compare:cursor] == (forward ? NSOrderedDescending : NSOrderedAscending))
+            return candidate;
+    }
+    return nil;
+}
+
+static BOOL revenant_chain_matches(NSDateComponents *found, NSDateComponents *expected, NSCalendarUnit through)
+{
+    for (size_t index = 0; index < sizeof revenant_chain_units / sizeof *revenant_chain_units; index++) {
+        NSCalendarUnit unit = revenant_chain_units[index];
+        if (revenant_calendar_value(found, unit) != revenant_calendar_value(expected, unit))
+            return NO;
+        if (unit == through)
+            break;
+    }
+    return YES;
+}
+
+static BOOL revenant_other_units_match(NSDateComponents *found, NSDateComponents *comps, NSCalendarUnit others)
+{
+    for (NSCalendarUnit unit = NSCalendarUnitWeekday; unit <= NSCalendarUnitWeekOfYear; unit <<= 1) {
+        if ((others & unit) && revenant_calendar_value(found, unit) != revenant_calendar_value(comps, unit))
+            return NO;
+    }
+    return YES;
+}
+
+static NSDate *revenant_gap_resolution(NSCalendar *calendar, NSDate *cursor, NSInteger hour, NSInteger minute, NSInteger second, RevenantMatchPolicy policy)
+{
+    if (policy == RevenantMatchPolicyStrict)
+        return nil;
+    NSTimeZone *zone = calendar.timeZone;
+    NSDate *dayStart = revenant_period_start(calendar, NSCalendarUnitDay, cursor);
+    NSDate *transition = dayStart ? [zone nextDaylightSavingTimeTransitionAfterDate:dayStart] : nil;
+    if (!transition)
+        return nil;
+    NSDate *before = [transition dateByAddingTimeInterval:-1];
+    NSInteger jump = [zone secondsFromGMTForDate:transition] - [zone secondsFromGMTForDate:before];
+    NSDateComponents *wall = [calendar components:NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond fromDate:before];
+    NSInteger gapStart = wall.hour * 3600 + wall.minute * 60 + wall.second + 1;
+    NSInteger offset = hour * 3600 + minute * 60 + second - gapStart;
+    if (jump <= 0 || offset < 0 || offset >= jump)
+        return nil;
+    if (policy == RevenantMatchPolicyNextTime)
+        return transition;
+    if (policy == RevenantMatchPolicyNextTimePreserving)
+        return [transition dateByAddingTimeInterval:offset];
+    return [transition dateByAddingTimeInterval:offset - jump];
+}
+
+static NSInteger revenant_time_part(NSDateComponents *comps, NSDateComponents *reference, NSCalendarUnit unit)
+{
+    NSInteger given = revenant_calendar_value(comps, unit);
+    return given != NSDateComponentUndefined ? given : revenant_calendar_value(reference, unit);
+}
+
+static NSDate *revenant_missing_day_resolution(NSCalendar *calendar, NSDate *cursor, NSDate *reference, NSDateComponents *comps, RevenantMatchPolicy policy)
+{
+    if (policy == RevenantMatchPolicyStrict)
+        return nil;
+    NSDate *monthStart = revenant_period_start(calendar, NSCalendarUnitMonth, cursor);
+    NSDate *nextMonth = revenant_step(calendar, monthStart, NSCalendarUnitMonth, 1);
+    if (policy == RevenantMatchPolicyNextTime || !nextMonth)
+        return nextMonth;
+    NSDateComponents *kept = [calendar components:NSCalendarUnitHour | NSCalendarUnitMinute | NSCalendarUnitSecond fromDate:reference];
+    NSInteger hour = revenant_time_part(comps, kept, NSCalendarUnitHour);
+    NSInteger minute = revenant_time_part(comps, kept, NSCalendarUnitMinute);
+    NSInteger second = revenant_time_part(comps, kept, NSCalendarUnitSecond);
+    if (policy == RevenantMatchPolicyNextTimePreserving)
+        return revenant_with_time(calendar, nextMonth, hour, minute, second);
+    NSDate *lastDay = revenant_step(calendar, nextMonth, NSCalendarUnitDay, -1);
+    return lastDay ? revenant_with_time(calendar, lastDay, hour, minute, second) : nil;
+}
+
+static BOOL revenant_next_match(NSCalendar *calendar, NSDate *date, NSDateComponents *comps, NSCalendarUnit given, NSCalendarOptions options, NSDate **result)
+{
+    const NSCalendarUnit unsupported = NSCalendarUnitEra | NSCalendarUnitYearForWeekOfYear | NSCalendarUnitNanosecond | NSCalendarUnitDayOfYear;
+    if (given & unsupported)
+        return NO;
+    if ((given & NSCalendarUnitQuarter) && revenant_calendar_quarter(calendar, date) <= 0)
+        return NO;
+    NSCalendarUnit finest = revenant_finest_given(given);
+    NSCalendarUnit period = revenant_candidate_period(finest);
+    if (!finest || !period)
+        return NO;
+    BOOL forward = !(options & NSCalendarSearchBackwards);
+    NSCalendarUnit chainGiven = given & revenant_chain_mask;
+    NSCalendarUnit otherGiven = given & (NSCalendarUnitWeekday | NSCalendarUnitWeekdayOrdinal | NSCalendarUnitQuarter | NSCalendarUnitWeekOfMonth | NSCalendarUnitWeekOfYear);
+    BOOL coarseSingle = !(given & (given - 1)) && (given & (NSCalendarUnitDay | NSCalendarUnitWeekday | NSCalendarUnitMonth | NSCalendarUnitQuarter | NSCalendarUnitWeekOfMonth | NSCalendarUnitWeekOfYear));
+    RevenantMatchPolicy policy = (options & NSCalendarMatchStrictly) ? RevenantMatchPolicyStrict
+        : (options & NSCalendarMatchPreviousTimePreservingSmallerUnits) ? RevenantMatchPolicyPreviousTimePreserving
+        : (options & NSCalendarMatchNextTimePreservingSmallerUnits) ? RevenantMatchPolicyNextTimePreserving : RevenantMatchPolicyNextTime;
+    NSCalendarUnit coarsest = 0;
+    for (size_t index = 0; index < sizeof revenant_chain_units / sizeof *revenant_chain_units && !coarsest; index++) {
+        if (chainGiven & revenant_chain_units[index])
+            coarsest = revenant_chain_units[index];
+    }
+    NSCalendarUnit excluded = coarsest == NSCalendarUnitDay ? NSCalendarUnitDay : coarseSingle ? period : 0;
+    BOOL wall = coarsest != NSCalendarUnitMinute && coarsest != NSCalendarUnitSecond;
+    NSDate *startOfPeriod = revenant_period_start(calendar, period, date);
+    NSDate *threshold = (!forward && excluded) ? revenant_period_start(calendar, excluded, date) : date;
+    if (!startOfPeriod || !threshold)
+        return NO;
+    NSCalendarUnit enclosing = coarsest ? revenant_calendar_period_unit(coarsest) : 0;
+    NSDate *cursor;
+    if (forward && enclosing && enclosing != NSCalendarUnitEra) {
+        cursor = revenant_period_start(calendar, enclosing, date);
+    } else if (forward) {
+        cursor = revenant_step(calendar, startOfPeriod, period, 1);
+    } else {
+        NSDate *base = revenant_period_start(calendar, period, threshold);
+        cursor = [base compare:threshold] == NSOrderedAscending ? base : revenant_step(calendar, base, period, -1);
+    }
+    NSCalendarUnit read = revenant_chain_mask | otherGiven | NSCalendarUnitWeekday;
+    NSDate *fallback = nil;
+    NSComparisonResult towardsEnd = forward ? NSOrderedAscending : NSOrderedDescending;
+    for (NSInteger iteration = 0; iteration < revenant_match_iterations && cursor; iteration++) {
+        if (fallback && [cursor compare:fallback] != towardsEnd) {
+            *result = fallback;
+            return YES;
+        }
+        NSDateComponents *found = revenant_calendar_components(calendar, read, cursor);
+        NSCalendarUnit mismatch = 0;
+        for (size_t index = 0; index < sizeof revenant_chain_units / sizeof *revenant_chain_units; index++) {
+            NSCalendarUnit unit = revenant_chain_units[index];
+            if ((chainGiven & unit) && revenant_calendar_value(found, unit) != revenant_calendar_value(comps, unit)) {
+                mismatch = unit;
+                break;
+            }
+        }
+        NSCalendarUnit parent = mismatch ? revenant_calendar_period_unit(mismatch) : 0;
+        if (mismatch) {
+            NSInteger target = revenant_calendar_value(comps, mismatch);
+            NSInteger current = revenant_calendar_value(found, mismatch);
+            BOOL reachable = forward ? target > current : target < current;
+            NSDate *next = nil;
+            BOOL absentDay = mismatch == NSCalendarUnitDay && target > (NSInteger)[calendar rangeOfUnit:NSCalendarUnitDay inUnit:NSCalendarUnitMonth forDate:cursor].length;
+            if (absentDay) {
+                NSDate *resolved = revenant_missing_day_resolution(calendar, cursor, date, comps, policy);
+                if (resolved) {
+                    NSComparisonResult order = [resolved compare:date];
+                    BOOL beyond = forward ? order == NSOrderedDescending : order == NSOrderedAscending;
+                    if (beyond && (!fallback || [resolved compare:fallback] == (forward ? NSOrderedAscending : NSOrderedDescending)))
+                        fallback = resolved;
+                }
+            } else if (reachable) {
+                NSDateComponents *expected = [found copy];
+                revenant_calendar_set_value(expected, mismatch, target);
+                NSDate *landing = revenant_calendar_direct_construct(calendar, cursor, mismatch, target, nil);
+                NSDateComponents *landed = landing ? [calendar components:revenant_chain_mask fromDate:landing] : nil;
+                if (landed && revenant_chain_matches(landed, expected, mismatch)) {
+                    NSDate *instant = revenant_occurrence_beside(calendar, landing, cursor, forward);
+                    next = !instant ? nil : forward ? instant : revenant_step(calendar, revenant_step(calendar, instant, mismatch, 1), period, -1);
+                } else if (landing) {
+                    NSDate *resolved = nil;
+                    if (mismatch == NSCalendarUnitHour && revenant_other_units_match(found, comps, otherGiven)) {
+                        NSInteger minute = revenant_calendar_value(comps, NSCalendarUnitMinute);
+                        NSInteger second = revenant_calendar_value(comps, NSCalendarUnitSecond);
+                        resolved = revenant_gap_resolution(calendar, cursor, target, minute == NSDateComponentUndefined ? 0 : minute, second == NSDateComponentUndefined ? 0 : second, policy);
+                    }
+                    if (resolved) {
+                        NSComparisonResult order = [resolved compare:date];
+                        BOOL beyond = forward ? order == NSOrderedDescending : order == NSOrderedAscending;
+                        if (beyond && (!fallback || [resolved compare:fallback] == (forward ? NSOrderedAscending : NSOrderedDescending)))
+                            fallback = resolved;
+                    }
+                }
+            }
+            if (!next) {
+                if (!parent || parent == NSCalendarUnitEra)
+                    break;
+                NSDate *parentStart = revenant_period_start(calendar, parent, cursor);
+                next = forward ? revenant_step(calendar, parentStart, parent, 1) : revenant_step(calendar, parentStart, period, -1);
+            }
+            cursor = next;
+            continue;
+        }
+        BOOL aligned = revenant_other_units_match(found, comps, otherGiven);
+        if (aligned && (finest == NSCalendarUnitWeekOfMonth || finest == NSCalendarUnitWeekOfYear) && !(given & NSCalendarUnitWeekday))
+            aligned = found.weekday == (NSInteger)calendar.firstWeekday;
+        if (aligned && finest == NSCalendarUnitQuarter)
+            aligned = (found.month - 1) % 3 == 0;
+        if (!aligned) {
+            if (period == NSCalendarUnitDay || period == NSCalendarUnitHour || period == NSCalendarUnitMinute || period == NSCalendarUnitSecond) {
+                NSDate *dayStart = revenant_period_start(calendar, NSCalendarUnitDay, cursor);
+                cursor = forward ? revenant_step(calendar, dayStart, NSCalendarUnitDay, 1) : revenant_step(calendar, dayStart, period, -1);
+            } else {
+                cursor = revenant_step(calendar, cursor, period, forward ? 1 : -1);
+            }
+            continue;
+        }
+        NSDate *exact = revenant_pick_occurrence(calendar, cursor, forward, threshold, options, wall);
+        if (!exact) {
+            NSCalendarUnit outer = coarsest ? revenant_calendar_period_unit(coarsest) : 0;
+            if (!outer) {
+                cursor = revenant_step(calendar, cursor, period, forward ? 1 : -1);
+            } else if (outer == NSCalendarUnitEra) {
+                break;
+            } else {
+                NSDate *outerStart = revenant_period_start(calendar, outer, cursor);
+                cursor = forward ? revenant_step(calendar, outerStart, outer, 1) : revenant_step(calendar, outerStart, period, -1);
+            }
+            continue;
+        }
+        if (fallback && [fallback compare:exact] == towardsEnd)
+            exact = fallback;
+        *result = exact;
+        return YES;
+    }
+    *result = fallback;
+    return YES;
+}
+
 @implementation NSCalendar (RevenantComponents)
 
 + (NSCalendar *)calendarWithIdentifier:(NSString *)calendarIdentifierConstant
@@ -484,6 +819,9 @@ static NSDate *revenant_add_unit(NSCalendar *calendar, NSCalendarUnit unit, NSIn
     NSCalendarUnit given = revenant_calendar_given_units(comps);
     if (!given)
         return nil;
+    NSDate *matched = nil;
+    if (revenant_next_match(self, date, comps, given, opts, &matched))
+        return matched;
     static const NSCalendarUnit chain[] = {NSCalendarUnitEra, NSCalendarUnitYear, NSCalendarUnitMonth, NSCalendarUnitDay, NSCalendarUnitHour, NSCalendarUnitMinute, NSCalendarUnitSecond};
     NSCalendarUnit stepUnit = 0;
     for (size_t i = 0; i < sizeof chain / sizeof *chain; i++) {
