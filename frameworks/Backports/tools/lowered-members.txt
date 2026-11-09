@@ -1904,9 +1904,15 @@ class RevenantOrientationWatcher
 class RevenantOrthogonalController
 class RevenantOverrides
 class RevenantPDFFontMetrics
+class RevenantPDFHighlight
+class RevenantPDFLayout
+class RevenantPDFPageRender
 class RevenantPDFPageText
+class RevenantPDFPageView
+class RevenantPDFScrollView
 class RevenantPDFSelectionSpan
 class RevenantPDFTextRun
+class RevenantPDFTileLayer
 class RevenantPagination
 class RevenantParagraphStyle9
 class RevenantPasscodePrompt
@@ -25338,21 +25344,28 @@ member PDFDestination -revenant_pageForDictionary:inDocument:
 member PDFDestination -zoom
 member PDFDocument +revenant_documentWithCGPDFDocument:
 member PDFDocument -allowsCopying
+member PDFDocument -beginFindString:withOptions:
+member PDFDocument -cancelFindString
 member PDFDocument -dataRepresentation
+member PDFDocument -delegate
 member PDFDocument -documentAttribute:
 member PDFDocument -documentAttributes
 member PDFDocument -documentURL
 member PDFDocument -findString:fromSelection:withOptions:
 member PDFDocument -findString:withOptions:
+member PDFDocument -indexForPage:
 member PDFDocument -init
 member PDFDocument -initWithData:
 member PDFDocument -initWithURL:
 member PDFDocument -isEncrypted
+member PDFDocument -isFinding
 member PDFDocument -isLocked
 member PDFDocument -outlineRoot
 member PDFDocument -pageAtIndex:
 member PDFDocument -pageCount
 member PDFDocument -revenant_CGPDFDocument
+member PDFDocument -revenant_findOnPage:string:options:token:
+member PDFDocument -revenant_notify:selector:userInfo:
 member PDFDocument -revenant_readAttributes
 member PDFDocument -revenant_setUpWithData:
 member PDFDocument -unlockWithPassword:
@@ -25375,6 +25388,7 @@ member PDFPage -boundsForBox:
 member PDFPage -cropBox
 member PDFPage -dealloc
 member PDFPage -document
+member PDFPage -drawWithBox:toContext:
 member PDFPage -initWithCGPDFPage:document:index:
 member PDFPage -label
 member PDFPage -mediaBox
@@ -25385,6 +25399,7 @@ member PDFPage -revenant_buildAnnotations
 member PDFPage -revenant_textLayout
 member PDFPage -rotation
 member PDFPage -string
+member PDFPage -transformForBox:
 member PDFSelection -addSelection:
 member PDFSelection -addSelections:
 member PDFSelection -attributedString
@@ -25412,26 +25427,114 @@ member PDFSelection -revenant_unionWith:
 member PDFSelection -selectionsByLine
 member PDFSelection -setColor:
 member PDFSelection -string
+member PDFView -annotationsChangedOnPage:
 member PDFView -autoScales
+member PDFView -canGoBack
+member PDFView -canGoForward
+member PDFView -canGoToFirstPage
+member PDFView -canGoToLastPage
+member PDFView -canGoToNextPage
+member PDFView -canGoToPreviousPage
+member PDFView -canZoomIn
+member PDFView -canZoomOut
+member PDFView -clearSelection
+member PDFView -convertPoint:fromPage:
+member PDFView -convertPoint:toPage:
+member PDFView -convertRect:fromPage:
+member PDFView -convertRect:toPage:
+member PDFView -copy:
+member PDFView -currentDestination
 member PDFView -currentPage
-member PDFView -dealloc
+member PDFView -currentSelection
+member PDFView -delegate
 member PDFView -displayBox
 member PDFView -displayDirection
 member PDFView -displayMode
+member PDFView -displaysAsBook
+member PDFView -displaysPageBreaks
+member PDFView -displaysRTL
 member PDFView -document
+member PDFView -documentView
+member PDFView -drawPage:toContext:
+member PDFView -drawPagePost:toContext:
+member PDFView -enablePageShadows:
+member PDFView -gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:
+member PDFView -goBack:
+member PDFView -goForward:
+member PDFView -goToDestination:
+member PDFView -goToFirstPage:
+member PDFView -goToLastPage:
+member PDFView -goToNextPage:
 member PDFView -goToPage:
-member PDFView -init
+member PDFView -goToPreviousPage:
+member PDFView -goToRect:onPage:
+member PDFView -goToSelection:
+member PDFView -highlightedSelections
+member PDFView -initWithCoder:
+member PDFView -initWithFrame:
+member PDFView -interpolationQuality
+member PDFView -layoutDocumentView
+member PDFView -layoutSubviews
 member PDFView -maxScaleFactor
 member PDFView -minScaleFactor
+member PDFView -pageBreakMargins
+member PDFView -pageForPoint:nearest:
 member PDFView -pageShadowsEnabled
+member PDFView -performAction:
+member PDFView -revenant_applyScale:anchor:
+member PDFView -revenant_clampedOffset:
+member PDFView -revenant_clampedScale:
+member PDFView -revenant_configureShadowOf:
+member PDFView -revenant_continuous
+member PDFView -revenant_crossExtent
+member PDFView -revenant_doubleTapped:
+member PDFView -revenant_ensureFrames
+member PDFView -revenant_ensureHistoryHasOrigin
+member PDFView -revenant_highlightsForPage:
+member PDFView -revenant_insets
+member PDFView -revenant_invalidateLayout
+member PDFView -revenant_layoutPage
+member PDFView -revenant_leadingIndexOfRowWithPage:
+member PDFView -revenant_moveToIndex:
+member PDFView -revenant_navigateToDestination:
+member PDFView -revenant_pageAtDocumentPoint:nearest:
+member PDFView -revenant_pinched:
+member PDFView -revenant_prepareLayout
+member PDFView -revenant_record
+member PDFView -revenant_relayout
+member PDFView -revenant_scrollTo:
+member PDFView -revenant_scrollToIndex:
+member PDFView -revenant_scrolled
+member PDFView -revenant_setCurrentIndex:
+member PDFView -revenant_setUp
+member PDFView -revenant_tapped:
+member PDFView -revenant_transformForPage:
+member PDFView -revenant_updatePageViews
+member PDFView -revenant_vertical
+member PDFView -rowSizeForPage:
 member PDFView -scaleFactor
+member PDFView -scaleFactorForSizeToFit
+member PDFView -scrollSelectionToVisible:
+member PDFView -selectAll:
 member PDFView -setAutoScales:
+member PDFView -setCurrentSelection:
+member PDFView -setCurrentSelection:animate:
 member PDFView -setDisplayBox:
 member PDFView -setDisplayDirection:
 member PDFView -setDisplayMode:
+member PDFView -setDisplaysAsBook:
+member PDFView -setDisplaysPageBreaks:
+member PDFView -setDisplaysRTL:
 member PDFView -setDocument:
-member PDFView -setPageShadowsEnabled:
+member PDFView -setHighlightedSelections:
+member PDFView -setInterpolationQuality:
+member PDFView -setMaxScaleFactor:
+member PDFView -setMinScaleFactor:
+member PDFView -setPageBreakMargins:
 member PDFView -setScaleFactor:
+member PDFView -visiblePages
+member PDFView -zoomIn:
+member PDFView -zoomOut:
 member PHASECardioidDirectivityModelParameters -initWithSubbandParameters:
 member PHASECardioidDirectivityModelParameters -subbandParameters
 member PHASECardioidDirectivityModelSubbandParameters -frequency
@@ -27659,6 +27762,25 @@ member RevenantPDFFontMetrics -dealloc
 member RevenantPDFFontMetrics -descent
 member RevenantPDFFontMetrics -hasWidths
 member RevenantPDFFontMetrics -size
+member RevenantPDFLayout -contentSize
+member RevenantPDFLayout -continuous
+member RevenantPDFLayout -dealloc
+member RevenantPDFLayout -extentOfRow:scale:
+member RevenantPDFLayout -firstPageOfRowAfterPageAtIndex:
+member RevenantPDFLayout -firstPageOfRowBeforePageAtIndex:
+member RevenantPDFLayout -fitScaleForViewSize:currentPage:
+member RevenantPDFLayout -frameOfPageAtIndex:
+member RevenantPDFLayout -initWithPageSizes:count:displayMode:direction:displaysPageBreaks:margins:displaysAsBook:rightToLeft:
+member RevenantPDFLayout -layoutAtScale:currentPage:crossExtent:
+member RevenantPDFLayout -padding
+member RevenantPDFLayout -pageCount
+member RevenantPDFLayout -pageGap
+member RevenantPDFLayout -pageNearestToPoint:
+member RevenantPDFLayout -pagesIntersectingRect:
+member RevenantPDFLayout -pagesSharingRowWithPageAtIndex:
+member RevenantPDFLayout -rowGap
+member RevenantPDFLayout -rowsConsidered:
+member RevenantPDFLayout -vertical
 member RevenantPDFPageText +layoutWithRuns:
 member RevenantPDFPageText -boundsForRange:
 member RevenantPDFPageText -dealloc
@@ -27669,6 +27791,10 @@ member RevenantPDFPageText -runForOffset:
 member RevenantPDFPageText -runs
 member RevenantPDFPageText -string
 member RevenantPDFPageText -substringForRange:
+member RevenantPDFPageView +layerClass
+member RevenantPDFPageView -drawRect:
+member RevenantPDFPageView -initWithFrame:
+member RevenantPDFScrollView -layoutSubviews
 member RevenantPDFSelectionSpan -page
 member RevenantPDFSelectionSpan -range
 member RevenantPDFSelectionSpan -textRange
@@ -27680,6 +27806,7 @@ member RevenantPDFTextRun -revenant_setGlyphRects:count:
 member RevenantPDFTextRun -size
 member RevenantPDFTextRun -x
 member RevenantPDFTextRun -y
+member RevenantPDFTileLayer +fadeDuration
 member RevenantPagination -forwardingTargetForSelector:
 member RevenantPagination -respondsToSelector:
 member RevenantPagination -webViewDidFinishLoad:
@@ -35661,6 +35788,7 @@ protocol OS_sec_protocol_metadata
 protocol OS_sec_protocol_options
 protocol OS_sec_trust
 protocol PDFDocumentDelegate
+protocol PDFViewDelegate
 protocol PHPhotoLibraryAvailabilityObserver
 protocol PHPhotoLibraryChangeObserver
 protocol PHPickerViewControllerDelegate
@@ -37155,6 +37283,7 @@ type PDFBorderStyle
 type PDFDisplayBox
 type PDFDisplayDirection
 type PDFDisplayMode
+type PDFInterpolationQuality
 type PHAccessLevel
 type PHAssetCollectionSubtype
 type PHAssetCollectionType

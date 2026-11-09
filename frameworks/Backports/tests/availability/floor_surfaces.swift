@@ -3,6 +3,7 @@ import CallKit
 import CoreMedia
 import CoreVideo
 import Intents
+import PDFKit
 import Photos
 import PhotosUI
 import UIKit
@@ -294,4 +295,29 @@ func fetchOptions() {
     _ = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: options)
     _ = PHAsset.fetchAssets(with: options)
     _ = PHAssetCollectionChangeRequest.creationRequestForAssetCollection(withTitle: "x")
+}
+
+final class PdfContent: NSObject, PDFDocumentDelegate {
+    var results: [PDFSelection] = []
+
+    func search(view: PDFView, document: PDFDocument, query: String) {
+        document.cancelFindString()
+        document.delegate = self
+        document.beginFindString(query, withOptions: .caseInsensitive)
+        view.highlightedSelections = nil
+        view.highlightedSelections = results
+        view.go(to: results[0])
+        view.minScaleFactor = view.scaleFactorForSizeToFit
+    }
+
+    func observePageChanges(selector: Selector) {
+        NotificationCenter.default.addObserver(self, selector: selector, name: .PDFViewPageChanged, object: nil)
+    }
+
+    func didMatchString(_ instance: PDFSelection) {
+        results.append(instance)
+    }
+
+    func documentDidEndDocumentFind(_ notification: Notification) {
+    }
 }

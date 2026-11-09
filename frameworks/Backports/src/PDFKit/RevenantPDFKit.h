@@ -32,23 +32,21 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readonly, nullable) NSURL *documentURL;
 @property (readonly, nullable) NSData *dataRepresentation;
 @property (readonly, nullable) PDFOutline *outlineRoot;
+@property (nonatomic, weak, nullable) id delegate;
+@property (readonly, getter=isFinding) BOOL finding;
+- (void)beginFindString:(NSString *)string withOptions:(NSStringCompareOptions)options;
+- (void)cancelFindString;
+- (NSUInteger)indexForPage:(PDFPage *)page;
 @end
 
 extern NSString *const PDFDocumentDidUnlockNotification;
-
-@interface PDFView : NSObject
-@property (nonatomic, nullable) PDFDocument *document;
-@property (nonatomic, readonly, nullable) PDFPage *currentPage;
-@property (nonatomic) CGFloat scaleFactor;
-@property (nonatomic, readonly) CGFloat minScaleFactor;
-@property (nonatomic, readonly) CGFloat maxScaleFactor;
-@property (nonatomic) BOOL autoScales;
-@property (nonatomic) NSInteger displayMode;
-@property (nonatomic) NSInteger displayDirection;
-@property (nonatomic) NSInteger displayBox;
-@property (nonatomic, setter=enablePageShadows:) BOOL pageShadowsEnabled;
-- (void)goToPage:(nullable PDFPage *)page;
-@end
+extern NSString *const PDFDocumentDidBeginFindNotification;
+extern NSString *const PDFDocumentDidEndFindNotification;
+extern NSString *const PDFDocumentDidBeginPageFindNotification;
+extern NSString *const PDFDocumentDidEndPageFindNotification;
+extern NSString *const PDFDocumentDidFindMatchNotification;
+extern NSString *const PDFDocumentFoundSelectionKey;
+extern NSString *const PDFDocumentPageIndexKey;
 
 @interface PDFPage : NSObject
 - (nullable instancetype)initWithCGPDFPage:(CGPDFPageRef)page
@@ -65,6 +63,8 @@ extern NSString *const PDFDocumentDidUnlockNotification;
 @property (readonly) NSUInteger numberOfCharacters;
 @property (readonly) NSUInteger annotationCount;
 @property (readonly, copy) NSArray *annotations;
+- (CGAffineTransform)transformForBox:(NSInteger)box;
+- (void)drawWithBox:(NSInteger)box toContext:(CGContextRef)context;
 @end
 
 @interface PDFDocument (RevenantInternals)

@@ -2,6 +2,11 @@
 #import "PDFPageText11.h"
 
 #import <dlfcn.h>
+#import <objc/message.h>
+
+static NSArray<PDFSelection *> *revenantMatchesOnPage(PDFPage *page, NSString *needle,
+                                                    NSStringCompareOptions options, NSUInteger from,
+                                                    NSUInteger to);
 
 @interface PDFDocument ()
 - (NSDictionary *)revenant_readAttributes;
@@ -14,8 +19,11 @@
     NSData *_data;
     NSURL *_url;
     NSDictionary *_attributes;
-    NSMutableArray *_pages;
+    NSMutableDictionary<NSNumber *, PDFPage *> *_pages;
+    NSObject *_findToken;
 }
+
+@synthesize delegate = _delegate;
 
 @dynamic pageCount;
 @dynamic documentAttributes;
@@ -31,7 +39,7 @@
     CGDataProviderRelease(provider);
     if (_document == NULL)
         return nil;
-    _pages = [NSMutableArray array];
+    _pages = [NSMutableDictionary dictionary];
     _lastFindResults = [NSMutableArray array];
     _data = [data copy];
     _attributes = [self revenant_readAttributes];
@@ -43,7 +51,7 @@
     self = [super init];
     if (self == nil)
         return nil;
-    _pages = [NSMutableArray array];
+    _pages = [NSMutableDictionary dictionary];
     _attributes = @{};
     return self;
 }
@@ -78,7 +86,7 @@
     CGPDFDocumentRetain(document);
     made->_document = document;
     if (made->_pages == nil)
-        made->_pages = [NSMutableArray array];
+        made->_pages = [NSMutableDictionary dictionary];
     made->_attributes = [made revenant_readAttributes];
     return made;
 }
@@ -165,16 +173,82 @@
 {
     if (_document == NULL || index >= (NSUInteger)CGPDFDocumentGetNumberOfPages(_document))
         return nil;
-    if (_pages.count > index)
-        return [_pages objectAtIndex:index];
+    PDFPage *cached = _pages[@(index)];
+    if (cached != nil)
+        return cached;
     CGPDFPageRef page = CGPDFDocumentGetPage(_document, (size_t)index + 1);
     if (page == NULL)
         return nil;
     PDFPage *carried = [[PDFPage alloc] initWithCGPDFPage:page document:self index:index];
     if (carried == nil)
         return nil;
-    [_pages addObject:carried];
+    _pages[@(index)] = carried;
     return carried;
+}
+
+- (NSUInteger)indexForPage:(PDFPage *)page
+{
+    if (page == nil || page.document != self)
+        return NSNotFound;
+    return page.pageIndex;
+}
+
+- (BOOL)isFinding
+{
+    return _findToken != nil;
+}
+
+- (void)revenant_notify:(NSString *)name selector:(SEL)selector userInfo:(NSDictionary *)userInfo
+{
+    NSNotification *notification = [NSNotification notificationWithName:name object:self userInfo:userInfo];
+    id delegate = _delegate;
+    if ([delegate respondsToSelector:selector])
+        ((void (*)(id, SEL, NSNotification *))objc_msgSend)(delegate, selector, notification);
+    [[NSNotificationCenter defaultCenter] postNotification:notification];
+}
+
+- (void)revenant_findOnPage:(NSUInteger)index string:(NSString *)string options:(NSStringCompareOptions)options token:(NSObject *)token
+{
+    if (_findToken != token)
+        return;
+    if (index >= self.pageCount) {
+        _findToken = nil;
+        [self revenant_notify:PDFDocumentDidEndFindNotification selector:@selector(documentDidEndDocumentFind:) userInfo:nil];
+        return;
+    }
+    NSDictionary *pageInfo = @{PDFDocumentPageIndexKey: @(index)};
+    [self revenant_notify:PDFDocumentDidBeginPageFindNotification selector:@selector(documentDidBeginPageFind:) userInfo:pageInfo];
+    for (PDFSelection *match in revenantMatchesOnPage([self pageAtIndex:index], string, options, 0, NSUIntegerMax)) {
+        if (_findToken != token)
+            return;
+        [self revenant_notify:PDFDocumentDidFindMatchNotification selector:@selector(documentDidFindMatch:) userInfo:@{PDFDocumentFoundSelectionKey: match}];
+        id delegate = _delegate;
+        if ([delegate respondsToSelector:@selector(didMatchString:)])
+            ((void (*)(id, SEL, PDFSelection *))objc_msgSend)(delegate, @selector(didMatchString:), match);
+    }
+    if (_findToken != token)
+        return;
+    [self revenant_notify:PDFDocumentDidEndPageFindNotification selector:@selector(documentDidEndPageFind:) userInfo:pageInfo];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self revenant_findOnPage:index + 1 string:string options:options token:token];
+    });
+}
+
+- (void)beginFindString:(NSString *)string withOptions:(NSStringCompareOptions)options
+{
+    [self cancelFindString];
+    NSObject *token = [[NSObject alloc] init];
+    _findToken = token;
+    [self revenant_notify:PDFDocumentDidBeginFindNotification selector:@selector(documentDidBeginDocumentFind:) userInfo:nil];
+    NSString *needle = [string copy];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self revenant_findOnPage:needle.length > 0 ? 0 : NSUIntegerMax string:needle options:options token:token];
+    });
+}
+
+- (void)cancelFindString
+{
+    _findToken = nil;
 }
 
 
