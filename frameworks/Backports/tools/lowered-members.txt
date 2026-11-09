@@ -28019,6 +28019,8 @@ member RevenantPDFFontMetrics -dealloc
 member RevenantPDFFontMetrics -descent
 member RevenantPDFFontMetrics -hasWidths
 member RevenantPDFFontMetrics -size
+member RevenantPDFHighlight -color
+member RevenantPDFHighlight -rect
 member RevenantPDFLayout -contentSize
 member RevenantPDFLayout -continuous
 member RevenantPDFLayout -dealloc
@@ -28038,6 +28040,13 @@ member RevenantPDFLayout -pagesSharingRowWithPageAtIndex:
 member RevenantPDFLayout -rowGap
 member RevenantPDFLayout -rowsConsidered:
 member RevenantPDFLayout -vertical
+member RevenantPDFPageRender -box
+member RevenantPDFPageRender -generation
+member RevenantPDFPageRender -highlights
+member RevenantPDFPageRender -page
+member RevenantPDFPageRender -quality
+member RevenantPDFPageRender -scale
+member RevenantPDFPageRender -size
 member RevenantPDFPageText +layoutWithRuns:
 member RevenantPDFPageText -boundsForRange:
 member RevenantPDFPageText -dealloc
@@ -28051,7 +28060,10 @@ member RevenantPDFPageText -substringForRange:
 member RevenantPDFPageView +layerClass
 member RevenantPDFPageView -drawRect:
 member RevenantPDFPageView -initWithFrame:
+member RevenantPDFPageView -owner
+member RevenantPDFPageView -render
 member RevenantPDFScrollView -layoutSubviews
+member RevenantPDFScrollView -owner
 member RevenantPDFSelectionSpan -page
 member RevenantPDFSelectionSpan -range
 member RevenantPDFSelectionSpan -textRange
