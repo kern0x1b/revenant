@@ -440,6 +440,7 @@ package("swift-runtime")
             local presentation_intent = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "PresentationIntent.swift")
             local locale_language = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "LocaleLanguage.swift")
             local attributed_string_markdown = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "AttributedStringMarkdown.swift")
+            local date_format_style = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "DateFormatStyle.swift")
             local url_session_web_socket_task = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "URLSessionWebSocketTask.swift")
             local url_percent_encoded = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "URLPercentEncoded.swift")
             local url_components_encoded = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "URLComponentsEncoded.swift")
@@ -468,7 +469,7 @@ package("swift-runtime")
                 "PersonNameComponents.swift", "PlistEncoder.swift", "Pointers+DataProtocol.swift",
                 "Progress.swift", "ReferenceConvertible.swift", "Scanner.swift", "String.swift", "TimeZone.swift",
                 "URL.swift", "URLCache.swift", "URLComponents.swift", "URLRequest.swift", "URLSession.swift",
-                "UUID.swift"}), {presentation_intent, locale_language, attributed_string_markdown, url_session_web_socket_task, url_percent_encoded, url_components_encoded, url_directories}),
+                "UUID.swift"}), {presentation_intent, locale_language, attributed_string_markdown, date_format_style, url_session_web_socket_task, url_percent_encoded, url_components_encoded, url_directories}),
                           table.join(flat_flags, {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation", "-lswiftCoreGraphics",
                            "-framework", "Foundation", "-framework", "CoreFoundation"}), foundation_objects,
                           {concurrency = true, module_cache = foundation_cache,

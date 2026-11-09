@@ -17,6 +17,7 @@ local FAMILIES = {
     {fixture = "dispatch.swift", lowered = false},
     {fixture = "locale_language.swift", lowered = false, sources = {"Foundation/LocaleLanguage.swift"}},
     {fixture = "attributed_string_markdown.swift", lowered = false, sources = {"Foundation/AttributedStringMarkdown.swift"}},
+    {fixture = "date_format_style.swift", lowered = false, sources = {"Foundation/DateFormatStyle.swift"}},
 }
 
 local OVERLAY = path.absolute(path.join(backports, "..", "..", "toolchain", "src", "swift-runtime", "overlay"))
