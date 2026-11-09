@@ -1,3 +1,4 @@
+local aliases = import("host_alias", {rootdir = path.join(os.scriptdir(), "..", "tools"), anonymous = true})
 local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local backports = path.absolute(path.join(os.scriptdir(), ".."))
 local tests = path.join(backports, "tests")
@@ -82,7 +83,7 @@ function main()
     clang({"-o", oracle, program, "-framework", "CoreFoundation", "-framework", "Security"})
     clang(table.join({"-fobjc-arc", "-DREVENANT_SECURITY_EMULATE_ACCESS_CONTROL=1", "-include", path.join(keys, "host_private.h"),
                       "-I", webauth, "-I", source, "-o", emulated, program},
-                     library, frameworks, {"-Wl,-undefined,dynamic_lookup"}))
+                     library, aliases.flags(library), frameworks, {"-Wl,-undefined,dynamic_lookup"}))
     local expected = run(oracle)
     assert(expected == contract, "the macOS Secure Enclave oracle differs from the contract in " .. out)
     local emit = path.join(out, "emit")

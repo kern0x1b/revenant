@@ -217,6 +217,16 @@ below it, and the sources of Telegram stay as they are.
   (`NSAttributedStringMarkdown15.m`) and the Swift side (`AttributedString`, `MarkdownParsingOptions`) is in the overlay.
   `attributed_string_markdown_test.lua` compares the Swift side with the host's, but on the host that side calls the host's
   own parser, so it does not test the Backports parser; `MarkdownDumpProbe` on a device does (see below).
+- `BrowserMarkdown.swift:2481`: a `switch` over `PresentationIntent.Kind` with a `default` after all twelve cases. The
+  SDK's Foundation is built with library evolution, so its enums are not frozen and the `default` is reachable for a
+  case a later release adds. The overlay is not built that way, so its enum was exhaustive and the compiler reported
+  "default will never be executed", an error under the `-warnings-as-errors` of the Telegram build. The case list is the
+  SDK's (twelve cases, same labels). `PresentationIntent.Kind` now has one more case, `_nonfrozen`, marked
+  `@available(*, unavailable)`: no code can name or build it and no switch has to cover it, and the compiler counts it
+  among the cases, so a `default` and an `@unknown default` compile without a diagnostic and a switch that lists the
+  twelve cases needs neither. Any other public enum of the overlay that the SDK does not freeze has the same fault and
+  the same remedy; `swiftc -typecheck` does not show it, because the diagnostic comes from SIL generation, so a replay
+  that looks for it must use `-emit-sil`.
 - `LocationUtils.swift:153`: `MKDirectionsRequest.transportType`, with `requestsAlternateRoutes`, `departureDate` and
   `arrivalDate`, kept per request. `MapRequestProbe` runs 14 checks on an iPhone 4S, iOS 6.1.3, and all pass.
 - `WebAppController.swift:2827`: `CMDeviceMotion.heading`. The geometry is checked on the host against poses built from

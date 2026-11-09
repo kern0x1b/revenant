@@ -10,7 +10,7 @@ local CASES = {
         kind = "cgsize",
         library = PHOTOS,
         source = "src/Photos/PHImageManager8.m",
-        line = "const CGSize PHImageManagerMaximumSize = {-1, -1};",
+        line = "const CGSize BACKPORT_IMPL(PHImageManagerMaximumSize) = {-1, -1};",
         mutant = {"{-1, -1}", "{-1, 0}"},
     },
     {
@@ -18,7 +18,7 @@ local CASES = {
         kind = "cfstring",
         library = SECURITY,
         source = "src/Security/SecAccessControl8.m",
-        line = "const CFStringRef kSecAttrAccessControl = CFSTR(\"accc\");",
+        line = "const CFStringRef BACKPORT_IMPL(kSecAttrAccessControl) = CFSTR(\"accc\");",
         mutant = {"\"accc\"", "\"acc\""},
     },
     {
@@ -27,7 +27,7 @@ local CASES = {
         library = SECURITY,
         oracle = "kSecAttrAccessibleWhenUnlockedThisDeviceOnly",
         source = "src/Security/SecAccessControl8.m",
-        line = "const CFStringRef kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly = CFSTR(\"aku\");",
+        line = "const CFStringRef BACKPORT_IMPL(kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly) = CFSTR(\"aku\");",
         mutant = {"\"aku\"", "\"akpu\""},
     },
     {
@@ -35,7 +35,7 @@ local CASES = {
         kind = "cfstring",
         library = SECURITY,
         source = "src/Security/SecUseAuthentication9.m",
-        line = "const CFStringRef kSecUseAuthenticationContext = CFSTR(\"u_AuthCtx\");",
+        line = "const CFStringRef BACKPORT_IMPL(kSecUseAuthenticationContext) = CFSTR(\"u_AuthCtx\");",
         mutant = {"\"u_AuthCtx\"", "\"u_AuthUI\""},
     },
     {
@@ -43,7 +43,7 @@ local CASES = {
         kind = "cfstring",
         library = SECURITY,
         source = "src/Security/SecurityKeychain13_0.m",
-        line = "const CFStringRef kSecUseDataProtectionKeychain = CFSTR(\"nleg\");",
+        line = "const CFStringRef BACKPORT_IMPL(kSecUseDataProtectionKeychain) = CFSTR(\"nleg\");",
         mutant = {"\"nleg\"", "\"nlg\""},
     },
 }
@@ -57,7 +57,7 @@ end
 
 local function backport_program(case, line)
     return "#include <stdio.h>\n#include <CoreFoundation/CoreFoundation.h>\n#include <CoreGraphics/CoreGraphics.h>\n"
-        .. line .. "\nint main(void)\n{\n" .. print_value(case.kind, case.symbol) .. "    return 0;\n}\n"
+        .. (line:gsub("BACKPORT_IMPL%(([%w_]+)%)", "%1")) .. "\nint main(void)\n{\n" .. print_value(case.kind, case.symbol) .. "    return 0;\n}\n"
 end
 
 local function oracle_program(case)
