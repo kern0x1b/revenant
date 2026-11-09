@@ -3078,9 +3078,16 @@ local function implemented_scope(scope, names)
     return scope ~= nil and names["type " .. scope] == true
 end
 
+local function names_unlowered_type(line, names)
+    return line:find("%f[%w_]DateInterval%f[^%w_]") ~= nil and not names["type DateInterval"]
+end
+
 local function lowered_by(line, names, types, scope)
     local name = line:match("public%s+[%a%s]-var%s+([%a_][%w_]*)") or line:match("public%s+[%a%s]-func%s+([%a_][%w_]*)")
     if name then
+        if names_unlowered_type(line, names) then
+            return false
+        end
         if scope and names["scoped " .. scope] then
             return names["scope " .. scope .. " " .. name] or false
         end
