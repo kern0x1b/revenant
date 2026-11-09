@@ -17,11 +17,38 @@ static NSString *const RevenantEvaluate =
     @"return '{\"ok\":'+text+'}';"
     @"})(%@)";
 
-static NSString *literal(NSString *string)
+static NSString *const RevenantCallAsync =
+    @"(function(report,id,names,values,body){"
+    @"try{"
+    @"var AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;"
+    @"AsyncFunction.apply(null,names.concat([body])).apply(undefined,values).then(function(value){report(id,0,value);},function(reason){report(id,1,reason);});"
+    @"}catch(e){report(id,1,e);}"
+    @"return '1';"
+    @"})(window['%@a'],%@,%@,[%@],%@)";
+
+static NSError *webKitError(WKErrorCode code, NSString *description)
 {
-    NSData *data = [NSJSONSerialization dataWithJSONObject:@[string ?: @""] options:0 error:NULL];
-    NSString *array = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    return [array substringWithRange:NSMakeRange(1, array.length - 2)];
+    return [NSError errorWithDomain:WKErrorDomain code:code userInfo:description ? @{NSLocalizedDescriptionKey: description} : nil];
+}
+
+static NSError *exceptionError(NSString *message, id line, id column)
+{
+    return [NSError errorWithDomain:WKErrorDomain code:WKErrorJavaScriptExceptionOccurred userInfo:@{@"WKJavaScriptExceptionMessage": message ?: @"", @"WKJavaScriptExceptionLineNumber": line ?: @0, @"WKJavaScriptExceptionColumnNumber": column ?: @0, NSLocalizedDescriptionKey: @"A JavaScript exception occurred"}];
+}
+
+static void noteContentWorld(WKContentWorld *contentWorld)
+{
+    static dispatch_once_t once;
+    if (contentWorld == [WKContentWorld pageWorld])
+        return;
+    dispatch_once(&once, ^{
+        NSLog(@"[WebKit] The engine has one JavaScript world, so a script asked to run in a client or named content world runs in the page world: the page can see and change what it defines.");
+    });
+}
+
+static NSError *unsupportedResultError(void)
+{
+    return webKitError(WKErrorJavaScriptResultTypeIsUnsupported, @"JavaScript execution returned a result of an unsupported type");
 }
 
 static NSURL *withoutFragment(NSURL *url)
@@ -91,6 +118,7 @@ static NSURL *withoutFragment(NSURL *url)
     BOOL _substituteHistory;
     UIFindInteraction *_findInteraction;
     RevenantWebFindSession *_findSession;
+    NSMutableDictionary<NSString *, void (^)(id, NSError *)> *_asyncCalls;
 }
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -126,6 +154,7 @@ static NSURL *withoutFragment(NSURL *url)
     [_list revenant_setItems:@[] index:-1];
     _index = -1;
     _allowsLinkPreview = NO;
+    _asyncCalls = [NSMutableDictionary dictionary];
     _host = [[RevenantEngineHost alloc] initWithFrame:self.bounds];
     _web = _host.webView;
     _host.scrollView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
@@ -139,6 +168,7 @@ static NSURL *withoutFragment(NSURL *url)
 
 - (void)dealloc
 {
+    [self revenant_failAsyncCalls:webKitError(WKErrorWebViewInvalidated, nil)];
     id<RevenantEngineView> web = _web;
     RevenantWithWebLock(^{
         [web setFrameLoadDelegate:nil];
@@ -613,21 +643,24 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
 
 - (void)evaluateJavaScript:(NSString *)javaScriptString completionHandler:(void (^)(id, NSError *))completionHandler
 {
-    NSString *script = [NSString stringWithFormat:RevenantEvaluate, RevenantEncoder, literal(javaScriptString)];
+    NSString *quoted = RevenantCodecStringLiteral(javaScriptString);
+    NSString *script = quoted ? [NSString stringWithFormat:RevenantEvaluate, RevenantEncoder, quoted] : nil;
     __block NSString *answer = nil;
-    RevenantWithWebLock(^{
-        answer = [self->_web stringByEvaluatingJavaScriptFromString:script];
-    });
+    if (script) {
+        RevenantWithWebLock(^{
+            answer = [self->_web stringByEvaluatingJavaScriptFromString:script];
+        });
+    }
     id result = nil;
     NSError *error = nil;
     BOOL valid = NO;
     id envelope = answer.length ? RevenantCodecParsed(answer, &valid) : nil;
     if (!valid || ![envelope isKindOfClass:[NSDictionary class]]) {
-        error = [NSError errorWithDomain:WKErrorDomain code:WKErrorUnknown userInfo:nil];
+        error = webKitError(WKErrorUnknown, nil);
     } else if (envelope[@"error"]) {
-        error = [NSError errorWithDomain:WKErrorDomain code:WKErrorJavaScriptExceptionOccurred userInfo:@{@"WKJavaScriptExceptionMessage": envelope[@"error"], @"WKJavaScriptExceptionLineNumber": envelope[@"line"] ?: @0, @"WKJavaScriptExceptionColumnNumber": @0, NSLocalizedDescriptionKey: @"A JavaScript exception occurred"}];
+        error = exceptionError(envelope[@"error"], envelope[@"line"], nil);
     } else if (envelope[@"unsupported"]) {
-        error = [NSError errorWithDomain:WKErrorDomain code:WKErrorJavaScriptResultTypeIsUnsupported userInfo:@{NSLocalizedDescriptionKey: @"JavaScript execution returned a result of an unsupported type"}];
+        error = unsupportedResultError();
     } else {
         result = RevenantCodecDecoded(envelope[@"ok"]);
     }
@@ -639,6 +672,133 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
             handler(result, error);
         });
     }
+}
+
+- (void)evaluateJavaScript:(NSString *)javaScriptString inFrame:(WKFrameInfo *)frame inContentWorld:(WKContentWorld *)contentWorld completionHandler:(void (^)(id, NSError *))completionHandler
+{
+    noteContentWorld(contentWorld);
+    if (frame && ![frame isMainFrame]) {
+        if (completionHandler) {
+            void (^handler)(id, NSError *) = [completionHandler copy];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                handler(nil, webKitError(WKErrorJavaScriptInvalidFrameTarget, nil));
+            });
+        }
+        return;
+    }
+    [self evaluateJavaScript:javaScriptString completionHandler:completionHandler];
+}
+
+- (void)revenant_ensureBridge
+{
+    NSString *probe = [NSString stringWithFormat:@"typeof window['%@a']", _token];
+    if ([[_web stringByEvaluatingJavaScriptFromString:probe] isEqualToString:@"function"])
+        return;
+    [_web stringByEvaluatingJavaScriptFromString:[self revenant_shimWithNames:_configuration.userContentController.revenant_handlerNames]];
+}
+
+- (void)revenant_failAsyncCalls:(NSError *)error
+{
+    NSArray *handlers;
+    @synchronized (_asyncCalls) {
+        handlers = [_asyncCalls allValues];
+        [_asyncCalls removeAllObjects];
+    }
+    for (void (^handler)(id, NSError *) in handlers) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            handler(nil, error);
+        });
+    }
+}
+
+- (void)revenant_finishAsyncCall:(NSDictionary *)message
+{
+    NSString *callID = message[@"i"];
+    if (![callID isKindOfClass:[NSString class]])
+        return;
+    void (^handler)(id, NSError *);
+    @synchronized (_asyncCalls) {
+        handler = _asyncCalls[callID];
+        [_asyncCalls removeObjectForKey:callID];
+    }
+    if (!handler)
+        return;
+    id result = nil;
+    NSError *error = nil;
+    NSNumber *state = message[@"s"];
+    if (![state isKindOfClass:[NSNumber class]] || state.integerValue == 2) {
+        error = unsupportedResultError();
+    } else if (state.integerValue == 1) {
+        error = exceptionError(message[@"m"], message[@"l"], message[@"c"]);
+    } else {
+        BOOL valid = NO;
+        result = RevenantCodecMessageBody(message[@"b"], &valid);
+        if (!valid)
+            error = unsupportedResultError();
+    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        handler(result, error);
+    });
+}
+
+- (void)callAsyncJavaScript:(NSString *)functionBody arguments:(NSDictionary<NSString *, id> *)arguments inFrame:(WKFrameInfo *)frame inContentWorld:(WKContentWorld *)contentWorld completionHandler:(void (^)(id, NSError *))completionHandler
+{
+    noteContentWorld(contentWorld);
+    void (^handler)(id, NSError *) = [completionHandler copy];
+    void (^fail)(NSError *) = ^(NSError *error) {
+        if (handler) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                handler(nil, error);
+            });
+        }
+    };
+    if (frame && ![frame isMainFrame]) {
+        fail(webKitError(WKErrorJavaScriptInvalidFrameTarget, nil));
+        return;
+    }
+    NSArray *names = arguments.allKeys ?: @[];
+    NSMutableArray *values = [NSMutableArray array];
+    for (id name in names) {
+        NSString *value = RevenantCodecScriptLiteral(arguments[name]);
+        if (value)
+            [values addObject:value];
+    }
+    NSString *nameList = RevenantCodecScriptLiteral(names);
+    NSString *body = RevenantCodecStringLiteral(functionBody);
+    if (!nameList || !body || values.count != names.count) {
+        fail(webKitError(WKErrorUnknown, @"The function body is not a string, or an argument name is not a string, or an argument value is not an NSNumber, NSString, NSDate, NSArray, NSDictionary or NSNull"));
+        return;
+    }
+    NSString *callID = [[NSUUID UUID] UUIDString];
+    if (handler) {
+        @synchronized (_asyncCalls) {
+            _asyncCalls[callID] = handler;
+        }
+    }
+    NSString *script = [NSString stringWithFormat:RevenantCallAsync, _token, RevenantCodecStringLiteral(callID), nameList, [values componentsJoinedByString:@","], body];
+    __block NSString *answer = nil;
+    RevenantWithWebLock(^{
+        [self revenant_ensureBridge];
+        answer = [self->_web stringByEvaluatingJavaScriptFromString:script];
+    });
+    if (![answer isEqualToString:@"1"]) {
+        @synchronized (_asyncCalls) {
+            [_asyncCalls removeObjectForKey:callID];
+        }
+        fail(webKitError(WKErrorUnknown, nil));
+    }
+}
+
+- (void)createWebArchiveDataWithCompletionHandler:(void (^)(NSData *, NSError *))completionHandler
+{
+    __block NSData *data = nil;
+    RevenantWithWebLock(^{
+        data = self->_web.mainFrame.dataSource.webArchive.data;
+    });
+    void (^handler)(NSData *, NSError *) = [completionHandler copy];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        handler(data, data ? nil : webKitError(WKErrorUnknown, nil));
+    });
 }
 
 - (UIFindInteraction *)findInteraction
@@ -973,6 +1133,10 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
         [self revenant_navigateOpener:message];
         return;
     }
+    if ([kind isEqual:@8]) {
+        [self revenant_finishAsyncCall:message];
+        return;
+    }
     if ([kind isEqual:@2]) {
         [self revenant_closeOpenedWindow:message];
         return;
@@ -1083,6 +1247,7 @@ static NSString *MIMETypeForLocalURL(NSURL *URL)
 
 - (void)revenant_commit
 {
+    [self revenant_failAsyncCalls:webKitError(WKErrorJavaScriptInvalidFrameTarget, nil)];
     NSURL *URL = _URL;
     NSMutableArray<WKBackForwardListItem *> *items = [_items mutableCopy];
     NSInteger index = _index;

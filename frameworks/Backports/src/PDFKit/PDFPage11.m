@@ -408,9 +408,11 @@ static RevenantPDFPageText *revenantScanPageText(CGPDFPageRef page, RevenantText
 
 - (RevenantPDFPageText *)revenant_textLayout
 {
-    if (_layout == nil)
-        _layout = revenantScanPageText(_page, NULL);
-    return _layout;
+    @synchronized (self) {
+        if (_layout == nil)
+            _layout = revenantScanPageText(_page, NULL);
+        return _layout;
+    }
 }
 
 - (NSString *)string
@@ -422,9 +424,11 @@ static RevenantPDFPageText *revenantScanPageText(CGPDFPageRef page, RevenantText
 
 - (NSArray *)annotations
 {
-    if (_annotations == nil)
-        [self revenant_buildAnnotations];
-    return _annotations != nil ? [_annotations copy] : @[];
+    @synchronized (self) {
+        if (_annotations == nil)
+            [self revenant_buildAnnotations];
+        return _annotations != nil ? [_annotations copy] : @[];
+    }
 }
 
 - (void)revenant_buildAnnotations
@@ -537,6 +541,29 @@ static RevenantPDFPageText *revenantScanPageText(CGPDFPageRef page, RevenantText
         return 0;
     NSInteger degrees = (NSInteger)raw;
     return degrees == 0 ? 0 : (degrees % 360 + 360) % 360;
+}
+
+- (CGAffineTransform)transformForBox:(NSInteger)box
+{
+    if (_page == NULL)
+        return CGAffineTransformIdentity;
+    CGRect bounds = [self boundsForBox:(CGPDFBox)box];
+    NSInteger turned = [self rotation];
+    BOOL sideways = turned == 90 || turned == 270;
+    CGRect target = CGRectMake(0, 0, sideways ? bounds.size.height : bounds.size.width, sideways ? bounds.size.width : bounds.size.height);
+    return CGPDFPageGetDrawingTransform(_page, (CGPDFBox)box, target, 0, true);
+}
+
+- (void)drawWithBox:(NSInteger)box toContext:(CGContextRef)context
+{
+    if (_page == NULL || context == NULL)
+        return;
+    CGContextSaveGState(context);
+    CGContextConcatCTM(context, [self transformForBox:box]);
+    @synchronized (self) {
+        CGContextDrawPDFPage(context, _page);
+    }
+    CGContextRestoreGState(context);
 }
 
 - (CGPDFPageRef)revenant_CGPDFPage

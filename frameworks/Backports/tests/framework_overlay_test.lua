@@ -14,6 +14,12 @@ local OVERLAYS = {
      without = "has no member 'languageHypotheses'"},
     {name = "PassKit", folder = "PassKit", fixture = path.join("PassKit", "overlay.swift"), flags = UNDERLYING,
      without = "has no case 'capability3DS'"},
+    {name = "WebKit", folder = "WebKit", fixture = path.join("WebKit", "overlay.swift"), flags = UNDERLYING,
+     without = "has no member 'createWebArchiveData'"},
+    {name = "ContactsUI", folder = "ContactsUI", fixture = path.join("ContactsUI", "overlay.swift"), flags = UNDERLYING, packages = true,
+     without = "has no member 'contactAccessPicker'"},
+    {name = "Intents", folder = "Intents", fixture = path.join("Intents", "overlay.swift"), flags = UNDERLYING,
+     without = "has no member 'setImage'"},
     {name = "AuthenticationServices", folder = path.join("AuthenticationServices", "Updater"), fixture = path.join("AuthenticationServices", "updater.swift"),
      flags = table.join(UNDERLYING, {"-module-link-name", "swiftAuthenticationServices", "-Xfrontend", "-disable-implicit-string-processing-module-import"}),
      without = "cannot find 'ASCredentialUpdater' in scope"},
@@ -23,6 +29,15 @@ local function flags_for(module, runtime, sdk, vfs, include, cache)
     local flags = swift.runtime_flags({architecture = "armv7", deployment = "6.0", sdk = sdk,
                                        resources = path.join(runtime, "lib", "swift"), module = module, optimize = "none"})
     table.join2(flags, {"-module-cache-path", cache, "-vfsoverlay", vfs, "-Xcc", "-I" .. include, "-Xfrontend", "-application-availability-floor", "-Xfrontend", "15"})
+    return flags
+end
+
+local function with_packages(flags, entry)
+    if entry.packages then
+        for folder in (os.getenv("REVENANT_TEST_MODULES") or ""):gmatch("[^:]+") do
+            table.join2(flags, {"-I", folder})
+        end
+    end
     return flags
 end
 
@@ -43,6 +58,7 @@ function main()
     os.mkdir(modules)
     for _, entry in ipairs(OVERLAYS) do
         local emit = flags_for(entry.name, runtime, sdk, vfs, include, cache)
+        with_packages(emit, entry)
         table.join2(emit, entry.flags, {"-emit-module", "-emit-module-path", path.join(modules, entry.name .. ".swiftmodule")})
         table.join2(emit, os.files(path.join(backports, "src", entry.folder, "*.swift")))
         os.vrunv(compiler, emit)
@@ -50,9 +66,11 @@ function main()
     for _, entry in ipairs(OVERLAYS) do
         local fixture = path.join(backports, "tests", entry.fixture)
         local check = flags_for(entry.name .. "Overlay", runtime, sdk, vfs, include, cache)
+        with_packages(check, entry)
         table.join2(check, {"-I", modules, "-typecheck", "-parse-as-library", fixture})
         os.vrunv(compiler, check)
         local bare = flags_for(entry.name .. "Overlay", runtime, sdk, vfs, include, cache)
+        with_packages(bare, entry)
         table.join2(bare, {"-typecheck", "-parse-as-library", fixture})
         local log = path.join(out, entry.name .. "-without-overlay.log")
         local code = os.execv(compiler, bare, {try = true, stdout = log, stderr = log})

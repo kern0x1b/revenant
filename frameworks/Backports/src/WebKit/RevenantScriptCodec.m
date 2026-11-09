@@ -89,6 +89,12 @@ NSString *const RevenantShim =
     @"try{Object.defineProperty(event,'source',{value:source});}catch(e){}"
     @"window.dispatchEvent(event);return;}"
     @"var entry=update.opener?table.opener:table[update.i];if(entry){entry.update(update);}};"
+    @"window[nonce+'a']=function(id,state,value){"
+    @"var envelope={w:8,i:id,s:state,k:nonce};"
+    @"if(state===0){try{envelope.b=encode(value);}catch(e){envelope.s=2;}}"
+    @"else if(state===1){try{envelope.m=String(value&&value.message!==undefined?value.message:value);}catch(e){envelope.m='';}"
+    @"envelope.l=value&&value.line!==undefined?value.line:0;envelope.c=value&&value.column!==undefined?value.column:0;}"
+    @"post(envelope);};"
     @"if(!names.length){try{delete window.webkit;}catch(e){window.webkit=undefined;}return;}"
     @"var handlers={};"
     @"names.forEach(function(name){handlers[name]={postMessage:function(body){"
@@ -99,6 +105,76 @@ NSString *const RevenantShim =
     @"})(%@,\"%@\",%@)";
 
 static const NSUInteger MaximumDepth = 64;
+
+NSString *RevenantCodecStringLiteral(NSString *string)
+{
+    NSData *data = [NSJSONSerialization dataWithJSONObject:@[string ?: @""] options:0 error:NULL];
+    NSString *array = data ? [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] : nil;
+    if (array.length < 2)
+        return nil;
+    NSString *quoted = [array substringWithRange:NSMakeRange(1, array.length - 2)];
+    quoted = [quoted stringByReplacingOccurrencesOfString:@" " withString:@"\\u2028"];
+    return [quoted stringByReplacingOccurrencesOfString:@" " withString:@"\\u2029"];
+}
+
+static NSString *scriptNumber(NSNumber *number)
+{
+    if (CFGetTypeID((__bridge CFTypeRef)number) == CFBooleanGetTypeID())
+        return number.boolValue ? @"true" : @"false";
+    if (!CFNumberIsFloatType((__bridge CFNumberRef)number))
+        return number.stringValue;
+    double value = number.doubleValue;
+    if (isnan(value))
+        return @"NaN";
+    if (isinf(value))
+        return value < 0 ? @"-Infinity" : @"Infinity";
+    if (value == 0 && signbit(value))
+        return @"-0";
+    return [NSString stringWithFormat:@"%.17g", value];
+}
+
+static NSString *scriptLiteral(id value, NSUInteger depth)
+{
+    if (depth > MaximumDepth)
+        return nil;
+    if ([value isKindOfClass:[NSString class]])
+        return RevenantCodecStringLiteral(value);
+    if ([value isKindOfClass:[NSNumber class]])
+        return scriptNumber(value);
+    if ([value isKindOfClass:[NSNull class]])
+        return @"null";
+    if ([value isKindOfClass:[NSDate class]])
+        return [NSString stringWithFormat:@"new Date(%.17g)", [value timeIntervalSince1970] * 1000];
+    if ([value isKindOfClass:[NSArray class]]) {
+        NSMutableArray *items = [NSMutableArray array];
+        for (id item in value) {
+            NSString *text = scriptLiteral(item, depth + 1);
+            if (!text)
+                return nil;
+            [items addObject:text];
+        }
+        return [NSString stringWithFormat:@"[%@]", [items componentsJoinedByString:@","]];
+    }
+    if ([value isKindOfClass:[NSDictionary class]]) {
+        NSMutableArray *members = [NSMutableArray array];
+        for (id key in value) {
+            if (![key isKindOfClass:[NSString class]])
+                return nil;
+            NSString *name = RevenantCodecStringLiteral(key);
+            NSString *text = scriptLiteral(value[key], depth + 1);
+            if (!name || !text)
+                return nil;
+            [members addObject:[NSString stringWithFormat:@"[%@]:%@", name, text]];
+        }
+        return [NSString stringWithFormat:@"{%@}", [members componentsJoinedByString:@","]];
+    }
+    return nil;
+}
+
+NSString *RevenantCodecScriptLiteral(id value)
+{
+    return scriptLiteral(value, 0);
+}
 
 static id decode(id value, NSMutableArray *ids, NSUInteger depth)
 {

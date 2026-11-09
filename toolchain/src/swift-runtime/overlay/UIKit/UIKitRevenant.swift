@@ -126,6 +126,14 @@ extension UITraitChangeObservable {
     }
 }
 
+extension UIContextMenuConfiguration {
+    @_alwaysEmitIntoClient
+    public convenience init(identifier: (any NSCopying)? = nil, previewProvider: UIContextMenuContentPreviewProvider? = nil,
+                            actionProvider: UIContextMenuActionProvider? = nil) {
+        self.init(__identifier: identifier, previewProvider: previewProvider, actionProvider: actionProvider)
+    }
+}
+
 extension UIView {
     public var cornerConfiguration: UICornerConfiguration {
         get { __cornerConfiguration }

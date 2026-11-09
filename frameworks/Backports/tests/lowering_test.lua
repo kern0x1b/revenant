@@ -47,12 +47,17 @@ local ACCEPTANCE = [=[
 #import <CoreImage/CoreImage.h>
 #import <ImageIO/ImageIO.h>
 
+void revenantVisitChanges(CNContactStore *store, CNChangeHistoryFetchRequest *request, id<CNChangeHistoryEventVisitor> visitor);
+
 void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager *manager)
 {
     WKWebView *web = [[WKWebView alloc] initWithFrame:CGRectZero];
     web.navigationDelegate = nil;
     id<WKNavigationDelegate> navigation = web.navigationDelegate;
     (void)navigation;
+    [web createWebArchiveDataWithCompletionHandler:^(NSData *archive, NSError *archiveError) {}];
+    [web callAsyncJavaScript:@"return 1" arguments:@{@"x": @1} inFrame:nil inContentWorld:[WKContentWorld defaultClientWorld] completionHandler:^(id result, NSError *scriptError) {}];
+    [web evaluateJavaScript:@"1" inFrame:nil inContentWorld:[WKContentWorld pageWorld] completionHandler:nil];
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     (void)[device newCommandQueue];
     (void)[device newBufferWithLength:16 options:0];
@@ -106,6 +111,9 @@ void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager 
     CGPathRef created = CGPathCreateWithRoundedRect(CGRectMake(0, 0, 10, 10), 2, 2, NULL);
     CGPathRelease(created);
     CGPathRelease(rounded);
+    CNChangeHistoryEvent *changeEvent = nil;
+    id<CNChangeHistoryEventVisitor> changeVisitor = nil;
+    [changeEvent acceptEventVisitor:changeVisitor];
     CIImage *image = nil;
     (void)[image imageByApplyingOrientation:1];
     (void)[image imageTransformForOrientation:1];
@@ -516,6 +524,45 @@ function main()
            and not protocol_lowered:find("reset API_AVAILABLE", 1, true) and not protocol_lowered:find("rewind API_AVAILABLE", 1, true)
            and not protocol_lowered:find("pause API_AVAILABLE", 1, true),
            "an implemented protocol member loses its availability, and a member Backports does not implement keeps it:\n" .. protocol_lowered)
+
+    local visitor_header = table.concat({
+        "API_AVAILABLE(ios(13.0))",
+        "@protocol VisitVisitor <NSObject>",
+        "- (void)visit:(VisitEvent *)event;",
+        "@end",
+        "",
+        "API_AVAILABLE(ios(13.0))",
+        "@protocol VisitUnnamed <NSObject>",
+        "@end",
+        "",
+        "@protocol VisitPlain <NSObject>",
+        "@end",
+        "",
+        "API_AVAILABLE_BEGIN(ios(13.0))",
+        "@protocol VisitRegional <NSObject>",
+        "@end",
+        "API_AVAILABLE_END",
+        "",
+        "API_AVAILABLE(ios(13.0))",
+        "@interface VisitEvent : NSObject",
+        "- (void)accept:(id<VisitVisitor>)visitor API_AVAILABLE(ios(13.0));",
+        "- (void)acceptPlain:(id<VisitPlain>)plain API_AVAILABLE(ios(13.0));",
+        "- (void)acceptRegional:(id<VisitRegional>)regional API_AVAILABLE(ios(13.0));",
+        "- (void)acceptNothing:(NSString *)text API_AVAILABLE(ios(13.0));",
+        "@end",
+        "",
+    }, "\n")
+    local visitor_set = {classes = {VisitEvent = {["-accept:"] = true, ["-acceptPlain:"] = true, ["-acceptRegional:"] = true}}, functions = {},
+                         globals = {}, protocols = {}, protocol_members = {}, types = {}, enum_types = {}}
+    local _, _, signature = lowered.signature_types({visitor_header}, visitor_set)
+    assert(signature.VisitVisitor and signature.VisitRegional and not signature.VisitUnnamed and not signature.VisitPlain,
+           "a protocol that an implemented member names in its signature and that carries availability, alone or through its region, is lowered with the member; one that no implemented member names, or that carries no availability, is not")
+    visitor_set.protocols = signature
+    local visitor_lowered = lowered.lower_header(visitor_header, visitor_set)
+    assert(not visitor_lowered:find("API_AVAILABLE(ios(13.0))\n@protocol VisitVisitor", 1, true)
+           and visitor_lowered:find("API_AVAILABLE(ios(13.0))\n@protocol VisitUnnamed", 1, true)
+           and not visitor_lowered:find("API_AVAILABLE_BEGIN(ios(13.0))\n@protocol VisitRegional", 1, true),
+           "the protocol in an implemented member's signature loses its availability and the protocol no signature names keeps it:\n" .. visitor_lowered)
 
     local photos_source = path.join(sdk, "System", "Library", "Frameworks", "Photos.framework", "Headers", "PhotosTypes.h")
     local photos_lowered = lowered.lower_header(io.readfile(photos_source), {markers = lowered.region_markers(sdk), classes = {}, functions = {},

@@ -14,6 +14,7 @@ local PROTOCOLS = {
     {name = "JSExport", framework = "JavaScriptCore", header = "JSExport.h", source = "JavaScriptCore/JSExport7.m", marker = true},
     {name = "CNKeyDescriptor", framework = "Contacts", header = "CNContact.h", source = "Contacts/CNKeyDescriptor9.m", marker = true},
     {name = "PDFDocumentDelegate", framework = "PDFKit", header = "PDFDocument.h", source = "PDFKit/PDFDocumentDelegate11.m", macos_only = {"classForAnnotationClass:"}},
+    {name = "PDFViewDelegate", framework = "PDFKit", header = "PDFView.h", source = "PDFKit/PDFViewDelegate11.m", macos_only = {"PDFViewWillChangeScaleFactor:toScale:", "PDFViewPrintJobTitle:", "PDFViewPerformPrint:"}},
 }
 
 local function strip_parens(text)

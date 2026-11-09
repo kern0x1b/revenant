@@ -664,13 +664,20 @@ class HMTimerTrigger
 class HMTrigger
 class HMUser
 class HMZone
+class INCallDestinationTypeResolutionResult
+class INCallRecord
+class INCallRecordTypeOptionsResolutionResult
+class INCallRecordTypeResolutionResult
 class INDateComponentsRange
 class INExtension
 class INImage
 class INIntent
 class INIntentResolutionResult
+class INIntentResponse
 class INInteraction
 class INMessage
+class INMessageAttributeOptionsResolutionResult
+class INMessageAttributeResolutionResult
 class INObject
 class INObjectCollection
 class INObjectResolutionResult
@@ -679,12 +686,24 @@ class INParameter
 class INPaymentMethod
 class INPerson
 class INPersonHandle
+class INPersonResolutionResult
 class INPreferences
 class INRideCompletionStatus
 class INRideDriver
+class INSearchCallHistoryIntent
+class INSearchCallHistoryIntentResponse
+class INSearchForMessagesIntent
+class INSearchForMessagesIntentResponse
 class INSendMessageIntent
+class INSendMessageIntentResponse
+class INSendMessageRecipientResolutionResult
+class INSetMessageAttributeIntent
+class INSetMessageAttributeIntentResponse
 class INSpeakableString
+class INStartCallContactResolutionResult
 class INStartCallIntent
+class INStartCallIntentResponse
+class INStringResolutionResult
 class INUIAddVoiceShortcutButton
 class INUIAddVoiceShortcutViewController
 class INUIEditVoiceShortcutViewController
@@ -1907,9 +1926,15 @@ class RevenantOrientationWatcher
 class RevenantOrthogonalController
 class RevenantOverrides
 class RevenantPDFFontMetrics
+class RevenantPDFHighlight
+class RevenantPDFLayout
+class RevenantPDFPageRender
 class RevenantPDFPageText
+class RevenantPDFPageView
+class RevenantPDFScrollView
 class RevenantPDFSelectionSpan
 class RevenantPDFTextRun
+class RevenantPDFTileLayer
 class RevenantPagination
 class RevenantParagraphStyle9
 class RevenantPasscodePrompt
@@ -2184,6 +2209,7 @@ class SRWebUsage
 class SRWristDetection
 class SRWristTemperature
 class SRWristTemperatureSession
+class SSReadingList
 class UIAccessibilityCustomAction
 class UIAccessibilityElement
 class UIAction
@@ -2992,7 +3018,33 @@ enum HMHomeManagerAuthorizationStatusDetermined
 enum INCallAudioRouteUnknown
 enum INCallCapabilityUnknown
 enum INCallDestinationTypeUnknown
+enum INCallRecordTypeInProgress
+enum INCallRecordTypeLatest
+enum INCallRecordTypeMissed
+enum INCallRecordTypeOnHold
+enum INCallRecordTypeOptionInProgress
+enum INCallRecordTypeOptionLatest
+enum INCallRecordTypeOptionMissed
+enum INCallRecordTypeOptionOnHold
+enum INCallRecordTypeOptionOutgoing
+enum INCallRecordTypeOptionReceived
+enum INCallRecordTypeOptionRinging
+enum INCallRecordTypeOptionVoicemail
+enum INCallRecordTypeOutgoing
+enum INCallRecordTypeReceived
+enum INCallRecordTypeRinging
+enum INCallRecordTypeUnknown
+enum INCallRecordTypeVoicemail
+enum INConditionalOperatorAll
+enum INConditionalOperatorAny
+enum INConditionalOperatorNone
 enum INInteractionDirectionOutgoing
+enum INMessageAttributeFlagged
+enum INMessageAttributePlayed
+enum INMessageAttributeRead
+enum INMessageAttributeUnflagged
+enum INMessageAttributeUnknown
+enum INMessageAttributeUnread
 enum INMessageTypeUnspecified
 enum INOutgoingMessageTypeUnknown
 enum INPaymentMethodTypeApplePay
@@ -3001,7 +3053,68 @@ enum INRecurrenceFrequencyDaily
 enum INRecurrenceFrequencyMonthly
 enum INRecurrenceFrequencyWeekly
 enum INRecurrenceFrequencyYearly
+enum INSearchCallHistoryIntentResponseCodeContinueInApp
+enum INSearchCallHistoryIntentResponseCodeFailure
+enum INSearchCallHistoryIntentResponseCodeFailureAppConfigurationRequired
+enum INSearchCallHistoryIntentResponseCodeFailureRequiringAppLaunch
+enum INSearchCallHistoryIntentResponseCodeInProgress
+enum INSearchCallHistoryIntentResponseCodeReady
+enum INSearchCallHistoryIntentResponseCodeSuccess
+enum INSearchCallHistoryIntentResponseCodeUnspecified
+enum INSearchForMessagesIntentResponseCodeFailure
+enum INSearchForMessagesIntentResponseCodeFailureMessageServiceNotAvailable
+enum INSearchForMessagesIntentResponseCodeFailureMessageTooManyResults
+enum INSearchForMessagesIntentResponseCodeFailureRequiringAppLaunch
+enum INSearchForMessagesIntentResponseCodeFailureRequiringInAppAuthentication
+enum INSearchForMessagesIntentResponseCodeInProgress
+enum INSearchForMessagesIntentResponseCodeReady
+enum INSearchForMessagesIntentResponseCodeSuccess
+enum INSearchForMessagesIntentResponseCodeUnspecified
+enum INSendMessageIntentResponseCodeFailure
+enum INSendMessageIntentResponseCodeFailureMessageServiceNotAvailable
+enum INSendMessageIntentResponseCodeFailureRequiringAppLaunch
+enum INSendMessageIntentResponseCodeFailureRequiringInAppAuthentication
+enum INSendMessageIntentResponseCodeInProgress
+enum INSendMessageIntentResponseCodeReady
+enum INSendMessageIntentResponseCodeSuccess
+enum INSendMessageIntentResponseCodeUnspecified
+enum INSendMessageRecipientUnsupportedReasonMessagingServiceNotEnabledForRecipient
+enum INSendMessageRecipientUnsupportedReasonNoAccount
+enum INSendMessageRecipientUnsupportedReasonNoHandleForLabel
+enum INSendMessageRecipientUnsupportedReasonNoValidHandle
+enum INSendMessageRecipientUnsupportedReasonOffline
+enum INSendMessageRecipientUnsupportedReasonRequestedHandleInvalid
+enum INSendMessageRecipientUnsupportedReasonRequiringInAppAuthentication
+enum INSetMessageAttributeIntentResponseCodeFailure
+enum INSetMessageAttributeIntentResponseCodeFailureMessageAttributeNotSet
+enum INSetMessageAttributeIntentResponseCodeFailureMessageNotFound
+enum INSetMessageAttributeIntentResponseCodeFailureRequiringAppLaunch
+enum INSetMessageAttributeIntentResponseCodeInProgress
+enum INSetMessageAttributeIntentResponseCodeReady
+enum INSetMessageAttributeIntentResponseCodeSuccess
+enum INSetMessageAttributeIntentResponseCodeUnspecified
 enum INSiriAuthorizationStatusRestricted
+enum INStartCallContactUnsupportedReasonInvalidHandle
+enum INStartCallContactUnsupportedReasonMultipleContactsUnsupported
+enum INStartCallContactUnsupportedReasonNoCallHistoryForRedial
+enum INStartCallContactUnsupportedReasonNoContactFound
+enum INStartCallContactUnsupportedReasonNoHandleForLabel
+enum INStartCallContactUnsupportedReasonNoUsableHandleForRedial
+enum INStartCallContactUnsupportedReasonRequiringInAppAuthentication
+enum INStartCallContactUnsupportedReasonUnsupportedMmiUssd
+enum INStartCallIntentResponseCodeContinueInApp
+enum INStartCallIntentResponseCodeFailure
+enum INStartCallIntentResponseCodeFailureAirplaneModeEnabled
+enum INStartCallIntentResponseCodeFailureAppConfigurationRequired
+enum INStartCallIntentResponseCodeFailureCallInProgress
+enum INStartCallIntentResponseCodeFailureCallingServiceNotAvailable
+enum INStartCallIntentResponseCodeFailureContactNotSupportedByApp
+enum INStartCallIntentResponseCodeFailureRequiringAppLaunch
+enum INStartCallIntentResponseCodeFailureRequiringInAppAuthentication
+enum INStartCallIntentResponseCodeFailureUnableToHandOff
+enum INStartCallIntentResponseCodeReady
+enum INStartCallIntentResponseCodeUnspecified
+enum INStartCallIntentResponseCodeUserConfirmationRequired
 enum INUIAddVoiceShortcutButtonStyleAutomatic
 enum INUIAddVoiceShortcutButtonStyleAutomaticOutline
 enum INUIAddVoiceShortcutButtonStyleBlack
@@ -3752,6 +3865,7 @@ enum SKUniformTypeNone
 enum SKUniformTypeTexture
 enum SRAuthorizationStatusDenied
 enum SRErrorDataInaccessible
+enum SSReadingListErrorURLSchemeNotAllowed
 enum UIAccessibilityContrastHigh
 enum UIAccessibilityHearingDeviceEarNone
 enum UIActivityCategoryAction
@@ -4040,8 +4154,10 @@ enum WKErrorContentRuleListStoreCompileFailed
 enum WKErrorContentRuleListStoreLookUpFailed
 enum WKErrorContentRuleListStoreRemoveFailed
 enum WKErrorJavaScriptExceptionOccurred
+enum WKErrorJavaScriptInvalidFrameTarget
 enum WKErrorJavaScriptResultTypeIsUnsupported
 enum WKErrorUnknown
+enum WKErrorWebViewInvalidated
 enum WKNavigationActionPolicyAllow
 enum WKNavigationResponsePolicyAllow
 enum WKNavigationResponsePolicyCancel
@@ -4198,6 +4314,7 @@ enum_type PHPhotosError
 enum_type SCNHitTestSearchMode
 enum_type SFAuthenticationError
 enum_type SRErrorCode
+enum_type SSReadingListErrorCode
 enum_type UIActivityIndicatorViewStyle
 enum_type UIDatePickerMode
 enum_type UIEventType
@@ -4575,6 +4692,8 @@ function RevenantCodecBridgeMessage
 function RevenantCodecDecoded
 function RevenantCodecMessageBody
 function RevenantCodecParsed
+function RevenantCodecScriptLiteral
+function RevenantCodecStringLiteral
 function RevenantCornerPathCreate
 function RevenantCornerRadiiFitted
 function RevenantCreatePhotoImage
@@ -5806,6 +5925,8 @@ function revenant_intents_copy
 function revenant_intents_decode
 function revenant_intents_delete_interactions
 function revenant_intents_encode
+function revenant_intents_equal
+function revenant_intents_hash
 function revenant_intents_remove_vocabulary
 function revenant_intents_store_directory
 function revenant_intents_store_interaction
@@ -9246,6 +9367,7 @@ global SRSensorSleepSessions
 global SRSensorTelephonySpeechMetrics
 global SRSensorVisits
 global SRSensorWristTemperature
+global SSReadingListErrorDomain
 global UIAccessibilityAssistiveTechnologyKey
 global UIAccessibilityBoldTextStatusDidChangeNotification
 global UIAccessibilityButtonShapesEnabledStatusDidChangeNotification
@@ -17078,6 +17200,33 @@ member HMZone -revenant_initWithStore:identifier:
 member HMZone -rooms
 member HMZone -uniqueIdentifier
 member HMZone -updateName:completionHandler:
+member INCallDestinationTypeResolutionResult +confirmationRequiredWithCallDestinationTypeToConfirm:
+member INCallDestinationTypeResolutionResult +successWithResolvedCallDestinationType:
+member INCallRecord +supportsSecureCoding
+member INCallRecord -callCapability
+member INCallRecord -callDuration
+member INCallRecord -callRecordType
+member INCallRecord -caller
+member INCallRecord -copyWithZone:
+member INCallRecord -dateCreated
+member INCallRecord -encodeWithCoder:
+member INCallRecord -hash
+member INCallRecord -identifier
+member INCallRecord -initWithCoder:
+member INCallRecord -initWithIdentifier:dateCreated:callRecordType:callCapability:callDuration:unseen:
+member INCallRecord -initWithIdentifier:dateCreated:callRecordType:callCapability:callDuration:unseen:numberOfCalls:
+member INCallRecord -initWithIdentifier:dateCreated:callRecordType:callCapability:callDuration:unseen:participants:numberOfCalls:isCallerIdBlocked:
+member INCallRecord -initWithIdentifier:dateCreated:caller:callRecordType:callCapability:callDuration:unseen:
+member INCallRecord -initWithIdentifier:dateCreated:caller:callRecordType:callCapability:callDuration:unseen:numberOfCalls:
+member INCallRecord -isCallerIdBlocked
+member INCallRecord -isEqual:
+member INCallRecord -numberOfCalls
+member INCallRecord -participants
+member INCallRecord -unseen
+member INCallRecordTypeOptionsResolutionResult +confirmationRequiredWithCallRecordTypeOptionsToConfirm:
+member INCallRecordTypeOptionsResolutionResult +successWithResolvedCallRecordTypeOptions:
+member INCallRecordTypeResolutionResult +confirmationRequiredWithCallRecordTypeToConfirm:
+member INCallRecordTypeResolutionResult +successWithResolvedCallRecordType:
 member INDateComponentsRange -EKRecurrenceRule
 member INDateComponentsRange -initWithEKRecurrenceRule:
 member INExtension +revenant_handlingProtocolNameForIntent:
@@ -17136,6 +17285,12 @@ member INIntentResolutionResult -revenant_unsupportedReason
 member INIntentResolutionResult -unsupportedReason
 member INIntentResolutionResult -valueToConfirm
 member INIntentResolutionResult -valuesToDisambiguate
+member INIntentResponse +supportsSecureCoding
+member INIntentResponse -copyWithZone:
+member INIntentResponse -encodeWithCoder:
+member INIntentResponse -initWithCoder:
+member INIntentResponse -setUserActivity:
+member INIntentResponse -userActivity
 member INInteraction +deleteAllInteractionsWithCompletion:
 member INInteraction +deleteInteractionsWithGroupIdentifier:completion:
 member INInteraction +deleteInteractionsWithIdentifiers:completion:
@@ -17170,6 +17325,14 @@ member INMessage -reaction
 member INMessage -setReaction:
 member INMessage -setSticker:
 member INMessage -sticker
+member INMessageAttributeOptionsResolutionResult +confirmationRequiredWithMessageAttributeOptionsToConfirm:
+member INMessageAttributeOptionsResolutionResult +confirmationRequiredWithValueToConfirm:
+member INMessageAttributeOptionsResolutionResult +successWithResolvedMessageAttributeOptions:
+member INMessageAttributeOptionsResolutionResult +successWithResolvedValue:
+member INMessageAttributeResolutionResult +confirmationRequiredWithMessageAttributeToConfirm:
+member INMessageAttributeResolutionResult +confirmationRequiredWithValueToConfirm:
+member INMessageAttributeResolutionResult +successWithResolvedMessageAttribute:
+member INMessageAttributeResolutionResult +successWithResolvedValue:
 member INObject +supportsSecureCoding
 member INObject -alternativeSpeakableMatches
 member INObject -copyWithZone:
@@ -17266,6 +17429,9 @@ member INPersonHandle -isEqual:
 member INPersonHandle -label
 member INPersonHandle -type
 member INPersonHandle -value
+member INPersonResolutionResult +confirmationRequiredWithPersonToConfirm:
+member INPersonResolutionResult +disambiguationWithPeopleToDisambiguate:
+member INPersonResolutionResult +successWithResolvedPerson:
 member INPreferences +requestSiriAuthorization:
 member INPreferences +siriAuthorizationStatus
 member INPreferences +siriLanguageCode
@@ -17291,6 +17457,58 @@ member INRideCompletionStatus -isOutstanding
 member INRideCompletionStatus -paymentAmount
 member INRideDriver -initWithHandle:displayName:image:rating:phoneNumber:
 member INRideDriver -initWithHandle:nameComponents:image:rating:phoneNumber:
+member INSearchCallHistoryIntent +supportsSecureCoding
+member INSearchCallHistoryIntent -callCapabilities
+member INSearchCallHistoryIntent -callType
+member INSearchCallHistoryIntent -callTypes
+member INSearchCallHistoryIntent -copyWithZone:
+member INSearchCallHistoryIntent -dateCreated
+member INSearchCallHistoryIntent -encodeWithCoder:
+member INSearchCallHistoryIntent -hash
+member INSearchCallHistoryIntent -init
+member INSearchCallHistoryIntent -initWithCallType:dateCreated:recipient:callCapabilities:
+member INSearchCallHistoryIntent -initWithCoder:
+member INSearchCallHistoryIntent -initWithDateCreated:recipient:callCapabilities:callTypes:unseen:
+member INSearchCallHistoryIntent -isEqual:
+member INSearchCallHistoryIntent -recipient
+member INSearchCallHistoryIntent -unseen
+member INSearchCallHistoryIntentResponse -callRecords
+member INSearchCallHistoryIntentResponse -code
+member INSearchCallHistoryIntentResponse -description
+member INSearchCallHistoryIntentResponse -initWithCode:userActivity:
+member INSearchForMessagesIntent +supportsSecureCoding
+member INSearchForMessagesIntent -attributes
+member INSearchForMessagesIntent -conversationIdentifiers
+member INSearchForMessagesIntent -conversationIdentifiersOperator
+member INSearchForMessagesIntent -copyWithZone:
+member INSearchForMessagesIntent -dateTimeRange
+member INSearchForMessagesIntent -description
+member INSearchForMessagesIntent -encodeWithCoder:
+member INSearchForMessagesIntent -groupNames
+member INSearchForMessagesIntent -groupNamesOperator
+member INSearchForMessagesIntent -hash
+member INSearchForMessagesIntent -identifiers
+member INSearchForMessagesIntent -identifiersOperator
+member INSearchForMessagesIntent -init
+member INSearchForMessagesIntent -initWithCoder:
+member INSearchForMessagesIntent -initWithRecipients:senders:searchTerms:attributes:dateTimeRange:identifiers:notificationIdentifiers:groupNames:
+member INSearchForMessagesIntent -initWithRecipients:senders:searchTerms:attributes:dateTimeRange:identifiers:notificationIdentifiers:speakableGroupNames:
+member INSearchForMessagesIntent -initWithRecipients:senders:searchTerms:attributes:dateTimeRange:identifiers:notificationIdentifiers:speakableGroupNames:conversationIdentifiers:
+member INSearchForMessagesIntent -isEqual:
+member INSearchForMessagesIntent -notificationIdentifiers
+member INSearchForMessagesIntent -notificationIdentifiersOperator
+member INSearchForMessagesIntent -recipients
+member INSearchForMessagesIntent -recipientsOperator
+member INSearchForMessagesIntent -searchTerms
+member INSearchForMessagesIntent -searchTermsOperator
+member INSearchForMessagesIntent -senders
+member INSearchForMessagesIntent -sendersOperator
+member INSearchForMessagesIntent -speakableGroupNames
+member INSearchForMessagesIntent -speakableGroupNamesOperator
+member INSearchForMessagesIntentResponse -code
+member INSearchForMessagesIntentResponse -description
+member INSearchForMessagesIntentResponse -initWithCode:userActivity:
+member INSearchForMessagesIntentResponse -messages
 member INSendMessageIntent +supportsSecureCoding
 member INSendMessageIntent -attachments
 member INSendMessageIntent -content
@@ -17308,6 +17526,27 @@ member INSendMessageIntent -recipients
 member INSendMessageIntent -sender
 member INSendMessageIntent -serviceName
 member INSendMessageIntent -speakableGroupName
+member INSendMessageIntentResponse -code
+member INSendMessageIntentResponse -description
+member INSendMessageIntentResponse -initWithCode:userActivity:
+member INSendMessageIntentResponse -sentMessages
+member INSendMessageRecipientResolutionResult +unsupportedForReason:
+member INSendMessageRecipientResolutionResult -description
+member INSendMessageRecipientResolutionResult -initWithPersonResolutionResult:
+member INSetMessageAttributeIntent +supportsSecureCoding
+member INSetMessageAttributeIntent -attribute
+member INSetMessageAttributeIntent -copyWithZone:
+member INSetMessageAttributeIntent -description
+member INSetMessageAttributeIntent -encodeWithCoder:
+member INSetMessageAttributeIntent -hash
+member INSetMessageAttributeIntent -identifiers
+member INSetMessageAttributeIntent -init
+member INSetMessageAttributeIntent -initWithCoder:
+member INSetMessageAttributeIntent -initWithIdentifiers:attribute:
+member INSetMessageAttributeIntent -isEqual:
+member INSetMessageAttributeIntentResponse -code
+member INSetMessageAttributeIntentResponse -description
+member INSetMessageAttributeIntentResponse -initWithCode:userActivity:
 member INSpeakableString +supportsSecureCoding
 member INSpeakableString -alternativeSpeakableMatches
 member INSpeakableString -copyWithZone:
@@ -17320,6 +17559,9 @@ member INSpeakableString -initWithVocabularyIdentifier:spokenPhrase:pronunciatio
 member INSpeakableString -pronunciationHint
 member INSpeakableString -spokenPhrase
 member INSpeakableString -vocabularyIdentifier
+member INStartCallContactResolutionResult +unsupportedForReason:
+member INStartCallContactResolutionResult -description
+member INStartCallContactResolutionResult -initWithPersonResolutionResult:
 member INStartCallIntent +supportsSecureCoding
 member INStartCallIntent -audioRoute
 member INStartCallIntent -callCapability
@@ -17334,6 +17576,12 @@ member INStartCallIntent -init
 member INStartCallIntent -initWithCallRecordFilter:callRecordToCallBack:audioRoute:destinationType:contacts:callCapability:
 member INStartCallIntent -initWithCoder:
 member INStartCallIntent -isEqual:
+member INStartCallIntentResponse -code
+member INStartCallIntentResponse -description
+member INStartCallIntentResponse -initWithCode:userActivity:
+member INStringResolutionResult +confirmationRequiredWithStringToConfirm:
+member INStringResolutionResult +disambiguationWithStringsToDisambiguate:
+member INStringResolutionResult +successWithResolvedString:
 member INUIAddVoiceShortcutButton -cornerRadius
 member INUIAddVoiceShortcutButton -delegate
 member INUIAddVoiceShortcutButton -initWithStyle:
@@ -25352,21 +25600,28 @@ member PDFDestination -revenant_pageForDictionary:inDocument:
 member PDFDestination -zoom
 member PDFDocument +revenant_documentWithCGPDFDocument:
 member PDFDocument -allowsCopying
+member PDFDocument -beginFindString:withOptions:
+member PDFDocument -cancelFindString
 member PDFDocument -dataRepresentation
+member PDFDocument -delegate
 member PDFDocument -documentAttribute:
 member PDFDocument -documentAttributes
 member PDFDocument -documentURL
 member PDFDocument -findString:fromSelection:withOptions:
 member PDFDocument -findString:withOptions:
+member PDFDocument -indexForPage:
 member PDFDocument -init
 member PDFDocument -initWithData:
 member PDFDocument -initWithURL:
 member PDFDocument -isEncrypted
+member PDFDocument -isFinding
 member PDFDocument -isLocked
 member PDFDocument -outlineRoot
 member PDFDocument -pageAtIndex:
 member PDFDocument -pageCount
 member PDFDocument -revenant_CGPDFDocument
+member PDFDocument -revenant_findOnPage:string:options:token:
+member PDFDocument -revenant_notify:selector:userInfo:
 member PDFDocument -revenant_readAttributes
 member PDFDocument -revenant_setUpWithData:
 member PDFDocument -unlockWithPassword:
@@ -25389,6 +25644,7 @@ member PDFPage -boundsForBox:
 member PDFPage -cropBox
 member PDFPage -dealloc
 member PDFPage -document
+member PDFPage -drawWithBox:toContext:
 member PDFPage -initWithCGPDFPage:document:index:
 member PDFPage -label
 member PDFPage -mediaBox
@@ -25399,6 +25655,7 @@ member PDFPage -revenant_buildAnnotations
 member PDFPage -revenant_textLayout
 member PDFPage -rotation
 member PDFPage -string
+member PDFPage -transformForBox:
 member PDFSelection -addSelection:
 member PDFSelection -addSelections:
 member PDFSelection -attributedString
@@ -25426,26 +25683,114 @@ member PDFSelection -revenant_unionWith:
 member PDFSelection -selectionsByLine
 member PDFSelection -setColor:
 member PDFSelection -string
+member PDFView -annotationsChangedOnPage:
 member PDFView -autoScales
+member PDFView -canGoBack
+member PDFView -canGoForward
+member PDFView -canGoToFirstPage
+member PDFView -canGoToLastPage
+member PDFView -canGoToNextPage
+member PDFView -canGoToPreviousPage
+member PDFView -canZoomIn
+member PDFView -canZoomOut
+member PDFView -clearSelection
+member PDFView -convertPoint:fromPage:
+member PDFView -convertPoint:toPage:
+member PDFView -convertRect:fromPage:
+member PDFView -convertRect:toPage:
+member PDFView -copy:
+member PDFView -currentDestination
 member PDFView -currentPage
-member PDFView -dealloc
+member PDFView -currentSelection
+member PDFView -delegate
 member PDFView -displayBox
 member PDFView -displayDirection
 member PDFView -displayMode
+member PDFView -displaysAsBook
+member PDFView -displaysPageBreaks
+member PDFView -displaysRTL
 member PDFView -document
+member PDFView -documentView
+member PDFView -drawPage:toContext:
+member PDFView -drawPagePost:toContext:
+member PDFView -enablePageShadows:
+member PDFView -gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer:
+member PDFView -goBack:
+member PDFView -goForward:
+member PDFView -goToDestination:
+member PDFView -goToFirstPage:
+member PDFView -goToLastPage:
+member PDFView -goToNextPage:
 member PDFView -goToPage:
-member PDFView -init
+member PDFView -goToPreviousPage:
+member PDFView -goToRect:onPage:
+member PDFView -goToSelection:
+member PDFView -highlightedSelections
+member PDFView -initWithCoder:
+member PDFView -initWithFrame:
+member PDFView -interpolationQuality
+member PDFView -layoutDocumentView
+member PDFView -layoutSubviews
 member PDFView -maxScaleFactor
 member PDFView -minScaleFactor
+member PDFView -pageBreakMargins
+member PDFView -pageForPoint:nearest:
 member PDFView -pageShadowsEnabled
+member PDFView -performAction:
+member PDFView -revenant_applyScale:anchor:
+member PDFView -revenant_clampedOffset:
+member PDFView -revenant_clampedScale:
+member PDFView -revenant_configureShadowOf:
+member PDFView -revenant_continuous
+member PDFView -revenant_crossExtent
+member PDFView -revenant_doubleTapped:
+member PDFView -revenant_ensureFrames
+member PDFView -revenant_ensureHistoryHasOrigin
+member PDFView -revenant_highlightsForPage:
+member PDFView -revenant_insets
+member PDFView -revenant_invalidateLayout
+member PDFView -revenant_layoutPage
+member PDFView -revenant_leadingIndexOfRowWithPage:
+member PDFView -revenant_moveToIndex:
+member PDFView -revenant_navigateToDestination:
+member PDFView -revenant_pageAtDocumentPoint:nearest:
+member PDFView -revenant_pinched:
+member PDFView -revenant_prepareLayout
+member PDFView -revenant_record
+member PDFView -revenant_relayout
+member PDFView -revenant_scrollTo:
+member PDFView -revenant_scrollToIndex:
+member PDFView -revenant_scrolled
+member PDFView -revenant_setCurrentIndex:
+member PDFView -revenant_setUp
+member PDFView -revenant_tapped:
+member PDFView -revenant_transformForPage:
+member PDFView -revenant_updatePageViews
+member PDFView -revenant_vertical
+member PDFView -rowSizeForPage:
 member PDFView -scaleFactor
+member PDFView -scaleFactorForSizeToFit
+member PDFView -scrollSelectionToVisible:
+member PDFView -selectAll:
 member PDFView -setAutoScales:
+member PDFView -setCurrentSelection:
+member PDFView -setCurrentSelection:animate:
 member PDFView -setDisplayBox:
 member PDFView -setDisplayDirection:
 member PDFView -setDisplayMode:
+member PDFView -setDisplaysAsBook:
+member PDFView -setDisplaysPageBreaks:
+member PDFView -setDisplaysRTL:
 member PDFView -setDocument:
-member PDFView -setPageShadowsEnabled:
+member PDFView -setHighlightedSelections:
+member PDFView -setInterpolationQuality:
+member PDFView -setMaxScaleFactor:
+member PDFView -setMinScaleFactor:
+member PDFView -setPageBreakMargins:
 member PDFView -setScaleFactor:
+member PDFView -visiblePages
+member PDFView -zoomIn:
+member PDFView -zoomOut:
 member PHASECardioidDirectivityModelParameters -initWithSubbandParameters:
 member PHASECardioidDirectivityModelParameters -subbandParameters
 member PHASECardioidDirectivityModelSubbandParameters -frequency
@@ -27674,6 +28019,25 @@ member RevenantPDFFontMetrics -dealloc
 member RevenantPDFFontMetrics -descent
 member RevenantPDFFontMetrics -hasWidths
 member RevenantPDFFontMetrics -size
+member RevenantPDFLayout -contentSize
+member RevenantPDFLayout -continuous
+member RevenantPDFLayout -dealloc
+member RevenantPDFLayout -extentOfRow:scale:
+member RevenantPDFLayout -firstPageOfRowAfterPageAtIndex:
+member RevenantPDFLayout -firstPageOfRowBeforePageAtIndex:
+member RevenantPDFLayout -fitScaleForViewSize:currentPage:
+member RevenantPDFLayout -frameOfPageAtIndex:
+member RevenantPDFLayout -initWithPageSizes:count:displayMode:direction:displaysPageBreaks:margins:displaysAsBook:rightToLeft:
+member RevenantPDFLayout -layoutAtScale:currentPage:crossExtent:
+member RevenantPDFLayout -padding
+member RevenantPDFLayout -pageCount
+member RevenantPDFLayout -pageGap
+member RevenantPDFLayout -pageNearestToPoint:
+member RevenantPDFLayout -pagesIntersectingRect:
+member RevenantPDFLayout -pagesSharingRowWithPageAtIndex:
+member RevenantPDFLayout -rowGap
+member RevenantPDFLayout -rowsConsidered:
+member RevenantPDFLayout -vertical
 member RevenantPDFPageText +layoutWithRuns:
 member RevenantPDFPageText -boundsForRange:
 member RevenantPDFPageText -dealloc
@@ -27684,6 +28048,10 @@ member RevenantPDFPageText -runForOffset:
 member RevenantPDFPageText -runs
 member RevenantPDFPageText -string
 member RevenantPDFPageText -substringForRange:
+member RevenantPDFPageView +layerClass
+member RevenantPDFPageView -drawRect:
+member RevenantPDFPageView -initWithFrame:
+member RevenantPDFScrollView -layoutSubviews
 member RevenantPDFSelectionSpan -page
 member RevenantPDFSelectionSpan -range
 member RevenantPDFSelectionSpan -textRange
@@ -27695,6 +28063,7 @@ member RevenantPDFTextRun -revenant_setGlyphRects:count:
 member RevenantPDFTextRun -size
 member RevenantPDFTextRun -x
 member RevenantPDFTextRun -y
+member RevenantPDFTileLayer +fadeDuration
 member RevenantPagination -forwardingTargetForSelector:
 member RevenantPagination -respondsToSelector:
 member RevenantPagination -webViewDidFinishLoad:
@@ -29835,6 +30204,11 @@ member SRSupplementalCategory +supportsSecureCoding
 member SRSupplementalCategory -copyWithZone:
 member SRSupplementalCategory -encodeWithCoder:
 member SRSupplementalCategory -initWithCoder:
+member SSReadingList +defaultReadingList
+member SSReadingList +supportsURL:
+member SSReadingList -addReadingListItemWithURL:title:previewText:error:
+member SSReadingList -init
+member SSReadingList -revenant_init
 member UIAccessibilityCustomAction -actionHandler
 member UIAccessibilityCustomAction -attributedName
 member UIAccessibilityCustomAction -image
@@ -35302,13 +35676,16 @@ member WKWebView -URL
 member WKWebView -allowsBackForwardNavigationGestures
 member WKWebView -allowsLinkPreview
 member WKWebView -backForwardList
+member WKWebView -callAsyncJavaScript:arguments:inFrame:inContentWorld:completionHandler:
 member WKWebView -canGoBack
 member WKWebView -canGoForward
 member WKWebView -configuration
+member WKWebView -createWebArchiveDataWithCompletionHandler:
 member WKWebView -customUserAgent
 member WKWebView -dealloc
 member WKWebView -estimatedProgress
 member WKWebView -evaluateJavaScript:completionHandler:
+member WKWebView -evaluateJavaScript:inFrame:inContentWorld:completionHandler:
 member WKWebView -findInteraction
 member WKWebView -findInteraction:sessionForView:
 member WKWebView -goBack
@@ -35342,8 +35719,11 @@ member WKWebView -revenant_denyNavigation:
 member WKWebView -revenant_documentStartScripts
 member WKWebView -revenant_downloadResponse:request:
 member WKWebView -revenant_emitCommit
+member WKWebView -revenant_ensureBridge
+member WKWebView -revenant_failAsyncCalls:
 member WKWebView -revenant_failLoad:forFrame:
 member WKWebView -revenant_failNavigation:interruptedAt:
+member WKWebView -revenant_finishAsyncCall:
 member WKWebView -revenant_installScripts:
 member WKWebView -revenant_isMainFrameRequest:
 member WKWebView -revenant_itemsReplacingCurrent:
@@ -35457,59 +35837,126 @@ member WKWindowFeatures -width
 member WKWindowFeatures -x
 member WKWindowFeatures -y
 protocol ARAnchorCopying
+protocol ARSCNViewDelegate
+protocol ARSessionDelegate
 protocol ARTrackable
+protocol ASAuthorizationCredential
+protocol ASAuthorizationProvider
+protocol ASAuthorizationPublicKeyCredentialAssertion
+protocol ASAuthorizationPublicKeyCredentialAssertionRequest
+protocol ASAuthorizationPublicKeyCredentialRegistration
+protocol ASAuthorizationPublicKeyCredentialRegistrationRequest
+protocol ASCredentialIdentity
+protocol ASCredentialRequest
+protocol ASWebAuthenticationPresentationContextProviding
+protocol AVAssetWriterDelegate
 protocol AVAsynchronousKeyValueLoading
 protocol AVAudio3DMixing
 protocol AVAudioMixing
+protocol AVAudioStereoMixing
 protocol AVCaptureAudioDataOutputSampleBufferDelegate
+protocol AVCaptureDataOutputSynchronizerDelegate
 protocol AVCaptureMetadataOutputObjectsDelegate
 protocol AVCapturePhotoCaptureDelegate
+protocol AVCaptureSessionControlsDelegate
+protocol AVCaptureSessionDeferredStartDelegate
 protocol AVCaptureVideoDataOutputSampleBufferDelegate
+protocol AVContentKeyRecipient
+protocol AVContentKeySessionDelegate
+protocol AVExternalSyncDeviceDelegate
 protocol AVMetricEventStreamPublisher
 protocol AVMetricEventStreamSubscriber
 protocol AVPictureInPictureControllerDelegate
+protocol AVPlaybackCoordinatorPlaybackControlDelegate
+protocol AVPlayerViewControllerDelegate
 protocol AVQueuedSampleBufferRendering
+protocol AVVideoCompositionInstruction
+protocol AVVideoCompositionValidationHandling
+protocol AXChart
 protocol AXDataAxisDescriptor
 protocol AXMathExpressionProvider
 protocol CAAction
 protocol CAAnimationDelegate
 protocol CALayerDelegate
+protocol CAMediaTiming
 protocol CAMetalDrawable
 protocol CBCentralManagerDelegate
 protocol CBPeripheralDelegate
 protocol CKRecordKeyValueSetting
+protocol CKSyncEngineDelegate
 protocol CKSyncEngineRecordProvider
 protocol CLLocationManagerDelegate
+protocol CNChangeHistoryEventVisitor
 protocol CNKeyDescriptor
+protocol CPBarButtonProviding
+protocol CPInterfaceControllerDelegate
+protocol CPListTemplateDelegate
 protocol CPListTemplateItem
+protocol CPMapTemplateDelegate
+protocol CPSearchTemplateDelegate
+protocol CPSelectableListItem
+protocol CPSessionConfigurationDelegate
+protocol CSSearchableIndexDelegate
+protocol CTTelephonyNetworkInfoDelegate
+protocol CXCallDirectoryExtensionContextDelegate
+protocol CXCallObserverDelegate
 protocol CXProviderDelegate
+protocol GCAxisElementName
+protocol GCButtonElementName
 protocol GCDevice
+protocol GCDevicePhysicalInput
+protocol GCDevicePhysicalInputState
+protocol GCDirectionPadElementName
+protocol GCPhysicalInputElement
+protocol GCPhysicalInputElementName
+protocol GCPhysicalInputSource
+protocol GCSwitchElementName
 protocol GKRandom
+protocol HMAccessoryDelegate
 protocol HMHomeDelegate
 protocol HMHomeManagerDelegate
 protocol INEditMessageIntentHandling
+protocol INIntentHandlerProviding
 protocol INSpeakable
+protocol INUIAddVoiceShortcutButtonDelegate
+protocol INUIAddVoiceShortcutViewControllerDelegate
+protocol INUIEditVoiceShortcutViewControllerDelegate
 protocol INUIHostedViewControlling
 protocol INUnsendMessagesIntentHandling
 protocol JSExport
+protocol LAEnvironmentObserver
 protocol MDLAssetResolver
+protocol MDLComponent
 protocol MDLMeshBuffer
 protocol MDLMeshBufferAllocator
 protocol MDLMeshBufferZone
+protocol MDLNamed
 protocol MDLObjectContainerComponent
 protocol MDLTransformComponent
 protocol MDLTransformOp
 protocol MKAnnotation
+protocol MKLocalSearchCompleterDelegate
+protocol MKLookAroundViewControllerDelegate
+protocol MKMapItemDetailViewControllerDelegate
 protocol MKOverlay
 protocol MLBatchProvider
 protocol MLComputeDeviceProtocol
 protocol MLFeatureProvider
 protocol MLWritable
+protocol MPPlayableContentDataSource
+protocol MPPlayableContentDelegate
+protocol MPSCNNBatchNormalizationDataSource
 protocol MPSImageAllocator
 protocol MPSNDArrayAllocator
+protocol MTKViewDelegate
 protocol MTL4BinaryFunction
+protocol MTL4CommandBuffer
 protocol MTL4CommandQueue
+protocol MTL4RenderCommandEncoder
+protocol MTLAccelerationStructure
+protocol MTLAccelerationStructureCommandEncoder
 protocol MTLAllocation
+protocol MTLArgumentEncoder
 protocol MTLBinaryArchive
 protocol MTLBinding
 protocol MTLBlitCommandEncoder
@@ -35517,28 +35964,50 @@ protocol MTLBuffer
 protocol MTLBufferBinding
 protocol MTLCaptureScope
 protocol MTLCommandBuffer
+protocol MTLCommandBufferEncoderInfo
+protocol MTLCommandEncoder
 protocol MTLCommandQueue
 protocol MTLComputeCommandEncoder
 protocol MTLComputePipelineState
+protocol MTLCounterSampleBuffer
+protocol MTLCounterSet
 protocol MTLDepthStencilState
 protocol MTLDevice
 protocol MTLDrawable
+protocol MTLDynamicLibrary
+protocol MTLEvent
+protocol MTLFence
 protocol MTLFunction
+protocol MTLFunctionHandle
 protocol MTLFunctionLog
 protocol MTLFunctionLogDebugLocation
+protocol MTLFunctionStitchingAttribute
+protocol MTLFunctionStitchingNode
 protocol MTLHeap
+protocol MTLIOScratchBufferAllocator
 protocol MTLLibrary
 protocol MTLLogContainer
+protocol MTLLogState
 protocol MTLObjectPayloadBinding
+protocol MTLRasterizationRateMap
 protocol MTLRenderCommandEncoder
 protocol MTLRenderPipelineState
+protocol MTLResidencySet
 protocol MTLResource
+protocol MTLResourceStateCommandEncoder
 protocol MTLSamplerState
 protocol MTLSharedEvent
 protocol MTLTexture
 protocol MTLTextureBinding
 protocol MTLThreadgroupBinding
+protocol MTLVisibleFunctionTable
+protocol MXMetricManagerSubscriber
+protocol NFCNDEFReaderSessionDelegate
+protocol NFCNDEFTag
 protocol NFCReaderSession
+protocol NFCReaderSessionDelegate
+protocol NFCTag
+protocol NFCVASReaderSessionDelegate
 protocol NSCoding
 protocol NSCollectionLayoutContainer
 protocol NSCollectionLayoutEnvironment
@@ -35551,14 +36020,22 @@ protocol NSMutableCopying
 protocol NSSecureCoding
 protocol NSStreamDelegate
 protocol NSTextAttachmentContainer
+protocol NSTextAttachmentLayout
+protocol NSTextContentManagerDelegate
+protocol NSTextContentStorageDelegate
+protocol NSTextElementProvider
 protocol NSTextLocation
+protocol NSTextSelectionDataSource
 protocol NSTextStorageDelegate
+protocol NSTextStorageObserving
 protocol NSURLConnectionDataDelegate
+protocol NSURLConnectionDelegate
 protocol NSURLProtocolClient
 protocol NSURLSessionDataDelegate
 protocol NSURLSessionDelegate
 protocol NSURLSessionDownloadDelegate
 protocol NSURLSessionTaskDelegate
+protocol NSUserActivityDelegate
 protocol NSXPCProxyCreating
 protocol OS_nw_browser
 protocol OS_nw_connection
@@ -35573,15 +36050,20 @@ protocol OS_sec_protocol_metadata
 protocol OS_sec_protocol_options
 protocol OS_sec_trust
 protocol PDFDocumentDelegate
+protocol PDFViewDelegate
+protocol PHPhotoLibraryAvailabilityObserver
 protocol PHPhotoLibraryChangeObserver
 protocol PHPickerViewControllerDelegate
+protocol PKAddPaymentPassViewControllerDelegate
 protocol PKPushRegistryDelegate
+protocol RPScreenRecorderDelegate
 protocol RevenantARTrackerDelegate
 protocol RevenantBackdropClient
 protocol RevenantBrailleMapPinStore
 protocol RevenantDOMDocument
 protocol RevenantDOMEvent
 protocol RevenantDOMInputElement
+protocol RevenantEngineArchive
 protocol RevenantEngineDataSource
 protocol RevenantEngineEvent
 protocol RevenantEngineFrame
@@ -35612,8 +36094,14 @@ protocol RevenantVoiceServicesSpeaking
 protocol RevenantWebKitScriptHost
 protocol RevenantWebView
 protocol SCNAnimatable
+protocol SCNPhysicsContactDelegate
 protocol SCNSceneRenderer
 protocol SFSafariViewControllerDelegate
+protocol SKSceneDelegate
+protocol SKWarpable
+protocol SRSensorReaderDelegate
+protocol TCControl
+protocol TCControlLayout
 protocol UIActionSheetDelegate
 protocol UIActivityItemSource
 protocol UIActivityItemsConfigurationProviding
@@ -35621,9 +36109,14 @@ protocol UIActivityItemsConfigurationReading
 protocol UIAlertViewDelegate
 protocol UIAppearance
 protocol UICGFloatTraitDefinition
+protocol UICalendarSelectionMultiDateDelegate
+protocol UICalendarSelectionSingleDateDelegate
+protocol UICalendarViewDelegate
 protocol UICollectionViewDataSource
 protocol UICollectionViewDelegate
+protocol UICollectionViewDragDelegate
 protocol UICollectionViewDropCoordinator
+protocol UICollectionViewDropDelegate
 protocol UICollectionViewDropItem
 protocol UICollectionViewDropPlaceholderContext
 protocol UIColorPickerViewControllerDelegate
@@ -35635,29 +36128,51 @@ protocol UIContentView
 protocol UIContextMenuInteractionAnimating
 protocol UIContextMenuInteractionDelegate
 protocol UICoordinateSpace
+protocol UIDataSourceTranslating
 protocol UIDocumentBrowserViewControllerDelegate
+protocol UIDocumentMenuDelegate
+protocol UIDragAnimating
+protocol UIDragDropSession
 protocol UIDragInteractionDelegate
 protocol UIDragSession
 protocol UIDropInteractionDelegate
 protocol UIDropSession
 protocol UIDynamicItem
+protocol UIEditMenuInteractionAnimating
+protocol UIEditMenuInteractionDelegate
 protocol UIFindInteractionDelegate
+protocol UIFocusEnvironment
 protocol UIFocusItem
+protocol UIFocusItemContainer
+protocol UIFocusItemScrollableContainer
+protocol UIFontPickerViewControllerDelegate
 protocol UIGestureRecognizerDelegate
+protocol UIHoverEffect
 protocol UIImagePickerControllerDelegate
+protocol UIIndirectScribbleInteractionDelegate
 protocol UIInteraction
+protocol UIItemProviderPresentationSizeProviding
 protocol UIKeyInput
+protocol UILargeContentViewerInteractionDelegate
 protocol UILargeContentViewerItem
 protocol UILayoutSupport
+protocol UILetterformAwareAdjusting
 protocol UIMenuBuilder
 protocol UIMenuLeaf
 protocol UIMutableTraits
 protocol UINSIntegerTraitDefinition
 protocol UINavigationControllerDelegate
 protocol UIObjectTraitDefinition
+protocol UIPageControlProgressDelegate
+protocol UIPageControlTimerProgressDelegate
 protocol UIPasteConfigurationSupporting
+protocol UIPencilInteractionDelegate
+protocol UIPointerInteractionDelegate
 protocol UIPopoverControllerDelegate
+protocol UIPopoverPresentationControllerSourceItem
 protocol UIPreviewActionItem
+protocol UISceneDelegate
+protocol UIScribbleInteractionDelegate
 protocol UIScrollViewDelegate
 protocol UISearchBarDelegate
 protocol UISearchSuggestion
@@ -35667,15 +36182,26 @@ protocol UISplitViewControllerDelegate
 protocol UIStateRestoring
 protocol UITableViewDataSource
 protocol UITableViewDelegate
+protocol UITableViewDragDelegate
 protocol UITableViewDropCoordinator
+protocol UITableViewDropDelegate
 protocol UITableViewDropItem
 protocol UITableViewDropPlaceholderContext
 protocol UITextDocumentProxy
 protocol UITextDragRequest
+protocol UITextDraggable
 protocol UITextDropRequest
+protocol UITextDroppable
+protocol UITextFormattingCoordinatorDelegate
 protocol UITextInput
 protocol UITextInputTraits
+protocol UITextInteractionDelegate
+protocol UITextPasteConfigurationSupporting
+protocol UITextSearching
+protocol UITextSelectionHandleView
+protocol UITextSelectionHighlightView
 protocol UITimingCurveProvider
+protocol UIToolTipInteractionDelegate
 protocol UITraitChangeObservable
 protocol UITraitChangeRegistration
 protocol UITraitDefinition
@@ -35686,13 +36212,23 @@ protocol UIViewControllerAnimatedTransitioning
 protocol UIViewControllerContextTransitioning
 protocol UIViewControllerInteractiveTransitioning
 protocol UIViewControllerPreviewing
+protocol UIViewControllerPreviewingDelegate
 protocol UIViewControllerTransitionCoordinator
 protocol UIViewControllerTransitionCoordinatorContext
 protocol UIViewControllerTransitioningDelegate
 protocol UIWebViewDelegate
 protocol UNUserNotificationCenterDelegate
+protocol VNDocumentCameraViewControllerDelegate
+protocol VNFaceObservationAccepting
+protocol VNRequestProgressProviding
+protocol VNRequestRevisionProviding
 protocol VTFrameProcessorConfiguration
+protocol VTFrameProcessorParameters
+protocol WKURLSchemeHandler
 protocol WKURLSchemeTask
+protocol WKWebExtensionControllerDelegate
+protocol WKWebExtensionTab
+protocol WKWebExtensionWindow
 protocol_member ARAnchorCopying -initWithAnchor:
 protocol_member ARTrackable -isTracked
 protocol_member AVAsynchronousKeyValueLoading -loadValuesAsynchronouslyForKeys:completionHandler:
@@ -36736,17 +37272,30 @@ type ICDownloadOption
 type ICScannerFunctionalUnitType
 type INCallAudioRoute
 type INCallCapability
+type INCallCapabilityOptions
 type INCallDestinationType
+type INCallRecordType
+type INCallRecordTypeOptions
+type INConditionalOperator
 type INIntentHandlingStatus
 type INInteractionDirection
+type INMessageAttribute
+type INMessageAttributeOptions
 type INMessageType
 type INOutgoingMessageType
 type INPaymentMethodType
 type INPersonHandleType
 type INPersonSuggestionType
 type INRideFeedbackTypeOptions
+type INSearchCallHistoryIntentResponseCode
+type INSearchForMessagesIntentResponseCode
+type INSendMessageIntentResponseCode
+type INSendMessageRecipientUnsupportedReason
+type INSetMessageAttributeIntentResponseCode
 type INShortcutAvailabilityOptions
 type INSiriAuthorizationStatus
+type INStartCallContactUnsupportedReason
+type INStartCallIntentResponseCode
 type INUIAddVoiceShortcutButtonStyle
 type INUIHostedViewContext
 type INUIInteractiveBehavior
@@ -37011,6 +37560,7 @@ type PDFBorderStyle
 type PDFDisplayBox
 type PDFDisplayDirection
 type PDFDisplayMode
+type PDFInterpolationQuality
 type PHAccessLevel
 type PHAssetCollectionSubtype
 type PHAssetCollectionType

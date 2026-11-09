@@ -11,8 +11,13 @@ BOOL RevenantWebEngineLoad(NSError **error);
 void *RevenantWebEngineSymbol(const char *name);
 Class RevenantWebEngineClass(NSString *name);
 
+@protocol RevenantEngineArchive <NSObject>
+@property (nonatomic, readonly) NSData *data;
+@end
+
 @protocol RevenantEngineDataSource <NSObject>
 @property (nonatomic, readonly) NSURLRequest *request;
+@property (nonatomic, readonly) id<RevenantEngineArchive> webArchive;
 @end
 
 @protocol RevenantEngineFrame <NSObject>
