@@ -49,9 +49,20 @@ function failures(opt)
         table.insert(found, "a folder without a manifest takes the bundle id of its name")
     end
 
+    local named = os.getenv("REVENANT_PREBUILT_ONLY")
+    os.setenv("REVENANT_PREBUILT_ONLY", nil)
     local env = isolate.build_environment({folder = "/f", cache = "/k", checkout = "/w", engine = "/e", swiftui = "/s", backports = "/b", real = ""})
-    if env.RN_EXPO_REAL ~= nil or env.RN_SRC ~= "/f/build/rn-src" or env.REVENANT_CACHE ~= "/k" or env.REVENANT_PREBUILT_ONLY ~= "1" then
+    os.setenv("REVENANT_PREBUILT_ONLY", "llvm,swift,ld64")
+    local passed = isolate.build_environment({folder = "/f"}).REVENANT_PREBUILT_ONLY
+    os.setenv("REVENANT_PREBUILT_ONLY", named)
+    if env.RN_EXPO_REAL ~= nil or env.RN_SRC ~= "/f/build/rn-src" or env.REVENANT_CACHE ~= "/k" then
         table.insert(found, "the environment must name the folder's own sources and cache, and an empty --real must set no RN_EXPO_REAL")
+    end
+    if env.REVENANT_PREBUILT_ONLY ~= "1" then
+        table.insert(found, "without REVENANT_PREBUILT_ONLY in the process the environment must limit the build to prebuilt packages")
+    end
+    if passed ~= "llvm,swift,ld64" then
+        table.insert(found, "the packages that REVENANT_PREBUILT_ONLY names in the process must reach the environment")
     end
     if isolate.build_environment({folder = "/f", real = "expo-battery"}).RN_EXPO_REAL ~= "expo-battery" then
         table.insert(found, "--real must reach RN_EXPO_REAL")
