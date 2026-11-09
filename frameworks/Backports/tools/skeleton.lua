@@ -252,6 +252,14 @@ local function storage_type(text)
     return plain(out)
 end
 
+local function typedef_type(text)
+    local out = storage_type(text)
+    out = string.gsub(out, "%f[%w_]%u[%u%d_]*_EXTERN%f[^%w_]", "")
+    out = string.gsub(out, "%f[%w_]%u[%u%d_]*_EXPORT%f[^%w_]", "")
+    out = string.gsub(out, "%f[%w_]extern%f[^%w_]", "")
+    return trim(string.gsub(out, "%s+", " "))
+end
+
 local function group_close(text, open)
     local depth = 0
     for index = open, #text do
@@ -571,7 +579,7 @@ local function objc_source(model, umbrella, alias)
         table.insert(lines, string.format("static Protocol *revenant_protocols[%d] __attribute__((used));", #model.protocols))
     end
     for _, global in ipairs(model.globals) do
-        table.insert(lines, string.format("typedef %s;", declarator(storage_type(global.type), "revenant_type_" .. global.name)))
+        table.insert(lines, string.format("typedef %s;", declarator(typedef_type(global.type), "revenant_type_" .. global.name)))
         table.insert(lines, string.format('__attribute__((weak, visibility("default"))) __typeof_unqual__(revenant_type_%s) revenant_global_%s __asm__(%s) = {0};',
             global.name, global.name, quoted("_" .. global.name)))
         if global.fallback then
