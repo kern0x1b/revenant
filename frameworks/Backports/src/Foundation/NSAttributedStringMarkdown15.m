@@ -5,6 +5,12 @@
 
 @implementation NSAttributedStringMarkdownParsingOptions
 
+@synthesize allowsExtendedAttributes = _allowsExtendedAttributes;
+@synthesize interpretedSyntax = _interpretedSyntax;
+@synthesize failurePolicy = _failurePolicy;
+@synthesize languageCode = _languageCode;
+@synthesize appliesSourcePositionAttributes = _appliesSourcePositionAttributes;
+
 - (instancetype)init
 {
     return [super init];

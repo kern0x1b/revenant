@@ -371,6 +371,7 @@ class CLVisit
 class CMAbsoluteAltitudeData
 class CMAltimeter
 class CMAltitudeData
+class CMDeviceMotion
 class CMMotionActivity
 class CMMotionActivityManager
 class CMPedometer
@@ -1857,6 +1858,7 @@ class RevenantMetalTypeTree
 class RevenantMetricSnapshot
 class RevenantMetricValue
 class RevenantMonitoredRequest
+class RevenantMotionHeadingInstaller
 class RevenantMovement
 class RevenantNWAdvertiseDescriptor
 class RevenantNWBrowseDescriptor
@@ -4184,7 +4186,6 @@ enum_type MTLStencilOperation
 enum_type MTLTensorDataType
 enum_type MTLVertexStepFunction
 enum_type NFCReaderError
-enum_type NSAttributedStringMarkdownInterpretedSyntax
 enum_type NSGrammaticalNumber
 enum_type NSGrammaticalPartOfSpeech
 enum_type NSLayoutAttribute
@@ -4708,6 +4709,7 @@ function RevenantMetalSynchroniseSurfaceTextures
 function RevenantMetalTexelBytes
 function RevenantMetalTriangleEdges
 function RevenantMetalVertexFormat
+function RevenantMotionHeadingDegrees
 function RevenantMusicKitSignES256
 function RevenantNDEFRecordDecode
 function RevenantNDEFRecordEncode
@@ -4798,6 +4800,7 @@ function RevenantTLSEngineWantsWrite
 function RevenantTLSEngineWrite
 function RevenantTLSOptionsCreate
 function RevenantTLSOptionsHasServerCredentials
+function RevenantTagDeviceMotion
 function RevenantTagForChannelCount
 function RevenantTagFromName
 function RevenantTargetAllows
@@ -14164,6 +14167,7 @@ member CMAltitudeData -encodeWithCoder:
 member CMAltitudeData -initWithCoder:
 member CMAltitudeData -pressure
 member CMAltitudeData -relativeAltitude
+member CMDeviceMotion -heading
 member CMMotionActivity +supportsSecureCoding
 member CMMotionActivity -automotive
 member CMMotionActivity -confidence
@@ -22786,10 +22790,15 @@ member NSAttributedString -initWithFormat:options:locale:context:
 member NSAttributedString -initWithFormat:options:locale:context:arguments:
 member NSAttributedString -initWithMarkdown:options:baseURL:error:
 member NSAttributedString -initWithMarkdownString:options:baseURL:error:
+member NSAttributedStringMarkdownParsingOptions -allowsExtendedAttributes
+member NSAttributedStringMarkdownParsingOptions -appliesSourcePositionAttributes
 member NSAttributedStringMarkdownParsingOptions -copyWithZone:
 member NSAttributedStringMarkdownParsingOptions -encodeWithCoder:
+member NSAttributedStringMarkdownParsingOptions -failurePolicy
 member NSAttributedStringMarkdownParsingOptions -init
 member NSAttributedStringMarkdownParsingOptions -initWithCoder:
+member NSAttributedStringMarkdownParsingOptions -interpretedSyntax
+member NSAttributedStringMarkdownParsingOptions -languageCode
 member NSAttributedStringMarkdownParsingOptions -supportsSecureCoding
 member NSAttributedStringMarkdownSourcePosition +supportsSecureCoding
 member NSAttributedStringMarkdownSourcePosition -copyWithZone:
@@ -27576,6 +27585,7 @@ member RevenantMetricValue +decodableClasses
 member RevenantMetricValue +dictionaryOf:
 member RevenantMetricValue +jsonOf:
 member RevenantMetricValue +propertyNamesOf:
+member RevenantMotionHeadingInstaller +load
 member RevenantMovement -autoscroll
 member RevenantMovement -cancelled
 member RevenantMovement -current
@@ -36908,6 +36918,8 @@ type NSAttributedStringDocumentAttributeKey
 type NSAttributedStringDocumentReadingOptionKey
 type NSAttributedStringDocumentType
 type NSAttributedStringFormattingOptions
+type NSAttributedStringMarkdownInterpretedSyntax
+type NSAttributedStringMarkdownParsingFailurePolicy
 type NSBatchDeleteRequestResultType
 type NSBatchInsertRequestResultType
 type NSBatchUpdateRequestResultType
