@@ -63,7 +63,7 @@ NSSet *revenant_intents_allowed_classes(void)
                                  [NSDateInterval class], [NSURL class], [NSUUID class], [NSError class],
                                  [NSLocale class], [NSRegularExpression class], nil];
         for (NSString *name in @[@"CLPlacemark", @"CNContact", @"MKMapItem", @"INShortcut",
-                                 @"INVoiceShortcut", @"AXBrailleTable", @"AXRequest"]) {
+                                 @"INVoiceShortcut", @"AXBrailleTable", @"AXRequest", @"NSUserActivity"]) {
             Class named = NSClassFromString(name);
             if (named) {
                 [classes addObject:named];
@@ -173,8 +173,12 @@ void revenant_intents_copy(id copy, id object)
             int kind = revenant_intents_kind(ivars[index], &size);
             if (kind == RevenantIntentsObject) {
                 id value = object_getIvar(object, ivars[index]);
-                id owned = (value && revenant_intents_ivar_is_copy(owner, ivar_getName(ivars[index])) &&
-                            [value respondsToSelector:@selector(copy)]) ? [value copy] : value;
+                id owned = value;
+                if (value && revenant_intents_ivar_is_copy(owner, ivar_getName(ivars[index])) &&
+                    [value conformsToProtocol:@protocol(NSCopying)]) {
+                    const char *type = ivar_getTypeEncoding(ivars[index]);
+                    owned = type && strncmp(type, "@\"NSMutable", 11) == 0 ? [value mutableCopy] : [value copy];
+                }
                 object_setIvar(copy, ivars[index], owned);
             } else if (kind == RevenantIntentsValue && size > 0) {
                 NSUInteger offset = ivar_getOffset(ivars[index]);
@@ -184,4 +188,47 @@ void revenant_intents_copy(id copy, id object)
         }
         free(ivars);
     }
+}
+
+BOOL revenant_intents_equal(id object, id other, Class owner)
+{
+    unsigned count = 0;
+    Ivar *ivars = class_copyIvarList(owner, &count);
+    BOOL equal = YES;
+    for (unsigned index = 0; index < count && equal; index++) {
+        NSUInteger size = 0;
+        int kind = revenant_intents_kind(ivars[index], &size);
+        if (kind == RevenantIntentsObject) {
+            id left = object_getIvar(object, ivars[index]);
+            id right = object_getIvar(other, ivars[index]);
+            equal = left == right || [left isEqual:right];
+        } else if (kind == RevenantIntentsValue && size > 0) {
+            NSUInteger offset = ivar_getOffset(ivars[index]);
+            equal = memcmp((const char *)(__bridge void *)object + offset,
+                           (const char *)(__bridge void *)other + offset, size) == 0;
+        }
+    }
+    free(ivars);
+    return equal;
+}
+
+NSUInteger revenant_intents_hash(id object, Class owner)
+{
+    unsigned count = 0;
+    Ivar *ivars = class_copyIvarList(owner, &count);
+    NSUInteger hash = 5381;
+    for (unsigned index = 0; index < count; index++) {
+        NSUInteger size = 0;
+        int kind = revenant_intents_kind(ivars[index], &size);
+        if (kind == RevenantIntentsObject) {
+            hash = hash * 33 + [object_getIvar(object, ivars[index]) hash];
+        } else if (kind == RevenantIntentsValue && size > 0) {
+            const unsigned char *bytes = (const unsigned char *)(__bridge void *)object + ivar_getOffset(ivars[index]);
+            for (NSUInteger offset = 0; offset < size; offset++) {
+                hash = hash * 33 + bytes[offset];
+            }
+        }
+    }
+    free(ivars);
+    return hash;
 }

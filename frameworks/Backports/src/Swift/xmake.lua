@@ -166,6 +166,7 @@ framework_overlay("SceneKit")
 framework_overlay("Vision")
 framework_overlay("NaturalLanguage")
 framework_overlay("PassKit")
+framework_overlay("Intents")
 
 local function createml(name, folder, deps, flags)
     swift_target(name, "static")
