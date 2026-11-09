@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import "RevenantMarkdownParser.h"
 
 #pragma mark - the options class
 
@@ -56,202 +57,42 @@
 
 @end
 
-#pragma mark - the document
+#pragma mark - the emitter
 
-typedef NS_ENUM(NSInteger, RevenantMarkdownKind) {
-    RevenantMarkdownParagraph,
-    RevenantMarkdownHeader,
-    RevenantMarkdownCodeBlock,
-    RevenantMarkdownThematicBreak,
-    RevenantMarkdownBlockQuote,
-    RevenantMarkdownList,
-    RevenantMarkdownTable,
-};
+static NSString *const RevenantMarkdownLinkKey = @"NSLink";
+static NSString *const RevenantMarkdownAlternateKey = @"NSAlternateDescription";
+static NSString *const RevenantMarkdownDelimiterKey = @"NSListItemDelimiter";
+static const NSUInteger RevenantMarkdownInlineHTML = 1 << 8;
+static const NSUInteger RevenantMarkdownBlockHTML = 1 << 9;
 
-typedef struct {
-    NSUInteger start;
-    NSUInteger end;
-    NSUInteger indent;
-    RevenantMarkdownKind kind;
-    NSInteger level;
-    BOOL ordered;
-    NSString *language;
-    NSPresentationIntent *intent;
-    NSMutableArray *children;
-} RevenantMarkdownBlock;
-
-static BOOL RevenantMarkdownBlank(NSString *line)
-{
-    for (NSUInteger i = 0; i < line.length; i++)
-        if (![[NSCharacterSet whitespaceAndNewlineCharacterSet] characterIsMember:[line characterAtIndex:i]])
-            return NO;
-    return YES;
-}
-
-static NSUInteger RevenantMarkdownIndent(NSString *line)
-{
-    NSUInteger columns = 0, limit = line.length;
-    for (NSUInteger i = 0; i < limit; i++) {
-        unichar c = [line characterAtIndex:i];
-        if (c == ' ')
-            columns++;
-        else if (c == '\t')
-            columns += 4 - columns % 4;
-        else
-            return columns;
-    }
-    return columns;
-}
-
-static NSString *RevenantMarkdownTrimmed(NSString *line)
-{
-    return [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-}
-
-static BOOL RevenantMarkdownThematic(NSString *trimmed)
-{
-    if (trimmed.length < 3)
-        return NO;
-    unichar first = [trimmed characterAtIndex:0];
-    if (first != '*' && first != '-' && first != '_')
-        return NO;
-    for (NSUInteger i = 0; i < trimmed.length; i++) {
-        unichar c = [trimmed characterAtIndex:i];
-        if (c != first && c != ' ' && c != '\t')
-            return NO;
-    }
-    return YES;
-}
-
-static BOOL RevenantMarkdownFence(NSString *trimmed, unichar *fence, NSUInteger *count, NSString **info)
-{
-    NSUInteger length = trimmed.length, run = 0;
-    unichar first = length ? [trimmed characterAtIndex:0] : 0;
-    if (first != '`' && first != '~')
-        return NO;
-    while (run < length && [trimmed characterAtIndex:run] == first)
-        run++;
-    if (run < 3)
-        return NO;
-    if (fence)
-        *fence = first;
-    if (count)
-        *count = run;
-    if (info)
-        *info = [[trimmed substringFromIndex:run] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    return YES;
-}
-
-static NSInteger RevenantMarkdownHeading(NSString *trimmed, NSString **text)
-{
-    NSUInteger level = 0, length = trimmed.length, start;
-    while (level < length && level < 6 && [trimmed characterAtIndex:level] == '#')
-        level++;
-    if (!level || level >= length)
-        return 0;
-    if ([trimmed characterAtIndex:level] != ' ' && [trimmed characterAtIndex:level] != '\t')
-        return 0;
-    start = level;
-    while (start < length && [trimmed characterAtIndex:start] == ' ')
-        start++;
-    NSString *tail = [trimmed substringFromIndex:start];
-    NSMutableString *body = [tail mutableCopy];
-    while (body.length && [body characterAtIndex:body.length - 1] == '#')
-        [body deleteCharactersInRange:NSMakeRange(body.length - 1, 1)];
-    if (text)
-        *text = [body stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    return (NSInteger)level;
-}
-
-static BOOL RevenantMarkdownBullet(NSString *trimmed, BOOL *ordered, NSUInteger *width)
-{
-    unichar first = trimmed.length ? [trimmed characterAtIndex:0] : 0;
-    if ((first == '-' || first == '*' || first == '+') && trimmed.length > 1
-        && ([trimmed characterAtIndex:1] == ' ' || [trimmed characterAtIndex:1] == '\t')) {
-        *ordered = NO;
-        *width = 2;
-        return YES;
-    }
-    NSUInteger digits = 0;
-    while (digits < trimmed.length && [trimmed characterAtIndex:digits] >= '0' && [trimmed characterAtIndex:digits] <= '9')
-        digits++;
-    if (digits && digits + 1 < trimmed.length && ([trimmed characterAtIndex:digits] == '.' || [trimmed characterAtIndex:digits] == ')')
-        && ([trimmed characterAtIndex:digits + 1] == ' ' || [trimmed characterAtIndex:digits + 1] == '\t')) {
-        *ordered = YES;
-        *width = digits + 2;
-        return YES;
-    }
-    return NO;
-}
-
-static BOOL RevenantMarkdownDivider(NSString *trimmed)
-{
-    if (trimmed.length < 1 || [trimmed characterAtIndex:0] != '|')
-        return NO;
-    NSUInteger pipes = 0;
-    for (NSUInteger i = 0; i < trimmed.length; i++) {
-        unichar c = [trimmed characterAtIndex:i];
-        if (c == '|')
-            pipes++;
-        else if (c != '-' && c != ':' && c != ' ' && c != '\t')
-            return NO;
-    }
-    return pipes >= 2;
-}
-
-static NSArray *RevenantMarkdownCells(NSString *line, NSArray **alignments)
-{
-    NSString *trimmed = [line stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    NSMutableArray *cells = [NSMutableArray array];
-    NSMutableArray *found = [NSMutableArray array];
-    if ([trimmed hasPrefix:@"|"])
-        trimmed = [trimmed substringFromIndex:1];
-    if ([trimmed hasSuffix:@"|"])
-        trimmed = [trimmed substringToIndex:trimmed.length - 1];
-    NSMutableString *cell = [NSMutableString string];
-    for (NSUInteger i = 0; i < trimmed.length; i++) {
-        unichar c = [trimmed characterAtIndex:i];
-        if (c == '\\' && i + 1 < trimmed.length) {
-            [cell appendFormat:@"%C", [trimmed characterAtIndex:i + 1]];
-            i++;
-            continue;
-        }
-        if (c == '|') {
-            NSString *finished = RevenantMarkdownTrimmed(cell);
-            [cells addObject:finished];
-            [cell setString:@""];
-            continue;
-        }
-        [cell appendFormat:@"%C", c];
-    }
-    {
-        NSString *last = RevenantMarkdownTrimmed(cell);
-        [cells addObject:last];
-    }
-    if (alignments) {
-        for (NSString *one in cells) {
-            BOOL left = [one hasPrefix:@":"], right = [one hasSuffix:@":"];
-            [found addObject:@(left && right ? 1 : right ? 2 : 0)];
-        }
-        *alignments = found;
-    }
-    return cells;
-}
-
-#pragma mark - the parser
-
-@interface RevenantMarkdownParser : NSObject {
+@interface RevenantMarkdownEmitter : NSObject {
     NSAttributedStringMarkdownParsingOptions *_options;
     NSURL *_baseURL;
     NSInteger _identity;
     NSMutableAttributedString *_result;
     NSString *_language;
+    NSUInteger _mask;
 }
 - (id)initWithOptions:(NSAttributedStringMarkdownParsingOptions *)options baseURL:(NSURL *)baseURL;
-- (NSAttributedString *)parse:(NSString *)markdown;
+- (NSAttributedString *)emit:(NSString *)markdown;
 @end
 
-@implementation RevenantMarkdownParser
+static NSString *RevenantMarkdownCString(NSString *text)
+{
+    return text.length && [text characterAtIndex:0] == 0xFEFF ? [text substringFromIndex:1] : text;
+}
+
+static BOOL RevenantMarkdownPlatformEncodesURLs(void)
+{
+    static BOOL encodes;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        encodes = [NSURL URLWithString:@"a b"] != nil;
+    });
+    return encodes;
+}
+
+@implementation RevenantMarkdownEmitter
 
 - (id)initWithOptions:(NSAttributedStringMarkdownParsingOptions *)options baseURL:(NSURL *)baseURL
 {
@@ -274,575 +115,210 @@ static NSArray *RevenantMarkdownCells(NSString *line, NSArray **alignments)
     return _options.interpretedSyntax == NSAttributedStringMarkdownInterpretedSyntaxFull;
 }
 
-- (BOOL)keepsSourceSpacing
+- (NSURL *)resolve:(NSString *)text
 {
-    return _options.interpretedSyntax == NSAttributedStringMarkdownInterpretedSyntaxInlineOnlyPreservingWhitespace;
+    return _baseURL ? [NSURL URLWithString:text relativeToURL:_baseURL] : [NSURL URLWithString:text];
 }
-
-- (NSDictionary *)blockAttributes:(NSPresentationIntent *)intent span:(NSUInteger)span extra:(NSDictionary *)extra
-{
-    NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
-    if ([self carriesIntents] && intent)
-        attributes[NSPresentationIntentAttributeName] = intent;
-    if (span)
-        attributes[NSInlinePresentationIntentAttributeName] = @(span);
-    if (extra)
-        [attributes addEntriesFromDictionary:extra];
-    if (_language)
-        attributes[NSLanguageIdentifierAttributeName] = _language;
-    return attributes;
-}
-
-#pragma mark the span spans
-
-static NSString *const RevenantMarkdownLinkKey = @"NSLink";
 
 - (NSURL *)urlFor:(NSString *)text
 {
     if (!text.length)
         return nil;
-    if (!_baseURL)
-        return [NSURL URLWithString:text];
-    return [NSURL URLWithString:text relativeToURL:_baseURL];
+    NSURL *url = [self resolve:text];
+    if (url || RevenantMarkdownPlatformEncodesURLs())
+        return url;
+    NSURL *encoded = [NSURL URLWithString:text encodingInvalidCharacters:YES];
+    return encoded ? [self resolve:encoded.relativeString] : nil;
 }
 
-- (NSString *)targetIn:(NSString *)body
+- (void)append:(NSString *)text base:(NSDictionary *)base mask:(NSUInteger)mask extra:(NSDictionary *)extra
 {
-    NSString *trimmed = [body stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    NSRange quote = [trimmed rangeOfString:@" \""];
-    if (quote.location != NSNotFound)
-        trimmed = [trimmed substringToIndex:quote.location];
-    return RevenantMarkdownTrimmed(trimmed);
-}
-
-- (void)appendInline:(NSString *)text
-               from:(NSUInteger)start
-                 to:(NSUInteger)end
-            intent:(NSPresentationIntent *)intent
-            span:(NSUInteger)span
-             extra:(NSDictionary *)extra
-{
-    if (end <= start)
+    if (!text.length)
         return;
-    NSString *piece = [text substringWithRange:NSMakeRange(start, end - start)];
-    [_result appendAttributedString:[[NSAttributedString alloc] initWithString:piece
-                                                                     attributes:[self blockAttributes:intent
-                                                                                            span:span
-                                                                                             extra:extra]]];
+    NSMutableDictionary *attributes = [base mutableCopy];
+    if (_mask | mask)
+        attributes[NSInlinePresentationIntentAttributeName] = @(_mask | mask);
+    if (extra)
+        [attributes addEntriesFromDictionary:extra];
+    if (_language)
+        attributes[NSLanguageIdentifierAttributeName] = _language;
+    [_result appendAttributedString:[[NSAttributedString alloc] initWithString:text attributes:attributes]];
 }
 
-static NSUInteger RevenantMarkdownBracketEnd(NSString *text, NSUInteger start, unichar open, unichar close, NSUInteger limit)
+- (NSDictionary *)baseFor:(NSPresentationIntent *)intent delimiter:(NSString *)delimiter
 {
-    NSUInteger depth = 0, index = start;
-    while (index < limit) {
-        unichar c = [text characterAtIndex:index];
-        if (c == '\\') {
-            index += 2;
-            continue;
-        }
-        if (c == open)
-            depth++;
-        else if (c == close && !--depth)
-            return index;
-        index++;
-    }
-    return NSNotFound;
+    NSMutableDictionary *base = [NSMutableDictionary dictionary];
+    if ([self carriesIntents] && intent)
+        base[NSPresentationIntentAttributeName] = intent;
+    if (delimiter)
+        base[RevenantMarkdownDelimiterKey] = delimiter;
+    return base;
 }
 
-static NSUInteger RevenantMarkdownMarkerEnd(NSString *text, NSUInteger start, unichar mark, NSUInteger runLength, NSUInteger limit)
+- (void)flatten:(RevenantMarkdownNode *)node into:(NSMutableString *)text
 {
-    NSUInteger index = start;
-    while (index < limit) {
-        unichar c = [text characterAtIndex:index];
-        if (c == '\\') {
-            index += 2;
-            continue;
-        }
-        if (c == mark) {
-            NSUInteger here = 0;
-            while (index + here < limit && [text characterAtIndex:index + here] == mark)
-                here++;
-            if (here == runLength && index > start)
-                return index;
-            index += here;
-            continue;
-        }
-        index++;
-    }
-    return NSNotFound;
-}
-
-static BOOL RevenantMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger limit, NSUInteger *at)
-{
-    NSUInteger depth = 1, index = body;
-    while (index < limit) {
-        unichar c = [text characterAtIndex:index];
-        if (c == '\\') {
-            index += 2;
-            continue;
-        }
-        if (c == '(')
-            depth++;
-        else if (c == ')' && !--depth) {
-            *at = index;
-            return YES;
-        }
-        index++;
-    }
-    return NO;
-}
-
-- (BOOL)parseMarkerIn:(NSString *)text
-               index:(NSUInteger *)index
-               plain:(NSUInteger *)plain
-               limit:(NSUInteger)limit
-              intent:(NSPresentationIntent *)intent
-{
-    unichar c = [text characterAtIndex:*index];
-    NSUInteger run = 0, runLength, close, inner, innerEnd, value;
-    if (c == '~') {
-        if (*index + 1 >= limit || [text characterAtIndex:*index + 1] != '~')
-            return NO;
-    }
-    while (*index + run < limit && [text characterAtIndex:*index + run] == c)
-        run++;
-    runLength = run >= 2 ? 2 : 1;
-    if (c == '~' && runLength != 2)
-        return NO;
-    value = c == '~' ? NSInlinePresentationIntentStrikethrough
-          : runLength == 2 ? NSInlinePresentationIntentStronglyEmphasized
-                           : NSInlinePresentationIntentEmphasized;
-    close = RevenantMarkdownMarkerEnd(text, *index + runLength, c, runLength, limit);
-    if (close == NSNotFound || close == *index + runLength)
-        return NO;
-    inner = *index + runLength;
-    innerEnd = close;
-    [self appendInline:text from:*plain to:*index intent:intent span:0 extra:nil];
-    NSUInteger appended = _result.length;
-    [self parseInlines:text from:inner to:innerEnd intent:intent];
-    [_result addAttribute:NSInlinePresentationIntentAttributeName
-                   value:@(value)
-                   range:NSMakeRange(appended, _result.length - appended)];
-    *index = close + runLength;
-    *plain = *index;
-    return YES;
-}
-
-- (void)parseInlines:(NSString *)text
-               from:(NSUInteger)start
-                 to:(NSUInteger)end
-            intent:(NSPresentationIntent *)intent
-{
-    NSUInteger index = start, plain = start, limit = end;
-    while (index < limit) {
-        unichar c = [text characterAtIndex:index];
-        if (c == '\n' || c == '\r') {
-            NSUInteger at = index, after = index + 1, spaces, cut;
-            BOOL backslash, hard;
-            if (c == '\r' && after < limit && [text characterAtIndex:after] == '\n')
-                after++;
-            spaces = at;
-            while (spaces > plain && [text characterAtIndex:spaces - 1] == ' ')
-                spaces--;
-            backslash = spaces > plain && [text characterAtIndex:spaces - 1] == '\\';
-            cut = backslash ? spaces - 1 : spaces;
-            hard = backslash || at - spaces >= 2;
-            [self appendInline:text from:plain to:cut intent:intent span:0 extra:nil];
-            [_result appendAttributedString:
-                [[NSAttributedString alloc] initWithString:hard ? @"\n" : ([self keepsSourceSpacing] ? @"\n" : @" ")
-                                               attributes:[self blockAttributes:intent
-                                                                  span:hard ? NSInlinePresentationIntentLineBreak
-                                                                             : NSInlinePresentationIntentSoftBreak
-                                                                   extra:nil]]];
-            index = after;
-            plain = index;
-            continue;
-        }
-        if (c == '\\' && index + 1 < limit) {
-            [self appendInline:text from:plain to:index intent:intent span:0 extra:nil];
-            [_result appendAttributedString:
-                [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%C", [text characterAtIndex:index + 1]]
-                                               attributes:[self blockAttributes:intent span:0 extra:nil]]];
-            index += 2;
-            plain = index;
-            continue;
-        }
-        if (c == '`') {
-            NSUInteger run = 0, close = index, search, found = NSNotFound, here;
-            while (close < limit && [text characterAtIndex:close] == '`')
-                run++, close++;
-            for (search = close; search < limit;) {
-                if ([text characterAtIndex:search] == '`') {
-                    here = 0;
-                    while (search + here < limit && [text characterAtIndex:search + here] == '`')
-                        here++;
-                    if (here == run && search > close) {
-                        found = search;
-                        break;
-                    }
-                    search += here;
-                    continue;
-                }
-                if ([text characterAtIndex:search] == '\n')
-                    break;
-                search++;
-            }
-            if (found != NSNotFound) {
-                NSString *code = [text substringWithRange:NSMakeRange(close, found - close)];
-                while (code.length && ([code characterAtIndex:0] == ' ' || [code characterAtIndex:0] == '\n'))
-                    code = [code substringFromIndex:1];
-                while (code.length && ([code characterAtIndex:code.length - 1] == ' ' || [code characterAtIndex:code.length - 1] == '\n'))
-                    code = [code substringToIndex:code.length - 1];
-                [self appendInline:text from:plain to:index intent:intent span:0 extra:nil];
-                [_result appendAttributedString:
-                    [[NSAttributedString alloc] initWithString:code
-                                                   attributes:[self blockAttributes:intent
-                                                                      span:NSInlinePresentationIntentCode
-                                                                       extra:nil]]];
-                index = found + run;
-                plain = index;
-                continue;
-            }
-            index = close;
-            continue;
-        }
-        if (c == '*' || c == '_' || c == '~') {
-            if ([self parseMarkerIn:text index:&index plain:&plain limit:limit intent:intent])
-                continue;
-        }
-        if (c == '!' && index + 1 < limit && [text characterAtIndex:index + 1] == '[') {
-            NSUInteger close = RevenantMarkdownBracketEnd(text, index + 1, '[', ']', limit), at;
-            if (close != NSNotFound && close + 1 < limit && [text characterAtIndex:close + 1] == '('
-                && RevenantMarkdownParenEnd(text, close + 2, limit, &at)) {
-                NSURL *url = [self urlFor:[self targetIn:[text substringWithRange:NSMakeRange(close + 2, at - close - 2)]]];
-                if (url) {
-                    [self appendInline:text from:plain to:index intent:intent span:0 extra:nil];
-                    NSUInteger appended = _result.length;
-                    [self parseInlines:text from:index + 2 to:close intent:intent];
-                    [_result addAttribute:NSImageURLAttributeName
-                                   value:url
-                                   range:NSMakeRange(appended, _result.length - appended)];
-                    index = at + 1;
-                    plain = index;
-                    continue;
-                }
-            }
-            index++;
-            continue;
-        }
-        if (c == '[') {
-            NSUInteger close = RevenantMarkdownBracketEnd(text, index, '[', ']', limit), at;
-            if (close != NSNotFound && close + 1 < limit && [text characterAtIndex:close + 1] == '('
-                && RevenantMarkdownParenEnd(text, close + 2, limit, &at)) {
-                NSURL *url = [self urlFor:[self targetIn:[text substringWithRange:NSMakeRange(close + 2, at - close - 2)]]];
-                if (url) {
-                    [self appendInline:text from:plain to:index intent:intent span:0 extra:nil];
-                    NSUInteger appended = _result.length;
-                    [self parseInlines:text from:index + 1 to:close intent:intent];
-                    [_result addAttribute:RevenantMarkdownLinkKey
-                                   value:url
-                                   range:NSMakeRange(appended, _result.length - appended)];
-                    index = at + 1;
-                    plain = index;
-                    continue;
-                }
-            }
-            index++;
-            continue;
-        }
-        if (c == '<') {
-            NSUInteger close = index + 1;
-            NSString *inside;
-            NSURL *url;
-            while (close < limit) {
-                unichar d = [text characterAtIndex:close];
-                if (d == '>' || d == '<' || d == ' ' || d == '\n')
-                    break;
-                close++;
-            }
-            inside = close < limit && [text characterAtIndex:close] == '>' ? [text substringWithRange:NSMakeRange(index + 1, close - index - 1)] : nil;
-            url = inside ? [self urlFor:inside] : nil;
-            if (url && ([inside hasPrefix:@"http://"] || [inside hasPrefix:@"https://"] || [inside hasPrefix:@"mailto:"])) {
-                [self appendInline:text from:plain to:index intent:intent span:0 extra:nil];
-                [_result appendAttributedString:
-                    [[NSAttributedString alloc] initWithString:inside
-                                                   attributes:[self blockAttributes:intent
-                                                                      span:0
-                                                                       extra:@{RevenantMarkdownLinkKey: url}]]];
-                index = close + 1;
-                plain = index;
-                continue;
-            }
-            index++;
-            continue;
-        }
-        index++;
-    }
-    [self appendInline:text from:plain to:limit intent:intent span:0 extra:nil];
-}
-
-
-#pragma mark - the blocks
-
-- (NSArray *)linesOf:(NSString *)markdown
-{
-    NSMutableArray *lines = [NSMutableArray array];
-    NSUInteger start = 0, length = markdown.length;
-    while (start <= length) {
-        NSUInteger at = start;
-        while (at < length && [markdown characterAtIndex:at] != '\n' && [markdown characterAtIndex:at] != '\r')
-            at++;
-        [lines addObject:[markdown substringWithRange:NSMakeRange(start, at - start)]];
-        if (at >= length)
+    for (RevenantMarkdownNode *child = node->firstChild; child; child = child->next) {
+        switch (child->kind) {
+        case RevenantMarkdownText:
+        case RevenantMarkdownCode:
+        case RevenantMarkdownHTMLInline:
+            [text appendString:RevenantMarkdownCString(child->literal) ?: @""];
             break;
-        if ([markdown characterAtIndex:at] == '\r' && at + 1 < length && [markdown characterAtIndex:at + 1] == '\n')
-            at++;
-        start = at + 1;
+        case RevenantMarkdownSoftBreak:
+        case RevenantMarkdownLineBreak:
+            break;
+        default:
+            [self flatten:child into:text];
+            break;
+        }
     }
-    return lines;
 }
 
-- (void)parseLines:(NSArray *)lines
-              from:(NSUInteger)start
-                to:(NSUInteger)end
-           parent:(NSPresentationIntent *)parent
-            item:(NSPresentationIntent *)item
+- (void)emitSpan:(RevenantMarkdownNode *)node flag:(NSUInteger)flag base:(NSDictionary *)base extra:(NSDictionary *)extra
 {
-    NSUInteger at = start;
-    NSMutableString *paragraph = [NSMutableString string];
-    #define RevenantFlushParagraph() do { \
-        if (paragraph.length) { \
-            NSPresentationIntent *intent = [NSPresentationIntent paragraphIntentWithIdentity:[self nextIdentity] nestedInsideIntent:item ?: parent]; \
-            [self parseInlines:paragraph from:0 to:paragraph.length intent:intent]; \
-            [paragraph setString:@""]; \
-        } \
-    } while (0)
-    while (at < end) {
-        NSString *line = [lines objectAtIndex:at];
-        NSString *trimmed = RevenantMarkdownTrimmed(line);
-        NSUInteger indent = RevenantMarkdownIndent(line);
-        unichar fence;
-        NSUInteger fenceCount;
-        NSString *info;
-        NSString *headerText;
-        NSInteger level;
-        BOOL ordered, bullet;
-        NSUInteger bulletWidth;
-        if (!trimmed.length) {
-            RevenantFlushParagraph();
-            at++;
-            continue;
-        }
-        if (RevenantMarkdownThematic(trimmed)) {
-            RevenantFlushParagraph();
-            NSPresentationIntent *intent = [NSPresentationIntent thematicBreakIntentWithIdentity:[self nextIdentity]
-                                                                            nestedInsideIntent:parent];
-            [_result appendAttributedString:[[NSAttributedString alloc] initWithString:@"\u2E3B"
-                                                                           attributes:[self blockAttributes:intent
-                                                                                              span:0
-                                                                                               extra:nil]]];
-            at++;
-            continue;
-        }
-        level = RevenantMarkdownHeading(trimmed, &headerText);
-        if (level) {
-            RevenantFlushParagraph();
-            NSPresentationIntent *intent = [NSPresentationIntent headerIntentWithIdentity:[self nextIdentity]
-                                                                                     level:level
-                                                                        nestedInsideIntent:parent];
-            [self parseInlines:headerText from:0 to:headerText.length intent:intent];
-            at++;
-            continue;
-        }
-        if (RevenantMarkdownFence(trimmed, &fence, &fenceCount, &info)) {
-            RevenantFlushParagraph();
-            NSPresentationIntent *intent = [NSPresentationIntent codeBlockIntentWithIdentity:[self nextIdentity]
-                                                                             languageHint:info.length ? info : nil
-                                                                          nestedInsideIntent:parent];
-            NSMutableString *code = [NSMutableString string];
-            NSUInteger body = at + 1, closing = end;
-            while (body < end) {
-                NSString *candidate = RevenantMarkdownTrimmed([lines objectAtIndex:body]);
-                NSUInteger run = 0;
-                while (run < candidate.length && [candidate characterAtIndex:run] == fence)
-                    run++;
-                if (run >= fenceCount && RevenantMarkdownTrimmed([candidate substringFromIndex:run]).length == 0) {
-                    closing = body;
-                    break;
-                }
-                [code appendFormat:@"%@\n", [lines objectAtIndex:body]];
-                body++;
-            }
-            [_result appendAttributedString:[[NSAttributedString alloc] initWithString:code
-                                                                           attributes:[self blockAttributes:intent
-                                                                                              span:0
-                                                                                               extra:nil]]];
-            at = closing + 1;
-            continue;
-        }
-        if (indent >= 4) {
-            RevenantFlushParagraph();
-            NSPresentationIntent *intent = [NSPresentationIntent codeBlockIntentWithIdentity:[self nextIdentity]
-                                                                             languageHint:nil
-                                                                          nestedInsideIntent:parent];
-            NSMutableString *code = [NSMutableString string];
-            while (at < end) {
-                NSString *candidate = [lines objectAtIndex:at];
-                if (RevenantMarkdownBlank(candidate))
-                    break;
-                if (RevenantMarkdownIndent(candidate) < 4)
-                    break;
-                [code appendFormat:@"%@\n", [candidate substringFromIndex:4]];
-                at++;
-            }
-            [_result appendAttributedString:[[NSAttributedString alloc] initWithString:code
-                                                                           attributes:[self blockAttributes:intent
-                                                                                              span:0
-                                                                                               extra:nil]]];
-            continue;
-        }
-        if ([trimmed characterAtIndex:0] == '>') {
-            RevenantFlushParagraph();
-            NSPresentationIntent *intent = [NSPresentationIntent blockQuoteIntentWithIdentity:[self nextIdentity]
-                                                                           nestedInsideIntent:parent];
-            NSMutableArray *inner = [NSMutableArray array];
-            NSUInteger body = at, last = at;
-            while (body < end) {
-                NSString *candidate = RevenantMarkdownTrimmed([lines objectAtIndex:body]);
-                if (!candidate.length || [candidate characterAtIndex:0] != '>')
-                    break;
-                [inner addObject:[[candidate substringFromIndex:1] stringByTrimmingCharactersInSet:
-                                  [NSCharacterSet whitespaceCharacterSet]]];
-                last = body;
-                body++;
-            }
-            [self parseLines:inner from:0 to:inner.count parent:intent item:nil];
-            at = last + 1;
-            continue;
-        }
-        if ([trimmed hasPrefix:@"|"] && at + 1 < end && RevenantMarkdownDivider(RevenantMarkdownTrimmed([lines objectAtIndex:at + 1]))) {
-            RevenantFlushParagraph();
-            NSArray<NSNumber *> *alignments = nil;
-            NSArray *header = RevenantMarkdownCells(line, &alignments);
-            NSMutableArray *rows = [NSMutableArray array];
-            NSUInteger body = at + 2;
-            NSPresentationIntent *table = [NSPresentationIntent tableIntentWithIdentity:[self nextIdentity]
-                                                                          columnCount:header.count
-                                                                           alignments:alignments
-                                                                  nestedInsideIntent:parent];
-            NSPresentationIntent *headerRow = [NSPresentationIntent tableHeaderRowIntentWithIdentity:[self nextIdentity]
-                                                                                  nestedInsideIntent:table];
-            NSUInteger column;
-            for (column = 0; column < header.count; column++) {
-                NSPresentationIntent *cell = [NSPresentationIntent tableCellIntentWithIdentity:[self nextIdentity]
-                                                                                      column:(NSInteger)column
-                                                                               nestedInsideIntent:headerRow];
-                [self parseInlines:[header objectAtIndex:column] from:0 to:[[header objectAtIndex:column] length] intent:cell];
-            }
-            while (body < end) {
-                NSString *candidate = RevenantMarkdownTrimmed([lines objectAtIndex:body]);
-                if (![candidate hasPrefix:@"|"])
-                    break;
-                [rows addObject:RevenantMarkdownCells([lines objectAtIndex:body], NULL)];
-                body++;
-            }
-            for (NSUInteger row = 0; row < rows.count; row++) {
-                NSArray *cells = [rows objectAtIndex:row];
-                NSPresentationIntent *rowIntent = [NSPresentationIntent tableRowIntentWithIdentity:[self nextIdentity]
-                                                                                             row:(NSInteger)row + 1
-                                                                               nestedInsideIntent:table];
-                for (column = 0; column < cells.count; column++) {
-                    NSPresentationIntent *cell = [NSPresentationIntent tableCellIntentWithIdentity:[self nextIdentity]
-                                                                                          column:(NSInteger)column
-                                                                                   nestedInsideIntent:rowIntent];
-                    NSString *text = [cells objectAtIndex:column];
-                    [self parseInlines:text from:0 to:text.length intent:cell];
-                }
-            }
-            at = body;
-            continue;
-        }
-        bullet = RevenantMarkdownBullet(trimmed, &ordered, &bulletWidth);
-        if (bullet) {
-            RevenantFlushParagraph();
-            NSPresentationIntent *list = ordered
-                ? [NSPresentationIntent orderedListIntentWithIdentity:[self nextIdentity] nestedInsideIntent:parent]
-                : [NSPresentationIntent unorderedListIntentWithIdentity:[self nextIdentity] nestedInsideIntent:parent];
-            {
-                NSUInteger item = 0, body = at;
-                while (body < end) {
-                    NSString *candidate = [lines objectAtIndex:body];
-                    NSString *candidateTrimmed = RevenantMarkdownTrimmed(candidate);
-                    BOOL candidateOrdered, isItem;
-                    NSUInteger candidateWidth, candidateIndent = RevenantMarkdownIndent(candidate);
-                    NSPresentationIntent *itemIntent;
-                    NSMutableArray *inner = [NSMutableArray array];
-                    if (!candidateTrimmed.length) {
-                        NSUInteger look = body + 1;
-                        if (look >= end)
-                            break;
-                        isItem = RevenantMarkdownBullet(RevenantMarkdownTrimmed([lines objectAtIndex:look]), &candidateOrdered, &candidateWidth)
-                                 && candidateOrdered == ordered && RevenantMarkdownIndent([lines objectAtIndex:look]) == candidateIndent;
-                        if (!isItem)
-                            break;
-                        body++;
-                        continue;
-                    }
-                    isItem = RevenantMarkdownBullet(candidateTrimmed, &candidateOrdered, &candidateWidth)
-                             && candidateOrdered == ordered && candidateIndent == indent;
-                    if (!isItem && item)
-                        break;
-                    if (!isItem)
-                        break;
-                    itemIntent = [NSPresentationIntent listItemIntentWithIdentity:[self nextIdentity]
-                                                                            ordinal:(NSInteger)++item
-                                                                   nestedInsideIntent:list];
-                    [inner addObject:[candidateTrimmed substringFromIndex:candidateWidth]];
-                    body++;
-                    while (body < end) {
-                        NSString *next = [lines objectAtIndex:body];
-                        NSString *nextTrimmed = RevenantMarkdownTrimmed(next);
-                        BOOL nextOrdered, nextIsItem;
-                        NSUInteger nextWidth;
-                        nextIsItem = RevenantMarkdownBullet(nextTrimmed, &nextOrdered, &nextWidth)
-                                     && nextOrdered == ordered && RevenantMarkdownIndent(next) == indent;
-                        if (nextIsItem)
-                            break;
-                        if (!nextTrimmed.length)
-                            break;
-                        if (RevenantMarkdownIndent(next) > indent) {
-                            [inner addObject:[next substringFromIndex:MIN(indent + candidateWidth, next.length)]];
-                            body++;
-                            continue;
-                        }
-                        if (RevenantMarkdownThematic(nextTrimmed) || RevenantMarkdownHeading(nextTrimmed, NULL)
-                            || [nextTrimmed characterAtIndex:0] == '>' || RevenantMarkdownFence(nextTrimmed, NULL, NULL, NULL))
-                            break;
-                        [inner addObject:nextTrimmed];
-                        body++;
-                    }
-                    [self parseLines:inner from:0 to:inner.count parent:nil item:itemIntent];
-                }
-                at = body > at ? body : at + 1;
-            }
-            continue;
-        }
-        if (paragraph.length)
-            [paragraph appendString:@"\n"];
-        [paragraph appendString:trimmed];
-        at++;
-    }
-    RevenantFlushParagraph();
-    #undef RevenantFlushParagraph
+    _mask |= flag;
+    [self emitInlines:node base:base mask:0 extra:extra];
+    _mask &= ~flag;
 }
 
-- (NSAttributedString *)parse:(NSString *)markdown
+- (void)emitInlines:(RevenantMarkdownNode *)parent base:(NSDictionary *)base mask:(NSUInteger)mask extra:(NSDictionary *)extra
+{
+    for (RevenantMarkdownNode *node = parent->firstChild; node; node = node->next) {
+        switch (node->kind) {
+        case RevenantMarkdownText:
+            [self append:RevenantMarkdownCString(node->literal) base:base mask:mask extra:extra];
+            break;
+        case RevenantMarkdownSoftBreak:
+            [self append:@" " base:base mask:mask | NSInlinePresentationIntentSoftBreak extra:extra];
+            break;
+        case RevenantMarkdownLineBreak:
+            [self append:@"\n" base:base mask:mask | NSInlinePresentationIntentLineBreak extra:extra];
+            break;
+        case RevenantMarkdownCode:
+            [self append:RevenantMarkdownCString(node->literal) base:base mask:mask | NSInlinePresentationIntentCode extra:extra];
+            break;
+        case RevenantMarkdownHTMLInline:
+            [self append:node->literal base:base mask:mask | RevenantMarkdownInlineHTML extra:extra];
+            break;
+        case RevenantMarkdownEmphasis:
+            [self emitSpan:node flag:NSInlinePresentationIntentEmphasized base:base extra:extra];
+            break;
+        case RevenantMarkdownStrong:
+            [self emitSpan:node flag:NSInlinePresentationIntentStronglyEmphasized base:base extra:extra];
+            break;
+        case RevenantMarkdownStrikethrough:
+            [self emitSpan:node flag:NSInlinePresentationIntentStrikethrough base:base extra:extra];
+            break;
+        case RevenantMarkdownLink:
+        case RevenantMarkdownImage: {
+            BOOL image = node->kind == RevenantMarkdownImage;
+            NSMutableString *flat = [NSMutableString string];
+            [self flatten:node into:flat];
+            NSMutableDictionary *merged = extra ? [extra mutableCopy] : [NSMutableDictionary dictionary];
+            NSURL *url = [self urlFor:RevenantMarkdownCString(node->destination)];
+            if (url)
+                merged[image ? NSImageURLAttributeName : RevenantMarkdownLinkKey] = url;
+            NSString *title = RevenantMarkdownCString(node->title);
+            if (title.length)
+                merged[RevenantMarkdownAlternateKey] = title;
+            if (image && !flat.length)
+                [flat setString:@"\uFFFC"];
+            [self append:flat base:base mask:mask extra:merged];
+            break;
+        }
+        default:
+            [self emitInlines:node base:base mask:mask extra:extra];
+            break;
+        }
+    }
+}
+
+- (void)emitBlocks:(RevenantMarkdownNode *)parent intent:(NSPresentationIntent *)parentIntent delimiter:(NSString *)delimiter
+{
+    for (RevenantMarkdownNode *node = parent->firstChild; node; node = node->next) {
+        switch (node->kind) {
+        case RevenantMarkdownBlockQuote: {
+            NSPresentationIntent *intent = [NSPresentationIntent blockQuoteIntentWithIdentity:[self nextIdentity] nestedInsideIntent:parentIntent];
+            [self emitBlocks:node intent:intent delimiter:delimiter];
+            break;
+        }
+        case RevenantMarkdownList: {
+            NSPresentationIntent *list = node->ordered
+                ? [NSPresentationIntent orderedListIntentWithIdentity:[self nextIdentity] nestedInsideIntent:parentIntent]
+                : [NSPresentationIntent unorderedListIntentWithIdentity:[self nextIdentity] nestedInsideIntent:parentIntent];
+            NSInteger ordinal = node->ordered ? node->start : 1;
+            NSString *mark = [NSString stringWithCharacters:&node->marker length:1];
+            for (RevenantMarkdownNode *item = node->firstChild; item; item = item->next, ordinal++) {
+                NSPresentationIntent *itemIntent = [NSPresentationIntent listItemIntentWithIdentity:[self nextIdentity] ordinal:ordinal nestedInsideIntent:list];
+                [self emitBlocks:item intent:itemIntent delimiter:mark];
+            }
+            break;
+        }
+        case RevenantMarkdownItem:
+            [self emitBlocks:node intent:parentIntent delimiter:delimiter];
+            break;
+        case RevenantMarkdownCodeBlock: {
+            NSString *info = RevenantMarkdownCString(node->info);
+            NSString *hint = info.length ? info : nil;
+            NSPresentationIntent *intent = [NSPresentationIntent codeBlockIntentWithIdentity:[self nextIdentity] languageHint:hint nestedInsideIntent:parentIntent];
+            [self append:RevenantMarkdownCString(node->literal) base:[self baseFor:intent delimiter:delimiter] mask:0 extra:nil];
+            break;
+        }
+        case RevenantMarkdownHTMLBlock:
+            [self append:node->literal base:[self baseFor:parentIntent delimiter:delimiter] mask:RevenantMarkdownBlockHTML extra:nil];
+            break;
+        case RevenantMarkdownParagraph: {
+            NSPresentationIntent *intent = [NSPresentationIntent paragraphIntentWithIdentity:[self nextIdentity] nestedInsideIntent:parentIntent];
+            [self emitInlines:node base:[self baseFor:intent delimiter:delimiter] mask:0 extra:nil];
+            break;
+        }
+        case RevenantMarkdownHeading: {
+            NSPresentationIntent *intent = [NSPresentationIntent headerIntentWithIdentity:[self nextIdentity] level:node->level nestedInsideIntent:parentIntent];
+            [self emitInlines:node base:[self baseFor:intent delimiter:delimiter] mask:0 extra:nil];
+            break;
+        }
+        case RevenantMarkdownThematicBreak: {
+            NSPresentationIntent *intent = [NSPresentationIntent thematicBreakIntentWithIdentity:[self nextIdentity] nestedInsideIntent:parentIntent];
+            [self append:@"\u2E3B" base:[self baseFor:intent delimiter:delimiter] mask:0 extra:nil];
+            break;
+        }
+        case RevenantMarkdownTable: {
+            NSPresentationIntent *table = [NSPresentationIntent tableIntentWithIdentity:[self nextIdentity]
+                                                                            columnCount:(NSUInteger)node->columnCount
+                                                                             alignments:node->alignments
+                                                                    nestedInsideIntent:parentIntent];
+            NSInteger row = 0;
+            for (RevenantMarkdownNode *line = node->firstChild; line; line = line->next, row++) {
+                NSPresentationIntent *rowIntent = line->header
+                    ? [NSPresentationIntent tableHeaderRowIntentWithIdentity:[self nextIdentity] nestedInsideIntent:table]
+                    : [NSPresentationIntent tableRowIntentWithIdentity:[self nextIdentity] row:row nestedInsideIntent:table];
+                NSInteger column = 0;
+                for (RevenantMarkdownNode *cell = line->firstChild; cell; cell = cell->next, column++) {
+                    NSPresentationIntent *cellIntent = [NSPresentationIntent tableCellIntentWithIdentity:[self nextIdentity] column:column nestedInsideIntent:rowIntent];
+                    [self emitInlines:cell base:[self baseFor:cellIntent delimiter:delimiter] mask:0 extra:nil];
+                }
+            }
+            break;
+        }
+        default:
+            break;
+        }
+    }
+}
+
+- (NSAttributedString *)emit:(NSString *)markdown
 {
     _result = [[NSMutableAttributedString alloc] init];
     _identity = 0;
-    if (markdown.length) {
-        NSArray *lines = [self linesOf:markdown];
-        [self parseLines:lines from:0 to:lines.count parent:nil item:nil];
+    _mask = 0;
+    if (!markdown.length)
+        return _result;
+    if ([self carriesIntents]) {
+        RevenantMarkdownTree *tree = RevenantMarkdownParseDocument(markdown);
+        [self emitBlocks:tree.root intent:nil delimiter:nil];
+    } else {
+        RevenantMarkdownTree *tree = RevenantMarkdownParseInlineOnly(markdown);
+        [self emitInlines:tree.root->firstChild base:@{} mask:0 extra:nil];
     }
     return _result;
 }
@@ -858,6 +334,22 @@ static NSError *RevenantMarkdownError(NSInteger code, NSString *reason)
                            userInfo:@{NSLocalizedDescriptionKey: reason ?: @"The data could not be read."}];
 }
 
+static NSString *RevenantMarkdownDecode(NSData *data)
+{
+    const uint8_t *bytes = (const uint8_t *)data.bytes;
+    NSUInteger length = data.length, marks = 0;
+    while (length >= marks * 3 + 3 && bytes[marks * 3] == 0xEF && bytes[marks * 3 + 1] == 0xBB && bytes[marks * 3 + 2] == 0xBF)
+        marks++;
+    NSString *body = [[NSString alloc] initWithBytes:bytes + marks * 3 length:length - marks * 3 encoding:NSUTF8StringEncoding];
+    if (!body || !marks)
+        return body;
+    NSMutableString *text = [NSMutableString stringWithCapacity:marks + body.length];
+    for (NSUInteger i = 0; i < marks; i++)
+        [text appendFormat:@"%C", (unichar)0xFEFF];
+    [text appendString:body];
+    return text;
+}
+
 @implementation NSAttributedString (RevenantMarkdown15)
 
 - (instancetype)initWithMarkdown:(NSData *)markdown
@@ -867,7 +359,7 @@ static NSError *RevenantMarkdownError(NSInteger code, NSString *reason)
 {
     NSString *text = nil;
     if (markdown)
-        text = [[NSString alloc] initWithData:markdown encoding:NSUTF8StringEncoding];
+        text = RevenantMarkdownDecode(markdown);
     if (!text) {
         if (error)
             *error = RevenantMarkdownError(NSFileReadUnknownError, @"The data is not text in UTF-8.");
@@ -886,8 +378,8 @@ static NSError *RevenantMarkdownError(NSInteger code, NSString *reason)
             *error = RevenantMarkdownError(NSFileReadUnknownError, @"The Markdown string is nil.");
         return nil;
     }
-    RevenantMarkdownParser *parser = [[RevenantMarkdownParser alloc] initWithOptions:options baseURL:baseURL];
-    return [self initWithAttributedString:[parser parse:markdownString]];
+    RevenantMarkdownEmitter *emitter = [[RevenantMarkdownEmitter alloc] initWithOptions:options baseURL:baseURL];
+    return [self initWithAttributedString:[emitter emit:markdownString]];
 }
 
 - (instancetype)initWithContentsOfMarkdownFileAtURL:(NSURL *)markdownFile
@@ -897,8 +389,14 @@ static NSError *RevenantMarkdownError(NSInteger code, NSString *reason)
 {
     NSString *text = nil;
     NSError *read = nil;
-    if (markdownFile)
-        text = [NSString stringWithContentsOfURL:markdownFile encoding:NSUTF8StringEncoding error:&read];
+    if (markdownFile) {
+        NSData *data = [NSData dataWithContentsOfURL:markdownFile options:0 error:&read];
+        if (data) {
+            text = RevenantMarkdownDecode(data);
+            if (!text)
+                read = RevenantMarkdownError(NSFileReadInapplicableStringEncodingError, @"The file is not text in UTF-8.");
+        }
+    }
     if (!text) {
         if (error)
             *error = read ?: RevenantMarkdownError(NSFileReadNoSuchFileError, @"The Markdown file could not be read.");
