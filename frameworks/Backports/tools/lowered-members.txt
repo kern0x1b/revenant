@@ -1695,6 +1695,7 @@ class RevenantBackgroundView
 class RevenantBarAppearanceInstaller
 class RevenantBarrierGate
 class RevenantBase14Widths
+class RevenantBridgedContext
 class RevenantButtonTint
 class RevenantCASpringAnimation
 class RevenantCKCredentials
@@ -1932,6 +1933,7 @@ class RevenantOpenURLBridgeInstaller
 class RevenantOperationScheduler
 class RevenantOrientationWatcher
 class RevenantOrthogonalController
+class RevenantOutputContext
 class RevenantOverrides
 class RevenantPDFCopier
 class RevenantPDFEncryption
@@ -26691,6 +26693,9 @@ member RevenantBarrierGate -isFinished
 member RevenantBarrierGate -revenant_wait
 member RevenantBase14Widths +descentForFaceNamed:
 member RevenantBase14Widths +widthForCode:inFaceNamed:
+member RevenantBridgedContext -init
+member RevenantBridgedContext -options
+member RevenantBridgedContext -outputs
 member RevenantButtonTint +load
 member RevenantCASpringAnimation +alloc
 member RevenantCASpringAnimation +allocWithZone:
@@ -28177,6 +28182,9 @@ member RevenantOrthogonalController -solvedForSection:
 member RevenantOrthogonalController -step:
 member RevenantOrthogonalController -updateSections:view:environment:
 member RevenantOrthogonalController -viewportShows:section:
+member RevenantOutputContext -context
+member RevenantOutputContext -initWithOutput:context:
+member RevenantOutputContext -output
 member RevenantOverrides +load
 member RevenantOverrides -containsTrait:
 member RevenantOverrides -description
@@ -32120,6 +32128,7 @@ member UIEventAttributionView -initWithCoder:
 member UIEventAttributionView -initWithFrame:
 member UIFeedbackGenerator +feedbackGeneratorForView:
 member UIFeedbackGenerator -_revenantPlayIntensity:milliseconds:count:
+member UIFeedbackGenerator -init
 member UIFeedbackGenerator -initWithBoundView:
 member UIFeedbackGenerator -prepare
 member UIFeedbackGenerator -revenant_boundView
@@ -36338,6 +36347,7 @@ protocol RevenantMPSCommitAndContinuing
 protocol RevenantMPSImageThresholdHooks
 protocol RevenantMPSNDArrayAxisKernel
 protocol RevenantMetalDeviceContext
+protocol RevenantMetalRenderTarget
 protocol RevenantMetalTextureName
 protocol RevenantOverlayView
 protocol RevenantPhotosChange

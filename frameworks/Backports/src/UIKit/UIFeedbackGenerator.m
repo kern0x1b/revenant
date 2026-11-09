@@ -41,6 +41,11 @@ void revenant_feedback_play(float intensity, const int *milliseconds, NSUInteger
 
 @implementation UIFeedbackGenerator
 
+- (instancetype)init
+{
+    return [super init];
+}
+
 - (void)prepare
 {
 }

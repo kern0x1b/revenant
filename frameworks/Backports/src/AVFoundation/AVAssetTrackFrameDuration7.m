@@ -18,6 +18,7 @@ static CMTime revenant_shortest_sample_duration(AVAssetTrack *track)
     AVAssetReaderTrackOutput *output = [AVAssetReaderTrackOutput assetReaderTrackOutputWithTrack:track outputSettings:nil];
     if (!reader || !output || ![reader canAddOutput:output])
         return kCMTimeInvalid;
+    output.alwaysCopiesSampleData = NO;
     [reader addOutput:output];
     if (![reader startReading])
         return kCMTimeInvalid;

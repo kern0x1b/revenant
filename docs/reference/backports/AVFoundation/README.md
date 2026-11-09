@@ -92,7 +92,10 @@ speaker read by the phone's microphone): the backport's volume and mute change t
 `frameworks/Backports/src/AVFoundation/AVAssetTrackFrameDuration7.m` returns the shortest sample duration of a visual track, read once with a passthrough
 `AVAssetReader` over the whole track and cached on the track. A track with no samples, a non-visual track, a reader that does not complete and a track
 whose asset is gone give `kCMTimeInvalid`, an invalid time that a caller testing validity or taking the reciprocal reads as unknown. The first call reads every sample of the
-track once (compressed, not decoded) and the answer is kept, so the cost is one pass over the track; C53 records it.
+track once (compressed, not decoded, and with `alwaysCopiesSampleData` off so the reader does not copy each sample) and the answer is kept, so the cost is one
+pass over the track; C53 records it. Measured on the iPhone 4S: a 30 s clip of 900 frames took 0.29 s at 0.7 MB, 0.57 s at 14.3 MB and 0.88 s at
+42.9 MB. The system keeps no stored value to read instead (no such property in the FigTrack lists of 6.0 and 6.1.3, no reachable sample cursor), and `samplePresentationTimeForTrackTime:`
+returns the time it is given and so cannot step along the samples (measured, about 300 microseconds a call).
 
 A composition track has no samples of its own, and the SDK redeclares the property on `AVCompositionTrack` for Swift (`AVCompositionTrack
 (SynchronousTrackInterface)`), which is the declaration Telegram's `MediaEditorVideoExport.frameRate(for:)` and `MediaEditor.swift` resolve to. The same file
@@ -109,7 +112,7 @@ invalid time for it.
 Checked: a 320 by 240 clip written with unequal frame durations (the shortest a sixtieth of a second) gives the sixtieth, twice the same value, and the
 reciprocal exceeds the average frame rate; a composition track that plays the clip gives the sixtieth, an empty segment after it changes nothing, the clip
 stretched to twice its length gives a thirtieth, and an audio composition track gives an invalid time. Host 9 of 9 (the `--negative` mode fails 7) and device
-9 of 9. The test does not cover a track whose frames are all the same length, a variable-rate H.264 asset longer than a few seconds, a
+9 of 9 (targets `TrackFrameDurationTest` and `FrameDurationProbe`). The test does not cover a track whose frames are all the same length, a variable-rate H.264 asset longer than a few seconds, a
 track of an asset on the network, or a segment whose source file has moved.
 
-Not measured: the time of the first call on a long clip on the A5.
+Not measured: the time of the first call on a clip longer than 30 s on the A5.
