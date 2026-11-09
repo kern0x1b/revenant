@@ -683,6 +683,7 @@ class INRideCompletionStatus
 class INRideDriver
 class INSendMessageIntent
 class INSpeakableString
+class INStartCallIntent
 class INUIAddVoiceShortcutButton
 class INUIAddVoiceShortcutViewController
 class INUIEditVoiceShortcutViewController
@@ -2985,6 +2986,9 @@ enum HMErrorCodeRoomForHomeCannotBeUpdated
 enum HMErrorCodeUserManagementFailed
 enum HMHomeHubStateNotAvailable
 enum HMHomeManagerAuthorizationStatusDetermined
+enum INCallAudioRouteUnknown
+enum INCallCapabilityUnknown
+enum INCallDestinationTypeUnknown
 enum INInteractionDirectionOutgoing
 enum INMessageTypeUnspecified
 enum INOutgoingMessageTypeUnknown
@@ -3651,6 +3655,15 @@ enum PHAssetCollectionSubtypeSmartAlbumUserLibrary
 enum PHAssetCollectionSubtypeSmartAlbumVideos
 enum PHAssetCollectionTypeAlbum
 enum PHAssetCollectionTypeSmartAlbum
+enum PHAssetMediaSubtypeNone
+enum PHAssetMediaSubtypePhotoDepthEffect
+enum PHAssetMediaSubtypePhotoLive
+enum PHAssetMediaSubtypePhotoPanorama
+enum PHAssetMediaSubtypePhotoScreenshot
+enum PHAssetMediaSubtypeVideoCinematic
+enum PHAssetMediaSubtypeVideoHighFrameRate
+enum PHAssetMediaSubtypeVideoScreenRecording
+enum PHAssetMediaSubtypeVideoTimelapse
 enum PHAssetMediaTypeImage
 enum PHAssetMediaTypeUnknown
 enum PHAssetMediaTypeVideo
@@ -4179,7 +4192,6 @@ enum_type NSNumberFormatterStyle
 enum_type NSTextContentManagerEnumerationOptions
 enum_type NSURLSessionDelayedRequestDisposition
 enum_type NSURLSessionResponseDisposition
-enum_type PHAssetSourceType
 enum_type PHPhotosError
 enum_type SCNHitTestSearchMode
 enum_type SFAuthenticationError
@@ -15649,6 +15661,7 @@ member GKARC4RandomSource -revenant_nextWord:context:
 member GKARC4RandomSource -seed
 member GKARC4RandomSource -setSeed:
 member GKBasePlayer -description
+member GKBasePlayer -displayName
 member GKBasePlayer -hash
 member GKBasePlayer -init
 member GKBasePlayer -initWithPlayerID:displayName:
@@ -15840,6 +15853,7 @@ member GKLeaderboardSet +loadLeaderboardSetsWithCompletionHandler:
 member GKLeaderboardSet +revenantNoSetsError
 member GKLeaderboardSet +supportsSecureCoding
 member GKLeaderboardSet -encodeWithCoder:
+member GKLeaderboardSet -groupIdentifier
 member GKLeaderboardSet -identifier
 member GKLeaderboardSet -initWithCoder:
 member GKLeaderboardSet -initWithIdentifier:title:groupIdentifier:
@@ -15847,6 +15861,7 @@ member GKLeaderboardSet -loadImageWithCompletionHandler:
 member GKLeaderboardSet -loadLeaderboardsWithCompletionHandler:
 member GKLeaderboardSet -loadLeaderboardsWithHandler:
 member GKLeaderboardSet -revenantMutatedImageWithCompletionHandler:
+member GKLeaderboardSet -title
 member GKLinearCongruentialRandomSource -initWithCoder:initWithSeed:
 member GKLinearCongruentialRandomSource -initWithSeed:
 member GKLinearCongruentialRandomSource -revenant_nextWord:context:
@@ -16756,6 +16771,8 @@ member HMAccessory -manufacturer
 member HMAccessory -model
 member HMAccessory -name
 member HMAccessory -reachable
+member HMAccessory -revenant_delegate
+member HMAccessory -revenant_homeIdentifier
 member HMAccessory -revenant_identifier
 member HMAccessory -revenant_setHomeIdentifier:
 member HMAccessory -revenant_setRoom:
@@ -16781,6 +16798,7 @@ member HMAccessorySetupPayload -initWithURL:ownershipToken:
 member HMAccessorySetupPayload -revenant_ownershipToken
 member HMAccessorySetupPayload -revenant_setupPayloadURL
 member HMAccessorySetupRequest -copyWithZone:
+member HMAccessorySetupRequest -homeUniqueIdentifier
 member HMAccessorySetupRequest -init
 member HMAccessorySetupRequest -payload
 member HMAccessorySetupResult -copyWithZone:
@@ -16796,6 +16814,7 @@ member HMActionSet -executing
 member HMActionSet -lastExecutionDate
 member HMActionSet -name
 member HMActionSet -removeAction:completionHandler:
+member HMActionSet -revenant_homeIdentifier
 member HMActionSet -revenant_identifier
 member HMActionSet -revenant_initWithStore:identifier:
 member HMActionSet -revenant_setHomeIdentifier:
@@ -16818,6 +16837,7 @@ member HMCharacteristic -notificationEnabled
 member HMCharacteristic -properties
 member HMCharacteristic -readValueWithCompletionHandler:
 member HMCharacteristic -revenant_identifier
+member HMCharacteristic -revenant_serviceIdentifier
 member HMCharacteristic -revenant_setProperties:
 member HMCharacteristic -revenant_setServiceIdentifier:
 member HMCharacteristic -revenant_setValue:
@@ -16830,6 +16850,7 @@ member HMCharacteristicEvent -characteristic
 member HMCharacteristicEvent -init
 member HMCharacteristicEvent -initWithCharacteristic:triggerValue:
 member HMCharacteristicEvent -revenant_characteristic
+member HMCharacteristicEvent -revenant_triggerValue
 member HMCharacteristicEvent -triggerValue
 member HMCharacteristicEvent -updateTriggerValue:completionHandler:
 member HMCharacteristicMetadata -format
@@ -16846,10 +16867,12 @@ member HMCharacteristicThresholdRangeEvent -characteristic
 member HMCharacteristicThresholdRangeEvent -initWithCharacteristic:thresholdRange:
 member HMCharacteristicThresholdRangeEvent -revenant_characteristic
 member HMCharacteristicThresholdRangeEvent -revenant_initWithStore:identifier:
+member HMCharacteristicThresholdRangeEvent -revenant_thresholdRange
 member HMCharacteristicThresholdRangeEvent -thresholdRange
 member HMCharacteristicWriteAction -characteristic
 member HMCharacteristicWriteAction -initWithCharacteristic:targetValue:
 member HMCharacteristicWriteAction -revenant_characteristic
+member HMCharacteristicWriteAction -revenant_targetValue
 member HMCharacteristicWriteAction -targetValue
 member HMCharacteristicWriteAction -updateTargetValue:completionHandler:
 member HMDurationEvent -duration
@@ -16871,6 +16894,7 @@ member HMEventTrigger -revenant_applyEvents:forKey:
 member HMEventTrigger -revenant_applyName:
 member HMEventTrigger -revenant_applyPredicate:
 member HMEventTrigger -revenant_eventsForKey:
+member HMEventTrigger -revenant_homeIdentifier
 member HMEventTrigger -revenant_identifier
 member HMEventTrigger -revenant_initWithStore:identifier:
 member HMEventTrigger -revenant_setHomeIdentifier:
@@ -16906,7 +16930,9 @@ member HMHome -removeTrigger:completionHandler:
 member HMHome -removeUser:completionHandler:
 member HMHome -removeZone:completionHandler:
 member HMHome -revenant_append:to:
+member HMHome -revenant_delegate
 member HMHome -revenant_holdsAccessory:
+member HMHome -revenant_homeIdentifier
 member HMHome -revenant_identifier
 member HMHome -revenant_initWithStore:identifier:
 member HMHome -revenant_nameInUse:
@@ -16929,6 +16955,7 @@ member HMHome -zones
 member HMHomeAccessControl -administrator
 member HMHomeAccessControl -revenant_home
 member HMHomeAccessControl -revenant_initWithStore:identifier:
+member HMHomeAccessControl -revenant_user
 member HMHomeManager -addHomeWithName:completionHandler:
 member HMHomeManager -authorizationStatus
 member HMHomeManager -delegate
@@ -16959,14 +16986,17 @@ member HMNumberRange +numberRangeWithMinValue:maxValue:
 member HMNumberRange -maxValue
 member HMNumberRange -minValue
 member HMNumberRange -revenant_initWithStore:identifier:
+member HMNumberRange -revenant_maxValue
 member HMNumberRange -revenant_minValue
 member HMPresenceEvent -initWithPresenceEventType:presenceUserType:
 member HMPresenceEvent -presenceEventType
 member HMPresenceEvent -presenceUserType
 member HMPresenceEvent -revenant_initWithStore:identifier:
 member HMPresenceEvent -revenant_presenceEventType
+member HMPresenceEvent -revenant_presenceUserType
 member HMRoom -accessories
 member HMRoom -name
+member HMRoom -revenant_homeIdentifier
 member HMRoom -revenant_identifier
 member HMRoom -revenant_initWithStore:identifier:
 member HMRoom -uniqueIdentifier
@@ -16979,6 +17009,7 @@ member HMService -linkedServices
 member HMService -localizedDescription
 member HMService -name
 member HMService -primaryService
+member HMService -revenant_accessoryIdentifier
 member HMService -revenant_identifier
 member HMService -revenant_setAccessoryIdentifier:
 member HMService -revenant_setCharacteristicIdentifiers:
@@ -16990,6 +17021,7 @@ member HMService -userInteractive
 member HMServiceGroup -addService:completionHandler:
 member HMServiceGroup -name
 member HMServiceGroup -removeService:completionHandler:
+member HMServiceGroup -revenant_homeIdentifier
 member HMServiceGroup -revenant_identifier
 member HMServiceGroup -revenant_initWithStore:identifier:
 member HMServiceGroup -services
@@ -16998,6 +17030,7 @@ member HMServiceGroup -updateName:completionHandler:
 member HMSignificantTimeEvent -initWithSignificantEvent:offset:
 member HMSignificantTimeEvent -offset
 member HMSignificantTimeEvent -revenant_initWithStore:identifier:
+member HMSignificantTimeEvent -revenant_offset
 member HMSignificantTimeEvent -revenant_significantEvent
 member HMSignificantTimeEvent -significantEvent
 member HMTimeEvent -revenant_initWithStore:identifier:
@@ -17020,11 +17053,13 @@ member HMTrigger -enabled
 member HMTrigger -lastFireDate
 member HMTrigger -name
 member HMTrigger -removeActionSet:completionHandler:
+member HMTrigger -revenant_homeIdentifier
 member HMTrigger -revenant_identifier
 member HMTrigger -revenant_initWithStore:identifier:
 member HMTrigger -uniqueIdentifier
 member HMTrigger -updateName:completionHandler:
 member HMUser -name
+member HMUser -revenant_homeIdentifier
 member HMUser -revenant_identifier
 member HMUser -revenant_initWithStore:identifier:
 member HMUser -revenant_setName:
@@ -17032,6 +17067,7 @@ member HMUser -uniqueIdentifier
 member HMZone -addRoom:completionHandler:
 member HMZone -name
 member HMZone -removeRoom:completionHandler:
+member HMZone -revenant_homeIdentifier
 member HMZone -revenant_identifier
 member HMZone -revenant_initWithStore:identifier:
 member HMZone -rooms
@@ -17279,6 +17315,20 @@ member INSpeakableString -initWithVocabularyIdentifier:spokenPhrase:pronunciatio
 member INSpeakableString -pronunciationHint
 member INSpeakableString -spokenPhrase
 member INSpeakableString -vocabularyIdentifier
+member INStartCallIntent +supportsSecureCoding
+member INStartCallIntent -audioRoute
+member INStartCallIntent -callCapability
+member INStartCallIntent -callRecordFilter
+member INStartCallIntent -callRecordToCallBack
+member INStartCallIntent -contacts
+member INStartCallIntent -copyWithZone:
+member INStartCallIntent -destinationType
+member INStartCallIntent -encodeWithCoder:
+member INStartCallIntent -hash
+member INStartCallIntent -init
+member INStartCallIntent -initWithCallRecordFilter:callRecordToCallBack:audioRoute:destinationType:contacts:callCapability:
+member INStartCallIntent -initWithCoder:
+member INStartCallIntent -isEqual:
 member INUIAddVoiceShortcutButton -cornerRadius
 member INUIAddVoiceShortcutButton -delegate
 member INUIAddVoiceShortcutButton -initWithStyle:
@@ -17483,11 +17533,14 @@ member LAEnvironmentMechanismUserPassword -initWithRevenantLockScreenPasscode
 member LAEnvironmentMechanismUserPassword -isSet
 member LAEnvironmentMechanismUserPassword -isUsable
 member LAEnvironmentMechanismUserPassword -localizedName
+member LAEnvironmentState -allMechanisms
 member LAEnvironmentState -biometry
+member LAEnvironmentState -companions
 member LAEnvironmentState -copyWithZone:
 member LAEnvironmentState -hash
 member LAEnvironmentState -initWithRevenantMechanisms:biometry:userPassword:companions:
 member LAEnvironmentState -isEqual:
+member LAEnvironmentState -userPassword
 member LPLinkMetadata +revenant_metadataFromHTML:originalURL:finalURL:imageURL:iconURL:
 member LPLinkMetadata +supportsSecureCoding
 member LPLinkMetadata -copyWithZone:
@@ -22605,9 +22658,12 @@ member NEProxySettings -setMatchDomains:
 member NEProxySettings -setProxyAutoConfigurationJavaScript:
 member NEProxySettings -setProxyAutoConfigurationURL:
 member NFCISO15693CustomCommandConfiguration -copyWithZone:
+member NFCISO15693CustomCommandConfiguration -customCommandCode
 member NFCISO15693CustomCommandConfiguration -initWithManufacturerCode:customCommandCode:requestParameters:
 member NFCISO15693CustomCommandConfiguration -initWithManufacturerCode:customCommandCode:requestParameters:maximumRetries:retryInterval:
 member NFCISO15693CustomCommandConfiguration -manufacturerCode
+member NFCISO15693CustomCommandConfiguration -requestParameters
+member NFCISO15693ReadMultipleBlocksConfiguration -chunkSize
 member NFCISO15693ReadMultipleBlocksConfiguration -copyWithZone:
 member NFCISO15693ReadMultipleBlocksConfiguration -initWithRange:chunkSize:
 member NFCISO15693ReadMultipleBlocksConfiguration -initWithRange:chunkSize:maximumRetries:retryInterval:
@@ -22624,6 +22680,7 @@ member NFCNDEFMessage -isEqual:
 member NFCNDEFMessage -length
 member NFCNDEFMessage -records
 member NFCNDEFMessage -revenantAppendPayload:into:first:last:
+member NFCNDEFMessage -revenantEncoded
 member NFCNDEFMessage -revenantEncodedRecords
 member NFCNDEFPayload +revenantURIPayload:
 member NFCNDEFPayload +supportsSecureCoding
@@ -22631,15 +22688,19 @@ member NFCNDEFPayload +wellKnowTypeTextPayloadWithString:locale:
 member NFCNDEFPayload +wellKnownTypeTextPayloadWithString:locale:
 member NFCNDEFPayload +wellKnownTypeURIPayloadWithString:
 member NFCNDEFPayload +wellKnownTypeURIPayloadWithURL:
+member NFCNDEFPayload -chunkSize
 member NFCNDEFPayload -description
 member NFCNDEFPayload -encodeWithCoder:
 member NFCNDEFPayload -hash
+member NFCNDEFPayload -identifier
 member NFCNDEFPayload -initWithCoder:
 member NFCNDEFPayload -initWithFormat:type:identifier:payload:
 member NFCNDEFPayload -initWithFormat:type:identifier:payload:chunkSize:
 member NFCNDEFPayload -isEqual:
+member NFCNDEFPayload -payload
 member NFCNDEFPayload -revenantChunkSize
 member NFCNDEFPayload -revenantTextWithLocale:
+member NFCNDEFPayload -type
 member NFCNDEFPayload -typeNameFormat
 member NFCNDEFPayload -wellKnownTypeTextPayloadWithLocale:
 member NFCNDEFPayload -wellKnownTypeURIPayload
@@ -22656,6 +22717,7 @@ member NFCReaderSession -sessionQueue
 member NFCReaderSession -setAlertMessage:
 member NFCTagCommandConfiguration -copyWithZone:
 member NFCTagCommandConfiguration -maximumRetries
+member NFCTagCommandConfiguration -retryInterval
 member NLLanguageRecognizer +dominantLanguageForString:
 member NLLanguageRecognizer -dominantLanguage
 member NLLanguageRecognizer -init
@@ -25471,6 +25533,7 @@ member PHAsset -cancelContentEditingInputRequest:
 member PHAsset -hasAdjustments
 member PHAsset -initWithRevenantAsset:sourceType:
 member PHAsset -isLocallyAvailable
+member PHAsset -mediaSubtypes
 member PHAsset -playbackStyle
 member PHAsset -requestContentEditingInputWithOptions:completionHandler:
 member PHAsset -revenant_asset
@@ -25545,6 +25608,8 @@ member PHAssetResource -type
 member PHAssetResource -uniformTypeIdentifier
 member PHAssetResourceCreationOptions -copyWithZone:
 member PHAssetResourceCreationOptions -originalFilename
+member PHAssetResourceCreationOptions -shouldMoveFile
+member PHAssetResourceCreationOptions -uniformTypeIdentifier
 member PHAssetResourceManager +defaultManager
 member PHAssetResourceManager +revenant_nextRequestID
 member PHAssetResourceManager -cancelDataRequest:
@@ -25582,6 +25647,8 @@ member PHContentEditingInputRequestOptions -canHandleAdjustmentData
 member PHContentEditingInputRequestOptions -networkAccessAllowed
 member PHContentEditingInputRequestOptions -progressHandler
 member PHFetchOptions -copyWithZone:
+member PHFetchOptions -fetchLimit
+member PHFetchOptions -includeAssetSourceTypes
 member PHFetchOptions -init
 member PHFetchOptions -revenant_apply:
 member PHFetchResult -containsObject:
@@ -25693,12 +25760,15 @@ member PHPickerFilter +notFilterOfSubfilter:
 member PHPickerFilter +panoramasFilter
 member PHPickerFilter +playbackStyleFilter:
 member PHPickerFilter +revenant_filterOfKind:subfilters:
+member PHPickerFilter +revenant_filterOfSubtype:
 member PHPickerFilter +screenRecordingsFilter
 member PHPickerFilter +screenshotsFilter
 member PHPickerFilter +slomoVideosFilter
 member PHPickerFilter +timelapseVideosFilter
 member PHPickerFilter +videosFilter
 member PHPickerFilter -copyWithZone:
+member PHPickerFilter -hash
+member PHPickerFilter -isEqual:
 member PHPickerFilter -revenant_mediaTypes
 member PHPickerResult -assetIdentifier
 member PHPickerResult -initWithRevenantItemProvider:
@@ -26008,7 +26078,9 @@ member RevenantAccessoryView -setRevenant_handler:
 member RevenantAccessoryView -tintColorDidChange
 member RevenantActiveFrameDurationInstaller +load
 member RevenantActivityIndicatorStyle13 +load
+member RevenantAlertPopoverPresentation -barButtonItem
 member RevenantAlertPopoverPresentation -init
+member RevenantAlertPopoverPresentation -sourceRect
 member RevenantAlertPopoverPresentation -sourceView
 member RevenantAnimationGroup -autoreverses
 member RevenantAnimationGroup -duration
@@ -26312,6 +26384,7 @@ member RevenantContactPredicate -initWithCoder:
 member RevenantContactPredicate -isEqual:
 member RevenantContactPredicate -match
 member RevenantContactPredicate -predicateFormat
+member RevenantContactPredicate -value
 member RevenantContacts +addressBookAddressWithPostalAddress:
 member RevenantContacts +addressBookMessageWithInstantMessageAddress:
 member RevenantContacts +addressBookProfileWithSocialProfile:
@@ -26407,6 +26480,8 @@ member RevenantDeferral -mode
 member RevenantDeferral -original
 member RevenantDeferral -owners
 member RevenantDeferral -pending
+member RevenantDocumentMenuOption -handler
+member RevenantDocumentMenuOption -order
 member RevenantDocumentMenuOption -title
 member RevenantDocumentProgress9 +load
 member RevenantDragSession -allowsMoveOperation
@@ -26440,9 +26515,12 @@ member RevenantDynamicsBody -applyForce:
 member RevenantDynamicsBody -applyForce:atPoint:
 member RevenantDynamicsBody -applyImpulse:
 member RevenantDynamicsBody -applyImpulse:atPoint:
+member RevenantDynamicsBody -associations
 member RevenantDynamicsBody -b2Body
 member RevenantDynamicsBody -categoryBitMask
 member RevenantDynamicsBody -charge
+member RevenantDynamicsBody -collisionBitMask
+member RevenantDynamicsBody -contactTestBitMask
 member RevenantDynamicsBody -dealloc
 member RevenantDynamicsBody -dynamic
 member RevenantDynamicsBody -friction
@@ -26478,7 +26556,11 @@ member RevenantDynamicsBody -setUsesPreciseCollisionDetection:
 member RevenantDynamicsBody -setVelocity:
 member RevenantDynamicsBody -usesPreciseCollisionDetection
 member RevenantDynamicsBody -velocity
+member RevenantDynamicsContact -beganDelivered
 member RevenantDynamicsContact -bodyA
+member RevenantDynamicsContact -bodyB
+member RevenantDynamicsContact -contactPoint
+member RevenantDynamicsContact -ended
 member RevenantDynamicsTicker -animator
 member RevenantDynamicsTicker -tick:
 member RevenantEdgePopAnimator -animateTransition:
@@ -26488,6 +26570,7 @@ member RevenantEdgePopGate -gestureRecognizerShouldBegin:
 member RevenantEdgePopGate -navigation
 member RevenantEdgePopInstaller +load
 member RevenantEdgePopState -animator
+member RevenantEdgePopState -interactor
 member RevenantEndEditingReason +load
 member RevenantEngineHost -applyDocumentHeight:
 member RevenantEngineHost -attachRootLayer:
@@ -26569,6 +26652,9 @@ member RevenantFindNavigator -layoutSubviews
 member RevenantFindNavigator -showsReplaceRow
 member RevenantFlashActiveWait -finish
 member RevenantFlashActiveWait -observeValueForKeyPath:ofObject:change:context:
+member RevenantFlowModel -content
+member RevenantFlowModel -footers
+member RevenantFlowModel -headers
 member RevenantFlowModel -items
 member RevenantFontDescriptorInstaller +load
 member RevenantFormattingContextInstaller +load
@@ -26717,6 +26803,9 @@ member RevenantJSONReader -failAtEndOfTextWantingValue:
 member RevenantJSONReader -finishedContainer:
 member RevenantJSONReader -hexDigit:
 member RevenantJSONReader -json5
+member RevenantJSONReader -length
+member RevenantJSONReader -line
+member RevenantJSONReader -lineStart
 member RevenantJSONReader -literal:
 member RevenantJSONReader -matchesWord:
 member RevenantJSONReader -parseArray
@@ -26729,6 +26818,7 @@ member RevenantJSONReader -peek
 member RevenantJSONReader -peekAfterSpace:
 member RevenantJSONReader -peekAfterSpaceAndComments:
 member RevenantJSONReader -peekAt:
+member RevenantJSONReader -position
 member RevenantJSONReader -readHex4
 member RevenantJSONReader -skipWhitespaceAndComments
 member RevenantKeyCommandInstaller +load
@@ -26744,6 +26834,7 @@ member RevenantKeyInputView -isSecureTextEntry
 member RevenantKeyInputView -keyboardType
 member RevenantKeyInputView -setKeyboardType:
 member RevenantKeyInputView -setSecureTextEntry:
+member RevenantKeyboardDismissTracker -dismissed
 member RevenantKeyboardDismissTracker -pan:
 member RevenantKeyboardDismissTracker -scrollView
 member RevenantKeyboardLocalInstaller +load
@@ -27334,7 +27425,11 @@ member RevenantMetalHeap -storageMode
 member RevenantMetalHeap -type
 member RevenantMetalHeap -usedSize
 member RevenantMetalLayerState -dealloc
+member RevenantMetalLayerState -framebuffer
 member RevenantMetalLayerState -layer
+member RevenantMetalLayerState -renderbuffer
+member RevenantMetalLayerState -size
+member RevenantMetalLayerState -texture
 member RevenantMetalLibrary -device
 member RevenantMetalLibrary -functionNames
 member RevenantMetalLibrary -initWithFolder:error:
@@ -27595,6 +27690,9 @@ member RevenantPendingLayout -layout
 member RevenantPersonNameParts -composite
 member RevenantPersonNameParts -delimiter
 member RevenantPersonNameParts -familyFirst
+member RevenantPhotosAvailability -delivery
+member RevenantPhotosAvailability -last
+member RevenantPhotosAvailability -listening
 member RevenantPhotosAvailability -observers
 member RevenantPhotosBlock -run
 member RevenantPhotosImageCache -capacity
@@ -27664,6 +27762,9 @@ member RevenantPopoverState -popover
 member RevenantPopoverState -popoverController:willRepositionPopoverToRect:inView:
 member RevenantPopoverState -popoverControllerDidDismissPopover:
 member RevenantPopoverState -popoverControllerShouldDismissPopover:
+member RevenantPopoverState -presentation
+member RevenantPopoverState -presented
+member RevenantPopoverState -presenting
 member RevenantPostOrderEnumerator -directoryAttributes
 member RevenantPostOrderEnumerator -fileAttributes
 member RevenantPostOrderEnumerator -initWithEnumerator:
@@ -27691,6 +27792,8 @@ member RevenantPresentationIntentState -row
 member RevenantPreviewingContext -delegate
 member RevenantPreviewingContext -initWithDelegate:sourceView:
 member RevenantPreviewingContext -previewingGestureRecognizerForFailureRelationship
+member RevenantPreviewingContext -sourceRect
+member RevenantPreviewingContext -sourceView
 member RevenantPrinterPickerList -cancel:
 member RevenantPrinterPickerList -init
 member RevenantPrinterPickerList -loadView
@@ -27713,6 +27816,9 @@ member RevenantPrinterPickerRow -service
 member RevenantProcessActivity -description
 member RevenantProcessActivity -end
 member RevenantProcessActivity -initWithOptions:reason:
+member RevenantProgressFrame -childAttached
+member RevenantProgressFrame -next
+member RevenantProgressFrame -pendingUnitCount
 member RevenantProgressFrame -progress
 member RevenantProgressLink -child
 member RevenantProgressLink -dealloc
@@ -27723,12 +27829,26 @@ member RevenantProgressLink -parent
 member RevenantProgressLink -synchronize
 member RevenantProgressObserver -dealloc
 member RevenantProgressObserver -observeValueForKeyPath:ofObject:change:context:
+member RevenantProgressObserver -progress
 member RevenantProgressObserver -start
 member RevenantProgressObserver -stop
 member RevenantProgressObserver -view
 member RevenantProgressPatch +load
+member RevenantProgressState -cancellable
+member RevenantProgressState -cancellationHandler
+member RevenantProgressState -cancelled
+member RevenantProgressState -completedUnitCount
+member RevenantProgressState -implicitChildFrames
 member RevenantProgressState -init
+member RevenantProgressState -kind
+member RevenantProgressState -localizedAdditionalDescription
+member RevenantProgressState -localizedDescription
+member RevenantProgressState -pausable
+member RevenantProgressState -paused
+member RevenantProgressState -pausingHandler
+member RevenantProgressState -resumingHandler
 member RevenantProgressState -totalUnitCount
+member RevenantProgressState -userInfo
 member RevenantProviderItem -activityViewController:itemForActivityType:
 member RevenantProviderItem -activityViewControllerPlaceholderItem:
 member RevenantProviderItem -initWithProvider:
@@ -27900,7 +28020,10 @@ member RevenantSCNRenderEngine -deleteMesh:
 member RevenantSCNRenderEngine -drawItem:viewProjection:cameraPosition:coatView:lights:
 member RevenantSCNRenderEngine -initWithContext:
 member RevenantSCNRenderEngine -jitterX
+member RevenantSCNRenderEngine -jitterY
+member RevenantSCNRenderEngine -lastRenderHeight
 member RevenantSCNRenderEngine -lastRenderPointOfView
+member RevenantSCNRenderEngine -lastRenderWidth
 member RevenantSCNRenderEngine -linearTextures
 member RevenantSCNRenderEngine -materialBlends:
 member RevenantSCNRenderEngine -meshFor:
@@ -28027,18 +28150,30 @@ member RevenantSecProtocolMetadata -negotiatedCipherSuite
 member RevenantSecProtocolMetadata -negotiatedProtocol
 member RevenantSecProtocolMetadata -negotiatedVersion
 member RevenantSecProtocolMetadata -ocspResponse
+member RevenantSecProtocolOptions -applicationProtocols
+member RevenantSecProtocolOptions -breaksOnServerAuth
 member RevenantSecProtocolOptions -challengeBlock
+member RevenantSecProtocolOptions -challengeQueue
+member RevenantSecProtocolOptions -ciphersuiteGroup
+member RevenantSecProtocolOptions -ciphersuiteGroups
 member RevenantSecProtocolOptions -ciphersuites
 member RevenantSecProtocolOptions -diffieHellmanParameters
+member RevenantSecProtocolOptions -fallbackAttempt
+member RevenantSecProtocolOptions -falseStartEnabled
 member RevenantSecProtocolOptions -init
 member RevenantSecProtocolOptions -keyUpdateBlock
+member RevenantSecProtocolOptions -keyUpdateQueue
 member RevenantSecProtocolOptions -localIdentity
+member RevenantSecProtocolOptions -maxTLSVersion
 member RevenantSecProtocolOptions -minTLSVersion
 member RevenantSecProtocolOptions -ocspEnabled
 member RevenantSecProtocolOptions -peerAuthenticationRequired
+member RevenantSecProtocolOptions -preSharedKeyIdentities
 member RevenantSecProtocolOptions -preSharedKeyIdentityHint
 member RevenantSecProtocolOptions -preSharedKeySelection
+member RevenantSecProtocolOptions -preSharedKeySelectionQueue
 member RevenantSecProtocolOptions -preSharedKeys
+member RevenantSecProtocolOptions -renegotiationEnabled
 member RevenantSecProtocolOptions -resumptionEnabled
 member RevenantSecProtocolOptions -revenantChallengeIdentity
 member RevenantSecProtocolOptions -revenantCiphersuiteGroups
@@ -28046,9 +28181,11 @@ member RevenantSecProtocolOptions -revenantCopyData:index:into:capacity:
 member RevenantSecProtocolOptions -revenantCopyIdentityRef
 member RevenantSecProtocolOptions -revenantUnsupportedSettingForServer:
 member RevenantSecProtocolOptions -revenantVerifyTrust:
+member RevenantSecProtocolOptions -sctEnabled
 member RevenantSecProtocolOptions -serverName
 member RevenantSecProtocolOptions -ticketsEnabled
 member RevenantSecProtocolOptions -verifyBlock
+member RevenantSecProtocolOptions -verifyQueue
 member RevenantSecTrust -dealloc
 member RevenantSecTrust -initWithTrust:
 member RevenantSecTrust -revenantTrust
@@ -28210,7 +28347,14 @@ member RevenantSpotlightStore -setItem:
 member RevenantSpringCompletion -animationDidStart:
 member RevenantSpringCompletion -animationDidStop:finished:
 member RevenantSpringCompletion -completion
+member RevenantSpringCompletion -interrupted
+member RevenantSpringCompletion -running
 member RevenantStringDrawing +load
+member RevenantSubstitute -MIMEType
+member RevenantSubstitute -baseURL
+member RevenantSubstitute -data
+member RevenantSubstitute -encoding
+member RevenantSubstitute -fileURL
 member RevenantSubstitute -revenant_document
 member RevenantSubstitute -string
 member RevenantSuiteDefaults -URLForKey:
@@ -28606,8 +28750,15 @@ member RevenantUserNotificationDefaultDelegate -userNotificationCenter:didReceiv
 member RevenantUserNotificationDefaultDelegate -userNotificationCenter:willPresentNotification:withCompletionHandler:
 member RevenantVTMultiPassStorage -dealloc
 member RevenantVTMultiPassStorage -revenant_initWithPath:isURL:createdFile:doNotDelete:timeRange:
+member RevenantVTPendingFrame -buffer
 member RevenantVTPendingFrame -dealloc
+member RevenantVTPendingFrame -output
+member RevenantVTPendingFrame -presentationDuration
 member RevenantVTPendingFrame -presentationTimeStamp
+member RevenantVTPendingFrame -resolved
+member RevenantVTPendingFrame -sourceFrameRefCon
+member RevenantVTPendingFrame -status
+member RevenantVTPendingFrame -suppressed
 member RevenantVTSoftwareSession -canAcceptFormat:
 member RevenantVTSoftwareSession -copyProperty:allocator:valueOut:
 member RevenantVTSoftwareSession -dealloc
@@ -28708,8 +28859,12 @@ member RevenantWebURLProtocol +canInitWithRequest:
 member RevenantWebURLProtocol +canonicalRequestForRequest:
 member RevenantWebURLProtocol -startLoading
 member RevenantWebURLProtocol -stopLoading
+member RevenantZoomRamp -device
+member RevenantZoomRamp -last
+member RevenantZoomRamp -rate
 member RevenantZoomRamp -step
 member RevenantZoomRamp -target
+member RevenantZoomRamp -timer
 member RevenantZoomSampleRelay -captureOutput:didOutputSampleBuffer:fromConnection:
 member RevenantZoomSampleRelay -class
 member RevenantZoomSampleRelay -conformsToProtocol:
@@ -28722,6 +28877,7 @@ member RevenantZoomSampleRelay -isEqual:
 member RevenantZoomSampleRelay -isKindOfClass:
 member RevenantZoomSampleRelay -isMemberOfClass:
 member RevenantZoomSampleRelay -methodSignatureForSelector:
+member RevenantZoomSampleRelay -refusalLogged
 member RevenantZoomSampleRelay -respondsToSelector:
 member SCNAction +customActionWithDuration:actionBlock:
 member SCNAction +fadeInWithDuration:
@@ -32836,6 +32992,7 @@ member UISearchController -active
 member UISearchController -automaticallyShowsCancelButton
 member UISearchController -automaticallyShowsScopeBar
 member UISearchController -automaticallyShowsSearchResultsController
+member UISearchController -delegate
 member UISearchController -dimsBackgroundDuringPresentation
 member UISearchController -encodeWithCoder:
 member UISearchController -forwardingTargetForSelector:
@@ -32860,11 +33017,13 @@ member UISearchController -revenant_statusBarInsetForHost:
 member UISearchController -revenant_updateResults
 member UISearchController -revenant_updateVisibility
 member UISearchController -scopeBarActivation
+member UISearchController -searchBar
 member UISearchController -searchBar:textDidChange:
 member UISearchController -searchBarCancelButtonClicked:
 member UISearchController -searchBarPlacement
 member UISearchController -searchBarSearchButtonClicked:
 member UISearchController -searchBarTextDidBeginEditing:
+member UISearchController -searchResultsController
 member UISearchController -searchResultsUpdater
 member UISearchController -searchSuggestions
 member UISearchController -setActive:
@@ -36230,6 +36389,8 @@ protocol_member UIViewControllerInteractiveTransitioning -startInteractiveTransi
 protocol_member UIViewControllerInteractiveTransitioning -wantsInteractiveStart
 protocol_member UIViewControllerPreviewing -delegate
 protocol_member UIViewControllerPreviewing -previewingGestureRecognizerForFailureRelationship
+protocol_member UIViewControllerPreviewing -sourceRect
+protocol_member UIViewControllerPreviewing -sourceView
 protocol_member UIViewControllerTransitionCoordinator -animateAlongsideTransition:completion:
 protocol_member UIViewControllerTransitionCoordinator -animateAlongsideTransitionInView:animation:completion:
 protocol_member UIViewControllerTransitionCoordinator -notifyWhenInteractionChangesUsingBlock:
@@ -36554,6 +36715,9 @@ type HMPresenceEventType
 type HMPresenceEventUserType
 type ICDownloadOption
 type ICScannerFunctionalUnitType
+type INCallAudioRoute
+type INCallCapability
+type INCallDestinationType
 type INIntentHandlingStatus
 type INInteractionDirection
 type INMessageType
@@ -36829,9 +36993,11 @@ type PDFDisplayMode
 type PHAccessLevel
 type PHAssetCollectionSubtype
 type PHAssetCollectionType
+type PHAssetMediaSubtype
 type PHAssetPlaybackStyle
 type PHAssetResourceDataRequestID
 type PHAssetResourceType
+type PHAssetSourceType
 type PHAuthorizationStatus
 type PHCollectionListSubtype
 type PHCollectionListType

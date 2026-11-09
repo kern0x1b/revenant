@@ -38,6 +38,45 @@ removes the availability that follows the closing brace of such a typedef and no
 which the lowering writes onto the case before it takes the typedef out of the region. A typedef with no availability
 after its brace is left alone.
 
+## A case that names a lowered case is lowered with it
+
+`PHImageContentModeDefault` is declared as `PHImageContentModeAspectFit`, so it is the same value, and Telegram writes
+`contentMode: .default` for it. The lowering read each case's own availability and gave `Default` the enclosing region's
+iOS 8, because `src/` never writes the word `Default`. `enumerator_alias` reads an initializer that is only the name of
+another case of the same enum, and the lowering repeats until no case remains that names a lowered case, so `Default`
+loses its availability with `AspectFit` and a case that names nothing lowered keeps its own. `lowering_test.lua` checks
+both directions on the Photos header and compiles a probe that uses all three modes at iOS 6.0.
+
+## A class that a macro implements
+
+`UITextInputTraits11.m` gives `UITextField`, `UITextView` and `UISearchBar` the same traits through one macro that wraps
+`@implementation CLASS (RevenantTextInputTraits11)`. The scan is line based and does not run the preprocessor, so it
+read the macro's body as an implementation of a class named `CLASS` and recorded no member for the three real classes:
+`smartQuotesType`, `smartDashesType`, `smartInsertDeleteType` and `textContentType` kept their iOS 11 and iOS 10
+availability. `expanded_class_macros` finds a `#define` whose body holds `@implementation` followed by its own parameter,
+drops the definition, and replaces each line that is only a use of that macro with the body, so the members belong to the
+class each use names. A macro whose body has no implementation of its parameter is left alone.
+
+## A synthesize list implements every property it names
+
+`@synthesize a, b, c;` implements three properties, and the scan recorded only the first. `PHAssetResourceCreationOptions`
+had `originalFilename` in the list and `uniformTypeIdentifier` and `shouldMoveFile` missing, so Telegram's
+`options.shouldMoveFile = true` stopped at "only available in iOS 9.0". Each name of the list is a member now, with or
+without `= ivar`. A property that the SDK declares with its own availability needs a `@synthesize` or an accessor in `src/`
+to be a member at all: relying on the compiler's automatic synthesis leaves it out, which is why `PHFetchOptions` names
+`includeAssetSourceTypes` and `fetchLimit`, the two iOS 9 members of its header, in a list.
+
+## A protocol is backed through the classes that conform to it
+
+A protocol's members are lowered when a class that `src/` implements conforms to the protocol and implements the member.
+`protocol_status` reads the conformance from the `@interface` declarations of the SDK headers and of `src/`, through the
+superclasses of the class and the parent protocols of each protocol, so `UITextField` conforms to `UITextInputTraits`
+through the protocol it adopts and not only by the line that names it. Such a protocol is a candidate even when no file
+of `src/` names it. `UIMenuBuilder`, `UITextInputTraits` and `UIViewControllerPreviewing` are backed this way. A member
+is lowered when a conforming class implements it and either the protocol is one that `src/` names (adopts, uses as a
+type or defines) or the SDK marks the member later than the floor; a member that an earlier release already declares is
+not touched through a protocol that `src/` never names.
+
 ## Swift names that only the SDK's interface declares
 
 The Swift overlays that the port builds from the open-source sources lack what the SDK's own overlay added later. Two

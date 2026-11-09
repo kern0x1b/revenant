@@ -4,7 +4,7 @@
 
 + (PHPickerFilter *)depthEffectPhotosFilter
 {
-    return [PHPickerFilter livePhotosFilter];
+    return [PHPickerFilter revenant_filterOfSubtype:PHAssetMediaSubtypePhotoDepthEffect];
 }
 
 + (PHPickerFilter *)burstsFilter
@@ -14,7 +14,7 @@
 
 + (PHPickerFilter *)cinematicVideosFilter
 {
-    return [PHPickerFilter livePhotosFilter];
+    return [PHPickerFilter revenant_filterOfSubtype:PHAssetMediaSubtypeVideoCinematic];
 }
 
 @end

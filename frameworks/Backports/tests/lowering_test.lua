@@ -156,7 +156,15 @@ function main()
     local accepted, accepting = compiles(sdk, vfs, acceptance, path.join(probes, "acceptance.log"))
     assert(accepted, "the lowered SDK headers do not compile the acceptance members at iOS 6.0:\n" .. accepting)
 
-    local fixture = lowered.overlay(sdk, path.join(out, "fixture-overlay"), lowered.members_of(path.join(os.scriptdir(), "data", "src"), sdk))
+    local fixture_members = lowered.members_of(path.join(os.scriptdir(), "data", "src"), sdk)
+    local synthesized = fixture_members.classes.FXProperties or {}
+    assert(synthesized["-fx_first"] and synthesized["-fx_second"] and synthesized["-fx_third"],
+           "every property of a synthesize list is an implemented member, not only the first")
+    for _, class in ipairs({"FXMacroOne", "FXMacroTwo"}) do
+        assert((fixture_members.classes[class] or {})["-fx_wrapped"], "a macro that wraps an implementation of its parameter implements that member in each class it is invoked for: " .. class)
+    end
+    assert(not fixture_members.classes.CLASS and not fixture_members.functions.FX_WRAPPED, "the macro definition is not an implementation of a class named after its parameter")
+    local fixture = lowered.overlay(sdk, path.join(out, "fixture-overlay"), fixture_members)
     local unimplemented = path.join(probes, "unimplemented.m")
     io.writefile(unimplemented, UNIMPLEMENTED)
     local refused, refusal = compiles(sdk, fixture, unimplemented, path.join(probes, "unimplemented.log"))

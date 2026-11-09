@@ -6,12 +6,13 @@
 typedef NS_ENUM(NSInteger, RevenantFilterKind) {
     RevenantFilterImages,
     RevenantFilterVideos,
-    RevenantFilterLivePhotos,
+    RevenantFilterSubtype,
     RevenantFilterAny
 };
 
 @implementation PHPickerFilter {
     RevenantFilterKind _kind;
+    PHAssetMediaSubtype _subtype;
     NSArray<PHPickerFilter *> *_subfilters;
 }
 
@@ -20,6 +21,13 @@ typedef NS_ENUM(NSInteger, RevenantFilterKind) {
     PHPickerFilter *filter = [[self alloc] init];
     filter->_kind = kind;
     filter->_subfilters = [subfilters copy];
+    return filter;
+}
+
++ (PHPickerFilter *)revenant_filterOfSubtype:(PHAssetMediaSubtype)subtype
+{
+    PHPickerFilter *filter = [self revenant_filterOfKind:RevenantFilterSubtype subfilters:nil];
+    filter->_subtype = subtype;
     return filter;
 }
 
@@ -35,7 +43,7 @@ typedef NS_ENUM(NSInteger, RevenantFilterKind) {
 
 + (PHPickerFilter *)livePhotosFilter
 {
-    return [self revenant_filterOfKind:RevenantFilterLivePhotos subfilters:nil];
+    return [self revenant_filterOfSubtype:PHAssetMediaSubtypePhotoLive];
 }
 
 + (PHPickerFilter *)anyFilterMatchingSubfilters:(NSArray<PHPickerFilter *> *)subfilters
@@ -48,6 +56,21 @@ typedef NS_ENUM(NSInteger, RevenantFilterKind) {
     return self;
 }
 
+- (BOOL)isEqual:(id)other
+{
+    if (other == self)
+        return YES;
+    if (![other isKindOfClass:[PHPickerFilter class]])
+        return NO;
+    PHPickerFilter *filter = other;
+    return filter->_kind == _kind && filter->_subtype == _subtype && (filter->_subfilters == _subfilters || [filter->_subfilters isEqual:_subfilters]);
+}
+
+- (NSUInteger)hash
+{
+    return (NSUInteger)_kind ^ (NSUInteger)_subtype ^ _subfilters.hash;
+}
+
 - (NSArray<NSString *> *)revenant_mediaTypes
 {
     switch (_kind) {
@@ -55,7 +78,7 @@ typedef NS_ENUM(NSInteger, RevenantFilterKind) {
         return @[@"public.image"];
     case RevenantFilterVideos:
         return @[@"public.movie"];
-    case RevenantFilterLivePhotos:
+    case RevenantFilterSubtype:
         return @[];
     case RevenantFilterAny: {
         NSMutableArray *types = [NSMutableArray array];

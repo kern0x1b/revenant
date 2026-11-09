@@ -6,6 +6,8 @@
 
 @implementation PHFetchOptions
 
+@synthesize includeAssetSourceTypes = _includeAssetSourceTypes, fetchLimit = _fetchLimit;
+
 - (instancetype)init
 {
     self = [super init];

@@ -35,27 +35,27 @@ static PHPickerFilter *revenant_filter_naming(NSSet<NSString *> *types)
 
 + (PHPickerFilter *)panoramasFilter
 {
-    return [PHPickerFilter livePhotosFilter];
+    return [PHPickerFilter revenant_filterOfSubtype:PHAssetMediaSubtypePhotoPanorama];
 }
 
 + (PHPickerFilter *)screenshotsFilter
 {
-    return [PHPickerFilter livePhotosFilter];
+    return [PHPickerFilter revenant_filterOfSubtype:PHAssetMediaSubtypePhotoScreenshot];
 }
 
 + (PHPickerFilter *)screenRecordingsFilter
 {
-    return [PHPickerFilter livePhotosFilter];
+    return [PHPickerFilter revenant_filterOfSubtype:PHAssetMediaSubtypeVideoScreenRecording];
 }
 
 + (PHPickerFilter *)slomoVideosFilter
 {
-    return [PHPickerFilter livePhotosFilter];
+    return [PHPickerFilter revenant_filterOfSubtype:PHAssetMediaSubtypeVideoHighFrameRate];
 }
 
 + (PHPickerFilter *)timelapseVideosFilter
 {
-    return [PHPickerFilter livePhotosFilter];
+    return [PHPickerFilter revenant_filterOfSubtype:PHAssetMediaSubtypeVideoTimelapse];
 }
 
 + (PHPickerFilter *)playbackStyleFilter:(PHAssetPlaybackStyle)playbackStyle
