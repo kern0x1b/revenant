@@ -20193,6 +20193,7 @@ member MPRemoteCommandCenter -stopCommand
 member MPRemoteCommandCenter -togglePlayPauseCommand
 member MPRemoteCommandEvent -command
 member MPRemoteCommandEvent -initWithCommand:
+member MPRemoteCommandEvent -timestamp
 member MPSBinaryImageKernel -clipRect
 member MPSBinaryImageKernel -encodeToCommandBuffer:inPlacePrimaryTexture:secondaryTexture:fallbackCopyAllocator:
 member MPSBinaryImageKernel -encodeToCommandBuffer:inPlaceSecondaryTexture:primaryTexture:fallbackCopyAllocator:
@@ -30370,6 +30371,7 @@ member UIApplication -registeredForRemoteNotifications
 member UIApplication -requestSceneSessionActivation:userActivity:options:errorHandler:
 member UIApplication -requestSceneSessionDestruction:options:errorHandler:
 member UIApplication -requestSceneSessionRefresh:
+member UIApplication -revenant_dispatchRemoteControlEvent:
 member UIApplication -revenant_scene
 member UIApplication -revenant_sendEvent:
 member UIApplication -setAlternateIconName:completionHandler:
