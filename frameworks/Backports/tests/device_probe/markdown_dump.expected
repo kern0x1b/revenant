@@ -1,0 +1,349 @@
+== full 0
+length=10
+  0,10 plain text {NSPresentationIntent=intent(0#1)}
+== full 1
+length=60
+  0,5 Title {NSPresentationIntent=intent(1#1 level=1)}
+  5,15 Paragraph with  {NSPresentationIntent=intent(0#2)}
+  20,8 emphasis {NSInlinePresentationIntent=1; NSPresentationIntent=intent(0#2)}
+  28,2 ,  {NSPresentationIntent=intent(0#2)}
+  30,6 strong {NSInlinePresentationIntent=2; NSPresentationIntent=intent(0#2)}
+  36,2 ,  {NSPresentationIntent=intent(0#2)}
+  38,4 code {NSInlinePresentationIntent=4; NSPresentationIntent=intent(0#2)}
+  42,2 ,  {NSPresentationIntent=intent(0#2)}
+  44,4 gone {NSInlinePresentationIntent=32; NSPresentationIntent=intent(0#2)}
+  48,7  and a  {NSPresentationIntent=intent(0#2)}
+  55,4 link {NSLink=url(https://example.com/a?b=1); NSPresentationIntent=intent(0#2)}
+  59,1 . {NSPresentationIntent=intent(0#2)}
+== full 2
+length=23
+  0,3 one {NSListItemDelimiter=-; NSPresentationIntent=intent(0#3 <- 4#2 ordinal=1 <- 3#1)}
+  3,3 two {NSListItemDelimiter=-; NSPresentationIntent=intent(0#5 <- 4#4 ordinal=2 <- 3#1)}
+  6,6 nested {NSListItemDelimiter=-; NSPresentationIntent=intent(0#8 <- 4#7 ordinal=1 <- 3#6 <- 4#4 ordinal=2 <- 3#1)}
+  12,5 first {NSListItemDelimiter=.; NSPresentationIntent=intent(0#11 <- 4#10 ordinal=1 <- 2#9)}
+  17,6 second {NSListItemDelimiter=.; NSPresentationIntent=intent(0#13 <- 4#12 ordinal=2 <- 2#9)}
+== full 3
+length=16
+  0,5 quote {NSPresentationIntent=intent(0#2 <- 6#1)}
+  5,10 let x = 1\n {NSPresentationIntent=intent(5#3 hint=swift)}
+  15,1 ⸻ {NSPresentationIntent=intent(7#4)}
+== full 4
+length=4
+  0,1 a {NSPresentationIntent=intent(11#3 column=0 <- 9#2 <- 8#1 columns=2 alignments=0,1)}
+  1,1 b {NSPresentationIntent=intent(11#4 column=1 <- 9#2 <- 8#1 columns=2 alignments=0,1)}
+  2,1 1 {NSPresentationIntent=intent(11#6 column=0 <- 10#5 row=1 <- 8#1 columns=2 alignments=0,1)}
+  3,1 2 {NSPresentationIntent=intent(11#7 column=1 <- 10#5 row=1 <- 8#1 columns=2 alignments=0,1)}
+== full 5
+length=21
+  0,8 alt text {NSAlternateDescription=title; NSImageURL=url(https://base.example/docs/pic.png); NSPresentationIntent=intent(0#1)}
+  8,5  and  {NSPresentationIntent=intent(0#1)}
+  13,8 relative {NSLink=url(https://base.example/docs/docs/a.md); NSPresentationIntent=intent(0#1)}
+== full 6
+length=28
+  0,8 line one {NSPresentationIntent=intent(0#1)}
+  8,1   {NSInlinePresentationIntent=64; NSPresentationIntent=intent(0#1)}
+  9,8 line two {NSPresentationIntent=intent(0#1)}
+  17,1 \n {NSInlinePresentationIntent=128; NSPresentationIntent=intent(0#1)}
+  18,4 hard {NSPresentationIntent=intent(0#1)}
+  22,1 \n {NSInlinePresentationIntent=128; NSPresentationIntent=intent(0#1)}
+  23,5 break {NSPresentationIntent=intent(0#1)}
+== full 7
+length=35
+  0,3 <b> {NSInlinePresentationIntent=256; NSPresentationIntent=intent(0#1)}
+  3,4 html {NSPresentationIntent=intent(0#1)}
+  7,4 </b> {NSInlinePresentationIntent=256; NSPresentationIntent=intent(0#1)}
+  11,5  and  {NSPresentationIntent=intent(0#1)}
+  16,6 <span> {NSInlinePresentationIntent=256; NSPresentationIntent=intent(0#1)}
+  22,6 inline {NSPresentationIntent=intent(0#1)}
+  28,7 </span> {NSInlinePresentationIntent=256; NSPresentationIntent=intent(0#1)}
+== full 8
+length=21
+  0,13 multi   space {NSPresentationIntent=intent(0#1)}
+  13,8 indented {NSPresentationIntent=intent(0#2)}
+== full 9
+length=15
+  0,8 café 😀  {NSPresentationIntent=intent(0#1)}
+  8,2 中文 {NSInlinePresentationIntent=2; NSPresentationIntent=intent(0#1)}
+  10,5  שלום {NSPresentationIntent=intent(0#1)}
+== full 10
+length=13
+  0,6 Setext {NSPresentationIntent=intent(1#1 level=1)}
+  6,3 Sub {NSPresentationIntent=intent(1#2 level=2)}
+  9,4 text {NSPresentationIntent=intent(0#3)}
+== full 11
+length=25
+  0,5 three {NSListItemDelimiter=.; NSPresentationIntent=intent(0#3 <- 4#2 ordinal=3 <- 2#1)}
+  5,4 four {NSListItemDelimiter=.; NSPresentationIntent=intent(0#5 <- 4#4 ordinal=4 <- 2#1)}
+  9,8 [ ] task {NSListItemDelimiter=-; NSPresentationIntent=intent(0#8 <- 4#7 ordinal=1 <- 3#6)}
+  17,8 [x] done {NSListItemDelimiter=-; NSPresentationIntent=intent(0#10 <- 4#9 ordinal=2 <- 3#6)}
+== full 12
+length=45
+  0,13 Heading with  {NSPresentationIntent=intent(1#1 level=2)}
+  13,4 code {NSInlinePresentationIntent=4; NSPresentationIntent=intent(1#1 level=2)}
+  17,5  and  {NSPresentationIntent=intent(1#1 level=2)}
+  22,2 em {NSInlinePresentationIntent=1; NSPresentationIntent=intent(1#1 level=2)}
+  24,5 Third {NSPresentationIntent=intent(1#2 level=3)}
+  29,6 Fourth {NSPresentationIntent=intent(1#3 level=4)}
+  35,5 Fifth {NSPresentationIntent=intent(1#4 level=5)}
+  40,5 Sixth {NSPresentationIntent=intent(1#5 level=6)}
+== full 13
+length=60
+  0,24 https://autolink.example {NSLink=url(https://autolink.example); NSPresentationIntent=intent(0#1)}
+  24,5  and  {NSPresentationIntent=intent(0#1)}
+  29,20 https://bare.example {NSLink=url(https://bare.example); NSPresentationIntent=intent(0#1)}
+  49,5  and  {NSPresentationIntent=intent(0#1)}
+  54,6 titled {NSAlternateDescription=Title; NSLink=url(http://t.example); NSPresentationIntent=intent(0#1)}
+== full 14
+length=34
+  0,4 both {NSInlinePresentationIntent=3; NSPresentationIntent=intent(0#1)}
+  4,1   {NSPresentationIntent=intent(0#1)}
+  5,5 under {NSInlinePresentationIntent=1; NSPresentationIntent=intent(0#1)}
+  10,1   {NSPresentationIntent=intent(0#1)}
+  11,6 strong {NSInlinePresentationIntent=2; NSPresentationIntent=intent(0#1)}
+  17,1   {NSPresentationIntent=intent(0#1)}
+  18,7 nested  {NSInlinePresentationIntent=1; NSPresentationIntent=intent(0#1)}
+  25,6 inside {NSInlinePresentationIntent=3; NSPresentationIntent=intent(0#1)}
+  31,3  em {NSInlinePresentationIntent=1; NSPresentationIntent=intent(0#1)}
+== full 15
+length=52
+  0,52 escaped *stars* and # hash and a trailing backslash\ {NSPresentationIntent=intent(0#1)}
+== full 16
+length=41
+  0,32 indented code block\nsecond line\n {NSPresentationIntent=intent(5#1 hint=nil)}
+  32,9 paragraph {NSPresentationIntent=intent(0#2)}
+== full 17
+length=20
+  0,1 a {NSListItemDelimiter=.; NSPresentationIntent=intent(0#3 <- 4#2 ordinal=1 <- 2#1)}
+  1,1 b {NSListItemDelimiter=-; NSPresentationIntent=intent(0#6 <- 4#5 ordinal=1 <- 3#4 <- 4#2 ordinal=1 <- 2#1)}
+  2,1 c {NSListItemDelimiter=.; NSPresentationIntent=intent(0#9 <- 4#8 ordinal=1 <- 2#7 <- 4#5 ordinal=1 <- 3#4 <- 4#2 ordinal=1 <- 2#1)}
+  3,11 quoted list {NSListItemDelimiter=-; NSPresentationIntent=intent(0#13 <- 4#12 ordinal=1 <- 3#11 <- 6#10)}
+  14,6 deeper {NSPresentationIntent=intent(0#15 <- 6#14 <- 6#10)}
+== full 18
+length=18
+  0,4 Name {NSPresentationIntent=intent(11#3 column=0 <- 9#2 <- 8#1 columns=3 alignments=0,2,1)}
+  4,3 Qty {NSPresentationIntent=intent(11#4 column=1 <- 9#2 <- 8#1 columns=3 alignments=0,2,1)}
+  7,4 Note {NSPresentationIntent=intent(11#5 column=2 <- 9#2 <- 8#1 columns=3 alignments=0,2,1)}
+  11,1 x {NSInlinePresentationIntent=1; NSPresentationIntent=intent(11#7 column=0 <- 10#6 row=1 <- 8#1 columns=3 alignments=0,2,1)}
+  12,1 1 {NSPresentationIntent=intent(11#8 column=1 <- 10#6 row=1 <- 8#1 columns=3 alignments=0,2,1)}
+  13,1 y {NSInlinePresentationIntent=4; NSPresentationIntent=intent(11#9 column=2 <- 10#6 row=1 <- 8#1 columns=3 alignments=0,2,1)}
+  14,1 z {NSPresentationIntent=intent(11#11 column=0 <- 10#10 row=2 <- 8#1 columns=3 alignments=0,2,1)}
+  15,2 22 {NSPresentationIntent=intent(11#12 column=1 <- 10#10 row=2 <- 8#1 columns=3 alignments=0,2,1)}
+  17,1 l {NSLink=url(http://l.example); NSPresentationIntent=intent(11#13 column=2 <- 10#10 row=2 <- 8#1 columns=3 alignments=0,2,1)}
+== full 19
+length=14
+  0,8 no hint\n {NSPresentationIntent=intent(5#1 hint=nil)}
+  8,6 tilde\n {NSPresentationIntent=intent(5#2 hint=python)}
+== inline 0
+length=10
+  0,10 plain text {}
+== inline 1
+length=65
+  0,24 # Title\n\nParagraph with  {}
+  24,8 emphasis {NSInlinePresentationIntent=1}
+  32,2 ,  {}
+  34,6 strong {NSInlinePresentationIntent=2}
+  40,2 ,  {}
+  42,4 code {NSInlinePresentationIntent=4}
+  46,2 ,  {}
+  48,4 gone {NSInlinePresentationIntent=32}
+  52,7  and a  {}
+  59,4 link {NSLink=url(https://example.com/a?b=1)}
+  63,2 .\n {}
+== inline 2
+length=43
+  0,43 - one\n- two\n  - nested\n\n1. first\n2. second\n {}
+== inline 3
+length=31
+  0,9 > quote\n\n {}
+  9,16 swift let x = 1  {NSInlinePresentationIntent=4}
+  25,6 \n\n---\n {}
+== inline 4
+length=30
+  0,30 | a | b |\n|---|:-:|\n| 1 | 2 |\n {}
+== inline 5
+length=21
+  0,8 alt text {NSAlternateDescription=title; NSImageURL=url(https://base.example/docs/pic.png)}
+  8,5  and  {}
+  13,8 relative {NSLink=url(https://base.example/docs/docs/a.md)}
+== inline 6
+length=30
+  0,24 line one\nline two  \nhard {}
+  24,1 \n {NSInlinePresentationIntent=128}
+  25,5 break {}
+== inline 7
+length=35
+  0,3 <b> {NSInlinePresentationIntent=256}
+  3,4 html {}
+  7,4 </b> {NSInlinePresentationIntent=256}
+  11,5  and  {}
+  16,6 <span> {NSInlinePresentationIntent=256}
+  22,6 inline {}
+  28,7 </span> {NSInlinePresentationIntent=256}
+== inline 8
+length=28
+  0,28 multi   space  \n\n\n  indented {}
+== inline 9
+length=15
+  0,8 café 😀  {}
+  8,2 中文 {NSInlinePresentationIntent=2}
+  10,5  שלום {}
+== inline 10
+length=28
+  0,28 Setext\n======\n\nSub\n---\n\ntext {}
+== inline 11
+length=39
+  0,39 3. three\n4. four\n\n- [ ] task\n- [x] done {}
+== inline 12
+length=76
+  0,16 ## Heading with  {}
+  16,4 code {NSInlinePresentationIntent=4}
+  20,5  and  {}
+  25,2 em {NSInlinePresentationIntent=1}
+  27,49 \n\n### Third\n\n#### Fourth\n##### Fifth\n###### Sixth {}
+== inline 13
+length=60
+  0,24 https://autolink.example {NSLink=url(https://autolink.example)}
+  24,5  and  {}
+  29,20 https://bare.example {NSLink=url(https://bare.example)}
+  49,5  and  {}
+  54,6 titled {NSAlternateDescription=Title; NSLink=url(http://t.example)}
+== inline 14
+length=34
+  0,4 both {NSInlinePresentationIntent=3}
+  4,1   {}
+  5,5 under {NSInlinePresentationIntent=1}
+  10,1   {}
+  11,6 strong {NSInlinePresentationIntent=2}
+  17,1   {}
+  18,7 nested  {NSInlinePresentationIntent=1}
+  25,6 inside {NSInlinePresentationIntent=3}
+  31,3  em {NSInlinePresentationIntent=1}
+== inline 15
+length=52
+  0,52 escaped *stars* and # hash and a trailing backslash\ {}
+== inline 16
+length=50
+  0,50     indented code block\n    second line\n\nparagraph {}
+== inline 17
+length=49
+  0,49 1. a\n   - b\n     1. c\n\n> - quoted list\n> > deeper {}
+== inline 18
+length=72
+  0,46 | Name | Qty | Note |\n|:-----|----:|:----:|\n|  {}
+  46,1 x {NSInlinePresentationIntent=1}
+  47,7  | 1 |  {}
+  54,1 y {NSInlinePresentationIntent=4}
+  55,14  |\n| z | 22 |  {}
+  69,1 l {NSLink=url(http://l.example)}
+  70,2  | {}
+== inline 19
+length=28
+  0,7 no hint {NSInlinePresentationIntent=4}
+  7,21 \n\n~~~python\ntilde\n~~~ {}
+== inlinePreserving 0
+length=10
+  0,10 plain text {}
+== inlinePreserving 1
+length=65
+  0,24 # Title\n\nParagraph with  {}
+  24,8 emphasis {NSInlinePresentationIntent=1}
+  32,2 ,  {}
+  34,6 strong {NSInlinePresentationIntent=2}
+  40,2 ,  {}
+  42,4 code {NSInlinePresentationIntent=4}
+  46,2 ,  {}
+  48,4 gone {NSInlinePresentationIntent=32}
+  52,7  and a  {}
+  59,4 link {NSLink=url(https://example.com/a?b=1)}
+  63,2 .\n {}
+== inlinePreserving 2
+length=43
+  0,43 - one\n- two\n  - nested\n\n1. first\n2. second\n {}
+== inlinePreserving 3
+length=31
+  0,9 > quote\n\n {}
+  9,16 swift let x = 1  {NSInlinePresentationIntent=4}
+  25,6 \n\n---\n {}
+== inlinePreserving 4
+length=30
+  0,30 | a | b |\n|---|:-:|\n| 1 | 2 |\n {}
+== inlinePreserving 5
+length=21
+  0,8 alt text {NSAlternateDescription=title; NSImageURL=url(https://base.example/docs/pic.png)}
+  8,5  and  {}
+  13,8 relative {NSLink=url(https://base.example/docs/docs/a.md)}
+== inlinePreserving 6
+length=30
+  0,24 line one\nline two  \nhard {}
+  24,1 \n {NSInlinePresentationIntent=128}
+  25,5 break {}
+== inlinePreserving 7
+length=35
+  0,3 <b> {NSInlinePresentationIntent=256}
+  3,4 html {}
+  7,4 </b> {NSInlinePresentationIntent=256}
+  11,5  and  {}
+  16,6 <span> {NSInlinePresentationIntent=256}
+  22,6 inline {}
+  28,7 </span> {NSInlinePresentationIntent=256}
+== inlinePreserving 8
+length=28
+  0,28 multi   space  \n\n\n  indented {}
+== inlinePreserving 9
+length=15
+  0,8 café 😀  {}
+  8,2 中文 {NSInlinePresentationIntent=2}
+  10,5  שלום {}
+== inlinePreserving 10
+length=28
+  0,28 Setext\n======\n\nSub\n---\n\ntext {}
+== inlinePreserving 11
+length=39
+  0,39 3. three\n4. four\n\n- [ ] task\n- [x] done {}
+== inlinePreserving 12
+length=76
+  0,16 ## Heading with  {}
+  16,4 code {NSInlinePresentationIntent=4}
+  20,5  and  {}
+  25,2 em {NSInlinePresentationIntent=1}
+  27,49 \n\n### Third\n\n#### Fourth\n##### Fifth\n###### Sixth {}
+== inlinePreserving 13
+length=60
+  0,24 https://autolink.example {NSLink=url(https://autolink.example)}
+  24,5  and  {}
+  29,20 https://bare.example {NSLink=url(https://bare.example)}
+  49,5  and  {}
+  54,6 titled {NSAlternateDescription=Title; NSLink=url(http://t.example)}
+== inlinePreserving 14
+length=34
+  0,4 both {NSInlinePresentationIntent=3}
+  4,1   {}
+  5,5 under {NSInlinePresentationIntent=1}
+  10,1   {}
+  11,6 strong {NSInlinePresentationIntent=2}
+  17,1   {}
+  18,7 nested  {NSInlinePresentationIntent=1}
+  25,6 inside {NSInlinePresentationIntent=3}
+  31,3  em {NSInlinePresentationIntent=1}
+== inlinePreserving 15
+length=52
+  0,52 escaped *stars* and # hash and a trailing backslash\ {}
+== inlinePreserving 16
+length=50
+  0,50     indented code block\n    second line\n\nparagraph {}
+== inlinePreserving 17
+length=49
+  0,49 1. a\n   - b\n     1. c\n\n> - quoted list\n> > deeper {}
+== inlinePreserving 18
+length=72
+  0,46 | Name | Qty | Note |\n|:-----|----:|:----:|\n|  {}
+  46,1 x {NSInlinePresentationIntent=1}
+  47,7  | 1 |  {}
+  54,1 y {NSInlinePresentationIntent=4}
+  55,14  |\n| z | 22 |  {}
+  69,1 l {NSLink=url(http://l.example)}
+  70,2  | {}
+== inlinePreserving 19
+length=28
+  0,7 no hint {NSInlinePresentationIntent=4}
+  7,21 \n\n~~~python\ntilde\n~~~ {}

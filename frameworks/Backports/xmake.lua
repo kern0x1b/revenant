@@ -479,6 +479,16 @@ if is_plat("iphoneos") and not SELECTED then
         add_syslinks("objc")
     target_end()
 
+    target("MarkdownDumpProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/daemon")
+        add_files("tests/device_probe/markdown_dump_main.m", "src/Foundation/NSAttributedStringMarkdown15.m", "src/Foundation/NSAttributedStringMarkdownSourcePosition.m", "src/Foundation/NSPresentationIntent15.m")
+        add_mflags("-fobjc-arc", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability")
+        add_frameworks("Foundation", "UIKit", "CoreGraphics")
+        add_syslinks("objc")
+    target_end()
+
     target("MapRequestProbe")
         set_kind("binary")
         set_default(false)
