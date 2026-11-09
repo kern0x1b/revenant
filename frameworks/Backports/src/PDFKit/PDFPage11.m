@@ -1,5 +1,8 @@
 #import "RevenantPDFKit.h"
 #import "PDFPageText11.h"
+#import "RevenantPDFCopy.h"
+#import "RevenantPDFImage.h"
+#import <UIKit/UIKit.h>
 #include <ctype.h>
 
 @interface PDFPage ()
@@ -12,6 +15,7 @@
     CGPDFPageRef _page;
     __weak PDFDocument *_document;
     CGPDFDocumentRef _documentRef;
+    NSMutableArray *_retired;
     NSUInteger _index;
     NSArray *_annotations;
     RevenantPDFPageText *_layout;
@@ -23,6 +27,8 @@
 @dynamic string;
 @dynamic annotations;
 @dynamic annotationCount;
+@dynamic pageRef;
+@dynamic dataRepresentation;
 
 - (NSString *)label
 {
@@ -483,21 +489,111 @@ static RevenantPDFPageText *revenantScanPageText(CGPDFPageRef page, RevenantText
     return [self annotations].count;
 }
 
-- (instancetype)initWithCGPDFPage:(CGPDFPageRef)page document:(PDFDocument *)document index:(NSUInteger)index
+- (instancetype)initWithCGPDFPage:(CGPDFPageRef)page owner:(CGPDFDocumentRef)owner document:(PDFDocument *)document index:(NSUInteger)index
 {
     self = [super init];
     if (self == nil)
         return nil;
     if (page == NULL)
         return nil;
-    CGPDFDocumentRef documentRef = [document revenant_CGPDFDocument];
-    if (documentRef != NULL)
-        CGPDFDocumentRetain(documentRef);
+    if (owner != NULL)
+        CGPDFDocumentRetain(owner);
     _page = page;
     _document = document;
-    _documentRef = documentRef;
+    _documentRef = owner;
     _index = index;
+    _retired = [NSMutableArray array];
     return self;
+}
+
+- (instancetype)initWithCGPDFPage:(CGPDFPageRef)page document:(PDFDocument *)document index:(NSUInteger)index
+{
+    return [self initWithCGPDFPage:page owner:[document revenant_CGPDFDocument] document:document index:index];
+}
+
+- (instancetype)initWithPageData:(NSData *)data
+{
+    if (data == nil)
+        return nil;
+    CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)data);
+    if (provider == NULL)
+        return nil;
+    CGPDFDocumentRef owner = CGPDFDocumentCreateWithProvider(provider);
+    CGDataProviderRelease(provider);
+    if (owner == NULL)
+        return nil;
+    self = [self initWithCGPDFPage:CGPDFDocumentGetPage(owner, 1) owner:owner document:nil index:0];
+    CGPDFDocumentRelease(owner);
+    return self;
+}
+
+- (instancetype)init
+{
+    return [self initWithPageData:RevenantPDFBlankPageData(CGRectMake(0, 0, 612, 792))];
+}
+
+static CGImageRef revenantOrientedImage(UIImage *image)
+{
+    CGImageRef source = image.CGImage;
+    if (source == NULL)
+        return NULL;
+    if (image.imageOrientation == UIImageOrientationUp)
+        return CGImageRetain(source);
+    size_t width = CGImageGetWidth(source);
+    size_t height = CGImageGetHeight(source);
+    BOOL sideways = image.imageOrientation == UIImageOrientationLeft || image.imageOrientation == UIImageOrientationRight ||
+                    image.imageOrientation == UIImageOrientationLeftMirrored || image.imageOrientation == UIImageOrientationRightMirrored;
+    size_t outWidth = sideways ? height : width;
+    size_t outHeight = sideways ? width : height;
+    CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
+    CGContextRef context = CGBitmapContextCreate(NULL, outWidth, outHeight, 8, 0, space, (CGBitmapInfo)kCGImageAlphaPremultipliedLast);
+    CGColorSpaceRelease(space);
+    if (context == NULL)
+        return NULL;
+    CGContextTranslateCTM(context, 0, outHeight);
+    CGContextScaleCTM(context, 1, -1);
+    UIGraphicsPushContext(context);
+    [image drawInRect:CGRectMake(0, 0, outWidth, outHeight)];
+    UIGraphicsPopContext();
+    CGImageRef oriented = CGBitmapContextCreateImage(context);
+    CGContextRelease(context);
+    return oriented;
+}
+
+- (instancetype)initWithImage:(UIImage *)image
+{
+    return [self initWithImage:image options:@{}];
+}
+
+- (instancetype)initWithImage:(UIImage *)image options:(NSDictionary *)options
+{
+    if (image == nil)
+        return nil;
+    RevenantPDFImagePage settings = {NO, CGRectZero, 0, NO, RevenantPDFDefaultImageQuality};
+    NSValue *box = options[PDFPageImageInitializationOptionMediaBox];
+    if (box != nil) {
+        settings.hasMediaBox = YES;
+        settings.mediaBox = [box CGRectValue];
+    }
+    NSNumber *turn = options[PDFPageImageInitializationOptionRotation];
+    if (turn != nil) {
+        if (turn.integerValue % 90 != 0)
+            [NSException raise:NSInvalidArgumentException format:@"PDFPageImageInitializationOptionRotation must be a multiple of 90, not %ld", (long)turn.integerValue];
+        settings.rotation = turn.integerValue;
+    }
+    settings.upscaleIfSmaller = [options[PDFPageImageInitializationOptionUpscaleIfSmaller] boolValue];
+    NSNumber *quality = options[PDFPageImageInitializationOptionCompressionQuality];
+    if (quality != nil) {
+        if (quality.doubleValue < 0 || quality.doubleValue > 1)
+            [NSException raise:NSInvalidArgumentException format:@"PDFPageImageInitializationOptionCompressionQuality must be in 0 to 1, not %g", quality.doubleValue];
+        settings.quality = quality.doubleValue;
+    }
+    CGImageRef pixels = revenantOrientedImage(image);
+    if (pixels == NULL)
+        return nil;
+    NSData *data = RevenantPDFImagePageData(pixels, settings);
+    CGImageRelease(pixels);
+    return [self initWithPageData:data];
 }
 
 - (void)dealloc
@@ -505,6 +601,97 @@ static RevenantPDFPageText *revenantScanPageText(CGPDFPageRef page, RevenantText
     _page = NULL;
     if (_documentRef != NULL)
         CGPDFDocumentRelease(_documentRef);
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    return [[[self class] allocWithZone:zone] initWithCGPDFPage:_page owner:_documentRef document:nil index:0];
+}
+
+- (void)revenant_setDocument:(PDFDocument *)document index:(NSUInteger)index
+{
+    _document = document;
+    _index = index;
+}
+
+- (CGPDFPageRef)pageRef
+{
+    return _page;
+}
+
+- (RevenantPDFPageBoxes)revenant_boxes
+{
+    RevenantPDFPageBoxes boxes;
+    boxes.media = [self boundsForBox:kCGPDFMediaBox];
+    boxes.crop = [self boundsForBox:kCGPDFCropBox];
+    boxes.bleed = [self boundsForBox:kCGPDFBleedBox];
+    boxes.trim = [self boundsForBox:kCGPDFTrimBox];
+    boxes.art = [self boundsForBox:kCGPDFArtBox];
+    boxes.rotation = [self rotation];
+    return boxes;
+}
+
+- (void)revenant_replaceWithBoxes:(RevenantPDFPageBoxes)boxes
+{
+    NSData *data = RevenantPDFAssemble(@[ [RevenantPDFPageEntry entryWithPage:_page boxes:boxes] ], @{}, nil, nil, 0, nil);
+    CGDataProviderRef provider = data != nil ? CGDataProviderCreateWithCFData((__bridge CFDataRef)data) : NULL;
+    CGPDFDocumentRef fresh = provider != NULL ? CGPDFDocumentCreateWithProvider(provider) : NULL;
+    CGDataProviderRelease(provider);
+    CGPDFPageRef page = fresh != NULL ? CGPDFDocumentGetPage(fresh, 1) : NULL;
+    if (page == NULL) {
+        if (fresh != NULL)
+            CGPDFDocumentRelease(fresh);
+        [NSException raise:NSInternalInconsistencyException format:@"the page cannot be rewritten with its new boxes"];
+    }
+    @synchronized (self) {
+        if (_documentRef != NULL) {
+            [_retired addObject:(__bridge id)_documentRef];
+            CGPDFDocumentRelease(_documentRef);
+        }
+        _documentRef = fresh;
+        _page = page;
+        _annotations = nil;
+        _layout = nil;
+    }
+    [_document revenant_pageDidChange];
+}
+
+- (void)setBounds:(CGRect)bounds forBox:(CGPDFBox)box
+{
+    RevenantPDFPageBoxes boxes = [self revenant_boxes];
+    CGRect standard = CGRectStandardize(bounds);
+    switch (box) {
+        case kCGPDFMediaBox:
+            boxes.media = standard;
+            break;
+        case kCGPDFCropBox:
+            boxes.crop = standard;
+            break;
+        case kCGPDFBleedBox:
+            boxes.bleed = standard;
+            break;
+        case kCGPDFTrimBox:
+            boxes.trim = standard;
+            break;
+        case kCGPDFArtBox:
+            boxes.art = standard;
+            break;
+    }
+    [self revenant_replaceWithBoxes:boxes];
+}
+
+- (void)setRotation:(NSInteger)rotation
+{
+    if (rotation % 90 != 0)
+        [NSException raise:NSInvalidArgumentException format:@"the rotation of a page must be a multiple of 90, not %ld", (long)rotation];
+    RevenantPDFPageBoxes boxes = [self revenant_boxes];
+    boxes.rotation = (rotation % 360 + 360) % 360;
+    [self revenant_replaceWithBoxes:boxes];
+}
+
+- (NSData *)dataRepresentation
+{
+    return RevenantPDFAssemble(@[ [RevenantPDFPageEntry entryWithPage:_page boxes:[self revenant_boxes]] ], @{}, nil, nil, 0, nil);
 }
 
 - (PDFDocument *)document

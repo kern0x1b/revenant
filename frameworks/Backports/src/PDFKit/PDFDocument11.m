@@ -1,5 +1,6 @@
 #import "RevenantPDFKit.h"
 #import "PDFPageText11.h"
+#import "RevenantPDFCopy.h"
 
 #import <dlfcn.h>
 #import <objc/message.h>
@@ -10,6 +11,9 @@ static NSArray<PDFSelection *> *revenantMatchesOnPage(PDFPage *page, NSString *n
 
 @interface PDFDocument ()
 - (NSDictionary *)revenant_readAttributes;
+- (NSMutableArray *)revenant_entries;
+- (void)revenant_renumberFrom:(NSUInteger)start;
+- (void)revenant_markModified;
 @end
 
 @implementation PDFDocument {
@@ -19,14 +23,21 @@ static NSArray<PDFSelection *> *revenantMatchesOnPage(PDFPage *page, NSString *n
     NSData *_data;
     NSURL *_url;
     NSDictionary *_attributes;
-    NSMutableDictionary<NSNumber *, PDFPage *> *_pages;
+    NSMutableArray *_entries;
     NSObject *_findToken;
+    BOOL _modified;
+    NSMutableArray *_snapshots;
+    CGPDFDocumentRef _snapshot;
 }
 
 @synthesize delegate = _delegate;
 
 @dynamic pageCount;
 @dynamic documentAttributes;
+@dynamic documentRef;
+@dynamic majorVersion;
+@dynamic minorVersion;
+@dynamic pageClass;
 
 - (instancetype)revenant_setUpWithData:(NSData *)data
 {
@@ -39,10 +50,11 @@ static NSArray<PDFSelection *> *revenantMatchesOnPage(PDFPage *page, NSString *n
     CGDataProviderRelease(provider);
     if (_document == NULL)
         return nil;
-    _pages = [NSMutableDictionary dictionary];
     _lastFindResults = [NSMutableArray array];
+    _snapshots = [NSMutableArray array];
     _data = [data copy];
     _attributes = [self revenant_readAttributes];
+    [self revenant_loadEntries];
     return self;
 }
 
@@ -51,9 +63,59 @@ static NSArray<PDFSelection *> *revenantMatchesOnPage(PDFPage *page, NSString *n
     self = [super init];
     if (self == nil)
         return nil;
-    _pages = [NSMutableDictionary dictionary];
+    _entries = [NSMutableArray array];
+    _snapshots = [NSMutableArray array];
+    _lastFindResults = [NSMutableArray array];
     _attributes = @{};
     return self;
+}
+
+- (void)dealloc
+{
+    if (_document != NULL)
+        CGPDFDocumentRelease(_document);
+}
+
+- (void)revenant_loadEntries
+{
+    NSUInteger count = _document != NULL ? (NSUInteger)CGPDFDocumentGetNumberOfPages(_document) : 0;
+    _entries = [NSMutableArray arrayWithCapacity:count];
+    for (NSUInteger index = 0; index < count; index++)
+        [_entries addObject:[NSNull null]];
+}
+
+- (NSMutableArray *)revenant_entries
+{
+    for (NSUInteger index = 0; index < _entries.count; index++) {
+        if (_entries[index] != [NSNull null])
+            continue;
+        CGPDFPageRef page = CGPDFDocumentGetPage(_document, (size_t)index + 1);
+        PDFPage *carried = page != NULL ? [[PDFPage alloc] initWithCGPDFPage:page document:self index:index] : nil;
+        if (carried == nil)
+            [NSException raise:NSInternalInconsistencyException format:@"page %lu of the document cannot be read", (unsigned long)index];
+        _entries[index] = carried;
+    }
+    return _entries;
+}
+
+- (void)revenant_renumberFrom:(NSUInteger)start
+{
+    for (NSUInteger index = start; index < _entries.count; index++) {
+        PDFPage *page = _entries[index];
+        if (page.document == self)
+            [page revenant_setDocument:self index:index];
+    }
+}
+
+- (void)revenant_markModified
+{
+    _modified = YES;
+    _snapshot = NULL;
+}
+
+- (void)revenant_pageDidChange
+{
+    [self revenant_markModified];
 }
 
 - (instancetype)initWithURL:(NSURL *)url
@@ -80,17 +142,17 @@ static NSArray<PDFSelection *> *revenantMatchesOnPage(PDFPage *page, NSString *n
 
 + (instancetype)revenant_documentWithCGPDFDocument:(CGPDFDocumentRef)document
 {
-    PDFDocument *made = [[self alloc] revenant_setUpWithData:nil];
-    if (made == nil || document == NULL)
+    if (document == NULL)
+        return nil;
+    PDFDocument *made = [[self alloc] init];
+    if (made == nil)
         return nil;
     CGPDFDocumentRetain(document);
     made->_document = document;
-    if (made->_pages == nil)
-        made->_pages = [NSMutableDictionary dictionary];
     made->_attributes = [made revenant_readAttributes];
+    [made revenant_loadEntries];
     return made;
 }
-
 
 - (NSDictionary *)revenant_readAttributes
 {
@@ -100,8 +162,7 @@ static NSArray<PDFSelection *> *revenantMatchesOnPage(PDFPage *page, NSString *n
     if (info == NULL)
         return @{};
     NSMutableDictionary *out = [NSMutableDictionary dictionary];
-    for (NSString *name in @[ @"Title", @"Author", @"Subject", @"Creator", @"Producer",
-                              @"CreationDate", @"ModDate" ]) {
+    for (NSString *name in @[ @"Title", @"Author", @"Subject", @"Creator", @"Producer", @"CreationDate", @"ModDate", @"Keywords" ]) {
         CGPDFStringRef key = NULL;
         if (!CGPDFDictionaryGetString(info, [(NSString *)name UTF8String], &key) || key == NULL)
             continue;
@@ -109,8 +170,24 @@ static NSArray<PDFSelection *> *revenantMatchesOnPage(PDFPage *page, NSString *n
         if (text == NULL)
             continue;
         NSString *value = (__bridge_transfer NSString *)text;
-        if (value.length > 0)
+        if (value.length == 0)
+            continue;
+        if ([name isEqualToString:@"CreationDate"] || [name isEqualToString:@"ModDate"]) {
+            NSDate *date = RevenantPDFDateFromString(value);
+            if (date != nil)
+                out[name] = date;
+        } else if ([name isEqualToString:@"Keywords"]) {
+            NSMutableArray *keywords = [NSMutableArray array];
+            for (NSString *piece in [value componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@",;"]]) {
+                NSString *keyword = [piece stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+                if (keyword.length > 0)
+                    [keywords addObject:keyword];
+            }
+            if (keywords.count > 0)
+                out[name] = keywords;
+        } else {
             out[name] = value;
+        }
     }
     return out;
 }
@@ -118,6 +195,12 @@ static NSArray<PDFSelection *> *revenantMatchesOnPage(PDFPage *page, NSString *n
 - (NSDictionary *)documentAttributes
 {
     return _attributes;
+}
+
+- (void)setDocumentAttributes:(NSDictionary *)attributes
+{
+    _attributes = [attributes copy] ?: @{};
+    [self revenant_markModified];
 }
 
 - (id)documentAttribute:(NSString *)attributeName
@@ -143,6 +226,8 @@ static NSArray<PDFSelection *> *revenantMatchesOnPage(PDFPage *page, NSString *n
         return NO;
     if (!CGPDFDocumentUnlockWithPassword(_document, password.UTF8String))
         return NO;
+    if (!_modified)
+        [self revenant_loadEntries];
     [[NSNotificationCenter defaultCenter] postNotificationName:PDFDocumentDidUnlockNotification object:self];
     return YES;
 }
@@ -157,40 +242,234 @@ static NSArray<PDFSelection *> *revenantMatchesOnPage(PDFPage *page, NSString *n
     return _url;
 }
 
+- (NSDictionary *)revenant_infoDictionary
+{
+    NSMutableDictionary *info = [NSMutableDictionary dictionary];
+    for (NSString *key in @[ PDFDocumentTitleAttribute, PDFDocumentAuthorAttribute, PDFDocumentSubjectAttribute, PDFDocumentCreatorAttribute,
+                             PDFDocumentProducerAttribute ]) {
+        NSString *value = _attributes[key];
+        if ([value isKindOfClass:[NSString class]] && value.length > 0)
+            info[key] = value;
+    }
+    id keywords = _attributes[PDFDocumentKeywordsAttribute];
+    if ([keywords isKindOfClass:[NSArray class]])
+        keywords = [keywords componentsJoinedByString:@", "];
+    if ([keywords isKindOfClass:[NSString class]] && [keywords length] > 0)
+        info[PDFDocumentKeywordsAttribute] = keywords;
+    NSDate *now = [NSDate date];
+    NSDate *created = _attributes[PDFDocumentCreationDateAttribute];
+    info[PDFDocumentCreationDateAttribute] = [created isKindOfClass:[NSDate class]] ? created : now;
+    info[PDFDocumentModificationDateAttribute] = now;
+    return info;
+}
+
+- (void)revenant_post:(NSString *)name pageIndex:(NSUInteger)index
+{
+    NSDictionary *userInfo = index == NSNotFound ? nil : @{PDFDocumentPageIndexKey: @(index)};
+    [[NSNotificationCenter defaultCenter] postNotificationName:name object:self userInfo:userInfo];
+}
+
+- (NSData *)revenant_assembleWithOwner:(NSString *)owner user:(NSString *)user permissions:(uint32_t)permissions notify:(BOOL)notify
+{
+    NSArray *pages = [self revenant_entries];
+    if (pages.count == 0)
+        return nil;
+    NSMutableArray *entries = [NSMutableArray arrayWithCapacity:pages.count];
+    for (PDFPage *page in pages) {
+        CGPDFPageRef source = page.pageRef;
+        if (source == NULL)
+            return nil;
+        [entries addObject:[RevenantPDFPageEntry entryWithPage:source boxes:[page revenant_boxes]]];
+    }
+    if (notify)
+        [self revenant_post:PDFDocumentDidBeginWriteNotification pageIndex:NSNotFound];
+    NSData *data = RevenantPDFAssemble(entries, [self revenant_infoDictionary], owner, user, permissions, ^(NSUInteger index, BOOL finished) {
+        if (notify)
+            [self revenant_post:finished ? PDFDocumentDidEndPageWriteNotification : PDFDocumentDidBeginPageWriteNotification pageIndex:index];
+    });
+    if (notify)
+        [self revenant_post:PDFDocumentDidEndWriteNotification pageIndex:NSNotFound];
+    return data;
+}
+
 - (NSData *)dataRepresentation
 {
-    return _data;
+    return [self dataRepresentationWithOptions:@{}];
+}
+
+- (NSData *)dataRepresentationWithOptions:(NSDictionary *)options
+{
+    NSString *owner = options[PDFDocumentOwnerPasswordOption];
+    if (![owner isKindOfClass:[NSString class]])
+        owner = nil;
+    NSString *user = options[PDFDocumentUserPasswordOption];
+    if (![user isKindOfClass:[NSString class]])
+        user = nil;
+    if (!_modified && _data != nil && owner.length == 0)
+        return _data;
+    NSNumber *granted = options[PDFDocumentAccessPermissionsOption];
+    uint32_t permissions = RevenantPDFPermissionBits([granted isKindOfClass:[NSNumber class]] ? granted.unsignedIntegerValue : NSUIntegerMax);
+    return [self revenant_assembleWithOwner:owner user:user permissions:permissions notify:YES];
+}
+
+- (BOOL)writeToFile:(NSString *)path
+{
+    return [self writeToFile:path withOptions:nil];
+}
+
+- (BOOL)writeToFile:(NSString *)path withOptions:(NSDictionary *)options
+{
+    if (path.length == 0)
+        return NO;
+    return [self writeToURL:[NSURL fileURLWithPath:path] withOptions:options];
+}
+
+- (BOOL)writeToURL:(NSURL *)url
+{
+    return [self writeToURL:url withOptions:nil];
+}
+
+- (BOOL)writeToURL:(NSURL *)url withOptions:(NSDictionary *)options
+{
+    if (![url isFileURL])
+        return NO;
+    NSData *data = [self dataRepresentationWithOptions:options ?: @{}];
+    if (data == nil)
+        return NO;
+    return [data writeToURL:url options:NSDataWritingAtomic error:NULL];
+}
+
+- (CGPDFDocumentRef)documentRef
+{
+    if (!_modified && _document != NULL)
+        return _document;
+    if (_snapshot != NULL)
+        return _snapshot;
+    NSData *data = [self revenant_assembleWithOwner:nil user:nil permissions:0 notify:NO];
+    CGDataProviderRef provider = data != nil ? CGDataProviderCreateWithCFData((__bridge CFDataRef)data) : NULL;
+    CGPDFDocumentRef made = provider != NULL ? CGPDFDocumentCreateWithProvider(provider) : NULL;
+    CGDataProviderRelease(provider);
+    if (made == NULL)
+        return NULL;
+    [_snapshots addObject:(__bridge id)made];
+    CGPDFDocumentRelease(made);
+    _snapshot = made;
+    return made;
+}
+
+- (NSInteger)revenant_versionPart:(BOOL)major
+{
+    CGPDFDocumentRef source = _modified ? NULL : _document;
+    if (source == NULL)
+        return 0;
+    int majorVersion = 0;
+    int minorVersion = 0;
+    CGPDFDocumentGetVersion(source, &majorVersion, &minorVersion);
+    return major ? majorVersion : minorVersion;
+}
+
+- (NSInteger)majorVersion
+{
+    return [self revenant_versionPart:YES];
+}
+
+- (NSInteger)minorVersion
+{
+    return [self revenant_versionPart:NO];
+}
+
+- (Class)pageClass
+{
+    return [PDFPage class];
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    PDFDocument *copy = [[[self class] allocWithZone:zone] init];
+    if (copy == nil)
+        return nil;
+    copy->_document = _document != NULL ? CGPDFDocumentRetain(_document) : NULL;
+    copy->_data = _data;
+    copy->_url = _url;
+    copy->_attributes = _attributes;
+    copy->_modified = _modified;
+    for (PDFPage *page in [self revenant_entries]) {
+        PDFPage *duplicate = [page copy];
+        if (duplicate == nil)
+            continue;
+        [copy->_entries addObject:duplicate];
+        [duplicate revenant_setDocument:copy index:copy->_entries.count - 1];
+    }
+    return copy;
 }
 
 - (NSUInteger)pageCount
 {
-    if (_document == NULL)
-        return 0;
-    return (NSUInteger)CGPDFDocumentGetNumberOfPages(_document);
+    return _entries.count;
 }
 
 - (nullable PDFPage *)pageAtIndex:(NSUInteger)index
 {
-    if (_document == NULL || index >= (NSUInteger)CGPDFDocumentGetNumberOfPages(_document))
+    if (index >= _entries.count)
         return nil;
-    PDFPage *cached = _pages[@(index)];
-    if (cached != nil)
-        return cached;
+    id entry = _entries[index];
+    if (entry != [NSNull null])
+        return entry;
     CGPDFPageRef page = CGPDFDocumentGetPage(_document, (size_t)index + 1);
     if (page == NULL)
         return nil;
     PDFPage *carried = [[PDFPage alloc] initWithCGPDFPage:page document:self index:index];
     if (carried == nil)
         return nil;
-    _pages[@(index)] = carried;
+    _entries[index] = carried;
     return carried;
 }
 
 - (NSUInteger)indexForPage:(PDFPage *)page
 {
-    if (page == nil || page.document != self)
+    if (page == nil)
         return NSNotFound;
-    return page.pageIndex;
+    for (NSUInteger index = 0; index < _entries.count; index++) {
+        if (_entries[index] == page)
+            return index;
+    }
+    return NSNotFound;
+}
+
+- (void)insertPage:(PDFPage *)page atIndex:(NSUInteger)index
+{
+    if (page == nil)
+        [NSException raise:NSInvalidArgumentException format:@"-[PDFDocument insertPage:atIndex:]: page is nil"];
+    NSMutableArray *entries = [self revenant_entries];
+    if (index > entries.count)
+        [NSException raise:NSRangeException format:@"-[PDFDocument insertPage:atIndex:]: index %lu beyond bounds for a document of %lu pages", (unsigned long)index, (unsigned long)entries.count];
+    [entries insertObject:page atIndex:index];
+    [page revenant_setDocument:self index:index];
+    [self revenant_renumberFrom:index + 1];
+    [self revenant_markModified];
+}
+
+- (void)removePageAtIndex:(NSUInteger)index
+{
+    NSMutableArray *entries = [self revenant_entries];
+    if (index >= entries.count)
+        return;
+    PDFPage *page = entries[index];
+    [entries removeObjectAtIndex:index];
+    if (page.document == self && [self indexForPage:page] == NSNotFound)
+        [page revenant_setDocument:nil index:0];
+    [self revenant_renumberFrom:index];
+    [self revenant_markModified];
+}
+
+- (void)exchangePageAtIndex:(NSUInteger)indexA withPageAtIndex:(NSUInteger)indexB
+{
+    NSMutableArray *entries = [self revenant_entries];
+    if (indexA >= entries.count || indexB >= entries.count || indexA == indexB)
+        return;
+    [entries exchangeObjectAtIndex:indexA withObjectAtIndex:indexB];
+    [self revenant_renumberFrom:MIN(indexA, indexB)];
+    [self revenant_markModified];
 }
 
 - (BOOL)isFinding

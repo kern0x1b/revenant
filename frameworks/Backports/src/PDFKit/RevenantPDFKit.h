@@ -1,6 +1,8 @@
 #import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 
+#import "RevenantPDFCopy.h"
+
 NS_ASSUME_NONNULL_BEGIN
 
 @class PDFPage;
@@ -13,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class PDFDestination;
 @class PDFOutline;
 
-@interface PDFDocument : NSObject
+@interface PDFDocument : NSObject <NSCopying>
 - (nullable instancetype)init NS_DESIGNATED_INITIALIZER;
 - (NSArray<PDFSelection *> *)findString:(NSString *)string withOptions:(NSStringCompareOptions)options;
 - (nullable PDFSelection *)findString:(NSString *)string
@@ -22,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable instancetype)initWithURL:(NSURL *)url NS_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithData:(NSData *)data NS_DESIGNATED_INITIALIZER;
 @property (readonly) NSUInteger pageCount;
-@property (readonly, nullable) NSDictionary<NSString *, id> *documentAttributes;
+@property (nonatomic, copy, nullable) NSDictionary<NSString *, id> *documentAttributes;
 - (nullable id)documentAttribute:(NSString *)attributeName;
 - (nullable PDFPage *)pageAtIndex:(NSUInteger)index;
 @property (readonly) BOOL isLocked;
@@ -30,13 +32,25 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readonly) BOOL allowsCopying;
 - (BOOL)unlockWithPassword:(NSString *)password;
 @property (readonly, nullable) NSURL *documentURL;
-@property (readonly, nullable) NSData *dataRepresentation;
+@property (readonly, nullable) CGPDFDocumentRef documentRef;
+@property (readonly) NSInteger majorVersion;
+@property (readonly) NSInteger minorVersion;
+@property (readonly) Class pageClass;
+- (nullable NSData *)dataRepresentation;
+- (nullable NSData *)dataRepresentationWithOptions:(NSDictionary *)options;
+- (BOOL)writeToFile:(NSString *)path;
+- (BOOL)writeToFile:(NSString *)path withOptions:(nullable NSDictionary<NSString *, id> *)options;
+- (BOOL)writeToURL:(NSURL *)url;
+- (BOOL)writeToURL:(NSURL *)url withOptions:(nullable NSDictionary<NSString *, id> *)options;
 @property (readonly, nullable) PDFOutline *outlineRoot;
 @property (nonatomic, weak, nullable) id delegate;
 @property (readonly, getter=isFinding) BOOL finding;
 - (void)beginFindString:(NSString *)string withOptions:(NSStringCompareOptions)options;
 - (void)cancelFindString;
 - (NSUInteger)indexForPage:(PDFPage *)page;
+- (void)insertPage:(PDFPage *)page atIndex:(NSUInteger)index;
+- (void)removePageAtIndex:(NSUInteger)index;
+- (void)exchangePageAtIndex:(NSUInteger)indexA withPageAtIndex:(NSUInteger)indexB;
 @end
 
 extern NSString *const PDFDocumentDidUnlockNotification;
@@ -45,35 +59,69 @@ extern NSString *const PDFDocumentDidEndFindNotification;
 extern NSString *const PDFDocumentDidBeginPageFindNotification;
 extern NSString *const PDFDocumentDidEndPageFindNotification;
 extern NSString *const PDFDocumentDidFindMatchNotification;
+extern NSString *const PDFDocumentDidBeginWriteNotification;
+extern NSString *const PDFDocumentDidEndWriteNotification;
+extern NSString *const PDFDocumentDidBeginPageWriteNotification;
+extern NSString *const PDFDocumentDidEndPageWriteNotification;
 extern NSString *const PDFDocumentFoundSelectionKey;
 extern NSString *const PDFDocumentPageIndexKey;
+extern NSString *const PDFDocumentOwnerPasswordOption;
+extern NSString *const PDFDocumentUserPasswordOption;
+extern NSString *const PDFDocumentAccessPermissionsOption;
+extern NSString *const PDFDocumentTitleAttribute;
+extern NSString *const PDFDocumentAuthorAttribute;
+extern NSString *const PDFDocumentSubjectAttribute;
+extern NSString *const PDFDocumentCreatorAttribute;
+extern NSString *const PDFDocumentProducerAttribute;
+extern NSString *const PDFDocumentCreationDateAttribute;
+extern NSString *const PDFDocumentModificationDateAttribute;
+extern NSString *const PDFDocumentKeywordsAttribute;
+extern NSString *const PDFPageImageInitializationOptionMediaBox;
+extern NSString *const PDFPageImageInitializationOptionRotation;
+extern NSString *const PDFPageImageInitializationOptionUpscaleIfSmaller;
+extern NSString *const PDFPageImageInitializationOptionCompressionQuality;
 
-@interface PDFPage : NSObject
+@class UIImage;
+
+@interface PDFPage : NSObject <NSCopying>
+- (nullable instancetype)init NS_DESIGNATED_INITIALIZER;
+- (nullable instancetype)initWithImage:(UIImage *)image;
+- (nullable instancetype)initWithImage:(UIImage *)image options:(NSDictionary<NSString *, id> *)options NS_DESIGNATED_INITIALIZER;
 - (nullable instancetype)initWithCGPDFPage:(CGPDFPageRef)page
                                    document:(nullable PDFDocument *)document
                                       index:(NSUInteger)index;
 @property (readonly, nullable, weak) PDFDocument *document;
 @property (readonly) NSUInteger pageIndex;
+@property (readonly, nullable) CGPDFPageRef pageRef;
 @property (readonly) CGRect cropBox;
-@property (readonly) NSInteger rotation;
+@property (nonatomic) NSInteger rotation;
 @property (readonly, copy, nullable) NSString *string;
 - (CGRect)boundsForBox:(CGPDFBox)box;
+- (void)setBounds:(CGRect)bounds forBox:(CGPDFBox)box;
 @property (readonly) CGRect mediaBox;
 @property (readonly, copy, nullable) NSString *label;
 @property (readonly) NSUInteger numberOfCharacters;
 @property (readonly) NSUInteger annotationCount;
 @property (readonly, copy) NSArray *annotations;
+@property (readonly, nullable) NSData *dataRepresentation;
 - (CGAffineTransform)transformForBox:(NSInteger)box;
 - (void)drawWithBox:(NSInteger)box toContext:(CGContextRef)context;
 @end
 
 @interface PDFDocument (RevenantInternals)
 - (nullable CGPDFDocumentRef)revenant_CGPDFDocument;
+- (void)revenant_pageDidChange;
 @end
 
 @interface PDFPage (RevenantInternals)
 - (nullable CGPDFPageRef)revenant_CGPDFPage;
 - (nullable RevenantPDFPageText *)revenant_textLayout;
+- (nullable instancetype)initWithCGPDFPage:(CGPDFPageRef)page
+                                     owner:(nullable CGPDFDocumentRef)owner
+                                  document:(nullable PDFDocument *)document
+                                     index:(NSUInteger)index;
+- (void)revenant_setDocument:(nullable PDFDocument *)document index:(NSUInteger)index;
+- (RevenantPDFPageBoxes)revenant_boxes;
 @end
 
 @interface PDFAnnotation : NSObject

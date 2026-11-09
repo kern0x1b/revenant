@@ -36,7 +36,7 @@ local LIBRARIES = {
     {name = "AuthenticationServicesBackports", folder = "AuthenticationServices", frameworks = {"UIKit", "Foundation", "CoreGraphics"}, libraries = {"FoundationBackports", "SafariServicesBackports"}, archives = {}, system = {}},
     {name = "BackgroundTasksBackports", folder = "BackgroundTasks", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "DeviceCheckBackports", folder = "DeviceCheck", frameworks = {"DeviceCheck", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "VisionKitBackports", folder = "VisionKit", frameworks = {"VisionKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
+    {name = "VisionKitBackports", folder = "VisionKit", frameworks = {"VisionKit", "UIKit", "AVFoundation", "CoreMedia", "CoreVideo", "CoreGraphics", "ImageIO", "QuartzCore", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "PhotosBackports", folder = "Photos", frameworks = {"AssetsLibrary", "AVFoundation", "CoreLocation", "CoreGraphics", "ImageIO", "MobileCoreServices", "UIKit", "Foundation", "PhotosUI"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "GameControllerBackports", folder = "GameController", frameworks = {"UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreMLBackports", folder = "CoreML", frameworks = {"CoreML", "CoreVideo", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -88,7 +88,7 @@ local LIBRARIES = {
     {name = "VideoToolboxBackports", folder = "VideoToolbox", frameworks = {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreGraphics", "CoreFoundation", "Foundation"},libraries = {"FoundationBackports", "CoreMediaBackports"}, archives = {"ffmpeg-hevc"}, system = {}},
     {name = "ModelIOBackports", folder = "ModelIO", frameworks = {"ModelIO", "CoreGraphics", "ImageIO", "MobileCoreServices", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "GameplayKitBackports", folder = "GameplayKit", frameworks = {"Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
-    {name = "PDFKitBackports", folder = "PDFKit", frameworks = {"PDFKit", "UIKit", "CoreGraphics", "QuartzCore", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
+    {name = "PDFKitBackports", folder = "PDFKit", frameworks = {"PDFKit", "UIKit", "CoreGraphics", "ImageIO", "QuartzCore", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {"z"}},
     {name = "NetworkExtensionBackports", folder = "NetworkExtension", frameworks = {"NetworkExtension", "Foundation", "SystemConfiguration"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
 }
 

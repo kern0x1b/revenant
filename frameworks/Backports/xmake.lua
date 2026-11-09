@@ -115,6 +115,10 @@ if is_plat("iphoneos") then
             if library.name == "SecurityBackports" then
                 add_files(os.files(path.join(SRC, "Security", "SecureTransport", "*.m")))
             end
+            if library.name == "VisionKitBackports" then
+                add_files(path.join(SRC, "Vision", "VNRectangleDetector.c"))
+                add_includedirs(path.join(SRC, "Vision"))
+            end
             if library.name == "TLSBackports" or library.name == "UIKitBackports" then
                 after_build(function (target)
                     local exported = os.iorunv("nm", {"-gU", target:targetfile()})
@@ -994,6 +998,8 @@ if not is_plat("iphoneos") then
     host_tests("WebKit", {webkit = {"WKSnapshotConfiguration.m", "WKURLSchemes.m", "WKSecurityOrigin.m"}}, nil, {"Foundation", "WebKit", "CoreGraphics"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("Photos", {image_source = {"RevenantPhotosImageSource.c"}, image_cache = {"RevenantPhotosImageCache.m"}, photo_moves = {"RevenantPhotoMoves.c"}})
     host_tests("PDFKit", {layout = {"RevenantPDFLayout.m"}}, nil, {"Foundation", "CoreGraphics"})
+    host_tests("PDFKit", {writer = {"RevenantPDFObjects.m", "RevenantPDFImage.m", "RevenantPDFCopy.m"}}, nil, {"Foundation", "CoreGraphics", "ImageIO", "CoreText", "PDFKit", "AppKit"}, {syslinks = {"z"}})
+    host_tests("VisionKit", {warp = {"RevenantDocumentWarp.c"}}, nil, {}, {extension = "c"})
     host_tests("UIKit", {animation_duration = {"RevenantAnimationDuration.m"}, tightening = {"RevenantTightening.m"}, corner_path = {"RevenantCornerPath.c"}}, nil, {"Foundation", "CoreGraphics"})
     host_tests("AuthenticationServices", {authorization = {"ASAuthorizationController.m", "ASAuthorizationPlatformPublicKeyCredentialProvider.m", "ASAuthorizationPlatformPublicKeyCredentialRequests.m", "ASAuthorizationRequest.m", "ASConstants13_0.m", "RevenantASAppleIDButtonMetrics.m"}}, nil, {"Foundation", "AuthenticationServices", "AppKit"}, {defines = {"REVENANT_HOST_BUILD"}})
 end
