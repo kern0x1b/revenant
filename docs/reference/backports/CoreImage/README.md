@@ -47,26 +47,45 @@ On iOS 6 a Metal device is `RevenantMetalDevice`, which owns an `EAGLContext` (`
 and `-[CIContext render:toBitmap:rowBytes:bounds:format:colorSpace:]`; the backport maps the iOS 9 Metal calls onto them.
 
 - `CIContextMetal9.m`: `contextWithMTLDevice:` and `contextWithMTLDevice:options:` return `contextWithEAGLContext:options:` of the device's context, or nil for
-  a device that is not the backport's. The command-queue forms use the queue's device. `render:toMTLTexture:commandBuffer:bounds:colorSpace:` renders the
-  bounds to a bitmap with `render:toBitmap:` and writes the bitmap into the texture with `replaceRegion:`. The texture's row 0 is the bottom row of the image
-  (the convention of a default, non-flipped Metal destination as CoreImage uses it), so the image is flipped vertically before it is read back. Texture formats
-  are BGRA8, RGBA8, RGBA16F and RGBA32F; another format, an image of null or infinite bounds, or a texture of a type other than 2D draws nothing.
+  a device that is not the backport's, and keep the options on the context. The command-queue forms use the queue's device.
+  `render:toMTLTexture:commandBuffer:bounds:colorSpace:` draws into the texture without a copy through memory: it makes the device's GL context current, binds the
+  framebuffer of the texture, clears the part of the texture the bounds cover to transparent (`drawImage:` blends over what is there, a Metal render replaces it),
+  and calls `drawImage:inRect:fromRect:` of a context for the call's colour space. The framebuffer binding, viewport, scissor, clear colour and colour mask of the
+  GL context are restored afterwards. The texture's row 0 is the bottom row of the image (the convention of a default, non-flipped Metal destination as
+  CoreImage uses it), which is the orientation `drawImage:` gives, so there is no flip. The colour space of a call cannot be given to `drawImage:`, which uses the
+  output colour space of its context, so the first call with a colour space makes a context of the same EAGL context and the options of the first one with that
+  output colour space, and keeps it; a call with no colour space uses the working colour space of the context as the output (nothing to convert), or none when
+  the working colour space is `NSNull`. Texture formats are BGRA8, RGBA8 and RGBA16F; another format, an image of null or infinite bounds, a texture of a
+  type other than 2D, and RGBA32F draw nothing (see Gaps).
 - `CIImageMetalTexture9.m`: `imageWithMTLTexture:options:` and `initWithMTLTexture:options:` wrap the texture's GL name with `initWithTexture:size:flipped:colorSpace:`
   (`flipped:NO`, the colour space from `kCIImageColorSpace`, where `NSNull` means none). Only a 2D texture of the backport in BGRA8 or RGBA8 gives an image;
   any other gives nil. `metalTexture` returns the texture for an image made with no options and nil for any other image.
 - `render:toCVPixelBuffer:` is CoreImage's own and needed no work; the probe checks that it takes an image of a texture.
 
-Gaps (C54): the render goes through the CPU. CoreImage renders the bounds into a bitmap in memory and the bitmap is copied into the texture, once per call, and the `commandBuffer` argument is
-ignored, so the work is complete when the call returns and a later `commit` waits for nothing. The probe passes `NSNull` for `kCIContextWorkingColorSpace` and
-`kCIContextOutputColorSpace` and for `kCIImageColorSpace`, so that the values compare exactly; what the default colour management does to the values of a
-bridged render was not measured.
+Gaps (C54): one render still goes through memory and one format draws nothing. (1) With no colour space in the call and CoreImage's default working colour
+space (the context made without `kCIContextWorkingColorSpace`), `drawImage:` cannot give the working-space values that `render:toBitmap:colorSpace:NULL`
+gives: a context with `kCIContextOutputColorSpace` set to `NSNull` converts to device RGB like one with the default, and iOS 6 has no
+`kCGColorSpaceGenericRGBLinear` to name the default working space; that call keeps the old route, `render:toBitmap:` and `replaceRegion:`. (2) RGBA32F: the GPU
+has no framebuffer for the texture (`glCheckFramebufferStatus` 0x8cdd) and iOS 6.1.3 does not export `kCIFormatRGBAf`, so the call draws nothing; the code
+before this change read the missing constant and crashed (measured, a segmentation fault in the probe). (3) The `commandBuffer` argument is not used: the backport's
+encoders and this draw both issue GL commands at once on the same context, so a render is ordered with the passes encoded before and after it. (4) The first
+call with a colour space makes a `CIContext`; the time of that call was not measured.
 
-Checked on the iPhone 4S (iOS 6.1.3, 2026-11-08), `frameworks/Backports/tests/device_probe/ci_metal_main.m` (target `CIMetalProbe`), 11 of 11:
-a context for the device with and without options; the size of an image of a texture; `metalTexture` for an image made with and without options; the first
-texture row is the bottom row of the image; rendering an image of a texture into a texture gives the same rows back; bounds that pick a 2 by 2 part to the
-texture's origin; BGRA channel order; a pixel buffer rendered from the image holds the top row first; a texture of an unsupported format gives no image.
+Checked on the iPhone 4S (iOS 6.1.3, 2026-11-09), `frameworks/Backports/tests/device_probe/ci_metal_main.m` (target `CIMetalProbe`), 19 of 19 (the `--negative` run fails 17): a context for the
+device with and without options; the size of an image of a texture; `metalTexture` for an image made with and without options; the first texture row is the
+bottom row of the image; rendering an image of a texture into a texture gives the same rows back; bounds that pick a 2 by 2 part to the texture's origin; BGRA channel
+order; a pixel buffer rendered from the image holds the top row first; the values equal CoreImage's own render through memory (largest difference 0 on a
+256-level ramp) for each of three working colour spaces (none, generic RGB, default) with each of three colour spaces in the call (none, device RGB, generic RGB), and under
+the default working space the colour space of the call changes the values by more than 8 (so the comparison can tell them apart); a render replaces a texture that held 0x77 with translucent
+pixels and a transparent margin as the memory route does; a render raises no GL error and restores the framebuffer, viewport, scissor box and enable, clear colour and colour mask; the
+filter and wrap parameters of the texture that is read do not change; a half-float texture receives the image; a context made for the software renderer renders the same
+rows; a render into a full-float texture returns with no GL error; a texture of an unsupported format gives no image.
+
+Timing on the A5 (same probe, a noise texture scaled by 0.9, the mean of 10 renders, the GPU finished with `glFinish` before the clock stops): 512 by 384 took 8.9 ms
+through memory and 1.8 ms drawn; 1024 by 768 took 27.3 ms and 5.7 ms. The memory route, kept for the one case above, still costs that.
+
+Not measured: that a Metal pass of the backport that reads the texture after such a render sees the values the render wrote (the probe reads the texture back with `getBytes:`, which reads the
+same framebuffer); MediaEditor's own frames.
 
 Found while measuring, not caused by this change: a Metal texture of 4 by 2 or 8 by 2 texels does not give back what `replaceRegion:` wrote when read with `getBytes:`,
 while 4 by 4 and 2 by 2 do. The probe uses 4 by 4 and 2 by 2. The cause is in the texture backport or the driver and is not investigated here.
-
-Not measured: the time of one render of a full-size frame on the A5; MediaEditor's own frames through the bridge.
