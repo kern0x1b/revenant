@@ -81,6 +81,14 @@ extension Locale {
                 self.script = script
                 self.region = region
             }
+
+            public init(identifier: String) {
+                self = Language.components(of: identifier)
+            }
+
+            public init(language: Language) {
+                self = language.parts
+            }
         }
 
         private let parts: Components
@@ -132,11 +140,12 @@ extension Locale {
         }
 
         private static func completed(_ components: Components) -> Components {
-            guard components.script == nil, let code = components.languageCode, !code.identifier.isEmpty else {
+            let code = components.languageCode?.identifier ?? ""
+            guard components.script == nil, !code.isEmpty || components.region != nil else {
                 return components
             }
             var result = components
-            result.script = likelyScript(language: code.identifier, region: components.region?.identifier)
+            result.script = likelyScript(language: code.isEmpty ? "und" : code, region: components.region?.identifier)
             return result
         }
 
@@ -148,15 +157,48 @@ extension Locale {
             return maximal.split(separator: "_").dropFirst().first(where: { $0.count == 4 }).map { Script(String($0)) }
         }
 
-        private static func likelySubtags(_ locale: String) -> String? {
+        private static func transformed(_ locale: String, by function: ICULocaleTransform) -> String? {
             var output = [CChar](repeating: 0, count: 256)
             var status: Int32 = 0
-            let length = Int(icuAddLikelySubtags(locale, &output, Int32(output.count), &status))
+            let length = Int(function(locale, &output, Int32(output.count), &status))
             guard status <= 0, length > 0, length < output.count else {
                 return nil
             }
             return String(decoding: output[..<length].map { UInt8(bitPattern: $0) }, as: UTF8.self)
         }
+
+        private static func likelySubtags(_ locale: String) -> String? {
+            return transformed(locale, by: icuAddLikelySubtags)
+        }
+
+        private static func joined(_ found: Components, by separator: String) -> String {
+            return [found.languageCode?.identifier, found.script?.identifier, found.region?.identifier]
+                .compactMap({ $0 }).joined(separator: separator)
+        }
+
+        private func identifier(transformedBy function: ICULocaleTransform) -> String {
+            guard parts.languageCode != nil || parts.script != nil || parts.region != nil else {
+                return ""
+            }
+            let input = Language.joined(Components(languageCode: parts.languageCode ?? "und", script: parts.script, region: parts.region), by: "_")
+            guard let output = Language.transformed(input, by: function) else {
+                return Language.joined(parts, by: "-")
+            }
+            return Language.joined(Language.components(of: output), by: "-")
+        }
+
+        public var maximalIdentifier: String {
+            return identifier(transformedBy: icuAddLikelySubtags)
+        }
+
+        public var minimalIdentifier: String {
+            return identifier(transformedBy: icuMinimizeSubtags)
+        }
+
+        public func isEquivalent(to language: Language) -> Bool {
+            return maximalIdentifier == language.maximalIdentifier
+        }
+
 
         private static func components(of identifier: String) -> Components {
             let base = identifier.split(separator: "@", maxSplits: 1, omittingEmptySubsequences: false).first.map(String.init) ?? ""
@@ -221,11 +263,15 @@ extension Locale {
     }
 }
 
-private typealias ICULikelySubtags = @convention(c) (UnsafePointer<CChar>, UnsafeMutablePointer<CChar>, Int32, UnsafeMutablePointer<Int32>) -> Int32
+private typealias ICULocaleTransform = @convention(c) (UnsafePointer<CChar>, UnsafeMutablePointer<CChar>, Int32, UnsafeMutablePointer<Int32>) -> Int32
 
-private let icuAddLikelySubtags: ICULikelySubtags = {
-    guard let library = dlopen("/usr/lib/libicucore.dylib", RTLD_LAZY), let symbol = dlsym(library, "uloc_addLikelySubtags") else {
-        fatalError("libicucore does not export uloc_addLikelySubtags")
+private func icuLocaleTransform(_ name: String) -> ICULocaleTransform {
+    guard let library = dlopen("/usr/lib/libicucore.dylib", RTLD_LAZY), let symbol = dlsym(library, name) else {
+        fatalError("libicucore does not export \(name)")
     }
-    return unsafeBitCast(symbol, to: ICULikelySubtags.self)
-}()
+    return unsafeBitCast(symbol, to: ICULocaleTransform.self)
+}
+
+private let icuAddLikelySubtags = icuLocaleTransform("uloc_addLikelySubtags")
+
+private let icuMinimizeSubtags = icuLocaleTransform("uloc_minimizeSubtags")

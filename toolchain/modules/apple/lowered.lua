@@ -2970,12 +2970,30 @@ local function swift_init(key)
     return "init " .. label:sub(1, 1):lower() .. label:sub(2) .. ":" .. kind
 end
 
+local SWIFT_OVERLAY_NAMES = {
+    NSCalendar = {
+        ["-componentsInTimeZone:fromDate:"] = "dateComponents",
+        ["-components:fromDateComponents:toDateComponents:options:"] = "dateComponents",
+        ["-compareDate:toDate:toUnitGranularity:"] = "compare",
+        ["-rangeOfWeekendStartDate:interval:containingDate:"] = "dateIntervalOfWeekend",
+        ["-nextWeekendStartDate:interval:options:afterDate:"] = "nextWeekend",
+        ["-enumerateDatesStartingAfterDate:matchingComponents:options:usingBlock:"] = "enumerateDates",
+        ["-nextDateAfterDate:matchingComponents:options:"] = "nextDate",
+    },
+}
+
 function swift_names(set)
     local names = {}
     for class, members in pairs(set.classes) do
         local weak = set.weak_classes and set.weak_classes[class]
         local scope = class:startswith("NS") and class:sub(3) or class
         names["scoped " .. scope] = true
+        for key, swift in pairs(weak and {} or SWIFT_OVERLAY_NAMES[class] or {}) do
+            if members[key] then
+                names[swift] = true
+                names["scope " .. scope .. " " .. swift] = true
+            end
+        end
         for key in pairs(weak and {} or members) do
             local base = not key:sub(2):find("^init") and swift_base(key:sub(2))
             if base then
@@ -3008,7 +3026,7 @@ local function implemented_scope(scope, names)
 end
 
 local function lowered_by(line, names, types, scope)
-    local name = line:match("public%s+var%s+([%a_][%w_]*)") or line:match("public%s+func%s+([%a_][%w_]*)")
+    local name = line:match("public%s+[%a%s]-var%s+([%a_][%w_]*)") or line:match("public%s+[%a%s]-func%s+([%a_][%w_]*)")
     if name then
         if scope and names["scoped " .. scope] then
             return names["scope " .. scope .. " " .. name] or false
