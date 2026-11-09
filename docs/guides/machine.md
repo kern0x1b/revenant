@@ -354,6 +354,21 @@ differs from the index), the environment except the shell's bookkeeping (`PWD`, 
 when any of them changes; a check that failed is never remembered. None of the checks reads a file that git ignores, so an
 ignored file is not part of a key; a check that starts to read one must say so in `tools/prepush.lua`.
 
+`backports build` configures the Backports component for iphoneos armv7 and builds every one of its libraries, with the flags
+of the package, so a source the `backports` package cannot compile (a `-Werror` of `frameworks/Backports/xmake.lua`, a missing
+header, a link error) stops the push and not the build of an application that requires the package. The check works in a copy of
+the checkout, `build/backports-gate/tree`, which `rsync -a --delete` brings up to date from the checkout on every run (git, `.xmake`,
+`build`, the caches and `.claude/worktrees` stay out), so the host configuration of the checkout stays what it was and
+`./xmakew test -P .` still runs. The copy keeps its own `.xmake` and `build`, so a later run compiles only what changed. A shared
+`XMAKE_CONFIGDIR` would not do: the configure starts nested xmake processes that inherit it and wait on the project lock the
+configure holds. The check takes the prebuilt `llvm`, `swift` and `ld64` of `REVENANT_PREBUILT` and `REVENANT_PREBUILT_ONLY` when the
+environment names them (`kern0x1b/revenant` and `llvm,swift,ld64` otherwise), and fails rather than building them from source. It reads
+the package store, the iOS 6.0 shared cache and the lowered cache of `REVENANT_CACHE`, which are caches and not part of its key. On
+a failure it prints the compiler's errors and the path of the whole log, `build/backports-gate/prepush.log`. The first run builds
+all libraries (about six minutes on a 12-core Mac), a later one only what changed, and a run on an unchanged tree is remembered like the
+others. `./xmakew l -P . tools/ci_local.lua backports` runs the same build from a fresh configuration and goes on to the Backports
+tests, the probe app and the exports check.
+
 `recipe digests` is never remembered: it regenerates the digests and compares them with the committed ones, so it runs on
 every prepush, and a second prepush on the same tree runs only that check. `./xmakew l -P . tools/prepush.lua test` checks the
 keys: an edit, an untracked file, a deleted file, an environment variable and a new commit each change a key, restoring them

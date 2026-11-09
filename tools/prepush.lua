@@ -27,9 +27,102 @@ local function tracked(pattern)
     return files
 end
 
-local function budgeted(command)
-    local args = table.join({"l", "-P", root, path.join(root, "tools", "budget.lua"), "run", "--class", "critical", "--jobs", "2", "--"}, command)
-    return os.execv(os.programfile(), args, {try = true, curdir = root}) == 0
+local GATE_JOBS = 6
+local GATE_LINES = 30
+local GATE_EXCLUDES = {"/.git", "/.xmake", "/build", "/.cache", "/.cache-private", "/.cache-boot", "/.claude/worktrees"}
+
+local function budgeted(command, opt)
+    opt = opt or {}
+    local args = table.join({"l", "-P", root, path.join(root, "tools", "budget.lua"), "run", "--class", "critical", "--jobs", tostring(opt.jobs or 2), "--"}, command)
+    return os.execv(os.programfile(), args, {try = true, curdir = opt.curdir or root, envs = opt.envs, stdout = opt.output, stderr = opt.output}) == 0
+end
+
+local function gate_folder()
+    return path.join(root, "build", "backports-gate")
+end
+
+local function gate_tree(folder)
+    return path.join(folder, "tree")
+end
+
+local function gate_environment()
+    return {
+        REVENANT_PREBUILT = os.getenv("REVENANT_PREBUILT") or "kern0x1b/revenant",
+        REVENANT_PREBUILT_ONLY = os.getenv("REVENANT_PREBUILT_ONLY") or "llvm,swift,ld64",
+    }
+end
+
+local function gate_sync_arguments(tree)
+    local args = {"-a", "--delete"}
+    for _, pattern in ipairs(GATE_EXCLUDES) do
+        table.insert(args, "--exclude=" .. pattern)
+    end
+    table.insert(args, root .. "/")
+    table.insert(args, tree .. "/")
+    return args
+end
+
+local function gate_commands(tree)
+    return {
+        {os.programfile(), "f", "-P", tree, "-p", "iphoneos", "-a", "armv7", "--component=Backports", "-y"},
+        {os.programfile(), "build", "-P", tree, "-y"},
+    }
+end
+
+local function failure_lines(text)
+    local report = import("ci.log", {rootdir = os.scriptdir()}).report(text)
+    local lines = {}
+    for _, found in ipairs(report.modules) do
+        table.insert(lines, "swiftc failed for " .. found.module)
+        table.join2(lines, found.diagnostics)
+    end
+    for _, name in ipairs(report.failed) do
+        table.insert(lines, "failed: " .. name)
+    end
+    table.join2(lines, report.errors)
+    if #lines == 0 then
+        local tail = {}
+        for line in text:gmatch("[^\n]+") do
+            table.insert(tail, line)
+        end
+        for index = math.max(1, #tail - GATE_LINES + 1), #tail do
+            table.insert(lines, tail[index])
+        end
+    end
+    return lines
+end
+
+local function explain_failure(logfile)
+    local lines = failure_lines(io.readfile(logfile))
+    for index = 1, math.min(#lines, GATE_LINES) do
+        print("%s", lines[index])
+    end
+    if #lines > GATE_LINES then
+        print("... %d more", #lines - GATE_LINES)
+    end
+    print("the Backports build failed; the whole log is %s", logfile)
+end
+
+local function backports_build()
+    local folder = gate_folder()
+    local tree = gate_tree(folder)
+    local logfile = path.join(folder, "prepush.log")
+    os.mkdir(tree)
+    local output = io.open(logfile, "w")
+    local ok = os.execv("rsync", gate_sync_arguments(tree), {try = true, stdout = output, stderr = output}) == 0
+    if ok then
+        for _, command in ipairs(gate_commands(tree)) do
+            if not budgeted(command, {jobs = GATE_JOBS, curdir = tree, envs = gate_environment(), output = output}) then
+                ok = false
+                break
+            end
+        end
+    end
+    output:close()
+    if not ok then
+        explain_failure(logfile)
+    end
+    return ok
 end
 
 local function lua(script, ...)
@@ -229,6 +322,7 @@ local STEPS = {
     {name = "ci replay test", run = function () return lua("tools/ci_swiftc_replay.lua", "test") end},
     {name = "light suites", run = function () return lua("toolchain/tests/light_suites.lua") end},
     {name = "host install test", run = function () return lua("frameworks/ReactNative/tests/host_install_test.lua") end},
+    {name = "backports build", run = backports_build},
 }
 
 local function test_suite()
@@ -248,6 +342,22 @@ local function test_suite()
     local emulator = 'target("a")\n    add_files("tests/unit/a_test.cpp")\n    add_tests("default")\ntarget_end()\n'
         .. 'target("b")\n    add_files("tests/unit/b_test.cpp")\n    add_tests("negative", {runargs = {"--negative"}, expect_failure = true})\ntarget_end()\n'
     check("only a target that declares a negative run is a negative source", table.concat(emulator_negative(emulator), ","), "emulator/tests/unit/b_test.cpp")
+
+    local environment = gate_environment()
+    check("the gate names the prebuilt toolchain it may install, so it never builds llvm from source", #environment.REVENANT_PREBUILT_ONLY > 0 and #environment.REVENANT_PREBUILT > 0, true)
+    local sync = gate_sync_arguments("/g/tree")
+    check("the gate copies the checkout into its own tree and deletes what the checkout dropped", table.concat(sync, " ", 1, 2), "-a --delete")
+    check("the gate copies from the checkout's folder to its tree", table.concat(sync, " ", #sync - 1), root .. "/ /g/tree/")
+    check("the gate leaves out git, the configuration, the build and the caches", table.concat(sync, " "):find("--exclude=/.git --exclude=/.xmake --exclude=/build --exclude=/.cache ", 1, true) ~= nil, true)
+    local commands = gate_commands("/g/tree")
+    check("the gate configures the armv7 device build of the Backports component in its own tree",
+          table.concat(commands[1], " ", 2), "f -P /g/tree -p iphoneos -a armv7 --component=Backports -y")
+    check("the gate builds every target of that configuration", table.concat(commands[2], " ", 2), "build -P /g/tree -y")
+    local compiled = "\27[0mframeworks/Backports/src/PDFKit/PDFView11.m:68:17: error: auto property synthesis is not allowed [-Werror,-Wobjc-missing-property-synthesis]\n"
+        .. "   68 | @implementation RevenantPDFPageRender\n      |                 ^\n"
+    check("the gate reports the compiler's error and not its source lines", table.concat(failure_lines(compiled), "|"),
+          "frameworks/Backports/src/PDFKit/PDFView11.m:68:17: error: auto property synthesis is not allowed [-Werror,-Wobjc-missing-property-synthesis]")
+    check("a failure without a compiler error reports the end of the log", table.concat(failure_lines("one\ntwo\nthree\n"), "|"), "one|two|three")
 
     print("prepush: %d tests passed", count)
 end

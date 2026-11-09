@@ -96,9 +96,12 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   what we write or generate is efficient by design and aims to beat Apple's own code where Apple never tuned it for
   the A5; a change on a hot path carries a before and after measurement; compiler optimisations the A5 needs are
   patches on `llvm` and `swift`.
-- Before every push, a worker runs `./xmakew l -P . tools/prepush.lua`: the cheap host checks that CI would otherwise
-  find only after its macOS jobs have run (comments, layout, docs commands, open gaps, credentials, copied text, recipe
-  digests, lowered members, lowered exports, negative-test shape). It takes about 15 seconds with the caches warm and must print
-  `prepush: 16 checks passed`; `./xmakew l -P . tools/prepush.lua test` tests the tool itself.
+- Before every push, a worker runs `./xmakew l -P . tools/prepush.lua`: the host checks that a push would otherwise
+  break unnoticed (comments, layout, docs commands, open gaps, credentials, copied text, recipe
+  digests, lowered members, lowered exports, negative-test shape) and the build of every Backports library for armv7 with
+  the project's flags (`backports build`, in a configuration and a build folder of its own, so the checkout's host
+  configuration stays). The host checks take about 15 seconds with the caches warm; the Backports build takes about six
+  minutes the first time and builds only what changed after that. It must print
+  `prepush: 17 checks passed`; `./xmakew l -P . tools/prepush.lua test` tests the tool itself.
 - Before handing a change over: `./xmakew test -P .`, then that component's gate (the backports gate is gone until
   `./xmakew test -P .` replaces it; for the emulator, the skill `emulator-session`).
