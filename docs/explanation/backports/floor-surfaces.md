@@ -2,7 +2,7 @@
 
 A build of Telegram 13.0.0 for armv7 at iOS 6.0 stopped on three names the lowered SDK still gated, and a sweep of the
 families around them found more. Each entry says what the name does on iOS 6.1.3 and what the port does with it. The
-sources of Telegram stay as they are. `frameworks/Backports/tests/availability/telegram_lines.swift` holds Telegram's own
+sources of Telegram stay as they are. `frameworks/Backports/tests/availability/floor_surfaces.swift` holds Telegram's own
 lines for all of it, and `availability_test.lua` typechecks that file at armv7 iOS 6.0 against the lowered SDK and the
 runtime's overlays, and fails when the file also typechecks without the lowering.
 
