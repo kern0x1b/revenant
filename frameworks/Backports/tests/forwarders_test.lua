@@ -6,6 +6,8 @@ local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local SYSTEM = [[
 int FXValue = 42;
 int FXGapValue = 55;
+int FXQualifiedStore = 5;
+int *const FXQualified = &FXQualifiedStore;
 int FXAdd(int a, int b) { return a * 100 + b; }
 void FXSetValue(int value) { FXValue = value; }
 int FXGetValue(void) { return FXValue; }
@@ -48,6 +50,7 @@ int FXVariadic(const char *, ...);
 int FXHidden(int);
 extern int FXValue;
 extern int FXGapValue;
+extern int *const FXQualified;
 
 static void *hammer(void *slot)
 {
@@ -86,7 +89,7 @@ int main(int argc, char **argv)
     }
     int sum = FXAdd(1, 2);
     FXSetValue(7);
-    printf("%d %d %d\n", sum, FXValue, FXGetValue());
+    printf("%d %d %d %d\n", sum, FXValue, FXGetValue(), *FXQualified);
     return 0;
 }
 ]]
@@ -104,13 +107,14 @@ local function rows()
         member("C function", "FXVariadic", "int (const char *, ...)"),
         member("global variable", "FXValue", "int"),
         member("global variable", "FXTable", "const unsigned char[]"),
+        member("global variable", "FXQualified", "FXConstKey"),
     }
 end
 
 local function generated(folder, system, lazy)
     local images = {FXAdd = system, FXMissing = system, FXSetValue = system, FXGetValue = system, FXValue = system,
-        FXTable = system, FXGapValue = system, FXVariadic = lazy, FXHidden = lazy}
-    local framework = {name = "FXSkel", import = "", rows = rows(), unavailable = {}}
+        FXTable = system, FXGapValue = system, FXQualified = system, FXVariadic = lazy, FXHidden = lazy}
+    local framework = {name = "FXSkel", import = "typedef int *const FXConstKey;", rows = rows(), unavailable = {}}
     local markers = {FXHidden = "FXSkel", FXGapValue = "FXSkel"}
     local definitions = {FXHidden = {kind = "function"}, FXGapValue = {kind = "global", type = "int", array = false}}
     return skeleton.write(folder, {framework}, {}, images, markers, definitions)
@@ -166,9 +170,13 @@ function main()
     assert(totals.c == 4, "expected 4 forwarders, got " .. totals.c)
     assert(totals.trampolines == 2, "expected the variadic FXVariadic and the src-only FXHidden as trampolines, got " .. totals.trampolines)
     assert(totals.src_only == 2, "expected 2 names implemented in src and absent from the facts, got " .. totals.src_only)
-    assert(totals.globals == 3 and totals.globals_uncopied == 1, "expected 3 globals and 1 uncopied array, got " .. totals.globals .. " and " .. totals.globals_uncopied)
+    assert(totals.globals == 4 and totals.globals_uncopied == 1, "expected 4 globals and 1 uncopied array, got " .. totals.globals .. " and " .. totals.globals_uncopied)
     local text = io.readfile(path.join(present, "FXSkel.m"))
-    assert(not string.find(text, "__typeof_unqual__", 1, true), "the skeleton still types a global with __typeof_unqual__")
+    for name in string.gmatch(text, "__typeof_unqual__%(([%w_]*)%)") do
+        assert(string.find(name, "^revenant_type_"), "the skeleton types a global with __typeof_unqual__ of " .. name .. " and not of the facts type")
+    end
+    assert(string.find(text, "typedef FXConstKey revenant_type_FXQualified;", 1, true), "the facts type of FXQualified is not the type of its placeholder")
+    assert(string.find(text, "__typeof_unqual__(revenant_type_FXQualified) revenant_global_FXQualified", 1, true), "a global whose type is a const typedef is not stored unqualified")
     assert(not os.isfile(path.join(present, "FXSkel.c")), "the skeleton still writes a C file")
     assert(string.find(text, 'revenant_backports_c_target(&revenant_slot_1, "' .. system .. '", "FXAdd")', 1, true), "FXAdd does not look up its system symbol")
     assert(string.find(text, "__atomic_store_n(entry->slot", 1, true), "the trampoline resolver does not store the resolved address")
@@ -177,7 +185,7 @@ function main()
     built(present, present, present_library, fallback)
     local present_program = driver(work, present_library, "driver_present")
     local ok = os.iorunv(present_program, {}):trim()
-    assert(ok == "102 42 7", "with the system present, expected '102 42 7' (system FXAdd, copied FXValue, system FXSetValue), got '" .. ok .. "'")
+    assert(ok == "102 42 7 5", "with the system present, expected '102 42 7 5' (system FXAdd, copied FXValue, system FXSetValue, copied const typedef FXQualified), got '" .. ok .. "'")
 
     local missing = run(present_program, "missing")
     assert(string.find(missing, "not implemented: FXSkel.FXMissing", 1, true), "the fallback did not fail naming FXSkel.FXMissing: " .. missing)
