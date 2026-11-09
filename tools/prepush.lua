@@ -28,33 +28,46 @@ local function tracked(pattern)
 end
 
 local GATE_JOBS = 6
+local GATE_LINES = 30
+local GATE_EXCLUDES = {"/.git", "/.xmake", "/build", "/.cache", "/.cache-private", "/.cache-boot", "/.claude/worktrees"}
 
 local function budgeted(command, opt)
     opt = opt or {}
     local args = table.join({"l", "-P", root, path.join(root, "tools", "budget.lua"), "run", "--class", "critical", "--jobs", tostring(opt.jobs or 2), "--"}, command)
-    return os.execv(os.programfile(), args, {try = true, curdir = root, envs = opt.envs, stdout = opt.output, stderr = opt.output}) == 0
+    return os.execv(os.programfile(), args, {try = true, curdir = opt.curdir or root, envs = opt.envs, stdout = opt.output, stderr = opt.output}) == 0
 end
 
 local function gate_folder()
     return path.join(root, "build", "backports-gate")
 end
 
-local function gate_environment(folder)
+local function gate_tree(folder)
+    return path.join(folder, "tree")
+end
+
+local function gate_environment()
     return {
-        XMAKE_CONFIGDIR = path.join(folder, "config"),
         REVENANT_PREBUILT = os.getenv("REVENANT_PREBUILT") or "kern0x1b/revenant",
         REVENANT_PREBUILT_ONLY = os.getenv("REVENANT_PREBUILT_ONLY") or "llvm,swift,ld64",
     }
 end
 
-local function gate_commands(folder)
-    return {
-        {os.programfile(), "f", "-P", root, "-p", "iphoneos", "-a", "armv7", "--component=Backports", "-o", folder, "-y"},
-        {os.programfile(), "build", "-P", root, "-y"},
-    }
+local function gate_sync_arguments(tree)
+    local args = {"-a", "--delete"}
+    for _, pattern in ipairs(GATE_EXCLUDES) do
+        table.insert(args, "--exclude=" .. pattern)
+    end
+    table.insert(args, root .. "/")
+    table.insert(args, tree .. "/")
+    return args
 end
 
-local GATE_LINES = 30
+local function gate_commands(tree)
+    return {
+        {os.programfile(), "f", "-P", tree, "-p", "iphoneos", "-a", "armv7", "--component=Backports", "-y"},
+        {os.programfile(), "build", "-P", tree, "-y"},
+    }
+end
 
 local function failure_lines(text)
     local report = import("ci.log", {rootdir = os.scriptdir()}).report(text)
@@ -92,15 +105,17 @@ end
 
 local function backports_build()
     local folder = gate_folder()
-    local environment = gate_environment(folder)
+    local tree = gate_tree(folder)
     local logfile = path.join(folder, "prepush.log")
-    os.mkdir(folder)
+    os.mkdir(tree)
     local output = io.open(logfile, "w")
-    local ok = true
-    for _, command in ipairs(gate_commands(folder)) do
-        if not budgeted(command, {jobs = GATE_JOBS, envs = environment, output = output}) then
-            ok = false
-            break
+    local ok = os.execv("rsync", gate_sync_arguments(tree), {try = true, stdout = output, stderr = output}) == 0
+    if ok then
+        for _, command in ipairs(gate_commands(tree)) do
+            if not budgeted(command, {jobs = GATE_JOBS, curdir = tree, envs = gate_environment(), output = output}) then
+                ok = false
+                break
+            end
         end
     end
     output:close()
@@ -328,13 +343,16 @@ local function test_suite()
         .. 'target("b")\n    add_files("tests/unit/b_test.cpp")\n    add_tests("negative", {runargs = {"--negative"}, expect_failure = true})\ntarget_end()\n'
     check("only a target that declares a negative run is a negative source", table.concat(emulator_negative(emulator), ","), "emulator/tests/unit/b_test.cpp")
 
-    local environment = gate_environment("/g")
-    check("the gate keeps its xmake configuration in its own folder", environment.XMAKE_CONFIGDIR, path.join("/g", "config"))
+    local environment = gate_environment()
     check("the gate names the prebuilt toolchain it may install, so it never builds llvm from source", #environment.REVENANT_PREBUILT_ONLY > 0 and #environment.REVENANT_PREBUILT > 0, true)
-    local commands = gate_commands("/g")
-    check("the gate configures the armv7 device build of the Backports component into its own folder",
-          table.concat(commands[1], " ", 2), string.format("f -P %s -p iphoneos -a armv7 --component=Backports -o /g -y", root))
-    check("the gate builds every target of that configuration", table.concat(commands[2], " ", 2), string.format("build -P %s -y", root))
+    local sync = gate_sync_arguments("/g/tree")
+    check("the gate copies the checkout into its own tree and deletes what the checkout dropped", table.concat(sync, " ", 1, 2), "-a --delete")
+    check("the gate copies from the checkout's folder to its tree", table.concat(sync, " ", #sync - 1), root .. "/ /g/tree/")
+    check("the gate leaves out git, the configuration, the build and the caches", table.concat(sync, " "):find("--exclude=/.git --exclude=/.xmake --exclude=/build --exclude=/.cache ", 1, true) ~= nil, true)
+    local commands = gate_commands("/g/tree")
+    check("the gate configures the armv7 device build of the Backports component in its own tree",
+          table.concat(commands[1], " ", 2), "f -P /g/tree -p iphoneos -a armv7 --component=Backports -y")
+    check("the gate builds every target of that configuration", table.concat(commands[2], " ", 2), "build -P /g/tree -y")
     local compiled = "\27[0mframeworks/Backports/src/PDFKit/PDFView11.m:68:17: error: auto property synthesis is not allowed [-Werror,-Wobjc-missing-property-synthesis]\n"
         .. "   68 | @implementation RevenantPDFPageRender\n      |                 ^\n"
     check("the gate reports the compiler's error and not its source lines", table.concat(failure_lines(compiled), "|"),
