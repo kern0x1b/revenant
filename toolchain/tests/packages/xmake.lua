@@ -8,6 +8,7 @@ add_requires("revenant@sdwebimage 5.21.7", {alias = "sdwebimage"})
 add_requires("revenant@libwebp 1.6.0", {alias = "libwebp"})
 add_requires("revenant@sdwebimage-webp 0.14.6", {alias = "sdwebimage-webp"})
 add_requires("revenant@zxingobjc 3.6.4", {alias = "zxingobjc"})
+add_requires("revenant@libsql 0.5.0", {alias = "libsql"})
 includes("rnscreens.lua")
 includes("hermes.lua")
 
@@ -20,7 +21,6 @@ local SUITES = {
     {name = "zxingobjc", source = "zxingobjc.m", packages = {"zxingobjc"}, mflags = {"-fobjc-arc"},
      defines = {"ZXINGOBJC_USE_SUBSPECS", "ZXINGOBJC_ONED", "ZXINGOBJC_PDF417"},
      frameworks = {"Foundation", "AVFoundation", "CoreGraphics", "CoreMedia", "CoreVideo", "ImageIO", "QuartzCore"}},
-    {name = "libsql", source = "libsql.c", packages = {"libsql"}, cflags = {}},
 }
 
 local names = {}
@@ -39,6 +39,23 @@ for _, suite in ipairs(SUITES) do
 end
 
 table.insert(names, "rnscreens")
+
+local addon = path.join(here, "..", "addon")
+
+target("libsql")
+    set_kind("phony")
+    set_default(false)
+    add_packages("libsql")
+    add_tests("imports")
+    on_test(function (target, opt)
+        local libsql = import("libsql_test", {rootdir = addon, anonymous = true})
+        local failures = libsql.failures({libsql = target:pkg("libsql")})
+        for _, failure in ipairs(failures) do
+            cprint("${red}libsql: %s", failure)
+        end
+        return #failures == 0
+    end)
+target_end()
 
 target("packages")
     set_kind("phony")

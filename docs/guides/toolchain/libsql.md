@@ -59,9 +59,10 @@ The package includes a test that:
 3. Inserts and reads data
 4. Verifies all imports against the iOS 6.0 dyld cache
 
-Run the test with:
+The import check is a test of the `packages` component, which is configured for iphoneos because the package is built only there; a host configure does not require the package:
 ```bash
-./xmakew test -P . libsql_test
+./xmakew f -P . -p iphoneos -a armv7 --component=packages -y
+./xmakew test -P . 'libsql/*'
 ```
 
 ## Import Verification
