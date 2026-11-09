@@ -53,6 +53,8 @@ static UIColor *RevenantPDFSelectionColour(void)
 @end
 
 @implementation RevenantPDFHighlight
+@synthesize rect = _rect;
+@synthesize color = _color;
 @end
 
 @interface RevenantPDFPageRender : NSObject
@@ -66,6 +68,13 @@ static UIColor *RevenantPDFSelectionColour(void)
 @end
 
 @implementation RevenantPDFPageRender
+@synthesize page = _page;
+@synthesize size = _size;
+@synthesize scale = _scale;
+@synthesize box = _box;
+@synthesize quality = _quality;
+@synthesize highlights = _highlights;
+@synthesize generation = _generation;
 @end
 
 @interface RevenantPDFTileLayer : CATiledLayer
@@ -86,6 +95,9 @@ static UIColor *RevenantPDFSelectionColour(void)
 @end
 
 @implementation RevenantPDFPageView
+
+@synthesize render = _render;
+@synthesize owner = _owner;
 
 + (Class)layerClass
 {
@@ -145,6 +157,8 @@ static UIColor *RevenantPDFSelectionColour(void)
 @end
 
 @implementation RevenantPDFScrollView
+
+@synthesize owner = _owner;
 
 - (void)layoutSubviews
 {
