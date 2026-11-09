@@ -1,12 +1,5 @@
 #import "check.h"
 
-// nextDateAfterDate:matchingComponents:options: is compared with the system implementation, the oracle, over
-// the component shapes real code passes (a time of day, "this wall-clock time on a weekday", a day of the month,
-// a month, a year, a weekday ordinal), every matching policy, both directions, and six zones with transitions
-// near the sampled instants. The oracle's answer for backward weekday-ordinal searches (nil) and for backward
-// day-of-month searches that start on a day with a repeated hour (a result 28 years early) is a defect of the
-// system library, not a rule, so those cases are not compared; every other case must agree to the second.
-
 typedef NSDate *(*NextFunction)(id, SEL, NSDate *, NSDateComponents *, NSCalendarOptions);
 
 static NSString *revenant_stamp(NSCalendar *calendar, NSDate *date)

@@ -340,8 +340,6 @@ static NSDate *revenant_pick_occurrence(NSCalendar *calendar, NSDate *date, BOOL
         NSComparisonResult order = [date compare:threshold];
         return order == (forward ? NSOrderedDescending : NSOrderedAscending) ? date : nil;
     }
-    // First and Last count in the direction of the search: scanning back, the first occurrence met is the later one.
-    // A repeated wall time equal to the start's is behind it, unless Last asks for the other occurrence beyond it.
     BOOL last = (options & NSCalendarMatchLast) != 0;
     double thresholdValue = revenant_wall_time(calendar, threshold);
     NSArray<NSDate *> *occurrences = revenant_occurrences(calendar, date);
