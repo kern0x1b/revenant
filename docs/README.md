@@ -127,6 +127,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | --- | --- |
 | [Demand: the API an app needs](guides/backports/demand.md) | how the demand tool lists what an app references from the SDK, against iOS 6.1.3 and the Backports |
 | [Out-of-tree apps: the Backports an app links](guides/backports/out-of-tree.md) | how an app built outside the checkout takes the Backports from its package |
+| [Write and install the Backports package](guides/backports/package.md) | the commands that write `org.revenant.backports` and the Swift runtime, and install them on the phone |
 | [Crutches](reference/backports/crutches.md) | the stand-ins the Backports lowering uses, what each measured, and what removes it |
 | [GLSL ES 3.00 to 1.00 translator](reference/react-native/glsl-translator.md) | the glslang and SPIRV-Cross prototype on three.js's ES 3.00 programs: what translates on the host, the armv7 build, and what is still unmeasured |
 | [OpenGL ES 3 on iOS 6](reference/backports/opengles-es3.md) | the ES3 entry points on the ES2 driver: what is forwarded, emulated and refused, and why no ES3 EAGL context yet |
