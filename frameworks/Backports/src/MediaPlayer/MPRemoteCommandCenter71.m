@@ -11,16 +11,20 @@ typedef MPRemoteCommandHandlerStatus (^MPRemoteCommandHandler)(MPRemoteCommandEv
 
 @interface MPRemoteCommandEvent ()
 @property (nonatomic, strong, readwrite) MPRemoteCommand *command;
+@property (nonatomic, readwrite) NSTimeInterval timestamp;
 @end
 
 @implementation MPRemoteCommandEvent
 @synthesize command = _command;
+@synthesize timestamp = _timestamp;
 
 - (instancetype)initWithCommand:(MPRemoteCommand *)command
 {
     self = ((id (*)(id, SEL))objc_msgSend)(self, sel_registerName("init"));
-    if (self)
+    if (self) {
         _command = command;
+        _timestamp = [[NSProcessInfo processInfo] systemUptime];
+    }
     return self;
 }
 @end
@@ -54,6 +58,12 @@ static NSUInteger revenant_active_command_count;
 
 static void revenant_command_state_changed(MPRemoteCommand *command)
 {
+    if (![NSThread isMainThread]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            revenant_command_state_changed(command);
+        });
+        return;
+    }
     @synchronized ([MPRemoteCommand class]) {
         BOOL active;
         @synchronized (command.revenantTargets) {
@@ -171,11 +181,13 @@ static void revenant_command_state_changed(MPRemoteCommand *command)
 @synthesize supportedPlaybackRates = _supportedPlaybackRates;
 @end
 
-static id revenant_command(Class cls, id __strong *storage)
+static id revenant_command(id owner, Class cls, id __strong *storage)
 {
-    if (!*storage)
-        *storage = ((id (*)(id, SEL))objc_msgSend)((id)[cls alloc], sel_registerName("initRevenant"));
-    return *storage;
+    @synchronized (owner) {
+        if (!*storage)
+            *storage = ((id (*)(id, SEL))objc_msgSend)((id)[cls alloc], sel_registerName("initRevenant"));
+        return *storage;
+    }
 }
 
 @interface MPRemoteCommandCenter ()
@@ -204,26 +216,26 @@ static id revenant_command(Class cls, id __strong *storage)
     return shared;
 }
 
-- (MPRemoteCommand *)pauseCommand { return revenant_command([MPRemoteCommand class], &_pauseCommand); }
-- (MPRemoteCommand *)playCommand { return revenant_command([MPRemoteCommand class], &_playCommand); }
-- (MPRemoteCommand *)stopCommand { return revenant_command([MPRemoteCommand class], &_stopCommand); }
-- (MPRemoteCommand *)togglePlayPauseCommand { return revenant_command([MPRemoteCommand class], &_togglePlayPauseCommand); }
-- (MPRemoteCommand *)enableLanguageOptionCommand { return revenant_command([MPRemoteCommand class], &_enableLanguageOptionCommand); }
-- (MPRemoteCommand *)disableLanguageOptionCommand { return revenant_command([MPRemoteCommand class], &_disableLanguageOptionCommand); }
-- (MPChangePlaybackRateCommand *)changePlaybackRateCommand { return revenant_command([MPChangePlaybackRateCommand class], &_changePlaybackRateCommand); }
-- (MPChangeRepeatModeCommand *)changeRepeatModeCommand { return revenant_command([MPChangeRepeatModeCommand class], &_changeRepeatModeCommand); }
-- (MPChangeShuffleModeCommand *)changeShuffleModeCommand { return revenant_command([MPChangeShuffleModeCommand class], &_changeShuffleModeCommand); }
-- (MPRemoteCommand *)nextTrackCommand { return revenant_command([MPRemoteCommand class], &_nextTrackCommand); }
-- (MPRemoteCommand *)previousTrackCommand { return revenant_command([MPRemoteCommand class], &_previousTrackCommand); }
-- (MPSkipIntervalCommand *)skipForwardCommand { return revenant_command([MPSkipIntervalCommand class], &_skipForwardCommand); }
-- (MPSkipIntervalCommand *)skipBackwardCommand { return revenant_command([MPSkipIntervalCommand class], &_skipBackwardCommand); }
-- (MPRemoteCommand *)seekForwardCommand { return revenant_command([MPRemoteCommand class], &_seekForwardCommand); }
-- (MPRemoteCommand *)seekBackwardCommand { return revenant_command([MPRemoteCommand class], &_seekBackwardCommand); }
-- (MPChangePlaybackPositionCommand *)changePlaybackPositionCommand { return revenant_command([MPChangePlaybackPositionCommand class], &_changePlaybackPositionCommand); }
-- (MPRatingCommand *)ratingCommand { return revenant_command([MPRatingCommand class], &_ratingCommand); }
-- (MPFeedbackCommand *)likeCommand { return revenant_command([MPFeedbackCommand class], &_likeCommand); }
-- (MPFeedbackCommand *)dislikeCommand { return revenant_command([MPFeedbackCommand class], &_dislikeCommand); }
-- (MPFeedbackCommand *)bookmarkCommand { return revenant_command([MPFeedbackCommand class], &_bookmarkCommand); }
+- (MPRemoteCommand *)pauseCommand { return revenant_command(self, [MPRemoteCommand class], &_pauseCommand); }
+- (MPRemoteCommand *)playCommand { return revenant_command(self, [MPRemoteCommand class], &_playCommand); }
+- (MPRemoteCommand *)stopCommand { return revenant_command(self, [MPRemoteCommand class], &_stopCommand); }
+- (MPRemoteCommand *)togglePlayPauseCommand { return revenant_command(self, [MPRemoteCommand class], &_togglePlayPauseCommand); }
+- (MPRemoteCommand *)enableLanguageOptionCommand { return revenant_command(self, [MPRemoteCommand class], &_enableLanguageOptionCommand); }
+- (MPRemoteCommand *)disableLanguageOptionCommand { return revenant_command(self, [MPRemoteCommand class], &_disableLanguageOptionCommand); }
+- (MPChangePlaybackRateCommand *)changePlaybackRateCommand { return revenant_command(self, [MPChangePlaybackRateCommand class], &_changePlaybackRateCommand); }
+- (MPChangeRepeatModeCommand *)changeRepeatModeCommand { return revenant_command(self, [MPChangeRepeatModeCommand class], &_changeRepeatModeCommand); }
+- (MPChangeShuffleModeCommand *)changeShuffleModeCommand { return revenant_command(self, [MPChangeShuffleModeCommand class], &_changeShuffleModeCommand); }
+- (MPRemoteCommand *)nextTrackCommand { return revenant_command(self, [MPRemoteCommand class], &_nextTrackCommand); }
+- (MPRemoteCommand *)previousTrackCommand { return revenant_command(self, [MPRemoteCommand class], &_previousTrackCommand); }
+- (MPSkipIntervalCommand *)skipForwardCommand { return revenant_command(self, [MPSkipIntervalCommand class], &_skipForwardCommand); }
+- (MPSkipIntervalCommand *)skipBackwardCommand { return revenant_command(self, [MPSkipIntervalCommand class], &_skipBackwardCommand); }
+- (MPRemoteCommand *)seekForwardCommand { return revenant_command(self, [MPRemoteCommand class], &_seekForwardCommand); }
+- (MPRemoteCommand *)seekBackwardCommand { return revenant_command(self, [MPRemoteCommand class], &_seekBackwardCommand); }
+- (MPChangePlaybackPositionCommand *)changePlaybackPositionCommand { return revenant_command(self, [MPChangePlaybackPositionCommand class], &_changePlaybackPositionCommand); }
+- (MPRatingCommand *)ratingCommand { return revenant_command(self, [MPRatingCommand class], &_ratingCommand); }
+- (MPFeedbackCommand *)likeCommand { return revenant_command(self, [MPFeedbackCommand class], &_likeCommand); }
+- (MPFeedbackCommand *)dislikeCommand { return revenant_command(self, [MPFeedbackCommand class], &_dislikeCommand); }
+- (MPFeedbackCommand *)bookmarkCommand { return revenant_command(self, [MPFeedbackCommand class], &_bookmarkCommand); }
 
 @end
 
