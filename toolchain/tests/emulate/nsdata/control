@@ -1,0 +1,6 @@
+Package: org.revenant.emulatensdata
+Name: emulate NSData probe
+Architecture: iphoneos-arm
+Description: A Swift program that reads an NSData by position, inside the range and past both ends of it, to tell a read
+ that stays in the data from one that returns the bytes around it. Before iOS 7 the overlay reads the data's one run
+ of bytes directly.
