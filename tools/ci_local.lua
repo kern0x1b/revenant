@@ -9,7 +9,7 @@ local DEFAULT_JOBS = "6"
 local PARALLEL_JOBS = "3"
 local PREBUILT = "kern0x1b/revenant"
 local XCODE_DEFAULT = "/Applications/Xcode.app/Contents/Developer"
-local WORKFLOW = path.join(ROOT, ".github", "workflows", "check.yml")
+local BUDGET_MINUTES = 20
 local ORDER = {"quick", "checks", "backports", "swift", "package", "repository"}
 local ALL = {"quick", "checks", "backports", "swift", "package"}
 local HEAVY = {"checks", "backports", "package", "swift", "repository"}
@@ -372,30 +372,104 @@ local function preflight(requested)
     print("ci_local: commit %s %s", git("rev-parse", "--short=12", "HEAD"), git("log", "-1", "--format=%s"))
     print("ci_local: tree %s", dirty == 0 and "clean" or string.format("has %d changed or new paths; the result is for the working tree, not the commit", dirty))
     local developer, sdk, version = toolchain(requested)
-    print("ci_local: developer dir %s, SDK %s, %s (check.yml selects Xcode_26.6.app)", developer, sdk, version)
+    print("ci_local: developer dir %s, SDK %s, %s", developer, sdk, version)
     print("ci_local: cache %s", cache())
     print("ci_local: free %.1f GiB on the data volume", free_bytes() / GIB)
 end
 
+local function tracked(pattern)
+    return lines(git("ls-files", "--", pattern))
+end
+
+local function over_budget(ms)
+    return ms > BUDGET_MINUTES * 60000
+end
+
+local function budget_note(ms)
+    return string.format("%s the %d-minute budget", over_budget(ms) and "OVER" or "within", BUDGET_MINUTES)
+end
+
 local function test()
-    local text = io.readfile(WORKFLOW)
-    local compact = (text:gsub("[\"']", ""))
     local count = 0
-    local function check(job, steps)
-        for _, step in ipairs(steps) do
-            if step.argv and not step.fresh then
-                local line = table.concat(step.argv, " ")
-                assert(compact:find(line, 1, true), string.format("%s: '%s' is not a command of check.yml", job, line))
-                count = count + 1
+    local function check(name, got, want)
+        count = count + 1
+        assert(got == want, string.format("ci_local test %s: got %s, want %s", name, tostring(got), tostring(want)))
+    end
+    local sources = {}
+    for _, file in ipairs(tracked("*xmake.lua")) do
+        table.insert(sources, io.readfile(path.join(ROOT, file)))
+    end
+    local declared = table.concat(sources, "\n")
+    local function names(group)
+        local found = {}
+        for _, name in ipairs(group) do
+            found[name] = true
+        end
+        return found
+    end
+    check("a name that no xmake file declares is not found", declared:find('"NoTargetOfThisName"', 1, true), nil)
+    local reported = names(REPORT)
+    for _, name in ipairs(ORDER) do
+        check(name .. " is a job", JOBS[name] ~= nil, true)
+        check(name .. " is in the report", reported[name], true)
+    end
+    check("the preparation is in the report", reported.prepare, true)
+    for _, name in ipairs(HEAVY) do
+        check(name .. " has a memory estimate", ESTIMATE_GB[name] ~= nil, true)
+    end
+    for _, name in ipairs(ALL) do
+        check(name .. " is a job of the default run", JOBS[name] ~= nil, true)
+    end
+    for name, job in pairs(JOBS) do
+        for _, step in ipairs(job.steps) do
+            local argv = step.argv
+            if argv and not step.fresh then
+                local verb = argv[2]
+                local label = string.format("%s: %s", name, step.name)
+                if verb == "l" then
+                    check(label .. ": its script " .. tostring(argv[5]) .. " is in the repository", os.isfile(path.join(ROOT, argv[5])), true)
+                elseif verb == "build" or verb == "deb" then
+                    for index = 5, #argv do
+                        check(label .. ": target " .. argv[index] .. " is declared", declared:find('"' .. argv[index] .. '"', 1, true) ~= nil, true)
+                    end
+                elseif verb == "test" then
+                    for index = 5, #argv do
+                        local group = argv[index]:match("^([%w_]+)/")
+                        if group then
+                            check(label .. ": test group " .. group .. " is declared", declared:find('"' .. group .. '"', 1, true) ~= nil, true)
+                        end
+                    end
+                elseif verb == "require" then
+                    for index = 5, #argv do
+                        local package = argv[index]:match("^revenant@(.+)$")
+                        if package then
+                            check(label .. ": package " .. package .. " has a recipe", os.isfile(path.join(ROOT, "packages", package:sub(1, 1), package, "xmake.lua")), true)
+                        end
+                    end
+                end
             end
         end
     end
-    for _, name in ipairs(ORDER) do
-        assert(text:find("\n  " .. name .. ":\n", 1, true), "check.yml has no job " .. name)
-        check(name, JOBS[name].steps)
+    check("the quick job runs prepush after its fresh configuration", JOBS.quick.steps[2].argv[5], "tools/prepush.lua")
+    local selected = select_jobs({})
+    for _, name in ipairs(ALL) do
+        check("no job argument selects " .. name, selected[name], true)
     end
-    check("prepare", JOBS.prepare.steps)
-    print("ci_local: %d commands of %d jobs and the shared preparation are in check.yml", count, #ORDER)
+    check("no job argument leaves out the repository job", selected.repository, nil)
+    local one = select_jobs({"--job", "swift"})
+    check("--job swift selects swift alone", one.swift == true and one.checks == nil, true)
+    check("a job named without --job is selected", select_jobs({"package"}).package, true)
+    check("an unknown job is refused", try { function () select_jobs({"nonsense"}) return true end } or false, false)
+    local rss, children = {[1] = 10, [2] = 20, [3] = 30, [4] = 40}, {[1] = {2}, [2] = {3}}
+    local total, pids = subtree(rss, children, 1)
+    check("a process tree's size is the sum of its members", total, 60)
+    check("a process tree lists its members and not the others", #pids, 3)
+    check("a step without a condition applies", applies({}), true)
+    check("minutes are written with one decimal", minutes(90000), "1.5 min")
+    check("a run of twenty minutes is within the budget", over_budget(BUDGET_MINUTES * 60000), false)
+    check("a run past twenty minutes is over the budget", over_budget(BUDGET_MINUTES * 60000 + 1), true)
+    check("the budget note names the budget", budget_note(0), "within the 20-minute budget")
+    print("ci_local: %d checks of the jobs, their scripts, targets, test groups and packages passed", count)
 end
 
 local function work(name, dir)
@@ -593,9 +667,9 @@ local function report(by_name, selected, dir, began, peak_total)
         end
     end
     if peak_total then
-        print("ci_local: wall %s, peak total resident %s across the jobs at once (sampled each second)", minutes(os.mclock() - began), gigabytes(peak_total))
+        print("ci_local: wall %s, %s, peak total resident %s across the jobs at once (sampled each second)", minutes(os.mclock() - began), budget_note(os.mclock() - began), gigabytes(peak_total))
     else
-        print("ci_local: wall %s", minutes(os.mclock() - began))
+        print("ci_local: wall %s, %s", minutes(os.mclock() - began), budget_note(os.mclock() - began))
     end
     print("ci_local: logs in %s (the last %d runs are kept)", dir, KEEP_RUNS)
     return failed
