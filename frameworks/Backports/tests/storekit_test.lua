@@ -8,10 +8,9 @@ local sources = path.join(backports, "src", "StoreKit", "AppStoreSubscriptions.s
 local fixture = path.join(backports, "tests", "StoreKit", "main.swift")
 
 local expected = table.concat({
-    "url https://apps.apple.com/account/subscriptions",
-    "scheme https",
-    "host apps.apple.com",
-    "path /account/subscriptions",
+    "url prefs:root=STORE",
+    "scheme prefs",
+    "pane root=STORE",
 }, "\n") .. "\n"
 
 local MEMBERS = {
@@ -54,5 +53,5 @@ function main()
     os.vrunv("xcrun", {"swiftc", "-O", sources, fixture, "-o", binary})
     os.execv(binary, {}, {stdout = binary .. ".out"})
     local got = io.readfile(binary .. ".out")
-    assert(got == expected, "the subscriptions URL differs from the App Store page: " .. got)
+    assert(got == expected, "the subscriptions URL differs from the Settings pane the phone opened: " .. got)
 end
