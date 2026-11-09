@@ -2136,9 +2136,37 @@ local function mentions(text, names)
     return false
 end
 
-local function lowered_types(sdk, set, enumerators)
-    local changed = member_headers(sdk)
-    local declared, queue, queued, enumerated = {}, {}, {}, {}
+local function annotated_protocols(text, found)
+    if not text:find("@protocol", 1, true) then
+        return
+    end
+    local spans, regions = comment_spans(text), {}
+    for _, region in ipairs(regions_of(text)) do
+        if ios_later(region.text) then
+            table.insert(regions, region)
+        end
+    end
+    local position = 1
+    while true do
+        local start, stop = find_outside_comments(text, "@protocol%s+[%w_]+[%s<]", position, spans)
+        if not start then
+            return
+        end
+        local name = text:match("^@protocol%s+([%w_]+)", start)
+        local first = statement_start(text, start, true, true)
+        local annotated = first ~= nil and #availability(text:sub(first, text:find("\n", stop, true) or #text)) > 0
+        for _, region in ipairs(regions) do
+            annotated = annotated or (start > region.stop and start < region.ends_start)
+        end
+        if annotated then
+            found[name] = true
+        end
+        position = stop + 1
+    end
+end
+
+local function types_across(each_header, set, enumerators)
+    local declared, queue, queued, enumerated, annotated = {}, {}, {}, {}, {}
     local function enqueue(name)
         if not queued["$" .. name] then
             queued["$" .. name] = true
@@ -2146,9 +2174,9 @@ local function lowered_types(sdk, set, enumerators)
         end
     end
     local names = names_of(set)
-    for _, file in ipairs(framework_headers(sdk)) do
-        local text = changed[file] or io.readfile(file)
+    each_header(function (text)
         local declarations = typedef_declarations(text)
+        annotated_protocols(text, annotated)
         if mentions(text, names) then
             local _, used = lowering_of(text, set, declarations)
             for key in pairs(used) do
@@ -2169,10 +2197,13 @@ local function lowered_types(sdk, set, enumerators)
                 end
             end
         end
-    end
-    local types, visited = {}, {}
+    end)
+    local types, visited, protocols = {}, {}, {}
     while #queue > 0 do
         local name = table.remove(queue)
+        if annotated[name] and not set.protocols[name] then
+            protocols[name] = true
+        end
         if declared[name] and not visited[name] then
             visited[name] = true
             for _, declaration in ipairs(declared[name]) do
@@ -2191,7 +2222,24 @@ local function lowered_types(sdk, set, enumerators)
             enum_types[name] = true
         end
     end
-    return types, enum_types
+    return types, enum_types, protocols
+end
+
+local function lowered_types(sdk, set, enumerators)
+    local changed = member_headers(sdk)
+    return types_across(function (visit)
+        for _, file in ipairs(framework_headers(sdk)) do
+            visit(changed[file] or io.readfile(file))
+        end
+    end, set, enumerators)
+end
+
+function signature_types(headers, set, enumerators)
+    return types_across(function (visit)
+        for _, text in ipairs(headers) do
+            visit(text)
+        end
+    end, set, enumerators or {})
 end
 
 local function identifiers_in(src)
@@ -2233,7 +2281,12 @@ function members_of(src, sdk, intros)
     for name in pairs(status.backed) do
         set.protocol_members[name] = status.members[name]
     end
-    set.types, set.enum_types = lowered_types(sdk, merge_sets(set, read_device_members()), set.enums)
+    local signature
+    set.types, set.enum_types, signature = lowered_types(sdk, merge_sets(set, read_device_members()), set.enums)
+    for name in pairs(signature) do
+        set.protocols[name] = true
+        set.protocol_members[name] = {}
+    end
     return set
 end
 
