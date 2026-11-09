@@ -13,25 +13,25 @@ Run every command from the top of the checkout. In a linked worktree first make 
 ls build/*.deb                                 # the file names the writer printed, one per package
 ```
 
-To install on the phone that `device.env` names, copy each package and run `dpkg -i`. `./xmakew device install -P .` does the same
-for every package the root project writes, which includes the test probes and the tweaks, so it is not the way to install only the
-Backports package:
+To install on the phone that `device.env` names, copy each package and run `dpkg` on the phone. `./xmakew device install -P .` does the
+same for every package the root project writes, which includes the test probes and the tweaks, so it is not the way to install only the
+Backports package. Set the claim holder for the shell first, then claim the phone:
 
 ```sh
-export REVENANT_DEVICE_HOLDER=<name>           # every device command checks the claim against this name
-./xmakew device --minutes=30 claim
-./xmakew l frameworks/SwiftUI/tools/device.lua copy build/<package>.deb /tmp/<package>.deb
-./xmakew device run "dpkg -i /tmp/<package>.deb && rm -f /tmp/<package>.deb"
-./xmakew device run "dpkg -l | grep revenant"  # the version the package now has
-./xmakew device release
+export REVENANT_DEVICE_HOLDER=<name>
+./xmakew device -P . --minutes=30 claim
+./xmakew l -P . frameworks/SwiftUI/tools/device.lua copy build/<package>.deb /tmp/<package>.deb
+./xmakew device -P . run "dpkg --install /tmp/<package>.deb && rm --force /tmp/<package>.deb"
+./xmakew device -P . release
 ```
 
+The version the phone now has is the one `dpkg -l | grep revenant` lists, run on the phone through `device run` with the same claim.
 Install the Swift runtime package before `org.revenant.backports`, since the latter `Depends` on it at its exact version.
 
 ## What not to run
 
-- `./xmakew deb -P packages/b/backports` and `./xmakew device install -P packages/b/backports` do not work: the recipe folder is not
-  an xmake project, so `device` and `deb` are not tasks there (`invalid task: device`). The package is written by `-P .`.
+- `deb` and `device install` with `-P packages/b/backports` do not work: the recipe folder is not an xmake project, so `device` and
+  `deb` are not tasks there (`invalid task: device`). The package is written by `-P .`.
 - Do not configure with `--component=Backports` and then run `deb -P .`: the writer stops at `WebKitBackports` with "the project has no
   WebKitEngine target to hold it". A configure keeps the options of the one before it, so `-c` is what clears a stored `--component`.
 
