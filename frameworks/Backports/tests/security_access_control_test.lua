@@ -1,3 +1,4 @@
+local aliases = import("host_alias", {rootdir = path.join(os.scriptdir(), "..", "tools"), anonymous = true})
 local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local backports = path.absolute(path.join(os.scriptdir(), ".."))
 local fixture = path.join(backports, "tests", "Security", "access_control", "main.c")
@@ -12,8 +13,8 @@ function main()
     local host = path.join(out, "host")
     local backport = path.join(out, "backport")
     clang({"-o", host, fixture, "-framework", "CoreFoundation", "-framework", "Security"})
-    clang({"-fobjc-arc", "-o", backport, fixture, source, "-framework", "Foundation", "-framework", "CoreFoundation",
-        "-framework", "Security"})
+    clang(table.join({"-fobjc-arc", "-o", backport, fixture, source}, aliases.flags({source}), {"-framework", "Foundation", "-framework", "CoreFoundation",
+        "-framework", "Security"}))
     os.execv(host, {}, {stdout = host .. ".out"})
     os.execv(backport, {}, {stdout = backport .. ".out"})
     local expected, got = io.readfile(host .. ".out"), io.readfile(backport .. ".out")

@@ -1,3 +1,4 @@
+local aliases = import("host_alias", {rootdir = path.join(os.scriptdir(), "..", "tools"), anonymous = true})
 local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local backports = path.absolute(path.join(os.scriptdir(), ".."))
 local tests = path.join(backports, "tests")
@@ -41,7 +42,7 @@ function main()
         path.join(localauth, "LAErrorDomain.m"),
     }
     local frameworks = {"-framework", "Foundation", "-framework", "CoreFoundation"}
-    clang(table.join({"-fobjc-arc", "-I", localauth, "-o", program}, sources, frameworks))
+    clang(table.join({"-fobjc-arc", "-I", localauth, "-o", program}, sources, aliases.flags(sources), frameworks))
     local result = run(program)
     assert(result == contract, "the passcode contract differs in " .. out .. ":\n" .. result)
 end

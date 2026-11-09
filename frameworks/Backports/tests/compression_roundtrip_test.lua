@@ -1,3 +1,4 @@
+local aliases = import("host_alias", {rootdir = path.join(os.scriptdir(), "..", "tools"), anonymous = true})
 local checkout = import("@addon.revenant.checkout", {anonymous = true})
 local workspace = import("@addon.revenant.workspace", {anonymous = true})
 
@@ -109,7 +110,7 @@ function main()
     end
     local flags = {"-I" .. include, "-I" .. path.join(xz, "src", "liblzma", "api"), "-I" .. path.join(lzfse, "src"), "-I" .. path.join(lz4, "lib")}
     local backport = build(work, "backport_codec", table.join({path.join(TESTS, "compression", "backport_codec.c"), path.join(SRC, "CompressionBuffer.c"),
-        path.join(lz4, "lib", "lz4.c"), stub_lzma(work)}, lzfse_sources), table.join(flags, {"-lz"}))
+        path.join(lz4, "lib", "lz4.c"), stub_lzma(work)}, lzfse_sources), table.join(flags, aliases.flags({path.join(SRC, "CompressionBuffer.c")}), {"-lz"}))
     local oracle = build(work, "oracle_codec", {path.join(TESTS, "compression", "oracle_codec.c")}, {"-lcompression"})
 
     local mixed = (function ()

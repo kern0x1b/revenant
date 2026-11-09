@@ -1,3 +1,4 @@
+local aliases = import("host_alias", {rootdir = path.join(os.scriptdir(), "..", "tools"), anonymous = true})
 local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local backports = path.absolute(path.join(os.scriptdir(), ".."))
 local tls = path.join(backports, "src", "TLS")
@@ -46,6 +47,8 @@ local variants = {
     {name = "system", io = true, lines = table.join(systemLines, callbackLines)},
 }
 
+local OPTION_SOURCES = {"SecProtocolOptions13_0.m", "SecProtocolMetadata13_0.m", "SecObjectWrappers12_0.m", "SecObjectWrappersIdentity12_0.m"}
+
 local function clang(args)
     os.vrunv("xcrun", table.join({"clang"}, args))
 end
@@ -62,9 +65,12 @@ function main()
     end
     local shared = {}
     table.insert(shared, compile(path.join(tls, "RevenantTLSEngine.m"), table.join({"-fobjc-arc"}, include), out))
-    for _, file in ipairs({"SecProtocolOptions13_0.m", "SecProtocolMetadata13_0.m", "SecObjectWrappers12_0.m", "SecObjectWrappersIdentity12_0.m"}) do
+    local sources = {path.join(transport, "RevenantSecureTransport.m")}
+    for _, file in ipairs(OPTION_SOURCES) do
         table.insert(shared, compile(path.join(tls, file), {"-fobjc-arc"}, out))
+        table.insert(sources, path.join(tls, file))
     end
+    local renamed = aliases.flags(sources)
     local libraries = {path.join(boringssl, "lib", "libssl.a"), path.join(boringssl, "lib", "libcrypto.a"),
                        "-framework", "Foundation", "-framework", "Security", "-framework", "CoreFoundation", "-lc++"}
     for _, variant in ipairs(variants) do
@@ -81,7 +87,7 @@ function main()
         end
         local fixtureObject = compile(fixture, table.join(include, fixtureDefines), folder)
         local program = path.join(folder, "securetransport")
-        clang(table.join(shared, {object, fixtureObject}, libraries, {"-o", program}))
+        clang(table.join(shared, {object, fixtureObject}, renamed, libraries, {"-o", program}))
         os.execv(program, {identity}, {stdout = program .. ".out"})
         local lines = {}
         for line in io.lines(program .. ".out") do
