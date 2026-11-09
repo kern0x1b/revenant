@@ -418,10 +418,11 @@ static BOOL RevenantMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger
     inner = *index + runLength;
     innerEnd = close;
     [self appendInline:text from:*plain to:*index intent:intent span:0 extra:nil];
+    NSUInteger appended = _result.length;
     [self parseInlines:text from:inner to:innerEnd intent:intent];
     [_result addAttribute:NSInlinePresentationIntentAttributeName
                    value:@(value)
-                   range:NSMakeRange(_result.length - (innerEnd - inner), innerEnd - inner)];
+                   range:NSMakeRange(appended, _result.length - appended)];
     *index = close + runLength;
     *plain = *index;
     return YES;
@@ -516,10 +517,11 @@ static BOOL RevenantMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger
                 NSURL *url = [self urlFor:[self targetIn:[text substringWithRange:NSMakeRange(close + 2, at - close - 2)]]];
                 if (url) {
                     [self appendInline:text from:plain to:index intent:intent span:0 extra:nil];
+                    NSUInteger appended = _result.length;
                     [self parseInlines:text from:index + 2 to:close intent:intent];
                     [_result addAttribute:NSImageURLAttributeName
                                    value:url
-                                   range:NSMakeRange(_result.length - (close - index - 2), close - index - 2)];
+                                   range:NSMakeRange(appended, _result.length - appended)];
                     index = at + 1;
                     plain = index;
                     continue;
@@ -535,10 +537,11 @@ static BOOL RevenantMarkdownParenEnd(NSString *text, NSUInteger body, NSUInteger
                 NSURL *url = [self urlFor:[self targetIn:[text substringWithRange:NSMakeRange(close + 2, at - close - 2)]]];
                 if (url) {
                     [self appendInline:text from:plain to:index intent:intent span:0 extra:nil];
+                    NSUInteger appended = _result.length;
                     [self parseInlines:text from:index + 1 to:close intent:intent];
                     [_result addAttribute:RevenantMarkdownLinkKey
                                    value:url
-                                   range:NSMakeRange(_result.length - (close - index - 1), close - index - 1)];
+                                   range:NSMakeRange(appended, _result.length - appended)];
                     index = at + 1;
                     plain = index;
                     continue;

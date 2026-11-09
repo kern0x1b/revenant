@@ -1,5 +1,10 @@
 #import <Foundation/Foundation.h>
 
+NSString *const NSPresentationIntentAttributeName = @"NSPresentationIntent";
+NSString *const NSInlinePresentationIntentAttributeName = @"NSInlinePresentationIntent";
+NSString *const NSLanguageIdentifierAttributeName = @"NSLanguage";
+NSString *const NSImageURLAttributeName = @"NSImageURL";
+
 static NSString *revenant_intent(NSPresentationIntent *intent)
 {
     NSMutableArray *chain = [NSMutableArray array];
@@ -59,6 +64,7 @@ static NSString *revenant_dump(NSAttributedString *text)
 
 int main(void)
 {
+    setvbuf(stdout, NULL, _IONBF, 0);
     @autoreleasepool {
         NSArray *sources = @[
             @"plain text",
