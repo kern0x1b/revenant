@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import "RevenantURLParser.h"
 
 @implementation NSURL (RevenantEncoding)
 
@@ -9,7 +10,7 @@
 
 - (instancetype)initWithString:(NSString *)string encodingInvalidCharacters:(BOOL)encoding
 {
-    NSString *written = [[NSURLComponents alloc] initWithString:string encodingInvalidCharacters:encoding].string;
+    NSString *written = revenant_url_standard(string, encoding, YES);
     return written ? [self initWithString:written] : nil;
 }
 

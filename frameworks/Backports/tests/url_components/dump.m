@@ -31,6 +31,9 @@ int main(int argc, const char **argv)
             NSString *encodedRow = encoded ? [@[field(encoded.string), field(encoded.encodedHost), field(encoded.percentEncodedPath)] componentsJoinedByString:@"\t"] : @"nil";
             NSURLComponents *strict = [NSURLComponents componentsWithString:input encodingInvalidCharacters:NO];
             row = [row stringByAppendingFormat:@"\tencoding:%@\tstrict:%@", encodedRow, strict ? field(strict.string) : @"nil"];
+            NSURL *lenientURL = [NSURL URLWithString:input encodingInvalidCharacters:YES];
+            NSURL *strictURL = [NSURL URLWithString:input encodingInvalidCharacters:NO];
+            row = [row stringByAppendingFormat:@"\turl:%@\turlstrict:%@", lenientURL ? field(lenientURL.absoluteString) : @"nil", strictURL ? field(strictURL.absoluteString) : @"nil"];
             printf("%lu\t%s\n", (unsigned long)index, row.UTF8String);
             index++;
         }
