@@ -35,11 +35,13 @@ extension NSAttributedString {
 
 extension AttributedString {
     public struct MarkdownParsingOptions: Sendable {
+        @nonexhaustive
         public enum FailurePolicy: Int, Sendable {
             case throwError
             case returnPartiallyParsedIfPossible
         }
 
+        @nonexhaustive
         public enum InterpretedSyntax: Int, Sendable {
             case full
             case inlineOnly

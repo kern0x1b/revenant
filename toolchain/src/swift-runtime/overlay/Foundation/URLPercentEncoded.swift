@@ -162,6 +162,7 @@ extension URL {
         return percentEncoded ? fragment : decoded(fragment)
     }
 
+    @nonexhaustive
     public enum DirectoryHint: Sendable {
         case isDirectory
         case notDirectory

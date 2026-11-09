@@ -29,6 +29,7 @@ public struct PresentationIntent: Hashable, Codable, CustomDebugStringConvertibl
         return components.debugDescription
     }
 
+    @nonexhaustive
     public enum Kind: Hashable, Codable, CustomDebugStringConvertible, Sendable {
         case paragraph
         case header(level: Int)
@@ -143,6 +144,7 @@ public struct PresentationIntent: Hashable, Codable, CustomDebugStringConvertibl
     }
 
     public struct TableColumn: Hashable, Codable, Sendable {
+        @nonexhaustive
         public enum Alignment: Int, Hashable, Codable, Sendable {
             case left
             case center

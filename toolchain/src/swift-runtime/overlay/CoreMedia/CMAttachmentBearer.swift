@@ -7,6 +7,7 @@ public protocol CMAttachmentBearerProtocol {
 }
 
 public struct CMAttachmentBearerAttachments {
+    @nonexhaustive
     public enum Value {
         case shouldNotPropagate(Any)
         case shouldPropagate(Any)
@@ -28,6 +29,7 @@ public struct CMAttachmentBearerAttachments {
         }
     }
 
+    @nonexhaustive
     public enum Mode: CMAttachmentMode {
         case shouldNotPropagate = 0
         case shouldPropagate = 1

@@ -1,0 +1,156 @@
+diff --git a/stdlib/public/Darwin/UIKit/UIKit.swift b/stdlib/public/Darwin/UIKit/UIKit.swift
+--- a/stdlib/public/Darwin/UIKit/UIKit.swift
++++ b/stdlib/public/Darwin/UIKit/UIKit.swift
+@@ -573,6 +573,7 @@ import UIKit
+ 
+ public enum RevenantUIButton {
+     public enum Configuration {
++        @nonexhaustive
+         public enum CornerStyle {
+             case capsule
+             case dynamic
+@@ -581,23 +582,27 @@ public enum RevenantUIButton {
+             case medium
+             case small
+         }
++        @nonexhaustive
+         public enum Indicator {
+             case automatic
+             case none
+             case popup
+         }
++        @nonexhaustive
+         public enum MacIdiomStyle {
+             case automatic
+             case bordered
+             case borderless
+             case borderlessTinted
+         }
++        @nonexhaustive
+         public enum Size {
+             case large
+             case medium
+             case mini
+             case small
+         }
++        @nonexhaustive
+         public enum TitleAlignment {
+             case automatic
+             case center
+@@ -608,6 +613,7 @@ public enum RevenantUIButton {
+ }
+ 
+ public enum UICellAccessory {
++    @nonexhaustive
+     public enum AccessoryType {
+         case checkmark
+         case customView(RevenantUIView)
+@@ -621,23 +627,27 @@ public enum UICellAccessory {
+         case popUpMenu
+         case reorder
+     }
++    @nonexhaustive
+     public enum DisplayedState {
+         case always
+         case whenEditing
+         case whenNotEditing
+     }
++    @nonexhaustive
+     public enum LayoutDimension {
+         case actual
+         case custom(CGFloat)
+         case standard
+     }
+     public enum OutlineDisclosureOptions {
++        @nonexhaustive
+         public enum Style {
+             case automatic
+             case cell
+             case header
+         }
+     }
++    @nonexhaustive
+     public enum Placement {
+         public typealias Position = ([UICellAccessory]) -> Int
+         case leading(displayed: UICellAccessory.DisplayedState = .always, at: UICellAccessory.Placement.Position)
+@@ -646,11 +656,13 @@ public enum UICellAccessory {
+ }
+ 
+ public enum UICellConfigurationState {
++    @nonexhaustive
+     public enum DragState {
+         case dragging
+         case lifting
+         case none
+     }
++    @nonexhaustive
+     public enum DropState {
+         case none
+         case notTargeted
+@@ -659,6 +671,7 @@ public enum UICellConfigurationState {
+ }
+ 
+ public enum UICollectionLayoutListConfiguration {
++    @nonexhaustive
+     public enum Appearance {
+         case grouped
+         case insetGrouped
+@@ -666,10 +679,12 @@ public enum UICollectionLayoutListConfiguration {
+         case sidebar
+         case sidebarPlain
+     }
++    @nonexhaustive
+     public enum FooterMode {
+         case none
+         case supplementary
+     }
++    @nonexhaustive
+     public enum HeaderMode {
+         case firstItemInSection
+         case none
+@@ -678,6 +693,7 @@ public enum UICollectionLayoutListConfiguration {
+ }
+ 
+ public enum UIContentUnavailableConfiguration {
++    @nonexhaustive
+     public enum Alignment {
+         case center
+         case natural
+@@ -686,11 +702,13 @@ public enum UIContentUnavailableConfiguration {
+ 
+ public enum UIListContentConfiguration {
+     public enum TextProperties {
++        @nonexhaustive
+         public enum TextAlignment {
+             case center
+             case justified
+             case natural
+         }
++        @nonexhaustive
+         public enum TextTransform {
+             case capitalized
+             case lowercase
+@@ -701,6 +719,7 @@ public enum UIListContentConfiguration {
+ }
+ 
+ public enum UIListSeparatorConfiguration {
++    @nonexhaustive
+     public enum Visibility {
+         case automatic
+         case hidden
+@@ -710,6 +729,7 @@ public enum UIListSeparatorConfiguration {
+ 
+ public enum RevenantUITabBarController {
+     public enum Sidebar {
++        @nonexhaustive
+         public enum ScrollTarget {
+             case footer
+             case header
+@@ -719,6 +739,7 @@ public enum RevenantUITabBarController {
+ 
+ public enum RevenantUIView {
+     public enum LayoutRegion {
++        @nonexhaustive
+         public enum AdaptivityAxis {
+             case horizontal
+             case vertical

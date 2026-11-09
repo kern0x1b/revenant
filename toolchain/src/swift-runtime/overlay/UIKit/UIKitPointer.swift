@@ -5,6 +5,7 @@ import _SwiftRevenantUIKitOverlayShims
 public typealias UIPointerEffect = __UIPointerEffect
 
 @available(iOS 13.4, *)
+@nonexhaustive
 public enum UIPointerShape {
     case path(UIBezierPath)
     case roundedRect(CGRect, radius: CGFloat = UIPointerShape.defaultCornerRadius)

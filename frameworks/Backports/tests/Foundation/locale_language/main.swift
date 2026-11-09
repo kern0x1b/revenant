@@ -37,6 +37,20 @@ print("decoded", decoded == Locale.Language(identifier: "zh-Hant-TW"))
 print("ids", Locale.LanguageCode("en").identifier, Locale.Script("Latn").identifier, Locale.Region("US").identifier)
 print("literals", ("en" as Locale.LanguageCode).identifier, ("Cyrl" as Locale.Script).identifier, ("RU" as Locale.Region).identifier)
 print("systems", Locale.MeasurementSystem.metric == .metric, Locale.MeasurementSystem.us != .uk)
+let allSystems = Locale.MeasurementSystem.measurementSystems
+print("systemlist", allSystems.map { $0.identifier }, allSystems.map { "\($0)" })
+print("systemcompare", Locale.MeasurementSystem("METRIC") == .metric, Locale.MeasurementSystem("METRIC").identifier, ("ussystem" as Locale.MeasurementSystem) == .us, Locale.MeasurementSystem("Foo-Bar") == Locale.MeasurementSystem("foo-bar"))
+let systemJSON = try encoder.encode(allSystems)
+print("systemjson", String(decoding: systemJSON, as: UTF8.self), try JSONDecoder().decode([Locale.MeasurementSystem].self, from: systemJSON) == allSystems)
+print("systemset", Set<Locale.MeasurementSystem>([.metric, "METRIC", "Metric", .us]).count)
+var mutatedSystem = Locale.MeasurementSystem.metric
+mutatedSystem.identifier = "ussystem"
+print("systemmutate", mutatedSystem == .us, mutatedSystem.hashValue == Locale.MeasurementSystem.us.hashValue)
+switch Locale(identifier: "en_GB").measurementSystem {
+case .metric: print("systemswitch metric")
+case .us: print("systemswitch us")
+default: print("systemswitch other")
+}
 let overlong = Locale.Language(languageCode: Locale.LanguageCode(String(repeating: "q", count: 300)))
 print("overlong", overlong.languageCode?.identifier.count ?? -1, overlong.script?.identifier ?? "nil", overlong.region?.identifier ?? "nil")
 

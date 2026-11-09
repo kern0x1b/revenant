@@ -1,0 +1,22 @@
+diff --git a/stdlib/public/Platform/MachError.swift b/stdlib/public/Platform/MachError.swift
+--- a/stdlib/public/Platform/MachError.swift
++++ b/stdlib/public/Platform/MachError.swift
+@@ -13,6 +13,7 @@
+ #if (os(macOS) || os(iOS) || os(tvOS) || os(watchOS) || os(visionOS)) && _runtime(_ObjC)
+ /// Enumeration describing Mach error codes.
+ @objc
++@nonexhaustive
+ public enum MachErrorCode : Int32 {
+   case success                  = 0
+ 
+diff --git a/stdlib/public/Platform/POSIXError.swift b/stdlib/public/Platform/POSIXError.swift
+--- a/stdlib/public/Platform/POSIXError.swift
++++ b/stdlib/public/Platform/POSIXError.swift
+@@ -14,6 +14,7 @@
+ 
+ /// Enumeration describing POSIX error codes.
+ @objc
++@nonexhaustive
+ public enum POSIXErrorCode: Int32, Sendable {
+   /// Operation not permitted.
+   case EPERM           = 1
