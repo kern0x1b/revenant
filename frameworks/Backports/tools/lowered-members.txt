@@ -785,6 +785,7 @@ class MKCircleRenderer
 class MKClusterAnnotation
 class MKCompassButton
 class MKDirections
+class MKDirectionsRequest
 class MKDirectionsResponse
 class MKDistanceFormatter
 class MKETAResponse
@@ -18321,6 +18322,14 @@ member MKDirections -revenant_polylineOf:
 member MKDirections -revenant_profileForTransportType:
 member MKDirections -revenant_routeURL
 member MKDirections -revenant_routesOf:request:
+member MKDirectionsRequest -arrivalDate
+member MKDirectionsRequest -departureDate
+member MKDirectionsRequest -requestsAlternateRoutes
+member MKDirectionsRequest -setArrivalDate:
+member MKDirectionsRequest -setDepartureDate:
+member MKDirectionsRequest -setRequestsAlternateRoutes:
+member MKDirectionsRequest -setTransportType:
+member MKDirectionsRequest -transportType
 member MKDirectionsResponse -destination
 member MKDirectionsResponse -initWithRoutes:source:destination:
 member MKDirectionsResponse -routes

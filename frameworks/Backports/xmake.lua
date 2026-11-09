@@ -440,6 +440,17 @@ if is_plat("iphoneos") and not SELECTED then
         add_syslinks("objc")
     target_end()
 
+    target("MapRequestProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/daemon")
+        add_files("tests/device_probe/map_request_main.m", "src/MapKit/MKDirectionsRequest7.m")
+        add_includedirs("tests/Foundation")
+        add_mflags("-fobjc-arc", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability")
+        add_frameworks("Foundation", "MapKit", "CoreLocation")
+        add_syslinks("objc")
+    target_end()
+
     target("MenuElementsProbe")
         set_kind("binary")
         set_default(false)
