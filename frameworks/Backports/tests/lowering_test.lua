@@ -55,6 +55,9 @@ void revenantAcceptance(NSString *text, NSFileManager *files, CLLocationManager 
     web.navigationDelegate = nil;
     id<WKNavigationDelegate> navigation = web.navigationDelegate;
     (void)navigation;
+    [web createWebArchiveDataWithCompletionHandler:^(NSData *archive, NSError *archiveError) {}];
+    [web callAsyncJavaScript:@"return 1" arguments:@{@"x": @1} inFrame:nil inContentWorld:[WKContentWorld defaultClientWorld] completionHandler:^(id result, NSError *scriptError) {}];
+    [web evaluateJavaScript:@"1" inFrame:nil inContentWorld:[WKContentWorld pageWorld] completionHandler:nil];
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     (void)[device newCommandQueue];
     (void)[device newBufferWithLength:16 options:0];

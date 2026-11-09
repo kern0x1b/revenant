@@ -4037,8 +4037,10 @@ enum WKErrorContentRuleListStoreCompileFailed
 enum WKErrorContentRuleListStoreLookUpFailed
 enum WKErrorContentRuleListStoreRemoveFailed
 enum WKErrorJavaScriptExceptionOccurred
+enum WKErrorJavaScriptInvalidFrameTarget
 enum WKErrorJavaScriptResultTypeIsUnsupported
 enum WKErrorUnknown
+enum WKErrorWebViewInvalidated
 enum WKNavigationActionPolicyAllow
 enum WKNavigationResponsePolicyAllow
 enum WKNavigationResponsePolicyCancel
@@ -4573,6 +4575,8 @@ function RevenantCodecBridgeMessage
 function RevenantCodecDecoded
 function RevenantCodecMessageBody
 function RevenantCodecParsed
+function RevenantCodecScriptLiteral
+function RevenantCodecStringLiteral
 function RevenantCornerPathCreate
 function RevenantCornerRadiiFitted
 function RevenantCreatePhotoImage
@@ -35283,13 +35287,16 @@ member WKWebView -URL
 member WKWebView -allowsBackForwardNavigationGestures
 member WKWebView -allowsLinkPreview
 member WKWebView -backForwardList
+member WKWebView -callAsyncJavaScript:arguments:inFrame:inContentWorld:completionHandler:
 member WKWebView -canGoBack
 member WKWebView -canGoForward
 member WKWebView -configuration
+member WKWebView -createWebArchiveDataWithCompletionHandler:
 member WKWebView -customUserAgent
 member WKWebView -dealloc
 member WKWebView -estimatedProgress
 member WKWebView -evaluateJavaScript:completionHandler:
+member WKWebView -evaluateJavaScript:inFrame:inContentWorld:completionHandler:
 member WKWebView -findInteraction
 member WKWebView -findInteraction:sessionForView:
 member WKWebView -goBack
@@ -35323,8 +35330,11 @@ member WKWebView -revenant_denyNavigation:
 member WKWebView -revenant_documentStartScripts
 member WKWebView -revenant_downloadResponse:request:
 member WKWebView -revenant_emitCommit
+member WKWebView -revenant_ensureBridge
+member WKWebView -revenant_failAsyncCalls:
 member WKWebView -revenant_failLoad:forFrame:
 member WKWebView -revenant_failNavigation:interruptedAt:
+member WKWebView -revenant_finishAsyncCall:
 member WKWebView -revenant_installScripts:
 member WKWebView -revenant_isMainFrameRequest:
 member WKWebView -revenant_itemsReplacingCurrent:
@@ -35663,6 +35673,7 @@ protocol RevenantBrailleMapPinStore
 protocol RevenantDOMDocument
 protocol RevenantDOMEvent
 protocol RevenantDOMInputElement
+protocol RevenantEngineArchive
 protocol RevenantEngineDataSource
 protocol RevenantEngineEvent
 protocol RevenantEngineFrame

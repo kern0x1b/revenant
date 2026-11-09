@@ -7,6 +7,10 @@ extern NSString *const RevenantEncoder;
 
 extern NSString *const RevenantShim;
 
+NSString *RevenantCodecStringLiteral(NSString *string);
+
+NSString *RevenantCodecScriptLiteral(id value);
+
 id RevenantCodecParsed(NSString *text, BOOL *valid);
 
 id RevenantCodecDecoded(id value);
