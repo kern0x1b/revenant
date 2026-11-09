@@ -440,6 +440,17 @@ if is_plat("iphoneos") and not SELECTED then
         add_syslinks("objc")
     target_end()
 
+    target("MotionHeadingProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/daemon")
+        add_files("tests/device_probe/motion_heading_main.m", "src/CoreMotion/CMDeviceMotion+Heading11.m", "src/CoreMotion/RevenantMotionHeading.c")
+        add_includedirs("tests/Foundation", "src/CoreMotion")
+        add_mflags("-fobjc-arc", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability")
+        add_frameworks("Foundation", "CoreMotion")
+        add_syslinks("objc")
+    target_end()
+
     target("MapRequestProbe")
         set_kind("binary")
         set_default(false)
@@ -885,6 +896,7 @@ if not is_plat("iphoneos") then
                {syslinks = {"sqlite3"}, defines = {"REVENANT_HOST_BUILD"}})
     host_tests("QuartzCore", {iosurface_contents = {"CALayer+IOSurfaceContents.m"}}, "Metal", {"Foundation", "QuartzCore", "CoreGraphics", "IOSurface"})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
+    host_tests("CoreMotion", {heading = {"RevenantMotionHeading.c"}}, nil, {"Foundation"})
     host_tests("CoreML", {trainer = {"RevenantMLTrain.c", "RevenantMLProto.c", "RevenantMLSchema.c"}}, nil, {"Foundation"})
     host_tests("CoreText", CORETEXT_TESTS, nil, {"CoreText", "CoreGraphics", "Foundation"})
     local SCENEKIT_TESTS_NO_AUDIO = {}
