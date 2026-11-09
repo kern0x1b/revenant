@@ -140,7 +140,7 @@ static NSData *revenant_utf8(NSString *string)
     return data;
 }
 
-static BOOL revenant_valid_run(const uint8_t *bytes, RevenantSpan span, RevenantMask mask, BOOL percentAllowed)
+static BOOL revenant_valid_run_scalars(const uint8_t *bytes, RevenantSpan span, RevenantMask mask, BOOL percentAllowed, BOOL scalarsAllowed)
 {
     long hexRequired = 0;
     for (long index = span.start; index < span.end; index++) {
@@ -150,8 +150,11 @@ static BOOL revenant_valid_run(const uint8_t *bytes, RevenantSpan span, Revenant
                 return NO;
             continue;
         }
-        if (byte >= 128)
+        if (byte >= 128) {
+            if (scalarsAllowed)
+                continue;
             return NO;
+        }
         if (byte == '%') {
             if (hexRequired != 0)
                 return NO;
@@ -165,6 +168,11 @@ static BOOL revenant_valid_run(const uint8_t *bytes, RevenantSpan span, Revenant
         }
     }
     return hexRequired == 0;
+}
+
+static BOOL revenant_valid_run(const uint8_t *bytes, RevenantSpan span, RevenantMask mask, BOOL percentAllowed)
+{
+    return revenant_valid_run_scalars(bytes, span, mask, percentAllowed, NO);
 }
 
 static void revenant_percent_encode(RevenantBuffer *out, const uint8_t *bytes, RevenantSpan span, RevenantMask mask, BOOL skipEncoded)
@@ -838,6 +846,7 @@ NSString *revenant_url_nsurl(NSString *string, BOOL encoding)
     RevenantBuffer out = {NULL, 0, 0};
     NSString *result = nil;
     BOOL failed = NO;
+    BOOL converted = NO;
     if (revenant_present(info.scheme)) {
         revenant_buffer_append_span(&out, bytes, info.scheme);
         revenant_buffer_append_byte(&out, ':');
@@ -866,10 +875,11 @@ NSString *revenant_url_nsurl(NSString *string, BOOL encoding)
             failed = YES;
         } else if (revenant_special_scheme(bytes, info.scheme) && revenant_idna()) {
             NSData *ascii = revenant_idna_encode(bytes, info.host);
-            RevenantSpan span = {0, (long)ascii.length};
-            failed = !ascii.length || !revenant_valid_host_span(ascii.bytes, span) || memchr(ascii.bytes, '%', ascii.length) != NULL;
-            if (!failed)
+            failed = !ascii.length || !revenant_valid_run_scalars(bytes, info.host, revenant_mask_host, YES, YES) || memchr(bytes + info.host.start, '%', (size_t)revenant_span_length(info.host)) != NULL;
+            if (!failed) {
                 revenant_buffer_append(&out, ascii.bytes, (long)ascii.length);
+                converted = YES;
+            }
         } else {
             revenant_percent_encode(&out, bytes, info.host, revenant_mask_host, YES);
         }
@@ -889,7 +899,7 @@ NSString *revenant_url_nsurl(NSString *string, BOOL encoding)
             revenant_percent_encode(&out, bytes, info.fragment, revenant_mask_query, YES);
         }
         RevenantInfo reparsed;
-        if (revenant_parse_bytes(out.bytes, out.length, RevenantParseEmptyScheme | RevenantParseNoHeuristics | RevenantParseExactCase, &reparsed))
+        if (converted || revenant_parse_bytes(out.bytes, out.length, RevenantParseEmptyScheme | RevenantParseNoHeuristics | RevenantParseExactCase, &reparsed))
             result = [[NSString alloc] initWithBytes:out.bytes length:(NSUInteger)out.length encoding:NSUTF8StringEncoding];
     }
     free(out.bytes);

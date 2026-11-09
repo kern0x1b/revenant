@@ -1,6 +1,8 @@
 #import <Foundation/Foundation.h>
 #import "../../src/Foundation/RevenantMarkdownEntities.m"
 #import "../../src/Foundation/RevenantMarkdownParser.m"
+#import "../../src/Foundation/RevenantURLParser.m"
+#import "../../src/Foundation/RevenantURLReference.m"
 #import "../../src/Foundation/NSAttributedStringMarkdown15.m"
 
 NSAttributedString *RVParse(NSString *source, NSInteger syntax, NSURL *base)

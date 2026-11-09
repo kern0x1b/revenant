@@ -89,7 +89,7 @@ function main()
     local fuzz = import("fuzz", {rootdir = path.join(TESTS, "url_components"), anonymous = true})
 
     local oracle_program = build(work, "oracle_url", {DUMP})
-    local backport_sources = {DUMP, path.join(SRC, "NSURLComponents.m"), path.join(SRC, "RevenantURLGrammar.m"), path.join(SRC, "RevenantURLParser.m"), path.join(SRC, "NSURL+Encoding17.m")}
+    local backport_sources = {DUMP, path.join(SRC, "NSURLComponents.m"), path.join(SRC, "RevenantURLGrammar.m"), path.join(SRC, "RevenantURLParser.m"), path.join(SRC, "RevenantURLReference.m"), path.join(SRC, "NSURL+Encoding17.m")}
     for _, file in ipairs(os.files(path.join(SRC, "NSURLComponents+*.m"))) do
         table.insert(backport_sources, file)
     end

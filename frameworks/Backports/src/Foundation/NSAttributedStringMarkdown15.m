@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 #import "RevenantMarkdownParser.h"
+#import "RevenantURLParser.h"
 
 #pragma mark - the options class
 
@@ -124,11 +125,9 @@ static BOOL RevenantMarkdownPlatformEncodesURLs(void)
 {
     if (!text.length)
         return nil;
-    NSURL *url = [self resolve:text];
-    if (url || RevenantMarkdownPlatformEncodesURLs())
-        return url;
-    NSURL *encoded = [NSURL URLWithString:text encodingInvalidCharacters:YES];
-    return encoded ? [self resolve:encoded.relativeString] : nil;
+    if (RevenantMarkdownPlatformEncodesURLs())
+        return [self resolve:text];
+    return revenant_url_reference(text, _baseURL);
 }
 
 - (void)append:(NSString *)text base:(NSDictionary *)base mask:(NSUInteger)mask extra:(NSDictionary *)extra
