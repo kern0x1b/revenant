@@ -62,6 +62,17 @@ function scratch()
     return import("@addon.revenant.workspace", {anonymous = true}).fresh("tests")
 end
 
+function runtime_resources()
+    local packages = path.join(os.getenv("XMAKE_GLOBALDIR"), ".xmake", "packages")
+    local newest
+    for _, folder in ipairs(os.dirs(path.join(packages, "s", "swift-runtime", "6.4.0", "*", "lib", "swift", "iphoneos", "Foundation.swiftmodule"))) do
+        if not newest or os.mtime(folder) > os.mtime(newest) then
+            newest = folder
+        end
+    end
+    return newest and path.directory(path.directory(newest))
+end
+
 function empty_repository(folder)
     local main = path.join(folder, "main")
     if not os.isdir(main) then
