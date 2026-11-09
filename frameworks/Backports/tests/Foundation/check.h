@@ -31,7 +31,7 @@ static int revenant_finish(void)
 {
     printf("checks=%d failures=%d\n", revenant_checks, revenant_failures);
     fflush(stdout);
-    return revenant_failures;
+    return revenant_failures > 0 ? 1 : 0;
 }
 
 static void revenant_read_arguments(int argc, char **argv)

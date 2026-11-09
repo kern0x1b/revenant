@@ -304,7 +304,7 @@ static NSString *RevenantFlashTitle(AVCaptureFlashMode mode)
 {
     AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
     if (device == nil) {
-        *error = [self unavailableError:@"This device has no camera for scanning documents."];
+        *error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFeatureUnsupportedError userInfo:@{NSLocalizedDescriptionKey : @"This device has no camera for scanning documents."}];
         return NO;
     }
     NSError *inputError = nil;
