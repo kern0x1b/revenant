@@ -972,14 +972,12 @@ function rebind(file, moves, libraries)
             end
         end
     end
-    for _, name in ipairs(table.orderkeys(moves)) do
-        if not imported[name] then
-            raise("%s imports no %s, so there is no import to rebind", file, name)
-        end
-    end
     local binds = bind_stream(data, found, found.bind, false)
     for _, entry in ipairs(binds) do
         local install = moves[entry.name]
+        if install then
+            imported[entry.name] = true
+        end
         if install and found.libraries[entry.ordinal] ~= install then
             if not found.libraries[entry.ordinal] then
                 raise("%s binds %s flat, not to a library, so it cannot be moved to %s", file, entry.name, install)
@@ -990,6 +988,9 @@ function rebind(file, moves, libraries)
     end
     for _, entry in ipairs(bind_stream(data, found, found.lazy_bind, true)) do
         local install = moves[entry.name]
+        if install then
+            imported[entry.name] = true
+        end
         if install and found.libraries[entry.ordinal] ~= install then
             if not found.libraries[entry.ordinal] then
                 raise("%s binds %s flat, not to a library, so it cannot be moved to %s", file, entry.name, install)
@@ -1015,6 +1016,11 @@ function rebind(file, moves, libraries)
                 table.insert(edits, {entry.span_start, string.rep("\0", entry.span_end - entry.span_start)})
                 rewrite = true
             end
+        end
+    end
+    for _, name in ipairs(table.orderkeys(moves)) do
+        if not imported[name] then
+            raise("%s imports no %s, so there is no import to rebind", file, name)
         end
     end
     local tail, tail_size, cut_at, cut_end = "", 0, limit, limit
