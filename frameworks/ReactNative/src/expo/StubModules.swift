@@ -8,29 +8,6 @@ enum StubReport {
   }
 }
 
-public final class StubAudioModule: Module {
-  public func definition() -> ModuleDefinition {
-    Name("ExpoAudio")
-    Class("AudioPlayer") {
-      Constructor { () in }
-      Function("replace") { () in StubReport.called("ExpoAudio", "replace") }
-      Function("setPlaybackRate") { () in StubReport.called("ExpoAudio", "setPlaybackRate") }
-    }
-    Class("AudioRecorder") {
-      Constructor { () in }
-      AsyncFunction("prepareToRecordAsync") { () in StubReport.called("ExpoAudio", "prepareToRecordAsync") }
-    }
-    Class("AudioPlaylist") {
-      Constructor { () in }
-    }
-    Class("AudioStream") {
-      Constructor { () in }
-    }
-    AsyncFunction("setAudioModeAsync") { () in StubReport.called("ExpoAudio", "setAudioModeAsync") }
-    AsyncFunction("setIsAudioActiveAsync") { () in StubReport.called("ExpoAudio", "setIsAudioActiveAsync") }
-  }
-}
-
 public final class StubDocumentPickerModule: Module {
   public func definition() -> ModuleDefinition { Name("ExpoDocumentPicker") }
 }

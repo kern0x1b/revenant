@@ -1,0 +1,174 @@
+diff --git a/ios/AudioExceptions.swift b/ios/AudioExceptions.swift
+index b313227..1010006 100644
+--- a/ios/AudioExceptions.swift
++++ b/ios/AudioExceptions.swift
+@@ -42,6 +42,24 @@ internal final class PreferredInputFoundException: GenericException<String> {
+   }
+ }
+ 
++internal final class LockScreenUnavailableException: Exception {
++  override var reason: String {
++    "Lock screen controls need iOS 7.1 or later"
++  }
++}
++
++internal final class AudioInputSelectionUnavailableException: Exception {
++  override var reason: String {
++    "Selecting an audio input needs iOS 7 or later"
++  }
++}
++
++internal final class BitRateStrategyUnavailableException: Exception {
++  override var reason: String {
++    "Setting a bit rate strategy needs iOS 7 or later"
++  }
++}
++
+ internal final class AudioRecordingException: GenericException<String> {
+   override var reason: String {
+     "Audio recording error: \(param)"
+diff --git a/ios/AudioModule.swift b/ios/AudioModule.swift
+index d265606..9d63059 100644
+--- a/ios/AudioModule.swift
++++ b/ios/AudioModule.swift
+@@ -69,7 +69,9 @@ public class AudioModule: Module {
+         return
+       }
+       let player = AudioUtils.createAVPlayer(from: source)
+-      player.currentItem?.preferredForwardBufferDuration = preferredForwardBufferDuration
++      if #available(iOS 10.0, *) {
++        player.currentItem?.preferredForwardBufferDuration = preferredForwardBufferDuration
++      }
+       self.registry.addPreloadedPlayer(player, forKey: key)
+     }
+ 
+@@ -125,7 +127,7 @@ public class AudioModule: Module {
+           avPlayer = cachedPlayer
+         } else {
+           avPlayer = AudioUtils.createAVPlayer(from: source)
+-          if preferredForwardBufferDuration > 0 {
++          if #available(iOS 10.0, *), preferredForwardBufferDuration > 0 {
+             avPlayer.currentItem?.preferredForwardBufferDuration = preferredForwardBufferDuration
+           }
+         }
+@@ -223,11 +225,14 @@ public class AudioModule: Module {
+           player.ref.rate = playerRate
+         }
+ 
+-        if player.shouldCorrectPitch {
+-          player.pitchCorrectionQuality = pitchCorrectionQuality?.toPitchAlgorithm() ?? .timeDomain
+-          player.ref.currentItem?.audioTimePitchAlgorithm = player.pitchCorrectionQuality
+-        } else {
+-          player.ref.currentItem?.audioTimePitchAlgorithm = .varispeed
++        if #available(iOS 7.0, *) {
++          if player.shouldCorrectPitch {
++            let algorithm = pitchCorrectionQuality?.toPitchAlgorithm() ?? .timeDomain
++            player.pitchCorrectionQuality = algorithm
++            player.ref.currentItem?.audioTimePitchAlgorithm = algorithm
++          } else {
++            player.ref.currentItem?.audioTimePitchAlgorithm = .varispeed
++          }
+         }
+       }
+ 
+@@ -259,18 +264,18 @@ public class AudioModule: Module {
+       }
+ 
+       Function("setActiveForLockScreen") { (player: AudioPlayer, active: Bool, metadata: Metadata?, options: LockScreenOptions?) in
+-        player.setActiveForLockScreen(active, metadata: metadata, options: options)
++        try player.setActiveForLockScreen(active, metadata: metadata, options: options)
+       }
+ 
+       Function("updateLockScreenMetadata") { (player: AudioPlayer, metadata: Metadata?) in
+-        if player.isActiveForLockScreen {
++        if #available(iOS 7.1, *), player.isActiveForLockScreen {
+           player.metadata = metadata
+           MediaController.shared.updateNowPlayingInfo(for: player)
+         }
+       }
+ 
+       Function("clearLockScreenControls") { (player: AudioPlayer) in
+-        if player.isActiveForLockScreen {
++        if #available(iOS 7.1, *), player.isActiveForLockScreen {
+           player.metadata = nil
+           player.isActiveForLockScreen = false
+           MediaController.shared.setActivePlayer(nil)
+@@ -850,7 +855,7 @@ public class AudioModule: Module {
+       default:
+         break
+       }
+-    } else {
++    } else if #available(iOS 8.0, *) {
+       switch AVAudioSession.sharedInstance().recordPermission {
+       case .denied, .undetermined:
+         throw AudioPermissionsException()
+diff --git a/ios/AudioRecordingRequester.swift b/ios/AudioRecordingRequester.swift
+index fa50882..7b01aa3 100644
+--- a/ios/AudioRecordingRequester.swift
++++ b/ios/AudioRecordingRequester.swift
+@@ -9,17 +9,32 @@ public class AudioRecordingRequester: NSObject, EXPermissionsRequester {
+ 
+   public func getPermissions() -> [AnyHashable: Any] {
+     return Self.permissions(
+-      systemStatus: AVAudioSession.sharedInstance().recordPermission,
++      status: Self.systemStatus(),
+       usageDescription: Bundle.main.object(forInfoDictionaryKey: "NSMicrophoneUsageDescription")
+     )
+   }
+ 
++  private static func systemStatus() -> EXPermissionStatus {
++    guard #available(iOS 8.0, *) else {
++      return EXPermissionStatusGranted
++    }
++
++    switch AVAudioSession.sharedInstance().recordPermission {
++    case .granted:
++      return EXPermissionStatusGranted
++    case .denied:
++      return EXPermissionStatusDenied
++    case .undetermined:
++      return EXPermissionStatusUndetermined
++    @unknown default:
++      return EXPermissionStatusUndetermined
++    }
++  }
++
+   static func permissions(
+-    systemStatus: AVAudioSession.RecordPermission,
++    status: EXPermissionStatus,
+     usageDescription: Any?
+   ) -> [AnyHashable: Any] {
+-    var status: EXPermissionStatus
+-
+     guard usageDescription != nil else {
+       log.error("""
+         This app is missing NSMicrophoneUsageDescription, so audio recording will fail. \
+@@ -29,23 +44,17 @@ public class AudioRecordingRequester: NSObject, EXPermissionsRequester {
+       return ["status": EXPermissionStatusDenied.rawValue]
+     }
+ 
+-    switch systemStatus {
+-    case .granted:
+-      status = EXPermissionStatusGranted
+-    case .denied:
+-      status = EXPermissionStatusDenied
+-    case .undetermined:
+-      status = EXPermissionStatusUndetermined
+-    @unknown default:
+-      status = EXPermissionStatusUndetermined
+-    }
+-
+     return [
+       "status": status.rawValue
+     ]
+   }
+ 
+   public func requestPermissions(resolver resolve: @escaping EXPromiseResolveBlock, rejecter reject: @escaping EXPromiseRejectBlock) {
++    guard #available(iOS 7.0, *) else {
++      resolve(getPermissions())
++      return
++    }
++
+     typealias PermissionRequestFunction = @convention(c) (AnyObject, Selector, @escaping (Bool) -> Void) -> Void
+     let recordPermissionSelector = NSSelectorFromString(selector.joined())
+ 

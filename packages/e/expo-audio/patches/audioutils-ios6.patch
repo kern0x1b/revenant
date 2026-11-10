@@ -1,0 +1,149 @@
+diff --git a/ios/AVPlayerCompat.swift b/ios/AVPlayerCompat.swift
+new file mode 100644
+index 0000000..7b7ae64
+--- /dev/null
++++ b/ios/AVPlayerCompat.swift
+@@ -0,0 +1,39 @@
++import AVFoundation
++
++extension AVPlayer {
++  var isPlayingNow: Bool {
++    if #available(iOS 10.0, *) {
++      return timeControlStatus == .playing
++    }
++    return rate != 0
++  }
++
++  var isWaitingForRate: Bool {
++    if #available(iOS 10.0, *) {
++      return timeControlStatus == .waitingToPlayAtSpecifiedRate
++    }
++    return false
++  }
++
++  var timeControlStatusName: String {
++    if #available(iOS 10.0, *) {
++      return timeControlStatusString(status: timeControlStatus)
++    }
++    return rate != 0 ? "playing" : "paused"
++  }
++
++  var waitingReasonName: String {
++    if #available(iOS 10.0, *) {
++      return reasonForWaitingToPlayString(status: reasonForWaitingToPlay)
++    }
++    return "unknown"
++  }
++
++  func playNow(atRate playbackRate: Float) {
++    if #available(iOS 10.0, *) {
++      playImmediately(atRate: playbackRate)
++    } else {
++      rate = playbackRate
++    }
++  }
++}
+diff --git a/ios/AudioUtils.swift b/ios/AudioUtils.swift
+index 79c7c0b..7e44618 100644
+--- a/ios/AudioUtils.swift
++++ b/ios/AudioUtils.swift
+@@ -3,7 +3,13 @@ import ExpoModulesCore
+ 
+ struct RecordingUtils {
+   static func getAvailableInputs() -> [[String: Any]] {
+-    AVAudioSession.sharedInstance().availableInputs?.map { desc in
++    let session = AVAudioSession.sharedInstance()
++    guard #available(iOS 7.0, *) else {
++      return session.currentRoute.inputs.map { desc in
++        ["name": desc.portName, "type": desc.portType, "uid": desc.uid]
++      }
++    }
++    return session.availableInputs?.map { desc in
+       ["name": desc.portName, "type": desc.portType, "uid": desc.uid]
+     } ?? []
+   }
+@@ -21,6 +27,9 @@ struct RecordingUtils {
+   }
+ 
+   static func setInput(_ input: String) throws {
++    guard #available(iOS 7.0, *) else {
++      throw AudioInputSelectionUnavailableException()
++    }
+     var preferredInput: AVAudioSessionPortDescription?
+     if let currentInputs = AVAudioSession.sharedInstance().availableInputs {
+       for desc in currentInputs where desc.uid == input {
+@@ -40,6 +49,10 @@ struct RecordingUtils {
+       return input
+     }
+ 
++    guard #available(iOS 7.0, *) else {
++      return nil
++    }
++
+     if let preferredInput = AVAudioSession.sharedInstance().preferredInput {
+       return preferredInput
+     }
+@@ -90,20 +103,27 @@ struct AudioUtils {
+     }
+ 
+     let asset = AVURLAsset(url: finalUrl, options: options)
+-    return AVPlayerItem(asset: asset, automaticallyLoadedAssetKeys: [.tracks, .duration])
++    if #available(iOS 7.0, *) {
++      return AVPlayerItem(asset: asset, automaticallyLoadedAssetKeys: ["tracks", "duration"])
++    }
++    return AVPlayerItem(asset: asset)
+   }
+ 
+-  static func createRecordingOptions(_ options: RecordingOptions) -> [String: Any] {
+-    let strategy = options.bitRateStrategy?.toAVBitRateStrategy()
+-
++  static func createRecordingOptions(_ options: RecordingOptions) throws -> [String: Any] {
+     var settings = [String: Any]()
++    var qualityKey = AVEncoderAudioQualityKey
+ 
+-    if let strategy {
++    if let bitRateStrategy = options.bitRateStrategy {
++      guard #available(iOS 7.0, *) else {
++        throw BitRateStrategyUnavailableException()
++      }
++      let strategy = bitRateStrategy.toAVBitRateStrategy()
+       settings[AVEncoderBitRateStrategyKey] = strategy
++      if strategy == AVAudioBitRateStrategy_Variable || strategy == AVAudioBitRateStrategy_VariableConstrained {
++        qualityKey = AVEncoderAudioQualityForVBRKey
++      }
+     }
+ 
+-    let usesVBRQualityKey = strategy == AVAudioBitRateStrategy_Variable || strategy == AVAudioBitRateStrategy_VariableConstrained
+-    let qualityKey = usesVBRQualityKey ? AVEncoderAudioQualityForVBRKey : AVEncoderAudioQualityKey
+     settings[qualityKey] = options.audioQuality
+     settings[AVSampleRateKey] = options.sampleRate
+     settings[AVNumberOfChannelsKey] = options.numberOfChannels
+@@ -199,7 +219,7 @@ extension AVPlayer {
+     if isPlaying {
+       return false
+     }
+-    if timeControlStatus == .waitingToPlayAtSpecifiedRate {
++    if isWaitingForRate {
+       return true
+     }
+     if let currentItem {
+diff --git a/ios/StringConversions.swift b/ios/StringConversions.swift
+index 37f2448..bb9fee9 100644
+--- a/ios/StringConversions.swift
++++ b/ios/StringConversions.swift
+@@ -13,6 +13,7 @@ func statusToString(status: AVPlayer.Status) -> String {
+   }
+ }
+ 
++@available(iOS 10.0, *)
+ func timeControlStatusString(status: AVPlayer.TimeControlStatus) -> String {
+   switch status {
+   case .playing:
+@@ -26,6 +27,7 @@ func timeControlStatusString(status: AVPlayer.TimeControlStatus) -> String {
+   }
+ }
+ 
++@available(iOS 10.0, *)
+ func reasonForWaitingToPlayString(status: AVPlayer.WaitingReason?) -> String {
+   guard let status else {
+     return "unknown"

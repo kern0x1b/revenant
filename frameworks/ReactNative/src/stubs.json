@@ -1,13 +1,6 @@
 {
   "stubs": [
     {
-      "name": "StubAudioModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoAudio",
-      "owner": "expo-audio",
-      "reason": "Player, recorder and playlist class shells; the functions report the call and do nothing."
-    },
-    {
       "name": "StubDocumentPickerModule",
       "file": "src/expo/StubModules.swift",
       "module": "ExpoDocumentPicker",

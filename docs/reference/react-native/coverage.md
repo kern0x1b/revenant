@@ -7,9 +7,9 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 | Status | Meaning | Count |
 | --- | --- | --- |
 | real | built from the module's own sources, with no stub and no substitute | 41 |
-| partial | built and running, with a named part left out or rewritten | 16 |
+| partial | built and running, with a named part left out or rewritten | 17 |
 | js | no native code of its own, so it runs with the bundle | 12 |
-| stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 5 |
+| stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 4 |
 | missing | native code that is not built yet | 44 |
 | evaluate | not attempted; the note says what iOS 6 offers | 26 |
 | impossible | the system service does not exist before the iOS release the note names | 7 |
@@ -84,7 +84,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-apple-authentication | ~57.0.2 | yes | impossible | none | Sign in with Apple needs AuthenticationServices (iOS 13). The iOS 6.1.3 dyld cache has no AuthenticationServices framework and no ASAuthorizationController, and no iOS 6 sign-in service stands in for it. The backport answers the error of a platform without the service (backports-gaps T23). |
 | expo-application | ~57.0.3 | yes | real | build | Compiled; not exercised. |
 | expo-asset | ~57.0.20 | yes | real | build | Compiled; its use is not exercised by a screen. |
-| expo-audio | ~57.0.5 | yes | stub | none | Does not build for iOS 6: MediaController.swift:9 uses MPRemoteCommandCenter, which is iOS 7.1 or newer (build log of expo-audio 57.0.5). A stub (stubs.json): player, recorder and playlist class shells whose functions report the call and do nothing. The package is at packages/e/expo-audio, unpatched, and not built. Post-iOS 6 uses in the sources: MPRemoteCommandCenter (MediaController.swift, iOS 7.1), AVAudioEngine (AudioStream.swift, iOS 8; Backports has AVFAudio), AVAudioSession preferred input (AudioUtils.swift, iOS 7). AVAudioPlayer, AVAudioRecorder and AVAudioSession exist on iOS 6. The real module fails on MPRemoteCommandCenter (iOS 7.1) and other post-iOS 6 API. |
+| expo-audio | ~57.0.5 | yes | partial | build | Built from the package with patches, linked into RNHost with expo-audio real: MediaController guards MPRemoteCommandCenter/MPNowPlayingInfoCenter (iOS 7.1+), AudioStream guards AVAudioEngine (iOS 8+), RecordingUtils guards AVAudioSession availableInputs/preferredInput/setPreferredInput and the bit-rate strategy (iOS 7+), and the player and playlist watch their item with a key-value observer, since Combine has no key-path publisher on iOS 6. AVFoundation and MediaPlayer are weak-linked. On iOS 6: lock screen controls and now-playing info are unavailable, audio streaming throws an error, audio input selection returns empty/throws, a bit-rate strategy throws, and pitch correction is not applied (the playback rate still changes). Player, recorder, and playlist are built to run on iOS 6; not exercised on the phone. |
 | expo-auth-session | ~57.0.16 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-background-fetch | ~57.0.21 | yes | impossible | none | Background fetch is iOS 7. The iOS 6.1.3 dyld cache has neither setMinimumBackgroundFetchInterval nor UIBackgroundFetchInterval, so the system has no fetch wake-up. The backport UIApplication+BackgroundFetch7 keeps the interval and never calls performFetch. A wake would need a platform scheduler, which is not in the repository. |
 | expo-background-task | ~57.0.21 | yes | impossible | none | BackgroundTasks is iOS 13. The iOS 6.1.3 dyld cache has no BGTaskScheduler; beginBackgroundTaskWithExpirationHandler is present but schedules nothing. The backport answers submit with NotPermitted (backports-gaps N24). |
@@ -201,7 +201,6 @@ What the build stands in with for a module it does not build. Each is listed in 
 
 | Stub | Module | File | Owner | Reason |
 | --- | --- | --- | --- | --- |
-| StubAudioModule | ExpoAudio | src/expo/StubModules.swift | expo-audio | Player, recorder and playlist class shells; the functions report the call and do nothing. |
 | StubDocumentPickerModule | ExpoDocumentPicker | src/expo/StubModules.swift | expo-document-picker | Name only. |
 | StubImagePickerModule | ExponentImagePicker | src/expo/StubModules.swift | expo-image-picker | Name only. |
 | StubFileSystemModule | FileSystem | src/expo/StubModules.swift | expo-file-system | Constants for the directories and empty class shells; no file operation exists. |
