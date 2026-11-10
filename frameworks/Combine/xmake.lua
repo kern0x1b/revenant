@@ -8,7 +8,7 @@ if is_plat("iphoneos") then
         add_requires("revenant@swift-runtime", {alias = "swift-runtime"})
         add_requires("revenant@libcxx", {alias = "libcxx"})
     end
-    add_requires("revenant@combine", {alias = "combine"})
+    add_requires("revenant@combine", {alias = "combine", configs = {shared = component == "" or nil}})
 
     local function sources(target, ...)
         return path.join(target:pkg("combine"):installdir(), "src", ...)
