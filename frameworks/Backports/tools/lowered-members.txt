@@ -1621,6 +1621,7 @@ class PHFetchResultChangeDetails
 class PHImageManager
 class PHImageRequestOptions
 class PHLivePhoto
+class PHLivePhotoRequestOptions
 class PHObject
 class PHObjectChangeDetails
 class PHObjectPlaceholder
@@ -3833,6 +3834,7 @@ enum PHAssetSourceTypeUserLibrary
 enum PHAssetSourceTypeiTunesSynced
 enum PHImageContentModeAspectFill
 enum PHImageContentModeAspectFit
+enum PHImageRequestOptionsDeliveryModeOpportunistic
 enum PHImageRequestOptionsResizeModeExact
 enum PHImageRequestOptionsResizeModeFast
 enum PHImageRequestOptionsVersionCurrent
@@ -4516,6 +4518,7 @@ function CMTimeMultiplyByRatio
 function CMTimebaseCopySource
 function CMTimebaseCreateWithSourceClock
 function CMVideoFormatDescriptionCreateFromH264ParameterSets
+function CMVideoFormatDescriptionCreateFromHEVCParameterSets
 function CMVideoFormatDescriptionGetH264ParameterSetAtIndex
 function CMVideoFormatDescriptionGetHEVCParameterSetAtIndex
 function CTFrameDraw
@@ -26257,6 +26260,16 @@ member PHImageRequestOptions -init
 member PHLivePhoto +objectWithItemProviderData:typeIdentifier:error:
 member PHLivePhoto +readableTypeIdentifiersForItemProvider
 member PHLivePhoto -size
+member PHLivePhotoRequestOptions -copyWithZone:
+member PHLivePhotoRequestOptions -deliveryMode
+member PHLivePhotoRequestOptions -init
+member PHLivePhotoRequestOptions -isNetworkAccessAllowed
+member PHLivePhotoRequestOptions -progressHandler
+member PHLivePhotoRequestOptions -setDeliveryMode:
+member PHLivePhotoRequestOptions -setNetworkAccessAllowed:
+member PHLivePhotoRequestOptions -setProgressHandler:
+member PHLivePhotoRequestOptions -setVersion:
+member PHLivePhotoRequestOptions -version
 member PHObject -copyWithZone:
 member PHObject -hash
 member PHObject -initWithRevenantLocalIdentifier:
