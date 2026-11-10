@@ -543,14 +543,21 @@ package("swift-runtime")
             os.vrunv(toolchain:tool("cc"), table.join({"-target", triple, "-miphoneos-version-min=" .. minimum, "-isysroot",
                      toolchain:config("sdkdir"), "-Os", "-c", path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "DesignatedInitializers.mm"),
                      "-o", initializers}, objc_linker))
+            local symbols_cache = path.join(generated, "module-cache-symbols")
+            os.mkdir(symbols_cache)
+            local symbols_sources = os.files(path.join(revenant_overlay, "Symbols", "*.swift"))
+            table.sort(symbols_sources)
+            build_overlay("Symbols", symbols_sources, table.join(foundation_links, {"-Xlinker", "-weak_framework", "-Xlinker", "Symbols"}), nil,
+                          {module_cache = symbols_cache, extra_flags = lowered_cc})
             local uikit_cache = path.join(generated, "module-cache-lowered-uikit")
             os.mkdir(uikit_cache)
             build_overlay("UIKit", {path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "UIKit.swift"),
                                     generated_from("UIKit", "UIKit_FoundationExtensions.swift"),
                                     path.join(revenant_overlay, "UIKit", "UIKitRevenant.swift"),
                                     path.join(revenant_overlay, "UIKit", "UIKitPointer.swift"),
-                                    path.join(revenant_overlay, "UIKit", "UIKitSliderTrackConfiguration.swift")},
-                          table.join(foundation_links, {"-lswiftQuartzCore", "-framework", "QuartzCore", "-framework", "UIKit"}), {initializers},
+                                    path.join(revenant_overlay, "UIKit", "UIKitSliderTrackConfiguration.swift"),
+                                    path.join(revenant_overlay, "UIKit", "UIKitSymbolEffects.swift")},
+                          table.join(foundation_links, {"-lswiftQuartzCore", "-lswiftSymbols", "-framework", "QuartzCore", "-framework", "UIKit"}), {initializers},
                           {module_cache = uikit_cache, extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
             local photosui_cache = path.join(generated, "module-cache-photosui")
             os.mkdir(photosui_cache)
