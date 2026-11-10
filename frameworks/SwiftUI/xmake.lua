@@ -38,11 +38,13 @@ if is_plat("iphoneos") then
     local function probe_daemon(control, ...)
         add_rules("@addon/revenant/daemon", "@addon/revenant/swift")
         add_deps("SwiftUI")
+        add_packages("combine")
         add_files(...)
         add_deps("UIKitBackports", "CoreDataBackports")
         add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "CoreData")
         set_optimize("fastest")
         set_values("revenant.control", control)
+        set_values("revenant.version", "1.0.0")
         weak_import_waiver()
     end
 

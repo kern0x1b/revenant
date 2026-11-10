@@ -942,16 +942,27 @@ function first_releases(ladder, sdkdir, symbols)
 end
 
 local function undefined_imports(data, image)
-    local imported = {}
-    if not image.symtab then
-        return imported
+    local imported, listed = {}, {}
+    if image.symtab then
+        local symoff, nsyms, stroff = image.symtab[1], image.symtab[2], image.symtab[3]
+        local entry = image.wide and 16 or 12
+        for index = 0, nsyms - 1 do
+            local strx, kind, _, desc = string.unpack("<I4BBI2", data, image.base + symoff + index * entry + 1)
+            if kind & 0xE0 == 0 and kind & 0x0E == 0 and kind & 0x01 ~= 0 then
+                local name = cstring(data, image.base + stroff + strx)
+                listed[name] = true
+                table.insert(imported, {name = name, weak = desc & 0x40 ~= 0, ordinal = (desc >> 8) & 0xFF})
+            end
+        end
     end
-    local symoff, nsyms, stroff = image.symtab[1], image.symtab[2], image.symtab[3]
-    local entry = image.wide and 16 or 12
-    for index = 0, nsyms - 1 do
-        local strx, kind, _, desc = string.unpack("<I4BBI2", data, image.base + symoff + index * entry + 1)
-        if kind & 0xE0 == 0 and kind & 0x0E == 0 and kind & 0x01 ~= 0 then
-            table.insert(imported, {name = cstring(data, image.base + stroff + strx), weak = desc & 0x40 ~= 0, ordinal = (desc >> 8) & 0xFF})
+    for _, stream in ipairs({{image.bind, false}, {image.lazy_bind, true}}) do
+        if stream[1] and stream[1][2] > 0 then
+            for _, bound in ipairs(macho.bind_stream(data, image, stream[1], stream[2])) do
+                if not listed[bound.name] and (bound.ordinal > 0 or bound.ordinal == -2) then
+                    listed[bound.name] = true
+                    table.insert(imported, {name = bound.name, weak = bound.flags & 1 ~= 0, ordinal = bound.ordinal > 0 and bound.ordinal or 0xFE})
+                end
+            end
         end
     end
     return imported

@@ -15,7 +15,7 @@ local PACKAGES = {
     ["tesseract"] = {"revenant@tesseract 5.5.3"},
     ["leptonica"] = {"revenant@leptonica 1.85.0"},
     ["tessdata"] = {"revenant@tessdata", {languages = "all"}},
-    ["libcxx"] = {"revenant@libcxx"},
+    ["libcxx"] = {"revenant@libcxx", whole = {packaged = true}},
     ["ffmpeg-hevc"] = {"revenant@ffmpeg-hevc"},
     ["apple-compat"] = {"revenant@apple-compat"},
     ["glslang"] = {"revenant@glslang"},
@@ -65,14 +65,14 @@ function backports_uses(rows, target)
     return false
 end
 
-function backports_requires(rows)
+function backports_requires(rows, whole)
     local out, seen = {}, {}
     for _, library in ipairs(rows) do
         for _, name in ipairs(library.archives) do
             if not backports_is_target(name) and not seen[name] then
                 local spec = PACKAGES[name] or raise("%s uses package %s, which subset.lua does not require", library.name, name)
                 seen[name] = true
-                table.insert(out, {name = name, requirement = spec[1], configs = spec[2]})
+                table.insert(out, {name = name, requirement = spec[1], configs = whole and spec.whole or spec[2]})
             end
         end
     end

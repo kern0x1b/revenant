@@ -5236,6 +5236,7 @@ function VTSessionSetProperty
 function _MXSignpostMetricsSnapshot
 function __attribute__
 function __darwin_check_fd_set_overflow
+function _availability_version_check
 function _os_log_create
 function _os_log_debug_impl
 function _os_log_error_impl
@@ -5246,6 +5247,7 @@ function _os_signpost_emit_with_name_impl
 function appleblas_dgeadd
 function appleblas_sgeadd
 function body_of
+function clock_getres
 function compression_decode_buffer
 function compression_decode_scratch_buffer_size
 function compression_encode_buffer
@@ -5253,6 +5255,7 @@ function compression_encode_scratch_buffer_size
 function compression_stream_destroy
 function compression_stream_init
 function compression_stream_process
+function futimens
 function glBeginQuery
 function glBeginTransformFeedback
 function glBindBufferBase
@@ -5828,7 +5831,9 @@ function os_signpost_enabled
 function os_signpost_id_generate
 function os_signpost_id_make_with_pointer
 function quadrature_integrate
+function readlinkat
 function revenant_CTFontManagerCreateFontDescriptorsFromURL
+function revenant_absolute_path
 function revenant_add_trait_change_observer
 function revenant_add_trait_extras_description
 function revenant_add_trait_value_reader
@@ -6584,6 +6589,8 @@ function sqlite3_str_new
 function sqlite3_str_reset
 function sqlite3_str_value
 function sqlite3_str_vappendf
+function symlinkat
+function utimensat
 function vDSP_DFT_DestroySetupD
 function vDSP_DFT_ExecuteD
 function vDSP_DFT_Interleaved_CreateSetup
@@ -7562,6 +7569,10 @@ global AXPrefersHorizontalTextLayoutDidChangeNotification
 global AXPrefersNonBlinkingTextInsertionIndicatorDidChangeNotification
 global AXShowBordersEnabledStatusDidChangeNotification
 global BGTaskSchedulerErrorDomain
+global CADynamicRangeAutomatic
+global CADynamicRangeConstrainedHigh
+global CADynamicRangeHigh
+global CADynamicRangeStandard
 global CAFrameRateRangeDefault
 global CBAdvertisementDataIsConnectable
 global CHHapticDynamicParameterIDHapticIntensityControl
@@ -37486,6 +37497,7 @@ type BEEligibilityContext
 type BGContinuedProcessingTaskRequestResources
 type BGContinuedProcessingTaskRequestSubmissionStrategy
 type CACornerMask
+type CADynamicRange
 type CAGradientLayerType
 type CALayerContentsFormat
 type CALayerCornerCurve

@@ -1,5 +1,6 @@
 local component = get_config("component") or ""
-if component ~= "" and component ~= "Backports" and component ~= "Swift" then
+local selected_for_swiftui = component == "SwiftUI" and (os.getenv("REVENANT_BACKPORTS_LIBRARIES") or "") ~= ""
+if component ~= "" and component ~= "Backports" and component ~= "Swift" and not selected_for_swiftui then
     return
 end
 
@@ -22,7 +23,7 @@ includes("tools/subset.lua")
 local LIBRARIES = backports_subset(backports_libraries(), SELECTED)
 
 if is_plat("iphoneos") then
-    for _, package in ipairs(backports_requires(LIBRARIES)) do
+    for _, package in ipairs(backports_requires(LIBRARIES, get_config("component") == "")) do
         add_requires(package.requirement, {alias = package.name, configs = package.configs})
     end
 end
@@ -301,7 +302,7 @@ if is_plat("iphoneos") and not SELECTED then
     target("BackportsQRMetadataProbe")
         set_kind("binary")
         set_default(false)
-        add_rules("@addon/revenant/app")
+        add_rules("@addon/revenant/app", "backports.aliased")
         add_files("tests/qr_metadata/main.m", "src/AVFoundation/AVCaptureMetadataOutput+MachineReadableCode7.m",
                   "src/AVFoundation/AVCaptureMetadataOutput+RectOfInterest7.m", "src/AVFoundation/AVCaptureVideoPreviewLayer+MetadataRect7.m",
                   "src/AVFoundation/AVMetadataMachineReadableCodeObject7.m", "src/AVFoundation/AVFoundationNames7.m", "src/AVFoundation/RevenantQRCode.c", "src/AVFoundation/RevenantQRECI.c")
@@ -752,7 +753,7 @@ if is_plat("iphoneos") and not SELECTED then
     target("BackportsSceneKitProbe")
         set_kind("binary")
         set_default(false)
-        add_rules("@addon/revenant/app")
+        add_rules("@addon/revenant/app", "backports.aliased")
         add_files(table.unpack(DEVICE_PROBE_SOURCES))
         add_defines("REVENANT_PROBE_SCENEKIT")
         add_deps("SceneKitBackports", "IOSurfaceBackports")
@@ -769,7 +770,7 @@ if is_plat("iphoneos") and not SELECTED then
     backports_tests("backports_uikit", {uikit = "uikit_test.lua"})
     backports_tests("backports_avfoundation", {avfoundation = "avfoundation_test.lua"})
 else
-    backports_tests("backports", {generator = "backports_test.lua", forwarders = "forwarders_test.lua", markers = "markers_test.lua", srcimage = "skeleton_src_image_test.lua", device_probe = "device_probe_test.lua", libsystem = "libsystem_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
+    backports_tests("backports", {generator = "backports_test.lua", forwarders = "forwarders_test.lua", markers = "markers_test.lua", srcimage = "skeleton_src_image_test.lua", device_probe = "device_probe_test.lua", libsystem = "libsystem_test.lua", libsystem_at = "libsystem_at_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua", naturallanguageoverlay = "natural_language_overlay_test.lua", usernotifications = "user_notifications_test.lua",
                                   network = "network_test.lua", networkpath = "network_path_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", securetransport = "security_ssl_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua",
                                   device = "device_members_test.lua", compression = "compression_roundtrip_test.lua",

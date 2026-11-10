@@ -52,6 +52,9 @@ package("socketrocket")
             assert(os.isfile(path.join(package:installdir(), file)), file .. " is not installed")
         end
         local probe = import("@addon.revenant.apple.probe", {anonymous = true})
+        local libcxx = package:dep("libcxx")
+        local shared = import("@addon.revenant.apple.shared_runtime", {anonymous = true})
+        local runtime = libcxx:config("packaged") and shared.folder_of(shared.package_name("libcxx", libcxx:buildhash())) .. "/libc++.1.dylib" or "@rpath/libc++.1.dylib"
         local ok, output = probe.check(package, {name = "probe.m", source = [[
 #import <Foundation/Foundation.h>
 #import <SocketRocket/SRWebSocket.h>
@@ -66,7 +69,7 @@ int main(int argc, char **argv) {
 ]], deps = {"libcxx"}, flags = {"-fobjc-arc"}, link = true,
             ldflags = {"-fobjc-arc", "-lSocketRocket", "-framework", "Foundation", "-framework", "CFNetwork", "-framework", "Security"},
             bound = {_os_unfair_lock_lock = "libc++", _SecRandomCopyBytes = "Security", _CFHTTPMessageCreateRequest = "CFNetwork"},
-            linked = "@rpath/libc++.1.dylib"})
+            linked = runtime})
         assert(ok, "SocketRocket does not compile and link against armv7 libc++ with ARC: " .. output)
         probe.require_architecture(path.join(package:installdir("lib"), "libSocketRocket.a"), "armv7")
     end)

@@ -254,6 +254,59 @@ function failures(opt)
     end
     local guards = import("apple.runtime_guards", {rootdir = opt.modules, anonymous = true})
     local declared = guards.guards()
+    local autofill = declared.TelegramUIFramework and declared.TelegramUIFramework._UIMenuAutoFill or ""
+    if not autofill:find("WalletSendAmountField.swift:243%-244", 1) or not autofill:find("#available(iOS 17.0", 1, true) then
+        table.insert(found, "apple.runtime_guards must record UIMenuAutoFill for the TelegramUIFramework image and cite the guarded use in its wallet send amount field")
+    end
+    local root = path.absolute(path.join(opt.modules, "..", ".."))
+    local source_roots = {packages = true, toolchain = true, frameworks = true, docs = true, tools = true,
+                          addons = true, emulator = true, ["agent-skills"] = true}
+    local local_citations, external_citations = 0, 0
+    for library, rows in pairs(declared) do
+        for symbol, citation in pairs(rows) do
+            local cited = false
+            local at = 1
+            while true do
+                local first, last = citation:find("[%w_%-%.]+/[%w_%-%./]*[%w_%-%.]", at)
+                if not first then
+                    break
+                end
+                local token = citation:sub(first, last)
+                at = last + 1
+                if source_roots[token:match("^([%w_%-]+)/")] then
+                    cited = true
+                    local rest = citation:sub(last + 1)
+                    local low, high = rest:match("^:(%d+)%-(%d+)")
+                    if not low then
+                        low = rest:match("^:(%d+)")
+                    end
+                    high = high or low
+                    local text = io.readfile(path.join(root, token))
+                    if not text then
+                        table.insert(found, "apple.runtime_guards cites " .. token .. " for " .. symbol .. ", which the repository does not hold")
+                    elseif low then
+                        local lines = 1
+                        for _ in text:gmatch("\n") do
+                            lines = lines + 1
+                        end
+                        if text:sub(-1) == "\n" then
+                            lines = lines - 1
+                        end
+                        if tonumber(low) < 1 or tonumber(high) > lines then
+                            table.insert(found, "apple.runtime_guards cites " .. token .. ":" .. low .. "-" .. high .. " for " .. symbol .. ", which is outside the " .. lines .. " lines of that file")
+                        end
+                    end
+                    local_citations = local_citations + 1
+                end
+            end
+            if not cited then
+                external_citations = external_citations + 1
+            end
+        end
+    end
+    if local_citations < 20 or external_citations < 20 then
+        table.insert(found, "apple.runtime_guards' citations were read over: " .. local_citations .. " repository paths and " .. external_citations .. " external ones")
+    end
     local mach = {"_mach_port_destruct", "_mach_port_guard", "_mach_port_unguard"}
     for _, symbol in ipairs(mach) do
         if not declared["libswiftSystem.dylib"] or not declared["libswiftSystem.dylib"][symbol] then
