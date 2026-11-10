@@ -785,7 +785,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "Does not build for iOS 6 as packaged: SQLiteModuleLibSQL.swift imports the libsql module, which this build does not provide (no such module 'libsql', build log of expo-sqlite 57.0.4). Not built; package packages/e/expo-sqlite (57.0.4, unpatched). It vendors the SQLite amalgamation (vendor/sqlite3/sqlite3.c), which the default build uses; the optional libSQL mode (expo.sqlite.useLibSQL) is branch work/libsql. Measured: SQLite 3.50.3 amalgamation, 1912 Swift lines with no availability checks; the podspec's iOS 16.4 minimum is a deployment setting. Its podspec flags are in ExpoSQLite.podspec and are not yet compiled for armv7 iOS 6. Blocked on ExpoModulesCore, which the tree does not package."
+   "note": "Patched package for iOS 6 (packages/e/expo-sqlite, one patch): it removes SQLiteModuleLibSQL.swift, which imports the libsql module this build does not provide. The default build uses the vendored SQLite 3.50.3 amalgamation (vendor/sqlite3/sqlite3.c); the optional libSQL mode (expo.sqlite.useLibSQL) is not part of this. When expo-sqlite is real, expo-app-modules defines the SQLite macros in its bridging header and adds the amalgamation. expo-app-modules compiles with it, but the RNHost link has not run, so no build is claimed: the row stays stub with verified none, and the stub stays in place until a link on the current base. Once built it is partial: the module is not exercised on the phone."
   },
   {
    "id": "expo-status-bar",
