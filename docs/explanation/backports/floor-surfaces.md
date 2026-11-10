@@ -330,8 +330,11 @@ Two more findings came out of the comparison of the overlays with the SDK's enum
 `Locale.MeasurementSystem` is a structure in the SDK (`metric`, `us` and `uk` are static values of a string identifier,
 compared without case), and the overlay's was an enumeration, which no SDK program can switch over as one; the overlay
 has the SDK's structure now, and `locale_language_test.lua` compares it with the host's. `OSLogPrivacy` is a frozen
-structure in the SDK and an enumeration of four cases in the overlay, whose `mask:` forms are missing; no client can
-switch over the SDK's, so it was left as it is and is a gap of its own.
+structure in the SDK, and the overlay has the same structure now: the factories `public`, `private`, `sensitive` and
+`auto`, each with a `mask:` form, and the mask specifiers `hash`, `mailname`, `mailaddr`, `mailsubj`, `mailsumm`,
+`mailacco`, `mailbox`, `mailmbup` and `mailatta`. The mail masks are iOS 15 only, as in the SDK, and
+`os_log_privacy_test.lua` checks the shapes on the runtime at iOS 6.0 and on the SDK at iOS 14.0, and that a mail mask
+outside an iOS 15 guard is refused by both.
 
 A change that is not Telegram's: the lowering of the Calendar methods was by name, so the two overloads that return a
 `DateInterval` lost their iOS 10 gate with the iOS 8 methods of the same name, and the runtime did not build from source.

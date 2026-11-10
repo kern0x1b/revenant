@@ -35,11 +35,152 @@ public func os_log(_ type: OSLogType, dso: UnsafeRawPointer? = #dsohandle, log: 
     emit(formatBytes(message), log: log, type: type, args)
 }
 
-public enum OSLogPrivacy {
-    case auto
-    case `public`
-    case `private`
-    case sensitive
+@frozen public struct OSLogPrivacy {
+    public enum Mask {
+        case hash
+        case none
+        @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
+        case _mailName
+        @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
+        case _mailAddress
+        @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
+        case _mailSubject
+        @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
+        case _mailSummary
+        @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
+        case _mailAccount
+        @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
+        case _mailbox
+        @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
+        case _mailboxPath
+        @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
+        case _mailAttachmentFileName
+    }
+
+    @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
+    public enum _MailMask {
+        case name
+        case address
+        case subject
+        case summary
+        case account
+        case mailbox
+        case mailboxPath
+        case attachmentFileName
+    }
+
+    @usableFromInline
+    internal enum PrivacyOption {
+        case `private`
+        case `public`
+        case sensitive
+        case auto
+    }
+
+    @usableFromInline
+    internal let privacy: PrivacyOption
+    @usableFromInline
+    internal let mask: Mask
+
+    @usableFromInline
+    internal init(privacy: PrivacyOption, mask: Mask) {
+        self.privacy = privacy
+        self.mask = mask
+    }
+
+    public static var `public`: OSLogPrivacy {
+        return OSLogPrivacy(privacy: .public, mask: .none)
+    }
+
+    public static var `private`: OSLogPrivacy {
+        return OSLogPrivacy(privacy: .private, mask: .none)
+    }
+
+    public static func `private`(mask: Mask) -> OSLogPrivacy {
+        return OSLogPrivacy(privacy: .private, mask: mask)
+    }
+
+    public static var sensitive: OSLogPrivacy {
+        return OSLogPrivacy(privacy: .sensitive, mask: .none)
+    }
+
+    public static func sensitive(mask: Mask) -> OSLogPrivacy {
+        return OSLogPrivacy(privacy: .sensitive, mask: mask)
+    }
+
+    public static var auto: OSLogPrivacy {
+        return OSLogPrivacy(privacy: .auto, mask: .none)
+    }
+
+    public static func auto(mask: Mask) -> OSLogPrivacy {
+        return OSLogPrivacy(privacy: .auto, mask: mask)
+    }
+
+    fileprivate var privacySpecifier: String? {
+        var hasMask = true
+        if case .none = mask {
+            hasMask = false
+        }
+        var isAuto = false
+        if case .auto = privacy {
+            isAuto = true
+        }
+        if isAuto && !hasMask {
+            return nil
+        }
+        var specifier: String
+        switch privacy {
+        case .public:
+            specifier = "public"
+        case .private:
+            specifier = "private"
+        case .sensitive:
+            specifier = "sensitive"
+        case .auto:
+            specifier = ""
+        }
+        if hasMask {
+            if !isAuto {
+                specifier += ","
+            }
+            specifier += "mask." + maskSpecifier
+        }
+        return specifier
+    }
+
+    private var maskSpecifier: String {
+        if case .hash = mask {
+            return "hash"
+        }
+        if #available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *) {
+            return OSLogPrivacy.mailSpecifier(mask)
+        }
+        return "hash"
+    }
+
+    @available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *)
+    private static func mailSpecifier(_ mask: Mask) -> String {
+        switch mask {
+        case ._mailName:
+            return "mailname"
+        case ._mailAddress:
+            return "mailaddr"
+        case ._mailSubject:
+            return "mailsubj"
+        case ._mailSummary:
+            return "mailsumm"
+        case ._mailAccount:
+            return "mailacco"
+        case ._mailbox:
+            return "mailbox"
+        case ._mailboxPath:
+            return "mailmbup"
+        case ._mailAttachmentFileName:
+            return "mailatta"
+        default:
+            return "hash"
+        }
+    }
 }
 
 public struct OSLogMessage: ExpressibleByStringInterpolation {
@@ -47,7 +188,7 @@ public struct OSLogMessage: ExpressibleByStringInterpolation {
 
     fileprivate enum Segment {
         case literal(String)
-        case value(String, isPublic: Bool)
+        case value(String, specifier: String?)
     }
 
     public init(stringLiteral value: String) {
@@ -68,8 +209,12 @@ public struct OSLogMessage: ExpressibleByStringInterpolation {
                 for character in text {
                     format += character == "%" ? "%%" : String(character)
                 }
-            case .value(let text, let isPublic):
-                format += isPublic ? "%{public}s" : "%{private}s"
+            case .value(let text, let specifier):
+                if let specifier {
+                    format += "%{" + specifier + "}s"
+                } else {
+                    format += "%s"
+                }
                 let pointer = strdup(text)!
                 arguments.append(pointer)
                 strings.append(pointer)
@@ -89,7 +234,7 @@ public struct OSLogInterpolation: StringInterpolationProtocol {
     }
 
     public mutating func appendInterpolation(_ value: String, privacy: OSLogPrivacy = .auto) {
-        segments.append(.value(value, isPublic: privacy == .public))
+        segments.append(.value(value, specifier: privacy.privacySpecifier))
     }
 
     public mutating func appendInterpolation(_ value: Int, privacy: OSLogPrivacy = .auto) {
@@ -125,11 +270,11 @@ public struct OSLogInterpolation: StringInterpolationProtocol {
     }
 
     public mutating func appendInterpolation<Value: CustomStringConvertible>(_ value: Value, privacy: OSLogPrivacy = .auto) {
-        segments.append(.value(value.description, isPublic: privacy == .public))
+        segments.append(.value(value.description, specifier: privacy.privacySpecifier))
     }
 
     private mutating func appendScalar<Value: CustomStringConvertible>(_ value: Value, privacy: OSLogPrivacy) {
-        segments.append(.value(value.description, isPublic: privacy != .private && privacy != .sensitive))
+        segments.append(.value(value.description, specifier: privacy.privacySpecifier ?? "public"))
     }
 }
 
