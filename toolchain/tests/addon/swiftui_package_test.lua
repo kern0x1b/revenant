@@ -19,6 +19,11 @@ function failures(opt)
         table.insert(found, "the swiftui recipe sets REVENANT_BACKPORTS_LIBRARIES on " .. (direct + joined) .. " of 3 xmake calls (configure, build, install)")
     end
 
+    local backports_project = io.readfile(path.join(root, "frameworks", "Backports", "xmake.lua"))
+    if not backports_project:find("component == \"SwiftUI\" and (os.getenv(\"REVENANT_BACKPORTS_LIBRARIES\")", 1, true) then
+        table.insert(found, "frameworks/Backports/xmake.lua returns for component SwiftUI even when REVENANT_BACKPORTS_LIBRARIES selects libraries, so the swiftui package project never defines MapKitBackports")
+    end
+
     for dependency in swiftui:gmatch("\"([%w_]+Backports)\"") do
         if not libraries:find("name = \"" .. dependency .. "\"", 1, true) then
             table.insert(found, "frameworks/SwiftUI depends on " .. dependency .. ", which frameworks/Backports does not define")

@@ -1,5 +1,6 @@
 local component = get_config("component") or ""
-if component ~= "" and component ~= "Backports" and component ~= "Swift" then
+local selected_for_swiftui = component == "SwiftUI" and (os.getenv("REVENANT_BACKPORTS_LIBRARIES") or "") ~= ""
+if component ~= "" and component ~= "Backports" and component ~= "Swift" and not selected_for_swiftui then
     return
 end
 
