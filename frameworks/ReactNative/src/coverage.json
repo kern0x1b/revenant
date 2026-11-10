@@ -216,9 +216,9 @@
    "group": "sdk",
    "version": "~57.0.5",
    "native": true,
-   "status": "stub",
-   "verified": "none",
-   "note": "Does not build for iOS 6: MediaController.swift:9 uses MPRemoteCommandCenter, which is iOS 7.1 or newer (build log of expo-audio 57.0.5). A stub (stubs.json): player, recorder and playlist class shells whose functions report the call and do nothing. The package is at packages/e/expo-audio, unpatched, and not built. Post-iOS 6 uses in the sources: MPRemoteCommandCenter (MediaController.swift, iOS 7.1), AVAudioEngine (AudioStream.swift, iOS 8; Backports has AVFAudio), AVAudioSession preferred input (AudioUtils.swift, iOS 7). AVAudioPlayer, AVAudioRecorder and AVAudioSession exist on iOS 6. The real module fails on MPRemoteCommandCenter (iOS 7.1) and other post-iOS 6 API."
+   "status": "partial",
+   "verified": "build",
+   "note": "Built from the package with patches, linked into RNHost with expo-audio real: MediaController guards MPRemoteCommandCenter/MPNowPlayingInfoCenter (iOS 7.1+), AudioStream guards AVAudioEngine (iOS 8+), RecordingUtils guards AVAudioSession availableInputs/preferredInput/setPreferredInput and the bit-rate strategy (iOS 7+), and the player and playlist watch their item with a key-value observer, since Combine has no key-path publisher on iOS 6. AVFoundation and MediaPlayer are weak-linked. On iOS 6: lock screen controls and now-playing info are unavailable, audio streaming throws an error, audio input selection returns empty/throws, a bit-rate strategy throws, and pitch correction is not applied (the playback rate still changes). Player, recorder, and playlist are built to run on iOS 6; not exercised on the phone."
   },
   {
    "id": "expo-auth-session",

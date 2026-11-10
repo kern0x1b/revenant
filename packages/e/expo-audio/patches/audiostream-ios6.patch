@@ -1,0 +1,227 @@
+diff --git a/ios/AudioStream.swift b/ios/AudioStream.swift
+index f938eff..16af214 100644
+--- a/ios/AudioStream.swift
++++ b/ios/AudioStream.swift
+@@ -4,6 +4,12 @@ import ExpoModulesCore
+ private let AUDIO_STREAM_BUFFER = "audioStreamBuffer"
+ private let AUDIO_STREAM_STATUS = "audioStreamStatus"
+ 
++protocol AudioStreamSession: AnyObject {
++  var sampleRate: Double { get }
++  var channels: Int { get }
++  func stop()
++}
++
+ class AudioStream: SharedObject {
+   let id = UUID().uuidString
+ 
+@@ -11,13 +17,11 @@ class AudioStream: SharedObject {
+   private let requestedChannels: Int
+   private let encoding: AudioStreamEncoding
+ 
+-  private var audioEngine: AVAudioEngine?
+-  private var converter: AVAudioConverter?
++  private var session: AudioStreamSession?
+ 
+   private(set) var sampleRate: Double = 0
+   private(set) var channels: Int = 0
+   private(set) var isStreaming: Bool = false
+-  private var startTimestamp: AVAudioTime?
+ 
+   init(options: AudioStreamOptions) {
+     self.requestedSampleRate = options.sampleRate
+@@ -28,7 +32,61 @@ class AudioStream: SharedObject {
+ 
+   func start() throws {
+     guard !isStreaming else { return }
++    guard #available(iOS 8.0, *) else {
++      throw AudioStreamException("Audio streaming needs AVAudioEngine, which iOS 8 introduced")
++    }
++
++    let session = try AVAudioStreamSession(
++      requestedSampleRate: requestedSampleRate,
++      requestedChannels: requestedChannels,
++      encoding: encoding,
++      sendEvent: { [weak self] event, payload in
++        self?.emit(event: event, payload: payload)
++      }
++    )
++    self.session = session
++    sampleRate = session.sampleRate
++    channels = session.channels
++    isStreaming = true
++    emitStatus()
++  }
++
++  func stop() {
++    guard isStreaming else { return }
++    session?.stop()
++    session = nil
++    isStreaming = false
++    emitStatus()
++  }
++
++  private func emitStatus() {
++    emit(event: AUDIO_STREAM_STATUS, payload: [
++      "isStreaming": isStreaming
++    ])
++  }
++
++  deinit {
++    stop()
++  }
++}
++
++@available(iOS 8.0, *)
++final class AVAudioStreamSession: AudioStreamSession {
++  let sampleRate: Double
++  let channels: Int
++
++  private let encoding: AudioStreamEncoding
++  private let sendEvent: (String, [String: Any]) -> Void
++  private let audioEngine: AVAudioEngine
++  private var converter: AVAudioConverter?
++  private var startTimestamp: AVAudioTime?
+ 
++  init(
++    requestedSampleRate: Double,
++    requestedChannels: Int,
++    encoding: AudioStreamEncoding,
++    sendEvent: @escaping (String, [String: Any]) -> Void
++  ) throws {
+     let session = AVAudioSession.sharedInstance()
+     try session.setCategory(.record, mode: .measurement)
+     try session.setPreferredSampleRate(requestedSampleRate)
+@@ -38,45 +96,41 @@ class AudioStream: SharedObject {
+     let inputNode = engine.inputNode
+     let hardwareFormat = inputNode.outputFormat(forBus: 0)
+ 
+-    let targetSampleRate = requestedSampleRate
+     let targetChannels = AVAudioChannelCount(requestedChannels)
+ 
+     let isInt16 = encoding == .int16
+     let commonFormat: AVAudioCommonFormat = isInt16 ? .pcmFormatInt16 : .pcmFormatFloat32
+     guard let targetFormat = AVAudioFormat(
+       commonFormat: commonFormat,
+-      sampleRate: targetSampleRate,
++      sampleRate: requestedSampleRate,
+       channels: targetChannels,
+       interleaved: true
+     ) else {
+       throw AudioStreamException(
+-        "The audio format (\(Int(targetSampleRate)) Hz, \(Int(targetChannels)) ch, \(encoding.rawValue)) is not supported by this device. "
++        "The audio format (\(Int(requestedSampleRate)) Hz, \(Int(targetChannels)) ch, \(encoding.rawValue)) is not supported by this device. "
+         + "Try a different sample rate (48000, 44100, or 16000) or reduce the channel count to 1."
+       )
+     }
+ 
+-    let needsConversion = hardwareFormat.sampleRate != targetSampleRate
++    let needsConversion = hardwareFormat.sampleRate != requestedSampleRate
+       || hardwareFormat.channelCount != targetChannels
+       || hardwareFormat.commonFormat != commonFormat
+ 
++    var converter: AVAudioConverter?
+     if needsConversion {
+-      guard let conv = AVAudioConverter(from: hardwareFormat, to: targetFormat) else {
+-        sampleRate = hardwareFormat.sampleRate
+-        channels = Int(hardwareFormat.channelCount)
+-        setupTapWithoutConversion(engine: engine, inputNode: inputNode, format: hardwareFormat)
+-        self.audioEngine = engine
+-        try engine.start()
+-        isStreaming = true
+-        emitStatus()
+-        return
+-      }
+-      self.converter = conv
++      converter = AVAudioConverter(from: hardwareFormat, to: targetFormat)
+     }
++    let keepsHardwareFormat = needsConversion && converter == nil
+ 
+-    sampleRate = targetSampleRate
+-    channels = Int(targetChannels)
++    self.sampleRate = keepsHardwareFormat ? hardwareFormat.sampleRate : requestedSampleRate
++    self.channels = keepsHardwareFormat ? Int(hardwareFormat.channelCount) : Int(targetChannels)
++    self.encoding = encoding
++    self.sendEvent = sendEvent
++    self.audioEngine = engine
++    self.converter = converter
+ 
+-    let bufferSize = AVAudioFrameCount(targetSampleRate * 0.1)
++    let frameRate = converter == nil ? hardwareFormat.sampleRate : requestedSampleRate
++    let bufferSize = AVAudioFrameCount(frameRate * 0.1)
+ 
+     inputNode.installTap(onBus: 0, bufferSize: bufferSize, format: hardwareFormat) {
+       [weak self] (buffer, when) in
+@@ -93,37 +147,18 @@ class AudioStream: SharedObject {
+       }
+     }
+ 
+-    self.audioEngine = engine
+     try engine.start()
+-    isStreaming = true
+-    emitStatus()
+   }
+ 
+   func stop() {
+-    guard isStreaming else { return }
+-    audioEngine?.inputNode.removeTap(onBus: 0)
+-    audioEngine?.stop()
+-    audioEngine = nil
++    audioEngine.inputNode.removeTap(onBus: 0)
++    audioEngine.stop()
+     converter = nil
+-    isStreaming = false
+     startTimestamp = nil
+-    emitStatus()
+ 
+     try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+   }
+ 
+-  private func setupTapWithoutConversion(engine: AVAudioEngine, inputNode: AVAudioInputNode, format: AVAudioFormat) {
+-    let bufferSize = AVAudioFrameCount(format.sampleRate * 0.1)
+-    inputNode.installTap(onBus: 0, bufferSize: bufferSize, format: format) {
+-      [weak self] (buffer, when) in
+-      guard let self else { return }
+-      if self.startTimestamp == nil {
+-        self.startTimestamp = when
+-      }
+-      self.emitBuffer(buffer: buffer, when: when)
+-    }
+-  }
+-
+   private func convertAndEmit(
+     inputBuffer: AVAudioPCMBuffer,
+     converter: AVAudioConverter,
+@@ -154,12 +189,6 @@ class AudioStream: SharedObject {
+     }
+   }
+ 
+-  private func emitStatus() {
+-    emit(event: AUDIO_STREAM_STATUS, payload: [
+-      "isStreaming": isStreaming
+-    ])
+-  }
+-
+   private func emitBuffer(buffer: AVAudioPCMBuffer, when: AVAudioTime) {
+     let frameLength = Int(buffer.frameLength)
+     guard frameLength > 0 else { return }
+@@ -180,7 +209,7 @@ class AudioStream: SharedObject {
+       return
+     }
+ 
+-    emit(event: AUDIO_STREAM_BUFFER, payload: [
++    sendEvent(AUDIO_STREAM_BUFFER, [
+       "data": data,
+       "sampleRate": sampleRate,
+       "channels": channels,
+@@ -193,10 +222,6 @@ class AudioStream: SharedObject {
+     let hostTimeDiff = when.hostTime - startTimestamp.hostTime
+     return Double(hostTimeDiff) / Double(NSEC_PER_SEC)
+   }
+-
+-  deinit {
+-    stop()
+-  }
+ }
+ 
+ internal final class AudioStreamException: GenericException<String> {
