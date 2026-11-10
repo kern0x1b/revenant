@@ -1,1 +1,1 @@
-musickit_sources_digest = "84c8a795efdabc2b34fbd4271bd6cb86"
+musickit_sources_digest = "c1faf101d8e699a78fcfbccf0a3836b1"

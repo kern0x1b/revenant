@@ -110,6 +110,12 @@ int main(void) {
     show("42", "%{public}zd", 1, 0, 9L);
     show("59", "%{public}*d", 2, 0, 100000000, 1);
     show("60", "%99999999999999d", 1, 0, 1);
+    show("61", "%{private,mask.hash}s", 1, 0, "secret");
+    show("62", "%{mask.hash}s", 1, 0, "secret");
+    show("63", "%{mask.hash}d", 1, 0, 42);
+    show("64", "%{private,mask.mailaddr}s", 1, 0, "user@example.com");
+    show("65", "%{mask.mailaddr}s", 1, 0, "user@example.com");
+    show("66", "%{sensitive,mask.mailsubj}s", 1, 0, "subject");
     {
         uint8_t items[128];
         int number = 42, seven = 7;
@@ -149,6 +155,8 @@ local RENDER = {
     {"51", "<private>"}, {"52", "42"}, {"53", "7"}, {"54", "<private>"}, {"55", "plain"}, {"56", "<private>"},
     {"57", "object text"}, {"58", "42 <private>"},
     {"59", string.rep(" ", 127) .. "1"}, {"60", string.rep(" ", 127) .. "1"},
+    {"61", "<private>"}, {"62", "<private>"}, {"63", "<private>"}, {"64", "<private>"}, {"65", "<private>"},
+    {"66", "<private>"},
 }
 
 local MODES = {

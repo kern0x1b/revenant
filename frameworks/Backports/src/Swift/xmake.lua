@@ -37,10 +37,10 @@ end
 
 local SWIFT_DIR = os.scriptdir()
 
-local function stub_text(stub)
+local function stub_text(stub, version)
     local targets = "[ " .. table.concat(stub.targets, ", ") .. " ]"
     local lines = {"--- !tapi-tbd", "tbd-version: 4", "targets: " .. targets, "install-name: '" .. stub.installName .. "'",
-                   "current-version: 1", "compatibility-version: 1", "exports:", "  - targets: " .. targets}
+                   "current-version: " .. version, "compatibility-version: " .. version, "exports:", "  - targets: " .. targets}
     if #stub.symbols > 0 then
         table.insert(lines, "    symbols: [ " .. table.concat(stub.symbols, ", ") .. " ]")
     end
@@ -278,9 +278,10 @@ local function overlay(name, folder, opt)
                 local folder = path.join(target:autogendir(), "stub")
                 os.mkdir(folder)
                 local tbds = {}
+                local version = import("@addon.revenant.apple.backports_versions", {anonymous = true}).version()
                 for _, entry in ipairs(import(opt.stub, {rootdir = SWIFT_DIR, anonymous = true}).stub()) do
                     local file = path.join(folder, "lib" .. entry.library .. ".tbd")
-                    local text = stub_text(entry)
+                    local text = stub_text(entry, version)
                     if not os.isfile(file) or io.readfile(file) ~= text then
                         io.writefile(file, text)
                     end
@@ -320,6 +321,9 @@ local function overlay(name, folder, opt)
                 end
             end
         end)
+        after_build(function (target)
+            import("@addon.revenant.apple.backports_versions", {anonymous = true}).check(target:targetfile())
+        end)
     target_end()
 end
 
@@ -354,10 +358,10 @@ overlay("swiftTranslation", "Translation", {concurrency = true, packages = {"swi
 target("swift_backports_tests")
     set_kind("phony")
     set_default(false)
-    add_tests("oslock", "uikittraits", "uikitpointer", "uikitavailability", "availability", "metallowering", "translation", "iosurfaceswift", "coremlswift", "utiswift", "frameworkoverlay", "symboleffects", "cxxinterop", "linkname")
+    add_tests("oslock", "uikittraits", "uikitpointer", "uikitavailability", "availability", "metallowering", "translation", "iosurfaceswift", "coremlswift", "utiswift", "frameworkoverlay", "symboleffects", "oslogprivacy", "cxxinterop", "linkname")
     on_test(function (target, opt)
         import("core.project.project")
-        local scripts = {oslock = "os_lock_test.lua", uikittraits = "uikit_traits_test.lua", uikitpointer = "uikit_pointer_test.lua", uikitavailability = "uikit_availability_test.lua", availability = "availability_test.lua", metallowering = "metal_lowering_test.lua", translation = "translation_test.lua", iosurfaceswift = "iosurface_swift_test.lua", coremlswift = "coreml_swift_test.lua", utiswift = "uti_swift_test.lua", frameworkoverlay = "framework_overlay_test.lua", symboleffects = "symbol_effects_oracle_test.lua"}
+        local scripts = {oslock = "os_lock_test.lua", uikittraits = "uikit_traits_test.lua", uikitpointer = "uikit_pointer_test.lua", uikitavailability = "uikit_availability_test.lua", availability = "availability_test.lua", metallowering = "metal_lowering_test.lua", translation = "translation_test.lua", iosurfaceswift = "iosurface_swift_test.lua", coremlswift = "coreml_swift_test.lua", utiswift = "uti_swift_test.lua", frameworkoverlay = "framework_overlay_test.lua", symboleffects = "symbol_effects_oracle_test.lua", oslogprivacy = "os_log_privacy_test.lua"}
         local name = path.filename(opt.name)
         if name == "cxxinterop" then
             local interoperable = {}

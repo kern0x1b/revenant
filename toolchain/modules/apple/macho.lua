@@ -100,7 +100,7 @@ function image(data, base)
     local wide = magic == MAGIC64
     local cputype, cpusubtype, filetype, ncmds, _, flags = string.unpack("<i4i4I4I4I4I4", data, base + 5)
     local found = {base = base, cputype = cputype, cpusubtype = cpusubtype & 0xFFFFFF, filetype = filetype, flags = flags,
-                   wide = wide, segments = {}, sections = {}, libraries = {}, library_strength = {}, reexports = {},
+                   wide = wide, segments = {}, sections = {}, libraries = {}, library_strength = {}, library_versions = {}, reexports = {},
                    sub_names = {}, commands = {}, command_at = {}, linker_options = {}}
     local at = base + (wide and 32 or 28)
     for _ = 1, ncmds do
@@ -165,6 +165,8 @@ function image(data, base)
         elseif LIBRARY_COMMANDS[command] then
             table.insert(found.libraries, cstring(data, at + string.unpack("<I4", data, at + 9)))
             table.insert(found.library_strength, command == LC_LOAD_DYLIB or command == LC_REEXPORT_DYLIB)
+            local current, compatibility = string.unpack("<I4I4", data, at + 17)
+            table.insert(found.library_versions, {current = current, compatibility = compatibility})
             if command == LC_REEXPORT_DYLIB then
                 table.insert(found.reexports, found.libraries[#found.libraries])
             end

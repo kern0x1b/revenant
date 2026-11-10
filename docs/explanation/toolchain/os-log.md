@@ -22,7 +22,7 @@ A specifier with no privacy flag (auto) takes the default of the renderer. The A
 - strings, objects and `%P` data are private;
 - numbers, counts and pointers are public.
 
-An explicit flag always wins: `%{public}` prints the value, and `%{private}`, `%{sensitive}` and mask values print as `<private>`. A private argument is still consumed from the va_list, so the next specifier reads the next argument. The Backports code once treated an unannotated string that lay in a read-only segment as public, and printed it in full; that exception is not in the sources and is gone.
+An explicit flag always wins: `%{public}` prints the value, and `%{private}`, `%{sensitive}` and mask values print as `<private>`. A mask is a specifier of its own, `mask.hash` or `mask.mailaddr` and the other mail forms, written after the privacy flag when there is one (`%{private,mask.hash}s`); the renderer does not hash, so every mask prints as `<private>`, and the Swift overlay's `OSLogPrivacy.private(mask:)` produces that form. A private argument is still consumed from the va_list, so the next specifier reads the next argument. The Backports code once treated an unannotated string that lay in a read-only segment as public, and printed it in full; that exception is not in the sources and is gone.
 
 ## Behaviour the sources do not settle
 

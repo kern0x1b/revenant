@@ -585,11 +585,12 @@ static inline void revenant_os_log_parse_decorators(const char *_Nonnull *_Nonnu
             spec->isUUID = 1;
         } else if (length == 6 && !strncmp(token, "public", 6)) {
             spec->privacy = REVENANT_OS_LOG_PRIVACY_PUBLIC;
-        } else if ((length == 7 && !strncmp(token, "private", 7)) || (length == 9 && !strncmp(token, "sensitive", 9)) ||
-                   (length == 11 && !strncmp(token, "mask.redact", 11))) {
+        } else if ((length == 7 && !strncmp(token, "private", 7)) || (length == 9 && !strncmp(token, "sensitive", 9))) {
             spec->privacy = REVENANT_OS_LOG_PRIVACY_PRIVATE;
         } else if (length == 9 && !strncmp(token, "mask.hash", 9)) {
             spec->isMask = 1;
+            spec->privacy = REVENANT_OS_LOG_PRIVACY_PRIVATE;
+        } else if (length > 5 && !strncmp(token, "mask.", 5)) {
             spec->privacy = REVENANT_OS_LOG_PRIVACY_PRIVATE;
         }
         token = end + 1;
