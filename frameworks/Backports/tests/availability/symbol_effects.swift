@@ -1,3 +1,4 @@
+import Symbols
 import UIKit
 
 enum SymbolEffectUse {

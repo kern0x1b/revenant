@@ -270,6 +270,17 @@ function check_load_versions(file, data, images)
     end
 end
 
+function check_dependent_versions(file, data, images)
+    for _, record in ipairs(dylib_records(data)) do
+        local backports = not record.id and (record.name:startswith(OLD_PREFIX .. "/") or record.name:startswith(NEW_PREFIX .. "/"))
+        local image = backports and images[NEW_PREFIX .. "/" .. path.filename(record.name)]
+        if image and record.compatibility > image.current then
+            raise("%s requires %s with compatibility version %s or later, but the bundled library has version %s: dyld refuses such a library, so the application would not start; link that library against the Backports library with a compatibility version not above its current one",
+                file, path.filename(record.name), version_text(record.compatibility), version_text(image.current))
+        end
+    end
+end
+
 function signing_arguments(entitlements, index, file)
     if index == 1 then
         return {"-S" .. entitlements, file}
@@ -409,6 +420,9 @@ function stage(options)
             io.writefile(file, data, {encoding = "binary"})
         end
         check_load_versions(file, data, images)
+    end
+    for _, file in ipairs(os.files(path.join(frameworks, "libswift*.dylib"))) do
+        check_dependent_versions(file, io.readfile(file, {encoding = "binary"}), images)
     end
     if ldid ~= "" then
         local entitlements = path.join(os.scriptdir(), "data", "rnhost.entitlements")

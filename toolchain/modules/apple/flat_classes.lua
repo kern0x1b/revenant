@@ -14,7 +14,12 @@ local STUBBED = {
     },
     {
         framework = "UIKit",
-        classes = {"UIPointerEffect", "UIPointerShape", "UIPointerStyle"},
+        classes = {"UIPointerEffect", "UIPointerShape", "UIPointerStyle", "UISymbolEffectCompletionContext"},
+    },
+    {
+        framework = "Symbols",
+        classes = {"NSSymbolBounceEffect", "NSSymbolEffect", "NSSymbolEffectOptions", "NSSymbolPulseEffect", "NSSymbolScaleEffect",
+                   "NSSymbolVariableColorEffect"},
     },
     {
         framework = "CoreText",
@@ -25,7 +30,7 @@ local STUBBED = {
     },
 }
 
-local EXPORTED = {NSAttributedStringMarkdownParsingOptions = true, NSAttributedStringMarkdownSourcePosition = true, NSDimension = true, NSISO8601DateFormatter = true, NSMeasurement = true, NSURLComponents = true, NSURLQueryItem = true, NSURLSessionWebSocketMessage = true, UIPointerEffect = true, UIPointerShape = true, UIPointerStyle = true}
+local EXPORTED = {NSAttributedStringMarkdownParsingOptions = true, NSAttributedStringMarkdownSourcePosition = true, NSDimension = true, NSISO8601DateFormatter = true, NSMeasurement = true, NSURLComponents = true, NSURLQueryItem = true, NSURLSessionWebSocketMessage = true, UIPointerEffect = true, UIPointerShape = true, UIPointerStyle = true, UISymbolEffectCompletionContext = true, NSSymbolBounceEffect = true, NSSymbolEffect = true, NSSymbolEffectOptions = true, NSSymbolPulseEffect = true, NSSymbolScaleEffect = true, NSSymbolVariableColorEffect = true}
 
 local function symbol_of(entry, name)
     if entry.functions then

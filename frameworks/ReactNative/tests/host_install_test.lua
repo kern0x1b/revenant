@@ -123,6 +123,26 @@ function main()
         message ~= nil and message:find("RNHost loads " .. bundled, 1, true) ~= nil and message:find("2.0.0", 1, true) ~= nil and message:find("1.0.0", 1, true) ~= nil,
         "message " .. tostring(message))
 
+    local uikit = "@executable_path/Frameworks/libUIKitBackports.dylib"
+    local installed = "/usr/lib/revenant/org.revenant.backports/libUIKitBackports.dylib"
+    local bundled_uikit = {[uikit] = {current = 0, compatibility = 0}}
+    for _, name in ipairs({installed, uikit}) do
+        local overlay = macho({dylib_command(0x0C, name, 65536, 65536)})
+        local dependent = refusal(function () host.check_dependent_versions("libswiftUniformTypeIdentifiers.dylib", overlay, bundled_uikit) end)
+        expect("a Swift library that needs a newer Backports library than the bundled one fails the stage with both named (" .. name:sub(1, 5) .. ")",
+            dependent ~= nil and dependent:find("libswiftUniformTypeIdentifiers.dylib requires libUIKitBackports.dylib", 1, true) ~= nil
+                and dependent:find("1.0.0", 1, true) ~= nil and dependent:find("0.0.0", 1, true) ~= nil,
+            "message " .. tostring(dependent))
+    end
+    local satisfied = macho({dylib_command(0x0C, installed, 0, 0)})
+    expect("a Swift library whose requirement the bundled Backports library meets passes",
+        refusal(function () host.check_dependent_versions("libswiftCore.dylib", satisfied, bundled_uikit) end) == nil,
+        "the check refused a satisfied requirement")
+    local elsewhere = macho({dylib_command(0x0C, "/usr/lib/libSystem.B.dylib", 65536, 65536)})
+    expect("a Swift library that loads no Backports library is left alone",
+        refusal(function () host.check_dependent_versions("libswiftCore.dylib", elsewhere, bundled_uikit) end) == nil,
+        "the check refused a library that loads none")
+
     local system = macho({dylib_command(0x0C, "/usr/lib/libSystem.B.dylib", 65536, 65536)})
     expect("a load command to a system library is left alone",
         #host.version_fixes(system, library) == 0 and refusal(function () host.check_load_versions("RNHost", system, library) end) == nil,
