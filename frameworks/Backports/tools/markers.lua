@@ -1,6 +1,6 @@
 local KEYWORDS = {["if"] = true, ["for"] = true, ["while"] = true, ["switch"] = true, ["return"] = true,
     ["sizeof"] = true, ["typeof"] = true, ["__typeof__"] = true}
-local SKIP_FIRST = {typedef = true, struct = true, union = true, enum = true}
+local TAG_KEYWORDS = {struct = true, union = true, enum = true}
 local MARKER = "BACKPORT_IMPL("
 
 local function blank(text)
@@ -192,11 +192,18 @@ local function function_name(m, from, to)
     return nil
 end
 
+local function tag_declaration(text, first)
+    if not TAG_KEYWORDS[first] then
+        return false
+    end
+    return string.find(text, "{", 1, true) ~= nil or string.find(text, "^%s*%a+%s+[%w_]+%s*$") ~= nil
+end
+
 local function global_names(m, from, to)
     local text = string.sub(m, from, to)
     local first = string.match(text, "^%s*([%w_@]+)") or ""
-    if string.sub(first, 1, 1) == "@" or SKIP_FIRST[first] or has_word(text, "extern") or has_word(text, "static")
-        or has_word(text, "typedef") then
+    if string.sub(first, 1, 1) == "@" or first == "typedef" or tag_declaration(text, first) or has_word(text, "extern")
+        or has_word(text, "static") or has_word(text, "typedef") then
         return {}
     end
     local dend, depth = to, 0
