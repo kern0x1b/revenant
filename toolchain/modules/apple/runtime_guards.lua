@@ -6,9 +6,9 @@ GUARDS = {
     },
     ["libswiftCore.dylib"] = {
         ["__dyld_is_objc_constant"] = "stdlib/public/stubs/FoundationHelpers.mm:124 @ swiftlang/swift b8189d766d86ad7fc8106787d6ce9e402f38dd72",
-        ["__objc_realizeClassFromSwift"] = "packages/s/swift-runtime/patches/realize-a-pure-objc-class-before-objc-realize-class-from-swift.patch (tests the symbol at its use in swift_updatePureObjCClassMetadata)",
-        ["_objc_addLoadImageFunc"] = "stdlib/public/runtime/ImageInspectionMachO.cpp:242 (REGISTER_FUNC; #define at :78) @ swiftlang/swift b8189d766d86ad7fc8106787d6ce9e402f38dd72",
-        ["_objc_readClassPair"] = "patch packages/s/swift-runtime/patches/realize-a-class-before-objc-read-class-pair.patch:15",
+        ["__objc_realizeClassFromSwift"] = "packages/s/swift-runtime/patches/realize-a-pure-objc-class-before-objc-realize-class-from-swift.patch:20-23 (weak check and swift_getInitializedObjCClass fallback)",
+        ["_objc_addLoadImageFunc"] = "stdlib/public/runtime/ImageInspectionMachO.cpp:239-240 @ swiftlang/swift b8189d766d86ad7fc8106787d6ce9e402f38dd72 (weak check before registration)",
+        ["_objc_readClassPair"] = "packages/s/swift-runtime/patches/realize-a-class-before-objc-read-class-pair.patch:15-16",
         ["_objc_setHook_getClass"] = "stdlib/public/runtime/MetadataLookup.cpp:3297 @ swiftlang/swift b8189d766d86ad7fc8106787d6ce9e402f38dd72",
         ["_objc_setHook_getImageName"] = "stdlib/public/runtime/ObjCRuntimeGetImageNameFromClass.mm:361 @ swiftlang/swift b8189d766d86ad7fc8106787d6ce9e402f38dd72",
         ["_objc_setHook_lazyClassNamer"] = "stdlib/public/runtime/Metadata.cpp:3844 @ swiftlang/swift b8189d766d86ad7fc8106787d6ce9e402f38dd72",
@@ -17,9 +17,9 @@ GUARDS = {
         ["_kCGColorSpaceSRGB"] = "stdlib/public/Darwin/CoreGraphics/CoreGraphics.swift:80 @ swiftlang/swift 282fe25d1757ff9974ade028d92111acdae6876a (swift-5.4.3-RELEASE)",
     },
     ["libswiftDispatch.dylib"] = {
-        ["__dispatch_data_destructor_munmap"] = "packages/s/swift-runtime/patches/overlays/the-overlay-of-dispatch-unmaps-its-data-where-a-release-before-7-has-none.patch",
-        ["__dispatch_source_type_data_replace"] = "packages/s/swift-runtime/patches/overlays/the-overlay-of-dispatch-keeps-the-data-of-a-release-before-11s-replace-source.patch",
-        ["__dispatch_source_type_memorypressure"] = "packages/s/swift-runtime/patches/overlays/the-overlay-of-dispatch-makes-memory-pressure-a-release-before-8-reports.patch",
+        ["__dispatch_data_destructor_munmap"] = "packages/s/swift-runtime/patches/overlays/the-overlay-of-dispatch-unmaps-its-data-where-a-release-before-7-has-none.patch:72 (weak symbol check)",
+        ["__dispatch_source_type_data_replace"] = "packages/s/swift-runtime/patches/overlays/the-overlay-of-dispatch-keeps-the-data-of-a-release-before-11s-replace-source.patch:117-120 and :160 (weak-source check and DATA_OR fallback)",
+        ["__dispatch_source_type_memorypressure"] = "packages/s/swift-runtime/patches/overlays/the-overlay-of-dispatch-makes-memory-pressure-a-release-before-8-reports.patch:140-144 and :177 (weak-source check and DATA_OR fallback)",
         ["__dispatch_source_type_vm"] = "packages/s/swift-runtime/patches/overlays/the-overlay-of-dispatch-makes-memory-pressure-a-release-before-8-reports.patch (the shim declares it weak and asks for it only where the newer type is NULL)",
         ["_dispatch_queue_attr_make_with_qos_class"] = "stdlib/public/Darwin/Dispatch/Queue.swift:155 @ swiftlang/swift 282fe25d1757ff9974ade028d92111acdae6876a (swift-5.4.3-RELEASE)",
         ["_dispatch_queue_create_with_target$V2"] = "stdlib/public/Darwin/Dispatch/Queue.swift:159 @ swiftlang/swift 282fe25d1757ff9974ade028d92111acdae6876a (swift-5.4.3-RELEASE)",
@@ -93,6 +93,9 @@ GUARDS = {
         ["_OBJC_CLASS_$_UIFontMetrics"] = "stdlib/public/Darwin/UIKit/UIKit.swift:357 @ swiftlang/swift 71d85a7c28eed8f46241649a723ddf23989139c6 (swift-5.2.5-RELEASE)",
         ["_OBJC_CLASS_$_UIPointerShape"] = "toolchain/src/swift-runtime/overlay/UIKit/RevenantUIKitOverlayShims.h (revenant_pointer_shape_class tests its address; UIKitPointer.swift reaches the class only through the helpers, which call it only when that test passes)",
         ["_UIContentSizeCategoryIsAccessibilityCategory"] = "stdlib/public/Darwin/UIKit/UIKit.swift:366 @ swiftlang/swift 71d85a7c28eed8f46241649a723ddf23989139c6 (swift-5.2.5-RELEASE)",
+    },
+    ["UIKit"] = {
+        ["_UIMenuAutoFill"] = "Libraries/Text/TextInput/Singleline/RCTUITextField.mm:189-191 @ facebook/react-native 0.86.3",
     },
     ["libswiftos.dylib"] = {
         ["_revenant_os_log_named"] = "toolchain/src/swift-runtime/overlay/os/RevenantOSOverlayShims.h (revenant_os_log_linked tests its address; os.swift calls it only when that test passes)",
