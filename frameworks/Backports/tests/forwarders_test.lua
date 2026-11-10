@@ -210,7 +210,7 @@ function main()
     local arm = object(present, "armv7", "iphoneos", {"-miphoneos-version-min=6.0", "-isysroot", sdkfiles.sdk_folder()})
     local arm_symbols = os.iorunv("nm", {arm})
     assert(string.find(arm_symbols, " _FXVariadic", 1, true) and string.find(arm_symbols, " _FXHidden", 1, true), "the armv7 object does not export the trampolines")
-    local arm_linkage = os.iorunv("nm", {"-m", arm})
+    local arm_linkage = (os.iorunv("nm", {"-m", arm}):gsub("%[Thumb%] ", ""))
     assert(string.find(arm_linkage, "weak external _FXVariadic", 1, true), "the trampoline src/ does not implement is not a weak definition: " .. arm_linkage)
     assert(string.find(arm_linkage, "external _FXHidden", 1, true) and not string.find(arm_linkage, "weak external _FXHidden", 1, true),
         "the trampoline src/ implements is a weak definition, so a link would bind the SDK's copy: " .. arm_linkage)
