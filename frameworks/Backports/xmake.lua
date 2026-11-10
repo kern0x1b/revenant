@@ -1,4 +1,9 @@
-if get_config("component") == "Swift" then
+local component = get_config("component") or ""
+if component ~= "" and component ~= "Backports" and component ~= "Swift" then
+    return
+end
+
+if component == "Swift" then
     includes("src/Swift")
     return
 end

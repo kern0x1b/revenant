@@ -6,6 +6,8 @@ package("glslang")
     if is_mode("debug") then
         add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
     end
+    add_configs("default_resource_limits", {description = "Build with default resource limits.", default = false, type = "boolean"})
+    add_configs("hlsl", {description = "Enable HLSL support.", default = true, type = "boolean"})
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://github.com/KhronosGroup/glslang/archive/b5782e52ee2f7b3e40bb9c80d15b47016e008bc9.tar.gz")
@@ -39,6 +41,13 @@ package("glslang")
                          "-DENABLE_CTEST=OFF", "-DGLSLANG_ENABLE_INSTALL=ON"}
         cmake.install(package, configs, {cflags = {"-DDISABLE_THREAD_SUPPORT"}, cxxflags = {"-DDISABLE_THREAD_SUPPORT"},
                                          licenses = "LICENSE.txt", prune = {"lib/cmake", "lib/pkgconfig", "share", "bin"}})
+    end)
+
+    on_install("macosx", function (package)
+        local configs = {"-DCMAKE_POLICY_VERSION_MINIMUM=3.5", "-DBUILD_EXTERNAL=OFF", "-DENABLE_HLSL=OFF", "-DENABLE_OPT=OFF",
+                         "-DENABLE_PCH=OFF", "-DENABLE_SPIRV=ON", "-DENABLE_GLSLANG_BINARIES=OFF", "-DGLSLANG_TESTS=OFF",
+                         "-DENABLE_CTEST=OFF", "-DGLSLANG_ENABLE_INSTALL=ON"}
+        import("package.tools.cmake").install(package, configs, {licenses = "LICENSE.txt", prune = {"lib/cmake", "lib/pkgconfig", "share", "bin"}})
     end)
 
     on_test(function (package)
