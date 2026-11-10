@@ -431,6 +431,13 @@ local function asm_text(text)
     return '"' .. (string.gsub(text, "%%%%", "%%")) .. '\\n"'
 end
 
+local function exported(entry, public)
+    if entry.fallback then
+        return {".globl " .. public}
+    end
+    return {".globl " .. public, ".weak_definition " .. public}
+end
+
 local function trampoline_asm(prefix, entries)
     local shared = "Lrevenant_" .. prefix .. "_shared"
     local resolve = "_revenant_" .. prefix .. "_tramp_resolve"
@@ -461,7 +468,7 @@ local function trampoline_asm(prefix, entries)
     local function arm_entry(thumb)
         return function (index, entry)
             local public, slot, pool, here, slow = labels(index, entry)
-            local out = {".globl " .. public, ".weak_definition " .. public}
+            local out = exported(entry, public)
             if thumb then
                 table.insert(out, ".thumb_func " .. public)
             end
@@ -486,9 +493,11 @@ local function trampoline_asm(prefix, entries)
         "    bl " .. resolve, "    mov r12, r0", "    vpop {d0, d1, d2, d3, d4, d5, d6, d7}", "    pop {r0, r1, r2, r3, r4, lr}", "    bx r12"}
     local function arm64_entry(index, entry)
         local public, slot, _, _, slow = labels(index, entry)
-        return {".globl " .. public, ".weak_definition " .. public, ".p2align 2", public .. ":",
+        local out = exported(entry, public)
+        table.join2(out, {".p2align 2", public .. ":",
             "    adrp x16, " .. slot .. "@PAGE", "    ldr x17, [x16, " .. slot .. "@PAGEOFF]", "    cbz x17, " .. slow,
-            "    br x17", slow .. ":", "    mov x17, #" .. (index - 1), "    b " .. shared}
+            "    br x17", slow .. ":", "    mov x17, #" .. (index - 1), "    b " .. shared})
+        return out
     end
     local arm64_shared = {shared .. ":", "    sub sp, sp, #288", "    stp x0, x1, [sp, #0]", "    stp x2, x3, [sp, #16]",
         "    stp x4, x5, [sp, #32]", "    stp x6, x7, [sp, #48]", "    stp x8, x30, [sp, #64]", "    stp q0, q1, [sp, #80]",
@@ -498,8 +507,10 @@ local function trampoline_asm(prefix, entries)
         "    ldp q4, q5, [sp, #144]", "    ldp q6, q7, [sp, #176]", "    add sp, sp, #288", "    br x16"}
     local function x86_entry(index, entry)
         local public, slot, _, _, slow = labels(index, entry)
-        return {".globl " .. public, ".weak_definition " .. public, public .. ":", "    cmpq $0, " .. slot .. "(%%rip)",
-            "    je " .. slow, "    jmpq *" .. slot .. "(%%rip)", slow .. ":", "    movl $" .. (index - 1) .. ", %%r11d", "    jmp " .. shared}
+        local out = exported(entry, public)
+        table.join2(out, {public .. ":", "    cmpq $0, " .. slot .. "(%%rip)",
+            "    je " .. slow, "    jmpq *" .. slot .. "(%%rip)", slow .. ":", "    movl $" .. (index - 1) .. ", %%r11d", "    jmp " .. shared})
+        return out
     end
     local x86_shared = {shared .. ":", "    pushq %%rbp", "    movq %%rsp, %%rbp", "    pushq %%rdi", "    pushq %%rsi",
         "    pushq %%rdx", "    pushq %%rcx", "    pushq %%r8", "    pushq %%r9", "    pushq %%rax", "    subq $136, %%rsp"}
