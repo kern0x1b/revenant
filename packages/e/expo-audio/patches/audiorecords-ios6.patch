@@ -1,0 +1,20 @@
+diff --git a/ios/AudioRecords.swift b/ios/AudioRecords.swift
+index 33db27c..368d76b 100644
+--- a/ios/AudioRecords.swift
++++ b/ios/AudioRecords.swift
+@@ -26,6 +26,7 @@ enum PitchCorrectionQuality: String, Enumerable {
+   case medium
+   case high
+ 
++  @available(iOS 7.0, *)
+   func toPitchAlgorithm() -> AVAudioTimePitchAlgorithm {
+     switch self {
+     case .low:
+@@ -78,6 +79,7 @@ enum BitRateStrategy: String, Enumerable {
+   case variableConstrained
+   case variable
+ 
++  @available(iOS 7.0, *)
+   func toAVBitRateStrategy() -> String {
+     switch self {
+     case .constant:

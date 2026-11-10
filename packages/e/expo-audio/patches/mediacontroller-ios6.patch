@@ -1,0 +1,66 @@
+diff --git a/ios/MediaController.swift b/ios/MediaController.swift
+index e977f57..549a41b 100644
+--- a/ios/MediaController.swift
++++ b/ios/MediaController.swift
+@@ -2,6 +2,7 @@ import MediaPlayer
+ import AVFoundation
+ import ExpoModulesCore
+ 
++@available(iOS 7.1, *)
+ class MediaController {
+   static let shared = MediaController()
+ 
+@@ -76,7 +77,6 @@ class MediaController {
+ 
+   private func applyPlaybackInfo(_ info: inout [String: Any], for player: AudioPlayer) {
+     if isLiveStream {
+-      info[MPNowPlayingInfoPropertyIsLiveStream] = true
+       info.removeValue(forKey: MPMediaItemPropertyPlaybackDuration)
+       info.removeValue(forKey: MPNowPlayingInfoPropertyElapsedPlaybackTime)
+     } else {
+@@ -84,7 +84,12 @@ class MediaController {
+       info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = player.currentTime
+     }
+     info[MPNowPlayingInfoPropertyPlaybackRate] = player.isPlaying ? player.ref.rate : 0.0
+-    info[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.audio.rawValue
++    if #available(iOS 10.0, *) {
++      if isLiveStream {
++        info[MPNowPlayingInfoPropertyIsLiveStream] = true
++      }
++      info[MPNowPlayingInfoPropertyMediaType] = MPNowPlayingInfoMediaType.audio.rawValue
++    }
+   }
+ 
+   private func applyUserMetadata(_ info: inout [String: Any], from metadata: Metadata) {
+@@ -122,7 +127,7 @@ class MediaController {
+       case .commonKeyArtwork:
+         if let imageData = item.dataValue,
+           let image = UIImage(data: imageData) {
+-          info[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
++          info[MPMediaItemPropertyArtwork] = makeArtwork(image)
+         }
+       default:
+         break
+@@ -207,6 +212,13 @@ class MediaController {
+     artworkLoadToken = nil
+   }
+ 
++  private func makeArtwork(_ image: UIImage) -> MPMediaItemArtwork {
++    if #available(iOS 10.0, *) {
++      return MPMediaItemArtwork(boundsSize: image.size) { _ in image }
++    }
++    return MPMediaItemArtwork(image: image)
++  }
++
+   private func loadArtworkFromURL(url: URL, completion: @escaping (MPMediaItemArtwork?) -> Void) {
+     URLSession.shared.dataTask(with: url) { data, _, error in
+       if error != nil {
+@@ -223,7 +235,7 @@ class MediaController {
+         return
+       }
+ 
+-      let artwork = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
++      let artwork = self.makeArtwork(image)
+       self.performOnMain {
+         completion(artwork)
+       }

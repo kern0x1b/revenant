@@ -133,6 +133,11 @@ target("RNHost")
             local engine = target:pkg("rn-jsc-engine"):installdir()
             target:add("ldflags", path.join(engine, "bundle", "Frameworks", "JavaScriptCore.framework", "JavaScriptCore"), {force = true})
         end
+        local expo_real = os.getenv("RN_EXPO_REAL") or ""
+        if ("," .. expo_real .. ","):find(",expo-audio,", 1, true) then
+            target:add("ldflags", "-Wl,-weak_framework,AVFoundation", {force = true})
+            target:add("ldflags", "-Wl,-weak_framework,MediaPlayer", {force = true})
+        end
         local file = path.join(os.projectdir(), "build", "app-manifest", "host.json")
         local text = os.isfile(file) and io.readfile(file) or ""
         local function key(name)

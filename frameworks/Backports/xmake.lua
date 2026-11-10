@@ -521,6 +521,28 @@ if is_plat("iphoneos") and not SELECTED then
         add_syslinks("objc")
     target_end()
 
+    target("CoreHapticsProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/daemon")
+        add_files("tests/device_probe/corehaptics_main.m", "src/CoreHaptics/*.m", "src/libSystem/RevenantVibration.m")
+        add_includedirs("src/CoreHaptics")
+        add_mflags("-fobjc-arc", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability")
+        add_frameworks("Foundation", "CoreMotion", "CoreMedia", "AudioToolbox", "AVFoundation")
+        add_syslinks("objc")
+        on_config(function (target)
+            local files = {}
+            for _, file in ipairs({path.join(SKELETON, "CoreHaptics.m"), path.join(SKELETON, "registrar.m")}) do
+                if os.isfile(file) then
+                    table.insert(files, file)
+                end
+            end
+            if #files > 0 then
+                target:add("files", table.unpack(files))
+            end
+        end)
+    target_end()
+
     target("MarkdownDumpProbe")
         set_kind("binary")
         set_default(false)
@@ -1061,6 +1083,9 @@ local function host_tests(folder, tests, library, frameworks, options)
             set_arch("arm64")
             set_default(false)
             add_files(path.join(TESTS, name .. "_test." .. (options.extension or "m")))
+            for _, source in ipairs(options.test_sources or {}) do
+                add_files(path.join(TESTS, source))
+            end
             for _, source in ipairs(sources) do
                 add_files(path.join(SRC, library or folder, source))
             end
@@ -1104,7 +1129,10 @@ if not is_plat("iphoneos") then
     host_tests("QuartzCore", {iosurface_contents = {"CALayer+IOSurfaceContents.m"}}, "Metal", {"Foundation", "QuartzCore", "CoreGraphics", "IOSurface"})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
     host_tests("CoreMotion", {heading = {"RevenantMotionHeading.c"}}, nil, {"Foundation"})
-    host_tests("CoreML", {trainer = {"RevenantMLTrain.c", "RevenantMLProto.c", "RevenantMLSchema.c"}}, nil, {"Foundation"})
+    host_tests("CoreHaptics", {corehaptics = {"CHHapticConstants.m", "CHHapticDeviceCapability.m", "CHHapticEngine.m", "CHHapticEvent.m",
+                                                "CHHapticParameter.m", "CHHapticPattern.m", "CHHapticPatternPlayer.m", "../libSystem/RevenantVibration.m"}},
+               nil, {"Foundation", "CoreHaptics"},
+               {defines = {"REVENANT_HOST_BUILD"}, test_sources = {"corehaptics_oracle.m"}})    host_tests("CoreML", {trainer = {"RevenantMLTrain.c", "RevenantMLProto.c", "RevenantMLSchema.c"}}, nil, {"Foundation"})
     host_tests("CoreText", CORETEXT_TESTS, nil, {"CoreText", "CoreGraphics", "Foundation"})
     local SCENEKIT_TESTS_NO_AUDIO = {}
     for name, sources in pairs(SCENEKIT_TESTS) do

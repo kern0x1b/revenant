@@ -65,7 +65,7 @@ function main()
 
     local stubbed = fixture("verified-stub")
     edit_file(stubbed, "frameworks/ReactNative/src/coverage.json", function (data)
-        row(data, "expo-audio").verified = "phone"
+        row(data, "PaseoHardwareKeyboard").verified = "phone"
     end)
     expect_fail("a stub row verified on the phone", stubbed, "a stub is not a check of the module")
 
@@ -79,13 +79,13 @@ function main()
     edit_file(unlisted, "frameworks/ReactNative/src/stubs.json", function (data)
         local kept = {}
         for _, stub in ipairs(data.stubs) do
-            if stub.name ~= "StubAudioModule" then
+            if stub.name ~= "StubDocumentPickerModule" then
                 table.insert(kept, stub)
             end
         end
         data.stubs = kept
     end)
-    expect_fail("a stub class missing from stubs.json", unlisted, "declares StubAudioModule, which stubs.json does not list")
+    expect_fail("a stub class missing from stubs.json", unlisted, "declares StubDocumentPickerModule, which stubs.json does not list")
 
     local orphan = fixture("stub-without-entry")
     edit_file(orphan, "frameworks/ReactNative/src/coverage.json", function (data)
