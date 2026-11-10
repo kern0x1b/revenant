@@ -8,4 +8,4 @@ static struct os_log_s revenant_os_log_default_instance = {
     .category = ""
 };
 
-os_log_t __revenant_fb___os_log_default = (os_log_t)&revenant_os_log_default_instance;
+os_log_t __revenant_fb___os_log_default = (__bridge os_log_t)&revenant_os_log_default_instance;
