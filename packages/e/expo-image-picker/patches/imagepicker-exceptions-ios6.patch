@@ -1,0 +1,24 @@
+diff --git a/ios/ImagePickerExceptions.swift b/ios/ImagePickerExceptions.swift
+index df0ec8e..bffad50 100644
+--- a/ios/ImagePickerExceptions.swift
++++ b/ios/ImagePickerExceptions.swift
+@@ -26,12 +26,18 @@ internal final class MissingMicrophonePermissionException: Exception {
+   }
+ }
+ 
+-internal final class MissingCurrentViewControllerException: Exception {
++internal final class ImagePickerMissingCurrentViewControllerException: Exception {
+   override var reason: String {
+     "Cannot determine currently presented view controller"
+   }
+ }
+ 
++internal final class MultipleSelectionUnavailableException: Exception {
++  override var reason: String {
++    "Selecting multiple media items needs iOS 14 or later"
++  }
++}
++
+ internal final class MaxDurationWhileEditingExceededException: Exception {
+   override var reason: String {
+     "'videoMaxDuration' limits to 600 when 'allowsEditing=true'"

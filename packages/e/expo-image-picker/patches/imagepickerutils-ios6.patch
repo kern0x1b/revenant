@@ -1,0 +1,93 @@
+diff --git a/ios/ImageUtils.swift b/ios/ImageUtils.swift
+index eab6cee..2d683d3 100644
+--- a/ios/ImageUtils.swift
++++ b/ios/ImageUtils.swift
+@@ -3,9 +3,11 @@
+ import CoreGraphics
+ import ExpoModulesCore
+ import ImageIO
++import MobileCoreServices
+ import Photos
+ import UniformTypeIdentifiers
+ 
++@available(iOS 14.0, *)
+ extension UTType {
+   static var avif: UTType {
+     UTType(importedAs: "public.avif")
+@@ -92,11 +94,14 @@ internal struct ImageUtils {
+ 
+     case .some(let s) where s.contains("ext=GIF"):
+       var rawData: Data?
+-      if let imgUrl = mediaInfo[.imageURL] as? URL {
+-        rawData = try? Data(contentsOf: imgUrl)
++      var metadata: [String: Any]?
++      if #available(iOS 11.0, *) {
++        if let imgUrl = mediaInfo[.imageURL] as? URL {
++          rawData = try? Data(contentsOf: imgUrl)
++        }
++        metadata = mediaInfo[.mediaMetadata] as? [String: Any]
+       }
+       let inputData = rawData ?? image.jpegData(compressionQuality: options.quality)
+-      let metadata = mediaInfo[.mediaMetadata] as? [String: Any]
+       let cropRect = options.allowsEditing ? mediaInfo[.cropRect] as? CGRect : nil
+       let gifData = try processGifData(
+         inputData: inputData,
+@@ -111,6 +116,7 @@ internal struct ImageUtils {
+     }
+   }
+ 
++  @available(iOS 14.0, *)
+   static func readDataAndFileExtension(
+     image: UIImage,
+     rawData: Data,
+@@ -172,7 +178,7 @@ internal struct ImageUtils {
+    @returns `true` upon copying success and `false` otherwise
+    */
+   static func tryCopyingOriginalImageFrom(mediaInfo: MediaInfo, to: URL) -> Bool {
+-    guard let from = mediaInfo[.imageURL] as? URL else {
++    guard #available(iOS 11.0, *), let from = mediaInfo[.imageURL] as? URL else {
+       return false
+     }
+ 
+@@ -227,13 +233,11 @@ internal struct ImageUtils {
+   }
+ 
+   static func readExifFrom(mediaInfo: MediaInfo) async -> ExifInfo? {
+-    let metadata = mediaInfo[.mediaMetadata] as? [String: Any]
+-
+-    if let metadata {
++    if #available(iOS 11.0, *), let metadata = mediaInfo[.mediaMetadata] as? [String: Any] {
+       return ImageUtils.readExifFrom(imageMetadata: metadata)
+     }
+ 
+-    guard let imageUrl = mediaInfo[.referenceURL] as? URL else {
++    guard #available(iOS 8.0, *), let imageUrl = mediaInfo[.referenceURL] as? URL else {
+       log.error("Could not fetch metadata for image")
+       return nil
+     }
+@@ -271,14 +275,12 @@ internal struct ImageUtils {
+       return completion(nil)
+     }
+ 
+-    let metadata = mediaInfo[.mediaMetadata] as? [String: Any]
+-
+-    if let metadata {
++    if #available(iOS 11.0, *), let metadata = mediaInfo[.mediaMetadata] as? [String: Any] {
+       let exif = ImageUtils.readExifFrom(imageMetadata: metadata)
+       return completion(exif)
+     }
+ 
+-    guard let imageUrl = mediaInfo[.referenceURL] as? URL else {
++    guard #available(iOS 8.0, *), let imageUrl = mediaInfo[.referenceURL] as? URL else {
+       log.error("Could not fetch metadata for image")
+       return completion(nil)
+     }
+@@ -354,7 +356,7 @@ internal struct ImageUtils {
+     let frameCount = CGImageSourceGetCount(imageSource)
+     let destinationData = NSMutableData()
+ 
+-    guard let imageDestination = CGImageDestinationCreateWithData(destinationData, UTType.gif.identifier as CFString, frameCount, nil) else {
++    guard let imageDestination = CGImageDestinationCreateWithData(destinationData, kUTTypeGIF, frameCount, nil) else {
+       throw FailedToCreateGifException()
+     }
+ 
