@@ -302,7 +302,7 @@ if is_plat("iphoneos") and not SELECTED then
     target("BackportsQRMetadataProbe")
         set_kind("binary")
         set_default(false)
-        add_rules("@addon/revenant/app")
+        add_rules("@addon/revenant/app", "backports.aliased")
         add_files("tests/qr_metadata/main.m", "src/AVFoundation/AVCaptureMetadataOutput+MachineReadableCode7.m",
                   "src/AVFoundation/AVCaptureMetadataOutput+RectOfInterest7.m", "src/AVFoundation/AVCaptureVideoPreviewLayer+MetadataRect7.m",
                   "src/AVFoundation/AVMetadataMachineReadableCodeObject7.m", "src/AVFoundation/AVFoundationNames7.m", "src/AVFoundation/RevenantQRCode.c", "src/AVFoundation/RevenantQRECI.c")
@@ -731,7 +731,7 @@ if is_plat("iphoneos") and not SELECTED then
     target("BackportsSceneKitProbe")
         set_kind("binary")
         set_default(false)
-        add_rules("@addon/revenant/app")
+        add_rules("@addon/revenant/app", "backports.aliased")
         add_files(table.unpack(DEVICE_PROBE_SOURCES))
         add_defines("REVENANT_PROBE_SCENEKIT")
         add_deps("SceneKitBackports", "IOSurfaceBackports")
