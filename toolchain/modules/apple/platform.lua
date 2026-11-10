@@ -305,7 +305,7 @@ function webkit_engine_deb(signer)
     end
     task.run("build", {target = WEBKIT_ENGINE})
     local all, identities = shared_packages(holder)
-    return webkit_engine_package.ensure({installdir = holder:pkg("webkit-engine-prefixed"):installdir("deb"), ldid = ldid(signer),
+    return webkit_engine_package.ensure({installdir = path.join(holder:pkg("webkit-engine-prefixed"):installdir(), "deb"), ldid = ldid(signer),
                                          packages = all, provided = identities,
                                          workdir = path.join(config.builddir(), ".revenant", "webkit-engine", "work"),
                                          outputdir = path.join(config.builddir(), ".revenant", "webkit-engine")})

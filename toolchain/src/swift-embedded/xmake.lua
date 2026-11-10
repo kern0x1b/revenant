@@ -5,7 +5,7 @@ end
 add_requires("revenant@swift 6.4.0", {alias = "swift", host = true, system = false})
 
 local function source(target)
-    return path.join(target:pkg("swift"):installdir("share"), "swift-source")
+    return path.join(target:pkg("swift"):installdir(), "share", "swift-source")
 end
 
 target("swiftUnicodeDataTables")
@@ -32,7 +32,7 @@ target("swiftUnicodeDataTables")
         local found = target:toolchain("apple-ios")
         found:load()
         swift.build_module({
-            swiftc = path.join(target:pkg("swift"):installdir("bin"), "swiftc"),
+            swiftc = path.join(target:pkg("swift"):installdir(), "bin", "swiftc"),
             source = source(target),
             architecture = target:arch(),
             deployment = found:config("deployment"),
