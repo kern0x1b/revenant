@@ -259,6 +259,11 @@ class CAAnimation
 class CADisplayLink
 class CALayer
 class CAMetalLayer
+class CHHapticDynamicParameter
+class CHHapticEngine
+class CHHapticEvent
+class CHHapticEventParameter
+class CHHapticPattern
 class CIAztecCodeDescriptor
 class CIBarcodeDescriptor
 class CIColor
@@ -1698,6 +1703,7 @@ class RevenantBase14Widths
 class RevenantBridgedContext
 class RevenantButtonTint
 class RevenantCASpringAnimation
+class RevenantCHHapticPatternPlayer
 class RevenantCKCredentials
 class RevenantCKLocatedCoordinate
 class RevenantCKOPScheduler
@@ -1790,6 +1796,8 @@ class RevenantHKCDADocumentState
 class RevenantHKRow
 class RevenantHKStore
 class RevenantHandlerMediaItemArtwork
+class RevenantHapticDeviceCapability
+class RevenantHapticParameterAttributes
 class RevenantHomeKitStore
 class RevenantHostState
 class RevenantIOSurfaceContents
@@ -2804,6 +2812,15 @@ enum BLAS_THREADING_MAX_OPTIONS
 enum BLAS_THREADING_MULTI_THREADED
 enum BLAS_THREADING_SINGLE_THREADED
 enum CBManagerStatePoweredOn
+enum CHHapticErrorCodeEngineNotRunning
+enum CHHapticErrorCodeFileNotFound
+enum CHHapticErrorCodeInvalidParameterType
+enum CHHapticErrorCodeInvalidPatternData
+enum CHHapticErrorCodeInvalidPatternDictionary
+enum CHHapticErrorCodeInvalidTime
+enum CHHapticErrorCodeNotSupported
+enum CHHapticErrorCodeOperationNotPermitted
+enum CHHapticErrorCodeResourceNotAvailable
 enum CKAccountStatusNoAccount
 enum CKApplicationPermissionStatusCouldNotComplete
 enum CKApplicationPermissionStatusInitialState
@@ -4988,6 +5005,10 @@ function RevenantVTSoftwareSessionInvalidate
 function RevenantVTSoftwareSessionOwns
 function RevenantVTSoftwareSessionSetProperty
 function RevenantVTSoftwareSessionWait
+function RevenantVibratorIsAvailable
+function RevenantVibratorPlay
+function RevenantVibratorPulse
+function RevenantVibratorStop
 function RevenantVisionBarcodes
 function RevenantVisionDetectRectangles
 function RevenantVisionEdgeMap
@@ -5868,6 +5889,7 @@ function revenant_color_for_traits
 function revenant_content_overlay_insets
 function revenant_copy_all_tags
 function revenant_copy_is_copy_for_testing
+function revenant_corehaptics_error
 function revenant_coretext_draw_frame_shifted
 function revenant_coretext_draw_line_shifted
 function revenant_coretext_draw_run_shifted
@@ -5903,7 +5925,6 @@ function revenant_elided_text
 function revenant_encode_trait_extras
 function revenant_ephemeral_cookie_storage
 function revenant_fd_set_in_range
-function revenant_feedback_motor_present
 function revenant_feedback_play
 function revenant_field_allows_copying
 function revenant_field_allows_deleting
@@ -7540,6 +7561,12 @@ global AXShowBordersEnabledStatusDidChangeNotification
 global BGTaskSchedulerErrorDomain
 global CAFrameRateRangeDefault
 global CBAdvertisementDataIsConnectable
+global CHHapticDynamicParameterIDHapticIntensityControl
+global CHHapticDynamicParameterIDHapticSharpnessControl
+global CHHapticEventParameterIDHapticIntensity
+global CHHapticEventParameterIDHapticSharpness
+global CHHapticEventTypeHapticContinuous
+global CHHapticEventTypeHapticTransient
 global CIDetectorAspectRatio
 global CIDetectorEyeBlink
 global CIDetectorFocalLength
@@ -13544,6 +13571,61 @@ member CAMetalLayer -setPixelFormat:
 member CAMetalLayer -setPresentsWithTransaction:
 member CAMetalLayer -setWantsExtendedDynamicRangeContent:
 member CAMetalLayer -wantsExtendedDynamicRangeContent
+member CHHapticDynamicParameter -initWithParameterID:value:relativeTime:
+member CHHapticDynamicParameter -parameterID
+member CHHapticDynamicParameter -relativeTime
+member CHHapticDynamicParameter -setRelativeTime:
+member CHHapticDynamicParameter -setValue:
+member CHHapticDynamicParameter -value
+member CHHapticEngine +capabilitiesForHardware
+member CHHapticEngine -autoShutdownEnabled
+member CHHapticEngine -createAdvancedPlayerWithPattern:error:
+member CHHapticEngine -createPlayerWithPattern:error:
+member CHHapticEngine -currentTime
+member CHHapticEngine -initAndReturnError:
+member CHHapticEngine -initWithAudioSession:error:
+member CHHapticEngine -isMutedForAudio
+member CHHapticEngine -isMutedForHaptics
+member CHHapticEngine -notifyWhenPlayersFinished:
+member CHHapticEngine -playPatternFromData:error:
+member CHHapticEngine -playPatternFromURL:error:
+member CHHapticEngine -playsHapticsOnly
+member CHHapticEngine -registerAudioResource:options:error:
+member CHHapticEngine -resetHandler
+member CHHapticEngine -revenant_addPlayer:
+member CHHapticEngine -revenant_isRunning
+member CHHapticEngine -revenant_playerDidFinish:
+member CHHapticEngine -revenant_prepare
+member CHHapticEngine -revenant_runFinishedHandlers:
+member CHHapticEngine -setResetHandler:
+member CHHapticEngine -setStoppedHandler:
+member CHHapticEngine -startAndReturnError:
+member CHHapticEngine -startWithCompletionHandler:
+member CHHapticEngine -stopWithCompletionHandler:
+member CHHapticEngine -stoppedHandler
+member CHHapticEngine -unregisterAudioResource:error:
+member CHHapticEvent -duration
+member CHHapticEvent -eventParameters
+member CHHapticEvent -initWithAudioResourceID:parameters:relativeTime:
+member CHHapticEvent -initWithAudioResourceID:parameters:relativeTime:duration:
+member CHHapticEvent -initWithEventType:parameters:relativeTime:
+member CHHapticEvent -initWithEventType:parameters:relativeTime:duration:
+member CHHapticEvent -relativeTime
+member CHHapticEvent -setDuration:
+member CHHapticEvent -setRelativeTime:
+member CHHapticEvent -type
+member CHHapticEventParameter -initWithParameterID:value:
+member CHHapticEventParameter -parameterID
+member CHHapticEventParameter -setValue:
+member CHHapticEventParameter -value
+member CHHapticPattern -duration
+member CHHapticPattern -exportDictionaryAndReturnError:
+member CHHapticPattern -initWithContentsOfURL:error:
+member CHHapticPattern -initWithDictionary:error:
+member CHHapticPattern -initWithEvents:parameterCurves:error:
+member CHHapticPattern -initWithEvents:parameters:error:
+member CHHapticPattern -revenant_events
+member CHHapticPattern -revenant_parameters
 member CIAztecCodeDescriptor +descriptorWithPayload:isCompact:layerCount:dataCodewordCount:
 member CIAztecCodeDescriptor -copyWithZone:
 member CIAztecCodeDescriptor -encodeWithCoder:
@@ -26720,6 +26802,17 @@ member RevenantCASpringAnimation -runActionForKey:object:arguments:
 member RevenantCASpringAnimation -settlingDuration
 member RevenantCASpringAnimation -stiffness
 member RevenantCASpringAnimation -superclass
+member RevenantCHHapticPatternPlayer -cancelAndReturnError:
+member RevenantCHHapticPatternPlayer -initWithEngine:pattern:
+member RevenantCHHapticPatternPlayer -isMuted
+member RevenantCHHapticPatternPlayer -revenant_cancel
+member RevenantCHHapticPatternPlayer -revenant_intensityOf:
+member RevenantCHHapticPatternPlayer -revenant_millisecondsOf:
+member RevenantCHHapticPatternPlayer -revenant_scheduleFrom:generation:
+member RevenantCHHapticPatternPlayer -scheduleParameterCurve:atTime:error:
+member RevenantCHHapticPatternPlayer -sendParameters:atTime:error:
+member RevenantCHHapticPatternPlayer -startAtTime:error:
+member RevenantCHHapticPatternPlayer -stopAtTime:error:
 member RevenantCKCredentials +shared
 member RevenantCKCredentials -keysForContainer:
 member RevenantCKCredentials -provisionedKeyForContainer:
@@ -27293,6 +27386,14 @@ member RevenantHKStore -typeWithIdentifier:
 member RevenantHandlerMediaItemArtwork -bounds
 member RevenantHandlerMediaItemArtwork -imageWithSize:
 member RevenantHandlerMediaItemArtwork -initWithRevenantBounds:handler:
+member RevenantHapticDeviceCapability -attributesForDynamicParameter:error:
+member RevenantHapticDeviceCapability -attributesForEventParameter:eventType:error:
+member RevenantHapticDeviceCapability -supportsAudio
+member RevenantHapticDeviceCapability -supportsHaptics
+member RevenantHapticParameterAttributes -defaultValue
+member RevenantHapticParameterAttributes -initWithMinimum:maximum:initial:
+member RevenantHapticParameterAttributes -maxValue
+member RevenantHapticParameterAttributes -minValue
 member RevenantHomeKitStore +shared
 member RevenantHomeKitStore -flushTableNamed:
 member RevenantHomeKitStore -init
@@ -36147,6 +36248,10 @@ protocol CAMediaTiming
 protocol CAMetalDrawable
 protocol CBCentralManagerDelegate
 protocol CBPeripheralDelegate
+protocol CHHapticAdvancedPatternPlayer
+protocol CHHapticDeviceCapability
+protocol CHHapticParameterAttributes
+protocol CHHapticPatternPlayer
 protocol CKRecordKeyValueSetting
 protocol CKSyncEngineDelegate
 protocol CKSyncEngineRecordProvider
@@ -36535,6 +36640,19 @@ protocol_member CBCentralManagerDelegate -centralManagerDidUpdateState:
 protocol_member CBPeripheralDelegate -peripheral:didDiscoverCharacteristicsForService:error:
 protocol_member CBPeripheralDelegate -peripheral:didDiscoverServices:
 protocol_member CBPeripheralDelegate -peripheral:didUpdateValueForCharacteristic:error:
+protocol_member CHHapticDeviceCapability -attributesForDynamicParameter:error:
+protocol_member CHHapticDeviceCapability -attributesForEventParameter:eventType:error:
+protocol_member CHHapticDeviceCapability -supportsAudio
+protocol_member CHHapticDeviceCapability -supportsHaptics
+protocol_member CHHapticParameterAttributes -defaultValue
+protocol_member CHHapticParameterAttributes -maxValue
+protocol_member CHHapticParameterAttributes -minValue
+protocol_member CHHapticPatternPlayer -cancelAndReturnError:
+protocol_member CHHapticPatternPlayer -isMuted
+protocol_member CHHapticPatternPlayer -scheduleParameterCurve:atTime:error:
+protocol_member CHHapticPatternPlayer -sendParameters:atTime:error:
+protocol_member CHHapticPatternPlayer -startAtTime:error:
+protocol_member CHHapticPatternPlayer -stopAtTime:error:
 protocol_member CKRecordKeyValueSetting -allKeys
 protocol_member CKRecordKeyValueSetting -changedKeys
 protocol_member CKRecordKeyValueSetting -objectForKey:
@@ -37373,6 +37491,7 @@ type CGBitmapInfo
 type CGImageByteOrderInfo
 type CGImagePixelFormatInfo
 type CGPDFTagType
+type CHHapticErrorCode
 type CIRAWFilterOption
 type CKAccountStatus
 type CKApplicationPermissionBlock

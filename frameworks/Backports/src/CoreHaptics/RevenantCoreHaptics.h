@@ -1,0 +1,23 @@
+#ifndef REVENANT_COREHAPTICS_H
+#define REVENANT_COREHAPTICS_H
+
+#include "../revenant_impl.h"
+
+#if defined(REVENANT_HOST_BUILD)
+#define CHHapticEngine CHHapticEngineRevenant
+#define CHHapticEvent CHHapticEventRevenant
+#define CHHapticEventParameter CHHapticEventParameterRevenant
+#define CHHapticDynamicParameter CHHapticDynamicParameterRevenant
+#define CHHapticPattern CHHapticPatternRevenant
+#define CHHapticEventTypeHapticContinuous CHHapticEventTypeHapticContinuousRevenant
+#define CHHapticEventTypeHapticTransient CHHapticEventTypeHapticTransientRevenant
+#define CHHapticEventParameterIDHapticIntensity CHHapticEventParameterIDHapticIntensityRevenant
+#define CHHapticEventParameterIDHapticSharpness CHHapticEventParameterIDHapticSharpnessRevenant
+#define CHHapticDynamicParameterIDHapticIntensityControl CHHapticDynamicParameterIDHapticIntensityControlRevenant
+#define CHHapticDynamicParameterIDHapticSharpnessControl CHHapticDynamicParameterIDHapticSharpnessControlRevenant
+#endif
+
+#import <Foundation/Foundation.h>
+#import <CoreHaptics/CoreHaptics.h>
+
+#endif

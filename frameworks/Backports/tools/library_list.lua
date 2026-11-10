@@ -1,5 +1,5 @@
 local LIBRARIES = {
-    {name = "SystemBackports", folder = "libSystem", frameworks = {}, libraries = {}, archives = {}, system = {}},
+    {name = "SystemBackports", folder = "libSystem", frameworks = {"AudioToolbox"}, libraries = {}, archives = {}, system = {}},
     {name = "FoundationBackports", folder = "Foundation", frameworks = {"Foundation", "CoreFoundation", "SystemConfiguration"}, libraries = {"icucore", "CoreFoundationBackports", "SystemBackports"}, archives = {}, system = {"sqlite3"}},
     {name = "CloudKitBackports", folder = "CloudKit", frameworks = {"Foundation", "CoreLocation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"RevenantCKWebAuth", "micro-ecc"}, system = {}},
     {name = "AppTrackingTransparencyBackports", folder = "AppTrackingTransparency", frameworks = {"AppTrackingTransparency", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -14,7 +14,7 @@ local LIBRARIES = {
     {name = "CoreNFCBackports", folder = "CoreNFC", frameworks = {"Foundation", "CoreFoundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "GameKitBackports", folder = "GameKit", frameworks = {"GameKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "GraphicsBackports", folder = "Graphics", frameworks = {"CoreGraphics", "CoreImage", "CoreVideo", "ImageIO", "IOSurface", "OpenGLES", "Foundation"}, libraries = {"FoundationBackports", "IOSurfaceBackports"}, archives = {"apple-compat"}, system = {}},
-    {name = "UIKitBackports", folder = "UIKit", frameworks = {"UIKit", "Foundation", "CFNetwork", "CoreGraphics", "QuartzCore", "MobileCoreServices", "ImageIO", "CoreLocation"}, libraries = {"FoundationBackports", "GraphicsBackports", "CoreGraphicsBackports"}, archives = {"box2d"}, system = {}},
+    {name = "UIKitBackports", folder = "UIKit", frameworks = {"UIKit", "Foundation", "CFNetwork", "CoreGraphics", "QuartzCore", "MobileCoreServices", "ImageIO", "CoreLocation"}, libraries = {"FoundationBackports", "GraphicsBackports", "CoreGraphicsBackports", "SystemBackports"}, archives = {"box2d"}, system = {}},
     {name = "CoreLocationBackports", folder = "CoreLocation", frameworks = {"CoreLocation", "Foundation"}, libraries = {"FoundationBackports", "ContactsBackports"}, archives = {}, system = {}},
     {name = "CoreTextBackports", folder = "CoreText", frameworks = {"CoreText", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreDataBackports", folder = "CoreData", frameworks = {"CoreData", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
@@ -67,6 +67,7 @@ local LIBRARIES = {
     {name = "MapKitBackports", folder = "MapKit", frameworks = {"MapKit", "UIKit", "CoreGraphics", "CoreLocation", "QuartzCore", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "PassKitBackports", folder = "PassKit", frameworks = {"PassKit", "UIKit", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreMediaBackports", folder = "CoreMedia", frameworks = {"CoreMedia", "CoreVideo", "AudioToolbox", "CoreGraphics", "Foundation"}, libraries = {"FoundationBackports", "CoreVideoBackports"}, archives = {}, system = {}},
+    {name = "CoreHapticsBackports", folder = "CoreHaptics", frameworks = {"Foundation"}, libraries = {"FoundationBackports", "SystemBackports"}, archives = {}, system = {}},
     {name = "CoreFoundationBackports", folder = "CoreFoundation", frameworks = {"CoreFoundation", "Foundation"}, libraries = {}, archives = {}, system = {}},
     {name = "StoreKitBackports", folder = "StoreKit", frameworks = {"StoreKit", "UIKit", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
     {name = "CoreGraphicsBackports", folder = "CoreGraphics", frameworks = {"CoreGraphics", "Foundation"}, libraries = {"FoundationBackports"}, archives = {"apple-compat"}, system = {}},
