@@ -31,21 +31,28 @@ static void revenant_expect_equal(const char *name, NSString *value, NSString *e
                    [NSString stringWithFormat:@"%@ is not %@", value, expected]);
 }
 
+extern NSString * __revenant_fb_CHHapticEventTypeHapticTransient;
+extern NSString * __revenant_fb_CHHapticEventTypeHapticContinuous;
+extern NSString * __revenant_fb_CHHapticEventParameterIDHapticIntensity;
+extern NSString * __revenant_fb_CHHapticEventParameterIDHapticSharpness;
+extern NSString * __revenant_fb_CHHapticDynamicParameterIDHapticIntensityControl;
+extern NSString * __revenant_fb_CHHapticDynamicParameterIDHapticSharpnessControl;
+
 int main(int argc, char **argv)
 {
     revenant_read_arguments(argc, argv);
     @autoreleasepool {
-        revenant_expect_equal("the transient event type is the one Core Haptics uses", CHHapticEventTypeHapticTransient,
+        revenant_expect_equal("the transient event type the backport defines is the one Core Haptics uses", __revenant_fb_CHHapticEventTypeHapticTransient,
                                revenant_apple_event_type_transient());
-        revenant_expect_equal("the continuous event type is the one Core Haptics uses", CHHapticEventTypeHapticContinuous,
+        revenant_expect_equal("the continuous event type the backport defines is the one Core Haptics uses", __revenant_fb_CHHapticEventTypeHapticContinuous,
                                revenant_apple_event_type_continuous());
-        revenant_expect_equal("the intensity parameter is the one Core Haptics uses", CHHapticEventParameterIDHapticIntensity,
+        revenant_expect_equal("the intensity parameter the backport defines is the one Core Haptics uses", __revenant_fb_CHHapticEventParameterIDHapticIntensity,
                                revenant_apple_parameter_intensity());
-        revenant_expect_equal("the sharpness parameter is the one Core Haptics uses", CHHapticEventParameterIDHapticSharpness,
+        revenant_expect_equal("the sharpness parameter the backport defines is the one Core Haptics uses", __revenant_fb_CHHapticEventParameterIDHapticSharpness,
                                revenant_apple_parameter_sharpness());
-        revenant_expect_equal("the intensity control is the one Core Haptics uses", CHHapticDynamicParameterIDHapticIntensityControl,
+        revenant_expect_equal("the intensity control the backport defines is the one Core Haptics uses", __revenant_fb_CHHapticDynamicParameterIDHapticIntensityControl,
                                revenant_apple_dynamic_intensity());
-        revenant_expect_equal("the sharpness control is the one Core Haptics uses", CHHapticDynamicParameterIDHapticSharpnessControl,
+        revenant_expect_equal("the sharpness control the backport defines is the one Core Haptics uses", __revenant_fb_CHHapticDynamicParameterIDHapticSharpnessControl,
                                revenant_apple_dynamic_sharpness());
 
         CHHapticEventParameter *intensity = [[CHHapticEventParameter alloc] initWithParameterID:CHHapticEventParameterIDHapticIntensity value:0.7f];

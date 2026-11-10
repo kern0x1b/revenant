@@ -525,11 +525,21 @@ if is_plat("iphoneos") and not SELECTED then
         set_default(false)
         add_rules("@addon/revenant/daemon")
         add_files("tests/device_probe/corehaptics_main.m", "src/CoreHaptics/*.m", "src/libSystem/RevenantVibration.m")
-        add_files(path.join(SKELETON, "CoreHaptics.m"), path.join(SKELETON, "registrar.m"))
         add_includedirs("src/CoreHaptics")
         add_mflags("-fobjc-arc", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability")
         add_frameworks("Foundation", "CoreMotion", "CoreMedia", "AudioToolbox", "AVFoundation")
         add_syslinks("objc")
+        on_config(function (target)
+            local files = {}
+            for _, file in ipairs({path.join(SKELETON, "CoreHaptics.m"), path.join(SKELETON, "registrar.m")}) do
+                if os.isfile(file) then
+                    table.insert(files, file)
+                end
+            end
+            if #files > 0 then
+                target:add("files", table.unpack(files))
+            end
+        end)
     target_end()
 
     target("MarkdownDumpProbe")

@@ -77,13 +77,18 @@ the motor: the phone has one motor, so stopping one player stops the vibration o
   playback rate and no curve.
 - The audio resources (`registerAudioResource:options:error:`, `unregisterAudioResource:error:`,
   `initWithAudioResourceID:...`) fail with the same code: the phone plays no audio with a haptic.
-- A pattern that carries a parameter curve is refused by `initWithDictionary:error:` for the same reason. The rest of
-  the AHAP dictionary format is read, and `exportDictionaryAndReturnError:` writes it.
+- An event of an audio type in a pattern dictionary is refused with the same code, for the same reason.
+
+The AHAP dictionary format is read and written as CoreHaptics reads and writes it, measured on macOS: the version is
+optional and only 1 is accepted, an event needs its type and its time, an event parameter needs its identifier and its
+value, a dynamic parameter needs its identifier, its value and its time, and the exported dictionary carries no version
+and gives every event its duration. A pattern that carries a parameter curve is refused, because a motor has no curve.
 
 ## Checks
 
 The host test compares the backport with CoreHaptics on macOS, where the framework exists: the constants, the
 property round trips of the event parameter and the event, the pattern length of six cases, the length of a pattern
-of two events, and the exported pattern dictionary. The device probe ran the whole surface on the phone: the engine
-is created, started, the pattern of a 0.5 second continuous event has that length, the player is created and starts
-and stops, and the engine stops. No panic report was added by these runs.
+of two events, the exported pattern dictionary, and the reading of eleven dictionaries with their error codes. The
+device probe ran the whole surface on the phone: the engine is created, started, the pattern of a 0.5 second
+continuous event has that length, the player is created and starts and stops, and the engine stops. No panic report
+was added by these runs.
