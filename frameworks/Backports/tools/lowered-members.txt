@@ -4230,6 +4230,8 @@ enum kCALayerMaxXMaxYCorner
 enum kCALayerMaxXMinYCorner
 enum kCALayerMinXMaxYCorner
 enum kCALayerMinXMinYCorner
+enum kCMFormatDescriptionBridgeError_InvalidParameter
+enum kCMFormatDescriptionBridgeError_InvalidSerializedSampleDescription
 enum kCMTagCategory_ChannelID
 enum kCMTagCategory_MediaSubType
 enum kCMTagCategory_MediaType
