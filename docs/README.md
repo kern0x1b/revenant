@@ -138,6 +138,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [StoreKit on iOS 6: manage subscriptions](reference/backports/StoreKit/README.md) | the overlay over the SDK's module, why the call opens the Settings pane, and what was not measured |
 | [Security on iOS 6](reference/backports/Security/README.md) | the access-control rules, Secure Enclave and shared-credential answers measured on macOS, and what the iOS 6 keychain did |
 | [UIKit feedback generators on iOS 6](reference/backports/UIKit/FeedbackGenerators.md) | the impact, notification and selection generators as vibration patterns through AudioServices, by motor presence, and what is not measured |
+| [CoreHaptics on iOS 6](reference/backports/CoreHaptics/README.md) | the Telegram continuous-haptic surface, its vibration-motor mapping, and what the iPhone 4S measurements could not establish |
 | [UserNotifications: attachments on iOS 6](reference/backports/UserNotifications/Attachments.md) | what `UNNotificationAttachment` validates and keeps, and what iOS 6 does not show |
 | [UserNotifications: delegate on iOS 6](reference/backports/UserNotifications/Delegate.md) | which delegate calls a local notification makes, what each presentation option does on iOS 6, and the default delegate that lowers the protocol |
 | [UserNotifications: authorization on iOS 6](reference/backports/UserNotifications/Authorization.md) | how the status is read from the enabled remote notification types, how a request waits for the prompt, and the limits |
