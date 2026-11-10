@@ -221,6 +221,9 @@ int main(int argc, char **argv) {
             link = true, ldflags = {"-lfolly"}})
         assert(ok, "folly does not compile and link against armv7 libc++: " .. output)
         probe.require_architecture(path.join(package:installdir("lib"), "libfolly.a"), "armv7")
+        local libcxx = package:dep("libcxx")
+        local shared = import("@addon.revenant.apple.shared_runtime", {anonymous = true})
+        local runtime = libcxx:config("packaged") and shared.folder_of(shared.package_name("libcxx", libcxx:buildhash())) .. "/libc++.1.dylib" or "@rpath/libc++.1.dylib"
         local aligned, output_aligned = probe.check(package, {source = [[
 #include <new>
 struct alignas(64) Wide {
@@ -235,6 +238,6 @@ int main(int argc, char **argv) {
 }
 ]], deps = {"libcxx"}, flags = {"-std=c++20", "-faligned-allocation"}, link = true,
             bound = {["__ZnwmSt11align_val_t"] = "libc++", ["__ZdlPvSt11align_val_t"] = "libc++"},
-            linked = "@rpath/libc++.1.dylib"})
+            linked = runtime})
         assert(aligned, "over-aligned new does not compile and bind to the bundled libc++abi: " .. output_aligned)
     end)

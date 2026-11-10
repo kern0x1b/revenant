@@ -8,7 +8,7 @@ if is_plat("iphoneos") then
         add_requires("revenant@swift-runtime", {alias = "swift-runtime"})
         add_requires("revenant@libcxx", {alias = "libcxx"})
     end
-    add_requires("revenant@combine", {alias = "combine"})
+    add_requires("revenant@combine", {alias = "combine", configs = {shared = component == "" or nil}})
 
     local function sources(target, ...)
         return path.join(target:pkg("combine"):installdir(), "src", ...)
@@ -29,11 +29,12 @@ if is_plat("iphoneos") then
         add_rules("@addon/revenant/daemon", "@addon/revenant/swift")
         add_deps("CombineXCTest")
         add_packages("combine")
-        add_deps("UIKitBackports", "CoreDataBackports")
-        add_frameworks("Foundation", "CoreFoundation")
+        add_deps("CoreFoundationBackports", "UIKitBackports", "CoreDataBackports")
+        add_frameworks("Foundation")
         set_optimize("fastest")
         set_values("swift.flags", "-DOPENCOMBINE_COMPATIBILITY_TEST", "-disable-availability-checking", "-suppress-warnings")
         set_values("revenant.control", "tests/control")
+        set_values("revenant.version", "1.0.0")
         set_values("revenant.waive.weak-imports",
                    "every weak import is reached only behind #available or carried by the backports: the runtime's overlays built with availability checking on, Combine's run-loop timer tolerance, compiler-rt's version check")
         on_load(function (target)
