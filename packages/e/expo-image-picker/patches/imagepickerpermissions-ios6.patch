@@ -1,0 +1,181 @@
+diff --git a/ios/ImagePickerPermissionRequesters.swift b/ios/ImagePickerPermissionRequesters.swift
+index ad92115..ac98471 100644
+--- a/ios/ImagePickerPermissionRequesters.swift
++++ b/ios/ImagePickerPermissionRequesters.swift
+@@ -1,5 +1,6 @@
+ // Copyright 2022-present 650 Industries. All rights reserved.
+ 
++import AssetsLibrary
+ import Photos
+ import ExpoModulesCore
+ internal import React
+@@ -10,40 +11,43 @@ public class CameraPermissionRequester: NSObject, EXPermissionsRequester {
+   }
+ 
+   public func requestPermissions(resolver resolve: @escaping EXPromiseResolveBlock, rejecter reject: EXPromiseRejectBlock) {
++    guard #available(iOS 7.0, *) else {
++      resolve(getPermissions())
++      return
++    }
+     AVCaptureDevice.requestAccess(for: AVMediaType.video) { [weak self] _ in
+       resolve(self?.getPermissions())
+     }
+   }
+ 
+   public func getPermissions() -> [AnyHashable: Any] {
+-    var systemStatus: AVAuthorizationStatus
+-    var status: EXPermissionStatus
+     let cameraUsageDescription = Bundle.main.object(forInfoDictionaryKey: "NSCameraUsageDescription")
+     if cameraUsageDescription == nil {
+       RCTFatal(RCTErrorWithMessage("""
+       This app is missing 'NSCameraUsageDescription', video services will fail. \
+       Ensure this key exists in the app's Info.plist
+       """))
+-      systemStatus = AVAuthorizationStatus.denied
+-    } else {
+-      systemStatus = AVCaptureDevice.authorizationStatus(for: AVMediaType.video)
++      return ["status": EXPermissionStatusDenied.rawValue]
++    }
++    guard #available(iOS 7.0, *) else {
++      return ["status": EXPermissionStatusGranted.rawValue]
+     }
++    return ["status": Self.status(of: AVCaptureDevice.authorizationStatus(for: AVMediaType.video)).rawValue]
++  }
+ 
++  @available(iOS 7.0, *)
++  private static func status(of systemStatus: AVAuthorizationStatus) -> EXPermissionStatus {
+     switch systemStatus {
+     case .authorized:
+-      status = EXPermissionStatusGranted
++      return EXPermissionStatusGranted
+     case .restricted,
+          .denied:
+-      status = EXPermissionStatusDenied
++      return EXPermissionStatusDenied
+     case .notDetermined:
+       fallthrough
+     @unknown default:
+-      status = EXPermissionStatusUndetermined
++      return EXPermissionStatusUndetermined
+     }
+-
+-    return [
+-      "status": status.rawValue
+-    ]
+   }
+ }
+ 
+@@ -60,6 +64,7 @@ public class MediaLibraryWriteOnlyPermissionRequester: DefaultMediaLibraryPermis
+     return "mediaLibraryWriteOnly"
+   }
+ 
++  @available(iOS 14.0, *)
+   override internal func accessLevel() -> PHAccessLevel {
+     return PHAccessLevel.addOnly
+   }
+@@ -79,18 +84,45 @@ public class DefaultMediaLibraryPermissionRequester: NSObject {}
+  * To prevent repeating the similar code for every MediaLibrary PermissionRequester (the only differences so far are
+  * aforementioned permissionType and accessLevel, while the latter can be easily overritten) I've extracted the code
+  * to this extension. I'm using as a mixin that implements major part of EXPermissionsRequester protocol.
++ *
++ * iOS 14 and later ask Photos for a read-write or add-only level. iOS 8 to 13 ask Photos for library access,
++ * and iOS 6 and 7 ask the assets library, which has no add-only level.
+  */
+ extension DefaultMediaLibraryPermissionRequester {
+   @objc
+   public func requestPermissions(resolver resolve: @escaping EXPromiseResolveBlock, rejecter reject: EXPromiseRejectBlock) {
+-    PHPhotoLibrary.requestAuthorization(for: self.accessLevel()) { [weak self] (_: PHAuthorizationStatus) in
+-      resolve(self?.getPermissions())
++    if #available(iOS 14.0, *) {
++      PHPhotoLibrary.requestAuthorization(for: self.accessLevel()) { [weak self] (_: PHAuthorizationStatus) in
++        resolve(self?.getPermissions())
++      }
++    } else if #available(iOS 8.0, *) {
++      PHPhotoLibrary.requestAuthorization { [weak self] (_: PHAuthorizationStatus) in
++        resolve(self?.getPermissions())
++      }
++    } else {
++      ALAssetsLibrary().enumerateGroups(withTypes: ALAssetsGroupType(ALAssetsGroupAll), using: { [weak self] group, _ in
++        if group == nil {
++          resolve(self?.getPermissions())
++        }
++      }, failureBlock: { [weak self] _ in
++        resolve(self?.getPermissions())
++      })
+     }
+   }
+ 
+   @objc
+   public func getPermissions() -> [AnyHashable: Any] {
+-    let authorizationStatus = PHPhotoLibrary.authorizationStatus(for: self.accessLevel())
++    if #available(iOS 14.0, *) {
++      return DefaultMediaLibraryPermissionRequester.permissions(for: PHPhotoLibrary.authorizationStatus(for: self.accessLevel()))
++    }
++    if #available(iOS 8.0, *) {
++      return DefaultMediaLibraryPermissionRequester.permissions(beforeIOS14: PHPhotoLibrary.authorizationStatus())
++    }
++    return DefaultMediaLibraryPermissionRequester.permissions(assetsLibrary: ALAssetsLibrary.authorizationStatus())
++  }
++
++  @available(iOS 14.0, *)
++  private static func permissions(for authorizationStatus: PHAuthorizationStatus) -> [AnyHashable: Any] {
+     var status: EXPermissionStatus
+     var scope: String
+ 
+@@ -117,6 +149,56 @@ extension DefaultMediaLibraryPermissionRequester {
+     ]
+   }
+ 
++  @available(iOS 8.0, *)
++  private static func permissions(beforeIOS14 authorizationStatus: PHAuthorizationStatus) -> [AnyHashable: Any] {
++    var status: EXPermissionStatus
++    var scope: String
++
++    switch authorizationStatus {
++    case .authorized:
++      status = EXPermissionStatusGranted
++      scope = "all"
++    case .denied, .restricted:
++      status = EXPermissionStatusDenied
++      scope = "none"
++    case .notDetermined:
++      fallthrough
++    @unknown default:
++      status = EXPermissionStatusUndetermined
++      scope = "none"
++    }
++
++    return [
++      "status": status.rawValue,
++      "accessPrivileges": scope
++    ]
++  }
++
++  private static func permissions(assetsLibrary authorizationStatus: ALAuthorizationStatus) -> [AnyHashable: Any] {
++    var status: EXPermissionStatus
++    var scope: String
++
++    switch authorizationStatus {
++    case .authorized:
++      status = EXPermissionStatusGranted
++      scope = "all"
++    case .denied, .restricted:
++      status = EXPermissionStatusDenied
++      scope = "none"
++    case .notDetermined:
++      fallthrough
++    @unknown default:
++      status = EXPermissionStatusUndetermined
++      scope = "none"
++    }
++
++    return [
++      "status": status.rawValue,
++      "accessPrivileges": scope
++    ]
++  }
++
++  @available(iOS 14.0, *)
+   @objc
+   internal func accessLevel() -> PHAccessLevel {
+     return PHAccessLevel.readWrite
