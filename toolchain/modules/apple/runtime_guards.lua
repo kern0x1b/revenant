@@ -94,8 +94,8 @@ GUARDS = {
         ["_OBJC_CLASS_$_UIPointerShape"] = "toolchain/src/swift-runtime/overlay/UIKit/RevenantUIKitOverlayShims.h (revenant_pointer_shape_class tests its address; UIKitPointer.swift reaches the class only through the helpers, which call it only when that test passes)",
         ["_UIContentSizeCategoryIsAccessibilityCategory"] = "stdlib/public/Darwin/UIKit/UIKit.swift:366 @ swiftlang/swift 71d85a7c28eed8f46241649a723ddf23989139c6 (swift-5.2.5-RELEASE)",
     },
-    ["UIKit"] = {
-        ["_UIMenuAutoFill"] = "Libraries/Text/TextInput/Singleline/RCTUITextField.mm:189-191 @ facebook/react-native 0.86.3",
+    ["TelegramUIFramework"] = {
+        ["_UIMenuAutoFill"] = "submodules/TelegramUI/Components/Wallet/WalletSendScreen/Sources/WalletSendAmountField.swift:243-244 @ telegram-build (builder.remove(menu: .autoFill) inside #available(iOS 17.0, *))",
     },
     ["libswiftos.dylib"] = {
         ["_revenant_os_log_named"] = "toolchain/src/swift-runtime/overlay/os/RevenantOSOverlayShims.h (revenant_os_log_linked tests its address; os.swift calls it only when that test passes)",

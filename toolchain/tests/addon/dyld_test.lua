@@ -254,81 +254,58 @@ function failures(opt)
     end
     local guards = import("apple.runtime_guards", {rootdir = opt.modules, anonymous = true})
     local declared = guards.guards()
-    local autofill = declared.UIKit and declared.UIKit._UIMenuAutoFill or ""
-    local autofill_cache = os.getenv("REVENANT_CACHE") or path.join(path.absolute(path.join(os.scriptdir(), "..", "..", "..")), ".cache")
-    local autofill_sources = os.files(path.join(autofill_cache, "xmake-global", ".xmake", "cache", "packages", "**", "react-native-codegen", "**", "source", "Libraries", "Text", "TextInput", "Singleline", "RCTUITextField.mm"))
-    local autofill_text = #autofill_sources > 0 and (io.readfile(autofill_sources[1]) or "") or ""
-    local autofill_lines = {}
-    for line in (autofill_text .. "\n"):gmatch("(.-)\n") do
-        table.insert(autofill_lines, line)
-    end
-    local autofill_first, autofill_last = autofill:match("RCTUITextField%.mm:(%d+)%-(%d+)")
-    local source_guard = autofill_first and autofill_lines[tonumber(autofill_first)] and autofill_lines[tonumber(autofill_first)]:find("@available(iOS 17.0, tvOS 17.0, *)", 1, true)
-    local source_use = autofill_last and autofill_lines[tonumber(autofill_last)] and autofill_lines[tonumber(autofill_last)]:find("removeMenuForIdentifier:UIMenuAutoFill", 1, true)
-    if not autofill:find("RCTUITextField.mm:189%-191", 1) or not source_guard or not source_use then
-        table.insert(found, "apple.runtime_guards must cite the React Native source line that guards UIMenuAutoFill, and that line must match the source")
+    local autofill = declared.TelegramUIFramework and declared.TelegramUIFramework._UIMenuAutoFill or ""
+    if not autofill:find("WalletSendAmountField.swift:243%-244", 1) or not autofill:find("#available(iOS 17.0", 1, true) then
+        table.insert(found, "apple.runtime_guards must record UIMenuAutoFill for the TelegramUIFramework image and cite the guarded use in its wallet send amount field")
     end
     local root = path.absolute(path.join(opt.modules, "..", ".."))
-    local swift_source = path.join(autofill_cache, "xmake-global", ".xmake", "cache", "packages", "2611", "s", "swift-runtime", "6.4.0", "source")
-    local source_checks = {
-        {"libswiftCore.dylib", "__dyld_is_objc_constant", "FoundationHelpers.mm", "SWIFT_RUNTIME_WEAK_CHECK"},
-        {"libswiftCore.dylib", "__objc_realizeClassFromSwift", "realize-a-pure-objc-class-before-objc-realize-class-from-swift.patch", "SWIFT_RUNTIME_WEAK_CHECK"},
-        {"libswiftCore.dylib", "_objc_addLoadImageFunc", "ImageInspectionMachO.cpp", "SWIFT_RUNTIME_WEAK_CHECK"},
-        {"libswiftCore.dylib", "_objc_readClassPair", "realize-a-class-before-objc-read-class-pair.patch", "SWIFT_RUNTIME_WEAK_CHECK"},
-        {"libswiftCore.dylib", "_objc_setHook_getClass", "MetadataLookup.cpp", "SWIFT_RUNTIME_WEAK_CHECK"},
-        {"libswiftCore.dylib", "_objc_setHook_getImageName", "ObjCRuntimeGetImageNameFromClass.mm", "objc_setHook_getImageName"},
-        {"libswiftCore.dylib", "_objc_setHook_lazyClassNamer", "Metadata.cpp", "SWIFT_RUNTIME_WEAK_CHECK"},
-        {"libswiftDispatch.dylib", "__dispatch_data_destructor_munmap", "the-overlay-of-dispatch-unmaps-its-data-where-a-release-before-7-has-none.patch", "_dispatch_data_destructor_munmap"},
-        {"libswiftDispatch.dylib", "__dispatch_source_type_data_replace", "the-overlay-of-dispatch-keeps-the-data-of-a-release-before-11s-replace-source.patch", "DATA_OR"},
-        {"libswiftDispatch.dylib", "__dispatch_source_type_memorypressure", "the-overlay-of-dispatch-makes-memory-pressure-a-release-before-8-reports.patch", "DATA_OR"},
-        {"libswiftFoundation.dylib", "__CFURLComponentsGetURLUserAllowedCharacterSet", "CharacterSet.swift", "if #available"},
-        {"libswiftFoundation.dylib", "__CFURLComponentsGetURLPasswordAllowedCharacterSet", "CharacterSet.swift", "if #available"},
-        {"libswiftFoundation.dylib", "__CFURLComponentsGetURLHostAllowedCharacterSet", "CharacterSet.swift", "if #available"},
-        {"libswiftFoundation.dylib", "__CFURLComponentsGetURLPathAllowedCharacterSet", "CharacterSet.swift", "if #available"},
-        {"libswiftFoundation.dylib", "__CFURLComponentsGetURLQueryAllowedCharacterSet", "CharacterSet.swift", "if #available"},
-        {"libswiftFoundation.dylib", "__CFURLComponentsGetURLFragmentAllowedCharacterSet", "CharacterSet.swift", "if #available"},
-    }
-    for _, check in ipairs(source_checks) do
-        local source_path = check[3]:endswith(".patch") and path.join(root, "packages", "s", "swift-runtime", "patches", "overlays", check[3]) or
-                           path.join(swift_source, "swift-source", "stdlib", "public", "runtime", check[3])
-        if check[3]:find("realize-a-", 1, true) then
-            source_path = path.join(root, "packages", "s", "swift-runtime", "patches", check[3])
-        end
-        if check[3] == "FoundationHelpers.mm" then
-            source_path = path.join(swift_source, "swift-source", "stdlib", "public", "stubs", check[3])
-        end
-        if check[3] == "ObjCRuntimeGetImageNameFromClass.mm" then
-            source_path = path.join(swift_source, "swift-source", "stdlib", "public", "runtime", check[3])
-        end
-        if check[3] == "Metadata.cpp" or check[3] == "MetadataLookup.cpp" then
-            source_path = path.join(swift_source, "swift-source", "stdlib", "public", "runtime", check[3])
-        end
-        if check[3] == "CharacterSet.swift" then
-            source_path = path.join(swift_source, "overlays", "stdlib", "public", "Darwin", "Foundation", check[3])
-        end
-        if check[3] == "ImageInspectionMachO.cpp" then
-            source_path = path.join(swift_source, "swift-source", "stdlib", "public", "runtime", check[3])
-        end
-        local record = declared[check[1]] and declared[check[1]][check[2]] or ""
-        local cited_source = record:find(check[3], 1, true)
-        local number = cited_source and tonumber(record:sub(cited_source + #check[3]):match(":(%d+)"))
-        local source_text = io.readfile(source_path) or ""
-        local lines = {}
-        for line in (source_text .. "\n"):gmatch("(.-)\n") do
-            table.insert(lines, line)
-        end
-        local matched = false
-        if number then
-            local last = tonumber(record:match(":" .. number .. "%-([0-9]+)")) or number
-            for index = number, last do
-                if lines[index] and lines[index]:find(check[4], 1, true) then
-                    matched = true
+    local source_roots = {packages = true, toolchain = true, frameworks = true, docs = true, tools = true,
+                          addons = true, emulator = true, ["agent-skills"] = true}
+    local local_citations, external_citations = 0, 0
+    for library, rows in pairs(declared) do
+        for symbol, citation in pairs(rows) do
+            local cited = false
+            local at = 1
+            while true do
+                local first, last = citation:find("[%w_%-%.]+/[%w_%-%./]*[%w_%-%.]", at)
+                if not first then
+                    break
+                end
+                local token = citation:sub(first, last)
+                at = last + 1
+                if source_roots[token:match("^([%w_%-]+)/")] then
+                    cited = true
+                    local rest = citation:sub(last + 1)
+                    local low, high = rest:match("^:(%d+)%-(%d+)")
+                    if not low then
+                        low = rest:match("^:(%d+)")
+                    end
+                    high = high or low
+                    local text = io.readfile(path.join(root, token))
+                    if not text then
+                        table.insert(found, "apple.runtime_guards cites " .. token .. " for " .. symbol .. ", which the repository does not hold")
+                    elseif low then
+                        local lines = 1
+                        for _ in text:gmatch("\n") do
+                            lines = lines + 1
+                        end
+                        if text:sub(-1) == "\n" then
+                            lines = lines - 1
+                        end
+                        if tonumber(low) < 1 or tonumber(high) > lines then
+                            table.insert(found, "apple.runtime_guards cites " .. token .. ":" .. low .. "-" .. high .. " for " .. symbol .. ", which is outside the " .. lines .. " lines of that file")
+                        end
+                    end
+                    local_citations = local_citations + 1
                 end
             end
+            if not cited then
+                external_citations = external_citations + 1
+            end
         end
-        if not matched or not source_text:find(check[2]:sub(2), 1, true) then
-            table.insert(found, "apple.runtime_guards source citation for " .. check[2] .. " must name a real source line containing its weak check or fallback")
-        end
+    end
+    if local_citations < 20 or external_citations < 20 then
+        table.insert(found, "apple.runtime_guards' citations were read over: " .. local_citations .. " repository paths and " .. external_citations .. " external ones")
     end
     local mach = {"_mach_port_destruct", "_mach_port_guard", "_mach_port_unguard"}
     for _, symbol in ipairs(mach) do
