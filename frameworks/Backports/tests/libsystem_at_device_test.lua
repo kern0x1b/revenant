@@ -15,8 +15,6 @@ function main()
     local linker = first(path.join(packages, "l", "ld64", "956.6", "**", "bin", "ld"))
     local ldid = first(path.join(packages, "l", "ldid", "2.1.5-procursus7+23.gaf86971", "**", "bin", "ldid"))
     local out = workspace.run("backports-tests", "LibSystemAtDevice")
-    local source = path.join(backports, "src", "libSystem")
-    local compat = path.join(backports, "..", "..", "toolchain", "src", "apple-compat")
     local library = path.join(backports, "..", "..", "build", "iphoneos", "armv7", "release", "libSystemBackports.dylib")
     local test_library = path.join(out, "libSystemBackports.dylib")
     os.cp(library, test_library)
@@ -24,11 +22,9 @@ function main()
     local binary = path.join(out, "libsystem_at")
     local fixture = path.join(backports, "tests", "libsystem_at", "main.c")
     os.vrunv(clang, {"-target", "armv7-apple-ios6.0", "-miphoneos-version-min=6.0", "-isysroot", sdk, "-DREVENANT_DEVICE",
-                     "-std=gnu11", "-Wall", "-Werror", "-Wno-incompatible-sysroot", "-I", path.join(backports, "src"), "-I", source,
-                     "-I", path.join(compat, "include"), "-L", out, "-lSystemBackports", "-fuse-ld=" .. linker,
-                     "-Wl,-no_encryption", "-o", binary, fixture, path.join(source, "RevenantAtPath.c"),
-                     path.join(source, "RevenantAtPaths.c"), path.join(source, "RevenantAttributeTimes.c"),
-                     path.join(source, "RevenantClockGetRes.c"), path.join(compat, "src", "clock_getres.c")})
+                     "-std=gnu11", "-Wall", "-Werror", "-Wno-incompatible-sysroot",
+                     "-L", out, "-lSystemBackports", "-fuse-ld=" .. linker,
+                     "-Wl,-no_encryption", "-o", binary, fixture})
     os.vrunv(ldid, {"-S", binary})
     local settings = device.bind(os.projectdir())
     device.run(settings, "if [ -d /var/tmp/revenant-at-tg-sys ]; then rm -f /var/tmp/revenant-at-tg-sys/link /var/tmp/revenant-at-tg-sys/file /var/tmp/revenant-at-tg-sys/host-file /var/tmp/revenant-at-tg-sys/host-link && rmdir /var/tmp/revenant-at-tg-sys; fi")

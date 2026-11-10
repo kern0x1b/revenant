@@ -1,4 +1,5 @@
 #include "../revenant_impl.h"
+#include <errno.h>
 #include <limits.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -17,6 +18,10 @@ REVENANT_LIBSYSTEM_EXPORT ssize_t BACKPORT_IMPL(readlinkat)(int dirfd, const cha
 
 REVENANT_LIBSYSTEM_EXPORT int BACKPORT_IMPL(symlinkat)(const char *target, int dirfd, const char *path)
 {
+    if (target == NULL) {
+        errno = EFAULT;
+        return -1;
+    }
     char full[PATH_MAX];
     if (revenant_absolute_path(dirfd, path, full) == -1) {
         return -1;

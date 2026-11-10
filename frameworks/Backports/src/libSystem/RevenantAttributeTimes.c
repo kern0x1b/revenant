@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <limits.h>
 #include <string.h>
+#include <sys/attr.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <time.h>
@@ -26,105 +27,109 @@ static int valid_times(const struct timespec times[2])
     return 1;
 }
 
-static int make_times(const struct timespec times[2], const struct stat *status, struct timeval output[2])
-{
-    struct timeval now;
-    if (times == NULL || times[0].tv_nsec == UTIME_NOW || times[1].tv_nsec == UTIME_NOW) {
-        if (gettimeofday(&now, NULL) == -1) {
-            return -1;
-        }
-    }
-    for (size_t index = 0; index < 2; index++) {
-        if (times == NULL || times[index].tv_nsec == UTIME_NOW) {
-            output[index] = now;
-        } else if (times[index].tv_nsec == UTIME_OMIT) {
-            output[index].tv_sec = index == 0 ? status->st_atimespec.tv_sec : status->st_mtimespec.tv_sec;
-            output[index].tv_usec = (index == 0 ? status->st_atimespec.tv_nsec : status->st_mtimespec.tv_nsec) / 1000;
-        } else {
-            output[index].tv_sec = times[index].tv_sec;
-            output[index].tv_usec = times[index].tv_nsec / 1000;
-        }
-    }
-    return 0;
-}
-
 static int omit_both(const struct timespec times[2])
 {
     return times != NULL && times[0].tv_nsec == UTIME_OMIT && times[1].tv_nsec == UTIME_OMIT;
 }
 
-static int owned_or_writable_fd(int fd, const struct stat *status)
+static size_t build_attributes(struct attrlist *list, struct timespec buffer[2], const struct timespec times[2])
 {
-    if (geteuid() == 0 || status->st_uid == geteuid()) {
-        return 1;
+    memset(list, 0, sizeof *list);
+    list->bitmapcount = ATTR_BIT_MAP_COUNT;
+    struct timeval now;
+    if (times == NULL || times[0].tv_nsec == UTIME_NOW || times[1].tv_nsec == UTIME_NOW) {
+        if (gettimeofday(&now, NULL) == -1) {
+            return (size_t)-1;
+        }
     }
-    int mode = fcntl(fd, F_GETFL);
-    if (mode != -1 && (mode & O_ACCMODE) != O_RDONLY) {
-        return 1;
+    size_t count = 0;
+    if (times == NULL || times[1].tv_nsec != UTIME_OMIT) {
+        list->commonattr |= ATTR_CMN_MODTIME;
+        if (times == NULL || times[1].tv_nsec == UTIME_NOW) {
+            buffer[count].tv_sec = now.tv_sec;
+            buffer[count].tv_nsec = now.tv_usec * 1000;
+        } else {
+            buffer[count] = times[1];
+        }
+        count++;
     }
-    errno = EPERM;
-    return 0;
+    if (times == NULL || times[0].tv_nsec != UTIME_OMIT) {
+        list->commonattr |= ATTR_CMN_ACCTIME;
+        if (times == NULL || times[0].tv_nsec == UTIME_NOW) {
+            buffer[count].tv_sec = now.tv_sec;
+            buffer[count].tv_nsec = now.tv_usec * 1000;
+        } else {
+            buffer[count] = times[0];
+        }
+        count++;
+    }
+    return count;
+}
+
+static int set_link_times(const char *path, struct attrlist *list, const struct timespec buffer[2], size_t size)
+{
+    int fd = open(path, O_RDONLY | O_SYMLINK);
+    if (fd == -1) {
+        return -1;
+    }
+    int result = fsetattrlist(fd, list, (void *)buffer, size, 0);
+    int saved = errno;
+    close(fd);
+    errno = saved;
+    return result;
 }
 
 REVENANT_LIBSYSTEM_EXPORT int BACKPORT_IMPL(futimens)(int fd, const struct timespec times[2])
 {
-    if (!valid_times(times)) {
-        return -1;
-    }
     struct stat status;
     if (fstat(fd, &status) == -1) {
         return -1;
     }
-    if (omit_both(times)) {
-        return owned_or_writable_fd(fd, &status) ? 0 : -1;
-    }
-    struct timeval values[2];
-    if (make_times(times, &status, values) == -1) {
+    if (!valid_times(times)) {
         return -1;
     }
-    return futimes(fd, values);
+    if (omit_both(times)) {
+        return 0;
+    }
+    struct attrlist list;
+    struct timespec buffer[2];
+    size_t count = build_attributes(&list, buffer, times);
+    if (count == (size_t)-1) {
+        return -1;
+    }
+    return fsetattrlist(fd, &list, buffer, count * sizeof(struct timespec), 0);
 }
 
 REVENANT_LIBSYSTEM_EXPORT int BACKPORT_IMPL(utimensat)(int dirfd, const char *path, const struct timespec times[2], int flags)
 {
-    if (flags & ~AT_SYMLINK_NOFOLLOW) {
+    char full[PATH_MAX];
+    if (revenant_absolute_path(dirfd, path, full) == -1) {
+        return -1;
+    }
+    int nofollow = (flags & AT_SYMLINK_NOFOLLOW) != 0;
+    struct stat status;
+    if ((nofollow ? lstat(full, &status) : stat(full, &status)) == -1) {
+        return -1;
+    }
+    if ((flags & ~AT_SYMLINK_NOFOLLOW) != 0) {
         errno = EINVAL;
         return -1;
     }
     if (!valid_times(times)) {
         return -1;
     }
-    char full[PATH_MAX];
-    if (revenant_absolute_path(dirfd, path, full) == -1) {
-        return -1;
-    }
-    struct stat status;
-    int nofollow = (flags & AT_SYMLINK_NOFOLLOW) != 0;
-    if ((nofollow ? lstat(full, &status) : stat(full, &status)) == -1) {
-        return -1;
-    }
     if (omit_both(times)) {
-        if (nofollow && (geteuid() != 0 && status.st_uid != geteuid())) {
-            errno = EPERM;
-            return -1;
-        }
-        if (!nofollow && geteuid() != 0 && status.st_uid != geteuid() && access(full, W_OK) == -1) return -1;
         return 0;
     }
-    struct timeval values[2];
-    if (make_times(times, &status, values) == -1) {
+    struct attrlist list;
+    struct timespec buffer[2];
+    size_t count = build_attributes(&list, buffer, times);
+    if (count == (size_t)-1) {
         return -1;
     }
-    if (!nofollow || !S_ISLNK(status.st_mode)) {
-        return utimes(full, values);
+    size_t size = count * sizeof(struct timespec);
+    if (nofollow && S_ISLNK(status.st_mode)) {
+        return set_link_times(full, &list, buffer, size);
     }
-    int fd = open(full, O_RDONLY | O_SYMLINK);
-    if (fd == -1) {
-        return -1;
-    }
-    int result = futimes(fd, values);
-    int saved = errno;
-    close(fd);
-    errno = saved;
-    return result;
+    return setattrlist(full, &list, buffer, size, 0);
 }

@@ -11,6 +11,7 @@ function main()
                         "-I", path.join(compat, "include"),
                         "-o", binary, fixture, path.join(source, "RevenantAtPath.c"), path.join(source, "RevenantAtPaths.c"),
                         path.join(source, "RevenantAttributeTimes.c"), path.join(source, "RevenantClockGetRes.c"),
+                        path.join(source, "RevenantAvailability.c"),
                         path.join(compat, "src", "clock_getres.c")})
     local tree = path.join(out, "tree")
     os.tryrm(tree)
