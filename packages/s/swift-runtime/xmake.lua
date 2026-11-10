@@ -183,7 +183,7 @@ package("swift-runtime")
                                           "-sdk", toolchain:config("sdkdir"),
                                           "-Xclang-linker", "-nostdlib++"}, linker_version, {
                                           "-L" .. libcxx:installdir("lib"), "-lc++", "-lc++abi"}, shim_library)
-        local linked = table.join({"-nostdlib++", "-L" .. libcxx:installdir("lib"), "-lc++", "-lc++abi"}, shim_library)
+        local linked = table.join({"-nostdlib++", "-L" .. libcxx:installdir("lib"), "-lc++", "-lc++abi", "-Wl,-headerpad_max_install_names"}, shim_library)
 
         local function toolchain_file(name, extra)
             extra = extra or {}
@@ -276,7 +276,7 @@ package("swift-runtime")
                  path.join(darwin_module, package:arch() .. "-apple-ios.swiftmodule"),
                  "-emit-object", "-module-link-name", "swiftDarwin", "-o", path.join(generated, "Darwin.o")}, overlay_sources))
         os.vrunv(swiftc, table.join(overlay_flags, {"-emit-library", "-o", path.join(install, "libswiftDarwin.dylib"),
-                 path.join(generated, "Darwin.o"), "-Xlinker", "-install_name", "-Xlinker", "@rpath/libswiftDarwin.dylib",
+                 path.join(generated, "Darwin.o"), "-Xlinker", "-install_name", "-Xlinker", "@rpath/libswiftDarwin.dylib", "-Xlinker", "-headerpad_max_install_names",
                  "-L" .. install, "-lswiftCore"}))
         offer(path.join(install, "Darwin.swiftmodule"))
         offer(path.join(install, "libswiftDarwin.dylib"))
@@ -312,7 +312,7 @@ package("swift-runtime")
                      path.join(module, package:arch() .. "-apple-ios.swiftmodule"),
                      "-emit-object", "-module-link-name", "swift" .. name, "-o", object}, overlay_sources))
             os.vrunv(swiftc, table.join(flags, {"-emit-library", "-o", path.join(install, "libswift" .. name .. ".dylib"),
-                     object, table.unpack(objects or {})}, {"-Xlinker", "-install_name", "-Xlinker", "@rpath/libswift" .. name .. ".dylib",
+                     object, table.unpack(objects or {})}, {"-Xlinker", "-install_name", "-Xlinker", "@rpath/libswift" .. name .. ".dylib", "-Xlinker", "-headerpad_max_install_names",
                      "-L" .. install, "-lswiftCore"}, linked))
             offer(module)
             offer(path.join(install, "libswift" .. name .. ".dylib"))
