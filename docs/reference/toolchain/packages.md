@@ -78,13 +78,16 @@ Inside the project a target depends on a library with `add_deps`. The configure 
 ### Packaging
 
 `./xmakew deb -P .` writes one package for them, `org.revenant.backports_<version>_iphoneos-arm.deb`: every Backports
-library built for the configured architecture, installed under `/usr/lib/revenant/org.revenant.backports/` with the
-FFmpeg HEVC decoder those libraries link, and the Vision text models under `/var/lib/revenant/tessdata/{fast,best}`.
-Its documents are the licences of the tessdata models and of the decoder, under `/usr/share/doc/org.revenant.backports/licenses/`.
+library built for the configured architecture, installed under `/usr/lib/revenant/org.revenant.backports/`, and the Vision text
+models under `/var/lib/revenant/tessdata/{fast,best}`. The FFmpeg HEVC decoder those libraries link is a package of its own,
+`org.revenant.ffmpeg-hevc-<build>`, installed under `/usr/lib/revenant/org.revenant.ffmpeg-hevc-<build>/`, which the Backports
+package names in `Depends` at its exact version; `./xmakew deb -P .` writes it beside the Backports package. Its documents are the
+licences of the tessdata models and of the decoder, under `/usr/share/doc/org.revenant.backports/licenses/`.
 The CI check of the package, `./xmakew l -P . toolchain/tools/deb_check.lua build <demo> org.revenant.backports`, accepts
 exactly these files and no others, and refuses any other by name: the Backports libraries under
 `/usr/lib/revenant/org.revenant.backports/`; the C++ runtime, `libc++.1.dylib` and `libc++abi.1.dylib`, both or neither;
-the FFmpeg decoder, `libavcodec.62.dylib` and `libavutil.60.dylib`, which the package must carry; the Vision text models
+the FFmpeg decoder is not carried: the package must depend on an `org.revenant.ffmpeg-hevc-*` package at its exact version, and
+that package must carry `libavcodec.62.dylib` and `libavutil.60.dylib` under its own folder; the Vision text models
 that `toolchain/modules/apple/vision_text.lua` lists, 28 language codes at each of the `fast` and `best` levels, under
 `/var/lib/revenant/tessdata/{fast,best}`; and the two licences, `licenses/tessdata/LICENSE` and `licenses/ffmpeg-hevc/LICENSE.md`.
 The sonames of the decoder are the ones of FFmpeg 8.1.2 and change with it, so a new FFmpeg changes that list in `deb_check.lua`.

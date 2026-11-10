@@ -264,10 +264,14 @@ function backports_deb(signer)
     end
     local all, identities = shared_packages(signer)
     local targets = project_backports()
-    local linked, licenses = linked_packages(targets)
+    local linked, licenses, linked_identities = linked_packages(targets)
+    table.join2(all, linked)
+    for leaf, identity in pairs(linked_identities) do
+        identities[leaf] = identity
+    end
     local models = vision_text_installed(targets)
     return backports_package.ensure({targets = targets, ldid = ldid(signer), packages = all, provided = identities,
-                                     carried = table.join(backports_runtime(targets), linked), models = models.models,
+                                     carried = backports_runtime(targets), models = models.models,
                                      licenses = table.join(licenses, {{component = "tessdata", file = models.license}}),
                                      depends = webkit_depends(signer),
                                      builddir = path.join(config.builddir(), ".revenant", "backports")})
@@ -322,9 +326,13 @@ function vision_text_installed(targets)
 end
 
 function linked_packages(targets)
-    local all, seen = {}, {}
+    local all, seen, identities = {}, {}, {}
     for _, target in ipairs(targets) do
-        for _, package in ipairs((shared_packages(target, {LINKED}))) do
+        local packages, found = shared_packages(target, {LINKED})
+        for leaf, identity in pairs(found) do
+            identities[leaf] = identity
+        end
+        for _, package in ipairs(packages) do
             if not seen[package.name] then
                 seen[package.name] = true
                 table.insert(all, package)
@@ -334,16 +342,13 @@ function linked_packages(targets)
     if #all > 1 then
         raise("the Backports libraries link %d FFmpeg HEVC decoders, %s; the package set carries one", #all, table.concat(table.imap(all, function (_, package) return package.name end), " and "))
     end
-    local libraries, licenses = {}, {}
+    local licenses = {}
     for _, package in ipairs(all) do
-        for _, file in ipairs(os.files(path.join(package.root, staged.folder_of(package.name), "*.dylib"))) do
-            table.insert(libraries, {leaf = path.filename(file), file = file})
-        end
         for _, file in ipairs(os.files(path.join(package.root, "usr", "share", "doc", package.name, "*"))) do
             table.insert(licenses, {component = LINKED, file = file})
         end
     end
-    return libraries, licenses
+    return all, licenses, identities
 end
 
 function backports_runtime(targets)
