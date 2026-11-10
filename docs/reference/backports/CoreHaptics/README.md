@@ -53,7 +53,7 @@ measurements, and the backport does not claim one.
 The vibration itself goes through `AudioServicesPlaySystemSoundWithVibration` (AudioToolbox, `dlsym`) with the
 sound ID `kSystemSoundID_Vibrate`, a `VibePattern` array of millisecond durations that alternate on and off and
 start with on, and an `Intensity` value. This is the same call the UIKit feedback generators use
-([the generators](../../UIKit/FeedbackGenerators.md)).
+([the generators](../UIKit/FeedbackGenerators.md)).
 
 The threshold of 0.5 is a choice and not a measurement: the motor has one strength, so a haptic the phone cannot
 play weakly is not played at all rather than played at full strength. Whether iOS 6 uses the `Intensity` key is not
