@@ -12,6 +12,7 @@ typedef struct {
 
 NSTimeInterval revenant_apple_pattern_duration(const RevenantOracleEvent *events, int count);
 NSDictionary *revenant_apple_pattern_dictionary(const RevenantOracleEvent *events, int count);
+BOOL revenant_apple_parse_dictionary(NSDictionary *dictionary, NSTimeInterval *duration, NSString **domain, NSInteger *code);
 NSString *revenant_apple_event_type_transient(void);
 NSString *revenant_apple_event_type_continuous(void);
 NSString *revenant_apple_parameter_intensity(void);

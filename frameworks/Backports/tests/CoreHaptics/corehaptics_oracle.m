@@ -35,6 +35,19 @@ NSDictionary *revenant_apple_pattern_dictionary(const RevenantOracleEvent *event
     return [pattern exportDictionaryAndReturnError:NULL];
 }
 
+BOOL revenant_apple_parse_dictionary(NSDictionary *dictionary, NSTimeInterval *duration, NSString **domain, NSInteger *code)
+{
+    NSError *error = nil;
+    CHHapticPattern *pattern = [[CHHapticPattern alloc] initWithDictionary:dictionary error:&error];
+    if (domain)
+        *domain = error.domain;
+    if (code)
+        *code = error.code;
+    if (duration)
+        *duration = pattern ? pattern.duration : -1.0;
+    return pattern != nil;
+}
+
 NSString *revenant_apple_event_type_transient(void)
 {
     return CHHapticEventTypeHapticTransient;

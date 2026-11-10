@@ -15,6 +15,8 @@
 #define CHHapticEventParameterIDHapticSharpness CHHapticEventParameterIDHapticSharpnessRevenant
 #define CHHapticDynamicParameterIDHapticIntensityControl CHHapticDynamicParameterIDHapticIntensityControlRevenant
 #define CHHapticDynamicParameterIDHapticSharpnessControl CHHapticDynamicParameterIDHapticSharpnessControlRevenant
+#undef BACKPORT_IMPL
+#define BACKPORT_IMPL(name) name
 #endif
 
 #import <Foundation/Foundation.h>

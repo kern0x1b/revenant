@@ -9,6 +9,11 @@ static NSString *revenant_haptic_event_type(NSString *text)
     return nil;
 }
 
+static NSTimeInterval revenant_haptic_seconds(id value)
+{
+    return [value isKindOfClass:[NSNumber class]] ? [value doubleValue] : 0.0;
+}
+
 @implementation CHHapticPattern
 {
     NSArray<CHHapticEvent *> *_events;
@@ -56,14 +61,19 @@ static NSString *revenant_haptic_event_type(NSString *text)
 {
     id version = patternDict[CHHapticPatternKeyVersion];
     id listing = patternDict[CHHapticPatternKeyPattern];
-    if (![version isKindOfClass:[NSNumber class]] || ![listing isKindOfClass:[NSArray class]]) {
+    if (![listing isKindOfClass:[NSArray class]]) {
         if (outError)
             *outError = revenant_corehaptics_error(CHHapticErrorCodeInvalidPatternDictionary);
         return nil;
     }
-    if ([version unsignedIntegerValue] != 1) {
+    if (version != nil && ![version isKindOfClass:[NSNumber class]]) {
         if (outError)
             *outError = revenant_corehaptics_error(CHHapticErrorCodeInvalidPatternDictionary);
+        return nil;
+    }
+    if (version != nil && [version unsignedIntegerValue] != 1) {
+        if (outError)
+            *outError = revenant_corehaptics_error(CHHapticErrorCodeNotSupported);
         return nil;
     }
     NSMutableArray<CHHapticEvent *> *events = [NSMutableArray array];
@@ -87,14 +97,25 @@ static NSString *revenant_haptic_event_type(NSString *text)
                     *outError = revenant_corehaptics_error(CHHapticErrorCodeInvalidPatternDictionary);
                 return nil;
             }
-            NSString *type = revenant_haptic_event_type(event[CHHapticPatternKeyEventType]);
-            id duration = event[CHHapticPatternKeyEventDuration];
-            id time = event[CHHapticPatternKeyTime];
-            if (!type || ![duration isKindOfClass:[NSNumber class]] || ![time isKindOfClass:[NSNumber class]]) {
+            id type = event[CHHapticPatternKeyEventType];
+            if (![type isKindOfClass:[NSString class]]) {
                 if (outError)
-                    *outError = revenant_corehaptics_error(CHHapticErrorCodeInvalidPatternDictionary);
+                    *outError = revenant_corehaptics_error(CHHapticErrorCodeBadEventEntry);
                 return nil;
             }
+            NSString *eventType = revenant_haptic_event_type(type);
+            if (!eventType) {
+                if (outError)
+                    *outError = revenant_corehaptics_error(CHHapticErrorCodeOperationNotPermitted);
+                return nil;
+            }
+            id time = event[CHHapticPatternKeyTime];
+            if (time == nil) {
+                if (outError)
+                    *outError = revenant_corehaptics_error(CHHapticErrorCodeInvalidEventTime);
+                return nil;
+            }
+            id duration = event[CHHapticPatternKeyEventDuration];
             NSMutableArray<CHHapticEventParameter *> *eventParameters = [NSMutableArray array];
             id listed = event[CHHapticPatternKeyEventParameters];
             if (listed != nil) {
@@ -106,7 +127,7 @@ static NSString *revenant_haptic_event_type(NSString *text)
                 for (id parameter in listed) {
                     if (![parameter isKindOfClass:[NSDictionary class]]) {
                         if (outError)
-                            *outError = revenant_corehaptics_error(CHHapticErrorCodeInvalidPatternDictionary);
+                            *outError = revenant_corehaptics_error(CHHapticErrorCodeBadParameterEntry);
                         return nil;
                     }
                     NSDictionary *fields = parameter;
@@ -114,17 +135,17 @@ static NSString *revenant_haptic_event_type(NSString *text)
                     id value = fields[CHHapticPatternKeyParameterValue];
                     if (![identifier isKindOfClass:[NSString class]] || ![value isKindOfClass:[NSNumber class]]) {
                         if (outError)
-                            *outError = revenant_corehaptics_error(CHHapticErrorCodeInvalidPatternDictionary);
+                            *outError = revenant_corehaptics_error(CHHapticErrorCodeBadParameterEntry);
                         return nil;
                     }
                     [eventParameters addObject:[[CHHapticEventParameter alloc] initWithParameterID:identifier
                                                                                             value:[value floatValue]]];
                 }
             }
-            [events addObject:[[CHHapticEvent alloc] initWithEventType:type
+            [events addObject:[[CHHapticEvent alloc] initWithEventType:eventType
                                                                 parameters:eventParameters
-                                                              relativeTime:[time doubleValue]
-                                                                  duration:[duration doubleValue]]];
+                                                              relativeTime:revenant_haptic_seconds(time)
+                                                                  duration:revenant_haptic_seconds(duration)]];
             continue;
         }
         NSDictionary *parameter = dictionary[CHHapticPatternKeyParameter];
@@ -137,15 +158,14 @@ static NSString *revenant_haptic_event_type(NSString *text)
             id identifier = parameter[CHHapticPatternKeyParameterID];
             id value = parameter[CHHapticPatternKeyParameterValue];
             id time = parameter[CHHapticPatternKeyTime];
-            if (![identifier isKindOfClass:[NSString class]] || ![value isKindOfClass:[NSNumber class]] ||
-                ![time isKindOfClass:[NSNumber class]]) {
+            if (![identifier isKindOfClass:[NSString class]] || ![value isKindOfClass:[NSNumber class]] || time == nil) {
                 if (outError)
-                    *outError = revenant_corehaptics_error(CHHapticErrorCodeInvalidPatternDictionary);
+                    *outError = revenant_corehaptics_error(CHHapticErrorCodeBadParameterEntry);
                 return nil;
             }
             [parameters addObject:[[CHHapticDynamicParameter alloc] initWithParameterID:identifier
                                                                                    value:[value floatValue]
-                                                                            relativeTime:[time doubleValue]]];
+                                                                            relativeTime:revenant_haptic_seconds(time)]];
             continue;
         }
         if (outError)
@@ -187,8 +207,7 @@ static NSString *revenant_haptic_event_type(NSString *text)
         }
         NSMutableDictionary *fields = [NSMutableDictionary dictionary];
         fields[CHHapticPatternKeyEventType] = event.type;
-        if (event.duration > 0.0)
-            fields[CHHapticPatternKeyEventDuration] = @(event.duration);
+        fields[CHHapticPatternKeyEventDuration] = @(event.duration);
         if (eventParameters.count > 0)
             fields[CHHapticPatternKeyEventParameters] = eventParameters;
         fields[CHHapticPatternKeyTime] = @(event.relativeTime);
@@ -201,7 +220,7 @@ static NSString *revenant_haptic_event_type(NSString *text)
     }
     if (outError)
         *outError = nil;
-    return @{CHHapticPatternKeyVersion: @1, CHHapticPatternKeyPattern: listing};
+    return @{CHHapticPatternKeyPattern: listing};
 }
 
 - (NSTimeInterval)duration
