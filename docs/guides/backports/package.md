@@ -1,6 +1,6 @@
 # Write and install the Backports package
 
-`org.revenant.backports` holds every Backports library of the checkout, and the Swift runtime and libc++ packages it names in `Depends`. It is written by the root project only, and the root project has to be configured as a whole for iPhoneOS armv7: the package carries WebKit's engine (`WebKitBackports` names it, so the writer needs `WebKitEngine`), and `swift-runtime` and `libcxx` are required only by that configuration. A configuration with `--component=Backports` builds every library but cannot write the package, because it has no `WebKitEngine` target to hold the engine.
+`org.revenant.backports` holds every Backports library of the checkout. It is written by the root project only, and the root project has to be configured as a whole for iPhoneOS armv7: the package carries WebKit's engine (`WebKitBackports` names it, so the writer needs `WebKitEngine`), which it names in `Depends` together with the libc++ package that engine needs. The Backports libraries themselves do not link the Swift runtime, so `org.revenant.swift-runtime-*` is not in its `Depends`. A configuration with `--component=Backports` builds every library but cannot write the package, because it has no `WebKitEngine` target to hold the engine.
 
 Run every command from the top of the checkout. In a linked worktree first make its private cache as [the machine guide](../machine.md#a-private-cache) says, and set `REVENANT_CACHE` to that folder for each command below.
 
@@ -26,7 +26,9 @@ export REVENANT_DEVICE_HOLDER=<name>
 ```
 
 The version the phone now has is the one `dpkg -l | grep revenant` lists, run on the phone through `device run` with the same claim.
-Install the Swift runtime package before `org.revenant.backports`, since the latter `Depends` on it at its exact version.
+Install the packages a package `Depends` on before it, at the exact versions `dpkg-deb -f build/<package>.deb Depends` prints: the libc++
+package, then `org.revenant.webkit-engine-*`, then `org.revenant.backports`. `dpkg --install` does not fetch them, so a missing one leaves
+the package unconfigured.
 
 ## What not to run
 
@@ -37,8 +39,6 @@ Install the Swift runtime package before `org.revenant.backports`, since the lat
 
 ## Status
 
-The probes of `frameworks/Backports/tests/device_probe` link (`BackportsDeviceProbe` and the others that compile `src/Metal` or
-`src/MetalPerformanceShaders` into their own executable), and the component configure and build run. The whole configure above does
-not finish on this machine yet: it needs the `libsql` package, which builds the Rust nightly its recipe names, and the `swift-runtime`
-and `webkit-engine` packages at the keys of the whole configuration, for which no prebuilt release exists. Until those build, `deb -P .`
-cannot write the package, and the sequence above is what the writer runs, not a result that has been run to its end.
+The whole configure above completes on this machine, and `./xmakew deb -P .` writes `org.revenant.backports` with the Swift runtime,
+libc++ and WebKit engine packages beside it. The probes of `frameworks/Backports/tests/device_probe` link (`BackportsDeviceProbe` and the
+others that compile `src/Metal` or `src/MetalPerformanceShaders` into their own executable), and the component configure and build run.

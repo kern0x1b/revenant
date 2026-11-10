@@ -378,6 +378,10 @@ local function objc_model(rows, implemented, unavailable)
     return classes, methods
 end
 
+local function linkage(fallback)
+    return fallback and 'visibility("default")' or 'weak, visibility("default")'
+end
+
 local function forwarder(index, entry)
     local types, decls, args = {}, {}, {}
     for position, ptype in ipairs(entry.params) do
@@ -395,7 +399,7 @@ local function forwarder(index, entry)
     table.join2(lines, {
         string.format("typedef %s revenant_fn_%d(%s);", entry.ret, index, list),
         string.format("static void *revenant_slot_%d;", index),
-        string.format('__attribute__((weak, visibility("default"))) %s revenant_c_%d(%s) __asm__(%s);', entry.ret, index, params, quoted("_" .. entry.symbol)),
+        string.format("__attribute__((%s)) %s revenant_c_%d(%s) __asm__(%s);", linkage(entry.fallback), entry.ret, index, params, quoted("_" .. entry.symbol)),
         string.format("%s revenant_c_%d(%s)", entry.ret, index, params),
         "{",
         string.format("    void *target = revenant_backports_c_target(&revenant_slot_%d, %s, %s);", index, quoted(entry.image), quoted(entry.symbol)),
@@ -580,8 +584,8 @@ local function objc_source(model, umbrella, alias)
     end
     for _, global in ipairs(model.globals) do
         table.insert(lines, string.format("typedef %s;", declarator(typedef_type(global.type), "revenant_type_" .. global.name)))
-        table.insert(lines, string.format('__attribute__((weak, visibility("default"))) __typeof_unqual__(revenant_type_%s) revenant_global_%s __asm__(%s) = {0};',
-            global.name, global.name, quoted("_" .. global.name)))
+        table.insert(lines, string.format("__attribute__((%s)) __typeof_unqual__(revenant_type_%s) revenant_global_%s __asm__(%s) = {0};",
+            linkage(global.fallback), global.name, global.name, quoted("_" .. global.name)))
         if global.fallback then
             table.insert(lines, string.format("extern %s;", declarator(storage_type(global.type), "__revenant_fb_" .. global.name)))
         end
