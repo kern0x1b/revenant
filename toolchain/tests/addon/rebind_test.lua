@@ -97,6 +97,33 @@ function failures(opt)
         table.insert(found, "the plan must move each import the release lacks to the provider that exports it, and leave what the release exports: " .. table.concat(table.orderkeys(moves), " "))
     end
 
+    local unlisted = path.join(folder, "unlisted.dylib")
+    local unlisted_data = macho.read(prebuilt)
+    local unlisted_image = macho.images(unlisted_data)[1]
+    local symoff, nsyms, stroff = unlisted_image.symtab[1], unlisted_image.symtab[2], unlisted_image.symtab[3]
+    for index = 0, nsyms - 1 do
+        local strx = string.unpack("<I4", unlisted_data, symoff + index * 12 + 1)
+        if macho.cstring(unlisted_data, stroff + strx) == FUNCTION then
+            local at = symoff + index * 12 + 4
+            unlisted_data = unlisted_data:sub(1, at) .. "\0" .. unlisted_data:sub(at + 2)
+        end
+    end
+    io.writefile(unlisted, unlisted_data)
+    local unlisted_before = fixtures.refusal(function () dyld.check(release, {unlisted, provider}, nil, {release = true}) end) or ""
+    if not unlisted_before:find(FUNCTION, 1, true) then
+        table.insert(found, "an import that only the bind stream names, no longer in the symbol table, must still be refused: " .. unlisted_before)
+    end
+    local unlisted_moves, unlisted_libraries = dyld.rebind_plan(release, unlisted, {provider})
+    if unlisted_moves[FUNCTION] ~= PROVIDER then
+        table.insert(found, "the plan must move an import that only the bind stream names: " .. table.concat(table.orderkeys(unlisted_moves), " "))
+    end
+    macho.rebind(unlisted, {[FUNCTION] = PROVIDER}, unlisted_libraries)
+    local unlisted_after = macho.read(unlisted)
+    local unlisted_found = macho.images(unlisted_after)[1]
+    if (bindings(macho, unlisted_after, unlisted_found, unlisted_found.lazy_bind, true)[FUNCTION] or {}).library ~= PROVIDER then
+        table.insert(found, "the rebind must move the bind of an import that is not in the symbol table to the provider")
+    end
+
     local rebound = path.join(folder, "rebound.dylib")
     os.cp(prebuilt, rebound)
     macho.rebind(rebound, moves, libraries)
