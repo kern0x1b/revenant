@@ -23,7 +23,7 @@ includes("tools/subset.lua")
 local LIBRARIES = backports_subset(backports_libraries(), SELECTED)
 
 if is_plat("iphoneos") then
-    for _, package in ipairs(backports_requires(LIBRARIES)) do
+    for _, package in ipairs(backports_requires(LIBRARIES, get_config("component") == "")) do
         add_requires(package.requirement, {alias = package.name, configs = package.configs})
     end
 end
