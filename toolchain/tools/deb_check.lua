@@ -29,8 +29,12 @@ local function unpack(deb, scratch)
     return control, listing
 end
 
+local function optional_field(control, name)
+    return ("\n" .. control):match("\n" .. name .. ": ([^\n]*)")
+end
+
 local function field(control, name)
-    local value = ("\n" .. control):match("\n" .. name .. ": ([^\n]*)")
+    local value = optional_field(control, name)
     if not value then
         raise("the control file names no %s", name)
     end
@@ -78,7 +82,7 @@ function main(dir, demo, platform)
     end
 
     local ffmpeg
-    for _, dependency in ipairs(field(platform_control, "Depends"):split(",")) do
+    for _, dependency in ipairs((optional_field(platform_control, "Depends") or ""):split(",")) do
         dependency = dependency:trim()
         if dependency:startswith(FFMPEG_PACKAGE) then
             if ffmpeg then
