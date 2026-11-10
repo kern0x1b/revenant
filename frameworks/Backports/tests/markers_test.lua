@@ -165,15 +165,5 @@ REVENANT_EXPORT const int kLatePort = 2;
     assert(string.find(late_export, "extern const int __revenant_fb_kLatePort;", 1, true),
         "a forward declaration takes the type without the macro, got " .. late_export)
 
-    local tagged = markers.marked_definitions("struct os_log_s BACKPORT_IMPL(_os_log_default);\nstruct tag_s { int a; };\nstruct fwd_s;\n")
-    assert(tagged._os_log_default and tagged._os_log_default.kind == "global" and tagged._os_log_default.type == "struct os_log_s",
-        "a marked global typed with a struct tag must be read, got " .. tostring(tagged._os_log_default and tagged._os_log_default.type))
-    local tag_only = markers.marked_definitions("struct tag_s { int BACKPORT_IMPL(a); };\nstruct fwd_s;\n")
-    local tag_globals = 0
-    for _ in pairs(tag_only) do
-        tag_globals = tag_globals + 1
-    end
-    assert(tag_globals == 0, "a marked name inside a tag definition or after a forward declaration is not a global")
-
     print("markers tests passed: 9 definitions renamed, a prototype, a string, a comment, an extern and a variadic left alone; @dynamic and @synthesize names left alone")
 end

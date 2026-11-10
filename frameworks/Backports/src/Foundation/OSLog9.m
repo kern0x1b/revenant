@@ -2,13 +2,13 @@
 #import "RevenantOSLog.h"
 #include <errno.h>
 
-struct os_log_s BACKPORT_IMPL(_os_log_default);
+struct os_log_s _os_log_default;
 
 __attribute__((constructor)) static void revenant_os_log_default(void)
 {
-    BACKPORT_IMPL(_os_log_default).isa = [RevenantOSLog class];
-    BACKPORT_IMPL(_os_log_default).subsystem = "";
-    BACKPORT_IMPL(_os_log_default).category = "";
+    _os_log_default.isa = [RevenantOSLog class];
+    _os_log_default.subsystem = "";
+    _os_log_default.category = "";
 }
 
 void BACKPORT_IMPL(_os_log_internal)(void *dso, os_log_t log, os_log_type_t type, const char *message, ...)
