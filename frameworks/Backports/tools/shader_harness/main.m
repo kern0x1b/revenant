@@ -35,7 +35,7 @@ enum {
 };
 
 enum {
-    GL_NO_ERROR = 0, GL_FLOAT = 0x1406, GL_UNSIGNED_BYTE = 0x1401, GL_RGBA = 0x1908, GL_TRIANGLES = 0x0004,
+    GL_NO_ERROR = 0, GL_FALSE = 0, GL_FLOAT = 0x1406, GL_UNSIGNED_BYTE = 0x1401, GL_RGBA = 0x1908, GL_TRIANGLES = 0x0004,
     GL_COLOR_BUFFER_BIT = 0x4000, GL_TEXTURE_2D = 0x0DE1, GL_TEXTURE0 = 0x84C0, GL_LINEAR = 0x2601,
     GL_TEXTURE_MAG_FILTER = 0x2800, GL_TEXTURE_MIN_FILTER = 0x2801, GL_TEXTURE_WRAP_S = 0x2802,
     GL_TEXTURE_WRAP_T = 0x2803, GL_CLAMP_TO_EDGE = 0x812F, GL_FRAGMENT_SHADER = 0x8B30,
@@ -73,6 +73,9 @@ typedef struct {
     void (*glUniform3fv)(GLint, GLsizei, const float *);
     void (*glUniform4fv)(GLint, GLsizei, const float *);
     void (*glUniform1i)(GLint, GLint);
+    void (*glUniformMatrix2fv)(GLint, GLsizei, GLboolean, const float *);
+    void (*glUniformMatrix3fv)(GLint, GLsizei, GLboolean, const float *);
+    void (*glUniformMatrix4fv)(GLint, GLsizei, GLboolean, const float *);
     void (*glVertexAttribPointer)(GLuint, GLint, GLenum, GLboolean, GLsizei, const void *);
     void (*glEnableVertexAttribArray)(GLuint);
     void (*glDisableVertexAttribArray)(GLuint);
@@ -87,6 +90,20 @@ typedef struct {
 } API;
 
 static API api;
+
+static GLenum gFirstError = 0;
+static const char *gFirstCall = "";
+
+static void noteGLError(const char *call)
+{
+    GLenum error = api.glGetError();
+    if (error != GL_NO_ERROR && gFirstError == GL_NO_ERROR) {
+        gFirstError = error;
+        gFirstCall = call;
+    }
+}
+
+#define GL_CALL(...) do { __VA_ARGS__; noteGLError(#__VA_ARGS__); } while (0)
 static GLuint glTexture;
 
 static id<MTLDevice> device;
@@ -154,6 +171,9 @@ static void startANGLE(NSString *dir)
     LOAD(gles, glUniform3fv);
     LOAD(gles, glUniform4fv);
     LOAD(gles, glUniform1i);
+    LOAD(gles, glUniformMatrix2fv);
+    LOAD(gles, glUniformMatrix3fv);
+    LOAD(gles, glUniformMatrix4fv);
     LOAD(gles, glVertexAttribPointer);
     LOAD(gles, glEnableVertexAttribArray);
     LOAD(gles, glDisableVertexAttribArray);
@@ -305,11 +325,35 @@ static BOOL hasIntUniform(NSDictionary *shader)
     return NO;
 }
 
+static NSInteger columnsOf(NSDictionary *u)
+{
+    NSInteger columns = intValue(u, @"columns");
+    return columns > 1 ? columns : 1;
+}
+
+static NSInteger columnStride(NSDictionary *u)
+{
+    NSInteger comps = intValue(u, @"components");
+    return comps == 3 ? 16 : comps * 4;
+}
+
+static NSInteger uniformSize(NSDictionary *u)
+{
+    if (!isFloatScalar(u[@"scalar"]))
+        return 4;
+    NSInteger columns = columnsOf(u);
+    return columns == 1 ? intValue(u, @"components") * 4 : columns * columnStride(u);
+}
+
 static BOOL uniformSupported(NSDictionary *u)
 {
     NSInteger comps = intValue(u, @"components");
-    if (isFloatScalar(u[@"scalar"]))
+    if (isFloatScalar(u[@"scalar"])) {
+        NSInteger columns = columnsOf(u);
+        if (columns > 1)
+            return comps == columns && columns <= 4;
         return comps >= 1 && comps <= 4;
+    }
     return isIntScalar(u[@"scalar"]) && comps == 1;
 }
 
@@ -418,7 +462,7 @@ static NSString *placeUniform(NSDictionary *u, int ints, NSMutableData *blob, MT
 {
     NSInteger offset = intValue(u, @"offset");
     NSInteger comps = intValue(u, @"components");
-    NSInteger size = isFloatScalar(u[@"scalar"]) ? comps * 4 : 4;
+    NSInteger size = uniformSize(u);
     if (offset + size > (NSInteger)blob.length) {
         *state = @"FAIL";
         return [NSString stringWithFormat:@"layout: %@ at %ld is past Metal's %lu-byte buffer", u[@"name"],
@@ -433,10 +477,11 @@ static NSString *placeUniform(NSDictionary *u, int ints, NSMutableData *blob, MT
     }
     unsigned char *bytes = blob.mutableBytes;
     if (isFloatScalar(u[@"scalar"])) {
-        float values[4];
-        for (NSInteger k = 0; k < comps; k++)
-            values[k] = uniformValue(k);
-        memcpy(bytes + offset, values, comps * 4);
+        NSInteger columns = columnsOf(u), stride = columnStride(u);
+        for (NSInteger k = 0; k < comps * columns; k++) {
+            float value = uniformValue(k);
+            memcpy(bytes + offset + (k / comps) * stride + (k % comps) * 4, &value, 4);
+        }
     } else {
         int32_t value = ints;
         memcpy(bytes + offset, &value, 4);
@@ -568,6 +613,10 @@ static NSString *metalRun(NSDictionary *vs, NSDictionary *fs, int ints, NSMutabl
 
 static NSString *glesRun(NSDictionary *vs, NSDictionary *fs, int ints, NSMutableData *pixels, NSString **state)
 {
+    while (api.glGetError() != GL_NO_ERROR) {
+    }
+    gFirstError = GL_NO_ERROR;
+    gFirstCall = "";
     NSString *log = nil;
     GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vs[@"glsl"], &log);
     if (!vertexShader) {
@@ -594,7 +643,7 @@ static NSString *glesRun(NSDictionary *vs, NSDictionary *fs, int ints, NSMutable
         *state = @"ERROR";
         return [@"GLES link: " stringByAppendingString:log];
     }
-    api.glUseProgram(program);
+    GL_CALL(api.glUseProgram(program));
 
     NSString *detail = nil;
     NSDictionary *buffers = nil;
@@ -610,10 +659,10 @@ static NSString *glesRun(NSDictionary *vs, NSDictionary *fs, int ints, NSMutable
         if (location < 0)
             continue;
         NSData *data = buffers[@(intValue(a, @"buffer"))];
-        api.glVertexAttribPointer((GLuint)location, (GLint)intValue(a, @"components"), GL_FLOAT, 0,
-                                  (GLsizei)intValue(a, @"stride"),
-                                  (const char *)data.bytes + intValue(a, @"offset"));
-        api.glEnableVertexAttribArray((GLuint)location);
+        GL_CALL(api.glVertexAttribPointer((GLuint)location, (GLint)intValue(a, @"components"), GL_FLOAT, 0,
+                                          (GLsizei)intValue(a, @"stride"),
+                                          (const char *)data.bytes + intValue(a, @"offset")));
+        GL_CALL(api.glEnableVertexAttribArray((GLuint)location));
         [enabled addObject:@(location)];
     }
     NSMutableData *vertexIds = [NSMutableData dataWithLength:VERTICES * sizeof(float)];
@@ -621,8 +670,8 @@ static NSString *glesRun(NSDictionary *vs, NSDictionary *fs, int ints, NSMutable
         ((float *)vertexIds.mutableBytes)[v] = (float)v;
     GLint vertexIdLocation = api.glGetAttribLocation(program, "a_vertex_id");
     if (vertexIdLocation >= 0) {
-        api.glVertexAttribPointer((GLuint)vertexIdLocation, 1, GL_FLOAT, 0, sizeof(float), vertexIds.bytes);
-        api.glEnableVertexAttribArray((GLuint)vertexIdLocation);
+        GL_CALL(api.glVertexAttribPointer((GLuint)vertexIdLocation, 1, GL_FLOAT, 0, sizeof(float), vertexIds.bytes));
+        GL_CALL(api.glEnableVertexAttribArray((GLuint)vertexIdLocation));
         [enabled addObject:@(vertexIdLocation)];
     }
 
@@ -633,59 +682,67 @@ static NSString *glesRun(NSDictionary *vs, NSDictionary *fs, int ints, NSMutable
                 continue;
             NSInteger comps = intValue(u, @"components");
             if (!isFloatScalar(u[@"scalar"])) {
-                api.glUniform1i(location, ints);
+                GL_CALL(api.glUniform1i(location, ints));
                 continue;
             }
-            float values[4];
-            for (NSInteger k = 0; k < comps; k++)
+            NSInteger columns = columnsOf(u);
+            float values[16];
+            for (NSInteger k = 0; k < comps * columns; k++)
                 values[k] = uniformValue(k);
+            if (columns > 1) {
+                switch (columns) {
+                case 2: GL_CALL(api.glUniformMatrix2fv(location, 1, GL_FALSE, values)); break;
+                case 3: GL_CALL(api.glUniformMatrix3fv(location, 1, GL_FALSE, values)); break;
+                default: GL_CALL(api.glUniformMatrix4fv(location, 1, GL_FALSE, values)); break;
+                }
+                continue;
+            }
             switch (comps) {
-            case 1: api.glUniform1f(location, values[0]); break;
-            case 2: api.glUniform2f(location, values[0], values[1]); break;
-            case 3: api.glUniform3fv(location, 1, values); break;
-            default: api.glUniform4fv(location, 1, values); break;
+            case 1: GL_CALL(api.glUniform1f(location, values[0])); break;
+            case 2: GL_CALL(api.glUniform2f(location, values[0], values[1])); break;
+            case 3: GL_CALL(api.glUniform3fv(location, 1, values)); break;
+            default: GL_CALL(api.glUniform4fv(location, 1, values)); break;
             }
         }
     }
     GLint flip = api.glGetUniformLocation(program, "revenant_flip");
     if (flip >= 0)
-        api.glUniform1f(flip, 1.0f);
+        GL_CALL(api.glUniform1f(flip, 1.0f));
     for (NSDictionary *size in fs[@"reflection"][@"sizes"]) {
         GLint location = api.glGetUniformLocation(program, [size[@"name"] UTF8String]);
         if (location >= 0)
-            api.glUniform2f(location, TEX, TEX);
+            GL_CALL(api.glUniform2f(location, TEX, TEX));
     }
     for (NSDictionary *t in fs[@"reflection"][@"textures"]) {
         GLint unit = (GLint)intValue(t, @"index");
-        api.glActiveTexture(GL_TEXTURE0 + unit);
-        api.glBindTexture(GL_TEXTURE_2D, glTexture);
+        GL_CALL(api.glActiveTexture(GL_TEXTURE0 + unit));
+        GL_CALL(api.glBindTexture(GL_TEXTURE_2D, glTexture));
         GLint location = api.glGetUniformLocation(program, [t[@"name"] UTF8String]);
         if (location >= 0)
-            api.glUniform1i(location, unit);
+            GL_CALL(api.glUniform1i(location, unit));
     }
 
-    api.glViewport(0, 0, W, H);
-    api.glClearColor(0, 0, 0, 0);
-    api.glClear(GL_COLOR_BUFFER_BIT);
-    api.glDrawArrays(GL_TRIANGLES, 0, VERTICES);
-    GLenum error = api.glGetError();
+    GL_CALL(api.glViewport(0, 0, W, H));
+    GL_CALL(api.glClearColor(0, 0, 0, 0));
+    GL_CALL(api.glClear(GL_COLOR_BUFFER_BIT));
+    GL_CALL(api.glDrawArrays(GL_TRIANGLES, 0, VERTICES));
 
     unsigned char *rows = malloc(W * H * 4);
-    api.glReadPixels(0, 0, W, H, GL_RGBA, GL_UNSIGNED_BYTE, rows);
+    GL_CALL(api.glReadPixels(0, 0, W, H, GL_RGBA, GL_UNSIGNED_BYTE, rows));
     unsigned char *out = pixels.mutableBytes;
     for (int r = 0; r < H; r++)
         memcpy(out + r * W * 4, rows + (H - 1 - r) * W * 4, W * 4);
     free(rows);
 
     for (NSNumber *location in enabled)
-        api.glDisableVertexAttribArray((GLuint)location.integerValue);
-    api.glUseProgram(0);
+        GL_CALL(api.glDisableVertexAttribArray((GLuint)location.integerValue));
+    GL_CALL(api.glUseProgram(0));
     api.glDeleteProgram(program);
     api.glDeleteShader(vertexShader);
     api.glDeleteShader(fragmentShader);
-    if (error != GL_NO_ERROR) {
+    if (gFirstError != GL_NO_ERROR) {
         *state = @"ERROR";
-        return [NSString stringWithFormat:@"GLES draw: error 0x%x", error];
+        return [NSString stringWithFormat:@"GLES %s: error 0x%x", gFirstCall, gFirstError];
     }
     return nil;
 }
