@@ -1438,22 +1438,29 @@ private:
         }
         if (arms.empty())
             return side(block, fallback, join);
+        const std::set<const BasicBlock *> before = visited_;
+        std::set<const BasicBlock *> after = before;
         bool first = true;
         for (auto &arm : arms) {
             statement(std::string(first ? "if (" : "} else if (") + arm.second + ") {\n");
             first = false;
             depth_++;
+            visited_ = before;
             if (!side(block, arm.first, join))
                 return false;
+            after.insert(visited_.begin(), visited_.end());
             depth_--;
         }
         if (fallback != join || isa<PHINode>(join->front())) {
             statement("} else {\n");
             depth_++;
+            visited_ = before;
             if (!side(block, fallback, join))
                 return false;
+            after.insert(visited_.begin(), visited_.end());
             depth_--;
         }
+        visited_ = after;
         statement("}\n");
         return true;
     }

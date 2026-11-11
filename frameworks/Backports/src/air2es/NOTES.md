@@ -53,8 +53,8 @@ and why, so it is not rediscovered later.
   compiles the Metal sources of a Telegram checkout to iOS AIR, links them per
   directory, translates each library and writes one verdict per entry point.
 - On Telegram-iOS-release-13.0.0 it gives 89 entry points: 43 fragment, 27 vertex and
-  19 kernel. 64 translate (32 fragment, 21 vertex, 11 kernel) and 25 are refused, measured after the
-  bounded integers, which follow the clamp-to-zero emulation; `docs/explanation/backports/air2es-ios-verdicts.md` has the
+  19 kernel. 65 translate (32 fragment, 22 vertex, 11 kernel) and 24 are refused, measured after the switch change, which
+  follows the bounded integers and the clamp-to-zero emulation; `docs/explanation/backports/air2es-ios-verdicts.md` has the
   history.
 
 ## Precision and device checks still owed
