@@ -7,9 +7,9 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 | Status | Meaning | Count |
 | --- | --- | --- |
 | real | built from the module's own sources, with no stub and no substitute | 41 |
-| partial | built and running, with a named part left out or rewritten | 17 |
+| partial | built and running, with a named part left out or rewritten | 18 |
 | js | no native code of its own, so it runs with the bundle | 12 |
-| stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 4 |
+| stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 3 |
 | missing | native code that is not built yet | 44 |
 | evaluate | not attempted; the note says what iOS 6 offers | 26 |
 | impossible | the system service does not exist before the iOS release the note names | 7 |
@@ -114,7 +114,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-image | ~57.0.5 | yes | missing | none | Swift only (25 files plus the SDWebImage coders). Not compiled: needs expo-modules-core Swift for iOS 6 and the SDWebImage package; SF Symbols loader in it is a separate question. |
 | expo-image-loader | ~57.0.1 | no | js | none | No native iOS code; runs with the bundle, not yet exercised. |
 | expo-image-manipulator | ~57.0.21 | yes | missing | none | Not built: it needs the SDWebImageWebPCoder package, which is not packaged yet (the media worker 5a213326 packages it). |
-| expo-image-picker | ~57.0.20 | yes | stub | none | Patched package for iOS 6 (seven patches in packages/e/expo-image-picker): UIImagePickerController with the UTI constants, single selection there, PhotoKit, PHPickerController and live photo code gated to iOS 14+, asset metadata to iOS 11+, and the library permission to the assets library on iOS 6 and 7; the picker exception is renamed away from expo-sharing's. The AVAssetExportPreset constants are literal preset names, because the SDK symbols bind strongly on iOS 6. Linked green into RNHost alone with Photos and PhotosUI weak-linked, on the tree before the merges with origin/main 02f5d6ec5 and later. Not linked on the current base, so no build is claimed: the row stays stub with verified none, and the stub stays in place until a link on the current base. Once built it is partial: multi-select is not available on iOS 6, and the module is not exercised on the phone. |
+| expo-image-picker | ~57.0.20 | yes | partial | build | Built from the package with seven iOS 6 patches (packages/e/expo-image-picker) and linked into RNHost with expo-image-picker real, Photos and PhotosUI weak-linked, on base 6c8fd1bf5 (swift-runtime 6.4.0 install 2d9126ab): not relinked on the current swift-runtime digest, so the build claim is for that base. UIImagePickerController is the iOS 6 picker, with the UTI constants and single selection there; PhotoKit, PHPickerController and live photo code are gated to iOS 14+; asset metadata to iOS 11+; the library permission goes to the assets library on iOS 6 and 7; the picker exception is renamed away from expo-sharing's; the AVAssetExportPreset constants are literal preset names, because the SDK symbols bind strongly on iOS 6. Multi-select is not available on iOS 6; the module is not exercised on the phone. |
 | expo-intent-launcher | ~57.0.1 | no | n/a | none | Android only. |
 | expo-insights | ~57.0.21 | yes | missing | none | Has 6 files of iOS code and is not built. |
 | expo-keep-awake | ~57.0.2 | yes | real | build | Compiled; not exercised. |
@@ -202,7 +202,6 @@ What the build stands in with for a module it does not build. Each is listed in 
 | Stub | Module | File | Owner | Reason |
 | --- | --- | --- | --- | --- |
 | StubDocumentPickerModule | ExpoDocumentPicker | src/expo/StubModules.swift | expo-document-picker | Name only. |
-| StubImagePickerModule | ExponentImagePicker | src/expo/StubModules.swift | expo-image-picker | Name only. |
 | StubFileSystemModule | FileSystem | src/expo/StubModules.swift | expo-file-system | Constants for the directories and empty class shells; no file operation exists. |
 | StubTwoWayAudioModule | ExpoTwoWayAudio | src/expo/StubModules.swift | @getpaseo/expo-two-way-audio | Name only; the module belongs to the Paseo package @getpaseo/expo-two-way-audio, which is not built. |
 | StubHardwareKeyboardModule | PaseoHardwareKeyboard | src/expo/StubModules.swift | PaseoHardwareKeyboard | Name only; a module of the spike app that no package provides and the paseo app does not use. |
