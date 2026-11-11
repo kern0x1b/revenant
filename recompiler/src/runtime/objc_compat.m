@@ -8,6 +8,11 @@ __attribute__((visibility("hidden"))) id objc_alloc(Class cls)
     return cls ? [cls alloc] : nil;
 }
 
+__attribute__((visibility("hidden"))) id objc_allocWithZone(Class cls)
+{
+    return cls ? [cls allocWithZone:nil] : nil;
+}
+
 __attribute__((visibility("hidden"))) id objc_alloc_init(Class cls)
 {
     return cls ? [[cls alloc] init] : nil;

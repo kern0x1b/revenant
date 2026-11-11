@@ -27,6 +27,7 @@ void objc_moveWeak(id *to, id *from);
 void *objc_autoreleasePoolPush(void);
 void objc_autoreleasePoolPop(void *context);
 id objc_alloc(Class cls);
+id objc_allocWithZone(Class cls);
 id objc_alloc_init(Class cls);
 id objc_opt_new(Class cls);
 Class objc_opt_class(id object);
