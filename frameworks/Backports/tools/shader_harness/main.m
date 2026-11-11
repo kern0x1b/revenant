@@ -302,6 +302,37 @@ static float uniformValue(NSInteger k)
     return 0.25f * (float)(k + 1);
 }
 
+static NSDictionary *gSource;
+
+static BOOL elementOf(NSString *name, NSString **base, NSInteger *index)
+{
+    NSRange underscore = [name rangeOfString:@"_" options:NSBackwardsSearch];
+    if (underscore.location == NSNotFound || underscore.location == 0 || underscore.location + 1 >= name.length)
+        return NO;
+    NSString *digits = [name substringFromIndex:underscore.location + 1];
+    if ([digits rangeOfCharacterFromSet:[[NSCharacterSet decimalDigitCharacterSet] invertedSet]].location != NSNotFound)
+        return NO;
+    *base = [name substringToIndex:underscore.location];
+    *index = digits.integerValue;
+    return YES;
+}
+
+static float valueOf(NSDictionary *u, NSInteger k)
+{
+    NSString *name = u[@"name"];
+    NSArray *member = gSource[@"members"][name];
+    if (member)
+        return k < (NSInteger)member.count ? [member[k] floatValue] : 0;
+    NSString *base = nil;
+    NSInteger index = 0;
+    if (elementOf(name, &base, &index) && gSource[@"arrays"][base]) {
+        NSArray *array = gSource[@"arrays"][base];
+        NSInteger at = index * [u[@"components"] integerValue] + k;
+        return at < (NSInteger)array.count ? [array[at] floatValue] : 0;
+    }
+    return uniformValue(k);
+}
+
 static BOOL isFloatScalar(NSString *scalar)
 {
     return [scalar isEqualToString:@"float"];
@@ -475,11 +506,19 @@ static NSString *placeUniform(NSDictionary *u, int ints, NSMutableData *blob, MT
                     (long)offset, (unsigned long)member.offset];
         }
     }
+    NSString *base = nil;
+    NSInteger index = 0;
+    if (!argument.bufferStructType && elementOf(u[@"name"], &base, &index) &&
+        offset != index * (NSInteger)argument.bufferDataSize) {
+        *state = @"FAIL";
+        return [NSString stringWithFormat:@"layout: %@ is at %ld in air2es and %ld in Metal", u[@"name"],
+                (long)offset, (long)(index * (NSInteger)argument.bufferDataSize)];
+    }
     unsigned char *bytes = blob.mutableBytes;
     if (isFloatScalar(u[@"scalar"])) {
         NSInteger columns = columnsOf(u), stride = columnStride(u);
         for (NSInteger k = 0; k < comps * columns; k++) {
-            float value = uniformValue(k);
+            float value = valueOf(u, k);
             memcpy(bytes + offset + (k / comps) * stride + (k % comps) * 4, &value, 4);
         }
     } else {
@@ -512,6 +551,13 @@ static NSString *uniformBlobs(NSArray *arguments, NSDictionary *shader, int ints
             NSUInteger size = argument.bufferDataSize > 16 ? argument.bufferDataSize : 16;
             blob = [NSMutableData dataWithLength:size];
             blobs[@(argument.index)] = blob;
+        }
+        NSString *base = nil;
+        NSInteger index = 0;
+        if (!argument.bufferStructType && elementOf(u[@"name"], &base, &index)) {
+            NSUInteger need = (NSUInteger)(index + 1) * argument.bufferDataSize;
+            if (blob.length < need)
+                [blob setLength:need];
         }
         NSString *detail = placeUniform(u, ints, blob, argument, state);
         if (detail)
@@ -714,7 +760,7 @@ static NSString *glesRun(NSDictionary *vs, NSDictionary *fs, int ints, NSMutable
             NSInteger columns = columnsOf(u);
             float values[16];
             for (NSInteger k = 0; k < comps * columns; k++)
-                values[k] = uniformValue(k);
+                values[k] = valueOf(u, k);
             if (columns > 1) {
                 switch (columns) {
                 case 2: GL_CALL(api.glUniformMatrix2fv(location, 1, GL_FALSE, values)); break;
@@ -734,6 +780,9 @@ static NSString *glesRun(NSDictionary *vs, NSDictionary *fs, int ints, NSMutable
     GLint flip = api.glGetUniformLocation(program, "revenant_flip");
     if (flip >= 0)
         GL_CALL(api.glUniform1f(flip, 1.0f));
+    GLint target = api.glGetUniformLocation(program, "revenant_target");
+    if (target >= 0)
+        GL_CALL(api.glUniform2f(target, (float)W, (float)H));
     for (NSDictionary *size in fs[@"reflection"][@"sizes"]) {
         GLint location = api.glGetUniformLocation(program, [size[@"name"] UTF8String]);
         if (location >= 0)
@@ -851,12 +900,19 @@ int main(int argc, const char *argv[])
 {
     @autoreleasepool {
         if (argc < 3) {
-            fprintf(stderr, "usage: metal_shader_harness <metallib> <es2 folder> [<ANGLE libraries folder>]\n");
+            fprintf(stderr, "usage: metal_shader_harness <metallib> <es2 folder> [<ANGLE libraries folder> [<data source JSON>]]\n");
             return 2;
         }
         NSString *metallib = [NSString stringWithUTF8String:argv[1]];
         NSString *folder = [NSString stringWithUTF8String:argv[2]];
         NSString *angle = argc > 3 ? [NSString stringWithUTF8String:argv[3]] : [NSString stringWithUTF8String:REVENANT_ANGLE_LIB];
+        if (argc > 4) {
+            gSource = readJSON([NSString stringWithUTF8String:argv[4]]);
+            if (!gSource) {
+                fprintf(stderr, "metal_shader_harness: %s is not a JSON object\n", argv[4]);
+                return 2;
+            }
+        }
 
         startMetal(metallib);
         startANGLE(angle);

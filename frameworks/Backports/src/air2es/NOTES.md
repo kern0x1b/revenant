@@ -63,6 +63,26 @@ and why, so it is not rediscovered later.
 - Fixture: `tests/air2es/sample_mac.metal`, `sample_mac.metallib` and `sample_mac.golden/`. The harness matches Metal on
   `sampleFragment` with a max diff of 0 over 13,312 non-zero channels.
 
+## Oracle data source and device buffers
+
+- `metal_shader_harness METALLIB FOLDER [ANGLE_LIB [DATA_JSON]]` takes an optional data source, a JSON object with two keys.
+  `arrays` holds a device buffer's elements, flat, by the Metal argument's name (`"positions": [...]`). `members` holds a
+  uniform's values by its name, for both sides (`"viewport": [x, y, z, w]`). Without a data source the values are the fixed
+  ones of the earlier harness.
+- A device pointer is filled element by element at its Metal stride. The GLES element uniform `<name>_<k>`, which the
+  translator emits for a capped buffer, takes element k of the same array. Its GLES offset must equal k times that stride, or
+  the run FAILs with a layout line.
+- The harness sets `revenant_target` to the target's size, as the host does (`RevenantMetalEncoder.m`). A fragment that reads
+  `[[position]]` matched only after this; before it, the GLES side computed `0 - gl_FragCoord.y`.
+- Fixture: `tests/air2es/devbuf_mac.metal` (`callBlobVertex` reads a `const device float *positions` buffer, capped at eight
+  elements; `blobFragment` reads `viewport` from a constant struct) and its `devbuf_mac.metallib`. Data sets:
+  `devbuf_one.data.json` (viewport z and w 1), `devbuf_mid.data.json` (0.5) and `devbuf_zero.data.json` (0). Results: one PASS
+  over 1,044 non-zero channels, mid PASS, zero PASS over 261 (alpha only). Negative control: the Metal source reads
+  `positions[vid % 5]` against the GLES folder of `vid % 7`: FAIL, 255/255 over 592 channels.
+- The earlier Mac fixtures (`deriv_mac`, `exit_mac`, `sample_mac`) and the GramDiamond composite give the same numbers as before.
+- Not covered: vector elements (the diamond's `planes` are `float4`), since the translator has no vector-element cap in HEAD yet,
+  and a `max` viewport for the lens's 128 edges. Both need the translator's capped-buffer patch before there is a GLES side.
+
 ## Corpus check
 
 - `./xmakew l frameworks/Backports/tools/metal_corpus.lua DMG build/macosx/arm64/release/air2es REFERENCE OUT.tsv [MOUNT]`
