@@ -1,5 +1,6 @@
 #include "translate.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <map>
@@ -1624,41 +1625,168 @@ private:
         return name == "air.max.u.i32" && bounded(call->getArgOperand(0)) && bounded(call->getArgOperand(1));
     }
 
-    bool nonZero(Value *value)
+    static constexpr uint64_t kDivisionLimit = uint64_t(1) << 16;
+    static constexpr uint64_t kExactLimit = uint64_t(1) << 22;
+
+    static bool shiftAmount(const Value *value, uint64_t &amount)
     {
-        if (auto *constant = dyn_cast<ConstantInt>(value))
-            return !constant->isZero();
-        auto *call = dyn_cast<CallInst>(value);
-        if (!call || !call->getCalledFunction() || call->getCalledFunction()->getName() != "air.max.u.i32")
+        auto *constant = dyn_cast<Constant>(value);
+        auto *number = constant ? dyn_cast_or_null<ConstantInt>(constant->getSplatValue()) : nullptr;
+        if (!number || number->getZExtValue() >= 32)
             return false;
-        return nonZero(call->getArgOperand(0)) || nonZero(call->getArgOperand(1));
+        amount = number->getZExtValue();
+        return true;
     }
 
-    bool smallEnough(Value *value)
+    bool bufferValue(const Value *value)
     {
-        auto *constant = dyn_cast<ConstantInt>(value);
-        return !constant || constant->getZExtValue() < (1u << 23);
+        if (!value->getType()->isIntegerTy(32))
+            return false;
+        if (auto *lane = dyn_cast<ExtractElementInst>(value))
+            value = lane->getVectorOperand();
+        auto *load = dyn_cast<LoadInst>(value);
+        if (!load)
+            return false;
+        const Value *pointer = load->getPointerOperand();
+        for (;;) {
+            if (auto *cast = dyn_cast<BitCastInst>(pointer))
+                pointer = cast->getOperand(0);
+            else if (auto *element = dyn_cast<GetElementPtrInst>(pointer))
+                pointer = element->getPointerOperand();
+            else
+                break;
+        }
+        const Binding *binding = bindingOf(pointer);
+        return binding && binding->kind == "air.buffer";
     }
 
-    bool unsignedDivide(Instruction &instruction, BinaryOperator &binary)
+    bool boundOf(const Value *value, uint64_t &bound)
+    {
+        if (!value->getType()->isIntegerTy(32))
+            return false;
+        if (auto *constant = dyn_cast<ConstantInt>(value)) {
+            if (constant->getSExtValue() < 0)
+                return false;
+            bound = constant->getZExtValue();
+        } else if (const Binding *binding = bindingOf(value)) {
+            if (binding->kind != "air.vertex_id" && binding->kind != "air.instance_id")
+                return false;
+            bound = kDivisionLimit - 1;
+        } else if (bufferValue(value)) {
+            bound = kDivisionLimit - 1;
+        } else if (auto *call = dyn_cast<CallInst>(value)) {
+            Function *callee = call->getCalledFunction();
+            if (!callee)
+                return false;
+            if (callee->getName().starts_with("air.convert.u.i32.f.")) {
+                bound = kDivisionLimit - 1;
+            } else if (callee->getName() == "air.max.u.i32") {
+                uint64_t left, right;
+                if (!boundOf(call->getArgOperand(0), left) || !boundOf(call->getArgOperand(1), right))
+                    return false;
+                bound = std::max(left, right);
+            } else {
+                return false;
+            }
+        } else if (auto *binary = dyn_cast<BinaryOperator>(value)) {
+            uint64_t left, right, amount;
+            if (!boundOf(binary->getOperand(0), left))
+                return false;
+            switch (binary->getOpcode()) {
+            case Instruction::Add:
+                if (!boundOf(binary->getOperand(1), right))
+                    return false;
+                bound = left + right;
+                break;
+            case Instruction::UDiv: {
+                uint64_t smallest = 1;
+                if (auto *divisor = dyn_cast<ConstantInt>(binary->getOperand(1)))
+                    smallest = std::max<uint64_t>(divisor->getZExtValue(), 1);
+                bound = left / smallest;
+                break;
+            }
+            case Instruction::URem:
+                if (!boundOf(binary->getOperand(1), right))
+                    return false;
+                bound = right ? std::min(left, right - 1) : left;
+                break;
+            case Instruction::Shl:
+                if (!shiftAmount(binary->getOperand(1), amount) || left > (kExactLimit >> amount))
+                    return false;
+                bound = left << amount;
+                break;
+            case Instruction::LShr:
+                if (!shiftAmount(binary->getOperand(1), amount))
+                    return false;
+                bound = left >> amount;
+                break;
+            default:
+                return false;
+            }
+        } else {
+            return false;
+        }
+        return bound <= kExactLimit;
+    }
+
+    void declareDivision()
+    {
+        declare("float revenant_quotient(float a, float b)\n{\n"
+                "    float d = max(b, 1.0);\n"
+                "    float q = floor((a + 0.5) / d);\n"
+                "    float r = a - q * d;\n"
+                "    return q + floor((r + 0.5) / d);\n"
+                "}\n",
+                "revenant_quotient");
+        declare("float revenant_remainder(float a, float b)\n{\n"
+                "    float d = max(b, 1.0);\n"
+                "    return a - d * revenant_quotient(a, d);\n"
+                "}\n",
+                "revenant_remainder");
+    }
+
+    bool integerDivide(Instruction &instruction, BinaryOperator &binary)
     {
         if (!binary.getType()->isIntegerTy(32))
-            return refuse("an unsigned division of integers other than 32 bits");
-        if (!bounded(binary.getOperand(0)) || !bounded(binary.getOperand(1)) || !nonZero(binary.getOperand(1)))
-            return refuse("an unsigned division that is not of bounded integers with a non-zero divisor");
-        if (!smallEnough(binary.getOperand(0)) || !smallEnough(binary.getOperand(1)))
-            return refuse("an unsigned division of a constant at or above 2^23");
+            return refuse("a division of integers other than 32 bits");
+        uint64_t dividend, divisor;
+        if (!boundOf(binary.getOperand(0), dividend) || !boundOf(binary.getOperand(1), divisor))
+            return refuse("a division of an integer with no known bound");
+        if (dividend >= kDivisionLimit || divisor >= kDivisionLimit)
+            return refuse("a division of an integer at or above 2^16, which the corrected float quotient does not hold");
         std::string left, right, name;
         if (!expression(binary.getOperand(0), left) || !expression(binary.getOperand(1), right))
             return false;
         if (!local(instruction, name))
             return false;
-        std::string quotient = "int((float(" + left + ") + 0.5) / float(" + right + "))";
-        if (binary.getOpcode() == Instruction::UDiv)
-            statement(name + " = " + quotient + ";\n");
-        else
-            statement(name + " = (" + left + " - " + right + " * " + quotient + ");\n");
+        highp_ = true;
+        declareDivision();
+        bool remainder = binary.getOpcode() == Instruction::URem || binary.getOpcode() == Instruction::SRem;
+        statement(name + " = int(" + (remainder ? "revenant_remainder" : "revenant_quotient") + "(float(" + left +
+                  "), float(" + right + ")));\n");
         return true;
+    }
+
+    bool shiftLeft(Instruction &instruction, BinaryOperator &binary)
+    {
+        uint64_t amount, bound;
+        if (!shiftAmount(binary.getOperand(1), amount) || !boundOf(&binary, bound))
+            return refuse("a shift left of an integer with no known bound below 2^22, or by something other than a constant below 32");
+        std::string left, name;
+        if (!expression(binary.getOperand(0), left) || !local(instruction, name))
+            return false;
+        highp_ = true;
+        statement(name + " = int(float(" + left + ") * " + std::to_string(uint64_t(1) << amount) + ".0);\n");
+        return true;
+    }
+
+    static std::string reciprocalPowerOfTwo(uint64_t shift)
+    {
+        if (shift == 0)
+            return "1.0";
+        char text[64];
+        snprintf(text, sizeof text, "%.*f", int(shift), 1.0 / double(uint64_t(1) << shift));
+        return text;
     }
 
     std::string structOf(Type *type)
@@ -1867,8 +1995,11 @@ private:
                 return maskAnd(instruction, *binary);
             if (binary->getOpcode() == Instruction::LShr)
                 return shiftRight(instruction, *binary);
-            if (binary->getOpcode() == Instruction::UDiv || binary->getOpcode() == Instruction::URem)
-                return unsignedDivide(instruction, *binary);
+            if (binary->getOpcode() == Instruction::Shl)
+                return shiftLeft(instruction, *binary);
+            if (binary->getOpcode() == Instruction::UDiv || binary->getOpcode() == Instruction::URem ||
+                binary->getOpcode() == Instruction::SDiv || binary->getOpcode() == Instruction::SRem)
+                return integerDivide(instruction, *binary);
             const char *op = nullptr;
             switch (binary->getOpcode()) {
             case Instruction::FAdd: case Instruction::Add: op = "+"; break;
@@ -2049,17 +2180,27 @@ private:
 
     bool shiftRight(Instruction &instruction, BinaryOperator &binary)
     {
-        auto *constant = dyn_cast<Constant>(binary.getOperand(1));
-        auto *amount = constant ? dyn_cast_or_null<ConstantInt>(constant->getSplatValue()) : nullptr;
-        if (!amount || amount->getZExtValue() >= 31 || !threadPositionOf(binary.getOperand(0)))
-            return refuse("a logical shift right other than of a thread position or its lane by a constant");
+        uint64_t amount;
+        if (!shiftAmount(binary.getOperand(1), amount))
+            return refuse("a logical shift right by something other than a constant below 32");
+        if (amount < 31 && threadPositionOf(binary.getOperand(0))) {
+            std::string left, name;
+            if (!expression(binary.getOperand(0), left) || !local(instruction, name))
+                return false;
+            std::string divisor = std::to_string(uint64_t(1) << amount);
+            if (instruction.getType()->isVectorTy())
+                divisor = glslType(instruction.getType()) + "(" + divisor + ")";
+            statement(name + " = (" + left + " / " + divisor + ");\n");
+            return true;
+        }
+        uint64_t bound;
+        if (!binary.getType()->isIntegerTy(32) || !boundOf(binary.getOperand(0), bound))
+            return refuse("a logical shift right of an integer with no known bound");
         std::string left, name;
         if (!expression(binary.getOperand(0), left) || !local(instruction, name))
             return false;
-        std::string divisor = std::to_string(uint64_t(1) << amount->getZExtValue());
-        if (instruction.getType()->isVectorTy())
-            divisor = glslType(instruction.getType()) + "(" + divisor + ")";
-        statement(name + " = (" + left + " / " + divisor + ");\n");
+        highp_ = true;
+        statement(name + " = int(floor(float(" + left + ") * " + reciprocalPowerOfTwo(amount) + "));\n");
         return true;
     }
 

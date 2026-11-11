@@ -53,8 +53,9 @@ and why, so it is not rediscovered later.
   compiles the Metal sources of a Telegram checkout to iOS AIR, links them per
   directory, translates each library and writes one verdict per entry point.
 - On Telegram-iOS-release-13.0.0 it gives 89 entry points: 43 fragment, 27 vertex and
-  19 kernel. 63 translate (32 fragment, 20 vertex, 11 kernel) and 26 are refused, measured after the
-  clamp-to-zero emulation; `docs/explanation/backports/air2es-ios-verdicts.md` has the history.
+  19 kernel. 64 translate (32 fragment, 21 vertex, 11 kernel) and 25 are refused, measured after the
+  bounded integers, which follow the clamp-to-zero emulation; `docs/explanation/backports/air2es-ios-verdicts.md` has the
+  history.
 
 ## Precision and device checks still owed
 
@@ -67,6 +68,11 @@ and why, so it is not rediscovered later.
 - The `[[position]]` flip (`y = revenant_flip > 0 ? target.y - gl_FragCoord.y :
   gl_FragCoord.y`) is derived from the encoder's flip logic and is not verified on a
   device.
+
+- The bounded division and remainder (`revenant_quotient`, `revenant_remainder`) need a device float division with a relative
+  error up to 2^-18, and results up to 2^22 in highp int, which ES 1.00 guarantees only at 16 bits. The float check covers
+  the first. The ES 2 probe's `udiv_u_i32` and `urem_u_i32` maps check both on the 4S, and the run is owed for the
+  regenerated artefact.
 
 ## Design choices
 
@@ -106,6 +112,14 @@ and why, so it is not rediscovered later.
   reaches the driver. Cube samples with clamp to zero are refused. The emulation is measured on the Mac
   against Metal (`metal_shader_harness`); the nearest filter and the repeat axis are not measured by any
   corpus entry, and they stand on the same helper.
+- Bounded integers. A division or remainder of two non-negative integers, a shift left by a constant and a logical shift
+  right by a constant are computed in float, and each is refused unless its operands have a known bound. A bound is known
+  for a constant, a vertex or instance id, a buffer member, and a float converted to an unsigned integer. The host's ids,
+  buffer members and converted floats are taken below 2^16: a host contract the shader does not check. A division takes
+  operands below 2^16 and corrects its float quotient by one step from the exact remainder, so the result is exact. A
+  divisor of zero is undefined in LLVM, and it is taken as 1. A shift left or a sum keeps its result below 2^22, so the
+  float arithmetic is exact. The thread-position shift is unchanged. The star hash of `backgroundStarVertex` needs all 32
+  bits and has no bound, so it stays refused.
 - Half-precision vertex attributes are refused, because the loader reads anything but
   float and i8 as a short.
 - `BranchInst` is deprecated in LLVM 23.1.4, as in `air2cpu.cpp`. It is kept because the
