@@ -606,7 +606,7 @@ private:
             declarations_.push_back("vec4 " + sample + "(vec2 uv) {\n" + body + "}\n");
         }
         std::string value;
-        if (!local(call, value))
+        if (!sampleLocal(call, value))
             return false;
         statement(value + " = " + sample + "(" + coordinates + ");\n");
         return true;
@@ -1955,6 +1955,23 @@ private:
         return true;
     }
 
+    bool sampleLocal(CallInst &call, std::string &name)
+    {
+        auto *result = dyn_cast<StructType>(call.getType());
+        if (!result)
+            return local(call, name);
+        if (result->getNumElements() != 2 || !result->getElementType(0)->isVectorTy() ||
+            !result->getElementType(1)->isIntegerTy(8))
+            return refuse("a sample result of a shape this emitter does not hold");
+        Type *color = result->getElementType(0);
+        if (glslType(color).empty())
+            return refuse("a value of a type this emitter does not hold");
+        name = "t" + std::to_string(counter_++);
+        locals_.push_back(declaredType(color) + " " + name + ";\n");
+        aggregateTexts_[&call] = {name};
+        return true;
+    }
+
     bool local(Instruction &instruction, std::string &name)
     {
         std::string type = glslType(instruction.getType());
@@ -2469,7 +2486,8 @@ private:
             statement(name + " = int(" + size + (width ? ".x" : ".y") + ");\n");
             return true;
         }
-        if (call.arg_size() != 8)
+        const unsigned operands = call.arg_size();
+        if (operands != 8 && operands != 9)
             return refuse("a sample with an argument count this emitter does not map");
         Binding *texture = bindingOf(call.getArgOperand(0));
         if (!texture || texture->kind != "air.texture")
@@ -2484,6 +2502,14 @@ private:
         if (!normalized || !normalized->isOne() || !hasLevel || !hasLevel->isZero() ||
             !level || !level->isZero() || !isa<ConstantAggregateZero>(call.getArgOperand(4)))
             return refuse("a sample with a level, bias, offset or unnormalized coordinate this emitter does not map");
+        if (operands == 9) {
+            auto *minLod = dyn_cast<ConstantFP>(call.getArgOperand(7));
+            if (!minLod || !minLod->isZero())
+                return refuse("a sample with a minimum level of detail clamp this emitter does not map");
+        }
+        auto *access = dyn_cast<ConstantInt>(call.getArgOperand(operands - 1));
+        if (!access || !access->isZero())
+            return refuse("a sample of a texture whose access is not sample");
         if (args.size() != 1)
             return refuse("a sample with an argument count this emitter does not map");
         if (!bound && clampsToZero(sampler))
@@ -2491,7 +2517,7 @@ private:
         declare("uniform sampler2D " + texture->name + ";\n", texture->name);
         if (!sampledBy(*texture, bound ? "" : samplerJson(sampler), ", \"depth\": false, \"compare\": false"))
             return false;
-        if (!local(call, name))
+        if (!sampleLocal(call, name))
             return false;
         statement(name + " = texture2D(" + texture->name + ", " + args[0] + ");\n");
         return true;

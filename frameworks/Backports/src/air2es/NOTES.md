@@ -31,7 +31,8 @@ and why, so it is not rediscovered later.
   name, as is each part GLES 2 cannot express: mirrored repeat, a clamp-to-zero address
   whose minification and magnification filters differ (the level of detail that picks one
   is not computed), a cube sample with a clamp-to-zero address, a mipmap filter, pixel
-  coordinates, anisotropy and a LOD clamp above zero. A clamp-to-zero address with one
+  coordinates, anisotropy and, on iOS, a LOD clamp above zero (the macOS nine-operand form
+  is in its own section below). A clamp-to-zero address with one
   filter is emulated, see "Clamp-to-zero samples" below. A plain sample does
   not read the compare function, so a constexpr compare is not refused.
 - The generator needs the toolchain's `metal` and `metallib`. The image is pinned in
@@ -46,6 +47,21 @@ and why, so it is not rediscovered later.
   them at each draw, because a constexpr sampler has no MTLSamplerState to bind.
 - The iOS target declares no border colour, so `clamp_to_border` does not compile for
   iOS and the table has no border field.
+
+## macOS sample_texture_2d
+
+- The macOS form (`air64-apple-macos13.0`) of a sample is `air.sample_texture_2d.v4f32` with nine operands: texture, sampler
+  state, coordinate, normalized, offset, hasLod, level or bias, min_lod_clamp, access. It returns `{ <4 x float>, i8 }`. The
+  iOS form has eight operands, with no min_lod_clamp, and returns `<4 x float>`.
+- The operand order and types are those of `__metal_sample_texture_2d_t` in the Metal toolchain's header
+  `metal/__bits/metal_texture2d`.
+- `sampleLocal` (`translate.cpp`) holds the colour element. The translated form needs min_lod_clamp to be the constant 0.0 and
+  access to be 0 (sample); other values are refused by name. The i8 residency element is refused if it is used.
+- `metal_shader_harness` reads each texture's wrap and filter from the reflection (`filterOf`, `wrapOf`) and sets them as the
+  GL texture parameters, so the GLES sample uses the same sampler state as the constexpr one. A linear GLES sampler does not
+  pass for a nearest constexpr one.
+- Fixture: `tests/air2es/sample_mac.metal`, `sample_mac.metallib` and `sample_mac.golden/`. The harness matches Metal on
+  `sampleFragment` with a max diff of 0 over 13,312 non-zero channels.
 
 ## Corpus check
 
@@ -152,11 +168,14 @@ and why, so it is not rediscovered later.
   rules come from GLSL ES 1.00, Appendix A, section 4 (loops) and section 5 (indexing),
   revision 17.
 - `./xmakew l -P frameworks/Backports frameworks/Backports/tests/air2es_test.lua` runs 15
-  checker cases, the sampler checks, and the capped-buffer test. The capped-buffer test translates
+  checker cases, the sampler checks, the capped-buffer test and the sampling test. The capped-buffer test translates
   `tests/air2es/capped_buffer.metallib` (compiled from `capped_buffer.metal` with the pinned Metal compiler), with the built
   `build/macosx/arm64/release/air2es`, and compares the folder with `capped_buffer.golden/`. It needs `callBlobVertex` to
   translate through its host cap (eight uniforms and a select chain) and `uncappedVertex` to be refused by name, since it has
   no cap. It is registered as the `air2es` suite of the backports tests.
+- The sampling test translates `tests/air2es/sample_mac.metallib` (macOS, from `sample_mac.metal`). It checks that
+  `sampleVertex` and `sampleFragment` are OK, that `sampleMinLodFragment` is refused by name, and that the `sampleFragment`
+  folder matches `sample_mac.golden/`.
 - Negative control: replacing a loop bound with `int(inputTexture_size.x)` in the
   scaleAndBlur output keeps glslangValidator at exit 0, and the checker refuses it.
 - The Telegram oracle is an external file, so the harness run on it is not part of CI.

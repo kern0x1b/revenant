@@ -179,6 +179,30 @@ function cappedBufferChecks()
     os.rm(work)
 end
 
+local SAMPLING = path.join(os.scriptdir(), "air2es", "sample_mac")
+
+function samplingChecks()
+    local binary = path.join(os.scriptdir(), "..", "..", "..", "build", "macosx", "arm64", "release", "air2es")
+    assert(os.isfile(binary), "air2es is not built: configure with --air2es=y, then ./xmakew build air2es")
+    local work = path.join(os.tmpdir(), "air2es-sampling-test")
+    if os.isdir(work) then
+        os.rm(work)
+    end
+    os.mkdir(work)
+    local folder = path.join(work, "sample_mac.es2")
+    local output = os.iorunv(binary, {SAMPLING .. ".metallib", folder})
+    assert(output:find("OK sampleVertex vertex", 1, true), "sampleVertex is not translated: " .. output)
+    assert(output:find("OK sampleFragment fragment", 1, true), "sampleFragment, a nearest sample of a macOS texture, is not translated: " .. output)
+    assert(output:find("REFUSED sampleMinLodFragment: a sample with a minimum level of detail clamp this emitter does not map", 1, true),
+           "sampleMinLodFragment, a sample with min_lod_clamp(1.0), is not refused by name: " .. output)
+    for _, name in ipairs({"sampleFragment.fragment.glsl", "sampleFragment.fragment.json", "library.json"}) do
+        local expected = io.readfile(path.join(SAMPLING .. ".golden", name))
+        local got = io.readfile(path.join(folder, name))
+        assert(got == expected, name .. " differs from its golden output")
+    end
+    os.rm(work)
+end
+
 function main()
     for _, case in ipairs(CASES) do
         local reason = limits.check(case.source)
@@ -194,4 +218,6 @@ function main()
     print("air2es samplers: the table, the generator's pieces, the pin and the decode passed")
     cappedBufferChecks()
     print("air2es capped buffers: the host cap gives eight element uniforms and a select chain, and no cap is refused")
+    samplingChecks()
+    print("air2es sampling: the nine-operand macOS sample translates with a zero minimum LOD clamp, and a nonzero one is refused by name")
 end
