@@ -103,6 +103,9 @@ struct BufferCap {
 constexpr BufferCap kBufferCaps[] = {
     {"callBlobVertex", "positions", 8},
     {"loopFragment", "planes", 8},
+    {"diamondFragment", "planes", 17},
+    {"diamondLensFragment", "planes", 17},
+    {"diamondLensFragment", "edges", 128},
 };
 
 uint64_t bufferCapOf(const std::string &function, const std::string &argument)
@@ -1005,7 +1008,7 @@ private:
         const Member *field = memberAt(binding, address.offset);
         if (!field)
             return refuse("a load outside the members of " + binding.name);
-        if (address.selectCount == 0 || address.selectCount > 64)
+        if (address.selectCount == 0 || address.selectCount > 128)
             return refuse("an array member of " + binding.name + " with " + std::to_string(address.selectCount) + " elements");
         std::string type;
         if (!metalNameOf(address.selectType, type))
@@ -1260,7 +1263,7 @@ private:
         if (!before || !first || first->getSExtValue() >= bound->getSExtValue())
             return false;
         for (User *user : next->users())
-            if (user != index && user != test)
+            if (user != index && user != test && !(isa<Instruction>(user) && cast<Instruction>(user)->getParent() == header))
                 return false;
         for (User *user : test->users())
             if (user != branch)
@@ -1284,6 +1287,9 @@ private:
     {
         std::string index = "t" + std::to_string(counter_++);
         names_[loop.index] = index;
+        names_[loop.next] = "(" + index + " + 1)";
+        if (loop.first >= 0 && loop.last >= 1)
+            indexBounds_[loop.index] = uint64_t(loop.last - 1);
         statement("for (int " + index + " = " + std::to_string(loop.first) + "; " + index + " < " +
                   std::to_string(loop.last) + "; " + index + "++) {\n");
         depth_++;
@@ -1466,7 +1472,9 @@ private:
             if (!test || test->getPredicate() != (backFirst ? ICmpInst::ICMP_NE : ICmpInst::ICMP_EQ))
                 return false;
             auto *next = dyn_cast<BinaryOperator>(test->getOperand(0));
-            if (!next || next->getParent() != &latch || next->getOpcode() != Instruction::Add)
+            if (!next || next->getOpcode() != Instruction::Add)
+                return false;
+            if (next->getParent() != header && next->getParent() != &latch && !body.count(next->getParent()))
                 return false;
             auto *step = dyn_cast<ConstantInt>(next->getOperand(1));
             auto *index = dyn_cast<PHINode>(next->getOperand(0));
@@ -1496,9 +1504,12 @@ private:
                     return false;
                 cycle.last = (int64_t)cap;
             }
-            for (User *user : next->users())
-                if (user != index && user != test)
+            for (User *user : next->users()) {
+                auto *inside = dyn_cast<Instruction>(user);
+                if (user != index && user != test &&
+                    (!inside || (inside->getParent() != header && !body.count(inside->getParent()))))
                     return false;
+            }
             for (User *user : test->users())
                 if (user != back)
                     return false;
@@ -1516,6 +1527,8 @@ private:
         statement("for (int " + index + " = " + std::to_string(cycle.first) + "; " + index + " < " +
                   std::to_string(cycle.last) + "; " + index + "++) {\n");
         depth_++;
+        if (cycle.index && cycle.first >= 0 && cycle.last >= 1)
+            indexBounds_[cycle.index] = uint64_t(cycle.last - 1);
         ActiveLoop loop{header, cycle.exit, bodyOf(header, cycle.exit)};
         loops_.push_back(loop);
         bool emitted = region(header, nullptr);
@@ -1778,10 +1791,20 @@ private:
         if (!mask)
             return refuse("a bitwise and with no constant mask");
         auto *convert = dyn_cast<CallInst>(operand);
-        if (!convert || !convert->getCalledFunction() ||
-            !convert->getCalledFunction()->getName().starts_with("air.convert.u.i32.f."))
-            return refuse("a bitwise and of an integer that is not an unsigned float conversion");
+        bool fromFloat = convert && convert->getCalledFunction() &&
+                         convert->getCalledFunction()->getName().starts_with("air.convert.u.i32.f.");
         uint64_t bits = mask->getZExtValue();
+        if (!fromFloat) {
+            uint64_t bound = 0;
+            if ((bits & (bits + 1)) != 0 || !boundOf(operand, bound) || bound >= kExactLimit)
+                return refuse("a bitwise and of an integer that is not an unsigned float conversion");
+            std::string source, name;
+            if (!expression(operand, source) || !local(instruction, name))
+                return false;
+            highp_ = true;
+            statement(name + " = int(mod(float(" + source + "), " + std::to_string(bits + 1) + ".0));\n");
+            return true;
+        }
         if (!(bits & 0x80000000u))
             return refuse("a bitwise and that clears the sign bit");
         std::string source, name;
@@ -1918,6 +1941,11 @@ private:
             default:
                 return false;
             }
+        } else if (auto *phi = dyn_cast<PHINode>(value)) {
+            auto found = indexBounds_.find(phi);
+            if (found == indexBounds_.end())
+                return false;
+            bound = found->second;
         } else {
             return false;
         }
@@ -2725,6 +2753,7 @@ private:
     std::map<const Value *, std::vector<std::string>> aggregateTexts_;
     std::map<const Value *, const Value *> inlineArguments_;
     std::map<const Value *, std::string> names_;
+    std::map<const Value *, uint64_t> indexBounds_;
     std::set<std::string> declared_;
     std::map<std::string, std::string> textures_;
     std::vector<std::string> declarations_;

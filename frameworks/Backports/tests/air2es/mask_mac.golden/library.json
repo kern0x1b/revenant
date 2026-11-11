@@ -1,0 +1,1 @@
+{"functions": [{"name": "maskVertex", "stage": "vertex", "source": "maskVertex.vertex.glsl", "reflection": "maskVertex.vertex.json"}, {"name": "maskFragment", "stage": "fragment", "source": "maskFragment.fragment.glsl", "reflection": "maskFragment.fragment.json"}]}

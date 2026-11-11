@@ -225,6 +225,10 @@ and why, so it is not rediscovered later.
   the `dyFragment` folder matches `dfdy_mac.golden/`. `air.dfdy.v2f32` maps to `-dFdy`: GL's y axis points up and Metal's points down,
   so the same derivative has the opposite sign. Its negative control for the oracle is the same folder with the `-` removed, which
   fails with a channel difference of 255 over 4,096 channels.
+- The mask test translates `tests/air2es/mask_mac.metallib` (macOS, from `mask_mac.metal`): `maskVertex` and `maskFragment` are OK, and
+  the `maskFragment` folder matches `mask_mac.golden/`. The loop index plus one is taken modulo eight, which is `and` in the IR: a bitwise
+  and with `2^k - 1` of an integer with a known bound translates as `int(mod(float(x), 2^k))`, and the bound of a loop index is its trip
+  count. Its negative control for the oracle is the same source with `(i + 2) % 8`, which fails with 9/255 over 4,096 channels.
 - Negative control: replacing a loop bound with `int(inputTexture_size.x)` in the
   scaleAndBlur output keeps glslangValidator at exit 0, and the checker refuses it.
 - The Telegram oracle is an external file, so the harness run on it is not part of CI.
