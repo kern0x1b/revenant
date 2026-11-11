@@ -13,7 +13,7 @@ local FIELDS = {
     "Name: Revenant Backports",
     "Architecture: iphoneos-arm",
     "Section: System",
-    "Description: the Backports libraries of revenant, the iOS SDK's public APIs that the device's release lacks, in " .. FOLDER .. ", with the FFmpeg decoder they link and the Vision text models in /var/lib/revenant/tessdata; an application that links one of them depends on this package, and only an application that links a library loads it",
+    "Description: the Backports libraries of revenant, the iOS SDK's public APIs that the device's release lacks, in " .. FOLDER .. ", with the Vision text models in /var/lib/revenant/tessdata; the FFmpeg decoder they link is the package it depends on; an application that links one of them depends on this package, and only an application that links a library loads it",
 }
 
 local written

@@ -4,6 +4,7 @@ local BACKPORTS = "./usr/lib/revenant/org.revenant.backports/"
 local LINKED = {"libUIKitBackports.dylib", "libCoreDataBackports.dylib"}
 local RUNTIME = {["libc++.1.dylib"] = true, ["libc++abi.1.dylib"] = true}
 local FFMPEG = {"libavcodec.62.dylib", "libavutil.60.dylib"}
+local FFMPEG_PACKAGE = "org.revenant.ffmpeg-hevc-"
 local LICENSES = {
     "./usr/share/doc/org.revenant.backports/licenses/tessdata/LICENSE",
     "./usr/share/doc/org.revenant.backports/licenses/ffmpeg-hevc/LICENSE.md",
@@ -28,8 +29,12 @@ local function unpack(deb, scratch)
     return control, listing
 end
 
+local function optional_field(control, name)
+    return ("\n" .. control):match("\n" .. name .. ": ([^\n]*)")
+end
+
 local function field(control, name)
-    local value = ("\n" .. control):match("\n" .. name .. ": ([^\n]*)")
+    local value = optional_field(control, name)
     if not value then
         raise("the control file names no %s", name)
     end
@@ -76,6 +81,25 @@ function main(dir, demo, platform)
         raise("%s depends on %s, and not on %s", demo, field(demo_control, "Depends"), wanted)
     end
 
+    local ffmpeg
+    for _, dependency in ipairs((optional_field(platform_control, "Depends") or ""):split(",")) do
+        dependency = dependency:trim()
+        if dependency:startswith(FFMPEG_PACKAGE) then
+            if ffmpeg then
+                raise("%s depends on two FFmpeg packages, %s and %s", platform, ffmpeg, dependency)
+            end
+            ffmpeg = dependency
+        end
+    end
+    if not ffmpeg then
+        raise("%s depends on no %s package, and the Backports libraries link its FFmpeg decoder", platform, FFMPEG_PACKAGE .. "*")
+    end
+    local ffmpeg_control, ffmpeg_listing = unpack(single(dir, ffmpeg:match("^(%S+)")), scratch)
+    local ffmpeg_wanted = string.format("%s (= %s)", field(ffmpeg_control, "Package"), field(ffmpeg_control, "Version"))
+    if ffmpeg_wanted ~= ffmpeg then
+        raise("%s depends on %s, and the package is %s", platform, ffmpeg, ffmpeg_wanted)
+    end
+
     local files = members(platform_listing)
     local count = 0
     local vision = models()
@@ -83,8 +107,8 @@ function main(dir, demo, platform)
         local name = entry:startswith(BACKPORTS) and entry:sub(#BACKPORTS + 1)
         if name and name:match("^lib%w+Backports%.dylib$") then
             count = count + 1
-        elseif not (name and (RUNTIME[name] or table.contains(FFMPEG, name))) and not vision[entry] and not table.contains(LICENSES, entry) then
-            raise("%s carries %s, and it may carry only the Backports libraries, the C++ runtime and the FFmpeg decoder they link under %s, the Vision text models of vision_text.lua under ./var/lib/revenant/tessdata/, and their two licences", platform, entry, BACKPORTS)
+        elseif not (name and RUNTIME[name]) and not vision[entry] and not table.contains(LICENSES, entry) then
+            raise("%s carries %s, and it may carry only the Backports libraries and the C++ runtime under %s, the Vision text models of vision_text.lua under ./var/lib/revenant/tessdata/, and their licences", platform, entry, BACKPORTS)
         end
     end
     if (files[BACKPORTS .. "libc++.1.dylib"] ~= nil) ~= (files[BACKPORTS .. "libc++abi.1.dylib"] ~= nil) then
@@ -95,9 +119,11 @@ function main(dir, demo, platform)
             raise("%s carries no %s, and the demo links it", platform, library)
         end
     end
+    local ffmpeg_folder = "./usr/lib/revenant/" .. field(ffmpeg_control, "Package") .. "/"
+    local held = members(ffmpeg_listing)
     for _, library in ipairs(FFMPEG) do
-        if not files[BACKPORTS .. library] then
-            raise("%s carries no %s, and the Backports libraries link it", platform, library)
+        if not held[ffmpeg_folder .. library] then
+            raise("%s carries no %s, and the Backports libraries link it from %s", ffmpeg, library, ffmpeg_folder)
         end
     end
 
