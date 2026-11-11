@@ -486,9 +486,9 @@
    "group": "sdk",
    "version": "~57.0.20",
    "native": true,
-   "status": "stub",
-   "verified": "none",
-   "note": "Patched package for iOS 6 (seven patches in packages/e/expo-image-picker): UIImagePickerController with the UTI constants, single selection there, PhotoKit, PHPickerController and live photo code gated to iOS 14+, asset metadata to iOS 11+, and the library permission to the assets library on iOS 6 and 7; the picker exception is renamed away from expo-sharing's. The AVAssetExportPreset constants are literal preset names, because the SDK symbols bind strongly on iOS 6. Linked green into RNHost alone with Photos and PhotosUI weak-linked, on the tree before the merges with origin/main 02f5d6ec5 and later. Not linked on the current base, so no build is claimed: the row stays stub with verified none, and the stub stays in place until a link on the current base. Once built it is partial: multi-select is not available on iOS 6, and the module is not exercised on the phone."
+   "status": "partial",
+   "verified": "build",
+   "note": "Built from the package with seven iOS 6 patches (packages/e/expo-image-picker) and linked into RNHost with expo-image-picker real, Photos and PhotosUI weak-linked, on base 6c8fd1bf5 (swift-runtime 6.4.0 install 2d9126ab): not relinked on the current swift-runtime digest, so the build claim is for that base. UIImagePickerController is the iOS 6 picker, with the UTI constants and single selection there; PhotoKit, PHPickerController and live photo code are gated to iOS 14+; asset metadata to iOS 11+; the library permission goes to the assets library on iOS 6 and 7; the picker exception is renamed away from expo-sharing's; the AVAssetExportPreset constants are literal preset names, because the SDK symbols bind strongly on iOS 6. Multi-select is not available on iOS 6; the module is not exercised on the phone."
   },
   {
    "id": "expo-intent-launcher",
