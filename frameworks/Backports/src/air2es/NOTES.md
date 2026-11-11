@@ -31,7 +31,8 @@ and why, so it is not rediscovered later.
   name, as is each part GLES 2 cannot express: mirrored repeat, a clamp-to-zero address
   whose minification and magnification filters differ (the level of detail that picks one
   is not computed), a cube sample with a clamp-to-zero address, a mipmap filter, pixel
-  coordinates, anisotropy and a LOD clamp above zero. A clamp-to-zero address with one
+  coordinates, anisotropy and, on iOS, a LOD clamp above zero (the macOS nine-operand form
+  is in its own section below). A clamp-to-zero address with one
   filter is emulated, see "Clamp-to-zero samples" below. A plain sample does
   not read the compare function, so a constexpr compare is not refused.
 - The generator needs the toolchain's `metal` and `metallib`. The image is pinned in
@@ -46,6 +47,62 @@ and why, so it is not rediscovered later.
   them at each draw, because a constexpr sampler has no MTLSamplerState to bind.
 - The iOS target declares no border colour, so `clamp_to_border` does not compile for
   iOS and the table has no border field.
+
+## macOS sample_texture_2d
+
+- The macOS form (`air64-apple-macos13.0`) of a sample is `air.sample_texture_2d.v4f32` with nine operands: texture, sampler
+  state, coordinate, normalized, offset, hasLod, level or bias, min_lod_clamp, access. It returns `{ <4 x float>, i8 }`. The
+  iOS form has eight operands, with no min_lod_clamp, and returns `<4 x float>`.
+- The operand order and types are those of `__metal_sample_texture_2d_t` in the Metal toolchain's header
+  `metal/__bits/metal_texture2d`.
+- `sampleLocal` (`translate.cpp`) holds the colour element. The translated form needs min_lod_clamp to be the constant 0.0 and
+  access to be 0 (sample); other values are refused by name. The i8 residency element is refused if it is used.
+- `metal_shader_harness` reads each texture's wrap and filter from the reflection (`filterOf`, `wrapOf`) and sets them as the
+  GL texture parameters, so the GLES sample uses the same sampler state as the constexpr one. A linear GLES sampler does not
+  pass for a nearest constexpr one.
+- Fixture: `tests/air2es/sample_mac.metal`, `sample_mac.metallib` and `sample_mac.golden/`. The harness matches Metal on
+  `sampleFragment` with a max diff of 0 over 13,312 non-zero channels.
+
+## Oracle data source and device buffers
+
+- `metal_shader_harness METALLIB FOLDER [ANGLE_LIB [DATA_JSON]]` takes an optional data source, a JSON object with two keys.
+  `arrays` holds a device buffer's elements, flat, by the Metal argument's name (`"positions": [...]`). `members` holds a
+  uniform's values by its name, for both sides (`"viewport": [x, y, z, w]`). Without a data source the values are the fixed
+  ones of the earlier harness.
+- With `REVENANT_DUMP` set to a folder, the harness writes each run's Metal and GLES pixel buffers there as `<vertex>+<fragment>-<ints>-metal.rgba`
+  and `-gles.rgba`, 4 bytes per pixel, for a diff of a failing run.
+- A device pointer is filled element by element at its Metal stride. The GLES element uniform `<name>_<k>`, which the
+  translator emits for a capped buffer, takes element k of the same array. Its GLES offset must equal k times that stride, or
+  the run FAILs with a layout line.
+- The harness sets `revenant_target` to the target's size, as the host does (`RevenantMetalEncoder.m`). A fragment that reads
+  `[[position]]` matched only after this; before it, the GLES side computed `0 - gl_FragCoord.y`.
+- Fixture: `tests/air2es/devbuf_mac.metal` (`callBlobVertex` reads a `const device float *positions` buffer, capped at eight
+  elements; `blobFragment` reads `viewport` from a constant struct) and its `devbuf_mac.metallib`. Data sets:
+  `devbuf_one.data.json` (viewport z and w 1), `devbuf_mid.data.json` (0.5) and `devbuf_zero.data.json` (0). Results: one PASS
+  over 1,044 non-zero channels, mid PASS, zero PASS over 261 (alpha only). Negative control: the Metal source reads
+  `positions[vid % 5]` against the GLES folder of `vid % 7`: FAIL, 255/255 over 592 channels.
+- The earlier Mac fixtures (`deriv_mac`, `exit_mac`, `sample_mac`) and the GramDiamond composite give the same numbers as before.
+- Not covered: vector elements (the diamond's `planes` are `float4`), since the translator has no vector-element cap in HEAD yet,
+  and a `max` viewport for the lens's 128 edges. Both need the translator's capped-buffer patch before there is a GLES side.
+
+## Runtime-bounded loops and vector buffer elements
+
+- A counted loop whose latch compares the index with a value defined outside the loop is emitted as a `for` to the host cap of a
+  capped buffer that the body indexes with the loop index (`latchCycleOf`, `loopCapOf`). The latch test stays in the body, so the
+  loop stops at the uniform's count (`if (t17 == t0) break;`); a zero count is the guard before the loop. A loop with no capped
+  buffer behind its index stays refused.
+- A loop whose body is one block, which is both header and latch, is recognised with a runtime bound. A constant-bound
+  self-loop keeps its earlier route through `loopOf`: the first attempt changed four `gaussianBlur` kernels from OK to REFUSED,
+  and the corpus check caught it.
+- A host-capped buffer of `float2`, `float3` or `float4` elements is one uniform per element, as the scalar ones are
+  (`binding.stride` must equal the element size). `float3` is not tested.
+- Fixture: `tests/air2es/loop_mac.metal`, whose `loopFragment` loops `uint(viewport.z)` times over a `float4` buffer capped at
+  eight, and exits with the last index as a phi. Its capped buffer is named in `kBufferCaps` (`loopFragment`, `planes`, 8), as
+  `callBlobVertex` is. The diamond's entries (planes 17, edges 128) and the select limit of 128 are not in this change: they
+  change the diamond's verdicts, and they come with the geometry data source.
+- Oracle: `loop_z0`, `loop_z1`, `loop_z3` and `loop_z8` (the data sets, in `tests/air2es/`) PASS, max channel diff 0 over 16,384
+  channels each. The negative control, Metal `i + 1 < z` against the GLES folder of `i < z`, at z = 3, FAILs at 25/255 over 4,664
+  channels.
 
 ## Corpus check
 
@@ -152,11 +209,36 @@ and why, so it is not rediscovered later.
   rules come from GLSL ES 1.00, Appendix A, section 4 (loops) and section 5 (indexing),
   revision 17.
 - `./xmakew l -P frameworks/Backports frameworks/Backports/tests/air2es_test.lua` runs 15
-  checker cases, the sampler checks, and the capped-buffer test. The capped-buffer test translates
+  checker cases, the sampler checks, the capped-buffer test and the sampling test. The capped-buffer test translates
   `tests/air2es/capped_buffer.metallib` (compiled from `capped_buffer.metal` with the pinned Metal compiler), with the built
   `build/macosx/arm64/release/air2es`, and compares the folder with `capped_buffer.golden/`. It needs `callBlobVertex` to
   translate through its host cap (eight uniforms and a select chain) and `uncappedVertex` to be refused by name, since it has
   no cap. It is registered as the `air2es` suite of the backports tests.
+- The sampling test translates `tests/air2es/sample_mac.metallib` (macOS, from `sample_mac.metal`). It checks that
+  `sampleVertex` and `sampleFragment` are OK, that `sampleMinLodFragment` is refused by name, and that the `sampleFragment`
+  folder matches `sample_mac.golden/`.
+- The exit test translates `tests/air2es/exit_mac.metallib` (macOS, from `exit_mac.metal`): `exitVertex` and `exitFragment` are OK,
+  and the `exitFragment` folder matches `exit_mac.golden/`. Its negative control for the oracle is the same source with the break's
+  constant changed from 0.5 to 0.6.
+- The derivative test translates `tests/air2es/deriv_mac.metallib` (macOS, from `deriv_mac.metal`): `derivVertex` and `derivFragment` are OK,
+  and the `derivFragment` folder matches `deriv_mac.golden/`. Its negative control for the oracle is the same source with the `dfdx`
+  scale changed from 16.0 to 8.0.
+- The dfdy test translates `tests/air2es/dfdy_mac.metallib` (macOS, from `dfdy_mac.metal`): `dyFragment` and `dyNegFragment` are OK, and
+  the `dyFragment` folder matches `dfdy_mac.golden/`. `air.dfdy.v2f32` maps to `-dFdy`: GL's y axis points up and Metal's points down,
+  so the same derivative has the opposite sign. Its negative control for the oracle is the same folder with the `-` removed, which
+  fails with a channel difference of 255 over 4,096 channels.
+- The mask test translates `tests/air2es/mask_mac.metallib` (macOS, from `mask_mac.metal`): `maskVertex` and `maskFragment` are OK, and
+  the `maskFragment` folder matches `mask_mac.golden/`. The loop index plus one is taken modulo eight, which is `and` in the IR: a bitwise
+  and with `2^k - 1` of an integer with a known bound translates as `int(mod(float(x), 2^k))`, and the bound of a loop index is its trip
+  count. Its negative control for the oracle is the same source with `(i + 2) % 8`, which fails with 9/255 over 4,096 channels.
+- The flag test translates `tests/air2es/flag_mac.metallib` (macOS, from `flag_mac.metal`): `flagVertex` and `flagFragment` are OK, and the
+  `flagFragment` folder matches `flag_mac.golden/`. The latch tests a header phi that is true on entry and false on the back edge, so the
+  loop runs twice (`flagCycleOf`). Its negative control for the oracle is the same source with the second pass's factor 0.45 in place of
+  0.4, which fails with 31/255 over 576 channels.
+- The shared-member test translates `tests/air2es/shared_mac.metallib` (macOS, from `shared_mac.metal`): `sharedVertex` and `sharedFragment` are OK, and `sharedFragment` declares `u_viewport`, `u_parameters`, `lens_viewport` and `lens_parameters` at their own buffers. Members with the same name in two buffers of one kind get the argument's name as a prefix (`memberName`); `claimSlot` refuses a name claimed at another offset. The golden output is in `shared_mac.golden`.
+- A block reached from both arms of a branch is emitted in each arm: `region` resets the visited set per arm, as `multiway` does. The
+  Mac diamond's lens function needs this. No fixture covers it yet.
+- The diamond's uniform sets are generated in scratch (not committed). They set the stone's `Uniforms` members under their GLES names (`viewport`, `parameters`, ...) and the lens's under the prefixed names (`u_viewport`, `u_parameters`, `lens_viewport`, `lens_parameters`). The harness SKIPs a case whose Metal output is blank.
 - Negative control: replacing a loop bound with `int(inputTexture_size.x)` in the
   scaleAndBlur output keeps glslangValidator at exit 0, and the checker refuses it.
 - The Telegram oracle is an external file, so the harness run on it is not part of CI.

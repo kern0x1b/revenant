@@ -288,7 +288,7 @@ if is_plat("iphoneos") and not SELECTED then
         set_default(false)
         add_rules("@addon/revenant/app")
         add_files("tests/layout/main.m", "src/AVFoundation/AVCaptureMetadataOutput+RectOfInterest7.m", "src/AVFoundation/AVCaptureVideoPreviewLayer+MetadataRect7.m",
-                  "src/UIKit/UIViewController+ExtendedLayout.m")
+                  "src/UIKit/UIViewController+ExtendedLayout.m", "src/UIKit/RevenantExtendedLayout.c")
         add_mflags("-fobjc-arc")
         add_frameworks("UIKit", "Foundation", "CoreGraphics", "AVFoundation")
         set_values("app.plist-file", "tests/layout/Info.plist")
@@ -380,6 +380,31 @@ if is_plat("iphoneos") and not SELECTED then
         set_values("revenant.version", "1.0.0")
     target_end()
 
+    target("MetalLifecycleProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app", "backports.aliased")
+        add_files("tests/device_probe/lifecycle_main.m", "src/Metal/*.m", "src/Metal/RevenantMetalLineEdges.c")
+        add_mflags("-fobjc-arc")
+        add_deps("IOSurfaceBackports")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "OpenGLES", "CoreVideo")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.metallifecycleprobe", "CFBundleDisplayName=MetalLifecycleProbe")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
+    target("GLLockProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/device_probe/gl_lock_main.m")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "OpenGLES")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.gllockprobe", "CFBundleDisplayName=GLLockProbe")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
     target("MetalInstanceProbe")
         set_kind("binary")
         set_default(false)
@@ -454,6 +479,19 @@ if is_plat("iphoneos") and not SELECTED then
         add_frameworks("Foundation", "UIKit", "AVFoundation", "Security", "CoreTelephony", "MediaPlayer", "CoreMedia", "CoreFoundation")
         set_values("app.plist-file", "tests/device_probe/Info.plist")
         set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.symbolinventory", "CFBundleDisplayName=SymbolInventory")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
+    target("BackportsSpringProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_deps("UIKitBackports")
+        add_files("tests/device_probe/spring_probe_main.m")
+        add_mflags("-fobjc-arc", "-fobjc-arc-exceptions", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability")
+        add_frameworks("Foundation", "UIKit", "QuartzCore", "CoreGraphics")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.springprobe", "CFBundleDisplayName=SpringProbe")
         set_values("revenant.version", "1.0.0")
     target_end()
 
@@ -956,12 +994,12 @@ option("air2es", {default = false, showmenu = true,
     description = "Build air2es, the host tool that turns the AIR of a Metal render library into the OpenGL ES 2 folder (`<metallib>.es2/`) the Metal port loads. It reads LLVM IR, so it needs revenant@llvm with its libraries; the configure is not for iphoneos."})
 
 option("shader_harness", {default = false, showmenu = true,
-    description = "Build metal_shader_harness, which runs each shader of a metallib on the Mac's own Metal and its air2es GLSL on ANGLE, then compares the pixels. REVENANT_ANGLE_CEF must name the Libraries folder of a Chromium Embedded Framework 144.0.15.0 bundle; its four ANGLE files are checked against ANGLE_PINS before the build copies them; the configure is not for iphoneos."})
+    description = "Build metal_shader_harness, which runs each shader of a metallib on the Mac's own Metal and its air2es GLSL on ANGLE, then compares the pixels. REVENANT_ANGLE_CEF must name the Libraries folder of the official Chromium Embedded Framework 144.0.15.0 minimal macOS arm64 bundle; its four ANGLE files are checked against ANGLE_PINS before the build copies them; the configure is not for iphoneos."})
 
 local ANGLE_PINS = {
-    ["libEGL.dylib"] = "e2c562884bb6cdda6d191b451899a75727eaafce4256ad9474633058920c5152",
-    ["libGLESv2.dylib"] = "a237e9a51970a79e7534527665246fa4d93447e2bedb6809fdcb14a95f3443b2",
-    ["libvk_swiftshader.dylib"] = "ffa750fd2123ea58cd70ad854d8f40bf33e92d0cb034f46d7ee51c6be29ca8f5",
+    ["libEGL.dylib"] = "138c6b53ea9e1d9dc905caa1c6502cc22609bb28deb4be59cdb11c73b3a85c01",
+    ["libGLESv2.dylib"] = "e70c5051d8b979da4e0ed88290cce03cf4e3ebf145cc8ee46cd4661ab7bfe2f9",
+    ["libvk_swiftshader.dylib"] = "08a162491191cd6acaf16e85372a2f02c86dda8fe06977cbda1d458d968c5386",
     ["vk_swiftshader_icd.json"] = "d717d915e31e7c27948b80b36ab34e2d897888114c5c7d0af835f93eb53e58f5",
 }
 
@@ -1013,7 +1051,7 @@ if not is_plat("iphoneos") and has_config("shader_harness") then
         add_frameworks("Foundation", "Metal")
         before_build(function (target)
             local source = os.getenv("REVENANT_ANGLE_CEF")
-            assert(source and os.isdir(source), "metal_shader_harness needs REVENANT_ANGLE_CEF=<the Libraries folder of a Chromium Embedded Framework 144.0.15.0 bundle>")
+            assert(source and os.isdir(source), "metal_shader_harness needs REVENANT_ANGLE_CEF=<the Libraries folder of the official Chromium Embedded Framework 144.0.15.0 minimal macOS arm64 bundle>")
             local lib = path.join(target:targetdir(), "angle")
             if not os.isdir(lib) then
                 os.mkdir(lib)
@@ -1199,7 +1237,7 @@ if not is_plat("iphoneos") then
     
     host_tests("PassKit", {payment_network = {"PKPaymentNetworks8.m"}})
     host_tests("Intents", {message_types = {"RevenantIntents10.m", "coding/RevenantCoding.m"}, object = {"RevenantIntents120.m", "RevenantIntentsResolution.m", "coding/RevenantCoding.m"}, result = {"RevenantIntents120.m", "RevenantIntentsResolution.m", "coding/RevenantCoding.m"}, calls ={"RevenantIntentsCalls110.m", "coding/RevenantCoding.m"}}, nil, {"Foundation", "Intents"}, {defines = {"REVENANT_HOST_BUILD"}})
-    host_tests("Metal", {binary_archive = {"RevenantMetalBinaryArchive.m"}, line_edges = {"RevenantMetalLineEdges.c"}, grid = {}}, nil, {"Foundation", "Metal"}, {defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("Metal", {binary_archive = {"RevenantMetalBinaryArchive.m"}, line_edges = {"RevenantMetalLineEdges.c"}, grid = {}, lifecycle = {}, residency = {}}, nil, {"Foundation", "Metal"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("MetalPerformanceShaders", {bilinear = {"RevenantMPSBilinear.c"}}, nil, {}, {extension = "c"})
     host_tests("CoreImage", {render_destination = {"CIRenderDestination11.m"}}, "Graphics", {"Foundation", "CoreImage", "CoreGraphics", "CoreVideo", "IOSurface", "Metal", "OpenGL"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("CoreImage", {orientation = {}}, "Graphics", {"Foundation", "CoreImage", "CoreGraphics"})
@@ -1214,6 +1252,6 @@ if not is_plat("iphoneos") then
     host_tests("PDFKit", {writer = {"RevenantPDFObjects.m", "RevenantPDFImage.m", "RevenantPDFCopy.m"}}, nil, {"Foundation", "CoreGraphics", "ImageIO", "CoreText", "PDFKit", "AppKit"}, {syslinks = {"z"}})
     host_tests("VisionKit", {warp = {"RevenantDocumentWarp.c"}, live = {"RevenantDocumentLive.c", "RevenantDocumentWarp.c", "../Vision/VNRectangleDetector.c"}}, nil, {}, {extension = "c"})
     host_tests("VisionKit", {scan = {"RevenantDocumentScan.m", "RevenantDocumentLive.c", "RevenantDocumentWarp.c", "../Vision/VNRectangleDetector.c"}}, nil, {"Foundation", "CoreGraphics", "ImageIO"})
-    host_tests("UIKit", {animation_duration = {"RevenantAnimationDuration.m"}, tightening = {"RevenantTightening.m"}, corner_path = {"RevenantCornerPath.c"}}, nil, {"Foundation", "CoreGraphics"})
+    host_tests("UIKit", {animation_duration = {"RevenantAnimationDuration.m"}, tightening = {"RevenantTightening.m"}, corner_path = {"RevenantCornerPath.c"}, extended_layout = {"RevenantExtendedLayout.c"}}, nil, {"Foundation", "CoreGraphics"})
     host_tests("AuthenticationServices", {authorization = {"ASAuthorizationController.m", "ASAuthorizationPlatformPublicKeyCredentialProvider.m", "ASAuthorizationPlatformPublicKeyCredentialRequests.m", "ASAuthorizationRequest.m", "ASConstants13_0.m", "RevenantASAppleIDButtonMetrics.m"}}, nil, {"Foundation", "AuthenticationServices", "AppKit"}, {defines = {"REVENANT_HOST_BUILD"}})
 end

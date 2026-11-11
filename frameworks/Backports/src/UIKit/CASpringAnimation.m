@@ -7,6 +7,8 @@
 #import <objc/runtime.h>
 
 static double revenant_spring_position_value(double time, void *context);
+
+static Class revenant_spring_system;
 #endif
 
 @implementation RevenantCASpringAnimation {
@@ -23,14 +25,28 @@ static double revenant_spring_position_value(double time, void *context);
 @synthesize initialVelocity = _initialVelocity;
 @synthesize allowsOverdamping = _allowsOverdamping;
 
+static void revenant_spring_set_defaults(RevenantCASpringAnimation *spring)
+{
+    spring.mass = 1;
+    spring.stiffness = 100;
+    spring.damping = 10;
+    spring.initialVelocity = 0;
+    spring.allowsOverdamping = NO;
+}
+
 - (instancetype)init
 {
     if ((self = [super init])) {
-        _mass = 1;
-        _stiffness = 100;
-        _damping = 10;
-        _initialVelocity = 0;
-        _allowsOverdamping = NO;
+        revenant_spring_set_defaults(self);
+    }
+    return self;
+}
+
+- (instancetype)initWithKeyPath:(NSString *)keyPath
+{
+    if ((self = [super init])) {
+        revenant_spring_set_defaults(self);
+        self.keyPath = keyPath;
     }
     return self;
 }
@@ -123,8 +139,9 @@ static double revenant_spring_position_value(double time, void *context);
 {
     Class proxy = objc_getClass("RevenantCASpringAnimation");
     if (self == proxy) {
-        Class publicClass = objc_getClass("CASpringAnimation");
-        return publicClass ?: self;
+        Class system = revenant_spring_system;
+        if (system)
+            return system;
     }
     return self;
 }
@@ -133,9 +150,9 @@ static double revenant_spring_position_value(double time, void *context);
 {
     Class proxy = objc_getClass("RevenantCASpringAnimation");
     if (self == proxy) {
-        Class publicClass = objc_getClass("CASpringAnimation");
-        if (publicClass && publicClass != proxy)
-            return [publicClass alloc];
+        Class system = revenant_spring_system;
+        if (system)
+            return [system alloc];
     }
     return class_createInstance(self, 0);
 }
@@ -144,9 +161,9 @@ static double revenant_spring_position_value(double time, void *context);
 {
     Class proxy = objc_getClass("RevenantCASpringAnimation");
     if (self == proxy) {
-        Class publicClass = objc_getClass("CASpringAnimation");
-        if (publicClass && publicClass != proxy)
-            return [publicClass allocWithZone:zone];
+        Class system = revenant_spring_system;
+        if (system)
+            return [system allocWithZone:zone];
     }
     return class_createInstance(self, 0);
 }
@@ -164,9 +181,9 @@ static double revenant_spring_position_value(double time, void *context);
 {
     Class proxy = objc_getClass("RevenantCASpringAnimation");
     if (self == proxy) {
-        Class publicClass = objc_getClass("CASpringAnimation");
-        if (publicClass && publicClass != proxy)
-            return [publicClass isSubclassOfClass:aClass];
+        Class system = revenant_spring_system;
+        if (system)
+            return [system isSubclassOfClass:aClass];
     }
     return [super isSubclassOfClass:aClass];
 }
@@ -175,9 +192,9 @@ static double revenant_spring_position_value(double time, void *context);
 {
     Class proxy = objc_getClass("RevenantCASpringAnimation");
     if (self == proxy) {
-        Class publicClass = objc_getClass("CASpringAnimation");
-        if (publicClass && publicClass != proxy)
-            return [publicClass instancesRespondToSelector:selector];
+        Class system = revenant_spring_system;
+        if (system)
+            return [system instancesRespondToSelector:selector];
     }
     return [super instancesRespondToSelector:selector];
 }
@@ -239,10 +256,17 @@ static void revenant_add_animation(CALayer *self, SEL _cmd, CAAnimation *animati
 __attribute__((constructor)) static void revenant_spring_install(void)
 {
     Class proxy = objc_getClass("RevenantCASpringAnimation");
-    if (proxy && !objc_getClass("CASpringAnimation")) {
-        Class publicClass = objc_allocateClassPair(proxy, "CASpringAnimation", 0);
-        if (publicClass)
-            objc_registerClassPair(publicClass);
+    if (proxy) {
+        Class native = objc_getClass("CASpringAnimation");
+        if (!native) {
+            Class publicClass = objc_allocateClassPair(proxy, "CASpringAnimation", 0);
+            if (publicClass) {
+                objc_registerClassPair(publicClass);
+                revenant_spring_system = publicClass;
+            }
+        } else if (class_getInstanceMethod(native, @selector(initialVelocity)) && class_getInstanceMethod(native, @selector(settlingDuration))) {
+            revenant_spring_system = native;
+        }
     }
     Method method = class_getInstanceMethod([CALayer class], @selector(addAnimation:forKey:));
     if (method && !revenant_original_add_animation)

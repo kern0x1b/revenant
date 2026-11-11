@@ -102,6 +102,10 @@ struct BufferCap {
 
 constexpr BufferCap kBufferCaps[] = {
     {"callBlobVertex", "positions", 8},
+    {"loopFragment", "planes", 8},
+    {"diamondFragment", "planes", 17},
+    {"diamondLensFragment", "planes", 17},
+    {"diamondLensFragment", "edges", 128},
 };
 
 uint64_t bufferCapOf(const std::string &function, const std::string &argument)
@@ -148,10 +152,12 @@ struct PlainFunction {
     unsigned arguments;
     const char *tail = "";
     bool derivative = false;
+    const char *sign = "";
 };
 
 const PlainFunction kPlainFunctions[] = {
     {"air.fast_sin.f32", "sin", 1},
+    {"air.fast_asin.f32", "asin", 1},
     {"air.fast_cos.f32", "cos", 1},
     {"air.fast_fabs.f32", "abs", 1},
     {"air.fast_fabs.v2f32", "abs", 1},
@@ -175,6 +181,7 @@ const PlainFunction kPlainFunctions[] = {
     {"air.fast_clamp.v3f32", "clamp", 3},
     {"air.mix.f32", "mix", 3},
     {"air.mix.v3f32", "mix", 3},
+    {"air.mix.v4f32", "mix", 3},
     {"air.mix.v4f16", "mix", 3},
     {"air.fmin.f16", "min", 2},
     {"air.fmax.f16", "max", 2},
@@ -198,6 +205,10 @@ const PlainFunction kPlainFunctions[] = {
     {"air.fast_exp.f32", "exp", 1},
     {"air.fast_tan.f32", "tan", 1},
     {"air.fwidth.f32", "fwidth", 1, "", true},
+    {"air.fwidth.v3f32", "fwidth", 1, "", true},
+    {"air.dfdx.v2f32", "dFdx", 1, "", true},
+    {"air.dfdy.v2f32", "dFdy", 1, "", true, "-"},
+    {"air.sign.f32", "sign", 1},
 };
 
 const PlainFunction *plainFunction(const std::string &name)
@@ -409,8 +420,8 @@ public:
                 if (!cap) {
                     binding.members.push_back(Member{binding.name, 0, size, typeName});
                 } else {
-                    if (!scalarElement || components != 1 || size != binding.stride)
-                        return refuse("a buffer with a host cap whose element is not one scalar: " + binding.name);
+                    if (!scalarElement || size != binding.stride)
+                        return refuse("a buffer with a host cap whose element is not a scalar or a vector of one: " + binding.name);
                     binding.capCount = cap;
                     for (uint64_t k = 0; k < cap; k++)
                         binding.members.push_back(Member{binding.name + "_" + std::to_string(k), k * size, size, typeName});
@@ -606,7 +617,7 @@ private:
             declarations_.push_back("vec4 " + sample + "(vec2 uv) {\n" + body + "}\n");
         }
         std::string value;
-        if (!local(call, value))
+        if (!sampleLocal(call, value))
             return false;
         statement(value + " = " + sample + "(" + coordinates + ");\n");
         return true;
@@ -793,6 +804,38 @@ private:
         declare("uniform vec2 revenant_target;\n", "revenant_target");
     }
 
+    bool sharedMember(const Binding &binding, const std::string &field) const
+    {
+        for (const Binding &other : bindings_)
+            if (&other != &binding && other.indexedByVertex == binding.indexedByVertex)
+                for (const Member &member : other.members)
+                    if (member.name == field)
+                        return true;
+        return false;
+    }
+
+    std::string memberName(const Binding &binding, const Member &field, bool attribute, bool scoped) const
+    {
+        bool prefixed = (scoped && !attribute) || sharedMember(binding, field.name);
+        std::string name = prefixed ? binding.name + "_" + field.name : field.name;
+        return attribute ? "a_" + name : name;
+    }
+
+    bool claimSlot(const std::string &name, const Binding &binding, const Member &field, bool &fresh)
+    {
+        std::pair<uint64_t, uint64_t> slot(binding.index, field.offset);
+        auto found = slots_.find(name);
+        if (found == slots_.end()) {
+            if (declared_.count(name))
+                return refuse("a member named " + name + " that another declaration already uses in " + binding.name);
+            slots_[name] = slot;
+            fresh = true;
+            return true;
+        }
+        fresh = false;
+        return found->second == slot || refuse("two members named " + name + " at different offsets of " + binding.name);
+    }
+
     bool accessMatrix(Binding &binding, const Member &field, uint64_t offset, Type *loaded, std::string &out, bool scoped)
     {
         unsigned columns = 0;
@@ -803,8 +846,10 @@ private:
             return refuse("a matrix whose size does not match its type in " + binding.name);
         if (binding.indexedByVertex)
             return refuse("a matrix vertex attribute in " + binding.name);
-        std::string name = scoped ? binding.name + "_" + field.name : field.name;
-        bool fresh = !declared_.count(name);
+        std::string name = memberName(binding, field, false, scoped);
+        bool fresh = false;
+        if (!claimSlot(name, binding, field, fresh))
+            return false;
         declare("uniform mat" + std::to_string(columns) + " " + name + ";\n", name);
         if (fresh)
             uniformLines_.push_back("{\"name\": " + jsonQuote(name) + ", \"buffer\": " + std::to_string(binding.index) +
@@ -862,8 +907,10 @@ private:
         bool real = attribute || scalar == "float" || scalar == "half";
         std::string suffix = std::to_string(components);
         std::string glsl = real ? (components == 1 ? "float" : "vec" + suffix) : (components == 1 ? "int" : "ivec" + suffix);
-        std::string name = attribute ? "a_" + field.name : scoped ? binding.name + "_" + field.name : field.name;
-        bool fresh = !declared_.count(name);
+        std::string name = memberName(binding, field, attribute, scoped);
+        bool fresh = false;
+        if (!claimSlot(name, binding, field, fresh))
+            return false;
         declare((attribute ? "attribute " : "uniform ") + glsl + " " + name + ";\n", name);
         if (fresh) {
             std::string common = "\"name\": " + jsonQuote(name) + ", \"buffer\": " + std::to_string(binding.index) +
@@ -1000,7 +1047,7 @@ private:
         const Member *field = memberAt(binding, address.offset);
         if (!field)
             return refuse("a load outside the members of " + binding.name);
-        if (address.selectCount == 0 || address.selectCount > 64)
+        if (address.selectCount == 0 || address.selectCount > 128)
             return refuse("an array member of " + binding.name + " with " + std::to_string(address.selectCount) + " elements");
         std::string type;
         if (!metalNameOf(address.selectType, type))
@@ -1255,7 +1302,7 @@ private:
         if (!before || !first || first->getSExtValue() >= bound->getSExtValue())
             return false;
         for (User *user : next->users())
-            if (user != index && user != test)
+            if (user != index && user != test && !(isa<Instruction>(user) && cast<Instruction>(user)->getParent() == header))
                 return false;
         for (User *user : test->users())
             if (user != branch)
@@ -1279,6 +1326,9 @@ private:
     {
         std::string index = "t" + std::to_string(counter_++);
         names_[loop.index] = index;
+        names_[loop.next] = "(" + index + " + 1)";
+        if (loop.first >= 0 && loop.last >= 1)
+            indexBounds_[loop.index] = uint64_t(loop.last - 1);
         statement("for (int " + index + " = " + std::to_string(loop.first) + "; " + index + " < " +
                   std::to_string(loop.last) + "; " + index + "++) {\n");
         depth_++;
@@ -1395,7 +1445,163 @@ private:
         if (loops_.empty())
             return true;
         const ActiveLoop &loop = loops_.back();
+        if (block->getParent() != loop.header->getParent())
+            return true;
         return block == loop.header || block == loop.exit || loop.body.count(block) > 0;
+    }
+
+    std::set<const BasicBlock *> bodyOf(BasicBlock *header, const BasicBlock *exit)
+    {
+        std::set<const BasicBlock *> body;
+        std::vector<const BasicBlock *> pending = {header};
+        while (!pending.empty()) {
+            const Instruction *terminator = pending.back()->getTerminator();
+            pending.pop_back();
+            for (unsigned i = 0; i < terminator->getNumSuccessors(); i++) {
+                const BasicBlock *next = terminator->getSuccessor(i);
+                if (next != header && next != exit && body.insert(next).second)
+                    pending.push_back(next);
+            }
+        }
+        return body;
+    }
+
+    static bool isSameIndex(const Value *value, const Value *index)
+    {
+        if (auto *extend = dyn_cast<CastInst>(value);
+            extend && (extend->getOpcode() == Instruction::SExt || extend->getOpcode() == Instruction::ZExt))
+            value = extend->getOperand(0);
+        return value == index;
+    }
+
+    uint64_t loopCapOf(BasicBlock *header, const PHINode *index, const std::set<const BasicBlock *> &body)
+    {
+        std::vector<const BasicBlock *> blocks = {header};
+        blocks.insert(blocks.end(), body.begin(), body.end());
+        for (const BasicBlock *block : blocks)
+            for (const Instruction &instruction : *block) {
+                auto *gep = dyn_cast<GetElementPtrInst>(&instruction);
+                if (!gep)
+                    continue;
+                bool indexed = false;
+                for (unsigned i = 1; i < gep->getNumOperands(); i++)
+                    indexed = indexed || isSameIndex(gep->getOperand(i), index);
+                if (!indexed)
+                    continue;
+                const Binding *binding = bindingOf(gep->getPointerOperand());
+                if (binding && binding->capCount)
+                    return binding->capCount;
+            }
+        return 0;
+    }
+
+    bool latchCycleOf(BasicBlock *header, Cycle &cycle)
+    {
+        for (BasicBlock &latch : *header->getParent()) {
+            auto *back = dyn_cast<BranchInst>(latch.getTerminator());
+            if (!back || !back->isConditional())
+                continue;
+            bool backFirst = back->getSuccessor(0) == header;
+            bool backSecond = back->getSuccessor(1) == header;
+            if (backFirst == backSecond)
+                continue;
+            BasicBlock *exit = back->getSuccessor(backFirst ? 1 : 0);
+            std::set<const BasicBlock *> body = bodyOf(header, exit);
+            if (&latch != header && !body.count(&latch))
+                continue;
+            auto *test = dyn_cast<ICmpInst>(back->getCondition());
+            if (!test || test->getPredicate() != (backFirst ? ICmpInst::ICMP_NE : ICmpInst::ICMP_EQ))
+                return false;
+            auto *next = dyn_cast<BinaryOperator>(test->getOperand(0));
+            if (!next || next->getOpcode() != Instruction::Add)
+                return false;
+            if (next->getParent() != header && next->getParent() != &latch && !body.count(next->getParent()))
+                return false;
+            auto *step = dyn_cast<ConstantInt>(next->getOperand(1));
+            auto *index = dyn_cast<PHINode>(next->getOperand(0));
+            if (!step || !step->isOne() || !index || index->getParent() != header || index->getNumIncomingValues() != 2)
+                return false;
+            if (index->getIncomingValueForBlock(&latch) != next)
+                return false;
+            Value *start = nullptr;
+            for (unsigned j = 0; j < 2; j++)
+                if (index->getIncomingBlock(j) != &latch)
+                    start = index->getIncomingValue(j);
+            auto *first = dyn_cast_or_null<ConstantInt>(start);
+            if (!first)
+                return false;
+            if (auto *bound = dyn_cast<ConstantInt>(test->getOperand(1))) {
+                if (&latch == header)
+                    continue;
+                if (first->getSExtValue() >= bound->getSExtValue())
+                    return false;
+                cycle.last = bound->getSExtValue();
+            } else {
+                auto *limit = dyn_cast<Instruction>(test->getOperand(1));
+                if (limit && (limit->getParent() == header || limit->getParent() == &latch || body.count(limit->getParent())))
+                    return false;
+                uint64_t cap = loopCapOf(header, index, body);
+                if (!cap || first->getSExtValue() >= (int64_t)cap)
+                    return false;
+                cycle.last = (int64_t)cap;
+            }
+            for (User *user : next->users()) {
+                auto *inside = dyn_cast<Instruction>(user);
+                if (user != index && user != test &&
+                    (!inside || (inside->getParent() != header && !body.count(inside->getParent()))))
+                    return false;
+            }
+            for (User *user : test->users())
+                if (user != back)
+                    return false;
+            cycle.index = index;
+            cycle.exit = exit;
+            cycle.first = first->getSExtValue();
+            return true;
+        }
+        return false;
+    }
+
+    bool flagCycleOf(BasicBlock *header, Cycle &cycle)
+    {
+        for (BasicBlock &latch : *header->getParent()) {
+            auto *back = dyn_cast<BranchInst>(latch.getTerminator());
+            if (!back || !back->isConditional())
+                continue;
+            bool backFirst = back->getSuccessor(0) == header;
+            bool backSecond = back->getSuccessor(1) == header;
+            if (backFirst == backSecond)
+                continue;
+            BasicBlock *exit = back->getSuccessor(backFirst ? 1 : 0);
+            if (&latch != header && !bodyOf(header, exit).count(&latch))
+                continue;
+            auto *flag = dyn_cast<PHINode>(back->getCondition());
+            if (!flag || flag->getParent() != header || flag->getNumIncomingValues() != 2 ||
+                flag->getBasicBlockIndex(&latch) < 0 || !flag->getType()->isIntegerTy(1))
+                return false;
+            Value *start = nullptr;
+            for (unsigned j = 0; j < 2; j++)
+                if (flag->getIncomingBlock(j) != &latch)
+                    start = flag->getIncomingValue(j);
+            auto *first = dyn_cast_or_null<ConstantInt>(start);
+            auto *again = dyn_cast<ConstantInt>(flag->getIncomingValueForBlock(&latch));
+            if (!first || !again)
+                return false;
+            bool continueOn = backFirst;
+            bool current = !first->isZero();
+            uint64_t trips = 0;
+            while (current == continueOn) {
+                if (++trips >= 64)
+                    return false;
+                current = !again->isZero();
+            }
+            cycle.index = nullptr;
+            cycle.exit = exit;
+            cycle.first = 0;
+            cycle.last = int64_t(trips + 1);
+            return true;
+        }
+        return false;
     }
 
     bool emitCountedCycle(BasicBlock *header, const Cycle &cycle)
@@ -1404,17 +1610,9 @@ private:
         statement("for (int " + index + " = " + std::to_string(cycle.first) + "; " + index + " < " +
                   std::to_string(cycle.last) + "; " + index + "++) {\n");
         depth_++;
-        ActiveLoop loop{header, cycle.exit, {}};
-        std::vector<const BasicBlock *> pending = {header};
-        while (!pending.empty()) {
-            const Instruction *terminator = pending.back()->getTerminator();
-            pending.pop_back();
-            for (unsigned i = 0; i < terminator->getNumSuccessors(); i++) {
-                const BasicBlock *next = terminator->getSuccessor(i);
-                if (next != header && next != cycle.exit && loop.body.insert(next).second)
-                    pending.push_back(next);
-            }
-        }
+        if (cycle.index && cycle.first >= 0 && cycle.last >= 1)
+            indexBounds_[cycle.index] = uint64_t(cycle.last - 1);
+        ActiveLoop loop{header, cycle.exit, bodyOf(header, cycle.exit)};
         loops_.push_back(loop);
         bool emitted = region(header, nullptr);
         loops_.pop_back();
@@ -1548,7 +1746,7 @@ private:
                 return true;
             entering = false;
             Cycle cycle;
-            if (!iterating && cycleOf(block, cycle)) {
+            if (!iterating && (cycleOf(block, cycle) || latchCycleOf(block, cycle) || flagCycleOf(block, cycle))) {
                 if (!emitCountedCycle(block, cycle))
                     return false;
                 block = cycle.exit;
@@ -1598,15 +1796,20 @@ private:
             std::string condition;
             if (!expression(branch->getCondition(), condition))
                 return false;
+            const std::set<const BasicBlock *> before = visited_;
             statement("if (" + condition + ") {\n");
             depth_++;
             if (!side(block, branch->getSuccessor(0), join))
                 return false;
+            std::set<const BasicBlock *> after = visited_;
+            visited_ = before;
             depth_--;
             statement("} else {\n");
             depth_++;
             if (!side(block, branch->getSuccessor(1), join))
                 return false;
+            after.insert(visited_.begin(), visited_.end());
+            visited_ = after;
             depth_--;
             statement("}\n");
             block = join;
@@ -1676,10 +1879,20 @@ private:
         if (!mask)
             return refuse("a bitwise and with no constant mask");
         auto *convert = dyn_cast<CallInst>(operand);
-        if (!convert || !convert->getCalledFunction() ||
-            !convert->getCalledFunction()->getName().starts_with("air.convert.u.i32.f."))
-            return refuse("a bitwise and of an integer that is not an unsigned float conversion");
+        bool fromFloat = convert && convert->getCalledFunction() &&
+                         convert->getCalledFunction()->getName().starts_with("air.convert.u.i32.f.");
         uint64_t bits = mask->getZExtValue();
+        if (!fromFloat) {
+            uint64_t bound = 0;
+            if ((bits & (bits + 1)) != 0 || !boundOf(operand, bound) || bound >= kExactLimit)
+                return refuse("a bitwise and of an integer that is not an unsigned float conversion");
+            std::string source, name;
+            if (!expression(operand, source) || !local(instruction, name))
+                return false;
+            highp_ = true;
+            statement(name + " = int(mod(float(" + source + "), " + std::to_string(bits + 1) + ".0));\n");
+            return true;
+        }
         if (!(bits & 0x80000000u))
             return refuse("a bitwise and that clears the sign bit");
         std::string source, name;
@@ -1816,6 +2029,11 @@ private:
             default:
                 return false;
             }
+        } else if (auto *phi = dyn_cast<PHINode>(value)) {
+            auto found = indexBounds_.find(phi);
+            if (found == indexBounds_.end())
+                return false;
+            bound = found->second;
         } else {
             return false;
         }
@@ -1952,6 +2170,23 @@ private:
         element.name = name;
         element.type = type;
         element.selected = selected;
+        return true;
+    }
+
+    bool sampleLocal(CallInst &call, std::string &name)
+    {
+        auto *result = dyn_cast<StructType>(call.getType());
+        if (!result)
+            return local(call, name);
+        if (result->getNumElements() != 2 || !result->getElementType(0)->isVectorTy() ||
+            !result->getElementType(1)->isIntegerTy(8))
+            return refuse("a sample result of a shape this emitter does not hold");
+        Type *color = result->getElementType(0);
+        if (glslType(color).empty())
+            return refuse("a value of a type this emitter does not hold");
+        name = "t" + std::to_string(counter_++);
+        locals_.push_back(declaredType(color) + " " + name + ";\n");
+        aggregateTexts_[&call] = {name};
         return true;
     }
 
@@ -2446,7 +2681,7 @@ private:
                     return refuse("a derivative outside a fragment function");
                 derivatives_ = true;
             }
-            statement(name + " = " + plain->glsl + "(" + join(args) + plain->tail + ");\n");
+            statement(name + " = " + plain->sign + plain->glsl + "(" + join(args) + plain->tail + ");\n");
             return true;
         }
         if (width || height) {
@@ -2469,7 +2704,8 @@ private:
             statement(name + " = int(" + size + (width ? ".x" : ".y") + ");\n");
             return true;
         }
-        if (call.arg_size() != 8)
+        const unsigned operands = call.arg_size();
+        if (operands != 8 && operands != 9)
             return refuse("a sample with an argument count this emitter does not map");
         Binding *texture = bindingOf(call.getArgOperand(0));
         if (!texture || texture->kind != "air.texture")
@@ -2484,6 +2720,14 @@ private:
         if (!normalized || !normalized->isOne() || !hasLevel || !hasLevel->isZero() ||
             !level || !level->isZero() || !isa<ConstantAggregateZero>(call.getArgOperand(4)))
             return refuse("a sample with a level, bias, offset or unnormalized coordinate this emitter does not map");
+        if (operands == 9) {
+            auto *minLod = dyn_cast<ConstantFP>(call.getArgOperand(7));
+            if (!minLod || !minLod->isZero())
+                return refuse("a sample with a minimum level of detail clamp this emitter does not map");
+        }
+        auto *access = dyn_cast<ConstantInt>(call.getArgOperand(operands - 1));
+        if (!access || !access->isZero())
+            return refuse("a sample of a texture whose access is not sample");
         if (args.size() != 1)
             return refuse("a sample with an argument count this emitter does not map");
         if (!bound && clampsToZero(sampler))
@@ -2491,7 +2735,7 @@ private:
         declare("uniform sampler2D " + texture->name + ";\n", texture->name);
         if (!sampledBy(*texture, bound ? "" : samplerJson(sampler), ", \"depth\": false, \"compare\": false"))
             return false;
-        if (!local(call, name))
+        if (!sampleLocal(call, name))
             return false;
         statement(name + " = texture2D(" + texture->name + ", " + args[0] + ");\n");
         return true;
@@ -2597,7 +2841,9 @@ private:
     std::map<const Value *, std::vector<std::string>> aggregateTexts_;
     std::map<const Value *, const Value *> inlineArguments_;
     std::map<const Value *, std::string> names_;
+    std::map<const Value *, uint64_t> indexBounds_;
     std::set<std::string> declared_;
+    std::map<std::string, std::pair<uint64_t, uint64_t>> slots_;
     std::map<std::string, std::string> textures_;
     std::vector<std::string> declarations_;
     std::vector<std::string> locals_;

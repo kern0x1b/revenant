@@ -179,6 +179,256 @@ function cappedBufferChecks()
     os.rm(work)
 end
 
+local SAMPLING = path.join(os.scriptdir(), "air2es", "sample_mac")
+
+function samplingChecks()
+    local binary = path.join(os.scriptdir(), "..", "..", "..", "build", "macosx", "arm64", "release", "air2es")
+    assert(os.isfile(binary), "air2es is not built: configure with --air2es=y, then ./xmakew build air2es")
+    local work = path.join(os.tmpdir(), "air2es-sampling-test")
+    if os.isdir(work) then
+        os.rm(work)
+    end
+    os.mkdir(work)
+    local folder = path.join(work, "sample_mac.es2")
+    local output = os.iorunv(binary, {SAMPLING .. ".metallib", folder})
+    assert(output:find("OK sampleVertex vertex", 1, true), "sampleVertex is not translated: " .. output)
+    assert(output:find("OK sampleFragment fragment", 1, true), "sampleFragment, a nearest sample of a macOS texture, is not translated: " .. output)
+    assert(output:find("REFUSED sampleMinLodFragment: a sample with a minimum level of detail clamp this emitter does not map", 1, true),
+           "sampleMinLodFragment, a sample with min_lod_clamp(1.0), is not refused by name: " .. output)
+    for _, name in ipairs({"sampleFragment.fragment.glsl", "sampleFragment.fragment.json", "library.json"}) do
+        local expected = io.readfile(path.join(SAMPLING .. ".golden", name))
+        local got = io.readfile(path.join(folder, name))
+        assert(got == expected, name .. " differs from its golden output")
+    end
+    os.rm(work)
+end
+
+local EXIT = path.join(os.scriptdir(), "air2es", "exit_mac")
+
+function exitChecks()
+    local binary = path.join(os.scriptdir(), "..", "..", "..", "build", "macosx", "arm64", "release", "air2es")
+    assert(os.isfile(binary), "air2es is not built: configure with --air2es=y, then ./xmakew build air2es")
+    local work = path.join(os.tmpdir(), "air2es-exit-test")
+    if os.isdir(work) then
+        os.rm(work)
+    end
+    os.mkdir(work)
+    local folder = path.join(work, "exit_mac.es2")
+    local output = os.iorunv(binary, {EXIT .. ".metallib", folder})
+    assert(output:find("OK exitVertex vertex", 1, true), "exitVertex is not translated: " .. output)
+    assert(output:find("OK exitFragment fragment", 1, true), "exitFragment, a constant loop with a break and two exits, is not translated: " .. output)
+    for _, name in ipairs({"exitFragment.fragment.glsl", "exitFragment.fragment.json", "library.json"}) do
+        local expected = io.readfile(path.join(EXIT .. ".golden", name))
+        local got = io.readfile(path.join(folder, name))
+        assert(got == expected, name .. " differs from its golden output")
+    end
+    os.rm(work)
+end
+
+local DERIV = path.join(os.scriptdir(), "air2es", "deriv_mac")
+
+function derivChecks()
+    local binary = path.join(os.scriptdir(), "..", "..", "..", "build", "macosx", "arm64", "release", "air2es")
+    assert(os.isfile(binary), "air2es is not built: configure with --air2es=y, then ./xmakew build air2es")
+    local work = path.join(os.tmpdir(), "air2es-deriv-test")
+    if os.isdir(work) then
+        os.rm(work)
+    end
+    os.mkdir(work)
+    local folder = path.join(work, "deriv_mac.es2")
+    local output = os.iorunv(binary, {DERIV .. ".metallib", folder})
+    assert(output:find("OK derivFragment fragment", 1, true), "derivFragment, a dfdx of a float2 and a fwidth of a float3, is not translated: " .. output)
+    for _, name in ipairs({"derivFragment.fragment.glsl", "derivFragment.fragment.json", "library.json"}) do
+        local expected = io.readfile(path.join(DERIV .. ".golden", name))
+        local got = io.readfile(path.join(folder, name))
+        assert(got == expected, name .. " differs from its golden output")
+    end
+    os.rm(work)
+end
+
+local DFDY = path.join(os.scriptdir(), "air2es", "dfdy_mac")
+
+function dfdyChecks()
+    local binary = path.join(os.scriptdir(), "..", "..", "..", "build", "macosx", "arm64", "release", "air2es")
+    assert(os.isfile(binary), "air2es is not built: configure with --air2es=y, then ./xmakew build air2es")
+    local work = path.join(os.tmpdir(), "air2es-dfdy-test")
+    if os.isdir(work) then
+        os.rm(work)
+    end
+    os.mkdir(work)
+    local folder = path.join(work, "dfdy_mac.es2")
+    local output = os.iorunv(binary, {DFDY .. ".metallib", folder})
+    assert(output:find("OK dyFragment fragment", 1, true), "dyFragment, a dfdy of a float2, is not translated: " .. output)
+    assert(output:find("OK dyNegFragment fragment", 1, true), "dyNegFragment, a negated dfdy of a float2, is not translated: " .. output)
+    for _, name in ipairs({"dyFragment.fragment.glsl", "dyFragment.fragment.json", "library.json"}) do
+        local expected = io.readfile(path.join(DFDY .. ".golden", name))
+        local got = io.readfile(path.join(folder, name))
+        assert(got == expected, name .. " differs from its golden output")
+    end
+    os.rm(work)
+end
+
+local LOOP = path.join(os.scriptdir(), "air2es", "loop_mac")
+
+function loopChecks()
+    local binary = path.join(os.scriptdir(), "..", "..", "..", "build", "macosx", "arm64", "release", "air2es")
+    assert(os.isfile(binary), "air2es is not built: configure with --air2es=y, then ./xmakew build air2es")
+    local work = path.join(os.tmpdir(), "air2es-loop-test")
+    if os.isdir(work) then
+        os.rm(work)
+    end
+    os.mkdir(work)
+    local folder = path.join(work, "loop_mac.es2")
+    local output = os.iorunv(binary, {LOOP .. ".metallib", folder})
+    assert(output:find("OK loopFragment fragment", 1, true), "loopFragment, a loop whose bound is a uniform and whose body reads a capped vector buffer, is not translated: " .. output)
+    for _, name in ipairs({"loopFragment.fragment.glsl", "loopFragment.fragment.json", "library.json"}) do
+        local expected = io.readfile(path.join(LOOP .. ".golden", name))
+        local got = io.readfile(path.join(folder, name))
+        assert(got == expected, name .. " differs from its golden output")
+    end
+    os.rm(work)
+end
+
+local MASK = path.join(os.scriptdir(), "air2es", "mask_mac")
+
+function maskChecks()
+    local binary = path.join(os.scriptdir(), "..", "..", "..", "build", "macosx", "arm64", "release", "air2es")
+    assert(os.isfile(binary), "air2es is not built: configure with --air2es=y, then ./xmakew build air2es")
+    local work = path.join(os.tmpdir(), "air2es-mask-test")
+    if os.isdir(work) then
+        os.rm(work)
+    end
+    os.mkdir(work)
+    local folder = path.join(work, "mask_mac.es2")
+    local output = os.iorunv(binary, {MASK .. ".metallib", folder})
+    assert(output:find("OK maskFragment fragment", 1, true), "maskFragment, a loop whose index plus one is taken modulo eight, is not translated: " .. output)
+    for _, name in ipairs({"maskFragment.fragment.glsl", "maskFragment.fragment.json", "library.json"}) do
+        local expected = io.readfile(path.join(MASK .. ".golden", name))
+        local got = io.readfile(path.join(folder, name))
+        assert(got == expected, name .. " differs from its golden output")
+    end
+    os.rm(work)
+end
+
+local FLAG = path.join(os.scriptdir(), "air2es", "flag_mac")
+
+function flagChecks()
+    local binary = path.join(os.scriptdir(), "..", "..", "..", "build", "macosx", "arm64", "release", "air2es")
+    assert(os.isfile(binary), "air2es is not built: configure with --air2es=y, then ./xmakew build air2es")
+    local work = path.join(os.tmpdir(), "air2es-flag-test")
+    if os.isdir(work) then
+        os.rm(work)
+    end
+    os.mkdir(work)
+    local folder = path.join(work, "flag_mac.es2")
+    local output = os.iorunv(binary, {FLAG .. ".metallib", folder})
+    assert(output:find("OK flagFragment fragment", 1, true), "flagFragment, a two-pass loop whose latch tests a header flag and that calls a helper with a branch, is not translated: " .. output)
+    for _, name in ipairs({"flagFragment.fragment.glsl", "flagFragment.fragment.json", "library.json"}) do
+        local expected = io.readfile(path.join(FLAG .. ".golden", name))
+        local got = io.readfile(path.join(folder, name))
+        assert(got == expected, name .. " differs from its golden output")
+    end
+    os.rm(work)
+end
+
+local SHARED = path.join(os.scriptdir(), "air2es", "shared_mac")
+
+function sharedChecks()
+    local binary = path.join(os.scriptdir(), "..", "..", "..", "build", "macosx", "arm64", "release", "air2es")
+    assert(os.isfile(binary), "air2es is not built: configure with --air2es=y, then ./xmakew build air2es")
+    local work = path.join(os.tmpdir(), "air2es-shared-test")
+    if os.isdir(work) then
+        os.rm(work)
+    end
+    os.mkdir(work)
+    local folder = path.join(work, "shared_mac.es2")
+    local output = os.iorunv(binary, {SHARED .. ".metallib", folder})
+    assert(output:find("OK sharedFragment fragment", 1, true), "sharedFragment, whose two uniform blocks both have a viewport and a parameters member, is not translated: " .. output)
+    for _, name in ipairs({"sharedFragment.fragment.glsl", "sharedFragment.fragment.json", "library.json"}) do
+        local expected = io.readfile(path.join(SHARED .. ".golden", name))
+        local got = io.readfile(path.join(folder, name))
+        assert(got == expected, name .. " differs from its golden output")
+    end
+    os.rm(work)
+end
+
+local DIAMOND = path.join(os.scriptdir(), "air2es", "diamond_data.c")
+
+local DIAMOND_SETS = {
+    {name = "zero", planes = 0, edges = 0},
+    {name = "one", planes = 1, edges = 3},
+    {name = "mid", planes = 8, edges = 64},
+    {name = "max", planes = 17, edges = 128},
+}
+
+local DIAMOND_VECTORS = {"viewport", "u_viewport", "parameters", "u_parameters", "lens_viewport", "lens_parameters", "rect", "uv", "center"}
+
+local function numbers(text)
+    local out = {}
+    for item in text:gmatch("[^,%s]+") do
+        out[#out + 1] = tonumber(item)
+    end
+    return out
+end
+
+local function arrays(text)
+    local found = {}
+    for name, list in text:gmatch('"([%w_]+)": %[([^%]]*)%]') do
+        found[name] = numbers(list)
+    end
+    return found
+end
+
+local function contractFailure(text, set)
+    local found = arrays(text)
+    if not found.planes or #found.planes ~= 68 then
+        return "planes is not 17 vec4"
+    end
+    if not found.edges or #found.edges ~= 512 then
+        return "edges is not 128 vec4"
+    end
+    for _, name in ipairs({"model", "projection", "inverseModel"}) do
+        if not found[name] or #found[name] ~= 16 then
+            return name .. " is not a 4x4 matrix"
+        end
+    end
+    for _, name in ipairs(DIAMOND_VECTORS) do
+        if not found[name] or #found[name] ~= 4 then
+            return name .. " is missing or not a vec4"
+        end
+    end
+    if found.viewport[3] ~= set.planes then
+        return "viewport.z is not " .. set.planes
+    end
+    if found.lens_viewport[4] ~= set.edges then
+        return "lens_viewport.w is not " .. set.edges
+    end
+    return nil
+end
+
+function diamondChecks()
+    local work = path.join(os.tmpdir(), "air2es-diamond-test")
+    if os.isdir(work) then
+        os.rm(work)
+    end
+    os.mkdir(work)
+    local generator = path.join(work, "make_diamond_data")
+    os.iorunv("cc", {"-O2", "-Wall", "-o", generator, DIAMOND, "-lm"})
+    local folder = path.join(work, "data")
+    os.mkdir(folder)
+    os.iorunv(generator, {folder})
+    for _, set in ipairs(DIAMOND_SETS) do
+        local text = io.readfile(path.join(folder, "diamond_" .. set.name .. ".data.json"))
+        local failure = contractFailure(text, set)
+        assert(failure == nil, "diamond " .. set.name .. " data: " .. tostring(failure))
+    end
+    local text = io.readfile(path.join(folder, "diamond_max.data.json"))
+    local without = text:gsub('"lens_viewport": %[[^%]]*%], ', "", 1)
+    assert(without ~= text, "negative control: lens_viewport was not in the max set")
+    assert(contractFailure(without, DIAMOND_SETS[4]) ~= nil, "negative control: a set without lens_viewport passed the contract")
+    os.rm(work)
+end
+
 function main()
     for _, case in ipairs(CASES) do
         local reason = limits.check(case.source)
@@ -194,4 +444,22 @@ function main()
     print("air2es samplers: the table, the generator's pieces, the pin and the decode passed")
     cappedBufferChecks()
     print("air2es capped buffers: the host cap gives eight element uniforms and a select chain, and no cap is refused")
+    samplingChecks()
+    print("air2es sampling: the nine-operand macOS sample translates with a zero minimum LOD clamp, and a nonzero one is refused by name")
+    exitChecks()
+    print("air2es exit: a constant loop with a break and two exits translates, and matches its golden output")
+    derivChecks()
+    print("air2es derivatives: dfdx of a float2 and fwidth of a float3 translate, and match their golden output")
+    dfdyChecks()
+    print("air2es dfdy: dfdy of a float2 translates as -dFdy, and matches its golden output")
+    loopChecks()
+    print("air2es loops: a loop bounded by a uniform, with a capped float4 buffer read in its body, translates and matches its golden output")
+    maskChecks()
+    print("air2es masks: a loop whose index plus one is taken modulo eight translates as a bounded integer, and matches its golden output")
+    flagChecks()
+    print("air2es flags: a two-pass loop whose latch tests a header flag, with a helper call that branches inside it, translates and matches its golden output")
+    sharedChecks()
+    print("air2es shared members: two uniform blocks that both have a viewport and a parameters member translate under their own names, and match their golden output")
+    diamondChecks()
+    print("air2es diamond data: the generator writes zero, one, mid and max sets with 17 planes, 128 edge slots and the lens members, and a set without lens_viewport is refused")
 end

@@ -1,0 +1,1 @@
+{"functions": [{"name": "flagVertex", "stage": "vertex", "source": "flagVertex.vertex.glsl", "reflection": "flagVertex.vertex.json"}, {"name": "flagFragment", "stage": "fragment", "source": "flagFragment.fragment.glsl", "reflection": "flagFragment.fragment.json"}]}

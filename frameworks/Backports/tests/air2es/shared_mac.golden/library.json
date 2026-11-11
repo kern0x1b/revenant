@@ -1,0 +1,1 @@
+{"functions": [{"name": "sharedVertex", "stage": "vertex", "source": "sharedVertex.vertex.glsl", "reflection": "sharedVertex.vertex.json"}, {"name": "sharedFragment", "stage": "fragment", "source": "sharedFragment.fragment.glsl", "reflection": "sharedFragment.fragment.json"}]}

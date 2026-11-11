@@ -128,6 +128,14 @@ Before the changes below, the corpus measured 89 entry points, 32 OK and 57 REFU
 | `half` values declared `mediump float` at each declaration site (`declaredType`, `translate.cpp`, see the half-values section); a struct returned by an inlined call taken from the returned fields (`aggregates_`, `Frame::fields`); an undefined argument the callee does not use dropped; the bounds of an inlined argument followed to its actual value; `sdiv` and `srem` bounded as `udiv` and `urem`; an instance id has no bound (`boundOf`), which corrects the earlier bounded-integer row | 64 | 25 | `dustEffectVertex` (DustEffect), OK to REFUSED: its instance id runs to the particle count, the item's width times its height in points, 153,600 for the layer-sized MediaCutout item on the 4S, above the 2^16 bound (see the bounded-integers section); `callBlobVertex` and the four liquid glass fragments change reason; the other verdicts are the same; 33 corpus `.glsl` files change only by `mediump` |
 | a buffer argument with an element count that the host declares (`kBufferCaps`, `Binding::capCount`, `resolve`, `selectMember`): a `const device` scalar pointer read at a dynamic index is one uniform per element, and the index is a select chain over them, as for an array member of a buffer struct; `air.fast_atan2.f32` as GLSL `atan(y, x)` (`kPlainFunctions`); an `extractvalue` of an inlined call's returned struct, read from the fields captured at the return (`aggregateTexts_`) | 65 | 24 | `callBlobVertex` (CallScreen), REFUSED to OK (its `positions` buffer, capped at the host's 8 elements, and its `atan2` and struct field); the other 88 verdicts are the same; the CallScreen folder gains `callBlobVertex` and eight `positions_k` uniforms on buffer 1, and no other `.glsl` changes |
 | a vertex output of kind `air.point_size` as `gl_PointSize`, a float only (`translate.cpp`, the return path), and `air.any.v2i1` as GLSL `any` (`kPlainFunctions`) | 66 | 23 | `vertex_point_func` (DrawingUI), REFUSED to OK; `walletCardBackgroundFragment` keeps its REFUSED, now at an address this emitter does not read; the other 87 verdicts are the same; the DrawingUI folder passes `air2es_check.lua` and glslangValidator (4 of 4 functions); the translator does not clamp the size, the GLES driver clamps it to its aliased point size range, which may differ from Metal's, and the size is not measured on a device |
+| a macOS `air.sample_texture_2d.v4f32` sample, nine operands, as GLSL `texture2D` of its colour: `min_lod_clamp` must be the constant 0.0 and the access must be sample, and the residency element of the result is refused if used (`translate.cpp`, `sampleLocal`, the sample gate; see the macOS section) | 66 | 23 | none on the iOS corpus, which has no macOS sample: the 89 verdicts and the 66 OK outputs are the same (`new8` = `new7`); the fixture `tests/air2es/sample_mac` gives `sampleVertex` and `sampleFragment` OK and `sampleMinLodFragment` REFUSED by name, and the harness matches Metal on `sampleFragment` with a max diff of 0 over 13,312 non-zero channels |
+| a constant loop with a break: the loop's latch is found by reachability from its header, and a block that the header branches to and that flows to the loop's exit is part of the body; each exit copies the exit phis before it breaks (`translate.cpp`, `latchCycleOf`, `bodyOf`) | 66 | 23 | none on the iOS corpus: the 89 verdicts and the 66 OK outputs are byte-identical to the previous state; `tests/air2es/exit_mac` gives `exitFragment` OK, and the Mac harness matches Metal on it with a max diff of 0 over 16,062 non-zero channels (see the loops section) |
+| derivatives of a `float2` and a `float3`: `air.dfdx.v2f32` as GLSL `dFdx`, and `air.fwidth.v3f32` as `fwidth`, both with `GL_OES_standard_derivatives` and fragment only, and `air.dfdy.v2f32` as `-dFdy`, since GL's y axis points up and Metal's points down (`kPlainFunctions` with its `sign` field, `translate.cpp`; see the derivatives section) | 66 | 23 | none on the iOS corpus: the 89 verdicts and the 66 OK outputs are byte-identical; `tests/air2es/deriv_mac` gives `derivFragment` OK, and the Mac harness matches Metal on it with a max diff of 0 over 14,368 non-zero channels; `tests/air2es/dfdy_mac` gives `dyFragment` OK with a max diff of 0 over 8,192 non-zero channels, and its negative control fails |
+| a counted loop whose bound is a uniform, cut at the host cap of the capped buffer its body indexes (`latchCycleOf`, `loopCapOf`), with the latch test kept in the body so the loop stops at the uniform's count; a loop whose body is one block (header and latch) with a runtime bound; a host-capped buffer of `float2` to `float4` elements, one uniform per element (`translate.cpp`, the cap check) | 66 | 23 | none on the iOS corpus: the 89 verdicts and the 66 OK outputs are byte-identical; `tests/air2es/loop_mac` gives `loopFragment` OK, and the Mac harness matches Metal at counts 0, 1, 3 and 8 with a max diff of 0 over 16,384 channels each (see the runtime-bounded loops section) |
+| a bitwise and of an integer with a known bound that is `2^k - 1`, as `int(mod(float(x), 2^k))` (`maskAnd`, `boundOf`); a loop index's bound is its trip count, so `(i + 1) % 8` in a loop of eight is exact (`indexBounds_`); the diamond's host caps, planes 17 and edges 128, and the select limit of 128 (`kBufferCaps`, `selectMember`) | 66 | 23 | none on the iOS corpus: the 89 verdicts and the 66 OK outputs are byte-identical; `tests/air2es/mask_mac` gives `maskFragment` OK with a max diff of 0 over 16,384 channels, and its negative control fails with 9/255 over 4,096 channels; the Mac diamond stays REFUSED on its control flow |
+| a loop whose latch tests a header flag that is a constant on entry and on the back edge, as a `for` of the passes the flag gives (`flagCycleOf`); a helper's blocks inside a caller's loop (`insideLoop`); `air.sign.f32` as `sign`, `air.mix.v4f32` as `mix`, and `air.fast_asin.f32` as `asin` (`kPlainFunctions`) | 66 | 23 | none on the iOS corpus: the 89 verdicts and the 66 OK outputs are byte-identical; `tests/air2es/flag_mac` gives `flagFragment` OK with a max diff of 0 over 16,384 channels, and its negative control fails with 31/255 over 576 channels; on the Mac library `diamondFragment` becomes OK, and `diamondLensFragment` stays REFUSED |
+| two members of one name in two uniform or vertex buffers (a lens's `viewport` and the stone's `viewport`) were declared once, so a load of the second read the first; they are now prefixed with their argument's name (`memberName`), and a name claimed at another offset is refused (`claimSlot`) | 66 | 23 | none on the iOS corpus: the 89 verdicts and all 150 output files are byte-identical; `tests/air2es/shared_mac` gives `sharedFragment` OK with a max diff of 0 over 13,312 channels, and its negative control, the pre-fix translator, fails with 255/255 over 8,192 of 16,384 channels; on the Mac library the lens reads `lens_viewport` and `lens_parameters`, and `diamondLensFragment` passes the oracle at all four uniform sets |
+| a block reached from both arms of a branch is emitted in each arm, with the visited set reset per arm (`region`, as `multiway` does); on the Mac library `diamondLensFragment` becomes OK | 66 | 23 | none on the iOS corpus: the 89 verdicts and the 66 OK outputs are byte-identical; the Mac library's `diamondFragment` and `diamondLensFragment` translate, and the Mac diamond oracle is blank for them, so it proves nothing yet (see the section below) |
 
 Checks on the state the table shows (58 OK, 31 REFUSED):
 
@@ -485,3 +493,179 @@ id, which is not a precision effect.
 Not measured. No pixel comparison of a `mediump` output against Metal's `half` has been made. The Mac harness
 (`metal_shader_harness`) needs `REVENANT_ANGLE_CEF`, which this worker does not have, and the phone check of the regenerated
 probe folders is owed (the bounded-integers section). The precision claim rests on the specification, not on a measurement.
+
+## macOS sample_texture_2d (2026-11-11)
+
+The brief of 2026-11-11 (coordinator aa549f85) asked for the macOS sample form to map in general, with a fixture test, so that the Mac harness can check a sampled shader against Metal. The corpus is iOS, so this changes no verdict on it.
+
+The form. On `air64-apple-macos13.0` a sample is `air.sample_texture_2d.v4f32` with nine operands: the texture, the sampler state, the coordinate (`<2 x float>`), `normalized` (i1), the offset (`<2 x i32>`), `hasLod` (i1), the level or bias (float), `min_lod_clamp` (float) and the access (i32). It returns `{ <4 x float>, i8 }`. The iOS form has eight operands, with no `min_lod_clamp`, and returns `<4 x float>`. The order and types are those of `__metal_sample_texture_2d_t` in the Metal toolchain's header `metal/__bits/metal_texture2d`, which takes the same values in the same order.
+
+What is translated. The colour element is the sampled value (`sampleLocal`, `translate.cpp`). A `min_lod_clamp` that is not the constant 0.0 is refused ("a sample with a minimum level of detail clamp this emitter does not map"), and so is an access that is not sample ("a sample of a texture whose access is not sample"). The `i8` residency element is refused if it is used. The eight-operand form is unchanged. The `v4f16` variant takes the same path; no fixture has a half sample.
+
+Fixture. `tests/air2es/sample_mac.metal`, compiled with the pinned Metal compiler for `air64-apple-macos13.0` with `-ffast-math`, gives `sample_mac.metallib`. `sampleVertex` and `sampleFragment` translate (the fragment samples a nearest, clamp-to-edge constexpr sampler with no LOD clamp), and `sampleMinLodFragment` is refused by name. `tests/air2es_test.lua` checks those verdicts and compares the folder with `sample_mac.golden/`.
+
+Oracle. `metal_shader_harness` on the fixture: `sampleVertex + sampleFragment` PASS, max channel diff 0 over 13,312 non-zero Metal channels. The harness reads each texture's wrap and filter from the reflection and sets them on the GLES texture, so a GLES sampler that differs from the constexpr one fails. A run before that change differed on 9,408 of 16,384 channels, and the difference was the sampler.
+
+Not measured. A `min_lod_clamp` other than zero and an access other than sample are refused, and no fixture produces either, so neither is run against Metal. The residency element is not run. The diamond entries (`diamondFragment`, `diamondLensFragment`) keep their refusals: this mapping changes no verdict, and the diamond structurer is not validated by the oracle.
+
+Real shader check (same run): `gramDiamondCompositeVertex` and `gramDiamondCompositeFragment` of the Mac GramDiamond library, the 9-operand sample of a real Telegram shader, match Metal with a max diff of 0 over 6,036 non-zero channels.
+
+## Loops with a break to the exit (2026-11-11)
+
+The brief of 2026-11-11 (coordinator aa549f85) asked for the structurer to handle the loops of the diamond shaders. This section covers the part that does not need a runtime bound: a constant loop whose body breaks out to a block that flows to the loop's exit.
+
+- Shape handled: the header of a constant-bound loop branches to the latch path or to a block that does its own work and then goes to the loop's exit, and the latch test goes to that same exit. The latch is the block of the body that branches back to the header and to the exit (`latchCycleOf`). The body is the blocks reached from the header without the exit (`bodyOf`), so the break block is inside the loop and breaks with its own code. Each exit copies the exit phis and then breaks.
+- Shape still refused: when clang peels the first iteration into the entry block, the break block has a predecessor outside the loop and is reached twice, and the translator refuses it with "control flow that reaches one block twice", as before. The fixture `exit_mac.metal` keeps its test on a loop-carried value, which clang does not peel. A first variant with a test on the constant `1/7` was peeled and stayed refused.
+- Mac check: `exit_mac.metallib`, compiled for `air64-apple-macos13.0` with `-ffast-math`, gives `exitVertex` and `exitFragment` OK. `metal_shader_harness` on it: PASS, max channel diff 0 over 16,062 non-zero Metal channels. Negative control: the same source with the break's constant changed from 0.5 to 0.6, run against the GLES folder of the original: FAIL, 3,004 of 16,384 channels over the tolerance of 2 (max diff 22).
+- The iOS corpus is unchanged: the 89 verdicts and the 66 OK `.glsl` outputs are byte-identical to the previous state.
+- Diamond: `diamondFragment` and `diamondLensFragment` still refuse. The loop with a break in `diamondSurface` is now translated, and their first refusal is `air.dfdx.v2f32`, a derivative of a `float2`, which is the next item. Their loops over the planes and the edges have a runtime bound, which this push does not handle.
+- Not measured: the loops of the diamond against Metal, and the runtime-bounded loops, which are not in this change.
+
+## Derivatives (2026-11-11)
+
+The brief of 2026-11-11 (coordinator aa549f85) asked for the diamond shaders. Their first refusal after the constant loop was `air.dfdx.v2f32`, a derivative of a `float2`; this section covers the derivative intrinsics.
+
+- Mapped: `air.dfdx.v2f32` as GLSL `dFdx`, and `air.fwidth.v3f32` as `fwidth` (`kPlainFunctions`). `air.fwidth.f32` was already mapped. All three set `GL_OES_standard_derivatives` and are fragment only.
+- Mapped with a sign: `air.dfdy.v2f32` as GLSL `-dFdy`. The first translation, `dFdy` as is, failed on the Mac: its output differed from Metal's on 4,096 of 16,384 channels. The mismatch was the green channel of every pixel, with the sign flipped, and not a scale or a varying fault: the interpolated `in.uv.y` without a derivative passes. A pixel dump from the harness (`REVENANT_DUMP`) showed the flip, and negating `dFdy` in a copy of the failing folder makes every channel pass. The cause is the y axis: GL's points up and Metal's points down, so the same derivative has the opposite sign. The fixture `tests/air2es/dfdy_mac` gives `dyFragment` and `dyNegFragment` OK, and the Mac harness matches Metal on `dyFragment` with a max diff of 0 over 8,192 non-zero channels. Its negative control, the same folder without the minus, fails with a difference of 255 over 4,096 channels.
+- Oracle: `tests/air2es/deriv_mac.metal`, compiled for `air64-apple-macos13.0` with `-ffast-math`, gives `deriv_mac.metallib`. `derivVertex` and `derivFragment` translate, and the `derivFragment` folder matches `deriv_mac.golden/`. `metal_shader_harness` on it: PASS, max channel diff 0 over 14,368 non-zero Metal channels. The harness tolerance is 2/255; the positive run is exact, so the tolerance does not carry the pass.
+- Negative control: the same source with the `dfdx` scale changed from 16.0 to 8.0, run against the GLES folder of the original: FAIL, max channel diff 32/255, 4,096 of 16,384 channels over the tolerance.
+- The iOS corpus is unchanged: the 89 verdicts and the 66 OK `.glsl` outputs are byte-identical to the previous state.
+- Diamond, Mac library (`GramDiamond.metallib`): `gramDiamondCompositeFragment` is OK, and `diamondFragment` and `diamondLensFragment` now refuse with "an address this emitter does not read", the planes read at a dynamic index. The derivative is no longer their first refusal, and a `dfdy` later in those functions now translates as `-dFdy`. The iOS library's diamond refusals ("control flow that reaches one block twice") are unchanged.
+- Not measured: derivative values on a device, and `dfdy` against Metal beyond the fixture.
+
+## Runtime-bounded loops and vector buffer elements (2026-11-11)
+
+The brief of 2026-11-11 (coordinator aa549f85) asked for the diamond's loops over `planes` and `edges`. Their bounds are the uniform counts `viewport.z` and `viewport.w`, and the host caps the buffers at 17 planes and 128 edges (`DiamondGeometry.swift:50`, `DiamondRenderer.swift:169`, `:272–273`). This section covers the part the Mac oracle can check: a loop with a uniform bound over a capped buffer.
+
+- Shape: a counted loop whose latch compares its index with a value from outside the loop (a uniform, here) is emitted as a `for` to the cap of the capped buffer its body indexes with the loop index. The latch test stays in the body, so the loop stops at the count (`if (t17 == t0) break;`), and a zero count is the guard before the loop. A loop with no capped buffer behind its index is refused, as before.
+- Self-loops: a loop whose body is one block, which is both header and latch, is recognised when its bound is a runtime value. A constant-bound self-loop keeps its earlier route. The first attempt changed four `gaussianBlur` kernels from OK to REFUSED ("a branch that leaves a loop somewhere other than its exit"); the corpus check caught it, and the constant case was put back.
+- Vector elements: a host-capped buffer of `float2`, `float3` or `float4` elements is one uniform per element. `float3` is not tested.
+- Fixture: `tests/air2es/loop_mac.metal`. `loopFragment` loops `uint(viewport.z)` times over a `float4` buffer capped at eight, and returns the last index through a phi. Its capped buffer is named in `kBufferCaps` (`loopFragment`, `planes`, 8), as `callBlobVertex` is. `tests/air2es_test.lua` checks the verdict and compares the folder with `loop_mac.golden/`.
+- Oracle: `metal_shader_harness` with the data sets `loop_z0`, `loop_z1`, `loop_z3` and `loop_z8`: PASS at every count, max channel diff 0 over 16,384 channels each. Negative control: Metal `i + 1 < z` against the GLES folder of `i < z`, at z = 3: FAIL, 25/255 over 4,664 channels.
+- The iOS corpus is unchanged: the 89 verdicts and the 66 OK `.glsl` outputs are byte-identical.
+- The diamond's `kBufferCaps` entries and the select limit of 128 come in the next section. They do not move the diamond's verdicts yet, because its next blocker is its control flow.
+- Not measured: the diamond itself, 128 edges, and `float3` elements.
+
+## Masks and bounded indices (2026-11-11)
+
+The brief of 2026-11-11 (coordinator aa549f85) asked for the diamond shaders' loops. Their index arithmetic is taken modulo a power of two, which LLVM emits as an `and` of an integer; this section covers that `and` and the bound of a loop index.
+
+- Mapped: a bitwise and with `2^k - 1` of an integer whose bound is known and below 2^22 (`kExactLimit`) is `int(mod(float(x), 2^k))` at `highp` (`maskAnd`). The bound of a loop index is its trip count (`indexBounds_`, set in `emitLoop` and `emitCountedCycle`), so `(i + 1) % 8` in a loop of eight is at most 8 and the modulo is exact. The old path, an `and` of an unsigned float conversion with the sign bit, is unchanged.
+- The successor of a loop index, `(t + 1)` in the GLSL, may sit in the header or the body: `latchCycleOf` and `loopOf` accepted it only in the latch.
+- Refused as before: an `and` whose mask is not `2^k - 1`, and an integer with no bound, such as a loop over a uniform with no cap.
+- Diamond: `kBufferCaps` now gives `diamondFragment` and `diamondLensFragment` a planes buffer of 17 (`DiamondGeometry.swift:50`), and `diamondLensFragment` an edges buffer of 128 (`DiamondRenderer.swift:272–273`); the select limit of an array member is 128. The verdicts do not move: on the Mac library `diamondFragment` and `diamondLensFragment` are REFUSED with "control flow that reaches one block twice", as on the iOS corpus. That is the next blocker. The planes and edges loops are not lowered yet.
+- Fixture: `tests/air2es/mask_mac.metal`. `maskFragment` sums eight terms over `ring[i % 8]` and `ring[(i + 1) % 8]`, and writes `acc * 0.05 + 0.5` to red, which keeps the sum inside the channel. The unscaled sum saturated red at 255 on both sides, so the first negative control passed; the scale fixes that. `tests/air2es_test.lua` checks the verdict and compares the folder with `mask_mac.golden/`.
+- Oracle: `metal_shader_harness` PASS, max channel diff 0 over 16,384 channels. Negative control: the same source with `(i + 2) % 8` in place of `(i + 1) % 8`, its GLES folder against the Metal of the positive: FAIL, 9/255 over 4,096 channels, every pixel's red channel.
+- The iOS corpus is unchanged: the 89 verdicts and the 66 OK `.glsl` outputs are byte-identical, and all 18 output folders are byte-identical to the 2026-11-11 run before this change.
+- Not measured: the diamond against Metal (it still refuses), `float3` capped elements, and 128 edges on a device.
+
+## Flag loops and calls inside loops (2026-11-11)
+
+The brief of 2026-11-11 (coordinator aa549f85) asked for the diamond shaders. On the Mac library, `diamondFragment` stopped at a flag loop, a helper call with a branch inside a loop, and three intrinsics. This section covers them.
+
+- Flag loops: `flagCycleOf` takes a latch whose branch tests a header phi that is a constant on the entry edge and a constant on the back edge. The number of passes comes from simulating the flag, up to 64, and the loop is emitted as `for (int t = 0; t < n; t++)` with the flag as a local. A single-block loop (header and latch) and a multi-block body are both accepted. The exit is still a `break` from the latch. A flag that never leaves its continue value is not taken as a loop.
+- Calls in loops: the blocks of a helper that is not inlined are not in the caller loop's body. `insideLoop` now treats a block of another function as inside, so the helper's own branch and join are emitted in place. Before, a branch in such a helper refused with "a branch that rejoins outside its loop".
+- Intrinsics: `air.sign.f32` as `sign`, `air.mix.v4f32` as `mix`, and `air.fast_asin.f32` as `asin`. The accuracy of `fast_asin` against Metal is not measured yet.
+- Fixture: `tests/air2es/flag_mac.metal`. `flagFragment` runs a two-pass loop whose latch tests the flag that is true on the first pass, and calls `pick`, a `__attribute__((noinline))` helper with a branch. `tests/air2es_test.lua` checks the verdict and compares the folder with `flag_mac.golden/`, which has `for (int t4 = 0; t4 < 2; t4++)`.
+- Oracle: the positive matches Metal with a max channel diff of 0 over 16,384 channels. Negative control: the second pass's factor 0.4 changed to 0.45, the GLES folder against the Metal of the positive: FAIL, 31/255 over 576 channels.
+- Mac library: `diamondFragment` is OK, but it is not yet compared with Metal. `diamondLensFragment` is REFUSED with "control flow that reaches one block twice", the loop over its edges, which is the next item.
+- iOS corpus: unchanged, 66 OK and 23 REFUSED, with byte-identical outputs. The Telegram release library's `diamondFragment` and `diamondLensFragment` are still REFUSED with "control flow that reaches one block twice". The Mac and iOS builds of the same source have different control flow. That difference is not diagnosed yet.
+- Not measured: the diamond against Metal (its uniform sets are the next step), `fast_asin` against Metal, and the iOS diamond's control flow.
+
+## Shared blocks in branches (2026-11-11)
+
+The brief of 2026-11-11 (coordinator aa549f85) asked for the diamond's lens loop. Its refusal, "control flow that reaches one block twice", came from a block reached from both arms of a branch before the branch's join.
+
+- Rule: the two arms of a conditional branch are separate paths. A block reached from both is emitted in each arm (tail duplication). The visited set is reset to the blocks seen before the branch for each arm, and the two sets are joined after the branch (`region`, the same rule `multiway` uses). A block reached twice on one path is still refused, so an unrecognised cycle stays refused.
+- Values: each emission declares its own locals, and the latest name wins. A value of a shared block that is used after the join goes through a phi, which the edge copies assign on each arm.
+- Mac library (`GramDiamond.metallib`): `diamondLensFragment` is OK now, and so is `diamondFragment`. The one refusal left is `backgroundStarVertex`, "a logical shift right of an integer with no known bound". This is translation only.
+- iOS corpus: unchanged. 89 verdicts, 66 OK, 23 REFUSED, and the output folders are byte-identical.
+- Diamond oracle: `diamondFragment` and `diamondLensFragment` are SKIP for all four uniform sets (zero, one, mid, max), with the harness's note "Metal output is blank, so the case proves nothing". The data sets (`diamond_*.data.json`) set `viewport` only. The vertex stage reads the `model`, `projection` and `inverseModel` matrices of `Uniforms`, and the fragment reads the other `Uniforms` fields, so the geometry lands outside the target. The composite pair is a real check on the same sets: PASS, max channel diff 0 over 6,036 non-zero channels.
+- Not tested: a fixture for a block shared between arms. The Mac diamond is the only input that exercises it.
+- Not measured: the diamond against Metal. The next step is to fill the `Uniforms` members the diamond reads from `DiamondRenderer.swift`, and the vertex buffer the vertex stage reads. (Measured in the next section.)
+
+## Members with one name in two buffers (2026-11-11)
+
+The diamond's lens reads `viewport` and `parameters` from its own argument (`LensFields lens`, buffer 3), and the stone's `Uniforms` has fields of the same names at buffer 1. The GLES uniform was keyed by name, so the second declaration was dropped and every load of the lens's `viewport` read the stone's. The lens's `viewport.w`, the edge count, read 0, so the lens loop never ran. The reflection showed it (`viewport` at buffer 1 only, with no lens entry); the oracle confirmed it.
+
+- Rule: a member is declared under its argument's name as a prefix (`u_viewport`, `lens_viewport`) when another buffer of the same kind (uniform or vertex) has a member of that name. Other names are unchanged, so no existing output moves. A name is claimed by one buffer and offset; a second claim at another offset is refused, not aliased (`memberName`, `claimSlot`).
+- Fixture: `tests/air2es/shared_mac.metal` (macOS): `StoneUniforms u` at buffer 1 and `LensFields lens` at buffer 3, both with `viewport` and `parameters`. `sharedChecks` compares the output of `sharedFragment` with its golden files.
+- Fixture oracle, with `u_viewport`, `u_parameters`, `lens_viewport` and `lens_parameters` set to distinct values: after the fix, PASS with a max channel diff of 0 over 13,312 non-zero Metal channels. Before the fix (negative control), FAIL with 255/255 over 8,192 of 16,384 channels.
+- iOS corpus: unchanged. 89 verdicts (66 OK, 23 REFUSED), and all 150 output files are byte-identical to the 2026-11-11 run.
+
+Diamond oracle (Mac library `GramDiamond.metallib`: nine functions translated, `backgroundStarVertex` still refused). The data come from a generator in scratch, not committed (`diamond-data/make_full.c`). The model is `Rx(0.35)·Ry(0.6)`, the projection a 40° perspective (near 0.1, far 10) moved four units back on z, and `inverseModel` the transpose of `model`. The stone takes the `Uniforms` values listed in the generator. The lens takes `lens_viewport = (32, 32, 2, edges)`, `lens_parameters = (0.8, 0.6, 40, 0)`, `rect = (-32, -32, 64, 64)`, `uv = (0, 0, 1, 1)` and `center = 0`; the source texture is the harness's. The four sets are zero (0 planes, 0 edges), one (1, 3), mid (8, 64) and max (17, 128). `planes` always has 17 entries. The vertex stage reads the harness's default quad, not DiamondGeometry's mesh.
+
+| set | stone (`diamondVertex` + `diamondFragment`) | lens (`diamondVertex` + `diamondLensFragment`) | composite |
+|---|---|---|---|
+| zero | PASS, 0 over 6,304 channels | PASS, 0 over 6,304 | PASS, 0 over 16,384 |
+| one | PASS, 0 | PASS, 0 | PASS, 0 |
+| mid | PASS, 0 | PASS, 0 | PASS, 0 |
+| max | PASS, 0 | PASS, 1/255 | PASS, 0 |
+
+Tolerance: 2/255, the harness's. The 8-bit outputs of Metal and ANGLE come from the same float expressions on different backends, so one step of rounding, 1/255, is expected; the largest difference seen is one such step. The tolerance is not what makes the oracle pass or fail: the negative control below differs by 35/255.
+
+Negative control: the pre-fix translator on the same data, max set. The stone still PASSes with 0. The lens FAILs with 35/255 over 4,728 of 16,384 channels. The lens output differs from the stone output, so the lens case is not a copy of the stone.
+
+Not covered: the sparkle pair is SKIP (blank Metal output) and outside this check; the lens hull is a synthetic 128-gon of radius 90 points, not the device projection; the vertex stage is the default quad; nothing ran on a device. Telegram's iOS AIR still refuses the diamond ("control flow that reaches one block twice"), so this change does not alter what Telegram builds from origin/main, and the diamond on iOS is still not validated.
+
+## Diamond oracle data: how to reproduce (2026-11-11)
+
+The data generator is committed as `frameworks/Backports/tests/air2es/diamond_data.c`. It writes `diamond_zero.data.json`, `diamond_one.data.json`, `diamond_mid.data.json` and `diamond_max.data.json` into the directory it is given. Each file has `arrays.planes` (17 vec4, from the seven rings of Telegram's `DiamondGeometry`, release 13.0.0), `arrays.edges` (128 vec4, with the first `w` set to a regular polygon of radius 90 points), and `members`: `model`, `projection` and `inverseModel` (column-major 4×4), the stone's `Uniforms` fields under their GLES names, and the lens's fields under the names the translator emits for a member shared with the stone (`u_viewport`, `u_parameters`, `lens_viewport`, `lens_parameters`), with `rect`, `uv` and `center`.
+
+Runbook (the Metal library is compiled from Telegram's `MetalResources/GramDiamond.metal`, which is not in this repository):
+
+```
+cc -O2 -o make_diamond_data frameworks/Backports/tests/air2es/diamond_data.c -lm
+mkdir -p OUT && ./make_diamond_data OUT
+TC="$HOME/Library/Caches/revenant/metal-toolchain/mount/Metal.xctoolchain/usr/bin"
+"$TC/metal" -c -target air64-apple-macos13.0 -ffast-math GramDiamond.metal -o GramDiamond.air
+"$TC/metallib" GramDiamond.air -o GramDiamond.metallib
+build/macosx/arm64/release/air2es GramDiamond.metallib FOLDER
+REVENANT_DUMP=DUMP build/macosx/arm64/release/metal_shader_harness GramDiamond.metallib FOLDER build/macosx/arm64/release/angle OUT/diamond_max.data.json
+```
+
+Repeat the last line for `zero`, `one` and `mid`. The harness needs the ANGLE argument whenever a data set is given. A pair is PASS when the largest channel difference is within 2/255, and SKIP when Metal's output is blank.
+
+Results at `0f09451ee` plus the member-name fix (`3dd642f6c`):
+
+| set | stone (`diamondVertex` + `diamondFragment`) | lens (`diamondVertex` + `diamondLensFragment`) | composite |
+|---|---|---|---|
+| zero | PASS, 0 over 6,304 channels | PASS, 0 over 6,304 | PASS, 0 over 16,384 |
+| one | PASS, 0 | PASS, 0 | PASS, 0 |
+| mid | PASS, 0 | PASS, 0 | PASS, 0 |
+| max | PASS, 0 | PASS, 1/255 | PASS, 0 |
+
+Tolerance: 2/255. The largest difference observed is one step of 8-bit rounding, and the tolerance allows one more such step. A translation error is far larger (see the controls).
+
+Controls:
+- Translator negative control: the pre-fix translator on the same data, max set. The stone still PASSes; the lens FAILs with 35/255 over 4,728 of 16,384 channels, and its output differs from the stone's.
+- Test negative control: `diamondChecks` removes `lens_viewport` from the max set and requires the contract check to refuse it. The fixture golden `shared_mac.golden` fails with the pre-fix translator, because `sharedFragment` declares `viewport` once.
+
+Limits, which the numbers above do not cover:
+- The vertex stage reads the harness's default quad (`a_position` by name, `a_normal` and `a_surface` at 0.5), not the mesh of `DiamondGeometry`. The fragment's ray-plane work is exercised over the quad's area; the vertex transform is not checked against the mesh.
+- The lens hull is the synthetic 128-gon of the generator, not the projected hull of a device frame.
+- The sparkle pair is SKIP because its Metal output is blank; it is outside this check.
+- The stone's rotation (pitch 0.35, yaw 0.6) and projection (40°, camera 4 units back) are fixed values, not the app's; the sets cover planes and edges, not the app's motion or appearance values.
+- Nothing ran on a device.
+
+## Phone window and the iOS diamond, state (2026-11-11)
+
+Phone window (item 3 of the brief): not used for new measurements. The probe that reads the GL limits, `Es2ProgramProbe` (`frameworks/Backports/tests/device_probe/es2_main.m`), is not built in this worktree: `./xmakew -P frameworks/Backports build Es2ProgramProbe` stops in package resolution (`llvm`, `ffmpeg` from xmake-repo) before any of its code compiles. The earlier windows still stand:
+
+- `udiv` and `urem` are exact on the 4S over the 4096 texels, maxdiff 0 (the integer-map section).
+- Highp float and int in a fragment shader are exact for the bitwise-`and` emulation (the bitwise section).
+- Mediump float holds integers only up to 2048 (the enhance-LUT design note); the mediump range of ±2^14 is not measured on the device.
+- The GL limits (`GL_MAX_VERTEX_UNIFORM_VECTORS`, `GL_MAX_FRAGMENT_UNIFORM_VECTORS`, `GL_MAX_VARYING_VECTORS`, `GL_MAX_TEXTURE_IMAGE_UNITS`, `GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS`) are read by `revenant_limits` in the probe, and no run of it is recorded in the docs; their values are not recorded here.
+
+The iOS diamond refusal, "control flow that reaches one block twice": the refusing block is the header of a counted loop inside `diamondSurface`, which both `diamondFragment` and `diamondLensFragment` inline. A temporary trace at the refusal site (removed; the committed translator is unchanged) printed the block's first instruction. In the iOS AIR (`submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources.metallib`, `air-objdump -d`):
+
+- block 286: `%287 = phi i32 [ %288, %257 ], [ 1, %187 ]`, `%288 = add nuw nsw i32 %287, 1`, `%289 = icmp eq i32 %288, 7`, `br i1 %289, label %290, label %257`;
+- block 257, the body, ends in an unconditional branch back to 286.
+
+The walk reaches 286 from its entry, follows the body 257, and comes back to 286, so it is visited twice. `cycleOf`, `latchCycleOf` and `flagCycleOf` need a conditional latch that tests the next index with `eq` or `ne`, and `loopOf` needs the test on the header's phi. The test here sits in the header and the body branches back unconditionally, so none of them matches.
+
+Direction for the fix: a do-while recogniser. The header holds a phi with a constant start and step 1, tests the next index against a constant bound with `eq` (exit on true), and the body branches back unconditionally; it is emitted as `for (int t = start; t < bound - 1; t++) { body }`, with the index uses handled as `emitLoop` does. It needs a macOS fixture with the same shape, a corpus check over the 18 libraries, a digest and a prepush. Estimate: one to two hours. It was not started in this window.
+
+Not checked: whether the Mac AIR of the same library has this shape. The Mac library translates, so its loop must be recognised, but the two disassemblies were not compared.
+
+The shared-member fix (`3dd642f6c`), the diamond data generator and its test (`138a49101`) are unchanged by this section.
