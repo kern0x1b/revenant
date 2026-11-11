@@ -1,0 +1,1 @@
+{"functions": [{"name": "exitVertex", "stage": "vertex", "source": "exitVertex.vertex.glsl", "reflection": "exitVertex.vertex.json"}, {"name": "exitFragment", "stage": "fragment", "source": "exitFragment.fragment.glsl", "reflection": "exitFragment.fragment.json"}]}
