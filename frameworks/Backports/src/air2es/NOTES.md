@@ -53,7 +53,7 @@ and why, so it is not rediscovered later.
   compiles the Metal sources of a Telegram checkout to iOS AIR, links them per
   directory, translates each library and writes one verdict per entry point.
 - On Telegram-iOS-release-13.0.0 it gives 89 entry points: 43 fragment, 27 vertex and
-  19 kernel. 65 translate (32 fragment, 22 vertex, 11 kernel) and 24 are refused, measured after the host element cap of
+  19 kernel. 66 translate (32 fragment, 23 vertex, 11 kernel) and 23 are refused, measured after the `air.point_size` and `air.any` change and the host element cap of
   `callBlobVertex`, which follows the half-precision change, the switch change, the bounded integers and the clamp-to-zero
   emulation; `docs/explanation/backports/air2es-ios-verdicts.md` has the
   history.
@@ -133,6 +133,9 @@ and why, so it is not rediscovered later.
   translation promises no more precision than Metal's half, and a value above 2^14 is not guaranteed on a device that
   implements only the minimum. Fragment shaders already default to mediump, so only vertex shaders change. Not measured
   against Metal; see the verdict doc's half-values section.
+- A vertex function's `air.point_size` output is `gl_PointSize`, and only a float is accepted. The translator does not clamp
+  the size: the GLES driver clamps it to its aliased point size range, which may differ from Metal's clamp. Not measured on a
+  device. `air.any.v2i1` is GLSL `any`.
 - Half-precision vertex attributes are refused, because the loader reads anything but
   float and i8 as a short.
 - `BranchInst` is deprecated in LLVM 23.1.4, as in `air2cpu.cpp`. It is kept because the

@@ -169,6 +169,7 @@ const PlainFunction kPlainFunctions[] = {
     {"air.dot.v2f32", "dot", 2},
     {"air.dot.v3f32", "dot", 2},
     {"air.all.v2i1", "all", 1},
+    {"air.any.v2i1", "any", 1},
     {"air.fast_clamp.f32", "clamp", 3},
     {"air.fast_clamp.v2f32", "clamp", 3},
     {"air.fast_clamp.v3f32", "clamp", 3},
@@ -2541,6 +2542,12 @@ private:
                     declare("varying " + declaredType(fields[k]->getType()) + " " + output.name + ";\n", output.name);
                     statement(output.name + " = " + text + ";\n");
                 }
+            } else if (output.kind == "air.point_size" && stage_ == Stage::Vertex) {
+                if (!fields[k]->getType()->isFloatTy())
+                    return refuse("a point size that is not a float");
+                if (!expression(fields[k], text))
+                    return false;
+                statement("gl_PointSize = " + text + ";\n");
             } else if (output.kind == "air.render_target" && stage_ == Stage::Fragment && output.index == 0) {
                 if (!expression(fields[k], text))
                     return false;
