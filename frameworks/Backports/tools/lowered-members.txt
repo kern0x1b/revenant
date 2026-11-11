@@ -3387,10 +3387,12 @@ enum MTLColorWriteMaskAlpha
 enum MTLColorWriteMaskBlue
 enum MTLColorWriteMaskGreen
 enum MTLColorWriteMaskRed
+enum MTLCommandBufferErrorNotPermitted
 enum MTLCommandBufferErrorOptionNone
 enum MTLCommandBufferStatusCommitted
 enum MTLCommandBufferStatusCompleted
 enum MTLCommandBufferStatusEnqueued
+enum MTLCommandBufferStatusError
 enum MTLCommandBufferStatusNotEnqueued
 enum MTLCommandBufferStatusScheduled
 enum MTLCompareFunctionAlways
@@ -4341,6 +4343,7 @@ enum_type MPErrorCode
 enum_type MPSPurgeableState
 enum_type MTLBinaryArchiveError
 enum_type MTLCaptureError
+enum_type MTLCommandBufferError
 enum_type MTLLoadAction
 enum_type MTLStencilOperation
 enum_type MTLTensorDataType
@@ -27978,6 +27981,10 @@ member RevenantMetalDevice -newTextureWithDescriptor:
 member RevenantMetalDevice -newTextureWithDescriptor:iosurface:plane:
 member RevenantMetalDevice -registryID
 member RevenantMetalDevice -relinquish
+member RevenantMetalDevice -revenantResume
+member RevenantMetalDevice -revenantResumptions
+member RevenantMetalDevice -revenantSuspend
+member RevenantMetalDevice -revenantSuspended
 member RevenantMetalDevice -supportsFamily:
 member RevenantMetalDevice -supportsFeatureSet:
 member RevenantMetalDevice -supportsTextureSampleCount:
@@ -28099,6 +28106,7 @@ member RevenantMetalLayerState -dealloc
 member RevenantMetalLayerState -framebuffer
 member RevenantMetalLayerState -layer
 member RevenantMetalLayerState -renderbuffer
+member RevenantMetalLayerState -resumptions
 member RevenantMetalLayerState -size
 member RevenantMetalLayerState -texture
 member RevenantMetalLibrary -device
