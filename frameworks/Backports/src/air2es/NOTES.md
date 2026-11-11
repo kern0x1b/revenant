@@ -31,7 +31,8 @@ and why, so it is not rediscovered later.
   name, as is each part GLES 2 cannot express: mirrored repeat, a clamp-to-zero address
   whose minification and magnification filters differ (the level of detail that picks one
   is not computed), a cube sample with a clamp-to-zero address, a mipmap filter, pixel
-  coordinates, anisotropy and a LOD clamp above zero. A clamp-to-zero address with one
+  coordinates, anisotropy and, on iOS, a LOD clamp above zero (the macOS nine-operand form
+  is in its own section below). A clamp-to-zero address with one
   filter is emulated, see "Clamp-to-zero samples" below. A plain sample does
   not read the compare function, so a constexpr compare is not refused.
 - The generator needs the toolchain's `metal` and `metallib`. The image is pinned in
@@ -47,14 +48,30 @@ and why, so it is not rediscovered later.
 - The iOS target declares no border colour, so `clamp_to_border` does not compile for
   iOS and the table has no border field.
 
+## macOS sample_texture_2d
+
+- The macOS form (`air64-apple-macos13.0`) of a sample is `air.sample_texture_2d.v4f32` with nine operands: texture, sampler
+  state, coordinate, normalized, offset, hasLod, level or bias, min_lod_clamp, access. It returns `{ <4 x float>, i8 }`. The
+  iOS form has eight operands, with no min_lod_clamp, and returns `<4 x float>`.
+- The operand order and types are those of `__metal_sample_texture_2d_t` in the Metal toolchain's header
+  `metal/__bits/metal_texture2d`.
+- `sampleLocal` (`translate.cpp`) holds the colour element. The translated form needs min_lod_clamp to be the constant 0.0 and
+  access to be 0 (sample); other values are refused by name. The i8 residency element is refused if it is used.
+- `metal_shader_harness` reads each texture's wrap and filter from the reflection (`filterOf`, `wrapOf`) and sets them as the
+  GL texture parameters, so the GLES sample uses the same sampler state as the constexpr one. A linear GLES sampler does not
+  pass for a nearest constexpr one.
+- Fixture: `tests/air2es/sample_mac.metal`, `sample_mac.metallib` and `sample_mac.golden/`. The harness matches Metal on
+  `sampleFragment` with a max diff of 0 over 13,312 non-zero channels.
+
 ## Corpus check
 
 - `./xmakew l frameworks/Backports/tools/metal_corpus.lua DMG build/macosx/arm64/release/air2es REFERENCE OUT.tsv [MOUNT]`
   compiles the Metal sources of a Telegram checkout to iOS AIR, links them per
   directory, translates each library and writes one verdict per entry point.
 - On Telegram-iOS-release-13.0.0 it gives 89 entry points: 43 fragment, 27 vertex and
-  19 kernel. 65 translate (32 fragment, 22 vertex, 11 kernel) and 24 are refused, measured after the switch change, which
-  follows the bounded integers and the clamp-to-zero emulation; `docs/explanation/backports/air2es-ios-verdicts.md` has the
+  19 kernel. 66 translate (32 fragment, 23 vertex, 11 kernel) and 23 are refused, measured after the `air.point_size` and `air.any` change and the host element cap of
+  `callBlobVertex`, which follows the half-precision change, the switch change, the bounded integers and the clamp-to-zero
+  emulation; `docs/explanation/backports/air2es-ios-verdicts.md` has the
   history.
 
 ## Precision and device checks still owed
@@ -93,6 +110,11 @@ and why, so it is not rediscovered later.
   texture stage of the ES 2 probe checks both on the 4S: exact for the sizes it runs, which are up to 1024 by 1024.
 - Internal helper functions are inlined at each call site. They are not emitted as GLSL
   functions, so their sampler and texture parameters map to the caller's bindings.
+- A buffer argument with an element count that the host declares (`kBufferCaps` in `translate.cpp`). A scalar pointer
+  argument read at a dynamic index becomes one uniform per element, and the index is a select chain over them, as for an
+  array member of a buffer struct. The count is a host contract taken from the host's code, and neither the shader nor the
+  loader checks it: the loader reads each element's bytes at its offset, so a host that sets fewer bytes reads past them.
+  Only `callBlobVertex` has an entry (`positions`, 8 elements; `CallScreen/Sources/Components/CallBlobsLayer.swift:113`).
 - Control flow: an if/else region ends at the branch's immediate post-dominator. Phi
   values are copied on each edge, through temporaries when an edge copies more than one
   phi.
@@ -114,12 +136,22 @@ and why, so it is not rediscovered later.
   corpus entry, and they stand on the same helper.
 - Bounded integers. A division or remainder of two non-negative integers, a shift left by a constant and a logical shift
   right by a constant are computed in float, and each is refused unless its operands have a known bound. A bound is known
-  for a constant, a vertex or instance id, a buffer member, and a float converted to an unsigned integer. The host's ids,
-  buffer members and converted floats are taken below 2^16: a host contract the shader does not check. A division takes
-  operands below 2^16 and corrects its float quotient by one step from the exact remainder, so the result is exact. A
-  divisor of zero is undefined in LLVM, and it is taken as 1. A shift left or a sum keeps its result below 2^22, so the
-  float arithmetic is exact. The thread-position shift is unchanged. The star hash of `backgroundStarVertex` needs all 32
-  bits and has no bound, so it stays refused.
+  for a constant, a vertex id, a buffer member, and a float converted to an unsigned integer. An instance id has no bound:
+  DustEffect draws one instance per particle, and the count is the item's width times height in points, above 2^16 on the
+  4S, so `dustEffectVertex` is refused. The host's vertex ids, buffer members and converted floats are taken below 2^16: a
+  host contract the shader does not check, with the Telegram values and their citations in the verdict doc's bounded-integers
+  section. A division takes operands below 2^16 and corrects its float quotient by one step from the exact remainder, so the
+  result is exact. A divisor of zero is undefined in LLVM, and it is taken as 1. A shift left or a sum keeps its result below
+  2^22, so the float arithmetic is exact. The thread-position shift is unchanged. The star hash of `backgroundStarVertex` needs
+  all 32 bits and has no bound, so it stays refused.
+- Half values are declared `mediump float` (`declaredType`), at each declaration site, not highp. GLSL ES 1.00 guarantees
+  `mediump` a 10-bit mantissa and a range of plus or minus 2^14; Metal's `half` has 10 bits and a range up to 65504. So the
+  translation promises no more precision than Metal's half, and a value above 2^14 is not guaranteed on a device that
+  implements only the minimum. Fragment shaders already default to mediump, so only vertex shaders change. Not measured
+  against Metal; see the verdict doc's half-values section.
+- A vertex function's `air.point_size` output is `gl_PointSize`, and only a float is accepted. The translator does not clamp
+  the size: the GLES driver clamps it to its aliased point size range, which may differ from Metal's clamp. Not measured on a
+  device. `air.any.v2i1` is GLSL `any`.
 - Half-precision vertex attributes are refused, because the loader reads anything but
   float and i8 as a short.
 - `BranchInst` is deprecated in LLVM 23.1.4, as in `air2cpu.cpp`. It is kept because the
@@ -136,7 +168,14 @@ and why, so it is not rediscovered later.
   rules come from GLSL ES 1.00, Appendix A, section 4 (loops) and section 5 (indexing),
   revision 17.
 - `./xmakew l -P frameworks/Backports frameworks/Backports/tests/air2es_test.lua` runs 15
-  checker cases. It is registered as the `air2es` suite of the backports tests.
+  checker cases, the sampler checks, the capped-buffer test and the sampling test. The capped-buffer test translates
+  `tests/air2es/capped_buffer.metallib` (compiled from `capped_buffer.metal` with the pinned Metal compiler), with the built
+  `build/macosx/arm64/release/air2es`, and compares the folder with `capped_buffer.golden/`. It needs `callBlobVertex` to
+  translate through its host cap (eight uniforms and a select chain) and `uncappedVertex` to be refused by name, since it has
+  no cap. It is registered as the `air2es` suite of the backports tests.
+- The sampling test translates `tests/air2es/sample_mac.metallib` (macOS, from `sample_mac.metal`). It checks that
+  `sampleVertex` and `sampleFragment` are OK, that `sampleMinLodFragment` is refused by name, and that the `sampleFragment`
+  folder matches `sample_mac.golden/`.
 - Negative control: replacing a loop bound with `int(inputTexture_size.x)` in the
   scaleAndBlur output keeps glslangValidator at exit 0, and the checker refuses it.
 - The Telegram oracle is an external file, so the harness run on it is not part of CI.

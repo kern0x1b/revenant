@@ -15,9 +15,9 @@ void main() {
     vec2 t5;
     vec2 t6;
     vec2 t7;
-    vec4 t8;
-    vec4 t9;
-    vec4 t10;
+    mediump vec4 t8;
+    mediump vec4 t9;
+    mediump vec4 t10;
     vec4 t11;
     position = gl_FragCoord;
     position.y = revenant_flip > 0.0 ? revenant_target.y - gl_FragCoord.y : gl_FragCoord.y;

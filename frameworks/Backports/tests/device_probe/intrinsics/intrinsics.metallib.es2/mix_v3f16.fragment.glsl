@@ -15,10 +15,10 @@ void main() {
     vec2 t5;
     vec2 t6;
     vec2 t7;
-    vec4 t8;
-    vec3 t9;
-    vec3 t10;
-    vec3 t11;
+    mediump vec4 t8;
+    mediump vec3 t9;
+    mediump vec3 t10;
+    mediump vec3 t11;
     vec3 t12;
     vec4 t13;
     vec4 t14;

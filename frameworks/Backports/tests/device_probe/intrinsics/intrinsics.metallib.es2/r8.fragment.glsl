@@ -15,7 +15,7 @@ void main() {
     vec2 t5;
     vec2 t6;
     vec2 t7;
-    vec4 t8;
+    mediump vec4 t8;
     float t9;
     vec4 t10;
     position = gl_FragCoord;
