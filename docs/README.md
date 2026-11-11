@@ -172,6 +172,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Intents](reference/backports/Intents/README.md) | the responses, message and call intents and resolution results Telegram's extensions name, the Swift module for the key path forms, and what is measured on a device |
 | [Metal: dispatchThreads](reference/backports/Metal/DispatchThreads.md) | compute dispatch by threads per grid, the edge group, and the pipeline limits |
 | [Metal: linear texture alignment](reference/backports/Metal/LinearTextureAlignment.md) | the row alignment a device reports per pixel format, the padded-row readback fix, and the slice forms of getBytes and replaceRegion |
+| [Metal: the background lifecycle](reference/backports/Metal/Lifecycle.md) | why an OpenGL ES context kills the app in the background, the variant table of the device probe, what is restored across the background, and the pixel check on the iPhone 4S |
 | [MusicKit](reference/backports/MusicKit/README.md) | MusicKit for a legacy Apple platform |
 | [NaturalLanguage](reference/backports/NaturalLanguage/README.md) | the Swift forms of the recognizer, tokenizer, tagger, model and embedding members, and their refined Objective-C names |
 | [PassKit](reference/backports/PassKit/README.md) | the `capability3DS`, `capabilityEMV`, `capabilityCredit` and `capabilityDebit` aliases of `PKMerchantCapability` |

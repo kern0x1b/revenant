@@ -1,4 +1,6 @@
 #import "RevenantMetal.h"
+#import "RevenantMetalResidency.h"
+#import "../RevenantSayOnce.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -124,6 +126,9 @@ static NSHashTable *RevenantMetalSurfaceTextures;
     __strong RevenantMetalHeap *_revenantHeap;
     NSUInteger _revenantHeapOffset;
     NSUInteger _attachedLevel;
+    CVImageBufferRef _image;
+    size_t _plane;
+    NSArray *_levelBytes;
 }
 
 @synthesize label;
@@ -152,24 +157,9 @@ static int depthKind(MTLPixelFormat pixelFormat)
         _attachedLevel = NSNotFound;
         RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
-        if (kind == 3) {
-            glGenRenderbuffers(1, &_renderbuffer);
-            glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
-            glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, (GLsizei)_width, (GLsizei)_height);
-        } else {
-            RevenantMetalBindEpoch++;
-            glGenTextures(1, &_name);
-            glBindTexture(GL_TEXTURE_2D, _name);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            if (kind == 2)
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_STENCIL_OES, (GLsizei)_width, (GLsizei)_height, 0, GL_DEPTH_STENCIL_OES, GL_UNSIGNED_INT_24_8_OES, NULL);
-            else
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, (GLsizei)_width, (GLsizei)_height, 0, GL_DEPTH_COMPONENT, (NSUInteger)descriptor.pixelFormat == RevenantMetalDepth16UnormPixelFormat ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, NULL);
-        }
+        [self revenantAllocateDepth];
         [device relinquish];
+        RevenantMetalRegisterResident(self);
     }
     return self;
 }
@@ -237,19 +227,9 @@ static int depthKind(MTLPixelFormat pixelFormat)
         _attachedLevel = NSNotFound;
         RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
-        RevenantMetalBindEpoch++;
-        glGenTextures(1, &_name);
-        glBindTexture(GL_TEXTURE_2D, _name);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        for (NSUInteger level = 0; level < _levels; level++)
-            glTexImage2D(GL_TEXTURE_2D, (GLint)level, format.internal,
-                         (GLsizei)levelExtent(_width, level), (GLsizei)levelExtent(_height, level), 0,
-                         format.format, format.type, NULL);
+        [self revenantAllocateColour];
         [device relinquish];
+        RevenantMetalRegisterResident(self);
     }
     return self;
 }
@@ -276,16 +256,9 @@ static int depthKind(MTLPixelFormat pixelFormat)
         _iosurface = (IOSurfaceRef)CFRetain(iosurface);
         RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
-        RevenantMetalBindEpoch++;
-        glGenTextures(1, &_name);
-        glBindTexture(GL_TEXTURE_2D, _name);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, format.internal, (GLsizei)_width, (GLsizei)_height, 0, format.format, format.type, NULL);
+        [self revenantAllocateColour];
         [device relinquish];
+        RevenantMetalRegisterResident(self);
         [self revenantUploadSurface];
     }
     return self;
@@ -301,12 +274,18 @@ static int depthKind(MTLPixelFormat pixelFormat)
     }
     [device acquire];
     CVOpenGLESTextureCacheRef cache = [device textureCache];
-    CVOpenGLESTextureRef texture = NULL;
-    *status = cache ? CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, cache, image, NULL, GL_TEXTURE_2D, format.internal, (GLsizei)width, (GLsizei)height, format.format, format.type, plane, &texture) : kCVReturnError;
+    CVOpenGLESTextureRef surface = NULL;
+    *status = cache ? CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, cache, image, NULL, GL_TEXTURE_2D, format.internal, (GLsizei)width, (GLsizei)height, format.format, format.type, plane, &surface) : kCVReturnError;
     [device relinquish];
     if (*status != kCVReturnSuccess)
         return nil;
-    return [[self alloc] initWithOpenGLESTexture:texture pixelFormat:pixelFormat width:width height:height usage:MTLTextureUsageShaderRead | MTLTextureUsageRenderTarget];
+    RevenantMetalTexture *texture = [[self alloc] initWithOpenGLESTexture:surface pixelFormat:pixelFormat width:width height:height usage:MTLTextureUsageShaderRead | MTLTextureUsageRenderTarget];
+    if (!texture)
+        return nil;
+    texture->_image = (CVImageBufferRef)CFRetain(image);
+    texture->_plane = plane;
+    RevenantMetalRegisterResident(texture);
+    return texture;
 }
 
 - (instancetype)initWithOpenGLESTexture:(CVOpenGLESTextureRef)texture pixelFormat:(MTLPixelFormat)pixelFormat width:(NSUInteger)width height:(NSUInteger)height usage:(MTLTextureUsage)usage
@@ -402,6 +381,8 @@ static int depthKind(MTLPixelFormat pixelFormat)
 {
     if (_iosurface)
         CFRelease(_iosurface);
+    if (_image)
+        CFRelease(_image);
     if (_surfaceTexture) {
         RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
@@ -420,6 +401,159 @@ static int depthKind(MTLPixelFormat pixelFormat)
             glDeleteRenderbuffers(1, &_renderbuffer);
         [device relinquish];
     }
+}
+
+- (void)revenantAllocateColour
+{
+    RevenantFormat format;
+    if (!formatFor(_pixelFormat, &format))
+        return;
+    RevenantMetalBindEpoch++;
+    glGenTextures(1, &_name);
+    glBindTexture(GL_TEXTURE_2D, _name);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    for (NSUInteger level = 0; level < _levels; level++)
+        glTexImage2D(GL_TEXTURE_2D, (GLint)level, format.internal,
+                     (GLsizei)levelExtent(_width, level), (GLsizei)levelExtent(_height, level), 0,
+                     format.format, format.type, NULL);
+}
+
+- (void)revenantAllocateDepth
+{
+    if (_kind == 3) {
+        glGenRenderbuffers(1, &_renderbuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, (GLsizei)_width, (GLsizei)_height);
+        return;
+    }
+    RevenantMetalBindEpoch++;
+    glGenTextures(1, &_name);
+    glBindTexture(GL_TEXTURE_2D, _name);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    if (_kind == 2)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_STENCIL_OES, (GLsizei)_width, (GLsizei)_height, 0, GL_DEPTH_STENCIL_OES, GL_UNSIGNED_INT_24_8_OES, NULL);
+    else
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, (GLsizei)_width, (GLsizei)_height, 0, GL_DEPTH_COMPONENT, (NSUInteger)_pixelFormat == RevenantMetalDepth16UnormPixelFormat ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, NULL);
+}
+
+- (RevenantMetalResidencyPlan)revenantPlan
+{
+    RevenantFormat format = {0};
+    formatFor(_pixelFormat, &format);
+    return RevenantMetalResidencyPlanFor(_iosurface != NULL, _image != NULL, _kind != 0, (unsigned)format.channel);
+}
+
+- (NSArray *)revenantSnapshot
+{
+    RevenantFormat format;
+    if (!formatFor(_pixelFormat, &format))
+        return nil;
+    NSMutableArray *levels = [NSMutableArray arrayWithCapacity:_levels];
+    for (NSUInteger level = 0; level < _levels; level++) {
+        NSUInteger width = levelExtent(_width, level), height = levelExtent(_height, level);
+        NSUInteger rowBytes = width * format.bytes;
+        NSMutableData *bytes = [NSMutableData dataWithLength:rowBytes * height];
+        MTLRegion region = {{0, 0, 0}, {width, height, 1}};
+        if (![self revenantReadRegion:region level:level bytesPerRow:rowBytes into:bytes.mutableBytes]) {
+            revenant_say_once_for(@"metal-readback", @"Metal: a texture cannot be read back for the background; it returns empty after the return to the foreground");
+            return nil;
+        }
+        [levels addObject:bytes];
+    }
+    return levels;
+}
+
+- (void)revenantRestoreSnapshot
+{
+    RevenantFormat format;
+    if (!formatFor(_pixelFormat, &format))
+        return;
+    for (NSUInteger level = 0; level < _levels && level < _levelBytes.count; level++) {
+        NSUInteger width = levelExtent(_width, level), height = levelExtent(_height, level);
+        MTLRegion region = {{0, 0, 0}, {width, height, 1}};
+        [self revenantWriteRegion:region level:level bytes:[_levelBytes[level] bytes] bytesPerRow:width * format.bytes];
+    }
+    _levelBytes = nil;
+}
+
+- (void)revenantRestoreImage
+{
+    RevenantFormat format = {0};
+    formatFor(_pixelFormat, &format);
+    CVOpenGLESTextureCacheRef cache = [[RevenantMetalDevice shared] textureCache];
+    CVOpenGLESTextureRef surface = NULL;
+    CVReturn status = cache ? CVOpenGLESTextureCacheCreateTextureFromImage(kCFAllocatorDefault, cache, _image, NULL, GL_TEXTURE_2D, format.internal, (GLsizei)_width, (GLsizei)_height, format.format, format.type, _plane, &surface) : kCVReturnError;
+    if (status != kCVReturnSuccess) {
+        revenant_say_once_for(@"metal-image-restore", @"Metal: a CoreVideo texture cannot be recreated after the background; it returns empty after the return to the foreground");
+        return;
+    }
+    RevenantMetalBindEpoch++;
+    _surfaceTexture = surface;
+    _name = CVOpenGLESTextureGetName(surface);
+}
+
+- (void)revenantEvict
+{
+    RevenantMetalDevice *device = [RevenantMetalDevice shared];
+    [device acquire];
+    RevenantMetalResidencyPlan plan = [self revenantPlan];
+    if (plan == RevenantMetalResidencyReadback)
+        _levelBytes = [self revenantSnapshot];
+    else if (plan == RevenantMetalResidencyLost)
+        revenant_say_once_for(@"metal-residency-lost", @"Metal: the contents of depth, stencil and float textures are not kept across a background, because OpenGL ES 2.0 cannot read them back; they return empty");
+    if (_framebuffer)
+        glDeleteFramebuffers(1, &_framebuffer);
+    if (_surfaceTexture) {
+        CFRelease(_surfaceTexture);
+        _surfaceTexture = NULL;
+    } else if (_name) {
+        glDeleteTextures(1, &_name);
+    }
+    if (_renderbuffer)
+        glDeleteRenderbuffers(1, &_renderbuffer);
+    _framebuffer = 0;
+    _name = 0;
+    _renderbuffer = 0;
+    _checkedDepth = 0;
+    _checkedStencil = 0;
+    _appliedSampler = nil;
+    _appliedCompare = 0;
+    _attachedLevel = NSNotFound;
+    _gpuDirty = NO;
+    [device relinquish];
+}
+
+- (void)revenantRestore
+{
+    RevenantMetalDevice *device = [RevenantMetalDevice shared];
+    [device acquire];
+    switch ([self revenantPlan]) {
+    case RevenantMetalResidencySurface:
+        [self revenantAllocateColour];
+        [self revenantUploadSurface];
+        break;
+    case RevenantMetalResidencyImage:
+        [self revenantRestoreImage];
+        break;
+    case RevenantMetalResidencyReadback:
+        [self revenantAllocateColour];
+        [self revenantRestoreSnapshot];
+        break;
+    case RevenantMetalResidencyLost:
+        if (_kind)
+            [self revenantAllocateDepth];
+        else
+            [self revenantAllocateColour];
+        break;
+    }
+    [device relinquish];
 }
 
 - (RevenantMetalSampler *)appliedSampler

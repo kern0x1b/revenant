@@ -1,4 +1,7 @@
 #import "RevenantMetal.h"
+#import "RevenantMetalLifecycle.h"
+#import "../RevenantSayOnce.h"
+#import <UIKit/UIKit.h>
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -10,11 +13,28 @@ NSError *RevenantMetalError(NSInteger code, NSString *message)
     return [NSError errorWithDomain:RevenantMetalErrorDomain code:code userInfo:@{NSLocalizedDescriptionKey: message}];
 }
 
+static NSHashTable *RevenantMetalResidents;
+
+void RevenantMetalRegisterResident(id<RevenantMetalResident> resident)
+{
+    if (!RevenantMetalResidents)
+        RevenantMetalResidents = [NSHashTable weakObjectsHashTable];
+    [RevenantMetalResidents addObject:resident];
+}
+
+static NSArray *RevenantMetalResidentList(void)
+{
+    return RevenantMetalResidents ? [RevenantMetalResidents allObjects] : @[];
+}
+
 @implementation RevenantMetalDevice {
     EAGLContext *_context;
     NSRecursiveLock *_lock;
     NSMutableDictionary *_pipelines;
     CVOpenGLESTextureCacheRef _textureCache;
+    RevenantMetalLifecycle _lifecycle;
+    EAGLContext *_previous;
+    NSUInteger _generation;
 }
 
 + (RevenantMetalDevice *)shared
@@ -35,6 +55,14 @@ NSError *RevenantMetalError(NSInteger code, NSString *message)
     if ((self = [super init])) {
         _context = context;
         _lock = [[NSRecursiveLock alloc] init];
+        _lifecycle.suspended = [UIApplication sharedApplication].applicationState == UIApplicationStateBackground;
+        NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+        [center addObserverForName:UIApplicationDidEnterBackgroundNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
+            [self revenantSuspend];
+        }];
+        [center addObserverForName:UIApplicationWillEnterForegroundNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
+            [self revenantResume];
+        }];
     }
     return self;
 }
@@ -47,12 +75,85 @@ NSError *RevenantMetalError(NSInteger code, NSString *message)
 - (void)acquire
 {
     [_lock lock];
+    BOOL makeCurrent = RevenantMetalLifecycleAcquire(&_lifecycle);
+    if (_lifecycle.depth == 1)
+        _previous = [EAGLContext currentContext];
+    if (!makeCurrent) {
+        revenant_say_once_for(@"metal-background", @"Metal: GL work requested while the app is in the background is not issued; the call runs without a current context, and command buffers committed in the background fail with MTLCommandBufferErrorNotPermitted");
+        return;
+    }
     if ([EAGLContext currentContext] != _context)
         [EAGLContext setCurrentContext:_context];
 }
 
 - (void)relinquish
 {
+    if (RevenantMetalLifecycleRelinquish(&_lifecycle)) {
+        if ([EAGLContext currentContext] != _previous)
+            [EAGLContext setCurrentContext:_previous];
+        _previous = nil;
+    }
+    [_lock unlock];
+}
+
+- (BOOL)revenantSuspended
+{
+    return _lifecycle.suspended;
+}
+
+- (NSUInteger)revenantResumptions
+{
+    return _lifecycle.resumptions;
+}
+
+- (NSUInteger)revenantGeneration
+{
+    return _generation;
+}
+
+- (void)revenantSuspend
+{
+    [_lock lock];
+    if (!_lifecycle.suspended) {
+        [self acquire];
+        RevenantMetalSynchroniseSurfaceTextures();
+        glFinish();
+        for (id<RevenantMetalResident> resident in RevenantMetalResidentList())
+            [resident revenantEvict];
+        RevenantMetalDropPrograms();
+        if (_textureCache) {
+            CVOpenGLESTextureCacheFlush(_textureCache, 0);
+            CFRelease(_textureCache);
+            _textureCache = NULL;
+        }
+        [self relinquish];
+        RevenantMetalLifecycleSuspend(&_lifecycle);
+        _context = nil;
+    }
+    [_lock unlock];
+}
+
+- (void)revenantResume
+{
+    [_lock lock];
+    if (_lifecycle.suspended) {
+        if (!_context) {
+            EAGLContext *context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+            if (!context) {
+                NSLog(@"Metal: the OpenGL ES context cannot be recreated after the background; Metal work stays refused until the app is relaunched");
+                [_lock unlock];
+                return;
+            }
+            _context = context;
+            _generation++;
+        }
+        RevenantMetalLifecycleResume(&_lifecycle);
+        RevenantMetalBindEpoch++;
+        [self acquire];
+        for (id<RevenantMetalResident> resident in RevenantMetalResidentList())
+            [resident revenantRestore];
+        [self relinquish];
+    }
     [_lock unlock];
 }
 
@@ -138,6 +239,8 @@ NSError *RevenantMetalError(NSInteger code, NSString *message)
 
 - (CVOpenGLESTextureCacheRef)textureCache
 {
+    if (!_context)
+        return NULL;
     if (!_textureCache) {
         CVReturn status = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, _context, NULL, &_textureCache);
         if (status != kCVReturnSuccess) {
