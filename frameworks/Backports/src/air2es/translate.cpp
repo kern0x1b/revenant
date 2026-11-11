@@ -149,6 +149,7 @@ struct PlainFunction {
     unsigned arguments;
     const char *tail = "";
     bool derivative = false;
+    const char *sign = "";
 };
 
 const PlainFunction kPlainFunctions[] = {
@@ -201,6 +202,7 @@ const PlainFunction kPlainFunctions[] = {
     {"air.fwidth.f32", "fwidth", 1, "", true},
     {"air.fwidth.v3f32", "fwidth", 1, "", true},
     {"air.dfdx.v2f32", "dFdx", 1, "", true},
+    {"air.dfdy.v2f32", "dFdy", 1, "", true, "-"},
 };
 
 const PlainFunction *plainFunction(const std::string &name)
@@ -2563,7 +2565,7 @@ private:
                     return refuse("a derivative outside a fragment function");
                 derivatives_ = true;
             }
-            statement(name + " = " + plain->glsl + "(" + join(args) + plain->tail + ");\n");
+            statement(name + " = " + plain->sign + plain->glsl + "(" + join(args) + plain->tail + ");\n");
             return true;
         }
         if (width || height) {

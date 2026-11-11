@@ -246,6 +246,28 @@ function derivChecks()
     os.rm(work)
 end
 
+local DFDY = path.join(os.scriptdir(), "air2es", "dfdy_mac")
+
+function dfdyChecks()
+    local binary = path.join(os.scriptdir(), "..", "..", "..", "build", "macosx", "arm64", "release", "air2es")
+    assert(os.isfile(binary), "air2es is not built: configure with --air2es=y, then ./xmakew build air2es")
+    local work = path.join(os.tmpdir(), "air2es-dfdy-test")
+    if os.isdir(work) then
+        os.rm(work)
+    end
+    os.mkdir(work)
+    local folder = path.join(work, "dfdy_mac.es2")
+    local output = os.iorunv(binary, {DFDY .. ".metallib", folder})
+    assert(output:find("OK dyFragment fragment", 1, true), "dyFragment, a dfdy of a float2, is not translated: " .. output)
+    assert(output:find("OK dyNegFragment fragment", 1, true), "dyNegFragment, a negated dfdy of a float2, is not translated: " .. output)
+    for _, name in ipairs({"dyFragment.fragment.glsl", "dyFragment.fragment.json", "library.json"}) do
+        local expected = io.readfile(path.join(DFDY .. ".golden", name))
+        local got = io.readfile(path.join(folder, name))
+        assert(got == expected, name .. " differs from its golden output")
+    end
+    os.rm(work)
+end
+
 local LOOP = path.join(os.scriptdir(), "air2es", "loop_mac")
 
 function loopChecks()
@@ -288,6 +310,8 @@ function main()
     print("air2es exit: a constant loop with a break and two exits translates, and matches its golden output")
     derivChecks()
     print("air2es derivatives: dfdx of a float2 and fwidth of a float3 translate, and match their golden output")
+    dfdyChecks()
+    print("air2es dfdy: dfdy of a float2 translates as -dFdy, and matches its golden output")
     loopChecks()
     print("air2es loops: a loop bounded by a uniform, with a capped float4 buffer read in its body, translates and matches its golden output")
 end

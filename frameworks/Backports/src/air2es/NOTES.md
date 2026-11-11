@@ -221,6 +221,10 @@ and why, so it is not rediscovered later.
 - The derivative test translates `tests/air2es/deriv_mac.metallib` (macOS, from `deriv_mac.metal`): `derivVertex` and `derivFragment` are OK,
   and the `derivFragment` folder matches `deriv_mac.golden/`. Its negative control for the oracle is the same source with the `dfdx`
   scale changed from 16.0 to 8.0.
+- The dfdy test translates `tests/air2es/dfdy_mac.metallib` (macOS, from `dfdy_mac.metal`): `dyFragment` and `dyNegFragment` are OK, and
+  the `dyFragment` folder matches `dfdy_mac.golden/`. `air.dfdy.v2f32` maps to `-dFdy`: GL's y axis points up and Metal's points down,
+  so the same derivative has the opposite sign. Its negative control for the oracle is the same folder with the `-` removed, which
+  fails with a channel difference of 255 over 4,096 channels.
 - Negative control: replacing a loop bound with `int(inputTexture_size.x)` in the
   scaleAndBlur output keeps glslangValidator at exit 0, and the checker refuses it.
 - The Telegram oracle is an external file, so the harness run on it is not part of CI.
