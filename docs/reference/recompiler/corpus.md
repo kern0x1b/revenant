@@ -54,6 +54,14 @@ The check builds the libc-free driver `main.c`, feeds it to xlate, and requires 
 targets. Requiring "not zero" would let a partial regression (two or three targets) pass. This is host only: it
 checks xlate's build-time discovery, not the guest at run time.
 
+A second binary, `inline.c` with `inline.s`, covers a jump table that sits inside `__text`. ld64 lists such a table's
+symbol in `LC_FUNCTION_STARTS` as if it were a function, and the words of a table are data: a `udf`, or an
+address, that is not an instruction. xlate used to lift each word as a function and count it as a failure (the
+image linked from the 319 objects of Google's reCAPTCHA Enterprise SDK had three: "3 failures", now
+"0 failures, 3 jump table data words"). `JumpTables` now keeps the words of every table it resolved, and the lift
+loop skips a listed start that lies in one and counts it as `table data` in the summary line. The check requires the
+exact line `4 jump table targets, 0 failures, 1 jump table data words`.
+
 ### lse
 
 A control for rellume's lifting of the ARMv8.1 LSE atomics: LDADD, LDCLR, LDEOR, LDSET, LDSMAX, LDSMIN, LDUMAX,

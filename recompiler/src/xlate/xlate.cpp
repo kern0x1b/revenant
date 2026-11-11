@@ -644,6 +644,10 @@ class JumpTables {
     if (!width || width > 8) {
       return;
     }
+    std::vector<std::pair<uint64_t, unsigned>> entries;
+    if (auto base = Evaluate(load->getPointerOperand(), index, 0, nullptr, std::nullopt, 0)) {
+      entries.push_back({*base, width});
+    }
     for (uint64_t i = 0; i < limit; ++i) {
       bool in_domain = true;
       for (auto &guard : guards) {
@@ -665,6 +669,7 @@ class JumpTables {
       if (!image || !image->ReadBytes(*address, bytes, width)) {
         return;
       }
+      entries.push_back({*address, width});
       uint64_t raw = 0;
       memcpy(&raw, bytes, width);
       auto target = Evaluate(pc, index, i, load, raw, 0);
@@ -676,13 +681,22 @@ class JumpTables {
       }
       targets.insert(*target);
     }
+    for (auto &[address, size] : entries) {
+      data_[address] = std::max<uint64_t>(data_[address], address + size);
+    }
   }
 
   Program &program_;
   std::set<uint64_t> starts_;
+  std::map<uint64_t, uint64_t> data_;
   const DataLayout *dl_ = nullptr;
 
  public:
+  bool IsData(uint64_t address) const {
+    auto it = data_.upper_bound(address);
+    return it != data_.begin() && address < std::prev(it)->second;
+  }
+
   uint64_t Owner(uint64_t address) const {
     auto it = starts_.upper_bound(address);
     return it == starts_.begin() ? address : *std::prev(it);
@@ -1266,11 +1280,16 @@ int main(int argc, char **argv) {
   JumpTables tables(program);
   std::set<uint64_t> pending(program.functions.begin(), program.functions.end());
   unsigned table_targets = 0;
+  unsigned table_data = 0;
   while (!pending.empty()) {
     std::set<uint64_t> discovered;
     for (auto address : pending) {
       auto lifted = lifter.Lift(address);
       if (!lifted) {
+        if (tables.IsData(address)) {
+          ++table_data;
+          continue;
+        }
         errs() << "xlate: cannot decode function at 0x" << Hex(address) << "\n";
         ++failures;
         continue;
@@ -1289,7 +1308,7 @@ int main(int argc, char **argv) {
   }
   auto devirtualized = lifter.Devirtualize();
   errs() << "xlate: lifted " << lifter.functions.size() << " functions, " << devirtualized << " direct calls, " << table_targets << " jump table targets, "
-         << failures << " failures\n";
+         << failures << " failures, " << table_data << " jump table data words that the linker listed as function starts\n";
   std::vector<GuestSegment> segments;
   if (!EmitGuestData(program, module, segments, ObjCOverrides(module, objc))) {
     return 1;
