@@ -647,3 +647,25 @@ Limits, which the numbers above do not cover:
 - The sparkle pair is SKIP because its Metal output is blank; it is outside this check.
 - The stone's rotation (pitch 0.35, yaw 0.6) and projection (40°, camera 4 units back) are fixed values, not the app's; the sets cover planes and edges, not the app's motion or appearance values.
 - Nothing ran on a device.
+
+## Phone window and the iOS diamond, state (2026-11-11)
+
+Phone window (item 3 of the brief): not used for new measurements. The probe that reads the GL limits, `Es2ProgramProbe` (`frameworks/Backports/tests/device_probe/es2_main.m`), is not built in this worktree: `./xmakew -P frameworks/Backports build Es2ProgramProbe` stops in package resolution (`llvm`, `ffmpeg` from xmake-repo) before any of its code compiles. The earlier windows still stand:
+
+- `udiv` and `urem` are exact on the 4S over the 4096 texels, maxdiff 0 (the integer-map section).
+- Highp float and int in a fragment shader are exact for the bitwise-`and` emulation (the bitwise section).
+- Mediump float holds integers only up to 2048 (the enhance-LUT design note); the mediump range of ±2^14 is not measured on the device.
+- The GL limits (`GL_MAX_VERTEX_UNIFORM_VECTORS`, `GL_MAX_FRAGMENT_UNIFORM_VECTORS`, `GL_MAX_VARYING_VECTORS`, `GL_MAX_TEXTURE_IMAGE_UNITS`, `GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS`) are read by `revenant_limits` in the probe, and no run of it is recorded in the docs; their values are not recorded here.
+
+The iOS diamond refusal, "control flow that reaches one block twice": the refusing block is the header of a counted loop inside `diamondSurface`, which both `diamondFragment` and `diamondLensFragment` inline. A temporary trace at the refusal site (removed; the committed translator is unchanged) printed the block's first instruction. In the iOS AIR (`submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources.metallib`, `air-objdump -d`):
+
+- block 286: `%287 = phi i32 [ %288, %257 ], [ 1, %187 ]`, `%288 = add nuw nsw i32 %287, 1`, `%289 = icmp eq i32 %288, 7`, `br i1 %289, label %290, label %257`;
+- block 257, the body, ends in an unconditional branch back to 286.
+
+The walk reaches 286 from its entry, follows the body 257, and comes back to 286, so it is visited twice. `cycleOf`, `latchCycleOf` and `flagCycleOf` need a conditional latch that tests the next index with `eq` or `ne`, and `loopOf` needs the test on the header's phi. The test here sits in the header and the body branches back unconditionally, so none of them matches.
+
+Direction for the fix: a do-while recogniser. The header holds a phi with a constant start and step 1, tests the next index against a constant bound with `eq` (exit on true), and the body branches back unconditionally; it is emitted as `for (int t = start; t < bound - 1; t++) { body }`, with the index uses handled as `emitLoop` does. It needs a macOS fixture with the same shape, a corpus check over the 18 libraries, a digest and a prepush. Estimate: one to two hours. It was not started in this window.
+
+Not checked: whether the Mac AIR of the same library has this shape. The Mac library translates, so its loop must be recognised, but the two disassemblies were not compared.
+
+The shared-member fix (`3dd642f6c`), the diamond data generator and its test (`138a49101`) are unchanged by this section.
