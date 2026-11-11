@@ -1,6 +1,5 @@
 #include "../revenant_impl.h"
-#import "RevenantPhotos.h"
-#import <Photos/PhotosTypes.h>
+#import <Photos/Photos.h>
 
 @implementation PHLivePhotoRequestOptions {
     PHImageRequestOptionsVersion _version;
