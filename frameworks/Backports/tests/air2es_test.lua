@@ -246,6 +246,27 @@ function derivChecks()
     os.rm(work)
 end
 
+local LOOP = path.join(os.scriptdir(), "air2es", "loop_mac")
+
+function loopChecks()
+    local binary = path.join(os.scriptdir(), "..", "..", "..", "build", "macosx", "arm64", "release", "air2es")
+    assert(os.isfile(binary), "air2es is not built: configure with --air2es=y, then ./xmakew build air2es")
+    local work = path.join(os.tmpdir(), "air2es-loop-test")
+    if os.isdir(work) then
+        os.rm(work)
+    end
+    os.mkdir(work)
+    local folder = path.join(work, "loop_mac.es2")
+    local output = os.iorunv(binary, {LOOP .. ".metallib", folder})
+    assert(output:find("OK loopFragment fragment", 1, true), "loopFragment, a loop whose bound is a uniform and whose body reads a capped vector buffer, is not translated: " .. output)
+    for _, name in ipairs({"loopFragment.fragment.glsl", "loopFragment.fragment.json", "library.json"}) do
+        local expected = io.readfile(path.join(LOOP .. ".golden", name))
+        local got = io.readfile(path.join(folder, name))
+        assert(got == expected, name .. " differs from its golden output")
+    end
+    os.rm(work)
+end
+
 function main()
     for _, case in ipairs(CASES) do
         local reason = limits.check(case.source)
@@ -267,4 +288,6 @@ function main()
     print("air2es exit: a constant loop with a break and two exits translates, and matches its golden output")
     derivChecks()
     print("air2es derivatives: dfdx of a float2 and fwidth of a float3 translate, and match their golden output")
+    loopChecks()
+    print("air2es loops: a loop bounded by a uniform, with a capped float4 buffer read in its body, translates and matches its golden output")
 end

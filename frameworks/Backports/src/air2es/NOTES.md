@@ -83,6 +83,25 @@ and why, so it is not rediscovered later.
 - Not covered: vector elements (the diamond's `planes` are `float4`), since the translator has no vector-element cap in HEAD yet,
   and a `max` viewport for the lens's 128 edges. Both need the translator's capped-buffer patch before there is a GLES side.
 
+## Runtime-bounded loops and vector buffer elements
+
+- A counted loop whose latch compares the index with a value defined outside the loop is emitted as a `for` to the host cap of a
+  capped buffer that the body indexes with the loop index (`latchCycleOf`, `loopCapOf`). The latch test stays in the body, so the
+  loop stops at the uniform's count (`if (t17 == t0) break;`); a zero count is the guard before the loop. A loop with no capped
+  buffer behind its index stays refused.
+- A loop whose body is one block, which is both header and latch, is recognised with a runtime bound. A constant-bound
+  self-loop keeps its earlier route through `loopOf`: the first attempt changed four `gaussianBlur` kernels from OK to REFUSED,
+  and the corpus check caught it.
+- A host-capped buffer of `float2`, `float3` or `float4` elements is one uniform per element, as the scalar ones are
+  (`binding.stride` must equal the element size). `float3` is not tested.
+- Fixture: `tests/air2es/loop_mac.metal`, whose `loopFragment` loops `uint(viewport.z)` times over a `float4` buffer capped at
+  eight, and exits with the last index as a phi. Its capped buffer is named in `kBufferCaps` (`loopFragment`, `planes`, 8), as
+  `callBlobVertex` is. The diamond's entries (planes 17, edges 128) and the select limit of 128 are not in this change: they
+  change the diamond's verdicts, and they come with the geometry data source.
+- Oracle: `loop_z0`, `loop_z1`, `loop_z3` and `loop_z8` (the data sets, in `tests/air2es/`) PASS, max channel diff 0 over 16,384
+  channels each. The negative control, Metal `i + 1 < z` against the GLES folder of `i < z`, at z = 3, FAILs at 25/255 over 4,664
+  channels.
+
 ## Corpus check
 
 - `./xmakew l frameworks/Backports/tools/metal_corpus.lua DMG build/macosx/arm64/release/air2es REFERENCE OUT.tsv [MOUNT]`

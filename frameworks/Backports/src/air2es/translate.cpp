@@ -102,6 +102,7 @@ struct BufferCap {
 
 constexpr BufferCap kBufferCaps[] = {
     {"callBlobVertex", "positions", 8},
+    {"loopFragment", "planes", 8},
 };
 
 uint64_t bufferCapOf(const std::string &function, const std::string &argument)
@@ -411,8 +412,8 @@ public:
                 if (!cap) {
                     binding.members.push_back(Member{binding.name, 0, size, typeName});
                 } else {
-                    if (!scalarElement || components != 1 || size != binding.stride)
-                        return refuse("a buffer with a host cap whose element is not one scalar: " + binding.name);
+                    if (!scalarElement || size != binding.stride)
+                        return refuse("a buffer with a host cap whose element is not a scalar or a vector of one: " + binding.name);
                     binding.capCount = cap;
                     for (uint64_t k = 0; k < cap; k++)
                         binding.members.push_back(Member{binding.name + "_" + std::to_string(k), k * size, size, typeName});
@@ -1416,11 +1417,40 @@ private:
         return body;
     }
 
+    static bool isSameIndex(const Value *value, const Value *index)
+    {
+        if (auto *extend = dyn_cast<CastInst>(value);
+            extend && (extend->getOpcode() == Instruction::SExt || extend->getOpcode() == Instruction::ZExt))
+            value = extend->getOperand(0);
+        return value == index;
+    }
+
+    uint64_t loopCapOf(BasicBlock *header, const PHINode *index, const std::set<const BasicBlock *> &body)
+    {
+        std::vector<const BasicBlock *> blocks = {header};
+        blocks.insert(blocks.end(), body.begin(), body.end());
+        for (const BasicBlock *block : blocks)
+            for (const Instruction &instruction : *block) {
+                auto *gep = dyn_cast<GetElementPtrInst>(&instruction);
+                if (!gep)
+                    continue;
+                bool indexed = false;
+                for (unsigned i = 1; i < gep->getNumOperands(); i++)
+                    indexed = indexed || isSameIndex(gep->getOperand(i), index);
+                if (!indexed)
+                    continue;
+                const Binding *binding = bindingOf(gep->getPointerOperand());
+                if (binding && binding->capCount)
+                    return binding->capCount;
+            }
+        return 0;
+    }
+
     bool latchCycleOf(BasicBlock *header, Cycle &cycle)
     {
         for (BasicBlock &latch : *header->getParent()) {
             auto *back = dyn_cast<BranchInst>(latch.getTerminator());
-            if (&latch == header || !back || !back->isConditional())
+            if (!back || !back->isConditional())
                 continue;
             bool backFirst = back->getSuccessor(0) == header;
             bool backSecond = back->getSuccessor(1) == header;
@@ -1428,7 +1458,7 @@ private:
                 continue;
             BasicBlock *exit = back->getSuccessor(backFirst ? 1 : 0);
             std::set<const BasicBlock *> body = bodyOf(header, exit);
-            if (!body.count(&latch))
+            if (&latch != header && !body.count(&latch))
                 continue;
             auto *test = dyn_cast<ICmpInst>(back->getCondition());
             if (!test || test->getPredicate() != (backFirst ? ICmpInst::ICMP_NE : ICmpInst::ICMP_EQ))
@@ -1447,10 +1477,23 @@ private:
                 if (index->getIncomingBlock(j) != &latch)
                     start = index->getIncomingValue(j);
             auto *first = dyn_cast_or_null<ConstantInt>(start);
-            auto *bound = dyn_cast<ConstantInt>(test->getOperand(1));
-            if (!first || !bound || first->getSExtValue() >= bound->getSExtValue())
+            if (!first)
                 return false;
-            cycle.last = bound->getSExtValue();
+            if (auto *bound = dyn_cast<ConstantInt>(test->getOperand(1))) {
+                if (&latch == header)
+                    continue;
+                if (first->getSExtValue() >= bound->getSExtValue())
+                    return false;
+                cycle.last = bound->getSExtValue();
+            } else {
+                auto *limit = dyn_cast<Instruction>(test->getOperand(1));
+                if (limit && (limit->getParent() == header || limit->getParent() == &latch || body.count(limit->getParent())))
+                    return false;
+                uint64_t cap = loopCapOf(header, index, body);
+                if (!cap || first->getSExtValue() >= (int64_t)cap)
+                    return false;
+                cycle.last = (int64_t)cap;
+            }
             for (User *user : next->users())
                 if (user != index && user != test)
                     return false;
