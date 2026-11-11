@@ -221,6 +221,12 @@ if is_plat("iphoneos") then
                     table.insert(files, path.join(SKELETON, "registrar.m"))
                     target:add("files", table.unpack(files))
                 end
+                local weak = path.join(SKELETON, library.folder .. ".weak")
+                if os.isfile(weak) then
+                    for flag in io.readfile(weak):gmatch("[^\n]+") do
+                        target:add("shflags", flag, {force = true})
+                    end
+                end
             end)
             if library.name == "TLSBackports" then
                 before_build(function (target)
@@ -423,6 +429,19 @@ if is_plat("iphoneos") and not SELECTED then
         add_frameworks("UIKit", "Foundation", "MediaPlayer", "AVFoundation")
         set_values("app.plist-file", "tests/device_probe/Info.plist")
         set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.remotecommandsprobe", "CFBundleDisplayName=RemoteCommandsProbe")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
+    target("AVFoundationNotificationProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_deps("AVFoundationBackports")
+        add_files("tests/device_probe/avfoundation_notification_main.m")
+        add_mflags("-fobjc-arc", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability")
+        add_frameworks("Foundation", "AVFoundation")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.avfnotificationprobe", "CFBundleDisplayName=AVFNotificationProbe")
         set_values("revenant.version", "1.0.0")
     target_end()
 
@@ -774,7 +793,7 @@ else
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua", naturallanguageoverlay = "natural_language_overlay_test.lua", usernotifications = "user_notifications_test.lua",
                                   network = "network_test.lua", networkpath = "network_path_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", securetransport = "security_ssl_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua",
                                   device = "device_members_test.lua", compression = "compression_roundtrip_test.lua",
-                                  presentation = "presentation_intent_test.lua", localelanguage = "locale_language_test.lua", attributedstringmarkdown = "attributed_string_markdown_test.lua", markdownparser = "markdown_parser_oracle_test.lua", dateformatstyle = "date_format_style_test.lua", urlpercentencoded = "url_percent_encoded_test.lua",pastematching = "paste_matching_test.lua", documentpickerrules = "document_picker_rules_test.lua",exports = "lowered_exports_test.lua", constants = "constants_test.lua", loadglobals = "load_globals_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
+                                  presentation = "presentation_intent_test.lua", localelanguage = "locale_language_test.lua", attributedstringmarkdown = "attributed_string_markdown_test.lua", markdownparser = "markdown_parser_oracle_test.lua", dateformatstyle = "date_format_style_test.lua", urlpercentencoded = "url_percent_encoded_test.lua",pastematching = "paste_matching_test.lua", documentpickerrules = "document_picker_rules_test.lua",exports = "lowered_exports_test.lua", constants = "constants_test.lua", loadglobals = "load_globals_test.lua", deviceglobals = "device_globals_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
                                   vfs = "lowered_vfs_test.lua", modules = "lowered_modules_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua", sec_access_control = "security_access_control_test.lua", sec_shared_web = "security_shared_web_test.lua", sec_items = "security_item_test.lua", sec_keys = "security_key_test.lua", la_passcode = "localauth_passcode_test.lua", air2es = "air2es_test.lua",
                                   webkitvalues = "webkit_values_test.lua", webkitmessage = "webkit_script_message_test.lua", webkittiling = "webkit_tiling_test.lua",
                                   webkitwindow = "webkit_window_test.lua", webkitdownload = "webkit_download_test.lua", webkithistoryplan = "webkit_history_plan_test.lua",

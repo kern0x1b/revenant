@@ -2,6 +2,15 @@ local sdkfiles = import("sdk", {rootdir = os.scriptdir(), anonymous = true})
 
 local SWIFT_FUNCTION = {Func = true, Constructor = true, Accessor = true, Subscript = true}
 local SWIFT_METADATA = {Struct = true, Class = true, Enum = true}
+local FRAMEWORK_IMAGE = "^/System/Library/Frameworks/([^/]+)%.framework/"
+
+function weak_flag(install)
+    local framework = string.match(install, FRAMEWORK_IMAGE)
+    if framework then
+        return "-Wl,-weak_framework," .. framework
+    end
+    return "-Wl,-weak_library," .. install
+end
 
 function src_only_image(images, name, folder, framework_exists)
     if images[name] ~= nil then
@@ -641,13 +650,15 @@ local function emit(file, text)
     end
 end
 
-function write(skeleton, frameworks, implemented, images, markers, definitions)
+function write(skeleton, frameworks, implemented, images, markers, definitions, device, references)
     definitions = definitions or {}
+    device = device or {}
+    references = references or {}
     os.mkdir(skeleton)
     emit(path.join(skeleton, "revenant_backports.h"), HEADER)
     emit(path.join(skeleton, "registrar.m"), REGISTRAR)
     local alias = path.join(sdkfiles.src_root(), "revenant_alias.h")
-    local totals = {objc = 0, classes = 0, protocols = 0, globals = 0, globals_uncopied = 0, c = 0, trampolines = 0, c_in_src = 0, src_only = 0, swift = 0}
+    local totals = {objc = 0, classes = 0, protocols = 0, globals = 0, globals_uncopied = 0, device_bound = 0, c = 0, trampolines = 0, c_in_src = 0, src_only = 0, swift = 0}
     local outputs, seen_c, seen_global, imports_of = {}, {}, {}, {}
     local function output(name)
         if outputs[name] == nil then
@@ -697,11 +708,15 @@ function write(skeleton, frameworks, implemented, images, markers, definitions)
                 assert(not (marked and array), row.name .. " is implemented in src as an array, which has no copy")
                 local out = output(marked and markers[row.name] or framework.name)
                 import_of(out, framework.import or "")
-                table.insert(out.globals, {name = row.name, type = row.signature, image = image_of(row.name), array = array,
-                    fallback = marked})
-                totals.globals = totals.globals + 1
-                if array then
-                    totals.globals_uncopied = totals.globals_uncopied + 1
+                if device[row.name] then
+                    totals.device_bound = totals.device_bound + 1
+                else
+                    table.insert(out.globals, {name = row.name, type = row.signature, image = image_of(row.name), array = array,
+                        fallback = marked})
+                    totals.globals = totals.globals + 1
+                    if array then
+                        totals.globals_uncopied = totals.globals_uncopied + 1
+                    end
                 end
             elseif row.kind == "protocol" and not string.find(" " .. (row.flags or "") .. " ", " nonruntime ", 1, true) then
                 table.insert(own.protocols, row.name)
@@ -739,8 +754,12 @@ function write(skeleton, frameworks, implemented, images, markers, definitions)
         elseif definition.kind == "global" then
             assert(definition.type ~= nil and definition.type ~= "", name .. " is implemented in src, but its declaration has no type")
             assert(not definition.array, name .. " is implemented in src as an array, which has no copy")
-            table.insert(out.globals, {name = name, type = definition.type, image = image, array = false, fallback = true})
-            totals.globals = totals.globals + 1
+            if device[name] then
+                totals.device_bound = totals.device_bound + 1
+            else
+                table.insert(out.globals, {name = name, type = definition.type, image = image, array = false, fallback = true})
+                totals.globals = totals.globals + 1
+            end
         else
             raise("%s is implemented in src, but is neither a function nor a global", name)
         end
@@ -762,6 +781,23 @@ function write(skeleton, frameworks, implemented, images, markers, definitions)
         else
             os.tryrm(file)
         end
+    end
+    for folder, set in pairs(references) do
+        local flags, seen = {}, {}
+        local function add(flag)
+            if not seen[flag] then
+                seen[flag] = true
+                table.insert(flags, flag)
+            end
+        end
+        for name in pairs(set) do
+            add(weak_flag(device[name]))
+            if images[name] ~= device[name] then
+                add("-Wl,-U,_" .. name)
+            end
+        end
+        table.sort(flags)
+        emit(path.join(skeleton, folder .. ".weak"), #flags > 0 and (table.concat(flags, "\n") .. "\n") or "")
     end
     return totals
 end
