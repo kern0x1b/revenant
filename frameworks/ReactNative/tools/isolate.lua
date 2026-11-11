@@ -22,17 +22,15 @@ local WHOLE = {
     {line = 'add_requires("revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = true}})', alias = "swift-runtime", plain = 'add_requires("revenant@swift-runtime", {alias = "swift-runtime"})'},
     {line = 'add_requires("revenant@libcxx", {alias = "libcxx", configs = {packaged = true}})', alias = "libcxx", plain = 'add_requires("revenant@libcxx", {alias = "libcxx"})'},
     {line = 'add_requireconfs("**.libcxx", {configs = {packaged = true}})'},
-    -- every edge to swift-runtime is shared, as the one runtime of the whole configuration is: the copy's packages that
-    -- depend on it plainly (uniformtypeidentifiers, swiftui, cryptokit, swift-crypto) would otherwise bring an unshared
-    -- runtime into the configuration. override is needed: a plain edge already has its default configs, and xmake keeps those
-    -- unless the requireconf overrides them.
-    {line = 'add_requireconfs("**.swift-runtime", {override = true, configs = {shared = true}})'},
     {line = 'add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}})', emit = 'if not os.getenv("RN_WEBKIT") then add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}}) end'},
     {line = 'option("component", {type = "string", default = "", showmenu = true, description = "Configure only this component and what it needs, for example Backports or emulator; empty configures every component."})'},
     {line = 'add_requireconfs("combine", {override = true, configs = {shared = get_config("component") == "" or nil}})'}
 }
 
-local WHOLE_PROBE = {WHOLE[1].line, WHOLE[2].line, WHOLE[3].line, WHOLE[4].line}
+-- Known limit: swiftui, cryptokit, uniformtypeidentifiers and swift-crypto, which the application adds through RN_DEPS_REPO,
+-- depend on swift-runtime with a plain edge (their recipes declare no shared config), and xmake does not change that edge
+-- from the project: the copy then needs an unshared swift-runtime, which the whole configuration does not build.
+local WHOLE_PROBE = {WHOLE[1].line, WHOLE[2].line, WHOLE[3].line}
 
 function declares(text, alias)
     return text:find('alias = "' .. alias .. '"', 1, true) ~= nil

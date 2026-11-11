@@ -25,9 +25,9 @@ The copy carries the requirements of the whole configuration, the one the root `
 and `webkit-engine` as `frameworks/WebKit` declares it. It also declares the `component` option (default empty, so `--component`
 selects one component as in the root) and `add_requireconfs("combine")` with `shared = get_config("component") == "" or nil`, the
 same rule `frameworks/Combine` applies to its own `shared`; without it the application's `RN_DEPS_REPO` line makes `combine` build
-its Swift runtime unshared, which changes the `swift-runtime` package key. It also declares `add_requireconfs("**.swift-runtime")`
-with `shared = true`, so that every edge to the runtime, including a plain one such as the one `uniformtypeidentifiers` makes, is the
-shared runtime of the whole configuration. `copy` rewrites the application's plain `swift-runtime` and `libcxx`
+its Swift runtime unshared, which changes the `swift-runtime` package key. The application's `swiftui`, `cryptokit`, `uniformtypeidentifiers` and `swift-crypto` depend on `swift-runtime` with plain
+edges that no project line can change, so the copy needs an unshared runtime that the whole configuration does not build (see
+the note in `tools/isolate.lua`). `copy` rewrites the application's plain `swift-runtime` and `libcxx`
 lines into those forms and adds the lines it lacks; an application that declares `swift-runtime` or `libcxx` with other configs is
 refused, because the packages would not be the ones the whole configuration builds. The install probes of `copy` and of `--real`
 packages carry the same libc++ and Swift runtime lines, so the packages they install are the ones the copy links. `build` refuses
