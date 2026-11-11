@@ -2,7 +2,7 @@
 
 Measured 2026-10-30 with the Metal compiler of Xcode 27B47 (Metal 32023.922), compiling the 27 Telegram `.metal` files in 18 directories of the Telegram-iOS-release-13.0.0 reference to `air64-apple-ios12.0` with `-ffast-math` and linking each directory with `metallib`, as `rules_apple` does. The verdicts come from `./xmakew l -P . frameworks/Backports/tools/metal_corpus.lua`. The ffmpeg sources and the `rules_apple` test samples are not included. The sources are the `.metal` files of the `release-13.0.0` tag of `github.com/TelegramMessenger/Telegram-iOS` (commit `f1dd7a2`), fetched with a blobless sparse checkout of the 19 directories that hold them; the tool leaves out the 28th file, under `submodules/ffmpeg`, which leaves 27 files in 18 directories.
 
-Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes measured below, 32 translate (18 fragment, 14 vertex) and 57 are refused by name, including all 19 kernels. After the matrix uniforms, 48 translated (21 fragment, 19 vertex, 8 kernel) and 41 were refused. After the intrinsic batch in the section below, 57 translate (27 fragment, 20 vertex, 10 kernel) and 32 are refused; 9 of the 19 kernels are still refused. After the unsigned max, divide and remainder in the last change row of the table, 58 translate (27 fragment, 20 vertex, 11 kernel) and 31 are refused; 8 of the 19 kernels are still refused. After the clamp-to-zero emulation, 63 translate (32 fragment, 20 vertex, 11 kernel) and 26 are refused. After the bounded integers, 64 translate (32 fragment, 21 vertex, 11 kernel) and 25 are refused. After the switch change in the last change row, 65 translate (32 fragment, 22 vertex, 11 kernel) and 24 are refused. The table shows the state after that row. Which of the 26 block the app, and in what order, is in the last section, which predates that row. Refusals are by air2es's own reasons, not by the GLES 2 target, except the mipmap-filter row, which is the target's limit (see `frameworks/Backports/src/air2es/NOTES.md`).
+Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes measured below, 32 translate (18 fragment, 14 vertex) and 57 are refused by name, including all 19 kernels. After the matrix uniforms, 48 translated (21 fragment, 19 vertex, 8 kernel) and 41 were refused. After the intrinsic batch in the section below, 57 translate (27 fragment, 20 vertex, 10 kernel) and 32 are refused; 9 of the 19 kernels are still refused. After the unsigned max, divide and remainder in the last change row of the table, 58 translate (27 fragment, 20 vertex, 11 kernel) and 31 are refused; 8 of the 19 kernels are still refused. After the clamp-to-zero emulation, 63 translate (32 fragment, 20 vertex, 11 kernel) and 26 are refused. After the bounded integers, 64 translate (32 fragment, 21 vertex, 11 kernel) and 25 are refused. After the switch change, 65 translate (32 fragment, 22 vertex, 11 kernel) and 24 are refused. After the half-precision change and the instance-id correction in the last change row, 64 translate (32 fragment, 21 vertex, 11 kernel) and 25 are refused. The table shows the state after that row. Which of the 26 block the app, and in what order, is in the last section, which predates that row. Refusals are by air2es's own reasons, not by the GLES 2 target, except the mipmap-filter row, which is the target's limit (see `frameworks/Backports/src/air2es/NOTES.md`).
 
 | Library | Entry point | Stage | Verdict | Reason |
 | --- | --- | --- | --- | --- |
@@ -35,7 +35,7 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes 
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | gaussianBlurHorizontal | kernel | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | gaussianBlurVertical | kernel | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | callBackgroundVertex | vertex | OK |  |
-| submodules_TelegramUI_Components_Calls_CallScreen_Metal | callBlobVertex | vertex | REFUSED | a zero of a type this emitter does not hold |
+| submodules_TelegramUI_Components_Calls_CallScreen_Metal | callBlobVertex | vertex | REFUSED | an address this emitter does not read (the `positions` buffer) |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | mainVideoVertex | vertex | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | edgeTestVertex | vertex | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | callBackgroundFragment | fragment | REFUSED | an address this emitter does not read |
@@ -52,15 +52,15 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes 
 | submodules_TelegramUI_Components_CameraScreen_MetalResources | mainVideoFragment | fragment | OK |  |
 | submodules_TelegramUI_Components_DustEffect_Metal | dustEffectInitializeParticle | kernel | REFUSED | a shift left of an integer with no known bound below 2^22, or by something other than a constant below 32 |
 | submodules_TelegramUI_Components_DustEffect_Metal | dustEffectUpdateParticle | kernel | REFUSED | a division of an integer with no known bound |
-| submodules_TelegramUI_Components_DustEffect_Metal | dustEffectVertex | vertex | OK |  |
+| submodules_TelegramUI_Components_DustEffect_Metal | dustEffectVertex | vertex | REFUSED | a division of an integer with no known bound |
 | submodules_TelegramUI_Components_DustEffect_Metal | dustEffectFragment | fragment | OK |  |
 | submodules_TelegramUI_Components_LiquidGlassShapes_Metal | liquidGlassCrestKernel | kernel | REFUSED | a struct member this emitter does not read in parameters |
 | submodules_TelegramUI_Components_LiquidGlassShapes_Metal | liquidGlassRadialKernel | kernel | REFUSED | a struct member this emitter does not read in parameters |
 | submodules_TelegramUI_Components_LiquidGlassShapes_Metal | liquidGlassShapesVertex | vertex | OK |  |
-| submodules_TelegramUI_Components_LiquidGlassShapes_Metal | liquidGlassShapesContentFragment | fragment | REFUSED | a value of a type this emitter does not hold |
-| submodules_TelegramUI_Components_LiquidGlassShapes_Metal | liquidGlassShapesMultiplyFragment | fragment | REFUSED | a value of a type this emitter does not hold |
-| submodules_TelegramUI_Components_LiquidGlassShapes_Metal | liquidGlassShapesMaskFragment | fragment | REFUSED | a value of a type this emitter does not hold |
-| submodules_TelegramUI_Components_LiquidGlassShapes_Metal | liquidGlassShapesDisplacementFragment | fragment | REFUSED | a value of a type this emitter does not hold |
+| submodules_TelegramUI_Components_LiquidGlassShapes_Metal | liquidGlassShapesContentFragment | fragment | REFUSED | a local of a type this emitter does not hold as a variable |
+| submodules_TelegramUI_Components_LiquidGlassShapes_Metal | liquidGlassShapesMultiplyFragment | fragment | REFUSED | a local of a type this emitter does not hold as a variable |
+| submodules_TelegramUI_Components_LiquidGlassShapes_Metal | liquidGlassShapesMaskFragment | fragment | REFUSED | a load from an address this emitter does not read |
+| submodules_TelegramUI_Components_LiquidGlassShapes_Metal | liquidGlassShapesDisplacementFragment | fragment | REFUSED | a load from an address this emitter does not read |
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | dualFragmentShader | fragment | OK |  |
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | bt709ToRGBFragmentShader | fragment | OK |  |
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | defaultVertexShader | vertex | OK |  |
@@ -125,6 +125,7 @@ Before the changes below, the corpus measured 89 entry points, 32 OK and 57 REFU
 | clamp-to-zero samples emulated (`samplers.cpp`, `translate.cpp`, `emulatedSample`): a constexpr sampler with a clamp-to-zero address becomes four nearest fetches per linear sample, each masked to zero outside the texture, with the texel count from the `<texture>_size` uniform the host already sets; a clamp-to-edge or repeat axis is clamped or wrapped in the shader, so the host binds nearest and clamp-to-edge; a clamp-to-zero address whose minification and magnification filters differ stays refused, since the level of detail is not computed; a clamp-to-zero cube sample stays refused | 63 | 26 | the three MediaEditor blurs, `enhanceColorLookupFragmentShader` and `walletAmountFragment` (Wallet send), REFUSED to OK; the blurs and the lookup are checked against Metal on the Mac (see the clamp-to-zero section) |
 | bounded integers: division, remainder, shift left and logical shift right of bounded integers, computed in float and exact below 2^16 for the operands and 2^22 for the results (`translate.cpp`, `boundOf`, `integerDivide`, `shiftLeft`, `shiftRight`); the bounds are a constant, a vertex or instance id, a buffer member and a float converted to unsigned, all taken below 2^16 (see the bounded-integers section) | 64 | 25 | `dustEffectVertex` (DustEffect), REFUSED to OK; `compositeRoundVideo` keeps its OK with a new division text; the reasons of `callBlobVertex`, `samplingYuvaShader`, `dustEffectUpdateParticle`, `dustEffectInitializeParticle` and `backgroundStarVertex` change and they stay refused |
 | switch arms that fall through to the default block: the default block is emitted again on each path that reaches it, with the visited blocks kept per arm (`translate.cpp`, `multiway`), so a block reached by two paths before the join is not refused | 65 | 24 | `referenceHighlightVertex` (Premium gem), REFUSED to OK; no other entry changes, the 89 verdicts and the other 64 OK outputs are byte-identical |
+| `half` values declared `mediump float` at each declaration site (`declaredType`, `translate.cpp`, see the half-values section); a struct returned by an inlined call taken from the returned fields (`aggregates_`, `Frame::fields`); an undefined argument the callee does not use dropped; the bounds of an inlined argument followed to its actual value; `sdiv` and `srem` bounded as `udiv` and `urem`; an instance id has no bound (`boundOf`), which corrects the earlier bounded-integer row | 64 | 25 | `dustEffectVertex` (DustEffect), OK to REFUSED: its instance id runs to the particle count, the item's width times its height in points, 153,600 for the layer-sized MediaCutout item on the 4S, above the 2^16 bound (see the bounded-integers section); `callBlobVertex` and the four liquid glass fragments change reason; the other verdicts are the same; 33 corpus `.glsl` files change only by `mediump` |
 
 Checks on the state the table shows (58 OK, 31 REFUSED):
 
@@ -364,18 +365,35 @@ shift path is unchanged.
 
 What is computed:
 
-- A bound is the largest value of a non-negative integer. It is known for a constant; a vertex or instance id; a member of a
-  buffer; a float converted to an unsigned integer (accepted before with no bound, now bounded as below); and a `max`, `add`,
-  `udiv`, `urem`, `shl` or `lshr` of bounded values. A bound above 2^22 is not known.
-- The host inputs (ids, buffer members, converted floats) are taken below 2^16. That is a contract on the host, which the
-  shader does not check: a draw of 65536 or more vertices, or a buffer integer of 65536 or more, is outside it. The Telegram
-  callers stay far below.
+- A bound is the largest value of a non-negative integer. It is known for a constant; a vertex id; a member of a buffer; a
+  float converted to an unsigned integer; and a `max`, `add`, `udiv`, `urem`, `shl` or `lshr` of bounded values. A bound above
+  2^22 is not known. An instance id has no bound. A DustEffect draw has one instance per particle, and the particle count is
+  the item's width times its height in points (`submodules/TelegramUI/Components/DustEffect/Sources/DustEffectLayer.swift:255-257`
+  and `:337-339`). The item of `MediaEditorScreen/Sources/MediaCutoutScreen.swift:259` is the effect layer's own bounds, and at the
+  4S's 320 by 480 points that is 153,600 particles. The shader divides that id by the column count (`DustEffect/Metal/DustEffectShaders.metal:148-149`),
+  and the translator refuses the division: the quotient is a row index, so the float division would be exact at these sizes on the
+  device model, but the operand is above the 2^16 limit that the division is checked against.
+- The host inputs taken below 2^16 are a contract on the host, which the shader does not check: a draw of 65536 or more
+  vertices, or a buffer integer of 65536 or more, is outside it. The vertex counts with a bounded vertex id are 6 for the
+  quads (`DustEffect/Sources/DustEffectLayer.swift:360`, `CallScreen/Sources/Components/CallBackgroundLayer.swift:225`), 4 for the
+  wallet quads with `WalletSendScreen/Sources/WalletSendAmountCanvas.swift:82` and `WalletCardComponent/Sources/WalletCardBackgroundView.swift:461`,
+  and `3 * 8 * points.count` for the blobs (`CallScreen/Sources/Components/CallBlobsLayer.swift:152`). The buffer members are the
+  DustEffect grid, `particleResolution` set from the item's width and height in points (`DustEffectLayer.swift:353`), at most the
+  screen size; the blob point count of 8 (`CallBlobsLayer.swift:113`); and the gem's plane count from its fixed geometry
+  (`Premium/PremiumDiamondComponent/Sources/InteractiveDiamond/DiamondRenderer.swift:169`). The Telegram tree is the
+  `release-13.0.0` reference, and all paths are relative to `submodules/TelegramUI/Components/` unless they name a directory.
+- No host-side check is added. A range check needs the buffer contents at draw creation, which the Metal layer does not read,
+  so the limits are documented here and not checked.
 - A division or remainder takes operands below 2^16 and is computed in float. The quotient `floor((a + 0.5) / d)` is within one
   of the exact quotient, so the remainder `a - q * d` lies in [-d, 2d), and one more `floor((r + 0.5) / d)` gives the exact
   quotient. A divisor of zero is undefined in LLVM, and the translation takes it as 1.
 - A shift left by a constant stays exact below 2^22, as `float(x) * 2^k`. A logical shift right by a constant is
   `floor(float(x) * 2^-k)`, with 2^-k written as a decimal literal of exactly k digits, so it is exact for any bounded x.
 - A signed division or remainder is translated only where both operands are known non-negative, as the unsigned one is.
+- A zero divisor is taken as 1. The divisors of the translated shaders are constants, and in DustEffect the column count of
+  the grid. A zero column count gives zero instances (`DustEffectLayer.swift:257`), so the vertex shader does not run with
+  a zero divisor. A divisor that the host sets from a buffer and that could be zero is not checked; the translator refuses
+  the divisions it cannot bound, and the zero case is documented here, not checked.
 
 Measured:
 
@@ -385,16 +403,19 @@ Measured:
   every error level tried, from zero to plus or minus 2^-17. The uncorrected formula the translator emitted before has 2,462
   failures at +2^-17 and none at the other levels, so the correction is what makes the division exact. The shift literals
   are the exact float 2^-k for k from 0 to 31; 399,760 shl cases and 6,400,000 lshr cases agree with integer shifts.
-- The corpus of 89 entry points, rerun on the iOS AIR of the 18 libraries from the earlier run: 64 translate. The only verdict
-  that changed is `dustEffectVertex`, REFUSED to OK. `compositeRoundVideo` stays OK, and its division text changes with the
-  same result below 2^16. Every other `.glsl` and `.json` is byte-identical, except the DustEffect library, which gains
-  `dustEffectVertex`.
-- `air2es_check` with glslangValidator: DustEffect 2 of 2, CameraNeo 3 of 3, and the ES 2 probe's intrinsic folder 27 of 27.
-  `./xmakew l -P frameworks/Backports frameworks/Backports/tests/air2es_test.lua` passes.
-- The ES 2 probe's intrinsic folder (`tests/device_probe/intrinsics/intrinsics.metallib.es2`): the base translator reproduces
-  the checked-in folder byte for byte, so the pipeline matches. The new translator changes only `udiv_u_i32` and
-  `urem_u_i32`, and those two files are regenerated. The 4S compared these two maps exactly over all 4096 texels with the old
-  formula, so the next probe run tests the new one.
+- The corpus of 89 entry points, rerun on the iOS AIR of the 18 libraries after the half-precision change: 64 translate. Against
+  the switch-change run, the only verdict that changed is `dustEffectVertex`, OK to REFUSED. `compositeRoundVideo` stays OK.
+  Of the 34 files that differ, 33 `.glsl` files differ only by `mediump` (see the half-values section); the DustEffect
+  `library.json` loses `dustEffectVertex`.
+- `air2es_check` with glslangValidator on the new corpus folders: all 64 translated functions pass (DustEffect 1 of 1,
+  CameraNeo 3 of 3, and the rest as in the table). `./xmakew l -P frameworks/Backports frameworks/Backports/tests/air2es_test.lua`
+  passes its 15 checker cases and the sampler checks.
+- The ES 2 probe folders (`tests/device_probe/intrinsics`, `instance` and `cvrender`) are regenerated from their `.metal`
+  sources with the pinned Metal compiler (`metal -c -target air64-apple-ios12.0 -ffast-math`, then `metallib`). The base
+  translator reproduced the checked-in intrinsic folder byte for byte, so the pipeline matches. What changes is the `mediump`
+  declarations (26 intrinsic files and one cvrender file) and the `highp` `revenant_flip` uniform of the earlier group, which the
+  instance folder (3 files) did not carry. `udiv_u_i32` and `urem_u_i32` change only by `mediump`. The 4S compared the old two
+  maps exactly over all 4096 texels, so the next probe run tests the new formula.
 
 Not measured on the phone. The regenerated `udiv_u_i32` and `urem_u_i32` have not run on the 4S: the probe app needs an iOS
 build that the worktree does not have. The next probe run must show both maps exact (maxdiff 0). It also tests the float
@@ -404,20 +425,54 @@ it runs `0 / n` and `1 / n` and does not exercise the division.
 
 Still refused, with the reason:
 
-- `dustEffectVertex` now translates, but the DustEffect effect needs its two particle kernels. Both store to a device buffer
+- `dustEffectVertex` is refused again, for the instance-id bound above: its particle id runs to the particle count, which
+  is above 2^16 on the 4S. The DustEffect effect also needs its two particle kernels. Both store to a device buffer
   (`particles[gid] = particle`), which the translator does not write (it writes only textures), so they stay refused:
   `dustEffectInitializeParticle` (a shift of an unbounded hash, and the store) and `dustEffectUpdateParticle` (a division by
   `size.x * size.y`, a product with no bound here, and the store). Until a buffer-writing kernel is designed, the effect is not
   shown; the vertex alone is not an effect.
-- `callBlobVertex` (CallScreen): its integer part is bounded now (the vertex index by 3 and 24, and the `srem` by the buffer
-  count). The next refusal is a zero of type half: SmoothPoint and the blob maths are half, and this emitter holds no half
-  values. Mapping half to mediump float changes the precision, so it is an owner decision in the types group, not a fix here.
+- `callBlobVertex` (CallScreen): its integer part is bounded (the vertex index by 3 and 24, and the `srem` by the buffer count,
+  which the host sets to 8, `CallBlobsLayer.swift:113`). Its next refusal is `positions`, a `const device float *` buffer
+  (buffer 1, `CallScreen/Metal/CallScreenShaders.metal:204`) read at a dynamic index (`positions[index]`, line 156). The host
+  always passes 8 floats (`CallBlobsLayer.swift:146`), so an element cap of 8 is documented. A raw pointer buffer has no element
+  count in the reflection, and the translator maps a dynamic index into an array member of a buffer struct, into a constant
+  table, and for the instance id, but not into a raw buffer. Eight per-element uniforms need a reflection change for the
+  pointer buffer, which is a loader change, so the function stays refused. Its half values are `mediump` now (the half-values
+  section), so they are no longer the blocker.
 - `backgroundStarVertex` (PremiumDiamond): `starRandom` is a 32-bit finaliser (xorshift, a wrap-around multiply by two
   constants, then the low 24 bits). It needs all 32 bits, and no bound applies. ES 1.00 has no bit operators, and a float
   product does not wrap exactly. A wide-integer representation (two 16-bit halves in float, with 8-bit limbs for the product)
-  would be needed; it is not built here, so the function stays refused.
+  would be needed; it is not built here, so the function stays refused. The coordinator's option of an exact emulation in a highp
+  vertex shader was not attempted in this change; the refusal stands on the bit-level reason above, and the attempt is open.
 - `samplingYuvaShader`: a division of an integer with no known bound (a signed value the translator cannot see as
   non-negative).
 
 The statements earlier in this file that `dustEffectVertex` and `dustEffectUpdateParticle` stay refused for their divisor are
-superseded for the bounded case by this section.
+superseded for the bounded case by this section, and this section is superseded for `dustEffectVertex` by its correction: the
+instance id has no bound, so `dustEffectVertex` is refused again.
+
+## Half values as mediump (2026-11-11)
+
+The coordinator decided on 2026-11-11 that `half` maps to `mediump float`, and asked for the precision to be documented. The
+translator declares a `half` value, or a vector of them, as `mediump float` (or `mediump vec2`, `vec3`, `vec4`) at each
+declaration site: locals and temporaries, phi copies, fragment varyings, vertex outputs, struct fields and local slots
+(`declaredType` in `translate.cpp`). Constructors keep the plain type names, which carry no precision.
+
+Precision. Metal's `half` has a 10-bit mantissa and a range up to 65504. The GLSL ES 1.00 minimum for `mediump` is a 10-bit
+mantissa and a range of plus or minus 2^14 (GLSL ES 1.00 specification, section 4.5.2). So the mapping keeps Metal's
+precision and has a smaller range: a value above 2^14 is not guaranteed on a device that implements only the minimum. The
+translation does not promise more precision than Metal's half, and it relies on no device that runs `mediump` at a higher
+precision.
+
+Where it applies. A fragment shader already defaults to `mediump float` (the loader's `precision mediump float;`), so the
+declaration changes no value there. A vertex shader defaults to `highp`, so the declaration lowers its half values to the
+`mediump` above. The changed text is declarations only: the 33 corpus `.glsl` files that differ from the switch-change run each differ by
+`mediump` alone, and 27 probe files differ by `mediump` alone.
+
+Checks. The checker and glslangValidator pass all 64 translated functions of the corpus. The verdict changes are the ones in the
+table: `callBlobVertex` and the four liquid glass fragments change reason, and `dustEffectVertex` is refused for its instance
+id, which is not a precision effect.
+
+Not measured. No pixel comparison of a `mediump` output against Metal's `half` has been made. The Mac harness
+(`metal_shader_harness`) needs `REVENANT_ANGLE_CEF`, which this worker does not have, and the phone check of the regenerated
+probe folders is owed (the bounded-integers section). The precision claim rests on the specification, not on a measurement.

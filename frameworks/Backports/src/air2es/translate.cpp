@@ -281,6 +281,13 @@ std::string glslType(Type *type)
     return "";
 }
 
+std::string declaredType(Type *type)
+{
+    Type *scalar = type->isVectorTy() ? cast<FixedVectorType>(type)->getElementType() : type;
+    std::string glsl = glslType(type);
+    return scalar->isHalfTy() && !glsl.empty() ? "mediump " + glsl : glsl;
+}
+
 std::string colorOf(Type *type, const std::string &text)
 {
     unsigned lanes = type->isVectorTy() ? cast<FixedVectorType>(type)->getNumElements() : 1;
@@ -1026,7 +1033,7 @@ private:
                 }
                 if (type == "bool" || type.rfind("ivec", 0) == 0 || type.rfind("bvec", 0) == 0)
                     return refuse("an integer or bool fragment input, which ES 1.00 has no varying for");
-                declare("varying " + type + " " + binding->name + ";\n", binding->name);
+                declare("varying " + declaredType(argument->getType()) + " " + binding->name + ";\n", binding->name);
                 out = binding->name;
                 return true;
             }
@@ -1107,6 +1114,7 @@ private:
         const Function *function = nullptr;
         std::string result;
         bool returned = false;
+        std::vector<Value *> fields;
     };
 
     void statement(const std::string &text)
@@ -1273,7 +1281,7 @@ private:
         std::vector<std::string> temps;
         for (const Copy &copy : copies) {
             std::string temp = "t" + std::to_string(counter_++);
-            locals_.push_back(glslType(copy.phi->getType()) + " " + temp + ";\n");
+            locals_.push_back(declaredType(copy.phi->getType()) + " " + temp + ";\n");
             statement(temp + " = " + copy.value + ";\n");
             temps.push_back(temp);
         }
@@ -1389,6 +1397,13 @@ private:
             frames_.back().returned = true;
             if (!ret.getReturnValue())
                 return true;
+            if (ret.getReturnValue()->getType()->isStructTy()) {
+                auto found = aggregates_.find(ret.getReturnValue());
+                if (found == aggregates_.end())
+                    return refuse("a returned aggregate this emitter does not build");
+                frames_.back().fields = found->second;
+                return true;
+            }
             std::string value;
             if (!expression(ret.getReturnValue(), value))
                 return false;
@@ -1550,6 +1565,9 @@ private:
         for (unsigned i = 0; i < call.arg_size(); i++) {
             Value *actual = call.getArgOperand(i);
             Argument *formal = callee.getArg(i);
+            if (isa<UndefValue>(actual) && formal->use_empty())
+                continue;
+            inlineArguments_[formal] = actual;
             if (Binding *binding = bindingOf(actual)) {
                 inlineBindings_[formal] = binding;
                 continue;
@@ -1565,7 +1583,8 @@ private:
         }
         Frame frame;
         frame.function = &callee;
-        if (!callee.getReturnType()->isVoidTy() && !local(call, frame.result))
+        bool aggregate = callee.getReturnType()->isStructTy();
+        if (!callee.getReturnType()->isVoidTy() && !aggregate && !local(call, frame.result))
             return false;
         frames_.push_back(frame);
         std::set<const BasicBlock *> outer;
@@ -1573,6 +1592,8 @@ private:
         bool emitted = region(&callee.getEntryBlock(), nullptr);
         visited_.swap(outer);
         bool returned = frames_.back().returned;
+        if (aggregate && emitted && returned)
+            aggregates_[&call] = frames_.back().fields;
         frames_.pop_back();
         if (!emitted)
             return false;
@@ -1671,12 +1692,14 @@ private:
     {
         if (!value->getType()->isIntegerTy(32))
             return false;
+        if (auto inlined = inlineArguments_.find(value); inlined != inlineArguments_.end())
+            return boundOf(inlined->second, bound);
         if (auto *constant = dyn_cast<ConstantInt>(value)) {
             if (constant->getSExtValue() < 0)
                 return false;
             bound = constant->getZExtValue();
         } else if (const Binding *binding = bindingOf(value)) {
-            if (binding->kind != "air.vertex_id" && binding->kind != "air.instance_id")
+            if (binding->kind != "air.vertex_id")
                 return false;
             bound = kDivisionLimit - 1;
         } else if (bufferValue(value)) {
@@ -1705,7 +1728,8 @@ private:
                     return false;
                 bound = left + right;
                 break;
-            case Instruction::UDiv: {
+            case Instruction::UDiv:
+            case Instruction::SDiv: {
                 uint64_t smallest = 1;
                 if (auto *divisor = dyn_cast<ConstantInt>(binary->getOperand(1)))
                     smallest = std::max<uint64_t>(divisor->getZExtValue(), 1);
@@ -1713,6 +1737,7 @@ private:
                 break;
             }
             case Instruction::URem:
+            case Instruction::SRem:
                 if (!boundOf(binary->getOperand(1), right))
                     return false;
                 bound = right ? std::min(left, right - 1) : left;
@@ -1803,7 +1828,7 @@ private:
         for (unsigned i = 0; i < structure->getNumElements(); i++) {
             Type *member = structure->getElementType(i);
             Type *element = member->isArrayTy() ? member->getArrayElementType() : member;
-            std::string glsl = glslType(element);
+            std::string glsl = declaredType(element);
             if (glsl.empty() || element->isStructTy() || element->isArrayTy())
                 return "";
             std::string dimension = member->isArrayTy() ? "[" + std::to_string(cast<ArrayType>(member)->getNumElements()) + "]" : "";
@@ -1875,7 +1900,7 @@ private:
         if (type.empty())
             return refuse("a value of a type this emitter does not hold");
         name = "t" + std::to_string(counter_++);
-        locals_.push_back(type + " " + name + ";\n");
+        locals_.push_back(declaredType(instruction.getType()) + " " + name + ";\n");
         names_[&instruction] = name;
         return true;
     }
@@ -1885,7 +1910,7 @@ private:
         if (auto *slot = dyn_cast<AllocaInst>(&instruction)) {
             Type *type = slot->getAllocatedType();
             Type *element = type->isArrayTy() ? type->getArrayElementType() : type;
-            std::string glsl = type->isStructTy() ? structOf(type) : glslType(element);
+            std::string glsl = type->isStructTy() ? structOf(type) : declaredType(element);
             if (glsl.empty() || (type->isArrayTy() && (element->isStructTy() || element->isArrayTy())))
                 return refuse("a local of a type this emitter does not hold as a variable");
             Local &local = localPointers_[slot];
@@ -2433,7 +2458,7 @@ private:
                     declare("varying float " + output.name + ";\n", output.name);
                     statement(output.name + " = float(" + text + ");\n");
                 } else {
-                    declare("varying " + type + " " + output.name + ";\n", output.name);
+                    declare("varying " + declaredType(fields[k]->getType()) + " " + output.name + ";\n", output.name);
                     statement(output.name + " = " + text + ";\n");
                 }
             } else if (output.kind == "air.render_target" && stage_ == Stage::Fragment && output.index == 0) {
@@ -2482,6 +2507,7 @@ private:
     std::map<const Value *, size_t> argumentSlot_;
     std::vector<Output> outputs_;
     std::map<const Value *, std::vector<Value *>> aggregates_;
+    std::map<const Value *, const Value *> inlineArguments_;
     std::map<const Value *, std::string> names_;
     std::set<std::string> declared_;
     std::map<std::string, std::string> textures_;

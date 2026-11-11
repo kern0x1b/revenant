@@ -53,8 +53,8 @@ and why, so it is not rediscovered later.
   compiles the Metal sources of a Telegram checkout to iOS AIR, links them per
   directory, translates each library and writes one verdict per entry point.
 - On Telegram-iOS-release-13.0.0 it gives 89 entry points: 43 fragment, 27 vertex and
-  19 kernel. 65 translate (32 fragment, 22 vertex, 11 kernel) and 24 are refused, measured after the switch change, which
-  follows the bounded integers and the clamp-to-zero emulation; `docs/explanation/backports/air2es-ios-verdicts.md` has the
+  19 kernel. 64 translate (32 fragment, 21 vertex, 11 kernel) and 25 are refused, measured after the half-precision change,
+  which follows the switch change, the bounded integers and the clamp-to-zero emulation; `docs/explanation/backports/air2es-ios-verdicts.md` has the
   history.
 
 ## Precision and device checks still owed
@@ -114,12 +114,19 @@ and why, so it is not rediscovered later.
   corpus entry, and they stand on the same helper.
 - Bounded integers. A division or remainder of two non-negative integers, a shift left by a constant and a logical shift
   right by a constant are computed in float, and each is refused unless its operands have a known bound. A bound is known
-  for a constant, a vertex or instance id, a buffer member, and a float converted to an unsigned integer. The host's ids,
-  buffer members and converted floats are taken below 2^16: a host contract the shader does not check. A division takes
-  operands below 2^16 and corrects its float quotient by one step from the exact remainder, so the result is exact. A
-  divisor of zero is undefined in LLVM, and it is taken as 1. A shift left or a sum keeps its result below 2^22, so the
-  float arithmetic is exact. The thread-position shift is unchanged. The star hash of `backgroundStarVertex` needs all 32
-  bits and has no bound, so it stays refused.
+  for a constant, a vertex id, a buffer member, and a float converted to an unsigned integer. An instance id has no bound:
+  DustEffect draws one instance per particle, and the count is the item's width times height in points, above 2^16 on the
+  4S, so `dustEffectVertex` is refused. The host's vertex ids, buffer members and converted floats are taken below 2^16: a
+  host contract the shader does not check, with the Telegram values and their citations in the verdict doc's bounded-integers
+  section. A division takes operands below 2^16 and corrects its float quotient by one step from the exact remainder, so the
+  result is exact. A divisor of zero is undefined in LLVM, and it is taken as 1. A shift left or a sum keeps its result below
+  2^22, so the float arithmetic is exact. The thread-position shift is unchanged. The star hash of `backgroundStarVertex` needs
+  all 32 bits and has no bound, so it stays refused.
+- Half values are declared `mediump float` (`declaredType`), at each declaration site, not highp. GLSL ES 1.00 guarantees
+  `mediump` a 10-bit mantissa and a range of plus or minus 2^14; Metal's `half` has 10 bits and a range up to 65504. So the
+  translation promises no more precision than Metal's half, and a value above 2^14 is not guaranteed on a device that
+  implements only the minimum. Fragment shaders already default to mediump, so only vertex shaders change. Not measured
+  against Metal; see the verdict doc's half-values section.
 - Half-precision vertex attributes are refused, because the loader reads anything but
   float and i8 as a short.
 - `BranchInst` is deprecated in LLVM 23.1.4, as in `air2cpu.cpp`. It is kept because the

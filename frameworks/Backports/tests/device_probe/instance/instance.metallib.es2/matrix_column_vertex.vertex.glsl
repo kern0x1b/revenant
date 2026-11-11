@@ -4,7 +4,7 @@ uniform mat4 model;
 uniform mat4 projection;
 uniform float revenant_instance;
 uniform mat3 normal;
-uniform float revenant_flip;
+uniform highp float revenant_flip;
 varying vec4 color;
 void main() {
     vec4 t0;

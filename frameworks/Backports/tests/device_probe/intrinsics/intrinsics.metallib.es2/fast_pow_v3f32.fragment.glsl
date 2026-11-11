@@ -15,8 +15,8 @@ void main() {
     vec2 t5;
     vec2 t6;
     vec2 t7;
-    vec4 t8;
-    vec3 t9;
+    mediump vec4 t8;
+    mediump vec3 t9;
     vec3 t10;
     vec3 t11;
     vec4 t12;
