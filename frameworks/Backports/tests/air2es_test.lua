@@ -352,6 +352,83 @@ function sharedChecks()
     os.rm(work)
 end
 
+local DIAMOND = path.join(os.scriptdir(), "air2es", "diamond_data.c")
+
+local DIAMOND_SETS = {
+    {name = "zero", planes = 0, edges = 0},
+    {name = "one", planes = 1, edges = 3},
+    {name = "mid", planes = 8, edges = 64},
+    {name = "max", planes = 17, edges = 128},
+}
+
+local DIAMOND_VECTORS = {"viewport", "u_viewport", "parameters", "u_parameters", "lens_viewport", "lens_parameters", "rect", "uv", "center"}
+
+local function numbers(text)
+    local out = {}
+    for item in text:gmatch("[^,%s]+") do
+        out[#out + 1] = tonumber(item)
+    end
+    return out
+end
+
+local function arrays(text)
+    local found = {}
+    for name, list in text:gmatch('"([%w_]+)": %[([^%]]*)%]') do
+        found[name] = numbers(list)
+    end
+    return found
+end
+
+local function contractFailure(text, set)
+    local found = arrays(text)
+    if not found.planes or #found.planes ~= 68 then
+        return "planes is not 17 vec4"
+    end
+    if not found.edges or #found.edges ~= 512 then
+        return "edges is not 128 vec4"
+    end
+    for _, name in ipairs({"model", "projection", "inverseModel"}) do
+        if not found[name] or #found[name] ~= 16 then
+            return name .. " is not a 4x4 matrix"
+        end
+    end
+    for _, name in ipairs(DIAMOND_VECTORS) do
+        if not found[name] or #found[name] ~= 4 then
+            return name .. " is missing or not a vec4"
+        end
+    end
+    if found.viewport[3] ~= set.planes then
+        return "viewport.z is not " .. set.planes
+    end
+    if found.lens_viewport[4] ~= set.edges then
+        return "lens_viewport.w is not " .. set.edges
+    end
+    return nil
+end
+
+function diamondChecks()
+    local work = path.join(os.tmpdir(), "air2es-diamond-test")
+    if os.isdir(work) then
+        os.rm(work)
+    end
+    os.mkdir(work)
+    local generator = path.join(work, "make_diamond_data")
+    os.iorunv("cc", {"-O2", "-Wall", "-o", generator, DIAMOND, "-lm"})
+    local folder = path.join(work, "data")
+    os.mkdir(folder)
+    os.iorunv(generator, {folder})
+    for _, set in ipairs(DIAMOND_SETS) do
+        local text = io.readfile(path.join(folder, "diamond_" .. set.name .. ".data.json"))
+        local failure = contractFailure(text, set)
+        assert(failure == nil, "diamond " .. set.name .. " data: " .. tostring(failure))
+    end
+    local text = io.readfile(path.join(folder, "diamond_max.data.json"))
+    local without = text:gsub('"lens_viewport": %[[^%]]*%], ', "", 1)
+    assert(without ~= text, "negative control: lens_viewport was not in the max set")
+    assert(contractFailure(without, DIAMOND_SETS[4]) ~= nil, "negative control: a set without lens_viewport passed the contract")
+    os.rm(work)
+end
+
 function main()
     for _, case in ipairs(CASES) do
         local reason = limits.check(case.source)
@@ -383,4 +460,6 @@ function main()
     print("air2es flags: a two-pass loop whose latch tests a header flag, with a helper call that branches inside it, translates and matches its golden output")
     sharedChecks()
     print("air2es shared members: two uniform blocks that both have a viewport and a parameters member translate under their own names, and match their golden output")
+    diamondChecks()
+    print("air2es diamond data: the generator writes zero, one, mid and max sets with 17 planes, 128 edge slots and the lens members, and a set without lens_viewport is refused")
 end

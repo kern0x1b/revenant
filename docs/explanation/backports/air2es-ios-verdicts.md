@@ -607,3 +607,43 @@ Tolerance: 2/255, the harness's. The 8-bit outputs of Metal and ANGLE come from 
 Negative control: the pre-fix translator on the same data, max set. The stone still PASSes with 0. The lens FAILs with 35/255 over 4,728 of 16,384 channels. The lens output differs from the stone output, so the lens case is not a copy of the stone.
 
 Not covered: the sparkle pair is SKIP (blank Metal output) and outside this check; the lens hull is a synthetic 128-gon of radius 90 points, not the device projection; the vertex stage is the default quad; nothing ran on a device. Telegram's iOS AIR still refuses the diamond ("control flow that reaches one block twice"), so this change does not alter what Telegram builds from origin/main, and the diamond on iOS is still not validated.
+
+## Diamond oracle data: how to reproduce (2026-11-11)
+
+The data generator is committed as `frameworks/Backports/tests/air2es/diamond_data.c`. It writes `diamond_zero.data.json`, `diamond_one.data.json`, `diamond_mid.data.json` and `diamond_max.data.json` into the directory it is given. Each file has `arrays.planes` (17 vec4, from the seven rings of Telegram's `DiamondGeometry`, release 13.0.0), `arrays.edges` (128 vec4, with the first `w` set to a regular polygon of radius 90 points), and `members`: `model`, `projection` and `inverseModel` (column-major 4×4), the stone's `Uniforms` fields under their GLES names, and the lens's fields under the names the translator emits for a member shared with the stone (`u_viewport`, `u_parameters`, `lens_viewport`, `lens_parameters`), with `rect`, `uv` and `center`.
+
+Runbook (the Metal library is compiled from Telegram's `MetalResources/GramDiamond.metal`, which is not in this repository):
+
+```
+cc -O2 -o make_diamond_data frameworks/Backports/tests/air2es/diamond_data.c -lm
+mkdir -p OUT && ./make_diamond_data OUT
+TC="$HOME/Library/Caches/revenant/metal-toolchain/mount/Metal.xctoolchain/usr/bin"
+"$TC/metal" -c -target air64-apple-macos13.0 -ffast-math GramDiamond.metal -o GramDiamond.air
+"$TC/metallib" GramDiamond.air -o GramDiamond.metallib
+build/macosx/arm64/release/air2es GramDiamond.metallib FOLDER
+REVENANT_DUMP=DUMP build/macosx/arm64/release/metal_shader_harness GramDiamond.metallib FOLDER build/macosx/arm64/release/angle OUT/diamond_max.data.json
+```
+
+Repeat the last line for `zero`, `one` and `mid`. The harness needs the ANGLE argument whenever a data set is given. A pair is PASS when the largest channel difference is within 2/255, and SKIP when Metal's output is blank.
+
+Results at `0f09451ee` plus the member-name fix (`3dd642f6c`):
+
+| set | stone (`diamondVertex` + `diamondFragment`) | lens (`diamondVertex` + `diamondLensFragment`) | composite |
+|---|---|---|---|
+| zero | PASS, 0 over 6,304 channels | PASS, 0 over 6,304 | PASS, 0 over 16,384 |
+| one | PASS, 0 | PASS, 0 | PASS, 0 |
+| mid | PASS, 0 | PASS, 0 | PASS, 0 |
+| max | PASS, 0 | PASS, 1/255 | PASS, 0 |
+
+Tolerance: 2/255. The largest difference observed is one step of 8-bit rounding, and the tolerance allows one more such step. A translation error is far larger (see the controls).
+
+Controls:
+- Translator negative control: the pre-fix translator on the same data, max set. The stone still PASSes; the lens FAILs with 35/255 over 4,728 of 16,384 channels, and its output differs from the stone's.
+- Test negative control: `diamondChecks` removes `lens_viewport` from the max set and requires the contract check to refuse it. The fixture golden `shared_mac.golden` fails with the pre-fix translator, because `sharedFragment` declares `viewport` once.
+
+Limits, which the numbers above do not cover:
+- The vertex stage reads the harness's default quad (`a_position` by name, `a_normal` and `a_surface` at 0.5), not the mesh of `DiamondGeometry`. The fragment's ray-plane work is exercised over the quad's area; the vertex transform is not checked against the mesh.
+- The lens hull is the synthetic 128-gon of the generator, not the projected hull of a device frame.
+- The sparkle pair is SKIP because its Metal output is blank; it is outside this check.
+- The stone's rotation (pitch 0.35, yaw 0.6) and projection (40°, camera 4 units back) are fixed values, not the app's; the sets cover planes and edges, not the app's motion or appearance values.
+- Nothing ran on a device.
