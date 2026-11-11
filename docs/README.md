@@ -15,6 +15,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Backports gaps](explanation/backports-gaps.md) | the implemented members that do not do what the real API does, by Telegram use and size |
 | [Photos over AssetsLibrary](explanation/backports/photos-over-assetslibrary.md) | Telegram 13.0.0's Photos use against the AssetsLibrary-backed backport, and the status of each gap |
 | [The Network framework surface Telegram 13.0.0 uses](explanation/backports/network-framework-surface.md) | the `Network` members Telegram calls, what the backport must answer, and why Reachability cannot find `NWPathMonitor` yet |
+| [Google reCAPTCHA Enterprise SDK on iOS 6](explanation/recaptcha-sdk-on-ios6.md) | whether Google's original SDK can run on iOS 6: its measured imports and gates, what revenant already provides, the variants with their blockers, and the decisions for the owner |
 | [What iOS 6.1.3 can reach over TLS](explanation/backports/tls-reach-ios-6.md) | the firmware's SecureTransport versions and ciphers, the hosts it reaches, and the proposed BoringSSL fix |
 | [Metal on iOS 6](explanation/backports/metal-on-ios6.md) | the Metal render path and the fragment-pass compute that ship in v1 through air2es, the driver-level backlog for v2, the device findings, and the licence rules for both |
 | [Nested frameworks in the lowered overlay](explanation/backports/lowered-nested-frameworks.md) | why the overlay copies the headers of a framework nested in a mapped framework, such as MPSCore in MetalPerformanceShaders |
