@@ -20,6 +20,16 @@ application's `node_modules`, read only) and installs the `react-native` package
 worker's tree. The sources are the install the recipe reports for this build, not another recipe's install that happens to
 carry the same patches.
 
+The copy carries the requirements of the whole configuration, the one the root `xmake.lua` makes when no `--component` is given:
+`revenant@swift-runtime` shared, `revenant@libcxx` packaged, every libc++ dependency packaged too (`add_requireconfs("**.libcxx")`),
+and `webkit-engine` as `frameworks/WebKit` declares it. `copy` rewrites the application's plain `swift-runtime` and `libcxx`
+lines into those forms and adds the lines it lacks; an application that declares `swift-runtime` or `libcxx` with other configs is
+refused, because the packages would not be the ones the whole configuration builds. The install probes of `copy` and of `--real`
+packages carry the same libc++ and Swift runtime lines, so the packages they install are the ones the copy links. `build` refuses
+a copy whose `xmake.lua` lacks these lines and names the one missing; such a copy is made again with `copy`. The `webkit-engine` line is
+added under `if not os.getenv("RN_WEBKIT")`, so an application's own `RN_WEBKIT` declaration (with `carried`) applies when that is set
+and the whole one applies when it is not.
+
 The private cache is made with `./xmakew l -P . tools/private_cache.lua <your private cache>`. A cache made before the manifests were
 rewritten is repaired with `./xmakew l -P . tools/private_cache.lua --repair <your private cache>`; without it the Swift compile does not
 find the package modules such as Combine.

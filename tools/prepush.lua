@@ -322,6 +322,7 @@ local STEPS = {
     {name = "ci replay test", run = function () return lua("tools/ci_swiftc_replay.lua", "test") end},
     {name = "light suites", run = function () return lua("toolchain/tests/light_suites.lua") end},
     {name = "host install test", run = function () return lua("frameworks/ReactNative/tests/host_install_test.lua") end},
+    {name = "isolate test", run = function () return lua("frameworks/ReactNative/tests/isolate_test.lua") end},
     {name = "backports build", run = backports_build},
 }
 
