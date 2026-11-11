@@ -6,43 +6,18 @@ local GUARDED = {
     CASpringAnimation = {file = "UIKit/CASpringAnimation.m", guard = "revenant_spring_install", selectors = {"initialVelocity", "settlingDuration"}},
 }
 
-local function has_members(members)
-    for _ in pairs(members or {}) do
-        return true
-    end
-    return false
-end
-
 local function shadow_check(src, parsed)
-    local aliased = {}
-    for _, file in ipairs(os.files(path.join(src, "**.m"))) do
-        local text = io.readfile(file)
-        for name in text:gmatch("REVENANT_ALIAS%(%s*([%a_][%w_]*)%s*%)") do
-            aliased[name] = true
-        end
-        for name in text:gmatch("%.set _OBJC_CLASS_%$_([%a_][%w_]*),") do
-            aliased[name] = true
-        end
-    end
-    local device = lowered.read_device_members().classes
+    local shadows = lowered.shadowed_classes(src, parsed, lowered.read_device_members())
+    local committed = io.readfile(lowered.shadowed_file())
+    assert(committed == lowered.shadowed_text(shadows), "frameworks/Backports/tools/shadowed-classes.txt no longer matches the sources: run "
+           .. "./xmakew l -P . frameworks/Backports/tools/shadowed_classes.lua and commit the result")
+    assert(lowered.shadowed_text(lowered.parse_shadowed(committed)) == committed, "the shadowed class list does not survive a parse and serialize")
     local names = {}
-    for name in pairs(aliased) do
-        if device[name] then
-            table.insert(names, name)
-        end
+    for _, shadow in ipairs(shadows) do
+        table.insert(names, shadow.class)
     end
-    table.sort(names)
-    local shadows = {}
+    print("shadowed classes: " .. table.concat(names, ", "))
     for _, name in ipairs(names) do
-        local proxy = parsed.classes["Revenant" .. name]
-        local own = parsed.classes[name]
-        if has_members(proxy) and not has_members(own) then
-            table.insert(shadows, name)
-        end
-    end
-    print("alias classes that the device also has: " .. table.concat(names, ", "))
-    print("alias classes whose system class has no lowered member: " .. table.concat(shadows, ", "))
-    for _, name in ipairs(shadows) do
         local guard = GUARDED[name]
         assert(guard, name .. " forwards to the system class on iOS 6, where the system class has none of the members its proxy implements: "
                .. "a forwarding answer needs a completeness check, registered in GUARDED in this test")
