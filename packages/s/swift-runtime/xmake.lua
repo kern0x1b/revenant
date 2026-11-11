@@ -208,7 +208,6 @@ package("swift-runtime")
         local no_interface = "-DSwiftCore_NO_MODULE_INTERFACE=" .. (package:config("library_evolution") and "ON" or "OFF")
 
         if stdlib_kept then
-            -- The kept tree was configured for the install prefix of the build that made it; this build installs to its own.
             os.vrunv("cmake", {"--install", path.absolute(path.join("build", "core")), "--prefix", package:installdir()})
         else
             configure("core", path.join(source, "Runtimes", "Core"), {
@@ -586,9 +585,6 @@ package("swift-runtime")
             timed("supplemental:" .. library)
         end
 
-        -- The simd overlay is not built for arm64, as the overlays above are not: the recipe installs the arm64 runtime
-        -- only as far as the guest of a translated program needs it, and the SDK's _DarwinFoundation1 makes the
-        -- overlay's own sqrt of Darwin ambiguous at SDK 26.2.
         if not package:is_arch("arm64") then
             local simd = path.absolute("simd")
             os.mkdir(simd)
@@ -677,8 +673,6 @@ package("swift-runtime")
         local swift = import("@addon.revenant.apple.swift", {anonymous = true})
         local resources = path.join(package:installdir("lib"), "swift")
         if package:is_arch("arm64") then
-            -- The arm64 runtime is the guest of a translated program: nothing places it on a device, so the checks below
-            -- (the firmware's armv7 dyld cache, the guard table of the iOS 6 runtime) do not apply to it.
             for _, library in ipairs({"swiftCore", "swift_Concurrency", "swiftDarwin"}) do
                 assert(os.isfile(path.join(resources, "iphoneos", "lib" .. library .. ".dylib")),
                        "the arm64 runtime has no lib" .. library .. ".dylib")
