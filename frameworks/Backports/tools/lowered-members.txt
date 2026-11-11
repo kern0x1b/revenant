@@ -4760,6 +4760,7 @@ function RevenantDocumentTrackerCaptured
 function RevenantDocumentTrackerReset
 function RevenantDocumentTrackerUpdate
 function RevenantDocumentWarp
+function RevenantExtendedLayoutMappedEdges
 function RevenantGKBufferedCorners
 function RevenantGKCellCeiling
 function RevenantGKCellFloor
