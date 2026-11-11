@@ -804,6 +804,38 @@ private:
         declare("uniform vec2 revenant_target;\n", "revenant_target");
     }
 
+    bool sharedMember(const Binding &binding, const std::string &field) const
+    {
+        for (const Binding &other : bindings_)
+            if (&other != &binding && other.indexedByVertex == binding.indexedByVertex)
+                for (const Member &member : other.members)
+                    if (member.name == field)
+                        return true;
+        return false;
+    }
+
+    std::string memberName(const Binding &binding, const Member &field, bool attribute, bool scoped) const
+    {
+        bool prefixed = (scoped && !attribute) || sharedMember(binding, field.name);
+        std::string name = prefixed ? binding.name + "_" + field.name : field.name;
+        return attribute ? "a_" + name : name;
+    }
+
+    bool claimSlot(const std::string &name, const Binding &binding, const Member &field, bool &fresh)
+    {
+        std::pair<uint64_t, uint64_t> slot(binding.index, field.offset);
+        auto found = slots_.find(name);
+        if (found == slots_.end()) {
+            if (declared_.count(name))
+                return refuse("a member named " + name + " that another declaration already uses in " + binding.name);
+            slots_[name] = slot;
+            fresh = true;
+            return true;
+        }
+        fresh = false;
+        return found->second == slot || refuse("two members named " + name + " at different offsets of " + binding.name);
+    }
+
     bool accessMatrix(Binding &binding, const Member &field, uint64_t offset, Type *loaded, std::string &out, bool scoped)
     {
         unsigned columns = 0;
@@ -814,8 +846,10 @@ private:
             return refuse("a matrix whose size does not match its type in " + binding.name);
         if (binding.indexedByVertex)
             return refuse("a matrix vertex attribute in " + binding.name);
-        std::string name = scoped ? binding.name + "_" + field.name : field.name;
-        bool fresh = !declared_.count(name);
+        std::string name = memberName(binding, field, false, scoped);
+        bool fresh = false;
+        if (!claimSlot(name, binding, field, fresh))
+            return false;
         declare("uniform mat" + std::to_string(columns) + " " + name + ";\n", name);
         if (fresh)
             uniformLines_.push_back("{\"name\": " + jsonQuote(name) + ", \"buffer\": " + std::to_string(binding.index) +
@@ -873,8 +907,10 @@ private:
         bool real = attribute || scalar == "float" || scalar == "half";
         std::string suffix = std::to_string(components);
         std::string glsl = real ? (components == 1 ? "float" : "vec" + suffix) : (components == 1 ? "int" : "ivec" + suffix);
-        std::string name = attribute ? "a_" + field.name : scoped ? binding.name + "_" + field.name : field.name;
-        bool fresh = !declared_.count(name);
+        std::string name = memberName(binding, field, attribute, scoped);
+        bool fresh = false;
+        if (!claimSlot(name, binding, field, fresh))
+            return false;
         declare((attribute ? "attribute " : "uniform ") + glsl + " " + name + ";\n", name);
         if (fresh) {
             std::string common = "\"name\": " + jsonQuote(name) + ", \"buffer\": " + std::to_string(binding.index) +
@@ -2807,6 +2843,7 @@ private:
     std::map<const Value *, std::string> names_;
     std::map<const Value *, uint64_t> indexBounds_;
     std::set<std::string> declared_;
+    std::map<std::string, std::pair<uint64_t, uint64_t>> slots_;
     std::map<std::string, std::string> textures_;
     std::vector<std::string> declarations_;
     std::vector<std::string> locals_;

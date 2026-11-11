@@ -331,6 +331,27 @@ function flagChecks()
     os.rm(work)
 end
 
+local SHARED = path.join(os.scriptdir(), "air2es", "shared_mac")
+
+function sharedChecks()
+    local binary = path.join(os.scriptdir(), "..", "..", "..", "build", "macosx", "arm64", "release", "air2es")
+    assert(os.isfile(binary), "air2es is not built: configure with --air2es=y, then ./xmakew build air2es")
+    local work = path.join(os.tmpdir(), "air2es-shared-test")
+    if os.isdir(work) then
+        os.rm(work)
+    end
+    os.mkdir(work)
+    local folder = path.join(work, "shared_mac.es2")
+    local output = os.iorunv(binary, {SHARED .. ".metallib", folder})
+    assert(output:find("OK sharedFragment fragment", 1, true), "sharedFragment, whose two uniform blocks both have a viewport and a parameters member, is not translated: " .. output)
+    for _, name in ipairs({"sharedFragment.fragment.glsl", "sharedFragment.fragment.json", "library.json"}) do
+        local expected = io.readfile(path.join(SHARED .. ".golden", name))
+        local got = io.readfile(path.join(folder, name))
+        assert(got == expected, name .. " differs from its golden output")
+    end
+    os.rm(work)
+end
+
 function main()
     for _, case in ipairs(CASES) do
         local reason = limits.check(case.source)
@@ -360,4 +381,6 @@ function main()
     print("air2es masks: a loop whose index plus one is taken modulo eight translates as a bounded integer, and matches its golden output")
     flagChecks()
     print("air2es flags: a two-pass loop whose latch tests a header flag, with a helper call that branches inside it, translates and matches its golden output")
+    sharedChecks()
+    print("air2es shared members: two uniform blocks that both have a viewport and a parameters member translate under their own names, and match their golden output")
 end
