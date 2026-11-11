@@ -1002,6 +1002,7 @@ end
 
 local FOUNDATION_TESTS = {
     progress_keys = {"NSProgressKeys7.m"},
+    oslog_default = {"OSLog9.m", "RevenantOSLogCore.m", "RevenantOSLogFormat.m"},
     metadata_query = {"NSMetadataQuery+Enumerate7.m"},
     text_checking = {"NSTextCheckingResult+Alternatives7.m"},
     expression = {"NSExpression+AllowEvaluation7.m"},
@@ -1128,6 +1129,7 @@ if not is_plat("iphoneos") then
                {syslinks = {"sqlite3"}, defines = {"REVENANT_HOST_BUILD"}})
     host_tests("QuartzCore", {iosurface_contents = {"CALayer+IOSurfaceContents.m"}}, "Metal", {"Foundation", "QuartzCore", "CoreGraphics", "IOSurface"})
     host_tests("CoreMedia", {timebase = {"CMTimebase6.c"}}, nil, {"CoreMedia", "Foundation"})
+    host_tests("CoreMedia", {hevc_format = {"CMVideoFormatDescriptionHEVC.m"}}, nil, {"CoreMedia", "CoreVideo", "Foundation"}, {extension = "c"})
     host_tests("CoreMotion", {heading = {"RevenantMotionHeading.c"}}, nil, {"Foundation"})
     host_tests("CoreHaptics", {corehaptics = {"CHHapticConstants.m", "CHHapticDeviceCapability.m", "CHHapticEngine.m", "CHHapticEvent.m",
                                                 "CHHapticParameter.m", "CHHapticPattern.m", "CHHapticPatternPlayer.m", "../libSystem/RevenantVibration.m"}},
@@ -1176,7 +1178,7 @@ if not is_plat("iphoneos") then
     host_tests("LinkPresentation", {metadata = {"RevenantLinkPresentation.m", "RevenantLinkFetch.m", "LPLinkMetadata.m", "LPMetadataProvider.m"}}, nil, {"Foundation", "LinkPresentation"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("DeviceCheck", {device = {"DCDevice.m", "DCAppAttestService.m"}}, nil, {"Foundation", "DeviceCheck"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("WebKit", {webkit = {"WKSnapshotConfiguration.m", "WKURLSchemes.m", "WKSecurityOrigin.m"}}, nil, {"Foundation", "WebKit", "CoreGraphics"}, {defines = {"REVENANT_HOST_BUILD"}})
-    host_tests("Photos", {image_source = {"RevenantPhotosImageSource.c"}, image_cache = {"RevenantPhotosImageCache.m"}, photo_moves = {"RevenantPhotoMoves.c"}})
+    host_tests("Photos", {image_source = {"RevenantPhotosImageSource.c"}, image_cache = {"RevenantPhotosImageCache.m"}, photo_moves = {"RevenantPhotoMoves.c"}, live_photo_request_options = {"PHLivePhotoRequestOptions.m"}})
     host_tests("PDFKit", {layout = {"RevenantPDFLayout.m"}}, nil, {"Foundation", "CoreGraphics"})
     host_tests("PDFKit", {writer = {"RevenantPDFObjects.m", "RevenantPDFImage.m", "RevenantPDFCopy.m"}}, nil, {"Foundation", "CoreGraphics", "ImageIO", "CoreText", "PDFKit", "AppKit"}, {syslinks = {"z"}})
     host_tests("VisionKit", {warp = {"RevenantDocumentWarp.c"}, live = {"RevenantDocumentLive.c", "RevenantDocumentWarp.c", "../Vision/VNRectangleDetector.c"}}, nil, {}, {extension = "c"})
