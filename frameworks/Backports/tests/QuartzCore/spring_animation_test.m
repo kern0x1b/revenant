@@ -162,6 +162,19 @@ int main(int argc, char **argv)
     revenant_check(revenant_close(spring.settlingDuration, 1.472700335, 1e-6), "default settling",
                    [NSString stringWithFormat:@"%.17g", spring.settlingDuration]);
 
+    CASpringAnimation *appleKeyed = [CASpringAnimation animationWithKeyPath:@"position.x"];
+    RevenantCASpringAnimation *keyed = [[RevenantCASpringAnimation alloc] initWithKeyPath:@"position.x"];
+    revenant_check([keyed.keyPath isEqualToString:@"position.x"] &&
+                   revenant_close(keyed.mass, appleKeyed.mass, 0) && revenant_close(keyed.stiffness, appleKeyed.stiffness, 0) &&
+                   revenant_close(keyed.damping, appleKeyed.damping, 0) && revenant_close(keyed.initialVelocity, appleKeyed.initialVelocity, 0) &&
+                   keyed.allowsOverdamping == appleKeyed.allowsOverdamping &&
+                   revenant_close(keyed.settlingDuration, appleKeyed.settlingDuration, 1e-6), "keypath defaults",
+                   [NSString stringWithFormat:@"m %.17g k %.17g c %.17g v %.17g settle %.17g apple settle %.17g", keyed.mass, keyed.stiffness, keyed.damping, keyed.initialVelocity, keyed.settlingDuration, appleKeyed.settlingDuration]);
+    RevenantCASpringAnimation *keyedByClass = [RevenantCASpringAnimation animationWithKeyPath:@"position.x"];
+    revenant_check([keyedByClass isKindOfClass:[RevenantCASpringAnimation class]] && revenant_close(keyedByClass.stiffness, 100, 0) &&
+                   revenant_close(keyedByClass.damping, 10, 0), "keypath class constructor",
+                   [NSString stringWithFormat:@"k %.17g c %.17g", keyedByClass.stiffness, keyedByClass.damping]);
+
     spring.mass = 2;
     spring.stiffness = 8;
     spring.damping = 12;

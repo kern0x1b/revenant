@@ -26822,6 +26822,7 @@ member RevenantCASpringAnimation -damping
 member RevenantCASpringAnimation -encodeWithCoder:
 member RevenantCASpringAnimation -init
 member RevenantCASpringAnimation -initWithCoder:
+member RevenantCASpringAnimation -initWithKeyPath:
 member RevenantCASpringAnimation -initWithPerceptualDuration:bounce:
 member RevenantCASpringAnimation -initialVelocity
 member RevenantCASpringAnimation -mass
