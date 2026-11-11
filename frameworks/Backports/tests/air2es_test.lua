@@ -310,6 +310,27 @@ function maskChecks()
     os.rm(work)
 end
 
+local FLAG = path.join(os.scriptdir(), "air2es", "flag_mac")
+
+function flagChecks()
+    local binary = path.join(os.scriptdir(), "..", "..", "..", "build", "macosx", "arm64", "release", "air2es")
+    assert(os.isfile(binary), "air2es is not built: configure with --air2es=y, then ./xmakew build air2es")
+    local work = path.join(os.tmpdir(), "air2es-flag-test")
+    if os.isdir(work) then
+        os.rm(work)
+    end
+    os.mkdir(work)
+    local folder = path.join(work, "flag_mac.es2")
+    local output = os.iorunv(binary, {FLAG .. ".metallib", folder})
+    assert(output:find("OK flagFragment fragment", 1, true), "flagFragment, a two-pass loop whose latch tests a header flag and that calls a helper with a branch, is not translated: " .. output)
+    for _, name in ipairs({"flagFragment.fragment.glsl", "flagFragment.fragment.json", "library.json"}) do
+        local expected = io.readfile(path.join(FLAG .. ".golden", name))
+        local got = io.readfile(path.join(folder, name))
+        assert(got == expected, name .. " differs from its golden output")
+    end
+    os.rm(work)
+end
+
 function main()
     for _, case in ipairs(CASES) do
         local reason = limits.check(case.source)
@@ -337,4 +358,6 @@ function main()
     print("air2es loops: a loop bounded by a uniform, with a capped float4 buffer read in its body, translates and matches its golden output")
     maskChecks()
     print("air2es masks: a loop whose index plus one is taken modulo eight translates as a bounded integer, and matches its golden output")
+    flagChecks()
+    print("air2es flags: a two-pass loop whose latch tests a header flag, with a helper call that branches inside it, translates and matches its golden output")
 end
