@@ -157,6 +157,7 @@ struct PlainFunction {
 
 const PlainFunction kPlainFunctions[] = {
     {"air.fast_sin.f32", "sin", 1},
+    {"air.fast_asin.f32", "asin", 1},
     {"air.fast_cos.f32", "cos", 1},
     {"air.fast_fabs.f32", "abs", 1},
     {"air.fast_fabs.v2f32", "abs", 1},
@@ -180,6 +181,7 @@ const PlainFunction kPlainFunctions[] = {
     {"air.fast_clamp.v3f32", "clamp", 3},
     {"air.mix.f32", "mix", 3},
     {"air.mix.v3f32", "mix", 3},
+    {"air.mix.v4f32", "mix", 3},
     {"air.mix.v4f16", "mix", 3},
     {"air.fmin.f16", "min", 2},
     {"air.fmax.f16", "max", 2},
@@ -206,6 +208,7 @@ const PlainFunction kPlainFunctions[] = {
     {"air.fwidth.v3f32", "fwidth", 1, "", true},
     {"air.dfdx.v2f32", "dFdx", 1, "", true},
     {"air.dfdy.v2f32", "dFdy", 1, "", true, "-"},
+    {"air.sign.f32", "sign", 1},
 };
 
 const PlainFunction *plainFunction(const std::string &name)
@@ -1406,6 +1409,8 @@ private:
         if (loops_.empty())
             return true;
         const ActiveLoop &loop = loops_.back();
+        if (block->getParent() != loop.header->getParent())
+            return true;
         return block == loop.header || block == loop.exit || loop.body.count(block) > 0;
     }
 
@@ -1516,6 +1521,48 @@ private:
             cycle.index = index;
             cycle.exit = exit;
             cycle.first = first->getSExtValue();
+            return true;
+        }
+        return false;
+    }
+
+    bool flagCycleOf(BasicBlock *header, Cycle &cycle)
+    {
+        for (BasicBlock &latch : *header->getParent()) {
+            auto *back = dyn_cast<BranchInst>(latch.getTerminator());
+            if (!back || !back->isConditional())
+                continue;
+            bool backFirst = back->getSuccessor(0) == header;
+            bool backSecond = back->getSuccessor(1) == header;
+            if (backFirst == backSecond)
+                continue;
+            BasicBlock *exit = back->getSuccessor(backFirst ? 1 : 0);
+            if (&latch != header && !bodyOf(header, exit).count(&latch))
+                continue;
+            auto *flag = dyn_cast<PHINode>(back->getCondition());
+            if (!flag || flag->getParent() != header || flag->getNumIncomingValues() != 2 ||
+                flag->getBasicBlockIndex(&latch) < 0 || !flag->getType()->isIntegerTy(1))
+                return false;
+            Value *start = nullptr;
+            for (unsigned j = 0; j < 2; j++)
+                if (flag->getIncomingBlock(j) != &latch)
+                    start = flag->getIncomingValue(j);
+            auto *first = dyn_cast_or_null<ConstantInt>(start);
+            auto *again = dyn_cast<ConstantInt>(flag->getIncomingValueForBlock(&latch));
+            if (!first || !again)
+                return false;
+            bool continueOn = backFirst;
+            bool current = !first->isZero();
+            uint64_t trips = 0;
+            while (current == continueOn) {
+                if (++trips >= 64)
+                    return false;
+                current = !again->isZero();
+            }
+            cycle.index = nullptr;
+            cycle.exit = exit;
+            cycle.first = 0;
+            cycle.last = int64_t(trips + 1);
             return true;
         }
         return false;
@@ -1663,7 +1710,7 @@ private:
                 return true;
             entering = false;
             Cycle cycle;
-            if (!iterating && (cycleOf(block, cycle) || latchCycleOf(block, cycle))) {
+            if (!iterating && (cycleOf(block, cycle) || latchCycleOf(block, cycle) || flagCycleOf(block, cycle))) {
                 if (!emitCountedCycle(block, cycle))
                     return false;
                 block = cycle.exit;
