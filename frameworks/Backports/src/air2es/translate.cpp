@@ -1398,23 +1398,78 @@ private:
         return block == loop.header || block == loop.exit || loop.body.count(block) > 0;
     }
 
-    bool emitCountedCycle(BasicBlock *header, const Cycle &cycle)
+    std::set<const BasicBlock *> bodyOf(BasicBlock *header, const BasicBlock *exit)
     {
-        std::string index = "t" + std::to_string(counter_++);
-        statement("for (int " + index + " = " + std::to_string(cycle.first) + "; " + index + " < " +
-                  std::to_string(cycle.last) + "; " + index + "++) {\n");
-        depth_++;
-        ActiveLoop loop{header, cycle.exit, {}};
+        std::set<const BasicBlock *> body;
         std::vector<const BasicBlock *> pending = {header};
         while (!pending.empty()) {
             const Instruction *terminator = pending.back()->getTerminator();
             pending.pop_back();
             for (unsigned i = 0; i < terminator->getNumSuccessors(); i++) {
                 const BasicBlock *next = terminator->getSuccessor(i);
-                if (next != header && next != cycle.exit && loop.body.insert(next).second)
+                if (next != header && next != exit && body.insert(next).second)
                     pending.push_back(next);
             }
         }
+        return body;
+    }
+
+    bool latchCycleOf(BasicBlock *header, Cycle &cycle)
+    {
+        for (BasicBlock &latch : *header->getParent()) {
+            auto *back = dyn_cast<BranchInst>(latch.getTerminator());
+            if (&latch == header || !back || !back->isConditional())
+                continue;
+            bool backFirst = back->getSuccessor(0) == header;
+            bool backSecond = back->getSuccessor(1) == header;
+            if (backFirst == backSecond)
+                continue;
+            BasicBlock *exit = back->getSuccessor(backFirst ? 1 : 0);
+            std::set<const BasicBlock *> body = bodyOf(header, exit);
+            if (!body.count(&latch))
+                continue;
+            auto *test = dyn_cast<ICmpInst>(back->getCondition());
+            if (!test || test->getPredicate() != (backFirst ? ICmpInst::ICMP_NE : ICmpInst::ICMP_EQ))
+                return false;
+            auto *next = dyn_cast<BinaryOperator>(test->getOperand(0));
+            if (!next || next->getParent() != &latch || next->getOpcode() != Instruction::Add)
+                return false;
+            auto *step = dyn_cast<ConstantInt>(next->getOperand(1));
+            auto *index = dyn_cast<PHINode>(next->getOperand(0));
+            if (!step || !step->isOne() || !index || index->getParent() != header || index->getNumIncomingValues() != 2)
+                return false;
+            if (index->getIncomingValueForBlock(&latch) != next)
+                return false;
+            Value *start = nullptr;
+            for (unsigned j = 0; j < 2; j++)
+                if (index->getIncomingBlock(j) != &latch)
+                    start = index->getIncomingValue(j);
+            auto *first = dyn_cast_or_null<ConstantInt>(start);
+            auto *bound = dyn_cast<ConstantInt>(test->getOperand(1));
+            if (!first || !bound || first->getSExtValue() >= bound->getSExtValue())
+                return false;
+            cycle.last = bound->getSExtValue();
+            for (User *user : next->users())
+                if (user != index && user != test)
+                    return false;
+            for (User *user : test->users())
+                if (user != back)
+                    return false;
+            cycle.index = index;
+            cycle.exit = exit;
+            cycle.first = first->getSExtValue();
+            return true;
+        }
+        return false;
+    }
+
+    bool emitCountedCycle(BasicBlock *header, const Cycle &cycle)
+    {
+        std::string index = "t" + std::to_string(counter_++);
+        statement("for (int " + index + " = " + std::to_string(cycle.first) + "; " + index + " < " +
+                  std::to_string(cycle.last) + "; " + index + "++) {\n");
+        depth_++;
+        ActiveLoop loop{header, cycle.exit, bodyOf(header, cycle.exit)};
         loops_.push_back(loop);
         bool emitted = region(header, nullptr);
         loops_.pop_back();
@@ -1548,7 +1603,7 @@ private:
                 return true;
             entering = false;
             Cycle cycle;
-            if (!iterating && cycleOf(block, cycle)) {
+            if (!iterating && (cycleOf(block, cycle) || latchCycleOf(block, cycle))) {
                 if (!emitCountedCycle(block, cycle))
                     return false;
                 block = cycle.exit;
