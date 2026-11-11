@@ -8,13 +8,6 @@
       "reason": "Name only."
     },
     {
-      "name": "StubImagePickerModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExponentImagePicker",
-      "owner": "expo-image-picker",
-      "reason": "Name only."
-    },
-    {
       "name": "StubFileSystemModule",
       "file": "src/expo/StubModules.swift",
       "module": "FileSystem",

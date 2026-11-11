@@ -1,0 +1,154 @@
+diff --git a/ios/MediaHandler.swift b/ios/MediaHandler.swift
+index d94e221..e4a2cd8 100644
+--- a/ios/MediaHandler.swift
++++ b/ios/MediaHandler.swift
+@@ -13,18 +13,16 @@ internal struct MediaHandler {
+   internal func handleMedia(_ mediaInfo: MediaInfo) async throws -> AssetInfo {
+     let mediaType: String? = mediaInfo[UIImagePickerController.InfoKey.mediaType] as? String
+ 
+-    switch mediaType {
+-    case UTType.image.identifier:
++    if mediaType == kUTTypeImage as String {
+       return try await handleImage(mediaInfo: mediaInfo)
+-
+-    case UTType.movie.identifier:
++    }
++    if mediaType == kUTTypeMovie as String {
+       return try await handleVideo(mediaInfo: mediaInfo)
+-
+-    default:
+-      throw InvalidMediaTypeException(mediaType)
+     }
++    throw InvalidMediaTypeException(mediaType)
+   }
+ 
++  @available(iOS 14.0, *)
+   internal func handleMultipleMedia(_ selection: [PHPickerResult]) async throws -> [AssetInfo] {
+     // TODO: (@hirbod): Use withThrowingTaskGroup instead of asyncMap once iOS 15 support is dropped
+     return try await asyncMap(selection) { selectedItem in
+@@ -82,8 +80,12 @@ internal struct MediaHandler {
+ 
+       // as calling this already requires media library permission, we can access it here
+       // if user gave limited permissions, in the worst case this will be null
+-      let asset = mediaInfo[.phAsset] as? PHAsset
+-      var fileName = asset?.value(forKey: "filename") as? String
++      var assetId: String?
++      var fileName: String?
++      if #available(iOS 14.0, *), let asset = mediaInfo[.phAsset] as? PHAsset {
++        assetId = asset.localIdentifier
++        fileName = asset.value(forKey: "filename") as? String
++      }
+       // Extension will change to png when editing BMP files, reflect that change in fileName
+       if let unwrappedName = fileName {
+         fileName = replaceFileExtension(
+@@ -105,7 +107,7 @@ internal struct MediaHandler {
+       let size = CGSize(width: image.size.width, height: image.size.height)
+ 
+       return AssetInfo(
+-        assetId: asset?.localIdentifier,
++        assetId: assetId,
+         uri: targetUrl.absoluteString,
+         width: Double(size.width),
+         height: Double(size.height),
+@@ -122,6 +124,7 @@ internal struct MediaHandler {
+     }
+   }
+ 
++  @available(iOS 14.0, *)
+   private func handleImage(from selectedImage: PHPickerResult) async throws -> AssetInfo {
+     let itemProvider = selectedImage.itemProvider
+ 
+@@ -228,6 +231,7 @@ internal struct MediaHandler {
+   // Unlike the case of regular images, we have to operate on original data of the image in order to preserve the exif data,
+   // otherwise it won't be possible to connect the image and video into a `PHLivePhoto` after reading it from the cache directory later.
+   // As a result a live photo photo cannot be compressed or edited.
++  @available(iOS 14.0, *)
+   private func handleLivePhoto(from selectedImage: PHPickerResult) async throws -> AssetInfo {
+     let itemProvider = selectedImage.itemProvider
+     let livePhotoObject = try await itemProvider.loadObject(ofClass: PHLivePhoto.self)
+@@ -280,6 +284,7 @@ internal struct MediaHandler {
+     )
+   }
+ 
++  @available(iOS 14.0, *)
+   private func getPairedAssetInfo(
+     from videoResource: PHAssetResource, fileUrl: URL, assetId: String?
+   ) throws -> AssetInfo {
+@@ -305,9 +310,20 @@ internal struct MediaHandler {
+   }
+ 
+   private func getMimeType(from pathExtension: String) -> String? {
+-    return UTType(filenameExtension: pathExtension)?.preferredMIMEType
++    if #available(iOS 14.0, *) {
++      return UTType(filenameExtension: pathExtension)?.preferredMIMEType
++    }
++    guard
++      let identifier = UTTypeCreatePreferredIdentifierForTag(
++        kUTTagClassFilenameExtension, pathExtension as CFString, nil)?.takeRetainedValue(),
++      let mimeType = UTTypeCopyPreferredTagWithClass(identifier, kUTTagClassMIMEType)?.takeRetainedValue()
++    else {
++      return nil
++    }
++    return mimeType as String
+   }
+ 
++  @available(iOS 14.0, *)
+   private func getMimeType(from asset: PHAsset?, fileExtension: String) -> String? {
+     let utType: UTType? = if #available(iOS 26.0, *) {
+       asset?.contentType ?? UTType(filenameExtension: fileExtension)
+@@ -317,6 +333,7 @@ internal struct MediaHandler {
+     return utType?.preferredMIMEType
+   }
+ 
++  @available(iOS 14.0, *)
+   private func getMimeType(from resource: PHAssetResource, fileExtension: String) -> String? {
+     let utType: UTType? = if #available(iOS 26.0, *) {
+       resource.contentType
+@@ -334,7 +351,7 @@ internal struct MediaHandler {
+ 
+     // Fast-path: if we have a PHAsset and passthrough preset, stream the full-size resource to avoid
+     // assets-library URLs that FileManager cannot copy.
+-    if options.videoExportPreset == .passthrough, let asset = mediaInfo[.phAsset] as? PHAsset {
++    if #available(iOS 14.0, *), options.videoExportPreset == .passthrough, let asset = mediaInfo[.phAsset] as? PHAsset {
+       let resources = PHAssetResource.assetResources(for: asset)
+       if let resource = resources.first(where: { $0.type == .fullSizeVideo }) ?? resources.first(where: { $0.type == .video }) {
+         let originalFilename = resource.originalFilename
+@@ -383,13 +400,18 @@ internal struct MediaHandler {
+     // TODO: (@bbarthec): inspect whether it makes sense to read duration from two different assets
+     let videoUrlToReadDurationFrom = self.options.allowsEditing ? pickedUrl : targetUrl
+ 
+-    let asset = mediaInfo[.phAsset] as? PHAsset
+-    let mimeType = getMimeType(from: asset, fileExtension: targetUrl.pathExtension)
+-    let fileName = asset?.value(forKey: "filename") as? String
++    var assetId: String?
++    var fileName: String?
++    var mimeType = getMimeType(from: targetUrl.pathExtension)
++    if #available(iOS 14.0, *), let asset = mediaInfo[.phAsset] as? PHAsset {
++      assetId = asset.localIdentifier
++      fileName = asset.value(forKey: "filename") as? String
++      mimeType = getMimeType(from: asset, fileExtension: targetUrl.pathExtension)
++    }
+     let fileSize = getFileSize(from: targetUrl)
+ 
+     return AssetInfo(
+-      assetId: asset?.localIdentifier,
++      assetId: assetId,
+       type: "video",
+       uri: targetUrl.absoluteString,
+       width: dimensions.width,
+@@ -401,6 +423,7 @@ internal struct MediaHandler {
+     )
+   }
+ 
++  @available(iOS 14.0, *)
+   private func handleVideo(from selectedVideo: PHPickerResult) async throws -> AssetInfo {
+     // Fast-path: If transcoding is disabled (passthrough) and we have direct access to the underlying
+     // `PHAsset`, try to copy the original/full-size video resource via `PHAssetResourceManager`.
+@@ -559,6 +582,7 @@ internal struct MediaHandler {
+   }
+ }
+ 
++@available(iOS 14.0, *)
+ extension PHAssetResourceManager {
+   fileprivate func requestData(
+     for assetResource: PHAssetResource, options: PHAssetResourceRequestOptions?

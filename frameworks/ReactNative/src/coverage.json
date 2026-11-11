@@ -486,9 +486,9 @@
    "group": "sdk",
    "version": "~57.0.20",
    "native": true,
-   "status": "stub",
-   "verified": "none",
-   "note": "Does not build for iOS 6: the Swift compile fails because PHPickerResult and PHPickerViewControllerDelegate are not in scope and MissingCurrentViewControllerException is declared twice (build log of expo-image-picker 57.0.20). Not built; the package is at packages/e/expo-image-picker, unpatched. Backports has the Objective-C classes of those Photos types (src/Photos), and PHPickerViewController14 presents UIImagePickerController, which iOS 6 has, so picking is single-select; the Swift compile of ImagePickerHandler.swift still does not see PHPickerResult or PHPickerViewControllerDelegate, so the package does not build yet. PHAssetResourceManager, UTType and NSItemProvider file loading are backported too. Multi-select is the part iOS 6 cannot do: UIImagePickerController picks one item, and it stays partial once built."
+   "status": "partial",
+   "verified": "build",
+   "note": "Built from the package with seven iOS 6 patches (packages/e/expo-image-picker) and linked into RNHost with expo-image-picker real, Photos and PhotosUI weak-linked, on base 6c8fd1bf5 (swift-runtime 6.4.0 install 2d9126ab): not relinked on the current swift-runtime digest, so the build claim is for that base. UIImagePickerController is the iOS 6 picker, with the UTI constants and single selection there; PhotoKit, PHPickerController and live photo code are gated to iOS 14+; asset metadata to iOS 11+; the library permission goes to the assets library on iOS 6 and 7; the picker exception is renamed away from expo-sharing's; the AVAssetExportPreset constants are literal preset names, because the SDK symbols bind strongly on iOS 6. Multi-select is not available on iOS 6; the module is not exercised on the phone."
   },
   {
    "id": "expo-intent-launcher",

@@ -1,0 +1,41 @@
+diff --git a/ios/ImagePickerModule.swift b/ios/ImagePickerModule.swift
+index 6d41360..68989d1 100644
+--- a/ios/ImagePickerModule.swift
++++ b/ios/ImagePickerModule.swift
+@@ -148,6 +148,13 @@ public class ImagePickerModule: Module, OnMediaPickingResultHandler {
+   }
+ 
+   private func launchMultiSelectPicker(pickingContext: PickingContext) {
++    guard #available(iOS 14.0, *) else {
++      if pickingContext.options.allowsMultipleSelection {
++        return pickingContext.promise.reject(MultipleSelectionUnavailableException())
++      }
++      return launchLegacyImagePicker(sourceType: .photoLibrary, pickingContext: pickingContext)
++    }
++
+     var configuration = PHPickerConfiguration(photoLibrary: PHPhotoLibrary.shared())
+     let options = pickingContext.options
+ 
+@@ -164,12 +171,12 @@ public class ImagePickerModule: Module, OnMediaPickingResultHandler {
+ 
+   private func presentPickerUI(_ picker: PickerUIController, pickingContext context: PickingContext) {
+     guard let currentViewController = self.appContext?.utilities?.currentViewController() else {
+-      return context.promise.reject(MissingCurrentViewControllerException())
++      return context.promise.reject(ImagePickerMissingCurrentViewControllerException())
+     }
+ 
+     picker.modalPresentationStyle = context.options.presentationStyle.toPresentationStyle()
+ 
+-    if UIDevice.current.userInterfaceIdiom == .pad {
++    if UIDevice.current.userInterfaceIdiom == .pad, #available(iOS 8.0, *) {
+       let viewFrame = currentViewController.view.frame
+       picker.popoverPresentationController?.sourceRect = CGRect(
+         x: viewFrame.midX,
+@@ -194,6 +201,7 @@ public class ImagePickerModule: Module, OnMediaPickingResultHandler {
+     self.currentPickingContext = nil
+   }
+ 
++  @available(iOS 14.0, *)
+   func didPickMultipleMedia(selection: [PHPickerResult]) {
+     guard let options = self.currentPickingContext?.options,
+           let promise = self.currentPickingContext?.promise else {
