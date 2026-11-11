@@ -4,6 +4,7 @@
 #import <objc/runtime.h>
 
 static NSString *const REVENANT_LAYOUT_LOG = @"/var/revenant/layout.txt";
+static NSString *const REVENANT_ROOT_LOG = @"/var/revenant/layout-root.txt";
 static NSTimeInterval const REVENANT_CASE_HOLD = 4.0;
 static const CGFloat REVENANT_EDGE_NONE = 0;
 static const CGFloat REVENANT_EDGE_ALL = 15;
@@ -146,12 +147,40 @@ static void revenant_test_rect_of_interest(NSMutableString *log)
     [self.log appendFormat:@"iOS %@ setTranslucent=%d\n",
         [[UIDevice currentDevice] systemVersion],
         [UINavigationBar instancesRespondToSelector:@selector(setTranslucent:)]];
+    if ([NSProcessInfo processInfo].environment[@"REVENANT_LAYOUT_ROOT"]) {
+        [self.window makeKeyAndVisible];
+        [self rootCase];
+        return YES;
+    }
     revenant_test_rect_of_interest(self.log);
     [self.window makeKeyAndVisible];
     [self startSession];
     [self performSelector:@selector(measureSession) withObject:nil afterDelay:3.0];
     [self next];
     return YES;
+}
+
+- (void)rootCase
+{
+    UIViewController *root = [[UIViewController alloc] init];
+    root.view.backgroundColor = [UIColor redColor];
+    ((void (*)(id, SEL, BOOL))objc_msgSend)(root, sel_registerName("setExtendedLayoutIncludesOpaqueBars:"), YES);
+    self.window.rootViewController = root;
+    [self performSelector:@selector(reportRoot) withObject:nil afterDelay:1.0];
+}
+
+- (void)reportRoot
+{
+    UIViewController *root = self.window.rootViewController;
+    BOOL opaque = ((BOOL (*)(id, SEL))objc_msgSend)(root, sel_registerName("extendedLayoutIncludesOpaqueBars"));
+    CGRect view = [root.view.superview convertRect:root.view.frame toView:nil];
+    NSString *existing = [NSString stringWithContentsOfFile:REVENANT_ROOT_LOG encoding:NSUTF8StringEncoding error:NULL] ?: @"";
+    NSUInteger run = [[existing componentsSeparatedByString:@"\n"] count];
+    NSString *line = [NSString stringWithFormat:@"run %lu iOS %@ opaqueBars=%d wantsFull=%d rootFrame=%@ statusBarH=%.1f\n",
+        (unsigned long)run, [[UIDevice currentDevice] systemVersion], opaque, root.wantsFullScreenLayout,
+        NSStringFromCGRect(view), [UIApplication sharedApplication].statusBarFrame.size.height];
+    [[existing stringByAppendingString:line] writeToFile:REVENANT_ROOT_LOG atomically:YES encoding:NSUTF8StringEncoding error:NULL];
+    exit(0);
 }
 
 - (void)startSession

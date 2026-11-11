@@ -288,7 +288,7 @@ if is_plat("iphoneos") and not SELECTED then
         set_default(false)
         add_rules("@addon/revenant/app")
         add_files("tests/layout/main.m", "src/AVFoundation/AVCaptureMetadataOutput+RectOfInterest7.m", "src/AVFoundation/AVCaptureVideoPreviewLayer+MetadataRect7.m",
-                  "src/UIKit/UIViewController+ExtendedLayout.m")
+                  "src/UIKit/UIViewController+ExtendedLayout.m", "src/UIKit/RevenantExtendedLayout.c")
         add_mflags("-fobjc-arc")
         add_frameworks("UIKit", "Foundation", "CoreGraphics", "AVFoundation")
         set_values("app.plist-file", "tests/layout/Info.plist")
@@ -1252,6 +1252,6 @@ if not is_plat("iphoneos") then
     host_tests("PDFKit", {writer = {"RevenantPDFObjects.m", "RevenantPDFImage.m", "RevenantPDFCopy.m"}}, nil, {"Foundation", "CoreGraphics", "ImageIO", "CoreText", "PDFKit", "AppKit"}, {syslinks = {"z"}})
     host_tests("VisionKit", {warp = {"RevenantDocumentWarp.c"}, live = {"RevenantDocumentLive.c", "RevenantDocumentWarp.c", "../Vision/VNRectangleDetector.c"}}, nil, {}, {extension = "c"})
     host_tests("VisionKit", {scan = {"RevenantDocumentScan.m", "RevenantDocumentLive.c", "RevenantDocumentWarp.c", "../Vision/VNRectangleDetector.c"}}, nil, {"Foundation", "CoreGraphics", "ImageIO"})
-    host_tests("UIKit", {animation_duration = {"RevenantAnimationDuration.m"}, tightening = {"RevenantTightening.m"}, corner_path = {"RevenantCornerPath.c"}}, nil, {"Foundation", "CoreGraphics"})
+    host_tests("UIKit", {animation_duration = {"RevenantAnimationDuration.m"}, tightening = {"RevenantTightening.m"}, corner_path = {"RevenantCornerPath.c"}, extended_layout = {"RevenantExtendedLayout.c"}}, nil, {"Foundation", "CoreGraphics"})
     host_tests("AuthenticationServices", {authorization = {"ASAuthorizationController.m", "ASAuthorizationPlatformPublicKeyCredentialProvider.m", "ASAuthorizationPlatformPublicKeyCredentialRequests.m", "ASAuthorizationRequest.m", "ASConstants13_0.m", "RevenantASAppleIDButtonMetrics.m"}}, nil, {"Foundation", "AuthenticationServices", "AppKit"}, {defines = {"REVENANT_HOST_BUILD"}})
 end
