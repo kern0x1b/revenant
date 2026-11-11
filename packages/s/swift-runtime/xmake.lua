@@ -202,13 +202,14 @@ package("swift-runtime")
                 "-DCMAKE_BUILD_TYPE=Release", "-DBUILD_SHARED_LIBS=ON", "-DCMAKE_INSTALL_PREFIX=" .. package:installdir(),
                 "-DCMAKE_INSTALL_LIBDIR=lib", "-DCMAKE_MAKE_PROGRAM=" .. ninja}, configs))
             os.vrunv(ninja, table.join({"-C", builddir}, parallel.ninja(8, ninja)))
-            os.vrunv("cmake", {"--install", builddir})
+            os.vrunv("cmake", {"--install", builddir, "--prefix", package:installdir()})
         end
 
         local no_interface = "-DSwiftCore_NO_MODULE_INTERFACE=" .. (package:config("library_evolution") and "ON" or "OFF")
 
         if stdlib_kept then
-            os.vrunv("cmake", {"--install", path.absolute(path.join("build", "core"))})
+            -- The kept tree was configured for the install prefix of the build that made it; this build installs to its own.
+            os.vrunv("cmake", {"--install", path.absolute(path.join("build", "core")), "--prefix", package:installdir()})
         else
             configure("core", path.join(source, "Runtimes", "Core"), {
                 cxxflags = {"-DSWIFT_CLASS_IS_SWIFT_MASK=1ULL"},
@@ -585,30 +586,35 @@ package("swift-runtime")
             timed("supplemental:" .. library)
         end
 
-        local simd = path.absolute("simd")
-        os.mkdir(simd)
-        local simd_module = os.files(path.join(toolchain:config("sdkdir"), "usr", "lib", "swift", "simd.swiftmodule", "*-apple-ios.swiftinterface"))
-        assert(#simd_module > 0, "the SDK at %s carries no simd.swiftmodule; the Swift half of simd cannot be built",
-               toolchain:config("sdkdir"))
-        table.sort(simd_module, function (a, b) return path.basename(a) < path.basename(b) end)
-        os.vcp(simd_module[1], path.join(simd, "simd.swift"))
-        local simd_text = {}
-        for line in io.readfile(path.join(simd, "simd.swift")):gmatch("[^\n]+") do
-            if not line:startswith("// swift-") and not line:startswith("// swift-module-flags-ignorable") then
-                table.insert(simd_text, line)
+        -- The simd overlay is not built for arm64, as the overlays above are not: the recipe installs the arm64 runtime
+        -- only as far as the guest of a translated program needs it, and the SDK's _DarwinFoundation1 makes the
+        -- overlay's own sqrt of Darwin ambiguous at SDK 26.2.
+        if not package:is_arch("arm64") then
+            local simd = path.absolute("simd")
+            os.mkdir(simd)
+            local simd_module = os.files(path.join(toolchain:config("sdkdir"), "usr", "lib", "swift", "simd.swiftmodule", "*-apple-ios.swiftinterface"))
+            assert(#simd_module > 0, "the SDK at %s carries no simd.swiftmodule; the Swift half of simd cannot be built",
+                   toolchain:config("sdkdir"))
+            table.sort(simd_module, function (a, b) return path.basename(a) < path.basename(b) end)
+            os.vcp(simd_module[1], path.join(simd, "simd.swift"))
+            local simd_text = {}
+            for line in io.readfile(path.join(simd, "simd.swift")):gmatch("[^\n]+") do
+                if not line:startswith("// swift-") and not line:startswith("// swift-module-flags-ignorable") then
+                    table.insert(simd_text, line)
+                end
             end
+            io.writefile(path.join(simd, "simd.swift"), table.concat(simd_text, "\n") .. "\n")
+            local simd_release = toolchain:config("sdkdir"):match("iPhoneOS([%d%.]+)%.sdk$")
+            assert(simd_release, "the SDK at " .. toolchain:config("sdkdir") .. " is not an iPhoneOS SDK the simd patches name")
+            local simd_patches = os.files(path.join(os.scriptdir(), "patches", "simd", simd_release, "*.patch"))
+            assert(#simd_patches > 0, "the simd overlay has no patch for the iPhoneOS " .. simd_release .. " SDK; add patches/simd/" .. simd_release)
+            table.sort(simd_patches)
+            for _, patch in ipairs(simd_patches) do
+                os.vrunv("patch", {"-p1", "-i", patch}, {curdir = simd})
+            end
+            local simd_links = {"-lswiftDarwin", "-lswiftObjectiveC", "-framework", "Foundation", "-framework", "CoreFoundation"}
+            build_overlay("simd", {path.join(simd, "simd.swift")}, simd_links, nil)
         end
-        io.writefile(path.join(simd, "simd.swift"), table.concat(simd_text, "\n") .. "\n")
-        local simd_release = toolchain:config("sdkdir"):match("iPhoneOS([%d%.]+)%.sdk$")
-        assert(simd_release, "the SDK at " .. toolchain:config("sdkdir") .. " is not an iPhoneOS SDK the simd patches name")
-        local simd_patches = os.files(path.join(os.scriptdir(), "patches", "simd", simd_release, "*.patch"))
-        assert(#simd_patches > 0, "the simd overlay has no patch for the iPhoneOS " .. simd_release .. " SDK; add patches/simd/" .. simd_release)
-        table.sort(simd_patches)
-        for _, patch in ipairs(simd_patches) do
-            os.vrunv("patch", {"-p1", "-i", patch}, {curdir = simd})
-        end
-        local simd_links = {"-lswiftDarwin", "-lswiftObjectiveC", "-framework", "Foundation", "-framework", "CoreFoundation"}
-        build_overlay("simd", {path.join(simd, "simd.swift")}, simd_links, nil)
 
         local platform_dir = path.join(install, "iphoneos")
         os.mkdir(platform_dir)
@@ -670,6 +676,15 @@ package("swift-runtime")
     on_test(function (package)
         local swift = import("@addon.revenant.apple.swift", {anonymous = true})
         local resources = path.join(package:installdir("lib"), "swift")
+        if package:is_arch("arm64") then
+            -- The arm64 runtime is the guest of a translated program: nothing places it on a device, so the checks below
+            -- (the firmware's armv7 dyld cache, the guard table of the iOS 6 runtime) do not apply to it.
+            for _, library in ipairs({"swiftCore", "swift_Concurrency", "swiftDarwin"}) do
+                assert(os.isfile(path.join(resources, "iphoneos", "lib" .. library .. ".dylib")),
+                       "the arm64 runtime has no lib" .. library .. ".dylib")
+            end
+            return
+        end
         local install = path.join(resources, "iphoneos")
         local libraries = install
         local installed = {}
