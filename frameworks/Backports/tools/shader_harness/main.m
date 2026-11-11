@@ -954,6 +954,12 @@ int main(int argc, const char *argv[])
                             detail = compare(metalPixels, glesPixels, &state);
                     }
                     runs++;
+                    const char *dump = getenv("REVENANT_DUMP");
+                    if (dump) {
+                        NSString *stem = [NSString stringWithFormat:@"%s/%@+%@-%d", dump, vs[@"name"], fs[@"name"], ints];
+                        [metalPixels writeToFile:[stem stringByAppendingString:@"-metal.rgba"] atomically:NO];
+                        [glesPixels writeToFile:[stem stringByAppendingString:@"-gles.rgba"] atomically:NO];
+                    }
                     if (rank(state) >= 2)
                         failures++;
                     printf("%-5s %s + %s [ints=%d] %s\n", state.UTF8String, [vs[@"name"] UTF8String],

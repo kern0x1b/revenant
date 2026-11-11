@@ -69,6 +69,8 @@ and why, so it is not rediscovered later.
   `arrays` holds a device buffer's elements, flat, by the Metal argument's name (`"positions": [...]`). `members` holds a
   uniform's values by its name, for both sides (`"viewport": [x, y, z, w]`). Without a data source the values are the fixed
   ones of the earlier harness.
+- With `REVENANT_DUMP` set to a folder, the harness writes each run's Metal and GLES pixel buffers there as `<vertex>+<fragment>-<ints>-metal.rgba`
+  and `-gles.rgba`, 4 bytes per pixel, for a diff of a failing run.
 - A device pointer is filled element by element at its Metal stride. The GLES element uniform `<name>_<k>`, which the
   translator emits for a capped buffer, takes element k of the same array. Its GLES offset must equal k times that stride, or
   the run FAILs with a layout line.
@@ -221,6 +223,14 @@ and why, so it is not rediscovered later.
 - The derivative test translates `tests/air2es/deriv_mac.metallib` (macOS, from `deriv_mac.metal`): `derivVertex` and `derivFragment` are OK,
   and the `derivFragment` folder matches `deriv_mac.golden/`. Its negative control for the oracle is the same source with the `dfdx`
   scale changed from 16.0 to 8.0.
+- The dfdy test translates `tests/air2es/dfdy_mac.metallib` (macOS, from `dfdy_mac.metal`): `dyFragment` and `dyNegFragment` are OK, and
+  the `dyFragment` folder matches `dfdy_mac.golden/`. `air.dfdy.v2f32` maps to `-dFdy`: GL's y axis points up and Metal's points down,
+  so the same derivative has the opposite sign. Its negative control for the oracle is the same folder with the `-` removed, which
+  fails with a channel difference of 255 over 4,096 channels.
+- The mask test translates `tests/air2es/mask_mac.metallib` (macOS, from `mask_mac.metal`): `maskVertex` and `maskFragment` are OK, and
+  the `maskFragment` folder matches `mask_mac.golden/`. The loop index plus one is taken modulo eight, which is `and` in the IR: a bitwise
+  and with `2^k - 1` of an integer with a known bound translates as `int(mod(float(x), 2^k))`, and the bound of a loop index is its trip
+  count. Its negative control for the oracle is the same source with `(i + 2) % 8`, which fails with 9/255 over 4,096 channels.
 - Negative control: replacing a loop bound with `int(inputTexture_size.x)` in the
   scaleAndBlur output keeps glslangValidator at exit 0, and the checker refuses it.
 - The Telegram oracle is an external file, so the harness run on it is not part of CI.
