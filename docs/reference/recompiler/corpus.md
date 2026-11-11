@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, tsdscan, tsdguard,
-int128, weakimport and lse; `classpair` and `ordinal` are the device group's. Their output goes to the
+int128, weakimport, lse and llsc; `classpair` and `ordinal` are the device group's. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
 
@@ -76,6 +76,30 @@ The lifted IR is checked, not only xlate's failure count. Without the LSE cases,
 as undecodable: those whose atomic is the first instruction. The 20 `and` functions start with an `mvn`. rellume
 lifted each of them up to the atomic and ended it with an exit to that instruction's guest address. xlate counted
 those as lifted, and the program would only fail when it got there.
+
+### llsc
+
+A control for rellume's lifting of the exclusive loads and stores, the loop clang emits for an atomic when the target
+has no LSE: `LDXR`, `LDAXR`, `STXR`, `STLXR` and `CLREX`, in the byte, halfword, word and doubleword forms.
+
+`main.c` defines 160 functions: add, and, xor, or, exchange, signed max and unsigned min, and compare-and-swap, in each
+access width and each of the five memory orders. It is built with `-march=armv8-a`, so each is an exclusive loop.
+The check proves four things on the host:
+
+1. Every function carries the pair its width and order ask for (`ldxr` or `ldaxr`, `stxr` or `stlxr`, with the `b` or
+   `h` suffix).
+2. xlate leaves no instruction unlifted (`coverage: 0 of ...`, `clrex` among them) and lifts every function.
+3. The exclusive monitor is part of the state header (`EXCL_ADDR` and `EXCL_VAL`), and in each lifted function every
+   exclusive load is an atomic load of its width (acquire for `LDAXR`) and every exclusive store is a `cmpxchg` that
+   expects the loaded value, release for `STLXR`, with no `atomicrmw`. A plain store with a status register of 0,
+   which is what `STXR` was lifted to before, has none of these.
+4. The lifted code, compiled for armv7, carries the byte, halfword, word and doubleword exclusive pairs.
+
+The monitor remembers the address and the value an exclusive load saw. `STXR` succeeds only when the address is the
+recorded one and the `cmpxchg` still finds the recorded value, so a thread that wrote in between makes it fail and
+the loop retry. A store that finds the same value written back by another thread succeeds, as it does in a user-mode
+emulator; the loops compilers emit are value-based and tolerate it. `LDXP` and `STXP` still lift as a plain load and
+store, because a 128-bit `cmpxchg` has no armv7 lowering.
 
 ### tsdscan
 

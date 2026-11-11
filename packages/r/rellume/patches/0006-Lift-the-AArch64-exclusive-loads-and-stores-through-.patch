@@ -1,0 +1,107 @@
+From 03b75a1e0b4f57c8a83bfb85638de70d1e976f75 Mon Sep 17 00:00:00 2001
+From: Alexander Havrysh <kesha1511@gmail.com>
+Date: Wed, 11 Nov 2026 21:57:49 +0100
+Subject: [PATCH 6/6] Lift the AArch64 exclusive loads and stores through a
+ monitor
+
+LDXR and STXR were lifted as a plain load and a plain store, with STXR
+always reporting success. That is right for one thread and wrong for
+two: a read-modify-write loop built on them, such as the reference count
+or the once-flag of the Swift runtime, lost updates when another thread
+wrote between the load and the store.
+
+The exclusive monitor is now part of the CPU structure, two exported
+slots at its end: the address and the value an exclusive load saw.
+
+- LDXR and LDAXR load atomically (acquire for the acquire form) at the
+  access width, record the address and the value in the slots, and
+  write the zero-extended value into the destination register.
+- STXR and STLXR are one cmpxchg that expects the recorded value. It
+  stores the new value only when the address is the recorded one; the
+  status register is 0 when the address matched and the cmpxchg
+  succeeded, 1 otherwise, and the monitor is cleared either way. The
+  release form is a release cmpxchg.
+- CLREX clears the monitor.
+
+Like the exclusive emulation of a user-mode emulator, this lets a store
+succeed when the location was written and restored to the loaded value
+in between; the loops compilers emit are value-based and tolerate that.
+LDXP and STXP, the pair forms, still lift as a plain load and store,
+because a 128-bit cmpxchg has no armv7 lowering.
+---
+ data/rellume/cpustruct-aarch64.json |  5 +++-
+ src/a64/main.cc                     | 41 ++++++++++++++++++++++-------
+ 2 files changed, 35 insertions(+), 11 deletions(-)
+
+diff --git a/data/rellume/cpustruct-aarch64.json b/data/rellume/cpustruct-aarch64.json
+index 03e7233..f98329c 100644
+--- a/data/rellume/cpustruct-aarch64.json
++++ b/data/rellume/cpustruct-aarch64.json
+@@ -71,5 +71,8 @@
+     {"name": "v28", "size": 16, "reg": ["VEC(28)", "V2I64"], "export": true},
+     {"name": "v29", "size": 16, "reg": ["VEC(29)", "V2I64"], "export": true},
+     {"name": "v30", "size": 16, "reg": ["VEC(30)", "V2I64"], "export": true},
+-    {"name": "v31", "size": 16, "reg": ["VEC(31)", "V2I64"], "export": true}
++    {"name": "v31", "size": 16, "reg": ["VEC(31)", "V2I64"], "export": true},
++
++    {"name": "excl_addr", "size": 8, "reg": ["INVALID", "I64"], "export": true},
++    {"name": "excl_val", "size": 8, "reg": ["INVALID", "I64"], "export": true}
+ ]
+diff --git a/src/a64/main.cc b/src/a64/main.cc
+index ecd9530..487523c 100644
+--- a/src/a64/main.cc
++++ b/src/a64/main.cc
+@@ -737,19 +737,40 @@ bool Lifter::Lift(const Instr& inst) {
+         SetGp(a64.rs, w32, irb.CreateZExt(irb.CreateExtractValue(pair, 0), irb.getIntNTy(bits)));
+         break;
+     }
+-    // Exclusive Loads and Stores always come in pairs and appear in a loop: first the
+-    // value is loaded and the address thus locked (LDXR), then the value is compared
+-    // and if necessary, a new value is stored to the previously locked address (STXR).
+-    // If the store fails (Rs == 1), the loop continues.
+-    //
+-    // Because we do not support true parallelism and because they always appear in
+-    // matching pairs, we can model LDXR/STXR as normal loads and stores, with STXR
+-    // always succeeding (Rs == 0).
+-    case farmdec::A64_LDXR:
++    case farmdec::A64_LDXR: {
++        auto memty = TypeOf(static_cast<farmdec::Size>(fad_get_mem_extend(a64.flags) & 3));
++        auto ptr = Addr(memty, a64.rn);
++        bool acq = a64.ldst_order.load != farmdec::MO_NONE;
++        auto load = irb.CreateAlignedLoad(memty, ptr, llvm::Align(memty->getBitWidth() / 8));
++        load->setOrdering(acq ? llvm::AtomicOrdering::Acquire : llvm::AtomicOrdering::Monotonic);
++        irb.CreateStore(irb.CreatePtrToInt(ptr, irb.getInt64Ty()), fi.sptr[SptrIdx::aarch64::EXCL_ADDR]);
++        irb.CreateStore(irb.CreateZExt(load, irb.getInt64Ty()), fi.sptr[SptrIdx::aarch64::EXCL_VAL]);
++        SetGp(a64.rt, w32, irb.CreateZExt(load, irb.getIntNTy(bits)));
++        break;
++    }
++    case farmdec::A64_STXR: {
++        auto memty = TypeOf(static_cast<farmdec::Size>(fad_get_mem_extend(a64.flags) & 3));
++        auto ptr = Addr(memty, a64.rn);
++        bool rel = a64.ldst_order.store != farmdec::MO_NONE;
++        auto addr = irb.CreatePtrToInt(ptr, irb.getInt64Ty());
++        auto monitor_addr = irb.CreateLoad(irb.getInt64Ty(), fi.sptr[SptrIdx::aarch64::EXCL_ADDR]);
++        auto monitor_val = irb.CreateLoad(irb.getInt64Ty(), fi.sptr[SptrIdx::aarch64::EXCL_VAL]);
++        auto armed = irb.CreateICmpEQ(addr, monitor_addr);
++        auto expected = irb.CreateTrunc(monitor_val, memty);
++        auto desired = irb.CreateSelect(armed, irb.CreateTrunc(GetGp(a64.rt, w32), memty), expected);
++        auto success = rel ? llvm::AtomicOrdering::Release : llvm::AtomicOrdering::Monotonic;
++        auto pair = irb.CreateAtomicCmpXchg(ptr, expected, desired, llvm::MaybeAlign(memty->getBitWidth() / 8), success, llvm::AtomicOrdering::Monotonic);
++        auto stored = irb.CreateAnd(armed, irb.CreateExtractValue(pair, 1));
++        irb.CreateStore(irb.getInt64(0), fi.sptr[SptrIdx::aarch64::EXCL_ADDR]);
++        SetGp(a64.ldst_order.rs, /*w32=*/true, irb.CreateZExt(irb.CreateNot(stored), irb.getInt32Ty()));
++        break;
++    }
++    case farmdec::A64_CLREX:
++        irb.CreateStore(irb.getInt64(0), fi.sptr[SptrIdx::aarch64::EXCL_ADDR]);
++        break;
+     case farmdec::A64_LDXP:
+         LiftLoadStore(a64, w32);
+         break;
+-    case farmdec::A64_STXR:
+     case farmdec::A64_STXP:
+         LiftLoadStore(a64, w32);
+         SetGp(a64.ldst_order.rs, w32, getIntN(bits, 0));
+-- 
+2.54.0 (Apple Git-157)
+

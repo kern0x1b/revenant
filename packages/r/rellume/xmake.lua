@@ -8,7 +8,8 @@ package("rellume")
                      "0002-Lift-reads-of-TPIDRRO_EL0-on-AArch64.patch",
                      "0003-Map-a-calling-convention-only-to-the-architectures-b.patch",
                      "0004-Lift-AArch64-without-the-x86-64-decoder.patch",
-                     "0005-Lift-the-AArch64-LSE-atomic-memory-operations.patch"}
+                     "0005-Lift-the-AArch64-LSE-atomic-memory-operations.patch",
+                     "0006-Lift-the-AArch64-exclusive-loads-and-stores-through-.patch"}
     add_urls("https://github.com/aengelke/rellume.git", {submodules = false})
     add_versions("2026.09.10", commit)
     local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}

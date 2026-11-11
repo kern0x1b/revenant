@@ -90,7 +90,7 @@ target("recompiler_corpus")
     set_default(false)
     add_deps("xlate", "xlgen")
     add_packages("blocksruntime", "iphoneos-sdk", "ld64", "ldid")
-    add_tests("jumptable", "tsdscan", "tsdguard", "int128", "weakimport", "lse")
+    add_tests("jumptable", "tsdscan", "tsdguard", "int128", "weakimport", "lse", "llsc")
     on_test(corpus)
 target_end()
 
