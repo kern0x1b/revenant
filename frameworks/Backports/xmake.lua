@@ -956,12 +956,12 @@ option("air2es", {default = false, showmenu = true,
     description = "Build air2es, the host tool that turns the AIR of a Metal render library into the OpenGL ES 2 folder (`<metallib>.es2/`) the Metal port loads. It reads LLVM IR, so it needs revenant@llvm with its libraries; the configure is not for iphoneos."})
 
 option("shader_harness", {default = false, showmenu = true,
-    description = "Build metal_shader_harness, which runs each shader of a metallib on the Mac's own Metal and its air2es GLSL on ANGLE, then compares the pixels. REVENANT_ANGLE_CEF must name the Libraries folder of a Chromium Embedded Framework 144.0.15.0 bundle; its four ANGLE files are checked against ANGLE_PINS before the build copies them; the configure is not for iphoneos."})
+    description = "Build metal_shader_harness, which runs each shader of a metallib on the Mac's own Metal and its air2es GLSL on ANGLE, then compares the pixels. REVENANT_ANGLE_CEF must name the Libraries folder of the official Chromium Embedded Framework 144.0.15.0 minimal macOS arm64 bundle; its four ANGLE files are checked against ANGLE_PINS before the build copies them; the configure is not for iphoneos."})
 
 local ANGLE_PINS = {
-    ["libEGL.dylib"] = "e2c562884bb6cdda6d191b451899a75727eaafce4256ad9474633058920c5152",
-    ["libGLESv2.dylib"] = "a237e9a51970a79e7534527665246fa4d93447e2bedb6809fdcb14a95f3443b2",
-    ["libvk_swiftshader.dylib"] = "ffa750fd2123ea58cd70ad854d8f40bf33e92d0cb034f46d7ee51c6be29ca8f5",
+    ["libEGL.dylib"] = "138c6b53ea9e1d9dc905caa1c6502cc22609bb28deb4be59cdb11c73b3a85c01",
+    ["libGLESv2.dylib"] = "e70c5051d8b979da4e0ed88290cce03cf4e3ebf145cc8ee46cd4661ab7bfe2f9",
+    ["libvk_swiftshader.dylib"] = "08a162491191cd6acaf16e85372a2f02c86dda8fe06977cbda1d458d968c5386",
     ["vk_swiftshader_icd.json"] = "d717d915e31e7c27948b80b36ab34e2d897888114c5c7d0af835f93eb53e58f5",
 }
 
@@ -1013,7 +1013,7 @@ if not is_plat("iphoneos") and has_config("shader_harness") then
         add_frameworks("Foundation", "Metal")
         before_build(function (target)
             local source = os.getenv("REVENANT_ANGLE_CEF")
-            assert(source and os.isdir(source), "metal_shader_harness needs REVENANT_ANGLE_CEF=<the Libraries folder of a Chromium Embedded Framework 144.0.15.0 bundle>")
+            assert(source and os.isdir(source), "metal_shader_harness needs REVENANT_ANGLE_CEF=<the Libraries folder of the official Chromium Embedded Framework 144.0.15.0 minimal macOS arm64 bundle>")
             local lib = path.join(target:targetdir(), "angle")
             if not os.isdir(lib) then
                 os.mkdir(lib)
