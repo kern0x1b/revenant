@@ -1760,15 +1760,20 @@ private:
             std::string condition;
             if (!expression(branch->getCondition(), condition))
                 return false;
+            const std::set<const BasicBlock *> before = visited_;
             statement("if (" + condition + ") {\n");
             depth_++;
             if (!side(block, branch->getSuccessor(0), join))
                 return false;
+            std::set<const BasicBlock *> after = visited_;
+            visited_ = before;
             depth_--;
             statement("} else {\n");
             depth_++;
             if (!side(block, branch->getSuccessor(1), join))
                 return false;
+            after.insert(visited_.begin(), visited_.end());
+            visited_ = after;
             depth_--;
             statement("}\n");
             block = join;

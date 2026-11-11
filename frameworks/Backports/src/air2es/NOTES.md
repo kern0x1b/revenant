@@ -235,6 +235,10 @@ and why, so it is not rediscovered later.
   `flagFragment` folder matches `flag_mac.golden/`. The latch tests a header phi that is true on entry and false on the back edge, so the
   loop runs twice (`flagCycleOf`). Its negative control for the oracle is the same source with the second pass's factor 0.45 in place of
   0.4, which fails with 31/255 over 576 channels.
+- A block reached from both arms of a branch is emitted in each arm: `region` resets the visited set per arm, as `multiway` does. The
+  Mac diamond's lens function needs this. No fixture covers it yet.
+- The diamond's uniform sets, which are not committed, set `viewport` only. The harness SKIPs a case whose Metal output is blank,
+  so the diamond is not compared with Metal until its `Uniforms` members are filled in.
 - Negative control: replacing a loop bound with `int(inputTexture_size.x)` in the
   scaleAndBlur output keeps glslangValidator at exit 0, and the checker refuses it.
 - The Telegram oracle is an external file, so the harness run on it is not part of CI.
