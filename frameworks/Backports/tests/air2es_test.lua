@@ -225,6 +225,27 @@ function exitChecks()
     os.rm(work)
 end
 
+local DERIV = path.join(os.scriptdir(), "air2es", "deriv_mac")
+
+function derivChecks()
+    local binary = path.join(os.scriptdir(), "..", "..", "..", "build", "macosx", "arm64", "release", "air2es")
+    assert(os.isfile(binary), "air2es is not built: configure with --air2es=y, then ./xmakew build air2es")
+    local work = path.join(os.tmpdir(), "air2es-deriv-test")
+    if os.isdir(work) then
+        os.rm(work)
+    end
+    os.mkdir(work)
+    local folder = path.join(work, "deriv_mac.es2")
+    local output = os.iorunv(binary, {DERIV .. ".metallib", folder})
+    assert(output:find("OK derivFragment fragment", 1, true), "derivFragment, a dfdx of a float2 and a fwidth of a float3, is not translated: " .. output)
+    for _, name in ipairs({"derivFragment.fragment.glsl", "derivFragment.fragment.json", "library.json"}) do
+        local expected = io.readfile(path.join(DERIV .. ".golden", name))
+        local got = io.readfile(path.join(folder, name))
+        assert(got == expected, name .. " differs from its golden output")
+    end
+    os.rm(work)
+end
+
 function main()
     for _, case in ipairs(CASES) do
         local reason = limits.check(case.source)
@@ -244,4 +265,6 @@ function main()
     print("air2es sampling: the nine-operand macOS sample translates with a zero minimum LOD clamp, and a nonzero one is refused by name")
     exitChecks()
     print("air2es exit: a constant loop with a break and two exits translates, and matches its golden output")
+    derivChecks()
+    print("air2es derivatives: dfdx of a float2 and fwidth of a float3 translate, and match their golden output")
 end

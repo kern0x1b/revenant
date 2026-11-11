@@ -198,6 +198,8 @@ const PlainFunction kPlainFunctions[] = {
     {"air.fast_exp.f32", "exp", 1},
     {"air.fast_tan.f32", "tan", 1},
     {"air.fwidth.f32", "fwidth", 1, "", true},
+    {"air.fwidth.v3f32", "fwidth", 1, "", true},
+    {"air.dfdx.v2f32", "dFdx", 1, "", true},
 };
 
 const PlainFunction *plainFunction(const std::string &name)

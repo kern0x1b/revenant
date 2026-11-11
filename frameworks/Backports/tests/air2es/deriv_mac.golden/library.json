@@ -1,0 +1,1 @@
+{"functions": [{"name": "derivVertex", "stage": "vertex", "source": "derivVertex.vertex.glsl", "reflection": "derivVertex.vertex.json"}, {"name": "derivFragment", "stage": "fragment", "source": "derivFragment.fragment.glsl", "reflection": "derivFragment.fragment.json"}]}
