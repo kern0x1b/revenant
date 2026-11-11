@@ -69,6 +69,8 @@ and why, so it is not rediscovered later.
   `arrays` holds a device buffer's elements, flat, by the Metal argument's name (`"positions": [...]`). `members` holds a
   uniform's values by its name, for both sides (`"viewport": [x, y, z, w]`). Without a data source the values are the fixed
   ones of the earlier harness.
+- With `REVENANT_DUMP` set to a folder, the harness writes each run's Metal and GLES pixel buffers there as `<vertex>+<fragment>-<ints>-metal.rgba`
+  and `-gles.rgba`, 4 bytes per pixel, for a diff of a failing run.
 - A device pointer is filled element by element at its Metal stride. The GLES element uniform `<name>_<k>`, which the
   translator emits for a capped buffer, takes element k of the same array. Its GLES offset must equal k times that stride, or
   the run FAILs with a layout line.
