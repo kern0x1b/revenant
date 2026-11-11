@@ -6,7 +6,7 @@ uniform int pick;
 uniform vec4 frame_gain_2;
 uniform vec4 frame_gain_1;
 uniform vec4 frame_gain_0;
-uniform float revenant_flip;
+uniform highp float revenant_flip;
 varying vec4 color;
 void main() {
     vec4 t0;

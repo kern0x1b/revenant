@@ -5,6 +5,18 @@ uniform highp float revenant_flip;
 uniform vec2 revenant_target;
 uniform vec2 src_size;
 uniform sampler2D src;
+float revenant_quotient(float a, float b)
+{
+    float d = max(b, 1.0);
+    float q = floor((a + 0.5) / d);
+    float r = a - q * d;
+    return q + floor((r + 0.5) / d);
+}
+float revenant_remainder(float a, float b)
+{
+    float d = max(b, 1.0);
+    return a - d * revenant_quotient(a, d);
+}
 void main() {
     vec4 position;
     int t0;
@@ -15,7 +27,7 @@ void main() {
     vec2 t5;
     vec2 t6;
     vec2 t7;
-    vec4 t8;
+    mediump vec4 t8;
     float t9;
     float t10;
     float t11;
@@ -51,7 +63,7 @@ void main() {
     t15 = (t14 + 0.5);
     t16 = int(t15);
     t17 = (t16 > 1) ? t16 : 1;
-    t18 = (t12 - t17 * int((float(t12) + 0.5) / float(t17)));
+    t18 = int(revenant_remainder(float(t12), float(t17)));
     t19 = float(t18);
     t20 = (t19 * 0.00392156886);
     t21 = vec4(0.0, 0.0, 0.0, 1.0);

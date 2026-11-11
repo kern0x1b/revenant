@@ -149,6 +149,36 @@ function samplerChecks()
     os.rm(directory)
 end
 
+local CAPPED = path.join(os.scriptdir(), "air2es", "capped_buffer")
+
+function cappedBufferChecks()
+    local binary = path.join(os.scriptdir(), "..", "..", "..", "build", "macosx", "arm64", "release", "air2es")
+    assert(os.isfile(binary), "air2es is not built: configure with --air2es=y, then ./xmakew build air2es")
+    local work = path.join(os.tmpdir(), "air2es-capped-buffer-test")
+    if os.isdir(work) then
+        os.rm(work)
+    end
+    os.mkdir(work)
+    local folder = path.join(work, "capped.es2")
+    local output = os.iorunv(binary, {CAPPED .. ".metallib", folder})
+    assert(output:find("OK callBlobVertex vertex", 1, true), "callBlobVertex is not translated: " .. output)
+    assert(output:find("REFUSED uncappedVertex: an address this emitter does not read", 1, true),
+           "uncappedVertex, which has no host cap, is not refused by name: " .. output)
+    for _, name in ipairs({"callBlobVertex.vertex.glsl", "callBlobVertex.vertex.json", "library.json"}) do
+        local expected = io.readfile(path.join(CAPPED .. ".golden", name))
+        local got = io.readfile(path.join(folder, name))
+        assert(got == expected, name .. " differs from its golden output")
+    end
+    local glsl = io.readfile(path.join(folder, "callBlobVertex.vertex.glsl"))
+    local uniforms = 0
+    for _ in glsl:gmatch("uniform float positions_%d;") do
+        uniforms = uniforms + 1
+    end
+    assert(uniforms == 8, "expected 8 element uniforms for the capped buffer, got " .. uniforms)
+    assert(glsl:find("(t0 == 0) ? positions_0 : ", 1, true), "the dynamic index is not a select chain over the elements")
+    os.rm(work)
+end
+
 function main()
     for _, case in ipairs(CASES) do
         local reason = limits.check(case.source)
@@ -162,4 +192,6 @@ function main()
     print("air2es limits: all %d cases passed", #CASES)
     samplerChecks()
     print("air2es samplers: the table, the generator's pieces, the pin and the decode passed")
+    cappedBufferChecks()
+    print("air2es capped buffers: the host cap gives eight element uniforms and a select chain, and no cap is refused")
 end

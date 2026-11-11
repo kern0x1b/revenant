@@ -1,5 +1,6 @@
 #include "translate.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <map>
@@ -90,7 +91,26 @@ struct Binding {
     bool indexedByInstance = false;
     std::vector<Member> members;
     Argument *argument = nullptr;
+    uint64_t capCount = 0;
 };
+
+struct BufferCap {
+    const char *function;
+    const char *argument;
+    uint64_t count;
+};
+
+constexpr BufferCap kBufferCaps[] = {
+    {"callBlobVertex", "positions", 8},
+};
+
+uint64_t bufferCapOf(const std::string &function, const std::string &argument)
+{
+    for (const BufferCap &cap : kBufferCaps)
+        if (function == cap.function && argument == cap.argument)
+            return cap.count;
+    return 0;
+}
 
 struct Address {
     Binding *binding = nullptr;
@@ -145,9 +165,11 @@ const PlainFunction kPlainFunctions[] = {
     {"air.fast_fmax.v2f32", "max", 2},
     {"air.fast_fmin.f32", "min", 2},
     {"air.fast_pow.f32", "pow", 2},
+    {"air.fast_atan2.f32", "atan", 2},
     {"air.dot.v2f32", "dot", 2},
     {"air.dot.v3f32", "dot", 2},
     {"air.all.v2i1", "all", 1},
+    {"air.any.v2i1", "any", 1},
     {"air.fast_clamp.f32", "clamp", 3},
     {"air.fast_clamp.v2f32", "clamp", 3},
     {"air.fast_clamp.v3f32", "clamp", 3},
@@ -280,6 +302,13 @@ std::string glslType(Type *type)
     return "";
 }
 
+std::string declaredType(Type *type)
+{
+    Type *scalar = type->isVectorTy() ? cast<FixedVectorType>(type)->getElementType() : type;
+    std::string glsl = glslType(type);
+    return scalar->isHalfTy() && !glsl.empty() ? "mediump " + glsl : glsl;
+}
+
 std::string colorOf(Type *type, const std::string &text)
 {
     unsigned lanes = type->isVectorTy() ? cast<FixedVectorType>(type)->getNumElements() : 1;
@@ -373,9 +402,19 @@ public:
                 std::string scalar;
                 unsigned components = 0;
                 uint64_t size = binding.stride;
-                if (scalarOf(typeName, scalar, components))
+                bool scalarElement = scalarOf(typeName, scalar, components);
+                if (scalarElement)
                     size = components * scalarBytes(scalar);
-                binding.members.push_back(Member{binding.name, 0, size, typeName});
+                uint64_t cap = bufferCapOf(function_.getName().str(), binding.name);
+                if (!cap) {
+                    binding.members.push_back(Member{binding.name, 0, size, typeName});
+                } else {
+                    if (!scalarElement || components != 1 || size != binding.stride)
+                        return refuse("a buffer with a host cap whose element is not one scalar: " + binding.name);
+                    binding.capCount = cap;
+                    for (uint64_t k = 0; k < cap; k++)
+                        binding.members.push_back(Member{binding.name + "_" + std::to_string(k), k * size, size, typeName});
+                }
             }
             bindings_.push_back(binding);
             argumentNumbers_.push_back((unsigned)number->getZExtValue());
@@ -657,6 +696,20 @@ private:
         Type *type = gep->getSourceElementType();
         for (unsigned i = 0; i < gep->getNumIndices(); i++) {
             Value *index = gep->getOperand(i + 1);
+            if (i == 0 && !isa<ConstantInt>(index) && out.binding->capCount) {
+                if (allocSize(type) != out.binding->stride || out.selector)
+                    return false;
+                Value *selector = index;
+                if (auto *extend = dyn_cast<CastInst>(index);
+                    extend && (extend->getOpcode() == Instruction::SExt || extend->getOpcode() == Instruction::ZExt) &&
+                    extend->getOperand(0)->getType()->isIntegerTy(32))
+                    selector = extend->getOperand(0);
+                out.selector = selector;
+                out.selectCount = out.binding->capCount;
+                out.selectStride = out.binding->stride;
+                out.selectType = type;
+                continue;
+            }
             if (i == 0 && !isa<ConstantInt>(index)) {
                 bool vertex = isVertexIndex(index);
                 bool instance = !vertex && isIndexOf(index, "air.instance_id");
@@ -955,11 +1008,14 @@ private:
         std::string selector;
         if (!expression(address.selector, selector))
             return false;
+        bool capped = binding.capCount != 0;
         std::string chain;
         for (uint64_t k = address.selectCount; k-- > 0;) {
-            Member element{field->name + "_" + std::to_string(k), address.offset + k * address.selectStride, address.selectStride, type};
+            Member element = capped ? binding.members[k]
+                                    : Member{field->name + "_" + std::to_string(k), address.offset + k * address.selectStride,
+                                             address.selectStride, type};
             std::string value;
-            if (!accessMember(binding, element, element.offset + address.inner, load.getType(), value, true))
+            if (!accessMember(binding, element, element.offset + address.inner, load.getType(), value, !capped))
                 return false;
             chain = chain.empty() ? value : "((" + selector + " == " + std::to_string(k) + ") ? " + value + " : " + chain + ")";
         }
@@ -1025,7 +1081,7 @@ private:
                 }
                 if (type == "bool" || type.rfind("ivec", 0) == 0 || type.rfind("bvec", 0) == 0)
                     return refuse("an integer or bool fragment input, which ES 1.00 has no varying for");
-                declare("varying " + type + " " + binding->name + ";\n", binding->name);
+                declare("varying " + declaredType(argument->getType()) + " " + binding->name + ";\n", binding->name);
                 out = binding->name;
                 return true;
             }
@@ -1106,6 +1162,8 @@ private:
         const Function *function = nullptr;
         std::string result;
         bool returned = false;
+        std::vector<Value *> fields;
+        std::vector<std::string> fieldTexts;
     };
 
     void statement(const std::string &text)
@@ -1272,7 +1330,7 @@ private:
         std::vector<std::string> temps;
         for (const Copy &copy : copies) {
             std::string temp = "t" + std::to_string(counter_++);
-            locals_.push_back(glslType(copy.phi->getType()) + " " + temp + ";\n");
+            locals_.push_back(declaredType(copy.phi->getType()) + " " + temp + ";\n");
             statement(temp + " = " + copy.value + ";\n");
             temps.push_back(temp);
         }
@@ -1388,6 +1446,23 @@ private:
             frames_.back().returned = true;
             if (!ret.getReturnValue())
                 return true;
+            if (ret.getReturnValue()->getType()->isStructTy()) {
+                auto found = aggregates_.find(ret.getReturnValue());
+                if (found == aggregates_.end())
+                    return refuse("a returned aggregate this emitter does not build");
+                frames_.back().fields = found->second;
+                frames_.back().fieldTexts.clear();
+                auto texts = aggregateTexts_.find(ret.getReturnValue());
+                for (unsigned i = 0; i < found->second.size(); i++) {
+                    std::string text;
+                    if (texts != aggregateTexts_.end())
+                        text = texts->second[i];
+                    else if (found->second[i] && !expression(found->second[i], text))
+                        return false;
+                    frames_.back().fieldTexts.push_back(text);
+                }
+                return true;
+            }
             std::string value;
             if (!expression(ret.getReturnValue(), value))
                 return false;
@@ -1437,22 +1512,29 @@ private:
         }
         if (arms.empty())
             return side(block, fallback, join);
+        const std::set<const BasicBlock *> before = visited_;
+        std::set<const BasicBlock *> after = before;
         bool first = true;
         for (auto &arm : arms) {
             statement(std::string(first ? "if (" : "} else if (") + arm.second + ") {\n");
             first = false;
             depth_++;
+            visited_ = before;
             if (!side(block, arm.first, join))
                 return false;
+            after.insert(visited_.begin(), visited_.end());
             depth_--;
         }
         if (fallback != join || isa<PHINode>(join->front())) {
             statement("} else {\n");
             depth_++;
+            visited_ = before;
             if (!side(block, fallback, join))
                 return false;
+            after.insert(visited_.begin(), visited_.end());
             depth_--;
         }
+        visited_ = after;
         statement("}\n");
         return true;
     }
@@ -1542,6 +1624,9 @@ private:
         for (unsigned i = 0; i < call.arg_size(); i++) {
             Value *actual = call.getArgOperand(i);
             Argument *formal = callee.getArg(i);
+            if (isa<UndefValue>(actual) && formal->use_empty())
+                continue;
+            inlineArguments_[formal] = actual;
             if (Binding *binding = bindingOf(actual)) {
                 inlineBindings_[formal] = binding;
                 continue;
@@ -1557,7 +1642,8 @@ private:
         }
         Frame frame;
         frame.function = &callee;
-        if (!callee.getReturnType()->isVoidTy() && !local(call, frame.result))
+        bool aggregate = callee.getReturnType()->isStructTy();
+        if (!callee.getReturnType()->isVoidTy() && !aggregate && !local(call, frame.result))
             return false;
         frames_.push_back(frame);
         std::set<const BasicBlock *> outer;
@@ -1565,6 +1651,10 @@ private:
         bool emitted = region(&callee.getEntryBlock(), nullptr);
         visited_.swap(outer);
         bool returned = frames_.back().returned;
+        if (aggregate && emitted && returned) {
+            aggregates_[&call] = frames_.back().fields;
+            aggregateTexts_[&call] = frames_.back().fieldTexts;
+        }
         frames_.pop_back();
         if (!emitted)
             return false;
@@ -1624,41 +1714,172 @@ private:
         return name == "air.max.u.i32" && bounded(call->getArgOperand(0)) && bounded(call->getArgOperand(1));
     }
 
-    bool nonZero(Value *value)
+    static constexpr uint64_t kDivisionLimit = uint64_t(1) << 16;
+    static constexpr uint64_t kExactLimit = uint64_t(1) << 22;
+
+    static bool shiftAmount(const Value *value, uint64_t &amount)
     {
-        if (auto *constant = dyn_cast<ConstantInt>(value))
-            return !constant->isZero();
-        auto *call = dyn_cast<CallInst>(value);
-        if (!call || !call->getCalledFunction() || call->getCalledFunction()->getName() != "air.max.u.i32")
+        auto *constant = dyn_cast<Constant>(value);
+        auto *number = constant ? dyn_cast_or_null<ConstantInt>(constant->getSplatValue()) : nullptr;
+        if (!number || number->getZExtValue() >= 32)
             return false;
-        return nonZero(call->getArgOperand(0)) || nonZero(call->getArgOperand(1));
+        amount = number->getZExtValue();
+        return true;
     }
 
-    bool smallEnough(Value *value)
+    bool bufferValue(const Value *value)
     {
-        auto *constant = dyn_cast<ConstantInt>(value);
-        return !constant || constant->getZExtValue() < (1u << 23);
+        if (!value->getType()->isIntegerTy(32))
+            return false;
+        if (auto *lane = dyn_cast<ExtractElementInst>(value))
+            value = lane->getVectorOperand();
+        auto *load = dyn_cast<LoadInst>(value);
+        if (!load)
+            return false;
+        const Value *pointer = load->getPointerOperand();
+        for (;;) {
+            if (auto *cast = dyn_cast<BitCastInst>(pointer))
+                pointer = cast->getOperand(0);
+            else if (auto *element = dyn_cast<GetElementPtrInst>(pointer))
+                pointer = element->getPointerOperand();
+            else
+                break;
+        }
+        const Binding *binding = bindingOf(pointer);
+        return binding && binding->kind == "air.buffer";
     }
 
-    bool unsignedDivide(Instruction &instruction, BinaryOperator &binary)
+    bool boundOf(const Value *value, uint64_t &bound)
+    {
+        if (!value->getType()->isIntegerTy(32))
+            return false;
+        if (auto inlined = inlineArguments_.find(value); inlined != inlineArguments_.end())
+            return boundOf(inlined->second, bound);
+        if (auto *constant = dyn_cast<ConstantInt>(value)) {
+            if (constant->getSExtValue() < 0)
+                return false;
+            bound = constant->getZExtValue();
+        } else if (const Binding *binding = bindingOf(value)) {
+            if (binding->kind != "air.vertex_id")
+                return false;
+            bound = kDivisionLimit - 1;
+        } else if (bufferValue(value)) {
+            bound = kDivisionLimit - 1;
+        } else if (auto *call = dyn_cast<CallInst>(value)) {
+            Function *callee = call->getCalledFunction();
+            if (!callee)
+                return false;
+            if (callee->getName().starts_with("air.convert.u.i32.f.")) {
+                bound = kDivisionLimit - 1;
+            } else if (callee->getName() == "air.max.u.i32") {
+                uint64_t left, right;
+                if (!boundOf(call->getArgOperand(0), left) || !boundOf(call->getArgOperand(1), right))
+                    return false;
+                bound = std::max(left, right);
+            } else {
+                return false;
+            }
+        } else if (auto *binary = dyn_cast<BinaryOperator>(value)) {
+            uint64_t left, right, amount;
+            if (!boundOf(binary->getOperand(0), left))
+                return false;
+            switch (binary->getOpcode()) {
+            case Instruction::Add:
+                if (!boundOf(binary->getOperand(1), right))
+                    return false;
+                bound = left + right;
+                break;
+            case Instruction::UDiv:
+            case Instruction::SDiv: {
+                uint64_t smallest = 1;
+                if (auto *divisor = dyn_cast<ConstantInt>(binary->getOperand(1)))
+                    smallest = std::max<uint64_t>(divisor->getZExtValue(), 1);
+                bound = left / smallest;
+                break;
+            }
+            case Instruction::URem:
+            case Instruction::SRem:
+                if (!boundOf(binary->getOperand(1), right))
+                    return false;
+                bound = right ? std::min(left, right - 1) : left;
+                break;
+            case Instruction::Shl:
+                if (!shiftAmount(binary->getOperand(1), amount) || left > (kExactLimit >> amount))
+                    return false;
+                bound = left << amount;
+                break;
+            case Instruction::LShr:
+                if (!shiftAmount(binary->getOperand(1), amount))
+                    return false;
+                bound = left >> amount;
+                break;
+            default:
+                return false;
+            }
+        } else {
+            return false;
+        }
+        return bound <= kExactLimit;
+    }
+
+    void declareDivision()
+    {
+        declare("float revenant_quotient(float a, float b)\n{\n"
+                "    float d = max(b, 1.0);\n"
+                "    float q = floor((a + 0.5) / d);\n"
+                "    float r = a - q * d;\n"
+                "    return q + floor((r + 0.5) / d);\n"
+                "}\n",
+                "revenant_quotient");
+        declare("float revenant_remainder(float a, float b)\n{\n"
+                "    float d = max(b, 1.0);\n"
+                "    return a - d * revenant_quotient(a, d);\n"
+                "}\n",
+                "revenant_remainder");
+    }
+
+    bool integerDivide(Instruction &instruction, BinaryOperator &binary)
     {
         if (!binary.getType()->isIntegerTy(32))
-            return refuse("an unsigned division of integers other than 32 bits");
-        if (!bounded(binary.getOperand(0)) || !bounded(binary.getOperand(1)) || !nonZero(binary.getOperand(1)))
-            return refuse("an unsigned division that is not of bounded integers with a non-zero divisor");
-        if (!smallEnough(binary.getOperand(0)) || !smallEnough(binary.getOperand(1)))
-            return refuse("an unsigned division of a constant at or above 2^23");
+            return refuse("a division of integers other than 32 bits");
+        uint64_t dividend, divisor;
+        if (!boundOf(binary.getOperand(0), dividend) || !boundOf(binary.getOperand(1), divisor))
+            return refuse("a division of an integer with no known bound");
+        if (dividend >= kDivisionLimit || divisor >= kDivisionLimit)
+            return refuse("a division of an integer at or above 2^16, which the corrected float quotient does not hold");
         std::string left, right, name;
         if (!expression(binary.getOperand(0), left) || !expression(binary.getOperand(1), right))
             return false;
         if (!local(instruction, name))
             return false;
-        std::string quotient = "int((float(" + left + ") + 0.5) / float(" + right + "))";
-        if (binary.getOpcode() == Instruction::UDiv)
-            statement(name + " = " + quotient + ";\n");
-        else
-            statement(name + " = (" + left + " - " + right + " * " + quotient + ");\n");
+        highp_ = true;
+        declareDivision();
+        bool remainder = binary.getOpcode() == Instruction::URem || binary.getOpcode() == Instruction::SRem;
+        statement(name + " = int(" + (remainder ? "revenant_remainder" : "revenant_quotient") + "(float(" + left +
+                  "), float(" + right + ")));\n");
         return true;
+    }
+
+    bool shiftLeft(Instruction &instruction, BinaryOperator &binary)
+    {
+        uint64_t amount, bound;
+        if (!shiftAmount(binary.getOperand(1), amount) || !boundOf(&binary, bound))
+            return refuse("a shift left of an integer with no known bound below 2^22, or by something other than a constant below 32");
+        std::string left, name;
+        if (!expression(binary.getOperand(0), left) || !local(instruction, name))
+            return false;
+        highp_ = true;
+        statement(name + " = int(float(" + left + ") * " + std::to_string(uint64_t(1) << amount) + ".0);\n");
+        return true;
+    }
+
+    static std::string reciprocalPowerOfTwo(uint64_t shift)
+    {
+        if (shift == 0)
+            return "1.0";
+        char text[64];
+        snprintf(text, sizeof text, "%.*f", int(shift), 1.0 / double(uint64_t(1) << shift));
+        return text;
     }
 
     std::string structOf(Type *type)
@@ -1668,7 +1889,7 @@ private:
         for (unsigned i = 0; i < structure->getNumElements(); i++) {
             Type *member = structure->getElementType(i);
             Type *element = member->isArrayTy() ? member->getArrayElementType() : member;
-            std::string glsl = glslType(element);
+            std::string glsl = declaredType(element);
             if (glsl.empty() || element->isStructTy() || element->isArrayTy())
                 return "";
             std::string dimension = member->isArrayTy() ? "[" + std::to_string(cast<ArrayType>(member)->getNumElements()) + "]" : "";
@@ -1740,7 +1961,7 @@ private:
         if (type.empty())
             return refuse("a value of a type this emitter does not hold");
         name = "t" + std::to_string(counter_++);
-        locals_.push_back(type + " " + name + ";\n");
+        locals_.push_back(declaredType(instruction.getType()) + " " + name + ";\n");
         names_[&instruction] = name;
         return true;
     }
@@ -1750,7 +1971,7 @@ private:
         if (auto *slot = dyn_cast<AllocaInst>(&instruction)) {
             Type *type = slot->getAllocatedType();
             Type *element = type->isArrayTy() ? type->getArrayElementType() : type;
-            std::string glsl = type->isStructTy() ? structOf(type) : glslType(element);
+            std::string glsl = type->isStructTy() ? structOf(type) : declaredType(element);
             if (glsl.empty() || (type->isArrayTy() && (element->isStructTy() || element->isArrayTy())))
                 return refuse("a local of a type this emitter does not hold as a variable");
             Local &local = localPointers_[slot];
@@ -1787,6 +2008,26 @@ private:
             return true;
         if (auto *extend = dyn_cast<SExtInst>(&instruction); extend && isAddressIndex(*extend))
             return true;
+        if (auto *extract = dyn_cast<ExtractValueInst>(&instruction)) {
+            if (extract->getNumIndices() != 1)
+                return refuse("a nested extractvalue");
+            unsigned field = extract->getIndices()[0];
+            std::string text;
+            auto texts = aggregateTexts_.find(extract->getAggregateOperand());
+            if (texts != aggregateTexts_.end()) {
+                if (field >= texts->second.size() || texts->second[field].empty())
+                    return refuse("an aggregate field this emitter does not build");
+                text = texts->second[field];
+            } else {
+                auto found = aggregates_.find(extract->getAggregateOperand());
+                if (found == aggregates_.end() || field >= found->second.size() || !found->second[field])
+                    return refuse("an aggregate this emitter does not build");
+                if (!expression(found->second[field], text))
+                    return false;
+            }
+            names_[extract] = text;
+            return true;
+        }
         if (auto *insert = dyn_cast<InsertValueInst>(&instruction)) {
             if (insert->getNumIndices() != 1)
                 return refuse("a nested insertvalue");
@@ -1867,8 +2108,11 @@ private:
                 return maskAnd(instruction, *binary);
             if (binary->getOpcode() == Instruction::LShr)
                 return shiftRight(instruction, *binary);
-            if (binary->getOpcode() == Instruction::UDiv || binary->getOpcode() == Instruction::URem)
-                return unsignedDivide(instruction, *binary);
+            if (binary->getOpcode() == Instruction::Shl)
+                return shiftLeft(instruction, *binary);
+            if (binary->getOpcode() == Instruction::UDiv || binary->getOpcode() == Instruction::URem ||
+                binary->getOpcode() == Instruction::SDiv || binary->getOpcode() == Instruction::SRem)
+                return integerDivide(instruction, *binary);
             const char *op = nullptr;
             switch (binary->getOpcode()) {
             case Instruction::FAdd: case Instruction::Add: op = "+"; break;
@@ -2049,17 +2293,27 @@ private:
 
     bool shiftRight(Instruction &instruction, BinaryOperator &binary)
     {
-        auto *constant = dyn_cast<Constant>(binary.getOperand(1));
-        auto *amount = constant ? dyn_cast_or_null<ConstantInt>(constant->getSplatValue()) : nullptr;
-        if (!amount || amount->getZExtValue() >= 31 || !threadPositionOf(binary.getOperand(0)))
-            return refuse("a logical shift right other than of a thread position or its lane by a constant");
+        uint64_t amount;
+        if (!shiftAmount(binary.getOperand(1), amount))
+            return refuse("a logical shift right by something other than a constant below 32");
+        if (amount < 31 && threadPositionOf(binary.getOperand(0))) {
+            std::string left, name;
+            if (!expression(binary.getOperand(0), left) || !local(instruction, name))
+                return false;
+            std::string divisor = std::to_string(uint64_t(1) << amount);
+            if (instruction.getType()->isVectorTy())
+                divisor = glslType(instruction.getType()) + "(" + divisor + ")";
+            statement(name + " = (" + left + " / " + divisor + ");\n");
+            return true;
+        }
+        uint64_t bound;
+        if (!binary.getType()->isIntegerTy(32) || !boundOf(binary.getOperand(0), bound))
+            return refuse("a logical shift right of an integer with no known bound");
         std::string left, name;
         if (!expression(binary.getOperand(0), left) || !local(instruction, name))
             return false;
-        std::string divisor = std::to_string(uint64_t(1) << amount->getZExtValue());
-        if (instruction.getType()->isVectorTy())
-            divisor = glslType(instruction.getType()) + "(" + divisor + ")";
-        statement(name + " = (" + left + " / " + divisor + ");\n");
+        highp_ = true;
+        statement(name + " = int(floor(float(" + left + ") * " + reciprocalPowerOfTwo(amount) + "));\n");
         return true;
     }
 
@@ -2285,9 +2539,15 @@ private:
                     declare("varying float " + output.name + ";\n", output.name);
                     statement(output.name + " = float(" + text + ");\n");
                 } else {
-                    declare("varying " + type + " " + output.name + ";\n", output.name);
+                    declare("varying " + declaredType(fields[k]->getType()) + " " + output.name + ";\n", output.name);
                     statement(output.name + " = " + text + ";\n");
                 }
+            } else if (output.kind == "air.point_size" && stage_ == Stage::Vertex) {
+                if (!fields[k]->getType()->isFloatTy())
+                    return refuse("a point size that is not a float");
+                if (!expression(fields[k], text))
+                    return false;
+                statement("gl_PointSize = " + text + ";\n");
             } else if (output.kind == "air.render_target" && stage_ == Stage::Fragment && output.index == 0) {
                 if (!expression(fields[k], text))
                     return false;
@@ -2334,6 +2594,8 @@ private:
     std::map<const Value *, size_t> argumentSlot_;
     std::vector<Output> outputs_;
     std::map<const Value *, std::vector<Value *>> aggregates_;
+    std::map<const Value *, std::vector<std::string>> aggregateTexts_;
+    std::map<const Value *, const Value *> inlineArguments_;
     std::map<const Value *, std::string> names_;
     std::set<std::string> declared_;
     std::map<std::string, std::string> textures_;

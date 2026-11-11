@@ -1,0 +1,1 @@
+{"functions": [{"name": "callBlobVertex", "stage": "vertex", "source": "callBlobVertex.vertex.glsl", "reflection": "callBlobVertex.vertex.json"}]}

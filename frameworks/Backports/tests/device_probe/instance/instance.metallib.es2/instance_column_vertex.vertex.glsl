@@ -1,7 +1,7 @@
 #version 100
 attribute vec2 a_corners;
 uniform float revenant_instance;
-uniform float revenant_flip;
+uniform highp float revenant_flip;
 varying vec4 color;
 void main() {
     vec4 t0;
