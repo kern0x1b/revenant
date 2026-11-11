@@ -69,8 +69,10 @@ int main()
         {0x70, "clamp_to_edge", "clamp_to_edge", "clamp_to_edge", "nearest", "nearest", "none", "normalized", "never", 0.0f, 1000.0f, 2},
         {0x80, "clamp_to_edge", "clamp_to_edge", "clamp_to_edge", "nearest", "nearest", "none", "normalized", "never", 1.0f, 1000.0f, 1},
         {0x90, "clamp_to_edge", "clamp_to_edge", "repeat", "nearest", "nearest", "none", "normalized", "less", 0.0f, 1000.0f, 1},
+        {0xa0, "clamp_to_zero", "clamp_to_zero", "clamp_to_zero", "linear", "linear", "none", "normalized", "never", 0.0f, 1000.0f, 1},
+        {0xb0, "clamp_to_zero", "clamp_to_edge", "clamp_to_edge", "linear", "nearest", "none", "normalized", "never", 0.0f, 1000.0f, 1},
     };
-    const char *names[] = {"clamp", "repeat", "mirrored", "zero", "mip", "pixel", "aniso", "lod", "compare"};
+    const char *names[] = {"clamp", "repeat", "mirrored", "zero", "mip", "pixel", "aniso", "lod", "compare", "zeroLinear", "zeroMixed"};
     for (size_t i = 0; i < rows.size(); i++) {
         GLESSampler sampler;
         std::string refusal;
@@ -92,12 +94,14 @@ local DECODE_EXPECTED = {
     "clamp ok clamp_to_edge clamp_to_edge nearest nearest",
     "repeat ok repeat clamp_to_edge linear linear",
     "mirrored refused a mirrored repeat address, which OpenGL ES 2 does not have",
-    "zero refused a clamp-to-zero address, which OpenGL ES 2 does not have",
+    "zero ok clamp_to_zero clamp_to_edge nearest nearest",
     "mip refused a linear mipmap filter, and the textures of a translated shader have no mipmaps",
     "pixel refused pixel coordinates, which the translated shader does not scale to texture coordinates",
     "aniso refused anisotropic filtering, which OpenGL ES 2 does not have",
     "lod refused a level-of-detail clamp that starts above zero, which OpenGL ES 2 does not clamp",
     "compare ok clamp_to_edge clamp_to_edge nearest nearest",
+    "zeroLinear ok clamp_to_zero clamp_to_zero linear linear",
+    "zeroMixed refused a clamp-to-zero address with a minification filter and a magnification filter that differ: the level of detail that selects between them is not computed",
     "unknown refused a constexpr sampler with the state 0x0000000000000099 that the sampler table does not carry: derive it with tools/metal_sampler_table.lua",
 }
 
