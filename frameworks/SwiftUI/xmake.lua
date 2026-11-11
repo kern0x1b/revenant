@@ -20,12 +20,29 @@ if is_plat("iphoneos") then
                    "every weak import is reached only behind #available or carried by the backports: the runtime's overlays built with availability checking on, Combine's run-loop timer tolerance, compiler-rt's version check")
     end
 
+    local function relink_after_backports()
+        before_build(function (target)
+            local out = target:targetfile()
+            if not os.isfile(out) then
+                return
+            end
+            for _, dep in pairs(target:deps()) do
+                if dep:kind() == "shared" and string.find(dep:name(), "Backports$") and os.isfile(dep:targetfile())
+                   and os.mtime(dep:targetfile()) > os.mtime(out) then
+                    os.rm(out)
+                    return
+                end
+            end
+        end)
+    end
+
     local function demo_application(identifier, name, ...)
         add_rules("@addon/revenant/app", "@addon/revenant/swift")
         add_deps("SwiftUI")
         add_packages("combine")
         add_files("examples/showcase/*.swift")
         add_deps("UIKitBackports", "CoreDataBackports")
+        relink_after_backports()
         add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "CoreData")
         set_optimize("fastest")
         set_values("app.plist-file", "examples/showcase/Info.plist")
@@ -41,6 +58,7 @@ if is_plat("iphoneos") then
         add_packages("combine")
         add_files(...)
         add_deps("UIKitBackports", "CoreDataBackports")
+        relink_after_backports()
         add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "CoreData")
         set_optimize("fastest")
         set_values("revenant.control", control)
