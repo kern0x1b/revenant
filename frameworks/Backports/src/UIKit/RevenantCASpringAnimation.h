@@ -14,6 +14,7 @@
 @property (nonatomic, readonly) CFTimeInterval perceptualDuration;
 @property (nonatomic, readonly) CGFloat bounce;
 
+- (instancetype)initWithKeyPath:(NSString *)keyPath;
 - (instancetype)initWithPerceptualDuration:(CFTimeInterval)perceptualDuration bounce:(CGFloat)bounce;
 
 @end
