@@ -38,7 +38,7 @@ enum {
     GL_NO_ERROR = 0, GL_FALSE = 0, GL_FLOAT = 0x1406, GL_UNSIGNED_BYTE = 0x1401, GL_RGBA = 0x1908, GL_TRIANGLES = 0x0004,
     GL_COLOR_BUFFER_BIT = 0x4000, GL_TEXTURE_2D = 0x0DE1, GL_TEXTURE0 = 0x84C0, GL_LINEAR = 0x2601,
     GL_TEXTURE_MAG_FILTER = 0x2800, GL_TEXTURE_MIN_FILTER = 0x2801, GL_TEXTURE_WRAP_S = 0x2802,
-    GL_TEXTURE_WRAP_T = 0x2803, GL_CLAMP_TO_EDGE = 0x812F, GL_FRAGMENT_SHADER = 0x8B30,
+    GL_TEXTURE_WRAP_T = 0x2803, GL_CLAMP_TO_EDGE = 0x812F, GL_NEAREST = 0x2600, GL_REPEAT = 0x2901, GL_FRAGMENT_SHADER = 0x8B30,
     GL_VERTEX_SHADER = 0x8B31, GL_COMPILE_STATUS = 0x8B81, GL_LINK_STATUS = 0x8B82, GL_INFO_LOG_LENGTH = 0x8B84,
 };
 
@@ -611,8 +611,34 @@ static NSString *metalRun(NSDictionary *vs, NSDictionary *fs, int ints, NSMutabl
     return nil;
 }
 
+static GLint filterOf(NSString *name)
+{
+    if ([name isEqualToString:@"nearest"])
+        return GL_NEAREST;
+    if ([name isEqualToString:@"linear"])
+        return GL_LINEAR;
+    return -1;
+}
+
+static GLint wrapOf(NSString *name)
+{
+    if ([name isEqualToString:@"clamp_to_edge"])
+        return GL_CLAMP_TO_EDGE;
+    if ([name isEqualToString:@"repeat"])
+        return GL_REPEAT;
+    return -1;
+}
+
 static NSString *glesRun(NSDictionary *vs, NSDictionary *fs, int ints, NSMutableData *pixels, NSString **state)
 {
+    for (NSDictionary *t in fs[@"reflection"][@"textures"]) {
+        NSDictionary *sampler = t[@"sampler"];
+        if (sampler && (filterOf(sampler[@"minFilter"]) < 0 || filterOf(sampler[@"magFilter"]) < 0 ||
+                        wrapOf(sampler[@"wrapS"]) < 0 || wrapOf(sampler[@"wrapT"]) < 0)) {
+            *state = @"ERROR";
+            return [NSString stringWithFormat:@"the sampler of %@ is not nearest or linear, clamp_to_edge or repeat", t[@"name"]];
+        }
+    }
     while (api.glGetError() != GL_NO_ERROR) {
     }
     gFirstError = GL_NO_ERROR;
@@ -717,6 +743,13 @@ static NSString *glesRun(NSDictionary *vs, NSDictionary *fs, int ints, NSMutable
         GLint unit = (GLint)intValue(t, @"index");
         GL_CALL(api.glActiveTexture(GL_TEXTURE0 + unit));
         GL_CALL(api.glBindTexture(GL_TEXTURE_2D, glTexture));
+        NSDictionary *sampler = t[@"sampler"];
+        if (sampler) {
+            GL_CALL(api.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterOf(sampler[@"minFilter"])));
+            GL_CALL(api.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterOf(sampler[@"magFilter"])));
+            GL_CALL(api.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapOf(sampler[@"wrapS"])));
+            GL_CALL(api.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapOf(sampler[@"wrapT"])));
+        }
         GLint location = api.glGetUniformLocation(program, [t[@"name"] UTF8String]);
         if (location >= 0)
             GL_CALL(api.glUniform1i(location, unit));
