@@ -33,6 +33,7 @@ local APPLICATION = table.concat({
 
 local COMPONENT = 'option("component", {type = "string", default = "", showmenu = true, description = "Configure only this component and what it needs, for example Backports or emulator; empty configures every component."})'
 local COMBINE = 'add_requireconfs("combine", {configs = {shared = get_config("component") == "" or nil}})'
+local EDGES = 'add_requireconfs("**.swift-runtime", {configs = {shared = true}})'
 
 local ROOT_TEXT = table.concat({SWIFT, LIBCXX, LIBCXX_DEPS, WEBKIT, COMPONENT, COMBINE, ""}, "\n")
 
@@ -50,12 +51,15 @@ expect("the replaced swift-runtime keeps its condition", whole:find('if not os.g
 expect("the whole requirements are carried once", isolate.whole_requirements(whole) == whole, "a second copy changed the text")
 expect("the copy declares the component option and the combine rule", whole:find('option("component"', 1, true) ~= nil and whole:find(COMBINE, 1, true) ~= nil,
        "the component option or the combine requireconf is missing from the copy")
-expect("a plain application lacks all six whole requirements", #isolate.whole_missing(APPLICATION) == 6,
-       "expected 6 missing, found " .. #isolate.whole_missing(APPLICATION))
-expect("the root's own declarations are already whole", #isolate.whole_missing(ROOT_TEXT) == 0 and isolate.whole_requirements(ROOT_TEXT) == ROOT_TEXT,
-       "the root's text is rewritten or reported missing")
+expect("the copy makes every swift-runtime edge shared", whole:find(EDGES, 1, true) ~= nil,
+       "the swift-runtime edge requireconf is missing from the copy")
+expect("a plain application lacks all seven whole requirements", #isolate.whole_missing(APPLICATION) == 7,
+       "expected 7 missing, found " .. #isolate.whole_missing(APPLICATION))
+expect("the root's declarations gain only the swift-runtime edge rule", #isolate.whole_missing(ROOT_TEXT) == 1
+       and isolate.whole_requirements(ROOT_TEXT) == ROOT_TEXT .. "\n" .. EDGES .. "\n",
+       "the root's text is rewritten beyond the edge rule, or the edge rule is not the one reported missing")
 local carried = isolate.whole_requirements(CARRIED)
-expect("a webkit-engine that RN_WEBKIT declares keeps its own line, and the whole one is added unless RN_WEBKIT is set", #isolate.whole_missing(CARRIED) == 3
+expect("a webkit-engine that RN_WEBKIT declares keeps its own line, and the whole one is added unless RN_WEBKIT is set", #isolate.whole_missing(CARRIED) == 4
        and #isolate.whole_missing(carried) == 0 and carried:find('if not os.getenv("RN_WEBKIT") then add_requires("webkit-engine"', 1, true) ~= nil
        and isolate.whole_requirements(carried) == carried, "the RN_WEBKIT line is not kept beside the whole one, or a second pass changes the copy")
 

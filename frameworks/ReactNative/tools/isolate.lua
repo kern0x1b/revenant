@@ -1,5 +1,5 @@
 local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua copy <project> <folder> --cache <private cache> [--bundle-id org.revenant.rnhost.<name>]
-       ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua build <folder> --cache <private cache> [--target RNHost] [--real a,b] [--pods pkg:module,...] [--jobs N] [--log file]
+       ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua build <folder> --cache <private cache> [--target RNHost] [--real a,b] [--pods pkg:module,...] [--jobs N] [--log file] [--configure-only 1]
   copy   makes a private copy of the host project in <folder>: the hand-made inputs of its build/ with every absolute path rewritten to
          the folder, build/ref linked read only, and the react-native package with all its patches installed into the private cache
          and linked as build/rn-src. The path of <folder> must not contain "test" or "Example". The copy's app gets its own bundle id,
@@ -22,12 +22,15 @@ local WHOLE = {
     {line = 'add_requires("revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = true}})', alias = "swift-runtime", plain = 'add_requires("revenant@swift-runtime", {alias = "swift-runtime"})'},
     {line = 'add_requires("revenant@libcxx", {alias = "libcxx", configs = {packaged = true}})', alias = "libcxx", plain = 'add_requires("revenant@libcxx", {alias = "libcxx"})'},
     {line = 'add_requireconfs("**.libcxx", {configs = {packaged = true}})'},
+    -- every edge to swift-runtime is shared, as the one runtime of the whole configuration is: the copy's packages that
+    -- depend on it plainly (uniformtypeidentifiers, for one) would otherwise bring an unshared runtime into the configuration
+    {line = 'add_requireconfs("**.swift-runtime", {configs = {shared = true}})'},
     {line = 'add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}})', emit = 'if not os.getenv("RN_WEBKIT") then add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}}) end'},
     {line = 'option("component", {type = "string", default = "", showmenu = true, description = "Configure only this component and what it needs, for example Backports or emulator; empty configures every component."})'},
     {line = 'add_requireconfs("combine", {configs = {shared = get_config("component") == "" or nil}})'}
 }
 
-local WHOLE_PROBE = {WHOLE[1].line, WHOLE[2].line, WHOLE[3].line}
+local WHOLE_PROBE = {WHOLE[1].line, WHOLE[2].line, WHOLE[3].line, WHOLE[4].line}
 
 function declares(text, alias)
     return text:find('alias = "' .. alias .. '"', 1, true) ~= nil
@@ -413,7 +416,7 @@ function build(folder, cache, options)
     local xmakew = path.join(checkout(), "xmakew")
     local configured = command_status({"-c", "\"$1\" f -c -y -p iphoneos -a armv7 -P \"$2\" > \"$3\" 2>&1", "sh", xmakew, folder, log}, {envs = env})
     local built = configured
-    if configured == 0 then
+    if configured == 0 and not options.configure_only then
         built = command_status({"-c", "\"$1\" build -P \"$2\" -j \"$5\" -y -v \"$3\" >> \"$4\" 2>&1", "sh", xmakew, folder, options.target or "RNHost", log, options.jobs or "4"}, {envs = env})
     end
     return built or 1, log
@@ -439,7 +442,7 @@ function main(...)
         local sources = install_react_native(path.absolute(positional[2]), path.absolute(options.cache))
         print(string.format("isolated %s: %d files rewritten, %d links retargeted, rn-src %s, bundle id %s", positional[2], result.rewritten, result.relinked, sources, result.bundle_id))
     elseif command == "build" and #positional == 1 and options.cache then
-        local code, log = build(positional[1], options.cache, {target = options.target, real = options.real, pods = options.pods, log = options.log, engine = options.engine, swiftui = options.swiftui, backports = options.backports, shared = options.shared, jobs = options.jobs})
+        local code, log = build(positional[1], options.cache, {target = options.target, real = options.real, pods = options.pods, log = options.log, engine = options.engine, swiftui = options.swiftui, backports = options.backports, shared = options.shared, jobs = options.jobs, configure_only = options["configure-only"]})
         print(string.format("exit %d, log %s", code, log))
         local errors = try {
             function ()
