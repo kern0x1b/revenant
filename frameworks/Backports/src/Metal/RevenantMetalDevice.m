@@ -13,6 +13,20 @@ NSError *RevenantMetalError(NSInteger code, NSString *message)
     return [NSError errorWithDomain:RevenantMetalErrorDomain code:code userInfo:@{NSLocalizedDescriptionKey: message}];
 }
 
+static NSHashTable *RevenantMetalResidents;
+
+void RevenantMetalRegisterResident(id<RevenantMetalResident> resident)
+{
+    if (!RevenantMetalResidents)
+        RevenantMetalResidents = [NSHashTable weakObjectsHashTable];
+    [RevenantMetalResidents addObject:resident];
+}
+
+static NSArray *RevenantMetalResidentList(void)
+{
+    return RevenantMetalResidents ? [RevenantMetalResidents allObjects] : @[];
+}
+
 @implementation RevenantMetalDevice {
     EAGLContext *_context;
     NSRecursiveLock *_lock;
@@ -20,6 +34,7 @@ NSError *RevenantMetalError(NSInteger code, NSString *message)
     CVOpenGLESTextureCacheRef _textureCache;
     RevenantMetalLifecycle _lifecycle;
     EAGLContext *_previous;
+    NSUInteger _generation;
 }
 
 + (RevenantMetalDevice *)shared
@@ -74,9 +89,8 @@ NSError *RevenantMetalError(NSInteger code, NSString *message)
 - (void)relinquish
 {
     if (RevenantMetalLifecycleRelinquish(&_lifecycle)) {
-        EAGLContext *target = _lifecycle.suspended ? nil : _previous;
-        if ([EAGLContext currentContext] != target)
-            [EAGLContext setCurrentContext:target];
+        if ([EAGLContext currentContext] != _previous)
+            [EAGLContext setCurrentContext:_previous];
         _previous = nil;
     }
     [_lock unlock];
@@ -92,16 +106,29 @@ NSError *RevenantMetalError(NSInteger code, NSString *message)
     return _lifecycle.resumptions;
 }
 
+- (NSUInteger)revenantGeneration
+{
+    return _generation;
+}
+
 - (void)revenantSuspend
 {
     [_lock lock];
     if (!_lifecycle.suspended) {
         [self acquire];
+        RevenantMetalSynchroniseSurfaceTextures();
         glFinish();
-        if (_textureCache)
+        for (id<RevenantMetalResident> resident in RevenantMetalResidentList())
+            [resident revenantEvict];
+        RevenantMetalDropPrograms();
+        if (_textureCache) {
             CVOpenGLESTextureCacheFlush(_textureCache, 0);
-        RevenantMetalLifecycleSuspend(&_lifecycle);
+            CFRelease(_textureCache);
+            _textureCache = NULL;
+        }
         [self relinquish];
+        RevenantMetalLifecycleSuspend(&_lifecycle);
+        _context = nil;
     }
     [_lock unlock];
 }
@@ -109,7 +136,24 @@ NSError *RevenantMetalError(NSInteger code, NSString *message)
 - (void)revenantResume
 {
     [_lock lock];
-    RevenantMetalLifecycleResume(&_lifecycle);
+    if (_lifecycle.suspended) {
+        if (!_context) {
+            EAGLContext *context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+            if (!context) {
+                NSLog(@"Metal: the OpenGL ES context cannot be recreated after the background; Metal work stays refused until the app is relaunched");
+                [_lock unlock];
+                return;
+            }
+            _context = context;
+            _generation++;
+        }
+        RevenantMetalLifecycleResume(&_lifecycle);
+        RevenantMetalBindEpoch++;
+        [self acquire];
+        for (id<RevenantMetalResident> resident in RevenantMetalResidentList())
+            [resident revenantRestore];
+        [self relinquish];
+    }
     [_lock unlock];
 }
 
@@ -195,6 +239,8 @@ NSError *RevenantMetalError(NSInteger code, NSString *message)
 
 - (CVOpenGLESTextureCacheRef)textureCache
 {
+    if (!_context)
+        return NULL;
     if (!_textureCache) {
         CVReturn status = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, _context, NULL, &_textureCache);
         if (status != kCVReturnSuccess) {

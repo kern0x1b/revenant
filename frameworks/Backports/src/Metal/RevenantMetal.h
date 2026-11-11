@@ -120,6 +120,11 @@ typedef struct {
 } RevenantPlan;
 
 
+@protocol RevenantMetalResident
+- (void)revenantEvict;
+- (void)revenantRestore;
+@end
+
 @interface RevenantMetalDevice : NSObject <MTLDevice>
 @property (nonatomic, readonly) EAGLContext *context;
 + (RevenantMetalDevice *)shared;
@@ -127,6 +132,7 @@ typedef struct {
 - (void)relinquish;
 - (BOOL)revenantSuspended;
 - (NSUInteger)revenantResumptions;
+- (NSUInteger)revenantGeneration;
 - (CVOpenGLESTextureCacheRef)textureCache;
 @end
 
@@ -137,7 +143,7 @@ typedef struct {
 - (instancetype)initWithHeap:(RevenantMetalHeap *)heap offset:(NSUInteger)offset length:(NSUInteger)length;
 @end
 
-@interface RevenantMetalTexture : NSObject <MTLTexture>
+@interface RevenantMetalTexture : NSObject <MTLTexture, RevenantMetalResident>
 @property (nonatomic, readonly) GLuint name;
 @property (nonatomic, readonly) GLuint framebuffer;
 @property (nonatomic, readonly) BOOL screen;
@@ -207,7 +213,7 @@ extern const NSUInteger RevenantMetalHeapAlignment;
 - (id<MTLFunction>)revenantFunctionNamed:(NSString *)name specializedName:(NSString *)specializedName options:(MTLFunctionOptions)options constantValues:(MTLFunctionConstantValues *)constantValues error:(NSError **)error;
 @end
 
-@interface RevenantMetalPipeline : NSObject <MTLRenderPipelineState>
+@interface RevenantMetalPipeline : NSObject <MTLRenderPipelineState, RevenantMetalResident>
 @property (nonatomic, readonly) GLuint program;
 @property (nonatomic, readonly) NSDictionary *vertexReflection;
 @property (nonatomic, readonly) NSDictionary *fragmentReflection;
@@ -307,6 +313,8 @@ typedef struct {
 extern NSUInteger RevenantMetalBindEpoch;
 void RevenantMetalSynchroniseSurfaceTextures(void);
 void RevenantIOSurfaceLayersRefresh(void);
+void RevenantMetalRegisterResident(id<RevenantMetalResident> resident);
+void RevenantMetalDropPrograms(void);
 
 extern NSString *const RevenantMetalErrorDomain;
 NSError *RevenantMetalError(NSInteger code, NSString *message);

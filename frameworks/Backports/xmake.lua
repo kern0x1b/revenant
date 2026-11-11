@@ -393,6 +393,18 @@ if is_plat("iphoneos") and not SELECTED then
         set_values("revenant.version", "1.0.0")
     target_end()
 
+    target("GLLockProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/device_probe/gl_lock_main.m")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "OpenGLES")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.gllockprobe", "CFBundleDisplayName=GLLockProbe")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
     target("MetalInstanceProbe")
         set_kind("binary")
         set_default(false)
@@ -1212,7 +1224,7 @@ if not is_plat("iphoneos") then
     
     host_tests("PassKit", {payment_network = {"PKPaymentNetworks8.m"}})
     host_tests("Intents", {message_types = {"RevenantIntents10.m", "coding/RevenantCoding.m"}, object = {"RevenantIntents120.m", "RevenantIntentsResolution.m", "coding/RevenantCoding.m"}, result = {"RevenantIntents120.m", "RevenantIntentsResolution.m", "coding/RevenantCoding.m"}, calls ={"RevenantIntentsCalls110.m", "coding/RevenantCoding.m"}}, nil, {"Foundation", "Intents"}, {defines = {"REVENANT_HOST_BUILD"}})
-    host_tests("Metal", {binary_archive = {"RevenantMetalBinaryArchive.m"}, line_edges = {"RevenantMetalLineEdges.c"}, grid = {}, lifecycle = {}}, nil, {"Foundation", "Metal"}, {defines = {"REVENANT_HOST_BUILD"}})
+    host_tests("Metal", {binary_archive = {"RevenantMetalBinaryArchive.m"}, line_edges = {"RevenantMetalLineEdges.c"}, grid = {}, lifecycle = {}, residency = {}}, nil, {"Foundation", "Metal"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("MetalPerformanceShaders", {bilinear = {"RevenantMPSBilinear.c"}}, nil, {}, {extension = "c"})
     host_tests("CoreImage", {render_destination = {"CIRenderDestination11.m"}}, "Graphics", {"Foundation", "CoreImage", "CoreGraphics", "CoreVideo", "IOSurface", "Metal", "OpenGL"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("CoreImage", {orientation = {}}, "Graphics", {"Foundation", "CoreImage", "CoreGraphics"})

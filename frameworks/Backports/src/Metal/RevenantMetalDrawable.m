@@ -1,4 +1,6 @@
 #import "RevenantMetal.h"
+#import "RevenantMetalResidency.h"
+#import "../RevenantSayOnce.h"
 #import <objc/runtime.h>
 
 
@@ -8,7 +10,8 @@ static const char revenant_last_presented_key;
 @implementation RevenantMetalDrawable {
     RevenantMetalTexture *_texture;
     __weak CAMetalLayer *_layer;
-    EAGLContext *_context;
+    __weak EAGLContext *_context;
+    NSUInteger _generation;
     GLuint _renderbuffer;
     NSMutableArray *_presentedHandlers;
     NSUInteger _drawableID;
@@ -21,6 +24,7 @@ static const char revenant_last_presented_key;
         _texture = texture;
         _layer = layer;
         _context = context;
+        _generation = [[RevenantMetalDevice shared] revenantGeneration];
         _drawableID = __sync_add_and_fetch(&revenant_drawable_counter, 1);
     }
     return self;
@@ -46,6 +50,11 @@ static const char revenant_last_presented_key;
     RevenantMetalDevice *device = [RevenantMetalDevice shared];
     [device acquire];
     if ([device revenantSuspended]) {
+        [device relinquish];
+        return;
+    }
+    if (!RevenantMetalGenerationIsCurrent(_generation, [device revenantGeneration])) {
+        revenant_say_once_for(@"metal-stale-drawable", @"Metal: a drawable made before the background is not presented; the frames after the return to the foreground draw into new drawables");
         [device relinquish];
         return;
     }
@@ -98,7 +107,7 @@ static const char revenant_last_presented_key;
 
 @end
 
-@interface RevenantMetalLayerState : NSObject
+@interface RevenantMetalLayerState : NSObject <RevenantMetalResident>
 @property (nonatomic, strong) CAEAGLLayer *layer;
 @property (nonatomic) GLuint framebuffer;
 @property (nonatomic) GLuint renderbuffer;
@@ -122,6 +131,25 @@ static const char revenant_last_presented_key;
     }
 }
 
+- (void)revenantEvict
+{
+    RevenantMetalDevice *device = [RevenantMetalDevice shared];
+    [device acquire];
+    if (_framebuffer)
+        glDeleteFramebuffers(1, &_framebuffer);
+    if (_renderbuffer)
+        glDeleteRenderbuffers(1, &_renderbuffer);
+    [device relinquish];
+    _framebuffer = 0;
+    _renderbuffer = 0;
+    self.texture = nil;
+    self.size = CGSizeZero;
+}
+
+- (void)revenantRestore
+{
+}
+
 @end
 
 static char stateKey;
@@ -140,6 +168,7 @@ id<CAMetalDrawable> RevenantMetalNextDrawable(CAMetalLayer *layer)
         state.layer.opaque = YES;
         state.layer.drawableProperties = @{kEAGLDrawablePropertyRetainedBacking: @NO, kEAGLDrawablePropertyColorFormat: kEAGLColorFormatRGBA8};
         [layer addSublayer:state.layer];
+        RevenantMetalRegisterResident(state);
         objc_setAssociatedObject(layer, &stateKey, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     [device acquire];

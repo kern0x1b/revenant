@@ -1,5 +1,6 @@
 #import "RevenantMetal.h"
 #import "RevenantMetalDebugGroups.h"
+#import "RevenantMetalResidency.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -62,6 +63,7 @@ static void RevenantMetalWaitFence(GLsync fence)
     CFTimeInterval _startTime;
     CFTimeInterval _endTime;
     GLsync _fence;
+    NSUInteger _generation;
 }
 
 @synthesize label;
@@ -71,7 +73,8 @@ static void RevenantMetalWaitFence(GLsync fence)
     if (_fence) {
         RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
-        glDeleteSyncAPPLE(_fence);
+        if (RevenantMetalGenerationIsCurrent(_generation, [device revenantGeneration]) && ![device revenantSuspended])
+            glDeleteSyncAPPLE(_fence);
         [device relinquish];
     }
 }
@@ -167,6 +170,7 @@ static void RevenantMetalWaitFence(GLsync fence)
             [self revenantBeginWork];
             if (_drawable)
                 [_drawable present];
+            _generation = [device revenantGeneration];
             _fence = RevenantMetalCreateFence();
             glFlush();
             RevenantMetalSynchroniseSurfaceTextures();
@@ -244,7 +248,8 @@ static void RevenantMetalWaitFence(GLsync fence)
     [device acquire];
     if (![device revenantSuspended]) {
         if (_fence) {
-            RevenantMetalWaitFence(_fence);
+            if (RevenantMetalGenerationIsCurrent(_generation, [device revenantGeneration]))
+                RevenantMetalWaitFence(_fence);
             _fence = NULL;
         } else {
             glFinish();

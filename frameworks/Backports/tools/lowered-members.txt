@@ -4883,9 +4883,11 @@ function RevenantMetal4SparseTextureCopyRefusal
 function RevenantMetal4SparseTextureUpdateRefusal
 function RevenantMetalDecodeVertex
 function RevenantMetalDeviceHasExtension
+function RevenantMetalDropPrograms
 function RevenantMetalError
 function RevenantMetalFormatFromMDL
 function RevenantMetalNextDrawable
+function RevenantMetalRegisterResident
 function RevenantMetalSynchroniseSurfaceTextures
 function RevenantMetalTexelBytes
 function RevenantMetalTriangleEdges
@@ -27981,6 +27983,7 @@ member RevenantMetalDevice -newTextureWithDescriptor:
 member RevenantMetalDevice -newTextureWithDescriptor:iosurface:plane:
 member RevenantMetalDevice -registryID
 member RevenantMetalDevice -relinquish
+member RevenantMetalDevice -revenantGeneration
 member RevenantMetalDevice -revenantResume
 member RevenantMetalDevice -revenantResumptions
 member RevenantMetalDevice -revenantSuspend
@@ -28107,6 +28110,8 @@ member RevenantMetalLayerState -framebuffer
 member RevenantMetalLayerState -layer
 member RevenantMetalLayerState -renderbuffer
 member RevenantMetalLayerState -resumptions
+member RevenantMetalLayerState -revenantEvict
+member RevenantMetalLayerState -revenantRestore
 member RevenantMetalLayerState -size
 member RevenantMetalLayerState -texture
 member RevenantMetalLibrary -device
@@ -28143,6 +28148,10 @@ member RevenantMetalPipeline -label
 member RevenantMetalPipeline -locationForName:
 member RevenantMetalPipeline -plan
 member RevenantMetalPipeline -program
+member RevenantMetalPipeline -revenantEvict
+member RevenantMetalPipeline -revenantFreePlan
+member RevenantMetalPipeline -revenantLinkWithError:
+member RevenantMetalPipeline -revenantRestore
 member RevenantMetalPipeline -vertexReflection
 member RevenantMetalQueue -commandBuffer
 member RevenantMetalQueue -commandBufferWithDescriptor:
@@ -28205,16 +28214,24 @@ member RevenantMetalTexture -replaceRegion:mipmapLevel:slice:withBytes:bytesPerR
 member RevenantMetalTexture -replaceRegion:mipmapLevel:withBytes:bytesPerRow:
 member RevenantMetalTexture -resourceOptions
 member RevenantMetalTexture -revenantAcceptsSlice:region:operation:
+member RevenantMetalTexture -revenantAllocateColour
+member RevenantMetalTexture -revenantAllocateDepth
 member RevenantMetalTexture -revenantCanFilter
 member RevenantMetalTexture -revenantChannels
+member RevenantMetalTexture -revenantEvict
 member RevenantMetalTexture -revenantGenerateMipmaps
 member RevenantMetalTexture -revenantIsColour
 member RevenantMetalTexture -revenantMarkSurfaceDirty
 member RevenantMetalTexture -revenantOpenGLESTexture
+member RevenantMetalTexture -revenantPlan
 member RevenantMetalTexture -revenantReadRegion:level:bytesPerRow:into:
 member RevenantMetalTexture -revenantRefreshSurface
+member RevenantMetalTexture -revenantRestore
 member RevenantMetalTexture -revenantRestoreAttachment:previous:
+member RevenantMetalTexture -revenantRestoreImage
+member RevenantMetalTexture -revenantRestoreSnapshot
 member RevenantMetalTexture -revenantSetHeap:offset:
+member RevenantMetalTexture -revenantSnapshot
 member RevenantMetalTexture -revenantStorageSize
 member RevenantMetalTexture -revenantSynchroniseSurface
 member RevenantMetalTexture -revenantUploadSurface
@@ -36490,6 +36507,7 @@ protocol RevenantMPSImageThresholdHooks
 protocol RevenantMPSNDArrayAxisKernel
 protocol RevenantMetalDeviceContext
 protocol RevenantMetalRenderTarget
+protocol RevenantMetalResident
 protocol RevenantMetalTextureName
 protocol RevenantOverlayView
 protocol RevenantPhotosChange

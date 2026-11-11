@@ -42,6 +42,10 @@ static void revenant_event(NSString *text)
     NSUInteger _resumedFrames;
     NSUInteger _nilDrawables;
     NSUInteger _droppedBuffers;
+    id<MTLTexture> _target;
+    NSData *_last;
+    BOOL _compared;
+    uint8_t _frame;
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)options
@@ -58,6 +62,10 @@ static void revenant_event(NSString *text)
 
     id<MTLDevice> device = MTLCreateSystemDefaultDevice();
     _queue = [device newCommandQueue];
+    MTLTextureDescriptor *descriptor = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm width:64 height:64 mipmapped:NO];
+    descriptor.usage = MTLTextureUsageRenderTarget | MTLTextureUsageShaderRead;
+    _target = [device newTextureWithDescriptor:descriptor];
+    revenant_event([NSString stringWithFormat:@"target %@ 64x64 BGRA8", _target ? @"created" : @"missing"]);
     _layer = (CAMetalLayer *)view.layer;
     _layer.device = device;
     _layer.pixelFormat = MTLPixelFormatBGRA8Unorm;
@@ -83,7 +91,35 @@ static void revenant_event(NSString *text)
                         (unsigned long)_nilDrawables, (unsigned long)_droppedBuffers]);
         exit(0);
     }
+    if (_resumed && !_compared) {
+        _compared = YES;
+        [self comparePixels];
+    }
     [self render];
+}
+
+- (void)comparePixels
+{
+    if (!_last) {
+        revenant_event(@"PIXELS skipped: no frame was drawn before the background");
+        return;
+    }
+    NSMutableData *now = [NSMutableData dataWithLength:_last.length];
+    [_target getBytes:now.mutableBytes bytesPerRow:64 * 4 fromRegion:MTLRegionMake2D(0, 0, 64, 64) mipmapLevel:0];
+    const uint8_t *before = _last.bytes;
+    const uint8_t *after = now.bytes;
+    NSInteger first = -1;
+    for (NSUInteger i = 0; i < _last.length; i++) {
+        if (before[i] != after[i]) {
+            first = (NSInteger)i;
+            break;
+        }
+    }
+    if (first < 0)
+        revenant_event([NSString stringWithFormat:@"PIXELS match bytes=%lu", (unsigned long)_last.length]);
+    else
+        revenant_event([NSString stringWithFormat:@"PIXELS MISMATCH bytes=%lu first=%ld before=%02x after=%02x",
+                        (unsigned long)_last.length, (long)first, before[first], after[first]]);
 }
 
 - (void)render
@@ -93,6 +129,30 @@ static void revenant_event(NSString *text)
         _nilDrawables++;
         return;
     }
+    uint8_t shade = _frame++;
+    MTLRenderPassDescriptor *clear = [MTLRenderPassDescriptor renderPassDescriptor];
+    clear.colorAttachments[0].texture = _target;
+    clear.colorAttachments[0].loadAction = MTLLoadActionClear;
+    clear.colorAttachments[0].storeAction = MTLStoreActionStore;
+    clear.colorAttachments[0].clearColor = MTLClearColorMake(shade / 255.0, 0.5, 0.25, 1.0);
+    id<MTLCommandBuffer> offscreen = [_queue commandBuffer];
+    [[offscreen renderCommandEncoderWithDescriptor:clear] endEncoding];
+    [offscreen commit];
+    [offscreen waitUntilCompleted];
+    uint8_t pattern[32 * 32 * 4];
+    for (NSUInteger y = 0; y < 32; y++) {
+        for (NSUInteger x = 0; x < 32; x++) {
+            uint8_t *p = pattern + (y * 32 + x) * 4;
+            p[0] = (uint8_t)x;
+            p[1] = (uint8_t)y;
+            p[2] = shade ^ (uint8_t)(x * y);
+            p[3] = 255;
+        }
+    }
+    [_target replaceRegion:MTLRegionMake2D(0, 0, 32, 32) mipmapLevel:0 withBytes:pattern bytesPerRow:32 * 4];
+    NSMutableData *drawn = [NSMutableData dataWithLength:64 * 64 * 4];
+    [_target getBytes:drawn.mutableBytes bytesPerRow:64 * 4 fromRegion:MTLRegionMake2D(0, 0, 64, 64) mipmapLevel:0];
+    _last = drawn;
     MTLRenderPassDescriptor *pass = [MTLRenderPassDescriptor renderPassDescriptor];
     pass.colorAttachments[0].texture = drawable.texture;
     pass.colorAttachments[0].loadAction = MTLLoadActionClear;
@@ -124,6 +184,7 @@ static void revenant_event(NSString *text)
 - (void)willEnterForeground:(NSNotification *)note
 {
     _resumed = YES;
+    _compared = NO;
     revenant_event([NSString stringWithFormat:@"WillEnterForeground background-frames=%lu", (unsigned long)_backgroundFrames]);
 }
 
