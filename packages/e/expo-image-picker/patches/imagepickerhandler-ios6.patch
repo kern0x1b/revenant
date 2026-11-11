@@ -1,0 +1,78 @@
+diff --git a/ios/ImagePickerHandler.swift b/ios/ImagePickerHandler.swift
+index 476910d..23de21e 100644
+--- a/ios/ImagePickerHandler.swift
++++ b/ios/ImagePickerHandler.swift
+@@ -6,6 +6,7 @@ import PhotosUI
+  Protocol that describes scenarios we care about while the user is picking media.
+  */
+ protocol OnMediaPickingResultHandler {
++  @available(iOS 14.0, *)
+   func didPickMultipleMedia(selection: [PHPickerResult])
+   func didPickMedia(mediaInfo: MediaInfo)
+   func didCancelPicking()
+@@ -21,10 +22,8 @@ protocol OnMediaPickingResultHandler {
+  2) it separates some logic from the main module class and hopefully makes it cleaner.
+  */
+ internal class ImagePickerHandler: NSObject,
+-                                   PHPickerViewControllerDelegate,
+                                    UINavigationControllerDelegate,
+-                                   UIImagePickerControllerDelegate,
+-                                   UIAdaptivePresentationControllerDelegate {
++                                   UIImagePickerControllerDelegate {
+   private let onMediaPickingResultHandler: OnMediaPickingResultHandler
+   private let hideStatusBarWhenPresented: Bool
+   private var statusBarVisibilityController = StatusBarVisibilityController()
+@@ -39,6 +38,7 @@ internal class ImagePickerHandler: NSObject,
+     onMediaPickingResultHandler.didPickMedia(mediaInfo: mediaInfo)
+   }
+ 
++  @available(iOS 14.0, *)
+   private func handlePickedMedia(selection: [PHPickerResult]) {
+     statusBarVisibilityController.maybeRestoreStatusBarVisibility()
+     onMediaPickingResultHandler.didPickMultipleMedia(selection: selection)
+@@ -63,6 +63,7 @@ internal class ImagePickerHandler: NSObject,
+ 
+   // MARK: - PHPickerViewControllerDelegate
+ 
++  @available(iOS 14.0, *)
+   func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+     // The PHPickerViewController returns empty collection when canceled
+     if results.isEmpty {
+@@ -73,12 +74,6 @@ internal class ImagePickerHandler: NSObject,
+     picker.dismiss(animated: true)
+   }
+ 
+-  // MARK: - UIAdaptivePresentationControllerDelegate
+-
+-  func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+-    handlePickingCancellation()
+-  }
+-
+   // MARK: - UINavigationControllerDelegate
+ 
+   func navigationController(_ navigationController: UINavigationController, willShow viewController: UIViewController, animated: Bool) {
+@@ -96,10 +91,23 @@ internal protocol PickerUIController: UIViewController {
+ extension UIImagePickerController: PickerUIController {
+   func setResultHandler(_ handler: ImagePickerHandler) {
+     self.delegate = handler
+-    self.presentationController?.delegate = handler
++    if #available(iOS 8.0, *) {
++      self.presentationController?.delegate = handler
++    }
+   }
+ }
+ 
++@available(iOS 8.0, *)
++extension ImagePickerHandler: UIAdaptivePresentationControllerDelegate {
++  func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
++    handlePickingCancellation()
++  }
++}
++
++@available(iOS 14.0, *)
++extension ImagePickerHandler: PHPickerViewControllerDelegate {}
++
++@available(iOS 14.0, *)
+ extension PHPickerViewController: PickerUIController {
+   func setResultHandler(_ handler: ImagePickerHandler) {
+     self.delegate = handler

@@ -138,6 +138,10 @@ target("RNHost")
             target:add("ldflags", "-Wl,-weak_framework,AVFoundation", {force = true})
             target:add("ldflags", "-Wl,-weak_framework,MediaPlayer", {force = true})
         end
+        if ("," .. expo_real .. ","):find(",expo-image-picker,", 1, true) then
+            target:add("ldflags", "-Wl,-weak_framework,Photos", {force = true})
+            target:add("ldflags", "-Wl,-weak_framework,PhotosUI", {force = true})
+        end
         local file = path.join(os.projectdir(), "build", "app-manifest", "host.json")
         local text = os.isfile(file) and io.readfile(file) or ""
         local function key(name)

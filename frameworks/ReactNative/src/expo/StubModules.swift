@@ -12,10 +12,6 @@ public final class StubDocumentPickerModule: Module {
   public func definition() -> ModuleDefinition { Name("ExpoDocumentPicker") }
 }
 
-public final class StubImagePickerModule: Module {
-  public func definition() -> ModuleDefinition { Name("ExponentImagePicker") }
-}
-
 public final class StubFileSystemModule: Module {
   public func definition() -> ModuleDefinition {
     Name("FileSystem")
