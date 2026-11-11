@@ -22,7 +22,9 @@ local WHOLE = {
     {line = 'add_requires("revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = true}})', alias = "swift-runtime", plain = 'add_requires("revenant@swift-runtime", {alias = "swift-runtime"})'},
     {line = 'add_requires("revenant@libcxx", {alias = "libcxx", configs = {packaged = true}})', alias = "libcxx", plain = 'add_requires("revenant@libcxx", {alias = "libcxx"})'},
     {line = 'add_requireconfs("**.libcxx", {configs = {packaged = true}})'},
-    {line = 'add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}})', emit = 'if not os.getenv("RN_WEBKIT") then add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}}) end'}
+    {line = 'add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}})', emit = 'if not os.getenv("RN_WEBKIT") then add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}}) end'},
+    {line = 'option("component", {type = "string", default = "", showmenu = true, description = "Configure only this component and what it needs, for example Backports or emulator; empty configures every component."})'},
+    {line = 'add_requireconfs("combine", {configs = {shared = get_config("component") == "" or nil}})'}
 }
 
 local WHOLE_PROBE = {WHOLE[1].line, WHOLE[2].line, WHOLE[3].line}

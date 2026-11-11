@@ -31,7 +31,10 @@ local APPLICATION = table.concat({
     ""
 }, "\n")
 
-local ROOT_TEXT = table.concat({SWIFT, LIBCXX, LIBCXX_DEPS, WEBKIT, ""}, "\n")
+local COMPONENT = 'option("component", {type = "string", default = "", showmenu = true, description = "Configure only this component and what it needs, for example Backports or emulator; empty configures every component."})'
+local COMBINE = 'add_requireconfs("combine", {configs = {shared = get_config("component") == "" or nil}})'
+
+local ROOT_TEXT = table.concat({SWIFT, LIBCXX, LIBCXX_DEPS, WEBKIT, COMPONENT, COMBINE, ""}, "\n")
 
 local CARRIED = table.concat({SWIFT, LIBCXX, LIBCXX_DEPS,
     'add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed", carried = "jsc"}})', ""}, "\n")
@@ -45,12 +48,14 @@ expect("the plain swift-runtime and libcxx lines are replaced", not whole:find('
 expect("the replaced swift-runtime keeps its condition", whole:find('if not os.getenv("RN_ONLY")', 1, true) ~= nil and whole:find(SWIFT, 1, true) ~= nil,
        "the condition or the shared swift-runtime is missing")
 expect("the whole requirements are carried once", isolate.whole_requirements(whole) == whole, "a second copy changed the text")
-expect("a plain application lacks all four whole requirements", #isolate.whole_missing(APPLICATION) == 4,
-       "expected 4 missing, found " .. #isolate.whole_missing(APPLICATION))
+expect("the copy declares the component option and the combine rule", whole:find('option("component"', 1, true) ~= nil and whole:find(COMBINE, 1, true) ~= nil,
+       "the component option or the combine requireconf is missing from the copy")
+expect("a plain application lacks all six whole requirements", #isolate.whole_missing(APPLICATION) == 6,
+       "expected 6 missing, found " .. #isolate.whole_missing(APPLICATION))
 expect("the root's own declarations are already whole", #isolate.whole_missing(ROOT_TEXT) == 0 and isolate.whole_requirements(ROOT_TEXT) == ROOT_TEXT,
        "the root's text is rewritten or reported missing")
 local carried = isolate.whole_requirements(CARRIED)
-expect("a webkit-engine that RN_WEBKIT declares keeps its own line, and the whole one is added unless RN_WEBKIT is set", #isolate.whole_missing(CARRIED) == 1
+expect("a webkit-engine that RN_WEBKIT declares keeps its own line, and the whole one is added unless RN_WEBKIT is set", #isolate.whole_missing(CARRIED) == 3
        and #isolate.whole_missing(carried) == 0 and carried:find('if not os.getenv("RN_WEBKIT") then add_requires("webkit-engine"', 1, true) ~= nil
        and isolate.whole_requirements(carried) == carried, "the RN_WEBKIT line is not kept beside the whole one, or a second pass changes the copy")
 

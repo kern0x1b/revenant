@@ -22,7 +22,10 @@ carry the same patches.
 
 The copy carries the requirements of the whole configuration, the one the root `xmake.lua` makes when no `--component` is given:
 `revenant@swift-runtime` shared, `revenant@libcxx` packaged, every libc++ dependency packaged too (`add_requireconfs("**.libcxx")`),
-and `webkit-engine` as `frameworks/WebKit` declares it. `copy` rewrites the application's plain `swift-runtime` and `libcxx`
+and `webkit-engine` as `frameworks/WebKit` declares it. It also declares the `component` option (default empty, so `--component`
+selects one component as in the root) and `add_requireconfs("combine")` with `shared = get_config("component") == "" or nil`, the
+same rule `frameworks/Combine` applies to its own `shared`; without it the application's `RN_DEPS_REPO` line makes `combine` build
+its Swift runtime unshared, which changes the `swift-runtime` package key. `copy` rewrites the application's plain `swift-runtime` and `libcxx`
 lines into those forms and adds the lines it lacks; an application that declares `swift-runtime` or `libcxx` with other configs is
 refused, because the packages would not be the ones the whole configuration builds. The install probes of `copy` and of `--real`
 packages carry the same libc++ and Swift runtime lines, so the packages they install are the ones the copy links. `build` refuses
