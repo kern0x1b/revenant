@@ -30,8 +30,9 @@ RecaptchaEnterprise.xcframework/ios-arm64_arm64e/RecaptchaEnterprise.framework/R
 (`ar`) with arm64 and arm64e slices, 12,206,256 bytes. **Measured:** the arm64 slice was extracted with `lipo -thin` into
 scratch and removed at the end of the task. The framework's `Info.plist` gives `CFBundleShortVersionString` 1.0,
 `MinimumOSVersion` 15.0, `DTXcode` 2620 (17C52), and the iphoneos 26.2 SDK. The generated Swift header says Swift 6.2.3.
-There is no `.swiftinterface`; the `.swiftmodule` is binary and covers arm64 and arm64e only. The framework has a privacy
-manifest and no licence file.
+The `.swiftmodule` is a directory with `arm64.swiftinterface` and `arm64e.swiftinterface` (128 lines each, compiled with
+`-enable-library-evolution`, `-swift-version 6`, Swift 6.2.3) and the matching `.swiftdoc`; there is no binary
+`.swiftmodule` file. The framework has a privacy manifest and no licence file.
 
 Tools (Apple's, from the Command Line Tools): `ar`, `lipo`, `nm`, `strings`, `swift-demangle`, `llvm-objdump --macho -d`.
 **Measured:** all 319 object members were disassembled into one listing (261,038 lines). The call graph uses the symbol
@@ -157,9 +158,9 @@ Blockers and risks, each to be checked by lifting:
    runtime is 32-bit. The public classes that subclass host classes use the existing bridge. Pure Swift classes with only
    guest ancestry use the shadow mechanism (`src/runtime/swift_classes.m`).
 2. **Swift ABI at the link with Telegram.** Telegram's armv7 Swift code needs a module interface for `RecaptchaEnterprise`.
-   The shipped module is arm64-only and has no `.swiftinterface`. Options: regenerate the interface from the binary
-   module with the Swift 6.2 tooling (not tried), or write it from the public API in section 2 and let the armv7 compile
-   check it. Not verified.
+   The shipped module has an `arm64.swiftinterface` (the public API, 128 lines) but no armv7 slice, so the armv7 compile
+   of Telegram needs a copy of that interface with the target changed to armv7 (a text change; the interface uses
+   library evolution, so the compiler does not rely on the arm64 layout). Not verified with an armv7 compile.
 3. **Exceptions.** The archive has 14 Objective-C catch sites (`objc_begin_catch`) and 15 `__Unwind_Resume` sites, and
    the protobuf runtime raises `RCAx_GPBCodedInputStreamException`. None of the catch sites is on the static path, which is
    only a lower bound. The recompiler does not yet unwind exceptions through translated frames (`how-it-works.md`, "C++
@@ -261,3 +262,48 @@ in the owner's Google Cloud project).
    Google.
 3. Confirm the licence of the xcframework binary (section 9).
 4. Trace the consumer of `isSupported` (section 7). It is a static task that can run first in stage 2, before translation.
+
+## 12. Stage 2: the object-model probe (measured on the iPhone 4S)
+
+Question: can a Swift class with a host ancestor (`NSObject`, `NSError`, `NSOperation`), as 13 of the SDK's Swift classes
+are, run in the guest Swift runtime (an arm64 `libswiftCore` 6.4.0 built from source, translated with the program) while
+the host Objective-C runtime (armv7, 32-bit) still sees it as a class? The probe is a small arm64 program with the same
+shapes: an open `NSObject` subclass with a `String`, an array, an optional and a closure as fields, a `final` subclass of
+it, a `final` subclass of `NSOperation`, an `NSObject` subclass with a `String` field, and a pure Swift class. It was
+translated with `translate.lua` and run on the phone, one test per run.
+
+**Worked (measured):**
+
+- A pure Swift class (guest ancestry only): create, field, method.
+- The Objective-C view of the host-layout classes: the five words of the rewritten `class_t` are right (`isa`, `super`,
+  `cache`, `vtable`, `data`); `class_getSuperclass` returns `NSObject`, `ProbeClient` and `NSOperation`.
+- An open `NSObject` subclass: allocation, `init` (`objc_msgSendSuper2` into the host `NSObject`), methods, `String` and
+  array fields, creating a second `NSObject` subclass object from a method, and its `deinit` running when the last
+  reference goes.
+
+**Did not work (measured, three crashes, one cause):** `[super init]` of a `final` subclass (of `ProbeClient` and of
+`NSOperation`) and `[super dealloc]` of the `NSObject` subclass after its `deinit` body. The Swift code builds the
+`objc_super` with `swift_getObjectType(self)`. The guest runtime reads that class as a 64-bit `ClassMetadata` (`Superclass`
+at +8, `Data` at +32) while the program rewrote it in place to the 32-bit layout (`super` at +4, `cache` at +8, `data`
+at +16). It does not see a Swift class and returns the same constant (a metadata-pool address in the guest runtime's data)
+for every class; the host `objc_msgSendSuper2` dereferences a null superclass. The runtime was traced: `raw_class=0x105f92a8` for
+`ProbeSub`, `ProbeOperation` and `ProbeToken`, while the open class `init` calls (static class from the code) were right.
+
+**Why this is not a local bug:** the two layouts cannot share one cell (`super32` at +4 is inside the 8-byte `isa` the guest
+reads; `cache32` at +8 is the guest's `Superclass`). Every runtime path that reads the metadata of such a class is
+affected: `swift_getObjectType`, `type(of:)`, `as?` casts, `swift_dynamicCastClass`, protocol conformance lookup. Instance
+layout has the same problem: the guest reads the 8-byte `isa` of a host-layout instance and sees the first field in its high
+half.
+
+**Verdict: the in-place host layout works only for the cases above and fails in general.** The alternatives are in section 13.
+
+**A separate failure, not caused by an ancestor:** `String(describing: PureSwift.self)` (a metatype of a pure Swift class)
+aborts in `_swift_release_dealloc` (the object's `destroy` slot is zero). It needs its own investigation.
+
+## 13. Stage 2: milestone 1 and the blocker table
+
+All 319 objects went through the recompiler (milestone 1). Blockers, from the lift of the whole archive: the arm64 guest
+overlays that the SDK imports (Foundation 59 + 22 names, CryptoKit 18, Dispatch 9, Network 8, Darwin 2), the generated
+bridges still missing for about 114 imported functions, the 14 Objective-C exception catch sites, and 127 "cannot decode
+function" entries in the guest `libswiftCore` (most are jump-table words that `ld64` lists as function starts; the fix is in
+the recompiler, `JumpTables::IsData`, covered by the `jumptable` host test).
