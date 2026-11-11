@@ -45,6 +45,10 @@ static const char revenant_last_presented_key;
 {
     RevenantMetalDevice *device = [RevenantMetalDevice shared];
     [device acquire];
+    if ([device revenantSuspended]) {
+        [device relinquish];
+        return;
+    }
     GLint renderbuffer = 0;
     glBindFramebuffer(GL_FRAMEBUFFER, _texture.framebuffer);
     glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &renderbuffer);
@@ -100,11 +104,12 @@ static const char revenant_last_presented_key;
 @property (nonatomic) GLuint renderbuffer;
 @property (nonatomic, strong) RevenantMetalTexture *texture;
 @property (nonatomic) CGSize size;
+@property (nonatomic) NSUInteger resumptions;
 @end
 
 @implementation RevenantMetalLayerState
 
-@synthesize layer = _layer, framebuffer = _framebuffer, renderbuffer = _renderbuffer, texture = _texture, size = _size;
+@synthesize layer = _layer, framebuffer = _framebuffer, renderbuffer = _renderbuffer, texture = _texture, size = _size, resumptions = _resumptions;
 
 - (void)dealloc
 {
@@ -138,10 +143,14 @@ id<CAMetalDrawable> RevenantMetalNextDrawable(CAMetalLayer *layer)
         objc_setAssociatedObject(layer, &stateKey, state, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     }
     [device acquire];
+    if ([device revenantSuspended]) {
+        [device relinquish];
+        return nil;
+    }
     state.layer.frame = layer.bounds;
     state.layer.contentsScale = size.width / bounds.width;
     state.layer.opaque = layer.isOpaque;
-    if (!state.texture || !CGSizeEqualToSize(state.size, size)) {
+    if (!state.texture || !CGSizeEqualToSize(state.size, size) || state.resumptions != [device revenantResumptions]) {
         if (!state.framebuffer) {
             GLuint fbo, rbo;
             glGenFramebuffers(1, &fbo);
@@ -158,6 +167,7 @@ id<CAMetalDrawable> RevenantMetalNextDrawable(CAMetalLayer *layer)
         glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &h);
         state.texture = [[RevenantMetalTexture alloc] initScreenWithFramebuffer:state.framebuffer width:w height:h pixelFormat:layer.pixelFormat];
         state.size = size;
+        state.resumptions = [device revenantResumptions];
     }
     [device relinquish];
     return (id<CAMetalDrawable>)[[RevenantMetalDrawable alloc] initWithTexture:state.texture layer:layer context:device.context];

@@ -125,6 +125,8 @@ typedef struct {
 + (RevenantMetalDevice *)shared;
 - (void)acquire;
 - (void)relinquish;
+- (BOOL)revenantSuspended;
+- (NSUInteger)revenantResumptions;
 - (CVOpenGLESTextureCacheRef)textureCache;
 @end
 

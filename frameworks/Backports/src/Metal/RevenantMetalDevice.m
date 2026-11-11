@@ -1,4 +1,7 @@
 #import "RevenantMetal.h"
+#import "RevenantMetalLifecycle.h"
+#import "../RevenantSayOnce.h"
+#import <UIKit/UIKit.h>
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -15,6 +18,8 @@ NSError *RevenantMetalError(NSInteger code, NSString *message)
     NSRecursiveLock *_lock;
     NSMutableDictionary *_pipelines;
     CVOpenGLESTextureCacheRef _textureCache;
+    RevenantMetalLifecycle _lifecycle;
+    EAGLContext *_previous;
 }
 
 + (RevenantMetalDevice *)shared
@@ -35,6 +40,14 @@ NSError *RevenantMetalError(NSInteger code, NSString *message)
     if ((self = [super init])) {
         _context = context;
         _lock = [[NSRecursiveLock alloc] init];
+        _lifecycle.suspended = [UIApplication sharedApplication].applicationState == UIApplicationStateBackground;
+        NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+        [center addObserverForName:UIApplicationDidEnterBackgroundNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
+            [self revenantSuspend];
+        }];
+        [center addObserverForName:UIApplicationWillEnterForegroundNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
+            [self revenantResume];
+        }];
     }
     return self;
 }
@@ -47,12 +60,56 @@ NSError *RevenantMetalError(NSInteger code, NSString *message)
 - (void)acquire
 {
     [_lock lock];
+    BOOL makeCurrent = RevenantMetalLifecycleAcquire(&_lifecycle);
+    if (_lifecycle.depth == 1)
+        _previous = [EAGLContext currentContext];
+    if (!makeCurrent) {
+        revenant_say_once_for(@"metal-background", @"Metal: GL work requested while the app is in the background is not issued; the call runs without a current context, and command buffers committed in the background fail with MTLCommandBufferErrorNotPermitted");
+        return;
+    }
     if ([EAGLContext currentContext] != _context)
         [EAGLContext setCurrentContext:_context];
 }
 
 - (void)relinquish
 {
+    if (RevenantMetalLifecycleRelinquish(&_lifecycle)) {
+        EAGLContext *target = _lifecycle.suspended ? nil : _previous;
+        if ([EAGLContext currentContext] != target)
+            [EAGLContext setCurrentContext:target];
+        _previous = nil;
+    }
+    [_lock unlock];
+}
+
+- (BOOL)revenantSuspended
+{
+    return _lifecycle.suspended;
+}
+
+- (NSUInteger)revenantResumptions
+{
+    return _lifecycle.resumptions;
+}
+
+- (void)revenantSuspend
+{
+    [_lock lock];
+    if (!_lifecycle.suspended) {
+        [self acquire];
+        glFinish();
+        if (_textureCache)
+            CVOpenGLESTextureCacheFlush(_textureCache, 0);
+        RevenantMetalLifecycleSuspend(&_lifecycle);
+        [self relinquish];
+    }
+    [_lock unlock];
+}
+
+- (void)revenantResume
+{
+    [_lock lock];
+    RevenantMetalLifecycleResume(&_lifecycle);
     [_lock unlock];
 }
 
