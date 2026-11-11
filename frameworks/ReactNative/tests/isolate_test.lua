@@ -32,8 +32,8 @@ local APPLICATION = table.concat({
 }, "\n")
 
 local COMPONENT = 'option("component", {type = "string", default = "", showmenu = true, description = "Configure only this component and what it needs, for example Backports or emulator; empty configures every component."})'
-local COMBINE = 'add_requireconfs("combine", {configs = {shared = get_config("component") == "" or nil}})'
-local EDGES = 'add_requireconfs("**.swift-runtime", {configs = {shared = true}})'
+local COMBINE = 'add_requireconfs("combine", {override = true, configs = {shared = get_config("component") == "" or nil}})'
+local EDGES = 'add_requireconfs("**.swift-runtime", {override = true, configs = {shared = true}})'
 
 local ROOT_TEXT = table.concat({SWIFT, LIBCXX, LIBCXX_DEPS, WEBKIT, COMPONENT, COMBINE, ""}, "\n")
 

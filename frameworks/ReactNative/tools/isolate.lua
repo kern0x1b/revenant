@@ -23,11 +23,13 @@ local WHOLE = {
     {line = 'add_requires("revenant@libcxx", {alias = "libcxx", configs = {packaged = true}})', alias = "libcxx", plain = 'add_requires("revenant@libcxx", {alias = "libcxx"})'},
     {line = 'add_requireconfs("**.libcxx", {configs = {packaged = true}})'},
     -- every edge to swift-runtime is shared, as the one runtime of the whole configuration is: the copy's packages that
-    -- depend on it plainly (uniformtypeidentifiers, for one) would otherwise bring an unshared runtime into the configuration
-    {line = 'add_requireconfs("**.swift-runtime", {configs = {shared = true}})'},
+    -- depend on it plainly (uniformtypeidentifiers, swiftui, cryptokit, swift-crypto) would otherwise bring an unshared
+    -- runtime into the configuration. override is needed: a plain edge already has its default configs, and xmake keeps those
+    -- unless the requireconf overrides them.
+    {line = 'add_requireconfs("**.swift-runtime", {override = true, configs = {shared = true}})'},
     {line = 'add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}})', emit = 'if not os.getenv("RN_WEBKIT") then add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}}) end'},
     {line = 'option("component", {type = "string", default = "", showmenu = true, description = "Configure only this component and what it needs, for example Backports or emulator; empty configures every component."})'},
-    {line = 'add_requireconfs("combine", {configs = {shared = get_config("component") == "" or nil}})'}
+    {line = 'add_requireconfs("combine", {override = true, configs = {shared = get_config("component") == "" or nil}})'}
 }
 
 local WHOLE_PROBE = {WHOLE[1].line, WHOLE[2].line, WHOLE[3].line, WHOLE[4].line}
