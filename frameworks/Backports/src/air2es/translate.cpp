@@ -91,7 +91,26 @@ struct Binding {
     bool indexedByInstance = false;
     std::vector<Member> members;
     Argument *argument = nullptr;
+    uint64_t capCount = 0;
 };
+
+struct BufferCap {
+    const char *function;
+    const char *argument;
+    uint64_t count;
+};
+
+constexpr BufferCap kBufferCaps[] = {
+    {"callBlobVertex", "positions", 8},
+};
+
+uint64_t bufferCapOf(const std::string &function, const std::string &argument)
+{
+    for (const BufferCap &cap : kBufferCaps)
+        if (function == cap.function && argument == cap.argument)
+            return cap.count;
+    return 0;
+}
 
 struct Address {
     Binding *binding = nullptr;
@@ -146,6 +165,7 @@ const PlainFunction kPlainFunctions[] = {
     {"air.fast_fmax.v2f32", "max", 2},
     {"air.fast_fmin.f32", "min", 2},
     {"air.fast_pow.f32", "pow", 2},
+    {"air.fast_atan2.f32", "atan", 2},
     {"air.dot.v2f32", "dot", 2},
     {"air.dot.v3f32", "dot", 2},
     {"air.all.v2i1", "all", 1},
@@ -381,9 +401,19 @@ public:
                 std::string scalar;
                 unsigned components = 0;
                 uint64_t size = binding.stride;
-                if (scalarOf(typeName, scalar, components))
+                bool scalarElement = scalarOf(typeName, scalar, components);
+                if (scalarElement)
                     size = components * scalarBytes(scalar);
-                binding.members.push_back(Member{binding.name, 0, size, typeName});
+                uint64_t cap = bufferCapOf(function_.getName().str(), binding.name);
+                if (!cap) {
+                    binding.members.push_back(Member{binding.name, 0, size, typeName});
+                } else {
+                    if (!scalarElement || components != 1 || size != binding.stride)
+                        return refuse("a buffer with a host cap whose element is not one scalar: " + binding.name);
+                    binding.capCount = cap;
+                    for (uint64_t k = 0; k < cap; k++)
+                        binding.members.push_back(Member{binding.name + "_" + std::to_string(k), k * size, size, typeName});
+                }
             }
             bindings_.push_back(binding);
             argumentNumbers_.push_back((unsigned)number->getZExtValue());
@@ -665,6 +695,20 @@ private:
         Type *type = gep->getSourceElementType();
         for (unsigned i = 0; i < gep->getNumIndices(); i++) {
             Value *index = gep->getOperand(i + 1);
+            if (i == 0 && !isa<ConstantInt>(index) && out.binding->capCount) {
+                if (allocSize(type) != out.binding->stride || out.selector)
+                    return false;
+                Value *selector = index;
+                if (auto *extend = dyn_cast<CastInst>(index);
+                    extend && (extend->getOpcode() == Instruction::SExt || extend->getOpcode() == Instruction::ZExt) &&
+                    extend->getOperand(0)->getType()->isIntegerTy(32))
+                    selector = extend->getOperand(0);
+                out.selector = selector;
+                out.selectCount = out.binding->capCount;
+                out.selectStride = out.binding->stride;
+                out.selectType = type;
+                continue;
+            }
             if (i == 0 && !isa<ConstantInt>(index)) {
                 bool vertex = isVertexIndex(index);
                 bool instance = !vertex && isIndexOf(index, "air.instance_id");
@@ -963,11 +1007,14 @@ private:
         std::string selector;
         if (!expression(address.selector, selector))
             return false;
+        bool capped = binding.capCount != 0;
         std::string chain;
         for (uint64_t k = address.selectCount; k-- > 0;) {
-            Member element{field->name + "_" + std::to_string(k), address.offset + k * address.selectStride, address.selectStride, type};
+            Member element = capped ? binding.members[k]
+                                    : Member{field->name + "_" + std::to_string(k), address.offset + k * address.selectStride,
+                                             address.selectStride, type};
             std::string value;
-            if (!accessMember(binding, element, element.offset + address.inner, load.getType(), value, true))
+            if (!accessMember(binding, element, element.offset + address.inner, load.getType(), value, !capped))
                 return false;
             chain = chain.empty() ? value : "((" + selector + " == " + std::to_string(k) + ") ? " + value + " : " + chain + ")";
         }
@@ -1115,6 +1162,7 @@ private:
         std::string result;
         bool returned = false;
         std::vector<Value *> fields;
+        std::vector<std::string> fieldTexts;
     };
 
     void statement(const std::string &text)
@@ -1402,6 +1450,16 @@ private:
                 if (found == aggregates_.end())
                     return refuse("a returned aggregate this emitter does not build");
                 frames_.back().fields = found->second;
+                frames_.back().fieldTexts.clear();
+                auto texts = aggregateTexts_.find(ret.getReturnValue());
+                for (unsigned i = 0; i < found->second.size(); i++) {
+                    std::string text;
+                    if (texts != aggregateTexts_.end())
+                        text = texts->second[i];
+                    else if (found->second[i] && !expression(found->second[i], text))
+                        return false;
+                    frames_.back().fieldTexts.push_back(text);
+                }
                 return true;
             }
             std::string value;
@@ -1592,8 +1650,10 @@ private:
         bool emitted = region(&callee.getEntryBlock(), nullptr);
         visited_.swap(outer);
         bool returned = frames_.back().returned;
-        if (aggregate && emitted && returned)
+        if (aggregate && emitted && returned) {
             aggregates_[&call] = frames_.back().fields;
+            aggregateTexts_[&call] = frames_.back().fieldTexts;
+        }
         frames_.pop_back();
         if (!emitted)
             return false;
@@ -1947,6 +2007,26 @@ private:
             return true;
         if (auto *extend = dyn_cast<SExtInst>(&instruction); extend && isAddressIndex(*extend))
             return true;
+        if (auto *extract = dyn_cast<ExtractValueInst>(&instruction)) {
+            if (extract->getNumIndices() != 1)
+                return refuse("a nested extractvalue");
+            unsigned field = extract->getIndices()[0];
+            std::string text;
+            auto texts = aggregateTexts_.find(extract->getAggregateOperand());
+            if (texts != aggregateTexts_.end()) {
+                if (field >= texts->second.size() || texts->second[field].empty())
+                    return refuse("an aggregate field this emitter does not build");
+                text = texts->second[field];
+            } else {
+                auto found = aggregates_.find(extract->getAggregateOperand());
+                if (found == aggregates_.end() || field >= found->second.size() || !found->second[field])
+                    return refuse("an aggregate this emitter does not build");
+                if (!expression(found->second[field], text))
+                    return false;
+            }
+            names_[extract] = text;
+            return true;
+        }
         if (auto *insert = dyn_cast<InsertValueInst>(&instruction)) {
             if (insert->getNumIndices() != 1)
                 return refuse("a nested insertvalue");
@@ -2507,6 +2587,7 @@ private:
     std::map<const Value *, size_t> argumentSlot_;
     std::vector<Output> outputs_;
     std::map<const Value *, std::vector<Value *>> aggregates_;
+    std::map<const Value *, std::vector<std::string>> aggregateTexts_;
     std::map<const Value *, const Value *> inlineArguments_;
     std::map<const Value *, std::string> names_;
     std::set<std::string> declared_;

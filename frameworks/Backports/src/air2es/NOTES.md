@@ -53,8 +53,9 @@ and why, so it is not rediscovered later.
   compiles the Metal sources of a Telegram checkout to iOS AIR, links them per
   directory, translates each library and writes one verdict per entry point.
 - On Telegram-iOS-release-13.0.0 it gives 89 entry points: 43 fragment, 27 vertex and
-  19 kernel. 64 translate (32 fragment, 21 vertex, 11 kernel) and 25 are refused, measured after the half-precision change,
-  which follows the switch change, the bounded integers and the clamp-to-zero emulation; `docs/explanation/backports/air2es-ios-verdicts.md` has the
+  19 kernel. 65 translate (32 fragment, 22 vertex, 11 kernel) and 24 are refused, measured after the host element cap of
+  `callBlobVertex`, which follows the half-precision change, the switch change, the bounded integers and the clamp-to-zero
+  emulation; `docs/explanation/backports/air2es-ios-verdicts.md` has the
   history.
 
 ## Precision and device checks still owed
@@ -93,6 +94,11 @@ and why, so it is not rediscovered later.
   texture stage of the ES 2 probe checks both on the 4S: exact for the sizes it runs, which are up to 1024 by 1024.
 - Internal helper functions are inlined at each call site. They are not emitted as GLSL
   functions, so their sampler and texture parameters map to the caller's bindings.
+- A buffer argument with an element count that the host declares (`kBufferCaps` in `translate.cpp`). A scalar pointer
+  argument read at a dynamic index becomes one uniform per element, and the index is a select chain over them, as for an
+  array member of a buffer struct. The count is a host contract taken from the host's code, and neither the shader nor the
+  loader checks it: the loader reads each element's bytes at its offset, so a host that sets fewer bytes reads past them.
+  Only `callBlobVertex` has an entry (`positions`, 8 elements; `CallScreen/Sources/Components/CallBlobsLayer.swift:113`).
 - Control flow: an if/else region ends at the branch's immediate post-dominator. Phi
   values are copied on each edge, through temporaries when an edge copies more than one
   phi.

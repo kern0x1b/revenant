@@ -2,7 +2,7 @@
 
 Measured 2026-10-30 with the Metal compiler of Xcode 27B47 (Metal 32023.922), compiling the 27 Telegram `.metal` files in 18 directories of the Telegram-iOS-release-13.0.0 reference to `air64-apple-ios12.0` with `-ffast-math` and linking each directory with `metallib`, as `rules_apple` does. The verdicts come from `./xmakew l -P . frameworks/Backports/tools/metal_corpus.lua`. The ffmpeg sources and the `rules_apple` test samples are not included. The sources are the `.metal` files of the `release-13.0.0` tag of `github.com/TelegramMessenger/Telegram-iOS` (commit `f1dd7a2`), fetched with a blobless sparse checkout of the 19 directories that hold them; the tool leaves out the 28th file, under `submodules/ffmpeg`, which leaves 27 files in 18 directories.
 
-Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes measured below, 32 translate (18 fragment, 14 vertex) and 57 are refused by name, including all 19 kernels. After the matrix uniforms, 48 translated (21 fragment, 19 vertex, 8 kernel) and 41 were refused. After the intrinsic batch in the section below, 57 translate (27 fragment, 20 vertex, 10 kernel) and 32 are refused; 9 of the 19 kernels are still refused. After the unsigned max, divide and remainder in the last change row of the table, 58 translate (27 fragment, 20 vertex, 11 kernel) and 31 are refused; 8 of the 19 kernels are still refused. After the clamp-to-zero emulation, 63 translate (32 fragment, 20 vertex, 11 kernel) and 26 are refused. After the bounded integers, 64 translate (32 fragment, 21 vertex, 11 kernel) and 25 are refused. After the switch change, 65 translate (32 fragment, 22 vertex, 11 kernel) and 24 are refused. After the half-precision change and the instance-id correction in the last change row, 64 translate (32 fragment, 21 vertex, 11 kernel) and 25 are refused. The table shows the state after that row. Which of the 26 block the app, and in what order, is in the last section, which predates that row. Refusals are by air2es's own reasons, not by the GLES 2 target, except the mipmap-filter row, which is the target's limit (see `frameworks/Backports/src/air2es/NOTES.md`).
+Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes measured below, 32 translate (18 fragment, 14 vertex) and 57 are refused by name, including all 19 kernels. After the matrix uniforms, 48 translated (21 fragment, 19 vertex, 8 kernel) and 41 were refused. After the intrinsic batch in the section below, 57 translate (27 fragment, 20 vertex, 10 kernel) and 32 are refused; 9 of the 19 kernels are still refused. After the unsigned max, divide and remainder in the last change row of the table, 58 translate (27 fragment, 20 vertex, 11 kernel) and 31 are refused; 8 of the 19 kernels are still refused. After the clamp-to-zero emulation, 63 translate (32 fragment, 20 vertex, 11 kernel) and 26 are refused. After the bounded integers, 64 translate (32 fragment, 21 vertex, 11 kernel) and 25 are refused. After the switch change, 65 translate (32 fragment, 22 vertex, 11 kernel) and 24 are refused. After the half-precision change and the instance-id correction, 64 translate (32 fragment, 21 vertex, 11 kernel) and 25 are refused. After the host element cap of `callBlobVertex` in the last change row, 65 translate (32 fragment, 22 vertex, 11 kernel) and 24 are refused. The table shows the state after that row. Which of the 26 block the app, and in what order, is in the last section, which predates that row. Refusals are by air2es's own reasons, not by the GLES 2 target, except the mipmap-filter row, which is the target's limit (see `frameworks/Backports/src/air2es/NOTES.md`).
 
 | Library | Entry point | Stage | Verdict | Reason |
 | --- | --- | --- | --- | --- |
@@ -35,7 +35,7 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes 
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | gaussianBlurHorizontal | kernel | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | gaussianBlurVertical | kernel | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | callBackgroundVertex | vertex | OK |  |
-| submodules_TelegramUI_Components_Calls_CallScreen_Metal | callBlobVertex | vertex | REFUSED | an address this emitter does not read (the `positions` buffer) |
+| submodules_TelegramUI_Components_Calls_CallScreen_Metal | callBlobVertex | vertex | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | mainVideoVertex | vertex | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | edgeTestVertex | vertex | OK |  |
 | submodules_TelegramUI_Components_Calls_CallScreen_Metal | callBackgroundFragment | fragment | REFUSED | an address this emitter does not read |
@@ -126,6 +126,7 @@ Before the changes below, the corpus measured 89 entry points, 32 OK and 57 REFU
 | bounded integers: division, remainder, shift left and logical shift right of bounded integers, computed in float and exact below 2^16 for the operands and 2^22 for the results (`translate.cpp`, `boundOf`, `integerDivide`, `shiftLeft`, `shiftRight`); the bounds are a constant, a vertex or instance id, a buffer member and a float converted to unsigned, all taken below 2^16 (see the bounded-integers section) | 64 | 25 | `dustEffectVertex` (DustEffect), REFUSED to OK; `compositeRoundVideo` keeps its OK with a new division text; the reasons of `callBlobVertex`, `samplingYuvaShader`, `dustEffectUpdateParticle`, `dustEffectInitializeParticle` and `backgroundStarVertex` change and they stay refused |
 | switch arms that fall through to the default block: the default block is emitted again on each path that reaches it, with the visited blocks kept per arm (`translate.cpp`, `multiway`), so a block reached by two paths before the join is not refused | 65 | 24 | `referenceHighlightVertex` (Premium gem), REFUSED to OK; no other entry changes, the 89 verdicts and the other 64 OK outputs are byte-identical |
 | `half` values declared `mediump float` at each declaration site (`declaredType`, `translate.cpp`, see the half-values section); a struct returned by an inlined call taken from the returned fields (`aggregates_`, `Frame::fields`); an undefined argument the callee does not use dropped; the bounds of an inlined argument followed to its actual value; `sdiv` and `srem` bounded as `udiv` and `urem`; an instance id has no bound (`boundOf`), which corrects the earlier bounded-integer row | 64 | 25 | `dustEffectVertex` (DustEffect), OK to REFUSED: its instance id runs to the particle count, the item's width times its height in points, 153,600 for the layer-sized MediaCutout item on the 4S, above the 2^16 bound (see the bounded-integers section); `callBlobVertex` and the four liquid glass fragments change reason; the other verdicts are the same; 33 corpus `.glsl` files change only by `mediump` |
+| a buffer argument with an element count that the host declares (`kBufferCaps`, `Binding::capCount`, `resolve`, `selectMember`): a `const device` scalar pointer read at a dynamic index is one uniform per element, and the index is a select chain over them, as for an array member of a buffer struct; `air.fast_atan2.f32` as GLSL `atan(y, x)` (`kPlainFunctions`); an `extractvalue` of an inlined call's returned struct, read from the fields captured at the return (`aggregateTexts_`) | 65 | 24 | `callBlobVertex` (CallScreen), REFUSED to OK (its `positions` buffer, capped at the host's 8 elements, and its `atan2` and struct field); the other 88 verdicts are the same; the CallScreen folder gains `callBlobVertex` and eight `positions_k` uniforms on buffer 1, and no other `.glsl` changes |
 
 Checks on the state the table shows (58 OK, 31 REFUSED):
 
@@ -431,14 +432,21 @@ Still refused, with the reason:
   `dustEffectInitializeParticle` (a shift of an unbounded hash, and the store) and `dustEffectUpdateParticle` (a division by
   `size.x * size.y`, a product with no bound here, and the store). Until a buffer-writing kernel is designed, the effect is not
   shown; the vertex alone is not an effect.
-- `callBlobVertex` (CallScreen): its integer part is bounded (the vertex index by 3 and 24, and the `srem` by the buffer count,
-  which the host sets to 8, `CallBlobsLayer.swift:113`). Its next refusal is `positions`, a `const device float *` buffer
-  (buffer 1, `CallScreen/Metal/CallScreenShaders.metal:204`) read at a dynamic index (`positions[index]`, line 156). The host
-  always passes 8 floats (`CallBlobsLayer.swift:146`), so an element cap of 8 is documented. A raw pointer buffer has no element
-  count in the reflection, and the translator maps a dynamic index into an array member of a buffer struct, into a constant
-  table, and for the instance id, but not into a raw buffer. Eight per-element uniforms need a reflection change for the
-  pointer buffer, which is a loader change, so the function stays refused. Its half values are `mediump` now (the half-values
-  section), so they are no longer the blocker.
+- `callBlobVertex` (CallScreen) translates now (the last row of the table). Its `positions` buffer is a host cap of 8 elements:
+  `CallBlobsLayer.swift:113` (`Blob(count: 8, ...)`), `:146` (`setVertexBytes` of `points.count` floats) and `:152`
+  (`vertexCount` of `3 * 8 * points.count`). The host passes the count buffer as the same 8, so the dynamic index stays below
+  8 (`CallScreen/Metal/CallScreenShaders.metal:204`, `:156`). The cap is `kBufferCaps` in `translate.cpp`. The shader reads the
+  index through eight uniforms `positions_0` to `positions_7` on buffer 1 and a select chain. The loader reads uniform bytes at
+  their offsets without a length check, so a host that set fewer than 8 floats would read past its bytes. The cap was checked
+  by reading the Swift code, not by a run, and the device check of this function is owed.
+- `diamondFragment` and `diamondLensFragment` (PremiumDiamond) stay refused. Their bounds are real: the planes loop of
+  `coolInnerGlow` runs to `uint(u.viewport.z)`, the plane count of the fixed geometry (`DiamondGeometry.swift:50`,
+  `DiamondRenderer.swift:169`), and the lens loop runs to the edge count, which the host caps at 128
+  (`DiamondRenderer.swift:272-273`). The translator does not lower these loops. In the AIR the planes loop is rotated: its
+  latch tests the index against the converted bound, and its exit is the post-loop block, which has phis; its body has an
+  `if`; and a zero-trip guard comes before it. Lowering it needs a structurer change for rotated runtime-bounded loops with exit
+  phis and multi-block bodies, and the lens edges need a loader rule for a buffer shorter than its cap. No oracle is available
+  for such a loop: the Mac harness needs `REVENANT_ANGLE_CEF`, and the phone is claimed.
 - `backgroundStarVertex` (PremiumDiamond): `starRandom` is a 32-bit finaliser (xorshift, a wrap-around multiply by two
   constants, then the low 24 bits). It needs all 32 bits, and no bound applies. ES 1.00 has no bit operators, and a float
   product does not wrap exactly. A wide-integer representation (two 16-bit halves in float, with 8-bit limbs for the product)
