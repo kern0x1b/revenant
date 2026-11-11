@@ -149,7 +149,11 @@ and why, so it is not rediscovered later.
   rules come from GLSL ES 1.00, Appendix A, section 4 (loops) and section 5 (indexing),
   revision 17.
 - `./xmakew l -P frameworks/Backports frameworks/Backports/tests/air2es_test.lua` runs 15
-  checker cases. It is registered as the `air2es` suite of the backports tests.
+  checker cases, the sampler checks, and the capped-buffer test. The capped-buffer test translates
+  `tests/air2es/capped_buffer.metallib` (compiled from `capped_buffer.metal` with the pinned Metal compiler), with the built
+  `build/macosx/arm64/release/air2es`, and compares the folder with `capped_buffer.golden/`. It needs `callBlobVertex` to
+  translate through its host cap (eight uniforms and a select chain) and `uncappedVertex` to be refused by name, since it has
+  no cap. It is registered as the `air2es` suite of the backports tests.
 - Negative control: replacing a loop bound with `int(inputTexture_size.x)` in the
   scaleAndBlur output keeps glslangValidator at exit 0, and the checker refuses it.
 - The Telegram oracle is an external file, so the harness run on it is not part of CI.
