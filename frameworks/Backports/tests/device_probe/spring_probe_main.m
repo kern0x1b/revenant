@@ -3,12 +3,72 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
+#include <execinfo.h>
+#include <fcntl.h>
 #include <math.h>
+#include <pthread.h>
+#include <signal.h>
+#include <string.h>
+#include <unistd.h>
 #import "../../src/UIKit/RevenantSpringSolver.h"
+#import "../../src/UIKit/RevenantSpringKeyframes.h"
 
 static NSString *const PROBE_LOG = @"/var/revenant/spring-probe.txt";
 static NSMutableString *probeLog;
 static int probeFailures;
+
+static pthread_t probeMainThread;
+static volatile int probeWatchArmed;
+static volatile int probeWatchSerial;
+static char probeWatchName[128];
+
+static void probeStackHandler(int signalNumber)
+{
+    (void)signalNumber;
+    int fd = open("/var/revenant/spring-probe-stack.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd >= 0) {
+        (void)write(fd, probeWatchName, strlen(probeWatchName));
+        (void)write(fd, "\n", 1);
+        void *frames[64];
+        int count = backtrace(frames, 64);
+        backtrace_symbols_fd(frames, count, fd);
+        close(fd);
+    }
+    _exit(3);
+}
+
+static void *probeWatchdog(void *argument)
+{
+    int serial = (int)(intptr_t)argument;
+    sleep(3);
+    if (probeWatchArmed && probeWatchSerial == serial)
+        pthread_kill(probeMainThread, SIGUSR1);
+    return NULL;
+}
+
+static void probeWatchBegin(const char *name)
+{
+    strncpy(probeWatchName, name, sizeof(probeWatchName) - 1);
+    probeMainThread = pthread_self();
+    probeWatchSerial++;
+    probeWatchArmed = 1;
+    pthread_attr_t attributes;
+    pthread_attr_init(&attributes);
+    pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
+    pthread_t thread;
+    pthread_create(&thread, &attributes, probeWatchdog, (void *)(intptr_t)probeWatchSerial);
+    pthread_attr_destroy(&attributes);
+}
+
+static void probeWatchEnd(void)
+{
+    probeWatchArmed = 0;
+}
+
+static double probeSpringProgress(double time, void *context)
+{
+    return revenant_spring_position(*(RevenantSpringParameters *)context, time);
+}
 
 static void probeFlush(void)
 {
@@ -100,7 +160,114 @@ static void probeSpring(void)
 
     CALayer *layer = [CALayer layer];
     layer.position = CGPointMake(0, 0);
+    [probeLog appendString:@"step: converting the spring to keyframes\n"];
+    probeFlush();
+    RevenantSpringParameters convertParameters = parameters;
+    id probeCurrent = nil;
+    @try {
+        probeCurrent = [layer valueForKeyPath:@"position.x"];
+    } @catch (NSException *exception) {
+        [probeLog appendFormat:@"step: layer value raised %@\n", exception.name];
+    }
+    [probeLog appendFormat:@"step: layer value %@\n", probeCurrent];
+    probeFlush();
+    [probeLog appendFormat:@"step: sample %.6f\n", probeSpringProgress(spring.duration * 0.5, &convertParameters)];
+    probeFlush();
+    CABasicAnimation *probePlain = [CABasicAnimation animationWithKeyPath:@"position.x"];
+    [probeLog appendFormat:@"step: plain class %@\n", NSStringFromClass(object_getClass(probePlain))];
+    probeFlush();
+    BOOL probePlainCumulative = probePlain.cumulative;
+    [probeLog appendFormat:@"step: plain cumulative %d\n", probePlainCumulative];
+    probeFlush();
+    [probeLog appendString:@"step: reading cumulative\n"];
+    probeFlush();
+    Class probeProxyClass = object_getClass(spring);
+    Class probeSuperClass = class_getSuperclass(probeProxyClass);
+    Ivar probeMass = class_getInstanceVariable(probeProxyClass, "_mass");
+    Ivar probeOverdamping = class_getInstanceVariable(probeProxyClass, "_allowsOverdamping");
+    [probeLog appendFormat:@"layout: proxy %@ size %zu, superclass %@ size %zu, _mass offset %td, _allowsOverdamping offset %td\n",
+                           NSStringFromClass(probeProxyClass), class_getInstanceSize(probeProxyClass),
+                           NSStringFromClass(probeSuperClass), class_getInstanceSize(probeSuperClass),
+                           probeMass ? ivar_getOffset(probeMass) : -1, probeOverdamping ? ivar_getOffset(probeOverdamping) : -1];
+    probeFlush();
+    Class probeBareClass = objc_allocateClassPair([CABasicAnimation class], "RevenantProbeBareSubclass", 0);
+    objc_registerClassPair(probeBareClass);
+    id probeBare = [[probeBareClass alloc] init];
+    [probeLog appendFormat:@"bare subclass instance %@\n", NSStringFromClass(object_getClass(probeBare))];
+    probeFlush();
+    [probeLog appendString:@"read bare subclass beginTime\n"]; probeFlush(); (void)[probeBare beginTime];
+    [probeLog appendString:@"read bare subclass beginTime done\n"]; probeFlush();
+    Class probeAllocClass = objc_allocateClassPair([CABasicAnimation class], "RevenantProbeAllocSubclass", 0);
+    objc_registerClassPair(probeAllocClass);
+    id probeAllocated = [class_createInstance(probeAllocClass, 0) init];
+    [probeLog appendFormat:@"class_createInstance subclass %@\n", NSStringFromClass(object_getClass(probeAllocated))]; probeFlush();
+    [probeLog appendString:@"read class_createInstance beginTime\n"]; probeFlush(); (void)[probeAllocated beginTime];
+    [probeLog appendString:@"read class_createInstance beginTime done\n"]; probeFlush();
+    Class probeIvarClass = objc_allocateClassPair([CABasicAnimation class], "RevenantProbeIvarSubclass", 0);
+    class_addIvar(probeIvarClass, "_a", sizeof(CGFloat), 2, @encode(CGFloat));
+    class_addIvar(probeIvarClass, "_b", sizeof(CGFloat), 2, @encode(CGFloat));
+    class_addIvar(probeIvarClass, "_c", sizeof(CGFloat), 2, @encode(CGFloat));
+    class_addIvar(probeIvarClass, "_d", sizeof(CGFloat), 2, @encode(CGFloat));
+    class_addIvar(probeIvarClass, "_e", sizeof(BOOL), 0, @encode(BOOL));
+    objc_registerClassPair(probeIvarClass);
+    id probeIvar = [[probeIvarClass alloc] init];
+    [probeLog appendFormat:@"ivar subclass instance size %zu\n", class_getInstanceSize(probeIvarClass)]; probeFlush();
+    [probeLog appendString:@"read ivar subclass beginTime\n"]; probeFlush(); (void)[probeIvar beginTime];
+    [probeLog appendString:@"read ivar subclass beginTime done\n"]; probeFlush();
+    Class probeSuperClass2 = objc_allocateClassPair([CABasicAnimation class], "RevenantProbeSuperSubclass", 0);
+    objc_registerClassPair(probeSuperClass2);
+    class_addMethod(probeSuperClass2, @selector(superclass), imp_implementationWithBlock(^Class(id receiver) { return class_getSuperclass(object_getClass(receiver)); }), "#@:");
+    id probeSuper = [[probeSuperClass2 alloc] init];
+    [probeLog appendFormat:@"superclass override instance %@\n", NSStringFromClass(object_getClass(probeSuper))]; probeFlush();
+    [probeLog appendString:@"read superclass-override beginTime\n"]; probeFlush(); (void)[probeSuper beginTime];
+    [probeLog appendString:@"read superclass-override beginTime done\n"]; probeFlush();
+    CAKeyframeAnimation *probeKeyframes = [CAKeyframeAnimation animation];
+    [probeLog appendString:@"read keyframe beginTime\n"]; probeFlush(); (void)probeKeyframes.beginTime;
+    [probeLog appendString:@"read keyframe beginTime done\n"]; probeFlush();
+    [probeLog appendString:@"read fresh spring beginTime\n"]; probeFlush();
+    probeWatchBegin("fresh spring beginTime");
+    (void)initialized.beginTime;
+    probeWatchEnd();
+    [probeLog appendString:@"read fresh spring beginTime done\n"]; probeFlush();
+    [probeLog appendString:@"read beginTime\n"]; probeFlush(); (void)spring.beginTime;
+    [probeLog appendString:@"read speed\n"]; probeFlush(); (void)spring.speed;
+    [probeLog appendString:@"read repeatCount\n"]; probeFlush(); (void)spring.repeatCount;
+    [probeLog appendString:@"read autoreverses\n"]; probeFlush(); (void)spring.autoreverses;
+    [probeLog appendString:@"read removedOnCompletion\n"]; probeFlush(); (void)spring.removedOnCompletion;
+    [probeLog appendString:@"read fillMode\n"]; probeFlush(); (void)spring.fillMode;
+    [probeLog appendString:@"read timingFunction\n"]; probeFlush(); (void)spring.timingFunction;
+    [probeLog appendString:@"read delegate\n"]; probeFlush(); (void)spring.delegate;
+    [probeLog appendString:@"read additive\n"]; probeFlush(); (void)spring.additive;
+    [probeLog appendString:@"read valueFunction\n"]; probeFlush(); (void)spring.valueFunction;
+    [probeLog appendString:@"read cumulative\n"]; probeFlush(); (void)spring.cumulative;
+    [probeLog appendString:@"read all done\n"]; probeFlush();
+    NSMutableArray *probeValues = [NSMutableArray array];
+    for (NSUInteger index = 0; index <= 87; index++) {
+        double time = spring.duration * (double)index / 87.0;
+        [probeValues addObject:@(100 * probeSpringProgress(time, &convertParameters))];
+        if (index % 20 == 0) {
+            [probeLog appendFormat:@"step: replica sample %lu\n", (unsigned long)index];
+            probeFlush();
+        }
+    }
+    [probeLog appendFormat:@"step: replica %lu values\n", (unsigned long)probeValues.count];
+    probeFlush();
+    CAKeyframeAnimation *probeKeys = [CAKeyframeAnimation animationWithKeyPath:@"position.x"];
+    [probeLog appendString:@"step: replica keyframe object created\n"];
+    probeFlush();
+    probeKeys.values = probeValues;
+    probeKeys.duration = spring.duration;
+    [probeLog appendString:@"step: replica keyframe values set\n"];
+    probeFlush();
+    CAKeyframeAnimation *converted = revenant_spring_keyframes(spring, layer, spring.duration, probeSpringProgress, &convertParameters, NO);
+    [probeLog appendFormat:@"step: converted to %lu keyframes\n", (unsigned long)converted.values.count];
+    probeFlush();
+    [layer addAnimation:converted forKey:@"converted"];
+    [probeLog appendString:@"step: converted keyframes added\n"];
+    probeFlush();
     [layer addAnimation:spring forKey:@"spring"];
+    [probeLog appendString:@"step: spring added\n"];
+    probeFlush();
     CAAnimation *added = [layer animationForKey:@"spring"];
     probeReport([added isKindOfClass:[CAKeyframeAnimation class]], @"added animation is converted to keyframes", NSStringFromClass(object_getClass(added)));
     CAKeyframeAnimation *frames = (CAKeyframeAnimation *)added;
@@ -114,10 +281,16 @@ static void probeSpring(void)
     probeReport(count > 1 && worst <= 1e-6, @"keyframe values match the damped spring",
                 [NSString stringWithFormat:@"samples %lu worst %.3g", (unsigned long)count, worst]);
 
+    CALayer *plainLayer = [CALayer layer];
+    plainLayer.position = CGPointMake(0, 0);
+    CAKeyframeAnimation *plainAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position.x"];
+    plainAnimation.values = @[@0, @100];
+    plainAnimation.duration = 0.5;
+    [plainLayer addAnimation:plainAnimation forKey:@"plain"];
     [[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:spring.duration + 0.5]];
-    id presentation = [layer.presentationLayer valueForKeyPath:@"position.x"];
-    double final = presentation ? [presentation doubleValue] : NAN;
-    probeReport(probeNear(final, 100, 1e-3), @"presentation final value", [NSString stringWithFormat:@"%.6f", final]);
+    [probeLog appendFormat:@"presentation layers: spring %d plain %d\n", layer.presentationLayer != nil, plainLayer.presentationLayer != nil];
+    [probeLog appendFormat:@"presentation of a plain keyframe animation: %@\n", [plainLayer.presentationLayer valueForKeyPath:@"position.x"]];
+    [probeLog appendFormat:@"presentation of the spring (informational, detached layers have none): %@\n", [layer.presentationLayer valueForKeyPath:@"position.x"]];
 
     spring.allowsOverdamping = YES;
     CASpringAnimation *copied = [spring copy];
@@ -130,7 +303,9 @@ static void probeSpring(void)
                 @"archive keeps the spring", @"");
 
     CASpringAnimation *perceptual = [[CASpringAnimation alloc] initWithPerceptualDuration:0.5 bounce:0.25];
-    probeReport(perceptual != nil && probeNear(perceptual.perceptualDuration, 0.5, 1e-9) && probeNear(perceptual.bounce, 0.25, 1e-6) &&
+    [probeLog appendFormat:@"perceptual: pd %.12g bounce %.12g duration %.12g settling %.12g mass %g k %g c %g\n", perceptual.perceptualDuration,
+                           perceptual.bounce, perceptual.duration, perceptual.settlingDuration, perceptual.mass, perceptual.stiffness, perceptual.damping];
+    probeReport(perceptual != nil && probeNear(perceptual.perceptualDuration, 0.5, 1e-6) && probeNear(perceptual.bounce, 0.25, 1e-6) &&
                 probeNear(perceptual.duration, perceptual.settlingDuration, 1e-9), @"perceptual initializer", @"");
 }
 
@@ -138,6 +313,7 @@ int main(int argc, char **argv)
 {
     (void)argc;
     (void)argv;
+    signal(SIGUSR1, probeStackHandler);
     @autoreleasepool {
         probeLog = [NSMutableString string];
         Class nativeClass = objc_getClass("CASpringAnimation");

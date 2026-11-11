@@ -3,7 +3,7 @@ local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local facts = import("facts", {rootdir = path.join(os.scriptdir(), "..", "tools"), anonymous = true})
 
 local GUARDED = {
-    CASpringAnimation = {file = "UIKit/CASpringAnimation.m", guard = "revenant_spring_system_class", selectors = {"initialVelocity", "settlingDuration"}},
+    CASpringAnimation = {file = "UIKit/CASpringAnimation.m", guard = "revenant_spring_install", selectors = {"initialVelocity", "settlingDuration"}},
 }
 
 local function has_members(members)
@@ -47,7 +47,7 @@ local function shadow_check(src, parsed)
         assert(guard, name .. " forwards to the system class on iOS 6, where the system class has none of the members its proxy implements: "
                .. "a forwarding answer needs a completeness check, registered in GUARDED in this test")
         local text = io.readfile(path.join(src, guard.file))
-        local start = text:find("static Class " .. guard.guard .. "(", 1, true)
+        local start = text:find(" " .. guard.guard .. "(", 1, true)
         local finish = start and text:find("\n}", start, true)
         local body = start and finish and text:sub(start, finish) or ""
         assert(body:find("objc_getClass(\"" .. name .. "\")", 1, true), guard.file .. ": " .. guard.guard .. " must look the system class up by name")
