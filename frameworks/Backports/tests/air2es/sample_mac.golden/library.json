@@ -1,0 +1,1 @@
+{"functions": [{"name": "sampleVertex", "stage": "vertex", "source": "sampleVertex.vertex.glsl", "reflection": "sampleVertex.vertex.json"}, {"name": "sampleFragment", "stage": "fragment", "source": "sampleFragment.fragment.glsl", "reflection": "sampleFragment.fragment.json"}]}
