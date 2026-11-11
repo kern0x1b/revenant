@@ -1,5 +1,6 @@
 #import "RevenantMetal.h"
 #import "RevenantMetalDebugGroups.h"
+#import "RevenantMetalResidency.h"
 
 #pragma clang diagnostic ignored "-Wprotocol"
 #pragma clang diagnostic ignored "-Wincomplete-implementation"
@@ -62,6 +63,7 @@ static void RevenantMetalWaitFence(GLsync fence)
     CFTimeInterval _startTime;
     CFTimeInterval _endTime;
     GLsync _fence;
+    NSUInteger _generation;
 }
 
 @synthesize label;
@@ -71,7 +73,8 @@ static void RevenantMetalWaitFence(GLsync fence)
     if (_fence) {
         RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
-        glDeleteSyncAPPLE(_fence);
+        if (RevenantMetalGenerationIsCurrent(_generation, [device revenantGeneration]) && ![device revenantSuspended])
+            glDeleteSyncAPPLE(_fence);
         [device relinquish];
     }
 }
@@ -149,6 +152,7 @@ static void RevenantMetalWaitFence(GLsync fence)
 
 - (void)commit
 {
+    BOOL dropped = NO;
     @synchronized (self) {
         if (_status != MTLCommandBufferStatusNotEnqueued && _status != MTLCommandBufferStatusEnqueued) {
             NSLog(@"Metal: a command buffer is committed once, and this one was committed already (status %ld)", (long)_status);
@@ -157,15 +161,28 @@ static void RevenantMetalWaitFence(GLsync fence)
         _status = MTLCommandBufferStatusCommitted;
         RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
-        [self revenantBeginWork];
-        if (_drawable)
-            [_drawable present];
-        _fence = RevenantMetalCreateFence();
-        glFlush();
-        RevenantMetalSynchroniseSurfaceTextures();
-        [device relinquish];
-        _endTime = CACurrentMediaTime();
-        _status = MTLCommandBufferStatusScheduled;
+        if ([device revenantSuspended]) {
+            dropped = YES;
+            _error = [NSError errorWithDomain:MTLCommandBufferErrorDomain code:MTLCommandBufferErrorNotPermitted userInfo:@{NSLocalizedDescriptionKey: @"Metal work is not permitted while the app is in the background"}];
+            _status = MTLCommandBufferStatusError;
+            [device relinquish];
+        } else {
+            [self revenantBeginWork];
+            if (_drawable)
+                [_drawable present];
+            _generation = [device revenantGeneration];
+            _fence = RevenantMetalCreateFence();
+            glFlush();
+            RevenantMetalSynchroniseSurfaceTextures();
+            [device relinquish];
+            _endTime = CACurrentMediaTime();
+            _status = MTLCommandBufferStatusScheduled;
+        }
+    }
+    if (dropped) {
+        for (void (^handler)(id<MTLCommandBuffer>) in _completed)
+            handler(self);
+        return;
     }
     for (void (^handler)(id<MTLCommandBuffer>) in _scheduled)
         handler(self);
@@ -176,6 +193,8 @@ static void RevenantMetalWaitFence(GLsync fence)
 
 - (void)addScheduledHandler:(MTLCommandBufferHandler)block
 {
+    if (_status == MTLCommandBufferStatusError)
+        return;
     if (_status >= MTLCommandBufferStatusScheduled) {
         NSLog(@"Metal: a scheduled handler was added after the command buffer was committed; Metal aborts there, the port calls it now");
         block(self);
@@ -186,7 +205,7 @@ static void RevenantMetalWaitFence(GLsync fence)
 
 - (void)addCompletedHandler:(MTLCommandBufferHandler)block
 {
-    if (_status == MTLCommandBufferStatusCompleted) {
+    if (_status == MTLCommandBufferStatusCompleted || _status == MTLCommandBufferStatusError) {
         NSLog(@"Metal: a completed handler was added after the command buffer was committed; Metal aborts there, the port calls it now");
         block(self);
         return;
@@ -223,13 +242,18 @@ static void RevenantMetalWaitFence(GLsync fence)
         NSLog(@"Metal: waitUntilCompleted on a command buffer that was never committed: it would wait for ever");
         return;
     }
+    if (_status == MTLCommandBufferStatusError)
+        return;
     RevenantMetalDevice *device = [RevenantMetalDevice shared];
     [device acquire];
-    if (_fence) {
-        RevenantMetalWaitFence(_fence);
-        _fence = NULL;
-    } else {
-        glFinish();
+    if (![device revenantSuspended]) {
+        if (_fence) {
+            if (RevenantMetalGenerationIsCurrent(_generation, [device revenantGeneration]))
+                RevenantMetalWaitFence(_fence);
+            _fence = NULL;
+        } else {
+            glFinish();
+        }
     }
     [device relinquish];
 }

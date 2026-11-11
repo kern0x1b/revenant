@@ -187,6 +187,13 @@ static NSMutableDictionary *programs(void)
     return cache;
 }
 
+void RevenantMetalDropPrograms(void)
+{
+    for (NSDictionary *entry in [programs() allValues])
+        glDeleteProgram([entry[@"program"] unsignedIntValue]);
+    [programs() removeAllObjects];
+}
+
 @implementation RevenantMetalPipeline {
     RevenantPlan _plan;
     GLuint _program;
@@ -234,61 +241,73 @@ static NSMutableDictionary *programs(void)
         _descriptor = [descriptor copy];
         _vertexReflection = vertex.reflection;
         _fragmentReflection = fragment.reflection;
-        _locations = [NSMutableDictionary dictionary];
         RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
-        _cacheKey = [[vertex.source stringByAppendingString:@"\0"] stringByAppendingString:fragment.source];
-        NSMutableDictionary *cached = programs()[_cacheKey];
-        if (cached) {
-            _program = [cached[@"program"] unsignedIntValue];
-            cached[@"count"] = @([cached[@"count"] unsignedIntegerValue] + 1);
-        } else {
-            NSString *log = nil;
-            GLuint v = compile(GL_VERTEX_SHADER, vertex.source, &log);
-            GLuint f = v ? compile(GL_FRAGMENT_SHADER, fragment.source, &log) : 0;
-            if (!v || !f) {
-                if (error)
-                    *error = RevenantMetalError(7, [NSString stringWithFormat:@"shader did not compile: %@", log]);
-                [device relinquish];
-                _cacheKey = nil;
-                return nil;
-            }
-            GLuint program = glCreateProgram();
-            glAttachShader(program, v);
-            glAttachShader(program, f);
-            GLuint index = 0;
-            if ([_vertexReflection[@"usesVertexId"] boolValue])
-                glBindAttribLocation(program, index++, "a_vertex_id");
-            for (NSDictionary *a in _vertexReflection[@"attributes"])
-                glBindAttribLocation(program, index++, [a[@"name"] UTF8String]);
-            for (NSDictionary *a in _vertexReflection[@"inputs"])
-                glBindAttribLocation(program, index++, [a[@"name"] UTF8String]);
-            glLinkProgram(program);
-            GLint ok = 0;
-            glGetProgramiv(program, GL_LINK_STATUS, &ok);
-            glDeleteShader(v);
-            glDeleteShader(f);
-            if (!ok) {
-                char buffer[1024] = {0};
-                glGetProgramInfoLog(program, sizeof buffer - 1, NULL, buffer);
-                if (error)
-                    *error = RevenantMetalError(8, [NSString stringWithFormat:@"program did not link: %s", buffer]);
-                glDeleteProgram(program);
-                [device relinquish];
-                _cacheKey = nil;
-                return nil;
-            }
-            _program = program;
-            programs()[_cacheKey] = [@{@"program": @(program), @"count": @1} mutableCopy];
-        }
-        [self buildPlan];
+        BOOL linked = [self revenantLinkWithError:error];
+        if (linked)
+            [self buildPlan];
         [device relinquish];
+        if (!linked)
+            return nil;
+        RevenantMetalRegisterResident(self);
     }
     return self;
 }
 
+- (BOOL)revenantLinkWithError:(NSError **)error
+{
+    RevenantMetalFunction *vertex = (RevenantMetalFunction *)_descriptor.vertexFunction;
+    RevenantMetalFunction *fragment = (RevenantMetalFunction *)_descriptor.fragmentFunction;
+    _locations = [NSMutableDictionary dictionary];
+    _cacheKey = [[vertex.source stringByAppendingString:@"\0"] stringByAppendingString:fragment.source];
+    NSMutableDictionary *cached = programs()[_cacheKey];
+    if (cached) {
+        _program = [cached[@"program"] unsignedIntValue];
+        cached[@"count"] = @([cached[@"count"] unsignedIntegerValue] + 1);
+        return YES;
+    }
+    NSString *log = nil;
+    GLuint v = compile(GL_VERTEX_SHADER, vertex.source, &log);
+    GLuint f = v ? compile(GL_FRAGMENT_SHADER, fragment.source, &log) : 0;
+    if (!v || !f) {
+        if (error)
+            *error = RevenantMetalError(7, [NSString stringWithFormat:@"shader did not compile: %@", log]);
+        _cacheKey = nil;
+        return NO;
+    }
+    GLuint program = glCreateProgram();
+    glAttachShader(program, v);
+    glAttachShader(program, f);
+    GLuint index = 0;
+    if ([_vertexReflection[@"usesVertexId"] boolValue])
+        glBindAttribLocation(program, index++, "a_vertex_id");
+    for (NSDictionary *a in _vertexReflection[@"attributes"])
+        glBindAttribLocation(program, index++, [a[@"name"] UTF8String]);
+    for (NSDictionary *a in _vertexReflection[@"inputs"])
+        glBindAttribLocation(program, index++, [a[@"name"] UTF8String]);
+    glLinkProgram(program);
+    GLint ok = 0;
+    glGetProgramiv(program, GL_LINK_STATUS, &ok);
+    glDeleteShader(v);
+    glDeleteShader(f);
+    if (!ok) {
+        char buffer[1024] = {0};
+        glGetProgramInfoLog(program, sizeof buffer - 1, NULL, buffer);
+        if (error)
+            *error = RevenantMetalError(8, [NSString stringWithFormat:@"program did not link: %s", buffer]);
+        glDeleteProgram(program);
+        _cacheKey = nil;
+        return NO;
+    }
+    _program = program;
+    programs()[_cacheKey] = [@{@"program": @(program), @"count": @1} mutableCopy];
+    return YES;
+}
+
 - (void)buildPlan
 {
+    [self revenantFreePlan];
+    _plan = (RevenantPlan){0};
     _plan.program = _program;
     _plan.flip = [self locationForName:@"revenant_flip"];
     _plan.instance = [self locationForName:@"revenant_instance"];
@@ -398,7 +417,7 @@ static NSMutableDictionary *programs(void)
     return &_plan;
 }
 
-- (void)dealloc
+- (void)revenantFreePlan
 {
     free(_plan.vertexUniforms);
     free(_plan.fragmentUniforms);
@@ -407,6 +426,29 @@ static NSMutableDictionary *programs(void)
     free(_plan.textures);
     free(_plan.sizes);
     free(_plan.fetches);
+}
+
+- (void)revenantEvict
+{
+    _program = 0;
+    _plan.program = 0;
+    _cacheKey = nil;
+    [_locations removeAllObjects];
+}
+
+- (void)revenantRestore
+{
+    NSError *error = nil;
+    if (![self revenantLinkWithError:&error]) {
+        NSLog(@"Metal: a render pipeline cannot be relinked after the background: %@", error.localizedDescription);
+        return;
+    }
+    [self buildPlan];
+}
+
+- (void)dealloc
+{
+    [self revenantFreePlan];
     if (_program) {
         RevenantMetalDevice *device = [RevenantMetalDevice shared];
         [device acquire];
