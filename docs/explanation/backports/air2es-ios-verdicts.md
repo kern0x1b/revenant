@@ -2,7 +2,7 @@
 
 Measured 2026-10-30 with the Metal compiler of Xcode 27B47 (Metal 32023.922), compiling the 27 Telegram `.metal` files in 18 directories of the Telegram-iOS-release-13.0.0 reference to `air64-apple-ios12.0` with `-ffast-math` and linking each directory with `metallib`, as `rules_apple` does. The verdicts come from `./xmakew l -P . frameworks/Backports/tools/metal_corpus.lua`. The ffmpeg sources and the `rules_apple` test samples are not included. The sources are the `.metal` files of the `release-13.0.0` tag of `github.com/TelegramMessenger/Telegram-iOS` (commit `f1dd7a2`), fetched with a blobless sparse checkout of the 19 directories that hold them; the tool leaves out the 28th file, under `submodules/ffmpeg`, which leaves 27 files in 18 directories.
 
-Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes measured below, 32 translate (18 fragment, 14 vertex) and 57 are refused by name, including all 19 kernels. After the matrix uniforms, 48 translated (21 fragment, 19 vertex, 8 kernel) and 41 were refused. After the intrinsic batch in the section below, 57 translate (27 fragment, 20 vertex, 10 kernel) and 32 are refused; 9 of the 19 kernels are still refused. After the unsigned max, divide and remainder in the last change row of the table, 58 translate (27 fragment, 20 vertex, 11 kernel) and 31 are refused; 8 of the 19 kernels are still refused. The table shows this state. Which of the 32 block the app, and in what order, is in the last section. Refusals are by air2es's own reasons, not by the GLES 2 target, except the clamp-to-zero and the mipmap-filter rows, which are the target's limits (see `frameworks/Backports/src/air2es/NOTES.md`).
+Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes measured below, 32 translate (18 fragment, 14 vertex) and 57 are refused by name, including all 19 kernels. After the matrix uniforms, 48 translated (21 fragment, 19 vertex, 8 kernel) and 41 were refused. After the intrinsic batch in the section below, 57 translate (27 fragment, 20 vertex, 10 kernel) and 32 are refused; 9 of the 19 kernels are still refused. After the unsigned max, divide and remainder in the last change row of the table, 58 translate (27 fragment, 20 vertex, 11 kernel) and 31 are refused; 8 of the 19 kernels are still refused. After the clamp-to-zero emulation in the last change row, 63 translate (32 fragment, 20 vertex, 11 kernel) and 26 are refused. The table shows the state after that row. Which of the 26 block the app, and in what order, is in the last section, which predates that row. Refusals are by air2es's own reasons, not by the GLES 2 target, except the mipmap-filter row, which is the target's limit (see `frameworks/Backports/src/air2es/NOTES.md`).
 
 | Library | Entry point | Stage | Verdict | Reason |
 | --- | --- | --- | --- | --- |
@@ -70,10 +70,10 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes 
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | adjustmentsFragmentShader | fragment | REFUSED | an address this emitter does not read |
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | enhanceGenerateLUT | kernel | REFUSED | an address this emitter does not read |
 | submodules_TelegramUI_Components_MediaEditor_MetalResources | rgbToLightnessFragmentShader | fragment | OK |  |
-| submodules_TelegramUI_Components_MediaEditor_MetalResources | enhanceColorLookupFragmentShader | fragment | REFUSED | a sample with a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture |
-| submodules_TelegramUI_Components_MediaEditor_MetalResources | blurRadialFragmentShader | fragment | REFUSED | a sample with a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture |
-| submodules_TelegramUI_Components_MediaEditor_MetalResources | blurLinearFragmentShader | fragment | REFUSED | a sample with a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture |
-| submodules_TelegramUI_Components_MediaEditor_MetalResources | blurPortraitFragmentShader | fragment | REFUSED | a sample with a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture |
+| submodules_TelegramUI_Components_MediaEditor_MetalResources | enhanceColorLookupFragmentShader | fragment | OK |  |
+| submodules_TelegramUI_Components_MediaEditor_MetalResources | blurRadialFragmentShader | fragment | OK |  |
+| submodules_TelegramUI_Components_MediaEditor_MetalResources | blurLinearFragmentShader | fragment | OK |  |
+| submodules_TelegramUI_Components_MediaEditor_MetalResources | blurPortraitFragmentShader | fragment | OK |  |
 | submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | gramDiamondCompositeVertex | vertex | OK |  |
 | submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | backgroundStarVertex | vertex | REFUSED | a logical shift right other than of a thread position or its lane by a constant |
 | submodules_TelegramUI_Components_Premium_PremiumDiamondComponent_MetalResources | diamondVertex | vertex | OK |  |
@@ -91,7 +91,7 @@ Result: 89 entry points (43 fragment, 27 vertex, 19 kernel). Before the changes 
 | submodules_TelegramUI_Components_Wallet_WalletSendScreen_Resources | walletAmountBlur | kernel | REFUSED | an address this emitter does not read |
 | submodules_TelegramUI_Components_Wallet_WalletSendScreen_Resources | walletAmountVertex | vertex | OK |  |
 | submodules_TelegramUI_Components_Wallet_WalletSendScreen_Resources | walletAmountLayerVertex | vertex | OK |  |
-| submodules_TelegramUI_Components_Wallet_WalletSendScreen_Resources | walletAmountFragment | fragment | REFUSED | a sample with a linear filter and a clamp-to-zero address: the edge texels read as zero, which OpenGL ES 2 does not have, and an emulation needs the size of the texture |
+| submodules_TelegramUI_Components_Wallet_WalletSendScreen_Resources | walletAmountFragment | fragment | OK |  |
 | submodules_WallpaperBackgroundNode_Resources | wallpaperVertex | vertex | OK |  |
 | submodules_WallpaperBackgroundNode_Resources | wallpaperFragment1 | fragment | OK |  |
 | submodules_WallpaperBackgroundNode_Resources | wallpaperFragment | fragment | OK |  |
@@ -122,6 +122,7 @@ Before the changes below, the corpus measured 89 entry points, 32 OK and 57 REFU
 | square float matrix uniforms: a `float2x2`, `float3x3` or `float4x4` member of a constant buffer as one `uniform matN`, its column and lane loads as indexes, the host uploads it with `glUniformMatrixNfv` and packs the padded `float3` column (`translate.cpp`, `accessMatrix`; `RevenantMetalPipeline.m`, `RevenantMetalEncoder.m`); a pointer bitcast is an address, not a value (`translate.cpp`, the instruction pass) | 48 | 41 | `vertex_render_target` (DrawingUI) and `diamondVertex` (PremiumDiamondComponent), REFUSED to OK; `vertex_point_func` leaves the matrix for `air.point_size`; `sparkleVertex` leaves it for `air.mix.v2f32`, `referenceHighlightVertex` for a terminator, `diamondFragment` and `diamondLensFragment` for `air.fast_saturate.f32`; the 4S compiles and links all 48 OK programs, and the matrix probe checks the products on the 4S (see the matrix section) |
 | the intrinsic maps `sqrt`, `sin`, `cos`, `tan`, `exp`, `floor`, `pow`, `min`, `max`, `clamp` and `mix` at the half and vector widths, `fast_saturate`, `fabs`, `dot`, and `fwidth` with `GL_OES_standard_derivatives` (fragment only); a `switch` terminator as an if / else if chain, the join shared with the branch path (`multiway`, `rejoin`); a scalar integer fragment input or vertex output as a float, because ES 1.00 has no integer varyings; `discard` in a fragment function (`translate.cpp`) | 57 | 32 | `convertNV12` and `downsampleNV12` (the rotation switches), `mainVideoFragment` (both libraries), `bt709ToRGBFragmentShader`, `backgroundStarFragment`, `wallpaperFragment`, `sparkleVertex` and `sparkleFragment`, REFUSED to OK; `compositeRoundVideo` leaves the switch for `air.max.u.i32`; `callBackgroundFragment` leaves `sin` for an address; `referenceHighlightVertex`, `diamondFragment` and `diamondLensFragment` leave the switch or `fast_exp` for control flow that reaches one block twice; `walletCardBackgroundFragment` leaves `fast_pow` for `air.any.v2i1`; the 4S compiles and links all 57 OK programs |
 | unsigned `air.max.u.i32` as a select of its operands, and the unsigned divide and remainder of bounded integers (`translate.cpp`, `unsignedDivide`): the quotient is taken in float as `int((float(a) + 0.5) / float(b))`, because the device's integer `/` is off by one at exact multiples; a constant operand must be below 2^23; the `revenant_flip` uniform is declared `highp` in both stages (`needFlip`) | 58 | 31 | `compositeRoundVideo`, REFUSED to OK; the reasons of `callBlobVertex`, `dustEffectUpdateParticle` and `dustEffectVertex` change from the `udiv` and `urem` refusal to the bounded-divisor refusal, and they stay refused; the 4S compiles and links all 58 OK programs |
+| clamp-to-zero samples emulated (`samplers.cpp`, `translate.cpp`, `emulatedSample`): a constexpr sampler with a clamp-to-zero address becomes four nearest fetches per linear sample, each masked to zero outside the texture, with the texel count from the `<texture>_size` uniform the host already sets; a clamp-to-edge or repeat axis is clamped or wrapped in the shader, so the host binds nearest and clamp-to-edge; a clamp-to-zero address whose minification and magnification filters differ stays refused, since the level of detail is not computed; a clamp-to-zero cube sample stays refused | 63 | 26 | the three MediaEditor blurs, `enhanceColorLookupFragmentShader` and `walletAmountFragment` (Wallet send), REFUSED to OK; the blurs and the lookup are checked against Metal on the Mac (see the clamp-to-zero section) |
 
 Checks on the state the table shows (58 OK, 31 REFUSED):
 
@@ -322,3 +323,33 @@ Order of work, for the owner to set:
 4. The rest, in the order above. Rows 4, 5, 8 and 10 each include a blocker that is a decision: integer operations, clamp-to-zero samples, or the address rules. Those stay refused until the decision changes.
 
 The cheap intrinsic maps are built, and the ones listed in the intrinsics section are checked on the 4S. A check covers a map, not the whole shader.
+
+## Clamp-to-zero samples (2026-11-11)
+
+The earlier decision kept the clamp-to-zero linear samples refused, with the integer operations, because the translator
+did not emulate them. The brief of 2026-11-11 (coordinator aa549f85) changes that decision for clamp-to-zero samples, so
+they are emulated with the real semantics: a sample at uv reads the texels of a linear or nearest filter, and a texel
+outside the texture reads zero. Each tap is one nearest fetch of the texel centre, multiplied by a mask that is 1 inside
+the texture and 0 outside, on each clamp-to-zero axis. The texel count is the host's `<texture>_size` uniform. An axis
+that is clamp-to-edge is clamped in the shader, and a repeat axis is wrapped in the shader, so the host binds nearest
+and clamp-to-edge for these textures and the wrap of a non-power-of-two texture does not matter.
+
+Measured on the Mac, not on the phone:
+
+- Metal's own output for the MediaEditor bundle (compiled to `air64-apple-macos14.0` for the Mac's Metal, from the same
+  sources) against the air2es GLSL on ANGLE, through `metal_shader_harness`: `blurRadialFragmentShader`,
+  `blurLinearFragmentShader`, `blurPortraitFragmentShader` and `enhanceColorLookupFragmentShader` each PASS, with a maximum
+  channel difference of 1/255 over about 15,800 non-zero channels.
+- A negative control on the same folder, with the clamp-to-zero masks removed from `blurRadialFragmentShader`, FAILs with
+  a maximum difference of 174/255 over 1,401 channels. The harness does discriminate the edge rule.
+- `walletAmountFragment` is not compared on the Mac: the harness reports its Metal output as blank, because its vertex
+  reads a quad from a buffer the harness does not fill, and a blank case proves nothing. It uses the same emulation as the
+  blurs. Its translation passes glslangValidator and the Appendix A checker, as the three blurs and the lookup do.
+- The corpus translation of all 18 libraries, with the binary of the commit before this change and with the change: the
+  only outputs that differ are the five new functions. Every other `.glsl` and `.json` is byte-identical.
+- `./xmakew l -P frameworks/Backports frameworks/Backports/tests/air2es_test.lua` passes, with the decode of two new
+  constexpr states: a linear clamp-to-zero sampler is accepted, and a clamp-to-zero sampler with a linear minification and a
+  nearest magnification is refused.
+
+Not measured: the nearest filter with a clamp-to-zero address, and a repeat axis with a clamp-to-zero axis. Both are
+emitted by the same helper, and no corpus entry uses them. A cube sample with a clamp-to-zero address stays refused.

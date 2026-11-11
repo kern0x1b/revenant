@@ -476,23 +476,27 @@ private:
         return false;
     }
 
-    bool samplerOf(const Value *operand, std::string &json)
+    bool samplerOf(const Value *operand, GLESSampler &sampler, bool &bound)
     {
-        Binding *bound = bindingOf(operand);
-        if (bound && bound->kind == "air.sampler") {
-            json.clear();
+        Binding *argument = bindingOf(operand);
+        if (argument && argument->kind == "air.sampler") {
+            bound = true;
             return true;
         }
+        bound = false;
         uint64_t state = 0;
         auto *global = dyn_cast<GlobalVariable>(operand);
         if (!global || !samplerStateOf(*global, state))
             return refuse("a sample with a sampler this emitter cannot read");
-        GLESSampler sampler;
         std::string reason;
         if (!decodeSampler(state, samplerTable(), sampler, reason))
             return refuse("a sample with " + reason);
-        json = samplerJson(sampler);
         return true;
+    }
+
+    static bool clampsToZero(const GLESSampler &sampler)
+    {
+        return sampler.wrapS == "clamp_to_zero" || sampler.wrapT == "clamp_to_zero";
     }
 
     bool sampledBy(const Binding &texture, const std::string &json, const std::string &fields)
@@ -506,6 +510,66 @@ private:
         if (!json.empty())
             line += ", \"sampler\": " + json;
         textureLines_.push_back(line + "}");
+        return true;
+    }
+
+    static char wrapLetter(const std::string &mode)
+    {
+        return mode == "repeat" ? 'r' : mode == "clamp_to_zero" ? 'z' : 'e';
+    }
+
+    static std::string axisTap(const char *axis, const std::string &mode, const std::string &size)
+    {
+        std::string k = std::string("k.") + axis, s = size + "." + axis;
+        if (mode == "repeat")
+            return "    " + k + " = " + k + " - " + s + " * floor(" + k + " / " + s + ");\n";
+        std::string clamp = "    " + k + " = clamp(" + k + ", 0.0, " + s + " - 1.0);\n";
+        if (mode == "clamp_to_zero")
+            return "    m" + std::string(axis) + " = step(0.0, " + k + ") * step(" + k + ", " + s + " - 1.0);\n" + clamp;
+        return clamp;
+    }
+
+    bool emulatedSample(const Binding &texture, const GLESSampler &sampler, const std::string &coordinates, CallInst &call)
+    {
+        const std::string name = texture.name;
+        const std::string size = name + "_size";
+        std::string code = std::string(1, wrapLetter(sampler.wrapS)) + wrapLetter(sampler.wrapT);
+        std::string tap = "revenant_tap_" + name + "_" + code;
+        std::string sample = "revenant_sample_" + name + "_" + std::string(sampler.minFilter == "linear" ? "l" : "n") + code;
+        declare("uniform sampler2D " + name + ";\n", name);
+        bool fresh = !declared_.count(size);
+        declare("uniform vec2 " + size + ";\n", size);
+        if (fresh)
+            sizes_.push_back("{\"name\": " + jsonQuote(size) + ", \"texture\": " + std::to_string(texture.index) + "}");
+        GLESSampler nearest;
+        nearest.wrapS = nearest.wrapT = "clamp_to_edge";
+        nearest.minFilter = nearest.magFilter = "nearest";
+        if (!sampledBy(texture, samplerJson(nearest), ", \"depth\": false, \"compare\": false"))
+            return false;
+        if (!declared_.count(tap)) {
+            declared_.insert(tap);
+            std::string body = "    float mx = 1.0;\n    float my = 1.0;\n" + axisTap("x", sampler.wrapS, size) +
+                               axisTap("y", sampler.wrapT, size);
+            declarations_.push_back("vec4 " + tap + "(vec2 k) {\n" + body + "    return texture2D(" + name + ", (k + vec2(0.5)) / " +
+                                    size + ") * (mx * my);\n}\n");
+        }
+        if (!declared_.count(sample)) {
+            declared_.insert(sample);
+            std::string body;
+            if (sampler.minFilter == "linear")
+                body = "    vec2 p = uv * " + size + " - vec2(0.5);\n    vec2 base = floor(p);\n    vec2 f = p - base;\n"
+                       "    return (1.0 - f.x) * (1.0 - f.y) * " + tap + "(base) +\n"
+                       "        f.x * (1.0 - f.y) * " + tap + "(base + vec2(1.0, 0.0)) +\n"
+                       "        (1.0 - f.x) * f.y * " + tap + "(base + vec2(0.0, 1.0)) +\n"
+                       "        f.x * f.y * " + tap + "(base + vec2(1.0, 1.0));\n";
+            else
+                body = "    return " + tap + "(floor(uv * " + size + "));\n";
+            declarations_.push_back("vec4 " + sample + "(vec2 uv) {\n" + body + "}\n");
+        }
+        std::string value;
+        if (!local(call, value))
+            return false;
+        statement(value + " = " + sample + "(" + coordinates + ");\n");
         return true;
     }
 
@@ -2006,9 +2070,12 @@ private:
         Binding *texture = bindingOf(call.getArgOperand(0));
         if (!texture || texture->kind != "air.texture_cube")
             return refuse("a cube sample of something other than a cube texture argument");
-        std::string sampler;
-        if (!samplerOf(call.getArgOperand(1), sampler))
+        GLESSampler sampler;
+        bool bound = false;
+        if (!samplerOf(call.getArgOperand(1), sampler, bound))
             return false;
+        if (!bound && clampsToZero(sampler))
+            return refuse("a cube sample with a clamp-to-zero address, which this emitter does not emulate");
         auto *flag = dyn_cast<ConstantInt>(call.getArgOperand(3));
         auto *bias = dyn_cast<ConstantFP>(call.getArgOperand(4));
         auto *offset = dyn_cast<ConstantInt>(call.getArgOperand(5));
@@ -2018,7 +2085,7 @@ private:
         if (!expression(call.getArgOperand(2), coordinates))
             return false;
         declare("uniform samplerCube " + texture->name + ";\n", texture->name);
-        if (!sampledBy(*texture, sampler, ", \"depth\": false, \"compare\": false, \"cube\": true"))
+        if (!sampledBy(*texture, bound ? "" : samplerJson(sampler), ", \"depth\": false, \"compare\": false, \"cube\": true"))
             return false;
         std::string name;
         if (!local(call, name))
@@ -2153,8 +2220,9 @@ private:
         Binding *texture = bindingOf(call.getArgOperand(0));
         if (!texture || texture->kind != "air.texture")
             return refuse("a sample of something other than a texture argument");
-        std::string sampler;
-        if (!samplerOf(call.getArgOperand(1), sampler))
+        GLESSampler sampler;
+        bool bound = false;
+        if (!samplerOf(call.getArgOperand(1), sampler, bound))
             return false;
         auto *normalized = dyn_cast<ConstantInt>(call.getArgOperand(3));
         auto *hasLevel = dyn_cast<ConstantInt>(call.getArgOperand(5));
@@ -2164,8 +2232,10 @@ private:
             return refuse("a sample with a level, bias, offset or unnormalized coordinate this emitter does not map");
         if (args.size() != 1)
             return refuse("a sample with an argument count this emitter does not map");
+        if (!bound && clampsToZero(sampler))
+            return emulatedSample(*texture, sampler, args[0], call);
         declare("uniform sampler2D " + texture->name + ";\n", texture->name);
-        if (!sampledBy(*texture, sampler, ", \"depth\": false, \"compare\": false"))
+        if (!sampledBy(*texture, bound ? "" : samplerJson(sampler), ", \"depth\": false, \"compare\": false"))
             return false;
         if (!local(call, name))
             return false;
