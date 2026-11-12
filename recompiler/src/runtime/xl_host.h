@@ -80,6 +80,8 @@ void xl_shadow_init(void);
 Class xl_class_in(uint64_t guest);
 uint64_t xl_class_out(uintptr_t host);
 Class xl_class_of(id object);
+void xl_swift_sync_class(Class cls);
+void xl_swift_super_dealloc(id object, Class current);
 uint32_t xl_shadow_imp(IMP imp);
 int xl_guest_send(id object, SEL selector, uint64_t *result);
 uint32_t xl_guest_imp_address(IMP imp);

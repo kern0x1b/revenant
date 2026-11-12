@@ -229,7 +229,7 @@ Value Classify(ASTContext &gc, QualType g, ASTContext &hc, QualType h, bool para
   if (gcanon->isObjCObjectPointerType() || gcanon->isObjCSelType() || gcanon->isObjCClassType() ||
       gcanon->isObjCIdType()) {
     value.kind = Kind::Pointer;
-    value.is_object = gcanon->isObjCObjectPointerType() || gcanon->isObjCIdType();
+    value.is_object = gcanon->isObjCObjectPointerType() || gcanon->isObjCIdType() || gcanon->isObjCClassType();
     return value;
   }
   if (gcanon->isBlockPointerType()) {
