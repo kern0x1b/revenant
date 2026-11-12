@@ -13,8 +13,6 @@ function swift()
     raise("no revenant@swift install under %s carries its own legacy_layouts source cache (docs/reference/recompiler/corpus.md says why it is needed)", path.join(package.installdir(), "s", "swift"))
 end
 
--- the armv7 Swift runtime an iOS 6 executable is built against and runs on (revenant@swift-runtime), not the arm64 one
--- the translator lifts
 function swift_armv7()
     local installs = os.dirs(path.join(package.installdir(), "s", "swift-runtime", "*", "*"))
     table.sort(installs)
@@ -28,7 +26,6 @@ function swift_armv7()
     raise("no revenant@swift-runtime install under %s carries the armv7 Swift runtime", path.join(package.installdir(), "s", "swift-runtime"))
 end
 
--- the armv7 libc++ and libc++abi the armv7 Swift runtime depends on (revenant@libcxx)
 function libcxx_armv7()
     local installs = os.dirs(path.join(package.installdir(), "l", "libcxx", "*", "*"))
     table.sort(installs)

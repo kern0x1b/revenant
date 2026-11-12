@@ -123,7 +123,6 @@ struct ObjCImage {
   std::vector<ConstantString> strings;
   std::vector<SelectorReference> selectors;
   std::vector<std::string> errors;
-  // A library's own runtime and overlays: the names of their classes are registered under a prefix
   bool namespaced = false;
 };
 

@@ -1948,8 +1948,6 @@ std::string Generator::StubImpWrapper(uint64_t imp) {
   return name;
 }
 
-// "_TtCs12_SwiftObject" -> "_TtCs", "_TtC10Foundation3Foo" -> "_TtC10Foundation": the part of a Swift class's Objective-C
-// name that says which module it belongs to; empty for a name that is not a mangled Swift class name
 static std::string SwiftModulePrefix(const std::string &name) {
   if (name.compare(0, 4, "_TtC") != 0) {
     return "";
@@ -2155,7 +2153,6 @@ void Generator::EmitClasses(const json::Object &manifest) {
         auto protocols = emit_protocol_list(data.getArray("protocols"), base + "_protocols");
         std::string name_expression = "(const char *)" + hex(*data.getInteger("name_address"));
         if (namespaced && !name.empty()) {
-          // The host registers the class under the prefixed name; the guest's own copy of the name is not touched
           name_expression = base + "_name";
           meta << "static const char " << name_expression << "[] = \"" << prefix << name << "\";\n";
           if (!is_meta) {

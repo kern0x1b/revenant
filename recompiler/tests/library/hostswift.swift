@@ -1,9 +1,3 @@
-// The host's own Swift code, built for the host's own libswiftCore. It makes what Swift boxes and bridges at an Objective-C
-// boundary: a value that is no object, an Array and a String as objects. host.m looks at their classes, and at the names of
-// the Swift runtime's classes, before the library loads and again after it has run.
-
-// With BRIDGING the Foundation overlay is imported, so that an Array and a String become an NSArray and an NSString;
-// without it Swift boxes them, as it boxes every value that is no object.
 #if BRIDGING
 import Foundation
 #endif

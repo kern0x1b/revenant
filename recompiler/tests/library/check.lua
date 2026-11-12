@@ -24,7 +24,6 @@ local function exports(file)
     return list
 end
 
--- every @rpath library that a binary needs, and the ones those need, by leaf name; found[leaf] is the file
 local function dependencies(file, dirs, found)
     for line in os.iorunv("otool", {"-L", file}):gmatch("[^\n]+") do
         local leaf = line:match("^%s+@rpath/(%S+)")
@@ -119,13 +118,9 @@ function main(out, ...)
     local host_flags = {"-O2", "-w", "-fobjc-arc", "-I", path.join(e.recompiler, "include"), "-framework", "Foundation", "-framework", "UIKit"}
     local expected = EXPECTED
     local runtime
-    -- XL_LIBRARY_HOST_BRIDGING=1: the host's Swift also imports the Foundation overlay, so an Array and a String cross as an
-    -- NSArray and an NSString. The overlay of the package needs classes iOS 6 lacks; an app's own copy (Telegram's) is
-    -- patched for it, so this goes with XL_LIBRARY_HOST_RUNTIME, a folder on the phone with the runtime and overlays to use
     local bridging = (os.getenv("XL_LIBRARY_HOST_BRIDGING") or "") ~= ""
     local host_runtime = os.getenv("XL_LIBRARY_HOST_RUNTIME")
     if variant == "swift" then
-        -- a host with a Swift runtime and Swift code of its own, as Telegram is: the library's runtime must not take its names
         local swift = corpus.swift()
         runtime = corpus.swift_armv7()
         os.execv(path.join(swift, "bin", "swiftc"), table.join({"-target", "armv7-apple-ios6.0", "-clang-target", "armv7-apple-ios6.0", "-sdk", e.sdk,
@@ -154,8 +149,6 @@ function main(out, ...)
     device.copy(library, "/var/tmp/xl-library/RCFixture.dylib")
     device.copy(o("host"), "/var/tmp/xl-library/xl-library-host")
     if runtime and not host_runtime then
-        -- the host's own Swift runtime goes next to it, with what it depends on; dyld finds a name that starts with @rpath
-        -- in the fallback path, which is how the Telegram app's runtime is found too
         local found = {}
         dependencies(o("host"), {path.join(runtime, "lib", "swift", "iphoneos"), corpus.libcxx_armv7()}, found)
         for leaf, file in pairs(found) do

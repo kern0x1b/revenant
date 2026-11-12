@@ -87,14 +87,12 @@ static void occupy(const char *range)
 }
 
 #ifdef RC_SWIFT_HOST
-// The host's Swift runtime (the libswiftCore this executable is linked with) and the host's own Swift code, hostswift.swift.
-// The library brings a Swift runtime of its own; what the host's Swift sees by name must stay the host's.
 extern void *rch_make_box(NSInteger seed);
 extern void *rch_make_array(NSInteger seed);
 extern void *rch_make_string(NSInteger seed);
 
-static NSMutableDictionary *hostClasses;     // class name -> the host's class, for every class of the host's libswiftCore
-static NSString *hostRuntime;                // the image of the host's libswiftCore
+static NSMutableDictionary *hostClasses;
+static NSString *hostRuntime;
 static Class bridgedClasses[3];
 
 static void snapshotHostRuntime(void)
@@ -112,7 +110,6 @@ static void snapshotHostRuntime(void)
     fflush(stdout);
 }
 
-// Every name of the host's runtime still answers with the host's class
 static BOOL hostNamesUnchanged(void)
 {
     if (!hostClasses.count)
@@ -129,10 +126,8 @@ static BOOL hostNamesUnchanged(void)
     return same;
 }
 
-// The library registers no class under a name of the host's runtime
 static BOOL namesDisjoint(const char *library)
 {
-    // the image is named by the path dyld resolved, which need not be the path that was given
     const char *base = strrchr(library, '/') ? strrchr(library, '/') + 1 : library;
     unsigned images = 0, count = 0;
     const char **list = objc_copyImageNames(&images);
@@ -157,7 +152,6 @@ static BOOL namesDisjoint(const char *library)
     return disjoint;
 }
 
-// What the host's Swift boxes and bridges: the same classes, with the same contents, every time
 static BOOL hostBridges(BOOL record)
 {
     id objects[3] = {(__bridge_transfer id)rch_make_box(7), (__bridge_transfer id)rch_make_array(7), (__bridge_transfer id)rch_make_string(7)};
@@ -178,7 +172,7 @@ static BOOL hostBridges(BOOL record)
     BOOL string_ok = [string isKindOfClass:[NSString class]] && string.length == 12 && [string hasPrefix:@"host-7-h"];
 #else
     id array = objects[1], string = objects[2];
-    BOOL array_ok = YES, string_ok = YES;   // no Foundation overlay: Swift boxes them, and the classes above are what is checked
+    BOOL array_ok = YES, string_ok = YES;
 #endif
     if (!array_ok || !string_ok)
         printf("bridged contents: array %s %s (%lu items), string %s (%lu)\n", class_getName(object_getClass(array)), array_ok ? "ok" : "wrong",
@@ -224,7 +218,6 @@ int main(int argc, char **argv)
             if (!image)
                 line([NSString stringWithFormat:@"error %s", dlerror()]);
         }
-        // An app reserves the range before its heap grows (a constructor), and loads the library when it first needs it
         xl_load_status reserved = xl_reserve(path);
         grow(target << 10);
         measure("host");

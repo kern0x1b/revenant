@@ -43,8 +43,6 @@ extern const uint32_t xl_swift_static_classes[];
 extern const uint32_t xl_swift_listed_classes[];
 extern const struct xl_swift_method xl_swift_methods[];
 
-// The namespace of a library's own runtime: the host sees the Objective-C classes of the guest's libswiftCore and overlays
-// under xl_namespace_prefix, the guest asks for them by their own names (the translator writes all three)
 extern const char xl_namespace_prefix[];
 extern const uint32_t xl_namespaced_classes[];
 extern const char *const xl_namespace_modules[];
@@ -55,8 +53,6 @@ static int xl_has_prefix(const char *name)
     return length && strncmp(name, xl_namespace_prefix, length) == 0;
 }
 
-// A guest class is registered under the prefix when it is a class of a namespaced image, or when the runtime made it
-// from one (a generic instantiation carries the module of its generic class in its name)
 static int xl_namespaced_class(uintptr_t guest, const char *name)
 {
     if (!xl_namespace_prefix[0] || xl_has_prefix(name))
@@ -626,9 +622,6 @@ void xl_manual_default_class_getImageName(void *pack)
     p->r = xl_widen_pointer((uintptr_t)class_getImageName(xl_class_in(xl_narrow_pointer(p->cls, "class_getImageName", 0))));
 }
 
-// The guest finds a class of its own runtime by the name its runtime knows. Under a namespace that class is registered
-// under the prefix, and a name that belongs to the namespace never reaches a class of the host: it is looked up under the
-// prefix or not at all (the host's libswiftCore has classes of the same names, and they are not the guest's).
 static int xl_in_namespace_modules(const char *name)
 {
     for (const char *const *module = xl_namespace_modules; *module; module++) {
@@ -669,7 +662,6 @@ void xl_manual_objc_lookUpClass(void *pack)
     p->r = xl_object_out((uintptr_t)xl_lookup_class((const char *)xl_narrow_pointer(p->a0, "objc_lookUpClass", 0), objc_lookUpClass));
 }
 
-// The guest sees the name of one of its own runtime's classes without the prefix
 void xl_manual_class_getName(void *pack)
 {
     struct xl_class_name_pack *p = pack;

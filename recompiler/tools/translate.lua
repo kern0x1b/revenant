@@ -320,8 +320,6 @@ function translate(input, includes, out, images, opt)
         table.join2(replaces, {"--swift-host-ancestors"})
     end
     if library then
-        -- the guest images next to the library's own (its Swift runtime, its overlays) keep their Objective-C class
-        -- names under a prefix, so a host with a Swift runtime of its own never sees two classes of one name
         local namespace = getenv("XL_NAMESPACE") or ""
         if namespace == "" then
             namespace = "XLG."
