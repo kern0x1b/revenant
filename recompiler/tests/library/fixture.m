@@ -6,23 +6,24 @@
 static NSInteger RCFCreated;
 
 @implementation RCFToken
-- (instancetype)initWithValue:(NSString *)value
+- (instancetype)initWithValue:(NSInteger)value
 {
     self = [super init];
     if (self)
-        _value = [value copy];
+        _value = value;
     return self;
 }
 @end
 
 @implementation RCFClient {
-    NSString *_siteKey;
+    NSInteger _seed;
+    NSInteger _counter;
 }
 
-+ (RCFClient *)clientWithSiteKey:(NSString *)siteKey
++ (RCFClient *)clientWithSeed:(NSInteger)seed
 {
     RCFClient *client = [[RCFClient alloc] init];
-    client->_siteKey = [siteKey copy];
+    client->_seed = seed;
     RCFCreated++;
     return client;
 }
@@ -32,9 +33,14 @@ static NSInteger RCFCreated;
     return ++_counter;
 }
 
-- (NSString *)siteKey
+- (NSInteger)seed
 {
-    return _siteKey;
+    return _seed;
+}
+
+- (NSInteger)describedLength
+{
+    return (NSInteger)[NSString stringWithFormat:@"client-%ld-%ld", (long)_seed, (long)_counter].length;
 }
 
 - (NSObject *)hostBundle
@@ -42,17 +48,12 @@ static NSInteger RCFCreated;
     return [NSBundle mainBundle];
 }
 
-- (NSString *)bundleIdentifier
+- (RCFToken *)tokenForAction:(NSInteger)action
 {
-    return [[NSBundle mainBundle] bundleIdentifier];
+    return [[RCFToken alloc] initWithValue:_seed * 1000 + action * 10 + RCFCreated];
 }
 
-- (RCFToken *)tokenForAction:(NSString *)action
-{
-    return [[RCFToken alloc] initWithValue:[NSString stringWithFormat:@"%@:%@:%ld", _siteKey, action, (long)RCFCreated]];
-}
-
-- (void)executeWithAction:(NSString *)action completion:(void (^)(RCFToken *token, NSError *error))completion
+- (void)executeWithAction:(NSInteger)action completion:(void (^)(RCFToken *token, NSError *error))completion
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         completion([self tokenForAction:action], nil);

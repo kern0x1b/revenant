@@ -1,18 +1,17 @@
 #import <Foundation/Foundation.h>
 
 @interface RCFToken : NSObject
-@property (nonatomic, copy, readonly) NSString *value;
-- (instancetype)initWithValue:(NSString *)value;
+@property (nonatomic, readonly) NSInteger value;
+- (instancetype)initWithValue:(NSInteger)value;
 @end
 
 @interface RCFClient : NSObject
-@property (nonatomic, readonly) NSInteger counter;
-+ (RCFClient *)clientWithSiteKey:(NSString *)siteKey;
++ (RCFClient *)clientWithSeed:(NSInteger)seed;
 - (NSInteger)bump;
-- (NSString *)siteKey;
+- (NSInteger)seed;
+- (NSInteger)describedLength;
 - (NSObject *)hostBundle;
-- (NSString *)bundleIdentifier;
-- (RCFToken *)tokenForAction:(NSString *)action;
-- (void)executeWithAction:(NSString *)action completion:(void (^)(RCFToken *token, NSError *error))completion;
+- (RCFToken *)tokenForAction:(NSInteger)action;
+- (void)executeWithAction:(NSInteger)action completion:(void (^)(RCFToken *token, NSError *error))completion;
 - (NSUInteger)threadNumber;
 @end

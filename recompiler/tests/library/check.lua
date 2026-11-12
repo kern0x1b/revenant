@@ -24,24 +24,57 @@ local function exports(file)
     return list
 end
 
-local EXPECTED = {"reserve", "load", "class", "create", "methods", "string", "bundle", "bundle.path", "token", "completion", "completion.thread"}
+local EXPECTED = {"reserve", "load", "class", "create", "methods", "describe", "bundle", "bundle.path", "token", "completion", "completion.thread"}
 
-function main(out, opt)
-    opt = type(opt) == "table" and opt or {host_only = opt == "--host-only"}
+local function build_objc(e, corpus, o, here)
+    corpus.ios(e, {"-fuse-ld=" .. e.ld, "-O2", "-w", "-fobjc-arc", "-dynamiclib", "-install_name", "@rpath/RCFixture.dylib", "-framework", "Foundation", "-I", here,
+                   path.join(here, "fixture.m"), "-o", o("RCFixture.dylib")})
+    io.writefile(o("includes.h"), string.format('#include "%s"\n#include "%s"\n', path.join(e.recompiler, "include", "uikit-includes.h"), path.join(here, "RCFixture.h")))
+    return {XL_LIBRARY = "1"}, {}
+end
+
+local function build_swift(e, corpus, o, here)
+    local libs = os.getenv("XL_SWIFTOBJC_LIBS")
+    if not libs or not os.isdir(libs) then
+        raise("XL_SWIFTOBJC_LIBS must name the folder with libswiftCore.dylib (the arm64 runtime of revenant@swift-runtime), libc++.1.dylib and libc++abi.1.dylib the fixture is translated with")
+    end
+    local swift, layouts = corpus.swift()
+    os.execv(path.join(swift, "bin", "swiftc"), {"-target", "arm64-apple-ios12.0", "-sdk", e.sdk, "-Xfrontend", "-read-legacy-type-info-path=" .. layouts,
+                                                 "-runtime-compatibility-version", "none", "-emit-library", "-module-name", "RCFixture",
+                                                 "-emit-objc-header-path", o("RCFixture-Swift.h"), "-Xlinker", "-install_name", "-Xlinker", "@rpath/RCFixture.dylib",
+                                                 "-o", o("RCFixture.dylib"), path.join(here, "fixture.swift")})
+    io.writefile(o("includes.h"), string.format('#include "%s"\n#include "%s"\n', path.join(e.recompiler, "include", "swiftdemo-includes.h"), o("RCFixture-Swift.h")))
+    return {XL_LIBRARY = "1", XL_REPLACES = "/usr/lib/libc++.1.dylib=" .. path.join(libs, "libc++.1.dylib"), XL_SWIFT_HOST_ANCESTORS = "1"},
+           {path.join(libs, "libswiftCore.dylib"), path.join(libs, "libc++.1.dylib"), path.join(libs, "libc++abi.1.dylib")}
+end
+
+function main(out, ...)
+    local variant, host_only = "objc", false
+    for _, argument in ipairs({...}) do
+        if type(argument) == "table" then
+            host_only = argument.host_only or host_only
+        elseif argument == "--host-only" then
+            host_only = true
+        else
+            variant = argument
+        end
+    end
+    local build = ({objc = build_objc, swift = build_swift})[variant]
+    if not build then
+        raise("the library variant is objc or swift, not %s", variant)
+    end
     local scripts = path.join(os.scriptdir(), "..", "..", "tools")
     local corpus = import("corpus", {rootdir = scripts, anonymous = true})
     local translate = import("translate", {rootdir = scripts, anonymous = true})
     local e
-    e, out = corpus.setup("library", out)
+    e, out = corpus.setup("library-" .. variant, out)
     local here = os.scriptdir()
     local function o(file)
         return path.join(out, file)
     end
 
-    corpus.ios(e, {"-fuse-ld=" .. e.ld, "-O2", "-w", "-fobjc-arc", "-dynamiclib", "-install_name", "@rpath/RCFixture.dylib", "-framework", "Foundation", "-I", here,
-                   path.join(here, "fixture.m"), "-o", o("RCFixture.dylib")})
-    io.writefile(o("includes.h"), string.format('#include "%s"\n#include "%s"\n', path.join(e.recompiler, "include", "uikit-includes.h"), path.join(here, "RCFixture.h")))
-    translate.translate(o("RCFixture.dylib"), o("includes.h"), o("xl"), {}, {XL_LIBRARY = "1"})
+    local options, images = build(e, corpus, o, here)
+    translate.translate(o("RCFixture.dylib"), o("includes.h"), o("xl"), images, options)
     local library = o("xl/RCFixture.dylib")
 
     local list = segments(library)
@@ -67,7 +100,7 @@ function main(out, opt)
     corpus.armv7(e, {"-O2", "-w", "-fobjc-arc", "-I", path.join(e.recompiler, "include"), "-framework", "Foundation", "-framework", "UIKit",
                      path.join(here, "host.m"), path.join(e.recompiler, "src", "loader", "xl_loader.c"), "-o", o("host")})
     corpus.sign(e, o("host"))
-    if opt.host_only then
+    if host_only then
         print("ok (host part)")
         return
     end
