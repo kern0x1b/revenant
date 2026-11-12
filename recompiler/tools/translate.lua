@@ -275,8 +275,13 @@ function translate(input, includes, out, images, opt)
     for _, image in ipairs(images or {}) do
         table.insert(extra, path.absolute(image))
     end
+    local library = getenv("XL_LIBRARY")
+    library = library ~= nil and library ~= "" and library ~= "0"
     local name = basename(input)
     if #name > 6 and name:endswith("-arm64") then
+        name = name:sub(1, -7)
+    end
+    if library and name:endswith(".dylib") then
         name = name:sub(1, -7)
     end
     os.mkdir(out)
@@ -291,6 +296,9 @@ function translate(input, includes, out, images, opt)
     local base = getenv("XL_BASE") or "0x10000000"
     local guest = {"-target", "arm64-apple-ios12.0", "-isysroot", e.sdk, "-O2", "-fno-stack-protector", "-U_FORTIFY_SOURCE", "-D_FORTIFY_SOURCE=0", "-w"}
     local host = {"-target", "armv7-apple-ios6.0", "-marm", "-isysroot", e.sdk, "-O2", "-w"}
+    if library then
+        table.insert(host, "-fPIC")
+    end
 
     for _, source in ipairs({"runtime", "data"}) do
         run("xcrun", table.join({"clang"}, guest, {"-fno-builtin", "-I", e.blocks, "-c", path.join(e.blocks, source .. ".c"), "-o", o("support-blocks-" .. source .. ".o")}))
@@ -421,7 +429,7 @@ function translate(input, includes, out, images, opt)
     run("xcrun", table.join({"clang", "-target", "arm64-apple-ios12.0", "-isysroot", e.sdk, "-dynamiclib", "-install_name", "@rpath/libxl-guest.dylib",
                              o("guest.o")}, support, {"-o", o("libxl-guest.dylib")}, trapflags))
 
-    local key = lift_key(e, input, extra, out, replaces, base)
+    local key = lift_key(e, input, extra, out, replaces, base .. (library and " library" or ""))
     local lifted_objs
     if os.isfile(o("lift.stamp")) and io.readfile(o("lift.stamp")) == key and os.isfile(o("lifted-objs.txt")) then
         print("lift inputs unchanged since the last run: reusing its lifted objects")
@@ -429,16 +437,34 @@ function translate(input, includes, out, images, opt)
     else
         os.tryrm(o("lift.stamp"))
         run(e.xlate, table.join({"--base", base, "--output", o("lifted.bc"), "--layout", o("layout.txt"), "--passthrough", o("passthrough.txt"),
-                                 "--state-header", o("xl_state.h")}, replaces, {"--bridge", o("libxl-guest.dylib"), input}, extra, {o("libxl-guest.dylib")}))
+                                 "--state-header", o("xl_state.h")}, library and {"--library"} or {}, replaces, {"--bridge", o("libxl-guest.dylib"), input}, extra,
+                                {o("libxl-guest.dylib")}))
         lifted_objs = compile_lifted(e, out, host)
         io.writefile(o("lifted-objs.txt"), table.concat(lifted_objs, " ") .. "\n")
         io.writefile(o("lift.stamp"), key)
     end
 
-    local extra_cflags = words(getenv("XL_EXTRA_CFLAGS"))
+    local library_flags, host_base = {}, 0
+    if library then
+        local bytes = 0
+        for _, object in ipairs(lifted_objs) do
+            bytes = bytes + filesize(object)
+        end
+        local window = math.ceil((bytes + 0x800000) / 0x1000000) * 0x1000000
+        host_base = tonumber(base) - window
+        if host_base < 0x100000 then
+            raise("the lifted code needs %d bytes below the guest base %s: raise XL_BASE", bytes, base)
+        end
+        library_flags = {"-DXL_LIBRARY", string.format("-DXL_LIBRARY_BASE=0x%xu", host_base)}
+    end
+    local extra_cflags = table.join(library_flags, words(getenv("XL_EXTRA_CFLAGS")))
     local clang = path.join(e.llvmbin, "clang")
     local runtime = path.join(lab, "src", "runtime")
     run(clang, table.join(host, {"-I", out, "-I", runtime}, extra_cflags, {"-c", path.join(runtime, "runtime.c"), "-o", o("runtime.o")}))
+    if library then
+        run(clang, table.join(host, {"-I", out, "-I", runtime}, extra_cflags, {"-c", path.join(runtime, "library.c"), "-o", o("library.o")}))
+        writelines(o("exports.txt"), {"_xl_library_init", "_xl_library_diagnostics"})
+    end
     for _, source in ipairs({path.join(runtime, "bridge.m"), path.join(runtime, "objc_bridge.m"), path.join(runtime, "swift_classes.m"),
                              path.join(runtime, "objc_compat.m"), o("host.m")}) do
         local object = o(path.basename(source) .. ".o")
@@ -509,11 +535,17 @@ function translate(input, includes, out, images, opt)
         end
     end
 
-    local binary = o(name)
+    local binary = o(library and name .. ".dylib" or name)
+    local kind = {"-Wl,-no_pie"}
+    if library then
+        kind = {"-dynamiclib", "-install_name", getenv("XL_INSTALL_NAME") or "@rpath/" .. name .. ".dylib",
+                string.format("-Wl,-image_base,0x%x", host_base), "-Wl,-exported_symbols_list," .. o("exports.txt")}
+    end
     local function link(more)
-        return os.execv("xcrun", table.join({"clang", "-target", "armv7-apple-ios6.0", "-isysroot", e.sdk, "-fuse-ld=" .. e.ld, "-Wl,-no_pie"},
+        return os.execv("xcrun", table.join({"clang", "-target", "armv7-apple-ios6.0", "-isysroot", e.sdk, "-fuse-ld=" .. e.ld}, kind,
                                             strip_dylibs, {"-Wl,-no_objc_category_merging", "-Wl,-no_deduplicate"}, words(io.readfile(o("layout.txt"))),
                                             lifted_objs, {o("runtime.o"), o("bridge.o"), o("objc_bridge.o"), o("swift_classes.o"), o("objc_compat.o"), o("host.o")},
+                                            library and {o("library.o")} or {},
                                             words(getenv("XL_EXTRA_OBJ")), backport_libs, framework_flags, undef_flags, more or {},
                                             {"-framework", "Foundation", "-framework", "CoreGraphics", "-framework", "UIKit", "-lobjc", "-lz"},
                                             extra_libs, {"-o", binary}), {stderr = o("link.err"), try = true}) == 0
