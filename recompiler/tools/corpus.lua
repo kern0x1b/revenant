@@ -1,4 +1,17 @@
 import("env")
+import("core.package.package")
+
+function swift()
+    local installs = os.dirs(path.join(package.installdir(), "s", "swift", "*", "*"))
+    table.sort(installs)
+    for _, install in ipairs(installs) do
+        local layouts = path.join(install, "share", "swift-source", "stdlib", "toolchain", "legacy_layouts", "iphoneos", "layouts-arm64.yaml")
+        if os.isfile(path.join(install, "bin", "swiftc")) and os.isfile(layouts) then
+            return install, layouts
+        end
+    end
+    raise("no revenant@swift install under %s carries its own legacy_layouts source cache (docs/reference/recompiler/corpus.md says why it is needed)", path.join(package.installdir(), "s", "swift"))
+end
 
 function setup(name, out)
     local e = env()
@@ -13,6 +26,14 @@ end
 
 function ios(e, argv)
     os.execv("xcrun", table.join({"clang", "-target", "arm64-apple-ios12.0", "-isysroot", e.sdk}, argv))
+end
+
+function armv7(e, argv)
+    os.execv("xcrun", table.join({"clang", "-target", "armv7-apple-ios6.0", "-isysroot", e.sdk, "-fuse-ld=" .. e.ld}, argv))
+end
+
+function sign(e, file)
+    os.execv(e.ldid, {"-S", file})
 end
 
 function run(program, argv, log)

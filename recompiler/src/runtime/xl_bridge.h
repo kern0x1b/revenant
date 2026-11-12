@@ -35,6 +35,12 @@ struct xl_imp_entry {
     uint32_t guest;
 };
 
+struct xl_swift_method {
+    uint32_t guest;
+    void *host;
+    const char *types;
+};
+
 struct xl_variadic_shim {
     const char *selector;
     void (*handler)(State *);

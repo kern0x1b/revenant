@@ -1,17 +1,3 @@
-import("core.package.package")
-
-local function swift_toolchain()
-    local installs = os.dirs(path.join(package.installdir(), "s", "swift", "*", "*"))
-    table.sort(installs)
-    for _, install in ipairs(installs) do
-        local layouts = path.join(install, "share", "swift-source", "stdlib", "toolchain", "legacy_layouts", "iphoneos", "layouts-arm64.yaml")
-        if os.isfile(path.join(install, "bin", "swiftc")) and os.isfile(layouts) then
-            return install, layouts
-        end
-    end
-    raise("no revenant@swift install under %s carries its own legacy_layouts source cache (docs/reference/recompiler/corpus.md says why it is needed)", path.join(package.installdir(), "s", "swift"))
-end
-
 local EXPECTED = {
     "client.bump", "client.make", "client.block", "client.dyncast", "client.sametype", "objc.responds", "objc.perform", "objc.kind",
     "objc.hash", "sub.vtable", "sub.dispatch", "sub.dyncast", "sub.superclass", "ivars.released", "ivars.released.sub",
@@ -28,7 +14,7 @@ function main(out)
     if not libs or not os.isdir(libs) then
         raise("XL_SWIFTOBJC_LIBS must name the folder with libswiftCore.dylib (the arm64 runtime of revenant@swift-runtime), libc++.1.dylib and libc++abi.1.dylib the fixture is translated with")
     end
-    local swift, layouts = swift_toolchain()
+    local swift, layouts = corpus.swift()
     os.execv(path.join(swift, "bin", "swiftc"), {"-target", "arm64-apple-ios12.0", "-sdk", e.sdk, "-Xfrontend", "-read-legacy-type-info-path=" .. layouts,
                                                  "-runtime-compatibility-version", "none", "-o", path.join(out, "fixture-arm64"), path.join(os.scriptdir(), "fixture.swift")})
     local includes = path.join(e.recompiler, "include", "swiftdemo-includes.h")

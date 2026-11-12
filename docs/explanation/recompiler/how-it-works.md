@@ -130,6 +130,8 @@ print on the iPad 2 what objc4 printed.
 
 ## Scope and limits
 
+- A translated program can also be built as a library that an app loads into its own process, at fixed addresses
+  (`XL_LIBRARY=1`); see [library mode](library-mode.md).
 - Objective-C and C are supported. Swift is being brought up on a demo app, with `libswiftCore` lifted as a guest
   image. It does not run to the end yet, and what a Swift program meets is measured one failure at a time. Swift
   metadata is 64-bit only, so the Swift runtime needs a separate effort.

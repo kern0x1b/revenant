@@ -44,6 +44,7 @@ static cl::opt<std::string> ResolvedOut("resolved-out", cl::desc("With --objc-ma
 static cl::opt<std::string> Output("output", cl::desc("Output bitcode"));
 static cl::opt<std::string> IROutput("ir", cl::desc("Optional textual IR output"));
 static cl::opt<std::string> LayoutOutput("layout", cl::desc("Linker arguments placing guest segments"));
+static cl::opt<bool> Library("library", cl::desc("With --layout: the output is a dylib, so __LINKEDIT is placed after the last guest segment"));
 static cl::opt<std::string> StateHeader("state-header", cl::desc("C header with guest register offsets and guest export addresses"));
 static cl::opt<std::string> PassthroughPath("passthrough", cl::desc("Host symbols guest data may bind directly"));
 static cl::opt<std::string> ObjCManifest("objc-manifest", cl::desc("Write the Objective-C metadata of the guest images as JSON"));
@@ -1527,6 +1528,13 @@ bool WriteLayout(const std::vector<GuestSegment> &segments) {
     os << "-Wl,-segaddr," << name << ",0x" << Hex(lowest[name]) << "\n";
     const char *prot = writable[name] ? "rw" : "r";
     os << "-Wl,-segprot," << name << "," << prot << "," << prot << "\n";
+  }
+  if (Library) {
+    uint64_t end = 0;
+    for (auto &entry : segments) {
+      end = std::max(end, entry.image->host(entry.segment.vmaddr) + entry.segment.vmsize);
+    }
+    os << "-Wl,-segaddr,__LINKEDIT,0x" << Hex(AlignUp(end, 0x10000)) << "\n";
   }
   return true;
 }

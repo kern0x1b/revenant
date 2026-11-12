@@ -466,6 +466,7 @@ bool SplitGuestLayoutClasses(std::vector<ObjCImage> &objc, const std::vector<boo
         image.swift_static_classes.push_back(cls.address);
         image.swift_static_classes.push_back(cls.metaclass);
         image.swift_listed_classes.push_back(cls.address);
+        image.swift_methods.push_back({cls.data.name, cls.data.methods, cls.meta_data.methods});
       } else {
         kept.push_back(cls);
       }
@@ -537,6 +538,15 @@ void WriteManifest(llvm::raw_ostream &os, const std::vector<const Image *> &imag
           json.attributeArray("swift_listed_classes", [&] {
             for (uint64_t address : info.swift_listed_classes) {
               json.value(static_cast<int64_t>(address));
+            }
+          });
+          json.attributeArray("swift_methods", [&] {
+            for (auto &cls : info.swift_methods) {
+              json.object([&] {
+                json.attribute("name", cls.name);
+                WriteMethods(json, "instance_methods", cls.instance_methods);
+                WriteMethods(json, "class_methods", cls.class_methods);
+              });
             }
           });
           json.attribute("clsrolist_count", static_cast<int64_t>(info.clsrolist_count));
