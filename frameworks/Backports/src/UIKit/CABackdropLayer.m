@@ -7,6 +7,8 @@ static const void *RevenantBackdropEffectKey = &RevenantBackdropEffectKey;
 
 static const double RevenantBackdropClearRadius = 4.0;
 
+static const CGFloat RevenantBackdropMinimumSide = 100.0;
+
 REVENANT_ALIAS_STATE(CABackdropLayer, CALayer,
     double _revenantScale;
     BOOL _revenantDisabled;
@@ -101,7 +103,8 @@ REVENANT_ALIAS_STATE(CABackdropLayer, CALayer,
         return;
     }
     UIBlurEffectStyle style;
-    if (_revenantDisabled || ![self revenant_blurStyle:&style]) {
+    CGSize size = self.bounds.size;
+    if (_revenantDisabled || MIN(size.width, size.height) < RevenantBackdropMinimumSide || ![self revenant_blurStyle:&style]) {
         [self revenant_removeEffect];
         return;
     }
