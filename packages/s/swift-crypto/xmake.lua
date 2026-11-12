@@ -9,6 +9,7 @@ package("swift-crypto")
     add_resources("5.0.1", "swift-asn1", "https://github.com/apple/swift-asn1/archive/refs/tags/1.7.3.tar.gz",
                   "77add3684fd75a586529893288af51ed092c565ec0c154d2b4eedb3a6bdc294c")
 
+    add_configs("shared", {description = "Compile against a shared swift-runtime, for a port that requires it so.", default = false, type = "boolean"})
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("sources", {description = "The digest of this recipe, its patches and the apple-compat calls it builds, so a changed step is a different package.",
                             default = swift_crypto_sources_digest, type = "string", readonly = true})
@@ -16,7 +17,7 @@ package("swift-crypto")
     local FLOOR = "6.0"
 
     on_load("iphoneos", function (package)
-        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime"})
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil}})
         package:add("deps", "revenant@apple-compat", {alias = "apple-compat"})
         package:add("deps", "revenant@ld64", {alias = "ld64"})
         package:add("links", "swiftCrypto")
