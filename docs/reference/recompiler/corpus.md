@@ -65,6 +65,16 @@ image linked from the 319 objects of Google's reCAPTCHA Enterprise SDK had three
 loop skips a listed start that lies in one and counts it as `table data` in the summary line. The check requires the
 exact line `4 jump table targets, 0 failures, 1 jump table data words`.
 
+A third binary, `hoisted.c` with `hoisted.s`, covers a table whose base register is set before a call and read after
+it. Rellume writes every register to the state before a call and reads it back after, so the base after the call is an
+opaque load, and the same `getUnspecialized` of the new libswiftCore (x22 set once, a call to `isSpecialized` in a
+loop, then `adr`, `ldrb`, `add`, `br`) was not resolved: the guest jumped into the middle of the function and stopped
+with "jump to an address that does not start a translated function", for example on `String(describing:)` of a struct.
+`JumpTables` now clones only the functions that contain a `br`, and in the clone every call keeps x19 to x29 and sp as
+they were before it, which is what the AAPCS64 promises, then runs `GVN` so that the loads after the call take the
+values before it. The check requires exactly `4 jump table targets`. On the guest `libswiftCore` the lift finds 44
+more targets than before (2413 against 2369).
+
 ### lse
 
 A control for rellume's lifting of the ARMv8.1 LSE atomics: LDADD, LDCLR, LDEOR, LDSET, LDSMAX, LDSMIN, LDUMAX,

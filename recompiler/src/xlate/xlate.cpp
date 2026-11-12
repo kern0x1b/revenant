@@ -24,6 +24,7 @@
 #include <llvm/IR/Operator.h>
 #include <llvm/IR/GetElementPtrTypeIterator.h>
 #include <llvm/Transforms/InstCombine/InstCombine.h>
+#include <llvm/Transforms/Scalar/GVN.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 #include <llvm/Transforms/Utils/Local.h>
 #include <llvm/Transforms/Utils/ModuleUtils.h>
@@ -410,7 +411,7 @@ class JumpTables {
       auto call = dyn_cast<CallInst>(user);
       indirect |= call && call->getFunction() == &lifted;
     }
-    if (!indirect) {
+    if (!indirect || !HasIndirectBranch(start)) {
       return targets;
     }
     Module scratch("jump-tables", lifted.getContext());
@@ -424,6 +425,7 @@ class JumpTables {
     }
     SmallVector<ReturnInst *, 4> returns;
     CloneFunctionInto(clone, &lifted, map, CloneFunctionChangeType::DifferentModule, returns);
+    PreserveCalleeSaved(*clone);
     LoopAnalysisManager lam;
     FunctionAnalysisManager fam;
     CGSCCAnalysisManager cgam;
@@ -435,6 +437,8 @@ class JumpTables {
     builder.registerLoopAnalyses(lam);
     builder.crossRegisterProxies(lam, fam, cgam, mam);
     FunctionPassManager passes;
+    passes.addPass(InstCombinePass());
+    passes.addPass(GVNPass());
     passes.addPass(InstCombinePass());
     passes.run(*clone, fam);
     auto &lvi = fam.getResult<LazyValueAnalysis>(*clone);
@@ -471,6 +475,57 @@ class JumpTables {
   uint64_t NextFunction(uint64_t start) {
     auto next = starts_.upper_bound(start);
     return next == starts_.end() ? start + 0x100000 : *next;
+  }
+
+  bool HasIndirectBranch(uint64_t start) {
+    auto image = program_.ImageAt(start);
+    if (!image) {
+      return true;
+    }
+    uint64_t end = NextFunction(start);
+    for (uint64_t address = start; address + 4 <= end; address += 4) {
+      uint8_t bytes[4];
+      if (!image->ReadBytes(address, bytes, sizeof bytes)) {
+        return true;
+      }
+      uint32_t word;
+      memcpy(&word, bytes, sizeof word);
+      if ((word & 0xFFFFFC1Fu) == 0xD61F0000u) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static void PreserveCalleeSaved(Function &clone) {
+    auto &offsets = StateOffsets();
+    auto &context = clone.getContext();
+    auto i8 = Type::getInt8Ty(context);
+    auto i64 = Type::getInt64Ty(context);
+    std::vector<uint64_t> saved;
+    for (int n = 19; n <= 29; ++n) {
+      saved.push_back(offsets.at("x" + std::to_string(n)));
+    }
+    saved.push_back(offsets.at("sp"));
+    std::vector<CallInst *> calls;
+    for (auto &block : clone) {
+      for (auto &inst : block) {
+        auto call = dyn_cast<CallInst>(&inst);
+        if (call && call->getCalledFunction() && call->getCalledFunction()->getName() == "xl_call") {
+          calls.push_back(call);
+        }
+      }
+    }
+    auto state = clone.getArg(0);
+    for (auto call : calls) {
+      IRBuilder<> before(call);
+      IRBuilder<> after(call->getNextNode());
+      for (auto offset : saved) {
+        auto slot = before.CreateConstInBoundsGEP1_64(i8, state, offset);
+        auto value = before.CreateAlignedLoad(i64, slot, Align(8));
+        after.CreateAlignedStore(value, slot, Align(8));
+      }
+    }
   }
 
   static Value *Strip(Value *value) {
