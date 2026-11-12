@@ -973,6 +973,25 @@ if is_plat("iphoneos") and not SELECTED then
         add_frameworks("Foundation", "Security", "CoreFoundation")
     target_end()
 
+    target("SecurityKeyDataProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/apple-ios", "backports.aliased")
+        add_deps("RevenantCKWebAuth")
+        add_files(path.join(TESTS, "Security", "keydata", "main.c"),
+                  path.join(SRC, "Security", "SecurityFunctions10_0_1.m"), path.join(SRC, "Security", "SecKey100.m"),
+                  path.join(SRC, "Security", "SecKeyElliptic10.m"), path.join(SRC, "Security", "SecureEnclaveKey9.m"),
+                  path.join(SRC, "Security", "RevenantSecKeyFail.m"), path.join(SRC, "Security", "SecItemAccessControl8.m"),
+                  path.join(SRC, "Security", "SecAccessControl8.m"), path.join(SRC, "Security", "SecurityNames100.m"),
+                  path.join(SRC, "Security", "SecurityNames90.m"), path.join(SRC, "Security", "SecUseAuthentication9.m"),
+                  path.join(SRC, "LocalAuthentication", "LAContext.m"), path.join(SRC, "LocalAuthentication", "LAErrorDomain.m"),
+                  path.join(SRC, "LocalAuthentication", "RevenantPasscode.m"), path.join(SRC, "LocalAuthentication", "RevenantPasscodeKeyBag.m"))
+        add_cflags("-Wno-deprecated-declarations")
+        add_mflags("-fobjc-arc", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability")
+        add_ldflags("-Wl,-undefined,dynamic_lookup", {force = true})
+        add_frameworks("Foundation", "Security", "CoreFoundation", "UIKit")
+    target_end()
+
     target("LocalAuthProbe")
         set_kind("binary")
         set_default(false)

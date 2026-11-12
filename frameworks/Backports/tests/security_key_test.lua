@@ -78,16 +78,33 @@ function main()
         path.join(webauth, "RevenantCKWebAuth.c"),
         path.join(source, "uECC.c"),
     }
+    local function build_oracle(program, output)
+        clang({"-o", output, program, "-framework", "CoreFoundation", "-framework", "Security"})
+    end
+    local function build_emulated(program, output)
+        clang(table.join({"-fobjc-arc", "-DREVENANT_SECURITY_EMULATE_ACCESS_CONTROL=1", "-include", path.join(keys, "host_private.h"),
+                          "-I", webauth, "-I", source, "-o", output, program},
+                         library, aliases.flags(library), frameworks, {"-Wl,-undefined,dynamic_lookup"}))
+    end
     local oracle = path.join(out, "oracle")
     local emulated = path.join(out, "emulated")
-    clang({"-o", oracle, program, "-framework", "CoreFoundation", "-framework", "Security"})
-    clang(table.join({"-fobjc-arc", "-DREVENANT_SECURITY_EMULATE_ACCESS_CONTROL=1", "-include", path.join(keys, "host_private.h"),
-                      "-I", webauth, "-I", source, "-o", emulated, program},
-                     library, aliases.flags(library), frameworks, {"-Wl,-undefined,dynamic_lookup"}))
+    build_oracle(program, oracle)
+    build_emulated(program, emulated)
     local expected = run(oracle)
     assert(expected == contract, "the macOS Secure Enclave oracle differs from the contract in " .. out)
     local emit = path.join(out, "emit")
     os.mkdir(emit)
     assert(run(emulated, {emit}) == expected, "the emulated Secure Enclave keys differ from the macOS oracle in " .. out)
     verify_with_openssl(emit)
+
+    local keydata = path.join(tests, "Security", "keydata")
+    local data_program = path.join(keydata, "main.c")
+    local data_oracle = path.join(out, "keydata-oracle")
+    local data_emulated = path.join(out, "keydata-emulated")
+    build_oracle(data_program, data_oracle)
+    build_emulated(data_program, data_emulated)
+    local expected_ec = io.readfile(path.join(keydata, "ec.txt"))
+    assert(run(data_oracle, {"ec"}) == expected_ec, "the macOS SecKeyCreateWithData differs from keydata/ec.txt in " .. out)
+    assert(run(data_emulated, {"ec"}) == expected_ec, "the emulated SecKeyCreateWithData differs from the macOS one for EC keys in " .. out)
+    assert(run(data_oracle, {"rsa"}) == io.readfile(path.join(keydata, "rsa.txt")), "the macOS SecKeyCreateWithData differs from keydata/rsa.txt in " .. out)
 end

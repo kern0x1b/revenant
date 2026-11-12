@@ -4730,6 +4730,7 @@ function RevenantCKSystemFieldsSnapshotToken
 function RevenantCKTokenFromCursor
 function RevenantCKTransportError
 function RevenantCKUserIdentityWithDocument
+function RevenantCKValidPublicKeyES256
 function RevenantCKValueFromJSON
 function RevenantCKValueToJSON
 function RevenantCKVerifyES256
@@ -4971,10 +4972,13 @@ function RevenantSecKeyECExchange
 function RevenantSecKeyECSign
 function RevenantSecKeyECVerify
 function RevenantSecKeyFail
+function RevenantSecureEnclaveKeyCopyAttributes
 function RevenantSecureEnclaveKeyCopyPublic
+function RevenantSecureEnclaveKeyCreateImported
 function RevenantSecureEnclaveKeyCreateRandom
 function RevenantSecureEnclaveKeyDelete
 function RevenantSecureEnclaveKeyIs
+function RevenantSecureEnclaveKeyIsImported
 function RevenantSecureEnclaveKeyIsPrivate
 function RevenantSecureEnclaveKeyLookup
 function RevenantSecureEnclaveKeyPoint
@@ -4983,7 +4987,6 @@ function RevenantSecurityAttributesFromItemResult
 function RevenantSecurityCarries
 function RevenantSecurityKeyIsPortEC
 function RevenantSecurityNetworkFetchAllowedFor
-function RevenantSecurityPaddingFor
 function RevenantSensorKitMonotonicSeconds
 function RevenantSignpostMetrics
 function RevenantSpotlightDefaultItems
@@ -5162,6 +5165,7 @@ function SecKeyCreateDecryptedData
 function SecKeyCreateEncryptedData
 function SecKeyCreateRandomKey
 function SecKeyCreateSignature
+function SecKeyCreateWithData
 function SecKeyIsAlgorithmSupported
 function SecKeyVerifySignature
 function SecPolicyCopyProperties
