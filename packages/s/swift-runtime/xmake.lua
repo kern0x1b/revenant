@@ -302,6 +302,7 @@ package("swift-runtime")
                                       "-Xcc", "-Rmodule-build", "-Xcc", "-Rmodule-import"}, use_ld,
                                      opt and opt.extra_flags or {},
                                      (opt and opt.concurrency) and {} or {"-Xfrontend", "-disable-implicit-concurrency-module-import"},
+                                     package:is_arch("arm64") and {"-enable-library-evolution"} or {},
                                      runtime_flags, swift.availability(source))
             local object = path.join(generated, name .. ".o")
             local linked = {}
@@ -453,6 +454,7 @@ package("swift-runtime")
             local url_percent_encoded = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "URLPercentEncoded.swift")
             local url_components_encoded = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "URLComponentsEncoded.swift")
             local url_directories = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "URLDirectories.swift")
+            local url_invalid_characters = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "URLInvalidCharacters.swift")
             local values = expand(path.join(foundation, "NSValue.swift.gyb"), path.join(generated, "NSValue.swift"))
             local foundation_objects = {}
             for _, file in ipairs({"DataThunks.m", "BundleLookup.mm"}) do
@@ -477,7 +479,7 @@ package("swift-runtime")
                 "PersonNameComponents.swift", "PlistEncoder.swift", "Pointers+DataProtocol.swift",
                 "Progress.swift", "ReferenceConvertible.swift", "Scanner.swift", "String.swift", "TimeZone.swift",
                 "URL.swift", "URLCache.swift", "URLComponents.swift", "URLRequest.swift", "URLSession.swift",
-                "UUID.swift"}), {presentation_intent, locale_language, attributed_string_markdown, date_format_style, url_session_web_socket_task, url_percent_encoded, url_components_encoded, url_directories}),
+                "UUID.swift"}), {presentation_intent, locale_language, attributed_string_markdown, date_format_style, url_session_web_socket_task, url_percent_encoded, url_components_encoded, url_directories, url_invalid_characters}),
                           table.join(flat_flags, {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation", "-lswiftCoreGraphics",
                            "-framework", "Foundation", "-framework", "CoreFoundation"}), foundation_objects,
                           {concurrency = true, module_cache = foundation_cache,
