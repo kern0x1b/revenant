@@ -45,6 +45,8 @@
 #include <CommonCrypto/CommonRandom.h>
 #include <objc/runtime.h>
 #include <objc/objc-sync.h>
+#include <objc/objc-exception.h>
+#include <unwind.h>
 
 #include <stdarg.h>
 extern void *__memcpy_chk(void *, const void *, __SIZE_TYPE__, __SIZE_TYPE__);
@@ -56,6 +58,10 @@ extern __SIZE_TYPE__ __strlcpy_chk(char *, const char *, __SIZE_TYPE__, __SIZE_T
 extern __SIZE_TYPE__ __strlcat_chk(char *, const char *, __SIZE_TYPE__, __SIZE_TYPE__);
 extern char *__strncpy_chk(char *, const char *, __SIZE_TYPE__, __SIZE_TYPE__);
 extern char *__strncat_chk(char *, const char *, __SIZE_TYPE__, __SIZE_TYPE__);
+
+extern void *__cxa_begin_catch(void *);
+extern void __cxa_end_catch(void);
+extern void __cxa_rethrow(void) __attribute__((noreturn));
 
 typedef unsigned long long malloc_type_id_t;
 extern void *malloc_type_malloc(__SIZE_TYPE__ size, malloc_type_id_t type_id);

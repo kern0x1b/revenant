@@ -2515,7 +2515,7 @@ int main(int argc, const char **argv) {
       {"_objc_retainAutoreleaseReturnValue", 1}, {"_objc_unsafeClaimAutoreleasedReturnValue", 1},
       {"_objc_claimAutoreleasedReturnValue", 1}, {"_objc_retainBlock", 1},
       {"_objc_retain", 1}, {"_objc_release", 1}, {"_objc_autorelease", 1},
-      {"___cxa_atexit", 3},
+      {"___cxa_atexit", 3}, {"__Unwind_Resume", 1}, {"___cxa_begin_catch", 1}, {"___cxa_end_catch", 0}, {"___cxa_rethrow", 0},
       {"__Znwm", 1}, {"__Znam", 1}, {"__ZdlPv", 1}, {"__ZdaPv", 1},
       {"_NSGetUncaughtExceptionHandler", 0},
       {"_kevent", 6},
@@ -2527,13 +2527,15 @@ int main(int argc, const char **argv) {
       {"_exit", 1}, {"__exit", 1},
       {"_objc_copyImageNames", 1}, {"_objc_copyClassNamesForImage", 2}, {"_objc_copyClassList", 1},
       {"_objc_readClassPair", 2}, {"__objc_realizeClassFromSwift", 2}, {"_class_getImageName", 1}};
-  static const std::set<std::string> faults = {"__Unwind_Resume", "___objc_personality_v0", "___gxx_personality_v0",
-                                               "___cxa_throw", "_objc_exception_throw"};
+  static const std::set<std::string> personalities = {"___objc_personality_v0", "___gxx_personality_v0",
+                                                      "___gcc_personality_v0"};
+  static const std::set<std::string> faults = {"___cxa_throw"};
   for (auto &symbol : ReadLines(SymbolsPath)) {
-    if (provided.count(symbol) || symbol == "dyld_stub_binder") {
+    if (provided.count(symbol) || symbol == "dyld_stub_binder" || personalities.count(symbol)) {
       continue;
     }
     if (StringRef(symbol).starts_with("_OBJC_CLASS_$_") || StringRef(symbol).starts_with("_OBJC_METACLASS_$_") ||
+        StringRef(symbol).starts_with("_OBJC_EHTYPE_") || symbol == "_objc_ehtype_vtable" ||
         symbol == "__objc_empty_cache" || symbol == "___CFConstantStringClassReference") {
       generator.Passthrough(symbol);
       continue;
@@ -2564,7 +2566,7 @@ int main(int argc, const char **argv) {
       continue;
     }
     if (faults.count(symbol)) {
-      generator.Fault(symbol, "exception unwinding across translated code is not implemented");
+      generator.Fault(symbol, "a C++ exception thrown by translated code is not implemented");
       continue;
     }
     static const std::map<std::string, std::string> empty_singletons = {

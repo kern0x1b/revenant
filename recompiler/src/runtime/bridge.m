@@ -8,6 +8,7 @@ State *xl_current_state(void);
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unwind.h>
 
 _Static_assert(sizeof(va_list) == sizeof(char *), "host va_list must be a pointer");
 
@@ -704,6 +705,35 @@ void xl_manual__ZdlPv(void *pack) { struct xl_alloc_pack *p = pack; free((void *
 void xl_manual__ZdaPv(void *pack) { struct xl_alloc_pack *p = pack; free((void *)(uintptr_t)p->a0); }
 
 void xl_manual_NSGetUncaughtExceptionHandler(void *pack) { struct { uint64_t r; } *p = pack; p->r = 0; }
+
+extern void _Unwind_SjLj_Resume(struct _Unwind_Exception *exception);
+extern void *__cxa_begin_catch(void *exception);
+extern void __cxa_end_catch(void);
+extern void __cxa_rethrow(void) __attribute__((noreturn));
+
+void xl_manual___cxa_begin_catch(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t a0, r; } *p = pack;
+    p->r = (uint64_t)(uintptr_t)__cxa_begin_catch((void *)(uintptr_t)p->a0);
+}
+
+void xl_manual___cxa_end_catch(void *pack)
+{
+    (void)pack;
+    __cxa_end_catch();
+}
+
+void xl_manual___cxa_rethrow(void *pack)
+{
+    (void)pack;
+    __cxa_rethrow();
+}
+
+void xl_manual__Unwind_Resume(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t a0, r; } *p = pack;
+    _Unwind_SjLj_Resume((struct _Unwind_Exception *)(uintptr_t)p->a0);
+}
 
 struct xl_tlv_region {
     uint32_t vars_start;
