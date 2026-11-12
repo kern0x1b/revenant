@@ -195,6 +195,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [UIKit: CASpringAnimation](reference/backports/UIKit/CASpringAnimation.md) | the iOS 9 spring class on iOS 6, its curve and its keyframe delivery |
 | [UIKit: keyboard notification for a new input](reference/backports/UIKit/KeyboardInputSwitch.md) | why an application that lays out above the keyboard missed the focus of a new input on iOS 6, and the frame change the backports post |
 | [UIKit: UILabel background](reference/backports/UIKit/UILabelBackground.md) | the opaque white default of a code-made label on iOS 6 and the later default the backports give it |
+| [UIKit: UISwitch appearance](reference/backports/UIKit/UISwitchAppearance.md) | the 79 by 27 switch of iOS 6, and the 51 by 31 switch of iOS 13 to 18 that the backports draw in its place |
 | [UIKit: UITextField alignment](reference/backports/UIKit/UITextFieldAlignment.md) | the top vertical alignment a code-made text field starts with on iOS 6 and the centered start the backports give it |
 | [UIKit: UICornerConfiguration](reference/backports/UIKit/CornerConfiguration.md) | per-corner radii, concentric corners and how a view is clipped to them on iOS 6 |
 | [Vision](reference/backports/Vision/README.md) | the Swift forms of the landmark, recognised-text and contour accessors, and the missing landmark detector |
