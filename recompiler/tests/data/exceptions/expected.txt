@@ -1,0 +1,20 @@
+guest throw: NSException GuestError
+host throw: NSException NSRangeException
+guest subclass: XLError XLError
+guest object: id string
+no throw: nothing thrown
+finally blocks: 5
+destructors run: 10
+rethrow of a guest throw: GuestError
+rethrow of a host throw: NSRangeException
+rethrow count: 2
+catch all of a guest throw: 1
+catch all of a host throw: 1
+catch all of no throw: 0
+catch all count: 2
+registers after 2000 catches: 45081762
+two regions in 2000 rounds: 14000
+through a host frame: InBlock
+tail call after a catch: 1 9
+on a second thread: NSRangeException
+destructors run at the end: 12023
