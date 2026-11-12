@@ -132,6 +132,30 @@ print on the iPad 2 what objc4 printed.
   unknown personality, a function that mixes personalities). A `throw` of translated C++ code (`__cxa_throw`) is a
   fault, and a catch of a C++ class the guest itself defines cannot match a host exception, so that clause is dropped.
   `recompiler/tests/exceptions` is the regression test.
+- **Callbacks into the guest.** A thread has one set of guest registers, and host code that calls a guest function runs
+  it on that set: a method libobjc dispatches (`+initialize`, a delegate method, `+class` of a guest root class), a
+  block, a C callback, a hook. Every such call goes through `xl_invoke` or `xl_invoke_n`, which restore the program
+  counter, the link register and `x0` to `x7` and return the callee's `x0`; a callback pays for nothing else, and the
+  one that a C library makes for every comparison of a sort is the hot one (722 ns on the iPhone 4S). A message send in
+  flight depends on more than that. `objc_msgSend` routes with the arguments still in the registers (`x0` to `x7`, the
+  `x8` of a structure result, `v0` to `v7`) and then jumps to the guest method or to the selector's bridge, and routing
+  itself runs guest code: the shadow of a statically laid out class is built when the first message reaches it, which
+  asks the lazy class namer and sends `+class` to the superclass, and libobjc sends `+initialize` before it answers with
+  the method. A callback that left its own values behind made the message arrive with them. The first `objc_opt_self` of
+  a prespecialized `_IndexBox<Int>` returned `_SwiftObject`, the result of that `+class`, so the first index box was
+  allocated with a class that has no Swift destroy function, and every `Mirror`, `String(describing:)` and
+  `AnyCollection` died on it. So the three places that route and then enter guest code with the arguments they were
+  given (`objc_msgSend`, `objc_msgSendSuper2` and the entry of an `IMP` that the guest holds) save `x0` to `x8` and `v0`
+  to `v7` before they route and put them back after it; the cost falls on the message that routes, where the copy is
+  small beside the lookup, and not on every callback. On the iPhone 4S, copying the whole register file in `xl_invoke`
+  made the comparator callback of `qsort` 1470 ns, and copying only the argument registers there 1130 ns, against 722
+  ns. With the copy in the routing handlers the callback stays at 722 ns, and a message to a guest method takes 8.7 µs
+  where the whole-state copy that the routing used to make around `class_getMethodImplementation` took 9.5 µs. The copy
+  is `__builtin_memcpy_inline` (NEON loads and stores): a loop of 64-bit integer moves, which the compiler cannot turn
+  into a call, measured 8.9 µs to 9.0 µs.
+  `recompiler/tests/classpair` has both cases: the first message to a class laid out only in `__objc_clsrolist` under a
+  guest root class, and a first message with integer, floating-point and structure-result registers to a class whose
+  `+initialize` is guest code.
 - **Method implementations (`IMP`).** An `IMP` is a bare code address, and the guest and the host disagree on what one
   means. A guest method's `IMP` is the guest function, and the host reaches it through a block `IMP` that
   `class_addMethod`, `class_replaceMethod` and `method_setImplementation` build (`xl_host_imp_for_guest`, cached per
