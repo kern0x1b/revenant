@@ -1857,6 +1857,30 @@ std::string Generator::InvokeShim(const Signature &signature) {
   return name;
 }
 
+static bool GenericImpSuffices(const Signature &signature) {
+  auto plain = [](const Value &value) {
+    switch (value.kind) {
+      case Kind::Void:
+      case Kind::Pointer:
+      case Kind::Protocol:
+        return true;
+      case Kind::Integer:
+        return value.host_bits <= 32 && (!value.is_signed || value.guest_bits <= value.host_bits);
+      default:
+        return false;
+    }
+  };
+  if (!plain(signature.result)) {
+    return false;
+  }
+  for (auto &param : signature.params) {
+    if (!plain(param.value)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 std::string Generator::ImpWrapper(const Signature &signature, uint64_t imp, bool class_method, bool twin) {
   auto invoke = InvokeShim(signature);
   auto name = "xl_imp_" + std::to_string(counter_++);
@@ -2216,6 +2240,10 @@ void Generator::EmitClasses(const json::Object &manifest) {
           auto signature = resolve_signature(method, class_method, origin);
           if (!signature.supported) {
             Report(label + ": generic host IMP, " + signature.note);
+            continue;
+          }
+          if (GenericImpSuffices(signature)) {
+            Report(label + ": generic host IMP, every word of its signature is a pointer or a 32-bit value");
             continue;
           }
           auto host_types = HostEncoding(signature);
