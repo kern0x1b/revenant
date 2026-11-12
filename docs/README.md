@@ -191,6 +191,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [TipKit: rendering](reference/backports/TipKit/TipKit/Rendering.md) | the seam: the tip is drawn in the app |
 | [TipKit: reuse](reference/backports/TipKit/TipKit/Reuse.md) | what TipKit was compared against, and why |
 | [UIKit](reference/backports/UIKit/README.md) | the UIKit Swift overlay: the surface's Swift constants and cases |
+| [UIKit: CABackdropLayer](reference/backports/UIKit/CABackdropLayer.md) | the private backdrop layer that applications look up by name, and the blur it puts under its view on iOS 6 |
 | [UIKit: CASpringAnimation](reference/backports/UIKit/CASpringAnimation.md) | the iOS 9 spring class on iOS 6, its curve and its keyframe delivery |
 | [UIKit: UICornerConfiguration](reference/backports/UIKit/CornerConfiguration.md) | per-corner radii, concentric corners and how a view is clipped to them on iOS 6 |
 | [Vision](reference/backports/Vision/README.md) | the Swift forms of the landmark, recognised-text and contour accessors, and the missing landmark detector |
