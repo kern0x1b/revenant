@@ -3,6 +3,7 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 #include <Block.h>
+#include <dlfcn.h>
 #include <libkern/OSAtomic.h>
 #include <pthread.h>
 #include <fcntl.h>
@@ -192,6 +193,18 @@ enum {
     XL_TAIL_LIMIT = 1 << 20
 };
 
+static int xl_class_in_image(uintptr_t host)
+{
+    static uintptr_t own;
+    Dl_info info;
+    if (!own) {
+        if (!dladdr((const void *)xl_class_in_image, &info))
+            return 0;
+        own = (uintptr_t)info.dli_fbase;
+    }
+    return dladdr((const void *)host, &info) && (uintptr_t)info.dli_fbase == own;
+}
+
 static uint64_t xl_twin_of(Class host)
 {
     if (!host)
@@ -369,7 +382,7 @@ static Class xl_build_shadow(uintptr_t guest)
     if (extent) {
         xl_table_set(xl_tail_of_shadow, (uintptr_t)shadow, (const void *)(uintptr_t)extent);
         xl_sync_tail(c, shadow);
-        if (direct_host_super)
+        if (direct_host_super && !xl_class_in_image((uintptr_t)host_super))
             ((struct xl_guest_class *)c)->superclass = xl_twin_of(host_super);
     }
     xl_shadow_note("registered %s: class %p meta %p (guest meta %llx), instance size %zu, super %p", name, shadow, shadow_meta,
@@ -424,6 +437,8 @@ uint64_t xl_class_out(uintptr_t host)
     if (guest)
         return guest;
     uintptr_t twin = (uintptr_t)xl_table_get(xl_host_twin, host);
+    if (twin && xl_class_in_image(host))
+        return host;
     return twin ? twin : host;
 }
 
