@@ -2,14 +2,6 @@
 #import <QuartzCore/QuartzCore.h>
 #import "RevenantKeyboardSwitch.h"
 
-// When a text input of another keyboard type takes focus while the keyboard stays up, iOS 6 posts nothing (RevenantKeyboardSwitch.h).
-// The shim posts what a later iOS posts around a keyboard that changed: a frame change to hidden and back to the shown frame. Both go
-// out in one run-loop turn with a layout pass between them: an app that places its views from the window's keyboard height (Display's
-// window does, and drops an update that does not change the height) lays out once without the keyboard and once with it, while an app
-// that moves a scroll inset or a toolbar from the notification starts a second animation back to the value it had, which cannot be seen.
-// Only a portrait keyboard on the screen's bottom edge is handled. The wait of 0.15 s lets the notifications UIKit itself posts for the
-// change come first; when one comes, the shim stays out of it.
-
 static const NSTimeInterval RevenantKeyboardSwitchWait = 0.15;
 
 @interface RevenantKeyboardInputSwitch : NSObject

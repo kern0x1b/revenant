@@ -2,11 +2,6 @@
 #import <objc/runtime.h>
 #import "RevenantTextFieldAlignment.h"
 
-// iOS 6 starts a UITextField made in code with the top vertical alignment (measured on 6.1.3: contentVerticalAlignment 1 on a 48-point
-// field of Telegram's country search, text above the baseline of its placeholder; set to 0 the text sits on it). iOS 7 and later start
-// it centered. The initializer gives the later start. A field loaded from a nib keeps what the nib says (-initWithCoder: is not
-// touched), and an alignment set after the initializer is the application's.
-
 static IMP revenant_text_field_init_original;
 
 static id revenant_text_field_init_with_frame(UITextField *field, SEL selector, CGRect frame)
