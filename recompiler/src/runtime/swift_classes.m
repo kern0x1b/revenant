@@ -348,7 +348,14 @@ static Class xl_build_shadow(uintptr_t guest)
     if (direct_host_super)
         xl_twin_of(host_super);
     uint32_t extent = host_super && xl_has_host_ancestor(host_super) ? xl_swift_extent(c) : 0;
-    shadow = objc_allocateClassPair(host_super, name, extent > XL_HOST_CLASS_SIZE ? extent - XL_HOST_CLASS_SIZE : 0);
+    size_t extra = extent > XL_HOST_CLASS_SIZE ? extent - XL_HOST_CLASS_SIZE : 0;
+    char alias[256];
+    shadow = objc_allocateClassPair(host_super, name, extra);
+    if (!shadow) {
+        snprintf(alias, sizeof alias, "%s@%llx", name, (unsigned long long)guest);
+        xl_shadow_note("%s: a class of that name exists in the host, the shadow of %p is %s", name, (void *)guest, alias);
+        shadow = objc_allocateClassPair(host_super, alias, extra);
+    }
     if (!shadow) {
         char why[256];
         snprintf(why, sizeof why, "xlate: cannot make the shadow of class %s (%p): a class of that name exists", name, (void *)guest);
