@@ -15,6 +15,14 @@ function ios(e, argv)
     os.execv("xcrun", table.join({"clang", "-target", "arm64-apple-ios12.0", "-isysroot", e.sdk}, argv))
 end
 
+function armv7(e, argv)
+    os.execv("xcrun", table.join({"clang", "-target", "armv7-apple-ios6.0", "-isysroot", e.sdk, "-fuse-ld=" .. e.ld}, argv))
+end
+
+function sign(e, file)
+    os.execv(e.ldid, {"-S", file})
+end
+
 function run(program, argv, log)
     local errors = log .. ".stderr"
     local status = os.execv(program, argv, {stdout = log, stderr = errors, try = true})
