@@ -77,11 +77,20 @@ The runtime was written for a process of its own. Under `XL_LIBRARY` its process
   block has no signature.
 - **`NSBundle.mainBundle`.** The guest calls the host's `NSBundle`, so it sees the app's bundle, bundle id and
   `Info.plist`; nothing is copied.
-- **Names.** The guest `libswiftCore` and its Objective-C classes live inside the library and are registered next to
-  whatever Swift runtime the host app has loaded. Measured with the Swift runtime of Telegram 13 preloaded: the
-  Objective-C runtime prints a duplicate-class warning for each of 31 classes of the Swift runtime, and the shadow of a
-  guest class whose name the host has is registered under `<name>@<guest address>` instead of stopping the load. A
-  lookup by name of such a class can answer the host's; the public classes of an SDK have names of their own.
+- **Names.** The guest `libswiftCore` and the overlays next to the library's own image are registered with the host's
+  Objective-C runtime beside whatever Swift runtime the host app has loaded, and the two have classes of the same names
+  (`__SwiftValue`, `_TtCs12_SwiftObject`, `__SwiftNativeNSArrayBase`, the array and string storage classes). With one name
+  for two classes the Objective-C runtime keeps one of them, and the host's Swift, which looks these classes up by name to
+  box a value or bridge an array, can be handed the guest's class and read a layout it does not have. So the classes of
+  every guest image but the first are registered under a prefix (`XLG.` by default, `XL_NAMESPACE`): the translator writes
+  the prefixed name into the class, the runtime registers the shadows of the Swift classes and the classes the guest
+  runtime makes later (a generic instantiation of one of its own classes, known by the module in its mangled name) under
+  the same prefix, and the three ways the guest asks for a class by name are bridged. `objc_getClass` and
+  `objc_lookUpClass` look a name up under the prefix first, and for a name that belongs to the namespace only there, so the
+  guest never receives a class of the host; `class_getName` hands the guest the name without the prefix. The guest sees its
+  runtime under the names it knows, the host sees only its own, and the classes of the library's first image, the ones a
+  host reaches by name, keep their names. If a name is taken anyway (a host class with the prefixed name), the shadow is
+  registered under `<name>@<guest address>` instead of stopping the load.
 
 ## What it does not do
 
