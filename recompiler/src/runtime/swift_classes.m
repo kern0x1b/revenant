@@ -43,6 +43,35 @@ extern const uint32_t xl_swift_static_classes[];
 extern const uint32_t xl_swift_listed_classes[];
 extern const struct xl_swift_method xl_swift_methods[];
 
+// The namespace of a library's own runtime: the host sees the Objective-C classes of the guest's libswiftCore and overlays
+// under xl_namespace_prefix, the guest asks for them by their own names (the translator writes all three)
+extern const char xl_namespace_prefix[];
+extern const uint32_t xl_namespaced_classes[];
+extern const char *const xl_namespace_modules[];
+
+static int xl_has_prefix(const char *name)
+{
+    size_t length = strlen(xl_namespace_prefix);
+    return length && strncmp(name, xl_namespace_prefix, length) == 0;
+}
+
+// A guest class is registered under the prefix when it is a class of a namespaced image, or when the runtime made it
+// from one (a generic instantiation carries the module of its generic class in its name)
+static int xl_namespaced_class(uintptr_t guest, const char *name)
+{
+    if (!xl_namespace_prefix[0] || xl_has_prefix(name))
+        return 0;
+    for (const uint32_t *c = xl_namespaced_classes; *c; c++) {
+        if (*c == guest)
+            return 1;
+    }
+    for (const char *const *module = xl_namespace_modules; *module; module++) {
+        if (strncmp(name, *module, strlen(*module)) == 0)
+            return 1;
+    }
+    return 0;
+}
+
 static volatile int xl_shadows_active;
 static OSSpinLock xl_table_lock = OS_SPINLOCK_INIT;
 static CFMutableDictionaryRef xl_guest_to_host;
@@ -362,12 +391,17 @@ static Class xl_build_shadow(uintptr_t guest)
         xl_twin_of(host_super);
     uint32_t extent = host_super && xl_has_host_ancestor(host_super) ? xl_swift_extent(c) : 0;
     size_t extra = extent > XL_HOST_CLASS_SIZE ? extent - XL_HOST_CLASS_SIZE : 0;
-    char alias[256];
+    char *namespaced = NULL;
+    if (xl_namespaced_class(guest, name) && asprintf(&namespaced, "%s%s", xl_namespace_prefix, name) > 0)
+        name = namespaced;
     shadow = objc_allocateClassPair(host_super, name, extra);
     if (!shadow) {
-        snprintf(alias, sizeof alias, "%s@%llx", name, (unsigned long long)guest);
-        xl_shadow_note("%s: a class of that name exists in the host, the shadow of %p is %s", name, (void *)guest, alias);
-        shadow = objc_allocateClassPair(host_super, alias, extra);
+        char *alias = NULL;
+        if (asprintf(&alias, "%s@%llx", name, (unsigned long long)guest) > 0) {
+            xl_shadow_note("%s: a class of that name exists in the host, the shadow of %p is %s", name, (void *)guest, alias);
+            shadow = objc_allocateClassPair(host_super, alias, extra);
+        }
+        free(alias);
     }
     if (!shadow) {
         char why[256];
@@ -411,6 +445,7 @@ static Class xl_build_shadow(uintptr_t guest)
     xl_shadow_note("shadow %s: guest %p -> host %p, super %p, guest size %u, methods %llx / %llx", name, (void *)guest, shadow,
                    host_super, ro->instance_size, (unsigned long long)ro->base_methods,
                    (unsigned long long)(meta_ro ? meta_ro->base_methods : 0));
+    free(namespaced);
     pthread_mutex_unlock(&xl_build_lock);
     return shadow;
 }
@@ -589,4 +624,57 @@ void xl_manual_default_class_getImageName(void *pack)
 {
     struct xl_image_name_pack *p = pack;
     p->r = xl_widen_pointer((uintptr_t)class_getImageName(xl_class_in(xl_narrow_pointer(p->cls, "class_getImageName", 0))));
+}
+
+// The guest finds a class of its own runtime by the name its runtime knows. Under a namespace that class is registered
+// under the prefix, and a name that belongs to the namespace never reaches a class of the host: it is looked up under the
+// prefix or not at all (the host's libswiftCore has classes of the same names, and they are not the guest's).
+static int xl_in_namespace_modules(const char *name)
+{
+    for (const char *const *module = xl_namespace_modules; *module; module++) {
+        if (strncmp(name, *module, strlen(*module)) == 0)
+            return 1;
+    }
+    return 0;
+}
+
+static Class xl_lookup_class(const char *name, Class (*lookup)(const char *))
+{
+    if (!name || !xl_namespace_prefix[0] || xl_has_prefix(name))
+        return lookup(name);
+    char *prefixed = NULL;
+    Class found = Nil;
+    if (asprintf(&prefixed, "%s%s", xl_namespace_prefix, name) > 0)
+        found = lookup(prefixed);
+    free(prefixed);
+    if (found || xl_in_namespace_modules(name))
+        return found;
+    return lookup(name);
+}
+
+struct __attribute__((packed)) xl_class_name_pack {
+    uint64_t a0;
+    uint64_t r;
+};
+
+void xl_manual_objc_getClass(void *pack)
+{
+    struct xl_class_name_pack *p = pack;
+    p->r = xl_object_out((uintptr_t)xl_lookup_class((const char *)xl_narrow_pointer(p->a0, "objc_getClass", 0), objc_getClass));
+}
+
+void xl_manual_objc_lookUpClass(void *pack)
+{
+    struct xl_class_name_pack *p = pack;
+    p->r = xl_object_out((uintptr_t)xl_lookup_class((const char *)xl_narrow_pointer(p->a0, "objc_lookUpClass", 0), objc_lookUpClass));
+}
+
+// The guest sees the name of one of its own runtime's classes without the prefix
+void xl_manual_class_getName(void *pack)
+{
+    struct xl_class_name_pack *p = pack;
+    const char *name = class_getName(xl_class_in(xl_narrow_pointer(p->a0, "class_getName", 0)));
+    if (name && xl_has_prefix(name))
+        name += strlen(xl_namespace_prefix);
+    p->r = xl_widen_pointer((uintptr_t)name);
 }
