@@ -96,12 +96,14 @@ void _dyld_register_func_for_add_image(void (*func)(const struct mach_header *mh
         func((const struct mach_header *)xl_guest_images[i].header, xl_guest_images[i].slide);
     }
 #endif
+#ifndef XL_LIBRARY
     void (*real)(void (*)(const struct mach_header *, intptr_t)) =
         (void (*)(void (*)(const struct mach_header *, intptr_t)))
         dlsym(RTLD_NEXT, "_dyld_register_func_for_add_image");
     if (real) {
         real(func);
     }
+#endif
 }
 
 int xl_shim_openat(int dirfd, const char *path, int flags, int mode)

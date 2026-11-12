@@ -149,23 +149,10 @@ static void xl_wrap_layout_subviews(void)
     free(classes);
 }
 
-static void xl_setup(void)
+static void xl_setup_application(void)
 {
     NSSetUncaughtExceptionHandler(xl_uncaught);
-    { FILE *f = fopen("/private/var/revenant/xlate-trace.log", "a"); if (f) { fprintf(f, "fix start\n"); fclose(f); } }
-    xl_fix_layouts();
-    { FILE *f = fopen("/private/var/revenant/xlate-trace.log", "a"); if (f) { fprintf(f, "fix done\n"); fclose(f); } }
-    xl_shadow_init();
     xl_load_rules();
-    pthread_key_create(&xl_super_key, NULL);
-    xl_selector_table = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
-    xl_guest_imps = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
-    for (const struct xl_selector_shim *shim = xl_selector_shims; shim->selector; shim++)
-        CFDictionarySetValue(xl_selector_table, sel_registerName(shim->selector), (void *)(uintptr_t)shim->guest);
-    for (const struct xl_imp_entry *entry = xl_imp_map; entry->imp; entry++)
-        CFDictionarySetValue(xl_guest_imps, entry->imp, (void *)(uintptr_t)entry->guest);
-    xl_selector_variant_table = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
-    xl_variant_cache = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_wrap_layout_subviews();
     if (access("/private/var/revenant/xl-memlog", F_OK) == 0) {
         pthread_t thread;
@@ -220,6 +207,21 @@ static void xl_setup(void)
             class_replaceMethod(guide, @selector(forwardingTargetForSelector:), fwd, "@@::");
         }
     }
+}
+
+static void xl_setup(void)
+{
+    xl_fix_layouts();
+    xl_shadow_init();
+    pthread_key_create(&xl_super_key, NULL);
+    xl_selector_table = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+    xl_guest_imps = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+    for (const struct xl_selector_shim *shim = xl_selector_shims; shim->selector; shim++)
+        CFDictionarySetValue(xl_selector_table, sel_registerName(shim->selector), (void *)(uintptr_t)shim->guest);
+    for (const struct xl_imp_entry *entry = xl_imp_map; entry->imp; entry++)
+        CFDictionarySetValue(xl_guest_imps, entry->imp, (void *)(uintptr_t)entry->guest);
+    xl_selector_variant_table = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+    xl_variant_cache = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     for (const struct xl_selector_variant *v = xl_selector_variants; v->selector; v++) {
         SEL sel = sel_registerName(v->selector);
         CFMutableDictionaryRef by_enc = (CFMutableDictionaryRef)CFDictionaryGetValue(xl_selector_variant_table, sel);
@@ -235,9 +237,12 @@ static void xl_setup(void)
     for (const struct xl_variadic_shim *shim = xl_variadic_shims; shim->selector; shim++)
         CFDictionarySetValue(xl_variadic_table, sel_registerName(shim->selector), (void *)shim->handler);
     xl_bridge_init_generated();
+#ifndef XL_LIBRARY
+    xl_setup_application();
+#endif
 }
 
-static void xl_register_storyboard_segues(void)
+void xl_register_application_classes(void)
 {
     static const struct { const char *name, *base; } segues[] = {
         {"UIStoryboardShowSegueTemplate", "UIStoryboardPushSegueTemplate"},
@@ -259,7 +264,6 @@ static void xl_register_storyboard_segues(void)
 void xl_run_initializers(void)
 {
     xl_bridge_init();
-    xl_register_storyboard_segues();
     int trace = getenv("XL_INIT_TRACE") ? open("/private/var/revenant/init-trace.log",
                                                O_WRONLY | O_CREAT | O_TRUNC, 0666) : -1;
     for (uint32_t i = 0; i < xl_initializer_count; i++) {
