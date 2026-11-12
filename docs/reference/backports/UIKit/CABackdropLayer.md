@@ -1,9 +1,10 @@
 # `CABackdropLayer` on iOS 6
 
 `CABackdropLayer` is the QuartzCore layer that shows what is behind it, through the filters set on it. It is not public:
-no SDK header declares it and no framework exports it (`NSClassFromString` finds it by name only). It is in the backports
-as the second class the exports report lists as not public, beside `__NSConcreteUUID` (`frameworks/Backports/README.md`,
-"Public symbols"), because applications look it up by name and an iOS 6 target has no class of that name.
+no SDK header declares it and no `.tbd` exports it (`NSClassFromString` finds it by name only), so the exports report has no
+key for it and counts it nowhere. It is in the backports as an exception to the rule that they cover public SDK members,
+beside `__NSConcreteUUID` (`frameworks/Backports/README.md`, "Public symbols"), because applications look it up by name and
+an iOS 6 target has no class of that name.
 
 ## Why it is here
 
