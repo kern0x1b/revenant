@@ -1,4 +1,17 @@
 import("env")
+import("core.package.package")
+
+function swift()
+    local installs = os.dirs(path.join(package.installdir(), "s", "swift", "*", "*"))
+    table.sort(installs)
+    for _, install in ipairs(installs) do
+        local layouts = path.join(install, "share", "swift-source", "stdlib", "toolchain", "legacy_layouts", "iphoneos", "layouts-arm64.yaml")
+        if os.isfile(path.join(install, "bin", "swiftc")) and os.isfile(layouts) then
+            return install, layouts
+        end
+    end
+    raise("no revenant@swift install under %s carries its own legacy_layouts source cache (docs/reference/recompiler/corpus.md says why it is needed)", path.join(package.installdir(), "s", "swift"))
+end
 
 function setup(name, out)
     local e = env()
