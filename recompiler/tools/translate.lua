@@ -319,6 +319,15 @@ function translate(input, includes, out, images, opt)
     if (getenv("XL_SWIFT_HOST_ANCESTORS") or "") ~= "" then
         table.join2(replaces, {"--swift-host-ancestors"})
     end
+    if library then
+        local namespace = getenv("XL_NAMESPACE") or ""
+        if namespace == "" then
+            namespace = "XLG."
+        end
+        if namespace ~= "none" then
+            table.join2(replaces, {"--namespace-prefix", namespace})
+        end
+    end
     run(e.xlate, table.join({"--base", base}, replaces, {"--objc-manifest", o("manifest.json"), "--resolved-out", o("guest-resolved.txt"), input}, extra))
 
     local support_undefined = {}

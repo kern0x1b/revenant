@@ -1948,6 +1948,24 @@ std::string Generator::StubImpWrapper(uint64_t imp) {
   return name;
 }
 
+static std::string SwiftModulePrefix(const std::string &name) {
+  if (name.compare(0, 4, "_TtC") != 0) {
+    return "";
+  }
+  size_t at = 4;
+  if (at < name.size() && name[at] == 's') {
+    return name.substr(0, at + 1);
+  }
+  size_t length = 0, digits = at;
+  while (at < name.size() && isdigit(static_cast<unsigned char>(name[at]))) {
+    length = length * 10 + (name[at++] - '0');
+  }
+  if (at == digits || at + length > name.size()) {
+    return "";
+  }
+  return name.substr(0, at + length);
+}
+
 void Generator::EmitClasses(const json::Object &manifest) {
   if (guest_pool_.empty()) {
     CollectMethods(gc_, guest_pool_);
@@ -2078,9 +2096,27 @@ void Generator::EmitClasses(const json::Object &manifest) {
     return "(void *)&" + symbol;
   };
   std::vector<std::string> classlist, catlist, protolist;
+  std::string prefix = manifest.getString("namespace_prefix") ? manifest.getString("namespace_prefix")->str() : std::string();
+  std::vector<std::string> namespaced_classes;
+  std::set<std::string> namespaced_modules;
+  auto note_module = [&](const std::string &name) {
+    if (auto module = SwiftModulePrefix(name); !module.empty()) {
+      namespaced_modules.insert(module);
+      namespaced_modules.insert("_TtG" + module.substr(3));
+    }
+  };
   for (auto &image_value : *manifest.getArray("images")) {
     auto &image = *image_value.getAsObject();
     auto index = std::to_string(*image.getInteger("index"));
+    bool namespaced = !prefix.empty() && image.getBoolean("namespaced").value_or(false);
+    if (namespaced) {
+      for (auto &address : *image.getArray("swift_listed_classes")) {
+        namespaced_classes.push_back(hex(*address.getAsInteger()));
+      }
+      for (auto &item : *image.getArray("swift_methods")) {
+        note_module(item.getAsObject()->getString("name")->str());
+      }
+    }
     for (auto &error : *image.getArray("errors")) {
       Report("objc metadata: UNSUPPORTED: " + error.getAsString()->str());
       ++unsupported_;
@@ -2115,10 +2151,19 @@ void Generator::EmitClasses(const json::Object &manifest) {
         auto ivars = emit_ivars(data.getArray("ivars"), base + "_ivars");
         auto properties = emit_properties(data.getArray("properties"), base + "_properties");
         auto protocols = emit_protocol_list(data.getArray("protocols"), base + "_protocols");
+        std::string name_expression = "(const char *)" + hex(*data.getInteger("name_address"));
+        if (namespaced && !name.empty()) {
+          name_expression = base + "_name";
+          meta << "static const char " << name_expression << "[] = \"" << prefix << name << "\";\n";
+          if (!is_meta) {
+            note_module(name);
+            namespaced_classes.push_back(hex(*cls.getInteger("address")));
+          }
+        }
         meta << "struct xl_class_ro_t " << (is_meta ? "xl_objc_metaro_" : "xl_objc_ro_") << suffix
              << " __attribute__((used, section(\"__DATA,__objc_const\"))) = {" << *data.getInteger("flags") << "u, "
-             << *data.getInteger("instance_start") << "u, " << *data.getInteger("instance_size") << "u, 0, (const char *)"
-             << hex(*data.getInteger("name_address")) << ", " << methods << ", " << protocols << ", " << ivars << ", 0, "
+             << *data.getInteger("instance_start") << "u, " << *data.getInteger("instance_size") << "u, 0, "
+             << name_expression << ", " << methods << ", " << protocols << ", " << ivars << ", 0, "
              << properties << "};\n";
       }
       {
@@ -2214,6 +2259,16 @@ void Generator::EmitClasses(const json::Object &manifest) {
     }
     meta << "};\n";
   }
+  meta << "const char xl_namespace_prefix[] = \"" << prefix << "\";\n";
+  meta << "const uint32_t xl_namespaced_classes[] = {";
+  for (auto &address : namespaced_classes) {
+    meta << address << ", ";
+  }
+  meta << "0};\nconst char *const xl_namespace_modules[] = {";
+  for (auto &module : namespaced_modules) {
+    meta << "\"" << module << "\", ";
+  }
+  meta << "0};\n";
   meta << "const struct xl_class_layout xl_class_layouts[] = {\n" << layouts_ << "    {0, 0, 0, 0, 0, 0}};\n";
   meta << "const uint32_t xl_swift_static_classes[] = {";
   for (auto &image : *manifest.getArray("images")) {
@@ -2583,7 +2638,8 @@ int main(int argc, const char **argv) {
       {"___assert_rtn", 4},
       {"_exit", 1}, {"__exit", 1},
       {"_objc_copyImageNames", 1}, {"_objc_copyClassNamesForImage", 2}, {"_objc_copyClassList", 1},
-      {"_objc_readClassPair", 2}, {"__objc_realizeClassFromSwift", 2}, {"_class_getImageName", 1}};
+      {"_objc_readClassPair", 2}, {"__objc_realizeClassFromSwift", 2}, {"_class_getImageName", 1},
+      {"_objc_getClass", 1}, {"_objc_lookUpClass", 1}, {"_class_getName", 1}};
   static const std::set<std::string> personalities = {"___objc_personality_v0", "___gxx_personality_v0",
                                                       "___gcc_personality_v0"};
   static const std::set<std::string> faults = {"___cxa_throw"};

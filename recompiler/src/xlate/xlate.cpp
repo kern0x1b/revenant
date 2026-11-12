@@ -56,6 +56,9 @@ static cl::opt<uint64_t> Base("base", cl::init(0x10000000));
 static cl::opt<bool> Optimize("optimize", cl::init(true));
 static cl::opt<bool> SwiftHostAncestors("swift-host-ancestors", cl::init(false),
                                         cl::desc("Keep the guest's class layout for Swift classes that have a host ancestor"));
+static cl::opt<std::string> NamespacePrefix("namespace-prefix", cl::init(""),
+                                            cl::desc("The Objective-C classes of every guest image but the first (the runtime and overlays of a library) are "
+                                                     "registered under this prefix, so a host that has its own copy of them keeps its names"));
 
 namespace {
 
@@ -1762,7 +1765,10 @@ int main(int argc, char **argv) {
       errs() << "xlate: " << ObjCManifest << ": " << ec.message() << "\n";
       return 1;
     }
-    xlate::WriteManifest(os, images, objc);
+    for (size_t index = 1; index < objc.size() && !NamespacePrefix.empty(); ++index) {
+      objc[index].namespaced = true;
+    }
+    xlate::WriteManifest(os, images, objc, NamespacePrefix);
     return 0;
   }
   if (Output.empty() || !LoadPassthrough(program) || !LayoutAndResolve(program, true)) {

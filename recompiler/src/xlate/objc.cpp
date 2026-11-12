@@ -502,9 +502,11 @@ void ResolveGuestImports(std::vector<ObjCImage> &objc, const GuestExports &expor
   }
 }
 
-void WriteManifest(llvm::raw_ostream &os, const std::vector<const Image *> &images, const std::vector<ObjCImage> &objc) {
+void WriteManifest(llvm::raw_ostream &os, const std::vector<const Image *> &images, const std::vector<ObjCImage> &objc,
+                   const std::string &namespace_prefix) {
   llvm::json::OStream json(os, 1);
   json.object([&] {
+    json.attribute("namespace_prefix", namespace_prefix);
     json.attributeArray("images", [&] {
       for (size_t index = 0; index < images.size(); ++index) {
         auto &image = *images[index];
@@ -512,6 +514,7 @@ void WriteManifest(llvm::raw_ostream &os, const std::vector<const Image *> &imag
         json.object([&] {
           json.attribute("path", image.path());
           json.attribute("index", static_cast<int64_t>(index));
+          json.attribute("namespaced", info.namespaced);
           json.attributeArray("errors", [&] {
             for (auto &error : info.errors) {
               json.value(error);

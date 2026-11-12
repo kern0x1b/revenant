@@ -123,11 +123,13 @@ struct ObjCImage {
   std::vector<ConstantString> strings;
   std::vector<SelectorReference> selectors;
   std::vector<std::string> errors;
+  bool namespaced = false;
 };
 
 ObjCImage AnalyzeObjC(const Image &image);
 void ResolveGuestImports(std::vector<ObjCImage> &objc, const GuestExports &exports);
 bool SplitGuestLayoutClasses(std::vector<ObjCImage> &objc, const std::vector<bool> &host_ancestors, std::string &error);
-void WriteManifest(llvm::raw_ostream &os, const std::vector<const Image *> &images, const std::vector<ObjCImage> &objc);
+void WriteManifest(llvm::raw_ostream &os, const std::vector<const Image *> &images, const std::vector<ObjCImage> &objc,
+                   const std::string &namespace_prefix);
 
 }

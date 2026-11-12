@@ -352,9 +352,14 @@ static of the library), `completion` and `completion.thread` (a block called on 
 `measure <step> resident=… virtual=… threads=…` after each step and the address map of the process (`map <step>
 <start>-<end> <protection>`). A watchdog `alarm` ends a hung host after 180 seconds.
 
-`./xmakew l -P . recompiler/tests/library/check.lua <out> [objc|swift] [--host-only]` runs a variant whole. The `swift`
+`./xmakew l -P . recompiler/tests/library/check.lua <out> [objc|swift] [--host-only]` runs a variant whole (with an
+absolute path to the script). The `swift`
 variant needs `XL_SWIFTOBJC_LIBS` (the same folder as swiftobjc) and takes the translation of the guest `libswiftCore`,
 `libc++` and `libc++abi` with it, which is minutes to an hour of compile time depending on the load of the machine.
+It also builds the host with Swift code of its own (`hostswift.swift`, against the armv7 runtime of
+`revenant@swift-runtime`) and checks that the host's Swift names and bridging are the same before and after the
+library loads (`host.bridge.before`, `host.names`, `names.disjoint`, `host.bridge.after`), and that the Objective-C
+runtime reports no class implemented twice. [The names and variables](library-mode.md#the-check).
 
 ### cxxinit and refrepro
 

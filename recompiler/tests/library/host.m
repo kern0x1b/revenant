@@ -86,6 +86,104 @@ static void occupy(const char *range)
     report("occupy", held);
 }
 
+#ifdef RC_SWIFT_HOST
+extern void *rch_make_box(NSInteger seed);
+extern void *rch_make_array(NSInteger seed);
+extern void *rch_make_string(NSInteger seed);
+
+static NSMutableDictionary *hostClasses;
+static NSString *hostRuntime;
+static Class bridgedClasses[3];
+
+static void snapshotHostRuntime(void)
+{
+    Class value = objc_getClass("__SwiftValue");
+    const char *image = value ? class_getImageName(value) : NULL;
+    hostRuntime = image ? [NSString stringWithUTF8String:image] : nil;
+    hostClasses = [NSMutableDictionary dictionary];
+    unsigned count = 0;
+    const char **names = hostRuntime ? objc_copyClassNamesForImage(hostRuntime.UTF8String, &count) : NULL;
+    for (unsigned i = 0; i < count; i++)
+        hostClasses[[NSString stringWithUTF8String:names[i]]] = [NSValue valueWithPointer:(__bridge const void *)objc_getClass(names[i])];
+    free(names);
+    printf("host runtime %s: %lu classes\n", image ? image : "?", (unsigned long)hostClasses.count);
+    fflush(stdout);
+}
+
+static BOOL hostNamesUnchanged(void)
+{
+    if (!hostClasses.count)
+        return NO;
+    BOOL same = YES;
+    for (NSString *name in hostClasses) {
+        Class now = objc_getClass(name.UTF8String);
+        if ((__bridge const void *)now != [hostClasses[name] pointerValue]) {
+            printf("changed %s\n", name.UTF8String);
+            same = NO;
+        }
+    }
+    fflush(stdout);
+    return same;
+}
+
+static BOOL namesDisjoint(const char *library)
+{
+    const char *base = strrchr(library, '/') ? strrchr(library, '/') + 1 : library;
+    unsigned images = 0, count = 0;
+    const char **list = objc_copyImageNames(&images);
+    const char *image = library;
+    for (unsigned i = 0; i < images; i++) {
+        const char *name = strrchr(list[i], '/') ? strrchr(list[i], '/') + 1 : list[i];
+        if (strcmp(name, base) == 0)
+            image = list[i];
+    }
+    const char **names = objc_copyClassNamesForImage(image, &count);
+    free(list);
+    BOOL disjoint = count > 0;
+    for (unsigned i = 0; i < count; i++) {
+        if (hostClasses[[NSString stringWithUTF8String:names[i]]]) {
+            printf("both %s\n", names[i]);
+            disjoint = NO;
+        }
+    }
+    printf("library registers %u classes\n", count);
+    fflush(stdout);
+    free(names);
+    return disjoint;
+}
+
+static BOOL hostBridges(BOOL record)
+{
+    id objects[3] = {(__bridge_transfer id)rch_make_box(7), (__bridge_transfer id)rch_make_array(7), (__bridge_transfer id)rch_make_string(7)};
+    BOOL ok = YES;
+    for (int i = 0; i < 3; i++) {
+        Class cls = object_getClass(objects[i]);
+        if (record)
+            bridgedClasses[i] = cls;
+        BOOL named = strncmp(class_getName(cls), "XLG.", 4) != 0 && cls == bridgedClasses[i];
+        if (!named)
+            printf("bridged object %d is a %s\n", i, class_getName(cls));
+        ok = ok && named;
+    }
+#ifdef RC_BRIDGING
+    NSArray *array = objects[1];
+    NSString *string = objects[2];
+    BOOL array_ok = [array isKindOfClass:[NSArray class]] && array.count == 3 && [array[1] isEqual:@"item-7"] && array[0] && array[2];
+    BOOL string_ok = [string isKindOfClass:[NSString class]] && string.length == 12 && [string hasPrefix:@"host-7-h"];
+#else
+    id array = objects[1], string = objects[2];
+    BOOL array_ok = YES, string_ok = YES;
+#endif
+    if (!array_ok || !string_ok)
+        printf("bridged contents: array %s %s (%lu items), string %s (%lu)\n", class_getName(object_getClass(array)), array_ok ? "ok" : "wrong",
+               (unsigned long)([array respondsToSelector:@selector(count)] ? [array count] : 0), class_getName(object_getClass(string)),
+               (unsigned long)([string respondsToSelector:@selector(length)] ? [string length] : 0));
+    ok = ok && array_ok && string_ok;
+    fflush(stdout);
+    return ok;
+}
+#endif
+
 static void grow(size_t target_kilobytes)
 {
     struct task_basic_info info;
@@ -120,11 +218,15 @@ int main(int argc, char **argv)
             if (!image)
                 line([NSString stringWithFormat:@"error %s", dlerror()]);
         }
+        xl_load_status reserved = xl_reserve(path);
         grow(target << 10);
         measure("host");
         regions("host", 0x1000, 0xfffff000);
+#ifdef RC_SWIFT_HOST
+        snapshotHostRuntime();
+        report("host.bridge.before", hostBridges(YES));
+#endif
 
-        xl_load_status reserved = xl_reserve(path);
         report("reserve", reserved == XL_LOAD_OK);
         if (reserved != XL_LOAD_OK)
             line([NSString stringWithFormat:@"error %s", xl_load_error()]);
@@ -138,6 +240,10 @@ int main(int argc, char **argv)
         }
         measure("loaded");
         regions("loaded", 0x1000, 0xfffff000);
+#ifdef RC_SWIFT_HOST
+        report("host.names", hostNamesUnchanged());
+        report("names.disjoint", namesDisjoint(path));
+#endif
 
         Class cls = NSClassFromString(@"RCFClient");
         report("class", cls != Nil);
@@ -163,6 +269,9 @@ int main(int argc, char **argv)
         report("completion", arrived && async == 7091);
         report("completion.thread", arrived && !main_thread);
         measure("threaded");
+#ifdef RC_SWIFT_HOST
+        report("host.bridge.after", hostBridges(NO) && hostNamesUnchanged());
+#endif
         regions("end", 0x1000, 0xfffff000);
         line(@"done");
     }

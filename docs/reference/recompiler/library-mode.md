@@ -15,6 +15,7 @@ What `XL_LIBRARY=1` builds, the loader API, and what was measured on the iPhone 
 | `XL_INSTALL_NAME` | install name of the output | `@rpath/<name>.dylib` |
 | `XL_SWIFT_HOST_ANCESTORS` | Swift classes with an Objective-C ancestor are host objects with a twin | unset |
 | `XL_REPLACES` | guest images that stand for system libraries | unset |
+| `XL_NAMESPACE` | prefix of the Objective-C class names of every guest image but the first (the runtime and the overlays); `none` leaves the names as they are | `XLG.` |
 
 Layout of the output, from low to high addresses:
 
@@ -65,6 +66,29 @@ Measured on iOS 6.1.3, armv7:
 | `token` | an object result of a public method |
 | `completion`, `completion.thread` | a host block called from the library, on a thread that is not the main one |
 
+The `swift` variant builds the host with Swift code of its own (`hostswift.swift`, armv7, iOS 6.0) and its own
+`libswiftCore`, and expects four names more. The host's Swift makes a struct boxed as `AnyObject`, an `[Any]` and a
+`String`; `host.m` keeps the class of each and the class of every name in the host's `libswiftCore`:
+
+| Name | Proves |
+|---|---|
+| `host.bridge.before` | before the library loads, the three are objects that are not of the namespace |
+| `host.names` | after `xl_load`, every name of the host runtime answers with the host's class |
+| `names.disjoint` | the library registered classes, and none has the name of a class of the host runtime |
+| `host.bridge.after` | after the calls, the three are the same classes with the same contents, and the names still hold |
+
+| Variable | Meaning |
+|---|---|
+| `XL_LIBRARY_HOST_RUNTIME` | folder on the phone with the host's runtime and overlays (Telegram13's `Frameworks`); unset: the package's armv7 `libswiftCore`, `libc++` and `libc++abi` are copied next to the host |
+| `XL_LIBRARY_HOST_BRIDGING` | the host's Swift imports Foundation, so the `[Any]` and the `String` cross as `NSArray` and `NSString` and their contents are checked; needs a runtime folder with a Foundation overlay iOS 6 can load |
+| `XL_LIBRARY_RESIDENT_MB` | resident size the host grows to before it loads the library (85) |
+
+iOS 6.1.3 has no `@rpath` in dyld: a library named `@rpath/libswiftCore.dylib` is found through
+`DYLD_FALLBACK_LIBRARY_PATH` by its leaf name, which is how the check starts the host. The package's
+`libswiftFoundation` needs `NSDimension`, which iOS 6 lacks, and Telegram's patched overlay does not, hence the two
+runtime sources. Without the Foundation overlay Swift boxes an array and a string as `__SwiftValue`, and the check
+compares the classes only.
+
 ## Measurements
 
 The host grows its heap with 1 MB `malloc` chunks until `task_info` reports 85 MB resident (87,3xx K counting the
@@ -83,7 +107,12 @@ The Swift variant costs 2.2 MB of resident memory with the first calls done, tho
 the run touches become resident. The five threads are the host's main thread and the workers that
 `performSelector(inBackground:)` and Dispatch started.
 
-Address map of the Swift variant at the default base: host `__TEXT` at `0x08000000` (`0x6894000`, 104 MiB), host
+The table is the first measurement, with a 119.5 MB library and a host without Swift. The Swift variant has grown to
+162 MB since; its window is 176 MiB (host `__TEXT` at `0x21000000` for the base below), so the host that has a Swift
+runtime needs `XL_BASE=0x2c000000` (next section), and the numbers with a Swift runtime of its own are in
+[the namespace section](#a-host-that-has-its-own-swift-runtime).
+
+Address map of the first Swift variant at the default base: host `__TEXT` at `0x08000000` (`0x6894000`, 104 MiB), host
 `__DATA` at `0x0e894000`, guest `__X0` to `__X4` from `0x10000000` to `0x10910000` (`__X1` is the guest libswiftCore:
 text `0x4c4000` at `0x10100000`, data at `0x105c4000`), `__LINKEDIT` at `0x10910000` (`0x2e0000`). The ObjC variant
 occupies `0x0f000000` to `0x10118000` (17 MB).
@@ -106,27 +135,50 @@ A library therefore needs a base that the host's images and heap do not reach. `
 images and below the stack; whether a particular app leaves it free is for the app to measure with `xl_reserve` at
 launch, and a library whose reservation fails answers with a status, not a crash.
 
+The 162 MB Swift library (window 176 MiB) does not fit there any more: below `0x2a000000` its host code meets the
+heap that a host with its own Swift runtime has before `main` (`0x1e500000` to `0x1f900000`), and `xl_reserve` answers
+"another mapping holds ...". `XL_BASE=0x2c000000` works (host `__TEXT` `0x21000000`, guest segments to about
+`0x2c910000`, `__LINKEDIT` after them); ld64 refuses guest segments at `0x48000000` and above. `host.m` calls
+`xl_reserve` before it grows its heap, as an app does from a constructor.
+
 ### A host that has its own Swift runtime
 
-The Telegram13 frameworks include an armv7 `libswiftCore.dylib` (7.26 MB). Preloaded into the host
-(`dlopen`, `RTLD_GLOBAL`) next to the library:
+The Telegram13 frameworks include an armv7 `libswiftCore.dylib` (7.26 MB) and a patched Foundation overlay. A host with a
+Swift runtime and Swift code of its own has classes of the same names as the guest runtime (`__SwiftValue`,
+`_TtCs12_SwiftObject`, `__SwiftNativeNSArrayBase`, the array and string storage classes). Without a namespace the
+Objective-C runtime printed 31 "Class X is implemented in both .../libswiftCore.dylib and ??. One of the two will be used.
+Which one is undefined." warnings when the library loaded, kept either class of a pair, and the shadow of a guest class
+whose name the host had (the first one met was `_TtCs27_KeyedEncodingContainerBase`) could not be made.
 
-- the Objective-C runtime prints 31 duplicate-class warnings when the library loads ("Class `_TtCs12_SwiftObject` is
-  implemented in both .../libswiftCore.dylib and ??. One of the two will be used. Which one is undefined."), among them
-  `__SwiftValue`, `__SwiftNativeNSArrayBase`, `_TtCs19__EmptyArrayStorage`, `_TtCs15__StringStorage`: the Objective-C
-  classes of the Swift runtime exist twice, the host's and the guest's;
-- the shadow of a guest class whose name the host already has (the first one met was
-  `_TtCs27_KeyedEncodingContainerBase`) could not be made ("a class of that name exists") and the run stopped. It is
-  now registered under `<name>@<guest address>`, and the shadow table notes the alias.
+`XL_NAMESPACE` (default `XLG.`, [why](../../explanation/recompiler/library-mode.md)) registers the guest runtime and the
+overlays under the prefix, so the host keeps its names and a clash is the exception:
 
-With both in place the run is 11 of 11 `ok` on the phone: host 87,800 K resident, after `xl_load` 89,196 K, after the
-calls 91,176 K, at the end 91,344 K, virtual 368,704 K before and 521,008 K at the end, 4 threads. The preloaded
-runtime costs the host 0.5 MB more resident than the same host without it (87,324 K).
+- the translator writes `XLG.<name>` into the class of every guest image but the first, and three tables into the
+  generated code: `xl_namespace_prefix`, `xl_namespaced_classes` (the namespaced Swift classes by guest address),
+  `xl_namespace_modules` (the modules whose classes the runtime may make later);
+- `xl_build_shadow` registers the shadow of a moved Swift class under the prefix when the class is in the first table
+  or its mangled name is in a namespaced module (a generic instantiation the guest runtime made); a class that still
+  clashes is registered under `<name>@<guest address>`;
+- `objc_getClass`, `objc_lookUpClass` and `class_getName` are manual bridges: a name is looked up under the prefix
+  first, a name of a namespaced module only there, and the name the guest gets back has no prefix. They are bridged in an
+  executable too; with no prefix they pass the call through.
 
-The warnings stay. A lookup by name (`NSClassFromString`, `objc_getClass`) of a class whose name both runtimes have
-answers whichever one the Objective-C runtime holds, which can be the host's. Nothing in the fixture does that, and the
-public classes of an SDK have their own names. A library that must not name-clash at all would need the translator to
-prefix the names of the runtime's own classes; that is not done.
+Measured on the 4S with `XL_BASE=0x2c000000`, Swift variant: 15 of 15 `ok` (the 11 of the check and the 4 of the Swift
+host), no "implemented in both" line.
+
+| Host | Resident K: host, loaded, called, end | Virtual | Threads |
+|---|---|---|---|
+| Telegram13's `libswiftCore` and Foundation overlay, bridging on (`XL_LIBRARY_HOST_BRIDGING`) | 88,000, 90,600, 92,420, 92,504 | about 575 MB | 5 |
+| the package's armv7 runtime next to the host | 87,912, 89,984, 92,040, 92,224 | | 4 |
+
+The host's Swift is the same before and after the library loads: 42 classes of its runtime answer by name with the same
+objects, the library registers 33 classes and none has a name of the host runtime, and the box, the `[Any]` and the
+`String` that the host's Swift makes are the same classes with the same contents. The Objective-C variant is 11 of 11.
+
+Not covered: protocols are not namespaced (`objc_getProtocol` is not bridged); `NSClassFromString` and
+`NSStringFromClass` are not bridged, so a guest that goes through them meets the prefixed names; the secondary guest
+images of an SDK (not the runtime) are namespaced like the runtime, so a host reaches by name only the classes of the
+first image.
 
 ## Dead-strip and lazy loading
 
@@ -149,3 +201,6 @@ Not built; only measured and analysed.
 - The host's UI and its own use of the library were not run: the fixture host is a console tool, `Telegram13` was not
   modified.
 - The guest `libswiftCore` is not shared between two libraries.
+- Not run on the phone after the namespace: the `swiftobjc` fixture (the three name bridges now apply to executables
+  too, with a pass-through when there is no prefix) and a control with `XL_NAMESPACE=none` that shows the duplicate
+  warnings come back.
