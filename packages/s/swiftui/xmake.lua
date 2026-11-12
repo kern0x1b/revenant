@@ -5,12 +5,13 @@ package("swiftui")
     set_policy("package.strict_compatibility", true)
     add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", type = "string"})
 
+    add_configs("shared", {description = "Compile against a shared swift-runtime, for a port that requires it so.", default = false, type = "boolean"})
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("sources", {description = "The digest of this recipe and the SwiftUI sources it builds, so a changed source is a different package.", default = swiftui_sources_digest, type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
-        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime"})
-        package:add("deps", "revenant@combine", {alias = "combine"})
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil}})
+        package:add("deps", "revenant@combine", {alias = "combine", configs = {shared = package:config("shared") or nil}})
         package:add("links", "SwiftUI")
         package:add("frameworks", "UIKit", "CoreGraphics", "QuartzCore", "CoreData", "CoreImage", "Foundation", "CoreFoundation")
     end)
@@ -22,6 +23,7 @@ package("swiftui")
         local revenant = addon.addons()[addon.dirname("revenant")] or raise("SwiftUI is built with the revenant addon's rules, and no revenant addon is installed")
         local root = path.translate(path.join(package:scriptdir(), "..", "..", ".."))
         local project = path.absolute("swiftui")
+        local shared = package:config("shared") and ", configs = {shared = true}" or ""
         os.mkdir(project)
         io.writefile(path.join(project, "xmake.lua"), table.concat({
             "add_repositories(\"revenant " .. root .. "\")",
@@ -30,9 +32,9 @@ package("swiftui")
             "set_config(\"apple_sdk\", \"" .. package:config("apple_sdk") .. "\")",
             "includes(\"@addon/revenant/apple-ios\")",
             "option(\"component\", {type = \"string\", default = \"SwiftUI\"})",
-            "add_requires(\"revenant@swift-runtime\", {alias = \"swift-runtime\"})",
+            "add_requires(\"revenant@swift-runtime\", {alias = \"swift-runtime\"" .. shared .. "})",
             "add_requires(\"revenant@libcxx\", {alias = \"libcxx\"})",
-            "add_requires(\"revenant@combine\", {alias = \"combine\"})",
+            "add_requires(\"revenant@combine\", {alias = \"combine\"" .. shared .. "})",
             "add_requires(\"revenant@backports\", {alias = \"backports\"})",
             "includes(\"" .. path.join(root, "frameworks", "Backports") .. "\")",
             "includes(\"" .. path.join(root, "frameworks", "SwiftUI") .. "\")",
