@@ -32,9 +32,29 @@ between them, so that Display's window lays the sheet out once without the keybo
 - A notification UIKit posts itself within the 0.15 s keeps the shim out.
 - The notifications carry `UIKeyboardIsLocalUserInfoKey`, the animation duration 0.25 and the begin and end frames; only the will
   notification is posted, not the did notification.
-- For other applications the pair is a keyboard that went away and came back within one turn: a scroll inset or a toolbar that follows
-  `UIKeyboardWillChangeFrameNotification` starts an animation to its old value at once, and nothing moves that can be seen.
-  Applications that react to the same notification by closing something would see it; that was not measured on another application.
+## Scope: who is affected
+
+The shim lives in `libUIKitBackports.dylib` and runs in every process that loads it, not in Telegram only: any application built with the
+Revenant toolchain that links the Backports, on any phone that has the package. Stock iOS 6 applications (SpringBoard, Mail, Safari, Phone,
+Messages, Settings) do not load the library and are not touched. The pair is posted only when all of these hold:
+
+1. a `UITextField` or `UITextView` posts its begin-editing notification (a `UISearchBar`'s text field is a `UITextField` and counts);
+2. the last keyboard notification left a keyboard on the screen: full screen width, ending at the bottom edge, portrait;
+3. the `keyboardType` of that input differs from the one of the input that began editing before it (a number pad then letters, an email keyboard
+   then the default one, and so on);
+4. UIKit posted no keyboard notification for 0.15 s after the input began editing.
+
+It is not posted for the first input after launch (UIKit shows the keyboard and posts itself), for an input of the same keyboard type, for a
+landscape or upside-down keyboard, when the keyboard is hidden, and for inputs in web views (no begin-editing notification reaches it). There
+is no switch to turn it off for one application.
+
+What an application sees: two `UIKeyboardWillChangeFrameNotification` in one run-loop turn, the first with an end frame of zero height on the
+bottom edge, the second with the keyboard's frame (begin and end frames swapped, duration 0.25, `UIKeyboardIsLocalUserInfoKey` set). An
+application that moves a scroll inset or a toolbar from the notification starts a second animation back to the value it already has. An
+application that does something else on a keyboard change (closes an accessory, saves a draft, scrolls a field into view) does it twice.
+
+Not measured: the reaction of any application other than Telegram, and of a later iOS to the same sequence. The 0.15 s wait and the choice of the
+keyboard type as the trigger are decisions made from the one case that was measured (the country sheet), not from a survey of applications.
 
 ## Where it is not claimed
 
