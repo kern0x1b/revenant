@@ -2,6 +2,7 @@
 #include "macho.h"
 #include "objc.h"
 #include "tsd_scan.h"
+#include "unwind.h"
 
 #include <llvm-c/Core.h>
 #include <llvm/Bitcode/BitcodeWriter.h>
@@ -9,6 +10,7 @@
 #include <llvm/IR/DataLayout.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Instructions.h>
+#include <llvm/IR/Intrinsics.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/PassManager.h>
@@ -23,6 +25,7 @@
 #include <llvm/IR/GetElementPtrTypeIterator.h>
 #include <llvm/Transforms/InstCombine/InstCombine.h>
 #include <llvm/Transforms/Utils/Cloning.h>
+#include <llvm/Transforms/Utils/Local.h>
 #include <llvm/Transforms/Utils/ModuleUtils.h>
 #include <rellume/rellume.h>
 
@@ -30,6 +33,7 @@
 #include <fstream>
 #include <map>
 #include <set>
+#include <tuple>
 
 using namespace llvm;
 
@@ -73,6 +77,32 @@ std::string IRName(const std::string &symbol) {
   return "\1" + symbol;
 }
 
+bool IsPersonality(const std::string &symbol) {
+  return symbol == "___objc_personality_v0" || symbol == "___gxx_personality_v0" || symbol == "___gcc_personality_v0";
+}
+
+std::string HostPersonality(const std::string &guest) {
+  if (guest == "___objc_personality_v0") {
+    return "__objc_personality_v0";
+  }
+  if (guest == "___gxx_personality_v0") {
+    return "__gxx_personality_sj0";
+  }
+  if (guest == "___gcc_personality_v0") {
+    return "__gcc_personality_sj0";
+  }
+  return {};
+}
+
+const std::map<std::string, uint64_t> &StateOffsets() {
+  static const std::map<std::string, uint64_t> offsets = {
+#define RELLUME_PUBLIC_REG(name, name_cap, reg_size, offset) {#name, offset},
+#include <cpustruct-aarch64.inc>
+#undef RELLUME_PUBLIC_REG
+  };
+  return offsets;
+}
+
 struct Program {
   std::vector<std::unique_ptr<Image>> images;
   xlate::GuestExports exports;
@@ -80,6 +110,7 @@ struct Program {
   std::map<uint64_t, std::string> stub_to_host;
   std::set<std::string> passthrough;
   std::set<uint64_t> functions;
+  xlate::UnwindTable unwind;
 
   const Image *ImageAt(uint64_t host) const {
     for (auto &image : images) {
@@ -272,6 +303,30 @@ class Lifter {
     auto found = functions.find(pc);
     return found == functions.end() ? nullptr : found->second;
   }
+
+  std::vector<CallInst *> Calls() {
+    std::vector<CallInst *> calls;
+    for (auto user : call_->users()) {
+      if (auto call = dyn_cast<CallInst>(user)) {
+        calls.push_back(call);
+      }
+    }
+    return calls;
+  }
+
+  std::vector<CallInst *> CallsIn(Function &function) {
+    std::vector<CallInst *> calls;
+    for (auto &block : function) {
+      for (auto &inst : block) {
+        if (auto call = dyn_cast<CallInst>(&inst); call && call->getCalledFunction() == call_) {
+          calls.push_back(call);
+        }
+      }
+    }
+    return calls;
+  }
+
+  Function *Tail() { return tail_; }
 
   unsigned Devirtualize() {
     unsigned count = 0;
@@ -718,6 +773,376 @@ Constant *HostSymbol(Module &module, const std::string &symbol) {
                             nullptr, name);
 }
 
+class LandingPads {
+ public:
+  LandingPads(Program &program, Lifter &lifter, Module &module)
+      : program_(program), lifter_(lifter), module_(module), context_(module.getContext()) {
+    auto &offsets = StateOffsets();
+    x30_ = offsets.at("x30");
+    for (int n = 19; n <= 29; ++n) {
+      saved_.push_back({offsets.at("x" + std::to_string(n)), 8});
+    }
+    saved_.push_back({offsets.at("sp"), 8});
+    for (int n = 8; n <= 15; ++n) {
+      saved_.push_back({offsets.at("v" + std::to_string(n)), 16});
+    }
+  }
+
+  std::set<uint64_t> Targets(Function &lifted) {
+    std::set<uint64_t> targets;
+    for (auto call : lifter_.CallsIn(lifted)) {
+      auto site = SiteOf(call);
+      auto landing = site ? program_.unwind.Find(*site) : std::nullopt;
+      std::string why;
+      if (landing && landing->site->pad && Describe(*landing, why)) {
+        targets.insert(landing->site->pad);
+        continuations_.insert(landing->site->pad);
+      }
+    }
+    return targets;
+  }
+
+  unsigned Lower(const std::vector<CallInst *> &calls) {
+    for (auto address : continuations_) {
+      if (auto found = lifter_.functions.find(address); found != lifter_.functions.end()) {
+        continuation_functions_.insert(found->second);
+      }
+    }
+    std::map<std::string, std::pair<Function *, std::vector<Site>>> by_function;
+    for (auto call : calls) {
+      auto address = SiteOf(call);
+      auto landing = address ? program_.unwind.Find(*address) : std::nullopt;
+      if (landing && landing->site->pad) {
+        auto &entry = by_function[call->getFunction()->getName().str()];
+        entry.first = call->getFunction();
+        entry.second.push_back({call, *address, *landing});
+      }
+    }
+    unsigned lowered = 0;
+    for (auto &[name, entry] : by_function) {
+      lowered += LowerFunction(*entry.first, entry.second);
+    }
+    EmitResume();
+    for (auto &[reason, count] : unsupported_) {
+      errs() << "xlate: " << count << " call site(s) with a landing pad were left as plain calls: " << reason << "\n";
+    }
+    return lowered;
+  }
+
+  unsigned functions() const { return functions_; }
+
+ private:
+  struct Site {
+    CallInst *call;
+    uint64_t address;
+    xlate::Landing landing;
+  };
+
+  struct Pad {
+    uint64_t address = 0;
+    std::string personality;
+    bool cleanup = false;
+    std::vector<std::pair<Constant *, int64_t>> catches;
+  };
+
+  struct Saved {
+    uint64_t offset;
+    uint64_t size;
+  };
+
+  std::optional<uint64_t> SiteOf(CallInst *call) {
+    auto state = call->getArgOperand(0);
+    for (auto it = call->getReverseIterator(); it != call->getParent()->rend(); ++it) {
+      auto store = dyn_cast<StoreInst>(&*it);
+      auto gep = store ? dyn_cast<GEPOperator>(store->getPointerOperand()) : nullptr;
+      if (!gep || gep->getPointerOperand() != state || gep->getNumIndices() != 1) {
+        continue;
+      }
+      auto offset = dyn_cast<ConstantInt>(gep->getOperand(1));
+      auto value = dyn_cast<ConstantInt>(store->getValueOperand());
+      if (offset && value && offset->getZExtValue() == x30_) {
+        return value->getZExtValue() - 4;
+      }
+    }
+    return std::nullopt;
+  }
+
+  Constant *LocalType(const xlate::ExceptionType &type) {
+    auto key = std::make_tuple(type.name, type.cls, type.cls_symbol);
+    if (auto found = local_types_.find(key); found != local_types_.end()) {
+      return found->second;
+    }
+    auto ptr = PointerType::get(context_, 0);
+    auto i32 = Type::getInt32Ty(context_);
+    auto layout = StructType::get(context_, {ptr, ptr, ptr});
+    Constant *vtable = ConstantExpr::getPtrAdd(HostSymbol(module_, "_objc_ehtype_vtable"), ConstantInt::get(i32, 8));
+    Constant *name = ConstantExpr::getIntToPtr(ConstantInt::get(i32, type.name), ptr);
+    Constant *cls = type.cls_symbol.empty() ? ConstantExpr::getIntToPtr(ConstantInt::get(i32, type.cls), ptr)
+                                            : HostSymbol(module_, type.cls_symbol);
+    auto global = new GlobalVariable(module_, layout, false, GlobalValue::InternalLinkage,
+                                     ConstantStruct::get(layout, {vtable, name, cls}), "xl_ehtype_" + Hex(type.name));
+    local_types_[key] = global;
+    return global;
+  }
+
+  std::optional<Pad> Describe(const xlate::Landing &landing, std::string &why) {
+    Pad pad;
+    pad.address = landing.site->pad;
+    pad.personality = HostPersonality(landing.function->personality);
+    if (pad.personality.empty()) {
+      why = "its personality routine is " +
+            (landing.function->personality.empty() ? std::string("not an imported symbol") : landing.function->personality);
+      return std::nullopt;
+    }
+    for (auto filter : landing.site->filters) {
+      if (filter == 0) {
+        pad.cleanup = true;
+        continue;
+      }
+      if (filter < 0) {
+        why = "it has an exception specification";
+        return std::nullopt;
+      }
+      if (static_cast<uint64_t>(filter) > landing.function->types.size()) {
+        why = "its action refers to a type outside the type table";
+        return std::nullopt;
+      }
+      auto &type = landing.function->types[filter - 1];
+      Constant *clause = nullptr;
+      switch (type.kind) {
+        case xlate::ExceptionType::CatchAll:
+          clause = ConstantPointerNull::get(PointerType::get(context_, 0));
+          break;
+        case xlate::ExceptionType::Import:
+          clause = HostSymbol(module_, type.symbol);
+          break;
+        case xlate::ExceptionType::LocalObjC:
+          clause = LocalType(type);
+          break;
+        case xlate::ExceptionType::LocalOther:
+          break;
+      }
+      if (clause) {
+        pad.catches.push_back({clause, filter});
+      }
+    }
+    if (!pad.cleanup && pad.catches.empty()) {
+      return std::nullopt;
+    }
+    return pad;
+  }
+
+  std::set<size_t> Written(Function &function, Value *state) {
+    std::set<size_t> written;
+    for (auto &block : function) {
+      for (auto &inst : block) {
+        auto store = dyn_cast<StoreInst>(&inst);
+        auto gep = store ? dyn_cast<GEPOperator>(store->getPointerOperand()) : nullptr;
+        if (!gep || gep->getPointerOperand() != state || gep->getNumIndices() != 1) {
+          continue;
+        }
+        auto index = dyn_cast<ConstantInt>(gep->getOperand(1));
+        if (!index) {
+          continue;
+        }
+        for (size_t k = 0; k < saved_.size(); ++k) {
+          if (index->getZExtValue() >= saved_[k].offset && index->getZExtValue() < saved_[k].offset + saved_[k].size) {
+            written.insert(k);
+          }
+        }
+      }
+    }
+    return written;
+  }
+
+  void Capture(IRBuilder<> &b, Value *state, AllocaInst *snapshot, size_t k) {
+    auto i8 = Type::getInt8Ty(context_);
+    auto i64 = Type::getInt64Ty(context_);
+    auto value = b.CreateAlignedLoad(i64, b.CreateConstGEP1_64(i8, state, saved_[k].offset), Align(8));
+    b.CreateAlignedStore(value, b.CreateConstInBoundsGEP2_64(snapshot->getAllocatedType(), snapshot, 0, k), Align(8));
+  }
+
+  BasicBlock *PadBlock(Function &function, Value *state, AllocaInst *snapshot, const Pad &pad) {
+    auto target = lifter_.functions.find(pad.address);
+    if (target == lifter_.functions.end()) {
+      unsupported_["the landing pad was not lifted"]++;
+      return nullptr;
+    }
+    auto i8 = Type::getInt8Ty(context_);
+    auto i32 = Type::getInt32Ty(context_);
+    auto i64 = Type::getInt64Ty(context_);
+    auto ptr = PointerType::get(context_, 0);
+    auto block = BasicBlock::Create(context_, "xl.pad", &function);
+    IRBuilder<> b(block);
+    auto landing = b.CreateLandingPad(StructType::get(context_, {ptr, i32}), pad.catches.size());
+    landing->setCleanup(pad.cleanup);
+    for (auto &[type, filter] : pad.catches) {
+      landing->addClause(type);
+    }
+    Value *exception = b.CreateExtractValue(landing, 0);
+    Value *selector = b.CreateExtractValue(landing, 1);
+    Value *guest = ConstantInt::get(i32, 0);
+    for (auto it = pad.catches.rbegin(); it != pad.catches.rend(); ++it) {
+      Value *id = b.CreateIntrinsic(Intrinsic::eh_typeid_for, {ptr}, {it->first});
+      guest = b.CreateSelect(b.CreateICmpEQ(selector, id), ConstantInt::get(i32, it->second), guest);
+    }
+    for (size_t k = 0; k < saved_.size(); ++k) {
+      auto value = b.CreateAlignedLoad(i64, b.CreateConstInBoundsGEP2_64(snapshot->getAllocatedType(), snapshot, 0, k), Align(8));
+      b.CreateAlignedStore(value, b.CreateConstGEP1_64(i8, state, saved_[k].offset), Align(8));
+    }
+    auto &offsets = StateOffsets();
+    b.CreateAlignedStore(b.CreateZExt(b.CreatePtrToInt(exception, i32), i64), b.CreateConstGEP1_64(i8, state, offsets.at("x0")), Align(8));
+    b.CreateAlignedStore(b.CreateZExt(guest, i64), b.CreateConstGEP1_64(i8, state, offsets.at("x1")), Align(8));
+    resumable_.insert(pad.address);
+    if (continuation_functions_.count(&function)) {
+      b.CreateAlignedStore(ConstantInt::get(i64, kResumeMarker | pad.address), b.CreateConstGEP1_64(i8, state, offsets.at("pc")), Align(16));
+    } else {
+      b.CreateCall(Resume()->getFunctionType(), Resume(), {state, ConstantInt::get(i32, pad.address)});
+    }
+    b.CreateRetVoid();
+    return block;
+  }
+
+  Function *Resume() {
+    if (!resume_) {
+      auto ptr = PointerType::get(context_, 0);
+      auto type = FunctionType::get(Type::getVoidTy(context_), {ptr, Type::getInt32Ty(context_)}, false);
+      resume_ = Function::Create(type, GlobalValue::InternalLinkage, "xl.resume", module_);
+      resume_->addFnAttr(Attribute::NoInline);
+    }
+    return resume_;
+  }
+
+  void EmitResume() {
+    if (!resume_) {
+      return;
+    }
+    auto i32 = Type::getInt32Ty(context_);
+    auto i64 = Type::getInt64Ty(context_);
+    auto state = resume_->getArg(0);
+    auto entry = BasicBlock::Create(context_, "entry", resume_);
+    auto dispatch = BasicBlock::Create(context_, "dispatch", resume_);
+    auto check = BasicBlock::Create(context_, "check", resume_);
+    auto again = BasicBlock::Create(context_, "again", resume_);
+    auto done = BasicBlock::Create(context_, "done", resume_);
+    auto bad = BasicBlock::Create(context_, "bad", resume_);
+    IRBuilder<> b(entry);
+    b.CreateBr(dispatch);
+    b.SetInsertPoint(dispatch);
+    auto pad = b.CreatePHI(i32, 2);
+    auto select = b.CreateSwitch(pad, bad, resumable_.size());
+    for (auto address : resumable_) {
+      auto target = lifter_.functions.at(address);
+      auto block = BasicBlock::Create(context_, "pad." + Hex(address), resume_);
+      select->addCase(ConstantInt::get(i32, address), block);
+      IRBuilder<> call(block);
+      call.CreateCall(target->getFunctionType(), target, {state})->setIsNoInline();
+      call.CreateBr(check);
+    }
+    b.SetInsertPoint(check);
+    auto pc = b.CreateAlignedLoad(i64, state, Align(16));
+    b.CreateCondBr(b.CreateICmpSLT(pc, ConstantInt::get(i64, 0)), again, done);
+    b.SetInsertPoint(again);
+    auto next = b.CreateTrunc(pc, i32);
+    b.CreateBr(dispatch);
+    pad->addIncoming(resume_->getArg(1), entry);
+    pad->addIncoming(next, again);
+    b.SetInsertPoint(done);
+    b.CreateRetVoid();
+    b.SetInsertPoint(bad);
+    b.CreateUnreachable();
+  }
+
+  unsigned LowerFunction(Function &function, std::vector<Site> &sites) {
+    std::sort(sites.begin(), sites.end(), [](const Site &a, const Site &b) { return a.address < b.address; });
+    struct Usable {
+      Site site;
+      Pad pad;
+    };
+    std::vector<Usable> usable;
+    std::string personality;
+    for (auto &site : sites) {
+      std::string why;
+      auto pad = Describe(site.landing, why);
+      if (!pad) {
+        if (!why.empty()) {
+          unsupported_[why]++;
+        }
+        continue;
+      }
+      if (personality.empty()) {
+        personality = pad->personality;
+      } else if (pad->personality != personality) {
+        unsupported_["one function mixes personality routines"]++;
+        continue;
+      }
+      usable.push_back({site, std::move(*pad)});
+    }
+    if (usable.empty()) {
+      return 0;
+    }
+    Value *state = function.getArg(0);
+    auto written = Written(function, state);
+    IRBuilder<> entry(&*function.getEntryBlock().getFirstInsertionPt());
+    auto snapshot = entry.CreateAlloca(ArrayType::get(Type::getInt64Ty(context_), saved_.size()), nullptr, "xl.snapshot");
+    for (size_t k = 0; k < saved_.size(); ++k) {
+      if (!written.count(k)) {
+        Capture(entry, state, snapshot, k);
+      }
+    }
+    std::map<std::pair<uint64_t, uint64_t>, BasicBlock *> blocks;
+    unsigned lowered = 0;
+    for (auto &item : usable) {
+      auto &block = blocks[{item.pad.address, item.site.landing.site->action}];
+      if (!block) {
+        block = PadBlock(function, state, snapshot, item.pad);
+      }
+      if (!block) {
+        continue;
+      }
+      IRBuilder<> before(item.site.call);
+      for (auto k : written) {
+        Capture(before, state, snapshot, k);
+      }
+      changeToInvokeAndSplitBasicBlock(item.site.call, block);
+      ++lowered;
+    }
+    if (lowered) {
+      auto routine = module_.getFunction(personality);
+      if (!routine) {
+        routine = Function::Create(FunctionType::get(Type::getInt32Ty(context_), {}, true), GlobalValue::ExternalLinkage,
+                                   personality, module_);
+      }
+      function.setPersonalityFn(routine);
+      for (auto &block : function) {
+        for (auto &inst : block) {
+          if (auto call = dyn_cast<CallInst>(&inst); call && call->isMustTailCall()) {
+            call->setTailCallKind(CallInst::TCK_None);
+          }
+        }
+      }
+      ++functions_;
+    }
+    return lowered;
+  }
+
+  static constexpr uint64_t kResumeMarker = 1ull << 63;
+
+  Program &program_;
+  Lifter &lifter_;
+  Module &module_;
+  LLVMContext &context_;
+  uint64_t x30_ = 0;
+  std::vector<Saved> saved_;
+  std::set<uint64_t> continuations_;
+  std::set<Function *> continuation_functions_;
+  std::set<uint64_t> resumable_;
+  Function *resume_ = nullptr;
+  std::map<std::tuple<uint64_t, uint64_t, std::string>, Constant *> local_types_;
+  std::map<std::string, unsigned> unsupported_;
+  unsigned functions_ = 0;
+};
+
 struct Override {
   std::vector<Constant *> fields;
   uint64_t size = 0;
@@ -886,6 +1311,8 @@ bool EmitGuestData(Program &program, Module &module, std::vector<GuestSegment> &
             address = ConstantExpr::getAdd(address, ConstantInt::get(i32, bind.addend));
           }
           slots[vmaddr] = ConstantStruct::getAnon(context, {address, ConstantInt::get(i32, 0)}, true);
+        } else if (IsPersonality(bind.symbol)) {
+          slots[vmaddr] = ConstantInt::get(i64, 0);
         } else if (bind.symbol == "dyld_stub_binder" || bind.weak_import || bind.symbol.rfind(kTrapPrefix, 0) == 0) {
           if (bind.weak_import && program.exports.Find({}, bind.symbol)) {
             errs() << "xlate: " << image->path() << ": weak import " << bind.symbol << " of " << bind.library
@@ -1275,11 +1702,20 @@ int main(int argc, char **argv) {
   Module module("xlate", context);
   module.setTargetTriple(Triple(HostTriple));
   module.setDataLayout(HostLayout);
+  for (auto &image : program.images) {
+    std::vector<std::string> problems;
+    program.unwind.Add(*image, problems);
+    for (auto &problem : problems) {
+      errs() << "xlate: warning: " << image->path() << ": " << problem << "\n";
+    }
+  }
   Lifter lifter(program, module);
+  LandingPads pads(program, lifter, module);
   unsigned failures = 0;
   JumpTables tables(program);
   std::set<uint64_t> pending(program.functions.begin(), program.functions.end());
   unsigned table_targets = 0;
+  unsigned pad_targets = 0;
   unsigned table_data = 0;
   while (!pending.empty()) {
     std::set<uint64_t> discovered;
@@ -1295,20 +1731,27 @@ int main(int argc, char **argv) {
         continue;
       }
       for (auto target : tables.Targets(*lifted, tables.Owner(address))) {
-        if (!program.functions.count(target) && !lifter.functions.count(target)) {
-          discovered.insert(target);
+        if (!program.functions.count(target) && !lifter.functions.count(target) && discovered.insert(target).second) {
+          ++table_targets;
+        }
+      }
+      for (auto target : pads.Targets(*lifted)) {
+        if (!program.functions.count(target) && !lifter.functions.count(target) && discovered.insert(target).second) {
+          ++pad_targets;
         }
       }
     }
-    table_targets += discovered.size();
     for (auto target : discovered) {
       program.functions.insert(target);
     }
     pending = discovered;
   }
+  auto calls = lifter.Calls();
   auto devirtualized = lifter.Devirtualize();
   errs() << "xlate: lifted " << lifter.functions.size() << " functions, " << devirtualized << " direct calls, " << table_targets << " jump table targets, "
          << failures << " failures, " << table_data << " jump table data words that the linker listed as function starts\n";
+  auto invokes = pads.Lower(calls);
+  errs() << "xlate: " << invokes << " call sites in " << pads.functions() << " functions unwind to " << pad_targets << " landing pads\n";
   std::vector<GuestSegment> segments;
   if (!EmitGuestData(program, module, segments, ObjCOverrides(module, objc))) {
     return 1;
