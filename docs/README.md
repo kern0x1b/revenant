@@ -254,9 +254,11 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 
 | Document | About |
 | --- | --- |
-| [Build and translate](guides/recompiler/build-and-translate.md) | the commands, the guest libraries and what a bind names |
+| [Build and translate](guides/recompiler/build-and-translate.md) | the commands, the guest libraries, what a bind names, and how to translate a library |
 | [Contributor guide](guides/recompiler/contributing.md) | the layout, the conventions, the devices |
 | [How it works](explanation/recompiler/how-it-works.md) | the pipeline, the status, the Swift runtime's classes, the scope |
+| [Library mode](explanation/recompiler/library-mode.md) | a translated library inside an app's process: the address constraint, the loader, the runtime in a foreign process |
+| [Library mode measurements](reference/recompiler/library-mode.md) | what the phone measured: resident set, address map and threads next to an 85 MB host, the bases that link and run |
 | [Research](explanation/recompiler/research.md) | the research behind it |
 | [Corpus and benchmark](reference/recompiler/corpus.md) | what each check proves |
 

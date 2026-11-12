@@ -31,8 +31,17 @@ extern const uint32_t xl_entry_address;
 #define XL_REG(state, name) (*(uint64_t *)((char *)(state) + XL_OFFSET_##name))
 #define XL_GUEST_STACK_SIZE (16u << 20)
 
+#ifdef XL_LIBRARY
+extern void xl_library_ensure(void);
+#define xl_ensure_ready xl_library_ensure
+#else
+extern void xl_bridge_init(void);
+#define xl_ensure_ready xl_bridge_init
+#endif
+
 static pthread_key_t xl_state_key;
 static pthread_once_t xl_state_once = PTHREAD_ONCE_INIT;
+static int xl_diagnostics_installed;
 
 struct xl_thread {
     void *stack;
@@ -73,7 +82,8 @@ State *xl_current_state(void)
     XL_REG(state, TPIDRRO_EL0) = xl_tsd_base(thread->tsd_pages);
     XL_REG(state, SP) = ((uintptr_t)thread->stack + XL_GUEST_STACK_SIZE) & ~15u;
     pthread_setspecific(xl_state_key, state);
-    xl_thread_altstack();
+    if (xl_diagnostics_installed)
+        xl_thread_altstack();
     return state;
 }
 
@@ -216,8 +226,10 @@ static void xl_signal_note(int signal, siginfo_t *info, void *context)
     raise(signal);
 }
 
-__attribute__((constructor)) static void xl_install_crash_handler(void)
+void xl_install_diagnostics(void)
 {
+    if (__sync_lock_test_and_set(&xl_diagnostics_installed, 1))
+        return;
     atexit(xl_note_exit);
     {
         struct sigaction note = {0};
@@ -239,6 +251,13 @@ __attribute__((constructor)) static void xl_install_crash_handler(void)
     for (int i = 0; i < 5; i++)
         sigaction((int[]){SIGSEGV, SIGBUS, SIGILL, SIGABRT, SIGTRAP}[i], &action, NULL);
 }
+
+#ifndef XL_LIBRARY
+__attribute__((constructor)) static void xl_install_crash_handler(void)
+{
+    xl_install_diagnostics();
+}
+#endif
 
 static pthread_key_t xl_altstack_key;
 static pthread_once_t xl_altstack_once = PTHREAD_ONCE_INIT;
@@ -302,11 +321,9 @@ void xl_tail(State *state)
     [[clang::musttail]] return function(state);
 }
 
-extern void xl_bridge_init(void);
-
 uint64_t xl_invoke(uint64_t address, uint64_t argument)
 {
-    xl_bridge_init();
+    xl_ensure_ready();
     State *state = xl_current_state();
     xl_lifted function = xl_lookup(address);
     if (!function)
@@ -328,7 +345,7 @@ uint64_t xl_invoke(uint64_t address, uint64_t argument)
 
 uint64_t xl_invoke_n(uint64_t address, const uint64_t *arguments, unsigned count)
 {
-    xl_bridge_init();
+    xl_ensure_ready();
     State *state = xl_current_state();
     xl_lifted function = xl_lookup(address);
     if (!function)
@@ -354,6 +371,7 @@ uint64_t xl_invoke_n(uint64_t address, const uint64_t *arguments, unsigned count
     return result;
 }
 
+#ifndef XL_LIBRARY
 static uint64_t *xl_guest_vector(char **vector)
 {
     size_t count = 0;
@@ -365,10 +383,12 @@ static uint64_t *xl_guest_vector(char **vector)
     return copy;
 }
 
+extern void xl_register_application_classes(void);
 extern void xl_run_initializers(void);
 
 int main(int argc, char **argv, char **envp, char **apple)
 {
+    xl_register_application_classes();
     xl_run_initializers();
     State *state = xl_current_state();
     XL_REG(state, X0) = (uint64_t)argc;
@@ -383,3 +403,4 @@ int main(int argc, char **argv, char **envp, char **apple)
     entry(state);
     return (int)(uint32_t)XL_REG(state, X0);
 }
+#endif

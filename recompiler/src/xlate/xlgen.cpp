@@ -377,7 +377,7 @@ class Generator {
                          const std::string &callee, const FormatInfo &format, const std::string &manual);
   std::string HostEncoding(const Signature &signature);
   std::string InvokeShim(const Signature &signature);
-  std::string ImpWrapper(const Signature &signature, uint64_t imp, bool class_method);
+  std::string ImpWrapper(const Signature &signature, uint64_t imp, bool class_method, bool twin = false);
   std::string StubImpWrapper(uint64_t imp);
 
   ASTContext &gc_;
@@ -1857,7 +1857,31 @@ std::string Generator::InvokeShim(const Signature &signature) {
   return name;
 }
 
-std::string Generator::ImpWrapper(const Signature &signature, uint64_t imp, bool class_method) {
+static bool GenericImpSuffices(const Signature &signature) {
+  auto plain = [](const Value &value) {
+    switch (value.kind) {
+      case Kind::Void:
+      case Kind::Pointer:
+      case Kind::Protocol:
+        return true;
+      case Kind::Integer:
+        return value.host_bits <= 32 && (!value.is_signed || value.guest_bits <= value.host_bits);
+      default:
+        return false;
+    }
+  };
+  if (!plain(signature.result)) {
+    return false;
+  }
+  for (auto &param : signature.params) {
+    if (!plain(param.value)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+std::string Generator::ImpWrapper(const Signature &signature, uint64_t imp, bool class_method, bool twin) {
   auto invoke = InvokeShim(signature);
   auto name = "xl_imp_" + std::to_string(counter_++);
   bool has_result = signature.result.kind != Kind::Void;
@@ -1868,7 +1892,7 @@ std::string Generator::ImpWrapper(const Signature &signature, uint64_t imp, bool
   std::ostringstream hs;
   hs << "static " << Spell(hc_, has_result ? signature.result.host : hc_.VoidTy, name + "(" + args + ")") << "\n{\n";
   hs << "    struct " << invoke << "_pack p;\n    p.imp = 0x" << std::hex << imp << std::dec << "ull;\n";
-  hs << "    p.self = (uint64_t)(uintptr_t)self;\n    p.sel = (uint64_t)(uintptr_t)_cmd;\n";
+  hs << "    p.self = " << (twin ? "xl_object_out((uintptr_t)self)" : "(uint64_t)(uintptr_t)self") << ";\n    p.sel = (uint64_t)(uintptr_t)_cmd;\n";
   for (auto &param : signature.params) {
     if (param.value.kind == Kind::Record) {
       hs << "    " << Mirror(param.value.guest, param.value.host) << "_to_guest(&p." << param.name << ", &" << param.name << ");\n";
@@ -1935,6 +1959,34 @@ void Generator::EmitClasses(const json::Object &manifest) {
     os << "0x" << std::hex << value << "u";
     return os.str();
   };
+  auto resolve_signature = [&](const json::Object &method, bool class_method, std::string &origin) -> Signature {
+    auto selector = method.getString("selector")->str();
+    auto types = method.getString("types")->str();
+    Signature signature;
+    auto guest_types = types;
+    guest_types.erase(std::remove_if(guest_types.begin(), guest_types.end(), [](char ch) { return isdigit(static_cast<unsigned char>(ch)); }), guest_types.end());
+    if (auto found = guest_pool_.find(std::string(class_method ? "+" : "-") + selector); found != guest_pool_.end()) {
+      for (auto guest : found->second) {
+        auto key = gc_.getObjCEncodingForMethodDecl(guest);
+        key.erase(std::remove_if(key.begin(), key.end(), [](char ch) { return isdigit(static_cast<unsigned char>(ch)); }), key.end());
+        if (key != guest_types) {
+          continue;
+        }
+        auto host = Counterpart(guest, host_pool_[std::string(class_method ? "+" : "-") + selector]);
+        if (host) {
+          signature = FromMethod(guest, host);
+          origin = "SDK declaration in " + dyn_cast<NamedDecl>(guest->getDeclContext())->getNameAsString();
+          break;
+        }
+      }
+    }
+    if (origin.empty()) {
+      std::string error;
+      signature = FromEncoding(types, error);
+      origin = "guest type encoding " + types;
+    }
+    return signature;
+  };
   auto emit_methods = [&](const json::Array *methods, bool class_method, const std::string &symbol,
                           const std::string &superclass_hint, bool implementations = true) -> std::string {
     if (!methods || methods->empty()) {
@@ -1955,30 +2007,8 @@ void Generator::EmitClasses(const json::Object &manifest) {
              << "\", 0}, ";
         continue;
       }
-      Signature signature;
       std::string origin;
-      auto guest_types = types;
-      guest_types.erase(std::remove_if(guest_types.begin(), guest_types.end(), [](char ch) { return isdigit(static_cast<unsigned char>(ch)); }), guest_types.end());
-      if (auto found = guest_pool_.find(std::string(class_method ? "+" : "-") + selector); found != guest_pool_.end()) {
-        for (auto guest : found->second) {
-          auto key = gc_.getObjCEncodingForMethodDecl(guest);
-          key.erase(std::remove_if(key.begin(), key.end(), [](char ch) { return isdigit(static_cast<unsigned char>(ch)); }), key.end());
-          if (key != guest_types) {
-            continue;
-          }
-          auto host = Counterpart(guest, host_pool_[std::string(class_method ? "+" : "-") + selector]);
-          if (host) {
-            signature = FromMethod(guest, host);
-            origin = "SDK declaration in " + dyn_cast<NamedDecl>(guest->getDeclContext())->getNameAsString();
-            break;
-          }
-        }
-      }
-      if (origin.empty()) {
-        std::string error;
-        signature = FromEncoding(types, error);
-        origin = "guest type encoding " + types;
-      }
+      auto signature = resolve_signature(method, class_method, origin);
       std::string wrapper;
       std::string host_types;
       if (!signature.supported) {
@@ -2198,6 +2228,33 @@ void Generator::EmitClasses(const json::Object &manifest) {
     }
   }
   meta << "0};\n";
+  meta << "const struct xl_swift_method xl_swift_methods[] = {\n";
+  for (auto &image : *manifest.getArray("images")) {
+    for (auto &item : *image.getAsObject()->getArray("swift_methods")) {
+      auto &cls = *item.getAsObject();
+      for (bool class_method : {false, true}) {
+        for (auto &entry : *cls.getArray(class_method ? "class_methods" : "instance_methods")) {
+          auto &method = *entry.getAsObject();
+          auto label = std::string(class_method ? "+[" : "-[") + cls.getString("name")->str() + " " + method.getString("selector")->str() + "]";
+          std::string origin;
+          auto signature = resolve_signature(method, class_method, origin);
+          if (!signature.supported) {
+            Report(label + ": generic host IMP, " + signature.note);
+            continue;
+          }
+          if (GenericImpSuffices(signature)) {
+            Report(label + ": generic host IMP, every word of its signature is a pointer or a 32-bit value");
+            continue;
+          }
+          auto host_types = HostEncoding(signature);
+          auto wrapper = ImpWrapper(signature, *method.getInteger("imp"), class_method, true);
+          Report(label + ": host IMP from " + origin + " as " + host_types);
+          meta << "    {" << hex(*method.getInteger("imp")) << ", (void *)" << wrapper << ", \"" << host_types << "\"},\n";
+        }
+      }
+    }
+  }
+  meta << "    {0, 0, 0}};\n";
   tables_ += meta.str();
 }
 

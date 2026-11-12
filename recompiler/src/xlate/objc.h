@@ -91,6 +91,12 @@ struct ObjCCategory {
   std::vector<uint64_t> protocols;
 };
 
+struct SwiftClassMethods {
+  std::string name;
+  std::vector<Method> instance_methods;
+  std::vector<Method> class_methods;
+};
+
 struct ConstantString {
   uint64_t address = 0;
   uint32_t flags = 0;
@@ -109,6 +115,7 @@ struct ObjCImage {
   std::vector<uint64_t> swift_static_classes;
   std::vector<std::pair<uint64_t, Pointer>> clsrolist_superclass;
   std::vector<uint64_t> swift_listed_classes;
+  std::vector<SwiftClassMethods> swift_methods;
   uint64_t clsrolist_count = 0;
   uint64_t clsrolist_unowned = 0;
   std::vector<ObjCCategory> categories;
