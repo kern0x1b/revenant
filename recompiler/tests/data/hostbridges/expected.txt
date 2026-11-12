@@ -13,7 +13,7 @@ getaddrinfo v6 0
 getaddrinfo numeric host that is a name 8
 getaddrinfo passive 0 has nodes 1
 Probe instance methods 3
-  isKindOfClass: arguments 3 returns B
+  isKindOfClass: arguments 3 returns BOOL
   label arguments 2 returns @
   plus:to: arguments 4 returns i
 Probe class methods 1

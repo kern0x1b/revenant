@@ -165,7 +165,8 @@ static void list_methods(const char *label, Class cls)
     printf("%s %u\n", label, count);
     for (unsigned i = 0; i < count; i++) {
         char *result = method_copyReturnType(methods[i]);
-        printf("  %s arguments %u returns %s\n", sel_getName(method_getName(methods[i])), method_getNumberOfArguments(methods[i]), result);
+        const char *shown = strcmp(result, "B") == 0 || strcmp(result, "c") == 0 ? "BOOL" : result;
+        printf("  %s arguments %u returns %s\n", sel_getName(method_getName(methods[i])), method_getNumberOfArguments(methods[i]), shown);
         free(result);
     }
     free(methods);
