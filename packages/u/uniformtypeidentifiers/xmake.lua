@@ -5,11 +5,12 @@ package("uniformtypeidentifiers")
     set_policy("package.strict_compatibility", true)
     add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", type = "string"})
 
+    add_configs("shared", {description = "Compile against a shared swift-runtime, for a port that requires it so.", default = false, type = "boolean"})
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("sources", {description = "The digest of this recipe and the module's sources, so a changed declaration is a different package.", default = uniformtypeidentifiers_sources_digest, type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
-        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime"})
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil}})
         package:add("links", "swiftUniformTypeIdentifiers")
     end)
 
