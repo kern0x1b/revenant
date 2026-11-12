@@ -63,3 +63,11 @@ local OTHER = 'add_requires("revenant@swift-runtime", {alias = "swift-runtime", 
 local message = refusal(function () isolate.whole_requirements(OTHER) end)
 expect("a swift-runtime with other configs is refused", message ~= nil and message:find("swift%-runtime") ~= nil,
        "the copy was rewritten or the refusal does not name swift-runtime")
+
+local shared = isolate.shared_packages(APPLICATION)
+expect("the copy asks swiftui, cryptokit, uniformtypeidentifiers and swift-crypto for a shared swift-runtime",
+       shared:find('add_requireconfs("**.swiftui", {configs = {shared = true}})', 1, true) ~= nil
+       and shared:find('add_requireconfs("**.cryptokit", {configs = {shared = true}})', 1, true) ~= nil
+       and shared:find('add_requireconfs("**.uniformtypeidentifiers", {configs = {shared = true}})', 1, true) ~= nil
+       and shared:find('add_requireconfs("**.swift-crypto", {configs = {shared = true}})', 1, true) ~= nil, "a package lacks its shared rule")
+expect("the shared rules are carried once", isolate.shared_packages(shared) == shared, "a second pass changed the copy")

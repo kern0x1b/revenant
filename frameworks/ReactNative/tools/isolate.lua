@@ -27,9 +27,22 @@ local WHOLE = {
     {line = 'add_requireconfs("combine", {override = true, configs = {shared = get_config("component") == "" or nil}})'}
 }
 
--- Known limit: swiftui, cryptokit, uniformtypeidentifiers and swift-crypto, which the application adds through RN_DEPS_REPO,
--- depend on swift-runtime with a plain edge (their recipes declare no shared config), and xmake does not change that edge
--- from the project: the copy then needs an unshared swift-runtime, which the whole configuration does not build.
+local SHARED_PACKAGES = {"swiftui", "cryptokit", "uniformtypeidentifiers", "swift-crypto"}
+
+function shared_packages(text)
+    local added = {}
+    for _, name in ipairs(SHARED_PACKAGES) do
+        local line = 'add_requireconfs("**.' .. name .. '", {configs = {shared = true}})'
+        if not text:find(line, 1, true) then
+            table.insert(added, line)
+        end
+    end
+    if #added > 0 then
+        text = text .. "\n" .. table.concat(added, "\n") .. "\n"
+    end
+    return text
+end
+
 local WHOLE_PROBE = {WHOLE[1].line, WHOLE[2].line, WHOLE[3].line}
 
 function declares(text, alias)
@@ -269,7 +282,7 @@ function copy_project(project, folder, bundle_id)
     end
     local xmake = path.join(folder, "xmake.lua")
     local text = io.readfile(xmake)
-    local carried = whole_requirements(text)
+    local carried = shared_packages(whole_requirements(text))
     if carried ~= text then
         io.writefile(xmake, carried)
     end
