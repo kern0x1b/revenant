@@ -23,4 +23,6 @@ function main()
 
     local alias = source("src/revenant_alias.h")
     contains(alias, "+ (void)load", "the alias class macro, which makes every alias non-lazy and realized before attach.c runs")
+    contains(alias, "== REVENANT_ALIAS_SELF(Name) ? class_getSuperclass(found) : found", "the alias superclass answer, which skips the proxy so a class that +load registered under the alias name does not answer itself")
+    absent(alias, "== REVENANT_ALIAS_SELF(Name) ? REVENANT_ALIAS_RELEASE(Name) : found", "the alias superclass answer")
 end

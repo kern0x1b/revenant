@@ -256,6 +256,7 @@ class BGTask
 class BGTaskRequest
 class BGTaskScheduler
 class CAAnimation
+class CABackdropLayer
 class CADisplayLink
 class CALayer
 class CAMetalLayer
@@ -3928,6 +3929,7 @@ enum UIBackgroundRefreshStatusDenied
 enum UIBarPositionAny
 enum UIBarPositionBottom
 enum UIBarPositionTop
+enum UIBlurEffectStyleExtraLight
 enum UIBlurEffectStyleLight
 enum UIBlurEffectStyleSystemChromeMaterial
 enum UIButtonRoleCancel
@@ -13557,6 +13559,23 @@ member BGTaskScheduler -registerForTaskWithIdentifier:usingQueue:launchHandler:
 member BGTaskScheduler -submitTaskRequest:error:
 member CAAnimation -preferredFrameRateRange
 member CAAnimation -setPreferredFrameRateRange:
+member CABackdropLayer -enabled
+member CABackdropLayer -filters
+member CABackdropLayer -groupName
+member CABackdropLayer -init
+member CABackdropLayer -layoutSublayers
+member CABackdropLayer -removeFromSuperlayer
+member CABackdropLayer -revenant_blurStyle:
+member CABackdropLayer -revenant_host
+member CABackdropLayer -revenant_removeEffect
+member CABackdropLayer -revenant_syncEffect
+member CABackdropLayer -scale
+member CABackdropLayer -setBounds:
+member CABackdropLayer -setEnabled:
+member CABackdropLayer -setFilters:
+member CABackdropLayer -setFrame:
+member CABackdropLayer -setGroupName:
+member CABackdropLayer -setScale:
 member CADisplayLink -preferredFrameRateRange
 member CADisplayLink -preferredFramesPerSecond
 member CADisplayLink -setPreferredFrameRateRange:
