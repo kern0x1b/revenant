@@ -204,8 +204,11 @@ local function lift_key(e, input, images, out, replaces, base)
     return table.concat(parts, "\n")
 end
 
-local function split_compile(e, out, lifted, host, bytes)
-    io.stderr:write(string.format("lifted.o: a module of %d bytes does not fit one object's branch range; splitting code, keeping data in one object\n", bytes))
+local OBJECT_BYTES = 6000000
+
+local function split_compile(e, out, lifted, host, bytes, limit)
+    local wanted = math.ceil(bytes / limit)
+    io.stderr:write(string.format("lifted.o: a module of %d bytes is more than %d bytes of bitcode for one object; splitting code into %d pieces, keeping data in one object\n", bytes, limit, wanted))
     local split = path.join(out, "split")
     os.tryrm(split)
     os.mkdir(split)
@@ -213,7 +216,7 @@ local function split_compile(e, out, lifted, host, bytes)
     local data = path.join(split, "data.bc")
     os.execv(path.join(e.llvmbin, "llvm-extract"), {"--delete", "--rfunc=.*", lifted, "-o", data})
     local jobs = {{bitcode = data, object = path.join(split, "data.o")}}
-    os.execv(path.join(e.llvmbin, "llvm-split"), {"-j", "8", "-o", path.join(split, "p"), lifted})
+    os.execv(path.join(e.llvmbin, "llvm-split"), {"-j", string.format("%d", wanted), "-o", path.join(split, "p"), lifted})
     local pieces = {}
     for _, piece in ipairs(os.files(path.join(split, "p*"))) do
         local name = basename(piece)
@@ -231,29 +234,30 @@ local function split_compile(e, out, lifted, host, bytes)
     runjobs("compile", function (index)
         local job = jobs[index]
         if job.piece then
-            os.execv(path.join(e.llvmbin, "llvm-extract"), {"--delete", "--rglob=.*", job.piece, "-o", job.bitcode})
+            local log = job.bitcode .. ".log"
+            local status = os.execv(path.join(e.llvmbin, "llvm-extract"), {"--delete", "--rglob=.*", job.piece, "-o", job.bitcode}, {stderr = log, try = true})
+            if status ~= 0 then
+                local errors = io.readfile(log)
+                if not errors:find("doesn't contain global named", 1, true) then
+                    io.stderr:write(errors)
+                    raise("llvm-extract failed on %s", job.piece)
+                end
+                job.bitcode = job.piece
+            end
         end
-        os.execv(clang, table.join(host, {"-c", job.bitcode, "-o", job.object}))
+        os.execv(clang, table.join(host, {"-x", "ir", "-c", job.bitcode, "-o", job.object}))
     end, {total = #jobs, comax = count + 1})
     return objects
 end
 
-local function compile_lifted(e, out, host)
+function compile_lifted(e, out, host)
     local lifted = path.join(out, "lifted.bc")
     local bytes = os.filesize(lifted)
-    if bytes > (tonumber(os.getenv("XL_SPLIT_BYTES") or "") or 64000000) then
-        return split_compile(e, out, lifted, host, bytes)
+    local limit = tonumber(os.getenv("XL_OBJECT_BYTES") or "") or OBJECT_BYTES
+    if bytes > limit then
+        return split_compile(e, out, lifted, host, bytes, limit)
     end
-    local log = path.join(out, "lifted-cc.log")
-    local ok = os.execv(path.join(e.llvmbin, "clang"), table.join(host, {"-c", lifted, "-o", path.join(out, "lifted.o")}),
-                        {stderr = log, try = true})
-    if ok ~= 0 then
-        if io.readfile(log):find("out of range", 1, true) then
-            return split_compile(e, out, lifted, host, bytes)
-        end
-        io.stderr:write(io.readfile(log))
-        raise("compiling lifted.bc failed")
-    end
+    os.execv(path.join(e.llvmbin, "clang"), table.join(host, {"-c", lifted, "-o", path.join(out, "lifted.o")}))
     return {path.join(out, "lifted.o")}
 end
 
