@@ -24,7 +24,8 @@ package("uniformtypeidentifiers")
             "    add_values(\"swift.flags\", \"-module-cache-path\", \"" .. modules .. "\")",
             "target_end()",
             ""}, "\n"))
-        import("@addon.revenant.apple.wrapper", {anonymous = true}).install(package, {root = root,
+        local lines = package:config("shared") and import("@addon.revenant.apple.shared_requires", {anonymous = true}).lines(package:config("apple_sdk")) or nil
+        import("@addon.revenant.apple.wrapper", {anonymous = true}).install(package, {root = root, lines = lines,
             includes = {path.join(root, "frameworks", "Backports", "src", "Swift"), extra}, targets = {"swiftUniformTypeIdentifiers"}, modules = true})
     end)
 
