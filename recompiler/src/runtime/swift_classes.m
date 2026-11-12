@@ -40,6 +40,7 @@ enum { XL_RO_META = 1, XL_RO_ROOT = 2 };
 
 extern const uint32_t xl_swift_static_classes[];
 extern const uint32_t xl_swift_listed_classes[];
+extern const struct xl_swift_method xl_swift_methods[];
 
 static volatile int xl_shadows_active;
 static OSSpinLock xl_table_lock = OS_SPINLOCK_INIT;
@@ -147,6 +148,15 @@ uint32_t xl_shadow_imp(IMP imp)
     return (uint32_t)(uintptr_t)xl_table_get(xl_shadow_imps, (uintptr_t)imp);
 }
 
+static const struct xl_swift_method *xl_typed_method(uint64_t guest)
+{
+    for (const struct xl_swift_method *method = xl_swift_methods; method->guest; method++) {
+        if (method->guest == (uint32_t)guest)
+            return method;
+    }
+    return NULL;
+}
+
 static int xl_add_guest_methods(Class target, uint64_t list, const char *class_name)
 {
     int adds_dealloc = 0;
@@ -170,10 +180,14 @@ static int xl_add_guest_methods(Class target, uint64_t list, const char *class_n
             types = (const char *)(uintptr_t) * (const uint64_t *)(uintptr_t)(entry + 8);
             imp = *(const uint64_t *)(uintptr_t)(entry + 16);
         }
-        if (!class_addMethod(target, selector, xl_guest_method_imp(imp, selector), types)) {
+        const struct xl_swift_method *typed = xl_typed_method(imp);
+        IMP host_imp = typed ? (IMP)typed->host : xl_guest_method_imp(imp, selector);
+        if (!class_addMethod(target, selector, host_imp, typed ? typed->types : types)) {
             xl_shadow_note("%s: method %s already defined", class_name, sel_getName(selector));
             continue;
         }
+        if (typed)
+            xl_table_set(xl_shadow_imps, (uintptr_t)host_imp, (const void *)(uintptr_t)imp);
         if (selector == xl_cxx_destruct_selector)
             xl_table_set(xl_destructors, (uintptr_t)target, (const void *)(uintptr_t)imp);
         if (selector == @selector(dealloc))
