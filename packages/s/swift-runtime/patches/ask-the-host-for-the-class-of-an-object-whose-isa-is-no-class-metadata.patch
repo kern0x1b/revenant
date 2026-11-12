@@ -1,0 +1,29 @@
+diff --git a/stdlib/public/runtime/Private.h b/stdlib/public/runtime/Private.h
+--- a/stdlib/public/runtime/Private.h
++++ b/stdlib/public/runtime/Private.h
+@@ -30,7 +30,7 @@
+ #endif
+
+ // Opaque ISAs need to use object_getClass which is in runtime.h
+-#if SWIFT_OBJC_INTEROP && SWIFT_HAS_OPAQUE_ISAS
++#if SWIFT_OBJC_INTEROP && (SWIFT_HAS_OPAQUE_ISAS || defined(__aarch64__))
+ #include <objc/runtime.h>
+ #endif
+
+@@ -184,6 +184,16 @@
+ #if SWIFT_HAS_ISA_MASKING
+     // Apply the mask.
+     bits &= SWIFT_ISA_MASK;
++#endif
++
++#if SWIFT_OBJC_INTEROP && defined(__aarch64__)
++    // This runtime runs as the guest of a translated program, beside the objc runtime of the host (iOS 6, 32-bit). An
++    // instance of a Swift class that has an Objective-C ancestor is a host object: its isa is the host's class, whose
++    // layout is not a ClassMetadata, and the class object the guest knows is the one the host runtime answers with.
++    if (!reinterpret_cast<const ClassMetadata *>(bits)->isTypeMetadata()) {
++      id idObject = reinterpret_cast<id>(const_cast<void *>(object));
++      return reinterpret_cast<const ClassMetadata*>(object_getClass(idObject));
++    }
+ #endif
+
+     // The result is a class pointer.
