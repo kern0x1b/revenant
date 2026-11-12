@@ -14,7 +14,8 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, tsdscan, tsdguard,
-int128, weakimport, lse and llsc; `classpair` and `ordinal` are the device group's. Their output goes to the
+int128, weakimport, lse, llsc and exceptions; `classpair` and `ordinal` are the device group's, which also runs the
+device part of `exceptions`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
 
@@ -23,6 +24,7 @@ A check that also has a device part is run by hand, with the output folder as it
 ```sh
 ./xmakew l -P . recompiler/tests/weakimport/check.lua <out>
 ./xmakew l -P . recompiler/tests/classpair/check.lua <out>
+./xmakew l -P . recompiler/tests/exceptions/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftconformance/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftobjc/check.lua <out>
 ```
@@ -109,6 +111,27 @@ recorded one and the `cmpxchg` still finds the recorded value, so a thread that 
 the loop retry. A store that finds the same value written back by another thread succeeds, as it does in a user-mode
 emulator; the loops compilers emit are value-based and tolerate it. `LDXP` and `STXP` still lift as a plain load and
 store, because a 128-bit `cmpxchg` has no armv7 lowering.
+
+### exceptions
+
+A program of Objective-C and C++ (`main.m`, `guarded.mm`) that throws and catches across guest frames. It covers:
+
+- an `NSException` raised in a guest frame (`@throw`) and one raised by the host (`-objectAtIndex:` out of range), both
+  caught by a guest `@try` two guest frames up, through a C++ frame whose destructors must run;
+- `@catch` of a class the guest defines (a subclass of `NSException`), of `NSException`, of `id` (a thrown string), and
+  `@finally`;
+- `@throw;` rethrow, and a C++ `catch (...)` that takes an Objective-C exception;
+- an exception raised in a block the host calls (`enumerateObjectsUsingBlock:`), so the unwind crosses host frames;
+- callee-saved registers live across a catch, a catch followed by a tail call, a catch on a second thread;
+- loops that catch 2000 exceptions, one with two `@try` regions in the loop body (each landing pad continues into the
+  other), which kept a stack frame per catch before landing pads returned to a loop.
+
+The check builds the program for this Mac and for arm64 iOS. The Mac's output is `tests/data/exceptions/expected.txt`.
+On the host xlate must report at least 20 call sites unwinding to at least 6 landing pads, with no "left as plain
+calls" line and no unreadable LSDA, the lifted module must carry `invoke`, `landingpad` and both the Objective-C and
+the C++ personality, and the translated binary must import `_Unwind_SjLj_Register`. The device part runs the translated
+binary and compares its output with the Mac's. The program takes the number of loop rounds as its argument (2000
+by default), so a probe can run it deeper by hand.
 
 ### tsdscan
 

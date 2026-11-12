@@ -124,6 +124,10 @@ Test: the corpus fixture above; the SDK's catch sites by the coverage count of `
 Build on: libunwind's own sources for the LSDA and compact unwind formats (read for the format; not copied where the
 licence forbids), and the existing guest frame walker in `recompiler/src/runtime/runtime.c` (`xl_walk_guest`).
 
+Done: the second way, with the host's own unwinder. Each lifted call that has a landing pad is an `invoke` whose pad names
+the host personality; see "Exceptions" in `recompiler/how-it-works.md` and the `exceptions` check in the corpus reference.
+The SDK's 14 catch sites and 15 resume sites are among 349 call sites in 60 functions that unwind to 54 landing pads.
+
 ## D. Library mode (milestone 3b)
 
 Goal: the translated SDK and the guest `libswiftCore` and `libc++` are packed as armv7 dylibs plus a loader that an app

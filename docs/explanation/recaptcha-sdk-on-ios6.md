@@ -163,8 +163,9 @@ Blockers and risks, each to be checked by lifting:
    library evolution, so the compiler does not rely on the arm64 layout). Not verified with an armv7 compile.
 3. **Exceptions.** The archive has 14 Objective-C catch sites (`objc_begin_catch`) and 15 `__Unwind_Resume` sites, and
    the protobuf runtime raises `RCAx_GPBCodedInputStreamException`. None of the catch sites is on the static path, which is
-   only a lower bound. The recompiler does not yet unwind exceptions through translated frames (`how-it-works.md`, "C++
-   runtime"; `research.md`, section 8). Swift `throws` is not affected: `swift_willThrow` (483 sites) and
+   only a lower bound. The recompiler unwinds exceptions through translated frames (`how-it-works.md`, "Exceptions"):
+   with the 319 objects linked into one image, xlate turns 349 call sites in 60 functions into calls that unwind to 54
+   landing pads, and leaves none as a plain call. Swift `throws` is not affected: `swift_willThrow` (483 sites) and
    `swift_errorRetain` (341) are ordinary returns.
 4. **Exclusive monitors** (section 3): the 87 `ldaxr`/`stlxr` pairs need the atomicity the recompiler does not yet give.
 5. **Traps** (section 3): `brk` 904 and `udf` 45 must lower to traps, not to a failed lift.
@@ -304,6 +305,6 @@ aborts in `_swift_release_dealloc` (the object's `destroy` slot is zero). It nee
 
 All 319 objects went through the recompiler (milestone 1). Blockers, from the lift of the whole archive: the arm64 guest
 overlays that the SDK imports (Foundation 59 + 22 names, CryptoKit 18, Dispatch 9, Network 8, Darwin 2), the generated
-bridges still missing for about 114 imported functions, the 14 Objective-C exception catch sites, and 127 "cannot decode
+bridges still missing for about 114 imported functions, and 127 "cannot decode
 function" entries in the guest `libswiftCore` (most are jump-table words that `ld64` lists as function starts; the fix is in
 the recompiler, `JumpTables::IsData`, covered by the `jumptable` host test).

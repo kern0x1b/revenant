@@ -106,10 +106,27 @@ print on the iPad 2 what objc4 printed.
   piece leaves `__objc_classlist` pointing at the wrong class objects, and the image crashes inside objc's
   `map_images`, before any handler is installed. Small apps take no long calls, no text relocations and no cost.
 - **C++ runtime.** `__cxa_atexit` is bridged: the guest's static destructor is recorded and run through the runtime,
-  not the host C++ runtime. `operator new`, `new[]`, `delete` and `delete[]` go to the host allocator. Exception
-  unwinding (`__gxx_personality_v0`, `__cxa_begin_catch`, `_Unwind_Resume`) stays a trap, which is hit only if an
-  exception propagates. `recompiler/tests/cxxinit` is the regression test: a global C++ object with a `std::string`,
-  a `std::vector` and a destructor.
+  not the host C++ runtime. `operator new`, `new[]`, `delete` and `delete[]` go to the host allocator.
+  `recompiler/tests/cxxinit` is the regression test: a global C++ object with a `std::string`, a `std::vector` and a
+  destructor.
+- **Exceptions.** Objective-C and C++ exceptions pass through lifted frames, from guest code to guest code and from host
+  code to guest code. The host armv7 runtime unwinds with setjmp/longjmp function contexts, and a lifted function has
+  none, so xlate reads the guest's `__unwind_info` and LSDA (and the `__eh_frame` entry of a function the compact
+  encoding cannot describe) and turns every lifted call that has a landing pad into an `invoke`. Its unwind edge is a
+  `landingpad` that names the host's own personality routine (`__objc_personality_v0`, `__gxx_personality_sj0` or
+  `__gcc_personality_sj0`) with the catch types of the LSDA: the host's `OBJC_EHTYPE_*` objects for an imported class,
+  a type object built from the guest's metadata for a class the guest defines, null for a catch-all. LLVM registers the
+  function context and writes the host's call-site table, so the host personality does the matching. At the pad the
+  callee-saved registers and the stack pointer come back from a snapshot taken before the call, and the guest's landing
+  pad runs as a lifted function with the exception in `x0` and the selector in `x1`. A pad inside such a continuation
+  does not nest another host frame: it leaves a marker in the program counter and returns, and one loop calls the next
+  continuation, so a loop that catches thousands of exceptions keeps a constant stack. `objc_begin_catch`,
+  `__cxa_begin_catch`, `__cxa_end_catch`, `__cxa_rethrow` and `__Unwind_Resume` go to the host; the last one calls
+  `_Unwind_SjLj_Resume`, because iOS 6 has no `_Unwind_Resume`. xlate prints how many call sites in how many functions
+  unwind to how many landing pads, and counts the ones it left as plain calls (an exception specification, an
+  unknown personality, a function that mixes personalities). A `throw` of translated C++ code (`__cxa_throw`) is a
+  fault, and a catch of a C++ class the guest itself defines cannot match a host exception, so that clause is dropped.
+  `recompiler/tests/exceptions` is the regression test.
 
 ## Scope and limits
 
