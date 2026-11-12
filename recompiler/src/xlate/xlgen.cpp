@@ -321,6 +321,7 @@ enum class CallKind { Function, Message };
 struct FormatInfo {
   bool present = false;
   bool object = false;
+  bool scan = false;
   unsigned format_index = 0;
   std::string va_variant;
   int va_param = -1;
@@ -1212,15 +1213,24 @@ std::string Generator::EmitBridge(const std::string &id, const Signature &signat
     auto &param = signature.params[i];
     std::string arg;
     if (format.present && i == format.format_index) {
-      arg = format.object ? "(id)format.object" : "format.text";
+      arg = format.scan ? "(const char *)xl_narrow_pointer(p->" + param.name + ", \"" + id + "\", " + std::to_string(i) + ")"
+                        : format.object ? "(id)format.object" : "format.text";
     } else if (format.present && static_cast<int>(i) == format.va_param) {
-      arg = "(va_list)format.arguments";
+      arg = format.scan ? "(va_list)scan.arguments" : "(va_list)format.arguments";
     } else {
       arg = HostLoad(param.value, "p->" + param.name, "\"" + id + "\", " + std::to_string(i), prep, post, i);
     }
     call_args += ", " + arg;
   }
-  if (format.present) {
+  if (format.present && format.scan) {
+    std::string va_src = format.va_param < 0 ? "p->va" : ("p->" + signature.params[format.va_param].name);
+    prep += "    struct xl_scanf scan;\n    xl_scanf_marshal(&scan, (const char *)xl_narrow_pointer(p->" + signature.params[format.format_index].name +
+            ", \"" + id + "\", " + std::to_string(format.format_index) + "), (const uint64_t *)(uintptr_t)" + va_src + ", \"" + id + "\");\n";
+    if (format.va_param < 0) {
+      call_args += ", (va_list)scan.arguments";
+    }
+    post += "    xl_scanf_finish(&scan, (int)p->r);\n";
+  } else if (format.present) {
     std::string va_src = format.va_param < 0 ? "p->va" : ("p->" + signature.params[format.va_param].name);
     prep += "    struct xl_format format;\n    xl_format_marshal(&format, " +
             std::string(format.object ? "0, (id)xl_narrow_pointer(p->" + signature.params[format.format_index].name + ", \"" + id + "\", 0)"
@@ -1247,14 +1257,16 @@ std::string Generator::EmitBridge(const std::string &id, const Signature &signat
     types += ")";
     super_types += ")";
     bool stret = has_result && signature.result.kind == Kind::Record && hc_.getTypeSize(signature.result.host) > 32;
-    prep += "    Class super_class = xl_take_super_class(state);\n    struct objc_super super_receiver = {(id)xl_class_in(p->self), super_class};\n";
+    prep += "    Class super_class = xl_take_super_class(state);\n    void *forced_imp = xl_take_forced_imp(state);\n    struct objc_super super_receiver = {(id)xl_class_in(p->self), super_class};\n";
     std::string plain = "((" + types + ")" + (stret ? "objc_msgSend_stret" : "objc_msgSend") + ")((id)xl_class_in(p->self), (SEL)(uintptr_t)p->sel" + call_args + ")";
     std::string super = "((" + super_types + ")" + (stret ? "objc_msgSendSuper2_stret" : "objc_msgSendSuper2") + ")(&super_receiver, (SEL)(uintptr_t)p->sel" + call_args + ")";
+    std::string forced = "((" + types + ")forced_imp)((id)xl_class_in(p->self), (SEL)(uintptr_t)p->sel" + call_args + ")";
     if (format.present) {
       plain = callee + "((id)xl_class_in(p->self), (SEL)(uintptr_t)p->sel" + call_args + ")";
       super = plain;
+      forced = plain;
     }
-    call = "(super_class ? " + super + " : " + plain + ")";
+    call = "(forced_imp ? " + forced + " : super_class ? " + super + " : " + plain + ")";
   } else {
     call = callee + "(" + (call_args.empty() ? "" : call_args.substr(2)) + ")";
   }
@@ -1491,11 +1503,14 @@ bool Generator::EmitFunction(const std::string &symbol, FunctionDecl *g, Functio
         {"printf", "vprintf"}, {"fprintf", "vfprintf"}, {"sprintf", "vsprintf"}, {"snprintf", "vsnprintf"},
         {"asprintf", "vasprintf"}, {"dprintf", "vdprintf"}, {"syslog", "vsyslog"}, {"NSLog", "NSLogv"},
         {"asl_log", "asl_vlog"}};
+    static const std::map<std::string, std::string> scan_variants = {
+        {"scanf", "vscanf"}, {"fscanf", "vfscanf"}, {"sscanf", "vsscanf"}};
     static const std::set<std::string> valist_readers = {
         "vprintf", "vfprintf", "vsprintf", "vsnprintf", "vasprintf", "vdprintf",
-        "vsyslog", "asl_vlog", "NSLogv"};
-    auto variant = variants.find(name);
-    if (variant != variants.end() && g->isVariadic()) {
+        "vsyslog", "asl_vlog", "NSLogv", "vscanf", "vfscanf", "vsscanf"};
+    format.scan = attr->getType()->getName() == "scanf";
+    auto variant = format.scan ? scan_variants.find(name) : variants.find(name);
+    if (variant != (format.scan ? scan_variants.end() : variants.end()) && g->isVariadic()) {
       format.present = true;
       format.object = attr->getType()->getName() == "NSString";
       format.format_index = attr->getFormatIdx() - 1;
@@ -2639,7 +2654,11 @@ int main(int argc, const char **argv) {
       {"_exit", 1}, {"__exit", 1},
       {"_objc_copyImageNames", 1}, {"_objc_copyClassNamesForImage", 2}, {"_objc_copyClassList", 1},
       {"_objc_readClassPair", 2}, {"__objc_realizeClassFromSwift", 2}, {"_class_getImageName", 1},
-      {"_objc_getClass", 1}, {"_objc_lookUpClass", 1}, {"_class_getName", 1}};
+      {"_objc_getClass", 1}, {"_objc_lookUpClass", 1}, {"_class_getName", 1},
+      {"_class_getMethodImplementation", 2}, {"_method_getImplementation", 1}, {"_method_setImplementation", 2},
+      {"_class_addMethod", 4}, {"_class_replaceMethod", 4}, {"_imp_implementationWithBlock", 1},
+      {"_imp_getBlock", 1}, {"_imp_removeBlock", 1}, {"_class_copyMethodList", 2},
+      {"_getaddrinfo", 4}, {"_freeaddrinfo", 1}};
   static const std::set<std::string> personalities = {"___objc_personality_v0", "___gxx_personality_v0",
                                                       "___gcc_personality_v0"};
   static const std::set<std::string> faults = {"___cxa_throw"};

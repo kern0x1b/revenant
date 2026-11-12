@@ -5,7 +5,7 @@ package("swiftui")
     set_policy("package.strict_compatibility", true)
     add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", type = "string"})
 
-    add_configs("shared", {description = "Compile against a shared swift-runtime, for a port that requires it so.", default = false, type = "boolean"})
+    add_configs("shared", {description = "Compile and link against a shared swift-runtime and a shared combine, whose libraries the result binds by their absolute install names. The package is not yet one of a Debian package: it writes no shared-packages description.", default = false, type = "boolean"})
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("sources", {description = "The digest of this recipe and the SwiftUI sources it builds, so a changed source is a different package.", default = swiftui_sources_digest, type = "string", readonly = true})
 
@@ -24,6 +24,7 @@ package("swiftui")
         local root = path.translate(path.join(package:scriptdir(), "..", "..", ".."))
         local project = path.absolute("swiftui")
         local shared = package:config("shared") and ", configs = {shared = true}" or ""
+        local packaged = package:config("shared") and ", configs = {packaged = true}" or ""
         os.mkdir(project)
         io.writefile(path.join(project, "xmake.lua"), table.concat({
             "add_repositories(\"revenant " .. root .. "\")",
@@ -33,9 +34,10 @@ package("swiftui")
             "includes(\"@addon/revenant/apple-ios\")",
             "option(\"component\", {type = \"string\", default = \"SwiftUI\"})",
             "add_requires(\"revenant@swift-runtime\", {alias = \"swift-runtime\"" .. shared .. "})",
-            "add_requires(\"revenant@libcxx\", {alias = \"libcxx\"})",
+            "add_requires(\"revenant@libcxx\", {alias = \"libcxx\"" .. packaged .. "})",
             "add_requires(\"revenant@combine\", {alias = \"combine\"" .. shared .. "})",
             "add_requires(\"revenant@backports\", {alias = \"backports\"})",
+            package:config("shared") and "add_requireconfs(\"**.libcxx\", {configs = {packaged = true}})" or "",
             "includes(\"" .. path.join(root, "frameworks", "Backports") .. "\")",
             "includes(\"" .. path.join(root, "frameworks", "SwiftUI") .. "\")",
             "target(\"SwiftUI\")",

@@ -27,6 +27,7 @@ struct xl_function {
 extern const struct xl_function xl_functions[];
 extern const uint32_t xl_function_count;
 extern const uint32_t xl_entry_address;
+xl_lifted xl_imp_lookup(uint64_t address);
 
 #define XL_REG(state, name) (*(uint64_t *)((char *)(state) + XL_OFFSET_##name))
 #define XL_GUEST_STACK_SIZE (16u << 20)
@@ -302,7 +303,7 @@ xl_lifted xl_lookup(uint64_t address)
     }
     if (low < xl_function_count && xl_functions[low].address == address && address >> 32 == 0)
         return xl_functions[low].function;
-    return NULL;
+    return xl_imp_lookup(address);
 }
 
 void xl_call(State *state)

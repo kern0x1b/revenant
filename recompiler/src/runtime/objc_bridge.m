@@ -28,6 +28,7 @@ extern void xl_bridge_init_generated(void);
 extern const uint32_t xl_initializers[];
 extern const uint32_t xl_initializer_count;
 extern void xl_tail(State *state);
+extern void xl_call(State *state);
 extern void xl_fault(State *state, const char *reason);
 
 static CFMutableDictionaryRef xl_selector_table;
@@ -37,6 +38,7 @@ static CFMutableDictionaryRef xl_guest_imps;
 static CFMutableDictionaryRef xl_variadic_table;
 static pthread_once_t xl_setup_once = PTHREAD_ONCE_INIT;
 static pthread_key_t xl_super_key;
+static pthread_key_t xl_imp_key;
 static void xl_load_rules(void);
 
 static void xl_uncaught(NSException *exception)
@@ -214,6 +216,7 @@ static void xl_setup(void)
     xl_fix_layouts();
     xl_shadow_init();
     pthread_key_create(&xl_super_key, NULL);
+    pthread_key_create(&xl_imp_key, NULL);
     xl_selector_table = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_guest_imps = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     for (const struct xl_selector_shim *shim = xl_selector_shims; shim->selector; shim++)
@@ -286,6 +289,14 @@ void *xl_take_super_class(State *state)
     if (cls)
         pthread_setspecific(xl_super_key, NULL);
     return cls;
+}
+
+void *xl_take_forced_imp(State *state)
+{
+    void *imp = pthread_getspecific(xl_imp_key);
+    if (imp)
+        pthread_setspecific(xl_imp_key, NULL);
+    return imp;
 }
 
 static void xl_zero_result(State *state)
@@ -373,7 +384,9 @@ void xl_report_guest_frame(void);
 
 #define XL_NO_BRIDGE ((uint64_t)-1)
 
-static void xl_dynamic_send(State *state, id receiver, Class lookup, SEL selector);
+static void xl_dynamic_send(State *state, id receiver, Method method, SEL selector, IMP forced);
+
+static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp, Method method, id receiver, Class super_class);
 
 static uint64_t xl_route(State *state, Class lookup, SEL selector, id receiver, Class super_class)
 {
@@ -388,6 +401,12 @@ static uint64_t xl_route(State *state, Class lookup, SEL selector, id receiver, 
         guest = xl_shadow_imp(imp);
     if (guest)
         return guest;
+    return xl_bridge_for(state, lookup, selector, imp, NULL, receiver, super_class);
+}
+
+static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp, Method method, id receiver, Class super_class)
+{
+    uintptr_t guest;
     if (imp) {
         uintptr_t cached = (uintptr_t)CFDictionaryGetValue(xl_variant_cache, imp);
         if (cached)
@@ -395,8 +414,8 @@ static uint64_t xl_route(State *state, Class lookup, SEL selector, id receiver, 
     }
     CFMutableDictionaryRef by_enc = (CFMutableDictionaryRef)CFDictionaryGetValue(xl_selector_variant_table, selector);
     if (by_enc) {
-        Method method = class_getInstanceMethod(lookup, selector);
-        const char *enc = method ? method_getTypeEncoding(method) : NULL;
+        Method declared = method ? method : (lookup ? class_getInstanceMethod(lookup, selector) : NULL);
+        const char *enc = declared ? method_getTypeEncoding(declared) : NULL;
         if (enc) {
             char stripped[256];
             int j = 0;
@@ -457,10 +476,11 @@ static int xl_is_guest_block(uint64_t guest);
 static struct xl_block_wrapper *xl_wrapper_for(uint64_t guest);
 uint64_t xl_object_out(uintptr_t host);
 
-static void xl_dynamic_send(State *state, id receiver, Class lookup, SEL selector)
+static void xl_dynamic_send(State *state, id receiver, Method method, SEL selector, IMP forced)
 {
-    Method method = class_getInstanceMethod(lookup, selector);
     if (!method) {
+        if (forced)
+            xl_fault(state, "call of an IMP whose method the runtime does not describe");
         ((id (*)(id, SEL))objc_msgSend)(receiver, selector);
         xl_zero_result(state);
         xl_return(state);
@@ -509,7 +529,7 @@ static void xl_dynamic_send(State *state, id receiver, Class lookup, SEL selecto
     const char *r = ret;
     while (*r == 'r' || *r == 'n' || *r == 'N' || *r == 'o' || *r == 'O' || *r == 'R' || *r == 'V')
         r++;
-    IMP imp = method_getImplementation(method);
+    IMP imp = forced ? forced : method_getImplementation(method);
     typedef uintptr_t (*call32)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
                                 uintptr_t, uintptr_t, uintptr_t, uintptr_t);
     typedef uint64_t (*call64)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
@@ -671,7 +691,7 @@ void xl_h_objc_msgSend(State *state)
         xl_shadow_note("msg %p %s: isa %x, class %p (%s), target %llx", (void *)receiver, sel_getName(selector),
                        receiver ? *(uint32_t *)receiver : 0, receiver_class, class_getName(receiver_class), (unsigned long long)target);
     if (target == XL_NO_BRIDGE) {
-        xl_dynamic_send(state, (id)xl_class_in((uintptr_t)receiver), receiver_class, selector);
+        xl_dynamic_send(state, (id)xl_class_in((uintptr_t)receiver), class_getInstanceMethod(receiver_class, selector), selector, NULL);
         return;
     }
     if (!target) {
@@ -1319,6 +1339,181 @@ uint32_t xl_guest_imp_address(IMP imp)
 {
     uintptr_t guest = imp ? (uintptr_t)CFDictionaryGetValue(xl_guest_imps, imp) : 0;
     return (uint32_t)(guest ? guest : xl_shadow_imp(imp));
+}
+
+#define XL_IMP_SLOTS 4096
+
+struct xl_imp_slot {
+    IMP imp;
+    SEL selector;
+    Method method;
+    Class cls;
+    unsigned next;
+};
+
+static uint32_t xl_imp_region[XL_IMP_SLOTS];
+static struct xl_imp_slot xl_imp_slots[XL_IMP_SLOTS];
+static unsigned xl_imp_used;
+static CFMutableDictionaryRef xl_imp_first;
+static pthread_mutex_t xl_imp_lock = PTHREAD_MUTEX_INITIALIZER;
+
+static struct xl_imp_slot *xl_imp_slot_at(uint64_t address)
+{
+    uint64_t base = (uintptr_t)xl_imp_region;
+    if (address < base || address >= base + sizeof xl_imp_region || (address - base) % sizeof xl_imp_region[0])
+        return NULL;
+    unsigned index = (unsigned)((address - base) / sizeof xl_imp_region[0]);
+    return index < __atomic_load_n(&xl_imp_used, __ATOMIC_ACQUIRE) ? &xl_imp_slots[index] : NULL;
+}
+
+static uint64_t xl_imp_out(IMP imp, Class cls, SEL selector, Method method)
+{
+    if (!imp)
+        return 0;
+    uint32_t guest = xl_guest_imp_address(imp);
+    if (!guest)
+        guest = xl_guest_function_of(imp);
+    if (guest)
+        return guest;
+    pthread_mutex_lock(&xl_imp_lock);
+    if (!xl_imp_first)
+        xl_imp_first = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+    unsigned head = (unsigned)(uintptr_t)CFDictionaryGetValue(xl_imp_first, imp);
+    unsigned found = 0;
+    for (unsigned at = head; at && !found; at = xl_imp_slots[at - 1].next)
+        found = xl_imp_slots[at - 1].selector == selector ? at : 0;
+    if (!found) {
+        if (xl_imp_used == XL_IMP_SLOTS) {
+            pthread_mutex_unlock(&xl_imp_lock);
+            xl_unsupported("xlate: more than 4096 distinct implementations were handed to the guest");
+        }
+        found = xl_imp_used + 1;
+        xl_imp_slots[found - 1] = (struct xl_imp_slot){imp, selector, method, cls, head};
+        CFDictionarySetValue(xl_imp_first, imp, (void *)(uintptr_t)found);
+        __atomic_store_n(&xl_imp_used, found, __ATOMIC_RELEASE);
+    }
+    pthread_mutex_unlock(&xl_imp_lock);
+    return (uintptr_t)&xl_imp_region[found - 1];
+}
+
+static IMP xl_imp_in(uint64_t guest, SEL selector, const char *types)
+{
+    if (!guest)
+        return NULL;
+    struct xl_imp_slot *slot = xl_imp_slot_at(guest);
+    return slot ? slot->imp : xl_host_imp_for_guest(guest, selector, types);
+}
+
+static IMP xl_imp_host(uint64_t guest)
+{
+    struct xl_imp_slot *slot = xl_imp_slot_at(guest);
+    return slot ? slot->imp : NULL;
+}
+
+static void xl_imp_entry(State *state)
+{
+    struct xl_imp_slot *slot = xl_imp_slot_at(XL_REG(state, PC));
+    if (!slot->selector)
+        xl_fault(state, "call of an implementation that imp_implementationWithBlock made: it has no selector to marshal by");
+    id receiver = (id)xl_narrow_pointer(XL_REG(state, X0), "IMP", 0);
+    void (*variadic)(State *) = (void (*)(State *))CFDictionaryGetValue(xl_variadic_table, slot->selector);
+    if (variadic) {
+        variadic(state);
+        return;
+    }
+    uint64_t target = xl_bridge_for(state, slot->cls, slot->selector, slot->imp, slot->method, receiver, Nil);
+    if (target == XL_NO_BRIDGE) {
+        xl_dynamic_send(state, (id)xl_class_in((uintptr_t)receiver), slot->method, slot->selector, slot->imp);
+        return;
+    }
+    if (!target) {
+        xl_zero_result(state);
+        xl_return(state);
+        return;
+    }
+    pthread_setspecific(xl_imp_key, slot->imp);
+    XL_REG(state, PC) = target;
+    xl_call(state);
+    pthread_setspecific(xl_imp_key, NULL);
+}
+
+void (*xl_imp_lookup(uint64_t address))(State *)
+{
+    return xl_imp_slot_at(address) ? xl_imp_entry : NULL;
+}
+
+void xl_manual_class_getMethodImplementation(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t cls, sel, r; } *p = pack;
+    Class cls = xl_class_in(xl_narrow_pointer(p->cls, "class_getMethodImplementation", 0));
+    SEL selector = (SEL)xl_narrow_pointer(p->sel, "class_getMethodImplementation", 1);
+    p->r = xl_imp_out(class_getMethodImplementation(cls, selector), cls, selector, class_getInstanceMethod(cls, selector));
+}
+
+void xl_manual_method_getImplementation(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t method, r; } *p = pack;
+    Method method = (Method)xl_narrow_pointer(p->method, "method_getImplementation", 0);
+    p->r = xl_imp_out(method_getImplementation(method), Nil, method_getName(method), method);
+}
+
+void xl_manual_method_setImplementation(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t method, imp, r; } *p = pack;
+    Method method = (Method)xl_narrow_pointer(p->method, "method_setImplementation", 0);
+    SEL selector = method_getName(method);
+    IMP imp = xl_imp_in(p->imp, selector, method_getTypeEncoding(method));
+    p->r = xl_imp_out(method_setImplementation(method, imp), Nil, selector, method);
+}
+
+void xl_manual_class_addMethod(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t cls, sel, imp, types, r; } *p = pack;
+    SEL selector = (SEL)xl_narrow_pointer(p->sel, "class_addMethod", 1);
+    const char *types = (const char *)xl_narrow_pointer(p->types, "class_addMethod", 3);
+    IMP imp = xl_imp_in(p->imp, selector, types);
+    p->r = class_addMethod(xl_class_in(xl_narrow_pointer(p->cls, "class_addMethod", 0)), selector, imp, types);
+}
+
+void xl_manual_class_replaceMethod(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t cls, sel, imp, types, r; } *p = pack;
+    Class cls = xl_class_in(xl_narrow_pointer(p->cls, "class_replaceMethod", 0));
+    SEL selector = (SEL)xl_narrow_pointer(p->sel, "class_replaceMethod", 1);
+    const char *types = (const char *)xl_narrow_pointer(p->types, "class_replaceMethod", 3);
+    IMP replaced = class_replaceMethod(cls, selector, xl_imp_in(p->imp, selector, types), types);
+    p->r = xl_imp_out(replaced, cls, selector, class_getInstanceMethod(cls, selector));
+}
+
+void xl_manual_imp_implementationWithBlock(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t block, r; } *p = pack;
+    p->r = xl_imp_out(imp_implementationWithBlock((id)xl_object_in(p->block, "imp_implementationWithBlock", 0)), Nil, NULL, NULL);
+}
+
+void xl_manual_imp_getBlock(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t imp, r; } *p = pack;
+    IMP imp = xl_imp_host(p->imp);
+    p->r = imp ? xl_object_out((uintptr_t)imp_getBlock(imp)) : 0;
+}
+
+void xl_manual_imp_removeBlock(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t imp, r; } *p = pack;
+    IMP imp = xl_imp_host(p->imp);
+    p->r = imp ? imp_removeBlock(imp) : 0;
+}
+
+void xl_manual_class_copyMethodList(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t cls, count, r; } *p = pack;
+    unsigned count = 0;
+    Method *methods = class_copyMethodList(xl_class_in(xl_narrow_pointer(p->cls, "class_copyMethodList", 0)), &count);
+    p->r = methods ? xl_widen_pointer_array((const void *const *)methods, count) : 0;
+    free(methods);
+    if (p->count)
+        *(unsigned *)xl_narrow_pointer(p->count, "class_copyMethodList", 1) = count;
 }
 
 void xl_manual_objc_retain(struct xl_arc_pack *p)

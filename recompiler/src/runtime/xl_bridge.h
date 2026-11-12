@@ -54,6 +54,7 @@ struct xl_selector_variant {
 
 void xl_bridge_init(void);
 void *xl_take_super_class(State *state);
+void *xl_take_forced_imp(State *state);
 uintptr_t xl_protocol(uint64_t guest);
 _Noreturn void xl_unsupported(const char *message);
 _Noreturn void xl_narrowing_fault(const char *symbol, unsigned index, uint64_t value);
@@ -122,6 +123,16 @@ struct xl_format {
 };
 
 void xl_format_marshal(struct xl_format *format, const char *text, void *object, const uint64_t *arguments, const char *symbol);
+struct xl_scanf_fix;
+
+struct xl_scanf {
+    char *arguments;
+    struct xl_scanf_fix *fixes;
+    unsigned count;
+};
+
+void xl_scanf_marshal(struct xl_scanf *scan, const char *text, const uint64_t *arguments, const char *symbol);
+void xl_scanf_finish(struct xl_scanf *scan, int result);
 void xl_format_marshal_valist(struct xl_format *format, const char *text, void *object, uint64_t guest_valist, const char *symbol);
 void xl_format_release(struct xl_format *format);
 
