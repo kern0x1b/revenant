@@ -280,6 +280,35 @@ It needs the arm64 runtime, so `XL_SWIFTOBJC_LIBS` names the folder with `libswi
 target marks a Swift class with bit 0 of the class data, the bit the guest's libswiftCore tests. A class compiled for
 iOS 12.2 or later (bit 1) is accepted too, because the runtime rewrites that bit when it sets the class up.
 
+### library (device part by hand)
+
+A control for [library mode](../../explanation/recompiler/library-mode.md): an app that loads a translated library into
+its own process, next to a heap of its own size. `tests/library/check.lua` has two variants, `objc` (the default) and
+`swift`, one fixture each with the same public API: `RCFClient` (`+clientWithSeed:`, `-bump`, `-seed`,
+`-describedLength`, `-hostBundle`, `-tokenForAction:`, `-executeWithAction:completion:`) and `RCFToken`. Nothing in the
+API is a string, because a Swift `String` that crosses an Objective-C signature goes through the Foundation overlay,
+which the guest does not have yet; the strings stay inside the library (`describedLength` builds one).
+
+The host part, which `recompiler_corpus/library` runs, translates the `objc` fixture with `XL_LIBRARY=1`, then checks
+the dylib statically:
+
+- the segments are in ascending address order, which dyld requires, and `__LINKEDIT` is after the guest segments;
+- the dylib exports exactly `_xl_library_init` and `_xl_library_diagnostics`;
+- the armv7 host app (`host.m` with `xl_loader.c`) builds and signs.
+
+The device part copies the dylib and the host to the claimed phone and runs the host. The host first grows its own
+resident set to the size given as an argument (85 MB by default, `XL_LIBRARY_RESIDENT_MB`), loads any dylibs named after
+it the way an app's frameworks are loaded, reserves the range, loads the library, and prints `ok <name>` for 11 checks:
+`reserve`, `load`, `class` (`NSClassFromString`), `create`, `methods`, `describe` (a string built in the library),
+`bundle` (the library's `hostBundle` is the app's `mainBundle`), `bundle.path`, `token` (a value that depends on a
+static of the library), `completion` and `completion.thread` (a block called on another thread). It prints
+`measure <step> resident=… virtual=… threads=…` after each step and the address map of the process (`map <step>
+<start>-<end> <protection>`). A watchdog `alarm` ends a hung host after 180 seconds.
+
+`./xmakew l -P . recompiler/tests/library/check.lua <out> [objc|swift] [--host-only]` runs a variant whole. The `swift`
+variant needs `XL_SWIFTOBJC_LIBS` (the same folder as swiftobjc) and takes the translation of the guest `libswiftCore`,
+`libc++` and `libc++abi` with it, which is minutes to an hour of compile time depending on the load of the machine.
+
 ### cxxinit and refrepro
 
 These build targets each translate an app to an `.app`, for a device or the emulator.
