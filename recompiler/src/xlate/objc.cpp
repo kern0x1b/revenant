@@ -408,7 +408,7 @@ void WriteData(llvm::json::OStream &json, const char *key, const ClassData &data
 
 }
 
-bool SplitGuestLayoutClasses(std::vector<ObjCImage> &objc, std::string &error) {
+bool SplitGuestLayoutClasses(std::vector<ObjCImage> &objc, const std::vector<bool> &host_ancestors, std::string &error) {
   std::map<uint64_t, Pointer> superclass_of;
   for (auto &image : objc) {
     for (auto &cls : image.classes) {
@@ -437,9 +437,10 @@ bool SplitGuestLayoutClasses(std::vector<ObjCImage> &objc, std::string &error) {
     return false;
   };
   std::set<uint64_t> moved;
-  for (auto &image : objc) {
-    for (auto &cls : image.classes) {
-      if (cls.swift && guest_only(cls)) {
+  for (size_t index = 0; index < objc.size(); ++index) {
+    bool host_ancestor = index < host_ancestors.size() && host_ancestors[index];
+    for (auto &cls : objc[index].classes) {
+      if (cls.swift && (host_ancestor || guest_only(cls))) {
         moved.insert(cls.address);
       }
     }

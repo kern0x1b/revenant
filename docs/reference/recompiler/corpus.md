@@ -24,6 +24,7 @@ A check that also has a device part is run by hand, with the output folder as it
 ./xmakew l -P . recompiler/tests/weakimport/check.lua <out>
 ./xmakew l -P . recompiler/tests/classpair/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftconformance/check.lua <out>
+./xmakew l -P . recompiler/tests/swiftobjc/check.lua <out>
 ```
 
 These need a claimed device (the skill `device`): `REVENANT_DEVICE_HOLDER` and `REVENANT_DEVICE`
@@ -247,6 +248,37 @@ So the fixture is translated like the demo:
 `XL_SWIFTCONFORMANCE_ALSO_DEMO=1` adds a second, independent confirmation, off by default because it costs two more
 full translations. It also translates the real demo (`XL_SWIFTCONFORMANCE_DEMO`), normally and with the bridge
 compiled out. The control must crash with exit 139, and the normal build must not.
+
+### swiftobjc (device only)
+
+A control for the twin scheme of `src/runtime/swift_classes.m`: Swift classes that inherit from a class of the host's
+Objective-C runtime (here `NSObject`), translated with `XL_SWIFT_HOST_ANCESTORS=1` (`--swift-host-ancestors` of xlate).
+
+The fixture has three classes: `Client`, an `NSObject` subclass with stored properties (a `String`, an `[String]`, an
+optional reference, a closure); `Sub`, a final subclass of `Client` that overrides `bump` and calls `super`; and
+`Token`, a final `NSObject` subclass whose Swift `deinit` prints. It prints `ok <name>` or `FAIL <name>` for 21
+checks, among them:
+
+- construction through `Client()` (the Swift `init` of an ObjC ancestor runs `objc_msgSendSuper2` with the class from
+  `swift_getObjectType`, which must be the guest's own metadata);
+- Swift and `@objc` dispatch, `super` calls through the guest vtable, and an `as?` cast of an `AnyObject`;
+- `respondsToSelector:`, `performSelector:` (of a method that returns an object) and `isKindOfClass:` from the host side;
+- the Swift `deinit` of `Token` reached through the host's `dealloc`, and the release of the stored properties of a
+  `Client` and of a `Sub` when they die (the `.cxx_destruct` of the guest class, which the host's libobjc does not run
+  for a class it did not read from an image);
+- an instance the host allocates with `class_createInstance` (no `objc_alloc` on the way, so the copy of the Swift part
+  of the class must be current; no `init` runs, so only its class is used) and one made by `NSObject.Type.init()`,
+  which is then dispatched to and cast;
+- `_typeName` of the classes. `String(describing:)` of a class is not covered: it goes through `Mirror`, which aborts
+  in the guest `libswiftCore` (see [the work split](../../explanation/recaptcha-work-split.md)).
+
+The check wants every name `ok`, no `FAIL`, the `deinit` line, and exit 0.
+
+It needs the arm64 runtime, so `XL_SWIFTOBJC_LIBS` names the folder with `libswiftCore.dylib` (the one that
+`revenant@swift-runtime` built for arm64, which carries `-DSWIFT_CLASS_IS_SWIFT_MASK=1ULL`), `libc++.1.dylib` and
+`libc++abi.1.dylib`. The fixture is compiled like swiftconformance's, for iOS 12.0 with the legacy type info: that
+target marks a Swift class with bit 0 of the class data, the bit the guest's libswiftCore tests. A class compiled for
+iOS 12.2 or later (bit 1) is accepted too, because the runtime rewrites that bit when it sets the class up.
 
 ### cxxinit and refrepro
 
