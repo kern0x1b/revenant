@@ -2086,6 +2086,8 @@ class RevenantSwipeContainer
 class RevenantSwipeController
 class RevenantSwipeInstaller
 class RevenantSwipeItem
+class RevenantSwitch
+class RevenantSwitchState
 class RevenantSymbolEffectRun
 class RevenantSyncProtocol
 class RevenantTLSSession
@@ -4987,6 +4989,17 @@ function RevenantSecurityPaddingFor
 function RevenantSensorKitMonotonicSeconds
 function RevenantSignpostMetrics
 function RevenantSpotlightDefaultItems
+function RevenantSwitchKnobBounds
+function RevenantSwitchKnobContentsCenter
+function RevenantSwitchKnobImageCreate
+function RevenantSwitchKnobPosition
+function RevenantSwitchKnobTrackRect
+function RevenantSwitchTrackingBegin
+function RevenantSwitchTrackingEnd
+function RevenantSwitchTrackingMove
+function RevenantSwitchWellAlpha
+function RevenantSwitchWellFrame
+function RevenantSwitchWellImageCreate
 function RevenantSyncRegister
 function RevenantTLSEngineClose
 function RevenantTLSEngineCopyPeerTrust
@@ -9382,6 +9395,12 @@ global RevenantMetalErrorDomain
 global RevenantMetalHeapAlignment
 global RevenantPDFDefaultImageQuality
 global RevenantSpotlightSharedRoot
+global RevenantSwitchAlignmentRight
+global RevenantSwitchDisabledAlpha
+global RevenantSwitchKnobSpring
+global RevenantSwitchSize
+global RevenantSwitchWellOffSpring
+global RevenantSwitchWellOnSpring
 global RevenantWebActionNavigationTypeKey
 global RevenantWebEngineErrorDomain
 global RevenantWebKitBridgeScheme
@@ -29247,6 +29266,35 @@ member RevenantSwipeItem -color
 member RevenantSwipeItem -image
 member RevenantSwipeItem -title
 member RevenantSwipeItem -width
+member RevenantSwitch +load
+member RevenantSwitch -_intrinsicSizeWithinSize:
+member RevenantSwitch -alignmentRectInsets
+member RevenantSwitch -beginTrackingWithTouch:withEvent:
+member RevenantSwitch -cancelTrackingWithEvent:
+member RevenantSwitch -continueTrackingWithTouch:withEvent:
+member RevenantSwitch -encodeWithCoder:
+member RevenantSwitch -endTrackingWithTouch:withEvent:
+member RevenantSwitch -init
+member RevenantSwitch -initWithCoder:
+member RevenantSwitch -initWithFrame:
+member RevenantSwitch -intrinsicContentSize
+member RevenantSwitch -isOn
+member RevenantSwitch -offImage
+member RevenantSwitch -onImage
+member RevenantSwitch -onTintColor
+member RevenantSwitch -setAlpha:
+member RevenantSwitch -setEnabled:
+member RevenantSwitch -setFrame:
+member RevenantSwitch -setOffImage:
+member RevenantSwitch -setOn:
+member RevenantSwitch -setOn:animated:
+member RevenantSwitch -setOnImage:
+member RevenantSwitch -setOnTintColor:
+member RevenantSwitch -setThumbTintColor:
+member RevenantSwitch -setTintColor:
+member RevenantSwitch -sizeThatFits:
+member RevenantSwitch -thumbTintColor
+member RevenantSwitch -tintColor
 member RevenantSymbolEffectRun -animationDidStop:finished:
 member RevenantSymbolEffectRun -completion
 member RevenantSymbolEffectRun -effect
