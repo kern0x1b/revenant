@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
+#include <set>
 
 namespace xlate {
 
@@ -18,6 +19,8 @@ constexpr uint8_t kIndirect = 0x80;
 constexpr uint8_t kPcRelative = 0x10;
 constexpr uint8_t kApplicationMask = 0x70;
 constexpr uint8_t kFormatMask = 0x0F;
+constexpr size_t kMaxActionChain = 4096;
+constexpr uint64_t kMaxTypeIndex = 1u << 16;
 
 class Reader {
  public:
@@ -243,7 +246,12 @@ bool ParseLsda(const Image &image, Reader &reader, FunctionUnwind &function, std
       site.filters.push_back(0);
     } else {
       uint64_t record = actions + site.action - 1;
+      std::set<uint64_t> chain;
       for (;;) {
+        if (chain.size() >= kMaxActionChain || !chain.insert(record).second) {
+          error = "an action chain does not end";
+          return false;
+        }
         uint64_t position = record;
         int64_t filter = reader.Sleb(position);
         uint64_t next_field = position;
@@ -255,6 +263,10 @@ bool ParseLsda(const Image &image, Reader &reader, FunctionUnwind &function, std
         site.filters.push_back(filter);
         if (filter > 0 && type_encoding != kOmit) {
           uint64_t index = static_cast<uint64_t>(filter);
+          if (index > kMaxTypeIndex || index * type_width > type_base) {
+            error = "an action names a type outside the type table";
+            return false;
+          }
           if (!types.count(index)) {
             types[index] = DecodeType(image, reader, type_encoding, type_base - index * type_width);
           }
@@ -266,6 +278,10 @@ bool ParseLsda(const Image &image, Reader &reader, FunctionUnwind &function, std
       }
     }
     function.sites.push_back(std::move(site));
+  }
+  if (!reader.ok()) {
+    error = "a type table entry is unreadable";
+    return false;
   }
   if (!types.empty()) {
     function.types.resize(types.rbegin()->first);
@@ -384,13 +400,21 @@ void UnwindTable::Add(const Image &image, std::vector<std::string> &errors) {
     uint32_t encoding;
   };
   std::vector<Entry> entries;
+  if (index_offset + 12ull * index_count > info->size) {
+    errors.push_back("__unwind_info has an index past the end of its section");
+    return;
+  }
   for (uint32_t i = 0; i + 1 < index_count; ++i) {
     uint64_t index = table + index_offset + 12ull * i;
     uint32_t first = reader.U32(index);
     uint32_t page = reader.U32(index + 4);
-    uint32_t lsda_begin = reader.U32(index + 8);
-    uint32_t lsda_end = reader.U32(index + 12 + 8);
-    for (uint32_t at = lsda_begin; at < lsda_end; at += 8) {
+    uint64_t lsda_begin = reader.U32(index + 8);
+    uint64_t lsda_end = reader.U32(index + 12 + 8);
+    if (lsda_begin > lsda_end || lsda_end > info->size) {
+      errors.push_back("__unwind_info has an LSDA index outside its section");
+      return;
+    }
+    for (uint64_t at = lsda_begin; at + 8 <= lsda_end; at += 8) {
       lsdas[reader.U32(table + at)] = reader.U32(table + at + 4);
     }
     if (!page) {
@@ -420,6 +444,10 @@ void UnwindTable::Add(const Image &image, std::vector<std::string> &errors) {
     }
   }
   uint32_t last = index_count ? reader.U32(table + index_offset + 12ull * (index_count - 1)) : 0;
+  if (!reader.ok()) {
+    errors.push_back("__unwind_info is unreadable");
+    return;
+  }
   std::map<uint64_t, Frame> frames;
   bool frames_read = false;
   for (size_t i = 0; i < entries.size(); ++i) {
@@ -438,7 +466,11 @@ void UnwindTable::Add(const Image &image, std::vector<std::string> &errors) {
         continue;
       }
       if (!frames_read) {
-        frames = ParseEhFrame(image, reader, *eh_frame, errors);
+        Reader frame_reader(image);
+        frames = ParseEhFrame(image, frame_reader, *eh_frame, errors);
+        if (!frame_reader.ok()) {
+          errors.push_back("__eh_frame is unreadable");
+        }
         frames_read = true;
       }
       auto frame = frames.find(function.start);
