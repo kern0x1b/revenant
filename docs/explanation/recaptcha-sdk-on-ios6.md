@@ -307,3 +307,28 @@ overlays that the SDK imports (Foundation 59 + 22 names, CryptoKit 18, Dispatch 
 bridges still missing for about 114 imported functions, the 14 Objective-C exception catch sites, and 127 "cannot decode
 function" entries in the guest `libswiftCore` (most are jump-table words that `ld64` lists as function starts; the fix is in
 the recompiler, `JumpTables::IsData`, covered by the `jumptable` host test).
+
+## 14. Stage 2: the twin scheme, memory and Mirror (measured on the iPhone 4S)
+
+The object model of section 12 is now in the recompiler (`--swift-host-ancestors`) and `recompiler/tests/swiftobjc` passes
+21 of 21 checks on the 4S with the arm64 runtime of `revenant@swift-runtime`: construction, `@objc` and vtable dispatch,
+`super`, `as?`, the Swift `deinit` reached through the host's `dealloc`, the release of stored properties, and instances
+that the host allocates (`class_createInstance`, `NSObject.Type.init()`). Two fixes came out of the run on the phone: the
+runtime's raw reads of an object's `isa` (a patch to the guest runtime that asks `object_getClass` when the `isa` is no class
+metadata) and the bridge's handling of `Class` values (translated like an `id`, and a class object is not reference counted).
+
+Resident memory of the translated image, measured by the program itself with `task_info` on the 4S: the fixture's executable
+is 119 MB (mostly the lifted guest `libswiftCore`). After the loader has bound it the process has 1.9 MB resident and 391 MB
+of address space; at exit, after the 21 checks, 6.0 MB resident and 417 MB. The image is demand-paged (the guest keeps its
+addresses, so dyld rebases nothing), so the resident set follows the code and data that the program touches, not the
+file size. The measurement is of a standalone process running Swift code only; the SDK touches more (Foundation overlays,
+CryptoKit, the SDK itself), and the figure that decides the library mode is the resident set next to Telegram's own, which
+block D of [the work split](recaptcha-work-split.md) measures. Dead-stripping the unused part of `libswiftCore` is a
+download size question, not a resident memory one.
+
+`Mirror` and `AnyCollection` still fail in the guest `libswiftCore`. The cases that do not touch the host's object model:
+`Mirror(reflecting: 5).children.count` and `String(describing:)` of a struct, an enum or a class end in a call through a null
+pointer or in a jump to garbage; `AnyCollection([1, 2, 3]).count` ends in a null read inside the generic metadata cache's
+`getOrInsert`, reached through `swift_getTypeByMangledNameInContext`. A user-defined generic class instantiated at run
+time works, and so does the stdlib's `_ContiguousArrayStorage<Int8>`. The failing paths are the ones that look a type up by
+its mangled name; this is where the next probe starts.
