@@ -258,7 +258,8 @@ package("swift-runtime")
         os.mkdir(module_cache)
         os.mkdir(generated)
         local overlay_sources = {}
-        for _, name in ipairs({"Darwin", "tgmath"}) do
+        local darwin_parts = package:is_arch("arm64") and {"Darwin"} or {"Darwin", "tgmath"}
+        for _, name in ipairs(darwin_parts) do
             table.insert(overlay_sources, expand(path.join(platform_source, name .. ".swift.gyb"), path.join(generated, name .. ".swift")))
         end
         for _, name in ipairs({"Platform.swift", "TiocConstants.swift", "POSIXError.swift", "MachError.swift"}) do
@@ -319,7 +320,8 @@ package("swift-runtime")
             timed("overlay:" .. name)
         end
 
-        if not package:is_arch("arm64") then
+        do
+            local arm64 = package:is_arch("arm64")
             local overlays = path.absolute("overlays")
             local overlay_patches = os.files(path.join(package:scriptdir(), "patches", "overlays", "*.patch"))
             table.sort(overlay_patches)
@@ -345,28 +347,30 @@ package("swift-runtime")
             end
             os.vcp(path.join(overlays, "stdlib", "public", "SwiftShims", "FoundationShimSupport.h"), installed_shims .. "/")
             local uikit = path.absolute("uikit")
-            local uikit_patches = os.files(path.join(package:scriptdir(), "patches", "uikit", "*.patch"))
-            table.sort(uikit_patches)
-            for _, patch in ipairs(uikit_patches) do
-                os.vrunv("patch", {"-p1", "-i", patch}, {curdir = uikit})
-            end
-            import("@addon.revenant.apple.lowered", {anonymous = true}).lower_swift_overlay_folder(uikit, "AVFoundation")
-            os.vcp(path.join(uikit, "stdlib", "public", "SwiftShims", "UIKitOverlayShims.h"), installed_shims .. "/")
-            if not io.readfile(shim_modules):find("_SwiftUIKitOverlayShims", 1, true) then
-                io.writefile(shim_modules, io.readfile(shim_modules) ..
-                             "\nmodule _SwiftUIKitOverlayShims {\n  header \"UIKitOverlayShims.h\"\n}\n")
-            end
             local revenant_overlay = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay")
-            local revenant_shims = {{"_SwiftRevenantOSOverlayShims", "os", "RevenantOSOverlayShims.h"},
-                                    {"_SwiftRevenantUIKitOverlayShims", "UIKit", "RevenantUIKitOverlayShims.h"}}
-            for _, entry in ipairs(revenant_shims) do
-                os.vcp(path.join(revenant_overlay, entry[2], entry[3]), installed_shims .. "/")
-                if entry[2] == "os" then
-                    os.vcp(path.join(revenant_overlay, "os", "RevenantOSLogRender.h"), installed_shims .. "/")
+            if not arm64 then
+                local uikit_patches = os.files(path.join(package:scriptdir(), "patches", "uikit", "*.patch"))
+                table.sort(uikit_patches)
+                for _, patch in ipairs(uikit_patches) do
+                    os.vrunv("patch", {"-p1", "-i", patch}, {curdir = uikit})
                 end
-                if not io.readfile(shim_modules):find(entry[1], 1, true) then
+                import("@addon.revenant.apple.lowered", {anonymous = true}).lower_swift_overlay_folder(uikit, "AVFoundation")
+                os.vcp(path.join(uikit, "stdlib", "public", "SwiftShims", "UIKitOverlayShims.h"), installed_shims .. "/")
+                if not io.readfile(shim_modules):find("_SwiftUIKitOverlayShims", 1, true) then
                     io.writefile(shim_modules, io.readfile(shim_modules) ..
-                                 string.format("\nmodule %s {\n  header \"%s\"\n}\n", entry[1], entry[3]))
+                                 "\nmodule _SwiftUIKitOverlayShims {\n  header \"UIKitOverlayShims.h\"\n}\n")
+                end
+                local revenant_shims = {{"_SwiftRevenantOSOverlayShims", "os", "RevenantOSOverlayShims.h"},
+                                        {"_SwiftRevenantUIKitOverlayShims", "UIKit", "RevenantUIKitOverlayShims.h"}}
+                for _, entry in ipairs(revenant_shims) do
+                    os.vcp(path.join(revenant_overlay, entry[2], entry[3]), installed_shims .. "/")
+                    if entry[2] == "os" then
+                        os.vcp(path.join(revenant_overlay, "os", "RevenantOSLogRender.h"), installed_shims .. "/")
+                    end
+                    if not io.readfile(shim_modules):find(entry[1], 1, true) then
+                        io.writefile(shim_modules, io.readfile(shim_modules) ..
+                                     string.format("\nmodule %s {\n  header \"%s\"\n}\n", entry[1], entry[3]))
+                    end
                 end
             end
             local function overlay_sources_of(name, files)
@@ -376,39 +380,41 @@ package("swift-runtime")
                 end
                 return found
             end
-            local cxx = path.join(source, "stdlib", "public", "Cxx")
-            for _, header in ipairs({"libcxxshim.h", "libcxxstdlibshim.h"}) do
-                os.vcp(path.join(cxx, "cxxshim", header), installed_shims .. "/")
-            end
-            for _, entry in ipairs({{"CxxShim", "libcxxshim.h"}, {"CxxStdlibShim", "libcxxstdlibshim.h"}}) do
-                if not io.readfile(shim_modules):find(entry[1], 1, true) then
-                    io.writefile(shim_modules, io.readfile(shim_modules) ..
-                                 string.format("\nmodule %s {\n  header \"%s\"\n  requires cplusplus\n}\n", entry[1], entry[2]))
+            if not arm64 then
+                local cxx = path.join(source, "stdlib", "public", "Cxx")
+                for _, header in ipairs({"libcxxshim.h", "libcxxstdlibshim.h"}) do
+                    os.vcp(path.join(cxx, "cxxshim", header), installed_shims .. "/")
                 end
+                for _, entry in ipairs({{"CxxShim", "libcxxshim.h"}, {"CxxStdlibShim", "libcxxstdlibshim.h"}}) do
+                    if not io.readfile(shim_modules):find(entry[1], 1, true) then
+                        io.writefile(shim_modules, io.readfile(shim_modules) ..
+                                     string.format("\nmodule %s {\n  header \"%s\"\n  requires cplusplus\n}\n", entry[1], entry[2]))
+                    end
+                end
+                local cxx_flags = {"-cxx-interoperability-mode=default", "-strict-memory-safety", "-Xfrontend", "-empty-abi-descriptor",
+                                   "-Xcc", "-nostdinc++"}
+                for _, feature in ipairs({"AllowUnsafeAttribute", "SuppressedAssociatedTypesWithDefaults", "NonescapableTypes",
+                                          "LifetimeDependence", "InoutLifetimeDependence", "LifetimeDependenceMutableAccessors", "Lifetimes"}) do
+                    table.join2(cxx_flags, {"-enable-experimental-feature", feature})
+                end
+                local cxx_sources = {}
+                for _, file in ipairs({"CxxConvertibleToBool.swift", "CxxConvertibleToCollection.swift", "CxxDictionary.swift", "CxxPair.swift",
+                                       "CxxOptional.swift", "CxxSet.swift", "CxxRandomAccessCollection.swift", "CxxSequence.swift",
+                                       "CxxBorrowingSequence.swift", "CxxVector.swift", "CxxSpan.swift", "UnsafeCxxIterators.swift"}) do
+                    table.insert(cxx_sources, path.join(cxx, file))
+                end
+                build_overlay("Cxx", cxx_sources, {}, nil, {extra_flags = table.join(cxx_flags,
+                              {"-enable-experimental-feature", "BuiltinModule", "-enable-upcoming-feature", "MemberImportVisibility"})})
+                local std_sources = {}
+                for _, file in ipairs({"std.swift", "Chrono.swift", "String.swift"}) do
+                    table.insert(std_sources, path.join(cxx, "std", file))
+                end
+                build_overlay("CxxStdlib", std_sources, {"-lswiftCxx"}, nil, {extra_flags = table.join(cxx_flags,
+                              {"-enable-experimental-feature", "AssumeResilientCxxTypes", "-disable-upcoming-feature", "MemberImportVisibility",
+                               "-Xfrontend", "-module-interface-preserve-types-as-written",
+                               "-Xfrontend", "-disable-module-selectors-in-module-interface",
+                               "-Xcc", "-isystem", "-Xcc", libcxx:installdir("include", "c++", "v1")})})
             end
-            local cxx_flags = {"-cxx-interoperability-mode=default", "-strict-memory-safety", "-Xfrontend", "-empty-abi-descriptor",
-                               "-Xcc", "-nostdinc++"}
-            for _, feature in ipairs({"AllowUnsafeAttribute", "SuppressedAssociatedTypesWithDefaults", "NonescapableTypes",
-                                      "LifetimeDependence", "InoutLifetimeDependence", "LifetimeDependenceMutableAccessors", "Lifetimes"}) do
-                table.join2(cxx_flags, {"-enable-experimental-feature", feature})
-            end
-            local cxx_sources = {}
-            for _, file in ipairs({"CxxConvertibleToBool.swift", "CxxConvertibleToCollection.swift", "CxxDictionary.swift", "CxxPair.swift",
-                                   "CxxOptional.swift", "CxxSet.swift", "CxxRandomAccessCollection.swift", "CxxSequence.swift",
-                                   "CxxBorrowingSequence.swift", "CxxVector.swift", "CxxSpan.swift", "UnsafeCxxIterators.swift"}) do
-                table.insert(cxx_sources, path.join(cxx, file))
-            end
-            build_overlay("Cxx", cxx_sources, {}, nil, {extra_flags = table.join(cxx_flags,
-                          {"-enable-experimental-feature", "BuiltinModule", "-enable-upcoming-feature", "MemberImportVisibility"})})
-            local std_sources = {}
-            for _, file in ipairs({"std.swift", "Chrono.swift", "String.swift"}) do
-                table.insert(std_sources, path.join(cxx, "std", file))
-            end
-            build_overlay("CxxStdlib", std_sources, {"-lswiftCxx"}, nil, {extra_flags = table.join(cxx_flags,
-                          {"-enable-experimental-feature", "AssumeResilientCxxTypes", "-disable-upcoming-feature", "MemberImportVisibility",
-                           "-Xfrontend", "-module-interface-preserve-types-as-written",
-                           "-Xfrontend", "-disable-module-selectors-in-module-interface",
-                           "-Xcc", "-isystem", "-Xcc", libcxx:installdir("include", "c++", "v1")})})
             build_overlay("ObjectiveC", overlay_sources_of("ObjectiveC", {"ObjectiveC.swift"}), {"-lswiftDarwin"})
             local dispatch_object = path.join(generated, "Dispatch.mm.o")
             os.vrunv(toolchain:tool("cc"), table.join({"-target", triple, "-miphoneos-version-min=" .. minimum, "-isysroot",
@@ -432,9 +438,11 @@ package("swift-runtime")
                           {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftCoreFoundation",
                            "-framework", "CoreGraphics", "-framework", "CoreFoundation"},
                           nil, {module_cache = coregraphics_cache, extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
-            build_overlay("os", {path.join(revenant_overlay, "os", "os.swift")},
-                          {"-Xlinker", "-U", "-Xlinker", "_revenant_os_log_named", "-Xlinker", "-U", "-Xlinker", "_revenant_os_log_send",
-                           "-Xlinker", "-U", "-Xlinker", "_revenant_os_log_type_enabled"})
+            if not arm64 then
+                build_overlay("os", {path.join(revenant_overlay, "os", "os.swift")},
+                              {"-Xlinker", "-U", "-Xlinker", "_revenant_os_log_named", "-Xlinker", "-U", "-Xlinker", "_revenant_os_log_send",
+                               "-Xlinker", "-U", "-Xlinker", "_revenant_os_log_type_enabled"})
+            end
 
             local foundation = path.join(overlays, "stdlib", "public", "Darwin", "Foundation")
             local presentation_intent = path.join(package:scriptdir(), "..", "..", "..", "toolchain", "src", "swift-runtime", "overlay", "Foundation", "PresentationIntent.swift")
@@ -473,104 +481,107 @@ package("swift-runtime")
                           table.join(flat_flags, {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation", "-lswiftCoreGraphics",
                            "-framework", "Foundation", "-framework", "CoreFoundation"}), foundation_objects,
                           {concurrency = true, module_cache = foundation_cache,
-                           extra_flags = {"-enable-experimental-feature", "Lifetimes", "-enable-experimental-feature", "AddressableTypes",
-                                          "-enable-experimental-feature", "BuiltinModule",
-                                          "-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
+                           extra_flags = table.join({"-enable-experimental-feature", "Lifetimes", "-enable-experimental-feature", "AddressableTypes",
+                                                     "-enable-experimental-feature", "BuiltinModule",
+                                                     "-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include},
+                                                    package:is_arch("arm64") and {"-Xfrontend", "-disable-building-interface"} or {})})
 
-            local function generated_from(folder, name)
-                return expand(path.join(uikit, "stdlib", "public", "Darwin", folder, name .. ".gyb"), path.join(generated, name))
+            if not arm64 then
+                local function generated_from(folder, name)
+                    return expand(path.join(uikit, "stdlib", "public", "Darwin", folder, name .. ".gyb"), path.join(generated, name))
+                end
+                foundation_links = table.join(flat_flags, {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation",
+                                    "-lswiftCoreGraphics", "-lswiftFoundation", "-framework", "Foundation", "-framework", "CoreFoundation"})
+                build_overlay("QuartzCore", {generated_from("QuartzCore", "NSValue.swift"), path.join(revenant_overlay, "QuartzCore", "CAFrameRateRange.swift")},
+                              table.join(foundation_links, {"-framework", "QuartzCore"}), nil,
+                              {module_cache = quartzcore_cache, extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
+                local coremedia_cache = path.join(generated, "module-cache-coremedia")
+                os.mkdir(coremedia_cache)
+                local lowered_cc = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}
+                local coremedia = path.join(uikit, "stdlib", "public", "Darwin", "CoreMedia")
+                build_overlay("CoreMedia", {path.join(coremedia, "CMTime.swift"), path.join(coremedia, "CMTimeRange.swift"),
+                                            path.join(revenant_overlay, "CoreMedia", "CMTimeHashable.swift"),
+                                            path.join(revenant_overlay, "CoreMedia", "CMAttachmentBearer.swift"),
+                                            path.join(revenant_overlay, "CoreMedia", "CMSampleBuffer.swift")},
+                              table.join(foundation_links, {"-framework", "CoreMedia"}), nil,
+                              {module_cache = coremedia_cache, extra_flags = lowered_cc})
+                local photos_cache = path.join(generated, "module-cache-photos")
+                os.mkdir(photos_cache)
+                local photos = path.join(uikit, "stdlib", "public", "Darwin", "Photos")
+                local gated_phchange, gated = io.readfile(path.join(photos, "PHChange.swift")):gsub(
+                    "@available%(iOS [%d%.]+, [^%)]*%)\nextension PHChange {", "@available(iOS " .. minimum .. ", *)\nextension PHChange {")
+                assert(gated == 1, "PHChange.swift no longer declares its extension with an iOS availability the backport gate expects")
+                io.writefile(path.join(generated, "PHChange.swift"), gated_phchange)
+                build_overlay("Photos", {path.join(generated, "PHChange.swift"), path.join(photos, "PHProjectChangeRequest.swift")},
+                              table.join(foundation_links, {"-lswiftCoreMedia", "-Xlinker", "-weak_framework", "-Xlinker", "Photos"}), nil,
+                              {module_cache = photos_cache, extra_flags = lowered_cc})
+                local avfoundation_cache = path.join(generated, "module-cache-avfoundation")
+                os.mkdir(avfoundation_cache)
+                local avfoundation = path.join(uikit, "stdlib", "public", "Darwin", "AVFoundation")
+                local avfoundation_nsvalue = expand(path.join(avfoundation, "NSValue.swift.gyb"), path.join(generated, "AVFoundation-NSValue.swift"))
+                local notification_names = interfaces.interface_blocks(interfaces.sdk_interface(toolchain:config("sdkdir"), "AVFoundation"),
+                                                                       "extension Foundation.NSNotification.Name {")
+                assert(#notification_names > 0, "the AVFoundation interface of the SDK at " .. toolchain:config("sdkdir") ..
+                       " carries no extension of Foundation.NSNotification.Name, and the notification names its headers rename would be lost")
+                local avfoundation_notifications = path.join(generated, "AVFoundation-NotificationNames.swift")
+                io.writefile(avfoundation_notifications, "import Foundation\n\n" .. table.concat(notification_names, "\n") .. "\n")
+                build_overlay("AVFoundation", {avfoundation_nsvalue, path.join(avfoundation, "AVCaptureDevice.swift"),
+                                               path.join(avfoundation, "AVCapturePhotoOutput.swift"),
+                                               path.join(avfoundation, "AVCaptureVideoDataOutput.swift"),
+                                               path.join(avfoundation, "AVMetadataObject.swift"),
+                                               path.join(revenant_overlay, "AVFoundation", "AVCaptureRefinements.swift"),
+                                               avfoundation_notifications},
+                              table.join(foundation_links, {"-lswiftCoreMedia", "-framework", "AVFoundation"}), nil,
+                              {module_cache = avfoundation_cache, extra_flags = lowered_cc})
+                local mediaplayer_cache = path.join(generated, "module-cache-mediaplayer")
+                os.mkdir(mediaplayer_cache)
+                local mediaplayer = path.join(uikit, "stdlib", "public", "Darwin", "MediaPlayer")
+                build_overlay("MediaPlayer", {path.join(mediaplayer, "MPMusicPlayerPlayParameters.swift")},
+                              table.join(foundation_links, {"-framework", "MediaPlayer"}), nil,
+                              {module_cache = mediaplayer_cache, extra_flags = lowered_cc})
+                local coreaudio_cache = path.join(generated, "module-cache-coreaudio")
+                os.mkdir(coreaudio_cache)
+                local coreaudio = path.join(uikit, "stdlib", "public", "Darwin", "CoreAudio")
+                build_overlay("CoreAudio", {path.join(coreaudio, "CoreAudio.swift")}, {"-framework", "CoreAudio"}, nil,
+                              {module_cache = coreaudio_cache, extra_flags = lowered_cc})
+                local callkit_cache = path.join(generated, "module-cache-callkit")
+                os.mkdir(callkit_cache)
+                build_overlay("CallKit", {path.join(revenant_overlay, "CallKit", "CXProviderConfiguration.swift")},
+                              table.join(foundation_links, {"-Xlinker", "-weak_framework", "-Xlinker", "CallKit"}), nil,
+                              {module_cache = callkit_cache, extra_flags = lowered_cc})
+                local initializers = path.join(generated, "DesignatedInitializers.mm.o")
+                os.vrunv(toolchain:tool("cc"), table.join({"-target", triple, "-miphoneos-version-min=" .. minimum, "-isysroot",
+                         toolchain:config("sdkdir"), "-Os", "-c", path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "DesignatedInitializers.mm"),
+                         "-o", initializers}, objc_linker))
+                local symbols_cache = path.join(generated, "module-cache-symbols")
+                os.mkdir(symbols_cache)
+                local symbols_sources = os.files(path.join(revenant_overlay, "Symbols", "*.swift"))
+                table.sort(symbols_sources)
+                build_overlay("Symbols", symbols_sources, table.join(foundation_links, {"-Xlinker", "-weak_framework", "-Xlinker", "Symbols"}), nil,
+                              {module_cache = symbols_cache, extra_flags = lowered_cc})
+                local uikit_cache = path.join(generated, "module-cache-lowered-uikit")
+                os.mkdir(uikit_cache)
+                build_overlay("UIKit", {path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "UIKit.swift"),
+                                        generated_from("UIKit", "UIKit_FoundationExtensions.swift"),
+                                        path.join(revenant_overlay, "UIKit", "UIKitRevenant.swift"),
+                                        path.join(revenant_overlay, "UIKit", "UIKitPointer.swift"),
+                                        path.join(revenant_overlay, "UIKit", "UIKitSliderTrackConfiguration.swift"),
+                                        path.join(revenant_overlay, "UIKit", "UIKitSymbolEffects.swift")},
+                              table.join(foundation_links, {"-lswiftQuartzCore", "-lswiftSymbols", "-framework", "QuartzCore", "-framework", "UIKit"}), {initializers},
+                              {module_cache = uikit_cache, extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
+                local photosui_cache = path.join(generated, "module-cache-photosui")
+                os.mkdir(photosui_cache)
+                build_overlay("PhotosUI", {path.join(revenant_overlay, "PhotosUI", "PhotosUI.swift")},
+                              table.join(foundation_links, {"-lswiftPhotos", "-lswiftUIKit", "-framework", "UIKit", "-Xlinker", "-weak_framework", "-Xlinker", "PhotosUI"}), nil,
+                              {module_cache = photosui_cache, extra_flags = lowered_cc})
+
+                local coredata = path.join(uikit, "stdlib", "public", "Darwin", "CoreData")
+                local conformances = path.join(generated, "CoreData.mm.o")
+                os.vrunv(toolchain:tool("cc"), table.join({"-target", triple, "-miphoneos-version-min=" .. minimum, "-isysroot",
+                         toolchain:config("sdkdir"), "-Os", "-c", path.join(coredata, "CoreData.mm"), "-o", conformances}, objc_linker))
+                build_overlay("CoreData", {path.join(coredata, "CocoaError.swift"), path.join(coredata, "NSManagedObjectContext.swift")},
+                              table.join(foundation_links, {"-framework", "CoreData"}), {conformances})
             end
-            foundation_links = table.join(flat_flags, {"-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswiftCoreFoundation",
-                                "-lswiftCoreGraphics", "-lswiftFoundation", "-framework", "Foundation", "-framework", "CoreFoundation"})
-            build_overlay("QuartzCore", {generated_from("QuartzCore", "NSValue.swift"), path.join(revenant_overlay, "QuartzCore", "CAFrameRateRange.swift")},
-                          table.join(foundation_links, {"-framework", "QuartzCore"}), nil,
-                          {module_cache = quartzcore_cache, extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
-            local coremedia_cache = path.join(generated, "module-cache-coremedia")
-            os.mkdir(coremedia_cache)
-            local lowered_cc = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}
-            local coremedia = path.join(uikit, "stdlib", "public", "Darwin", "CoreMedia")
-            build_overlay("CoreMedia", {path.join(coremedia, "CMTime.swift"), path.join(coremedia, "CMTimeRange.swift"),
-                                        path.join(revenant_overlay, "CoreMedia", "CMTimeHashable.swift"),
-                                        path.join(revenant_overlay, "CoreMedia", "CMAttachmentBearer.swift"),
-                                        path.join(revenant_overlay, "CoreMedia", "CMSampleBuffer.swift")},
-                          table.join(foundation_links, {"-framework", "CoreMedia"}), nil,
-                          {module_cache = coremedia_cache, extra_flags = lowered_cc})
-            local photos_cache = path.join(generated, "module-cache-photos")
-            os.mkdir(photos_cache)
-            local photos = path.join(uikit, "stdlib", "public", "Darwin", "Photos")
-            local gated_phchange, gated = io.readfile(path.join(photos, "PHChange.swift")):gsub(
-                "@available%(iOS [%d%.]+, [^%)]*%)\nextension PHChange {", "@available(iOS " .. minimum .. ", *)\nextension PHChange {")
-            assert(gated == 1, "PHChange.swift no longer declares its extension with an iOS availability the backport gate expects")
-            io.writefile(path.join(generated, "PHChange.swift"), gated_phchange)
-            build_overlay("Photos", {path.join(generated, "PHChange.swift"), path.join(photos, "PHProjectChangeRequest.swift")},
-                          table.join(foundation_links, {"-lswiftCoreMedia", "-Xlinker", "-weak_framework", "-Xlinker", "Photos"}), nil,
-                          {module_cache = photos_cache, extra_flags = lowered_cc})
-            local avfoundation_cache = path.join(generated, "module-cache-avfoundation")
-            os.mkdir(avfoundation_cache)
-            local avfoundation = path.join(uikit, "stdlib", "public", "Darwin", "AVFoundation")
-            local avfoundation_nsvalue = expand(path.join(avfoundation, "NSValue.swift.gyb"), path.join(generated, "AVFoundation-NSValue.swift"))
-            local notification_names = interfaces.interface_blocks(interfaces.sdk_interface(toolchain:config("sdkdir"), "AVFoundation"),
-                                                                   "extension Foundation.NSNotification.Name {")
-            assert(#notification_names > 0, "the AVFoundation interface of the SDK at " .. toolchain:config("sdkdir") ..
-                   " carries no extension of Foundation.NSNotification.Name, and the notification names its headers rename would be lost")
-            local avfoundation_notifications = path.join(generated, "AVFoundation-NotificationNames.swift")
-            io.writefile(avfoundation_notifications, "import Foundation\n\n" .. table.concat(notification_names, "\n") .. "\n")
-            build_overlay("AVFoundation", {avfoundation_nsvalue, path.join(avfoundation, "AVCaptureDevice.swift"),
-                                           path.join(avfoundation, "AVCapturePhotoOutput.swift"),
-                                           path.join(avfoundation, "AVCaptureVideoDataOutput.swift"),
-                                           path.join(avfoundation, "AVMetadataObject.swift"),
-                                           path.join(revenant_overlay, "AVFoundation", "AVCaptureRefinements.swift"),
-                                           avfoundation_notifications},
-                          table.join(foundation_links, {"-lswiftCoreMedia", "-framework", "AVFoundation"}), nil,
-                          {module_cache = avfoundation_cache, extra_flags = lowered_cc})
-            local mediaplayer_cache = path.join(generated, "module-cache-mediaplayer")
-            os.mkdir(mediaplayer_cache)
-            local mediaplayer = path.join(uikit, "stdlib", "public", "Darwin", "MediaPlayer")
-            build_overlay("MediaPlayer", {path.join(mediaplayer, "MPMusicPlayerPlayParameters.swift")},
-                          table.join(foundation_links, {"-framework", "MediaPlayer"}), nil,
-                          {module_cache = mediaplayer_cache, extra_flags = lowered_cc})
-            local coreaudio_cache = path.join(generated, "module-cache-coreaudio")
-            os.mkdir(coreaudio_cache)
-            local coreaudio = path.join(uikit, "stdlib", "public", "Darwin", "CoreAudio")
-            build_overlay("CoreAudio", {path.join(coreaudio, "CoreAudio.swift")}, {"-framework", "CoreAudio"}, nil,
-                          {module_cache = coreaudio_cache, extra_flags = lowered_cc})
-            local callkit_cache = path.join(generated, "module-cache-callkit")
-            os.mkdir(callkit_cache)
-            build_overlay("CallKit", {path.join(revenant_overlay, "CallKit", "CXProviderConfiguration.swift")},
-                          table.join(foundation_links, {"-Xlinker", "-weak_framework", "-Xlinker", "CallKit"}), nil,
-                          {module_cache = callkit_cache, extra_flags = lowered_cc})
-            local initializers = path.join(generated, "DesignatedInitializers.mm.o")
-            os.vrunv(toolchain:tool("cc"), table.join({"-target", triple, "-miphoneos-version-min=" .. minimum, "-isysroot",
-                     toolchain:config("sdkdir"), "-Os", "-c", path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "DesignatedInitializers.mm"),
-                     "-o", initializers}, objc_linker))
-            local symbols_cache = path.join(generated, "module-cache-symbols")
-            os.mkdir(symbols_cache)
-            local symbols_sources = os.files(path.join(revenant_overlay, "Symbols", "*.swift"))
-            table.sort(symbols_sources)
-            build_overlay("Symbols", symbols_sources, table.join(foundation_links, {"-Xlinker", "-weak_framework", "-Xlinker", "Symbols"}), nil,
-                          {module_cache = symbols_cache, extra_flags = lowered_cc})
-            local uikit_cache = path.join(generated, "module-cache-lowered-uikit")
-            os.mkdir(uikit_cache)
-            build_overlay("UIKit", {path.join(uikit, "stdlib", "public", "Darwin", "UIKit", "UIKit.swift"),
-                                    generated_from("UIKit", "UIKit_FoundationExtensions.swift"),
-                                    path.join(revenant_overlay, "UIKit", "UIKitRevenant.swift"),
-                                    path.join(revenant_overlay, "UIKit", "UIKitPointer.swift"),
-                                    path.join(revenant_overlay, "UIKit", "UIKitSliderTrackConfiguration.swift"),
-                                    path.join(revenant_overlay, "UIKit", "UIKitSymbolEffects.swift")},
-                          table.join(foundation_links, {"-lswiftQuartzCore", "-lswiftSymbols", "-framework", "QuartzCore", "-framework", "UIKit"}), {initializers},
-                          {module_cache = uikit_cache, extra_flags = {"-Xcc", "-ivfsoverlay", "-Xcc", lowered_headers, "-Xcc", "-I", "-Xcc", lowered_include}})
-            local photosui_cache = path.join(generated, "module-cache-photosui")
-            os.mkdir(photosui_cache)
-            build_overlay("PhotosUI", {path.join(revenant_overlay, "PhotosUI", "PhotosUI.swift")},
-                          table.join(foundation_links, {"-lswiftPhotos", "-lswiftUIKit", "-framework", "UIKit", "-Xlinker", "-weak_framework", "-Xlinker", "PhotosUI"}), nil,
-                          {module_cache = photosui_cache, extra_flags = lowered_cc})
-
-            local coredata = path.join(uikit, "stdlib", "public", "Darwin", "CoreData")
-            local conformances = path.join(generated, "CoreData.mm.o")
-            os.vrunv(toolchain:tool("cc"), table.join({"-target", triple, "-miphoneos-version-min=" .. minimum, "-isysroot",
-                     toolchain:config("sdkdir"), "-Os", "-c", path.join(coredata, "CoreData.mm"), "-o", conformances}, objc_linker))
-            build_overlay("CoreData", {path.join(coredata, "CocoaError.swift"), path.join(coredata, "NSManagedObjectContext.swift")},
-                          table.join(foundation_links, {"-framework", "CoreData"}), {conformances})
         end
 
         for _, library in ipairs({"Synchronization", "Observation", "StringProcessing"}) do
@@ -673,7 +684,8 @@ package("swift-runtime")
         local swift = import("@addon.revenant.apple.swift", {anonymous = true})
         local resources = path.join(package:installdir("lib"), "swift")
         if package:is_arch("arm64") then
-            for _, library in ipairs({"swiftCore", "swift_Concurrency", "swiftDarwin"}) do
+            for _, library in ipairs({"swiftCore", "swift_Concurrency", "swiftDarwin", "swiftObjectiveC", "swiftDispatch",
+                                      "swiftCoreFoundation", "swiftCoreGraphics", "swiftFoundation"}) do
                 assert(os.isfile(path.join(resources, "iphoneos", "lib" .. library .. ".dylib")),
                        "the arm64 runtime has no lib" .. library .. ".dylib")
             end
