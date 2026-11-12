@@ -24,7 +24,25 @@ local function exports(file)
     return list
 end
 
+-- every @rpath library that a binary needs, and the ones those need, by leaf name; found[leaf] is the file
+local function dependencies(file, dirs, found)
+    for line in os.iorunv("otool", {"-L", file}):gmatch("[^\n]+") do
+        local leaf = line:match("^%s+@rpath/(%S+)")
+        if leaf and not found[leaf] then
+            for _, dir in ipairs(dirs) do
+                local candidate = path.join(dir, leaf)
+                if os.isfile(candidate) then
+                    found[leaf] = candidate
+                    dependencies(candidate, dirs, found)
+                    break
+                end
+            end
+        end
+    end
+end
+
 local EXPECTED = {"reserve", "load", "class", "create", "methods", "describe", "bundle", "bundle.path", "token", "completion", "completion.thread"}
+local SWIFT_HOST_EXPECTED = {"host.bridge.before", "host.names", "names.disjoint", "host.bridge.after"}
 
 local function build_objc(e, corpus, o, here)
     corpus.ios(e, {"-fuse-ld=" .. e.ld, "-O2", "-w", "-fobjc-arc", "-dynamiclib", "-install_name", "@rpath/RCFixture.dylib", "-framework", "Foundation", "-I", here,
@@ -97,8 +115,34 @@ function main(out, ...)
         corpus.fail("the library exports %s, not exactly its two entry points", table.concat(symbols, " "))
     end
 
-    corpus.armv7(e, {"-O2", "-w", "-fobjc-arc", "-I", path.join(e.recompiler, "include"), "-framework", "Foundation", "-framework", "UIKit",
-                     path.join(here, "host.m"), path.join(e.recompiler, "src", "loader", "xl_loader.c"), "-o", o("host")})
+    local host_sources = {path.join(here, "host.m"), path.join(e.recompiler, "src", "loader", "xl_loader.c")}
+    local host_flags = {"-O2", "-w", "-fobjc-arc", "-I", path.join(e.recompiler, "include"), "-framework", "Foundation", "-framework", "UIKit"}
+    local expected = EXPECTED
+    local runtime
+    -- XL_LIBRARY_HOST_BRIDGING=1: the host's Swift also imports the Foundation overlay, so an Array and a String cross as an
+    -- NSArray and an NSString. The overlay of the package needs classes iOS 6 lacks; an app's own copy (Telegram's) is
+    -- patched for it, so this goes with XL_LIBRARY_HOST_RUNTIME, a folder on the phone with the runtime and overlays to use
+    local bridging = (os.getenv("XL_LIBRARY_HOST_BRIDGING") or "") ~= ""
+    local host_runtime = os.getenv("XL_LIBRARY_HOST_RUNTIME")
+    if variant == "swift" then
+        -- a host with a Swift runtime and Swift code of its own, as Telegram is: the library's runtime must not take its names
+        local swift = corpus.swift()
+        runtime = corpus.swift_armv7()
+        os.execv(path.join(swift, "bin", "swiftc"), table.join({"-target", "armv7-apple-ios6.0", "-clang-target", "armv7-apple-ios6.0", "-sdk", e.sdk,
+                                                     "-resource-dir", path.join(runtime, "lib", "swift"), "-I", path.join(runtime, "lib", "swift", "iphoneos"),
+                                                     "-Xfrontend", "-bundled-swift-runtime",
+                                                     "-runtime-compatibility-version", "none", "-plugin-path", path.join(swift, "lib", "swift", "host", "plugins"),
+                                                     "-Xfrontend", "-disable-implicit-concurrency-module-import", "-Xfrontend", "-disable-implicit-string-processing-module-import",
+                                                     "-parse-as-library", "-wmo", "-O", "-module-name", "RCHost", "-emit-object", "-o", o("hostswift.o")},
+                                                     bridging and {"-DBRIDGING"} or {}, {path.join(here, "hostswift.swift")}))
+        table.join2(host_flags, {"-DRC_SWIFT_HOST", "-L", path.join(runtime, "lib", "swift", "iphoneos"), "-lswiftCore",
+                                  "-Wl,-rpath,@executable_path", o("hostswift.o")})
+        if bridging then
+            table.join2(host_flags, {"-DRC_BRIDGING", "-lswiftFoundation"})
+        end
+        expected = table.join(EXPECTED, SWIFT_HOST_EXPECTED)
+    end
+    corpus.armv7(e, table.join(host_flags, host_sources, {"-o", o("host")}))
     corpus.sign(e, o("host"))
     if host_only then
         print("ok (host part)")
@@ -109,14 +153,26 @@ function main(out, ...)
     device.run("mkdir -p /var/tmp/xl-library")
     device.copy(library, "/var/tmp/xl-library/RCFixture.dylib")
     device.copy(o("host"), "/var/tmp/xl-library/xl-library-host")
+    if runtime and not host_runtime then
+        -- the host's own Swift runtime goes next to it, with what it depends on; dyld finds a name that starts with @rpath
+        -- in the fallback path, which is how the Telegram app's runtime is found too
+        local found = {}
+        dependencies(o("host"), {path.join(runtime, "lib", "swift", "iphoneos"), corpus.libcxx_armv7()}, found)
+        for leaf, file in pairs(found) do
+            os.cp(file, o("runtime-" .. leaf))
+            os.runv("chmod", {"u+w", o("runtime-" .. leaf)})
+            corpus.sign(e, o("runtime-" .. leaf))
+            device.copy(o("runtime-" .. leaf), "/var/tmp/xl-library/" .. leaf)
+        end
+    end
     local resident = os.getenv("XL_LIBRARY_RESIDENT_MB") or "85"
     local output = try { function ()
-        return device.run("chmod +x /var/tmp/xl-library/xl-library-host && /var/tmp/xl-library/xl-library-host /var/tmp/xl-library/RCFixture.dylib " .. resident .. "; echo exit=$?")
+        return device.run("chmod +x /var/tmp/xl-library/xl-library-host && cd /var/tmp/xl-library && DYLD_FALLBACK_LIBRARY_PATH=" .. (host_runtime or "/var/tmp/xl-library") .. " ./xl-library-host /var/tmp/xl-library/RCFixture.dylib " .. resident .. " 2>&1; echo exit=$?")
     end } or ""
     device.run("rm -rf /var/tmp/xl-library")
     io.writefile(o("run.txt"), output)
     local text = "\n" .. output:gsub("\r", "")
-    for _, name in ipairs(EXPECTED) do
+    for _, name in ipairs(expected) do
         if not text:find("\nok " .. name .. "\n", 1, true) then
             io.write(output)
             corpus.fail("the host did not report ok for %s", name)
@@ -126,5 +182,9 @@ function main(out, ...)
         io.write(output)
         corpus.fail("the host reported a failure or did not run to its end")
     end
-    print("ok: a translated library loads into a %s MB host and answers (%d checks)", resident, #EXPECTED)
+    if text:find("is implemented in both", 1, true) then
+        io.write(output)
+        corpus.fail("the Objective-C runtime found two classes of one name, the host's and the library's")
+    end
+    print("ok: a translated library loads into a %s MB host and answers (%d checks)", resident, #expected)
 end
