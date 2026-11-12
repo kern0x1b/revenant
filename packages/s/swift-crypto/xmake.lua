@@ -158,10 +158,15 @@ package("swift-crypto")
             os.vrunv(swiftc, argv)
         end
 
+        local libdir = path.join(resources, "iphoneos")
+        if package:config("shared") then
+            local shared = import("@addon.revenant.apple.shared_runtime", {anonymous = true})
+            libdir = path.join(runtime:installdir("share"), "root", shared.folder_of(shared.package_name("swift-runtime", runtime:buildhash())))
+        end
         local lib = path.join(objects, "libswiftCrypto.dylib")
         os.vrunv(toolchain:tool("cc"), table.join(common, {"-fuse-ld=" .. ld64, "-dynamiclib", "-install_name", "@rpath/libswiftCrypto.dylib",
                  "-Wl,-dead_strip_dylibs", "-o", lib}, os.files(path.join(objects, "*.o")),
-                 {"-L", path.join(resources, "iphoneos"),
+                 {"-L", libdir,
                   "-lswiftCore", "-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswift_Concurrency",
                   "-lswiftFoundation", "-framework", "Security"}))
         os.cp(lib, package:installdir("lib"))
