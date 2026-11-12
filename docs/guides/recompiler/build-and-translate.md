@@ -61,7 +61,8 @@ XL_REPLACES=/usr/lib/libc++.1.dylib=<libs>/libc++.1.dylib \
 
 or the operators, guards and exception classes it takes from libc++ (307 names re-exported from libc++abi among them)
 come from the host's C++ runtime instead of the guest's. The run takes about three and a half minutes; a module too
-big for one object goes straight to the split, and the pieces are compiled four at a time (`XL_COMPILE_JOBS`). A run
+big for one object (more than `XL_OBJECT_BYTES` of bitcode, 6 MB by default) goes straight to the split into pieces of
+that size, and the pieces are compiled four at a time (`XL_COMPILE_JOBS`). A run
 whose guest images, bridge library and `xlate` are the last run's reuses its lifted objects and only recompiles and
 relinks the runtime, a few seconds.
 

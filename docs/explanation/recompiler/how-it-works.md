@@ -98,8 +98,13 @@ print on the iPad 2 what objc4 printed.
   ivar's 8-byte slot past the allocation, and memory is corrupted nondeterministically. OneBusAway found this.
 - **Floating-point data symbols** such as `NSFoundationVersionNumber` and `UIWindowLevelNormal` are bridged through
   a copy of the guest's globals that is filled at startup, in the guest's float width.
-- **Large binaries are split, and the globals stay whole.** When the direct-call compile fails with "Relocation out
-  of range", the module is split so that ld64 can insert branch islands between the pieces. All globals (the
+- **Large binaries are split, and the globals stay whole.** A module of more than 6 MB of bitcode (`XL_OBJECT_BYTES`)
+  is split into pieces of about that size. Two limits ask for it. Direct calls reach 32 MB, so the pieces let ld64
+  insert branch islands between them. And an armv7 Mach-O scattered relocation addresses 24 bits of a section: a
+  function with a landing pad registers its SjLj frame with the label difference between `__text` and
+  `__gcc_except_tab`, which is one, so an object whose `__text` passes 16 MB fails with "can not encode offset ... in
+  resulting scattered relocation". Lifted bitcode becomes 1.0 to 1.25 times as many bytes of object, and the pieces
+  `llvm-split` makes differ by up to 1.5 times, so a 6 MB budget keeps the biggest piece below 12 MB. All globals (the
   rehosted guest image and the Objective-C metadata) stay in one data object at their single-object layout, and only
   the functions are distributed into code-only pieces, using `llvm-extract --delete`. The lifted code reaches guest
   memory by absolute address and the metadata cross-references its own class objects. A global moved to another
