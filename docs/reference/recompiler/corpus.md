@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, tsdscan, tsdguard,
-int128, weakimport, lse, llsc and exceptions; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, exceptions and objectsplit; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -132,6 +132,20 @@ calls" line and no unreadable LSDA, the lifted module must carry `invoke`, `land
 the C++ personality, and the translated binary must import `_Unwind_SjLj_Register`. The device part runs the translated
 binary and compares its output with the Mac's. The program takes the number of loop rounds as its argument (2000
 by default), so a probe can run it deeper by hand.
+
+### objectsplit
+
+A synthetic module of 6500 functions, each with 120 `invoke`s into one SjLj cleanup landing pad (15 MB of bitcode, about
+20 MB of armv7 code). It is the swiftobjc regression in miniature: the guest `libswiftCore` with its exception edges
+split into pieces of 14 to 16 MB of bitcode and every piece failed with "can not encode offset ... in resulting
+scattered relocation", because an armv7 Mach-O scattered relocation, which the SjLj frame of a function with a landing
+pad needs for the label difference between `__text` and `__gcc_except_tab`, addresses 24 bits of a section: nothing past
+16 MB of `__text` can carry one.
+
+The check compiles the module as one object and requires that to fail with that message, so that the module keeps being
+too big. Then `compile_lifted` of `translate.lua` compiles it with its own piece size: at least three objects, each
+smaller than 16 MB, and every function defined once across them. The objects are compiled with `-O0` to keep the check
+at about a minute; the limit is on the size of an object, and `-O0` code is bigger than `-O2` code.
 
 ### tsdscan
 

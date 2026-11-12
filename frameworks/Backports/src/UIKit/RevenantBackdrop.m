@@ -3,6 +3,19 @@
 
 static const NSTimeInterval RevenantBackdropMinimumInterval = 0.1;
 static const NSTimeInterval RevenantBackdropQuietInterval = 0.5;
+static const NSUInteger RevenantBackdropQuietDoublings = 3;
+static const int RevenantBackdropPixelTolerance = 16;
+
+static BOOL revenant_backdrop_similar(const uint8_t *a, const uint8_t *b, size_t length)
+{
+    size_t differing = 0;
+    for (size_t i = 0; i < length; i += 4) {
+        int delta = MAX(abs(a[i] - b[i]), MAX(abs(a[i + 1] - b[i + 1]), abs(a[i + 2] - b[i + 2])));
+        if (delta > RevenantBackdropPixelTolerance)
+            differing++;
+    }
+    return differing * 400 <= length;
+}
 
 static void revenant_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutableArray *hidden)
 {
@@ -30,7 +43,10 @@ static void revenant_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutable
     __weak id<RevenantBackdropClient> _client;
     CADisplayLink *_link;
     NSTimeInterval _nextRefresh;
-    uint32_t _lastChecksum;
+    NSTimeInterval _earliestRefresh;
+    NSUInteger _unchanged;
+    uint8_t *_lastPixels;
+    size_t _lastLength;
     CGRect _lastRect;
     BOOL _delivered;
     BOOL _refreshing;
@@ -48,6 +64,11 @@ static void revenant_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutable
     return self;
 }
 
+- (void)dealloc
+{
+    free(_lastPixels);
+}
+
 - (void)start
 {
     if (_link || !_view.window)
@@ -56,6 +77,7 @@ static void revenant_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutable
     _link.frameInterval = 6;
     [_link addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
     _nextRefresh = 0;
+    _earliestRefresh = 0;
 }
 
 - (void)stop
@@ -63,17 +85,22 @@ static void revenant_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutable
     [_link invalidate];
     _link = nil;
     _delivered = NO;
+    _unchanged = 0;
 }
 
 - (void)setNeedsRefresh
 {
     _nextRefresh = 0;
+    _earliestRefresh = 0;
+    _unchanged = 0;
 }
 
 - (void)invalidate
 {
     _delivered = NO;
     _nextRefresh = 0;
+    _earliestRefresh = 0;
+    _unchanged = 0;
 }
 
 - (BOOL)wanted
@@ -90,7 +117,10 @@ static void revenant_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutable
     }
     if (![self wanted] || [UIApplication sharedApplication].applicationState == UIApplicationStateBackground)
         return;
-    if (CACurrentMediaTime() < _nextRefresh)
+    BOOL tracking = [[NSRunLoop currentRunLoop].currentMode isEqualToString:UITrackingRunLoopMode];
+    if (tracking)
+        _unchanged = 0;
+    if (CACurrentMediaTime() < (tracking ? _earliestRefresh : _nextRefresh))
         return;
     [self refresh];
 }
@@ -140,21 +170,36 @@ static void revenant_backdrop_hide_above(CALayer *layer, CALayer *top, NSMutable
         layer.hidden = NO;
     [CATransaction commit];
     CGContextRelease(context);
-    uint32_t checksum = 2166136261u;
-    for (size_t i = 0; i < rowBytes * height; i += 4)
-        checksum = (checksum ^ pixels[i] ^ ((uint32_t)pixels[i + 1] << 8) ^ ((uint32_t)pixels[i + 2] << 16)) * 16777619u;
-    if (_delivered && checksum == _lastChecksum && CGRectEqualToRect(captured, _lastRect)) {
+    size_t length = rowBytes * height;
+    BOOL same = _delivered && _lastPixels && _lastLength == length && CGRectEqualToRect(captured, _lastRect) && revenant_backdrop_similar(pixels, _lastPixels, length);
+    if (same) {
         free(pixels);
-        _nextRefresh = CACurrentMediaTime() + RevenantBackdropQuietInterval;
+        NSTimeInterval now = CACurrentMediaTime();
+        NSTimeInterval earliest = now + MAX(RevenantBackdropMinimumInterval, (now - started) * 3);
+        NSUInteger doublings = MIN(_unchanged, RevenantBackdropQuietDoublings);
+        _unchanged++;
+        _earliestRefresh = earliest;
+        _nextRefresh = MAX(earliest, now + RevenantBackdropQuietInterval * (1 << doublings));
         _refreshing = NO;
         return;
     }
-    _lastChecksum = checksum;
+    _unchanged = 0;
+    uint8_t *reference = realloc(_lastPixels, length);
+    if (reference) {
+        memcpy(reference, pixels, length);
+        _lastPixels = reference;
+        _lastLength = length;
+    } else {
+        free(_lastPixels);
+        _lastPixels = NULL;
+        _lastLength = 0;
+    }
     _lastRect = captured;
     _delivered = YES;
     [client backdrop:self captured:pixels width:width height:height rowBytes:rowBytes rect:captured];
     NSTimeInterval cost = CACurrentMediaTime() - started;
-    _nextRefresh = CACurrentMediaTime() + MAX(RevenantBackdropMinimumInterval, cost * 3);
+    _earliestRefresh = CACurrentMediaTime() + MAX(RevenantBackdropMinimumInterval, cost * 3);
+    _nextRefresh = _earliestRefresh;
     _refreshing = NO;
 }
 

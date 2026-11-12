@@ -94,7 +94,7 @@ static Method revenant_alias_method(Class cls, SEL selector, BOOL class_methods)
     + (Class)superclass                                                                                            \
     {                                                                                                              \
         Class found = REVENANT_ALIAS_ANSWER(Name, class_getSuperclass(self), [REVENANT_ALIAS_RELEASE(Name) superclass]);     \
-        return (__bridge const void *)found == REVENANT_ALIAS_SELF(Name) ? REVENANT_ALIAS_RELEASE(Name) : found; \
+        return (__bridge const void *)found == REVENANT_ALIAS_SELF(Name) ? class_getSuperclass(found) : found; \
     }                                                                                                              \
                                                                                                                    \
     + (BOOL)isSubclassOfClass:(Class)aClass                                                                        \
