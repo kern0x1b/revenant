@@ -2,24 +2,29 @@
 #import <objc/message.h>
 
 #include "objc_abi.h"
+#include "xl_host.h"
 
 __attribute__((visibility("hidden"))) id objc_alloc(Class cls)
 {
+    xl_swift_sync_class(cls);
     return cls ? [cls alloc] : nil;
 }
 
 __attribute__((visibility("hidden"))) id objc_allocWithZone(Class cls)
 {
+    xl_swift_sync_class(cls);
     return cls ? [cls allocWithZone:nil] : nil;
 }
 
 __attribute__((visibility("hidden"))) id objc_alloc_init(Class cls)
 {
+    xl_swift_sync_class(cls);
     return cls ? [[cls alloc] init] : nil;
 }
 
 __attribute__((visibility("hidden"))) id objc_opt_new(Class cls)
 {
+    xl_swift_sync_class(cls);
     return cls ? [cls new] : nil;
 }
 
