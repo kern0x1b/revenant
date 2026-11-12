@@ -5,7 +5,7 @@ package("cryptokit")
     set_policy("package.strict_compatibility", true)
     add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", type = "string"})
 
-    add_configs("shared", {description = "Compile against a shared swift-runtime, for a port that requires it so.", default = false, type = "boolean"})
+    add_configs("shared", {description = "Compile and link against a shared swift-runtime, whose libraries the result binds by their absolute install names. The package is not yet one of a Debian package: its own install names stay @rpath and it writes no shared-packages description.", default = false, type = "boolean"})
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("sources", {description = "The digest of this recipe and the module's sources, so a changed declaration is a different package.", default = cryptokit_sources_digest, type = "string", readonly = true})
 
@@ -25,7 +25,8 @@ package("cryptokit")
             "    add_values(\"swift.flags\", \"-module-cache-path\", \"" .. modules .. "\")",
             "target_end()",
             ""}, "\n"))
-        import("@addon.revenant.apple.wrapper", {anonymous = true}).install(package, {root = root,
+        local lines = package:config("shared") and import("@addon.revenant.apple.shared_requires", {anonymous = true}).lines(package:config("apple_sdk")) or nil
+        import("@addon.revenant.apple.wrapper", {anonymous = true}).install(package, {root = root, lines = lines,
             includes = {path.join(root, "frameworks", "Backports", "src", "Swift"), extra}, targets = {"swiftCryptoKit"}, modules = true})
     end)
 

@@ -35,6 +35,7 @@ function install(package, opt)
     for _, folder in ipairs(opt.includes) do
         table.insert(lines, "includes(\"" .. folder .. "\")")
     end
+    table.join2(lines, opt.lines or {})
     table.join2(lines, {"set_defaultplat(\"iphoneos\")", "set_defaultarchs(\"iphoneos|" .. package:arch() .. "\")", ""})
     io.writefile(path.join(project, "xmake.lua"), table.concat(lines, "\n"))
     io.save(path.join(project, "xmake-addons.lock"), {__meta__ = {version = "1.0"}, revenant = {version = revenant.version}})
