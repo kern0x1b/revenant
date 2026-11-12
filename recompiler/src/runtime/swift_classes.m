@@ -41,6 +41,7 @@ enum { XL_RO_META = 1, XL_RO_ROOT = 2 };
 
 extern const uint32_t xl_swift_static_classes[];
 extern const uint32_t xl_swift_listed_classes[];
+extern const struct xl_swift_method xl_swift_methods[];
 
 static volatile int xl_shadows_active;
 static OSSpinLock xl_table_lock = OS_SPINLOCK_INIT;
@@ -148,6 +149,15 @@ uint32_t xl_shadow_imp(IMP imp)
     return (uint32_t)(uintptr_t)xl_table_get(xl_shadow_imps, (uintptr_t)imp);
 }
 
+static const struct xl_swift_method *xl_typed_method(uint64_t guest)
+{
+    for (const struct xl_swift_method *method = xl_swift_methods; method->guest; method++) {
+        if (method->guest == (uint32_t)guest)
+            return method;
+    }
+    return NULL;
+}
+
 static int xl_add_guest_methods(Class target, uint64_t list, const char *class_name)
 {
     int adds_dealloc = 0;
@@ -171,10 +181,14 @@ static int xl_add_guest_methods(Class target, uint64_t list, const char *class_n
             types = (const char *)(uintptr_t) * (const uint64_t *)(uintptr_t)(entry + 8);
             imp = *(const uint64_t *)(uintptr_t)(entry + 16);
         }
-        if (!class_addMethod(target, selector, xl_guest_method_imp(imp, selector), types)) {
+        const struct xl_swift_method *typed = xl_typed_method(imp);
+        IMP host_imp = typed ? (IMP)typed->host : xl_guest_method_imp(imp, selector);
+        if (!class_addMethod(target, selector, host_imp, typed ? typed->types : types)) {
             xl_shadow_note("%s: method %s already defined", class_name, sel_getName(selector));
             continue;
         }
+        if (typed)
+            xl_table_set(xl_shadow_imps, (uintptr_t)host_imp, (const void *)(uintptr_t)imp);
         if (selector == xl_cxx_destruct_selector)
             xl_table_set(xl_destructors, (uintptr_t)target, (const void *)(uintptr_t)imp);
         if (selector == @selector(dealloc))
@@ -347,7 +361,14 @@ static Class xl_build_shadow(uintptr_t guest)
     if (direct_host_super)
         xl_twin_of(host_super);
     uint32_t extent = host_super && xl_has_host_ancestor(host_super) ? xl_swift_extent(c) : 0;
-    shadow = objc_allocateClassPair(host_super, name, extent > XL_HOST_CLASS_SIZE ? extent - XL_HOST_CLASS_SIZE : 0);
+    size_t extra = extent > XL_HOST_CLASS_SIZE ? extent - XL_HOST_CLASS_SIZE : 0;
+    char alias[256];
+    shadow = objc_allocateClassPair(host_super, name, extra);
+    if (!shadow) {
+        snprintf(alias, sizeof alias, "%s@%llx", name, (unsigned long long)guest);
+        xl_shadow_note("%s: a class of that name exists in the host, the shadow of %p is %s", name, (void *)guest, alias);
+        shadow = objc_allocateClassPair(host_super, alias, extra);
+    }
     if (!shadow) {
         char why[256];
         snprintf(why, sizeof why, "xlate: cannot make the shadow of class %s (%p): a class of that name exists", name, (void *)guest);

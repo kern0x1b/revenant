@@ -65,6 +65,44 @@ big for one object goes straight to the split, and the pieces are compiled four 
 whose guest images, bridge library and `xlate` are the last run's reuses its lifted objects and only recompiles and
 relinks the runtime, a few seconds.
 
+## Translate a library
+
+An arm64 dylib (and the guest images it needs) becomes an armv7 dylib that an app loads into its own process. See
+[library mode](../../explanation/recompiler/library-mode.md) for why and for what the runtime does there.
+
+```sh
+XL_LIBRARY=1 ./xmakew l -P . recompiler/tools/translate.lua Lib.dylib includes.h out/ [guest images]
+```
+
+`includes.h` imports what the library uses and the library's own public header: a block parameter of a public method
+has no signature in its type encoding, so the translator takes it from the header (without it the method is reported
+`UNSUPPORTED: block parameter of a method the SDK does not declare` and traps when the host calls it). The output is
+`out/<name>.dylib`, linked with its install name `@rpath/<name>.dylib` (`XL_INSTALL_NAME` changes it).
+
+- `XL_BASE` is the address of the guest window (default `0x10000000`). The lifted code sits just below it, in a window
+  of the size of the lifted code plus 8 MB, rounded up to 16 MB, so the library occupies `XL_BASE` minus that window up
+  to the end of the guest segments. An app whose images or heap hold that range needs another `XL_BASE`; ld64 links an
+  armv7 dylib with guest segments only below about `0x40000000`. The translation stops with a message naming
+  `XL_BASE` when the window is larger than the base itself.
+- The app links `recompiler/src/loader/xl_loader.c` (header `recompiler/include/xl_loader.h`), reserves the range as
+  early as it can, and loads the library when it first needs it:
+
+```objc
+xl_reserve(path);
+...
+if (xl_load(path) == XL_LOAD_OK) {
+    Class client = NSClassFromString(@"RCFClient");
+}
+```
+
+  `xl_load_error()` says why a load failed. The classes of the library are found by name only after `xl_load`
+  succeeded; before that `NSClassFromString` answers `Nil`.
+- `xl_library_diagnostics()` (found with `dlsym`) installs the crash handlers and the exit note for a debugging session;
+  an app that has its own crash reporter does not call it.
+
+`./xmakew l -P . recompiler/tests/library/check.lua <out> [objc|swift]` builds a fixture library and a host app and runs
+them on the claimed phone ([what it proves](../../reference/recompiler/corpus.md#library-device-part-by-hand)).
+
 ## Checks
 
 - `./xmakew test -P . 'recompiler_corpus/*'` runs the host part of every corpus check.
