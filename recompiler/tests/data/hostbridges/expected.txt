@@ -1,0 +1,46 @@
+sscanf 12: 42 -7 123456789012 99 2.50 1.25 hello 12 -3 255 0x1234 Z 54
+sscanf partial 1: 5 -5
+sscanf empty -1
+sscanf long 2: 4000000000 -2000000000
+sscanf suppressed 1: 2 3
+vsscanf 3: 77 88 3
+sscanf pair 2: 12 34
+getaddrinfo v4 0
+  node family 2 type 1 protocol 6 length 16 address 127.0.0.1 port 8080
+  nodes 1
+getaddrinfo v6 0
+  node family 30 type 2 length 28 address ::1
+getaddrinfo numeric host that is a name 8
+getaddrinfo passive 0 has nodes 1
+Probe instance methods 3
+  isKindOfClass: arguments 3 returns B
+  label arguments 2 returns @
+  plus:to: arguments 4 returns i
+Probe class methods 1
+  answer arguments 2 returns i
+ProbeChild instance methods 1
+  plus:to: arguments 4 returns i
+NSObject has methods 1
+guest imp same 1 stable 1
+guest imp on probe 5, on child 5
+child imp differs 1, on child 1005
+host imp length 5
+host imp uppercase HELLO
+host imp prefix 1 0
+host imp stable 1 same as method 1
+override says 0, NSObject imp says 1 0
+class method imp 42
+block imp added 1 again 0
+block imp called by the host 47
+block imp sees the capture 102
+block of the imp exists 1 removed 1
+function imp added 1
+function imp called by the host 63
+function imp read back 12 same 1
+replaced old is the original 1, old computes 5
+replacement computes 42
+set returned the replacement 1, restored computes 13
+label before 1 now changed
+label restored probe
+replace returned original 1 label swapped
+label back probe

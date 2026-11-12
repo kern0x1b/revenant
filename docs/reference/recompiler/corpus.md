@@ -14,8 +14,8 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, exceptions and objectsplit; `classpair` and `ordinal` are the device group's, which also runs the
-device part of `exceptions`. Their output goes to the
+int128, weakimport, lse, llsc, exceptions, objectsplit and hostbridges; `classpair` and `ordinal` are the device group's, which also runs the
+device part of `exceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
 
@@ -25,6 +25,7 @@ A check that also has a device part is run by hand, with the output folder as it
 ./xmakew l -P . recompiler/tests/weakimport/check.lua <out>
 ./xmakew l -P . recompiler/tests/classpair/check.lua <out>
 ./xmakew l -P . recompiler/tests/exceptions/check.lua <out>
+./xmakew l -P . recompiler/tests/hostbridges/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftconformance/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftobjc/check.lua <out>
 ```
@@ -132,6 +133,26 @@ calls" line and no unreadable LSDA, the lifted module must carry `invoke`, `land
 the C++ personality, and the translated binary must import `_Unwind_SjLj_Register`. The device part runs the translated
 binary and compares its output with the Mac's. The program takes the number of loop rounds as its argument (2000
 by default), so a probe can run it deeper by hand.
+
+### hostbridges
+
+A program (`main.m`) that calls the host functions whose guest and host layouts differ or whose argument is an `IMP`:
+
+- `sscanf` and `vsscanf` with `int`, `long`, `long long`, `size_t`, `double`, `float`, `short`, `signed char`, `%x`,
+  `%p`, `%c`, `%s`, `%n` and `%ln`, a conversion that fails half way (the later variables stay untouched), empty input,
+  a suppressed conversion;
+- `getaddrinfo` for a numeric IPv4 host with a service, for IPv6, for a name with `AI_NUMERICHOST` (status 8) and with
+  `AI_PASSIVE`, walking the list and `freeaddrinfo`;
+- `class_copyMethodList` of a guest class, its metaclass, a guest subclass and `NSObject`, sorted by selector;
+- `IMP`s both ways: a guest method's `IMP` called by the guest on a guest instance and on a subclass instance; host
+  `IMP`s of a concrete `NSString` class called by the guest; the `NSObject` `-isKindOfClass:` `IMP` called on an instance
+  of a guest class that overrides it; `imp_implementationWithBlock` with a captured `__block` variable, added with
+  `class_addMethod` and called by a message send, `imp_getBlock` and `imp_removeBlock`; a C function added with
+  `class_addMethod`; `class_replaceMethod` and `method_setImplementation` with the old `IMP` called afterwards.
+
+The check builds the program for this Mac and compares its output with `tests/data/hostbridges/expected.txt`, translates
+the arm64 build (which fails on any import without a bridge) and requires that the program imports each of the bridged
+functions. The device part runs the translated binary and compares its output with the Mac's.
 
 ### objectsplit
 

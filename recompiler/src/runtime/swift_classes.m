@@ -49,6 +49,7 @@ static CFMutableDictionaryRef xl_guest_to_host;
 static CFMutableDictionaryRef xl_host_to_guest;
 static CFMutableDictionaryRef xl_unbuilt_static;
 static CFMutableDictionaryRef xl_shadow_imps;
+static CFMutableDictionaryRef xl_guest_imp_cache;
 static CFMutableDictionaryRef xl_host_twin;
 static CFMutableDictionaryRef xl_twin_host;
 static CFMutableDictionaryRef xl_tail_of_shadow;
@@ -140,6 +141,86 @@ static IMP xl_guest_method_imp(uint64_t guest, SEL selector)
     });
     xl_table_set(xl_shadow_imps, (uintptr_t)imp, (const void *)(uintptr_t)guest);
     return imp;
+}
+
+static const char *xl_skip_type(const char *type)
+{
+    while (*type && strchr("rnNoORV", *type))
+        type++;
+    switch (*type) {
+    case 0:
+        return type;
+    case '^':
+        return xl_skip_type(type + 1);
+    case '{':
+    case '(': {
+        unsigned depth = 0;
+        do {
+            depth += *type == '{' || *type == '(';
+            depth -= *type == '}' || *type == ')';
+            type++;
+        } while (*type && depth);
+        return type;
+    }
+    case '@':
+        type++;
+        if (*type == '?') {
+            type++;
+        } else if (*type == '"') {
+            type++;
+            while (*type && *type != '"')
+                type++;
+            type += *type == '"';
+        }
+        return type;
+    default:
+        return type + 1;
+    }
+}
+
+static int xl_imp_types_are_words(const char *types)
+{
+    unsigned count = 0;
+    for (const char *type = types; *type; count++) {
+        const char *plain = type;
+        while (*plain && strchr("rnNoORV", *plain))
+            plain++;
+        if (!*plain || !strchr("v@#:*^cCsSiIlLB", *plain) || (*plain == 'v' && count))
+            return 0;
+        type = xl_skip_type(type);
+        while (*type >= '0' && *type <= '9')
+            type++;
+    }
+    return count >= 3 && count <= 7;
+}
+
+IMP xl_host_imp_for_guest(uint64_t guest, SEL selector, const char *types)
+{
+    if (!xl_imp_types_are_words(types)) {
+        char why[256];
+        snprintf(why, sizeof why, "xlate: the guest function 0x%llx given as the implementation of %s has the type encoding %s, which the bridge cannot marshal (self, _cmd and up to four 32-bit words)",
+                 (unsigned long long)guest, sel_getName(selector), types);
+        xl_unsupported(why);
+    }
+    CFNumberRef key = CFNumberCreate(NULL, kCFNumberSInt64Type, &(int64_t){(int64_t)((guest << 32) | (uint32_t)(uintptr_t)selector)});
+    OSSpinLockLock(&xl_table_lock);
+    if (!xl_guest_imp_cache)
+        xl_guest_imp_cache = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, NULL);
+    IMP imp = (IMP)CFDictionaryGetValue(xl_guest_imp_cache, key);
+    OSSpinLockUnlock(&xl_table_lock);
+    if (!imp) {
+        imp = xl_guest_method_imp(guest, selector);
+        OSSpinLockLock(&xl_table_lock);
+        CFDictionarySetValue(xl_guest_imp_cache, key, imp);
+        OSSpinLockUnlock(&xl_table_lock);
+    }
+    CFRelease(key);
+    return imp;
+}
+
+uint32_t xl_guest_function_of(IMP imp)
+{
+    return imp ? (uint32_t)(uintptr_t)xl_table_get(xl_shadow_imps, (uintptr_t)imp) : 0;
 }
 
 uint32_t xl_shadow_imp(IMP imp)

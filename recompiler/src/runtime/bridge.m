@@ -25,6 +25,8 @@ _Static_assert(sizeof(va_list) == sizeof(char *), "host va_list must be a pointe
 #include <dirent.h>
 #include <time.h>
 #include <dlfcn.h>
+#include <netdb.h>
+#include <stddef.h>
 #include <mach-o/loader.h>
 
 struct xl_gkevent {
@@ -963,4 +965,190 @@ void xl_format_release(struct xl_format *format)
     [(NSString *)format->object release];
     free(format->text);
     free(format->arguments);
+}
+
+enum { XL_SCANF_SIGNED, XL_SCANF_UNSIGNED, XL_SCANF_COUNT };
+
+struct xl_scanf_fix {
+    uint64_t guest;
+    uint32_t value;
+    unsigned index;
+    unsigned kind;
+};
+
+static const uint32_t xl_scanf_untouched = 0xFFFFFFFFu;
+
+void xl_scanf_marshal(struct xl_scanf *scan, const char *text, const uint64_t *arguments, const char *symbol)
+{
+    size_t conversions = 0;
+    for (const char *c = text; *c; c++)
+        conversions += *c == '%';
+    uint32_t *words = calloc(conversions + 1, sizeof *words);
+    struct xl_scanf_fix *fixes = calloc(conversions + 1, sizeof *fixes);
+    unsigned used = 0, assigned = 0, fixed = 0;
+    for (const char *c = text; *c;) {
+        if (*c++ != '%')
+            continue;
+        if (*c == '%') {
+            c++;
+            continue;
+        }
+        int suppress = *c == '*';
+        c += suppress;
+        while (*c >= '0' && *c <= '9')
+            c++;
+        int narrow = 0, wide = 0, longs = 0;
+        for (;; c++) {
+            if (*c == 'h')
+                narrow = 1;
+            else if (*c == 'l')
+                longs++;
+            else if (*c == 'z' || *c == 't')
+                wide = 1;
+            else if (*c == 'j' || *c == 'q')
+                wide = 2;
+            else if (*c != 'L')
+                break;
+        }
+        wide = longs > 1 ? 2 : (longs == 1 && !wide) ? 1 : wide;
+        char conversion = *c ? *c++ : 0;
+        if (conversion == '[') {
+            c += *c == '^';
+            c += *c == ']';
+            while (*c && *c != ']')
+                c++;
+            c += *c == ']';
+        }
+        if (suppress)
+            continue;
+        int counted = conversion != 'n';
+        unsigned kind = XL_SCANF_SIGNED;
+        int integer = 0;
+        switch (conversion) {
+        case 'D': case 'O': case 'U':
+            wide = 1;
+        case 'd': case 'i': case 'u': case 'o': case 'x': case 'X': case 'n':
+            integer = 1;
+            kind = conversion == 'n' ? XL_SCANF_COUNT : (conversion == 'd' || conversion == 'i' || conversion == 'D') ? XL_SCANF_SIGNED : XL_SCANF_UNSIGNED;
+            break;
+        case 'p':
+            integer = 1;
+            wide = 1;
+            kind = XL_SCANF_UNSIGNED;
+            break;
+        case 'e': case 'E': case 'f': case 'F': case 'g': case 'G': case 'a': case 'A':
+        case 's': case 'S': case 'c': case 'C': case '[':
+            break;
+        default:
+            fprintf(stderr, "xlate: %s: unsupported conversion in format \"%s\"\n", symbol, text);
+            abort();
+        }
+        unsigned slot = used++;
+        uint64_t guest = arguments[slot];
+        if (wide == 1 && integer && !narrow) {
+            struct xl_scanf_fix *fix = &fixes[fixed++];
+            fix->guest = guest;
+            fix->index = assigned;
+            fix->kind = kind;
+            fix->value = kind == XL_SCANF_COUNT ? xl_scanf_untouched : 0;
+            words[slot] = (uint32_t)(uintptr_t)&fix->value;
+        } else {
+            words[slot] = (uint32_t)xl_narrow_pointer(guest, symbol, slot);
+        }
+        assigned += counted;
+    }
+    scan->arguments = (char *)words;
+    scan->fixes = fixes;
+    scan->count = fixed;
+}
+
+void xl_scanf_finish(struct xl_scanf *scan, int result)
+{
+    for (unsigned i = 0; i < scan->count; i++) {
+        struct xl_scanf_fix *fix = &scan->fixes[i];
+        int reached = fix->kind == XL_SCANF_COUNT ? fix->value != xl_scanf_untouched : result > (int)fix->index;
+        if (!reached)
+            continue;
+        uint64_t *guest = (uint64_t *)(uintptr_t)fix->guest;
+        *guest = fix->kind == XL_SCANF_UNSIGNED ? (uint64_t)fix->value : (uint64_t)(int64_t)(int32_t)fix->value;
+    }
+    free(scan->arguments);
+    free(scan->fixes);
+}
+
+struct xl_guest_addrinfo {
+    int32_t ai_flags;
+    int32_t ai_family;
+    int32_t ai_socktype;
+    int32_t ai_protocol;
+    uint32_t ai_addrlen;
+    uint32_t reserved;
+    uint64_t ai_canonname;
+    uint64_t ai_addr;
+    uint64_t ai_next;
+};
+
+struct xl_addrinfo_list {
+    struct addrinfo *host;
+    uint64_t magic;
+    struct xl_guest_addrinfo nodes[];
+};
+
+static const uint64_t xl_addrinfo_magic = 0x6164647269696e66ull;
+
+void xl_manual_getaddrinfo(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t node, service, hints, result, r; } *p = pack;
+    const struct xl_guest_addrinfo *guest_hints = (const struct xl_guest_addrinfo *)xl_narrow_pointer(p->hints, "getaddrinfo", 2);
+    struct addrinfo hints, *request = NULL;
+    if (guest_hints) {
+        memset(&hints, 0, sizeof hints);
+        hints.ai_flags = guest_hints->ai_flags;
+        hints.ai_family = guest_hints->ai_family;
+        hints.ai_socktype = guest_hints->ai_socktype;
+        hints.ai_protocol = guest_hints->ai_protocol;
+        request = &hints;
+    }
+    struct addrinfo *host = NULL;
+    int status = getaddrinfo((const char *)xl_narrow_pointer(p->node, "getaddrinfo", 0),
+                             (const char *)xl_narrow_pointer(p->service, "getaddrinfo", 1), request, &host);
+    p->r = (uint64_t)(int64_t)status;
+    if (status)
+        return;
+    size_t count = 0;
+    for (struct addrinfo *node = host; node; node = node->ai_next)
+        count++;
+    struct xl_addrinfo_list *list = calloc(1, sizeof *list + count * sizeof list->nodes[0]);
+    if (!list) {
+        freeaddrinfo(host);
+        p->r = (uint64_t)(int64_t)EAI_MEMORY;
+        return;
+    }
+    list->host = host;
+    list->magic = xl_addrinfo_magic;
+    size_t at = 0;
+    for (struct addrinfo *node = host; node; node = node->ai_next, at++) {
+        struct xl_guest_addrinfo *guest = &list->nodes[at];
+        guest->ai_flags = node->ai_flags;
+        guest->ai_family = node->ai_family;
+        guest->ai_socktype = node->ai_socktype;
+        guest->ai_protocol = node->ai_protocol;
+        guest->ai_addrlen = node->ai_addrlen;
+        guest->ai_canonname = (uintptr_t)node->ai_canonname;
+        guest->ai_addr = (uintptr_t)node->ai_addr;
+        guest->ai_next = node->ai_next ? (uintptr_t)&list->nodes[at + 1] : 0;
+    }
+    *(uint64_t *)xl_narrow_pointer(p->result, "getaddrinfo", 3) = (uintptr_t)list->nodes;
+}
+
+void xl_manual_freeaddrinfo(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t head; } *p = pack;
+    if (!p->head)
+        return;
+    struct xl_addrinfo_list *list = (struct xl_addrinfo_list *)((char *)xl_narrow_pointer(p->head, "freeaddrinfo", 0) - offsetof(struct xl_addrinfo_list, nodes));
+    if (list->magic != xl_addrinfo_magic)
+        xl_unsupported("xlate: freeaddrinfo of a list that getaddrinfo did not return");
+    freeaddrinfo(list->host);
+    free(list);
 }

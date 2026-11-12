@@ -132,6 +132,29 @@ print on the iPad 2 what objc4 printed.
   unknown personality, a function that mixes personalities). A `throw` of translated C++ code (`__cxa_throw`) is a
   fault, and a catch of a C++ class the guest itself defines cannot match a host exception, so that clause is dropped.
   `recompiler/tests/exceptions` is the regression test.
+- **Method implementations (`IMP`).** An `IMP` is a bare code address, and the guest and the host disagree on what one
+  means. A guest method's `IMP` is the guest function, and the host reaches it through a block `IMP` that
+  `class_addMethod`, `class_replaceMethod` and `method_setImplementation` build (`xl_host_imp_for_guest`, cached per
+  guest function and selector; only `self`, `_cmd` and up to four 32-bit word arguments cross, anything else is an
+  `xl_unsupported` with the reason). A host `IMP` that reaches the guest (`class_getMethodImplementation`,
+  `method_getImplementation`, `imp_implementationWithBlock`, the old `IMP` that `class_replaceMethod` and
+  `method_setImplementation` return) becomes a unique fake guest address in a region the runtime owns
+  (`xl_imp_region`, 4096 slots; one `IMP` asked for twice gets the same address). `xl_lookup` falls back to
+  `xl_imp_lookup` for an address in that region, and the entry finds its slot from the program counter, routes the
+  call through the same bridge a message send would use (`xl_bridge_for`, by the type encoding of the method) and
+  sets a thread-local forced-`IMP` key that the generated message bridge takes (`xl_take_forced_imp`), so that exact
+  `IMP` runs and not the dynamic dispatch of the receiver. An `IMP` that the guest implements maps straight back to its
+  guest function. A block `IMP` has no selector and cannot be called as a function from the guest; that is a fault.
+  `dladdr` on such an address names the runtime image.
+- **`scanf` family.** The guest `long`, `size_t`, `ptrdiff_t`, pointers and `%n` are 8 bytes and the host's are 4. The
+  varargs of `scanf`, `sscanf` and `fscanf` are read into host temporaries for the conversions that differ, the call
+  goes to `vscanf`, `vsscanf` or `vfscanf`, and the temporaries are widened back into the guest's variables only for
+  the conversions the call completed (`xl_scanf_marshal`, `xl_scanf_finish`).
+- **`getaddrinfo`.** The guest `struct addrinfo` is 48 bytes and the host's 32. The result list is converted into a
+  `calloc`ed array of guest-layout nodes behind a header (the host list and a magic); `ai_addr` and `ai_canonname`
+  point at host data, and `freeaddrinfo` finds the header by its magic and frees both lists.
+- **`class_copyMethodList`.** The host returns an array of 4-byte `Method` pointers; the bridge widens it into
+  8-byte slots in place of the host array and stores the count.
 
 ## Scope and limits
 
