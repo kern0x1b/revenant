@@ -35,6 +35,14 @@ function install(package, opt)
     for _, folder in ipairs(opt.includes) do
         table.insert(lines, "includes(\"" .. folder .. "\")")
     end
+    if package:config("shared") then
+        table.join2(lines, {
+            "add_requireconfs(\"swift-runtime\", {configs = {shared = true}})",
+            "add_requireconfs(\"libcxx\", {configs = {packaged = true}})",
+            "add_requireconfs(\"**.libcxx\", {configs = {packaged = true}})",
+            "add_requireconfs(\"swiftui\", {configs = {shared = true, apple_sdk = \"" .. sdk .. "\"}})",
+            "add_requireconfs(\"swift-crypto\", {configs = {shared = true, apple_sdk = \"" .. sdk .. "\"}})"})
+    end
     table.join2(lines, {"set_defaultplat(\"iphoneos\")", "set_defaultarchs(\"iphoneos|" .. package:arch() .. "\")", ""})
     io.writefile(path.join(project, "xmake.lua"), table.concat(lines, "\n"))
     io.save(path.join(project, "xmake-addons.lock"), {__meta__ = {version = "1.0"}, revenant = {version = revenant.version}})
