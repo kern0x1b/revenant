@@ -1,5 +1,5 @@
 local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua copy <project> <folder> --cache <private cache> [--bundle-id org.revenant.rnhost.<name>]
-       ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua build <folder> --cache <private cache> [--target RNHost] [--real a,b] [--pods pkg:module,...] [--jobs N] [--log file]
+       ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua build <folder> --cache <private cache> [--target RNHost] [--real a,b] [--pods pkg:module,...] [--jobs N] [--log file] [--configure-only 1]
   copy   makes a private copy of the host project in <folder>: the hand-made inputs of its build/ with every absolute path rewritten to
          the folder, build/ref linked read only, and the react-native package with all its patches installed into the private cache
          and linked as build/rn-src. The path of <folder> must not contain "test" or "Example". The copy's app gets its own bundle id,
@@ -17,6 +17,53 @@ local PATCH_MARKERS = {
     {"Libraries/Image/RCTImageUtils.mm", "CGFloat)width.doubleValue"},
     {"ReactCommon/jsc/JSCRuntime.cpp", "RNJscRuntimeContext"}
 }
+
+local WHOLE = {
+    {line = 'add_requires("revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = true}})', alias = "swift-runtime", plain = 'add_requires("revenant@swift-runtime", {alias = "swift-runtime"})'},
+    {line = 'add_requires("revenant@libcxx", {alias = "libcxx", configs = {packaged = true}})', alias = "libcxx", plain = 'add_requires("revenant@libcxx", {alias = "libcxx"})'},
+    {line = 'add_requireconfs("**.libcxx", {configs = {packaged = true}})'},
+    {line = 'add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}})', emit = 'if not os.getenv("RN_WEBKIT") then add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}}) end'},
+    {line = 'option("component", {type = "string", default = "", showmenu = true, description = "Configure only this component and what it needs, for example Backports or emulator; empty configures every component."})'},
+    {line = 'add_requireconfs("combine", {override = true, configs = {shared = get_config("component") == "" or nil}})'}
+}
+
+-- Known limit: swiftui, cryptokit, uniformtypeidentifiers and swift-crypto, which the application adds through RN_DEPS_REPO,
+-- depend on swift-runtime with a plain edge (their recipes declare no shared config), and xmake does not change that edge
+-- from the project: the copy then needs an unshared swift-runtime, which the whole configuration does not build.
+local WHOLE_PROBE = {WHOLE[1].line, WHOLE[2].line, WHOLE[3].line}
+
+function declares(text, alias)
+    return text:find('alias = "' .. alias .. '"', 1, true) ~= nil
+end
+
+function whole_missing(text)
+    local missing = {}
+    for _, requirement in ipairs(WHOLE) do
+        if not text:find(requirement.line, 1, true) then
+            table.insert(missing, requirement)
+        end
+    end
+    return missing
+end
+
+function whole_requirements(text)
+    for _, requirement in ipairs(WHOLE) do
+        if requirement.plain then
+            text = replace(text, requirement.plain, requirement.line)
+        end
+    end
+    local added = {}
+    for _, requirement in ipairs(whole_missing(text)) do
+        if requirement.plain and declares(text, requirement.alias) then
+            raise("the application declares %s with configs other than the whole configuration, so the copy cannot carry it", requirement.alias)
+        end
+        table.insert(added, requirement.emit or requirement.line)
+    end
+    if #added > 0 then
+        text = text .. "\n" .. table.concat(added, "\n") .. "\n"
+    end
+    return text
+end
 
 function replace(text, old, new)
     local parts, position = {}, 1
@@ -63,6 +110,10 @@ function check_copy(folder)
     local missing = missing_input(folder)
     if missing then
         raise("%s is not a complete copy made by copy: %s is missing, so nothing is built", folder, missing)
+    end
+    local lacking = whole_missing(io.readfile(path.join(folder, "xmake.lua")))
+    if #lacking > 0 then
+        raise("%s is not a copy of the whole configuration: its xmake.lua lacks %s, so nothing is built; make the copy again", folder, lacking[1].line)
     end
 end
 
@@ -216,6 +267,12 @@ function copy_project(project, folder, bundle_id)
             relinked = relinked + 1
         end
     end
+    local xmake = path.join(folder, "xmake.lua")
+    local text = io.readfile(xmake)
+    local carried = whole_requirements(text)
+    if carried ~= text then
+        io.writefile(xmake, carried)
+    end
     local id = write_bundle_id(folder, bundle_id)
     return {rewritten = rewritten, relinked = relinked, bundle_id = id}
 end
@@ -227,21 +284,21 @@ end
 function install_react_native(folder, cache)
     local probe = path.join(folder, "build", "pkg-probe")
     os.mkdir(probe)
-    io.writefile(path.join(probe, "xmake.lua"), table.concat({
+    io.writefile(path.join(probe, "xmake.lua"), table.concat(table.join({
         'set_project("rnsrc")',
         'set_xmakever("3.1.2")',
         'add_rules("mode.release")',
         string.format('add_repositories("revenant %s")', checkout()),
         string.format('add_addons("revenant", {sourcedir = "%s"})', path.join(checkout(), "toolchain")),
         'set_config("apple_minimum", "6.0")',
-        'includes("@addon/revenant/apple-ios")',
+        'includes("@addon/revenant/apple-ios")'}, WHOLE_PROBE, {
         'add_requires("revenant@react-native 0.86.3", {alias = "react-native"})',
         'target("t")',
         '    set_kind("phony")',
         '    add_packages("react-native")',
         '    on_config(function (target)',
         '        io.writefile(path.join(os.projectdir(), "installdir.txt"), target:pkg("react-native"):installdir())',
-        '    end)', ""}, "\n"))
+        '    end)', ""}), "\n"))
     local installed = path.join(probe, "installdir.txt")
     os.tryrm(installed)
     os.vrunv(path.join(checkout(), "xmakew"), {"f", "-P", probe, "-p", "iphoneos", "-a", "armv7", "-y"}, {envs = {REVENANT_CACHE = cache}})
@@ -256,21 +313,21 @@ function install_recipe(folder, cache, name, version)
     os.mkdir(probe)
     local installed = path.join(probe, "installdir.txt")
     os.tryrm(installed)
-    io.writefile(path.join(probe, "xmake.lua"), table.concat({
+    io.writefile(path.join(probe, "xmake.lua"), table.concat(table.join({
         'set_project("pkgprobe")',
         'set_xmakever("3.1.2")',
         'add_rules("mode.release")',
         string.format('add_repositories("revenant %s")', checkout()),
         string.format('add_addons("revenant", {sourcedir = "%s"})', path.join(checkout(), "toolchain")),
         'set_config("apple_minimum", "6.0")',
-        'includes("@addon/revenant/apple-ios")',
+        'includes("@addon/revenant/apple-ios")'}, WHOLE_PROBE, {
         string.format('add_requires("revenant@%s %s", {alias = "%s"})', name, version, name),
         'target("t")',
         '    set_kind("phony")',
         string.format('    add_packages("%s")', name),
         '    on_config(function (target)',
         string.format('        io.writefile(path.join(os.projectdir(), "installdir.txt"), target:pkg("%s"):installdir())', name),
-        '    end)', ""}, "\n"))
+        '    end)', ""}), "\n"))
     os.vrunv(path.join(checkout(), "xmakew"), {"f", "-P", probe, "-p", "iphoneos", "-a", "armv7", "-y"}, {envs = {REVENANT_CACHE = cache}})
     if not os.isfile(installed) then
         raise("%s %s is not installed from its recipe", name, version)
@@ -359,7 +416,7 @@ function build(folder, cache, options)
     local xmakew = path.join(checkout(), "xmakew")
     local configured = command_status({"-c", "\"$1\" f -c -y -p iphoneos -a armv7 -P \"$2\" > \"$3\" 2>&1", "sh", xmakew, folder, log}, {envs = env})
     local built = configured
-    if configured == 0 then
+    if configured == 0 and not options.configure_only then
         built = command_status({"-c", "\"$1\" build -P \"$2\" -j \"$5\" -y -v \"$3\" >> \"$4\" 2>&1", "sh", xmakew, folder, options.target or "RNHost", log, options.jobs or "4"}, {envs = env})
     end
     return built or 1, log
@@ -385,7 +442,7 @@ function main(...)
         local sources = install_react_native(path.absolute(positional[2]), path.absolute(options.cache))
         print(string.format("isolated %s: %d files rewritten, %d links retargeted, rn-src %s, bundle id %s", positional[2], result.rewritten, result.relinked, sources, result.bundle_id))
     elseif command == "build" and #positional == 1 and options.cache then
-        local code, log = build(positional[1], options.cache, {target = options.target, real = options.real, pods = options.pods, log = options.log, engine = options.engine, swiftui = options.swiftui, backports = options.backports, shared = options.shared, jobs = options.jobs})
+        local code, log = build(positional[1], options.cache, {target = options.target, real = options.real, pods = options.pods, log = options.log, engine = options.engine, swiftui = options.swiftui, backports = options.backports, shared = options.shared, jobs = options.jobs, configure_only = options["configure-only"]})
         print(string.format("exit %d, log %s", code, log))
         local errors = try {
             function ()
