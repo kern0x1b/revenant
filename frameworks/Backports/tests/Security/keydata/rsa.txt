@@ -1,0 +1,30 @@
+rsa public ok class=public type=rsa
+rsa private ok class=private type=rsa
+rsa other public ok class=public type=rsa
+rsa public with private data null error=-50
+rsa private with public data null error=-50
+rsa garbage null error=-50
+rsa empty null error=-50
+rsa truncated null error=-50
+rsa trailing byte ok class=public type=rsa
+rsa private trailing ok class=private type=rsa
+rsa no class null error=-50
+rsa no type null error=-50
+rsa symmetric class null error=-4
+rsa type with ec data null error=-50
+rsa public verify=1
+rsa public tampered message verify=0
+rsa public tampered signature verify=0
+rsa public export equals=1
+rsa public digest verify=1
+rsa public tampered digest verify=0
+rsa public short digest verify=0
+rsa public digest as message verify=0
+rsa public message as digest verify=0
+rsa other public verify=0
+rsa trailing byte verify=1
+rsa private sign equals openssl=1
+rsa private digest sign equals openssl=1
+rsa private public key=1
+rsa derived public verify=1
+rsa encrypt length=256 decrypt equals=1

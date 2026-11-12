@@ -167,6 +167,11 @@ host functions; the names the SDK headers lack (`NSClassFromString` at the inclu
 
 Where: `recompiler/src/xlgen/` and the include header `recompiler/include/swiftdemo-includes.h`.
 
+Status: the bridges are done and the `hostbridges` corpus program passes 70 of 70 on the iPhone 4S (see
+[the corpus reference](../reference/recompiler/corpus.md)). The one function the iOS 6 host lacks that the SDK imports,
+`SecKeyCreateWithData`, is a Backports implementation, checked against macOS and on the 4S (see
+[Security](../reference/backports/Security/README.md), "Keys made from data").
+
 ## Held by the lead worker
 
 The Mirror crash (every `Mirror`, `print` of a struct or enum, `AnyCollection` aborts in the guest `libswiftCore`; the

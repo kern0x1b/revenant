@@ -308,6 +308,53 @@ prefix, the export refusal -4, sign and verify (own, other key, tampered message
 backport's DER signature and public point must verify with `openssl dgst -sha256 -verify` (LibreSSL 3.3.6), and a changed
 message must fail. micro-ecc is fetched at its pinned commit by `tests/Security/micro_ecc.lua`.
 
+## Keys made from data (SecKeyCreateWithData)
+
+Scope, from the imports of `RecaptchaEnterprise.xcframework` (arm64 slice): it calls `SecKeyCreateWithData` for an RSA
+public key (`kSecAttrKeyClassPublic`, `kSecAttrKeyTypeRSA`) and `SecKeyVerifySignature` with
+`kSecKeyAlgorithmRSASignatureDigestPKCS1v15SHA256`. It imports no private key class and no
+`SecKeyCopyExternalRepresentation`. The backport covers more than that, because the call is one API: RSA public and
+private, EC public and private.
+
+Oracle: the real macOS Security, through `tests/Security/keydata/main.c` (`rsa` and `ec` modes, fixtures made with
+openssl in `fixtures.h`). The recorded outputs are `keydata/rsa.txt` and `keydata/ec.txt`. What macOS does:
+
+- A missing dictionary, or a missing `kSecAttrKeyType` or `kSecAttrKeyClass`, fails with `errSecParam`. The symmetric class
+  is `errSecUnimplemented`; any other class is `errSecParam`. A type other than RSA and EC is `errSecParam`.
+- RSA public data is PKCS#1 `RSAPublicKey` or an SPKI with the `rsaEncryption` OID; bytes after the DER value are
+  accepted. RSA private data is PKCS#1 `RSAPrivateKey` (nine integers, version 0). Private data with the public class,
+  public data with the private class, garbage and empty data fail.
+- EC public data is 65 bytes `04 || X || Y`, EC private data is 97 bytes `04 || X || Y || K`. A hybrid prefix (`06` or
+  `07`) is accepted when its parity matches Y; a point off the curve fails.
+- The public key of a private key made from data signs and verifies, and a private EC key made from data exchanges.
+
+How the backport does it:
+
+- RSA does not use the keychain (it returns -25308 on the iPad 2). The iOS 6 Security exports
+  `SecKeyCreateRSAPublicKey` and `SecKeyCreateRSAPrivateKey(allocator, bytes, length, encoding)`, which build an in-memory
+  key; encoding 1 is PKCS#1. The backport cuts the PKCS#1 value out of an SPKI or out of trailing bytes first.
+- EC goes to the Secure Enclave emulation with an imported flag (`RevenantSecureEnclaveKeyCreateImported`): the key has no
+  token id, exports as the data it was made from (65 or 97 bytes), and signs and exchanges with micro-ecc.
+- `SecKeyCopyAttributes` on a key that is not in the keychain falls back to the key's own `SecKeyCopyAttributeDictionary`
+  (on iOS 6: `type` `42` for RSA, `kcls` `0` public and `1` private, `bsiz`), which `kSecAttrKeyType` and
+  `kSecAttrKeyClass` equal. Without it the backport could not tell a made-from-data key's type.
+- `SecKeyVerifySignature` and `SecKeyCreateSignature` carry the ten RSA PKCS#1 v1.5 algorithms (Digest and Message for
+  SHA-1, -224, -256, -384, -512). The release's `SecKeyRawSign` and `SecKeyRawVerify` with `kSecPaddingPKCS1SHAx` take
+  a digest, not a message, so a Message algorithm is hashed first and a Digest algorithm must receive exactly the
+  digest length. Before this change the Digest algorithms were not carried at all, and the Message ones passed the raw
+  message, which could never verify.
+
+Boundary: the export of a private RSA key made from data (`SecKeyCopyExternalRepresentation`) is not implemented. The
+iOS 6 SPI gives no private bytes back (`SecKeyCopyPublicBytes` returns the public key for both classes; the attribute
+dictionary's `v_Data` is empty for a private key), so the backport fails with -4. macOS returns the PKCS#1 DER. The SDK
+does not call it.
+
+Verification: `tests/security_key_test.lua` runs the `keydata` program on macOS and on the emulation (EC lines must equal
+`ec.txt`; the macOS RSA lines must equal `rsa.txt`). On the iPhone 4S (iOS 6.1.3) `SecurityKeyDataProbe`, which compiles
+the backport sources into one armv7 program, was run in `rsa` and `ec` modes: both outputs equal `rsa.txt` and `ec.txt`
+line by line (creation, class and type, SPKI and trailing bytes, verify with Digest and Message algorithms, a signature
+equal to openssl's, a public key derived from the private key). The first run found the attributes fallback above.
+
 ## What is implemented, and what is not
 
 - **Implemented, host-tested against macOS:** the SecAccessControl type, its creation rules and equality; the shared
@@ -321,6 +368,9 @@ message must fail. micro-ecc is fetched at its pinned commit by `tests/Security/
   `SecKeyCopyExternalRepresentation` on a private software key, which reads the stored data through the key's persistent
   reference (`kSecValueRef` with `kSecReturnPersistentRef`, then `kSecValuePersistentRef` with `kSecReturnData`) and
   returns it when it is a PKCS#1 private key.
+- **Implemented, host-tested against macOS and run on the iPhone 4S:** `SecKeyCreateWithData` for RSA and EC keys, the RSA
+  PKCS#1 v1.5 Digest and Message algorithms of `SecKeyVerifySignature` and `SecKeyCreateSignature`. Not implemented:
+  the export of a private RSA key made from data (see "Keys made from data").
 - **Implemented, measured on the iPad 2:** the LocalAuthentication answers above (no YES for device-owner).
 - **Open, not measured:** device-owner authentication with a passcode set, and whether an app can verify a passcode through
   `MKBUnlockDevice` (the caller's bytes are the typed passcode in UTF-8; the kernel's privilege is not in the image; see
