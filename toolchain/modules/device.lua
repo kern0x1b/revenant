@@ -2,7 +2,6 @@ import("core.base.option")
 import("core.base.process")
 import("lib.detect.find_tool")
 import("byteorder")
-import("workspace")
 
 CHOSEN = "REVENANT_DEVICE"
 
@@ -84,7 +83,15 @@ function where(settings)
 end
 
 local function leases()
-    return path.join(workspace.home(), "devices")
+    local named = os.getenv("REVENANT_DEVICE_LEASES")
+    if named and named ~= "" then
+        return path.absolute(named)
+    end
+    local home = os.getenv("HOME")
+    if not home or home == "" then
+        raise("the claims of a phone live in ~/.revenant/devices, shared by every cache; HOME is unset, so set REVENANT_DEVICE_LEASES to the folder")
+    end
+    return path.join(home, ".revenant", "devices")
 end
 
 function holder_name(given)

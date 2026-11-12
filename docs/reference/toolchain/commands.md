@@ -25,7 +25,7 @@ The xmake verbs the toolchain adds, their options and defaults, the verdicts and
 | `run COMMAND` | Runs a command on the phone for `-s` seconds. |
 | `where` | Prints the phone the bound `device.env` names. |
 | `list` | Lists the attached devices, with their UDID, product, iOS release, tunnel and lease. |
-| `claim`, `release` | Holds the device for `--holder` for `--minutes` (default 30), so every other holder's command is refused until the release or the expiry. |
+| `claim`, `release` | Holds the device for `--holder` for `--minutes` (default 30), so every other holder's command is refused until the release or the expiry. The claims are kept in `~/.revenant/devices` (`REVENANT_DEVICE_LEASES`), the same for every checkout, worktree and private cache. |
 
 `-d NAME` picks `device.NAME.env`. The phone is named in that file by `DEVICE_HOST`, `DEVICE_PORT`, `DEVICE_UDID` and `DEVICE_PASSWORD`.
 
@@ -119,6 +119,7 @@ The catalogue lookup, the archive range reads and the Keys page need the network
 | `REVENANT_RELEASE` | the import check | pins the release, so weak imports the release lacks are refused |
 | `REVENANT_DEVICE` | `xmake device` | the `device.NAME.env` of the whole shell |
 | `REVENANT_DEVICE_HOLDER` | `xmake device` | the holder the whole shell claims as |
+| `REVENANT_DEVICE_LEASES` | `xmake device`, `toolchain/modules/device.lua` | the folder with the claims of the phones, default `~/.revenant/devices`; it does not depend on `REVENANT_CACHE`, so sessions with private caches see each other's claims |
 | `REVENANT_SWIFT_MODULES` | the `swift` rule | folders of the Swift modules a package installs, set by the package with `package:setenv` |
 | `REVENANT_ASSETS_EXTRACT_CACHE` | `tools/assets_extract` | where the tool builds itself |
 | `LLVM_PREFIX` | the `ld64` package | the prefix of the `llvm` package, from which `llvm-config` finds `libLTO` |
