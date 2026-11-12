@@ -157,6 +157,8 @@ Where: `recompiler/src/xlgen/` and the include header `recompiler/include/swiftd
 
 ## Held by the lead worker
 
-The Mirror crash (every `Mirror`, `print` of a struct or enum, `AnyCollection` aborts in the guest `libswiftCore`); the raw
+The Mirror crash (every `Mirror`, `print` of a struct or enum, `AnyCollection` aborts in the guest `libswiftCore`; the
+smallest case is `String(describing: SomeClass.self)`: `String(describing:)` releases a `_RandomAccessCollectionBox`, whose
+destroy call reaches a null function pointer); the raw
 `isa` reads of the guest runtime on host objects; the 4S memory probe and the plan to shrink the image (dead-stripping what
 the SDK cannot reach).
