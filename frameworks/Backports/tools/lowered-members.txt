@@ -26808,6 +26808,7 @@ member RevenantBLEDevice -peripheral:didDiscoverServices:
 member RevenantBLEDevice -peripheral:didUpdateValueForCharacteristic:error:
 member RevenantBLEDevice -refusedOnce
 member RevenantBLEDevice -source
+member RevenantBackdrop -dealloc
 member RevenantBackdrop -initWithView:client:
 member RevenantBackdrop -invalidate
 member RevenantBackdrop -refresh
