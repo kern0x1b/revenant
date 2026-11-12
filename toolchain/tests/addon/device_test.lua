@@ -2,14 +2,24 @@ import("fixtures")
 
 function claim_failures(device, folder)
     local found = {}
-    local home, holder = os.getenv("REVENANT_CACHE"), os.getenv("REVENANT_DEVICE_HOLDER")
+    local home, holder, leases = os.getenv("REVENANT_CACHE"), os.getenv("REVENANT_DEVICE_HOLDER"), os.getenv("REVENANT_DEVICE_LEASES")
     os.setenv("REVENANT_CACHE", path.join(folder, "home"))
+    os.setenv("REVENANT_DEVICE_LEASES", path.join(folder, "leases"))
     local phone = {host = "10.0.0.7", port = "22", password = "", udid = "abc123"}
     device.claim(phone, "first", 30)
     local errors = fixtures.refusal(function () device.claim(phone, "second", 30) end)
     if not errors or not errors:find("held by first", 1, true) then
         table.insert(found, "a claimed device must refuse a second holder, naming the first: " .. tostring(errors))
     end
+    os.setenv("REVENANT_CACHE", path.join(folder, "other-home"))
+    errors = fixtures.refusal(function () device.claim(phone, "second", 30) end)
+    if not errors or not errors:find("held by first", 1, true) then
+        table.insert(found, "a claim is seen from every cache, so a second cache must refuse a second holder too: " .. tostring(errors))
+    end
+    if not device.lease("abc123") or device.lease("abc123").holder ~= "first" then
+        table.insert(found, "the claim of one cache is listed from another")
+    end
+    os.setenv("REVENANT_CACHE", path.join(folder, "home"))
     if not fixtures.refusal(function () device.release(phone, "second") end) then
         table.insert(found, "only the holder releases a claim")
     end
@@ -27,7 +37,7 @@ function claim_failures(device, folder)
         table.insert(found, "a released device has no claim")
     end
     device.claim(phone, "second", 30)
-    io.writefile(path.join(folder, "home", "devices", "abc123.lease", "holder"), "second\n" .. (os.time() - 1) .. "\n")
+    io.writefile(path.join(folder, "leases", "abc123.lease", "holder"), "second\n" .. (os.time() - 1) .. "\n")
     if device.lease("abc123") or fixtures.refusal(function () device.claim(phone, "third", 5) end) then
         table.insert(found, "an expired claim frees the device")
     end
@@ -43,7 +53,7 @@ function claim_failures(device, folder)
     end
     os.setenv("REVENANT_DEVICE_HOLDER", "first")
     device.release(networked, "first")
-    for name, value in pairs({REVENANT_CACHE = home or false, REVENANT_DEVICE_HOLDER = holder or false}) do
+    for name, value in pairs({REVENANT_CACHE = home or false, REVENANT_DEVICE_HOLDER = holder or false, REVENANT_DEVICE_LEASES = leases or false}) do
         if value then
             os.setenv(name, value)
         else
