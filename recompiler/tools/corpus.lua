@@ -13,6 +13,32 @@ function swift()
     raise("no revenant@swift install under %s carries its own legacy_layouts source cache (docs/reference/recompiler/corpus.md says why it is needed)", path.join(package.installdir(), "s", "swift"))
 end
 
+function swift_armv7()
+    local installs = os.dirs(path.join(package.installdir(), "s", "swift-runtime", "*", "*"))
+    table.sort(installs)
+    for index = #installs, 1, -1 do
+        local install = installs[index]
+        if os.isfile(path.join(install, "lib", "swift", "iphoneos", "Swift.swiftmodule", "armv7-apple-ios.swiftmodule")) and
+           os.isfile(path.join(install, "lib", "swift", "iphoneos", "libswiftCore.dylib")) then
+            return install
+        end
+    end
+    raise("no revenant@swift-runtime install under %s carries the armv7 Swift runtime", path.join(package.installdir(), "s", "swift-runtime"))
+end
+
+function libcxx_armv7()
+    local installs = os.dirs(path.join(package.installdir(), "l", "libcxx", "*", "*"))
+    table.sort(installs)
+    for index = #installs, 1, -1 do
+        local lib = path.join(installs[index], "lib")
+        if os.isfile(path.join(lib, "libc++.1.dylib")) and os.isfile(path.join(lib, "libc++abi.1.dylib")) and
+           os.iorunv("lipo", {"-info", path.join(lib, "libc++.1.dylib")}):find("armv7", 1, true) then
+            return lib
+        end
+    end
+    raise("no revenant@libcxx install under %s carries an armv7 libc++", path.join(package.installdir(), "l", "libcxx"))
+end
+
 function setup(name, out)
     local e = env()
     out = path.absolute(out or path.join(e.builddir, "recompiler", "corpus", name))

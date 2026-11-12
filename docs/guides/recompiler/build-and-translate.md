@@ -84,7 +84,11 @@ has no signature in its type encoding, so the translator takes it from the heade
   of the size of the lifted code plus 8 MB, rounded up to 16 MB, so the library occupies `XL_BASE` minus that window up
   to the end of the guest segments. An app whose images or heap hold that range needs another `XL_BASE`; ld64 links an
   armv7 dylib with guest segments only below about `0x40000000`. The translation stops with a message naming
-  `XL_BASE` when the window is larger than the base itself.
+  `XL_BASE` when the window is larger than the base itself. A host with a Swift runtime of its own (Telegram) and the
+  162 MB Swift library need `XL_BASE=0x2c000000`.
+- `XL_NAMESPACE` is the prefix of the Objective-C class names of every guest image but the first (default `XLG.`; `none`
+  leaves the names). It keeps the guest's Swift runtime from taking the names of a Swift runtime the host has loaded; the
+  guest still sees its own names. [What it changes](../../explanation/recompiler/library-mode.md).
 - The app links `recompiler/src/loader/xl_loader.c` (header `recompiler/include/xl_loader.h`), reserves the range as
   early as it can, and loads the library when it first needs it:
 
