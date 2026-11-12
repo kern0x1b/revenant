@@ -70,7 +70,7 @@ relinks the runtime, a few seconds.
 - `./xmakew test -P . 'recompiler_corpus/*'` runs the host part of every corpus check.
 - `./xmakew build -P . recompiler_cxxinit recompiler_refrepro recompiler_blockid recompiler_devtime` builds the corpus apps and the benchmark.
 - `./xmakew l -P . recompiler/tests/<name>/check.lua <out>` runs a check whole, including its device part where it has
-  one (weakimport, classpair, swiftconformance).
+  one (weakimport, classpair, swiftconformance, swiftobjc).
 - `./xmakew test -P . 'recompiler_*/*'` builds the translator and runs the host checks of its corpus together.
 
 Run them before and after a translator change. [The corpus](../../reference/recompiler/corpus.md) says what each

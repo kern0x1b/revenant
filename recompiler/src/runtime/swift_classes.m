@@ -47,6 +47,11 @@ static CFMutableDictionaryRef xl_guest_to_host;
 static CFMutableDictionaryRef xl_host_to_guest;
 static CFMutableDictionaryRef xl_unbuilt_static;
 static CFMutableDictionaryRef xl_shadow_imps;
+static CFMutableDictionaryRef xl_host_twin;
+static CFMutableDictionaryRef xl_twin_host;
+static CFMutableDictionaryRef xl_tail_of_shadow;
+static CFMutableDictionaryRef xl_destructors;
+static SEL xl_cxx_destruct_selector;
 static pthread_mutex_t xl_build_lock;
 static pthread_once_t xl_shadow_once = PTHREAD_ONCE_INIT;
 static uint64_t xl_lazy_namer;
@@ -85,11 +90,18 @@ static void xl_shadow_setup(void)
     xl_host_to_guest = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_unbuilt_static = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_shadow_imps = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+    xl_host_twin = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+    xl_twin_host = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+    xl_tail_of_shadow = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+    xl_destructors = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+    xl_cxx_destruct_selector = sel_registerName(".cxx_destruct");
     for (const uint32_t *object = xl_swift_static_classes; *object; object++) {
-        const struct xl_guest_class *c = (const struct xl_guest_class *)(uintptr_t)*object;
+        struct xl_guest_class *c = (struct xl_guest_class *)(uintptr_t)*object;
         const struct xl_guest_ro *ro = (const struct xl_guest_ro *)(uintptr_t)(c->bits & ~7ull);
         if (ro->flags & XL_RO_META)
             continue;
+        if ((c->bits & 3) == 2)
+            c->bits = (c->bits & ~3ull) | 1;
         CFDictionarySetValue(xl_unbuilt_static, (const void *)(uintptr_t)*object, (const void *)(uintptr_t)*object);
         if (c->isa)
             CFDictionarySetValue(xl_unbuilt_static, (const void *)(uintptr_t)c->isa, (const void *)(uintptr_t)*object);
@@ -135,10 +147,11 @@ uint32_t xl_shadow_imp(IMP imp)
     return (uint32_t)(uintptr_t)xl_table_get(xl_shadow_imps, (uintptr_t)imp);
 }
 
-static void xl_add_guest_methods(Class target, uint64_t list, const char *class_name)
+static int xl_add_guest_methods(Class target, uint64_t list, const char *class_name)
 {
+    int adds_dealloc = 0;
     if (!list)
-        return;
+        return adds_dealloc;
     uint32_t header = *(const uint32_t *)(uintptr_t)list;
     uint32_t count = *(const uint32_t *)(uintptr_t)(list + 4);
     int relative = (header & 0x80000000u) != 0;
@@ -157,12 +170,125 @@ static void xl_add_guest_methods(Class target, uint64_t list, const char *class_
             types = (const char *)(uintptr_t) * (const uint64_t *)(uintptr_t)(entry + 8);
             imp = *(const uint64_t *)(uintptr_t)(entry + 16);
         }
-        if (!class_addMethod(target, selector, xl_guest_method_imp(imp, selector), types))
+        if (!class_addMethod(target, selector, xl_guest_method_imp(imp, selector), types)) {
             xl_shadow_note("%s: method %s already defined", class_name, sel_getName(selector));
+            continue;
+        }
+        if (selector == xl_cxx_destruct_selector)
+            xl_table_set(xl_destructors, (uintptr_t)target, (const void *)(uintptr_t)imp);
+        if (selector == @selector(dealloc))
+            adds_dealloc = 1;
     }
+    return adds_dealloc;
 }
 
 static Class xl_class_from_guest(uint64_t guest);
+
+enum {
+    XL_CLASS_ANY_SIZE = 40,
+    XL_CLASS_SIZE_OFFSET = 56,
+    XL_CLASS_ADDRESS_POINT = 60,
+    XL_HOST_CLASS_SIZE = 20,
+    XL_TAIL_LIMIT = 1 << 20
+};
+
+static uint64_t xl_twin_of(Class host)
+{
+    if (!host)
+        return 0;
+    uintptr_t twin = (uintptr_t)xl_table_get(xl_host_twin, (uintptr_t)host);
+    if (twin)
+        return twin;
+    struct xl_guest_class *made = calloc(1, 64);
+    made->superclass = xl_twin_of(class_getSuperclass(host));
+    OSSpinLockLock(&xl_table_lock);
+    twin = (uintptr_t)CFDictionaryGetValue(xl_host_twin, (const void *)host);
+    if (twin) {
+        OSSpinLockUnlock(&xl_table_lock);
+        free(made);
+        return twin;
+    }
+    twin = (uintptr_t)made;
+    CFDictionarySetValue(xl_host_twin, (const void *)host, (const void *)twin);
+    CFDictionarySetValue(xl_twin_host, (const void *)twin, (const void *)host);
+    OSSpinLockUnlock(&xl_table_lock);
+    return twin;
+}
+
+static int xl_has_host_ancestor(Class cls)
+{
+    for (Class c = cls; c; c = class_getSuperclass(c))
+        if (xl_table_get(xl_host_twin, (uintptr_t)c))
+            return 1;
+    return 0;
+}
+
+static uint32_t xl_swift_extent(const struct xl_guest_class *c)
+{
+    if (!(c->bits & 3))
+        return 0;
+    const uint8_t *bytes = (const uint8_t *)c;
+    uint32_t size = *(const uint32_t *)(bytes + XL_CLASS_SIZE_OFFSET);
+    uint32_t point = *(const uint32_t *)(bytes + XL_CLASS_ADDRESS_POINT);
+    if (point > size || size - point <= XL_CLASS_ANY_SIZE || size - point > XL_TAIL_LIMIT)
+        return 0;
+    return size - point;
+}
+
+static void xl_sync_tail(const struct xl_guest_class *c, Class shadow)
+{
+    uint32_t extent = (uint32_t)(uintptr_t)xl_table_get(xl_tail_of_shadow, (uintptr_t)shadow);
+    if (!extent)
+        return;
+    uint32_t now = xl_swift_extent(c);
+    if (now < extent)
+        extent = now;
+    memcpy((uint8_t *)shadow + XL_CLASS_ANY_SIZE, (const uint8_t *)c + XL_CLASS_ANY_SIZE, extent - XL_CLASS_ANY_SIZE);
+}
+
+void xl_swift_sync_class(Class cls)
+{
+    if (!xl_shadows_active || !cls || !xl_tail_of_shadow)
+        return;
+    uintptr_t guest = (uintptr_t)xl_table_get(xl_host_to_guest, (uintptr_t)cls);
+    if (guest && xl_table_get(xl_tail_of_shadow, (uintptr_t)cls))
+        xl_sync_tail((const struct xl_guest_class *)guest, cls);
+}
+
+static int xl_is_shadow(Class cls)
+{
+    return cls && xl_table_get(xl_host_to_guest, (uintptr_t)cls);
+}
+
+static void xl_destroy_ivars(id object)
+{
+    for (Class cls = object_getClass(object); xl_is_shadow(cls); cls = class_getSuperclass(cls)) {
+        uintptr_t guest = (uintptr_t)xl_table_get(xl_destructors, (uintptr_t)cls);
+        if (guest) {
+            uint64_t arguments[2] = {(uint64_t)(uintptr_t)object, (uint64_t)(uintptr_t)xl_cxx_destruct_selector};
+            xl_invoke_n(guest, arguments, 2);
+        }
+    }
+}
+
+void xl_swift_super_dealloc(id object, Class current)
+{
+    if (!xl_shadows_active || !xl_table_get(xl_tail_of_shadow, (uintptr_t)current))
+        return;
+    if (xl_is_shadow(class_getSuperclass(current)))
+        return;
+    xl_destroy_ivars(object);
+}
+
+static void xl_add_dealloc(Class shadow, Class host_super)
+{
+    IMP imp = imp_implementationWithBlock(^void(id self_) {
+        if (!xl_is_shadow(host_super))
+            xl_destroy_ivars(self_);
+        ((void (*)(id, SEL))class_getMethodImplementation(host_super, @selector(dealloc)))(self_, @selector(dealloc));
+    });
+    class_addMethod(shadow, @selector(dealloc), imp, "v@:");
+}
 
 static Class xl_build_shadow(uintptr_t guest)
 {
@@ -204,7 +330,11 @@ static Class xl_build_shadow(uintptr_t guest)
     Class host_super = c->superclass ? xl_class_from_guest(c->superclass) : Nil;
     if (host_super)
         ((id(*)(id, SEL))objc_msgSend)((id)host_super, sel_registerName("class"));
-    shadow = objc_allocateClassPair(host_super, name, 0);
+    int direct_host_super = host_super && c->superclass == (uint64_t)(uintptr_t)host_super;
+    if (direct_host_super)
+        xl_twin_of(host_super);
+    uint32_t extent = host_super && xl_has_host_ancestor(host_super) ? xl_swift_extent(c) : 0;
+    shadow = objc_allocateClassPair(host_super, name, extent > XL_HOST_CLASS_SIZE ? extent - XL_HOST_CLASS_SIZE : 0);
     if (!shadow) {
         char why[256];
         snprintf(why, sizeof why, "xlate: cannot make the shadow of class %s (%p): a class of that name exists", name, (void *)guest);
@@ -214,7 +344,9 @@ static Class xl_build_shadow(uintptr_t guest)
     size_t super_size = host_super ? class_getInstanceSize(host_super) : 0;
     if (ro->instance_size > super_size)
         class_addIvar(shadow, "xl_guest_storage", ro->instance_size - super_size, 3, "?");
-    xl_add_guest_methods(shadow, ro->base_methods, name);
+    int own_dealloc = xl_add_guest_methods(shadow, ro->base_methods, name);
+    if (extent && !own_dealloc)
+        xl_add_dealloc(shadow, host_super);
     Class shadow_meta = object_getClass(shadow);
     if (meta_ro)
         xl_add_guest_methods(shadow_meta, meta_ro->base_methods, name);
@@ -234,6 +366,12 @@ static Class xl_build_shadow(uintptr_t guest)
     }
     xl_shadows_active = 1;
     OSSpinLockUnlock(&xl_table_lock);
+    if (extent) {
+        xl_table_set(xl_tail_of_shadow, (uintptr_t)shadow, (const void *)(uintptr_t)extent);
+        xl_sync_tail(c, shadow);
+        if (direct_host_super)
+            ((struct xl_guest_class *)c)->superclass = xl_twin_of(host_super);
+    }
     xl_shadow_note("registered %s: class %p meta %p (guest meta %llx), instance size %zu, super %p", name, shadow, shadow_meta,
                    (unsigned long long)c->isa, class_getInstanceSize(shadow), class_getSuperclass(shadow));
     xl_shadow_note("shadow %s: guest %p -> host %p, super %p, guest size %u, methods %llx / %llx", name, (void *)guest, shadow,
@@ -250,6 +388,9 @@ static Class xl_class_from_guest(uint64_t guest)
     Class shadow = (Class)xl_table_get(xl_guest_to_host, (uintptr_t)guest);
     if (shadow)
         return shadow;
+    Class twinned = (Class)xl_table_get(xl_twin_host, (uintptr_t)guest);
+    if (twinned)
+        return twinned;
     uintptr_t owner = (uintptr_t)xl_table_get(xl_unbuilt_static, (uintptr_t)guest);
     if (!owner)
         return (Class)(uintptr_t)guest;
@@ -280,7 +421,10 @@ uint64_t xl_class_out(uintptr_t host)
     if (!xl_shadows_active)
         return host;
     uintptr_t guest = (uintptr_t)xl_table_get(xl_host_to_guest, host);
-    return guest ? guest : host;
+    if (guest)
+        return guest;
+    uintptr_t twin = (uintptr_t)xl_table_get(xl_host_twin, host);
+    return twin ? twin : host;
 }
 
 Class xl_class_of(id object)
@@ -296,6 +440,10 @@ int xl_guest_send(id object, SEL selector, uint64_t *result)
 {
     if (!xl_shadows_active || !object)
         return 0;
+    if (xl_table_get(xl_guest_to_host, (uintptr_t)object)) {
+        *result = (uint64_t)(uintptr_t)object;
+        return 1;
+    }
     Class shadow = (Class)xl_table_get(xl_guest_to_host, *(const uintptr_t *)(uintptr_t)object);
     if (!shadow)
         return 0;
@@ -316,7 +464,10 @@ static uintptr_t xl_register_class(uintptr_t guest, const char *call)
     if (!guest)
         return 0;
     (void)call;
-    return (uintptr_t)xl_build_shadow(guest);
+    Class shadow = xl_build_shadow(guest);
+    if (xl_table_get(xl_tail_of_shadow, (uintptr_t)shadow))
+        xl_sync_tail((const struct xl_guest_class *)guest, shadow);
+    return (uintptr_t)shadow;
 }
 
 struct __attribute__((packed)) xl_pair_pack {

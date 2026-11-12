@@ -690,6 +690,8 @@ void xl_h_objc_msgSendSuper2(State *state)
     Class current = xl_class_in(guest_super[1]);
     SEL selector = (SEL)(uintptr_t)XL_REG(state, X1);
     XL_REG(state, X0) = (uintptr_t)receiver;
+    if (selector == @selector(dealloc))
+        xl_swift_super_dealloc(receiver, current);
     uint64_t target = xl_route(state, class_getSuperclass(current), selector, receiver, current);
     if (target == XL_NO_BRIDGE)
         xl_fault(state, "super message without a bridge");

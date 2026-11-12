@@ -49,6 +49,8 @@ static cl::opt<std::string> HostTriple("host-triple", cl::init("armv7-apple-ios6
 static cl::opt<std::string> HostLayout("host-datalayout", cl::init("e-m:o-p:32:32-Fi8-f64:32:64-v64:32:64-v128:32:128-a:0:32-n32-S32"));
 static cl::opt<uint64_t> Base("base", cl::init(0x10000000));
 static cl::opt<bool> Optimize("optimize", cl::init(true));
+static cl::opt<bool> SwiftHostAncestors("swift-host-ancestors", cl::init(false),
+                                        cl::desc("Keep the guest's class layout for Swift classes that have a host ancestor"));
 
 namespace {
 
@@ -128,6 +130,22 @@ bool IsBridge(const std::string &path) {
     bool same = false;
     return !sys::fs::equivalent(bridge, path, same) && same;
   });
+}
+
+std::vector<bool> HostAncestorImages(const Program &program) {
+  std::vector<bool> result;
+  for (auto &image : program.images) {
+    bool runtime = IsBridge(image->path()) || image->exports().count("_swift_allocObject");
+    for (auto &spec : Replaces) {
+      auto split = spec.find('=');
+      bool same = false;
+      if (split != std::string::npos && !sys::fs::equivalent(spec.substr(split + 1), image->path(), same) && same) {
+        runtime = true;
+      }
+    }
+    result.push_back(SwiftHostAncestors && !runtime);
+  }
+  return result;
 }
 
 bool LayoutAndResolve(Program &program, bool strict) {
@@ -1249,7 +1267,7 @@ int main(int argc, char **argv) {
       objc.push_back(xlate::AnalyzeObjC(*image));
     }
     xlate::ResolveGuestImports(objc, program.exports);
-    if (std::string error; !xlate::SplitGuestLayoutClasses(objc, error)) {
+    if (std::string error; !xlate::SplitGuestLayoutClasses(objc, HostAncestorImages(program), error)) {
       errs() << "xlate: " << error << "\n";
       return 1;
     }
@@ -1275,7 +1293,7 @@ int main(int argc, char **argv) {
     }
   }
   xlate::ResolveGuestImports(objc, program.exports);
-  if (std::string error; !xlate::SplitGuestLayoutClasses(objc, error)) {
+  if (std::string error; !xlate::SplitGuestLayoutClasses(objc, HostAncestorImages(program), error)) {
     errs() << "xlate: " << error << "\n";
     return 1;
   }

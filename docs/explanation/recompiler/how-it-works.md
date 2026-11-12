@@ -58,11 +58,32 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
   `src/xlate/objc.cpp`). A Swift class with a host ancestor, an `NSArray` subclass for instance, and every Objective-C
   class keep the host layout that the class list rewrite gives them, because host code sends their instances messages.
   What Swift reads from the fields that the rewrite overwrites (its superclass at +8 is the host's cache and vtable
-  words, its data word at +32 is zero) is not what it wrote.
+  words, its data word at +32 is zero) is not what it wrote. A Swift `init` or `dealloc` thunk of such a class
+  builds an `objc_super` from `swift_getObjectType(self)`, so it fails on the host layout.
+- With `--swift-host-ancestors` (`XL_SWIFT_HOST_ANCESTORS=1` for `translate.lua`) a Swift class with a host ancestor
+  moves too, in every image that is not a runtime image: a `--replaces` target, the bridge, or an image that exports
+  `swift_allocObject`, the Swift runtime itself, whose own classes keep the layout they have. The class
+  then has two classes, a **twin pair**: the guest's own, untouched (what Swift reads), and a host shadow whose
+  superclass is the host ancestor, with a copy of the Swift part of the guest's class after its 20 bytes
+  (`objc_allocateClassPair`'s extra bytes). An instance is a real host object (its isa word is the shadow), so host code
+  can message it, and `NSObject`'s own methods work on it. The guest's class gets a guest-layout twin of the host
+  ancestor as its superclass, so the Swift runtime can walk the ancestry. The runtime keeps the tables in both directions
+  (`xl_guest_to_host`, `xl_host_to_guest`, `xl_host_twin`, `xl_twin_host`) and the bridge translates at each crossing, as it
+  does for a shadow. The copy of the Swift part is made when the shadow is built and made again before `+alloc`
+  (`xl_swift_sync_class`), because the Swift runtime writes into its class when it first uses it. The host's libobjc
+  does not run the guest class's `.cxx_destruct`, which destroys the stored properties of a Swift class, for a class it
+  did not read from an image; the runtime runs the guest's `.cxx_destruct` of each shadow in the instance's ancestry
+  when the last `[super dealloc]` leaves for a host class (`xl_swift_super_dealloc`), and a shadow whose guest class has no
+  `-dealloc` of its own gets one that does the same before it calls its superclass's. A class compiled for
+  iOS 12.2 or later marks itself Swift with bit 1 of its data word, not the bit 0 of the guest's libswiftCore (built with
+  `-DSWIFT_CLASS_IS_SWIFT_MASK=1ULL`); the runtime rewrites the bit when it sets the class up.
 - A shadow cannot give the host an *instance* that the guest allocated. The instance's isa word is the guest class, so
   the bridge looks the shadow up when a guest message reaches it and answers `-retain`, `-release` and
   `-autorelease` with the guest's own methods. A host method of a shadow's ancestry (`-[NSObject isEqual:]`) sent to
-  such an instance, or host code that meets one (`CFRetain` from an array), still faults in libobjc. A shadow carries
+  such an instance, or host code that meets one (`CFRetain` from an array), still faults in libobjc. A class object
+  the guest holds is not reference counted: the bridge answers those three with the object itself. The bridge also
+  translates every `Class` it passes or returns for a host function (`class_createInstance`, `objc_getClass`) the way
+  it does an `id`. A shadow carries
   no protocols, properties or ivars yet; a class that has any says so in the shadow log (create
   `/private/var/revenant/xl-shadow-log` on the device, then read `xlate-shadow.log`). A method a shadow adds is a block
   IMP that carries `self`, the selector and four more words to the guest method.

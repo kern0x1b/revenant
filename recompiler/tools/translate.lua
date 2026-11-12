@@ -312,6 +312,9 @@ function translate(input, includes, out, images, opt)
     for _, spec in ipairs(words(getenv("XL_REPLACES"))) do
         table.join2(replaces, {"--replaces", spec})
     end
+    if (getenv("XL_SWIFT_HOST_ANCESTORS") or "") ~= "" then
+        table.join2(replaces, {"--swift-host-ancestors"})
+    end
     run(e.xlate, table.join({"--base", base}, replaces, {"--objc-manifest", o("manifest.json"), "--resolved-out", o("guest-resolved.txt"), input}, extra))
 
     local support_undefined = {}
