@@ -1816,9 +1816,11 @@ class RevenantJSONReader
 class RevenantKeyCommandInstaller
 class RevenantKeyInputView
 class RevenantKeyboardDismissTracker
+class RevenantKeyboardInputSwitch
 class RevenantKeyboardLocalInstaller
 class RevenantKeyframe
 class RevenantLAObject
+class RevenantLabelBackground
 class RevenantLargeContentView
 class RevenantLayoutGuideView
 class RevenantLayoutInvalidation
@@ -2102,6 +2104,7 @@ class RevenantTextDragAdaptor
 class RevenantTextDragRequest
 class RevenantTextDropAdaptor
 class RevenantTextDropRequest
+class RevenantTextFieldAlignment
 class RevenantTextLocation
 class RevenantTextReplacement
 class RevenantTextStack
@@ -4830,6 +4833,12 @@ function RevenantIOSurfaceLayersRefresh
 function RevenantInstallNSBundleAdditions
 function RevenantIsAppleProRAWPixelFormat
 function RevenantIsBayerRAWPixelFormat
+function RevenantKeyboardSwitchBegan
+function RevenantKeyboardSwitchDue
+function RevenantKeyboardSwitchHidden
+function RevenantKeyboardSwitchInit
+function RevenantKeyboardSwitchNotice
+function RevenantLabelBackgroundIsDefaultWhite
 function RevenantMDLFormatFromMetal
 function RevenantMIDIDeliverInProcess
 function RevenantMIDIDestination
@@ -4999,6 +5008,7 @@ function RevenantTagDeviceMotion
 function RevenantTagForChannelCount
 function RevenantTagFromName
 function RevenantTargetAllows
+function RevenantTextFieldInitialAlignment
 function RevenantTypedNode
 function RevenantVTConvertBiPlanarNEON
 function RevenantVTConvertBiPlanarScalar
@@ -27535,11 +27545,14 @@ member RevenantKeyInputView -setSecureTextEntry:
 member RevenantKeyboardDismissTracker -dismissed
 member RevenantKeyboardDismissTracker -pan:
 member RevenantKeyboardDismissTracker -scrollView
+member RevenantKeyboardInputSwitch +announce
+member RevenantKeyboardInputSwitch +load
 member RevenantKeyboardLocalInstaller +load
 member RevenantKeyframe -animations
 member RevenantKeyframe -duration
 member RevenantKeyframe -start
 member RevenantLAObject -dealloc
+member RevenantLabelBackground +load
 member RevenantLargeContentView -initWithItem:
 member RevenantLargeContentView -layoutSubviews
 member RevenantLayoutGuideView -revenant_guide
@@ -29350,6 +29363,7 @@ member RevenantTextDropRequest -proposal
 member RevenantTextDropRequest -sameView
 member RevenantTextDropRequest -session
 member RevenantTextDropRequest -suggestedProposal
+member RevenantTextFieldAlignment +load
 member RevenantTextLocation +locationWithTextContentStorage:offset:
 member RevenantTextLocation -compare:
 member RevenantTextLocation -description
@@ -37364,6 +37378,10 @@ protocol_member UITextInput -editMenuForTextRange:suggestedActions:
 protocol_member UITextInput -replaceRange:withAttributedText:
 protocol_member UITextInput -willDismissEditMenuWithAnimator:
 protocol_member UITextInput -willPresentEditMenuWithAnimator:
+protocol_member UITextInputTraits -autocapitalizationType
+protocol_member UITextInputTraits -autocorrectionType
+protocol_member UITextInputTraits -isSecureTextEntry
+protocol_member UITextInputTraits -keyboardType
 protocol_member UITextInputTraits -passwordRules
 protocol_member UITextInputTraits -smartDashesType
 protocol_member UITextInputTraits -smartInsertDeleteType
@@ -38196,6 +38214,7 @@ type UIImpactFeedbackStyle
 type UIInputViewStyle
 type UIKeyModifierFlags
 type UIKeyboardHIDUsage
+type UIKeyboardType
 type UILegibilityWeight
 type UIListContentTextAlignment
 type UIListContentTextTransform
