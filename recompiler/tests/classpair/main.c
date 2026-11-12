@@ -61,10 +61,52 @@ static struct cls static_meta = {&OBJC_METACLASS_$_NSObject, &OBJC_METACLASS_$_N
 static struct cls static_class = {&static_meta, &OBJC_CLASS_$_NSObject, &_objc_empty_cache, 0, (uintptr_t)&static_ro};
 __attribute__((used, section("__DATA,__objc_clsrolist,regular,no_dead_strip"))) static const void *static_rolist[] = {&static_ro, &static_meta_ro};
 
+struct spread {
+    long words[4];
+};
+
+struct blend {
+    id self;
+    long a;
+    double b;
+    long c;
+    double d;
+};
+
+static volatile long scramble_seed = 7;
+static volatile double scramble_fraction = 0.5;
+static long initialized;
+
+__attribute__((noinline)) long scramble(long a, long b, long c, long d, long e, long f, long g, long h, double i, double j,
+                                        double k, double l, double m, double n, double o, double p)
+{
+    return a + b + c + d + e + f + g + h + (long)(i + j + k + l + m + n + o + p);
+}
+
+__attribute__((noinline)) struct spread spread(long seed)
+{
+    struct spread made = {{seed, seed + 1, seed + 2, seed + 3}};
+    return made;
+}
+
+static void root_initialize(id self, SEL cmd)
+{
+    long s = scramble_seed;
+    double f = scramble_fraction;
+    initialized += scramble(s, s + 1, s + 2, s + 3, s + 4, s + 5, s + 6, s + 7, f, f + 1, f + 2, f + 3, f + 4, f + 5, f + 6, f + 7);
+    initialized += spread(s).words[3];
+}
+
+static struct blend fresh_blend(id self, SEL cmd, long a, double b, long c, double d)
+{
+    struct blend made = {self, a, b, c, d};
+    return made;
+}
+
 static id root_self(id self, SEL cmd) { return self; }
 static Class root_class(id self, SEL cmd) { return object_getClass(self); }
 static struct method_list root_methods = {24, 2, {{"self", "@16@0:8", root_self}, {"class", "#16@0:8", root_class}}};
-static struct method_list root_class_methods = {24, 2, {{"self", "@16@0:8", root_self}, {"class", "#16@0:8", root_self}}};
+static struct method_list root_class_methods = {24, 3, {{"self", "@16@0:8", root_self}, {"class", "#16@0:8", root_self}, {"initialize", "v16@0:8", root_initialize}}};
 __attribute__((section("__DATA,__objc_const"))) static struct ro root_ro = {RO_ARC | RO_ROOT, 8, 8, 0, 0, "XLPairRoot", &root_methods, 0, 0, 0, 0};
 __attribute__((section("__DATA,__objc_const"))) static struct ro root_meta_ro = {RO_ARC | RO_META | RO_ROOT, 40, 40, 0, 0, "XLPairRoot", &root_class_methods, 0, 0, 0, 0};
 extern struct cls root_class_object;
@@ -91,6 +133,21 @@ __attribute__((section("__DATA,__objc_const"))) static struct ro clsrochild_meta
 static struct cls clsrochild_meta = {&root_meta, &clsroot_meta, &_objc_empty_cache, 0, (uintptr_t)&clsrochild_meta_ro};
 static struct cls clsrochild_class = {&clsrochild_meta, &clsroot_class, &_objc_empty_cache, 0, (uintptr_t)((char *)&clsrochild_ro + 3)};
 __attribute__((used, section("__DATA,__objc_classlist,regular,no_dead_strip"))) static struct cls *clsrochild_classlist[] = {&clsrochild_class};
+
+static struct method_list clsroleaf_methods = {24, 1, {{"xl_ping:", "q24@0:8q16", ping}}};
+static struct method_list clsroleaf_class_methods = {24, 1, {{"xl_classPing:", "q24@0:8q16", class_ping}}};
+__attribute__((section("__DATA,__objc_const"))) static struct ro clsroleaf_ro = {RO_ARC, 8, 8, 0, 0, "XLPairClsroLeaf", &clsroleaf_methods, 0, 0, 0, 0};
+__attribute__((section("__DATA,__objc_const"))) static struct ro clsroleaf_meta_ro = {RO_ARC | RO_META, 40, 40, 0, 0, "XLPairClsroLeaf", &clsroleaf_class_methods, 0, 0, 0, 0};
+static struct cls clsroleaf_meta = {&root_meta, &root_meta, &_objc_empty_cache, 0, (uintptr_t)&clsroleaf_meta_ro};
+static struct cls clsroleaf_class = {&clsroleaf_meta, &root_class_object, &_objc_empty_cache, 0, (uintptr_t)&clsroleaf_ro};
+__attribute__((used, section("__DATA,__objc_clsrolist,regular,no_dead_strip"))) static const void *clsroleaf_rolist[] = {&clsroleaf_ro, &clsroleaf_meta_ro};
+
+static struct method_list fresh_class_methods = {24, 1, {{"xl_blend::::", "{blend=@qdqd}48@0:8q16d24q32d40", fresh_blend}}};
+__attribute__((section("__DATA,__objc_const"))) static struct ro fresh_ro = {RO_ARC, 8, 8, 0, 0, "XLPairFresh", 0, 0, 0, 0, 0};
+__attribute__((section("__DATA,__objc_const"))) static struct ro fresh_meta_ro = {RO_ARC | RO_META, 40, 40, 0, 0, "XLPairFresh", &fresh_class_methods, 0, 0, 0, 0};
+static struct cls fresh_meta = {&root_meta, &root_meta, &_objc_empty_cache, 0, (uintptr_t)&fresh_meta_ro};
+static struct cls fresh_class = {&fresh_meta, &root_class_object, &_objc_empty_cache, 0, (uintptr_t)((char *)&fresh_ro + 3)};
+__attribute__((used, section("__DATA,__objc_classlist,regular,no_dead_strip"))) static struct cls *fresh_classlist[] = {&fresh_class};
 
 static struct cls *build(const char *name, struct cls *super, struct method_list *methods, struct method_list *class_methods,
                          struct cls **meta_out)
@@ -152,6 +209,13 @@ int main(void)
     printf("listed: found by name: %d\n", objc_getClass("XLPairListed") == (Class)&listed_class);
     printf("listed: root found by name: %d\n", objc_getClass("XLPairRoot") == (Class)&root_class_object);
     report("listed", &listed_class, &root_class_object, &listed_meta, 0);
+
+    report("clsro leaf", &clsroleaf_class, &root_class_object, &clsroleaf_meta, 0);
+
+    struct blend blend = ((struct blend (*)(id, SEL, long, double, long, double))objc_msgSend)((id)&fresh_class, sel_registerName("xl_blend::::"), 1, 2.5, 3, 4.25);
+    printf("fresh: the first message keeps its receiver: %d, and its arguments: %ld %.2f %ld %.2f\n", blend.self == (id)&fresh_class,
+           blend.a, blend.b, blend.c, blend.d);
+    printf("root: +initialize ran: %d\n", initialized != 0);
 
     static struct method_list built_methods = {24, 1, {{"xl_ping:", "q24@0:8q16", ping}}};
     static struct method_list built_class_methods = {24, 1, {{"xl_classPing:", "q24@0:8q16", class_ping}}};
