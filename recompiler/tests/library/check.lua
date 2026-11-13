@@ -376,7 +376,12 @@ function main(out, ...)
     local host_size = last - first
     local mapped = launch("/var/tmp/xl-library/RCFixture.dylib " .. resident, "XL_LOADER_MAP=1 ")
     verify(mapped, expected, "launch with XL_LOADER_MAP=1")
-    local found = check_map(corpus, mapped, {"before-reserve", "reserve", "load"}, "XL_LOADER_MAP=1")
+    local found = check_map(corpus, mapped, {"before-reserve", "reserve", "before-dlopen", "load"}, "XL_LOADER_MAP=1")
+    if not mapped:find("\nxl-map reserve config host_reserve=1 host_size=0x" .. string.format("%x", host_size), 1, true) or
+       found["before-dlopen"].summary.largest_size < host_size then
+        io.write(mapped)
+        corpus.fail("the map has no config line of the reservation of the host part, or no hole of its %d bytes at the dlopen", host_size)
+    end
     if map_overlap(found["before-reserve"], guest.low, guest.high) ~= 0 then
         io.write(mapped)
         corpus.fail("the map before the reservation already shows a mapping inside the guest range 0x%x-0x%x", guest.low, guest.high)
@@ -419,6 +424,21 @@ function main(out, ...)
         io.write(mapped)
         corpus.fail("the map after xl_load shows no readable guest segment, or the library's own image is not where it should be (reserve: %s, load: %s)",
                     tostring(names_library(found.reserve)), tostring(names_library(found.load)))
+    end
+    local unreserved = launch("/var/tmp/xl-library/RCFixture.dylib " .. resident, "XL_LOADER_MAP=1 XL_LOADER_HOST_RESERVE=0 ")
+    verify(unreserved, expected, "launch with XL_LOADER_HOST_RESERVE=0")
+    local bare = check_map(corpus, unreserved, {"before-reserve", "reserve", "before-dlopen", "load"}, "XL_LOADER_HOST_RESERVE=0")
+    local _, bare_held = map_overlap(bare.reserve, guest.low, guest.high)
+    local bare_room = false
+    for _, region in ipairs(bare.reserve.regions) do
+        if region.protection == "---" and region.size >= host_size and (region.last <= guest.low or region.first >= guest.high) then
+            bare_room = true
+        end
+    end
+    if not unreserved:find("\nxl-map reserve config host_reserve=0 host_size=0x" .. string.format("%x", host_size) .. " host_low=0x0 ", 1, true) or bare_room or #bare_held == 0 or
+       not names_library(bare.load) then
+        io.write(unreserved)
+        corpus.fail("with XL_LOADER_HOST_RESERVE=0 the loader still holds room for the host part, lost the guest reservation, or the library did not load")
     end
     local crash_log = "/private/var/revenant/xlate-crash.log"
     local function crash(extra)

@@ -109,7 +109,22 @@ fact, fields separated by single spaces, addresses and sizes in hex:
 | `xl-map PHASE hole START END SIZE` | a free range of 1 MB or more between two mappings, up to `VM_MAX_ADDRESS` |
 | `xl-map PHASE summary mapped=… free=… largest_start=… largest_size=… free_below_0x30000000=…` | totals over the walk (the holes of every size count in `free`) |
 
+Besides the phases above the loader prints `before-dlopen` (after `xl_load` gave the host's room back, right before `dlopen`:
+its `largest_size` is the hole dyld has to choose from) and, after `reserve`, one line
+`xl-map reserve config host_reserve=0|1 host_size=… host_low=… guest_low=… guest_high=…`.
+
 The code is one header, `include/xl_vm_map.h`, that the loader and the runtime both include.
+
+### `XL_LOADER_HOST_RESERVE=0` (diagnostics)
+
+A diagnostic switch for comparing placements, not a mode to ship: with `XL_LOADER_HOST_RESERVE=0` in the environment
+`xl_reserve` takes only the guest range (at its fixed address) and leaves the room for the host part to `dlopen` at
+`xl_load`, which then takes the first hole that fits when it runs. Unset, or any other value, nothing changes. The
+risk of the switch is a `dlopen` that finds no hole of the host part's size when `xl_load` runs late in the process's life
+(`XL_LOAD_DLOPEN_FAILED`, with dyld's text); `before-dlopen` and its `largest_size` against `host_size` of the config line
+measure whether one is there. The library test runs the host with the switch and `XL_LOADER_MAP=1` and expects the same
+`ok` names, a config line with `host_reserve=0` and `host_low=0x0`, no inaccessible region of the host part's size after
+`xl_reserve`, the guest range still held, and the library's image after `xl_load`.
 
 ## What the phone's dyld and kernel do
 
@@ -151,8 +166,9 @@ in every launch:
 | a library whose registry is not next to it | the library alone in a folder, `--expect=registry` | `xl_reserve` refuses and names the missing file, no crash |
 | an init without a reservation, over a mapping with data | `+LOW-HIGH` (a read-write mapping with a sentinel), `--expect=direct` | `dlopen` of the library and the call of `xl_library_init` without `xl_reserve` is refused, and the occupant's data is intact |
 
-After the launches the check runs the host with `XL_LOADER_MAP=1` and reads the map: the phases `before-reserve`, `reserve`
-and `load` each have `begin`, `end`, a `summary`, at least ten regions in ascending order and a hole of 1 MB or more;
+After the launches the check runs the host with `XL_LOADER_MAP=1` and reads the map: the phases `before-reserve`, `reserve`,
+`before-dlopen` and `load` each have `begin`, `end`, a `summary`, at least ten regions in ascending order and a hole of 1 MB or more
+(at `before-dlopen` one of the host part's size, and the config line names that size);
 the guest range has no mapping before `xl_reserve`, is covered by `---` regions after it, together with one `---` region
 of the host part's size outside it, and has a readable segment after `xl_load`, which is also the first map that names
 the library's own image. Then the host aborts after `xl_library_diagnostics` (`--abort`): with the variable set the crash
