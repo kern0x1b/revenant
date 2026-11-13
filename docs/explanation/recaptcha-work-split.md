@@ -104,6 +104,53 @@ Test: as the criterion; the Network fixture needs the phone's Wi-Fi state only t
 
 Build on: swift-crypto (Apache-2.0) as the package already does; no new implementation of a primitive.
 
+Status, 2026-11-12: the guest images are two packages with a new arm64-only config `evolution`, not `packages/c/cryptokit`
+(which re-exports `Crypto` under the module name `Crypto`, so none of the SDK's `$s9CryptoKit…` names are in it).
+`swift-crypto` with `evolution` compiles the same sources as the module `CryptoKit` with library evolution against the
+runtime built with `library_evolution`, and `network` with `evolution` compiles the path monitor of the Network overlay
+(`NWPathMonitor`, `NWPath`, `NWInterface`, `NWEndpoint`, the two IP address types) with swiftc and links it on
+SystemConfiguration; connections and listeners are not built, and the backports package is not part of it. The SDK imports
+25 `$s9CryptoKit…` and 11 `$s7Network…` names in all (the measurement of the table above counted fewer); every one of them
+is exported by the built dylibs (`nm -gU` against `nm -u` of the SDK image). The unresolved-name measurement is made
+(next section); the fixtures on the 4S are still to do.
+
+### Measuring the unresolved names without a lift
+
+`xlate` reports every import no guest image resolves before it lifts anything, so the list costs about 0.1 second and under
+100 MB, not a translation:
+
+1. Link the arm64 slice of the SDK's static archive into one dylib: `lipo -thin arm64` of the framework binary, then
+   `clang -arch arm64 -dynamiclib -all_load -Wl,-undefined,dynamic_lookup -install_name @rpath/libRecaptchaGuest.dylib
+   -framework Foundation` over the archive (319 members, 712 undefined names).
+2. Run `xlate --base 0x10000000 --output lifted.bc --layout layout.txt --passthrough <empty file> --state-header xl_state.h
+   --bridge libxl-guest.dylib` with the SDK dylib and the guest images. Do not pass `--objc-manifest`: that route is the
+   analysis pass, which writes `manifest.json` and `guest-resolved.txt` and never reports. The run exits 1 and prints
+   `call stub for unresolved import _X` for each name left; the image named in the line says whose import it is.
+3. A bind that names a library by path takes that library: every image needs `--replaces <path the SDK binds>=<image>`
+   (`/usr/lib/swift/libswiftX.dylib` for each overlay, `/usr/lib/libc++.1.dylib`, and
+   `/System/Library/Frameworks/CryptoKit.framework/CryptoKit` for the CryptoKit image), otherwise `xlate` refuses the image
+   (`a bind names …, which no guest image is`).
+
+Count only the lines of the SDK image: the images' own unresolved stubs (libswiftCore 146, libc++ 157, Dispatch 108, …) are
+host imports of the images, the same kind as the SDK's own remaining ones.
+
+Result, 2026-11-13, the SDK from the Xcode 27.2 SDK, empty passthrough: with only libswiftCore and libc++ 300 names of the
+SDK are unresolved; with the whole set (CoreFoundation, Darwin, Dispatch, ObjectiveC, `_Concurrency`, Foundation,
+CoreGraphics, Network, CryptoKit added) 113. All 187 Swift names (Foundation 59, CryptoKit 18, Dispatch 9, Network 8, other
+overlay and standard library 93) are resolved and none is new. The 113 left are host C and Objective-C runtime symbols
+(libSystem, libobjc `objc_*`/`class_*`/`method_*`, CoreFoundation, Security, `CC_SHA256`, `Block_*`, `dispatch_once`,
+`os_unfair_lock_*`), which the passthrough and the runtime bridge answer, block E. Three weak `Locale.Language` names bind to
+`Foundation.framework` and stay unbound ("a bind takes the library it names"); the SDK takes its fallback for them.
+
+To tell which of the 113 have a bridge, run `xlgen` with the names as `--symbols`, the `manifest.json` of an analysis pass of
+the same images as `--objc-manifest`, and an includes file that imports Foundation, UIKit, WebKit, DeviceCheck, Security,
+CoreMotion, CoreTelephony, AdSupport, SystemConfiguration and `CommonCrypto/CommonDigest.h`; without Foundation six
+`NS*` functions read "no declaration in the SDK headers". Six symbols read UNSUPPORTED with an empty `--guest-provided`: `class_copyMethodList`,
+`class_getMethodImplementation`, `method_getImplementation`, `imp_implementationWithBlock` (a result that is a pointer to a
+struct or a function pointer), `getaddrinfo` (the `addrinfo` layout differs) and `sscanf` (no `va_list` variant). They are
+not gaps: the runtime bridges them by hand (`objc_bridge.m`, `bridge.m`) and `tests/hostbridges` runs all six on the 4S. Of the 298 selectors left
+UNSUPPORTED with that includes file almost all are the SDK's own protobuf getters and obfuscated selectors of its own classes.
+
 ## C. Objective-C exceptions across guest frames
 
 Goal: an Objective-C or Swift error raised in guest code and caught in guest code works, and one raised by the host and

@@ -14,13 +14,17 @@ package("swift-crypto")
     add_configs("sources", {description = "The digest of this recipe, its patches and the apple-compat calls it builds, so a changed step is a different package.",
                             default = swift_crypto_sources_digest, type = "string", readonly = true})
 
+    add_configs("evolution", {description = "arm64 only: compile the Crypto sources as the module CryptoKit with library evolution and install libswiftCryptoKit.dylib instead of libswiftCrypto.dylib, so the symbols of the CryptoKit that a program compiled by the SDK's Swift binds to resolve (its mangled names carry the module name, and its protocol requirements and enums are resilient). CryptoExtras are not built.", default = false, type = "boolean"})
+
     local FLOOR = "6.0"
 
     on_load("iphoneos", function (package)
-        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil}})
+        assert(not package:config("evolution") or package:is_arch("arm64"), "swift-crypto with evolution is an arm64 guest build")
+        package:add("deps", "revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = package:config("shared") or nil,
+                                                                                         library_evolution = package:config("evolution") or nil}})
         package:add("deps", "revenant@apple-compat", {alias = "apple-compat"})
         package:add("deps", "revenant@ld64", {alias = "ld64"})
-        package:add("links", "swiftCrypto")
+        package:add("links", package:config("evolution") and "swiftCryptoKit" or "swiftCrypto")
         package:add("linkdirs", "lib")
     end)
 
@@ -31,7 +35,8 @@ package("swift-crypto")
         local runtime = assert(package:dep("swift-runtime"), "swift-crypto is compiled against revenant@swift-runtime")
         local compat = package:dep("apple-compat")
         local swiftc = assert(table.wrap((runtime:envs() or {}).SWIFT_EXEC)[1], "swift-runtime names no compiler; reinstall it")
-        local minimum = FLOOR
+        local evolution = package:config("evolution")
+        local minimum = evolution and "7.0" or FLOOR
         local triple = package:arch() .. "-apple-ios" .. minimum
         local sdk = toolchain:config("sdkdir")
         local resources = path.join(runtime:installdir(), "lib", "swift")
@@ -45,6 +50,10 @@ package("swift-crypto")
         for _, file in ipairs(os.files(path.join(compat:installdir("include"), "revenant", "*.h"))) do
             table.insert(headers, "#include <revenant/" .. path.filename(file) .. ">")
         end
+        if not os.isfile(path.join(compat:installdir("include"), "revenant", "memset_s.h")) then
+            table.insert(headers, "#include <stddef.h>")
+            table.insert(headers, "int revenant_memset_s(void *bytes, size_t capacity, int value, size_t count);")
+        end
         table.sort(headers)
         io.writefile(path.join(shims, "shims.h"), table.concat(headers, "\n") .. "\n")
         io.writefile(path.join(shims, "module.modulemap"), "module RevenantCompat {\n    header \"shims.h\"\n    export *\n}\n")
@@ -54,7 +63,21 @@ package("swift-crypto")
             os.vrunv("patch", {"-d", tree, "-p1", "-s", "-i", patch})
         end
         local sources = path.join(tree, "Sources")
-        local common = {"-target", triple, "-isysroot", sdk, "-miphoneos-version-min=" .. minimum}
+        if evolution then
+            for _, file in ipairs(os.files(path.join(sources, "Crypto", "**.swift"))) do
+                local text = io.readfile(file)
+                local changed = text:gsub("canImport%(CryptoKit%)", "canImport(RevenantSystemCryptoKit)")
+                changed = changed:gsub("%f[%w_]Crypto%.", "CryptoKit.")
+                local name = path.filename(file)
+                if name == "X25519Keys_boring.swift" or name == "Ed25519_boring.swift" or name == "NISTCurvesKeys_boring.swift" then
+                    changed = changed:gsub("@inlinable(%s+)init", "@usableFromInline%1init")
+                end
+                if changed ~= text then
+                    io.writefile(file, changed)
+                end
+            end
+        end
+        local common ={"-target", triple, "-isysroot", sdk, "-miphoneos-version-min=" .. minimum}
 
         local bssl = path.join(sources, "CCryptoBoringSSL")
         for _, file in ipairs(os.files(path.join(bssl, "**.cc"))) do
@@ -63,6 +86,12 @@ package("swift-crypto")
                 os.vrunv(toolchain:tool("cxx"), table.join(common, {"-std=c++17", "-fno-exceptions", "-fno-rtti", "-Os",
                          "-Wno-shorten-64-to-32", "-I", path.join(bssl, "include"), "-I", bssl, "-c", file,
                          "-o", path.join(objects, "bssl_" .. rel:gsub("/", "_") .. ".o")}))
+            end
+        end
+        if package:is_arch("arm64") then
+            for _, file in ipairs(os.files(path.join(bssl, "gen", "**-apple.S"))) do
+                os.vrunv(toolchain:tool("cc"), table.join(common, {"-Os", "-I", path.join(bssl, "include"), "-I", bssl, "-c", file,
+                         "-o", path.join(objects, "bsslasm_" .. path.relative(file, bssl):gsub("/", "_") .. ".o")}))
             end
         end
         local kcp = path.join(sources, "CXKCP")
@@ -84,12 +113,24 @@ package("swift-crypto")
                  import("@addon.revenant.data", {anonymous = true}).src("apple-compat", "src", "objc_allocWithZone.c"),
                  "-o", path.join(objects, "objc_allocWithZone.o")}))
 
+        if evolution then
+            local markers = path.join(objects, "autolink_markers.c")
+            io.writefile(markers, table.concat({
+                "__attribute__((visibility(\"hidden\"))) const char _swift_FORCE_LOAD_$_swiftXPC = 0;",
+                "__attribute__((visibility(\"hidden\"))) const char _swift_FORCE_LOAD_$_swift_Builtin_float = 0;",
+                ""}, "\n"))
+            os.vrunv(toolchain:tool("cc"), table.join(common, {"-Os", "-c", markers, "-o", path.join(objects, "autolink_markers.o")}))
+        end
+
+        local main = evolution and "CryptoKit" or "Crypto"
+        local overlays = evolution and {"-I", path.join(resources, "iphoneos")} or {}
         local swiftflags = {"-enable-experimental-feature", "Lifetimes", "-enable-experimental-feature", "SourceWarningControl",
                             "-enable-upcoming-feature", "MemberImportVisibility", "-D", "CRYPTO_IN_SWIFTPM", "-swift-version", "6",
                             "-package-name", "swift-crypto", "-parse-as-library", "-O", "-wmo", "-c",
                             "-I", path.join(bssl, "include"), "-I", path.join(kcp, "include"),
                             "-I", path.join(sources, "CXKCPShims", "include"), "-I", path.join(objects, "shims"), "-I", compat:installdir("include"),
                             "-module-cache-path", path.join(objects, "modulecache")}
+        table.join2(swiftflags, overlays)
         local swiftmods = path.join(objects, "swiftmodules")
         os.mkdir(swiftmods)
         local function swiftmodule_path(name)
@@ -114,13 +155,13 @@ package("swift-crypto")
         end
         table.sort(crypto)
         local cargv = swift.runtime_flags({architecture = package:arch(), deployment = minimum, sdk = sdk, resources = resources,
-                                           module = "Crypto"})
-        table.join2(cargv, swiftflags)
-        table.join2(cargv, {"-module-name", "Crypto", "-I", swiftmods, "-emit-module", "-emit-module-path",
-                            swiftmodule_path("Crypto")}, crypto, {"-o", path.join(objects, "Crypto.o")})
+                                           module = main})
+        table.join2(cargv, swiftflags, evolution and {"-enable-library-evolution"} or {})
+        table.join2(cargv, {"-module-name", main, "-I", swiftmods, "-emit-module", "-emit-module-path",
+                            swiftmodule_path(main)}, crypto, {"-o", path.join(objects, main .. ".o")})
         os.vrunv(swiftc, cargv)
 
-        local asn1 = assert(os.dirs(path.join(package:resourcedir("swift-asn1"), "swift-asn1-*"))[1], "swift-asn1 is not fetched")
+        local asn1 =assert(os.dirs(path.join(package:resourcedir("swift-asn1"), "swift-asn1-*"))[1], "swift-asn1 is not fetched")
         local asn1tree = package:installdir("swift-asn1")
         os.cp(path.join(asn1, "*"), asn1tree)
         for _, patch in ipairs(os.files(path.join(package:scriptdir(), "patches", "swift-asn1", "*.patch"))) do
@@ -136,6 +177,7 @@ package("swift-crypto")
         end
         local asn1flags = {"-enable-upcoming-feature", "MemberImportVisibility", "-enable-upcoming-feature", "ExistentialAny",
                            "-package-name", "swift-asn1", "-swift-version", "6", "-O", "-module-cache-path", path.join(objects, "modulecache")}
+        table.join2(asn1flags, overlays)
         local asn1argv = swift.runtime_flags({architecture = package:arch(), deployment = minimum, sdk = sdk, resources = resources,
                                               module = "SwiftASN1"})
         table.join2(asn1argv, asn1flags, {"-c", "-module-name", "SwiftASN1", "-emit-module", "-emit-module-path",
@@ -148,7 +190,7 @@ package("swift-crypto")
         os.vrunv(ld64, {"-r", "-keep_private_externs", "-unexported_symbols_list", hidden,
                         "-o", path.join(objects, "SwiftASN1.o"), path.join(swiftmods, "SwiftASN1.raw.o")})
 
-        for _, module in ipairs({"CryptoExtras", "_CryptoExtras"}) do
+        for _, module in ipairs(evolution and {} or {"CryptoExtras", "_CryptoExtras"}) do
             local argv = swift.runtime_flags({architecture = package:arch(), deployment = minimum, sdk = sdk, resources = resources,
                                               module = module})
             table.join2(argv, swiftflags)
@@ -163,8 +205,8 @@ package("swift-crypto")
             local shared = import("@addon.revenant.apple.shared_runtime", {anonymous = true})
             libdir = path.join(runtime:installdir("share"), "root", shared.folder_of(shared.package_name("swift-runtime", runtime:buildhash())))
         end
-        local lib = path.join(objects, "libswiftCrypto.dylib")
-        os.vrunv(toolchain:tool("cc"), table.join(common, {"-fuse-ld=" .. ld64, "-dynamiclib", "-install_name", "@rpath/libswiftCrypto.dylib",
+        local lib = path.join(objects, "libswift" .. main .. ".dylib")
+        os.vrunv(toolchain:tool("cc"), table.join(common, {"-fuse-ld=" .. ld64, "-dynamiclib", "-install_name", "@rpath/libswift" .. main .. ".dylib",
                  "-Wl,-dead_strip_dylibs", "-o", lib}, os.files(path.join(objects, "*.o")),
                  {"-L", libdir,
                   "-lswiftCore", "-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswift_Concurrency",
@@ -172,13 +214,13 @@ package("swift-crypto")
         os.cp(lib, package:installdir("lib"))
         local module = path.join(package:installdir("lib"), "swift", "iphoneos")
         os.mkdir(module)
-        os.cp(path.join(swiftmods, "Crypto.swiftmodule"), path.join(module, "Crypto.swiftmodule"))
+        os.cp(path.join(swiftmods, main .. ".swiftmodule"), path.join(module, main .. ".swiftmodule"))
         os.cp(path.join(swiftmods, "CryptoBoringWrapper.swiftmodule"), path.join(module, "CryptoBoringWrapper.swiftmodule"))
-        for _, name in ipairs({"CryptoExtras", "_CryptoExtras"}) do
+        for _, name in ipairs(evolution and {} or {"CryptoExtras", "_CryptoExtras"}) do
             os.cp(path.join(swiftmods, name .. ".swiftmodule"), path.join(module, name .. ".swiftmodule"))
         end
-        os.cp(path.join(objects, "Crypto.o"), path.join(package:installdir("lib"), "Crypto.o"))
+        os.cp(path.join(objects, main .. ".o"), path.join(package:installdir("lib"), main .. ".o"))
         package:setenv("REVENANT_SWIFT_MODULES", module, path.join(compat:installdir("include"), "RevenantCompat"), compat:installdir("include"))
 
-        print("%s: %s installed; libswiftCrypto.dylib is in %s", package:name(), package:version_str(), package:installdir("lib"))
+        print("%s: %s installed; libswift%s.dylib is in %s", package:name(), package:version_str(), main, package:installdir("lib"))
     end)

@@ -384,6 +384,23 @@ void xl_report_guest_frame(void);
 
 #define XL_NO_BRIDGE ((uint64_t)-1)
 
+struct xl_arguments {
+    uint64_t words[(XL_OFFSET_X9 - XL_OFFSET_X0) / sizeof(uint64_t)];
+    uint64_t vectors[(XL_OFFSET_V8 - XL_OFFSET_V0) / sizeof(uint64_t)];
+};
+
+static inline void xl_arguments_save(State *state, struct xl_arguments *saved)
+{
+    __builtin_memcpy_inline(saved->words, &XL_REG(state, X0), sizeof saved->words);
+    __builtin_memcpy_inline(saved->vectors, &XL_REG(state, V0), sizeof saved->vectors);
+}
+
+static inline void xl_arguments_restore(State *state, const struct xl_arguments *saved)
+{
+    __builtin_memcpy_inline(&XL_REG(state, X0), saved->words, sizeof saved->words);
+    __builtin_memcpy_inline(&XL_REG(state, V0), saved->vectors, sizeof saved->vectors);
+}
+
 static void xl_dynamic_send(State *state, id receiver, Method method, SEL selector, IMP forced);
 
 static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp, Method method, id receiver, Class super_class);
@@ -392,10 +409,7 @@ static uint64_t xl_route(State *state, Class lookup, SEL selector, id receiver, 
 {
     if (xl_selector_neutralized(selector) || xl_class_neutralized(lookup))
         return 0;
-    uint8_t saved[XL_STATE_SIZE] __attribute__((aligned(16)));
-    memcpy(saved, state, XL_STATE_SIZE);
     IMP imp = class_getMethodImplementation(lookup, selector);
-    memcpy(state, saved, XL_STATE_SIZE);
     uintptr_t guest = (uintptr_t)CFDictionaryGetValue(xl_guest_imps, imp);
     if (!guest)
         guest = xl_shadow_imp(imp);
@@ -675,6 +689,8 @@ void xl_h_objc_msgSend(State *state)
                     class_getName(object_getClass(receiver)), classref);
         }
     }
+    struct xl_arguments arguments;
+    xl_arguments_save(state, &arguments);
     Class receiver_class = xl_class_of(receiver);
     if (xl_class_neutralized(receiver_class) || xl_selector_neutralized(selector)) {
         xl_zero_result(state);
@@ -683,6 +699,7 @@ void xl_h_objc_msgSend(State *state)
     }
     void (*variadic)(State *) = (void (*)(State *))CFDictionaryGetValue(xl_variadic_table, selector);
     if (variadic) {
+        xl_arguments_restore(state, &arguments);
         variadic(state);
         return;
     }
@@ -691,9 +708,13 @@ void xl_h_objc_msgSend(State *state)
         xl_shadow_note("msg %p %s: isa %x, class %p (%s), target %llx", (void *)receiver, sel_getName(selector),
                        receiver ? *(uint32_t *)receiver : 0, receiver_class, class_getName(receiver_class), (unsigned long long)target);
     if (target == XL_NO_BRIDGE) {
-        xl_dynamic_send(state, (id)xl_class_in((uintptr_t)receiver), class_getInstanceMethod(receiver_class, selector), selector, NULL);
+        id host_receiver = (id)xl_class_in((uintptr_t)receiver);
+        Method method = class_getInstanceMethod(receiver_class, selector);
+        xl_arguments_restore(state, &arguments);
+        xl_dynamic_send(state, host_receiver, method, selector, NULL);
         return;
     }
+    xl_arguments_restore(state, &arguments);
     if (!target) {
         xl_zero_result(state);
         xl_return(state);
@@ -705,14 +726,17 @@ void xl_h_objc_msgSend(State *state)
 
 void xl_h_objc_msgSendSuper2(State *state)
 {
+    struct xl_arguments arguments;
+    xl_arguments_save(state, &arguments);
     uint64_t *guest_super = (uint64_t *)xl_narrow_pointer(XL_REG(state, X0), "objc_msgSendSuper2", 0);
     id receiver = (id)(uintptr_t)guest_super[0];
     Class current = xl_class_in(guest_super[1]);
     SEL selector = (SEL)(uintptr_t)XL_REG(state, X1);
-    XL_REG(state, X0) = (uintptr_t)receiver;
     if (selector == @selector(dealloc))
         xl_swift_super_dealloc(receiver, current);
     uint64_t target = xl_route(state, class_getSuperclass(current), selector, receiver, current);
+    xl_arguments_restore(state, &arguments);
+    XL_REG(state, X0) = (uintptr_t)receiver;
     if (target == XL_NO_BRIDGE)
         xl_fault(state, "super message without a bridge");
     if (!target) {
@@ -1421,11 +1445,16 @@ static void xl_imp_entry(State *state)
         variadic(state);
         return;
     }
+    struct xl_arguments arguments;
+    xl_arguments_save(state, &arguments);
     uint64_t target = xl_bridge_for(state, slot->cls, slot->selector, slot->imp, slot->method, receiver, Nil);
     if (target == XL_NO_BRIDGE) {
-        xl_dynamic_send(state, (id)xl_class_in((uintptr_t)receiver), slot->method, slot->selector, slot->imp);
+        id host_receiver = (id)xl_class_in((uintptr_t)receiver);
+        xl_arguments_restore(state, &arguments);
+        xl_dynamic_send(state, host_receiver, slot->method, slot->selector, slot->imp);
         return;
     }
+    xl_arguments_restore(state, &arguments);
     if (!target) {
         xl_zero_result(state);
         xl_return(state);
