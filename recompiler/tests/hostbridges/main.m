@@ -3,6 +3,7 @@
 #import <objc/message.h>
 #import <objc/runtime.h>
 #include <arpa/inet.h>
+#include <copyfile.h>
 #include <crt_externs.h>
 #include <dispatch/dispatch.h>
 #include <errno.h>
@@ -20,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <unistd.h>
 #include <wchar.h>
 #include <xlocale.h>
 
@@ -428,6 +430,28 @@ static void wide_checks(void)
            (unsigned)buffer[3], (unsigned)buffer[4]);
 }
 
+static void copyfile_checks(void)
+{
+    char from_path[] = "/var/tmp/hostbridges-from-XXXXXX";
+    char to_path[] = "/var/tmp/hostbridges-to-XXXXXX";
+    int from = mkstemp(from_path);
+    int to = mkstemp(to_path);
+    write(from, "copy me", 7);
+    lseek(from, 0, SEEK_SET);
+    copyfile_state_t state = copyfile_state_alloc();
+    printf("copyfile state %d\n", state != NULL);
+    int result = fcopyfile(from, to, state, COPYFILE_DATA);
+    printf("copyfile state free %d\n", copyfile_state_free(state));
+    lseek(to, 0, SEEK_SET);
+    char text[16] = {0};
+    ssize_t count = read(to, text, sizeof text - 1);
+    printf("fcopyfile %d %ld %s\n", result, (long)count, text);
+    close(from);
+    close(to);
+    unlink(from_path);
+    unlink(to_path);
+}
+
 static void source_checks(void)
 {
     dispatch_queue_t queue = dispatch_queue_create("hostbridges.source", NULL);
@@ -453,6 +477,7 @@ int main(void)
         memory_checks();
         catalog_checks();
         wide_checks();
+        copyfile_checks();
         source_checks();
     }
     return 0;

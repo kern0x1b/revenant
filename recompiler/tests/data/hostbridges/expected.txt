@@ -73,4 +73,7 @@ catopen of a missing catalog 1
 swprintf 35: 42| 3.14|narrow|wide|x|123456789012
 swprintf short -1
 swprintf wide format 5: 233 61 55 124 122
+copyfile state 1
+copyfile state free 0
+fcopyfile 0 7 copy me
 vm dispatch source 1

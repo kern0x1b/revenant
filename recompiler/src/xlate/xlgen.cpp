@@ -259,7 +259,7 @@ Value Classify(ASTContext &gc, QualType g, ASTContext &hc, QualType h, bool para
     }
     if (auto record = gp->getAsRecordDecl();
         record && (StringRef(record->getName()).starts_with("_opaque_pthread_") || record->getName() == "__mbstate_t" ||
-                   record->getName() == "__nl_cat_d" || record->getName() == "_malloc_zone_t" ||
+                   record->getName() == "__nl_cat_d" || record->getName() == "_malloc_zone_t" || record->getName() == "_copyfile_state" ||
                    (record->getTypedefNameForAnonDecl() &&
                     (record->getTypedefNameForAnonDecl()->getName() == "__mbstate_t" ||
                      record->getTypedefNameForAnonDecl()->getName() == "DIR")))) {

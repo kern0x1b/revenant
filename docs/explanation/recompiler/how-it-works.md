@@ -202,9 +202,10 @@ print on the iPad 2 what objc4 printed.
     header, as `getaddrinfo`; the `if_data` of a link entry is copied with the 8-byte `timeval`); `localeconv_l` (one
     guest `struct lconv` per locale); `class_copyIvarList` (8-byte slots, as `class_copyMethodList`); `swprintf` (the
     format and the arguments are read as `printf` reads them, through UTF-8, and `vswprintf` gets the host's).
-  - *Opaque handles*: `catopen` returns an `nl_catd`, and `malloc_default_zone` and `malloc_zone_from_ptr` return a
-    `malloc_zone_t *`, which the guest only hands back (libswiftCore's `-[_SwiftObject zone]` answers it, libc++'s
-    `messages` passes the catalogue to `catgets` and `catclose`). They cross as the host's pointer, and `-1` crosses as
+  - *Opaque handles*: `catopen` returns an `nl_catd`, `malloc_default_zone` and `malloc_zone_from_ptr` return a
+    `malloc_zone_t *`, and `copyfile_state_alloc` a `copyfile_state_t`, which the guest only hands back (libswiftCore's
+    `-[_SwiftObject zone]` answers the zone, libc++'s `messages` passes the catalogue to `catgets` and `catclose`,
+    libc++'s `std::filesystem` copy gives the state to `fcopyfile` and `copyfile_state_free`). They cross as the host's pointer, and `-1` crosses as
     `-1`. A guest that read a zone's function table would read 4-byte pointers: none of these images does.
   - *Data*: `__progname` is a copy of the host's pointer, filled at start-up. `NSDataDeallocatorFree`, `Unmap` and `VM`
     are private blocks of Foundation that iOS 6.1.3 does not have; the guest gets blocks of its own that call `free`,

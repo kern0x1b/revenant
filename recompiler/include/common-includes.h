@@ -92,4 +92,5 @@ extern double lgamma_r(double, int *);
 extern const char *__progname;
 
 #include <dispatch/dispatch.h>
+#include <copyfile.h>
 extern const struct dispatch_source_type_s _dispatch_source_type_vm;

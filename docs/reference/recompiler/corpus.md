@@ -170,7 +170,8 @@ A program (`main.m`) that calls the host functions whose guest and host layouts 
   and `NSDataDeallocatorFree` called by the guest, the first two checked by asking the kernel whether the page is
   still mapped; `catopen` of a catalogue that does not exist (the host's `(nl_catd)-1` has to reach the guest as
   `-1`); `swprintf` with `%d`, `%5.2f`, `%s`, `%ls`, `%c`, `%lld`, one that truncates, and one whose format and
-  arguments are not ASCII; `_dispatch_source_type_vm` as the type of a dispatch source.
+  arguments are not ASCII; `_dispatch_source_type_vm` as the type of a dispatch source; `copyfile_state_alloc`,
+  `fcopyfile` (a file descriptor copied into another) and `copyfile_state_free`.
 
 The check builds the program for this Mac and compares its output with `tests/data/hostbridges/expected.txt`, translates
 the arm64 build (which fails on any import without a bridge) and requires that the program imports each of the bridged
