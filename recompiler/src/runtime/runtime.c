@@ -1,4 +1,5 @@
 #include "xl_state.h"
+#include "xl_vm_map.h"
 
 void xl_thread_altstack(void);
 
@@ -45,6 +46,7 @@ extern void xl_bridge_init(void);
 static pthread_key_t xl_state_key;
 static pthread_once_t xl_state_once = PTHREAD_ONCE_INIT;
 static int xl_diagnostics_installed;
+static int xl_map_on;
 
 struct xl_thread {
     void *stack;
@@ -98,6 +100,8 @@ static void xl_dump(State *state)
     for (int i = 0; i < 8; i++)
         fprintf(stderr, "xlate: x%d=0x%llx\n", i, *(uint64_t *)((char *)state + XL_OFFSET_X0 + (XL_OFFSET_X1 - XL_OFFSET_X0) * i));
     xl_walk_frames(state, fileno(stderr));
+    if (xl_map_on)
+        xl_vm_map_dump(fileno(stderr), "fault");
 }
 
 void xl_fault(State *state, const char *reason)
@@ -209,6 +213,8 @@ static void xl_crash_handler(int signal, siginfo_t *info, void *context)
             hfp = next;
         }
     }
+    if (xl_map_on)
+        xl_vm_map_dump(fd, "crash");
     xl_walk_guest(fd);
     if (fd != fileno(stderr))
         close(fd);
@@ -247,6 +253,7 @@ void xl_install_diagnostics(void)
 {
     if (__sync_lock_test_and_set(&xl_diagnostics_installed, 1))
         return;
+    xl_map_on = xl_vm_map_enabled();
     atexit(xl_note_exit);
     {
         struct sigaction note = {0};
