@@ -45,6 +45,26 @@ function shared_packages(text)
     return text
 end
 
+local HOST_LIBCXX = table.concat({
+    'target("RNHost")',
+    '    after_load(function (target)',
+    '        local kept = {}',
+    '        for _, name in ipairs(table.wrap(target:values("app.frameworks"))) do',
+    '            if name ~= "libcxx" then',
+    '                table.insert(kept, name)',
+    '            end',
+    '        end',
+    '        target:set("values", "app.frameworks", kept)',
+    '    end)',
+    'target_end()'}, "\n")
+
+function host_libcxx(text)
+    if text:find(HOST_LIBCXX, 1, true) then
+        return text
+    end
+    return text .. "\n" .. HOST_LIBCXX .. "\n"
+end
+
 local WHOLE_PROBE = {WHOLE[1].line, WHOLE[2].line, WHOLE[3].line}
 
 function declares(text, alias)
@@ -284,7 +304,7 @@ function copy_project(project, folder, bundle_id)
     end
     local xmake = path.join(folder, "xmake.lua")
     local text = io.readfile(xmake)
-    local carried = shared_packages(whole_requirements(text))
+    local carried = host_libcxx(shared_packages(whole_requirements(text)))
     if carried ~= text then
         io.writefile(xmake, carried)
     end

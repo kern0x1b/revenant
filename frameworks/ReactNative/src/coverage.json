@@ -488,7 +488,7 @@
    "native": true,
    "status": "partial",
    "verified": "build",
-   "note": "Built from the package with seven iOS 6 patches (packages/e/expo-image-picker) and linked into RNHost with expo-image-picker real, Photos and PhotosUI weak-linked, on base 6c8fd1bf5 (swift-runtime 6.4.0 install 2d9126ab): not relinked on the current swift-runtime digest, so the build claim is for that base. UIImagePickerController is the iOS 6 picker, with the UTI constants and single selection there; PhotoKit, PHPickerController and live photo code are gated to iOS 14+; asset metadata to iOS 11+; the library permission goes to the assets library on iOS 6 and 7; the picker exception is renamed away from expo-sharing's; the AVAssetExportPreset constants are literal preset names, because the SDK symbols bind strongly on iOS 6. Multi-select is not available on iOS 6; the module is not exercised on the phone."
+   "note": "Built from the package with seven iOS 6 patches (packages/e/expo-image-picker) and linked into RNHost with expo-image-picker real, Photos and PhotosUI weak-linked, relinked on the current main digest against the shared swift-runtime 5520c7fe and the shared libcxx (the packaging check and the import check pass). UIImagePickerController is the iOS 6 picker, with the UTI constants and single selection there; PhotoKit, PHPickerController and live photo code are gated to iOS 14+; asset metadata to iOS 11+; the library permission goes to the assets library on iOS 6 and 7; the picker exception is renamed away from expo-sharing's; the AVAssetExportPreset constants are literal preset names, because the SDK symbols bind strongly on iOS 6. Multi-select is not available on iOS 6; the module is not exercised on the phone."
   },
   {
    "id": "expo-intent-launcher",
@@ -785,7 +785,7 @@
    "native": true,
    "status": "stub",
    "verified": "none",
-   "note": "Patched package for iOS 6 (packages/e/expo-sqlite, one patch): it removes SQLiteModuleLibSQL.swift, which imports the libsql module this build does not provide. The default build uses the vendored SQLite 3.50.3 amalgamation (vendor/sqlite3/sqlite3.c); the optional libSQL mode (expo.sqlite.useLibSQL) is not part of this. When expo-sqlite is real, expo-app-modules defines the SQLite macros in its bridging header and adds the amalgamation. expo-app-modules compiles with it, but the RNHost link has not run, so no build is claimed: the row stays stub with verified none, and the stub stays in place until a link on the current base. Once built it is partial: the module is not exercised on the phone."
+   "note": "Patched package for iOS 6 (packages/e/expo-sqlite, one patch): it removes SQLiteModuleLibSQL.swift, which imports the libsql module this build does not provide. The default build uses the vendored SQLite 3.50.3 amalgamation (vendor/sqlite3/sqlite3.c); the optional libSQL mode (expo.sqlite.useLibSQL) is not part of this. When expo-sqlite is real, expo-app-modules defines the SQLite macros in its bridging header and adds the amalgamation. An isolated RNHost copy links with expo-sqlite real (with expo-image-picker) on the current main digest and passes the packaging and import checks, but the default host still carries StubSQLiteModule, so the row stays stub with verified none until the default host takes the real module. The module is not exercised on the phone."
   },
   {
    "id": "expo-status-bar",

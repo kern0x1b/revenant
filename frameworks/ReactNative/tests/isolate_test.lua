@@ -77,3 +77,8 @@ end
 expect("the copy asks the four packages, as the application requires them and as its dependants do, for a shared swift-runtime and keeps the SDK",
        #missing == 0, "no shared rule for " .. table.concat(missing, ", "))
 expect("the shared rules are carried once", isolate.shared_packages(shared) == shared, "a second pass changed the copy")
+
+local hosted = isolate.host_libcxx(APPLICATION)
+expect("the copy's host no longer carries the libc++ the shared package installs", hosted:find('target("RNHost")', 1, true) ~= nil
+       and hosted:find('name ~= "libcxx"', 1, true) ~= nil, "the app.frameworks filter is missing from the copy")
+expect("the host rule is carried once", isolate.host_libcxx(hosted) == hosted, "a second pass changed the copy")
