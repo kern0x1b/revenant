@@ -76,7 +76,10 @@ local function build_objc(e, corpus, o, here)
     corpus.ios(e, {"-fuse-ld=" .. e.ld, "-Wl,-no_objc_category_merging", "-O2", "-w", "-fobjc-arc", "-dynamiclib", "-install_name", "@rpath/RCFixture.dylib", "-framework", "Foundation", "-I", here,
                    path.join(here, "fixture.m"), "-o", o("RCFixture.dylib")})
     io.writefile(o("includes.h"), string.format('#include "%s"\n#include "%s"\n', path.join(e.recompiler, "include", "uikit-includes.h"), path.join(here, "RCFixture.h")))
-    return {XL_LIBRARY = "1"}, {}
+    -- XL_LIBRARY_INSTALL_NAME=executable: the library is named by a path dyld resolves on iOS 6 without any environment, and the host is
+    -- started without DYLD_FALLBACK_LIBRARY_PATH, so the registry (which depends on the library by that name) has to find the loaded image by itself
+    local install = os.getenv("XL_LIBRARY_INSTALL_NAME") == "executable" and "@executable_path/RCFixture.dylib" or nil
+    return {XL_LIBRARY = "1", XL_INSTALL_NAME = install}, {}
 end
 
 local function build_swift(e, corpus, o, here)
@@ -230,6 +233,9 @@ function main(out, ...)
     local resident = os.getenv("XL_LIBRARY_RESIDENT_MB") or "85"
     local launches = tonumber(os.getenv("XL_LIBRARY_LAUNCHES") or "1")
     local environment = "DYLD_FALLBACK_LIBRARY_PATH=" .. (host_runtime or "/var/tmp/xl-library")
+    if os.getenv("XL_LIBRARY_INSTALL_NAME") == "executable" and variant == "objc" then
+        environment = "XL_LIBRARY_NO_FALLBACK=1"
+    end
     local function launch(arguments)
         return try { function ()
             return device.run("chmod +x /var/tmp/xl-library/xl-library-host && cd /var/tmp/xl-library && " .. environment .. " ./xl-library-host " .. arguments .. " 2>&1; echo exit=$?")

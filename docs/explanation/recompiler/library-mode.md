@@ -11,45 +11,71 @@ measurements; [the guide](../../guides/recompiler/build-and-translate.md#transla
 ## The constraint: a guest address is a host address
 
 The guest keeps its arm64 memory image at its own addresses, and the lifted code reaches it by absolute address, so a
-guest segment has to sit where it was linked. An executable gets that from `-segaddr` and `-no_pie`. A library gets it
-from the layout below, and from a loader that checks it:
+guest segment has to sit where it was linked. An executable gets that from `-segaddr` and `-no_pie`. A library has no
+such thing: dyld slides a dylib to wherever it has room, and a library that asks for a fixed address gets it only while
+nobody else took it.
+
+The first version of library mode asked anyway: one fixed range for the lifted code and the guest together (198 MB for
+the 162 MB Swift library). On the iPhone 4S the heap of an app starts at one of eight random places, and in one launch of
+eight it sat in that range: 3 refusals in 20 launches of Telegram13. Nothing in the library can prevent that, and a retry
+only hides it. So only what has to be fixed is fixed, and the library is two parts:
 
 | Part | Address |
 |---|---|
-| host `__TEXT` and `__DATA` (the lifted code, the runtime, the bridges) | below the guest window, from `XL_BASE` minus a window sized to the lifted code |
-| guest segments (`__X<n>TEXT`, `__X<n>DATA`, one pair per image) | from `XL_BASE` (default `0x10000000`) |
-| `__LINKEDIT` | after the last guest segment |
+| the lifted code, the runtime, the bridges | the host part, linked at address 0 and placed by dyld in any hole that is large enough (104 MiB of `__TEXT` for the Swift library) |
+| the guest image: its segments at the guest's own addresses | a range of 9.1 MB for the Swift library, at `XL_BASE` |
 
-dyld needs the segments in ascending order, and ld64 puts `__LINKEDIT` right after `__DATA` unless it is told where,
-so `xlate --library` writes `-segaddr __LINKEDIT` after the guest window. The window below the base is the lifted
-code plus 8 MB, rounded up to 16 MB; the link fails, naming `XL_BASE`, if that does not fit under the base.
+The guest image is not linked. It is a section of the dylib, `__XGUEST,__image`, that holds the bytes of the guest's
+segments in a documented format ([the reference](../../reference/recompiler/library-mode.md#the-guest-image-recompilerincludexl_guest_imageh)),
+and the loader maps it at the guest's addresses with `mmap(MAP_FIXED|MAP_PRIVATE)` over a reservation it took before.
+A word of the guest that holds the address of something in the host (a class, a symbol of the system) is not in the
+bytes: it is an entry of a table of slots that dyld relocates with the rest of the dylib's data, and the loader writes
+it after the mapping.
 
-ld64 links an armv7 dylib at an address only up to a limit: a guest window at `0x28000000` links and runs on the
-phone, one at `0x48000000` or `0x50000000` is refused ("would make the output executable exceed available address
-range"), though a plain dylib links there. The base of a library therefore lies below about `0x40000000`.
+The range that must be fixed is small, so it can be put where no launch of the host app has anything: above the app's
+images and below the start of the random heap ([the map of the 4S](../../reference/recompiler/library-mode.md#the-address-space-of-a-host-on-the-4s),
+[the rule for `XL_BASE`](../../reference/recompiler/library-mode.md#choosing-xl_base)). What the host part needs is only a hole of its
+size, and the two free zones of the 4S (180 MB below the heap, 233 MB above it) together have about 410 MB of them.
 
 ## Loading
 
-What the phone's dyld (iOS 6.1.3) does with a preferred address was measured, not assumed:
+What the phone's dyld (iOS 6.1.3) does with a preferred address was measured, not assumed: a dylib that is `dlopen`ed at
+run time is placed at its preferred address if the range is free, and a dylib linked at address 0 is slid into the first
+hole that fits (dyld takes it with `vm_allocate` anywhere). The loader (`recompiler/src/loader/xl_loader.c`,
+`include/xl_loader.h`, and the format header `include/xl_guest_image.h`) is a `dlopen` loader, linked into the host app:
 
-- a dylib linked into the executable at launch is slid in a PIE process and honoured in a non-PIE one;
-- a dylib that is `dlopen`ed at run time is placed at its preferred address in both, if the range is free.
+1. `xl_reserve(path)` reads the guest image's header from the file, takes the guest range with `vm_allocate` at the fixed
+   address, protected `VM_PROT_NONE`, and takes room for the host part anywhere, also `VM_PROT_NONE`. An app calls it as
+   early as it can: the heap, other images and threads fill an address space from the bottom, and a range that is free at
+   launch is not free at login. If the guest range is held it fails with a message that names the holder (an image's
+   path, `malloc`, `stack`, a memory tag), its range and its size.
+2. `xl_load(path)` gives the room for the host part back and calls `dlopen`: dyld takes the first hole that fits, which is
+   the one just given back. It then calls the library's `xl_library_init`, which checks the header again and that the guest
+   range is still an untouched reservation, maps the segments, writes the slots, and loads the registry.
+3. Failures are statuses with a message (`xl_load_error`): a bad image or a format version the loader does not read, a
+   busy range, a failed `dlopen`, a failed mapping. The host app decides what to do; nothing in the loader aborts it, and a
+   library that was not reserved refuses to map anything, so it cannot write over memory that is not its own.
 
-The loader (`recompiler/src/loader/xl_loader.c`, `include/xl_loader.h`) is therefore a `dlopen` loader, linked into the
-host app:
+### The registry
 
-1. `xl_reserve(path)` reads the Mach-O header of the library and takes its whole range with `vm_allocate` at the fixed
-   address, protected `VM_PROT_NONE`. An app calls it as early as it can: the heap, other images and threads fill an
-   address space from the bottom, and a range that is free at launch is not free at login.
-2. `xl_load(path)` gives the reservation back, calls `dlopen`, and, if that fails, takes the reservation again. It then
-   calls the library's `xl_library_init`, which compares its own header with the link address. A library that dyld put
-   anywhere else is refused for good (`XL_LOAD_RELOCATED`): its guest addresses would be wrong, and running it would
-   corrupt memory instead of failing.
-3. Failures are statuses with a message (`xl_load_error`): a bad image, a busy range, a failed `dlopen`, a relocated
-   image. The host app decides what to do; nothing in the loader aborts it.
+libobjc registers the classes of an image while `dlopen` loads it: it reads the class structures from the image's
+`__objc_classlist`. The guest's class structures are in the guest image, which the library maps only after dyld has placed the
+host part and relocated the slots that point into it (the `isa` and the superclass of a guest class refer to symbols
+that are known only then). A list in the host dylib would therefore be read before the classes exist, and the process
+crashed in `dlopen` when it was tried.
 
-Only `xl_library_init` and `xl_library_diagnostics` are exported. The guest's symbols stay inside, so a library never
-takes a name from the host's own images or the other way round.
+So the lists are in a second, tiny dylib, `<name>-classes.dylib`, next to the library: the sections `__objc_classlist`,
+`__objc_protolist`, `__objc_catlist` and `__objc_imageinfo`, no code. `xl_library_init` `dlopen`s it as its last step
+before the guest's initializers run, when every class structure is in place, and libobjc registers the guest's classes
+from it. The second dylib is found by a rule (the name of the library without `.dylib`, plus `-classes.dylib`), and
+`xl_reserve` refuses a library that has none next to it. If that `dlopen` fails the status says so, and nothing was
+registered: the registry is what registers, and it has no side effects before it is loaded.
+
+The host dylib exports the structures of the guest's categories (`xl_objc_category_<n>`), because the registry's category
+list refers to them by symbol and dyld binds them when the registry is loaded.
+
+The only other exports of the library are `xl_library_init` and `xl_library_diagnostics`. The guest's symbols stay inside, so a
+library never takes a name from the host's own images or the other way round.
 
 ## The runtime inside someone else's process
 
