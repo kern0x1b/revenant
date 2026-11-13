@@ -68,6 +68,76 @@ local function dependencies(file, dirs, found)
     end
 end
 
+local function map_phases(text)
+    local phases = {}
+    for line in text:gmatch("[^\r\n]+") do
+        local phase, rest = line:match("^xl%-map (%S+) (.+)$")
+        if phase then
+            local entry = phases[phase]
+            if not entry then
+                entry = {regions = {}, holes = 0}
+                phases[phase] = entry
+            end
+            local first, last, size, protection, maximum, share, tag, name =
+                rest:match("^region 0x(%x+) 0x(%x+) 0x(%x+) (%S+)/(%S+) (%S+) (%d+) ?(.*)$")
+            if first then
+                table.insert(entry.regions, {first = tonumber(first, 16), last = tonumber(last, 16), size = tonumber(size, 16), protection = protection,
+                                             maximum = maximum, share = share, tag = tonumber(tag), name = name})
+            elseif rest:match("^hole 0x%x+ 0x%x+ 0x%x+$") then
+                entry.holes = entry.holes + 1
+            elseif rest == "begin" then
+                entry.begin = true
+            elseif rest == "end" then
+                entry.finish = true
+            else
+                local mapped, free, largest_start, largest_size, low =
+                    rest:match("^summary mapped=0x(%x+) free=0x(%x+) largest_start=0x(%x+) largest_size=0x(%x+) free_below_0x30000000=0x(%x+)$")
+                if mapped then
+                    entry.summary = {mapped = tonumber(mapped, 16), free = tonumber(free, 16), largest_start = tonumber(largest_start, 16),
+                                     largest_size = tonumber(largest_size, 16), low = tonumber(low, 16)}
+                end
+            end
+        end
+    end
+    return phases
+end
+
+local function map_overlap(entry, low, high)
+    local covered, overlapping = 0, {}
+    for _, region in ipairs(entry.regions) do
+        local first, last = math.max(region.first, low), math.min(region.last, high)
+        if last > first then
+            covered = covered + (last - first)
+            table.insert(overlapping, region)
+        end
+    end
+    return covered, overlapping
+end
+
+local function check_map(corpus, text, phases, what)
+    local found = map_phases(text)
+    for _, name in ipairs(phases) do
+        local entry = found[name]
+        if not entry or not entry.begin or not entry.finish or not entry.summary then
+            io.write(text)
+            corpus.fail("%s: the map %s is missing or has no begin, end or summary line", what, name)
+        end
+        local previous = 0
+        for _, region in ipairs(entry.regions) do
+            if region.first < previous or region.last <= region.first or region.last - region.first ~= region.size then
+                io.write(text)
+                corpus.fail("%s: the map %s lists a region 0x%x-0x%x out of order, empty or of another size than its range", what, name, region.first, region.last)
+            end
+            previous = region.last
+        end
+        if #entry.regions < 10 or entry.summary.largest_size < 0x100000 or entry.summary.mapped == 0 then
+            io.write(text)
+            corpus.fail("%s: the map %s has %d regions and a largest hole of 0x%x", what, name, #entry.regions, entry.summary.largest_size)
+        end
+    end
+    return found
+end
+
 local EXPECTED = {"reserve", "load", "class", "create", "methods", "describe", "bundle", "bundle.path", "token", "category", "completion", "completion.thread"}
 local SWIFT_HOST_EXPECTED = {"host.bridge.before", "host.names", "names.disjoint", "host.bridge.after"}
 
@@ -239,9 +309,9 @@ function main(out, ...)
     if os.getenv("XL_LIBRARY_INSTALL_NAME") == "executable" and variant == "objc" then
         environment = "XL_LIBRARY_NO_FALLBACK=1"
     end
-    local function launch(arguments)
+    local function launch(arguments, extra)
         return try { function ()
-            return device.run("chmod +x /var/tmp/xl-library/xl-library-host && cd /var/tmp/xl-library && " .. environment .. " ./xl-library-host " .. arguments .. " 2>&1; echo exit=$?")
+            return device.run("chmod +x /var/tmp/xl-library/xl-library-host && cd /var/tmp/xl-library && " .. (extra or "") .. environment .. " ./xl-library-host " .. arguments .. " 2>&1; echo exit=$?")
         end } or ""
     end
     local function verify(output, names, what)
@@ -290,7 +360,115 @@ function main(out, ...)
         end
         verify(output, expected, "launch " .. launch_number)
     end
+    for _, text in ipairs({output, table.concat(outputs, "\n")}) do
+        if text:find("xl-map", 1, true) then
+            io.write(text)
+            corpus.fail("the host printed a map of the address space with XL_LOADER_MAP unset")
+        end
+    end
+    local first, last = math.huge, 0
+    for _, segment in ipairs(list) do
+        if segment.name ~= "__PAGEZERO" and segment.size > 0 then
+            first = math.min(first, segment.address)
+            last = math.max(last, segment.address + segment.size)
+        end
+    end
+    local host_size = last - first
+    local mapped = launch("/var/tmp/xl-library/RCFixture.dylib " .. resident, "XL_LOADER_MAP=1 ")
+    verify(mapped, expected, "launch with XL_LOADER_MAP=1")
+    local found = check_map(corpus, mapped, {"before-reserve", "reserve", "before-dlopen", "load"}, "XL_LOADER_MAP=1")
+    if not mapped:find("\nxl-map reserve config host_reserve=1 host_size=0x" .. string.format("%x", host_size), 1, true) or
+       found["before-dlopen"].summary.largest_size < host_size then
+        io.write(mapped)
+        corpus.fail("the map has no config line of the reservation of the host part, or no hole of its %d bytes at the dlopen", host_size)
+    end
+    if map_overlap(found["before-reserve"], guest.low, guest.high) ~= 0 then
+        io.write(mapped)
+        corpus.fail("the map before the reservation already shows a mapping inside the guest range 0x%x-0x%x", guest.low, guest.high)
+    end
+    local covered, held = map_overlap(found.reserve, guest.low, guest.high)
+    for _, region in ipairs(held) do
+        if region.protection ~= "---" then
+            io.write(mapped)
+            corpus.fail("the map after xl_reserve shows 0x%x-0x%x of the guest range with protection %s, not ---", region.first, region.last, region.protection)
+        end
+    end
+    if covered ~= guest.high - guest.low then
+        io.write(mapped)
+        corpus.fail("the map after xl_reserve covers 0x%x of the guest range 0x%x-0x%x", covered, guest.low, guest.high)
+    end
+    local room = false
+    for _, region in ipairs(found.reserve.regions) do
+        if region.protection == "---" and region.size >= host_size and (region.last <= guest.low or region.first >= guest.high) then
+            room = true
+        end
+    end
+    if not room then
+        io.write(mapped)
+        corpus.fail("the map after xl_reserve shows no inaccessible region of the host part's %d bytes outside the guest range", host_size)
+    end
+    local function names_library(entry)
+        for _, region in ipairs(entry.regions) do
+            if region.name:find("RCFixture.dylib", 1, true) then
+                return true
+            end
+        end
+        return false
+    end
+    local _, mapped_guest = map_overlap(found.load, guest.low, guest.high)
+    local readable = false
+    for _, region in ipairs(mapped_guest) do
+        readable = readable or region.protection:sub(1, 1) == "r"
+    end
+    if not readable or names_library(found.reserve) or not names_library(found.load) then
+        io.write(mapped)
+        corpus.fail("the map after xl_load shows no readable guest segment, or the library's own image is not where it should be (reserve: %s, load: %s)",
+                    tostring(names_library(found.reserve)), tostring(names_library(found.load)))
+    end
+    local unreserved = launch("/var/tmp/xl-library/RCFixture.dylib " .. resident, "XL_LOADER_MAP=1 XL_LOADER_HOST_RESERVE=0 ")
+    verify(unreserved, expected, "launch with XL_LOADER_HOST_RESERVE=0")
+    local bare = check_map(corpus, unreserved, {"before-reserve", "reserve", "before-dlopen", "load"}, "XL_LOADER_HOST_RESERVE=0")
+    local _, bare_held = map_overlap(bare.reserve, guest.low, guest.high)
+    local bare_room = false
+    for _, region in ipairs(bare.reserve.regions) do
+        if region.protection == "---" and region.size >= host_size and (region.last <= guest.low or region.first >= guest.high) then
+            bare_room = true
+        end
+    end
+    if not unreserved:find("\nxl-map reserve config host_reserve=0 host_size=0x" .. string.format("%x", host_size) .. " host_low=0x0 ", 1, true) or bare_room or #bare_held == 0 or
+       not names_library(bare.load) then
+        io.write(unreserved)
+        corpus.fail("with XL_LOADER_HOST_RESERVE=0 the loader still holds room for the host part, lost the guest reservation, or the library did not load")
+    end
+    local crash_log = "/private/var/revenant/xlate-crash.log"
+    local function crash(extra)
+        device.run("rm -f " .. crash_log)
+        local text = launch("/var/tmp/xl-library/RCFixture.dylib " .. resident .. " --abort", extra)
+        return text .. "\n" .. (try { function ()
+            return device.run("cat " .. crash_log .. " 2>/dev/null; true")
+        end } or "")
+    end
+    local crashed = crash("XL_LOADER_MAP=1 ")
+    if not crashed:find("\nok diagnostics\n", 1, true) or not crashed:find("xlate: signal 6", 1, true) then
+        io.write(crashed)
+        corpus.fail("the host that aborts did not reach the crash handler of the runtime")
+    end
+    local crash_found = check_map(corpus, crashed, {"crash"}, "a crash with XL_LOADER_MAP=1")
+    local _, crash_guest = map_overlap(crash_found.crash, guest.low, guest.high)
+    local crash_readable = false
+    for _, region in ipairs(crash_guest) do
+        crash_readable = crash_readable or region.protection:sub(1, 1) == "r"
+    end
+    if not crash_readable then
+        io.write(crashed)
+        corpus.fail("the map in the crash handler shows no readable guest segment")
+    end
+    local silent = crash("")
+    if not silent:find("xlate: signal 6", 1, true) or silent:find("xl-map", 1, true) then
+        io.write(silent)
+        corpus.fail("the crash handler did not run, or printed a map with XL_LOADER_MAP unset")
+    end
     device.run("rm -rf /var/tmp/xl-library")
-    io.writefile(o("run.txt"), output .. table.concat(outputs, "\n"))
+    io.writefile(o("run.txt"), output .. table.concat(outputs, "\n") .. mapped .. crashed)
     print("ok: a translated library loads into a %s MB host and answers (%d checks in each of %d launches, %d negative controls)", resident, #expected, launches, #controls)
 end

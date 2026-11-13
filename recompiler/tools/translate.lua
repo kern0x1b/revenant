@@ -464,7 +464,7 @@ function translate(input, includes, out, images, opt)
     local extra_cflags = table.join(library and {"-DXL_LIBRARY"} or {}, words(getenv("XL_EXTRA_CFLAGS")))
     local clang = path.join(e.llvmbin, "clang")
     local runtime = path.join(lab, "src", "runtime")
-    run(clang, table.join(host, {"-I", out, "-I", runtime}, extra_cflags, {"-c", path.join(runtime, "runtime.c"), "-o", o("runtime.o")}))
+    run(clang, table.join(host, {"-I", out, "-I", runtime, "-I", path.join(lab, "include")}, extra_cflags, {"-c", path.join(runtime, "runtime.c"), "-o", o("runtime.o")}))
     run(clang, table.join(host, extra_cflags, {"-c", path.join(runtime, "crypto.c"), "-o", o("crypto.o")}))
     run(clang, table.join(host, extra_cflags, {"-c", path.join(runtime, "half.c"), "-o", o("half.o")}))
     if library then

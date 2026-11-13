@@ -1,6 +1,7 @@
 #include "xl_loader.h"
 
 #include "xl_guest_image.h"
+#include "xl_vm_map.h"
 
 #include <dlfcn.h>
 #include <fcntl.h>
@@ -112,47 +113,6 @@ static xl_load_status xl_read_image(const char *path, struct xl_image *image)
     return XL_LOAD_OK;
 }
 
-static const char *xl_region_name(unsigned int tag)
-{
-    switch (tag) {
-    case VM_MEMORY_MALLOC:
-        return "malloc";
-    case VM_MEMORY_MALLOC_SMALL:
-        return "malloc small";
-    case VM_MEMORY_MALLOC_LARGE:
-        return "malloc large";
-    case VM_MEMORY_MALLOC_TINY:
-        return "malloc tiny";
-    case VM_MEMORY_STACK:
-        return "stack";
-    default:
-        return NULL;
-    }
-}
-
-static const char *xl_region_image(uintptr_t start, uintptr_t end)
-{
-    uint32_t count = _dyld_image_count();
-    for (uint32_t image = 0; image < count; image++) {
-        const struct mach_header *header = _dyld_get_image_header(image);
-        if (!header || header->magic != MH_MAGIC)
-            continue;
-        intptr_t slide = _dyld_get_image_vmaddr_slide(image);
-        const uint8_t *cursor = (const uint8_t *)(header + 1);
-        for (uint32_t index = 0; index < header->ncmds; index++) {
-            const struct load_command *command = (const struct load_command *)cursor;
-            if (command->cmd == LC_SEGMENT) {
-                const struct segment_command *segment = (const struct segment_command *)cursor;
-                uintptr_t low = segment->vmaddr + slide, high = low + segment->vmsize;
-                if (segment->vmsize && low < end && high > start)
-                    return _dyld_get_image_name(image);
-            }
-            cursor += command->cmdsize;
-        }
-    }
-    return NULL;
-}
-
 static void xl_describe_occupant(uintptr_t low, uintptr_t high, char *text, size_t capacity)
 {
     vm_address_t address = low;
@@ -191,8 +151,16 @@ static xl_load_status xl_reserve_guest(const struct xl_image *image, const char 
     return XL_LOAD_OK;
 }
 
+static int xl_host_reserve_enabled(void)
+{
+    const char *value = getenv("XL_LOADER_HOST_RESERVE");
+    return !(value && strcmp(value, "0") == 0);
+}
+
 static xl_load_status xl_reserve_host(const struct xl_image *image, const char *path)
 {
+    if (!xl_host_reserve_enabled())
+        return XL_LOAD_OK;
     vm_address_t address = 0;
     if (vm_allocate(mach_task_self(), &address, image->host_size, VM_FLAGS_ANYWHERE) != KERN_SUCCESS)
         return xl_fail(XL_LOAD_RANGE_BUSY, "no free range of %lu MB for the host part of %s", (unsigned long)(image->host_size >> 20), path);
@@ -223,7 +191,7 @@ static xl_load_status xl_reserve_locked(const char *path)
     if (xl_guest_high || xl_host_low) {
         if (strcmp(resolved, xl_loader_path) != 0)
             return xl_fail(XL_LOAD_BAD_IMAGE, "%s is reserved, a process holds one translated library", xl_loader_path);
-        if (xl_guest_high && xl_host_low)
+        if (xl_guest_high && (xl_host_low || !xl_host_reserve_enabled()))
             return XL_LOAD_OK;
     }
     struct xl_image image;
@@ -241,10 +209,26 @@ static xl_load_status xl_reserve_locked(const char *path)
     return XL_LOAD_OK;
 }
 
+static void xl_map_phase(const char *phase, xl_load_status status)
+{
+    if (!xl_vm_map_enabled())
+        return;
+    char name[48];
+    snprintf(name, sizeof name, status == XL_LOAD_OK ? "%s" : "%s-failed", phase);
+    xl_vm_map_dump(STDERR_FILENO, name);
+}
+
 xl_load_status xl_reserve(const char *path)
 {
     pthread_mutex_lock(&xl_loader_lock);
+    if (!xl_guest_high && !xl_host_low && !xl_loaded_handle)
+        xl_map_phase("before-reserve", XL_LOAD_OK);
     xl_load_status status = xl_loader_final != XL_LOAD_OK ? xl_loader_final : xl_loaded_handle ? XL_LOAD_OK : xl_reserve_locked(path);
+    xl_map_phase("reserve", status);
+    if (xl_vm_map_enabled() && xl_reserved_image.host_size)
+        dprintf(STDERR_FILENO, "xl-map reserve config host_reserve=%d host_size=0x%lx host_low=0x%lx guest_low=0x%lx guest_high=0x%lx\n",
+                xl_host_reserve_enabled(), (unsigned long)xl_reserved_image.host_size, (unsigned long)xl_host_low,
+                (unsigned long)xl_reserved_image.guest_low, (unsigned long)xl_reserved_image.guest_high);
     pthread_mutex_unlock(&xl_loader_lock);
     return status;
 }
@@ -278,6 +262,7 @@ static xl_load_status xl_load_locked(const char *path)
     if (status != XL_LOAD_OK)
         return status;
     xl_release_host();
+    xl_map_phase("before-dlopen", XL_LOAD_OK);
     void *handle = dlopen(xl_loader_path, RTLD_NOW | RTLD_LOCAL);
     if (!handle) {
         xl_reserve_host(&xl_reserved_image, xl_loader_path);
@@ -298,6 +283,7 @@ xl_load_status xl_load(const char *path)
 {
     pthread_mutex_lock(&xl_loader_lock);
     xl_load_status status = xl_load_locked(path);
+    xl_map_phase("load", status);
     pthread_mutex_unlock(&xl_loader_lock);
     return status;
 }

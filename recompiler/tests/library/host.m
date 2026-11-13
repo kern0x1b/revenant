@@ -269,7 +269,12 @@ int main(int argc, char **argv)
         const char *path = argv[1];
         size_t target = argc > 2 ? (size_t)atoi(argv[2]) : 85;
         const char *expect = NULL;
+        BOOL abort_at_end = NO;
         for (int index = 3; index < argc; index++) {
+            if (strcmp(argv[index], "--abort") == 0) {
+                abort_at_end = YES;
+                continue;
+            }
             if (strncmp(argv[index], "--expect=", 9) == 0) {
                 expect = argv[index] + 9;
                 continue;
@@ -343,6 +348,15 @@ int main(int argc, char **argv)
         report("host.bridge.after", hostBridges(NO) && hostNamesUnchanged());
 #endif
         regions("end", 0x1000, 0xfffff000);
+        if (abort_at_end) {
+            void *handle = dlopen(path, RTLD_NOW | RTLD_NOLOAD);
+            void (*diagnostics)(void) = handle ? (void (*)(void))dlsym(handle, "xl_library_diagnostics") : NULL;
+            report("diagnostics", diagnostics != NULL);
+            if (diagnostics)
+                diagnostics();
+            fflush(stdout);
+            abort();
+        }
         line(@"done");
     }
     return 0;
