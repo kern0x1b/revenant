@@ -95,6 +95,16 @@ CASE(crypto_aesd, vaesdq_u8(v0, v1), 0)
 CASE(crypto_aesmc, vaesmcq_u8(v0), 0)
 CASE(crypto_aesimc, vaesimcq_u8(v0), 0)
 CASE(crypto_round, vaesmcq_u8(vaeseq_u8(v0, v1)), 0)
+CASE(crypto_trn1_16b, vtrn1q_u8(v0, v1), 0)
+CASE(crypto_trn2_16b, vtrn2q_u8(v0, v1), 0)
+CASE(crypto_trn1_8h, vreinterpretq_u8_u16(vtrn1q_u16(vreinterpretq_u16_u8(v0), vreinterpretq_u16_u8(v1))), 0)
+CASE(crypto_trn2_8h, vreinterpretq_u8_u16(vtrn2q_u16(vreinterpretq_u16_u8(v0), vreinterpretq_u16_u8(v1))), 0)
+CASE(crypto_trn1_4s, FROM_U32(vtrn1q_u32(U32(v0), U32(v1))), 0)
+CASE(crypto_trn2_4s, FROM_U32(vtrn2q_u32(U32(v0), U32(v1))), 0)
+CASE(crypto_trn1_2d, vreinterpretq_u8_u64(vtrn1q_u64(vreinterpretq_u64_u8(v0), vreinterpretq_u64_u8(v1))), 0)
+CASE(crypto_trn2_2d, vreinterpretq_u8_u64(vtrn2q_u64(vreinterpretq_u64_u8(v0), vreinterpretq_u64_u8(v1))), 0)
+CASE(crypto_trn1_8b, vcombine_u8(vtrn1_u8(vget_low_u8(v0), vget_low_u8(v1)), vdup_n_u8(0)), 0)
+CASE(crypto_trn2_8b, vcombine_u8(vtrn2_u8(vget_low_u8(v0), vget_low_u8(v1)), vdup_n_u8(0)), 0)
 CASE(crypto_sha1c, FROM_U32(vsha1cq_u32(U32(v0), (uint32_t)x0, U32(v1))), 0)
 CASE(crypto_sha1p, FROM_U32(vsha1pq_u32(U32(v0), (uint32_t)x0, U32(v1))), 0)
 CASE(crypto_sha1m, FROM_U32(vsha1mq_u32(U32(v0), (uint32_t)x0, U32(v1))), 0)
@@ -129,6 +139,16 @@ int main(void) {
     case_crypto_aesmc();
     case_crypto_aesimc();
     case_crypto_round();
+    case_crypto_trn1_16b();
+    case_crypto_trn2_16b();
+    case_crypto_trn1_8h();
+    case_crypto_trn2_8h();
+    case_crypto_trn1_4s();
+    case_crypto_trn2_4s();
+    case_crypto_trn1_2d();
+    case_crypto_trn2_2d();
+    case_crypto_trn1_8b();
+    case_crypto_trn2_8b();
     case_crypto_sha1c();
     case_crypto_sha1p();
     case_crypto_sha1m();
