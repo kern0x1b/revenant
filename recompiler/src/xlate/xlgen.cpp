@@ -2269,8 +2269,6 @@ void Generator::EmitClasses(const json::Object &manifest) {
       }
       registry << "};\n";
     };
-    // The lists are written under the forwarded names (__xlcls, __xlproto, __xlcat): ld64's Objective-C pass would read the
-    // entries as class structures and crash. translate.lua gives the real names back once the registry is linked.
     list("xl_registry_classes", "__xlcls", classlist);
     list("xl_registry_protocols", "__xlproto", protolist);
     list("xl_registry_categories", "__xlcat", catlist);

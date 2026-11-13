@@ -5,8 +5,6 @@ local EXPECTED = {
     "anycollection.int", "anycollection.string", "mirror.children", "describe.struct", "describe.class"
 }
 
--- `--host-only` stops after the translation (about ten minutes, no phone); `--device-only` runs the fixture that an earlier
--- `--host-only` run left in <out>/xl. With neither it does both.
 function main(out, ...)
     local host_only, device_only = false, false
     for _, argument in ipairs({...}) do

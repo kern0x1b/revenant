@@ -72,12 +72,9 @@ local EXPECTED = {"reserve", "load", "class", "create", "methods", "describe", "
 local SWIFT_HOST_EXPECTED = {"host.bridge.before", "host.names", "names.disjoint", "host.bridge.after"}
 
 local function build_objc(e, corpus, o, here)
-    -- ld64 merges a category into its class when both are in one dylib, which would leave the category list empty
     corpus.ios(e, {"-fuse-ld=" .. e.ld, "-Wl,-no_objc_category_merging", "-O2", "-w", "-fobjc-arc", "-dynamiclib", "-install_name", "@rpath/RCFixture.dylib", "-framework", "Foundation", "-I", here,
                    path.join(here, "fixture.m"), "-o", o("RCFixture.dylib")})
     io.writefile(o("includes.h"), string.format('#include "%s"\n#include "%s"\n', path.join(e.recompiler, "include", "uikit-includes.h"), path.join(here, "RCFixture.h")))
-    -- XL_LIBRARY_INSTALL_NAME=executable: the library is named by a path dyld resolves on iOS 6 without any environment, and the host is
-    -- started without DYLD_FALLBACK_LIBRARY_PATH, so the registry (which depends on the library by that name) has to find the loaded image by itself
     local install = os.getenv("XL_LIBRARY_INSTALL_NAME") == "executable" and "@executable_path/RCFixture.dylib" or nil
     return {XL_LIBRARY = "1", XL_INSTALL_NAME = install}, {}
 end
@@ -206,7 +203,7 @@ function main(out, ...)
         end
         expected = {}
         for _, name in ipairs(EXPECTED) do
-            if name ~= "category" then  -- the Swift fixture has no category
+            if name ~= "category" then
                 table.insert(expected, name)
             end
         end

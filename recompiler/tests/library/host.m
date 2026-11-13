@@ -178,8 +178,6 @@ static BOOL hostNamesUnchanged(void)
     return same;
 }
 
-// The classes of the library are registered by its registry (<name>-classes.dylib), not by the library itself, so the names of both images
-// are taken: none may be the name of a class of the host's own runtime, and the registry must register something.
 static unsigned classesOfImage(const char *path, BOOL *disjoint)
 {
     const char *base = strrchr(path, '/') ? strrchr(path, '/') + 1 : path;
@@ -324,7 +322,6 @@ int main(int argc, char **argv)
         report("bundle.path", [[[client hostBundle] performSelector:@selector(bundlePath)] isEqualToString:[[NSBundle mainBundle] bundlePath]]);
         id<RCFToken> token = [client tokenForAction:5];
         report("token", [token value] == 7051);
-        // only the Objective-C fixture has a category; the check expects "category" ok from that variant and from no other
         if ([client respondsToSelector:@selector(categoryValue)]) {
             report("category", [client categoryValue] == 42);
         }

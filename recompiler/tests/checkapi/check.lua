@@ -1,8 +1,3 @@
--- Every check script reaches the recompiler's tool modules (corpus, translate, env) through a local alias
--- (`local corpus = import("corpus", {rootdir = <tools>})`). A call `corpus.name(` to a function the module does not define
--- fails only when that script runs, and some scripts run only on a phone (the device group), so a rename in a module can leave a
--- caller broken for weeks. This check reads the scripts and the modules and compares the names, with no phone and no build.
-
 local function defined(module)
     local names = {}
     for _, line in ipairs(io.readfile(module):split("\n", {plain = true})) do

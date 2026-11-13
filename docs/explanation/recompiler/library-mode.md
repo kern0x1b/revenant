@@ -71,6 +71,11 @@ from it. The second dylib is found by a rule (the name of the library without `.
 `xl_reserve` refuses a library that has none next to it. If that `dlopen` fails the status says so, and nothing was
 registered: the registry is what registers, and it has no side effects before it is loaded.
 
+The registry is built the way an executable's lists are: `xlgen` writes them under the names `__xlcls`, `__xlproto` and
+`__xlcat`, and `translate.lua` gives the names `__objc_classlist`, `__objc_protolist` and `__objc_catlist` back once the
+registry is linked. Under the real names ld64's Objective-C pass reads every entry of a class list as a class structure,
+and the numbers that stand for guest addresses made it fail with a crash.
+
 The host dylib exports the structures of the guest's categories (`xl_objc_category_<n>`), because the registry's category
 list refers to them by symbol and dyld binds them when the registry is loaded.
 
