@@ -366,6 +366,9 @@ checks, among them:
 
 The check wants every name `ok`, no `FAIL`, the `deinit` line, and exit 0.
 
+The translation takes about ten minutes and needs no phone: `check.lua <out> --host-only` stops after it, and
+`check.lua <out> --device-only` runs the fixture that run left in `<out>/xl` on the claimed phone (26 names `ok`).
+
 It needs the arm64 runtime, so `XL_SWIFTOBJC_LIBS` names the folder with `libswiftCore.dylib` (the one that
 `revenant@swift-runtime` built for arm64, which carries `-DSWIFT_CLASS_IS_SWIFT_MASK=1ULL`), `libc++.1.dylib` and
 `libc++abi.1.dylib`. The fixture is compiled like swiftconformance's, for iOS 12.0 with the legacy type info: that

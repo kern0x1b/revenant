@@ -204,7 +204,13 @@ function main(out, ...)
         if bridging then
             table.join2(host_flags, {"-DRC_BRIDGING", "-lswiftFoundation"})
         end
-        expected = table.join(EXPECTED, SWIFT_HOST_EXPECTED)
+        expected = {}
+        for _, name in ipairs(EXPECTED) do
+            if name ~= "category" then  -- the Swift fixture has no category
+                table.insert(expected, name)
+            end
+        end
+        expected = table.join(expected, SWIFT_HOST_EXPECTED)
     end
     corpus.armv7(e, table.join(host_flags, host_sources, {"-o", o("host")}))
     corpus.sign(e, o("host"))

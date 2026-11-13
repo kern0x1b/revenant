@@ -147,7 +147,7 @@ The `swift` variant builds the host with Swift code of its own (`hostswift.swift
 |---|---|
 | `host.bridge.before` | before the library loads, the three are objects that are not of the namespace |
 | `host.names` | after `xl_load`, every name of the host runtime answers with the host's class |
-| `names.disjoint` | the library registered classes, and none has the name of a class of the host runtime |
+| `names.disjoint` | the registry registered classes (the host takes the classes of the library's image and of its registry), and none has the name of a class of the host runtime |
 | `host.bridge.after` | after the calls, the three are the same classes with the same contents, and the names still hold |
 
 | Variable | Meaning |
@@ -164,31 +164,34 @@ compares the classes only.
 
 ## Measurements
 
-The host grows its heap with 1 MB `malloc` chunks until `task_info` reports 85 MB resident (87,3xx K counting the
-frameworks). Sizes are K.
+The host grows its heap with 1 MB `malloc` chunks until `task_info` reports 85 MB resident (87 MB counting the frameworks).
+`host.m` calls `xl_reserve` first, as an app does from a constructor, so the first row already holds the reservation (the guest
+range and the room for the host part). Sizes are K; each cell is the lowest and the highest of 40 launches on the 4S
+(iOS 6.1.3), the check of the same commit, `XL_BASE` `0x10000000`.
 
-| Step | Objective-C variant | Swift variant (guest libswiftCore, libc++, libc++abi) |
+| Step | Objective-C variant (library 312 KB) | Swift variant (library 162.1 MB, guest libswiftCore, libc++, libc++abi) |
 |---|---|---|
-| library file | small | 119.5 MB |
-| host before | 87,328 resident, 360,064 virtual, 1 thread | 87,324, 360,064, 1 |
-| after `xl_reserve` | 87,332, 377,568 | 87,332, 503,360 (+143 MB virtual) |
-| after `xl_load` | 87,408 (+80) | 88,676 (+1.35 MB) |
-| after the calls | 87,728 (+320) | 90,696 (+2.0 MB) |
-| after the background call | 87,772, 394,280, 2 threads | 90,880, 521,108, 5 threads |
+| host with the reservation, resident / virtual | 87,340-87,360 / 361,680 | 87,912-87,932 / 536,496 |
+| after `xl_reserve` returned | 87,340-87,360 / 361,680 | 88,316-88,344 / 536,496 |
+| after `xl_load` | 87,448-87,464 / 378,120 | 90,156-90,176 / 552,944 |
+| after the calls | 87,752-87,772 / 378,120 | 92,148-92,172 / 552,944 |
+| after the background call | 87,804-87,852 / 395,544-404,760, 2 threads | 92,300-92,368 / 563,276-580,708, 3 to 5 threads |
 
-The Swift variant costs 2.2 MB of resident memory with the first calls done, though its file is 119 MB: only the pages
-the run touches become resident. The five threads are the host's main thread and the workers that
-`performSelector(inBackground:)` and Dispatch started.
+The Swift variant costs 4.4 MB of resident memory with the first calls done, though its file is 162 MB: only the pages
+the run touches become resident, and mapped pages that are never run cost nothing. The threads are the host's main
+thread and the workers that `performSelector(inBackground:)` and Dispatch started.
 
-The table is the first measurement, with a 119.5 MB library and a host without Swift. The Swift variant has grown to
-162 MB since; its window is 176 MiB (host `__TEXT` at `0x21000000` for the base below), so the host that has a Swift
-runtime needs `XL_BASE=0x2c000000` (next section), and the numbers with a Swift runtime of its own are in
-[the namespace section](#a-host-that-has-its-own-swift-runtime).
+The address map of the Swift variant: the guest image `0x10000000` to `0x10910000` (10 segments, 9.1 MB: the guest
+libswiftCore's text is `0x4c4000` at `0x10100000`, its data at `0x105c4000`; 6,438,912 bytes of it are in the library, the zero tails
+are not), and a host part that dyld places in a hole of 162 MB (`__TEXT` 104 MiB). Before this layout the host part was
+fixed too, at `0x21000000` to `0x2ccd4000` with the guest after it, which is what failed in 3 of 20 launches of Telegram13.
 
-Address map of the first Swift variant at the default base: host `__TEXT` at `0x08000000` (`0x6894000`, 104 MiB), host
-`__DATA` at `0x0e894000`, guest `__X0` to `__X4` from `0x10000000` to `0x10910000` (`__X1` is the guest libswiftCore:
-text `0x4c4000` at `0x10100000`, data at `0x105c4000`), `__LINKEDIT` at `0x10910000` (`0x2e0000`). The ObjC variant
-occupies `0x0f000000` to `0x10118000` (17 MB).
+In the 40 launches of the Swift variant the start of the malloc heap was `0x1c500000` 8 times, `0x1cd00000` 7, `0x1d500000` 3,
+`0x1e500000` 8, `0x1ed00000` 5, `0x1f500000` 6 and `0x1fd00000` 3 times (and in the 40 of the Objective-C variant at
+85 MB all eight starts, `0x1fd00000` 5 times; in the 40 at 22 MB all eight, 6 times): the library loaded in every one. With the
+ten launches of the first full check, 130 launches of the host were made without a refusal of the reservation, and
+the controls (a held range, a format this loader does not read, a registry that is missing, an init without a
+reservation) refused as they must, in every run.
 
 Where the heap, the stack and the images of an app sit, and why, is in [the next section](#the-address-space-of-a-host-on-the-4s).
 
@@ -269,16 +272,18 @@ overlays under the prefix, so the host keeps its names and a clash is the except
   first, a name of a namespaced module only there, and the name the guest gets back has no prefix. They are bridged in an
   executable too; with no prefix they pass the call through.
 
-Measured on the 4S with `XL_BASE=0x2c000000`, Swift variant: 15 of 15 `ok` (the 11 of the check and the 4 of the Swift
-host), no "implemented in both" line.
+Measured on the 4S, Swift variant, 40 launches: 15 of 15 `ok` in each (the 11 of the check and the 4 of the Swift
+host), no "implemented in both" line. The rows below were measured on the first design (a fixed range at
+`XL_BASE=0x2c000000`) and were not repeated with the host's Swift runtime from Telegram13 on the new layout; the second
+row is the new layout with the package's runtime (the table above has its counts).
 
 | Host | Resident K: host, loaded, called, end | Virtual | Threads |
 |---|---|---|---|
 | Telegram13's `libswiftCore` and Foundation overlay, bridging on (`XL_LIBRARY_HOST_BRIDGING`) | 88,000, 90,600, 92,420, 92,504 | about 575 MB | 5 |
-| the package's armv7 runtime next to the host | 87,912, 89,984, 92,040, 92,224 | | 4 |
+| the package's armv7 runtime next to the host (new layout, 40 launches) | 87,912-87,932, 90,156-90,176, 92,148-92,172, 92,300-92,368 | 563 to 581 MB | 3 to 5 |
 
 The host's Swift is the same before and after the library loads: 42 classes of its runtime answer by name with the same
-objects, the library registers 33 classes and none has a name of the host runtime, and the box, the `[Any]` and the
+objects, the library registers 33 classes (31 through its registry, 2 that the library itself makes) and none has a name of the host runtime, and the box, the `[Any]` and the
 `String` that the host's Swift makes are the same classes with the same contents. The Objective-C variant is 11 of 11.
 
 Not covered: protocols are not namespaced (`objc_getProtocol` is not bridged); `NSClassFromString` and

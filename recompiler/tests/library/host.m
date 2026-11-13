@@ -3,6 +3,7 @@
 #import <objc/message.h>
 #include <mach/mach.h>
 #include <dlfcn.h>
+#include <limits.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -177,12 +178,14 @@ static BOOL hostNamesUnchanged(void)
     return same;
 }
 
-static BOOL namesDisjoint(const char *library)
+// The classes of the library are registered by its registry (<name>-classes.dylib), not by the library itself, so the names of both images
+// are taken: none may be the name of a class of the host's own runtime, and the registry must register something.
+static unsigned classesOfImage(const char *path, BOOL *disjoint)
 {
-    const char *base = strrchr(library, '/') ? strrchr(library, '/') + 1 : library;
+    const char *base = strrchr(path, '/') ? strrchr(path, '/') + 1 : path;
     unsigned images = 0, count = 0;
     const char **list = objc_copyImageNames(&images);
-    const char *image = library;
+    const char *image = path;
     for (unsigned i = 0; i < images; i++) {
         const char *name = strrchr(list[i], '/') ? strrchr(list[i], '/') + 1 : list[i];
         if (strcmp(name, base) == 0)
@@ -190,17 +193,25 @@ static BOOL namesDisjoint(const char *library)
     }
     const char **names = objc_copyClassNamesForImage(image, &count);
     free(list);
-    BOOL disjoint = count > 0;
     for (unsigned i = 0; i < count; i++) {
         if (hostClasses[[NSString stringWithUTF8String:names[i]]]) {
             printf("both %s\n", names[i]);
-            disjoint = NO;
+            *disjoint = NO;
         }
     }
-    printf("library registers %u classes\n", count);
-    fflush(stdout);
     free(names);
-    return disjoint;
+    return count;
+}
+
+static BOOL namesDisjoint(const char *library)
+{
+    char registry[PATH_MAX];
+    BOOL disjoint = YES;
+    unsigned own = classesOfImage(library, &disjoint);
+    unsigned registered = xl_registry_path(library, registry, sizeof registry) ? classesOfImage(registry, &disjoint) : 0;
+    printf("library registers %u classes (its registry %u, the library itself %u)\n", own + registered, registered, own);
+    fflush(stdout);
+    return disjoint && registered > 0;
 }
 
 static BOOL hostBridges(BOOL record)
@@ -313,7 +324,10 @@ int main(int argc, char **argv)
         report("bundle.path", [[[client hostBundle] performSelector:@selector(bundlePath)] isEqualToString:[[NSBundle mainBundle] bundlePath]]);
         id<RCFToken> token = [client tokenForAction:5];
         report("token", [token value] == 7051);
-        report("category", [client categoryValue] == 42);
+        // only the Objective-C fixture has a category; the check expects "category" ok from that variant and from no other
+        if ([client respondsToSelector:@selector(categoryValue)]) {
+            report("category", [client categoryValue] == 42);
+        }
         measure("called");
 
         dispatch_semaphore_t done = dispatch_semaphore_create(0);
