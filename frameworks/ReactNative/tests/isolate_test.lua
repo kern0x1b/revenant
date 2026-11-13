@@ -65,9 +65,15 @@ expect("a swift-runtime with other configs is refused", message ~= nil and messa
        "the copy was rewritten or the refusal does not name swift-runtime")
 
 local shared = isolate.shared_packages(APPLICATION)
-expect("the copy asks swiftui, cryptokit, uniformtypeidentifiers and swift-crypto for a shared swift-runtime",
-       shared:find('add_requireconfs("**.swiftui", {configs = {shared = true}})', 1, true) ~= nil
-       and shared:find('add_requireconfs("**.cryptokit", {configs = {shared = true}})', 1, true) ~= nil
-       and shared:find('add_requireconfs("**.uniformtypeidentifiers", {configs = {shared = true}})', 1, true) ~= nil
-       and shared:find('add_requireconfs("**.swift-crypto", {configs = {shared = true}})', 1, true) ~= nil, "a package lacks its shared rule")
+local missing = {}
+for _, name in ipairs({"swiftui", "cryptokit", "uniformtypeidentifiers", "swift-crypto"}) do
+    for _, pattern in ipairs({name, "**." .. name}) do
+        local line = 'add_requireconfs("' .. pattern .. '", {configs = {shared = true, apple_sdk = get_config("apple_sdk")}})'
+        if not shared:find(line, 1, true) then
+            table.insert(missing, pattern)
+        end
+    end
+end
+expect("the copy asks the four packages, as the application requires them and as its dependants do, for a shared swift-runtime and keeps the SDK",
+       #missing == 0, "no shared rule for " .. table.concat(missing, ", "))
 expect("the shared rules are carried once", isolate.shared_packages(shared) == shared, "a second pass changed the copy")

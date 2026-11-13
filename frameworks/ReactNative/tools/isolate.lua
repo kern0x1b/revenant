@@ -32,9 +32,11 @@ local SHARED_PACKAGES = {"swiftui", "cryptokit", "uniformtypeidentifiers", "swif
 function shared_packages(text)
     local added = {}
     for _, name in ipairs(SHARED_PACKAGES) do
-        local line = 'add_requireconfs("**.' .. name .. '", {configs = {shared = true}})'
-        if not text:find(line, 1, true) then
-            table.insert(added, line)
+        for _, pattern in ipairs({name, "**." .. name}) do
+            local line = 'add_requireconfs("' .. pattern .. '", {configs = {shared = true, apple_sdk = get_config("apple_sdk")}})'
+            if not text:find(line, 1, true) then
+                table.insert(added, line)
+            end
         end
     end
     if #added > 0 then
