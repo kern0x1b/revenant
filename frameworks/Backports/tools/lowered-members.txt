@@ -13596,11 +13596,13 @@ member CADisplayLink -setPreferredFrameRateRange:
 member CADisplayLink -setPreferredFramesPerSecond:
 member CADisplayLink -targetTimestamp
 member CALayer +load
+member CALayer -contentsMultiplyColor
 member CALayer -cornerCurve
 member CALayer -maskedCorners
 member CALayer -revenantRefreshIOSurface
 member CALayer -revenantShowIOSurface:
 member CALayer -revenant_setContents:
+member CALayer -setContentsMultiplyColor:
 member CALayer -setCornerCurve:
 member CALayer -setMaskedCorners:
 member CAMetalLayer -EDRMetadata
