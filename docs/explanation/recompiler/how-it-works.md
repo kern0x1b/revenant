@@ -73,7 +73,8 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
   `objc_getClass` give, so `class_getSuperclass` of a guest class and `object_getClass` of an `NSObject` agree with
   `&OBJC_CLASS_$_NSObject`; the runtime used to make the twin for every shadow and hand it out at once, and such a program
   met two classes named `NSObject`. A program with Swift classes of a host ancestor still has both names once the twin is
-  published. The runtime keeps the tables in both directions
+  published. A class of the guest's own image is never given a twin: an executable's image is known to `dladdr`, and a
+  library's, which the loader maps itself, is known by its range (`xl_guest_low`, `xl_guest_high`). The runtime keeps the tables in both directions
   (`xl_guest_to_host`, `xl_host_to_guest`, `xl_host_twin`, `xl_twin_host`) and the bridge translates at each crossing, as it
   does for a shadow. The copy of the Swift part is made when the shadow is built and made again before `+alloc`
   (`xl_swift_sync_class`), because the Swift runtime writes into its class when it first uses it. The host's libobjc

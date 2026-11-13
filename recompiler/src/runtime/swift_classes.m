@@ -317,6 +317,8 @@ enum {
 
 static int xl_class_in_image(uintptr_t host)
 {
+    if (host >= xl_guest_low && host < xl_guest_high)
+        return 1;
     static uintptr_t own;
     Dl_info info;
     if (!own) {
