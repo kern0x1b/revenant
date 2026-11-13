@@ -1,0 +1,81 @@
+From 8f293cb28b8a8c02a803b3aac712b9385d083112 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Sat, 14 Nov 2026 00:13:30 +0100
+Subject: [PATCH] Compute the flags of the AArch64 ADC and SBC instructions
+ without wrapping
+
+The lifter added the carry to the second operand before it computed the
+flags, so an operand of all ones wrapped to zero and ADCS and SBCS set the
+carry and overflow flags from the wrong value. BoringSSL's stitched
+ChaCha20-Poly1305 reduces the Poly1305 accumulator with an ADDS and two
+SBCS against all ones, and the tag of a 1000-byte message came out wrong on
+the iPhone 4S whenever the top limb was 3. SBC is now Rn + NOT(Rm) + carry,
+and the flags come from that sum: the carry from a comparison of the result
+with Rn that depends on the carry in, the overflow from the signs of the
+operands and of the result.
+---
+ src/a64/lifter-private.h |  1 +
+ src/a64/main.cc          | 24 +++++++++++++++---------
+ 2 files changed, 16 insertions(+), 9 deletions(-)
+
+diff --git a/src/a64/lifter-private.h b/src/a64/lifter-private.h
+index 47f1814..5743160 100644
+--- a/src/a64/lifter-private.h
++++ b/src/a64/lifter-private.h
+@@ -65,6 +65,7 @@ private:
+     void SetScalar(farmdec::Reg r, llvm::Value* val);
+ 
+     void FlagCalcAdd(llvm::Value* res, llvm::Value* lhs, llvm::Value* rhs);
++    void FlagCalcAddWithCarry(llvm::Value* res, llvm::Value* lhs, llvm::Value* rhs, llvm::Value* carry);
+     void FlagCalcSub(llvm::Value* res, llvm::Value* lhs, llvm::Value* rhs);
+     void FlagCalcLogic(llvm::Value* res);
+ 
+diff --git a/src/a64/main.cc b/src/a64/main.cc
+index 42ddbf2..b0ee70b 100644
+--- a/src/a64/main.cc
++++ b/src/a64/main.cc
+@@ -552,19 +552,17 @@ bool Lifter::Lift(const Instr& inst) {
+     case farmdec::A64_SBC:
+     case farmdec::A64_NGC: {
+         // ADC: Rd := Rn + Rm + carry.
+-        // SBC: Rd := Rn - (Rm + NOT(carry)).
+-        bool add = (a64.op == farmdec::A64_ADC);
++        // SBC: Rd := Rn - Rm - NOT(carry), which is Rn + NOT(Rm) + carry.
+         auto lhs = GetGp(a64.rn, w32);
+         auto rhs = GetGp(a64.rm, w32);
++        if (a64.op != farmdec::A64_ADC) {
++            rhs = irb.CreateNot(rhs);
++        }
+         auto cf = GetFlag(ArchReg::CF);
+-        cf = (add) ? cf : irb.CreateNot(cf);
+-        rhs = irb.CreateAdd(rhs, irb.CreateZExt(cf, irb.getIntNTy(bits)));
+-        auto val = (add) ? irb.CreateAdd(lhs, rhs) : irb.CreateSub(lhs, rhs);
++        auto val = irb.CreateAdd(irb.CreateAdd(lhs, rhs), irb.CreateZExt(cf, irb.getIntNTy(bits)));
+         SetGp(a64.rd, w32, val);
+-        if (set_flags && add) {
+-            FlagCalcAdd(val, lhs, rhs);
+-        } else if (set_flags && !add) {
+-            FlagCalcSub(val, lhs, rhs);
++        if (set_flags) {
++            FlagCalcAddWithCarry(val, lhs, rhs, cf);
+         }
+         break;
+     }
+@@ -1045,6 +1043,14 @@ void Lifter::FlagCalcAdd(llvm::Value* res, llvm::Value* lhs, llvm::Value* rhs) {
+     }
+ }
+ 
++void Lifter::FlagCalcAddWithCarry(llvm::Value* res, llvm::Value* lhs, llvm::Value* rhs, llvm::Value* carry) {
++    auto zero = llvm::Constant::getNullValue(res->getType());
++    regfile->Set(ArchReg::ZF, RegFile::Transform::IsZero, res);
++    regfile->Set(ArchReg::SF, RegFile::Transform::IsNeg, res);
++    SetReg(ArchReg::CF, irb.CreateSelect(carry, irb.CreateICmpULE(res, lhs), irb.CreateICmpULT(res, lhs)));
++    SetReg(ArchReg::OF, irb.CreateICmpSLT(irb.CreateAnd(irb.CreateXor(lhs, res), irb.CreateXor(rhs, res)), zero));
++}
++
+ void Lifter::FlagCalcSub(llvm::Value* res, llvm::Value* lhs, llvm::Value* rhs) {
+     auto zero = llvm::Constant::getNullValue(res->getType());
+     llvm::Value* sf = irb.CreateICmpSLT(res, zero);  // also used for OF
+-- 
+2.54.0 (Apple Git-157)
+
