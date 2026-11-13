@@ -67,7 +67,13 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
   superclass is the host ancestor, with a copy of the Swift part of the guest's class after its 20 bytes
   (`objc_allocateClassPair`'s extra bytes). An instance is a real host object (its isa word is the shadow), so host code
   can message it, and `NSObject`'s own methods work on it. The guest's class gets a guest-layout twin of the host
-  ancestor as its superclass, so the Swift runtime can walk the ancestry. The runtime keeps the tables in both directions
+  ancestor as its superclass, so the Swift runtime can walk the ancestry. The twin is what the guest is told the host
+  class is only from the moment a Swift class with that ancestor is built (`xl_publish_twins`). Before that, and in a
+  program whose classes are all Objective-C, the host class goes out under its own address, the one that its symbol and
+  `objc_getClass` give, so `class_getSuperclass` of a guest class and `object_getClass` of an `NSObject` agree with
+  `&OBJC_CLASS_$_NSObject`; the runtime used to make the twin for every shadow and hand it out at once, and such a program
+  met two classes named `NSObject`. A program with Swift classes of a host ancestor still has both names once the twin is
+  published. The runtime keeps the tables in both directions
   (`xl_guest_to_host`, `xl_host_to_guest`, `xl_host_twin`, `xl_twin_host`) and the bridge translates at each crossing, as it
   does for a shadow. The copy of the Swift part is made when the shadow is built and made again before `+alloc`
   (`xl_swift_sync_class`), because the Swift runtime writes into its class when it first uses it. The host's libobjc

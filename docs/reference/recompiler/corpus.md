@@ -282,6 +282,11 @@ README's "Classes the Swift runtime lays out" has the design.
    - `XLPairRoot` has a `+initialize` that fills `x0` to `x8` and `d0` to `d7`. libobjc sends it to the shadow of
      `XLPairFresh` while the first message to that class is looked up. The message has integer and floating-point
      arguments and a structure result, and the receiver and all four arguments must arrive.
+5. Device part, the identity of a host class ("twin pair" in
+   [how the recompiler works](../../explanation/recompiler/how-it-works.md)): the program has Objective-C classes under
+   `NSObject` and no Swift class, so `class_getSuperclass` of `XLPairStatic` and `XLPairBuilt`, `object_getClass` of an
+   `NSObject` instance and `[NSObject class]` must all be `&OBJC_CLASS_$_NSObject`, as on macOS. The run on the iPhone 4S
+   prints `expected.txt` whole.
 
 The arm64 input is linked with Revenant's `ld64`. The linker of Xcode 15 and later drops `__objc_clsrolist`, which Swift
 binaries carry.
