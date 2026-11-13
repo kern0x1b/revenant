@@ -8,6 +8,7 @@ static: instance class is the class: 1
 static: instance method: 42
 static: [instance class] is the class: 1
 static: subclass of NSObject: 1
+nsobject: the class of an instance is the class its symbol names: 1, and so is its class message: 1
 listed: found by name: 1
 listed: root found by name: 1
 listed: self is the class: 1
@@ -19,6 +20,17 @@ listed: instances respond: 1, the class responds to the class method: 1
 listed: instance class is the class: 1
 listed: instance method: 42
 listed: [instance class] is the class: 1
+clsro leaf: self is the class: 1
+clsro leaf: name: XLPairClsroLeaf
+clsro leaf: superclass: XLPairRoot, the expected one: 1
+clsro leaf: isa is the metaclass: 1, and a metaclass: 1
+clsro leaf: class method: 141
+clsro leaf: instances respond: 1, the class responds to the class method: 1
+clsro leaf: instance class is the class: 1
+clsro leaf: instance method: 42
+clsro leaf: [instance class] is the class: 1
+fresh: the first message keeps its receiver: 1, and its arguments: 1 2.50 3 4.25
+root: +initialize ran: 1
 readClassPair: returns the class: 1
 readClassPair: found by name: 1
 built: self is the class: 1

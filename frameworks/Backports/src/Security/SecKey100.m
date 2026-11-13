@@ -7,6 +7,9 @@ extern OSStatus SecKeyCopyPublicBytes(SecKeyRef key, CFDataRef *serializedPublic
 extern SecKeyRef SecKeyCreateFromPublicData(CFAllocatorRef allocator, CFIndex algorithmID, CFDataRef serialized);
 extern CFDictionaryRef SecKeyCopyAttributeDictionary(SecKeyRef key);
 extern CFIndex SecKeyGetAlgorithmID(SecKeyRef key);
+extern SecKeyRef SecKeyCreateRSAPublicKey(CFAllocatorRef allocator, const uint8_t *keyData, CFIndex keyDataLength, uint32_t encoding);
+extern SecKeyRef SecKeyCreateRSAPrivateKey(CFAllocatorRef allocator, const uint8_t *keyData, CFIndex keyDataLength, uint32_t encoding);
+extern int RevenantCKValidPublicKeyES256(const uint8_t *publicKey, size_t publicLength);
 
 static void revenant_sec_fail(CFErrorRef *error, OSStatus status, NSString *description)
 {
@@ -60,17 +63,16 @@ static const uint8_t *revenant_der_value(const uint8_t *cursor, const uint8_t *e
     return cursor;
 }
 
-static size_t revenant_der_integers(CFDataRef data, BOOL *starts_at_zero)
+static size_t revenant_der_integers(const uint8_t *bytes, CFIndex count, BOOL *starts_at_zero, CFIndex *whole)
 {
-    const uint8_t *bytes = CFDataGetBytePtr(data);
-    CFIndex count = CFDataGetLength(data);
     if (!bytes || count <= 0)
         return 0;
     size_t length = 0;
     const uint8_t *cursor = revenant_der_value(bytes, bytes + count, 0x30, &length);
-    if (!cursor || cursor + length != bytes + count)
+    if (!cursor)
         return 0;
     const uint8_t *end = cursor + length;
+    *whole = end - bytes;
     size_t integers = 0;
     *starts_at_zero = NO;
     while (cursor < end) {
@@ -89,7 +91,9 @@ static size_t revenant_der_integers(CFDataRef data, BOOL *starts_at_zero)
 static BOOL revenant_is_private_representation(CFDataRef data)
 {
     BOOL zero = NO;
-    return revenant_der_integers(data, &zero) == 9 && zero;
+    CFIndex whole = 0;
+    return revenant_der_integers(CFDataGetBytePtr(data), CFDataGetLength(data), &zero, &whole) == 9 && zero
+        && whole == CFDataGetLength(data);
 }
 
 static BOOL revenant_says_public(CFDictionaryRef attributes)
@@ -224,16 +228,25 @@ CFDataRef BACKPORT_IMPL(SecKeyCopyExternalRepresentation)(SecKeyRef key, CFError
         return NULL;
     }
     if (RevenantSecureEnclaveKeyIs(key)) {
-        if (RevenantSecureEnclaveKeyIsPrivate(key)) {
-            revenant_sec_fail(error, errSecUnimplemented, @"export not implemented for key");
-            return NULL;
-        }
-        uint8_t point[65];
-        if (RevenantSecureEnclaveKeyPoint(key, point) != errSecSuccess) {
+        uint8_t exported[97];
+        if (RevenantSecureEnclaveKeyPoint(key, exported) != errSecSuccess) {
             revenant_sec_fail(error, errSecInternalError, @"the emulated key keeps no public point");
             return NULL;
         }
-        return CFDataCreate(kCFAllocatorDefault, point, sizeof point);
+        if (!RevenantSecureEnclaveKeyIsPrivate(key))
+            return CFDataCreate(kCFAllocatorDefault, exported, 65);
+        if (!RevenantSecureEnclaveKeyIsImported(key)) {
+            revenant_sec_fail(error, errSecUnimplemented, @"export not implemented for key");
+            return NULL;
+        }
+        OSStatus status = RevenantSecureEnclaveKeyScalar(key, exported + 65);
+        if (status != errSecSuccess) {
+            revenant_sec_fail(error, status, @"the imported key keeps no private scalar to export");
+            return NULL;
+        }
+        CFDataRef whole = CFDataCreate(kCFAllocatorDefault, exported, sizeof exported);
+        memset(exported + 65, 0, 32);
+        return whole;
     }
     CFDataRef stored = revenant_sec_stored_data(key);
     if (stored && revenant_is_private_representation(stored))
@@ -253,5 +266,114 @@ CFDataRef BACKPORT_IMPL(SecKeyCopyExternalRepresentation)(SecKeyRef key, CFError
     revenant_sec_fail(error, status != errSecSuccess ? status : errSecUnimplemented,
                     @"the release keeps no external representation of this key: it answers the public half only, "
                     @"and returning that for a private key would be a different key");
+    return NULL;
+}
+
+static const uint8_t revenant_rsa_encryption_oid[] = {0x2a, 0x86, 0x48, 0x86, 0xf7, 0x0d, 0x01, 0x01, 0x01};
+static const uint32_t revenant_rsa_encoding_pkcs1 = 1;
+
+static BOOL revenant_rsa_public_slice(const uint8_t *bytes, CFIndex count, const uint8_t **slice, CFIndex *length)
+{
+    BOOL zero = NO;
+    CFIndex whole = 0;
+    if (revenant_der_integers(bytes, count, &zero, &whole) == 2) {
+        *slice = bytes;
+        *length = whole;
+        return YES;
+    }
+    size_t outer = 0;
+    const uint8_t *cursor = revenant_der_value(bytes, bytes + count, 0x30, &outer);
+    if (!cursor)
+        return NO;
+    const uint8_t *end = cursor + outer;
+    size_t algorithm = 0;
+    const uint8_t *algorithmValue = revenant_der_value(cursor, end, 0x30, &algorithm);
+    if (!algorithmValue)
+        return NO;
+    size_t oid = 0;
+    const uint8_t *oidValue = revenant_der_value(algorithmValue, algorithmValue + algorithm, 0x06, &oid);
+    if (!oidValue || oid != sizeof revenant_rsa_encryption_oid || memcmp(oidValue, revenant_rsa_encryption_oid, oid) != 0)
+        return NO;
+    size_t bits = 0;
+    const uint8_t *bitValue = revenant_der_value(algorithmValue + algorithm, end, 0x03, &bits);
+    if (!bitValue || bits < 1 || bitValue[0] != 0)
+        return NO;
+    if (revenant_der_integers(bitValue + 1, (CFIndex)bits - 1, &zero, &whole) != 2)
+        return NO;
+    *slice = bitValue + 1;
+    *length = whole;
+    return YES;
+}
+
+static BOOL revenant_ec_point(const uint8_t *bytes, uint8_t point[65])
+{
+    memcpy(point, bytes, 65);
+    if (point[0] == 0x06 || point[0] == 0x07) {
+        if ((point[0] & 1) != (point[64] & 1))
+            return NO;
+        point[0] = 0x04;
+    }
+    return point[0] == 0x04 && RevenantCKValidPublicKeyES256(point, 65) != 0;
+}
+
+SecKeyRef BACKPORT_IMPL(SecKeyCreateWithData)(CFDataRef keyData, CFDictionaryRef attributes, CFErrorRef *error)
+{
+    if (!keyData || !attributes) {
+        revenant_sec_fail(error, errSecParam, @"a key needs its data and its attributes");
+        return NULL;
+    }
+    CFTypeRef type = CFDictionaryGetValue(attributes, kSecAttrKeyType);
+    CFTypeRef keyClass = CFDictionaryGetValue(attributes, kSecAttrKeyClass);
+    if (!type || !keyClass) {
+        revenant_sec_fail(error, errSecParam, @"the attributes name no key type or no key class");
+        return NULL;
+    }
+    if (CFEqual(keyClass, kSecAttrKeyClassSymmetric)) {
+        revenant_sec_fail(error, errSecUnimplemented, @"symmetric keys are not made from data");
+        return NULL;
+    }
+    BOOL isPublic = CFEqual(keyClass, kSecAttrKeyClassPublic);
+    if (!isPublic && !CFEqual(keyClass, kSecAttrKeyClassPrivate)) {
+        revenant_sec_fail(error, errSecParam, @"the key class is neither public nor private");
+        return NULL;
+    }
+    const uint8_t *bytes = CFDataGetBytePtr(keyData);
+    CFIndex count = CFDataGetLength(keyData);
+    if (CFEqual(type, kSecAttrKeyTypeRSA)) {
+        if (isPublic) {
+            const uint8_t *slice = NULL;
+            CFIndex length = 0;
+            if (!revenant_rsa_public_slice(bytes, count, &slice, &length)) {
+                revenant_sec_fail(error, errSecParam, @"the data is not a PKCS#1 RSA public key");
+                return NULL;
+            }
+            SecKeyRef key = SecKeyCreateRSAPublicKey(kCFAllocatorDefault, slice, length, revenant_rsa_encoding_pkcs1);
+            if (!key)
+                revenant_sec_fail(error, errSecParam, @"the release's Security refused the RSA public key data");
+            return key;
+        }
+        BOOL zero = NO;
+        CFIndex whole = 0;
+        if (revenant_der_integers(bytes, count, &zero, &whole) != 9 || !zero) {
+            revenant_sec_fail(error, errSecParam, @"the data is not a PKCS#1 RSA private key");
+            return NULL;
+        }
+        SecKeyRef key = SecKeyCreateRSAPrivateKey(kCFAllocatorDefault, bytes, whole, revenant_rsa_encoding_pkcs1);
+        if (!key)
+            revenant_sec_fail(error, errSecParam, @"the release's Security refused the RSA private key data");
+        return key;
+    }
+    if (CFEqual(type, kSecAttrKeyTypeECSECPrimeRandom)) {
+        uint8_t point[65];
+        if (count != (isPublic ? 65 : 97) || !revenant_ec_point(bytes, point)) {
+            revenant_sec_fail(error, errSecParam, @"the data is not an ANSI X9.63 P-256 key of this class");
+            return NULL;
+        }
+        SecKeyRef key = RevenantSecureEnclaveKeyCreateImported(point, isPublic ? NULL : bytes + 65);
+        if (!key)
+            revenant_sec_fail(error, errSecInternalError, @"the release could not make the key object");
+        return key;
+    }
+    revenant_sec_fail(error, errSecParam, @"only RSA and P-256 keys are made from data");
     return NULL;
 }

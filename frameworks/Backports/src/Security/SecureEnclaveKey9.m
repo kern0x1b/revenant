@@ -26,6 +26,7 @@ struct RevenantSecureEnclaveState {
     uint8_t scalar[32];
     Boolean hasScalar;
     Boolean isPrivate;
+    Boolean isImported;
     CFOptionFlags flags;
 };
 
@@ -120,6 +121,8 @@ static OSStatus revenant_secure_enclave_scalar_of(const struct RevenantSecureEnc
     memcpy(scalar, data.bytes, 32);
     return errSecSuccess;
 }
+
+static CFDictionaryRef revenant_secure_enclave_attributes(SecKeyRef key);
 
 #if TARGET_OS_IPHONE
 
@@ -229,21 +232,6 @@ static size_t revenant_secure_enclave_block_size(SecKeyRef key)
     return 32;
 }
 
-static CFDictionaryRef revenant_secure_enclave_copy_dictionary(SecKeyRef key)
-{
-    struct RevenantSecureEnclaveState *state = revenant_secure_enclave_state(key);
-    if (!state)
-        return NULL;
-    NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
-    attributes[(__bridge NSString *)kSecAttrKeyType] = (__bridge NSString *)kSecAttrKeyTypeECSECPrimeRandom;
-    attributes[(__bridge NSString *)kSecAttrKeyClass] = state->isPrivate ? (__bridge NSString *)kSecAttrKeyClassPrivate : (__bridge NSString *)kSecAttrKeyClassPublic;
-    attributes[(__bridge NSString *)kSecAttrKeySizeInBits] = @256;
-    attributes[(__bridge NSString *)kSecAttrTokenID] = (__bridge NSString *)kSecAttrTokenIDSecureEnclave;
-    if (state->tag)
-        attributes[(__bridge NSString *)kSecAttrApplicationTag] = (__bridge NSData *)state->tag;
-    return (CFDictionaryRef)CFBridgingRetain(attributes);
-}
-
 static CFIndex revenant_secure_enclave_algorithm_id(SecKeyRef key)
 {
     (void)key;
@@ -265,7 +253,7 @@ static const RevenantSecKeyDescriptor revenant_secure_enclave_private_descriptor
     revenant_secure_enclave_raw_sign, revenant_secure_enclave_raw_verify,
     NULL, NULL, NULL,
     revenant_secure_enclave_block_size,
-    revenant_secure_enclave_copy_dictionary,
+    revenant_secure_enclave_attributes,
     revenant_secure_enclave_algorithm_id,
     revenant_secure_enclave_copy_public,
 };
@@ -276,7 +264,7 @@ static const RevenantSecKeyDescriptor revenant_secure_enclave_public_descriptor 
     NULL, revenant_secure_enclave_raw_verify,
     NULL, NULL, NULL,
     revenant_secure_enclave_block_size,
-    revenant_secure_enclave_copy_dictionary,
+    revenant_secure_enclave_attributes,
     revenant_secure_enclave_algorithm_id,
     revenant_secure_enclave_copy_public,
 };
@@ -352,6 +340,27 @@ static SecKeyRef revenant_secure_enclave_make(const struct RevenantSecureEnclave
 
 #endif
 
+static CFDictionaryRef revenant_secure_enclave_attributes(SecKeyRef key)
+{
+    struct RevenantSecureEnclaveState *state = revenant_secure_enclave_state(key);
+    if (!state)
+        return NULL;
+    NSMutableDictionary *attributes = [NSMutableDictionary dictionary];
+    attributes[(__bridge NSString *)kSecAttrKeyType] = (__bridge NSString *)kSecAttrKeyTypeECSECPrimeRandom;
+    attributes[(__bridge NSString *)kSecAttrKeyClass] = state->isPrivate ? (__bridge NSString *)kSecAttrKeyClassPrivate : (__bridge NSString *)kSecAttrKeyClassPublic;
+    attributes[(__bridge NSString *)kSecAttrKeySizeInBits] = @256;
+    if (!state->isImported)
+        attributes[(__bridge NSString *)kSecAttrTokenID] = (__bridge NSString *)kSecAttrTokenIDSecureEnclave;
+    if (state->tag)
+        attributes[(__bridge NSString *)kSecAttrApplicationTag] = (__bridge NSData *)state->tag;
+    return (CFDictionaryRef)CFBridgingRetain(attributes);
+}
+
+CFDictionaryRef RevenantSecureEnclaveKeyCopyAttributes(SecKeyRef key)
+{
+    return revenant_secure_enclave_is_ours(key) ? revenant_secure_enclave_attributes(key) : NULL;
+}
+
 bool RevenantSecureEnclaveKeyIs(SecKeyRef key)
 {
     return revenant_secure_enclave_is_ours(key);
@@ -360,6 +369,27 @@ bool RevenantSecureEnclaveKeyIs(SecKeyRef key)
 bool RevenantSecureEnclaveKeyIsPrivate(SecKeyRef key)
 {
     return revenant_secure_enclave_is_ours(key) && revenant_secure_enclave_state(key)->isPrivate;
+}
+
+bool RevenantSecureEnclaveKeyIsImported(SecKeyRef key)
+{
+    return revenant_secure_enclave_is_ours(key) && revenant_secure_enclave_state(key)->isImported;
+}
+
+SecKeyRef RevenantSecureEnclaveKeyCreateImported(const uint8_t point[65], const uint8_t *scalar)
+{
+    struct RevenantSecureEnclaveState init;
+    memset(&init, 0, sizeof init);
+    memcpy(init.point, point, sizeof init.point);
+    init.isImported = YES;
+    if (scalar) {
+        memcpy(init.scalar, scalar, sizeof init.scalar);
+        init.hasScalar = YES;
+        init.isPrivate = YES;
+    }
+    SecKeyRef key = revenant_secure_enclave_make(&init);
+    memset(init.scalar, 0, sizeof init.scalar);
+    return key;
 }
 
 OSStatus RevenantSecureEnclaveKeyPoint(SecKeyRef key, uint8_t point[65])
@@ -460,6 +490,7 @@ SecKeyRef RevenantSecureEnclaveKeyCopyPublic(SecKeyRef key)
     struct RevenantSecureEnclaveState init;
     memset(&init, 0, sizeof init);
     init.tag = state->tag;
+    init.isImported = state->isImported;
     memcpy(init.point, state->point, sizeof init.point);
     return revenant_secure_enclave_make(&init);
 }

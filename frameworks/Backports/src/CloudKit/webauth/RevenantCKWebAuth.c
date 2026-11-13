@@ -181,6 +181,14 @@ int RevenantCKPublicKeyES256(const uint8_t *privateKey, uint8_t *out)
     return 65;
 }
 
+int RevenantCKValidPublicKeyES256(const uint8_t *publicKey, size_t publicLength)
+{
+    if (!publicKey || publicLength != 65 || publicKey[0] != 0x04) {
+        return 0;
+    }
+    return uECC_valid_public_key(publicKey + 1, uECC_secp256r1());
+}
+
 int RevenantCKDigestVerifyES256(const uint8_t *publicKey, size_t publicLength, const uint8_t *digest,
                               const uint8_t *der, size_t derLength)
 {

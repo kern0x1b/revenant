@@ -1,0 +1,27 @@
+ec public ok class=public type=ec
+ec private ok class=private type=ec
+ec other public ok class=public type=ec
+ec other private ok class=private type=ec
+ec private with public class null error=-50
+ec public with private class null error=-50
+ec public off curve null error=-50
+ec private off curve point null error=-50
+ec scalar only null error=-50
+ec short null error=-50
+ec public 66 bytes null error=-50
+ec private zero scalar ok class=private type=ec
+ec public hybrid prefix of the parity ok class=public type=ec
+ec public hybrid prefix of the other parity null error=-50
+ec private bad prefix null error=-50
+ec type with rsa data null error=-50
+rsa type with ec data null error=-50
+ec public verify=1
+ec public tampered message verify=0
+ec public export equals=1
+ec other public verify=0
+ec private sign=1
+ec own signature verify=1
+ec private export equals=1
+ec private public key=1
+ec derived public export equals=1
+ecdh length=32 symmetric=1

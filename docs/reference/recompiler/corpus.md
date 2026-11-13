@@ -66,6 +66,16 @@ image linked from the 319 objects of Google's reCAPTCHA Enterprise SDK had three
 loop skips a listed start that lies in one and counts it as `table data` in the summary line. The check requires the
 exact line `4 jump table targets, 0 failures, 1 jump table data words`.
 
+A third binary, `hoisted.c` with `hoisted.s`, covers a table whose base register is set before a call and read after
+it. Rellume writes every register to the state before a call and reads it back after, so the base after the call is an
+opaque load, and the same `getUnspecialized` of the new libswiftCore (x22 set once, a call to `isSpecialized` in a
+loop, then `adr`, `ldrb`, `add`, `br`) was not resolved: the guest jumped into the middle of the function and stopped
+with "jump to an address that does not start a translated function", for example on `String(describing:)` of a struct.
+`JumpTables` now clones only the functions that contain a `br`, and in the clone every call keeps x19 to x29 and sp as
+they were before it, which is what the AAPCS64 promises, then runs `GVN` so that the loads after the call take the
+values before it. The check requires exactly `4 jump table targets`. On the guest `libswiftCore` the lift finds 44
+more targets than before (2413 against 2369).
+
 ### lse
 
 A control for rellume's lifting of the ARMv8.1 LSE atomics: LDADD, LDCLR, LDEOR, LDSET, LDSMAX, LDSMIN, LDUMAX,
@@ -264,6 +274,19 @@ README's "Classes the Swift runtime lays out" has the design.
 3. Device part. The program is translated from arm64 and run on the iPad 2, and must print what macOS printed.
    - iOS 6's libobjc has none of `objc_readClassPair`, `_objc_realizeClassFromSwift` and
      `objc_setHook_lazyClassNamer`, so the program cannot be built for iOS 6 natively. The macOS run is the oracle.
+4. Device part, two cases of a callback into the guest while a message is routed ("Callbacks into the guest" in
+   [how the recompiler works](../../explanation/recompiler/how-it-works.md)):
+   - `XLPairClsroLeaf` is laid out only in `__objc_clsrolist` under the guest root class `XLPairRoot`. Its shadow is
+     built when the first message reaches it, and building it sends `+class` to `XLPairRoot`, a guest method. That first
+     message is `self`, and it must return the class, not what `+class` left in `x0`.
+   - `XLPairRoot` has a `+initialize` that fills `x0` to `x8` and `d0` to `d7`. libobjc sends it to the shadow of
+     `XLPairFresh` while the first message to that class is looked up. The message has integer and floating-point
+     arguments and a structure result, and the receiver and all four arguments must arrive.
+5. Device part, the identity of a host class ("twin pair" in
+   [how the recompiler works](../../explanation/recompiler/how-it-works.md)): the program has Objective-C classes under
+   `NSObject` and no Swift class, so `class_getSuperclass` of `XLPairStatic` and `XLPairBuilt`, `object_getClass` of an
+   `NSObject` instance and `[NSObject class]` must all be `&OBJC_CLASS_$_NSObject`, as on macOS. The run on the iPhone 4S
+   prints `expected.txt` whole.
 
 The arm64 input is linked with Revenant's `ld64`. The linker of Xcode 15 and later drops `__objc_clsrolist`, which Swift
 binaries carry.
@@ -314,7 +337,7 @@ Objective-C runtime (here `NSObject`), translated with `XL_SWIFT_HOST_ANCESTORS=
 
 The fixture has three classes: `Client`, an `NSObject` subclass with stored properties (a `String`, an `[String]`, an
 optional reference, a closure); `Sub`, a final subclass of `Client` that overrides `bump` and calls `super`; and
-`Token`, a final `NSObject` subclass whose Swift `deinit` prints. It prints `ok <name>` or `FAIL <name>` for 21
+`Token`, a final `NSObject` subclass whose Swift `deinit` prints. It prints `ok <name>` or `FAIL <name>` for 26
 checks, among them:
 
 - construction through `Client()` (the Swift `init` of an ObjC ancestor runs `objc_msgSendSuper2` with the class from
@@ -327,8 +350,10 @@ checks, among them:
 - an instance the host allocates with `class_createInstance` (no `objc_alloc` on the way, so the copy of the Swift part
   of the class must be current; no `init` runs, so only its class is used) and one made by `NSObject.Type.init()`,
   which is then dispatched to and cast;
-- `_typeName` of the classes. `String(describing:)` of a class is not covered: it goes through `Mirror`, which aborts
-  in the guest `libswiftCore` (see [the work split](../../explanation/recaptcha-work-split.md)).
+- `_typeName` of the classes;
+- the stdlib's own statically laid out classes, which the host first meets through a message: `AnyCollection` of an
+  array and of a `String` (the prespecialized `_IndexBox<Int>` and `_IndexBox<String.Index>`), the children of a
+  `Mirror`, and `String(describing:)` of a struct and of a class.
 
 The check wants every name `ok`, no `FAIL`, the `deinit` line, and exit 0.
 

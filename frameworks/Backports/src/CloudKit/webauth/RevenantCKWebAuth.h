@@ -26,6 +26,7 @@ int RevenantCKVerifyES256(const uint8_t *publicKey, size_t publicLength, const u
                         const uint8_t *der, size_t derLength);
 
 int RevenantCKPublicKeyES256(const uint8_t *privateKey, uint8_t *out);
+int RevenantCKValidPublicKeyES256(const uint8_t *publicKey, size_t publicLength);
 
 void RevenantCKSHA256(const uint8_t *message, size_t length, uint8_t *digest);
 
