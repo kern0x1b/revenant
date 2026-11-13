@@ -5,6 +5,9 @@ local AVFOUNDATION = "/System/Library/Frameworks/AVFoundation.framework/AVFounda
 local SYSTEM = "/usr/lib/libSystem.B.dylib"
 local SHIM = "/usr/lib/revenant/libSystemShim.dylib"
 local PROVIDER = "/usr/lib/revenant/org.revenant.backports/libAVFoundationBackports.dylib"
+local MARKED = "/usr/lib/revenant/org.revenant.backports/libMarked.dylib"
+local UNMARKED = "/usr/lib/revenant/org.revenant.backports/libUnmarked.dylib"
+local GETPID = "_getpid"
 local AMBIENT = "_AVAudioSessionCategoryAmbient"
 local DATA = "_AVAudioSessionMediaServicesWereLostNotification"
 local FUNCTION = "_AVAudioSessionSilenceSecondaryAudioHint"
@@ -216,6 +219,32 @@ function failures(opt)
         if not moved or described(moved) ~= described(expected) then
             table.insert(found, "the converted bind must bind " .. FUNCTION .. " in the bind stream as " .. described(expected) .. ", and it binds as " .. described(moved))
         end
+    end
+    io.writefile(path.join(folder, "override.c"), "extern int getpid(void);\nint use_pid(void) { return getpid(); }\n")
+    local overriding = fixtures.link(folder, opt.ld64, "override.dylib", TRIPLE, "override.c", {"-dynamiclib", "-Wl,-headerpad,0x1000"})
+    io.writefile(path.join(folder, "marked.c"), "int getpid(void) { return 2; }\nconst char __revenant_override_getpid = 0;\n")
+    local marked = built(folder, opt.ld64, "libMarked.dylib", "marked.c", MARKED, {"-L.", "-lSystem"})
+    io.writefile(path.join(folder, "unmarked.c"), "int getpid(void) { return 3; }\nconst char __revenant_override_getppid = 0;\n")
+    local unmarked = built(folder, opt.ld64, "libUnmarked.dylib", "unmarked.c", UNMARKED, {"-L.", "-lSystem"})
+    local override_before = dyld.rebind_plan(release, overriding, {unmarked})
+    if override_before[GETPID] ~= nil then
+        table.insert(found, "an import the release exports must stay on the release when the provider exports it without the marker, or with the marker of another symbol: " .. tostring(override_before[GETPID]))
+    end
+    local override_moves, override_libraries = dyld.rebind_plan(release, overriding, {unmarked, marked})
+    if override_moves[GETPID] ~= MARKED then
+        table.insert(found, "an import the release exports must move to the provider that exports the symbol and its marker, past a provider without it: " .. tostring(override_moves[GETPID]))
+    end
+    local overridden = path.join(folder, "overridden.dylib")
+    os.cp(overriding, overridden)
+    macho.rebind(overridden, override_moves, override_libraries)
+    local overridden_data = macho.read(overridden)
+    local overridden_image = macho.images(overridden_data)[1]
+    if (bindings(macho, overridden_data, overridden_image, overridden_image.lazy_bind, true)[GETPID] or {}).library ~= MARKED then
+        table.insert(found, "the rebind must bind the overridden import to the provider that carries the marker")
+    end
+    local override_refused = fixtures.refusal(function () dyld.check(release, {overridden, marked}, nil, {release = true}) end)
+    if override_refused then
+        table.insert(found, "an image rebound to an override must pass the import check against the release: " .. override_refused)
     end
     os.tryrm(folder)
     return found
