@@ -1,0 +1,58 @@
+From 4c37c37f5ecf9b672fe8cab0dc79f1e43b428e9f Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Fri, 13 Nov 2026 22:08:41 +0100
+Subject: [PATCH] Lift the AArch64 TRN1 and TRN2 instructions
+
+The AES-GCM kernel BoringSSL runs on an Apple arm64 CPU
+(aes_gcm_enc_kernel) arranges the GHASH operands with TRN1 and TRN2, and
+rellume did not lift them: the translated code ended at the first one
+with a jump to an address that starts no translated function.
+
+TRN1 interleaves the even-numbered elements of the two sources and TRN2
+the odd-numbered ones, which is one shuffle of the concatenated sources.
+---
+ src/a64/simd.cc | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
+
+diff --git a/src/a64/simd.cc b/src/a64/simd.cc
+index 51fc10b..7e978e5 100644
+--- a/src/a64/simd.cc
++++ b/src/a64/simd.cc
+@@ -62,6 +62,15 @@ static llvm::SmallVector<int, 16> odd(unsigned n) {
+     return linear(n, 2, 1);
+ }
+ 
++static llvm::SmallVector<int, 16> trnmask(unsigned n, unsigned part) {
++    llvm::SmallVector<int, 16> mask;
++    for (unsigned i = 0; i < n/2; i++) {
++        mask.push_back(2*i + part);
++        mask.push_back(2*i + part + n);
++    }
++    return mask;
++}
++
+ // [0, 0+n, 1, 1+n, ..., n/2-1]. For ZIP1, ST2.
+ static llvm::SmallVector<int, 16> zipmask_lower(unsigned n) {
+     llvm::SmallVector<int, 16> mask;
+@@ -976,6 +985,18 @@ bool Lifter::LiftSIMD(farmdec::Inst a64) {
+         SetVec(a64.rd, dstvec);
+         break;
+     }
++    case farmdec::A64_TRN1: {
++        auto vn = GetVec(a64.rn, va);
++        auto vm = GetVec(a64.rm, va);
++        SetVec(a64.rd, irb.CreateShuffleVector(vn, vm, trnmask(NumElem(va), 0)));
++        break;
++    }
++    case farmdec::A64_TRN2: {
++        auto vn = GetVec(a64.rn, va);
++        auto vm = GetVec(a64.rm, va);
++        SetVec(a64.rd, irb.CreateShuffleVector(vn, vm, trnmask(NumElem(va), 1)));
++        break;
++    }
+     case farmdec::A64_UZP1: {
+         auto vn = GetVec(a64.rn, va);
+         auto vm = GetVec(a64.rm, va);
+-- 
+2.54.0 (Apple Git-157)
+
