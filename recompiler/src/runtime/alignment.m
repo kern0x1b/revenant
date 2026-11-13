@@ -1,5 +1,7 @@
 #include <CoreFoundation/CoreFoundation.h>
+#include <dlfcn.h>
 #include <mach-o/dyld.h>
+#include <mach-o/loader.h>
 #include <mach-o/getsect.h>
 #include <mach/mach.h>
 #include <objc/runtime.h>
@@ -13,7 +15,7 @@
 #include "xl_host.h"
 
 enum {
-    XL_CONSTANT_RANGES = 128,
+    XL_CONSTANT_RANGES = 512,
     XL_ALIAS_ARENA = 4 << 20,
     XL_ALIAS_BLOCK_OFFSET = 12,
     XL_ALIAS_OBJECT_OFFSET = 16,
@@ -33,6 +35,8 @@ uintptr_t xl_alias_span;
 
 static struct xl_constant_range xl_constant_ranges[XL_CONSTANT_RANGES];
 static volatile unsigned xl_constant_count;
+static volatile uint32_t xl_scanned_images;
+static pthread_mutex_t xl_scan_lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_once_t xl_alias_once = PTHREAD_ONCE_INIT;
 static pthread_mutex_t xl_alias_lock = PTHREAD_MUTEX_INITIALIZER;
 static uintptr_t xl_alias_cursor;
@@ -81,23 +85,32 @@ static void xl_alias_deallocate(void *pointer, void *info)
     (void)info;
 }
 
-static void xl_alias_image(const struct mach_header *header, intptr_t slide)
+static void xl_alias_scan_images(void)
 {
-    const struct section *section = getsectbynamefromheader(header, "__DATA", "__cfstring");
-    if (!section || !section->size)
-        return;
-    uintptr_t start = (uintptr_t)section->addr + (uintptr_t)slide;
-    if ((start & 7) == 0)
-        return;
-    unsigned index = xl_constant_count;
-    if (index == XL_CONSTANT_RANGES) {
-        fprintf(stderr, "xlate: more than %d images with 4-aligned constant strings\n", XL_CONSTANT_RANGES);
-        abort();
+    pthread_mutex_lock(&xl_scan_lock);
+    uint32_t total = _dyld_image_count();
+    for (uint32_t i = xl_scanned_images; i < total; i++) {
+        const struct mach_header *header = _dyld_get_image_header(i);
+        if (!header || header->magic != MH_MAGIC)
+            continue;
+        const struct section *section = getsectbynamefromheader(header, "__DATA", "__cfstring");
+        if (!section || !section->size)
+            continue;
+        uintptr_t start = (uintptr_t)section->addr + (uintptr_t)_dyld_get_image_vmaddr_slide(i);
+        if ((start & 7) == 0)
+            continue;
+        unsigned index = xl_constant_count;
+        if (index == XL_CONSTANT_RANGES) {
+            fprintf(stderr, "xlate: more than %d images with 4-aligned constant strings\n", XL_CONSTANT_RANGES);
+            abort();
+        }
+        xl_constant_ranges[index].low = start;
+        xl_constant_ranges[index].size = section->size;
+        __sync_synchronize();
+        xl_constant_count = index + 1;
     }
-    xl_constant_ranges[index].low = start;
-    xl_constant_ranges[index].size = section->size;
-    __sync_synchronize();
-    xl_constant_count = index + 1;
+    xl_scanned_images = total;
+    pthread_mutex_unlock(&xl_scan_lock);
 }
 
 static void xl_alias_setup(void)
@@ -111,13 +124,13 @@ static void xl_alias_setup(void)
     xl_alias_strings = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_alias_protocols = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_protocol_class = objc_getClass("Protocol");
-    _dyld_register_func_for_add_image(xl_alias_image);
+    xl_alias_scan_images();
     __sync_synchronize();
     xl_alias_low = (uintptr_t)arena;
     xl_alias_span = XL_ALIAS_ARENA;
 }
 
-static int xl_constant_string(uintptr_t pointer)
+static int xl_constant_in_ranges(uintptr_t pointer)
 {
     unsigned count = xl_constant_count;
     for (unsigned i = 0; i < count; i++) {
@@ -126,6 +139,16 @@ static int xl_constant_string(uintptr_t pointer)
             return 1;
     }
     return 0;
+}
+
+static int xl_constant_string(uintptr_t pointer)
+{
+    if (xl_constant_in_ranges(pointer))
+        return 1;
+    if (_dyld_image_count() == xl_scanned_images)
+        return 0;
+    xl_alias_scan_images();
+    return xl_constant_in_ranges(pointer);
 }
 
 static int xl_read_word(uintptr_t address, uint32_t *word)
@@ -149,8 +172,21 @@ static uint64_t xl_alias_string(uintptr_t original)
         alias = (uintptr_t)CFStringCreateWithCharacters(xl_alias_allocator, characters, length);
         if (characters != stack)
             free(characters);
-        if (!alias || (alias & 7) || alias != xl_alias_first_block + XL_CF_ALLOCATOR_PREFIX)
-            xl_unsupported("xlate: CoreFoundation did not place a copy of a constant string at the start of its block, 8-aligned");
+        if (alias && (alias & 7 || alias != xl_alias_first_block + XL_CF_ALLOCATOR_PREFIX)) {
+            CFRelease((CFTypeRef)alias);
+            xl_alias_first_block = 0;
+            alias = (uintptr_t)CFStringCreateMutableCopy(xl_alias_allocator, 0, (CFStringRef)original);
+        }
+        if (!alias || (alias & 7) || alias != xl_alias_first_block + XL_CF_ALLOCATOR_PREFIX) {
+            char message[512], text[64] = "";
+            CFStringGetCString((CFStringRef)original, text, sizeof text, kCFStringEncodingUTF8);
+            snprintf(message, sizeof message,
+                     "xlate: CoreFoundation did not place a copy of the constant string %p (\"%s\", length %ld) at the start of its block, "
+                     "8-aligned: copy %p (class %s), first block %p",
+                     (void *)original, text, (long)length, (void *)alias, alias ? class_getName(object_getClass((id)alias)) : "none",
+                     (void *)xl_alias_first_block);
+            xl_unsupported(message);
+        }
         CFDictionarySetValue(xl_alias_strings, (const void *)original, (const void *)alias);
     }
     pthread_mutex_unlock(&xl_alias_lock);
@@ -190,6 +226,36 @@ uint64_t xl_protocol_out(uintptr_t host)
     return xl_alias_protocol_shell(host);
 }
 
+static void xl_describe_address(uintptr_t address, char *text, size_t size)
+{
+    Dl_info info;
+    if (!dladdr((const void *)address, &info) || !info.dli_fbase) {
+        snprintf(text, size, "in no image");
+        return;
+    }
+    const struct mach_header *header = (const struct mach_header *)info.dli_fbase;
+    intptr_t slide = 0;
+    for (uint32_t i = 0; i < _dyld_image_count(); i++)
+        if (_dyld_get_image_header(i) == header)
+            slide = _dyld_get_image_vmaddr_slide(i);
+    const uint8_t *command = (const uint8_t *)(header + 1);
+    for (uint32_t i = 0; i < header->ncmds; i++, command += ((const struct load_command *)command)->cmdsize) {
+        if (((const struct load_command *)command)->cmd != LC_SEGMENT)
+            continue;
+        const struct segment_command *segment = (const struct segment_command *)command;
+        const struct section *section = (const struct section *)(segment + 1);
+        for (uint32_t j = 0; j < segment->nsects; j++, section++) {
+            uintptr_t start = (uintptr_t)section->addr + (uintptr_t)slide;
+            if (address - start < section->size) {
+                snprintf(text, size, "in %s, section %.16s,%.16s starting at %p (offset %lu)", info.dli_fname, section->segname,
+                         section->sectname, (void *)start, (unsigned long)(address - start));
+                return;
+            }
+        }
+    }
+    snprintf(text, size, "in %s, in no section", info.dli_fname);
+}
+
 uint64_t xl_alias_object(uintptr_t host)
 {
     pthread_once(&xl_alias_once, xl_alias_setup);
@@ -204,11 +270,13 @@ uint64_t xl_alias_object(uintptr_t host)
         return xl_alias_protocol_shell(host);
     if (xl_class_out(host) != host || class_isMetaClass((Class)(uintptr_t)isa))
         return 0;
-    char message[256];
+    char where[512];
+    xl_describe_address(host, where, sizeof where);
+    char message[900];
     snprintf(message, sizeof message,
-             "xlate: the host object %p (class %s) is not 8-aligned and is neither a constant string nor a protocol, "
+             "xlate: the host object %p (class %s, %s) is not 8-aligned and is neither a constant string nor a protocol, "
              "and the guest Swift runtime clears the low 3 bits of object pointers",
-             (void *)host, class_getName((Class)(uintptr_t)isa));
+             (void *)host, class_getName((Class)(uintptr_t)isa), where);
     xl_unsupported(message);
 }
 

@@ -26,7 +26,7 @@ function main(out, opt)
                            "CGImageCreateWithMaskingColors", "_NSGetArgv", "_NSGetArgc", "_progname", "getifaddrs", "freeifaddrs", "getservbyname",
                            "localeconv_l", "class_copyIvarList", "malloc_default_zone", "malloc_zone_from_ptr", "malloc_zone_malloc",
                            "malloc_zone_free", "catopen", "swprintf", "NSDataDeallocatorFree", "NSDataDeallocatorUnmap", "NSDataDeallocatorVM",
-                           "_dispatch_source_type_vm", "copyfile_state_alloc", "copyfile_state_free", "fcopyfile"}) do
+                           "_dispatch_source_type_vm", "dispatch_sync", "dispatch_async", "copyfile_state_alloc", "copyfile_state_free", "fcopyfile"}) do
         if not imports:find("_" .. name .. "\n", 1, true) then
             corpus.fail("the program does not import %s, so the check proves nothing about it", name)
         end

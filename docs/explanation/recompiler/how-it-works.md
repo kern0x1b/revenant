@@ -173,6 +173,14 @@ print on the iPad 2 what objc4 printed.
   `recompiler/tests/classpair` has both cases: the first message to a class laid out only in `__objc_clsrolist` under a
   guest root class, and a first message with integer, floating-point and structure-result registers to a class whose
   `+initialize` is guest code.
+- **Blocks the guest hands to the host.** A block parameter of a host function is converted into a host block that holds a
+  copy of the guest block (`Block_copy` in the guest) and invokes it. The host block is the callee's for the call: the
+  generated stub takes it with a count of +1, and the one holder of the guest copy belongs to that block alone, so both
+  go when the stub returns the block; an API that keeps the block past the call (`dispatch_async`) has copied it, and the
+  copy keeps the holder and the guest block until the host lets go. An autoreleased block or holder would keep the guest
+  copy, and everything it captured, until some pool drained, and Swift's `withoutActuallyEscaping`, which
+  `DispatchQueue.sync` is written with, checks that the closure context is unique after the body and stops the process
+  if it is not. `recompiler/tests/hostbridges` has both cases (the `block sync` and `block async` lines).
 - **Method implementations (`IMP`).** An `IMP` is a bare code address, and the guest and the host disagree on what one
   means. A guest method's `IMP` is the guest function, and the host reaches it through a block `IMP` that
   `class_addMethod`, `class_replaceMethod` and `method_setImplementation` build (`xl_host_imp_for_guest`, cached per
@@ -207,13 +215,16 @@ print on the iPad 2 what objc4 printed.
   `src/runtime/alignment.m` gives the guest an **alias** instead: for a constant string a copy made with a private
   `CFAllocator` over a 4 MiB arena (CoreFoundation puts a 4-byte allocator word in front of the object, so the arena
   hands out blocks at 4 mod 8 and the object lands on a multiple of 8; the copy is a real `__NSCFString` with the same
-  characters), for a `Protocol` a 16-byte shell that holds the isa word and the name, which is also what `xl_protocol`
+  characters; CoreFoundation answers a few strings (`gregorian`) with the constant it already has instead of a new object,
+  and the runtime then makes a mutable copy through the same allocator), for a `Protocol` a 16-byte shell that holds the isa word and the name, which is also what `xl_protocol`
   reads. The cache constant to alias is made once under a lock and kept; the same constant is the same alias for every
   caller and every thread. Each alias sits in the arena behind an 8-byte header that holds the original and a check word,
   so the other direction is a range test of the arena (`xl_narrow_pointer`, `xl_object_in`): the host gets the original
   constant back and never sees an alias. One funnel serves every host-to-guest path: `xl_object_out` for objects,
   `xl_widen_pointer` for plain pointers (a value that is 4 mod 8 is looked up in the constant ranges of the loaded
-  images, which `_dyld_register_func_for_add_image` keeps current), and `xl_protocol_out` for `Protocol`; the generated
+  images, which the runtime reads from dyld's image list and reads again when the image count has changed; it does not
+  ask dyld for a callback, because the runtime defines `_dyld_register_func_for_add_image` itself for the guest images and
+  in library mode never forwards it to the host's dyld), and `xl_protocol_out` for `Protocol`; the generated
   bridge (returns, out slots, record fields, data imports, callback and block slot arguments) and the bridges by hand
   (dynamic message returns, fast enumeration, the weak-reference functions, the variadic collection constructors, the
   arguments and result of a guest block the host calls, the word trampoline of a guest method) call them. An object at

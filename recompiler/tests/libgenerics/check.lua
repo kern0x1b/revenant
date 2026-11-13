@@ -40,12 +40,25 @@ function main(out, ...)
                                                      "-runtime-compatibility-version", "none", "-emit-library", "-module-name", "LibGenerics",
                                                      "-Xlinker", "-install_name", "-Xlinker", "@rpath/LibGenerics.dylib", "-o", o("LibGenerics.dylib"),
                                                      path.join(here, "fixture.swift")})
-        local includes = path.join(e.recompiler, "include", "swiftdemo-includes.h")
+        local includes = o("includes.h")
+        io.writefile(includes, string.format('#include "%s"\n#include <Foundation/Foundation.h>\n', path.join(e.recompiler, "include", "swiftdemo-includes.h")))
         local images = {path.join(libs, "libswiftCore.dylib"), path.join(libs, "libc++.1.dylib"), path.join(libs, "libc++abi.1.dylib")}
         translate.translate(o("LibGenerics.dylib"), includes, o("xl"), images,
                             {XL_LIBRARY = "1", XL_REPLACES = "/usr/lib/libc++.1.dylib=" .. path.join(libs, "libc++.1.dylib"), XL_SWIFT_HOST_ANCESTORS = "1"})
         if not os.isfile(libraries) or not os.isfile(o("xl/LibGenerics-classes.dylib")) then
             corpus.fail("the library or its registry was not built")
+        end
+        local declared = false
+        for _, line in ipairs(io.readfile(o("xl/report.txt")):split("\n", {plain = true})) do
+            if line:find("getCharacters:range:]", 1, true) and line:find("host IMP from", 1, true) then
+                if not line:find("host IMP from SDK declaration", 1, true) or not line:find("{_NSRange=II}", 1, true) then
+                    corpus.fail("a host IMP of getCharacters:range: that Swift declares with {?=qq} is not the SDK's {_NSRange=II}: " .. line)
+                end
+                declared = true
+            end
+        end
+        if not declared then
+            corpus.fail("the report names no host IMP of getCharacters:range:")
         end
         local flags = {"-O2", "-w", "-fobjc-arc", "-I", path.join(e.recompiler, "include"), "-framework", "Foundation", "-framework", "UIKit"}
         corpus.armv7(e, table.join(flags, {path.join(here, "host.m"), path.join(e.recompiler, "src", "loader", "xl_loader.c"), "-o", o("host")}))

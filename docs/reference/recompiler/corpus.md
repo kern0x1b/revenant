@@ -263,7 +263,11 @@ A program (`main.m`) that calls the host functions whose guest and host layouts 
   still mapped; `catopen` of a catalogue that does not exist (the host's `(nl_catd)-1` has to reach the guest as
   `-1`); `swprintf` with `%d`, `%5.2f`, `%s`, `%ls`, `%c`, `%lld`, one that truncates, and one whose format and
   arguments are not ASCII; `_dispatch_source_type_vm` as the type of a dispatch source; `copyfile_state_alloc`,
-  `fcopyfile` (a file descriptor copied into another) and `copyfile_state_free`.
+  `fcopyfile` (a file descriptor copied into another) and `copyfile_state_free`; the lifetime of a block the guest hands to
+  the host (`block sync`, `block async`): an object captured by a block of `dispatch_sync` must be released when the call
+  returns (`released at return 1`), and one captured by a block of `dispatch_async` after the queue has run and dropped
+  it (`released 2`), both with the main pool still open. The control on the 4S, with the generated block bridge keeping
+  its holder until a pool drains (`autorelease` instead of `release`), prints 0 on both lines.
 
 Alignment of host constants (the `align` lines): the guest must get a constant string or a `Protocol` of the host at a
 multiple of 8, the same pointer each time, and the host must see the original. One check for each path that carries a
@@ -569,6 +573,15 @@ The steps are `stepDictionary` (`[String: String]`), `stepDictionaryAny` (`[Stri
 `xl_guest_high`) and a class of the guest is a class of the library. A class that the Swift runtime builds at run time has
 the superclass's size and fields from the host layout: the runtime reconciles them when it registers the shadow, and a
 subclass smaller than its superclass stops the program with a message.
+
+The host part also reads `report.txt` of the translation. Swift declares the `NSRange` argument of the `NSString` methods that
+`__SharedStringStorage` overrides as `{?=qq}`, which no SDK declaration matches name for name, so the host IMP of
+`getCharacters:range:` was built from the guest encoding: a 16-byte struct of two `long long`, which the host's call
+(`NSRange` is two 32-bit words) read from the wrong registers and stack slots, and `NSURL(string:)` died in
+`String.UTF16View` with "String index is out of bounds". `xlgen` now matches a guest method with an SDK declaration by the
+shape of its encoding (struct names ignored, integers compared without their signedness), and the check requires the
+report to say that the IMP of `getCharacters:range:` comes from the SDK declaration and is `{_NSRange=II}`. On the 4S
+`URLRequest(url:)` of a Swift `String` runs after the fix and fails before it.
 
 Each fix has a step that fails without it (the 4S, one fix taken out at a time): without the image range `stepDictionary`
 exits 139 (so do `stepClosures`, `stepNested`, `stepSubstring` and `stepStress`); without the reconciliation
