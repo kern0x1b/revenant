@@ -65,3 +65,10 @@ static NSInteger RCFCreated;
     return [[NSThread currentThread] isMainThread] ? 1 : 2;
 }
 @end
+
+@implementation RCFClient (RCFExtra)
+- (NSInteger)categoryValue
+{
+    return [self seed] + 35;
+}
+@end

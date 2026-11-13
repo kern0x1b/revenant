@@ -15,3 +15,7 @@
 - (void)executeWithAction:(NSInteger)action completion:(void (^)(RCFToken *token, NSError *error))completion;
 - (NSUInteger)threadNumber;
 @end
+
+@interface RCFClient (RCFExtra)
+- (NSInteger)categoryValue;
+@end

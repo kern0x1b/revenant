@@ -68,11 +68,12 @@ local function dependencies(file, dirs, found)
     end
 end
 
-local EXPECTED = {"reserve", "load", "class", "create", "methods", "describe", "bundle", "bundle.path", "token", "completion", "completion.thread"}
+local EXPECTED = {"reserve", "load", "class", "create", "methods", "describe", "bundle", "bundle.path", "token", "category", "completion", "completion.thread"}
 local SWIFT_HOST_EXPECTED = {"host.bridge.before", "host.names", "names.disjoint", "host.bridge.after"}
 
 local function build_objc(e, corpus, o, here)
-    corpus.ios(e, {"-fuse-ld=" .. e.ld, "-O2", "-w", "-fobjc-arc", "-dynamiclib", "-install_name", "@rpath/RCFixture.dylib", "-framework", "Foundation", "-I", here,
+    -- ld64 merges a category into its class when both are in one dylib, which would leave the category list empty
+    corpus.ios(e, {"-fuse-ld=" .. e.ld, "-Wl,-no_objc_category_merging", "-O2", "-w", "-fobjc-arc", "-dynamiclib", "-install_name", "@rpath/RCFixture.dylib", "-framework", "Foundation", "-I", here,
                    path.join(here, "fixture.m"), "-o", o("RCFixture.dylib")})
     io.writefile(o("includes.h"), string.format('#include "%s"\n#include "%s"\n', path.join(e.recompiler, "include", "uikit-includes.h"), path.join(here, "RCFixture.h")))
     return {XL_LIBRARY = "1"}, {}
@@ -148,9 +149,35 @@ function main(out, ...)
     if guest.low % 0x4000 ~= 0 or guest.high % 0x4000 ~= 0 or guest.low < base or guest.low >= guest.high then
         corpus.fail("the guest image range 0x%x-0x%x is not whole 16 KiB granules from the base 0x%x up", guest.low, guest.high, base)
     end
-    local symbols = exports(library)
+    local symbols = {}
+    local categories = 0
+    for _, symbol in ipairs(exports(library)) do
+        if symbol:startswith("_xl_objc_category_") then
+            categories = categories + 1
+        else
+            table.insert(symbols, symbol)
+        end
+    end
     if table.concat(symbols, " ") ~= "_xl_library_diagnostics _xl_library_init" then
-        corpus.fail("the library exports %s, not exactly its two entry points", table.concat(symbols, " "))
+        corpus.fail("the library exports %s, not exactly its two entry points and the category structures the registry lists", table.concat(symbols, " "))
+    end
+    local registry = o("xl/RCFixture-classes.dylib")
+    if not os.isfile(registry) then
+        corpus.fail("the registry %s was not built", registry)
+    end
+    local lists = {}
+    for _, segment in ipairs(segments(registry)) do
+        for _, section in ipairs(segment.sections) do
+            lists[section.name] = section.size
+        end
+    end
+    for name, size in pairs(lists) do
+        if not name:startswith("__objc_") and size > 0 then
+            corpus.fail("the registry has the section %s of %d bytes: it holds only what libobjc reads", name, size)
+        end
+    end
+    if (lists.__objc_classlist or 0) < 8 or (lists.__objc_catlist or 0) ~= 4 * categories or #exports(registry) ~= 0 then
+        corpus.fail("the registry lists %d bytes of classes and %d bytes of categories for %d category structures, and exports %d symbols", lists.__objc_classlist or 0, lists.__objc_catlist or 0, categories, #exports(registry))
     end
 
     local host_sources = {path.join(here, "host.m"), path.join(e.recompiler, "src", "loader", "xl_loader.c")}
@@ -186,6 +213,9 @@ function main(out, ...)
     local device = corpus.device()
     device.run("mkdir -p /var/tmp/xl-library")
     device.copy(library, "/var/tmp/xl-library/RCFixture.dylib")
+    device.copy(registry, "/var/tmp/xl-library/RCFixture-classes.dylib")
+    device.run("mkdir -p /var/tmp/xl-library/alone")
+    device.copy(library, "/var/tmp/xl-library/alone/RCFixture.dylib")
     device.copy(o("host"), "/var/tmp/xl-library/xl-library-host")
     if runtime and not host_runtime then
         local found = {}
@@ -234,6 +264,7 @@ function main(out, ...)
     local controls = {
         {"a guest range another mapping holds", "/var/tmp/xl-library/RCFixture.dylib 20 @" .. range .. " --expect=busy", {"occupy", "reserve.refused", "load.refused", "class.absent", "occupant.intact"}},
         {"a library with a guest image format this loader does not read", "/var/tmp/xl-library/RCFixtureV2.dylib 20 --expect=image", {"reserve.refused", "load.refused", "class.absent"}},
+        {"a library whose registry is not next to it", "/var/tmp/xl-library/alone/RCFixture.dylib 20 --expect=registry", {"reserve.refused", "load.refused", "class.absent"}},
         {"an init without a reservation, over a mapping with data", "/var/tmp/xl-library/RCFixture.dylib 20 +" .. range .. " --expect=direct", {"occupy", "dlopen", "init.refused", "init.final", "occupant.intact"}},
     }
     local outputs = {}

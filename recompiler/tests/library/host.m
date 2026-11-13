@@ -20,6 +20,7 @@
 - (NSInteger)bump;
 - (NSInteger)seed;
 - (NSInteger)describedLength;
+- (NSInteger)categoryValue;
 - (NSObject *)hostBundle;
 - (id<RCFToken>)tokenForAction:(NSInteger)action;
 - (void)executeWithAction:(NSInteger)action completion:(void (^)(id<RCFToken> token, NSError *error))completion;
@@ -124,7 +125,7 @@ static int refusals(const char *expect, const char *path)
         report("occupant.intact", occupantIntact());
     } else {
         xl_load_status wanted = strcmp(expect, "busy") == 0 ? XL_LOAD_RANGE_BUSY : XL_LOAD_BAD_IMAGE;
-        const char *phrase = wanted == XL_LOAD_RANGE_BUSY ? "another mapping holds" : "format version";
+        const char *phrase = strcmp(expect, "busy") == 0 ? "another mapping holds" : strcmp(expect, "registry") == 0 ? "registry" : "format version";
         xl_load_status reserved = xl_reserve(path);
         report("reserve.refused", reserved == wanted && strstr(xl_load_error(), phrase) != NULL);
         line([NSString stringWithFormat:@"error %s", xl_load_error()]);
@@ -253,7 +254,7 @@ int main(int argc, char **argv)
     alarm(180);
     @autoreleasepool {
         if (argc < 2) {
-            fprintf(stderr, "usage: host LIBRARY [RESIDENT-MB [@LOW-HIGH | +LOW-HIGH | --expect=busy|image|direct | PRELOADED-DYLIB]...]\n");
+            fprintf(stderr, "usage: host LIBRARY [RESIDENT-MB [@LOW-HIGH | +LOW-HIGH | --expect=busy|image|registry|direct | PRELOADED-DYLIB]...]\n");
             return 2;
         }
         const char *path = argv[1];
@@ -312,6 +313,7 @@ int main(int argc, char **argv)
         report("bundle.path", [[[client hostBundle] performSelector:@selector(bundlePath)] isEqualToString:[[NSBundle mainBundle] bundlePath]]);
         id<RCFToken> token = [client tokenForAction:5];
         report("token", [token value] == 7051);
+        report("category", [client categoryValue] == 42);
         measure("called");
 
         dispatch_semaphore_t done = dispatch_semaphore_create(0);
