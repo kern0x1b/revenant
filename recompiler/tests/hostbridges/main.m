@@ -1,12 +1,44 @@
 #import <Foundation/Foundation.h>
+#import <CoreGraphics/CoreGraphics.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
 #include <arpa/inet.h>
+#include <crt_externs.h>
+#include <dispatch/dispatch.h>
+#include <errno.h>
+#include <ifaddrs.h>
+#include <locale.h>
+#include <malloc/malloc.h>
+#include <mach/mach.h>
+#include <net/if.h>
+#include <net/if_types.h>
+#include <net/if_var.h>
 #include <netdb.h>
+#include <nl_types.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
+#include <wchar.h>
+#include <xlocale.h>
+
+extern const char *__progname;
+extern void (^NSDataDeallocatorFree)(void *, NSUInteger);
+extern void (^NSDataDeallocatorUnmap)(void *, NSUInteger);
+extern void (^NSDataDeallocatorVM)(void *, NSUInteger);
+extern const struct dispatch_source_type_s _dispatch_source_type_vm;
+
+@interface IvarProbe : NSObject {
+@public
+    int alpha;
+    id beta;
+    double gamma;
+}
+@end
+
+@implementation IvarProbe
+@end
 
 @interface Probe : NSObject
 - (int)plus:(int)a to:(int)b;
@@ -260,6 +292,151 @@ static void implementation_checks(void)
     printf("label back %s\n", [[probe label] UTF8String]);
 }
 
+static void color_checks(void)
+{
+    CGColorSpaceRef rgb = CGColorSpaceCreateDeviceRGB();
+    CGFloat components[4] = {0.25, 0.5, 0.75, 1.0};
+    CGColorRef color = CGColorCreate(rgb, components);
+    const CGFloat *read = CGColorGetComponents(color);
+    printf("color components %zu: %.3f %.3f %.3f %.3f\n", CGColorGetNumberOfComponents(color), read[0], read[1], read[2], read[3]);
+    printf("color components stable %d\n", CGColorGetComponents(color) == read);
+    CGColorRef other = CGColorCreate(rgb, (CGFloat[]){1.0, 0.0, 0.5, 0.25});
+    const CGFloat *again = CGColorGetComponents(other);
+    printf("second color %.3f %.3f %.3f %.3f, first kept %.3f\n", again[0], again[1], again[2], again[3], read[0]);
+    CGColorRelease(other);
+    CGColorRelease(color);
+
+    CGColorSpaceRef gray = CGColorSpaceCreateDeviceGray();
+    CGContextRef context = CGBitmapContextCreate(NULL, 2, 2, 8, 2, gray, kCGImageAlphaNone);
+    CGImageRef image = CGBitmapContextCreateImage(context);
+    CGFloat mask[2] = {0, 10};
+    CGImageRef masked = CGImageCreateWithMaskingColors(image, mask);
+    printf("masked image %d %zux%zu\n", masked != NULL, masked ? CGImageGetWidth(masked) : 0, masked ? CGImageGetHeight(masked) : 0);
+    if (masked)
+        CGImageRelease(masked);
+    CGImageRelease(image);
+    CGContextRelease(context);
+    CGColorSpaceRelease(gray);
+    CGColorSpaceRelease(rgb);
+}
+
+static void process_checks(void)
+{
+    char ***argv = _NSGetArgv();
+    int *argc = _NSGetArgc();
+    printf("argv has %d, first names the program %d, terminated %d\n", *argc, strstr((*argv)[0], "HostBridges") != NULL, (*argv)[*argc] == NULL);
+    printf("progname names the program %d\n", strstr(__progname, "HostBridges") != NULL);
+}
+
+static void interface_checks(void)
+{
+    struct ifaddrs *list = NULL;
+    int status = getifaddrs(&list);
+    int nodes = 0;
+    char inet_line[96] = "none", link_line[96] = "none";
+    for (struct ifaddrs *node = list; node; node = node->ifa_next) {
+        nodes++;
+        if (!node->ifa_addr || strcmp(node->ifa_name, "lo0"))
+            continue;
+        if (node->ifa_addr->sa_family == AF_INET) {
+            char address[INET_ADDRSTRLEN], netmask[INET_ADDRSTRLEN];
+            inet_ntop(AF_INET, &((struct sockaddr_in *)node->ifa_addr)->sin_addr, address, sizeof address);
+            inet_ntop(AF_INET, &((struct sockaddr_in *)node->ifa_netmask)->sin_addr, netmask, sizeof netmask);
+            snprintf(inet_line, sizeof inet_line, "inet %s mask %s loopback %d up %d", address, netmask, (node->ifa_flags & IFF_LOOPBACK) != 0,
+                     (node->ifa_flags & IFF_UP) != 0);
+        } else if (node->ifa_addr->sa_family == AF_LINK) {
+            const struct if_data *data = node->ifa_data;
+            snprintf(link_line, sizeof link_line, "link data %d type %u changed %d", data != NULL, data ? data->ifi_type : 0,
+                     data && data->ifi_lastchange.tv_sec > 1000000000);
+        }
+    }
+    printf("getifaddrs %d nodes %d\n", status, nodes > 0);
+    printf("getifaddrs lo0 %s\n", inet_line);
+    printf("getifaddrs lo0 %s\n", link_line);
+    freeifaddrs(list);
+}
+
+static void service_checks(void)
+{
+    struct servent *entry = getservbyname("http", "tcp");
+    printf("getservbyname %s port %d proto %s\n", entry ? entry->s_name : "-", entry ? ntohs(entry->s_port) : 0, entry ? entry->s_proto : "-");
+    printf("getservbyname missing %d\n", getservbyname("xlate-no-such-service", "tcp") == NULL);
+}
+
+static void locale_checks(void)
+{
+    locale_t locale = newlocale(LC_ALL_MASK, "C", NULL);
+    struct lconv *conv = localeconv_l(locale);
+    printf("localeconv_l decimal '%s' thousands '%s' grouping '%s' frac %d int_frac %d p_cs %d n_sign %d\n", conv->decimal_point,
+           conv->thousands_sep, conv->grouping, conv->frac_digits, conv->int_frac_digits, conv->p_cs_precedes, conv->n_sign_posn);
+    printf("localeconv_l stable %d\n", localeconv_l(locale) == conv);
+    freelocale(locale);
+}
+
+static void ivar_checks(void)
+{
+    unsigned count = 0;
+    Ivar *ivars = class_copyIvarList([IvarProbe class], &count);
+    printf("IvarProbe ivars %u\n", count);
+    for (unsigned i = 0; i < count; i++)
+        printf("  %s %s\n", ivar_getName(ivars[i]), ivar_getTypeEncoding(ivars[i]));
+    free(ivars);
+    ivars = class_copyIvarList([NSNull class], &count);
+    printf("NSNull ivars %u none %d\n", count, ivars == NULL);
+    free(ivars);
+}
+
+static void memory_checks(void)
+{
+    malloc_zone_t *zone = malloc_default_zone();
+    void *block = malloc_zone_malloc(zone, 48);
+    printf("malloc zone %d, owns the block %d\n", zone != NULL, malloc_zone_from_ptr(block) != NULL);
+    malloc_zone_free(malloc_zone_from_ptr(block), block);
+    int local = 0;
+    printf("zone of a stack address is null %d\n", malloc_zone_from_ptr(&local) == NULL);
+
+    size_t size = (size_t)getpagesize();
+    void *page = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+    printf("page mapped %d\n", page != MAP_FAILED && msync(page, size, MS_ASYNC) == 0);
+    NSDataDeallocatorUnmap(page, size);
+    printf("unmap deallocator removed the page %d\n", msync(page, size, MS_ASYNC) == -1 && errno == ENOMEM);
+    vm_address_t address = 0;
+    printf("vm allocated %d\n", vm_allocate(mach_task_self(), &address, size, VM_FLAGS_ANYWHERE) == KERN_SUCCESS && msync((void *)address, size, MS_ASYNC) == 0);
+    NSDataDeallocatorVM((void *)address, size);
+    printf("vm deallocator removed the page %d\n", msync((void *)address, size, MS_ASYNC) == -1 && errno == ENOMEM);
+    NSDataDeallocatorFree(malloc(64), 64);
+    printf("free deallocator ran\n");
+}
+
+static void catalog_checks(void)
+{
+    nl_catd catalog = catopen("xlate-no-such-catalog", NL_CAT_LOCALE);
+    printf("catopen of a missing catalog %d\n", catalog == (nl_catd)-1);
+}
+
+static void wide_checks(void)
+{
+    wchar_t buffer[64];
+    char text[64];
+    int written = swprintf(buffer, 64, L"%d|%5.2f|%s|%ls|%c|%lld", 42, 3.14159, "narrow", L"wide", 'x', 123456789012LL);
+    for (int i = 0; i <= written; i++)
+        text[i] = (char)buffer[i];
+    printf("swprintf %d: %s\n", written, text);
+    printf("swprintf short %d\n", swprintf(buffer, 4, L"truncated"));
+    written = swprintf(buffer, 64, L"é=%d|%lc", 7, (wint_t)'z');
+    printf("swprintf wide format %d: %u %u %u %u %u\n", written, (unsigned)buffer[0], (unsigned)buffer[1], (unsigned)buffer[2],
+           (unsigned)buffer[3], (unsigned)buffer[4]);
+}
+
+static void source_checks(void)
+{
+    dispatch_queue_t queue = dispatch_queue_create("hostbridges.source", NULL);
+    dispatch_source_t source = dispatch_source_create(&_dispatch_source_type_vm, 0, 0, queue);
+    printf("vm dispatch source %d\n", source != NULL);
+    if (source)
+        dispatch_source_cancel(source);
+}
+
 int main(void)
 {
     @autoreleasepool {
@@ -267,6 +444,16 @@ int main(void)
         address_checks();
         method_list_checks();
         implementation_checks();
+        color_checks();
+        process_checks();
+        interface_checks();
+        service_checks();
+        locale_checks();
+        ivar_checks();
+        memory_checks();
+        catalog_checks();
+        wide_checks();
+        source_checks();
     }
     return 0;
 }

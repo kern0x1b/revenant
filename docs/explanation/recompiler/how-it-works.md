@@ -185,6 +185,41 @@ print on the iPad 2 what objc4 printed.
   point at host data, and `freeaddrinfo` finds the header by its magic and frees both lists.
 - **`class_copyMethodList`.** The host returns an array of 4-byte `Method` pointers; the bridge widens it into
   8-byte slots in place of the host array and stores the count.
+- **What an import of a guest image becomes.** `xlgen` sorts every symbol that no guest image defines by what differs
+  between the arm64 guest and the armv7 host, and a symbol it cannot place is `UNSUPPORTED` in `report.txt`, is
+  printed by the translation, and aborts with its name if the guest reaches it: nothing is stubbed to look like it
+  worked.
+  - *Same ABI*: the declaration is in `include/common-includes.h` and the call goes through the generated bridge
+    (`lgamma_r`, `__snprintf_chk`, `asprintf_l`, `snprintf_l`, `sem_open`, `open_dprotected_np`, `copyfile`,
+    `catgets`, `pthread_key_init_np`); variadic functions with a format get their `va_list` variant, and `strftime_l`
+    has a format of dates, which the bridge does not read.
+  - *Layout differs*: a bridge by hand in `src/runtime/bridge.m`, with a case in `tests/hostbridges` that the Mac and
+    the 4S answer alike. `CGColorCreate`, `CGColorGetComponents`, `CGImageCreateWithMaskingColors` (`CGFloat` is a
+    `double` here and a `float` there; the count of components comes from the colour space; the array that
+    `CGColorGetComponents` returns is the runtime's, one per colour and refilled at each call, so it stays valid as long
+    as the colour does); `__NSGetArgv` (a 64-bit copy of `argv`, made at the first call, so a store through the
+    returned pointer changes the copy); `getifaddrs`/`freeifaddrs` and `getservbyname` (guest-layout lists behind a
+    header, as `getaddrinfo`; the `if_data` of a link entry is copied with the 8-byte `timeval`); `localeconv_l` (one
+    guest `struct lconv` per locale); `class_copyIvarList` (8-byte slots, as `class_copyMethodList`); `swprintf` (the
+    format and the arguments are read as `printf` reads them, through UTF-8, and `vswprintf` gets the host's).
+  - *Opaque handles*: `catopen` returns an `nl_catd`, and `malloc_default_zone` and `malloc_zone_from_ptr` return a
+    `malloc_zone_t *`, which the guest only hands back (libswiftCore's `-[_SwiftObject zone]` answers it, libc++'s
+    `messages` passes the catalogue to `catgets` and `catclose`). They cross as the host's pointer, and `-1` crosses as
+    `-1`. A guest that read a zone's function table would read 4-byte pointers: none of these images does.
+  - *Data*: `__progname` is a copy of the host's pointer, filled at start-up. `NSDataDeallocatorFree`, `Unmap` and `VM`
+    are private blocks of Foundation that iOS 6.1.3 does not have; the guest gets blocks of its own that call `free`,
+    `munmap` and `vm_deallocate`, which is what Foundation's blocks do (nothing on a null pointer for the last two).
+    `_dispatch_source_type_vm` is the host's. `__swiftImmortalRefCount` is an absolute symbol of libswiftCore
+    (`0x80000004ffffffff`): a bind to it takes the value, unslid.
+  - *A function that returns at once*: `__chkstk_darwin`, the stack probe that an arm64 Darwin function with a large
+    frame calls first, with the size in `x9`; it keeps every register but `x16`, `x17` and the flags, and touches
+    each page of the new frame from the stack pointer down so that a frame cannot jump over the guard page. The
+    lifted code runs on the host thread's stack, which has the same guard page; a frame that fits behaves the same
+    without the probe, and one that overflows stops at a page below the guard or in memory beside the stack instead of
+    at the guard itself.
+  - *Not implemented, and loud*: `__Unwind_RaiseException`, which libc++abi's `__cxa_throw` calls. A C++ exception
+    thrown by guest code has a `__cxa_exception` of arm64 layout that the host's personality cannot read, so the
+    throw is a fault, as `__cxa_throw` of an imported libc++ is.
 
 ## Scope and limits
 

@@ -44,3 +44,33 @@ label before 1 now changed
 label restored probe
 replace returned original 1 label swapped
 label back probe
+color components 4: 0.250 0.500 0.750 1.000
+color components stable 1
+second color 1.000 0.000 0.500 0.250, first kept 0.250
+masked image 1 2x2
+argv has 1, first names the program 1, terminated 1
+progname names the program 1
+getifaddrs 0 nodes 1
+getifaddrs lo0 inet 127.0.0.1 mask 255.0.0.0 loopback 1 up 1
+getifaddrs lo0 link data 1 type 24 changed 1
+getservbyname http port 80 proto tcp
+getservbyname missing 1
+localeconv_l decimal '.' thousands '' grouping '' frac 127 int_frac 127 p_cs 127 n_sign 127
+localeconv_l stable 1
+IvarProbe ivars 3
+  alpha i
+  beta @
+  gamma d
+NSNull ivars 0 none 1
+malloc zone 1, owns the block 1
+zone of a stack address is null 1
+page mapped 1
+unmap deallocator removed the page 1
+vm allocated 1
+vm deallocator removed the page 1
+free deallocator ran
+catopen of a missing catalog 1
+swprintf 35: 42| 3.14|narrow|wide|x|123456789012
+swprintf short -1
+swprintf wide format 5: 233 61 55 124 122
+vm dispatch source 1

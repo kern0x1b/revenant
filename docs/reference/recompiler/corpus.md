@@ -158,7 +158,19 @@ A program (`main.m`) that calls the host functions whose guest and host layouts 
   `IMP`s of a concrete `NSString` class called by the guest; the `NSObject` `-isKindOfClass:` `IMP` called on an instance
   of a guest class that overrides it; `imp_implementationWithBlock` with a captured `__block` variable, added with
   `class_addMethod` and called by a message send, `imp_getBlock` and `imp_removeBlock`; a C function added with
-  `class_addMethod`; `class_replaceMethod` and `method_setImplementation` with the old `IMP` called afterwards.
+  `class_addMethod`; `class_replaceMethod` and `method_setImplementation` with the old `IMP` called afterwards;
+- the imports of the reCAPTCHA work's guest images that had no bridge, one check each: `CGColorCreate`,
+  `CGColorGetComponents` (the pointer stays the same for one colour) and `CGImageCreateWithMaskingColors`, whose
+  `CGFloat` arrays are `double` in the guest and `float` in the host; `_NSGetArgv` and `__progname`; `getifaddrs` and
+  `freeifaddrs` for `lo0` (the address, the netmask, the flags, and the `if_data` of the link entry with its time
+  stamp); `getservbyname` for a known and an unknown service; `localeconv_l` of the C locale (strings, numbers, the
+  same pointer for the same locale); `class_copyIvarList` of a guest class with an `int`, an object and a `double`, and
+  of a class without ivars; `malloc_default_zone`, `malloc_zone_from_ptr` (a heap block and a stack address) and
+  `malloc_zone_malloc`/`malloc_zone_free` with the zone the guest got; `NSDataDeallocatorUnmap`, `NSDataDeallocatorVM`
+  and `NSDataDeallocatorFree` called by the guest, the first two checked by asking the kernel whether the page is
+  still mapped; `catopen` of a catalogue that does not exist (the host's `(nl_catd)-1` has to reach the guest as
+  `-1`); `swprintf` with `%d`, `%5.2f`, `%s`, `%ls`, `%c`, `%lld`, one that truncates, and one whose format and
+  arguments are not ASCII; `_dispatch_source_type_vm` as the type of a dispatch source.
 
 The check builds the program for this Mac and compares its output with `tests/data/hostbridges/expected.txt`, translates
 the arm64 build (which fails on any import without a bridge) and requires that the program imports each of the bridged

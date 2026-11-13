@@ -71,3 +71,25 @@ extern void *malloc_type_aligned_alloc(__SIZE_TYPE__ alignment, __SIZE_TYPE__ si
 
 #include <CoreFoundation/CoreFoundation.h>
 extern CFTypeRef MGCopyAnswer(CFStringRef question);
+
+#include <xlocale.h>
+#include <math.h>
+#include <crt_externs.h>
+#include <nl_types.h>
+#include <ifaddrs.h>
+#include <netdb.h>
+#include <objc/runtime.h>
+#include <malloc/malloc.h>
+
+extern CFURLRef _CFBundleCopyBundleURLForExecutableURL(CFURLRef url);
+extern int __pthread_fchdir(int fd);
+extern id _objc_rootAutorelease(id object);
+extern int pthread_key_init_np(int key, void (*destructor)(void *));
+extern int open_dprotected_np(const char *path, int flags, int class, int dpflags, ...);
+extern int __snprintf_chk(char *, __SIZE_TYPE__, int, __SIZE_TYPE__, const char *, ...) __attribute__((format(printf, 5, 6)));
+extern int __vsnprintf_chk(char *, __SIZE_TYPE__, int, __SIZE_TYPE__, const char *, va_list) __attribute__((format(printf, 5, 0)));
+extern double lgamma_r(double, int *);
+extern const char *__progname;
+
+#include <dispatch/dispatch.h>
+extern const struct dispatch_source_type_s _dispatch_source_type_vm;

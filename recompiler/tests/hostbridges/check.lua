@@ -11,7 +11,7 @@ function main(out, opt)
     end
     local expected = path.join(here, "..", "data", "hostbridges", "expected.txt")
     local source = path.join(here, "main.m")
-    local libraries = {"-framework", "Foundation"}
+    local libraries = {"-framework", "Foundation", "-framework", "CoreGraphics"}
 
     os.execv("xcrun", table.join({"clang", "-arch", "arm64", "-O2", "-w", source}, libraries, {"-o", o("HostBridges-mac")}))
     os.execv(o("HostBridges-mac"), {}, {stdout = o("run-mac.txt")})
@@ -22,7 +22,11 @@ function main(out, opt)
     local imports = os.iorunv("nm", {"-u", o("HostBridges-arm64")})
     for _, name in ipairs({"getaddrinfo", "freeaddrinfo", "vsscanf", "sscanf", "class_copyMethodList", "class_getMethodImplementation",
                            "method_getImplementation", "method_setImplementation", "class_addMethod", "class_replaceMethod",
-                           "imp_implementationWithBlock", "imp_getBlock", "imp_removeBlock"}) do
+                           "imp_implementationWithBlock", "imp_getBlock", "imp_removeBlock", "CGColorCreate", "CGColorGetComponents",
+                           "CGImageCreateWithMaskingColors", "_NSGetArgv", "_NSGetArgc", "_progname", "getifaddrs", "freeifaddrs", "getservbyname",
+                           "localeconv_l", "class_copyIvarList", "malloc_default_zone", "malloc_zone_from_ptr", "malloc_zone_malloc",
+                           "malloc_zone_free", "catopen", "swprintf", "NSDataDeallocatorFree", "NSDataDeallocatorUnmap", "NSDataDeallocatorVM",
+                           "_dispatch_source_type_vm"}) do
         if not imports:find("_" .. name .. "\n", 1, true) then
             corpus.fail("the program does not import %s, so the check proves nothing about it", name)
         end

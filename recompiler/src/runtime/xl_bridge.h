@@ -3,6 +3,7 @@
 #include "xl_state.h"
 
 #include <stdarg.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <dirent.h>
 #include <sqlite3.h>
@@ -120,9 +121,11 @@ struct xl_format {
     char *text;
     void *object;
     char *arguments;
+    void *wide;
 };
 
 void xl_format_marshal(struct xl_format *format, const char *text, void *object, const uint64_t *arguments, const char *symbol);
+void xl_format_marshal_wide(struct xl_format *format, const wchar_t *text, void *object, const uint64_t *arguments, const char *symbol);
 struct xl_scanf_fix;
 
 struct xl_scanf {
