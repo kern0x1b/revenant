@@ -1533,35 +1533,76 @@ bool EmitGuestImage(Program &program, Module &module, const Overrides &overrides
   return true;
 }
 
+bool MergesData(const Image &image) {
+  uint64_t previous_end = 0;
+  bool first = true;
+  for (auto &segment : image.segments()) {
+    if (segment.name == "__PAGEZERO" || segment.name == "__LINKEDIT" || !segment.vmsize || segment.name == "__TEXT") {
+      continue;
+    }
+    if (!first && segment.vmaddr != previous_end) {
+      return false;
+    }
+    first = false;
+    previous_end = segment.vmaddr + segment.vmsize;
+  }
+  return true;
+}
+
+std::string HostSegmentName(unsigned image_index, bool merge_data, const xlate::Segment &segment) {
+  if (merge_data && segment.name != "__TEXT") {
+    return "__X" + std::to_string(image_index) + "DATA";
+  }
+  return "__X" + std::to_string(image_index) + segment.name.substr(2, std::min<size_t>(12, segment.name.size() - 2));
+}
+
+constexpr unsigned kExecutableSegmentsBeforeGuest = 3;
+constexpr unsigned kBindSegmentIndexLimit = 16;
+
+bool CheckExecutableSegmentLimit(const Program &program) {
+  std::vector<std::string> order;
+  std::map<std::string, bool> writable;
+  unsigned image_index = 0;
+  for (auto &image : program.images) {
+    bool merge_data = MergesData(*image);
+    for (auto &segment : image->segments()) {
+      if (SkippedSegment(segment)) {
+        continue;
+      }
+      auto name = HostSegmentName(image_index, merge_data, segment);
+      if (!writable.count(name)) {
+        order.push_back(name);
+      }
+      writable[name] = writable[name] || (segment.initprot & 2);
+    }
+    ++image_index;
+  }
+  for (size_t position = 0; position < order.size(); ++position) {
+    unsigned index = kExecutableSegmentsBeforeGuest + static_cast<unsigned>(position);
+    if (writable[order[position]] && index >= kBindSegmentIndexLimit) {
+      errs() << "xlate: the executable would hold " << order.size() << " guest segments of " << program.images.size()
+             << " images after __PAGEZERO, __TEXT and __DATA, and the writable segment " << order[position] << " would be segment "
+             << index << ": dyld's bind and rebase opcodes name a segment with 4 bits, so a fixup in a segment past index "
+             << kBindSegmentIndexLimit - 1 << " lands in another segment and the program dies before main. An executable takes at most "
+             << (kBindSegmentIndexLimit - kExecutableSegmentsBeforeGuest) / 2 << " guest images; translate with --library (XL_LIBRARY=1 in translate.lua), "
+             << "where the guest is one image and has no segments of its own\n";
+      return false;
+    }
+  }
+  return true;
+}
+
 bool EmitGuestData(Program &program, Module &module, std::vector<GuestSegment> &out, const Overrides &overrides) {
   auto &context = module.getContext();
   bool ok = true;
   unsigned image_index = 0;
   for (auto &image : program.images) {
-    bool merge_data = true;
-    {
-      uint64_t previous_end = 0;
-      bool first = true;
-      for (auto &segment : image->segments()) {
-        if (segment.name == "__PAGEZERO" || segment.name == "__LINKEDIT" || !segment.vmsize || segment.name == "__TEXT") {
-          continue;
-        }
-        if (!first && segment.vmaddr != previous_end) {
-          merge_data = false;
-        }
-        first = false;
-        previous_end = segment.vmaddr + segment.vmsize;
-      }
-    }
+    bool merge_data = MergesData(*image);
     for (auto &segment : image->segments()) {
       if (SkippedSegment(segment)) {
         continue;
       }
-      std::string host_name = "__X" + std::to_string(image_index) +
-                              segment.name.substr(2, std::min<size_t>(12, segment.name.size() - 2));
-      if (merge_data && segment.name != "__TEXT") {
-        host_name = "__X" + std::to_string(image_index) + "DATA";
-      }
+      std::string host_name = HostSegmentName(image_index, merge_data, segment);
       std::vector<uint8_t> bytes(segment.vmsize);
       image->ReadBytes(image->host(segment.vmaddr), bytes.data(), bytes.size());
       auto pieces = SegmentPieces(program, module, *image, segment, overrides, ok);
@@ -1916,7 +1957,7 @@ int main(int argc, char **argv) {
     xlate::WriteManifest(os, images, objc, NamespacePrefix);
     return 0;
   }
-  if (Output.empty() || !LoadPassthrough(program) || !LayoutAndResolve(program, true)) {
+  if (Output.empty() || (!Library && !CheckExecutableSegmentLimit(program)) || !LoadPassthrough(program) || !LayoutAndResolve(program, true)) {
     return 1;
   }
   for (auto &image : program.images) {

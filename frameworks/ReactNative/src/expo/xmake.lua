@@ -32,6 +32,8 @@ for _, pair in ipairs(string.split(os.getenv("RN_PKG_DIRS") or "", ",", {plain =
     end
 end
 
+local SQLITE_DEFINES = {"HAVE_USLEEP=1", "SQLITE_ENABLE_LOCKING_STYLE=0", "SQLITE_ENABLE_BYTECODE_VTAB=1", "SQLITE_TEMP_STORE=2", "SQLITE_ENABLE_SESSION=1", "SQLITE_ENABLE_PREUPDATE_HOOK=1", "SQLITE_ENABLE_MATH_FUNCTIONS=1", "SQLITE_ENABLE_FTS4=1", "SQLITE_ENABLE_FTS3_PARENTHESIS=1", "SQLITE_ENABLE_FTS5=1"}
+
 local function expo_dir(package)
     if PKG_DIRS[package] then
         return PKG_DIRS[package]
@@ -379,6 +381,16 @@ target("expo-app-modules")
                     table.insert(lines, "#import \"" .. header .. "\"")
                 end
             end
+        end
+        if real["expo-sqlite"] then
+            local vendor = path.join(expo_dir("expo-sqlite"), "vendor", "sqlite3")
+            for _, define in ipairs(SQLITE_DEFINES) do
+                local name, value = define:match("^(.-)=(.*)$")
+                table.insert(lines, "#define " .. name .. " " .. value)
+            end
+            table.insert(lines, "#import \"" .. path.join(vendor, "sqlite3.h") .. "\"")
+            target:add("files", path.join(vendor, "sqlite3.c"))
+            target:add("defines", SQLITE_DEFINES)
         end
         io.writefile(bridging, "#import <Foundation/Foundation.h>\n" .. table.concat(lines, "\n") .. "\n")
         io.writefile(path.join(ecore, "implicit.rsp"), "-Xfrontend\n-import-module\n-Xfrontend\nFoundation\n-Xfrontend\n-import-module\n-Xfrontend\nUIKit\n-Xfrontend\n-import-module\n-Xfrontend\nCoreText\n-Xcc\n-I" .. path.join(proj, "build", "expo-pods") .. "\n-import-objc-header\n" .. bridging .. "\n-load-plugin-executable\n" .. macros .. "#ExpoModulesMacros\n")

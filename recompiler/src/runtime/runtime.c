@@ -5,6 +5,7 @@ void xl_thread_altstack(void);
 #include <dlfcn.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <mach/mach.h>
 #include <pthread.h>
 #include <signal.h>
 #include <stdint.h>
@@ -27,6 +28,7 @@ struct xl_function {
 extern const struct xl_function xl_functions[];
 extern const uint32_t xl_function_count;
 extern const uint32_t xl_entry_address;
+uint32_t xl_guest_low, xl_guest_high;
 xl_lifted xl_imp_lookup(uint64_t address);
 
 #define XL_REG(state, name) (*(uint64_t *)((char *)(state) + XL_OFFSET_##name))
@@ -88,11 +90,14 @@ State *xl_current_state(void)
     return state;
 }
 
+static void xl_walk_frames(State *state, int fd);
+
 static void xl_dump(State *state)
 {
     fprintf(stderr, "xlate: pc=0x%llx lr=0x%llx sp=0x%llx\n", XL_REG(state, PC), XL_REG(state, X30), XL_REG(state, SP));
     for (int i = 0; i < 8; i++)
         fprintf(stderr, "xlate: x%d=0x%llx\n", i, *(uint64_t *)((char *)state + XL_OFFSET_X0 + (XL_OFFSET_X1 - XL_OFFSET_X0) * i));
+    xl_walk_frames(state, fileno(stderr));
 }
 
 void xl_fault(State *state, const char *reason)
@@ -121,6 +126,11 @@ static void xl_walk_guest(int fd)
     dprintf(fd, "xlate: guest pc=0x%llx lr=0x%llx sp=0x%llx\n", XL_REG(state, PC), XL_REG(state, X30), XL_REG(state, SP));
     for (int i = 0; i < 8; i++)
         dprintf(fd, "xlate: guest x%d=0x%llx\n", i, *(uint64_t *)((char *)state + XL_OFFSET_X0 + (XL_OFFSET_X1 - XL_OFFSET_X0) * i));
+    xl_walk_frames(state, fd);
+}
+
+static void xl_walk_frames(State *state, int fd)
+{
     uint64_t fp = XL_REG(state, X29);
     for (int depth = 0; depth < 16 && fp && fp >> 32 == 0; depth++) {
         uint64_t saved_fp = *(uint64_t *)(uintptr_t)fp;
@@ -176,8 +186,14 @@ static void xl_crash_handler(int signal, siginfo_t *info, void *context)
             dprintf(fd, "xlate: host r%d=0x%x\n", i, ss->__r[i]);
         {
             Dl_info info;
-            if (dladdr((void *)(uintptr_t)ss->__pc, &info) && info.dli_sname)
+            if (dladdr((void *)(uintptr_t)ss->__pc, &info) && info.dli_sname) {
                 dprintf(fd, "xlate: host pc in %s\n", info.dli_sname);
+                vm_size_t got = 0;
+                uint32_t words[4] = {0, 0, 0, 0};
+                if (!strncmp(info.dli_sname, "objc_msgSend", 12) && ss->__r[0] > 0x1000 &&
+                    vm_read_overwrite(mach_task_self(), ss->__r[0], sizeof words, (vm_address_t)words, &got) == KERN_SUCCESS)
+                    dprintf(fd, "xlate: host message receiver 0x%x holds 0x%x 0x%x 0x%x 0x%x\n", ss->__r[0], words[0], words[1], words[2], words[3]);
+            }
         }
         dprintf(fd, "xlate: host frame 0 lr=0x%x\n", ss->__lr);
         uint32_t hfp = ss->__r[7];

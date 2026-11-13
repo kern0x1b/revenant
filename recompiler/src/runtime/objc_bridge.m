@@ -729,14 +729,15 @@ void xl_h_objc_msgSendSuper2(State *state)
     struct xl_arguments arguments;
     xl_arguments_save(state, &arguments);
     uint64_t *guest_super = (uint64_t *)xl_narrow_pointer(XL_REG(state, X0), "objc_msgSendSuper2", 0);
-    id receiver = (id)(uintptr_t)guest_super[0];
+    uint64_t guest_receiver = guest_super[0];
+    id receiver = (id)xl_narrow_pointer(guest_receiver, "objc_msgSendSuper2", 1);
     Class current = xl_class_in(guest_super[1]);
     SEL selector = (SEL)(uintptr_t)XL_REG(state, X1);
     if (selector == @selector(dealloc))
         xl_swift_super_dealloc(receiver, current);
     uint64_t target = xl_route(state, class_getSuperclass(current), selector, receiver, current);
     xl_arguments_restore(state, &arguments);
-    XL_REG(state, X0) = (uintptr_t)receiver;
+    XL_REG(state, X0) = guest_receiver;
     if (target == XL_NO_BRIDGE)
         xl_fault(state, "super message without a bridge");
     if (!target) {
@@ -771,11 +772,11 @@ void xl_unsupported_imp(id self, SEL selector)
     uint64_t _guestBlock;
 }
 
-+ (instancetype)holderWithGuestBlock:(uint64_t)guest
++ (instancetype)newWithGuestBlock:(uint64_t)guest
 {
     XLGuestBlock *holder = [[self alloc] init];
     holder->_guestBlock = xl_invoke(XL_GUEST__Block_copy, guest);
-    return [holder autorelease];
+    return holder;
 }
 
 - (uint64_t)guestBlock
@@ -814,11 +815,12 @@ void xl_manual_fast_enumeration(void *pack)
     NSFastEnumerationState *host = (NSFastEnumerationState *)&guest->extra[0];
     id buffer[16];
     NSUInteger length = p->length < 16 ? (NSUInteger)p->length : 16;
-    NSUInteger count = [(id)(uintptr_t)p->self countByEnumeratingWithState:host objects:buffer count:length];
+    id enumerated = (id)xl_object_in(p->self, "countByEnumeratingWithState:objects:count:", 0);
+    NSUInteger count = [enumerated countByEnumeratingWithState:host objects:buffer count:length];
     if (count) {
         uint64_t *items = [[NSMutableData dataWithLength:count * sizeof(uint64_t)] mutableBytes];
         for (NSUInteger i = 0; i < count; i++)
-            items[i] = (uintptr_t)host->itemsPtr[i];
+            items[i] = xl_object_out((uintptr_t)host->itemsPtr[i]);
         guest->items = (uintptr_t)items;
         guest->extra[4] = host->mutationsPtr ? *host->mutationsPtr : 0;
         guest->mutations = (uintptr_t)&guest->extra[4];
@@ -858,7 +860,7 @@ void xl_manual_init_with_format_arguments(void *pack)
     struct xl_format format;
     xl_format_marshal_valist(&format, 0, (void *)xl_object_in(p->format, "initWithFormat:arguments:", 0), p->arguments,
                              "initWithFormat:arguments:");
-    id result = [(id)(uintptr_t)p->self initWithFormat:(NSString *)format.object arguments:(va_list)format.arguments];
+    id result = [(id)xl_object_in(p->self, "initWithFormat:arguments:", 0) initWithFormat:(NSString *)format.object arguments:(va_list)format.arguments];
     xl_format_release(&format);
     p->r = xl_object_out((uintptr_t)result);
 }
@@ -929,12 +931,12 @@ void xl_manual_objc_initWeak(struct xl_weak_pack *p)
 {
     id *slot = xl_weak_slot(p->a0);
     *(uint64_t *)slot = 0;
-    p->r = (uintptr_t)objc_initWeak(slot, (id)xl_narrow_pointer(p->a1, "objc_initWeak", 1));
+    p->r = xl_object_out((uintptr_t)objc_initWeak(slot, (id)xl_object_in(p->a1, "objc_initWeak", 1)));
 }
 
 void xl_manual_objc_storeWeak(struct xl_weak_pack *p)
 {
-    p->r = (uintptr_t)objc_storeWeak(xl_weak_slot(p->a0), (id)xl_narrow_pointer(p->a1, "objc_storeWeak", 1));
+    p->r = xl_object_out((uintptr_t)objc_storeWeak(xl_weak_slot(p->a0), (id)xl_object_in(p->a1, "objc_storeWeak", 1)));
 }
 
 void xl_manual_objc_destroyWeak(struct xl_weak_pack1 *p)
@@ -944,12 +946,12 @@ void xl_manual_objc_destroyWeak(struct xl_weak_pack1 *p)
 
 void xl_manual_objc_loadWeakRetained(struct xl_weak_pack1 *p)
 {
-    p->r = (uintptr_t)objc_loadWeakRetained(xl_weak_slot(p->a0));
+    p->r = xl_object_out((uintptr_t)objc_loadWeakRetained(xl_weak_slot(p->a0)));
 }
 
 void xl_manual_objc_loadWeak(struct xl_weak_pack1 *p)
 {
-    p->r = (uintptr_t)objc_loadWeak(xl_weak_slot(p->a0));
+    p->r = xl_object_out((uintptr_t)objc_loadWeak(xl_weak_slot(p->a0)));
 }
 
 void xl_manual_objc_copyWeak(struct xl_weak_pack *p)
@@ -1011,6 +1013,8 @@ struct xl_block_wrapper {
     void *invoke;
     struct xl_block_desc *descriptor;
     uint64_t guest;
+    char kinds[4];
+    char result;
 };
 
 enum { XL_BLOCK_HAS_COPY_DISPOSE = 1 << 25, XL_BLOCK_HAS_SIGNATURE = 1 << 30, XL_BLOCK_NEEDS_FREE = 1 << 24 };
@@ -1040,14 +1044,15 @@ static char xl_type_token(const char **p)
         (*p)++;
         if (**p == '?') (*p)++;
         else if (**p == '"') { (*p)++; while (**p && **p != '"') (*p)++; if (**p == '"') (*p)++; }
-        return 'P';
-    case '#': case ':': case '*': (*p)++; return 'P';
+        return 'O';
+    case '#': (*p)++; return 'K';
+    case ':': case '*': (*p)++; return 'P';
     case '^': (*p)++; xl_type_token(p); return 'P';
     default: return 'X';
     }
 }
 
-static int xl_block_simple_args(const char *sig)
+static int xl_block_simple_args(const char *sig, char *kinds, char *result)
 {
     if (!sig)
         return -1;
@@ -1055,8 +1060,10 @@ static int xl_block_simple_args(const char *sig)
     char ret = xl_type_token(&p);
     if (ret == 'X')
         return -1;
+    *result = ret;
     while (*p >= '0' && *p <= '9') p++;
-    if (xl_type_token(&p) != 'P')
+    char self_kind = xl_type_token(&p);
+    if (self_kind != 'O' && self_kind != 'P' && self_kind != 'K')
         return -1;
     while (*p >= '0' && *p <= '9') p++;
     int count = 0;
@@ -1065,6 +1072,8 @@ static int xl_block_simple_args(const char *sig)
         if (t == 'X' || t == 'V')
             return -1;
         while (*p >= '0' && *p <= '9') p++;
+        if (count < 4)
+            kinds[count] = t;
         count++;
     }
     return count > 4 ? -1 : count;
@@ -1076,8 +1085,8 @@ static uintptr_t xl_block_call(struct xl_block_wrapper *w, const uint64_t *args,
     uint64_t all[5];
     all[0] = w->guest;
     for (unsigned i = 0; i < n; i++)
-        all[i + 1] = args[i];
-    return (uintptr_t)xl_invoke_n(invoke, all, n + 1);
+        all[i + 1] = xl_kind_out(w->kinds[i], (uintptr_t)args[i]);
+    return xl_kind_in(w->result, xl_invoke_n(invoke, all, n + 1), "guest block result");
 }
 
 static uintptr_t xl_block_t0(void *b) { return xl_block_call(b, 0, 0); }
@@ -1134,7 +1143,7 @@ static struct xl_block_wrapper *xl_wrapper_for(uint64_t guest)
     w->flags = XL_BLOCK_NEEDS_FREE | XL_BLOCK_HAS_COPY_DISPOSE | XL_BLOCK_HAS_SIGNATURE | 2;
     w->descriptor = &xl_block_descriptor;
     w->guest = xl_invoke(XL_GUEST__Block_copy, guest);
-    int args = xl_block_simple_args(xl_guest_block_signature(guest));
+    int args = xl_block_simple_args(xl_guest_block_signature(guest), w->kinds, &w->result);
     switch (args) {
     case 0: w->invoke = (void *)xl_block_t0; break;
     case 1: w->invoke = (void *)xl_block_t1; break;
@@ -1173,7 +1182,14 @@ uintptr_t xl_object_in(uint64_t guest, const char *symbol, unsigned index)
 uint64_t xl_object_out(uintptr_t host)
 {
     struct xl_block_wrapper *w = xl_wrapper_of(host);
-    return w ? w->guest : xl_class_out(host);
+    if (w)
+        return w->guest;
+    if ((host & 7) == 4) {
+        uint64_t alias = xl_alias_object(host);
+        if (alias)
+            return alias;
+    }
+    return xl_class_out(host);
 }
 
 uint64_t xl_block_retain(uint64_t guest)
@@ -1201,6 +1217,7 @@ uintptr_t xl_protocol(uint64_t guest)
 {
     if (!guest)
         return 0;
+    guest = xl_narrow_pointer(guest, "protocol", 0);
     const char *name = (const char *)xl_narrow_pointer(*(uint32_t *)(uintptr_t)(guest + 4), "protocol name", 0);
     return name ? (uintptr_t)objc_getProtocol(name) : 0;
 }
@@ -1215,7 +1232,7 @@ static uint64_t xl_variadic_arg(State *state, unsigned index)
 
 void xl_h_dictionaryWithObjectsAndKeys(State *state)
 {
-    id self = (id)xl_narrow_pointer(XL_REG(state, X0), "dictionaryWithObjectsAndKeys:", 0);
+    id self = (id)xl_object_in(XL_REG(state, X0), "dictionaryWithObjectsAndKeys:", 0);
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
     for (unsigned i = 0;; i += 2) {
         uint64_t value = xl_variadic_arg(state, i);
@@ -1224,46 +1241,46 @@ void xl_h_dictionaryWithObjectsAndKeys(State *state)
         uint64_t key = xl_variadic_arg(state, i + 1);
         if (!key)
             break;
-        [dict setObject:(id)(uintptr_t)value forKey:(id)(uintptr_t)key];
+        [dict setObject:(id)xl_object_in(value, "dictionaryWithObjectsAndKeys:", i + 2) forKey:(id)xl_object_in(key, "dictionaryWithObjectsAndKeys:", i + 3)];
     }
     id result = [self isKindOfClass:object_getClass([NSMutableDictionary class])] ? dict : [[dict copy] autorelease];
-    XL_REG(state, X0) = (uintptr_t)result;
+    XL_REG(state, X0) = xl_object_out((uintptr_t)result);
     xl_return(state);
 }
 
-static void xl_collect_objects(State *state, NSMutableArray *array)
+static void xl_collect_objects(State *state, NSMutableArray *array, const char *symbol)
 {
     for (unsigned i = 0;; i++) {
         uint64_t value = xl_variadic_arg(state, i);
         if (!value)
             break;
-        [array addObject:(id)(uintptr_t)value];
+        [array addObject:(id)xl_object_in(value, symbol, i + 2)];
     }
 }
 
 void xl_h_arrayWithObjects(State *state)
 {
     NSMutableArray *array = [NSMutableArray array];
-    xl_collect_objects(state, array);
-    XL_REG(state, X0) = (uintptr_t)[[array copy] autorelease];
+    xl_collect_objects(state, array, "arrayWithObjects:");
+    XL_REG(state, X0) = xl_object_out((uintptr_t)[[array copy] autorelease]);
     xl_return(state);
 }
 
 void xl_h_initWithObjects(State *state)
 {
-    id self = (id)xl_narrow_pointer(XL_REG(state, X0), "initWithObjects:", 0);
+    id self = (id)xl_object_in(XL_REG(state, X0), "initWithObjects:", 0);
     NSMutableArray *array = [NSMutableArray array];
-    xl_collect_objects(state, array);
+    xl_collect_objects(state, array, "initWithObjects:");
     id result = [self initWithArray:array];
-    XL_REG(state, X0) = (uintptr_t)result;
+    XL_REG(state, X0) = xl_object_out((uintptr_t)result);
     xl_return(state);
 }
 
 void xl_h_setWithObjects(State *state)
 {
     NSMutableArray *array = [NSMutableArray array];
-    xl_collect_objects(state, array);
-    XL_REG(state, X0) = (uintptr_t)[NSSet setWithArray:array];
+    xl_collect_objects(state, array, "setWithObjects:");
+    XL_REG(state, X0) = xl_object_out((uintptr_t)[NSSet setWithArray:array]);
     xl_return(state);
 }
 

@@ -16,6 +16,7 @@ extern const struct xl_guest_slot xl_guest_slots[];
 extern const uint32_t xl_guest_slot_count;
 extern void xl_run_initializers(void);
 extern void xl_install_diagnostics(void);
+extern uint32_t xl_guest_low, xl_guest_high;
 _Noreturn void xl_unsupported(const char *message);
 
 enum { XL_LIBRARY_IDLE, XL_LIBRARY_ATTACHED, XL_LIBRARY_FAILED, XL_LIBRARY_READY };
@@ -95,6 +96,8 @@ static int xl_library_attach(void)
         return status;
     for (uint32_t index = 0; index < xl_guest_slot_count; index++)
         *(volatile uint32_t *)(uintptr_t)xl_guest_slots[index].address = xl_guest_slots[index].value;
+    xl_guest_low = header->low;
+    xl_guest_high = header->high;
     for (uint32_t index = 0; index < header->segment_count; index++) {
         const struct xl_guest_segment *segment = &segments[index];
         if (segment->protection != (XL_GUEST_READ | XL_GUEST_WRITE) &&

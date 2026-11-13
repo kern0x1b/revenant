@@ -92,7 +92,7 @@ target("recompiler_corpus")
     set_default(false)
     add_deps("xlate", "xlgen")
     add_packages("blocksruntime", "iphoneos-sdk", "ld64", "ldid")
-    add_tests("jumptable", "tsdscan", "tsdguard", "int128", "weakimport", "lse", "llsc", "crypto", "library", "exceptions", "objectsplit", "hostbridges", "checkapi")
+    add_tests("jumptable", "tsdscan", "tsdguard", "int128", "weakimport", "lse", "llsc", "crypto", "library", "exceptions", "libexceptions", "objectsplit", "segmentlimit", "absolutes", "hostbridges", "checkapi")
     on_test(corpus)
 target_end()
 
@@ -103,7 +103,7 @@ if get_config("tests") == "device" then
         set_group("device")
         add_deps("xlate", "xlgen")
         add_packages("blocksruntime", "iphoneos-sdk", "ld64", "ldid")
-        add_tests("classpair", "ordinal", "exceptions", "hostbridges")
+        add_tests("classpair", "ordinal", "exceptions", "libexceptions", "hostbridges")
         on_test(corpus)
     target_end()
 end

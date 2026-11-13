@@ -259,12 +259,13 @@ Value Classify(ASTContext &gc, QualType g, ASTContext &hc, QualType h, bool para
     }
     if (auto record = gp->getAsRecordDecl();
         record && (StringRef(record->getName()).starts_with("_opaque_pthread_") || record->getName() == "__mbstate_t" ||
+                   record->getName() == "__nl_cat_d" || record->getName() == "_malloc_zone_t" || record->getName() == "_copyfile_state" ||
                    (record->getTypedefNameForAnonDecl() &&
                     (record->getTypedefNameForAnonDecl()->getName() == "__mbstate_t" ||
                      record->getTypedefNameForAnonDecl()->getName() == "DIR")))) {
       value.kind = Kind::Pointer;
       value.is_object = false;
-      value.note = "opaque pthread object";
+      value.note = "opaque handle";
       return value;
     }
     auto pointee = Classify(gc, gp, hc, hp, false);
@@ -326,6 +327,7 @@ struct FormatInfo {
   bool present = false;
   bool object = false;
   bool scan = false;
+  bool wide = false;
   unsigned format_index = 0;
   std::string va_variant;
   int va_param = -1;
@@ -342,6 +344,9 @@ class Generator {
   bool EmitFunction(const std::string &symbol, FunctionDecl *g, FunctionDecl *h);
   void EmitVariable(const std::string &symbol, VarDecl *g, VarDecl *h);
   void EmitTrampoline(const std::string &symbol, const std::string &trap);
+  void EmitReturn(const std::string &symbol, const std::string &why);
+  void EmitDataDeallocator(const std::string &symbol);
+  bool data_deallocator_emitted_ = false;
   void EmitManualFunction(const std::string &symbol, unsigned arguments, const std::string &handler);
   void EmitLazyClassNamer(const std::string &symbol);
   void EmitImageNameHook(const std::string &symbol);
@@ -553,6 +558,8 @@ std::string Generator::ScalarToGuest(const Value &value, const std::string &expr
       return value.is_signed ? "(uint64_t)(int64_t)" + expr : "(uint64_t)" + expr;
     case Kind::Floating:
       return "(double)" + expr;
+    case Kind::Protocol:
+      return "xl_protocol_out((uintptr_t)" + expr + ")";
     default:
       if (value.is_object)
         return "xl_object_out((uintptr_t)" + expr + ")";
@@ -635,8 +642,8 @@ std::string Generator::BlockBridge(const Value &value) {
   }
   auto ret = hproto ? Spell(hc_, hproto->getReturnType()) : "void";
   hs << "static " << Spell(hc_, value.host, name + "_host(uint64_t guest)") << "\n{\n";
-  hs << "    if (!guest)\n        return 0;\n    XLGuestBlock *holder = [XLGuestBlock holderWithGuestBlock:guest];\n";
-  hs << "    return [[^" << ret << "(" << (args.empty() ? "void" : args) << ") {\n";
+  hs << "    if (!guest)\n        return 0;\n    XLGuestBlock *holder = [XLGuestBlock newWithGuestBlock:guest];\n";
+  hs << "    id host_block = [^" << ret << "(" << (args.empty() ? "void" : args) << ") {\n";
   hs << "        struct " << name << "_pack p;\n        p.block = holder.guestBlock;\n";
   for (auto &param : signature.params) {
     if (param.value.kind == Kind::Record) {
@@ -660,7 +667,7 @@ std::string Generator::BlockBridge(const Value &value) {
       hs << "        return " << ScalarToHost(signature.result, "p.r", "\"" + name + "\", 99") << ";\n";
     }
   }
-  hs << "    } copy] autorelease];\n}\n\n";
+  hs << "    } copy];\n    [holder release];\n    return (" << Spell(hc_, value.host) << ")host_block;\n}\n\n";
   guest_ += gs.str();
   host_ += hs.str();
   return name + "_host";
@@ -799,8 +806,12 @@ std::string Generator::HostLoad(const Value &value, const std::string &expr, con
       return "(Protocol *)xl_protocol(" + expr + ")";
     case Kind::Record:
       return Mirror(value.guest, value.host) + "_to_host(&" + expr + ")";
-    case Kind::Block:
-      return BlockBridge(value) + "(" + expr + ")";
+    case Kind::Block: {
+      auto temp = "block" + std::to_string(index);
+      prep += "    " + Spell(hc_, value.host, temp) + " = " + BlockBridge(value) + "(" + expr + ");\n";
+      post += "    [(id)" + temp + " release];\n";
+      return temp;
+    }
     case Kind::Callback:
       return CallbackBridge(value) + "(" + expr + ")";
     case Kind::OutSlot: {
@@ -1220,7 +1231,7 @@ std::string Generator::EmitBridge(const std::string &id, const Signature &signat
     std::string arg;
     if (format.present && i == format.format_index) {
       arg = format.scan ? "(const char *)xl_narrow_pointer(p->" + param.name + ", \"" + id + "\", " + std::to_string(i) + ")"
-                        : format.object ? "(id)format.object" : "format.text";
+                        : format.object ? "(id)format.object" : format.wide ? "(const wchar_t *)format.wide" : "format.text";
     } else if (format.present && static_cast<int>(i) == format.va_param) {
       arg = format.scan ? "(va_list)scan.arguments" : "(va_list)format.arguments";
     } else {
@@ -1238,8 +1249,9 @@ std::string Generator::EmitBridge(const std::string &id, const Signature &signat
     post += "    xl_scanf_finish(&scan, (int)p->r);\n";
   } else if (format.present) {
     std::string va_src = format.va_param < 0 ? "p->va" : ("p->" + signature.params[format.va_param].name);
-    prep += "    struct xl_format format;\n    xl_format_marshal(&format, " +
-            std::string(format.object ? "0, (id)xl_narrow_pointer(p->" + signature.params[format.format_index].name + ", \"" + id + "\", 0)"
+    prep += "    struct xl_format format;\n    " + std::string(format.wide ? "xl_format_marshal_wide" : "xl_format_marshal") + "(&format, " +
+            std::string(format.wide ? "(const wchar_t *)xl_narrow_pointer(p->" + signature.params[format.format_index].name + ", \"" + id + "\", 0), 0"
+                        : format.object ? "0, (id)xl_narrow_pointer(p->" + signature.params[format.format_index].name + ", \"" + id + "\", 0)"
                                       : "(const char *)xl_narrow_pointer(p->" + signature.params[format.format_index].name + ", \"" + id + "\", 0), 0") +
             ", (const uint64_t *)(uintptr_t)" + va_src + ", \"" + id + "\");\n";
     if (format.va_param < 0) {
@@ -1333,6 +1345,37 @@ void Generator::EmitTrampoline(const std::string &symbol, const std::string &tra
   guest_ += "extern void xl_trap_" + trap + "(void);\n__asm__(\".globl _" + name + "\\n.p2align 2\\n_" + name +
             ":\\n    b _xl_trap_" + trap + "\\n\");\n\n";
   Report(symbol + ": register-preserving trampoline to " + trap);
+}
+
+void Generator::EmitReturn(const std::string &symbol, const std::string &why) {
+  auto name = symbol.substr(1);
+  guest_ += "__asm__(\".globl _" + name + "\\n.p2align 2\\n_" + name + ":\\n    ret\\n\");\n\n";
+  Report(symbol + ": guest function that returns at once (" + why + ")");
+}
+
+void Generator::EmitDataDeallocator(const std::string &symbol) {
+  static const std::map<std::string, std::pair<unsigned, const char *>> kinds = {
+      {"_NSDataDeallocatorFree", {0, "free"}}, {"_NSDataDeallocatorUnmap", {1, "munmap"}}, {"_NSDataDeallocatorVM", {2, "vm_deallocate"}}};
+  auto kind = kinds.at(symbol);
+  if (!data_deallocator_emitted_) {
+    data_deallocator_emitted_ = true;
+    guest_ +=
+        "extern void xl_trap_data_deallocator(void *);\n"
+        "static void xl_data_deallocate(unsigned kind, void *bytes, unsigned long length)\n{\n"
+        "    struct __attribute__((packed)) { uint64_t kind, bytes, length; } p;\n"
+        "    p.kind = kind;\n"
+        "    p.bytes = (uint64_t)(uintptr_t)bytes;\n"
+        "    p.length = length;\n"
+        "    xl_trap_data_deallocator(&p);\n}\n\n";
+    host_ +=
+        "void xl_manual_data_deallocator(void *pack);\n"
+        "void xl_h_data_deallocator(State *state)\n{\n"
+        "    xl_manual_data_deallocator(xl_argument(state));\n    xl_return(state);\n}\n\n";
+  }
+  auto name = symbol.substr(1);
+  guest_ += "void (^" + name + ")(void *, unsigned long) = ^(void *bytes, unsigned long length) {\n    xl_data_deallocate(" +
+            std::to_string(kind.first) + ", bytes, length);\n};\n\n";
+  Report(symbol + ": guest block that calls " + kind.second + " (Foundation's deallocator of that name is not in iOS 6.1.3)");
 }
 
 void Generator::EmitManualFunction(const std::string &symbol, unsigned arguments, const std::string &handler) {
@@ -1495,25 +1538,27 @@ bool Generator::EmitFunction(const std::string &symbol, FunctionDecl *g, Functio
   }
   FormatInfo format;
   static const std::map<std::string, std::pair<std::string, int>> unattributed_printf = {
-      {"sqlite3_mprintf", {"sqlite3_vmprintf", 0}}, {"sqlite3_snprintf", {"sqlite3_vsnprintf", 2}}};
+      {"sqlite3_mprintf", {"sqlite3_vmprintf", 0}}, {"sqlite3_snprintf", {"sqlite3_vsnprintf", 2}}, {"swprintf", {"vswprintf", 2}}};
   if (!g->getAttr<FormatAttr>() && g->isVariadic()) {
     if (auto known = unattributed_printf.find(name); known != unattributed_printf.end()) {
       format.present = true;
       format.object = false;
+      format.wide = name == "swprintf";
       format.format_index = known->second.second;
       format.va_variant = known->second.first;
     }
   }
-  if (auto attr = g->getAttr<FormatAttr>()) {
+  if (auto attr = g->getAttr<FormatAttr>(); attr && attr->getType()->getName() != "strftime") {
     static const std::map<std::string, std::string> variants = {
         {"printf", "vprintf"}, {"fprintf", "vfprintf"}, {"sprintf", "vsprintf"}, {"snprintf", "vsnprintf"},
         {"asprintf", "vasprintf"}, {"dprintf", "vdprintf"}, {"syslog", "vsyslog"}, {"NSLog", "NSLogv"},
-        {"asl_log", "asl_vlog"}};
+        {"asl_log", "asl_vlog"}, {"__snprintf_chk", "__vsnprintf_chk"}, {"asprintf_l", "vasprintf_l"},
+        {"snprintf_l", "vsnprintf_l"}};
     static const std::map<std::string, std::string> scan_variants = {
         {"scanf", "vscanf"}, {"fscanf", "vfscanf"}, {"sscanf", "vsscanf"}};
     static const std::set<std::string> valist_readers = {
         "vprintf", "vfprintf", "vsprintf", "vsnprintf", "vasprintf", "vdprintf",
-        "vsyslog", "asl_vlog", "NSLogv", "vscanf", "vfscanf", "vsscanf"};
+        "vsyslog", "asl_vlog", "NSLogv", "vscanf", "vfscanf", "vsscanf", "__vsnprintf_chk", "vasprintf_l", "vsnprintf_l"};
     format.scan = attr->getType()->getName() == "scanf";
     auto variant = format.scan ? scan_variants.find(name) : variants.find(name);
     if (variant != (format.scan ? scan_variants.end() : variants.end()) && g->isVariadic()) {
@@ -1533,7 +1578,7 @@ bool Generator::EmitFunction(const std::string &symbol, FunctionDecl *g, Functio
     }
   } else if (g->isVariadic() && !format.present) {
     static const std::map<std::string, unsigned> fixed_variadic = {
-        {"open", 1}, {"fcntl", 1}, {"ioctl", 1}, {"openat", 1}};
+        {"open", 1}, {"fcntl", 1}, {"ioctl", 1}, {"openat", 1}, {"open_dprotected_np", 1}, {"sem_open", 2}};
     static const std::map<std::string, std::string> shim_callee = {{"openat", "xl_shim_openat"}};
     auto fv = fixed_variadic.find(name);
     if (fv == fixed_variadic.end()) {
@@ -2002,12 +2047,35 @@ void Generator::EmitClasses(const json::Object &manifest) {
     auto selector = method.getString("selector")->str();
     auto types = method.getString("types")->str();
     Signature signature;
-    auto guest_types = types;
-    guest_types.erase(std::remove_if(guest_types.begin(), guest_types.end(), [](char ch) { return isdigit(static_cast<unsigned char>(ch)); }), guest_types.end());
+    auto shape = [](const std::string &encoding) {
+      std::string result;
+      for (size_t i = 0; i < encoding.size(); ++i) {
+        char ch = encoding[i];
+        if (isdigit(static_cast<unsigned char>(ch))) {
+          continue;
+        }
+        if (ch == '{') {
+          result += "{?";
+          while (i + 1 < encoding.size() && encoding[i + 1] != '=' && encoding[i + 1] != '}') {
+            ++i;
+          }
+          continue;
+        }
+        switch (ch) {
+          case 'Q': case 'L': case 'l': ch = 'q'; break;
+          case 'I': ch = 'i'; break;
+          case 'S': ch = 's'; break;
+          case 'C': ch = 'c'; break;
+          default: break;
+        }
+        result += ch;
+      }
+      return result;
+    };
+    auto guest_types = shape(types);
     if (auto found = guest_pool_.find(std::string(class_method ? "+" : "-") + selector); found != guest_pool_.end()) {
       for (auto guest : found->second) {
-        auto key = gc_.getObjCEncodingForMethodDecl(guest);
-        key.erase(std::remove_if(key.begin(), key.end(), [](char ch) { return isdigit(static_cast<unsigned char>(ch)); }), key.end());
+        auto key = shape(gc_.getObjCEncodingForMethodDecl(guest));
         if (key != guest_types) {
           continue;
         }
@@ -2696,10 +2764,12 @@ int main(int argc, const char **argv) {
       {"_class_getMethodImplementation", 2}, {"_method_getImplementation", 1}, {"_method_setImplementation", 2},
       {"_class_addMethod", 4}, {"_class_replaceMethod", 4}, {"_imp_implementationWithBlock", 1},
       {"_imp_getBlock", 1}, {"_imp_removeBlock", 1}, {"_class_copyMethodList", 2},
-      {"_getaddrinfo", 4}, {"_freeaddrinfo", 1}};
+      {"_getaddrinfo", 4}, {"_freeaddrinfo", 1},
+      {"_getifaddrs", 1}, {"_freeifaddrs", 1}, {"_getservbyname", 2}, {"_localeconv_l", 1}, {"_class_copyIvarList", 2},
+      {"__NSGetArgv", 0}, {"_CGColorCreate", 2}, {"_CGColorGetComponents", 1}, {"_CGImageCreateWithMaskingColors", 2}};
   static const std::set<std::string> personalities = {"___objc_personality_v0", "___gxx_personality_v0",
                                                       "___gcc_personality_v0"};
-  static const std::set<std::string> faults = {"___cxa_throw"};
+  static const std::set<std::string> faults = {"___cxa_throw", "__Unwind_RaiseException"};
   for (auto &symbol : ReadLines(SymbolsPath)) {
     if (provided.count(symbol) || symbol == "dyld_stub_binder" || personalities.count(symbol)) {
       continue;
@@ -2717,6 +2787,14 @@ int main(int argc, const char **argv) {
     }
     if (auto trampoline = trampolines.find(symbol); trampoline != trampolines.end()) {
       generator.EmitTrampoline(symbol, trampoline->second);
+      continue;
+    }
+    if (symbol == "___chkstk_darwin") {
+      generator.EmitReturn(symbol, "the stack probe of a large frame, which only orders the touches of the pages that the frame's own stores make");
+      continue;
+    }
+    if (symbol == "_NSDataDeallocatorFree" || symbol == "_NSDataDeallocatorUnmap" || symbol == "_NSDataDeallocatorVM") {
+      generator.EmitDataDeallocator(symbol);
       continue;
     }
     if (symbol == "__tlv_bootstrap") {

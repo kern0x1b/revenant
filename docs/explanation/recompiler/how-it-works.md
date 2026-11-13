@@ -73,7 +73,8 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
   `objc_getClass` give, so `class_getSuperclass` of a guest class and `object_getClass` of an `NSObject` agree with
   `&OBJC_CLASS_$_NSObject`; the runtime used to make the twin for every shadow and hand it out at once, and such a program
   met two classes named `NSObject`. A program with Swift classes of a host ancestor still has both names once the twin is
-  published. The runtime keeps the tables in both directions
+  published. A class of the guest's own image is never given a twin: an executable's image is known to `dladdr`, and a
+  library's, which the loader maps itself, is known by its range (`xl_guest_low`, `xl_guest_high`). The runtime keeps the tables in both directions
   (`xl_guest_to_host`, `xl_host_to_guest`, `xl_host_twin`, `xl_twin_host`) and the bridge translates at each crossing, as it
   does for a shadow. The copy of the Swift part is made when the shadow is built and made again before `+alloc`
   (`xl_swift_sync_class`), because the Swift runtime writes into its class when it first uses it. The host's libobjc
@@ -83,6 +84,16 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
   `-dealloc` of its own gets one that does the same before it calls its superclass's. A class compiled for
   iOS 12.2 or later marks itself Swift with bit 1 of its data word, not the bit 0 of the guest's libswiftCore (built with
   `-DSWIFT_CLASS_IS_SWIFT_MASK=1ULL`); the runtime rewrites the bit when it sets the class up.
+- The superclass of a Swift class can be a Swift class whose layout the host keeps (`__ContiguousArrayStorageBase`, which
+  derives from `NSObject`, so the pair split leaves it alone). A class that the Swift runtime builds at run time
+  (`_ContiguousArrayStorage<T>`, `_DictionaryStorage<K, V>`) copies the superclass's instance size, alignment mask and
+  vtable from the metadata of the superclass only when that metadata is the guest's; the runtime therefore
+  reconciles the new class with its superclass when it registers the shadow (`xl_reconcile_swift_super`). For any such
+  superclass it raises the alignment mask, moves the instance start behind the superclass's instance, shifts
+  `ro->instance_size`, the metadata's own size and the field offset vector by the same amount, and fills the vtable
+  slots the class left empty from the superclass. The three consumers of the size agree afterwards: `swift_allocObject`
+  reads the metadata, the host's `class_getInstanceSize` reads `ro`, and the field accessors read the offsets. A class
+  whose size is smaller than its superclass's, or whose metadata is shorter, stops the program with the class named.
 - A shadow cannot give the host an *instance* that the guest allocated. The instance's isa word is the guest class, so
   the bridge looks the shadow up when a guest message reaches it and answers `-retain`, `-release` and
   `-autorelease` with the guest's own methods. A host method of a shadow's ancestry (`-[NSObject isEqual:]`) sent to
@@ -162,6 +173,14 @@ print on the iPad 2 what objc4 printed.
   `recompiler/tests/classpair` has both cases: the first message to a class laid out only in `__objc_clsrolist` under a
   guest root class, and a first message with integer, floating-point and structure-result registers to a class whose
   `+initialize` is guest code.
+- **Blocks the guest hands to the host.** A block parameter of a host function is converted into a host block that holds a
+  copy of the guest block (`Block_copy` in the guest) and invokes it. The host block is the callee's for the call: the
+  generated stub takes it with a count of +1, and the one holder of the guest copy belongs to that block alone, so both
+  go when the stub returns the block; an API that keeps the block past the call (`dispatch_async`) has copied it, and the
+  copy keeps the holder and the guest block until the host lets go. An autoreleased block or holder would keep the guest
+  copy, and everything it captured, until some pool drained, and Swift's `withoutActuallyEscaping`, which
+  `DispatchQueue.sync` is written with, checks that the closure context is unique after the body and stops the process
+  if it is not. `recompiler/tests/hostbridges` has both cases (the `block sync` and `block async` lines).
 - **Method implementations (`IMP`).** An `IMP` is a bare code address, and the guest and the host disagree on what one
   means. A guest method's `IMP` is the guest function, and the host reaches it through a block `IMP` that
   `class_addMethod`, `class_replaceMethod` and `method_setImplementation` build (`xl_host_imp_for_guest`, cached per
@@ -185,6 +204,67 @@ print on the iPad 2 what objc4 printed.
   point at host data, and `freeaddrinfo` finds the header by its magic and frees both lists.
 - **`class_copyMethodList`.** The host returns an array of 4-byte `Method` pointers; the bridge widens it into
   8-byte slots in place of the host array and stores the count.
+- **Pointers to host constants that are 4 mod 8.** The guest Swift runtime clears the low three bits of an object
+  pointer (a bridged `String`, an `Array` of objects keep tags there), so an object that the host hands out at an address
+  that is not a multiple of 8 comes back as another object. The host's `malloc` blocks, its singletons (`kCFNull`,
+  `kCFBooleanTrue`, `kCFBooleanFalse`, the `@YES` and `@NO` numbers, the `kCFAllocator*` allocators, the classes, the
+  dispatch queues) are measured 0 mod 8 on the 4S. What is not: the constant strings (`__NSCFConstantString`, the
+  `__DATA,__cfstring` section of an image whose section starts at 4 mod 8, which is every constant of CoreFoundation,
+  Security, SystemConfiguration, IOKit and of the app itself, `NSDefaultRunLoopMode`, `kCFRunLoopDefaultMode`,
+  `NSLocaleLanguageCode`, `NSInvalidArgumentException`) and some `Protocol` objects (`@protocol(NSObject)`).
+  `src/runtime/alignment.m` gives the guest an **alias** instead: for a constant string a copy made with a private
+  `CFAllocator` over a 4 MiB arena (CoreFoundation puts a 4-byte allocator word in front of the object, so the arena
+  hands out blocks at 4 mod 8 and the object lands on a multiple of 8; the copy is a real `__NSCFString` with the same
+  characters; CoreFoundation answers a few strings (`gregorian`) with the constant it already has instead of a new object,
+  and the runtime then makes a mutable copy through the same allocator), for a `Protocol` a 16-byte shell that holds the isa word and the name, which is also what `xl_protocol`
+  reads. The cache constant to alias is made once under a lock and kept; the same constant is the same alias for every
+  caller and every thread. Each alias sits in the arena behind an 8-byte header that holds the original and a check word,
+  so the other direction is a range test of the arena (`xl_narrow_pointer`, `xl_object_in`): the host gets the original
+  constant back and never sees an alias. One funnel serves every host-to-guest path: `xl_object_out` for objects,
+  `xl_widen_pointer` for plain pointers (a value that is 4 mod 8 is looked up in the constant ranges of the loaded
+  images, which the runtime reads from dyld's image list and reads again when the image count has changed; it does not
+  ask dyld for a callback, because the runtime defines `_dyld_register_func_for_add_image` itself for the guest images and
+  in library mode never forwards it to the host's dyld), and `xl_protocol_out` for `Protocol`; the generated
+  bridge (returns, out slots, record fields, data imports, callback and block slot arguments) and the bridges by hand
+  (dynamic message returns, fast enumeration, the weak-reference functions, the variadic collection constructors, the
+  arguments and result of a guest block the host calls, the word trampoline of a guest method) call them. An object at
+  4 mod 8 that is neither a constant string, nor a protocol, nor a class stops the program with its class named.
+- **What an import of a guest image becomes.** `xlgen` sorts every symbol that no guest image defines by what differs
+  between the arm64 guest and the armv7 host, and a symbol it cannot place is `UNSUPPORTED` in `report.txt`, is
+  printed by the translation, and aborts with its name if the guest reaches it: nothing is stubbed to look like it
+  worked.
+  - *Same ABI*: the declaration is in `include/common-includes.h` and the call goes through the generated bridge
+    (`lgamma_r`, `__snprintf_chk`, `asprintf_l`, `snprintf_l`, `sem_open`, `open_dprotected_np`, `copyfile`,
+    `catgets`, `pthread_key_init_np`); variadic functions with a format get their `va_list` variant, and `strftime_l`
+    has a format of dates, which the bridge does not read.
+  - *Layout differs*: a bridge by hand in `src/runtime/bridge.m`, with a case in `tests/hostbridges` that the Mac and
+    the 4S answer alike. `CGColorCreate`, `CGColorGetComponents`, `CGImageCreateWithMaskingColors` (`CGFloat` is a
+    `double` here and a `float` there; the count of components comes from the colour space; the array that
+    `CGColorGetComponents` returns is the runtime's, one per colour and refilled at each call, so it stays valid as long
+    as the colour does); `__NSGetArgv` (a 64-bit copy of `argv`, made at the first call, so a store through the
+    returned pointer changes the copy); `getifaddrs`/`freeifaddrs` and `getservbyname` (guest-layout lists behind a
+    header, as `getaddrinfo`; the `if_data` of a link entry is copied with the 8-byte `timeval`); `localeconv_l` (one
+    guest `struct lconv` per locale); `class_copyIvarList` (8-byte slots, as `class_copyMethodList`); `swprintf` (the
+    format and the arguments are read as `printf` reads them, through UTF-8, and `vswprintf` gets the host's).
+  - *Opaque handles*: `catopen` returns an `nl_catd`, `malloc_default_zone` and `malloc_zone_from_ptr` return a
+    `malloc_zone_t *`, and `copyfile_state_alloc` a `copyfile_state_t`, which the guest only hands back (libswiftCore's
+    `-[_SwiftObject zone]` answers the zone, libc++'s `messages` passes the catalogue to `catgets` and `catclose`,
+    libc++'s `std::filesystem` copy gives the state to `fcopyfile` and `copyfile_state_free`). They cross as the host's pointer, and `-1` crosses as
+    `-1`. A guest that read a zone's function table would read 4-byte pointers: none of these images does.
+  - *Data*: `__progname` is a copy of the host's pointer, filled at start-up. `NSDataDeallocatorFree`, `Unmap` and `VM`
+    are private blocks of Foundation that iOS 6.1.3 does not have; the guest gets blocks of its own that call `free`,
+    `munmap` and `vm_deallocate`, which is what Foundation's blocks do (nothing on a null pointer for the last two).
+    `_dispatch_source_type_vm` is the host's. `__swiftImmortalRefCount` is an absolute symbol of libswiftCore
+    (`0x80000004ffffffff`): a bind to it takes the value, unslid.
+  - *A function that returns at once*: `__chkstk_darwin`, the stack probe that an arm64 Darwin function with a large
+    frame calls first, with the size in `x9`; it keeps every register but `x16`, `x17` and the flags, and touches
+    each page of the new frame from the stack pointer down so that a frame cannot jump over the guard page. The
+    lifted code runs on the host thread's stack, which has the same guard page; a frame that fits behaves the same
+    without the probe, and one that overflows stops at a page below the guard or in memory beside the stack instead of
+    at the guard itself.
+  - *Not implemented, and loud*: `__Unwind_RaiseException`, which libc++abi's `__cxa_throw` calls. A C++ exception
+    thrown by guest code has a `__cxa_exception` of arm64 layout that the host's personality cannot read, so the
+    throw is a fault, as `__cxa_throw` of an imported libc++ is.
 
 ## Scope and limits
 

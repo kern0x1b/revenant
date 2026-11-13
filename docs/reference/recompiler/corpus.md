@@ -14,8 +14,8 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, crypto, library, exceptions, objectsplit, hostbridges and checkapi; `classpair` and `ordinal` are the device group's, which also runs the
-device part of `exceptions` and `hostbridges`. Their output goes to the
+int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, objectsplit, segmentlimit, absolutes, hostbridges and checkapi; `classpair` and `ordinal` are the device group's, which also runs the
+device part of `exceptions`, `libexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
 
@@ -25,9 +25,11 @@ A check that also has a device part is run by hand, with the output folder as it
 ./xmakew l -P . recompiler/tests/weakimport/check.lua <out>
 ./xmakew l -P . recompiler/tests/classpair/check.lua <out>
 ./xmakew l -P . recompiler/tests/exceptions/check.lua <out>
+./xmakew l -P . recompiler/tests/libexceptions/check.lua <out>
 ./xmakew l -P . recompiler/tests/hostbridges/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftconformance/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftobjc/check.lua <out>
+./xmakew l -P . recompiler/tests/libgenerics/check.lua <out>
 ./xmakew l -P . recompiler/tests/cryptodevice/check.lua <out>
 ./xmakew l -P . recompiler/tests/cryptoboringssl/check.lua <out>
 ```
@@ -246,6 +248,21 @@ the C++ personality, and the translated binary must import `_Unwind_SjLj_Registe
 binary and compares its output with the Mac's. The program takes the number of loop rounds as its argument (2000
 by default), so a probe can run it deeper by hand.
 
+### libexceptions
+
+The same exception mechanism in a library (`XL_LIBRARY=1`), loaded by a small armv7 host (`host.m`, with the loader) that
+takes the class and the method to call, so each step runs in a process of its own and a fault in one hides none of the others.
+The guest (`fixture.mm`, class `LibExceptions`) has six steps: an `NSException` thrown in a guest frame and caught three
+frames up through frames with C++ destructors (4 destructors, `@finally` once); one raised by the host
+(`-objectAtIndex:` out of range, `NSRangeException`); `@catch` of a guest subclass of `NSException` before `NSException`;
+`@catch (id)` of a thrown string; a C++ `catch (...)` that takes an Objective-C exception, with its destructors and the
+case where nothing is thrown; and a function with a 20000-byte stack frame, which the compiler enters through
+`___chkstk_darwin` (its result is checked against the value a native program computes).
+
+The host part builds and translates the library and the host, and requires that the library registers SjLj frames
+(`_Unwind_SjLj_Register`). The device part runs each step and requires its `ok` names, `done` and `exit=0`. A C++ `throw`
+is not in the check, because it is the known limitation in `library-mode.md`.
+
 ### hostbridges
 
 A program (`main.m`) that calls the host functions whose guest and host layouts differ or whose argument is an `IMP`:
@@ -260,11 +277,93 @@ A program (`main.m`) that calls the host functions whose guest and host layouts 
   `IMP`s of a concrete `NSString` class called by the guest; the `NSObject` `-isKindOfClass:` `IMP` called on an instance
   of a guest class that overrides it; `imp_implementationWithBlock` with a captured `__block` variable, added with
   `class_addMethod` and called by a message send, `imp_getBlock` and `imp_removeBlock`; a C function added with
-  `class_addMethod`; `class_replaceMethod` and `method_setImplementation` with the old `IMP` called afterwards.
+  `class_addMethod`; `class_replaceMethod` and `method_setImplementation` with the old `IMP` called afterwards;
+- the imports of the reCAPTCHA work's guest images that had no bridge, one check each: `CGColorCreate`,
+  `CGColorGetComponents` (the pointer stays the same for one colour) and `CGImageCreateWithMaskingColors`, whose
+  `CGFloat` arrays are `double` in the guest and `float` in the host; `_NSGetArgv` and `__progname`; `getifaddrs` and
+  `freeifaddrs` for `lo0` (the address, the netmask, the flags, and the `if_data` of the link entry with its time
+  stamp); `getservbyname` for a known and an unknown service; `localeconv_l` of the C locale (strings, numbers, the
+  same pointer for the same locale); `class_copyIvarList` of a guest class with an `int`, an object and a `double`, and
+  of a class without ivars; `malloc_default_zone`, `malloc_zone_from_ptr` (a heap block and a stack address) and
+  `malloc_zone_malloc`/`malloc_zone_free` with the zone the guest got; `NSDataDeallocatorUnmap`, `NSDataDeallocatorVM`
+  and `NSDataDeallocatorFree` called by the guest, the first two checked by asking the kernel whether the page is
+  still mapped; `catopen` of a catalogue that does not exist (the host's `(nl_catd)-1` has to reach the guest as
+  `-1`); `swprintf` with `%d`, `%5.2f`, `%s`, `%ls`, `%c`, `%lld`, one that truncates, and one whose format and
+  arguments are not ASCII; `_dispatch_source_type_vm` as the type of a dispatch source; `copyfile_state_alloc`,
+  `fcopyfile` (a file descriptor copied into another) and `copyfile_state_free`; the lifetime of a block the guest hands to
+  the host (`block sync`, `block async`): an object captured by a block of `dispatch_sync` must be released when the call
+  returns (`released at return 1`), and one captured by a block of `dispatch_async` after the queue has run and dropped
+  it (`released 2`), both with the main pool still open. The control on the 4S, with the generated block bridge keeping
+  its holder until a pool drains (`autorelease` instead of `release`), prints 0 on both lines.
+
+Alignment of host constants (the `align` lines): the guest must get a constant string or a `Protocol` of the host at a
+multiple of 8, the same pointer each time, and the host must see the original. One check for each path that carries a
+host pointer to the guest or a guest pointer back:
+
+| Path | Line |
+| --- | --- |
+| data import of an object (`NSDefaultRunLoopMode`, `NSLocaleLanguageCode`) | `data import`, `locale key` |
+| data import of a Core Foundation reference (`kCFRunLoopDefaultMode`) | `core foundation data import` |
+| message result (`objc_msgSend`, `objectAtIndex:`), the same constant twice | `message return`, `same constant twice` |
+| fast enumeration | `fast enumeration` |
+| a plain pointer returned by a C function (`CFDictionaryGetValue`) | `core foundation return` |
+| the host receives an alias (receiver, argument), the class the host sees | `host sees the constant` |
+| a guest method called by the host with a constant (`makeObjectsPerformSelector:`) | `guest method argument` |
+| `Protocol` (`NSProtocolFromString`, `protocol_isEqual`, `protocol_getName`) | `protocol` |
+| `objc_initWeak`, `objc_loadWeakRetained`, `objc_loadWeak`, `objc_storeWeak` | `weak` |
+| `dictionaryWithObjectsAndKeys:`, `arrayWithObjects:`, `initWithObjects:`, `setWithObjects:` | `variadic dictionary`, `variadic array`, `variadic init`, `variadic set` |
+| `%@` of a constant (covered by construction: no control tells an alias from its original here, see below) | `format argument` |
+| arguments of a guest block the host calls (`enumerateObjectsUsingBlock:`) | `block arguments` |
+| result of a guest block the host calls (`imp_implementationWithBlock`) | `block result` |
+| a guest category method on `NSString` (`self`, and `objc_msgSendSuper2`) | `category self`, `category super` |
+| one constant fetched by 64 threads | `constant across threads` |
+
+The Mac prints 1 everywhere, because its constants are aligned and its class names are the same; the 4S prints the same
+because of the aliases. Three controls on the 4S, each run with the program unchanged and one part of
+`src/runtime/alignment.m` switched off:
+
+- the aliases off (`xl_alias_pointer`, `xl_alias_object` and `xl_protocol_out` return the host pointer): the first value of
+  `data import`, `core foundation data import`, `locale key`, `message return`, `fast enumeration`, `core foundation
+  return`, `guest method argument`, `protocol`, the four `weak` values, the first value of the four `variadic` lines, of
+  `block arguments`, `function imp argument` and `category self`, and the first and third value of `block result`
+  print 0;
+- the way back off (`xl_alias_resolve` returns what it gets: an alias reaches the host as it is): `host sees the constant`
+  and `category super` name `__NSCFString` instead of `__NSCFConstantString`;
+- the cache off (`xl_alias_string` makes a new copy at every call): `same constant twice`, `fast enumeration`,
+  `constant across threads`, and the identity values of `core foundation return`, `guest method argument`, `weak`, the
+  `variadic` lines, `block arguments`, `block result` and `function imp argument` print 0.
+
+`format argument` has no control: the alias is a real copy with the same characters, so a `%@` that gets the alias formats
+the same text as one that gets the original, and nothing the program can observe tells the two apart.
 
 The check builds the program for this Mac and compares its output with `tests/data/hostbridges/expected.txt`, translates
 the arm64 build (which fails on any import without a bridge) and requires that the program imports each of the bridged
 functions. The device part runs the translated binary and compares its output with the Mac's.
+
+### segmentlimit
+
+Seven small arm64 dylibs, each with a function and a global, are the guest images of one executable. An executable has the
+segments `__PAGEZERO`, `__TEXT` and `__DATA`, then a text and a data segment for every guest image, and dyld's bind and
+rebase opcodes name a segment with 4 bits (index 0 to 15). The data segment of the seventh image is segment 16, and an
+executable of twelve images (the reCAPTCHA work's full set) died with SIGSEGV before `main`: the last bind that
+`DYLD_PRINT_BINDINGS=1` printed on the 4S was at `0x1400`, in `__PAGEZERO`, right after the last bind in the data
+segment of the second image (`0x105f87f8`, segment 6), which is what a segment index truncated to 4 bits looks like.
+
+The check lifts the seven as an executable and requires `xlate` to refuse, naming the 4-bit index, the limit of six
+images and `--library`; it lifts six and requires that no such refusal is said, and lifts the seven with `--library`
+and requires the same. Nothing is run and nothing is compiled past the lift.
+
+### absolutes
+
+A symbol of a dylib can be absolute (`nm -m`: `(absolute) external`): it has a value and no address in any section.
+libswiftCore has one, `__swiftImmortalRefCount` (`0x80000004ffffffff`, the reference count the statically initialised
+objects of libswiftFoundation, libswiftCryptoKit and libswiftNetwork carry). `xlate` read only the symbols of a section,
+so those binds stayed unresolved and the translation named the symbol as an import of the host, which has none.
+
+One dylib defines `absolute_value` as `0x123456789` with `.set`, another holds `&absolute_value` in a global. The check
+lifts the second alone and requires the refusal "data bind to unresolved symbol _absolute_value"; lifts both and requires
+that no symbol is unresolved and that the data slot of the bind holds `0x123456789`, the value itself: a section symbol
+is slid with its image, an absolute value is not.
 
 ### objectsplit
 
@@ -476,6 +575,45 @@ It needs the arm64 runtime, so `XL_SWIFTOBJC_LIBS` names the folder with `libswi
 `libc++abi.1.dylib`. The fixture is compiled like swiftconformance's, for iOS 12.0 with the legacy type info: that
 target marks a Swift class with bit 0 of the class data, the bit the guest's libswiftCore tests. A class compiled for
 iOS 12.2 or later (bit 1) is accepted too, because the runtime rewrites that bit when it sets the class up.
+
+### libgenerics (device part by hand)
+
+The generic classes that the guest Swift runtime instantiates at run time, in a library (`XL_LIBRARY=1`) with the guest
+`libswiftCore`. The runtime's own metadata is prespecialized only for the common element types, so `[() -> Int]` or
+`[String: String]` makes `swift_getGenericMetadata` build a `_ContiguousArrayStorage<T>` or `_DictionaryStorage<K, V>` class
+and look its superclass up through `swift_getTypeByMangledName`. A small armv7 host (`host.m`, with the loader) takes the
+class and the method to call, so each step runs in a process of its own. The device part runs them with `MallocScribble` and
+`MallocGuardEdges`, and a `malloc:` line from the host's allocator fails the step.
+
+`XL_SWIFTOBJC_LIBS` names the same folder as for swiftobjc. The host part translates the library and builds the host
+(`check.lua <out> --host-only`, about ten minutes), the device part runs the steps of that run on the claimed phone
+(`--device-only`):
+
+```sh
+XL_SWIFTOBJC_LIBS=<folder> ./xmakew l -P . recompiler/tests/libgenerics/check.lua <out>
+```
+
+The steps are `stepDictionary` (`[String: String]`), `stepDictionaryAny` (`[String: Any]`), `stepClosures` (`[() -> Int]`),
+`stepNested` (`[[Int]]`), `stepSubstring` (`[Substring]` appended to and split) and `stepStress` (10 000 appends to an
+`[Int]`, a `[String]`, a `[Substring]` and a `[String: Int]`, under `MallocScribble`). A library on the device has no
+`dladdr` for the guest image, which the loader maps itself, so the runtime knows its range (`xl_guest_low`,
+`xl_guest_high`) and a class of the guest is a class of the library. A class that the Swift runtime builds at run time has
+the superclass's size and fields from the host layout: the runtime reconciles them when it registers the shadow, and a
+subclass smaller than its superclass stops the program with a message.
+
+The host part also reads `report.txt` of the translation. Swift declares the `NSRange` argument of the `NSString` methods that
+`__SharedStringStorage` overrides as `{?=qq}`, which no SDK declaration matches name for name, so the host IMP of
+`getCharacters:range:` was built from the guest encoding: a 16-byte struct of two `long long`, which the host's call
+(`NSRange` is two 32-bit words) read from the wrong registers and stack slots, and `NSURL(string:)` died in
+`String.UTF16View` with "String index is out of bounds". `xlgen` now matches a guest method with an SDK declaration by the
+shape of its encoding (struct names ignored, integers compared without their signedness), and the check requires the
+report to say that the IMP of `getCharacters:range:` comes from the SDK declaration and is `{_NSRange=II}`. On the 4S
+`URLRequest(url:)` of a Swift `String` runs after the fix and fails before it.
+
+Each fix has a step that fails without it (the 4S, one fix taken out at a time): without the image range `stepDictionary`
+exits 139 (so do `stepClosures`, `stepNested`, `stepSubstring` and `stepStress`); without the reconciliation
+`stepDictionary` and `stepDictionaryAny` still pass, and `stepClosures`, `stepNested`, `stepSubstring` and `stepStress`
+stop on a `malloc:` checksum error of a freed block.
 
 ### library (device part by hand)
 

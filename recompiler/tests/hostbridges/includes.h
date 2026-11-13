@@ -3,3 +3,4 @@
 #include <objc/message.h>
 #include <netdb.h>
 #import <Foundation/Foundation.h>
+#import <CoreGraphics/CoreGraphics.h>

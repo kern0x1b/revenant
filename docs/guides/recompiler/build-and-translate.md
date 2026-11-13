@@ -40,6 +40,12 @@ Further arguments are guest images lifted with the executable:
 ./xmakew l -P . recompiler/tools/translate.lua app-arm64 includes.h out/ libA.dylib libB.dylib
 ```
 
+An executable takes at most six guest images, the program itself counted. Each image is a pair of segments after
+`__PAGEZERO`, `__TEXT` and `__DATA`, and dyld's bind and rebase opcodes name a segment with 4 bits: a writable segment past
+index 15 would have its fixups written into another segment, and the program would die before `main`. `xlate` refuses
+such an input when it translates, with the count, the limit and the way out: a library (`XL_LIBRARY=1`, see
+[library mode](../../reference/recompiler/library-mode.md)) holds the guest as one image and has no limit of this kind.
+
 `XL_FRAMEWORKS_DIR` finds a bundle's embedded frameworks. A bind takes an image by the install name it spells,
 exactly: an app that binds the host's `NSString` next to an embedded image that defines its own keeps the host's. Two
 images with one install name are an error.
