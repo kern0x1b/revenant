@@ -104,6 +104,16 @@ Test: as the criterion; the Network fixture needs the phone's Wi-Fi state only t
 
 Build on: swift-crypto (Apache-2.0) as the package already does; no new implementation of a primitive.
 
+Status, 2026-11-12: the guest images are two packages with a new arm64-only config `evolution`, not `packages/c/cryptokit`
+(which re-exports `Crypto` under the module name `Crypto`, so none of the SDK's `$s9CryptoKit…` names are in it).
+`swift-crypto` with `evolution` compiles the same sources as the module `CryptoKit` with library evolution against the
+runtime built with `library_evolution`, and `network` with `evolution` compiles the path monitor of the Network overlay
+(`NWPathMonitor`, `NWPath`, `NWInterface`, `NWEndpoint`, the two IP address types) with swiftc and links it on
+SystemConfiguration; connections and listeners are not built, and the backports package is not part of it. The SDK imports
+25 `$s9CryptoKit…` and 11 `$s7Network…` names in all (the measurement of the table above counted fewer); every one of them
+is exported by the built dylibs (`nm -gU` against `nm -u` of the SDK image). The fixture on the 4S and the unresolved
+measurement through a full translation are still to do.
+
 ## C. Objective-C exceptions across guest frames
 
 Goal: an Objective-C or Swift error raised in guest code and caught in guest code works, and one raised by the host and
