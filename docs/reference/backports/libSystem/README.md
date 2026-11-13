@@ -4,7 +4,7 @@ The iOS 6.1.3 dyld cache does not export `clock_getres`, `futimens`, `readlinkat
 
 `clock_getres` forwards to the shared `apple-compat` implementation so the toolchain and Backports use one implementation.
 
-`memset_s`, the dispatch classes `OS_dispatch_queue` and `OS_dispatch_source`, and `_dispatch_data_destructor_munmap` with its `dispatch_data_create` wrapper are here as well, each with its own page: [memset_s](memset_s.md), [the dispatch classes](OS_dispatch_classes.md) and [the munmap destructor](dispatch_data_destructor_munmap.md).
+`memset_s`, the dispatch classes `OS_dispatch_queue` and `OS_dispatch_source`, and `_dispatch_data_destructor_munmap` with its `dispatch_data_create` wrapper are here as well, each with its own page: [memset_s](memset_s.md), [the dispatch classes](OS_dispatch_classes.md) and [the munmap destructor](dispatch_data_destructor_munmap.md). `os_unfair_lock_lock`, `os_unfair_lock_unlock` and `clock_gettime_nsec_np` follow the same pattern, over the shared `apple-compat` sources: [os_unfair_lock](os_unfair_lock.md) and [clock_gettime_nsec_np](clock_gettime_nsec_np.md).
 
 The vibration of the phone is here too, because the UIKit feedback generators and the CoreHaptics backport both need it and it is the lowest layer every other library stands on. `RevenantVibratorIsAvailable` asks CoreMedia whether the phone has a vibrator, `RevenantVibratorPlay` asks AudioToolbox for a vibration with a pattern of on and off lengths in milliseconds, `RevenantVibratorPulse` plays the fixed vibration sound and `RevenantVibratorStop` stops a running vibration. What the iPhone 4S answers, and what could not be measured there, is in [the CoreHaptics reference](../CoreHaptics/README.md).
 

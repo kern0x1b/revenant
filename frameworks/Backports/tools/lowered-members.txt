@@ -5288,6 +5288,7 @@ function appleblas_dgeadd
 function appleblas_sgeadd
 function body_of
 function clock_getres
+function clock_gettime_nsec_np
 function compression_decode_buffer
 function compression_decode_scratch_buffer_size
 function compression_encode_buffer
@@ -5872,6 +5873,8 @@ function os_log_type_enabled
 function os_signpost_enabled
 function os_signpost_id_generate
 function os_signpost_id_make_with_pointer
+function os_unfair_lock_lock
+function os_unfair_lock_unlock
 function quadrature_integrate
 function readlinkat
 function revenant_CTFontManagerCreateFontDescriptorsFromURL

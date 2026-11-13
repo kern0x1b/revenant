@@ -133,6 +133,8 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Write and install the Backports package](guides/backports/package.md) | the commands that write `org.revenant.backports` and the Swift runtime, and install them on the phone |
 | [libSystem compatibility calls](reference/backports/libSystem/README.md) | the missing `clock_getres` and `*at` file operations, host comparisons, iOS 6 timestamp precision and path snapshot limitation |
 | [libSystem: memset_s](reference/backports/libSystem/memset_s.md) | the C11 `memset_s` that iOS 6 lacks, its Darwin answers, who gets it and what it costs |
+| [libSystem: os_unfair_lock_lock and os_unfair_lock_unlock](reference/backports/libSystem/os_unfair_lock.md) | the iOS 10 lock on iOS 6: the wait queue behind it, the owner checks, the priority inversion measured on the 4S, and the per-image queue |
+| [libSystem: clock_gettime_nsec_np](reference/backports/libSystem/clock_gettime_nsec_np.md) | the eight clocks on iOS 6.1.3 and the one that differs from macOS in its absolute value |
 | [libSystem: OS_dispatch_queue and OS_dispatch_source](reference/backports/libSystem/OS_dispatch_classes.md) | the two dispatch classes iOS 6 registers but does not export, the proxies that bind them, and the limit of a bound symbol |
 | [libSystem: DISPATCH_DATA_DESTRUCTOR_MUNMAP](reference/backports/libSystem/dispatch_data_destructor_munmap.md) | the munmap sentinel of iOS 7, the `dispatch_data_create` wrapper and its override marker, who reaches it and who keeps the release's function, why dyld cannot interpose it |
 | [Crutches](reference/backports/crutches.md) | the stand-ins the Backports lowering uses, what each measured, and what removes it |
@@ -174,6 +176,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [CreateML: CSV reading](reference/backports/CreateML/TabularData/CSVReading.md) | CSV reading in TabularData, measured, and what is carried |
 | [CreateML: CSV writing](reference/backports/CreateML/TabularData/CSVWriting.md) | CSV writing in TabularData, measured, and what is carried |
 | [CreateML: date parsing](reference/backports/CreateML/TabularData/DateParsing.md) | date reading in TabularData, measured, and what is carried |
+| [Foundation: NSData base64](reference/backports/Foundation/NSData-base64.md) | the four iOS 7 base64 members, what the iOS 6.1.3 release has instead, how far its two members agree with macOS, and when the category is reachable |
 | [Foundation: URL](reference/backports/Foundation/URL.md) | the percent-encoded accessors and the file path initialiser of iOS 16 `URL`, and the host oracle they are measured against |
 | [Intents](reference/backports/Intents/README.md) | the responses, message and call intents and resolution results Telegram's extensions name, the Swift module for the key path forms, and what is measured on a device |
 | [Metal: dispatchThreads](reference/backports/Metal/DispatchThreads.md) | compute dispatch by threads per grid, the edge group, and the pipeline limits |
