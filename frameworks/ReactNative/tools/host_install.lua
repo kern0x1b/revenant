@@ -1,5 +1,6 @@
 local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stage --app BUILT.app --backports DIR|STORE [--key BUILDHASH] --manifest DIR --output DIR [--bundle-id ID]
-       ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua deploy --archive FILE --bundle-id ID [--bundle FILE] [--conf KEY=VALUE,...]
+       ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stage --app BUILT.app --packages DIR[,DIR...] --manifest DIR --output DIR [--bundle-id ID]
+       ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua deploy --archive FILE --bundle-id ID [--bundle FILE] [--conf KEY=VALUE,...] [--packages FILE]
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua launch --bundle-id ID
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stop --bundle-id ID
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua diagnostics --bundle-id ID [--output DIR]
@@ -9,11 +10,15 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
           to @executable_path/Frameworks, and signs every Mach-O file with ldid. With --bundle-id it refuses a built app whose
           CFBundleIdentifier is another id (rebuild it from a copy made with isolate.lua copy --bundle-id), and it renames the
           executable to RNHost-<last part of the id> (and CFBundleExecutable with it), so that no two installed hosts share a process name.
+          Without --backports the host takes its libraries from the shared packages the phone holds: stage carries no Frameworks, refuses a host that loads
+          a library from its own Frameworks, and writes OUT/host-packages.json, each package folder under /usr/lib/revenant that the host loads with the
+          version the build's description in --packages (the share/shared-packages folders of the packages it was linked against) names.
   deploy  installs the archive on the claimed phone as /var/stash/<claim holder>/<last part of the id>/<last part of the id>.app, linked
           from /Applications, registers it and, with --bundle, puts the JavaScript bundle at <that .app>/bundle.js and writes
           <that .app>/rnhost.conf with module=main and bundle=bundle.js (--conf adds lines: only module, bundle, engine and JSC_* keys).
           Both files are root-owned and read-only for everything else, which is what the host checks before it reads them. The
-          host's output goes to /var/tmp/<last part of the id>/, a folder of the app's user. It removes nothing of another bundle id.
+          host's output goes to /var/tmp/<last part of the id>/, a folder of the app's user. With --packages FILE (the host-packages.json of
+          a shared stage) it first asks the phone for the version of each package and stops, naming it, when one is missing or another version. It removes nothing of another bundle id.
   launch  wakes the phone and has SpringBoard start the app of the id.
   stop    ends the running process of the app of the id and of no other id: it finds the process by the launchd label of the app.
   diagnostics  copies what the phone keeps of the app of the id into DIR (build/diagnostics/<last part of the id> by default): the app's
@@ -332,11 +337,95 @@ function phone()
     return device, settings, holder
 end
 
+function shared_packages(otool_text, store)
+    local names, found = {}, {}
+    for line in otool_text:gmatch("[^\n]+") do
+        local name = line:match("^%s+/usr/lib/revenant/([^/%s]+)/")
+        if name and not names[name] then
+            names[name] = true
+            table.insert(found, name)
+        end
+    end
+    table.sort(found)
+    local packages = {}
+    for _, name in ipairs(found) do
+        local description
+        for _, folder in ipairs(store) do
+            local candidate = path.join(path.absolute(folder), name .. ".json")
+            if os.isfile(candidate) then
+                description = import("core.base.json").loadfile(candidate)
+                break
+            end
+        end
+        if not description then
+            raise("the host loads a library of the package %s, and no folder of --packages holds %s.json: name the shared-packages folder of the build that links it", name, name)
+        end
+        table.insert(packages, {name = name, version = description.version})
+    end
+    return packages
+end
+
+function version_mismatches(packages, installed)
+    local problems = {}
+    for _, package in ipairs(packages) do
+        local held = installed[package.name]
+        if not held or held == "" then
+            table.insert(problems, string.format("%s %s is not installed on the phone", package.name, package.version))
+        elseif held ~= package.version then
+            table.insert(problems, string.format("%s is %s on the phone, and the host is linked against %s", package.name, held, package.version))
+        end
+    end
+    return problems
+end
+
+local function stage_shared(options)
+    local built = path.absolute(options.app)
+    local binary = path.join(built, path.basename(built))
+    local otool = os.iorunv("otool", {"-L", binary})
+    if otool:find("@executable_path/Frameworks/", 1, true) then
+        raise("%s loads a library from its own Frameworks folder, and without --backports stage keeps no Frameworks: a host that carries libraries is staged with --backports", built)
+    end
+    local packages = shared_packages(otool, string.split(options.packages or "", ",", {plain = true}))
+    if #packages == 0 then
+        raise("%s loads no library of a shared package, so there is nothing for the phone to hold: stage it with --backports", built)
+    end
+    local output = path.absolute(options.output)
+    local target = path.join(output, path.filename(built))
+    os.tryrm(output)
+    os.mkdir(output)
+    os.vrunv("cp", {"-cR", built, target})
+    os.vrunv("cp", {"-R", path.join(path.absolute(options.manifest), "EXConstants.bundle"), target .. "/"})
+    local executable = path.basename(built)
+    if options["bundle-id"] then
+        executable = executable_name(options["bundle-id"])
+        os.vrunv("mv", {path.join(target, path.basename(built)), path.join(target, executable)})
+        os.vrunv("plutil", {"-replace", "CFBundleExecutable", "-string", executable, path.join(target, "Info.plist")})
+    end
+    local ldid = os.iorunv("sh", {"-c", "ls \"$1\"/xmake-global/.xmake/packages/l/ldid/*/*/bin/ldid | head -1", "sh", os.getenv("REVENANT_CACHE") or ""}):trim()
+    if ldid ~= "" then
+        os.vrunv(ldid, signing_arguments(path.join(os.scriptdir(), "data", "rnhost.entitlements"), 1, path.join(target, executable)))
+    end
+    import("core.base.json").savefile(path.join(output, "host-packages.json"), {packages = packages})
+    local archive = path.join(output, "host.tgz")
+    os.execv("tar", {"czf", archive, "-C", output, path.filename(built)}, {envs = {COPYFILE_DISABLE = "1"}})
+    print("wrote " .. archive .. " and " .. path.join(output, "host-packages.json"))
+end
+
 function stage(options)
-    for _, key in ipairs({"app", "backports", "manifest", "output"}) do
+    for _, key in ipairs({"app", "manifest", "output"}) do
         if not options[key] then
             raise("stage needs --%s", key)
         end
+    end
+    if options["bundle-id"] then
+        local identifier = os.iorunv("plutil", {"-extract", "CFBundleIdentifier", "raw", "-o", "-", path.join(path.absolute(options.app), "Info.plist")}):trim()
+        local problem = bundle_identifier_error(identifier, options["bundle-id"])
+        if problem then
+            raise(problem)
+        end
+    end
+    if not options.backports then
+        return stage_shared(options)
     end
     local built = path.absolute(options.app)
     if options["bundle-id"] then
@@ -443,6 +532,17 @@ function deploy(options)
     local id = options["bundle-id"]
     local name = app_name(id)
     local app = app_folder(holder, id)
+    if options.packages then
+        local packages = import("core.base.json").loadfile(path.absolute(options.packages)).packages
+        local installed = {}
+        for _, package in ipairs(packages) do
+            installed[package.name] = device.run(settings, "dpkg-query -W -f='${Version}' " .. package.name .. " 2>/dev/null ; true", {capture = true}):trim()
+        end
+        local problems = version_mismatches(packages, installed)
+        if #problems > 0 then
+            raise("the phone does not hold the packages this host is linked against:\n  %s", table.concat(problems, "\n  "))
+        end
+    end
     device.copy(settings, path.absolute(options.archive), "/var/tmp/" .. name .. ".tgz")
     device.run(settings, install_command(holder, id))
     local output = run_folder(id)
@@ -554,7 +654,7 @@ end
 
 function main(...)
     local shared = import("@addon.revenant.member", {anonymous = true})
-    local options, words = shared.arguments({...}, {app = "value", backports = "value", key = "value", manifest = "value", output = "value", archive = "value",
+    local options, words = shared.arguments({...}, {app = "value", backports = "value", packages = "value", key = "value", manifest = "value", output = "value", archive = "value",
                                                     ["bundle-id"] = "value", bundle = "value", conf = "value", help = "switch"})
     local command = words[1]
     if options.help then

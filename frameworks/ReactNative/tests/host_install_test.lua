@@ -207,4 +207,34 @@ function main()
         refusal(function () host.backports_generation(store, "../generation-a") end) ~= nil,
         "a path outside the store was accepted")
     os.vrunv("rm", {"-rf", base})
+
+    do
+        local base = os.tmpfile() .. "-packages"
+        os.mkdir(base)
+        local json = import("core.base.json")
+        json.savefile(path.join(base, "org.revenant.backports.json"), {name = "org.revenant.backports", version = "0.8.18+9772f8d3"})
+        json.savefile(path.join(base, "org.revenant.swift-runtime-8e5fdec8.json"), {name = "org.revenant.swift-runtime-8e5fdec8", version = "0.8.18+8e5fdec8"})
+        local listing = table.concat({
+            "RNHost:",
+            "\t/usr/lib/revenant/org.revenant.swift-runtime-8e5fdec8/libswiftCore.dylib (compatibility version 0.0.0, current version 0.0.0)",
+            "\t/usr/lib/revenant/org.revenant.backports/libUIKitBackports.dylib (compatibility version 1.0.0, current version 1.0.0)",
+            "\t/usr/lib/revenant/org.revenant.backports/libFoundationBackports.dylib (compatibility version 1.0.0, current version 1.0.0)",
+            "\t/System/Library/Frameworks/UIKit.framework/UIKit (compatibility version 1.0.0, current version 1.0.0)",
+            ""}, "\n")
+        local packages = host.shared_packages(listing, {base})
+        expect("a shared stage lists each package folder the host loads once, with the version of its description",
+            #packages == 2 and packages[1].name == "org.revenant.backports" and packages[1].version == "0.8.18+9772f8d3"
+            and packages[2].name == "org.revenant.swift-runtime-8e5fdec8" and packages[2].version == "0.8.18+8e5fdec8",
+            "the package list is " .. #packages .. " entries long or has other names or versions")
+        local message = refusal(function () host.shared_packages(listing, {path.join(base, "none")}) end)
+        expect("a package without a description is refused by name", message ~= nil and message:find("org.revenant.backports", 1, true) ~= nil,
+            "a package with no description was accepted or the refusal does not name it")
+        expect("the phone's versions that match raise no problem", #host.version_mismatches(packages,
+            {["org.revenant.backports"] = "0.8.18+9772f8d3", ["org.revenant.swift-runtime-8e5fdec8"] = "0.8.18+8e5fdec8"}) == 0, "a matching version was reported")
+        local problems = host.version_mismatches(packages, {["org.revenant.backports"] = "0.8.18+2396e86d"})
+        expect("another version and a missing package are each reported by name", #problems == 2 and problems[1]:find("0.8.18+2396e86d", 1, true) ~= nil
+            and problems[2]:find("swift-runtime-8e5fdec8", 1, true) ~= nil and problems[2]:find("not installed", 1, true) ~= nil,
+            "the problems are " .. table.concat(problems, " | "))
+        os.vrunv("rm", {"-rf", base})
+    end
 end
