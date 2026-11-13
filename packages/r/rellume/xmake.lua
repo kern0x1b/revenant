@@ -9,7 +9,9 @@ package("rellume")
                      "0003-Map-a-calling-convention-only-to-the-architectures-b.patch",
                      "0004-Lift-AArch64-without-the-x86-64-decoder.patch",
                      "0005-Lift-the-AArch64-LSE-atomic-memory-operations.patch",
-                     "0006-Lift-the-AArch64-exclusive-loads-and-stores-through-.patch"}
+                     "0006-Lift-the-AArch64-exclusive-loads-and-stores-through-.patch",
+                     "0007-Lift-the-AArch64-Crypto-extension-AES-SHA-1-SHA-256-.patch",
+                     "0008-Lift-the-AArch64-TRN1-and-TRN2-instructions.patch"}
     add_urls("https://github.com/aengelke/rellume.git", {submodules = false})
     add_versions("2026.09.10", commit)
     local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}

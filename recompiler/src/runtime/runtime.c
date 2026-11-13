@@ -27,6 +27,7 @@ struct xl_function {
 extern const struct xl_function xl_functions[];
 extern const uint32_t xl_function_count;
 extern const uint32_t xl_entry_address;
+uint32_t xl_guest_low, xl_guest_high;
 xl_lifted xl_imp_lookup(uint64_t address);
 
 #define XL_REG(state, name) (*(uint64_t *)((char *)(state) + XL_OFFSET_##name))

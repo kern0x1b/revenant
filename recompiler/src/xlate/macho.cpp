@@ -379,7 +379,8 @@ std::string Image::LibraryOf(int ordinal) const {
 bool Image::ParseExports(std::string &error) {
   for (auto &symbol : object_->symbols()) {
     auto raw = object_->getSymbol64TableEntry(symbol.getRawDataRefImpl());
-    if ((raw.n_type & MachO::N_STAB) || (raw.n_type & MachO::N_TYPE) != MachO::N_SECT) {
+    uint8_t kind = raw.n_type & MachO::N_TYPE;
+    if ((raw.n_type & MachO::N_STAB) || (kind != MachO::N_SECT && kind != MachO::N_ABS)) {
       continue;
     }
     auto name = symbol.getName();
@@ -387,7 +388,7 @@ bool Image::ParseExports(std::string &error) {
       continue;
     }
     if (raw.n_type & MachO::N_EXT) {
-      exports_[name->str()] = raw.n_value;
+      (kind == MachO::N_ABS ? absolutes_ : exports_)[name->str()] = raw.n_value;
     }
   }
   Error err = Error::success();

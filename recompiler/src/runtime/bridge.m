@@ -927,7 +927,7 @@ void xl_format_marshal(struct xl_format *format, const char *text, void *object,
                 fprintf(stderr, "xlate: %s: pointer argument 0x%llx above 4 GiB\n", symbol, value);
                 abort();
             }
-            uint32_t pointer = (uint32_t)value;
+            uint32_t pointer = conversion == '@' ? (uint32_t)xl_object_in(value, symbol, next - 1) : (uint32_t)value;
             if (!pointer && (conversion == 's' || conversion == 'S')) {
                 static const char null_utf8[] = "(null)";
                 static const unsigned short null_utf16[] = {'(', 'n', 'u', 'l', 'l', ')', 0};
@@ -952,7 +952,72 @@ void xl_format_marshal(struct xl_format *format, const char *text, void *object,
     xl_append(&args, "", 0);
     format->text = out.data;
     format->arguments = args.data;
+    format->wide = NULL;
     format->object = object_format ? [[NSString alloc] initWithUTF8String:out.data] : NULL;
+}
+
+static char *xl_utf8_from_wide(const wchar_t *wide)
+{
+    size_t length = 0;
+    while (wide[length])
+        length++;
+    char *out = malloc(length * 4 + 1), *at = out;
+    for (size_t i = 0; i < length; i++) {
+        uint32_t c = (uint32_t)wide[i];
+        if (c < 0x80) {
+            *at++ = (char)c;
+        } else if (c < 0x800) {
+            *at++ = (char)(0xC0 | c >> 6);
+            *at++ = (char)(0x80 | (c & 0x3F));
+        } else if (c < 0x10000) {
+            *at++ = (char)(0xE0 | c >> 12);
+            *at++ = (char)(0x80 | (c >> 6 & 0x3F));
+            *at++ = (char)(0x80 | (c & 0x3F));
+        } else {
+            *at++ = (char)(0xF0 | c >> 18);
+            *at++ = (char)(0x80 | (c >> 12 & 0x3F));
+            *at++ = (char)(0x80 | (c >> 6 & 0x3F));
+            *at++ = (char)(0x80 | (c & 0x3F));
+        }
+    }
+    *at = 0;
+    return out;
+}
+
+static wchar_t *xl_wide_from_utf8(const char *text)
+{
+    wchar_t *out = malloc((strlen(text) + 1) * sizeof *out), *at = out;
+    for (const unsigned char *c = (const unsigned char *)text; *c;) {
+        uint32_t value;
+        unsigned extra;
+        if (*c < 0x80) {
+            value = *c;
+            extra = 0;
+        } else if (*c >= 0xF0) {
+            value = *c & 0x07;
+            extra = 3;
+        } else if (*c >= 0xE0) {
+            value = *c & 0x0F;
+            extra = 2;
+        } else {
+            value = *c & 0x1F;
+            extra = 1;
+        }
+        c++;
+        while (extra-- && *c)
+            value = value << 6 | (*c++ & 0x3F);
+        *at++ = (wchar_t)value;
+    }
+    *at = 0;
+    return out;
+}
+
+void xl_format_marshal_wide(struct xl_format *format, const wchar_t *text, void *object, const uint64_t *arguments, const char *symbol)
+{
+    char *narrow = xl_utf8_from_wide(text);
+    xl_format_marshal(format, narrow, object, arguments, symbol);
+    free(narrow);
+    format->wide = xl_wide_from_utf8(format->text);
 }
 
 void xl_format_marshal_valist(struct xl_format *format, const char *text, void *object, uint64_t guest_valist, const char *symbol)
@@ -965,6 +1030,7 @@ void xl_format_release(struct xl_format *format)
     [(NSString *)format->object release];
     free(format->text);
     free(format->arguments);
+    free(format->wide);
 }
 
 enum { XL_SCANF_SIGNED, XL_SCANF_UNSIGNED, XL_SCANF_COUNT };
@@ -1151,4 +1217,315 @@ void xl_manual_freeaddrinfo(void *pack)
         xl_unsupported("xlate: freeaddrinfo of a list that getaddrinfo did not return");
     freeaddrinfo(list->host);
     free(list);
+}
+
+#include <ifaddrs.h>
+#include <net/if.h>
+#include <net/if_var.h>
+#include <xlocale.h>
+#include <locale.h>
+#include <crt_externs.h>
+#include <sys/mman.h>
+#include <mach/mach.h>
+#include <objc/runtime.h>
+#include <CoreGraphics/CoreGraphics.h>
+
+Class xl_class_in(uint64_t guest);
+
+struct xl_keyed {
+    pthread_mutex_t lock;
+    CFMutableDictionaryRef blocks;
+};
+
+static void *xl_keyed_block(struct xl_keyed *keyed, const void *key, size_t size)
+{
+    pthread_mutex_lock(&keyed->lock);
+    if (!keyed->blocks)
+        keyed->blocks = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+    uint64_t *block = (uint64_t *)CFDictionaryGetValue(keyed->blocks, key);
+    if (!block || block[0] < size) {
+        block = realloc(block, 16 + size);
+        if (block) {
+            block[0] = size;
+            CFDictionarySetValue(keyed->blocks, key, block);
+        }
+    }
+    pthread_mutex_unlock(&keyed->lock);
+    return block ? (char *)block + 16 : NULL;
+}
+
+static struct xl_keyed xl_color_components = {PTHREAD_MUTEX_INITIALIZER, NULL};
+static struct xl_keyed xl_locale_conventions = {PTHREAD_MUTEX_INITIALIZER, NULL};
+
+static void xl_guest_doubles(CGFloat *host, const void *guest, size_t count)
+{
+    for (size_t i = 0; i < count; i++) {
+        double value;
+        memcpy(&value, (const char *)guest + i * sizeof value, sizeof value);
+        host[i] = (CGFloat)value;
+    }
+}
+
+void xl_manual_CGColorCreate(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t space, components, r; } *p = pack;
+    CGColorSpaceRef space = (CGColorSpaceRef)xl_narrow_pointer(p->space, "CGColorCreate", 0);
+    const void *guest = (const void *)xl_narrow_pointer(p->components, "CGColorCreate", 1);
+    size_t count = space ? CGColorSpaceGetNumberOfComponents(space) + 1 : 0;
+    CGFloat host[count ? count : 1];
+    if (guest)
+        xl_guest_doubles(host, guest, count);
+    p->r = xl_widen_pointer((uintptr_t)CGColorCreate(space, guest && count ? host : NULL));
+}
+
+void xl_manual_CGColorGetComponents(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t color, r; } *p = pack;
+    CGColorRef color = (CGColorRef)xl_narrow_pointer(p->color, "CGColorGetComponents", 0);
+    const CGFloat *host = color ? CGColorGetComponents(color) : NULL;
+    p->r = 0;
+    if (!host)
+        return;
+    size_t count = CGColorGetNumberOfComponents(color);
+    double *guest = xl_keyed_block(&xl_color_components, color, count * sizeof *guest);
+    if (!guest)
+        xl_unsupported("xlate: CGColorGetComponents: out of memory");
+    for (size_t i = 0; i < count; i++)
+        guest[i] = host[i];
+    p->r = xl_widen_pointer((uintptr_t)guest);
+}
+
+void xl_manual_CGImageCreateWithMaskingColors(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t image, components, r; } *p = pack;
+    CGImageRef image = (CGImageRef)xl_narrow_pointer(p->image, "CGImageCreateWithMaskingColors", 0);
+    const void *guest = (const void *)xl_narrow_pointer(p->components, "CGImageCreateWithMaskingColors", 1);
+    CGColorSpaceRef space = image ? CGImageGetColorSpace(image) : NULL;
+    size_t count = space ? CGColorSpaceGetNumberOfComponents(space) * 2 : 0;
+    CGFloat host[count ? count : 1];
+    if (guest)
+        xl_guest_doubles(host, guest, count);
+    p->r = xl_widen_pointer((uintptr_t)CGImageCreateWithMaskingColors(image, guest && count ? host : NULL));
+}
+
+static pthread_once_t xl_argv_once = PTHREAD_ONCE_INIT;
+static uint64_t *xl_guest_argv_slot;
+
+static void xl_build_guest_argv(void)
+{
+    int argc = *_NSGetArgc();
+    char **argv = *_NSGetArgv();
+    uint64_t *table = calloc((size_t)argc + 1, sizeof *table);
+    for (int i = 0; i < argc; i++)
+        table[i] = xl_widen_pointer((uintptr_t)argv[i]);
+    xl_guest_argv_slot = calloc(1, sizeof *xl_guest_argv_slot);
+    *xl_guest_argv_slot = (uintptr_t)table;
+}
+
+void xl_manual__NSGetArgv(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t r; } *p = pack;
+    pthread_once(&xl_argv_once, xl_build_guest_argv);
+    p->r = (uintptr_t)xl_guest_argv_slot;
+}
+
+struct xl_guest_ifaddrs {
+    uint64_t ifa_next;
+    uint64_t ifa_name;
+    uint32_t ifa_flags;
+    uint32_t reserved;
+    uint64_t ifa_addr;
+    uint64_t ifa_netmask;
+    uint64_t ifa_dstaddr;
+    uint64_t ifa_data;
+};
+
+struct xl_guest_if_data {
+    uint8_t head[72];
+    int64_t tv_sec;
+    int32_t tv_usec;
+    int32_t padding;
+    uint32_t tail[4];
+};
+
+_Static_assert(offsetof(struct xl_guest_ifaddrs, ifa_flags) == 16 && offsetof(struct xl_guest_ifaddrs, ifa_addr) == 24 &&
+               offsetof(struct xl_guest_ifaddrs, ifa_data) == 48, "arm64 struct ifaddrs");
+_Static_assert(offsetof(struct if_data, ifi_lastchange) == 72 && sizeof(struct timeval) == 8 &&
+               offsetof(struct if_data, ifi_unused2) == 80 && sizeof(struct if_data) == 96, "armv7 struct if_data");
+_Static_assert(offsetof(struct xl_guest_if_data, tail) == 88 && offsetof(struct xl_guest_if_data, tv_sec) == 72, "arm64 struct if_data");
+
+struct xl_ifaddrs_list {
+    struct ifaddrs *host;
+    uint64_t magic;
+    size_t count;
+    struct xl_guest_ifaddrs nodes[];
+};
+
+static const uint64_t xl_ifaddrs_magic = 0x6966616464727321ull;
+
+void xl_manual_getifaddrs(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t result, r; } *p = pack;
+    struct ifaddrs *host = NULL;
+    int status = getifaddrs(&host);
+    p->r = (uint64_t)(int64_t)status;
+    if (status)
+        return;
+    size_t count = 0;
+    for (struct ifaddrs *node = host; node; node = node->ifa_next)
+        count++;
+    struct xl_ifaddrs_list *list = calloc(1, sizeof *list + count * (sizeof(struct xl_guest_ifaddrs) + sizeof(struct xl_guest_if_data)));
+    if (!list) {
+        freeifaddrs(host);
+        errno = ENOMEM;
+        p->r = (uint64_t)(int64_t)-1;
+        return;
+    }
+    list->host = host;
+    list->magic = xl_ifaddrs_magic;
+    list->count = count;
+    struct xl_guest_if_data *data = (struct xl_guest_if_data *)&list->nodes[count];
+    size_t at = 0;
+    for (struct ifaddrs *node = host; node; node = node->ifa_next, at++) {
+        struct xl_guest_ifaddrs *guest = &list->nodes[at];
+        guest->ifa_next = node->ifa_next ? (uintptr_t)&list->nodes[at + 1] : 0;
+        guest->ifa_name = xl_widen_pointer((uintptr_t)node->ifa_name);
+        guest->ifa_flags = node->ifa_flags;
+        guest->ifa_addr = xl_widen_pointer((uintptr_t)node->ifa_addr);
+        guest->ifa_netmask = xl_widen_pointer((uintptr_t)node->ifa_netmask);
+        guest->ifa_dstaddr = xl_widen_pointer((uintptr_t)node->ifa_dstaddr);
+        if (node->ifa_data && node->ifa_addr && node->ifa_addr->sa_family == AF_LINK) {
+            const struct if_data *source = node->ifa_data;
+            struct xl_guest_if_data *copy = &data[at];
+            memcpy(copy->head, source, offsetof(struct if_data, ifi_lastchange));
+            copy->tv_sec = source->ifi_lastchange.tv_sec;
+            copy->tv_usec = source->ifi_lastchange.tv_usec;
+            memcpy(copy->tail, &source->ifi_unused2, sizeof copy->tail);
+            guest->ifa_data = (uintptr_t)copy;
+        } else {
+            guest->ifa_data = xl_widen_pointer((uintptr_t)node->ifa_data);
+        }
+    }
+    *(uint64_t *)xl_narrow_pointer(p->result, "getifaddrs", 0) = (uintptr_t)list->nodes;
+}
+
+void xl_manual_freeifaddrs(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t head; } *p = pack;
+    if (!p->head)
+        return;
+    struct xl_ifaddrs_list *list = (struct xl_ifaddrs_list *)((char *)xl_narrow_pointer(p->head, "freeifaddrs", 0) - offsetof(struct xl_ifaddrs_list, nodes));
+    if (list->magic != xl_ifaddrs_magic)
+        xl_unsupported("xlate: freeifaddrs of a list that getifaddrs did not return");
+    freeifaddrs(list->host);
+    free(list);
+}
+
+struct xl_guest_servent {
+    uint64_t s_name;
+    uint64_t s_aliases;
+    int32_t s_port;
+    int32_t padding;
+    uint64_t s_proto;
+};
+
+_Static_assert(offsetof(struct xl_guest_servent, s_port) == 16 && offsetof(struct xl_guest_servent, s_proto) == 24, "arm64 struct servent");
+
+static pthread_once_t xl_servent_once = PTHREAD_ONCE_INIT;
+static pthread_key_t xl_servent_key;
+
+static void xl_servent_make_key(void)
+{
+    pthread_key_create(&xl_servent_key, free);
+}
+
+void xl_manual_getservbyname(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t name, protocol, r; } *p = pack;
+    struct servent *host = getservbyname((const char *)xl_narrow_pointer(p->name, "getservbyname", 0),
+                                         (const char *)xl_narrow_pointer(p->protocol, "getservbyname", 1));
+    p->r = 0;
+    if (!host)
+        return;
+    size_t aliases = 0;
+    while (host->s_aliases && host->s_aliases[aliases])
+        aliases++;
+    pthread_once(&xl_servent_once, xl_servent_make_key);
+    free(pthread_getspecific(xl_servent_key));
+    struct xl_guest_servent *guest = calloc(1, sizeof *guest + (aliases + 1) * sizeof(uint64_t));
+    if (!guest)
+        xl_unsupported("xlate: getservbyname: out of memory");
+    pthread_setspecific(xl_servent_key, guest);
+    uint64_t *list = (uint64_t *)(guest + 1);
+    for (size_t i = 0; i < aliases; i++)
+        list[i] = xl_widen_pointer((uintptr_t)host->s_aliases[i]);
+    guest->s_name = xl_widen_pointer((uintptr_t)host->s_name);
+    guest->s_aliases = (uintptr_t)list;
+    guest->s_port = host->s_port;
+    guest->s_proto = xl_widen_pointer((uintptr_t)host->s_proto);
+    p->r = (uintptr_t)guest;
+}
+
+struct xl_guest_lconv {
+    uint64_t strings[10];
+    char numbers[14];
+};
+
+_Static_assert(offsetof(struct lconv, int_n_sign_posn) - offsetof(struct lconv, int_frac_digits) == 13, "struct lconv numbers");
+
+void xl_manual_localeconv_l(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t locale, r; } *p = pack;
+    locale_t locale = (locale_t)xl_narrow_pointer(p->locale, "localeconv_l", 0);
+    struct lconv *host = localeconv_l(locale);
+    p->r = 0;
+    if (!host)
+        return;
+    struct xl_guest_lconv *guest = xl_keyed_block(&xl_locale_conventions, locale, sizeof *guest);
+    if (!guest)
+        xl_unsupported("xlate: localeconv_l: out of memory");
+    char *const *strings = &host->decimal_point;
+    for (unsigned i = 0; i < 10; i++)
+        guest->strings[i] = xl_widen_pointer((uintptr_t)strings[i]);
+    memcpy(guest->numbers, &host->int_frac_digits, sizeof guest->numbers);
+    p->r = (uintptr_t)guest;
+}
+
+void xl_manual_class_copyIvarList(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t cls, count, r; } *p = pack;
+    unsigned count = 0;
+    Ivar *ivars = class_copyIvarList(xl_class_in(xl_narrow_pointer(p->cls, "class_copyIvarList", 0)), &count);
+    uint64_t *guest = NULL;
+    if (ivars) {
+        guest = malloc(((size_t)count + 1) * sizeof *guest);
+        if (!guest)
+            xl_unsupported("xlate: class_copyIvarList: out of memory");
+        for (unsigned i = 0; i < count; i++)
+            guest[i] = xl_widen_pointer((uintptr_t)ivars[i]);
+        guest[count] = 0;
+        free(ivars);
+    }
+    p->r = (uintptr_t)guest;
+    if (p->count)
+        *(unsigned *)xl_narrow_pointer(p->count, "class_copyIvarList", 1) = count;
+}
+
+void xl_manual_data_deallocator(void *pack)
+{
+    struct __attribute__((packed)) { uint64_t kind, bytes, length; } *p = pack;
+    void *bytes = (void *)xl_narrow_pointer(p->bytes, "NSDataDeallocator", 1);
+    if (p->length >> 32)
+        xl_unsupported("xlate: NSDataDeallocator: a length above 4 GiB");
+    switch (p->kind) {
+    case 0:
+        free(bytes);
+        break;
+    case 1:
+        munmap(bytes, (size_t)p->length);
+        break;
+    default:
+        vm_deallocate(mach_task_self(), (vm_address_t)bytes, (vm_size_t)p->length);
+        break;
+    }
 }

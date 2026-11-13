@@ -88,5 +88,6 @@ IMP xl_host_imp_for_guest(uint64_t guest, SEL selector, const char *types);
 int xl_guest_send(id object, SEL selector, uint64_t *result);
 uint32_t xl_guest_imp_address(IMP imp);
 int xl_shadow_log_enabled(void);
+extern uint32_t xl_guest_low, xl_guest_high;
 void xl_shadow_note(const char *format, ...);
 void xl_shadow_register_listed(void);

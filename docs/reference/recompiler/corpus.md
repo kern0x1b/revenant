@@ -14,8 +14,8 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, library, exceptions, objectsplit, hostbridges and checkapi; `classpair` and `ordinal` are the device group's, which also runs the
-device part of `exceptions` and `hostbridges`. Their output goes to the
+int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, objectsplit, segmentlimit, absolutes, hostbridges and checkapi; `classpair` and `ordinal` are the device group's, which also runs the
+device part of `exceptions`, `libexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
 
@@ -25,9 +25,13 @@ A check that also has a device part is run by hand, with the output folder as it
 ./xmakew l -P . recompiler/tests/weakimport/check.lua <out>
 ./xmakew l -P . recompiler/tests/classpair/check.lua <out>
 ./xmakew l -P . recompiler/tests/exceptions/check.lua <out>
+./xmakew l -P . recompiler/tests/libexceptions/check.lua <out>
 ./xmakew l -P . recompiler/tests/hostbridges/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftconformance/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftobjc/check.lua <out>
+./xmakew l -P . recompiler/tests/libgenerics/check.lua <out>
+./xmakew l -P . recompiler/tests/cryptodevice/check.lua <out>
+./xmakew l -P . recompiler/tests/cryptoboringssl/check.lua <out>
 ```
 
 These need a claimed device (the skill `device`): `REVENANT_DEVICE_HOLDER` and `REVENANT_DEVICE`
@@ -123,6 +127,79 @@ the loop retry. A store that finds the same value written back by another thread
 emulator; the loops compilers emit are value-based and tolerate it. `LDXP` and `STXP` still lift as a plain load and
 store, because a 128-bit `cmpxchg` has no armv7 lowering.
 
+### crypto
+
+A control for the ARMv8 Crypto extension that BoringSSL, and with it CryptoKit, selects at run time on an Apple arm64
+CPU: AESE, AESD, AESMC, AESIMC, SHA1C, SHA1P, SHA1M, SHA1H, SHA1SU0, SHA1SU1, SHA256H, SHA256H2, SHA256SU0 and
+SHA256SU1, plus the PMULL and PMULL2 that GHASH uses, in their 8-bit polynomial and 64-bit polynomial forms. armv7 has
+no instruction for any of them, so the lifter turns each into a call of a helper in `recompiler/src/runtime/crypto.c`;
+[Lifted helpers](lifted-helpers.md) is the contract between the two. The check also covers TRN1 and TRN2, which
+BoringSSL's AES-GCM kernel (`aes_gcm_enc_kernel`) uses to arrange its GHASH operands and which rellume did not lift: the
+translated kernel stopped at the first one.
+
+`main.c` defines 30 functions: one per instruction, a round of AESE with AESMC, a loop of rounds, and TRN1 and TRN2 in
+the 8-, 16-, 32- and 64-bit element forms of both vector widths. It is built for arm64 with `-march=armv8-a+crypto`,
+so clang emits each intrinsic as its instruction; the 64-bit TRN forms are inline assembly, because clang turns the
+intrinsic into ZIP. The check proves six things, all on the host, which is an Apple-Silicon Mac, so the oracle is the
+hardware itself:
+
+1. The helpers agree with the instructions. `driver.c` includes `crypto.c` and compares each helper with the ACLE
+   intrinsic on 20000 random inputs each (`AESE` and `AESD` also on every byte value in every position). It also runs AES-128 and AES-256 from FIPS 197
+   appendix C, encrypting and decrypting with the equivalent inverse cipher (the decryption round keys go through
+   AESIMC), and one SHA-1 and one SHA-256 block of `abc` from FIPS 180-4, built from the helpers alone.
+2. farmdec decodes what an assembler assembles. A sweep of 498688 words (every register combination of each Crypto and
+   PMULL encoding, and a spread of the SIMD space around them) is assembled with `llvm-objdump` as the oracle and
+   decoded; the operation, the registers and the arrangement must agree on all of them, and no word that
+   `llvm-objdump` rejects may decode as one of these operations.
+3. xlate lifts every function with 0 failures and leaves no instruction of the fixture unlifted (`coverage: 0 of ...`),
+   and each lifted function holds the helper calls of its instruction and no others. SHA1H, a rotate of one word, is
+   one `llvm.fshl.i32`.
+4. The helper buffers are `alloca` instructions of the entry block, not of the loop that uses them, so the stack does
+   not grow with the rounds and no frame is realigned.
+5. The lifted functions, compiled natively with the helpers and run on the host, give the hardware's result for every
+   function on 4000 states each (the all-zero and all-one states first, then random ones), with the callee-saved
+   registers untouched. This is what proves the register
+   mapping, the choice of the PMULL halves and the scalar operands, which the IR assertions only describe.
+6. The lifted code and the helpers compile for armv7 with the flags `recompiler/tools/translate.lua` uses and link: the
+   prototype of every `rellume_aarch64_` function the lifted code declares is the one `crypto.c` defines, and no such
+   symbol stays undefined.
+
+### cryptodevice (device part by hand)
+
+The Crypto extension run on a real armv7 phone. `tests/cryptodevice/main.c` takes the vectors of the `crypto` check
+(`tests/crypto/vectors.h`: FIPS 197 AES-128 and AES-256 encryption and decryption, and one block each of SHA-1 and
+SHA-256 from FIPS 180-4) with the hardware intrinsics in place of the helpers, adds known products of PMULL and PMULL2,
+and times a round of AESE and AESMC, a round of AESD and AESIMC, and the two PMULL forms. It prints `ok <name>` or
+`FAIL <name>` for ten vectors, and `done`.
+
+`check.lua <out> --host-only` builds it for the Mac (where it must print the ten `ok` itself, so a wrong vector is
+caught before the phone), compiles it for arm64 with `-march=armv8-a+crypto`, and translates it. `check.lua <out>
+--device-only` copies the translated program to the claimed phone and requires the ten `ok` and exit 0. The times it
+prints are in [Lifted helpers](lifted-helpers.md).
+
+### cryptoboringssl (device part by hand)
+
+BoringSSL's own ARMv8 paths run on a real armv7 phone. `tests/cryptoboringssl/main.c` is a C program that links the
+`libswiftCryptoKit.dylib` of `revenant@swift-crypto` and calls the BoringSSL functions that library exports
+(`CCryptoBoringSSL_SHA256`, `CCryptoBoringSSL_SHA1` and the `EVP_AEAD` interface of AES-128-GCM and AES-256-GCM). The
+library takes its Crypto extension paths on an Apple arm64 CPU without asking the CPU, which the program shows by
+printing `OPENSSL_get_armcap()` (`0000003d`: NEON, AES, SHA-1, SHA-256, PMULL). It checks
+
+- SHA-256 of `abc` and of 1000 bytes, and SHA-1 of `abc`, against known digests;
+- AES-128-GCM and AES-256-GCM seals of 16 zero bytes under a zero key and nonce (NIST's test cases) and AES-256-GCM of
+  1000 bytes (the oracle for those 1000 bytes is CryptoKit on the Mac), each for the ciphertext, the tag, the open and
+  the refusal of a tag with a flipped bit;
+- the throughput of SHA-256 and of AES-256-GCM over 256 KiB.
+
+The translated program imports `libswiftCryptoKit.dylib`, `libswiftCore.dylib` and the C++ runtime as guest images. The
+check wants all 15 names `ok`, `done failures=0`, and exit 0. `check.lua <out> --host-only` stops after the translation
+(about ten minutes), `--device-only` runs the result on the claimed phone. It needs `XL_SWIFTCRYPTO_LIBS`, the folder
+with `libswiftCryptoKit.dylib`, `libswiftCore.dylib`, `libc++.1.dylib` and `libc++abi.1.dylib`, and
+`XL_BORINGSSL_INCLUDE`, the `Sources/CCryptoBoringSSL/include` folder of the swift-crypto sources.
+
+It runs the C interface of the library, not CryptoKit's Swift API: the Swift layer needs the Swift runtime images the
+Swift fixtures use, and CryptoKit calls these same functions.
+
 ### exceptions
 
 A program of Objective-C and C++ (`main.m`, `guarded.mm`) that throws and catches across guest frames. It covers:
@@ -144,6 +221,21 @@ the C++ personality, and the translated binary must import `_Unwind_SjLj_Registe
 binary and compares its output with the Mac's. The program takes the number of loop rounds as its argument (2000
 by default), so a probe can run it deeper by hand.
 
+### libexceptions
+
+The same exception mechanism in a library (`XL_LIBRARY=1`), loaded by a small armv7 host (`host.m`, with the loader) that
+takes the class and the method to call, so each step runs in a process of its own and a fault in one hides none of the others.
+The guest (`fixture.mm`, class `LibExceptions`) has six steps: an `NSException` thrown in a guest frame and caught three
+frames up through frames with C++ destructors (4 destructors, `@finally` once); one raised by the host
+(`-objectAtIndex:` out of range, `NSRangeException`); `@catch` of a guest subclass of `NSException` before `NSException`;
+`@catch (id)` of a thrown string; a C++ `catch (...)` that takes an Objective-C exception, with its destructors and the
+case where nothing is thrown; and a function with a 20000-byte stack frame, which the compiler enters through
+`___chkstk_darwin` (its result is checked against the value a native program computes).
+
+The host part builds and translates the library and the host, and requires that the library registers SjLj frames
+(`_Unwind_SjLj_Register`). The device part runs each step and requires its `ok` names, `done` and `exit=0`. A C++ `throw`
+is not in the check, because it is the known limitation in `library-mode.md`.
+
 ### hostbridges
 
 A program (`main.m`) that calls the host functions whose guest and host layouts differ or whose argument is an `IMP`:
@@ -158,11 +250,89 @@ A program (`main.m`) that calls the host functions whose guest and host layouts 
   `IMP`s of a concrete `NSString` class called by the guest; the `NSObject` `-isKindOfClass:` `IMP` called on an instance
   of a guest class that overrides it; `imp_implementationWithBlock` with a captured `__block` variable, added with
   `class_addMethod` and called by a message send, `imp_getBlock` and `imp_removeBlock`; a C function added with
-  `class_addMethod`; `class_replaceMethod` and `method_setImplementation` with the old `IMP` called afterwards.
+  `class_addMethod`; `class_replaceMethod` and `method_setImplementation` with the old `IMP` called afterwards;
+- the imports of the reCAPTCHA work's guest images that had no bridge, one check each: `CGColorCreate`,
+  `CGColorGetComponents` (the pointer stays the same for one colour) and `CGImageCreateWithMaskingColors`, whose
+  `CGFloat` arrays are `double` in the guest and `float` in the host; `_NSGetArgv` and `__progname`; `getifaddrs` and
+  `freeifaddrs` for `lo0` (the address, the netmask, the flags, and the `if_data` of the link entry with its time
+  stamp); `getservbyname` for a known and an unknown service; `localeconv_l` of the C locale (strings, numbers, the
+  same pointer for the same locale); `class_copyIvarList` of a guest class with an `int`, an object and a `double`, and
+  of a class without ivars; `malloc_default_zone`, `malloc_zone_from_ptr` (a heap block and a stack address) and
+  `malloc_zone_malloc`/`malloc_zone_free` with the zone the guest got; `NSDataDeallocatorUnmap`, `NSDataDeallocatorVM`
+  and `NSDataDeallocatorFree` called by the guest, the first two checked by asking the kernel whether the page is
+  still mapped; `catopen` of a catalogue that does not exist (the host's `(nl_catd)-1` has to reach the guest as
+  `-1`); `swprintf` with `%d`, `%5.2f`, `%s`, `%ls`, `%c`, `%lld`, one that truncates, and one whose format and
+  arguments are not ASCII; `_dispatch_source_type_vm` as the type of a dispatch source; `copyfile_state_alloc`,
+  `fcopyfile` (a file descriptor copied into another) and `copyfile_state_free`.
+
+Alignment of host constants (the `align` lines): the guest must get a constant string or a `Protocol` of the host at a
+multiple of 8, the same pointer each time, and the host must see the original. One check for each path that carries a
+host pointer to the guest or a guest pointer back:
+
+| Path | Line |
+| --- | --- |
+| data import of an object (`NSDefaultRunLoopMode`, `NSLocaleLanguageCode`) | `data import`, `locale key` |
+| data import of a Core Foundation reference (`kCFRunLoopDefaultMode`) | `core foundation data import` |
+| message result (`objc_msgSend`, `objectAtIndex:`), the same constant twice | `message return`, `same constant twice` |
+| fast enumeration | `fast enumeration` |
+| a plain pointer returned by a C function (`CFDictionaryGetValue`) | `core foundation return` |
+| the host receives an alias (receiver, argument), the class the host sees | `host sees the constant` |
+| a guest method called by the host with a constant (`makeObjectsPerformSelector:`) | `guest method argument` |
+| `Protocol` (`NSProtocolFromString`, `protocol_isEqual`, `protocol_getName`) | `protocol` |
+| `objc_initWeak`, `objc_loadWeakRetained`, `objc_loadWeak`, `objc_storeWeak` | `weak` |
+| `dictionaryWithObjectsAndKeys:`, `arrayWithObjects:`, `initWithObjects:`, `setWithObjects:` | `variadic dictionary`, `variadic array`, `variadic init`, `variadic set` |
+| `%@` of a constant (covered by construction: no control tells an alias from its original here, see below) | `format argument` |
+| arguments of a guest block the host calls (`enumerateObjectsUsingBlock:`) | `block arguments` |
+| result of a guest block the host calls (`imp_implementationWithBlock`) | `block result` |
+| a guest category method on `NSString` (`self`, and `objc_msgSendSuper2`) | `category self`, `category super` |
+| one constant fetched by 64 threads | `constant across threads` |
+
+The Mac prints 1 everywhere, because its constants are aligned and its class names are the same; the 4S prints the same
+because of the aliases. Three controls on the 4S, each run with the program unchanged and one part of
+`src/runtime/alignment.m` switched off:
+
+- the aliases off (`xl_alias_pointer`, `xl_alias_object` and `xl_protocol_out` return the host pointer): the first value of
+  `data import`, `core foundation data import`, `locale key`, `message return`, `fast enumeration`, `core foundation
+  return`, `guest method argument`, `protocol`, the four `weak` values, the first value of the four `variadic` lines, of
+  `block arguments`, `function imp argument` and `category self`, and the first and third value of `block result`
+  print 0;
+- the way back off (`xl_alias_resolve` returns what it gets: an alias reaches the host as it is): `host sees the constant`
+  and `category super` name `__NSCFString` instead of `__NSCFConstantString`;
+- the cache off (`xl_alias_string` makes a new copy at every call): `same constant twice`, `fast enumeration`,
+  `constant across threads`, and the identity values of `core foundation return`, `guest method argument`, `weak`, the
+  `variadic` lines, `block arguments`, `block result` and `function imp argument` print 0.
+
+`format argument` has no control: the alias is a real copy with the same characters, so a `%@` that gets the alias formats
+the same text as one that gets the original, and nothing the program can observe tells the two apart.
 
 The check builds the program for this Mac and compares its output with `tests/data/hostbridges/expected.txt`, translates
 the arm64 build (which fails on any import without a bridge) and requires that the program imports each of the bridged
 functions. The device part runs the translated binary and compares its output with the Mac's.
+
+### segmentlimit
+
+Seven small arm64 dylibs, each with a function and a global, are the guest images of one executable. An executable has the
+segments `__PAGEZERO`, `__TEXT` and `__DATA`, then a text and a data segment for every guest image, and dyld's bind and
+rebase opcodes name a segment with 4 bits (index 0 to 15). The data segment of the seventh image is segment 16, and an
+executable of twelve images (the reCAPTCHA work's full set) died with SIGSEGV before `main`: the last bind that
+`DYLD_PRINT_BINDINGS=1` printed on the 4S was at `0x1400`, in `__PAGEZERO`, right after the last bind in the data
+segment of the second image (`0x105f87f8`, segment 6), which is what a segment index truncated to 4 bits looks like.
+
+The check lifts the seven as an executable and requires `xlate` to refuse, naming the 4-bit index, the limit of six
+images and `--library`; it lifts six and requires that no such refusal is said, and lifts the seven with `--library`
+and requires the same. Nothing is run and nothing is compiled past the lift.
+
+### absolutes
+
+A symbol of a dylib can be absolute (`nm -m`: `(absolute) external`): it has a value and no address in any section.
+libswiftCore has one, `__swiftImmortalRefCount` (`0x80000004ffffffff`, the reference count the statically initialised
+objects of libswiftFoundation, libswiftCryptoKit and libswiftNetwork carry). `xlate` read only the symbols of a section,
+so those binds stayed unresolved and the translation named the symbol as an import of the host, which has none.
+
+One dylib defines `absolute_value` as `0x123456789` with `.set`, another holds `&absolute_value` in a global. The check
+lifts the second alone and requires the refusal "data bind to unresolved symbol _absolute_value"; lifts both and requires
+that no symbol is unresolved and that the data slot of the bind holds `0x123456789`, the value itself: a section symbol
+is slid with its image, an absolute value is not.
 
 ### objectsplit
 
@@ -374,6 +544,36 @@ It needs the arm64 runtime, so `XL_SWIFTOBJC_LIBS` names the folder with `libswi
 `libc++abi.1.dylib`. The fixture is compiled like swiftconformance's, for iOS 12.0 with the legacy type info: that
 target marks a Swift class with bit 0 of the class data, the bit the guest's libswiftCore tests. A class compiled for
 iOS 12.2 or later (bit 1) is accepted too, because the runtime rewrites that bit when it sets the class up.
+
+### libgenerics (device part by hand)
+
+The generic classes that the guest Swift runtime instantiates at run time, in a library (`XL_LIBRARY=1`) with the guest
+`libswiftCore`. The runtime's own metadata is prespecialized only for the common element types, so `[() -> Int]` or
+`[String: String]` makes `swift_getGenericMetadata` build a `_ContiguousArrayStorage<T>` or `_DictionaryStorage<K, V>` class
+and look its superclass up through `swift_getTypeByMangledName`. A small armv7 host (`host.m`, with the loader) takes the
+class and the method to call, so each step runs in a process of its own. The device part runs them with `MallocScribble` and
+`MallocGuardEdges`, and a `malloc:` line from the host's allocator fails the step.
+
+`XL_SWIFTOBJC_LIBS` names the same folder as for swiftobjc. The host part translates the library and builds the host
+(`check.lua <out> --host-only`, about ten minutes), the device part runs the steps of that run on the claimed phone
+(`--device-only`):
+
+```sh
+XL_SWIFTOBJC_LIBS=<folder> ./xmakew l -P . recompiler/tests/libgenerics/check.lua <out>
+```
+
+The steps are `stepDictionary` (`[String: String]`), `stepDictionaryAny` (`[String: Any]`), `stepClosures` (`[() -> Int]`),
+`stepNested` (`[[Int]]`), `stepSubstring` (`[Substring]` appended to and split) and `stepStress` (10 000 appends to an
+`[Int]`, a `[String]`, a `[Substring]` and a `[String: Int]`, under `MallocScribble`). A library on the device has no
+`dladdr` for the guest image, which the loader maps itself, so the runtime knows its range (`xl_guest_low`,
+`xl_guest_high`) and a class of the guest is a class of the library. A class that the Swift runtime builds at run time has
+the superclass's size and fields from the host layout: the runtime reconciles them when it registers the shadow, and a
+subclass smaller than its superclass stops the program with a message.
+
+Each fix has a step that fails without it (the 4S, one fix taken out at a time): without the image range `stepDictionary`
+exits 139 (so do `stepClosures`, `stepNested`, `stepSubstring` and `stepStress`); without the reconciliation
+`stepDictionary` and `stepDictionaryAny` still pass, and `stepClosures`, `stepNested`, `stepSubstring` and `stepStress`
+stop on a `malloc:` checksum error of a freed block.
 
 ### library (device part by hand)
 
