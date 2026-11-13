@@ -173,6 +173,14 @@ print on the iPad 2 what objc4 printed.
   `recompiler/tests/classpair` has both cases: the first message to a class laid out only in `__objc_clsrolist` under a
   guest root class, and a first message with integer, floating-point and structure-result registers to a class whose
   `+initialize` is guest code.
+- **Blocks the guest hands to the host.** A block parameter of a host function is converted into a host block that holds a
+  copy of the guest block (`Block_copy` in the guest) and invokes it. The host block is the callee's for the call: the
+  generated stub takes it with a count of +1, and the one holder of the guest copy belongs to that block alone, so both
+  go when the stub returns the block; an API that keeps the block past the call (`dispatch_async`) has copied it, and the
+  copy keeps the holder and the guest block until the host lets go. An autoreleased block or holder would keep the guest
+  copy, and everything it captured, until some pool drained, and Swift's `withoutActuallyEscaping`, which
+  `DispatchQueue.sync` is written with, checks that the closure context is unique after the body and stops the process
+  if it is not. `recompiler/tests/hostbridges` has both cases (the `block sync` and `block async` lines).
 - **Method implementations (`IMP`).** An `IMP` is a bare code address, and the guest and the host disagree on what one
   means. A guest method's `IMP` is the guest function, and the host reaches it through a block `IMP` that
   `class_addMethod`, `class_replaceMethod` and `method_setImplementation` build (`xl_host_imp_for_guest`, cached per

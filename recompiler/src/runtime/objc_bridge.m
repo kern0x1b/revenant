@@ -772,11 +772,11 @@ void xl_unsupported_imp(id self, SEL selector)
     uint64_t _guestBlock;
 }
 
-+ (instancetype)holderWithGuestBlock:(uint64_t)guest
++ (instancetype)newWithGuestBlock:(uint64_t)guest
 {
     XLGuestBlock *holder = [[self alloc] init];
     holder->_guestBlock = xl_invoke(XL_GUEST__Block_copy, guest);
-    return [holder autorelease];
+    return holder;
 }
 
 - (uint64_t)guestBlock

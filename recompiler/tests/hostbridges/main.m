@@ -588,6 +588,47 @@ static void source_checks(void)
         dispatch_source_cancel(source);
 }
 
+static int tracked_released;
+
+@interface Tracked : NSObject {
+@public
+    int tag;
+}
+@end
+
+@implementation Tracked
+- (void)dealloc
+{
+    __atomic_fetch_add(&tracked_released, 1, __ATOMIC_SEQ_CST);
+    [super dealloc];
+}
+@end
+
+static void block_lifetime_checks(void)
+{
+    dispatch_queue_t queue = dispatch_queue_create("hostbridges.lifetime", NULL);
+    Tracked *sync_object = [[Tracked alloc] init];
+    sync_object->tag = 3;
+    __block int sync_ran = 0;
+    dispatch_sync(queue, ^{
+        sync_ran = sync_object->tag;
+    });
+    [sync_object release];
+    printf("block sync ran %d, captured object released at return %d\n", sync_ran, __atomic_load_n(&tracked_released, __ATOMIC_SEQ_CST));
+    Tracked *async_object = [[Tracked alloc] init];
+    async_object->tag = 5;
+    __block int async_ran = 0;
+    dispatch_async(queue, ^{
+        async_ran = async_object->tag;
+    });
+    [async_object release];
+    dispatch_sync(queue, ^{
+    });
+    for (int i = 0; i < 300 && __atomic_load_n(&tracked_released, __ATOMIC_SEQ_CST) < 2; i++)
+        usleep(10000);
+    printf("block async ran %d, captured object released %d\n", async_ran, __atomic_load_n(&tracked_released, __ATOMIC_SEQ_CST));
+}
+
 int main(void)
 {
     @autoreleasepool {
@@ -607,6 +648,7 @@ int main(void)
         copyfile_checks();
         source_checks();
         alignment_checks();
+        block_lifetime_checks();
     }
     return 0;
 }

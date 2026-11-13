@@ -4,7 +4,7 @@
 #import <objc/message.h>
 
 @interface XLGuestBlock : NSObject
-+ (instancetype)holderWithGuestBlock:(uint64_t)guest;
++ (instancetype)newWithGuestBlock:(uint64_t)guest;
 @property (nonatomic, readonly) uint64_t guestBlock;
 @end
 

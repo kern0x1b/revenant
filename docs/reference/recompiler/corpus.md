@@ -263,7 +263,11 @@ A program (`main.m`) that calls the host functions whose guest and host layouts 
   still mapped; `catopen` of a catalogue that does not exist (the host's `(nl_catd)-1` has to reach the guest as
   `-1`); `swprintf` with `%d`, `%5.2f`, `%s`, `%ls`, `%c`, `%lld`, one that truncates, and one whose format and
   arguments are not ASCII; `_dispatch_source_type_vm` as the type of a dispatch source; `copyfile_state_alloc`,
-  `fcopyfile` (a file descriptor copied into another) and `copyfile_state_free`.
+  `fcopyfile` (a file descriptor copied into another) and `copyfile_state_free`; the lifetime of a block the guest hands to
+  the host (`block sync`, `block async`): an object captured by a block of `dispatch_sync` must be released when the call
+  returns (`released at return 1`), and one captured by a block of `dispatch_async` after the queue has run and dropped
+  it (`released 2`), both with the main pool still open. The control on the 4S, with the generated block bridge keeping
+  its holder until a pool drains (`autorelease` instead of `release`), prints 0 on both lines.
 
 Alignment of host constants (the `align` lines): the guest must get a constant string or a `Protocol` of the host at a
 multiple of 8, the same pointer each time, and the host must see the original. One check for each path that carries a

@@ -100,3 +100,5 @@ align function imp argument 1 1
 align category self 1 1
 align category super 1 __NSCFConstantString
 align constant across threads 1
+block sync ran 3, captured object released at return 1
+block async ran 5, captured object released 2

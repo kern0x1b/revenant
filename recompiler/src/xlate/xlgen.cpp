@@ -642,8 +642,8 @@ std::string Generator::BlockBridge(const Value &value) {
   }
   auto ret = hproto ? Spell(hc_, hproto->getReturnType()) : "void";
   hs << "static " << Spell(hc_, value.host, name + "_host(uint64_t guest)") << "\n{\n";
-  hs << "    if (!guest)\n        return 0;\n    XLGuestBlock *holder = [XLGuestBlock holderWithGuestBlock:guest];\n";
-  hs << "    return [[^" << ret << "(" << (args.empty() ? "void" : args) << ") {\n";
+  hs << "    if (!guest)\n        return 0;\n    XLGuestBlock *holder = [XLGuestBlock newWithGuestBlock:guest];\n";
+  hs << "    id host_block = [^" << ret << "(" << (args.empty() ? "void" : args) << ") {\n";
   hs << "        struct " << name << "_pack p;\n        p.block = holder.guestBlock;\n";
   for (auto &param : signature.params) {
     if (param.value.kind == Kind::Record) {
@@ -667,7 +667,7 @@ std::string Generator::BlockBridge(const Value &value) {
       hs << "        return " << ScalarToHost(signature.result, "p.r", "\"" + name + "\", 99") << ";\n";
     }
   }
-  hs << "    } copy] autorelease];\n}\n\n";
+  hs << "    } copy];\n    [holder release];\n    return (" << Spell(hc_, value.host) << ")host_block;\n}\n\n";
   guest_ += gs.str();
   host_ += hs.str();
   return name + "_host";
@@ -806,8 +806,12 @@ std::string Generator::HostLoad(const Value &value, const std::string &expr, con
       return "(Protocol *)xl_protocol(" + expr + ")";
     case Kind::Record:
       return Mirror(value.guest, value.host) + "_to_host(&" + expr + ")";
-    case Kind::Block:
-      return BlockBridge(value) + "(" + expr + ")";
+    case Kind::Block: {
+      auto temp = "block" + std::to_string(index);
+      prep += "    " + Spell(hc_, value.host, temp) + " = " + BlockBridge(value) + "(" + expr + ");\n";
+      post += "    [(id)" + temp + " release];\n";
+      return temp;
+    }
     case Kind::Callback:
       return CallbackBridge(value) + "(" + expr + ")";
     case Kind::OutSlot: {
