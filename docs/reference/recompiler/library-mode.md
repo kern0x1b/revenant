@@ -11,43 +11,88 @@ What `XL_LIBRARY=1` builds, the loader API, and what was measured on the iPhone 
 | Variable | Meaning | Default |
 |---|---|---|
 | `XL_LIBRARY` | build a dylib instead of an executable | unset |
-| `XL_BASE` | address of the first guest segment | `0x10000000` |
+| `XL_BASE` | address of the first guest segment: where the loader maps the guest image | `0x10000000` |
 | `XL_INSTALL_NAME` | install name of the output | `@rpath/<name>.dylib` |
 | `XL_SWIFT_HOST_ANCESTORS` | Swift classes with an Objective-C ancestor are host objects with a twin | unset |
 | `XL_REPLACES` | guest images that stand for system libraries | unset |
 | `XL_NAMESPACE` | prefix of the Objective-C class names of every guest image but the first (the runtime and the overlays); `none` leaves the names as they are | `XLG.` |
 
-Layout of the output, from low to high addresses:
+The output is one dylib with two kinds of content:
 
-| Part | Address | Size |
+| Part | Where | Holds |
 |---|---|---|
-| host `__TEXT`, `__DATA` | `XL_BASE` minus the window | lifted code + runtime |
-| guest `__X<n>TEXT`, `__X<n>DATA`, one pair per image | from `XL_BASE`, at the addresses the guest was linked at | the guest's own |
-| `__LINKEDIT` | after the last guest segment | symbols, signature |
+| host `__TEXT`, `__DATA`, `__LINKEDIT` | wherever dyld puts the dylib (it is linked at address 0 and slid) | lifted code, runtime, the table of slots |
+| `__XGUEST,__image` | a section in the file, read-only, aligned to 16 KiB; dyld maps it and nobody reads it there | the guest image: the guest's segments as bytes, to be mapped at the addresses the guest was linked at |
 
-The window is the size of the lifted bytes plus 8 MB, rounded up to 16 MB. Exports are exactly `_xl_library_init` and
-`_xl_library_diagnostics`; the check fails on anything else.
+There are no guest segments in the link any more (`__X<n>TEXT`, `__X<n>DATA` are gone), and no window under `XL_BASE`: the
+host part does not depend on where the guest is. Exports are exactly `_xl_library_init` and `_xl_library_diagnostics`;
+the check fails on anything else.
+
+### The guest image (`recompiler/include/xl_guest_image.h`)
+
+The loader, the runtime and `xlate` include one header, which is the format. All numbers are little-endian 32-bit words,
+every address, size and offset is a multiple of the 16 KiB granule (the guest is arm64, its segments are 16 KiB
+aligned; `xlate` refuses a segment that is not).
+
+| Part | Layout |
+|---|---|
+| header (at the start of the section) | `magic` `XLGI` (`0x49474c58`), `version` (1), `low`, `high` (the range of the guest, `high` is the end of the last segment), `segment_count` |
+| `segment_count` records, right after the header | `address`, `size` (in the guest), `offset` (of its bytes from the start of the section), `length` (bytes in the file: the segment without its zero tail, up to the granule), `protection` (`1` read, `2` write; what the segment has when the library is ready) |
+| bytes | each segment's `length` bytes at its `offset`; a segment that is all zeros has `length` 0 |
+
+The slots are not in the section. `xl_guest_slots` (`{address, value}` words, sorted by address) and `xl_guest_slot_count`
+are host data of the dylib, because the `value` of a slot is the address of a symbol (a class, an `xl_objc_ro_*` structure,
+`__CFConstantStringClassReference`, a system symbol the guest binds to) that dyld relocates when it loads the dylib. A guest
+word that holds such an address is zero in the bytes. In a segment of the guest the Objective-C classes and protocols are
+ordinary bytes at their own addresses, and the generated code refers to them by number.
+
+### Load order
+
+1. `xl_reserve` reads the header of the file (not the section in memory): refuses a wrong `magic` or `version`, takes
+   `[low, high)` with `vm_allocate` at the fixed address and `VM_PROT_NONE`, and takes the size of the host part
+   (the sum of the dylib's own segments) anywhere with `VM_PROT_NONE`. If the guest range is held it fails with the
+   region that holds it, its range, what it is (an image's path, `malloc`, `stack`, a memory tag) and its size.
+2. `xl_load` gives the host reservation back and `dlopen`s the dylib: dyld takes the first hole that fits, which is the one just
+   given back. It calls `xl_library_init`.
+3. `xl_library_init` checks the header again (`magic`, `version`, that every segment is inside `[low, high)`, that every slot
+   is inside it), checks that `[low, high)` is one untouched `VM_PROT_NONE` range (it writes nothing if it is not), then for
+   each segment: `mmap(address, length, READ|WRITE, MAP_FIXED|MAP_PRIVATE)` of the file at the segment's `offset`, and
+   `vm_protect` read-write for the zero tail. It writes every slot, applies the segment's `protection`, runs the guest's
+   initializers (once, behind a lock) and returns.
+
+Pages of the guest that nothing touches stay clean file pages: they are not in the resident set and the system can drop them.
 
 ## Loader API (`recompiler/include/xl_loader.h`)
 
 | Function | Does |
 |---|---|
-| `xl_reserve(path)` | reads the header of the library, takes its range with `vm_allocate` at the fixed address, `VM_PROT_NONE` |
-| `xl_load(path)` | gives the reservation back, `dlopen`s, calls `xl_library_init`, which checks the header against the link address |
+| `xl_reserve(path)` | reads the guest image's header from the file and takes the guest range and room for the host part, `VM_PROT_NONE` (the load order above) |
+| `xl_load(path)` | reserves if that was not done, gives the host room back, `dlopen`s, calls `xl_library_init`; the library owns the guest range from then on |
 | `xl_load_error()` | text of the last failure |
 
-Statuses: `XL_LOAD_OK`, `XL_LOAD_BAD_IMAGE`, `XL_LOAD_RANGE_BUSY`, `XL_LOAD_DLOPEN_FAILED`, `XL_LOAD_RELOCATED`. A
-library that dyld placed elsewhere is `XL_LOAD_RELOCATED` for good; the runtime does not run in it.
+Statuses: `XL_LOAD_OK`, `XL_LOAD_BAD_IMAGE` (not an armv7 dylib, no guest image, a `magic` or `version` that is not read: the message says which, and
+the version found), `XL_LOAD_RANGE_BUSY` (the guest range is held: the message names the holder; or the reservation is
+not an untouched inaccessible range when the library attaches; or no hole of the host's size), `XL_LOAD_DLOPEN_FAILED`,
+`XL_LOAD_MAP_FAILED` (`mmap` or `vm_protect` of the guest's segments failed). A status after the library's initialization has run is final: later
+calls return it, and the guest range is given back.
 
-## What the phone's dyld does
+The library reports `XL_LIBRARY_OK`, `XL_LIBRARY_BAD_FORMAT`, `XL_LIBRARY_NOT_RESERVED` or `XL_LIBRARY_MAP_FAILED` from
+`xl_library_init` (`xl_guest_image.h`); the loader turns them into the statuses above. Called before `xl_load`
+by a host that never reserved, `xl_library_init` answers `XL_LIBRARY_NOT_RESERVED` and maps nothing, and any entry of the
+library aborts with "the guest image of the translated library is not attached".
+
+## What the phone's dyld and kernel do
 
 Measured on iOS 6.1.3, armv7:
 
-- `dlopen` places a dylib at its preferred address in a PIE and in a non-PIE process, if the range is free.
-- A dylib linked into the executable at launch is slid in a PIE process.
-- ld64 links an armv7 dylib with guest segments at `0x28000000` and `0x2a000000`; at `0x48000000` and above it refuses
-  ("would make the output executable exceed available address range"), though a plain dylib links at `0x4f000000`.
-- The 119 MB dylib prints `dyld: F_ADDFILESIGS failed ... errno=7` (its signature is 1.5 MB) and loads.
+- `dlopen` of a dylib linked at address 0 slides it into the first hole that fits (`vm_allocate` anywhere): the range that
+  `xl_reserve` took and `xl_load` gave back, in the same call.
+- On the 4S, `MAP_FIXED|MAP_PRIVATE` of the pages of a file over a `VM_PROT_NONE` `vm_allocate` reservation works: the
+  mapping replaces the reservation exactly (the rest of the reservation stays `VM_PROT_NONE`), the bytes are the file's, a
+  write copies the page and does not change the file, `vm_protect` to read-only makes a write fault, `vm_protect` to
+  read-write over the rest gives zero pages. The probe is 25 checks, all `ok` (small dylib with a `__XGUEST,__image` section at
+  file offset `0x4000`).
+- A 119 MB dylib prints `dyld: F_ADDFILESIGS failed ... errno=7` (its signature is 1.5 MB) and loads.
 - Mapped code that is never run costs about no resident memory.
 
 ## The check
@@ -117,10 +162,40 @@ Address map of the first Swift variant at the default base: host `__TEXT` at `0x
 text `0x4c4000` at `0x10100000`, data at `0x105c4000`), `__LINKEDIT` at `0x10910000` (`0x2e0000`). The ObjC variant
 occupies `0x0f000000` to `0x10118000` (17 MB).
 
-The host heap of a plain app fills the low addresses from about `0x185000` upwards, malloc arenas sit near
-`0x1f500000` to `0x20800000`, the stack at `0x2fcc5000`, dyld at `0x2fe02000`, the shared cache from `0x31bcc000`.
+Where the heap, the stack and the images of an app sit, and why, is in [the next section](#the-address-space-of-a-host-on-the-4s).
 
-### A host with Telegram's address space
+### The address space of a host on the 4S
+
+iOS 6.1.3, armv7, measured with a probe injected through `DYLD_INSERT_LIBRARIES` into 20 launches of Telegram13 (pass68, 282
+images, no taps) and with a console tool that prints where its first `malloc` landed, 400 launches. The probe lists every
+region (`vm_region_recurse_64`: range, protection, `user_tag`) when its constructor runs, which is the first code of the
+process after libSystem, and again when the library's reservation is asked for; it also logs every `mmap` and `vm_allocate`
+that lands between `0x10000000` and `0x30000000` with the frames of its caller.
+
+| Zone | Where | Notes |
+|---|---|---|
+| images and first-fit mappings | `0x00078000` up to `0x10ebe000`-`0x110bd000` | Telegram13's executable and frameworks (271 MB). The executable slides by up to 1 MB; the frontier moved by 2 MB between the 20 launches. Every `mmap` that is not a malloc region (images, `fd=-1` anonymous mappings of 128 KB and less, file maps) takes the lowest hole that fits |
+| free | up to `0x1c500000` | 180 MB at the frontier above |
+| malloc heap | one run of tiny (`user_tag` 7, 1 MB) and small (tag 2, 8 MB) regions from a random start | the start is `0x1c500000 + k * 8 MB`, `k` 0 to 7, each value in about one launch of eight: 53, 43, 52, 41, 50, 57, 55 and 48 of 399 console launches, and 4, 1, 1, 4, 2, 4, 1, 3 of the 20 of Telegram13. The regions follow each other upwards from there: the allocator asks for the address after its last region and the kernel gives the next free hole at or above it. In 1 launch of 400 the heap was in the lowest hole (`0x00100000`) instead |
+| heap size | 19 MB before the first initializer, 21 to 22 MB when `xl_reserve` runs | dyld's own allocations while it maps the images account for the 19 MB; the initializers of the frameworks add 2 to 3 MB |
+| free | from the top of the heap (at most `0x21300000` at `xl_reserve`) to the stack | 233 MB at that heap top |
+| stack | top `0x2fe00000`, bottom `0x2fc02000` or higher | the main thread's 1 MB stack plus a random pad of up to 2 MB |
+| dyld, shared cache | `0x2fe00000` and above | the shared region `0x30000000` to `0x40000000` is the kernel's |
+
+When an allocation lands on a reserved range the allocator goes on above it (a 16 MB small region took `0x2ccd4000` when
+`0x21000000` to `0x2ccd4000` was reserved), and once its hint is used up the new regions go to the lowest holes, which is
+how a process with a 193 MB reservation runs on.
+
+What this means for a range that must be at a fixed address:
+
+- No constructor is early enough to be ahead of the heap: the first initializer already finds 19 MB of it, and the 2 to 3 MB
+  between that and `xl_reserve` are of no consequence. The heap's start is the random part, and it is a part of the
+  platform, not of the app: a console tool on the same phone has the same eight starts.
+- A range that overlaps `0x1c500000` to `0x21300000` fails in one launch of eight (the start `0x1fd00000` plus 22 MB passes
+  `0x21000000`: the three refusals of the 20 launches were all that start). The range `0x21000000` to `0x2ccd4000` of the
+  162 MB Swift library is 198 MB, and the room that is free in every launch is 180 MB below the heap and 233 MB between the
+  heap and the stack, before the margins of either side: it does not fit in either.
+- A range below `0x1c500000` is clear of the heap in every launch, and clear of the images by `0x1c500000` minus their frontier.
 
 Telegram 13 (armv7, iOS 6) is a PIE executable of 56 KB plus frameworks that add up to about 190 MB of images, loaded
 first-fit from about `0x6000` to about `0xC000000`. The host was started with `0x01000000` to `0x0c800000` occupied (191
