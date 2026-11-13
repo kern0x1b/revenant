@@ -190,6 +190,10 @@ print on the iPad 2 what objc4 printed.
 
 - A translated program can also be built as a library that an app loads into its own process, at fixed addresses
   (`XL_LIBRARY=1`); see [library mode](library-mode.md).
+- The AES, SHA-1 and SHA-256 instructions of the ARMv8 Crypto extension, and `PMULL`, are lifted to calls of C helpers
+  in the runtime, because armv7 has no instruction to lower them to
+  ([the helpers](../../reference/recompiler/lifted-helpers.md)). SHA-512 and SHA-3 are not lifted: the iOS 6 target does not
+  have them, and code that probes for them takes another path.
 - Objective-C and C are supported. Swift is being brought up on a demo app, with `libswiftCore` lifted as a guest
   image. It does not run to the end yet, and what a Swift program meets is measured one failure at a time. Swift
   metadata is 64-bit only, so the Swift runtime needs a separate effort.

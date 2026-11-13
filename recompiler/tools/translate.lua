@@ -465,6 +465,7 @@ function translate(input, includes, out, images, opt)
     local clang = path.join(e.llvmbin, "clang")
     local runtime = path.join(lab, "src", "runtime")
     run(clang, table.join(host, {"-I", out, "-I", runtime}, extra_cflags, {"-c", path.join(runtime, "runtime.c"), "-o", o("runtime.o")}))
+    run(clang, table.join(host, extra_cflags, {"-c", path.join(runtime, "crypto.c"), "-o", o("crypto.o")}))
     if library then
         run(clang, table.join(host, {"-I", out, "-I", runtime, "-I", path.join(lab, "include")}, extra_cflags, {"-c", path.join(runtime, "library.c"), "-o", o("library.o")}))
         writelines(o("exports.txt"), table.join({"_xl_library_init", "_xl_library_diagnostics"}, readlines(o("registry-exports.txt"))))
@@ -547,7 +548,7 @@ function translate(input, includes, out, images, opt)
     local function link(more)
         return os.execv("xcrun", table.join({"clang", "-target", "armv7-apple-ios6.0", "-isysroot", e.sdk, "-fuse-ld=" .. e.ld}, kind,
                                             strip_dylibs, {"-Wl,-no_objc_category_merging", "-Wl,-no_deduplicate"}, words(io.readfile(o("layout.txt"))),
-                                            lifted_objs, {o("runtime.o"), o("bridge.o"), o("objc_bridge.o"), o("swift_classes.o"), o("objc_compat.o"), o("host.o")},
+                                            lifted_objs, {o("runtime.o"), o("crypto.o"), o("bridge.o"), o("objc_bridge.o"), o("swift_classes.o"), o("objc_compat.o"), o("host.o")},
                                             library and {o("library.o")} or {},
                                             words(getenv("XL_EXTRA_OBJ")), backport_libs, framework_flags, undef_flags, more or {},
                                             {"-framework", "Foundation", "-framework", "CoreGraphics", "-framework", "UIKit", "-lobjc", "-lz"},
