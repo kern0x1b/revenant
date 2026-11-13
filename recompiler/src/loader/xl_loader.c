@@ -151,8 +151,16 @@ static xl_load_status xl_reserve_guest(const struct xl_image *image, const char 
     return XL_LOAD_OK;
 }
 
+static int xl_host_reserve_enabled(void)
+{
+    const char *value = getenv("XL_LOADER_HOST_RESERVE");
+    return !(value && strcmp(value, "0") == 0);
+}
+
 static xl_load_status xl_reserve_host(const struct xl_image *image, const char *path)
 {
+    if (!xl_host_reserve_enabled())
+        return XL_LOAD_OK;
     vm_address_t address = 0;
     if (vm_allocate(mach_task_self(), &address, image->host_size, VM_FLAGS_ANYWHERE) != KERN_SUCCESS)
         return xl_fail(XL_LOAD_RANGE_BUSY, "no free range of %lu MB for the host part of %s", (unsigned long)(image->host_size >> 20), path);
@@ -183,7 +191,7 @@ static xl_load_status xl_reserve_locked(const char *path)
     if (xl_guest_high || xl_host_low) {
         if (strcmp(resolved, xl_loader_path) != 0)
             return xl_fail(XL_LOAD_BAD_IMAGE, "%s is reserved, a process holds one translated library", xl_loader_path);
-        if (xl_guest_high && xl_host_low)
+        if (xl_guest_high && (xl_host_low || !xl_host_reserve_enabled()))
             return XL_LOAD_OK;
     }
     struct xl_image image;
@@ -217,6 +225,10 @@ xl_load_status xl_reserve(const char *path)
         xl_map_phase("before-reserve", XL_LOAD_OK);
     xl_load_status status = xl_loader_final != XL_LOAD_OK ? xl_loader_final : xl_loaded_handle ? XL_LOAD_OK : xl_reserve_locked(path);
     xl_map_phase("reserve", status);
+    if (xl_vm_map_enabled() && xl_reserved_image.host_size)
+        dprintf(STDERR_FILENO, "xl-map reserve config host_reserve=%d host_size=0x%lx host_low=0x%lx guest_low=0x%lx guest_high=0x%lx\n",
+                xl_host_reserve_enabled(), (unsigned long)xl_reserved_image.host_size, (unsigned long)xl_host_low,
+                (unsigned long)xl_reserved_image.guest_low, (unsigned long)xl_reserved_image.guest_high);
     pthread_mutex_unlock(&xl_loader_lock);
     return status;
 }
@@ -250,6 +262,7 @@ static xl_load_status xl_load_locked(const char *path)
     if (status != XL_LOAD_OK)
         return status;
     xl_release_host();
+    xl_map_phase("before-dlopen", XL_LOAD_OK);
     void *handle = dlopen(xl_loader_path, RTLD_NOW | RTLD_LOCAL);
     if (!handle) {
         xl_reserve_host(&xl_reserved_image, xl_loader_path);
