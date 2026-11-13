@@ -8,6 +8,7 @@ static: instance class is the class: 1
 static: instance method: 42
 static: [instance class] is the class: 1
 static: subclass of NSObject: 1
+nsobject: the class of an instance is the class its symbol names: 1, and so is its class message: 1
 listed: found by name: 1
 listed: root found by name: 1
 listed: self is the class: 1

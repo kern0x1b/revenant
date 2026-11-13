@@ -77,6 +77,7 @@ static CFMutableDictionaryRef xl_shadow_imps;
 static CFMutableDictionaryRef xl_guest_imp_cache;
 static CFMutableDictionaryRef xl_host_twin;
 static CFMutableDictionaryRef xl_twin_host;
+static CFMutableDictionaryRef xl_twin_published;
 static CFMutableDictionaryRef xl_tail_of_shadow;
 static CFMutableDictionaryRef xl_destructors;
 static SEL xl_cxx_destruct_selector;
@@ -120,6 +121,7 @@ static void xl_shadow_setup(void)
     xl_shadow_imps = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_host_twin = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_twin_host = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+    xl_twin_published = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_tail_of_shadow = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_destructors = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_cxx_destruct_selector = sel_registerName(".cxx_destruct");
@@ -348,6 +350,15 @@ static uint64_t xl_twin_of(Class host)
     return twin;
 }
 
+static void xl_publish_twins(Class host)
+{
+    for (Class c = host; c; c = class_getSuperclass(c)) {
+        const void *twin = xl_table_get(xl_host_twin, (uintptr_t)c);
+        if (twin)
+            xl_table_set(xl_twin_published, (uintptr_t)c, twin);
+    }
+}
+
 static int xl_has_host_ancestor(Class cls)
 {
     for (Class c = cls; c; c = class_getSuperclass(c))
@@ -514,6 +525,7 @@ static Class xl_build_shadow(uintptr_t guest)
     if (extent) {
         xl_table_set(xl_tail_of_shadow, (uintptr_t)shadow, (const void *)(uintptr_t)extent);
         xl_sync_tail(c, shadow);
+        xl_publish_twins(host_super);
         if (direct_host_super && !xl_class_in_image((uintptr_t)host_super))
             ((struct xl_guest_class *)c)->superclass = xl_twin_of(host_super);
     }
@@ -569,7 +581,7 @@ uint64_t xl_class_out(uintptr_t host)
     uintptr_t guest = (uintptr_t)xl_table_get(xl_host_to_guest, host);
     if (guest)
         return guest;
-    uintptr_t twin = (uintptr_t)xl_table_get(xl_host_twin, host);
+    uintptr_t twin = (uintptr_t)xl_table_get(xl_twin_published, host);
     if (twin && xl_class_in_image(host))
         return host;
     return twin ? twin : host;

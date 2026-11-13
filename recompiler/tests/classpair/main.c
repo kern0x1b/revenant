@@ -205,6 +205,9 @@ int main(void)
 {
     setvbuf(stdout, 0, _IONBF, 0);
     report("static", &static_class, &OBJC_CLASS_$_NSObject, &static_meta, 1);
+    printf("nsobject: the class of an instance is the class its symbol names: %d, and so is its class message: %d\n",
+           object_getClass(class_createInstance((Class)&OBJC_CLASS_$_NSObject, 0)) == (Class)&OBJC_CLASS_$_NSObject,
+           ((id(*)(id, SEL))objc_msgSend)((id)&OBJC_CLASS_$_NSObject, sel_registerName("class")) == (id)&OBJC_CLASS_$_NSObject);
 
     printf("listed: found by name: %d\n", objc_getClass("XLPairListed") == (Class)&listed_class);
     printf("listed: root found by name: %d\n", objc_getClass("XLPairRoot") == (Class)&root_class_object);
