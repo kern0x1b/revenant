@@ -53,6 +53,11 @@ var destroyed = 0
 
 final class Plain { var v = 3 }
 
+struct Point {
+    var x = 1
+    var y = 2
+}
+
 @inline(never) func client() {
     let c = Client()
     report("client.bump", c.bump() == 1 && c.bump() == 2 && c.items.count == 2)
@@ -120,6 +125,15 @@ final class Plain { var v = 3 }
 client()
 sub()
 release()
+@inline(never) func reflection() {
+    report("anycollection.int", AnyCollection([1, 2, 3]).count == 3)
+    report("anycollection.string", AnyCollection("abc").count == 3)
+    report("mirror.children", Mirror(reflecting: Point()).children.count == 2)
+    report("describe.struct", String(describing: Point()) == "Point(x: 1, y: 2)")
+    report("describe.class", String(describing: Plain.self) == "Plain")
+}
+
 host()
 names()
+reflection()
 line("done")

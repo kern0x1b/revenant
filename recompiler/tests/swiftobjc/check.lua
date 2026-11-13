@@ -1,7 +1,8 @@
 local EXPECTED = {
     "client.bump", "client.make", "client.block", "client.dyncast", "client.sametype", "objc.responds", "objc.perform", "objc.kind",
     "objc.hash", "sub.vtable", "sub.dispatch", "sub.dyncast", "sub.superclass", "ivars.released", "ivars.released.sub",
-    "host.create", "host.dispatch", "host.subtype", "host.init", "name.plain", "name.client"
+    "host.create", "host.dispatch", "host.subtype", "host.init", "name.plain", "name.client",
+    "anycollection.int", "anycollection.string", "mirror.children", "describe.struct", "describe.class"
 }
 
 function main(out)
