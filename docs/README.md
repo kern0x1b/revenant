@@ -272,6 +272,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Library mode measurements](reference/recompiler/library-mode.md) | what the phone measured: resident set, address map and threads next to an 85 MB host, the bases that link and run |
 | [Research](explanation/recompiler/research.md) | the research behind it |
 | [Corpus and benchmark](reference/recompiler/corpus.md) | what each check proves |
+| [Runtime helpers of the lifted code](reference/recompiler/lifted-helpers.md) | the C helpers that the AES, SHA-1, SHA-256 and PMULL instructions are lifted to: symbols, prototypes, the buffer contract |
 
 ## Agent skills
 

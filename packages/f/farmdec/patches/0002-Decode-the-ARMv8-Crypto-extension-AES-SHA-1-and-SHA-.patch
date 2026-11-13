@@ -1,0 +1,160 @@
+From 912d790d99a96e4c57d926ef7532091825f0ec6e Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Fri, 13 Nov 2026 16:34:11 +0100
+Subject: [PATCH] Decode the ARMv8 Crypto extension AES, SHA-1 and SHA-256
+ instructions
+
+decode_simd had the three Crypto groups only as commented-out names, so
+every AES, SHA-1 and SHA-256 instruction decoded as "SIMD: bad
+instruction": the SHA three-register form even decoded as a table lookup,
+because that case ignored the scalar bit. Code built for a baseline with
+the Crypto extension, such as BoringSSL's hardware paths, failed to
+decode for that reason.
+
+The fourteen instructions are decoded: AESE, AESD, AESMC and AESIMC; SHA1C,
+SHA1P, SHA1M, SHA1H, SHA1SU0 and SHA1SU1; SHA256H, SHA256H2, SHA256SU0 and
+SHA256SU1. Rd, Rn and Rm carry the registers, and the vector arrangement
+is that of the 128-bit operand (16B for AES, 4S for SHA). The opcodes
+that are unallocated in each group decode as errors.
+
+PMULL decoded for every size and for the scalar form. It is valid for
+size 0 (8B to 8H) and size 3 (1D to 1Q) of the vector form only; the
+other encodings now decode as errors.
+
+SHA-512 and SHA-3 stay undecoded: the iOS 6 target has neither.
+---
+ decode.c  | 63 ++++++++++++++++++++++++++++++++++++++++++++++++++-----
+ farmdec.h | 15 +++++++++++++
+ 2 files changed, 73 insertions(+), 5 deletions(-)
+
+diff --git a/decode.c b/decode.c
+index b35f63d..19b571e 100644
+--- a/decode.c
++++ b/decode.c
+@@ -1960,9 +1960,9 @@ static Inst decode_simd(u32 binst) {
+ 	// Bit 28 differentiates between the two: 0→vector, 1→scalar.
+ 	enum {
+ 		Unknown,
+-		// CryptoAES,
+-		// CryptoThreeRegSHA,
+-		// CryptoTwoRegSHA,
++		CryptoAES,
++		CryptoThreeRegSHA,
++		CryptoTwoRegSHA,
+ 		// ScalarThreeSameFP16,
+ 		// ScalarTwoRegMiscFP16,
+ 		// ThreeSameFP16,
+@@ -1998,7 +1998,9 @@ static Inst decode_simd(u32 binst) {
+ 	case 0b0010:
+ 	case 0b0100:
+ 	case 0b0110: // 0xx0
+-		if (op21 == 0b0000 && U && !b15 && !b10)
++		if (op21 == 0b0000 && scalar && !U && !b15 && !b11 && !b10)
++			kind = CryptoThreeRegSHA;
++		else if (op21 == 0b0000 && U && !b15 && !b10)
+ 			kind = Extract;
+ 		else if (op21 == 0b0000 && !b15 && b10)
+ 			kind = Copy;
+@@ -2017,6 +2019,8 @@ static Inst decode_simd(u32 binst) {
+ 			kind = TwoRegMisc;
+ 		else if (op17 == 0b1000 && b11 && !b10)
+ 			kind = Reduce;
++		else if (op21 == 0b0001 && op17 == 0b0100 && b11 && !b10 && !U && Q)
++			kind = (scalar) ? CryptoTwoRegSHA : CryptoAES;
+ 		else if (!b11 && !b10)
+ 			kind = ThreeDiff;
+ 		else if (b10)
+@@ -2042,6 +2046,51 @@ static Inst decode_simd(u32 binst) {
+ 	switch (kind) {
+ 	case Unknown:
+ 		return errinst("SIMD: bad instruction");
++	case CryptoAES: {
++		switch ((binst >> 12) & 0b11111) {
++		case 0b00100: inst.op = A64_AESE;   break;
++		case 0b00101: inst.op = A64_AESD;   break;
++		case 0b00110: inst.op = A64_AESMC;  break;
++		case 0b00111: inst.op = A64_AESIMC; break;
++		default:
++			return errinst("SIMD/CryptoAES: bad opcode");
++		}
++		inst.flags = set_vec_arrangement(inst.flags, VA_16B);
++		inst.rd = regRd(binst);
++		inst.rn = regRn(binst);
++		break;
++	}
++	case CryptoThreeRegSHA: {
++		switch ((binst >> 12) & 0b111) {
++		case 0b000: inst.op = A64_SHA1C;    break;
++		case 0b001: inst.op = A64_SHA1P;    break;
++		case 0b010: inst.op = A64_SHA1M;    break;
++		case 0b011: inst.op = A64_SHA1SU0;  break;
++		case 0b100: inst.op = A64_SHA256H;  break;
++		case 0b101: inst.op = A64_SHA256H2; break;
++		case 0b110: inst.op = A64_SHA256SU1; break;
++		default:
++			return errinst("SIMD/CryptoThreeRegSHA: bad opcode");
++		}
++		inst.flags = set_vec_arrangement(inst.flags, VA_4S);
++		inst.rd = regRd(binst);
++		inst.rn = regRn(binst);
++		inst.rm = regRm(binst);
++		break;
++	}
++	case CryptoTwoRegSHA: {
++		switch ((binst >> 12) & 0b11111) {
++		case 0b00000: inst.op = A64_SHA1H;     break;
++		case 0b00001: inst.op = A64_SHA1SU1;   break;
++		case 0b00010: inst.op = A64_SHA256SU0; break;
++		default:
++			return errinst("SIMD/CryptoTwoRegSHA: bad opcode");
++		}
++		inst.flags = set_vec_arrangement(inst.flags, VA_4S);
++		inst.rd = regRd(binst);
++		inst.rn = regRn(binst);
++		break;
++	}
+ 	case TableLookup: {
+ 		bool tbx = (binst >> 12) & 1;
+ 		u8 len = (binst >> 13) & 0b11; // #regs = len + 1
+@@ -2405,7 +2454,11 @@ static Inst decode_simd(u32 binst) {
+ 		case 0b1011: inst.op = A64_SQDMLAL_VEC; inst.flags |= SIMD_SIGNED; set_scalarity = true; break;
+ 		case 0b1100: inst.op = A64_MULL_VEC; set_signedness = true; break;
+ 		case 0b1101: inst.op = A64_SQDMULL_VEC; inst.flags |= SIMD_SIGNED; set_scalarity = true; break;
+-		case 0b1110: inst.op = A64_PMULL; break;
++		case 0b1110:
++			if (U || scalar || (size != 0b00 && size != 0b11))
++				return errinst("SIMD/ThreeDiff: bad PMULL encoding");
++			inst.op = A64_PMULL;
++			break;
+ 		default:
+ 			return errinst("SIMD/ThreeDiff: bad obcode");
+ 		}
+diff --git a/farmdec.h b/farmdec.h
+index 57a2d13..ae0ea08 100644
+--- a/farmdec.h
++++ b/farmdec.h
+@@ -702,6 +702,21 @@ enum Op {
+ 	// SIMD Polynomial Multiply
+ 	A64_PMUL,
+ 	A64_PMULL,
++
++	A64_AESD,
++	A64_AESE,
++	A64_AESIMC,
++	A64_AESMC,
++	A64_SHA1C,
++	A64_SHA1H,
++	A64_SHA1M,
++	A64_SHA1P,
++	A64_SHA1SU0,
++	A64_SHA1SU1,
++	A64_SHA256H,
++	A64_SHA256H2,
++	A64_SHA256SU0,
++	A64_SHA256SU1,
+ };
+ 
+ // The condition bits used by conditial branches, selects and compares, stored in the
+-- 
+2.54.0 (Apple Git-157)
+
