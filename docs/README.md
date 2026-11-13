@@ -176,6 +176,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [CreateML: CSV reading](reference/backports/CreateML/TabularData/CSVReading.md) | CSV reading in TabularData, measured, and what is carried |
 | [CreateML: CSV writing](reference/backports/CreateML/TabularData/CSVWriting.md) | CSV writing in TabularData, measured, and what is carried |
 | [CreateML: date parsing](reference/backports/CreateML/TabularData/DateParsing.md) | date reading in TabularData, measured, and what is carried |
+| [Foundation: NSData base64](reference/backports/Foundation/NSData-base64.md) | the four iOS 7 base64 members, what the iOS 6.1.3 release has instead, how far its two members agree with macOS, and when the category is reachable |
 | [Foundation: URL](reference/backports/Foundation/URL.md) | the percent-encoded accessors and the file path initialiser of iOS 16 `URL`, and the host oracle they are measured against |
 | [Intents](reference/backports/Intents/README.md) | the responses, message and call intents and resolution results Telegram's extensions name, the Swift module for the key path forms, and what is measured on a device |
 | [Metal: dispatchThreads](reference/backports/Metal/DispatchThreads.md) | compute dispatch by threads per grid, the edge group, and the pipeline limits |
