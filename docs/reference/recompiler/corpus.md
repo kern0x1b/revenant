@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, library, exceptions, objectsplit, hostbridges and checkapi; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, library, exceptions, objectsplit, segmentlimit, hostbridges and checkapi; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -163,6 +163,19 @@ A program (`main.m`) that calls the host functions whose guest and host layouts 
 The check builds the program for this Mac and compares its output with `tests/data/hostbridges/expected.txt`, translates
 the arm64 build (which fails on any import without a bridge) and requires that the program imports each of the bridged
 functions. The device part runs the translated binary and compares its output with the Mac's.
+
+### segmentlimit
+
+Seven small arm64 dylibs, each with a function and a global, are the guest images of one executable. An executable has the
+segments `__PAGEZERO`, `__TEXT` and `__DATA`, then a text and a data segment for every guest image, and dyld's bind and
+rebase opcodes name a segment with 4 bits (index 0 to 15). The data segment of the seventh image is segment 16, and an
+executable of twelve images (the reCAPTCHA work's full set) died with SIGSEGV before `main`: the last bind that
+`DYLD_PRINT_BINDINGS=1` printed on the 4S was at `0x1400`, in `__PAGEZERO`, right after the last bind in the data
+segment of the second image (`0x105f87f8`, segment 6), which is what a segment index truncated to 4 bits looks like.
+
+The check lifts the seven as an executable and requires `xlate` to refuse, naming the 4-bit index, the limit of six
+images and `--library`; it lifts six and requires that no such refusal is said, and lifts the seven with `--library`
+and requires the same. Nothing is run and nothing is compiled past the lift.
 
 ### objectsplit
 
