@@ -3,12 +3,14 @@
 #import <objc/message.h>
 #include <mach/mach.h>
 #include <dlfcn.h>
+#include <limits.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
+#include "xl_guest_image.h"
 #include "xl_loader.h"
 
 @protocol RCFToken <NSObject>
@@ -19,6 +21,7 @@
 - (NSInteger)bump;
 - (NSInteger)seed;
 - (NSInteger)describedLength;
+- (NSInteger)categoryValue;
 - (NSObject *)hostBundle;
 - (id<RCFToken>)tokenForAction:(NSInteger)action;
 - (void)executeWithAction:(NSInteger)action completion:(void (^)(id<RCFToken> token, NSError *error))completion;
@@ -75,15 +78,64 @@ static void regions(const char *tag, unsigned long low, unsigned long high)
     fflush(stdout);
 }
 
+static unsigned long occupied_low, occupied_high;
+
 static void occupy(const char *range)
 {
     unsigned long low = 0, high = 0;
     BOOL parsed = sscanf(range + 1, "%lx-%lx", &low, &high) == 2 && low < high;
     vm_address_t address = low;
     BOOL held = parsed && vm_allocate(mach_task_self(), &address, high - low, VM_FLAGS_FIXED) == KERN_SUCCESS;
-    if (held)
-        vm_protect(mach_task_self(), low, high - low, FALSE, VM_PROT_NONE);
+    if (held) {
+        occupied_low = low;
+        occupied_high = high;
+        if (range[0] == '@')
+            vm_protect(mach_task_self(), low, high - low, FALSE, VM_PROT_NONE);
+        else
+            *(volatile uint32_t *)low = 0x5a5a5a5au;
+    }
     report("occupy", held);
+}
+
+static BOOL occupantIntact(void)
+{
+    vm_address_t address = occupied_low;
+    vm_size_t size = 0;
+    struct vm_region_basic_info_64 info;
+    mach_msg_type_number_t count = VM_REGION_BASIC_INFO_COUNT_64;
+    mach_port_t object;
+    if (vm_region_64(mach_task_self(), &address, &size, VM_REGION_BASIC_INFO_64, (vm_region_info_t)&info, &count, &object) != KERN_SUCCESS)
+        return NO;
+    if (address != occupied_low || address + size != occupied_high)
+        return NO;
+    if (info.protection == VM_PROT_NONE)
+        return YES;
+    return info.protection == (VM_PROT_READ | VM_PROT_WRITE) && *(volatile uint32_t *)occupied_low == 0x5a5a5a5au;
+}
+
+static int refusals(const char *expect, const char *path)
+{
+    if (strcmp(expect, "direct") == 0) {
+        void *image = dlopen(path, RTLD_NOW | RTLD_LOCAL);
+        int (*initialize)(void) = image ? (int (*)(void))dlsym(image, "xl_library_init") : NULL;
+        report("dlopen", initialize != NULL);
+        if (!initialize)
+            return 1;
+        report("init.refused", initialize() == XL_LIBRARY_NOT_RESERVED);
+        report("init.final", initialize() == XL_LIBRARY_NOT_RESERVED);
+        report("occupant.intact", occupantIntact());
+    } else {
+        xl_load_status wanted = strcmp(expect, "busy") == 0 ? XL_LOAD_RANGE_BUSY : XL_LOAD_BAD_IMAGE;
+        const char *phrase = strcmp(expect, "busy") == 0 ? "another mapping holds" : strcmp(expect, "registry") == 0 ? "registry" : "format version";
+        xl_load_status reserved = xl_reserve(path);
+        report("reserve.refused", reserved == wanted && strstr(xl_load_error(), phrase) != NULL);
+        line([NSString stringWithFormat:@"error %s", xl_load_error()]);
+        report("load.refused", xl_load(path) == wanted);
+        report("class.absent", NSClassFromString(@"RCFClient") == Nil);
+        report("occupant.intact", occupied_low ? occupantIntact() : YES);
+    }
+    line(@"done");
+    return 0;
 }
 
 #ifdef RC_SWIFT_HOST
@@ -126,12 +178,12 @@ static BOOL hostNamesUnchanged(void)
     return same;
 }
 
-static BOOL namesDisjoint(const char *library)
+static unsigned classesOfImage(const char *path, BOOL *disjoint)
 {
-    const char *base = strrchr(library, '/') ? strrchr(library, '/') + 1 : library;
+    const char *base = strrchr(path, '/') ? strrchr(path, '/') + 1 : path;
     unsigned images = 0, count = 0;
     const char **list = objc_copyImageNames(&images);
-    const char *image = library;
+    const char *image = path;
     for (unsigned i = 0; i < images; i++) {
         const char *name = strrchr(list[i], '/') ? strrchr(list[i], '/') + 1 : list[i];
         if (strcmp(name, base) == 0)
@@ -139,17 +191,25 @@ static BOOL namesDisjoint(const char *library)
     }
     const char **names = objc_copyClassNamesForImage(image, &count);
     free(list);
-    BOOL disjoint = count > 0;
     for (unsigned i = 0; i < count; i++) {
         if (hostClasses[[NSString stringWithUTF8String:names[i]]]) {
             printf("both %s\n", names[i]);
-            disjoint = NO;
+            *disjoint = NO;
         }
     }
-    printf("library registers %u classes\n", count);
-    fflush(stdout);
     free(names);
-    return disjoint;
+    return count;
+}
+
+static BOOL namesDisjoint(const char *library)
+{
+    char registry[PATH_MAX];
+    BOOL disjoint = YES;
+    unsigned own = classesOfImage(library, &disjoint);
+    unsigned registered = xl_registry_path(library, registry, sizeof registry) ? classesOfImage(registry, &disjoint) : 0;
+    printf("library registers %u classes (its registry %u, the library itself %u)\n", own + registered, registered, own);
+    fflush(stdout);
+    return disjoint && registered > 0;
 }
 
 static BOOL hostBridges(BOOL record)
@@ -203,13 +263,18 @@ int main(int argc, char **argv)
     alarm(180);
     @autoreleasepool {
         if (argc < 2) {
-            fprintf(stderr, "usage: host LIBRARY [RESIDENT-MB [@LOW-HIGH | PRELOADED-DYLIB]...]\n");
+            fprintf(stderr, "usage: host LIBRARY [RESIDENT-MB [@LOW-HIGH | +LOW-HIGH | --expect=busy|image|registry|direct | PRELOADED-DYLIB]...]\n");
             return 2;
         }
         const char *path = argv[1];
         size_t target = argc > 2 ? (size_t)atoi(argv[2]) : 85;
+        const char *expect = NULL;
         for (int index = 3; index < argc; index++) {
-            if (argv[index][0] == '@') {
+            if (strncmp(argv[index], "--expect=", 9) == 0) {
+                expect = argv[index] + 9;
+                continue;
+            }
+            if (argv[index][0] == '@' || argv[index][0] == '+') {
                 occupy(argv[index]);
                 continue;
             }
@@ -218,6 +283,8 @@ int main(int argc, char **argv)
             if (!image)
                 line([NSString stringWithFormat:@"error %s", dlerror()]);
         }
+        if (expect)
+            return refusals(expect, path);
         xl_load_status reserved = xl_reserve(path);
         grow(target << 10);
         measure("host");
@@ -255,6 +322,9 @@ int main(int argc, char **argv)
         report("bundle.path", [[[client hostBundle] performSelector:@selector(bundlePath)] isEqualToString:[[NSBundle mainBundle] bundlePath]]);
         id<RCFToken> token = [client tokenForAction:5];
         report("token", [token value] == 7051);
+        if ([client respondsToSelector:@selector(categoryValue)]) {
+            report("category", [client categoryValue] == 42);
+        }
         measure("called");
 
         dispatch_semaphore_t done = dispatch_semaphore_create(0);

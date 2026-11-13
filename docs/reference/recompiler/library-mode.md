@@ -6,64 +6,141 @@ What `XL_LIBRARY=1` builds, the loader API, and what was measured on the iPhone 
 ## Build interface
 
 `XL_LIBRARY=1 ./xmakew l -P . recompiler/tools/translate.lua <input>.dylib includes.h out/ [guest images]` writes
-`out/<name>.dylib`.
+`out/<name>.dylib` and `out/<name>-classes.dylib`; the two files go into one folder, and the second is found by its name.
 
 | Variable | Meaning | Default |
 |---|---|---|
 | `XL_LIBRARY` | build a dylib instead of an executable | unset |
-| `XL_BASE` | address of the first guest segment | `0x10000000` |
+| `XL_BASE` | address of the first guest segment: where the loader maps the guest image | `0x10000000` |
 | `XL_INSTALL_NAME` | install name of the output | `@rpath/<name>.dylib` |
 | `XL_SWIFT_HOST_ANCESTORS` | Swift classes with an Objective-C ancestor are host objects with a twin | unset |
 | `XL_REPLACES` | guest images that stand for system libraries | unset |
 | `XL_NAMESPACE` | prefix of the Objective-C class names of every guest image but the first (the runtime and the overlays); `none` leaves the names as they are | `XLG.` |
 
-Layout of the output, from low to high addresses:
+The output is two dylibs. The first, `<name>.dylib`, has two kinds of content:
 
-| Part | Address | Size |
+| Part | Where | Holds |
 |---|---|---|
-| host `__TEXT`, `__DATA` | `XL_BASE` minus the window | lifted code + runtime |
-| guest `__X<n>TEXT`, `__X<n>DATA`, one pair per image | from `XL_BASE`, at the addresses the guest was linked at | the guest's own |
-| `__LINKEDIT` | after the last guest segment | symbols, signature |
+| host `__TEXT`, `__DATA`, `__LINKEDIT` | wherever dyld puts the dylib (it is linked at address 0 and slid) | lifted code, runtime, the table of slots |
+| `__XGUEST,__image` | a section in the file, read-only, aligned to 16 KiB; dyld maps it and nobody reads it there | the guest image: the guest's segments as bytes, to be mapped at the addresses the guest was linked at |
 
-The window is the size of the lifted bytes plus 8 MB, rounded up to 16 MB. Exports are exactly `_xl_library_init` and
-`_xl_library_diagnostics`; the check fails on anything else.
+There are no guest segments in the link any more (`__X<n>TEXT`, `__X<n>DATA` are gone), and no window under `XL_BASE`: the
+host part does not depend on where the guest is. Exports are `_xl_library_init`, `_xl_library_diagnostics` and one
+`_xl_objc_category_<n>` for each Objective-C category of the guest (the registry refers to them); the check fails on
+anything else.
+
+The second, `<name>-classes.dylib`, is the registry: the lists that libobjc reads when it loads an image, and nothing
+else. It has `__DATA,__objc_classlist` (the guest's classes, by their guest address), `__objc_protolist` (its
+protocols, by address), `__objc_catlist` (the categories, which are the first dylib's `xl_objc_category_<n>` structures,
+bound by dyld) and `__objc_imageinfo`; no code, no exports, a dependency on the first dylib by its install name. It
+is separate because libobjc registers the classes of an image while `dlopen` loads it, and reads the class
+structures then: they are in the guest image, which the library maps only after dyld has placed the first dylib and
+relocated the slots that point into it. The first dylib has none of these lists. The registry is loaded after the
+guest image is in place and before the guest's initializers run.
+
+### The guest image (`recompiler/include/xl_guest_image.h`)
+
+The loader, the runtime and `xlate` include one header, which is the format. All numbers are little-endian 32-bit words,
+every address, size and offset is a multiple of the 16 KiB granule (the guest is arm64, its segments are 16 KiB
+aligned; `xlate` refuses a segment that is not).
+
+| Part | Layout |
+|---|---|
+| header (at the start of the section) | `magic` `XLGI` (`0x49474c58`), `version` (1), `low`, `high` (the range of the guest, `high` is the end of the last segment), `segment_count` |
+| `segment_count` records, right after the header | `address`, `size` (in the guest), `offset` (of its bytes from the start of the section), `length` (bytes in the file: the segment without its zero tail, up to the granule), `protection` (`1` read, `2` write; what the segment has when the library is ready) |
+| bytes | each segment's `length` bytes at its `offset`; a segment that is all zeros has `length` 0 |
+
+The slots are not in the section. `xl_guest_slots` (`{address, value}` words, sorted by address) and `xl_guest_slot_count`
+are host data of the dylib, because the `value` of a slot is the address of a symbol (a class, an `xl_objc_ro_*` structure,
+`__CFConstantStringClassReference`, a system symbol the guest binds to) that dyld relocates when it loads the dylib. A guest
+word that holds such an address is zero in the bytes. In a segment of the guest the Objective-C classes and protocols are
+ordinary bytes at their own addresses, and the generated code refers to them by number.
+
+### Load order
+
+1. `xl_reserve` reads the header of the file (not the section in memory): refuses a wrong `magic` or `version`, takes
+   `[low, high)` with `vm_allocate` at the fixed address and `VM_PROT_NONE`, and takes the size of the host part
+   (the sum of the dylib's own segments) anywhere with `VM_PROT_NONE`. If the guest range is held it fails with the
+   region that holds it, its range, what it is (an image's path, `malloc`, `stack`, a memory tag) and its size.
+   It also refuses a library whose registry file (`<name>-classes.dylib` in the same folder) is not there.
+2. `xl_load` gives the host reservation back and `dlopen`s the dylib: dyld takes the first hole that fits, which is the one just
+   given back. It calls `xl_library_init`.
+3. `xl_library_init` checks the header again (`magic`, `version`, that every segment is inside `[low, high)`, that every slot
+   is inside it), checks that `[low, high)` is one untouched `VM_PROT_NONE` range (it writes nothing if it is not), then for
+   each segment: `mmap(address, length, READ|WRITE, MAP_FIXED|MAP_PRIVATE)` of the file at the segment's `offset`, and
+   `vm_protect` read-write for the zero tail. It writes every slot, applies the segment's `protection`, `dlopen`s the
+   registry (libobjc registers the guest's classes, protocols and categories), runs the guest's initializers (once, behind a
+   lock) and returns.
+
+Pages of the guest that nothing touches stay clean file pages: they are not in the resident set and the system can drop them.
 
 ## Loader API (`recompiler/include/xl_loader.h`)
 
 | Function | Does |
 |---|---|
-| `xl_reserve(path)` | reads the header of the library, takes its range with `vm_allocate` at the fixed address, `VM_PROT_NONE` |
-| `xl_load(path)` | gives the reservation back, `dlopen`s, calls `xl_library_init`, which checks the header against the link address |
+| `xl_reserve(path)` | reads the guest image's header from the file and takes the guest range and room for the host part, `VM_PROT_NONE` (the load order above) |
+| `xl_load(path)` | reserves if that was not done, gives the host room back, `dlopen`s, calls `xl_library_init`; the library owns the guest range from then on |
 | `xl_load_error()` | text of the last failure |
 
-Statuses: `XL_LOAD_OK`, `XL_LOAD_BAD_IMAGE`, `XL_LOAD_RANGE_BUSY`, `XL_LOAD_DLOPEN_FAILED`, `XL_LOAD_RELOCATED`. A
-library that dyld placed elsewhere is `XL_LOAD_RELOCATED` for good; the runtime does not run in it.
+Statuses: `XL_LOAD_OK`, `XL_LOAD_BAD_IMAGE` (not an armv7 dylib, no guest image, a `magic` or `version` that is not read: the message says which, and
+the version found; no registry next to the library), `XL_LOAD_RANGE_BUSY` (the guest range is held: the message names the holder; or the reservation is
+not an untouched inaccessible range when the library attaches; or no hole of the host's size), `XL_LOAD_DLOPEN_FAILED` (the library or its registry; the message has dyld's text),
+`XL_LOAD_MAP_FAILED` (`mmap` or `vm_protect` of the guest's segments failed). A status after the library's initialization has run is final: later
+calls return it, and the guest range is given back.
 
-## What the phone's dyld does
+The library reports `XL_LIBRARY_OK`, `XL_LIBRARY_BAD_FORMAT`, `XL_LIBRARY_NOT_RESERVED` or `XL_LIBRARY_MAP_FAILED` from
+`xl_library_init` (`xl_guest_image.h`); the loader turns them into the statuses above. Called before `xl_load`
+by a host that never reserved, `xl_library_init` answers `XL_LIBRARY_NOT_RESERVED` and maps nothing, and any entry of the
+library aborts with "the guest image of the translated library is not attached".
+
+## What the phone's dyld and kernel do
 
 Measured on iOS 6.1.3, armv7:
 
-- `dlopen` places a dylib at its preferred address in a PIE and in a non-PIE process, if the range is free.
-- A dylib linked into the executable at launch is slid in a PIE process.
-- ld64 links an armv7 dylib with guest segments at `0x28000000` and `0x2a000000`; at `0x48000000` and above it refuses
-  ("would make the output executable exceed available address range"), though a plain dylib links at `0x4f000000`.
-- The 119 MB dylib prints `dyld: F_ADDFILESIGS failed ... errno=7` (its signature is 1.5 MB) and loads.
+- `dlopen` of a dylib linked at address 0 slides it into the first hole that fits (`vm_allocate` anywhere): the range that
+  `xl_reserve` took and `xl_load` gave back, in the same call.
+- On the 4S, `MAP_FIXED|MAP_PRIVATE` of the pages of a file over a `VM_PROT_NONE` `vm_allocate` reservation works: the
+  mapping replaces the reservation exactly (the rest of the reservation stays `VM_PROT_NONE`), the bytes are the file's, a
+  write copies the page and does not change the file, `vm_protect` to read-only makes a write fault, `vm_protect` to
+  read-write over the rest gives zero pages. The probe is 25 checks, all `ok` (small dylib with a `__XGUEST,__image` section at
+  file offset `0x4000`).
+- A 119 MB dylib prints `dyld: F_ADDFILESIGS failed ... errno=7` (its signature is 1.5 MB) and loads.
 - Mapped code that is never run costs about no resident memory.
+- A library whose install name is `@executable_path/<leaf>` is found by dyld with no environment: the registry, which depends
+  on the library by that name, loads when the host is started without `DYLD_FALLBACK_LIBRARY_PATH` (12 checks in each of 10
+  launches and the 4 controls, `XL_LIBRARY_INSTALL_NAME=executable` of the check). A name `@rpath/<leaf>` is found only through
+  that variable.
 
 ## The check
 
-`./xmakew l -P . recompiler/tests/library/check.lua <out> [objc|swift] [--host-only]` builds a fixture library
-(`RCFClient`, `RCFToken`; Objective-C or Swift) and a host app (`xl-library-host`), checks the layout of the output
-(ascending segments, `__LINKEDIT` after the guest, two exports), and on the claimed phone grows the host to
-`XL_LIBRARY_RESIDENT_MB` (85) and expects these names `ok`, then `done` and `exit=0`:
+`./xmakew l -P . <absolute path of>/recompiler/tests/library/check.lua <out> [objc|swift] [--host-only]` builds a fixture
+library (`RCFClient`, `RCFToken`, and a category `RCFClient (RCFExtra)`; Objective-C or Swift) and a host app
+(`xl-library-host`). The path of the script has to be absolute (the include list it writes holds paths relative to it
+otherwise). The fixture is linked with `-no_objc_category_merging`: ld64 merges a category into its class when both are in
+one dylib, which leaves the category list empty and the check of the registry with nothing to prove.
+
+The host part of the check is the layout of the output (no `__X<n>` segment, `__LINKEDIT` and `__XGUEST` present, the header
+(`magic`, `version`, a range that is granule-aligned and not below `XL_BASE`), exports that are the two entry points and the
+`_xl_objc_category_<n>` names and nothing else, a registry with only the `__objc_*` sections, no code and no exports). On the
+claimed phone the check copies the library and its registry into one folder, runs four negative controls, then grows the
+host to `XL_LIBRARY_RESIDENT_MB` (85) `XL_LIBRARY_LAUNCHES` times (1) and expects these names `ok`, then `done` and `exit=0`
+in every launch:
+
+| Control | Host argument | Proves |
+|---|---|---|
+| a range another mapping holds | `@LOW-HIGH` over the guest range, `--expect=busy` | `xl_reserve` refuses, the message names the holder, the occupant's pages are untouched (`occupant.intact`), the class is not registered |
+| a guest image format this loader does not read | a copy of the library whose `version` word is 2, `--expect=image` | `xl_reserve` refuses with the version found, nothing is registered |
+| a library whose registry is not next to it | the library alone in a folder, `--expect=registry` | `xl_reserve` refuses and names the missing file, no crash |
+| an init without a reservation, over a mapping with data | `+LOW-HIGH` (a read-write mapping with a sentinel), `--expect=direct` | `dlopen` of the library and the call of `xl_library_init` without `xl_reserve` is refused, and the occupant's data is intact |
 
 | Name | Proves |
 |---|---|
-| `reserve`, `load` | the range was taken, the library loaded at its link address |
+| `reserve`, `load` | the guest range was taken at the guest's own addresses, the library loaded wherever dyld put it |
 | `class`, `create` | the public class is found by name and made |
 | `methods`, `describe` | calls with `NSInteger` arguments and results, state kept between calls |
 | `bundle`, `bundle.path` | the library sees the host's `NSBundle.mainBundle` (same object, same path) |
 | `token` | an object result of a public method |
+| `category` | a method that a category of the guest adds to a guest class is found (the category is in the registry) |
 | `completion`, `completion.thread` | a host block called from the library, on a thread that is not the main one |
 
 The `swift` variant builds the host with Swift code of its own (`hostswift.swift`, armv7, iOS 6.0) and its own
@@ -74,7 +151,7 @@ The `swift` variant builds the host with Swift code of its own (`hostswift.swift
 |---|---|
 | `host.bridge.before` | before the library loads, the three are objects that are not of the namespace |
 | `host.names` | after `xl_load`, every name of the host runtime answers with the host's class |
-| `names.disjoint` | the library registered classes, and none has the name of a class of the host runtime |
+| `names.disjoint` | the registry registered classes (the host takes the classes of the library's image and of its registry), and none has the name of a class of the host runtime |
 | `host.bridge.after` | after the calls, the three are the same classes with the same contents, and the names still hold |
 
 | Variable | Meaning |
@@ -91,55 +168,91 @@ compares the classes only.
 
 ## Measurements
 
-The host grows its heap with 1 MB `malloc` chunks until `task_info` reports 85 MB resident (87,3xx K counting the
-frameworks). Sizes are K.
+The host grows its heap with 1 MB `malloc` chunks until `task_info` reports 85 MB resident (87 MB counting the frameworks).
+`host.m` calls `xl_reserve` first, as an app does from a constructor, so the first row already holds the reservation (the guest
+range and the room for the host part). Sizes are K; each cell is the lowest and the highest of 40 launches on the 4S
+(iOS 6.1.3), the check of the same commit, `XL_BASE` `0x10000000`.
 
-| Step | Objective-C variant | Swift variant (guest libswiftCore, libc++, libc++abi) |
+| Step | Objective-C variant (library 312 KB) | Swift variant (library 162.1 MB, guest libswiftCore, libc++, libc++abi) |
 |---|---|---|
-| library file | small | 119.5 MB |
-| host before | 87,328 resident, 360,064 virtual, 1 thread | 87,324, 360,064, 1 |
-| after `xl_reserve` | 87,332, 377,568 | 87,332, 503,360 (+143 MB virtual) |
-| after `xl_load` | 87,408 (+80) | 88,676 (+1.35 MB) |
-| after the calls | 87,728 (+320) | 90,696 (+2.0 MB) |
-| after the background call | 87,772, 394,280, 2 threads | 90,880, 521,108, 5 threads |
+| host with the reservation, resident / virtual | 87,340-87,360 / 361,680 | 87,912-87,932 / 536,496 |
+| after `xl_reserve` returned | 87,340-87,360 / 361,680 | 88,316-88,344 / 536,496 |
+| after `xl_load` | 87,448-87,464 / 378,120 | 90,156-90,176 / 552,944 |
+| after the calls | 87,752-87,772 / 378,120 | 92,148-92,172 / 552,944 |
+| after the background call | 87,804-87,852 / 395,544-404,760, 2 threads | 92,300-92,368 / 563,276-580,708, 3 to 5 threads |
 
-The Swift variant costs 2.2 MB of resident memory with the first calls done, though its file is 119 MB: only the pages
-the run touches become resident. The five threads are the host's main thread and the workers that
-`performSelector(inBackground:)` and Dispatch started.
+The Swift variant costs 4.4 MB of resident memory with the first calls done, though its file is 162 MB: only the pages
+the run touches become resident, and mapped pages that are never run cost nothing. The threads are the host's main
+thread and the workers that `performSelector(inBackground:)` and Dispatch started.
 
-The table is the first measurement, with a 119.5 MB library and a host without Swift. The Swift variant has grown to
-162 MB since; its window is 176 MiB (host `__TEXT` at `0x21000000` for the base below), so the host that has a Swift
-runtime needs `XL_BASE=0x2c000000` (next section), and the numbers with a Swift runtime of its own are in
-[the namespace section](#a-host-that-has-its-own-swift-runtime).
+The address map of the Swift variant: the guest image `0x10000000` to `0x10910000` (10 segments, 9.1 MB: the guest
+libswiftCore's text is `0x4c4000` at `0x10100000`, its data at `0x105c4000`; 6,438,912 bytes of it are in the library, the zero tails
+are not), and a host part that dyld places in a hole of 162 MB (`__TEXT` 104 MiB). Before this layout the host part was
+fixed too, at `0x21000000` to `0x2ccd4000` with the guest after it, which is what failed in 3 of 20 launches of Telegram13.
 
-Address map of the first Swift variant at the default base: host `__TEXT` at `0x08000000` (`0x6894000`, 104 MiB), host
-`__DATA` at `0x0e894000`, guest `__X0` to `__X4` from `0x10000000` to `0x10910000` (`__X1` is the guest libswiftCore:
-text `0x4c4000` at `0x10100000`, data at `0x105c4000`), `__LINKEDIT` at `0x10910000` (`0x2e0000`). The ObjC variant
-occupies `0x0f000000` to `0x10118000` (17 MB).
+In the 40 launches of the Swift variant the start of the malloc heap was `0x1c500000` 8 times, `0x1cd00000` 7, `0x1d500000` 3,
+`0x1e500000` 8, `0x1ed00000` 5, `0x1f500000` 6 and `0x1fd00000` 3 times (and in the 40 of the Objective-C variant at
+85 MB all eight starts, `0x1fd00000` 5 times; in the 40 at 22 MB all eight, 6 times): the library loaded in every one. With the
+ten launches of the first full check, 130 launches of the host were made without a refusal of the reservation, and
+the controls (a held range, a format this loader does not read, a registry that is missing, an init without a
+reservation) refused as they must, in every run.
 
-The host heap of a plain app fills the low addresses from about `0x185000` upwards, malloc arenas sit near
-`0x1f500000` to `0x20800000`, the stack at `0x2fcc5000`, dyld at `0x2fe02000`, the shared cache from `0x31bcc000`.
+Where the heap, the stack and the images of an app sit, and why, is in [the next section](#the-address-space-of-a-host-on-the-4s).
 
-### A host with Telegram's address space
+### The address space of a host on the 4S
 
-Telegram 13 (armv7, iOS 6) is a PIE executable of 56 KB plus frameworks that add up to about 190 MB of images, loaded
-first-fit from about `0x6000` to about `0xC000000`. The host was started with `0x01000000` to `0x0c800000` occupied (191
-MB, `@LOW-HIGH` argument of `host.m`):
+iOS 6.1.3, armv7, measured with a probe injected through `DYLD_INSERT_LIBRARIES` into 20 launches of Telegram13 (pass68, 282
+images, no taps) and with a console tool that prints where its first `malloc` landed, 400 launches. The probe lists every
+region (`vm_region_recurse_64`: range, protection, `user_tag`) when its constructor runs, which is the first code of the
+process after libSystem, and again when the library's reservation is asked for; it also logs every `mmap` and `vm_allocate`
+that lands between `0x10000000` and `0x30000000` with the frames of its caller.
 
-| Library | Result |
-|---|---|
-| default base | `FAIL reserve`: "another mapping holds 0x8000000-0x10bf0000, where lo.dylib must be loaded"; the host is not harmed |
-| `XL_BASE=0x2a000000` | 11 of 11 `ok`, resident 88,724 K after load and 90,872 K at the end, virtual 681 to 709 MB, 4 threads |
+| Zone | Where | Notes |
+|---|---|---|
+| images and first-fit mappings | `0x00078000` up to `0x10ebe000`-`0x110bd000` | Telegram13's executable and frameworks (271 MB). The executable slides by up to 1 MB; the frontier moved by 2 MB between the 20 launches. Every `mmap` that is not a malloc region (images, `fd=-1` anonymous mappings of 128 KB and less, file maps) takes the lowest hole that fits |
+| free | up to `0x1c500000` | 180 MB at the frontier above |
+| malloc heap | one run of tiny (`user_tag` 7, 1 MB) and small (tag 2, 8 MB) regions from a random start | the start is `0x1c500000 + k * 8 MB`, `k` 0 to 7, each value in about one launch of eight: 53, 43, 52, 41, 50, 57, 55 and 48 of 399 console launches, and 4, 1, 1, 4, 2, 4, 1, 3 of the 20 of Telegram13. The regions follow each other upwards from there: the allocator asks for the address after its last region and the kernel gives the next free hole at or above it. In 1 launch of 400 the heap was in the lowest hole (`0x00100000`) instead |
+| heap size | 19 MB before the first initializer, 21 to 22 MB when `xl_reserve` runs | dyld's own allocations while it maps the images account for the 19 MB; the initializers of the frameworks add 2 to 3 MB |
+| free | from the top of the heap (at most `0x21300000` at `xl_reserve`) to the stack | 233 MB at that heap top |
+| stack | top `0x2fe00000`, bottom `0x2fc02000` or higher | the main thread's 1 MB stack plus a random pad of up to 2 MB |
+| dyld, shared cache | `0x2fe00000` and above | the shared region `0x30000000` to `0x40000000` is the kernel's |
 
-A library therefore needs a base that the host's images and heap do not reach. `0x2a000000` is above Telegram's
-images and below the stack; whether a particular app leaves it free is for the app to measure with `xl_reserve` at
-launch, and a library whose reservation fails answers with a status, not a crash.
+When an allocation lands on a reserved range the allocator goes on above it, and once its hint is used up the new
+regions go to the lowest holes, which is how a process with a large reservation runs on.
 
-The 162 MB Swift library (window 176 MiB) does not fit there any more: below `0x2a000000` its host code meets the
-heap that a host with its own Swift runtime has before `main` (`0x1e500000` to `0x1f900000`), and `xl_reserve` answers
-"another mapping holds ...". `XL_BASE=0x2c000000` works (host `__TEXT` `0x21000000`, guest segments to about
-`0x2c910000`, `__LINKEDIT` after them); ld64 refuses guest segments at `0x48000000` and above. `host.m` calls
-`xl_reserve` before it grows its heap, as an app does from a constructor.
+What this means for a range that must be at a fixed address:
+
+- No constructor is early enough to be ahead of the heap: the first initializer already finds 19 MB of it, and the 2 to 3 MB
+  between that and `xl_reserve` are of no consequence. The heap's start is the random part, and it is a part of the
+  platform, not of the app: a console tool on the same phone has the same eight starts.
+- A fixed range that overlaps `0x1c500000` to `0x21300000` fails in one launch of eight. The first design of library mode
+  was one such range: the host code and the guest together, 198 MB from `0x21000000` for the 162 MB Swift library. It
+  failed 3 of 20 launches of Telegram13 (all of the start `0x1fd00000`), and it fits neither of the free zones (180 MB
+  below the heap, 233 MB between the heap and the stack) once the margins of both sides are taken.
+- A range below `0x1c500000` is clear of the heap in every launch, and clear of the images by `0x1c500000` minus their frontier.
+
+So the library has two parts that are placed differently. Only the guest image has to be at fixed addresses, because the
+guest's pointers are absolute: it is 9.1 MB for the Swift library (`0x10000000` to `0x10910000`). The host part, which is
+all the rest of the 162 MB, is linked at address 0 and dyld puts it in whatever hole is large enough (104 MiB of `__TEXT` in
+the Swift variant): there are about 410 MB of holes in the two free zones, and it does not matter which one is taken.
+
+### Choosing `XL_BASE`
+
+The guest range `[XL_BASE, XL_BASE + guest size)` has to be inside the part of the first free zone that no launch of the
+host app touches:
+
+```
+frontier + 64 MiB  <=  XL_BASE  and  XL_BASE + guest size  <=  0x1c500000 - 16 MiB
+```
+
+where `frontier` is the highest end of an image of the host app (the measured maximum for Telegram13 is `0x110bd000`, from
+20 launches; it moves by about 2 MB between launches, and a changed set of frameworks moves it more). For Telegram13 that
+is `[0x150bd000, 0x1b500000)`, 100 MB, and `XL_BASE=0x18000000` leaves 53 MiB for the guest above the base (the Swift
+library's guest is 9.1 MB) and 47 MiB below it. The default `0x10000000` is in the middle of Telegram13's images and is
+for a host that is not Telegram13. The rule is for the person who builds the drop; whatever the base, a host whose images
+or heap hold the range gets `XL_LOAD_RANGE_BUSY` from `xl_reserve` with the name of the holder, never a crash.
+The check (`recompiler/tests/library/host.m`) calls `xl_reserve` before it grows its heap, as an app does from a
+constructor.
 
 ### A host that has its own Swift runtime
 
@@ -163,16 +276,18 @@ overlays under the prefix, so the host keeps its names and a clash is the except
   first, a name of a namespaced module only there, and the name the guest gets back has no prefix. They are bridged in an
   executable too; with no prefix they pass the call through.
 
-Measured on the 4S with `XL_BASE=0x2c000000`, Swift variant: 15 of 15 `ok` (the 11 of the check and the 4 of the Swift
-host), no "implemented in both" line.
+Measured on the 4S, Swift variant, 40 launches: 15 of 15 `ok` in each (the 11 of the check and the 4 of the Swift
+host), no "implemented in both" line. The rows below were measured on the first design (a fixed range at
+`XL_BASE=0x2c000000`) and were not repeated with the host's Swift runtime from Telegram13 on the new layout; the second
+row is the new layout with the package's runtime (the table above has its counts).
 
 | Host | Resident K: host, loaded, called, end | Virtual | Threads |
 |---|---|---|---|
 | Telegram13's `libswiftCore` and Foundation overlay, bridging on (`XL_LIBRARY_HOST_BRIDGING`) | 88,000, 90,600, 92,420, 92,504 | about 575 MB | 5 |
-| the package's armv7 runtime next to the host | 87,912, 89,984, 92,040, 92,224 | | 4 |
+| the package's armv7 runtime next to the host (new layout, 40 launches) | 87,912-87,932, 90,156-90,176, 92,148-92,172, 92,300-92,368 | 563 to 581 MB | 3 to 5 |
 
 The host's Swift is the same before and after the library loads: 42 classes of its runtime answer by name with the same
-objects, the library registers 33 classes and none has a name of the host runtime, and the box, the `[Any]` and the
+objects, the library registers 33 classes (31 through its registry, 2 that the library itself makes) and none has a name of the host runtime, and the box, the `[Any]` and the
 `String` that the host's Swift makes are the same classes with the same contents. The Objective-C variant is 11 of 11.
 
 Not covered: protocols are not namespaced (`objc_getProtocol` is not bridged); `NSClassFromString` and
@@ -201,6 +316,8 @@ Not built; only measured and analysed.
 - The host's UI and its own use of the library were not run: the fixture host is a console tool, `Telegram13` was not
   modified.
 - The guest `libswiftCore` is not shared between two libraries.
-- Not run on the phone after the namespace: the `swiftobjc` fixture (the three name bridges now apply to executables
-  too, with a pass-through when there is no prefix) and a control with `XL_NAMESPACE=none` that shows the duplicate
-  warnings come back.
+- Not run on the phone: a control with `XL_NAMESPACE=none` that shows the duplicate warnings come back; the Swift host with
+  the Telegram13 runtime and Foundation overlay (`XL_LIBRARY_HOST_RUNTIME`, `XL_LIBRARY_HOST_BRIDGING`) on the new layout; a
+  category written in Swift (the Swift fixture has none, so the registry's category list is run by the Objective-C fixture only).
+- Telegram13 itself: the range rule above comes from 20 launches of it with a probe and from the fixture's 130 launches with
+  the heap of the host at its random starts; the 40 launches of the app with the library in its ipa wait for that ipa.

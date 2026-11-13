@@ -78,19 +78,22 @@ XL_LIBRARY=1 ./xmakew l -P . recompiler/tools/translate.lua Lib.dylib includes.h
 `includes.h` imports what the library uses and the library's own public header: a block parameter of a public method
 has no signature in its type encoding, so the translator takes it from the header (without it the method is reported
 `UNSUPPORTED: block parameter of a method the SDK does not declare` and traps when the host calls it). The output is
-`out/<name>.dylib`, linked with its install name `@rpath/<name>.dylib` (`XL_INSTALL_NAME` changes it).
+`out/<name>.dylib`, linked with its install name `@rpath/<name>.dylib` (`XL_INSTALL_NAME` changes it), and
+`out/<name>-classes.dylib`, the registry of the Objective-C classes of the guest. Both files go to the app, into the same
+folder; the registry depends on the library by the library's install name, which on iOS 6 must be a name dyld resolves
+(`@executable_path/Frameworks/<name>.dylib`, or the folder in `DYLD_FALLBACK_LIBRARY_PATH` for an `@rpath` name).
 
-- `XL_BASE` is the address of the guest window (default `0x10000000`). The lifted code sits just below it, in a window
-  of the size of the lifted code plus 8 MB, rounded up to 16 MB, so the library occupies `XL_BASE` minus that window up
-  to the end of the guest segments. An app whose images or heap hold that range needs another `XL_BASE`; ld64 links an
-  armv7 dylib with guest segments only below about `0x40000000`. The translation stops with a message naming
-  `XL_BASE` when the window is larger than the base itself. A host with a Swift runtime of its own (Telegram) and the
-  162 MB Swift library need `XL_BASE=0x2c000000`.
+- `XL_BASE` is the address where the loader maps the guest image (default `0x10000000`). Only the guest image
+  (9.1 MB for the Swift library) is at a fixed address; the host part, the lifted code, is placed by dyld in any hole.
+  The base has to be above the app's images and below the heap's random start; for Telegram13 that is `XL_BASE=0x18000000`
+  ([the rule](../../reference/recompiler/library-mode.md#choosing-xl_base)). A host that holds the range gets
+  `XL_LOAD_RANGE_BUSY` from `xl_reserve`, with the name of the holder.
 - `XL_NAMESPACE` is the prefix of the Objective-C class names of every guest image but the first (default `XLG.`; `none`
   leaves the names). It keeps the guest's Swift runtime from taking the names of a Swift runtime the host has loaded; the
   guest still sees its own names. [What it changes](../../explanation/recompiler/library-mode.md).
-- The app links `recompiler/src/loader/xl_loader.c` (header `recompiler/include/xl_loader.h`), reserves the range as
-  early as it can, and loads the library when it first needs it:
+- The app links `recompiler/src/loader/xl_loader.c` (headers `recompiler/include/xl_loader.h` and
+  `recompiler/include/xl_guest_image.h`), reserves the guest range as early as it can, and loads the library when it first
+  needs it:
 
 ```objc
 xl_reserve(path);

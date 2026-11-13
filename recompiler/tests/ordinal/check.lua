@@ -3,6 +3,7 @@ import("core.base.json")
 function main(out)
     local corpus = import("corpus", {rootdir = path.join(os.scriptdir(), "..", "..", "tools"), anonymous = true})
     local translate = import("translate", {rootdir = path.join(os.scriptdir(), "..", "..", "tools"), anonymous = true})
+    local env = import("env", {rootdir = path.join(os.scriptdir(), "..", "..", "tools"), anonymous = true})
     local e
     e, out = corpus.setup("ordinal", out)
     local here = os.scriptdir()
@@ -52,7 +53,7 @@ function main(out)
         end
     end
     local names = table.keys(passthrough)
-    corpus.sorted(names)
+    env.sorted(names)
     io.writefile(o("passthrough.txt"), table.concat(names, "\n") .. "\n")
     local function lift(name)
         local ok, log = xlate({"--base", "0x10000000", "--output", o(name .. ".bc"), "--layout", o(name .. ".layout"), "--passthrough", o("passthrough.txt"),

@@ -5,23 +5,41 @@ local EXPECTED = {
     "anycollection.int", "anycollection.string", "mirror.children", "describe.struct", "describe.class"
 }
 
-function main(out)
+function main(out, ...)
+    local host_only, device_only = false, false
+    for _, argument in ipairs({...}) do
+        if type(argument) == "table" then
+            host_only = argument.host_only or host_only
+        elseif argument == "--host-only" then
+            host_only = true
+        elseif argument == "--device-only" then
+            device_only = true
+        end
+    end
     local scripts = path.join(os.scriptdir(), "..", "..", "tools")
     local corpus = import("corpus", {rootdir = scripts, anonymous = true})
     local translate = import("translate", {rootdir = scripts, anonymous = true})
     local e
     e, out = corpus.setup("swiftobjc", out)
     local libs = os.getenv("XL_SWIFTOBJC_LIBS")
-    if not libs or not os.isdir(libs) then
+    if not device_only and (not libs or not os.isdir(libs)) then
         raise("XL_SWIFTOBJC_LIBS must name the folder with libswiftCore.dylib (the arm64 runtime of revenant@swift-runtime), libc++.1.dylib and libc++abi.1.dylib the fixture is translated with")
     end
-    local swift, layouts = corpus.swift()
-    os.execv(path.join(swift, "bin", "swiftc"), {"-target", "arm64-apple-ios12.0", "-sdk", e.sdk, "-Xfrontend", "-read-legacy-type-info-path=" .. layouts,
-                                                 "-runtime-compatibility-version", "none", "-o", path.join(out, "fixture-arm64"), path.join(os.scriptdir(), "fixture.swift")})
-    local includes = path.join(e.recompiler, "include", "swiftdemo-includes.h")
-    local images = {path.join(libs, "libswiftCore.dylib"), path.join(libs, "libc++.1.dylib"), path.join(libs, "libc++abi.1.dylib")}
-    translate.translate(path.join(out, "fixture-arm64"), includes, path.join(out, "xl"), images,
-                        {XL_REPLACES = "/usr/lib/libc++.1.dylib=" .. path.join(libs, "libc++.1.dylib"), XL_SWIFT_HOST_ANCESTORS = "1"})
+    if not device_only then
+        local swift, layouts = corpus.swift()
+        os.execv(path.join(swift, "bin", "swiftc"), {"-target", "arm64-apple-ios12.0", "-sdk", e.sdk, "-Xfrontend", "-read-legacy-type-info-path=" .. layouts,
+                                                     "-runtime-compatibility-version", "none", "-o", path.join(out, "fixture-arm64"), path.join(os.scriptdir(), "fixture.swift")})
+        local includes = path.join(e.recompiler, "include", "swiftdemo-includes.h")
+        local images = {path.join(libs, "libswiftCore.dylib"), path.join(libs, "libc++.1.dylib"), path.join(libs, "libc++abi.1.dylib")}
+        translate.translate(path.join(out, "fixture-arm64"), includes, path.join(out, "xl"), images,
+                            {XL_REPLACES = "/usr/lib/libc++.1.dylib=" .. path.join(libs, "libc++.1.dylib"), XL_SWIFT_HOST_ANCESTORS = "1"})
+        if host_only then
+            print("ok (host part)")
+            return
+        end
+    elseif not os.isfile(path.join(out, "xl", "fixture")) then
+        raise("--device-only needs the translated fixture %s of an earlier --host-only run", path.join(out, "xl", "fixture"))
+    end
 
     local device = corpus.device()
     device.copy(path.join(out, "xl", "fixture"), "/var/tmp/xl-fixture-swiftobjc")

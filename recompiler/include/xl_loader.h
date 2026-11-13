@@ -5,7 +5,7 @@ typedef enum {
     XL_LOAD_BAD_IMAGE,
     XL_LOAD_RANGE_BUSY,
     XL_LOAD_DLOPEN_FAILED,
-    XL_LOAD_RELOCATED
+    XL_LOAD_MAP_FAILED
 } xl_load_status;
 
 xl_load_status xl_reserve(const char *path);

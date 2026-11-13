@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, exceptions, objectsplit and hostbridges; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, library, exceptions, objectsplit, hostbridges and checkapi; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -245,6 +245,15 @@ names that image. This holds for each kind of bind: the superclass pointer, a cl
 The image indices in xlate's JSON are 1-based in Lua: the app, libfrombx, `a/libcoll` (the app's link), then
 `b/libcoll` (libfrombx's).
 
+### checkapi
+
+The check scripts reach the tool modules (`corpus`, `translate`, `env`) through a local alias, and a call to a function
+the module no longer defines fails only when that script runs. The device group's scripts run rarely, so a rename in a
+module once left `ordinal` calling `corpus.sorted` for weeks after the helper moved to `env`. `checkapi` reads every
+`tests/*/check.lua`, takes each `local <alias> = import("<module>", {rootdir = <tools>})`, and fails for every
+`<alias>.<name>(` that `tools/<module>.lua` does not define as a function. It needs no phone and no build, and fails
+when it finds no call at all (the pattern that reads the scripts no longer matches).
+
 ### weakimport
 
 Weak imports, judged both by what `--strict` says and by what the translated program does.
@@ -357,6 +366,9 @@ checks, among them:
 
 The check wants every name `ok`, no `FAIL`, the `deinit` line, and exit 0.
 
+The translation takes about ten minutes and needs no phone: `check.lua <out> --host-only` stops after it, and
+`check.lua <out> --device-only` runs the fixture that run left in `<out>/xl` on the claimed phone (26 names `ok`).
+
 It needs the arm64 runtime, so `XL_SWIFTOBJC_LIBS` names the folder with `libswiftCore.dylib` (the one that
 `revenant@swift-runtime` built for arm64, which carries `-DSWIFT_CLASS_IS_SWIFT_MASK=1ULL`), `libc++.1.dylib` and
 `libc++abi.1.dylib`. The fixture is compiled like swiftconformance's, for iOS 12.0 with the legacy type info: that
@@ -375,16 +387,23 @@ which the guest does not have yet; the strings stay inside the library (`describ
 The host part, which `recompiler_corpus/library` runs, translates the `objc` fixture with `XL_LIBRARY=1`, then checks
 the dylib statically:
 
-- the segments are in ascending address order, which dyld requires, and `__LINKEDIT` is after the guest segments;
-- the dylib exports exactly `_xl_library_init` and `_xl_library_diagnostics`;
+- the library has no `__X<n>` segment, has `__XGUEST` and `__LINKEDIT`, and the guest image header (`magic`, `version`, a
+  granule-aligned range not below `XL_BASE`) is right;
+- the dylib exports exactly `_xl_library_init`, `_xl_library_diagnostics` and the `_xl_objc_category_<n>` of the guest's categories;
+- the registry `<name>-classes.dylib` has only the `__objc_*` sections, no code and no exports, and a category list entry for
+  each category;
 - the armv7 host app (`host.m` with `xl_loader.c`) builds and signs.
 
 The device part copies the dylib and the host to the claimed phone and runs the host. The host first grows its own
 resident set to the size given as an argument (85 MB by default, `XL_LIBRARY_RESIDENT_MB`), loads any dylibs named after
-it the way an app's frameworks are loaded, reserves the range, loads the library, and prints `ok <name>` for 11 checks:
+it the way an app's frameworks are loaded, reserves the guest range, loads the library, and prints `ok <name>` for 12 checks:
 `reserve`, `load`, `class` (`NSClassFromString`), `create`, `methods`, `describe` (a string built in the library),
 `bundle` (the library's `hostBundle` is the app's `mainBundle`), `bundle.path`, `token` (a value that depends on a
-static of the library), `completion` and `completion.thread` (a block called on another thread). It prints
+static of the library), `category` (a method that a category of the guest adds, found through the registry; the Objective-C
+variant only), `completion` and `completion.thread` (a block called on another thread). Four negative controls run first: a held
+range, a guest image format the loader does not read, a registry that is not next to the library, and an init without a
+reservation. `XL_LIBRARY_LAUNCHES` repeats the launch, and `XL_LIBRARY_INSTALL_NAME=executable` names the library by
+`@executable_path` and starts the host without `DYLD_FALLBACK_LIBRARY_PATH`. It prints
 `measure <step> resident=… virtual=… threads=…` after each step and the address map of the process (`map <step>
 <start>-<end> <protection>`). A watchdog `alarm` ends a hung host after 180 seconds.
 
