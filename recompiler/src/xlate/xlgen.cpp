@@ -33,7 +33,10 @@ static cl::opt<std::string> GuestProvidedPath("guest-provided", cl::desc("Symbol
 static cl::opt<std::string> WeakOnlyPath("weak-only", cl::desc("Imported symbols no image binds strongly"));
 static cl::opt<std::string> ManifestPath("objc-manifest", cl::desc("Objective-C manifest written by xlate"));
 static cl::opt<std::string> EntitlementsPath("entitlements", cl::desc("The input binary's entitlements plist, answered for getsectiondata(__TEXT,__entitlements)"));
-static cl::opt<bool> Library("library", cl::desc("The output is a library whose guest classes and protocols are bytes of its guest image at their addresses, not symbols"));
+static cl::opt<bool> Library("library", cl::desc("The output is a library whose guest classes and protocols are bytes of its guest image at their addresses, not symbols, "
+                                                 "and whose Objective-C lists are written to --registry-out for a dylib of their own"));
+static cl::opt<std::string> RegistryOut("registry-out", cl::desc("With --library: C source of the sections that libobjc reads (class, protocol and category lists)"));
+static cl::opt<std::string> RegistryExports("registry-exports", cl::desc("With --library: the symbols of the library that the registry refers to"));
 static cl::opt<std::string> GuestOut("guest-out");
 static cl::opt<std::string> HostOut("host-out");
 static cl::opt<std::string> PassthroughOut("passthrough-out");
@@ -389,6 +392,8 @@ class Generator {
   std::string host_;
   std::string init_;
   std::string tables_;
+  std::string registry_;
+  std::string registry_exports_;
   std::ostringstream report_;
   std::ostringstream passthrough_;
   std::set<std::string> mirrors_;
@@ -2247,26 +2252,53 @@ void Generator::EmitClasses(const json::Object &manifest) {
                entry.getString("selector")->str() + "\");\n";
     }
   }
-  if (!classlist.empty()) {
-    meta << "static Class const xl_objc_classlist[] __attribute__((used, section(\"__DATA,__xlcls,regular,no_dead_strip\"))) = {";
-    for (auto &entry : classlist) {
-      meta << "(Class)" << entry << ", ";
-    }
-    meta << "};\n";
-  }
-  if (!protolist.empty()) {
-    meta << "static void *const xl_objc_protolist[] __attribute__((used, section(\"__DATA,__xlproto,regular,no_dead_strip\"))) = {";
-    for (auto &entry : protolist) {
-      meta << entry << ", ";
-    }
-    meta << "};\n";
-  }
-  if (!catlist.empty()) {
-    meta << "static struct xl_category_t *const xl_objc_catlist[] __attribute__((used, section(\"__DATA,__xlcat,regular,no_dead_strip\"))) = {";
+  if (Library) {
+    std::ostringstream registry, exports;
+    registry << "#include <stdint.h>\n";
     for (auto &entry : catlist) {
-      meta << entry << ", ";
+      registry << "extern char " << entry.substr(1) << ";\n";
+      exports << "_" << entry.substr(1) << "\n";
     }
-    meta << "};\n";
+    auto list = [&](const char *name, const char *section, const std::vector<std::string> &entries) {
+      if (entries.empty()) {
+        return;
+      }
+      registry << "static void *const " << name << "[] __attribute__((used, section(\"__DATA," << section << ",regular,no_dead_strip\"))) = {";
+      for (auto &entry : entries) {
+        registry << entry << ", ";
+      }
+      registry << "};\n";
+    };
+    // The lists are written under the forwarded names (__xlcls, __xlproto, __xlcat): ld64's Objective-C pass would read the
+    // entries as class structures and crash. translate.lua gives the real names back once the registry is linked.
+    list("xl_registry_classes", "__xlcls", classlist);
+    list("xl_registry_protocols", "__xlproto", protolist);
+    list("xl_registry_categories", "__xlcat", catlist);
+    registry << "static const uint32_t xl_registry_imageinfo[2] __attribute__((used, section(\"__DATA,__objc_imageinfo,regular,no_dead_strip\"))) = {0, 0};\n";
+    registry_ = registry.str();
+    registry_exports_ = exports.str();
+  } else {
+    if (!classlist.empty()) {
+      meta << "static Class const xl_objc_classlist[] __attribute__((used, section(\"__DATA,__xlcls,regular,no_dead_strip\"))) = {";
+      for (auto &entry : classlist) {
+        meta << "(Class)" << entry << ", ";
+      }
+      meta << "};\n";
+    }
+    if (!protolist.empty()) {
+      meta << "static void *const xl_objc_protolist[] __attribute__((used, section(\"__DATA,__xlproto,regular,no_dead_strip\"))) = {";
+      for (auto &entry : protolist) {
+        meta << entry << ", ";
+      }
+      meta << "};\n";
+    }
+    if (!catlist.empty()) {
+      meta << "static struct xl_category_t *const xl_objc_catlist[] __attribute__((used, section(\"__DATA,__xlcat,regular,no_dead_strip\"))) = {";
+      for (auto &entry : catlist) {
+        meta << entry << ", ";
+      }
+      meta << "};\n";
+    }
   }
   meta << "const char xl_namespace_prefix[] = \"" << prefix << "\";\n";
   meta << "const uint32_t xl_namespaced_classes[] = {";
@@ -2378,6 +2410,20 @@ bool Generator::Write() {
   }
   host << "    {0, 0}};\n";
   host << "void xl_bridge_init_generated(void)\n{\n" << init_ << "}\n";
+  if (Library) {
+    raw_fd_ostream registry(RegistryOut, ec);
+    if (ec) {
+      errs() << "xlgen: " << RegistryOut << ": " << ec.message() << "\n";
+      return false;
+    }
+    registry << registry_;
+    raw_fd_ostream exports(RegistryExports, ec);
+    if (ec) {
+      errs() << "xlgen: " << RegistryExports << ": " << ec.message() << "\n";
+      return false;
+    }
+    exports << registry_exports_;
+  }
   raw_fd_ostream passthrough(PassthroughOut, ec);
   passthrough << passthrough_.str();
   raw_fd_ostream report(ReportOut, ec);

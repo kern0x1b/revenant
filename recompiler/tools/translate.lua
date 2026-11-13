@@ -414,7 +414,7 @@ function translate(input, includes, out, images, opt)
                              "--abi-header", path.join(lab, "src", "runtime", "objc_abi.h"), "--symbols", o("imports.txt"), "--guest-provided", o("provided.txt"),
                              "--weak-only", o("weak-only.txt"), "--objc-manifest", o("manifest.json"), "--guest-out", o("guest.m"),
                              "--host-out", o("host.m"), "--passthrough-out", o("passthrough.txt"), "--report-out", o("report.txt")},
-                            library and {"--library"} or {}))
+                            library and {"--library", "--registry-out", o("registry.c"), "--registry-exports", o("registry-exports.txt")} or {}))
 
     local need = {}
     for _, line in ipairs(imported) do
@@ -467,7 +467,7 @@ function translate(input, includes, out, images, opt)
     run(clang, table.join(host, {"-I", out, "-I", runtime}, extra_cflags, {"-c", path.join(runtime, "runtime.c"), "-o", o("runtime.o")}))
     if library then
         run(clang, table.join(host, {"-I", out, "-I", runtime, "-I", path.join(lab, "include")}, extra_cflags, {"-c", path.join(runtime, "library.c"), "-o", o("library.o")}))
-        writelines(o("exports.txt"), {"_xl_library_init", "_xl_library_diagnostics"})
+        writelines(o("exports.txt"), table.join({"_xl_library_init", "_xl_library_diagnostics"}, readlines(o("registry-exports.txt"))))
     end
     for _, source in ipairs({path.join(runtime, "bridge.m"), path.join(runtime, "objc_bridge.m"), path.join(runtime, "swift_classes.m"),
                              path.join(runtime, "objc_compat.m"), o("host.m")}) do
@@ -591,6 +591,13 @@ function translate(input, includes, out, images, opt)
         end
     end
     run(e.ldid, {"-S", binary})
+    if library then
+        local registry = o(name .. "-classes.dylib")
+        run("xcrun", {"clang", "-target", "armv7-apple-ios6.0", "-isysroot", e.sdk, "-fuse-ld=" .. e.ld, "-dynamiclib", "-install_name",
+                      "@rpath/" .. name .. "-classes.dylib", o("registry.c"), binary, "-o", registry})
+        print("registry: renamed %d sections", macho.rename_sections(registry, false))
+        run(e.ldid, {"-S", registry})
+    end
 
     local bad = false
     for _, line in ipairs(lines(iorun("nm", {binary}))) do

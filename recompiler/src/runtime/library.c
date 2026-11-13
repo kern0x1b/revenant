@@ -2,6 +2,7 @@
 
 #include <dlfcn.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <mach-o/getsect.h>
 #include <mach-o/loader.h>
 #include <mach/mach.h>
@@ -30,11 +31,11 @@ static int xl_library_reserved(uint32_t low, uint32_t high)
     while (cursor < high) {
         vm_address_t address = cursor;
         vm_size_t size = 0;
-        vm_region_extended_info_data_t info;
-        mach_msg_type_number_t count = VM_REGION_EXTENDED_INFO_COUNT;
-        mach_port_t object;
-        if (vm_region_64(mach_task_self(), &address, &size, VM_REGION_EXTENDED_INFO, (vm_region_info_t)&info, &count, &object) != KERN_SUCCESS ||
-            address > cursor || info.protection != VM_PROT_NONE || info.pages_resident != 0)
+        natural_t depth = 0;
+        struct vm_region_submap_info_64 info;
+        mach_msg_type_number_t count = VM_REGION_SUBMAP_INFO_COUNT_64;
+        if (vm_region_recurse_64(mach_task_self(), &address, &size, &depth, (vm_region_recurse_info_t)&info, &count) != KERN_SUCCESS || address > cursor ||
+            info.is_submap || info.protection != VM_PROT_NONE || info.pages_resident != 0)
             return 0;
         cursor = address + size;
     }
@@ -100,7 +101,10 @@ static int xl_library_attach(void)
             vm_protect(mach_task_self(), segment->address, segment->size, FALSE, (vm_prot_t)segment->protection) != KERN_SUCCESS)
             return XL_LIBRARY_MAP_FAILED;
     }
-    return XL_LIBRARY_OK;
+    char registry[PATH_MAX];
+    if (!xl_registry_path(info.dli_fname, registry, sizeof registry) || access(registry, R_OK) != 0)
+        return XL_LIBRARY_NO_REGISTRY;
+    return dlopen(registry, RTLD_NOW | RTLD_LOCAL) ? XL_LIBRARY_OK : XL_LIBRARY_REGISTRY_FAILED;
 }
 
 void xl_library_ensure(void)

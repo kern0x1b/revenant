@@ -102,6 +102,10 @@ static xl_load_status xl_read_image(const char *path, struct xl_image *image)
     if (guest.low >= guest.high || guest.low % XL_GUEST_GRANULE || guest.high % XL_GUEST_GRANULE)
         return xl_fail(XL_LOAD_BAD_IMAGE, "the guest image of %s has the range 0x%x-0x%x, not a range of whole %u byte granules", path, guest.low, guest.high,
                        XL_GUEST_GRANULE);
+    char registry[PATH_MAX];
+    if (!xl_registry_path(path, registry, sizeof registry) || access(registry, R_OK) != 0)
+        return xl_fail(XL_LOAD_BAD_IMAGE, "the registry of the Objective-C classes of %s is missing: it is the file %s%s next to it", path,
+                       strrchr(path, '/') ? strrchr(path, '/') + 1 : path, XL_REGISTRY_SUFFIX);
     image->guest_low = guest.low;
     image->guest_high = guest.high;
     image->host_size = xl_round_up(last - first, vm_page_size);
@@ -153,11 +157,10 @@ static void xl_describe_occupant(uintptr_t low, uintptr_t high, char *text, size
 {
     vm_address_t address = low;
     vm_size_t size = 0;
-    vm_region_extended_info_data_t info;
-    mach_msg_type_number_t count = VM_REGION_EXTENDED_INFO_COUNT;
-    mach_port_t object;
-    if (vm_region_64(mach_task_self(), &address, &size, VM_REGION_EXTENDED_INFO, (vm_region_info_t)&info, &count, &object) != KERN_SUCCESS ||
-        address >= high) {
+    natural_t depth = 0;
+    struct vm_region_submap_info_64 info;
+    mach_msg_type_number_t count = VM_REGION_SUBMAP_INFO_COUNT_64;
+    if (vm_region_recurse_64(mach_task_self(), &address, &size, &depth, (vm_region_recurse_info_t)&info, &count) != KERN_SUCCESS || address >= high) {
         snprintf(text, capacity, "a mapping that the kernel does not list");
         return;
     }
@@ -255,6 +258,11 @@ static xl_load_status xl_attach_failed(int failure)
     case XL_LIBRARY_NOT_RESERVED:
         return xl_fail(XL_LOAD_RANGE_BUSY, "the reservation of the guest image of %s was not an untouched, inaccessible range when the library attached it",
                        xl_loader_path);
+    case XL_LIBRARY_NO_REGISTRY:
+        return xl_fail(XL_LOAD_BAD_IMAGE, "the registry of the Objective-C classes of %s is missing: it is the file %s%s next to it", xl_loader_path,
+                       strrchr(xl_loader_path, '/') ? strrchr(xl_loader_path, '/') + 1 : xl_loader_path, XL_REGISTRY_SUFFIX);
+    case XL_LIBRARY_REGISTRY_FAILED:
+        return xl_fail(XL_LOAD_DLOPEN_FAILED, "dlopen of the registry of %s: %s", xl_loader_path, dlerror());
     default:
         return xl_fail(XL_LOAD_MAP_FAILED, "mapping the guest image of %s failed", xl_loader_path);
     }
