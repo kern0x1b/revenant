@@ -1,18 +1,46 @@
 local function segments(file)
-    local list, current = {}, nil
+    local list, current, section = {}, nil, nil
     for line in os.iorunv("otool", {"-l", file}):gmatch("[^\n]+") do
         if line:match("^Load command") then
-            current = nil
+            current, section = nil, nil
         elseif line:match("^%s+cmd LC_SEGMENT$") then
-            current = {}
+            current = {sections = {}}
+            section = nil
             table.insert(list, current)
         elseif current then
-            current.name = current.name or line:match("^%s+segname (%S+)")
-            current.address = current.address or tonumber(line:match("^%s+vmaddr 0x(%x+)") or "", 16)
-            current.size = current.size or tonumber(line:match("^%s+vmsize 0x(%x+)") or "", 16)
+            local sectname = line:match("^%s+sectname (%S+)")
+            if sectname then
+                section = {name = sectname}
+                table.insert(current.sections, section)
+            elseif section then
+                section.offset = section.offset or tonumber(line:match("^%s+offset (%d+)") or "")
+                section.size = section.size or tonumber(line:match("^%s+size 0x(%x+)") or "", 16)
+            else
+                current.name = current.name or line:match("^%s+segname (%S+)")
+                current.address = current.address or tonumber(line:match("^%s+vmaddr 0x(%x+)") or "", 16)
+                current.size = current.size or tonumber(line:match("^%s+vmsize 0x(%x+)") or "", 16)
+            end
         end
     end
     return list
+end
+
+local function word(data, offset)
+    local a, b, c, d = data:byte(offset, offset + 3)
+    return a + b * 256 + c * 65536 + d * 16777216
+end
+
+local function guest_header(file, list)
+    for _, segment in ipairs(list) do
+        for _, section in ipairs(segment.sections) do
+            if segment.name == "__XGUEST" and section.name == "__image" then
+                local data = io.readfile(file, {encoding = "binary"})
+                local at = section.offset + 1
+                return {offset = section.offset, size = section.size, magic = word(data, at), version = word(data, at + 4), low = word(data, at + 8),
+                        high = word(data, at + 12), count = word(data, at + 16), data = data}
+            end
+        end
+    end
 end
 
 local function exports(file)
@@ -105,9 +133,20 @@ function main(out, ...)
     local names = {}
     for _, segment in ipairs(list) do
         names[segment.name] = segment
+        if segment.name:match("^__X%d") then
+            corpus.fail("the library has the guest segment %s: guest segments are bytes of %s, mapped by the loader", segment.name, "__XGUEST")
+        end
     end
-    if not names.__LINKEDIT or names.__LINKEDIT.address < 0x10000000 then
-        corpus.fail("__LINKEDIT is not placed after the guest segments")
+    if not names.__LINKEDIT or not names.__XGUEST then
+        corpus.fail("the library has no __LINKEDIT or no __XGUEST segment")
+    end
+    local base = tonumber(os.getenv("XL_BASE") or "0x10000000")
+    local guest = guest_header(library, list)
+    if not guest or guest.magic ~= 0x49474c58 or guest.version ~= 1 or guest.count == 0 then
+        corpus.fail("the section __XGUEST,__image does not start with a version 1 header with segments")
+    end
+    if guest.low % 0x4000 ~= 0 or guest.high % 0x4000 ~= 0 or guest.low < base or guest.low >= guest.high then
+        corpus.fail("the guest image range 0x%x-0x%x is not whole 16 KiB granules from the base 0x%x up", guest.low, guest.high, base)
     end
     local symbols = exports(library)
     if table.concat(symbols, " ") ~= "_xl_library_diagnostics _xl_library_init" then
@@ -159,25 +198,59 @@ function main(out, ...)
         end
     end
     local resident = os.getenv("XL_LIBRARY_RESIDENT_MB") or "85"
-    local output = try { function ()
-        return device.run("chmod +x /var/tmp/xl-library/xl-library-host && cd /var/tmp/xl-library && DYLD_FALLBACK_LIBRARY_PATH=" .. (host_runtime or "/var/tmp/xl-library") .. " ./xl-library-host /var/tmp/xl-library/RCFixture.dylib " .. resident .. " 2>&1; echo exit=$?")
-    end } or ""
-    device.run("rm -rf /var/tmp/xl-library")
-    io.writefile(o("run.txt"), output)
-    local text = "\n" .. output:gsub("\r", "")
-    for _, name in ipairs(expected) do
-        if not text:find("\nok " .. name .. "\n", 1, true) then
+    local launches = tonumber(os.getenv("XL_LIBRARY_LAUNCHES") or "1")
+    local environment = "DYLD_FALLBACK_LIBRARY_PATH=" .. (host_runtime or "/var/tmp/xl-library")
+    local function launch(arguments)
+        return try { function ()
+            return device.run("chmod +x /var/tmp/xl-library/xl-library-host && cd /var/tmp/xl-library && " .. environment .. " ./xl-library-host " .. arguments .. " 2>&1; echo exit=$?")
+        end } or ""
+    end
+    local function verify(output, names, what)
+        local text = "\n" .. output:gsub("\r", "")
+        for _, name in ipairs(names) do
+            if not text:find("\nok " .. name .. "\n", 1, true) then
+                io.write(output)
+                corpus.fail("%s: the host did not report ok for %s", what, name)
+            end
+        end
+        if text:find("\nFAIL ", 1, true) or not text:find("\ndone\nexit=0\n", 1, true) then
             io.write(output)
-            corpus.fail("the host did not report ok for %s", name)
+            corpus.fail("%s: the host reported a failure or did not run to its end", what)
+        end
+        if text:find("is implemented in both", 1, true) then
+            io.write(output)
+            corpus.fail("%s: the Objective-C runtime found two classes of one name, the host's and the library's", what)
         end
     end
-    if text:find("\nFAIL ", 1, true) or not text:find("\ndone\nexit=0\n", 1, true) then
-        io.write(output)
-        corpus.fail("the host reported a failure or did not run to its end")
+
+    local range = string.format("%x-%x", guest.low, guest.high)
+    local newer = o("RCFixtureV2.dylib")
+    local patched = guest.data:sub(1, guest.offset + 4) .. "\2\0\0\0" .. guest.data:sub(guest.offset + 9)
+    io.writefile(newer, patched, {encoding = "binary"})
+    os.runv("chmod", {"u+w", newer})
+    corpus.sign(e, newer)
+    device.copy(newer, "/var/tmp/xl-library/RCFixtureV2.dylib")
+
+    local controls = {
+        {"a guest range another mapping holds", "/var/tmp/xl-library/RCFixture.dylib 20 @" .. range .. " --expect=busy", {"occupy", "reserve.refused", "load.refused", "class.absent", "occupant.intact"}},
+        {"a library with a guest image format this loader does not read", "/var/tmp/xl-library/RCFixtureV2.dylib 20 --expect=image", {"reserve.refused", "load.refused", "class.absent"}},
+        {"an init without a reservation, over a mapping with data", "/var/tmp/xl-library/RCFixture.dylib 20 +" .. range .. " --expect=direct", {"occupy", "dlopen", "init.refused", "init.final", "occupant.intact"}},
+    }
+    local outputs = {}
+    for _, control in ipairs(controls) do
+        local output = launch(control[2])
+        table.insert(outputs, output)
+        verify(output, control[3], control[1])
     end
-    if text:find("is implemented in both", 1, true) then
-        io.write(output)
-        corpus.fail("the Objective-C runtime found two classes of one name, the host's and the library's")
+    local output
+    for launch_number = 1, launches do
+        output = launch("/var/tmp/xl-library/RCFixture.dylib " .. resident)
+        if launches > 1 then
+            io.writefile(o(string.format("run-%02d.txt", launch_number)), output)
+        end
+        verify(output, expected, "launch " .. launch_number)
     end
-    print("ok: a translated library loads into a %s MB host and answers (%d checks)", resident, #expected)
+    device.run("rm -rf /var/tmp/xl-library")
+    io.writefile(o("run.txt"), output .. table.concat(outputs, "\n"))
+    print("ok: a translated library loads into a %s MB host and answers (%d checks in each of %d launches, %d negative controls)", resident, #expected, launches, #controls)
 end
