@@ -1,5 +1,5 @@
 local LIBRARIES = {
-    {name = "SystemBackports", folder = "libSystem", frameworks = {"AudioToolbox"}, libraries = {}, archives = {"apple-compat"}, system = {}},
+    {name = "SystemBackports", folder = "libSystem", frameworks = {"AudioToolbox", "Foundation"}, libraries = {}, archives = {"apple-compat"}, system = {}},
     {name = "FoundationBackports", folder = "Foundation", frameworks = {"Foundation", "CoreFoundation", "SystemConfiguration"}, libraries = {"icucore", "CoreFoundationBackports", "SystemBackports"}, archives = {}, system = {"sqlite3"}},
     {name = "CloudKitBackports", folder = "CloudKit", frameworks = {"Foundation", "CoreLocation", "CoreGraphics"}, libraries = {"FoundationBackports"}, archives = {"RevenantCKWebAuth", "micro-ecc"}, system = {}},
     {name = "AppTrackingTransparencyBackports", folder = "AppTrackingTransparency", frameworks = {"AppTrackingTransparency", "Foundation"}, libraries = {"FoundationBackports"}, archives = {}, system = {}},
