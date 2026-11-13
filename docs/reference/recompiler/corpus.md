@@ -432,9 +432,12 @@ iOS 12.2 or later (bit 1) is accepted too, because the runtime rewrites that bit
 
 ### libgenerics (device part by hand)
 
-A Swift library (`XL_LIBRARY=1`) translated with the guest `libswiftCore`, run by a small armv7 host (`host.m`, with the
-loader) that takes the class and the method to call, so each step runs in a process of its own. The device part runs them
-with `MallocScribble` and `MallocGuardEdges`, and a `malloc:` line from the host's allocator fails the step.
+The generic classes that the guest Swift runtime instantiates at run time, in a library (`XL_LIBRARY=1`) with the guest
+`libswiftCore`. The runtime's own metadata is prespecialized only for the common element types, so `[() -> Int]` or
+`[String: String]` makes `swift_getGenericMetadata` build a `_ContiguousArrayStorage<T>` or `_DictionaryStorage<K, V>` class
+and look its superclass up through `swift_getTypeByMangledName`. A small armv7 host (`host.m`, with the loader) takes the
+class and the method to call, so each step runs in a process of its own. The device part runs them with `MallocScribble` and
+`MallocGuardEdges`, and a `malloc:` line from the host's allocator fails the step.
 
 `XL_SWIFTOBJC_LIBS` names the same folder as for swiftobjc. The host part translates the library and builds the host
 (`check.lua <out> --host-only`, about ten minutes), the device part runs the steps of that run on the claimed phone
@@ -444,11 +447,18 @@ with `MallocScribble` and `MallocGuardEdges`, and a `malloc:` line from the host
 XL_SWIFTOBJC_LIBS=<folder> ./xmakew l -P . recompiler/tests/libgenerics/check.lua <out>
 ```
 
-`stepDictionary` builds a `[String: String]`, which makes the Swift runtime create a `_DictionaryStorage<String, String>`
-class and ask for its superclass `__ContiguousArrayStorageBase` by name. A library on the device has no `dladdr` for the
-guest image, which the loader maps itself, so the runtime knows its range (`xl_guest_low`, `xl_guest_high`) and a class of
-the guest is a class of the library; without that range the bridge handed out the twin that stands for a class of the
-host, and the step crashes (checked by taking the range out: exit 139 on the 4S).
+The steps are `stepDictionary` (`[String: String]`), `stepDictionaryAny` (`[String: Any]`), `stepClosures` (`[() -> Int]`),
+`stepNested` (`[[Int]]`), `stepSubstring` (`[Substring]` appended to and split) and `stepStress` (10 000 appends to an
+`[Int]`, a `[String]`, a `[Substring]` and a `[String: Int]`, under `MallocScribble`). A library on the device has no
+`dladdr` for the guest image, which the loader maps itself, so the runtime knows its range (`xl_guest_low`,
+`xl_guest_high`) and a class of the guest is a class of the library. A class that the Swift runtime builds at run time has
+the superclass's size and fields from the host layout: the runtime reconciles them when it registers the shadow, and a
+subclass smaller than its superclass stops the program with a message.
+
+Each fix has a step that fails without it (the 4S, one fix taken out at a time): without the image range `stepDictionary`
+exits 139 (so do `stepClosures`, `stepNested`, `stepSubstring` and `stepStress`); without the reconciliation
+`stepDictionary` and `stepDictionaryAny` still pass, and `stepClosures`, `stepNested`, `stepSubstring` and `stepStress`
+stop on a `malloc:` checksum error of a freed block.
 
 ### library (device part by hand)
 

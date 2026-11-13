@@ -1,5 +1,10 @@
 local STEPS = {
     {"stepDictionary", {"dictionary.string"}},
+    {"stepDictionaryAny", {"dictionary.any"}},
+    {"stepClosures", {"closures.array"}},
+    {"stepNested", {"array.nested"}},
+    {"stepSubstring", {"substring.split"}},
+    {"stepStress", {"stress.append"}},
 }
 
 function main(out, ...)
@@ -80,5 +85,5 @@ function main(out, ...)
     end
     device.run("rm -rf " .. remote)
     io.writefile(o("run.txt"), table.concat(log, "\n"))
-    print("ok: %d steps ran in a translated library", #STEPS)
+    print("ok: %d steps of generic classes the Swift runtime instantiates at run time ran in a translated library", #STEPS)
 end

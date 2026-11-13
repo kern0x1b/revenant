@@ -84,6 +84,16 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
   `-dealloc` of its own gets one that does the same before it calls its superclass's. A class compiled for
   iOS 12.2 or later marks itself Swift with bit 1 of its data word, not the bit 0 of the guest's libswiftCore (built with
   `-DSWIFT_CLASS_IS_SWIFT_MASK=1ULL`); the runtime rewrites the bit when it sets the class up.
+- The superclass of a Swift class can be a Swift class whose layout the host keeps (`__ContiguousArrayStorageBase`, which
+  derives from `NSObject`, so the pair split leaves it alone). A class that the Swift runtime builds at run time
+  (`_ContiguousArrayStorage<T>`, `_DictionaryStorage<K, V>`) copies the superclass's instance size, alignment mask and
+  vtable from the metadata of the superclass only when that metadata is the guest's; the runtime therefore
+  reconciles the new class with its superclass when it registers the shadow (`xl_reconcile_swift_super`). For any such
+  superclass it raises the alignment mask, moves the instance start behind the superclass's instance, shifts
+  `ro->instance_size`, the metadata's own size and the field offset vector by the same amount, and fills the vtable
+  slots the class left empty from the superclass. The three consumers of the size agree afterwards: `swift_allocObject`
+  reads the metadata, the host's `class_getInstanceSize` reads `ro`, and the field accessors read the offsets. A class
+  whose size is smaller than its superclass's, or whose metadata is shorter, stops the program with the class named.
 - A shadow cannot give the host an *instance* that the guest allocated. The instance's isa word is the guest class, so
   the bridge looks the shadow up when a guest message reaches it and answers `-retain`, `-release` and
   `-autorelease` with the guest's own methods. A host method of a shadow's ancestry (`-[NSObject isEqual:]`) sent to

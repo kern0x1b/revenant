@@ -436,6 +436,76 @@ static void xl_add_dealloc(Class shadow, Class host_super)
     class_addMethod(shadow, @selector(dealloc), imp, "v@:");
 }
 
+enum {
+    XL_META_FLAGS = 0x28,
+    XL_META_INSTANCE_SIZE = 0x30,
+    XL_META_ALIGN_MASK = 0x34,
+    XL_META_CLASS_SIZE = 0x38,
+    XL_META_ADDRESS_POINT = 0x3c,
+    XL_META_DESCRIPTION = 0x40,
+    XL_META_MEMBERS = 0x50,
+    XL_DESC_KIND_CLASS = 0x10,
+    XL_DESC_NUM_FIELDS = 0x24,
+    XL_DESC_FIELD_VECTOR = 0x28
+};
+
+static int xl_swift_host_layout(uintptr_t cls)
+{
+    if (!cls || !xl_class_in_image(cls))
+        return 0;
+    uint32_t description = *(const uint32_t *)(cls + XL_META_DESCRIPTION);
+    if (!description || !xl_class_in_image(description))
+        return 0;
+    return (*(const uint32_t *)(uintptr_t)description & 0x1f) == XL_DESC_KIND_CLASS;
+}
+
+static void xl_swift_super_layout_fatal(const char *name, const char *what, unsigned long long have, unsigned long long want)
+{
+    char why[256];
+    snprintf(why, sizeof why, "xlate: Swift class %s: %s (%llu, its superclass needs %llu)", name, what, have, want);
+    xl_unsupported(why);
+}
+
+static void xl_reconcile_swift_super(struct xl_guest_class *c, struct xl_guest_ro *ro, uintptr_t super, const char *name, int dynamic)
+{
+    uint8_t *meta = (uint8_t *)c;
+    const uint8_t *above = (const uint8_t *)super;
+    uint32_t super_size = *(const uint32_t *)(above + XL_META_INSTANCE_SIZE);
+    uint16_t super_mask = *(const uint16_t *)(above + XL_META_ALIGN_MASK);
+    uint32_t *size = (uint32_t *)(meta + XL_META_INSTANCE_SIZE);
+    uint16_t *mask = (uint16_t *)(meta + XL_META_ALIGN_MASK);
+    if (dynamic) {
+        if (super_mask > *mask)
+            *mask = super_mask;
+        uint32_t start = (super_size + *mask) & ~(uint32_t)*mask;
+        if (start > ro->instance_start) {
+            uint32_t delta = start - ro->instance_start;
+            uint64_t description = *(const uint64_t *)(meta + XL_META_DESCRIPTION);
+            uint32_t fields = description ? *(const uint32_t *)(uintptr_t)(description + XL_DESC_NUM_FIELDS) : 0;
+            if (fields) {
+                uint32_t vector = *(const uint32_t *)(uintptr_t)(description + XL_DESC_FIELD_VECTOR);
+                uint64_t *offsets = (uint64_t *)(meta + (uint64_t)vector * 8);
+                for (uint32_t index = 0; index < fields; index++)
+                    offsets[index] += delta;
+            }
+            ro->instance_start += delta;
+            ro->instance_size += delta;
+            *size = ro->instance_size;
+        }
+        uint32_t super_extent = *(const uint32_t *)(above + XL_META_CLASS_SIZE) - *(const uint32_t *)(above + XL_META_ADDRESS_POINT);
+        uint32_t own_extent = *(const uint32_t *)(meta + XL_META_CLASS_SIZE) - *(const uint32_t *)(meta + XL_META_ADDRESS_POINT);
+        if (own_extent < super_extent)
+            xl_swift_super_layout_fatal(name, "metadata smaller than the superclass's", own_extent, super_extent);
+        for (uint32_t offset = XL_META_MEMBERS; offset + 8 <= super_extent; offset += 8) {
+            uint64_t *slot = (uint64_t *)(meta + offset);
+            if (!*slot)
+                *slot = *(const uint64_t *)(above + offset);
+        }
+    }
+    if (*size < super_size || ro->instance_size < super_size)
+        xl_swift_super_layout_fatal(name, "instance size is smaller than the superclass's", *size < ro->instance_size ? *size : ro->instance_size, super_size);
+}
+
 static Class xl_build_shadow(uintptr_t guest)
 {
     pthread_mutex_lock(&xl_build_lock);
@@ -477,6 +547,8 @@ static Class xl_build_shadow(uintptr_t guest)
     if (host_super)
         ((id(*)(id, SEL))objc_msgSend)((id)host_super, sel_registerName("class"));
     int direct_host_super = host_super && c->superclass == (uint64_t)(uintptr_t)host_super;
+    if ((c->bits & 3) && xl_swift_host_layout((uintptr_t)host_super))
+        xl_reconcile_swift_super((struct xl_guest_class *)c, (struct xl_guest_ro *)ro, (uintptr_t)host_super, name, !xl_table_get(xl_unbuilt_static, guest));
     if (direct_host_super)
         xl_twin_of(host_super);
     uint32_t extent = host_super && xl_has_host_ancestor(host_super) ? xl_swift_extent(c) : 0;
