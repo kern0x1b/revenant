@@ -80,12 +80,18 @@ std::optional<uint64_t> GuestExports::Find(const std::string &library, const std
       if (auto found = image->exports().find(symbol); found != image->exports().end()) {
         return image->host(found->second);
       }
+      if (auto found = image->absolutes().find(symbol); found != image->absolutes().end()) {
+        return found->second;
+      }
     }
     return std::nullopt;
   }
   if (auto image = ImageOf(library)) {
     if (auto exported = image->exports().find(symbol); exported != image->exports().end()) {
       return image->host(exported->second);
+    }
+    if (auto absolute = image->absolutes().find(symbol); absolute != image->absolutes().end()) {
+      return absolute->second;
     }
     if (auto sent = image->reexports().find(symbol); sent != image->reexports().end() && depth < kMaxReexportDepth) {
       if (auto target = Find(sent->second.library, sent->second.symbol, depth + 1)) {

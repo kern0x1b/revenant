@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, library, exceptions, objectsplit, segmentlimit, hostbridges and checkapi; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, library, exceptions, objectsplit, segmentlimit, absolutes, hostbridges and checkapi; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -176,6 +176,18 @@ segment of the second image (`0x105f87f8`, segment 6), which is what a segment i
 The check lifts the seven as an executable and requires `xlate` to refuse, naming the 4-bit index, the limit of six
 images and `--library`; it lifts six and requires that no such refusal is said, and lifts the seven with `--library`
 and requires the same. Nothing is run and nothing is compiled past the lift.
+
+### absolutes
+
+A symbol of a dylib can be absolute (`nm -m`: `(absolute) external`): it has a value and no address in any section.
+libswiftCore has one, `__swiftImmortalRefCount` (`0x80000004ffffffff`, the reference count the statically initialised
+objects of libswiftFoundation, libswiftCryptoKit and libswiftNetwork carry). `xlate` read only the symbols of a section,
+so those binds stayed unresolved and the translation named the symbol as an import of the host, which has none.
+
+One dylib defines `absolute_value` as `0x123456789` with `.set`, another holds `&absolute_value` in a global. The check
+lifts the second alone and requires the refusal "data bind to unresolved symbol _absolute_value"; lifts both and requires
+that no symbol is unresolved and that the data slot of the bind holds `0x123456789`, the value itself: a section symbol
+is slid with its image, an absolute value is not.
 
 ### objectsplit
 
