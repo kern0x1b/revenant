@@ -174,9 +174,6 @@ target("RNHost")
     end
     if os.getenv("RN_BACKPORTS") then
         set_values("revenant.rebind", "RNHost")
-        if os.getenv("RN_EXPO") then
-            add_values("revenant.rebind", "Frameworks/libswiftCrypto.dylib", "Frameworks/libswiftUniformTypeIdentifiers.dylib")
-        end
     end
     set_values("revenant.waive.weak-imports", "UIAccessibilityPriority*, UIAccessibilitySpeechAttributeAnnouncementPriority: RCTAccessibilityManager.mm:335 inside @available(iOS 17.0); UITextContentType{Birthdate*,CreditCard*}: RCTTextInputUtils.mm:228 and RCTBaseTextInputView.mm:316 inside @available(iOS 17.0); UITextContentType{DateTime,FlightNumber,ShipmentTrackingNumber}: same files inside @available(iOS 15.0); UITextContentTypeCellular*: same files inside @available(iOS 17.4); UIMenuAutoFill: RCTUITextField.mm:189 and RCTUITextView.mm:318 inside @available(iOS 17.0); preadv, pwritev: folly SysUio.cpp takes the address only inside __builtin_available(iOS 14.0) and otherwise uses preadv_fallback/pwritev_fallback; UIContentSizeCategoryDidChangeNotification, UIContentSizeCategoryNewValueKey, UIApplicationLaunchOptionsUserActivityDictionaryKey, UIApplicationLaunchOptionsUserActivityTypeKey: each use is behind an address-of != NULL test added by packages/r/react-native/patches/ios6-weak-guards.patch")
     set_values("revenant.version", "0.1.0")

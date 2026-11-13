@@ -155,7 +155,7 @@ function backport_libraries(target)
     return libraries
 end
 
-local SHARED = {"swift-runtime", "libcxx", "backports"}
+local SHARED = {"swift-runtime", "libcxx", "backports", "swift-crypto", "cryptokit", "uniformtypeidentifiers"}
 local LINKED = "ffmpeg-hevc"
 
 function shared_packages(target, aliases)
@@ -665,10 +665,13 @@ function application(target)
     local identities = {}
     local binaries, runtime = {executable}, {}
     local carried, held, roots = {}, {}, {executable}
+    local shared = shared_runtime(target)
     for _, library in ipairs(bundle.carried_libraries(target)) do
-        table.insert(carries_runtime(library) and held or carried, library)
-        if not carries_runtime(library) then
-            table.insert(roots, library.source)
+        if not (shared and shared.identities[library.name]) then
+            table.insert(carries_runtime(library) and held or carried, library)
+            if not carries_runtime(library) then
+                table.insert(roots, library.source)
+            end
         end
     end
     for _, library in ipairs(distinct(table.join(reached(held, roots), carried), frameworks)) do
@@ -686,7 +689,6 @@ function application(target)
             table.insert(runtime, destination)
         end
     end
-    local shared = shared_runtime(target)
     bundle.retarget(binaries, identities, {provided = shared and shared.identities})
     bundle.copy_resources(target, folder)
     bundle.write_plist(path.join(folder, "Info.plist"), bundle.info(target, deployment(target)))

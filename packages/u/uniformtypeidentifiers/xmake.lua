@@ -5,7 +5,7 @@ package("uniformtypeidentifiers")
     set_policy("package.strict_compatibility", true)
     add_configs("apple_sdk", {description = "The iPhoneOS SDK the generated project names: the one the consumer installed, so the package is not built against a second SDK.", type = "string"})
 
-    add_configs("shared", {description = "Compile and link against a shared swift-runtime, whose libraries the result binds by their absolute install names. The package is not yet one of a Debian package: its own install names stay @rpath and it writes no shared-packages description.", default = false, type = "boolean"})
+    add_configs("shared", {description = "Compile and link against a shared swift-runtime, whose libraries the result binds by their absolute install names. The result is a shared package of its own, org.revenant.uniformtypeidentifiers-<hash>, which depends on the packages it binds and installs its library under an absolute install name.", default = false, type = "boolean"})
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("sources", {description = "The digest of this recipe and the module's sources, so a changed declaration is a different package.", default = uniformtypeidentifiers_sources_digest, type = "string", readonly = true})
 
@@ -22,11 +22,18 @@ package("uniformtypeidentifiers")
         io.writefile(path.join(extra, "xmake.lua"), table.concat({
             "target(\"swiftUniformTypeIdentifiers\")",
             "    add_values(\"swift.flags\", \"-module-cache-path\", \"" .. modules .. "\")",
+            "    add_shflags(\"-lswiftFoundation\", {force = true})",
             "target_end()",
             ""}, "\n"))
         local lines = package:config("shared") and import("@addon.revenant.apple.shared_requires", {anonymous = true}).lines(package:config("apple_sdk")) or nil
         import("@addon.revenant.apple.wrapper", {anonymous = true}).install(package, {root = root, lines = lines,
             includes = {path.join(root, "frameworks", "Backports", "src", "Swift"), extra}, targets = {"swiftUniformTypeIdentifiers"}, modules = true})
+        if package:config("shared") then
+            import("@addon.revenant.apple.shared_library", {anonymous = true}).publish(package, {kind = "uniformtypeidentifiers",
+                library = path.join(package:installdir("lib"), "libswiftUniformTypeIdentifiers.dylib"), title = "UniformTypeIdentifiers",
+                description = "libswiftUniformTypeIdentifiers.dylib of one build of Revenant's revenant@uniformtypeidentifiers,",
+                needs = {kind = "swift-runtime", package = package:dep("swift-runtime")}})
+        end
     end)
 
     on_test(function (package)

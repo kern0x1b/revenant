@@ -9,7 +9,7 @@ package("swift-crypto")
     add_resources("5.0.1", "swift-asn1", "https://github.com/apple/swift-asn1/archive/refs/tags/1.7.3.tar.gz",
                   "77add3684fd75a586529893288af51ed092c565ec0c154d2b4eedb3a6bdc294c")
 
-    add_configs("shared", {description = "Compile and link against a shared swift-runtime, whose libraries the result binds by their absolute install names. The package is not yet one of a Debian package: its own install names stay @rpath and it writes no shared-packages description.", default = false, type = "boolean"})
+    add_configs("shared", {description = "Compile and link against a shared swift-runtime, whose libraries the result binds by their absolute install names. The result is a shared package of its own, org.revenant.swift-crypto-<hash>, which depends on the packages it binds and installs its library under an absolute install name.", default = false, type = "boolean"})
     includes(path.join(os.scriptdir(), "port", "digest.lua"))
     add_configs("sources", {description = "The digest of this recipe, its patches and the apple-compat calls it builds, so a changed step is a different package.",
                             default = swift_crypto_sources_digest, type = "string", readonly = true})
@@ -212,6 +212,12 @@ package("swift-crypto")
                   "-lswiftCore", "-lswiftDarwin", "-lswiftObjectiveC", "-lswiftDispatch", "-lswift_Concurrency",
                   "-lswiftFoundation", "-framework", "Security"}))
         os.cp(lib, package:installdir("lib"))
+        if package:config("shared") then
+            import("@addon.revenant.apple.shared_library", {anonymous = true}).publish(package, {kind = "swift-crypto",
+                library = path.join(package:installdir("lib"), path.filename(lib)), title = "swift-crypto",
+                description = "libswift" .. main .. ".dylib of one build of Revenant's revenant@swift-crypto,",
+                needs = {kind = "swift-runtime", package = runtime}})
+        end
         local module = path.join(package:installdir("lib"), "swift", "iphoneos")
         os.mkdir(module)
         os.cp(path.join(swiftmods, main .. ".swiftmodule"), path.join(module, main .. ".swiftmodule"))
