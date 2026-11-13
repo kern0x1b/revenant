@@ -5288,6 +5288,7 @@ function appleblas_dgeadd
 function appleblas_sgeadd
 function body_of
 function clock_getres
+function clock_gettime_nsec_np
 function compression_decode_buffer
 function compression_decode_scratch_buffer_size
 function compression_encode_buffer
@@ -5295,6 +5296,7 @@ function compression_encode_scratch_buffer_size
 function compression_stream_destroy
 function compression_stream_init
 function compression_stream_process
+function dispatch_data_create
 function futimens
 function glBeginQuery
 function glBeginTransformFeedback
@@ -5443,6 +5445,7 @@ function la_vector_length
 function la_vector_slice
 function la_vector_to_double_buffer
 function la_vector_to_float_buffer
+function memset_s
 function nw_advertise_descriptor_copy_txt_record_object
 function nw_advertise_descriptor_create_application_service
 function nw_advertise_descriptor_create_bonjour_service
@@ -5870,6 +5873,8 @@ function os_log_type_enabled
 function os_signpost_enabled
 function os_signpost_id_generate
 function os_signpost_id_make_with_pointer
+function os_unfair_lock_lock
+function os_unfair_lock_unlock
 function quadrature_integrate
 function readlinkat
 function revenant_CTFontManagerCreateFontDescriptorsFromURL
@@ -10078,6 +10083,7 @@ global __NSArray0__
 global __NSDictionary0__
 global __kCFBooleanFalse
 global __kCFBooleanTrue
+global _dispatch_data_destructor_munmap
 global _nw_data_transfer_report_all_paths
 global _nw_parameters_configure_protocol_default_configuration
 global _nw_parameters_configure_protocol_disable

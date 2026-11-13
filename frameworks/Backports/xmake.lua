@@ -207,6 +207,9 @@ if is_plat("iphoneos") then
                 add_syslinks(name)
             end
             on_config(function (target)
+                if library.name == "SystemBackports" then
+                    target:add("includedirs", path.join(target:pkg("apple-compat"):installdir(), "share", "apple-compat", "process-wide"))
+                end
                 if not skeleton_generated then
                     os.execv(os.programfile(), {"l", "-P", ROOT, path.join(TOOLS, "generate.lua")})
                     skeleton_generated = true
@@ -839,7 +842,7 @@ if is_plat("iphoneos") and not SELECTED then
     backports_tests("backports_uikit", {uikit = "uikit_test.lua"})
     backports_tests("backports_avfoundation", {avfoundation = "avfoundation_test.lua"})
 else
-    backports_tests("backports", {generator = "backports_test.lua", forwarders = "forwarders_test.lua", markers = "markers_test.lua", srcimage = "skeleton_src_image_test.lua", device_probe = "device_probe_test.lua", libsystem = "libsystem_test.lua", libsystem_at = "libsystem_at_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
+    backports_tests("backports", {generator = "backports_test.lua", forwarders = "forwarders_test.lua", markers = "markers_test.lua", srcimage = "skeleton_src_image_test.lua", device_probe = "device_probe_test.lua", libsystem = "libsystem_test.lua", libsystem_at = "libsystem_at_test.lua", libsystem_dispatch = "libsystem_dispatch_test.lua", libsystem_unfair = "libsystem_unfair_test.lua", foundation_base64 = "foundation_base64_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua", naturallanguageoverlay = "natural_language_overlay_test.lua", usernotifications = "user_notifications_test.lua",
                                   network = "network_test.lua", networkpath = "network_path_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", securetransport = "security_ssl_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua",
                                   device = "device_members_test.lua", compression = "compression_roundtrip_test.lua",

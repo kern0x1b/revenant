@@ -6,6 +6,7 @@ local host = {plat = "macosx", arch = "arm64"}
 local llvm = "23.1.3"
 add_requires("revenant@llvm " .. llvm, {alias = "llvm", configs = {libraries = true}})
 add_requires("revenant@rellume 2026.09.10", table.join(host, {alias = "rellume", configs = {llvm = llvm}}))
+add_requires("revenant@farmdec 2022.02.08", table.join(host, {alias = "farmdec"}))
 add_requires("revenant@blocksruntime 2017.10.27", table.join(host, {alias = "blocksruntime"}))
 add_requires("revenant@iphoneos-sdk 26.2", {alias = "iphoneos-sdk"})
 add_requires("revenant@ld64 956.6", {alias = "ld64"})
@@ -91,7 +92,7 @@ target("recompiler_corpus")
     set_default(false)
     add_deps("xlate", "xlgen")
     add_packages("blocksruntime", "iphoneos-sdk", "ld64", "ldid")
-    add_tests("jumptable", "tsdscan", "tsdguard", "int128", "weakimport", "lse", "llsc", "library", "exceptions", "libexceptions", "objectsplit", "segmentlimit", "absolutes", "hostbridges", "checkapi")
+    add_tests("jumptable", "tsdscan", "tsdguard", "int128", "weakimport", "lse", "llsc", "crypto", "library", "exceptions", "libexceptions", "objectsplit", "segmentlimit", "absolutes", "hostbridges", "checkapi")
     on_test(corpus)
 target_end()
 

@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, library, exceptions, libexceptions, objectsplit, segmentlimit, absolutes, hostbridges and checkapi; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, objectsplit, segmentlimit, absolutes, hostbridges and checkapi; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions`, `libexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -125,6 +125,38 @@ the loop retry. A store that finds the same value written back by another thread
 emulator; the loops compilers emit are value-based and tolerate it. `LDXP` and `STXP` still lift as a plain load and
 store, because a 128-bit `cmpxchg` has no armv7 lowering.
 
+### crypto
+
+A control for the ARMv8 Crypto extension that BoringSSL, and with it CryptoKit, selects at run time on an Apple arm64
+CPU: AESE, AESD, AESMC, AESIMC, SHA1C, SHA1P, SHA1M, SHA1H, SHA1SU0, SHA1SU1, SHA256H, SHA256H2, SHA256SU0 and
+SHA256SU1, plus the PMULL and PMULL2 that GHASH uses, in their 8-bit polynomial and 64-bit polynomial forms. armv7 has
+no instruction for any of them, so the lifter turns each into a call of a helper in `recompiler/src/runtime/crypto.c`;
+[Lifted helpers](lifted-helpers.md) is the contract between the two.
+
+`main.c` defines 20 functions, one per instruction and a round of AESE with AESMC, and a loop of rounds. It is built
+for arm64 with `-march=armv8-a+crypto`, so clang emits each intrinsic as its instruction. The check proves six things,
+all on the host, which is an Apple-Silicon Mac, so the oracle is the hardware itself:
+
+1. The helpers agree with the instructions. `driver.c` includes `crypto.c` and compares each helper with the ACLE
+   intrinsic on 20000 random inputs each. It also runs AES-128 and AES-256 from FIPS 197
+   appendix C, encrypting and decrypting with the equivalent inverse cipher (the decryption round keys go through
+   AESIMC), and one SHA-1 and one SHA-256 block of `abc` from FIPS 180-4, built from the helpers alone.
+2. farmdec decodes what an assembler assembles. A sweep of 498688 words (every register combination of each Crypto and
+   PMULL encoding, and a spread of the SIMD space around them) is assembled with `llvm-objdump` as the oracle and
+   decoded; the operation, the registers and the arrangement must agree on all of them, and no word that
+   `llvm-objdump` rejects may decode as one of these operations.
+3. xlate lifts every function with 0 failures, and each lifted function holds the helper calls of its instruction and
+   no others. SHA1H, a rotate of one word, is one `llvm.fshl.i32`.
+4. The helper buffers are `alloca` instructions of the entry block, not of the loop that uses them, so the stack does
+   not grow with the rounds and no frame is realigned.
+5. The lifted functions, compiled natively with the helpers and run on the host, give the hardware's result for every
+   function on 4000 states each (the all-zero and all-one states first, then random ones), with the callee-saved
+   registers untouched. This is what proves the register
+   mapping, the choice of the PMULL halves and the scalar operands, which the IR assertions only describe.
+6. The lifted code and the helpers compile for armv7 with the flags `recompiler/tools/translate.lua` uses and link: the
+   prototype of every `rellume_aarch64_` function the lifted code declares is the one `crypto.c` defines, and no such
+   symbol stays undefined.
+
 ### exceptions
 
 A program of Objective-C and C++ (`main.m`, `guarded.mm`) that throws and catches across guest frames. It covers:
@@ -206,7 +238,7 @@ host pointer to the guest or a guest pointer back:
 | `Protocol` (`NSProtocolFromString`, `protocol_isEqual`, `protocol_getName`) | `protocol` |
 | `objc_initWeak`, `objc_loadWeakRetained`, `objc_loadWeak`, `objc_storeWeak` | `weak` |
 | `dictionaryWithObjectsAndKeys:`, `arrayWithObjects:`, `initWithObjects:`, `setWithObjects:` | `variadic dictionary`, `variadic array`, `variadic init`, `variadic set` |
-| `%@` of a constant | `format argument` |
+| `%@` of a constant (covered by construction: no control tells an alias from its original here, see below) | `format argument` |
 | arguments of a guest block the host calls (`enumerateObjectsUsingBlock:`) | `block arguments` |
 | result of a guest block the host calls (`imp_implementationWithBlock`) | `block result` |
 | a guest category method on `NSString` (`self`, and `objc_msgSendSuper2`) | `category self`, `category super` |

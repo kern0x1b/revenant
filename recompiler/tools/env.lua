@@ -47,6 +47,7 @@ function main()
         xlate = targetfile("xlate"),
         xlgen = targetfile("xlgen"),
         llvm = llvm,
+        farmdec = installdir("farmdec"),
         llvmbin = path.join(llvm, "bin"),
         resourcedir = path.join(llvm, "lib", "clang", "23"),
         sdk = sdks[1],

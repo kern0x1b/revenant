@@ -1232,6 +1232,8 @@ function check(cachefile, binaries, folder, opt)
     return warnings
 end
 
+local OVERRIDE_MARKER = "___revenant_override"
+
 function rebind_plan(cachefile, binary, providers)
     local cache = load(cachefile)
     local data = macho.read(binary)
@@ -1256,9 +1258,11 @@ function rebind_plan(cachefile, binary, providers)
     local installs = table.orderkeys(provided)
     for _, symbol in ipairs(undefined_imports(data, image)) do
         local bound = image.libraries[symbol.ordinal]
-        if bound and cache.libraries[bound] and not exported_by(cache, bound, symbol.name) then
+        if bound and cache.libraries[bound] then
+            local released = exported_by(cache, bound, symbol.name)
             for _, install in ipairs(installs) do
-                if exports_symbol(lookup, install, symbol.name, {}) then
+                if exports_symbol(lookup, install, symbol.name, {}) and
+                   (not released or exports_symbol(lookup, install, OVERRIDE_MARKER .. symbol.name, {})) then
                     moves[symbol.name] = install
                     break
                 end

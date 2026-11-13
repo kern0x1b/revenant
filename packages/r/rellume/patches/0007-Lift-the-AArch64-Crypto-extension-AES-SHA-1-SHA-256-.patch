@@ -1,0 +1,202 @@
+From 8725a32c60a8fcf33b476735d580bab075d8f9d3 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Fri, 13 Nov 2026 16:37:34 +0100
+Subject: [PATCH] Lift the AArch64 Crypto extension AES, SHA-1, SHA-256 and
+ PMULL instructions
+
+The lifter had no case for the AES, SHA-1 and SHA-256 instructions of the
+ARMv8 Crypto extension, nor for PMULL, so any function using one failed to
+lift as an unsupported instruction. A target without the extension (armv7)
+has no machine instruction to lower an LLVM intrinsic to, so these become
+calls of C helpers that the embedding provides.
+
+Each helper takes the destination first, as a pointer to a 16-byte buffer
+that holds the register before the instruction and receives it after.
+The source vectors follow as pointers to 16-byte buffers, and scalar
+operands follow by value: the S register of SHA1C, SHA1P and SHA1M, and
+the 64-bit halves PMULL multiplies. The buffers are 8-byte aligned slots
+of the function's entry block, shared by all calls of the function, so a
+function with many calls does not grow its frame, and the call is declared
+as touching only the memory its arguments point to.
+
+- AESE, AESD, AESMC and AESIMC: rellume_aarch64_aese, _aesd, _aesmc and
+  _aesimc.
+- SHA1C, SHA1P, SHA1M, SHA1SU0 and SHA1SU1: rellume_aarch64_sha1c, _sha1p,
+  _sha1m, _sha1su0 and _sha1su1.
+- SHA256H, SHA256H2, SHA256SU0 and SHA256SU1: rellume_aarch64_sha256h,
+  _sha256h2, _sha256su0 and _sha256su1.
+- PMULL and PMULL2, in the 8B to 8H and 1D to 1Q forms: the lifter takes
+  the low or the high 64-bit half of each source, and calls
+  rellume_aarch64_pmull8 or rellume_aarch64_pmull64.
+- SHA1H is a rotate of the S register by 30 and is lifted to a funnel
+  shift, with no call.
+---
+ src/a64/lifter-private.h |   3 ++
+ src/a64/simd.cc          | 104 +++++++++++++++++++++++++++++++++++++++
+ src/function-info.h      |   2 +
+ 3 files changed, 109 insertions(+)
+
+diff --git a/src/a64/lifter-private.h b/src/a64/lifter-private.h
+index f0561a1..f1f9091 100644
+--- a/src/a64/lifter-private.h
++++ b/src/a64/lifter-private.h
+@@ -122,6 +122,9 @@ private:
+     void LiftMulAccElem(farmdec::Inst a64, llvm::Instruction::BinaryOps addsub, llvm::Value* acc, bool extend_long, bool fp = false);
+     void TransformSIMDPairwise(farmdec::VectorArrangement va, farmdec::Reg rn, farmdec::Reg rm, llvm::Value** lhs, llvm::Value** rhs, bool fp = false);
+ 
++    llvm::Value* HelperBuffer(unsigned index);
++    void LiftHelperCall(llvm::StringRef name, farmdec::Reg rd, farmdec::VectorArrangement va, bool reads_rd, llvm::ArrayRef<llvm::Value*> sources);
++
+     void StoreMulti(llvm::Value* addr, llvm::Value* v0);
+     void StoreMulti(llvm::Value* addr, llvm::Value* v0, llvm::Value* v1);
+     void StoreMulti(llvm::Value* addr, llvm::Value* v0, llvm::Value* v1, llvm::Value* v2);
+diff --git a/src/a64/simd.cc b/src/a64/simd.cc
+index 1c927c5..51fc10b 100644
+--- a/src/a64/simd.cc
++++ b/src/a64/simd.cc
+@@ -32,11 +32,15 @@
+ #include <cmath>
+ #include <cstdint>
+ 
++#include <llvm/IR/Attributes.h>
+ #include <llvm/IR/Constants.h>
+ #include <llvm/IR/DerivedTypes.h>
++#include <llvm/IR/Function.h>
+ #include <llvm/IR/IRBuilder.h>
+ #include <llvm/IR/Instruction.h>
++#include <llvm/IR/Module.h>
+ #include <llvm/IR/Value.h>
++#include <llvm/Support/ModRef.h>
+ #include <llvm/Transforms/Utils/Cloning.h>
+ 
+ namespace rellume::aarch64 {
+@@ -1330,6 +1334,63 @@ bool Lifter::LiftSIMD(farmdec::Inst a64) {
+     case farmdec::A64_MINV:
+         SetScalar(a64.rd, irb.CreateIntMinReduce(GetVec(a64.rn, va), sgn));
+         break;
++    case farmdec::A64_PMULL: {
++        bool upper = va == farmdec::VA_16B || va == farmdec::VA_2D;
++        bool wide = va == farmdec::VA_1D || va == farmdec::VA_2D;
++        auto lhs = GetElem(a64.rn, farmdec::VA_2D, upper);
++        auto rhs = GetElem(a64.rm, farmdec::VA_2D, upper);
++        LiftHelperCall(wide ? "rellume_aarch64_pmull64" : "rellume_aarch64_pmull8", a64.rd,
++                       wide ? farmdec::VA_2D : farmdec::VA_8H, /*reads_rd=*/false, {lhs, rhs});
++        break;
++    }
++    case farmdec::A64_AESD:
++        LiftHelperCall("rellume_aarch64_aesd", a64.rd, va, /*reads_rd=*/true, {GetVec(a64.rn, va)});
++        break;
++    case farmdec::A64_AESE:
++        LiftHelperCall("rellume_aarch64_aese", a64.rd, va, /*reads_rd=*/true, {GetVec(a64.rn, va)});
++        break;
++    case farmdec::A64_AESIMC:
++        LiftHelperCall("rellume_aarch64_aesimc", a64.rd, va, /*reads_rd=*/false, {GetVec(a64.rn, va)});
++        break;
++    case farmdec::A64_AESMC:
++        LiftHelperCall("rellume_aarch64_aesmc", a64.rd, va, /*reads_rd=*/false, {GetVec(a64.rn, va)});
++        break;
++    case farmdec::A64_SHA1C:
++        LiftHelperCall("rellume_aarch64_sha1c", a64.rd, va, /*reads_rd=*/true,
++                       {GetScalar(a64.rn, farmdec::FSZ_S, /*fp=*/false), GetVec(a64.rm, va)});
++        break;
++    case farmdec::A64_SHA1M:
++        LiftHelperCall("rellume_aarch64_sha1m", a64.rd, va, /*reads_rd=*/true,
++                       {GetScalar(a64.rn, farmdec::FSZ_S, /*fp=*/false), GetVec(a64.rm, va)});
++        break;
++    case farmdec::A64_SHA1P:
++        LiftHelperCall("rellume_aarch64_sha1p", a64.rd, va, /*reads_rd=*/true,
++                       {GetScalar(a64.rn, farmdec::FSZ_S, /*fp=*/false), GetVec(a64.rm, va)});
++        break;
++    case farmdec::A64_SHA1H: {
++        auto word = GetScalar(a64.rn, farmdec::FSZ_S, /*fp=*/false);
++        auto fn = llvm::Intrinsic::getOrInsertDeclaration(GetModule(), llvm::Intrinsic::fshl, {word->getType()});
++        SetScalar(a64.rd, irb.CreateCall(fn, {word, word, getIntN(32, 30)}));
++        break;
++    }
++    case farmdec::A64_SHA1SU0:
++        LiftHelperCall("rellume_aarch64_sha1su0", a64.rd, va, /*reads_rd=*/true, {GetVec(a64.rn, va), GetVec(a64.rm, va)});
++        break;
++    case farmdec::A64_SHA1SU1:
++        LiftHelperCall("rellume_aarch64_sha1su1", a64.rd, va, /*reads_rd=*/true, {GetVec(a64.rn, va)});
++        break;
++    case farmdec::A64_SHA256H:
++        LiftHelperCall("rellume_aarch64_sha256h", a64.rd, va, /*reads_rd=*/true, {GetVec(a64.rn, va), GetVec(a64.rm, va)});
++        break;
++    case farmdec::A64_SHA256H2:
++        LiftHelperCall("rellume_aarch64_sha256h2", a64.rd, va, /*reads_rd=*/true, {GetVec(a64.rn, va), GetVec(a64.rm, va)});
++        break;
++    case farmdec::A64_SHA256SU0:
++        LiftHelperCall("rellume_aarch64_sha256su0", a64.rd, va, /*reads_rd=*/true, {GetVec(a64.rn, va)});
++        break;
++    case farmdec::A64_SHA256SU1:
++        LiftHelperCall("rellume_aarch64_sha256su1", a64.rd, va, /*reads_rd=*/true, {GetVec(a64.rn, va), GetVec(a64.rm, va)});
++        break;
+     default:
+     unhandled:
+         return false;
+@@ -1338,6 +1399,49 @@ bool Lifter::LiftSIMD(farmdec::Inst a64) {
+     return true;
+ }
+ 
++llvm::Value* Lifter::HelperBuffer(unsigned index) {
++    if (!fi.helper_buffers[index]) {
++        llvm::BasicBlock& entry = fi.fn->getEntryBlock();
++        llvm::IRBuilder<> entry_irb(&entry, entry.begin());
++        auto buffer = entry_irb.CreateAlloca(llvm::ArrayType::get(entry_irb.getInt8Ty(), 16));
++        buffer->setAlignment(llvm::Align(8));
++        fi.helper_buffers[index] = buffer;
++    }
++    return fi.helper_buffers[index];
++}
++
++void Lifter::LiftHelperCall(llvm::StringRef name, farmdec::Reg rd, farmdec::VectorArrangement va, bool reads_rd, llvm::ArrayRef<llvm::Value*> sources) {
++    auto dest = HelperBuffer(0);
++    if (reads_rd) {
++        irb.CreateAlignedStore(GetVec(rd, va), dest, llvm::Align(8));
++    }
++
++    llvm::SmallVector<llvm::Type*, 3> types{irb.getPtrTy()};
++    llvm::SmallVector<llvm::Value*, 3> args{dest};
++    unsigned buffers = 1;
++    for (auto source : sources) {
++        if (source->getType()->isVectorTy()) {
++            auto buffer = HelperBuffer(buffers++);
++            irb.CreateAlignedStore(source, buffer, llvm::Align(8));
++            source = buffer;
++        }
++        types.push_back(source->getType());
++        args.push_back(source);
++    }
++
++    llvm::AttrBuilder attrs(irb.getContext());
++    attrs.addAttribute(llvm::Attribute::NoUnwind);
++    attrs.addAttribute(llvm::Attribute::WillReturn);
++    attrs.addAttribute(llvm::Attribute::NoSync);
++    attrs.addAttribute(llvm::Attribute::NoFree);
++    attrs.addMemoryAttr(llvm::MemoryEffects::argMemOnly());
++    auto callee = GetModule()->getOrInsertFunction(
++        name, llvm::FunctionType::get(irb.getVoidTy(), types, /*isVarArg=*/false),
++        llvm::AttributeList::get(irb.getContext(), llvm::AttributeList::FunctionIndex, attrs));
++    irb.CreateCall(callee, args);
++    SetVec(rd, irb.CreateAlignedLoad(TypeOf(va), dest, llvm::Align(8)));
++}
++
+ llvm::Value* Lifter::GetVec(farmdec::Reg r, farmdec::VectorArrangement va, bool fp) {
+     return GetReg(ArchReg::VEC(r), FacetOf(va, fp));
+ }
+diff --git a/src/function-info.h b/src/function-info.h
+index 8a377fb..4667a46 100644
+--- a/src/function-info.h
++++ b/src/function-info.h
+@@ -98,6 +98,8 @@ struct FunctionInfo {
+     uint64_t pc_base_addr;
+     llvm::Value* pc_base_value;
+ 
++    llvm::Value* helper_buffers[3] = {nullptr, nullptr, nullptr};
++
+     std::vector<CallConvPack> call_conv_packs;
+ };
+ 
+-- 
+2.54.0 (Apple Git-157)
+
