@@ -1,0 +1,68 @@
+From d2c9fb326768469c7f6f47345dee19e4c51d8115 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Fri, 13 Nov 2026 23:30:43 +0100
+Subject: [PATCH] Lift the AArch64 SLI, SRI, SADDLV and UADDLV instructions
+
+farmdec decodes them and the lifter dropped them. SLI and SRI insert the
+shifted bits of Vn into Vd and keep the bits of Vd the shift does not fill,
+which BoringSSL's ChaCha20 uses for rotates. SADDLV and UADDLV add all lanes
+of Vn, each extended to double width, into one scalar.
+---
+ src/a64/simd.cc | 34 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 34 insertions(+)
+
+diff --git a/src/a64/simd.cc b/src/a64/simd.cc
+index 7e978e5..c27fb2d 100644
+--- a/src/a64/simd.cc
++++ b/src/a64/simd.cc
+@@ -744,6 +744,34 @@ bool Lifter::LiftSIMD(farmdec::Inst a64) {
+             SetVec(a64.rd, irb.CreateShl(lhs, rhs));
+         }
+         break;
++    case farmdec::A64_SLI:
++    case farmdec::A64_SRI: {
++        if (scalar) {
++            va = farmdec::VA_1D;
++        }
++
++        auto vd = GetVec(a64.rd, va);
++        auto vn = GetVec(a64.rn, va);
++        unsigned bits = ElemTypeOf(va)->getPrimitiveSizeInBits();
++        unsigned shift = a64.imm;
++        auto splat = [&](uint64_t value) { return irb.CreateVectorSplat(NumElem(va), getIntN(bits, value)); };
++
++        llvm::Value* inserted = nullptr;
++        llvm::APInt kept(bits, 0);
++        if (a64.op == farmdec::A64_SLI) {
++            inserted = irb.CreateShl(vn, splat(shift));
++            kept = llvm::APInt::getLowBitsSet(bits, shift);
++        } else if (shift < bits) {
++            inserted = irb.CreateLShr(vn, splat(shift));
++            kept = llvm::APInt::getHighBitsSet(bits, shift);
++        } else {
++            SetVec(a64.rd, vd);
++            break;
++        }
++        auto keep = irb.CreateVectorSplat(NumElem(va), irb.getInt(kept));
++        SetVec(a64.rd, irb.CreateOr(irb.CreateAnd(vd, keep), inserted));
++        break;
++    }
+     case farmdec::A64_SHL_REG: {
+         if (round)
+             goto unhandled; // rshl not yet implemented
+@@ -1303,6 +1331,12 @@ bool Lifter::LiftSIMD(farmdec::Inst a64) {
+     case farmdec::A64_ADDV:
+         SetScalar(a64.rd, irb.CreateAddReduce(GetVec(a64.rn, va)));
+         break;
++    case farmdec::A64_ADDLV: {
++        auto wide = llvm::VectorType::getExtendedElementVectorType(llvm::cast<llvm::VectorType>(TypeOf(va)));
++        auto vn = GetVec(a64.rn, va);
++        SetScalar(a64.rd, irb.CreateAddReduce((sgn) ? irb.CreateSExt(vn, wide) : irb.CreateZExt(vn, wide)));
++        break;
++    }
+     case farmdec::A64_ADALP:
+     case farmdec::A64_ADDLP: {
+         // These instructions take _one_ source operand, extend it to double width,
+-- 
+2.54.0 (Apple Git-157)
+

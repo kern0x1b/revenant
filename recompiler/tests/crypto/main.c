@@ -1,6 +1,8 @@
 #include <arm_neon.h>
 #include <stdint.h>
 
+#include "carry.h"
+
 #define FUNCTION __attribute__((noinline, used))
 
 FUNCTION uint8x16_t crypto_aese(uint8x16_t data, uint8x16_t key) { return vaeseq_u8(data, key); }
@@ -44,6 +46,41 @@ FUNCTION uint64x2_t crypto_trn2_2d(uint64x2_t a, uint64x2_t b) {
 FUNCTION uint8x8_t crypto_trn1_8b(uint8x8_t a, uint8x8_t b) { return vtrn1_u8(a, b); }
 FUNCTION uint8x8_t crypto_trn2_8b(uint8x8_t a, uint8x8_t b) { return vtrn2_u8(a, b); }
 
+FUNCTION uint8x16_t crypto_sli_16b(uint8x16_t a, uint8x16_t b) { return vsliq_n_u8(a, b, 3); }
+FUNCTION uint16x8_t crypto_sli_8h(uint16x8_t a, uint16x8_t b) { return vsliq_n_u16(a, b, 5); }
+FUNCTION uint32x4_t crypto_sli_4s(uint32x4_t a, uint32x4_t b) { return vsliq_n_u32(a, b, 12); }
+FUNCTION uint32x4_t crypto_sli_4s_by_0(uint32x4_t a, uint32x4_t b) { return vsliq_n_u32(a, b, 0); }
+FUNCTION uint64x2_t crypto_sli_2d(uint64x2_t a, uint64x2_t b) { return vsliq_n_u64(a, b, 40); }
+FUNCTION uint8x8_t crypto_sli_8b(uint8x8_t a, uint8x8_t b) { return vsli_n_u8(a, b, 7); }
+FUNCTION uint16x4_t crypto_sli_4h(uint16x4_t a, uint16x4_t b) { return vsli_n_u16(a, b, 1); }
+FUNCTION uint32x2_t crypto_sli_2s(uint32x2_t a, uint32x2_t b) { return vsli_n_u32(a, b, 31); }
+FUNCTION uint64x1_t crypto_sli_d(uint64x1_t a, uint64x1_t b) { return vsli_n_u64(a, b, 17); }
+FUNCTION uint8x16_t crypto_sri_16b(uint8x16_t a, uint8x16_t b) { return vsriq_n_u8(a, b, 3); }
+FUNCTION uint16x8_t crypto_sri_8h(uint16x8_t a, uint16x8_t b) { return vsriq_n_u16(a, b, 5); }
+FUNCTION uint32x4_t crypto_sri_4s(uint32x4_t a, uint32x4_t b) { return vsriq_n_u32(a, b, 12); }
+FUNCTION uint32x4_t crypto_sri_4s_by_32(uint32x4_t a, uint32x4_t b) { return vsriq_n_u32(a, b, 32); }
+FUNCTION uint64x2_t crypto_sri_2d(uint64x2_t a, uint64x2_t b) { return vsriq_n_u64(a, b, 40); }
+FUNCTION uint8x8_t crypto_sri_8b(uint8x8_t a, uint8x8_t b) { return vsri_n_u8(a, b, 7); }
+FUNCTION uint16x4_t crypto_sri_4h(uint16x4_t a, uint16x4_t b) { return vsri_n_u16(a, b, 1); }
+FUNCTION uint32x2_t crypto_sri_2s(uint32x2_t a, uint32x2_t b) { return vsri_n_u32(a, b, 31); }
+FUNCTION uint64x1_t crypto_sri_d(uint64x1_t a, uint64x1_t b) { return vsri_n_u64(a, b, 17); }
+
+FUNCTION uint16_t crypto_uaddlv_16b(uint8x16_t v) { return vaddlvq_u8(v); }
+FUNCTION uint16_t crypto_uaddlv_8b(uint8x8_t v) { return vaddlv_u8(v); }
+FUNCTION uint32_t crypto_uaddlv_8h(uint16x8_t v) { return vaddlvq_u16(v); }
+FUNCTION uint32_t crypto_uaddlv_4h(uint16x4_t v) { return vaddlv_u16(v); }
+FUNCTION uint64_t crypto_uaddlv_4s(uint32x4_t v) { return vaddlvq_u32(v); }
+FUNCTION int16_t crypto_saddlv_16b(int8x16_t v) { return vaddlvq_s8(v); }
+FUNCTION int16_t crypto_saddlv_8b(int8x8_t v) { return vaddlv_s8(v); }
+FUNCTION int32_t crypto_saddlv_8h(int16x8_t v) { return vaddlvq_s16(v); }
+FUNCTION int32_t crypto_saddlv_4h(int16x4_t v) { return vaddlv_s16(v); }
+FUNCTION int64_t crypto_saddlv_4s(int32x4_t v) { return vaddlvq_s32(v); }
+
+FUNCTION _Float16 crypto_fcvt_h_s(float value) { return (_Float16)value; }
+FUNCTION _Float16 crypto_fcvt_h_d(double value) { return (_Float16)value; }
+FUNCTION float crypto_fcvt_s_h(_Float16 value) { return (float)value; }
+FUNCTION double crypto_fcvt_d_h(_Float16 value) { return (double)value; }
+
 FUNCTION uint8x16_t crypto_round(uint8x16_t data, uint8x16_t key) { return vaesmcq_u8(vaeseq_u8(data, key)); }
 FUNCTION uint8x16_t crypto_rounds(uint8x16_t data, const uint8x16_t *keys, unsigned count) {
     for (unsigned i = 0; i < count; i++) {
@@ -51,6 +88,19 @@ FUNCTION uint8x16_t crypto_rounds(uint8x16_t data, const uint8x16_t *keys, unsig
     }
     return data;
 }
+
+FUNCTION uint64x2_t crypto_adc_x(uint64_t a, uint64_t b, uint64_t carry) { return carry_adc_x(a, b, carry); }
+FUNCTION uint64x2_t crypto_adc_w(uint64_t a, uint64_t b, uint64_t carry) { return carry_adc_w(a, b, carry); }
+FUNCTION uint64x2_t crypto_adcs_x(uint64_t a, uint64_t b, uint64_t carry) { return carry_adcs_x(a, b, carry); }
+FUNCTION uint64x2_t crypto_adcs_w(uint64_t a, uint64_t b, uint64_t carry) { return carry_adcs_w(a, b, carry); }
+FUNCTION uint64x2_t crypto_sbc_x(uint64_t a, uint64_t b, uint64_t carry) { return carry_sbc_x(a, b, carry); }
+FUNCTION uint64x2_t crypto_sbc_w(uint64_t a, uint64_t b, uint64_t carry) { return carry_sbc_w(a, b, carry); }
+FUNCTION uint64x2_t crypto_sbcs_x(uint64_t a, uint64_t b, uint64_t carry) { return carry_sbcs_x(a, b, carry); }
+FUNCTION uint64x2_t crypto_sbcs_w(uint64_t a, uint64_t b, uint64_t carry) { return carry_sbcs_w(a, b, carry); }
+FUNCTION uint64x2_t crypto_ngc_x(uint64_t a, uint64_t b, uint64_t carry) { return carry_ngc_x(a, b, carry); }
+FUNCTION uint64x2_t crypto_ngcs_x(uint64_t a, uint64_t b, uint64_t carry) { return carry_ngcs_x(a, b, carry); }
+FUNCTION uint64x2_t crypto_ngcs_w(uint64_t a, uint64_t b, uint64_t carry) { return carry_ngcs_w(a, b, carry); }
+FUNCTION uint64x2_t crypto_final_reduction(uint64_t h0, uint64_t h1, uint64_t h2) { return carry_final_reduction(h0, h1, h2); }
 
 static uint8x16_t block;
 

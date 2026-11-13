@@ -1,0 +1,100 @@
+From 34ff9a8c5a81e94c820dacec10fd655354d0811f Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Fri, 13 Nov 2026 23:31:18 +0100
+Subject: [PATCH] Lift the half-precision forms of the AArch64 FCVT instruction
+
+The lifter held half-precision values as integers and left every FCVT with a
+half-precision operand unlifted. The conversions between half precision and
+single or double precision become calls of four helpers of the embedding,
+because LLVM would lower a half-precision cast to a compiler-rt libcall that
+an old target's libSystem does not provide.
+---
+ src/a64/lifter-private.h |  1 +
+ src/a64/main.cc          | 22 ++++++++++++++--------
+ src/a64/simd.cc          | 18 ++++++++++++++++++
+ 3 files changed, 33 insertions(+), 8 deletions(-)
+
+diff --git a/src/a64/lifter-private.h b/src/a64/lifter-private.h
+index f1f9091..47f1814 100644
+--- a/src/a64/lifter-private.h
++++ b/src/a64/lifter-private.h
+@@ -124,6 +124,7 @@ private:
+ 
+     llvm::Value* HelperBuffer(unsigned index);
+     void LiftHelperCall(llvm::StringRef name, farmdec::Reg rd, farmdec::VectorArrangement va, bool reads_rd, llvm::ArrayRef<llvm::Value*> sources);
++    llvm::Value* LiftValueHelperCall(llvm::StringRef name, llvm::Type* result, llvm::ArrayRef<llvm::Value*> args);
+ 
+     void StoreMulti(llvm::Value* addr, llvm::Value* v0);
+     void StoreMulti(llvm::Value* addr, llvm::Value* v0, llvm::Value* v1);
+diff --git a/src/a64/main.cc b/src/a64/main.cc
+index 487523c..42ddbf2 100644
+--- a/src/a64/main.cc
++++ b/src/a64/main.cc
+@@ -855,21 +855,27 @@ bool Lifter::Lift(const Instr& inst) {
+         SetScalar(a64.rd, Round(GetScalar(a64.rn, prec), static_cast<farmdec::FPRounding>(a64.frint.mode), exact));
+         break;
+     }
+-    // case farmdec::A64_FCVT_H: half precision not implemented
+-    case farmdec::A64_FCVT_S: {
++    case farmdec::A64_FCVT_H: {
+         farmdec::FPSize prec = fad_get_prec(a64.flags);
+-        if (prec == farmdec::FSZ_H)
++        if (prec != farmdec::FSZ_S && prec != farmdec::FSZ_D)
+             goto unhandled;
+-        auto val = GetScalar(a64.rn, prec);
+-        SetScalar(a64.rd, irb.CreateFPCast(val, irb.getFloatTy()));
++        auto half = LiftValueHelperCall((prec == farmdec::FSZ_S) ? "rellume_aarch64_fcvt_h_s" : "rellume_aarch64_fcvt_h_d",
++                                        irb.getInt32Ty(), {GetScalar(a64.rn, prec)});
++        SetScalar(a64.rd, irb.CreateTrunc(half, irb.getInt16Ty()));
+         break;
+     }
++    case farmdec::A64_FCVT_S:
+     case farmdec::A64_FCVT_D: {
+         farmdec::FPSize prec = fad_get_prec(a64.flags);
+-        if (prec == farmdec::FSZ_H)
+-            goto unhandled;
++        bool single = a64.op == farmdec::A64_FCVT_S;
+         auto val = GetScalar(a64.rn, prec);
+-        SetScalar(a64.rd, irb.CreateFPCast(val, irb.getDoubleTy()));
++        if (prec == farmdec::FSZ_H) {
++            val = LiftValueHelperCall(single ? "rellume_aarch64_fcvt_s_h" : "rellume_aarch64_fcvt_d_h",
++                                      single ? irb.getFloatTy() : irb.getDoubleTy(), {irb.CreateZExt(val, irb.getInt32Ty())});
++        } else {
++            val = irb.CreateFPCast(val, single ? irb.getFloatTy() : irb.getDoubleTy());
++        }
++        SetScalar(a64.rd, val);
+         break;
+     }
+     case farmdec::A64_FABS:
+diff --git a/src/a64/simd.cc b/src/a64/simd.cc
+index c27fb2d..911960e 100644
+--- a/src/a64/simd.cc
++++ b/src/a64/simd.cc
+@@ -1497,6 +1497,24 @@ void Lifter::LiftHelperCall(llvm::StringRef name, farmdec::Reg rd, farmdec::Vect
+     SetVec(rd, irb.CreateAlignedLoad(TypeOf(va), dest, llvm::Align(8)));
+ }
+ 
++llvm::Value* Lifter::LiftValueHelperCall(llvm::StringRef name, llvm::Type* result, llvm::ArrayRef<llvm::Value*> args) {
++    llvm::SmallVector<llvm::Type*, 2> types;
++    for (auto arg : args) {
++        types.push_back(arg->getType());
++    }
++
++    llvm::AttrBuilder attrs(irb.getContext());
++    attrs.addAttribute(llvm::Attribute::NoUnwind);
++    attrs.addAttribute(llvm::Attribute::WillReturn);
++    attrs.addAttribute(llvm::Attribute::NoSync);
++    attrs.addAttribute(llvm::Attribute::NoFree);
++    attrs.addMemoryAttr(llvm::MemoryEffects::none());
++    auto callee = GetModule()->getOrInsertFunction(
++        name, llvm::FunctionType::get(result, types, /*isVarArg=*/false),
++        llvm::AttributeList::get(irb.getContext(), llvm::AttributeList::FunctionIndex, attrs));
++    return irb.CreateCall(callee, args);
++}
++
+ llvm::Value* Lifter::GetVec(farmdec::Reg r, farmdec::VectorArrangement va, bool fp) {
+     return GetReg(ArchReg::VEC(r), FacetOf(va, fp));
+ }
+-- 
+2.54.0 (Apple Git-157)
+

@@ -11,7 +11,10 @@ package("rellume")
                      "0005-Lift-the-AArch64-LSE-atomic-memory-operations.patch",
                      "0006-Lift-the-AArch64-exclusive-loads-and-stores-through-.patch",
                      "0007-Lift-the-AArch64-Crypto-extension-AES-SHA-1-SHA-256-.patch",
-                     "0008-Lift-the-AArch64-TRN1-and-TRN2-instructions.patch"}
+                     "0008-Lift-the-AArch64-TRN1-and-TRN2-instructions.patch",
+                     "0009-Lift-the-AArch64-SLI-SRI-SADDLV-and-UADDLV-instructi.patch",
+                     "0010-Lift-the-half-precision-forms-of-the-AArch64-FCVT-in.patch",
+                     "0011-Compute-the-flags-of-the-AArch64-ADC-and-SBC-instruc.patch"}
     add_urls("https://github.com/aengelke/rellume.git", {submodules = false})
     add_versions("2026.09.10", commit)
     local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}

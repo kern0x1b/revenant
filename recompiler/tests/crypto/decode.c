@@ -3,8 +3,8 @@
 
 #include "farmdec.h"
 
-static const char *name_of(unsigned op) {
-    switch (op) {
+static const char *name_of(const Inst *inst) {
+    switch (inst->op) {
     case A64_AESE: return "aese";
     case A64_AESD: return "aesd";
     case A64_AESMC: return "aesmc";
@@ -20,7 +20,24 @@ static const char *name_of(unsigned op) {
     case A64_SHA256SU0: return "sha256su0";
     case A64_SHA256SU1: return "sha256su1";
     case A64_PMULL: return "pmull";
+    case A64_SLI: return "sli";
+    case A64_SRI: return "sri";
+    case A64_ADDLV: return (inst->flags & SIMD_SIGNED) ? "saddlv" : "uaddlv";
+    case A64_FCVT_S: return "fcvt_s";
+    case A64_FCVT_D: return "fcvt_d";
+    case A64_FCVT_H: return "fcvt_h";
     default: return "other";
+    }
+}
+
+static unsigned shape_of(const Inst *inst) {
+    switch (inst->op) {
+    case A64_FCVT_S:
+    case A64_FCVT_D:
+    case A64_FCVT_H:
+        return (unsigned)fad_get_prec(inst->flags);
+    default:
+        return (unsigned)fad_get_vec_arrangement(inst->flags) | ((inst->flags & SIMD_SCALAR) ? 16u : 0u);
     }
 }
 
@@ -30,7 +47,7 @@ int main(void) {
         uint32_t binst = word;
         Inst inst;
         fad_decode(&binst, 1, &inst);
-        printf("%08x %s %u %u %u %u\n", word, name_of(inst.op), inst.rd, inst.rn, inst.rm, (unsigned)fad_get_vec_arrangement(inst.flags));
+        printf("%08x %s %u %u %u %u %llu\n", word, name_of(&inst), inst.rd, inst.rn, inst.rm, shape_of(&inst), (unsigned long long)inst.imm);
     }
     return 0;
 }

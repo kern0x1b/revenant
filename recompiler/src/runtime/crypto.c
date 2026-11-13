@@ -248,28 +248,36 @@ void rellume_aarch64_sha256su1(void *vd, const void *vn, const void *vm) {
     d[3] = r3;
 }
 
+static uint8x16_t lane_products(poly8x8_t a, poly8x8_t b) {
+    return vreinterpretq_u8_p16(vmull_p8(a, b));
+}
+
+static uint8x16_t kept_lanes(unsigned rotation) {
+    static const uint64_t high_kept[4] = {UINT64_C(0x0000ffffffffffff), UINT64_C(0x00000000ffffffff), UINT64_C(0x000000000000ffff), 0};
+    return vreinterpretq_u8_u64(vcombine_u64(vcreate_u64(UINT64_MAX), vcreate_u64(high_kept[rotation - 1])));
+}
+
+#define ROTATED_PRODUCTS(a, b, rotation) veorq_u8(lane_products(a, vext_p8(b, b, rotation)), lane_products(vext_p8(a, a, rotation), b))
+
+#define FOLD_ROTATED(products, rotation)                                                                       \
+    veorq_u8(vextq_u8(vdupq_n_u8(0), vandq_u8(products, kept_lanes(rotation)), 16 - (rotation)),               \
+             vextq_u8(vbicq_u8(products, kept_lanes(rotation)), vdupq_n_u8(0), 8 - (rotation)))
+
 void rellume_aarch64_pmull8(void *vd, uint64_t n, uint64_t m) {
-    uint16_t *d = vd;
-    for (unsigned i = 0; i < 8; i++) {
-        uint16_t a = (uint8_t)(n >> (8 * i));
-        uint8_t b = (uint8_t)(m >> (8 * i));
-        uint16_t product = 0;
-        for (unsigned bit = 0; bit < 8; bit++) {
-            product ^= (uint16_t)(a << bit) & (uint16_t)-((b >> bit) & 1);
-        }
-        d[i] = product;
-    }
+    vst1q_u8(vd, lane_products(vcreate_p8(n), vcreate_p8(m)));
 }
 
 void rellume_aarch64_pmull64(void *vd, uint64_t n, uint64_t m) {
-    uint64_t *d = vd;
-    uint64_t low = 0;
-    uint64_t high = 0;
-    for (unsigned bit = 0; bit < 64; bit++) {
-        uint64_t mask = -((m >> bit) & 1);
-        low ^= (n << bit) & mask;
-        high ^= ((n >> 1) >> (63 - bit)) & mask;
-    }
-    d[0] = low;
-    d[1] = high;
+    poly8x8_t a = vcreate_p8(n);
+    poly8x8_t b = vcreate_p8(m);
+    uint8x16_t result = lane_products(a, b);
+    uint8x16_t products = ROTATED_PRODUCTS(a, b, 1);
+    result = veorq_u8(result, FOLD_ROTATED(products, 1));
+    products = ROTATED_PRODUCTS(a, b, 2);
+    result = veorq_u8(result, FOLD_ROTATED(products, 2));
+    products = ROTATED_PRODUCTS(a, b, 3);
+    result = veorq_u8(result, FOLD_ROTATED(products, 3));
+    products = lane_products(a, vext_p8(b, b, 4));
+    result = veorq_u8(result, FOLD_ROTATED(products, 4));
+    vst1q_u8(vd, result);
 }
