@@ -133,6 +133,8 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Write and install the Backports package](guides/backports/package.md) | the commands that write `org.revenant.backports` and the Swift runtime, and install them on the phone |
 | [libSystem compatibility calls](reference/backports/libSystem/README.md) | the missing `clock_getres` and `*at` file operations, host comparisons, iOS 6 timestamp precision and path snapshot limitation |
 | [libSystem: memset_s](reference/backports/libSystem/memset_s.md) | the C11 `memset_s` that iOS 6 lacks, its Darwin answers, who gets it and what it costs |
+| [libSystem: os_unfair_lock_lock and os_unfair_lock_unlock](reference/backports/libSystem/os_unfair_lock.md) | the iOS 10 lock on iOS 6: the wait queue behind it, the owner checks, the priority inversion measured on the 4S, and the per-image queue |
+| [libSystem: clock_gettime_nsec_np](reference/backports/libSystem/clock_gettime_nsec_np.md) | the eight clocks on iOS 6.1.3 and the one that differs from macOS in its absolute value |
 | [libSystem: OS_dispatch_queue and OS_dispatch_source](reference/backports/libSystem/OS_dispatch_classes.md) | the two dispatch classes iOS 6 registers but does not export, the proxies that bind them, and the limit of a bound symbol |
 | [libSystem: DISPATCH_DATA_DESTRUCTOR_MUNMAP](reference/backports/libSystem/dispatch_data_destructor_munmap.md) | the munmap sentinel of iOS 7, the `dispatch_data_create` wrapper and its override marker, who reaches it and who keeps the release's function, why dyld cannot interpose it |
 | [Crutches](reference/backports/crutches.md) | the stand-ins the Backports lowering uses, what each measured, and what removes it |
