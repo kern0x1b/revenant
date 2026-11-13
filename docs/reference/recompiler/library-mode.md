@@ -310,6 +310,26 @@ Not built; only measured and analysed.
   relative references; an unsafe one fails at run time with a trap in a function that was stripped.
 - Lazy loading (lifting a function when first called) needs the compiler on the phone and is not planned.
 
+## Known limitation: C++ exceptions from guest code
+
+Objective-C exceptions work in a library as they do in an executable: `@throw` in a guest frame, an `NSException` the host
+raises, `@catch` of a guest subclass, of `NSException` and of `id`, `@finally`, and C++ destructors and `catch (...)` on
+the way (`recompiler/tests/libexceptions`, green on the 4S). A C++ exception that guest code throws does not work:
+
+- `throw` ends in `__cxa_throw`, and guest libc++abi's `__cxa_throw` calls `_Unwind_RaiseException`; the call is a loud
+  fault, `xlate: unsupported: _Unwind_RaiseException: a C++ exception thrown by translated code is not implemented`, and
+  the process stops there. It was seen on the 4S on 2026-11-13 with a fixture of three translated guest functions: `throw 42`
+  caught by `catch (...)` in the same function, a `std::runtime_error` thrown three frames down through destructors, and
+  `std::vector::at` out of range. The guest `__cxa_exception` has the arm64 layout, which the host's personality routine
+  cannot read, so the call cannot simply be handed to the host's `_Unwind_SjLj_RaiseException`.
+- A typed `catch` of a class that a guest image defines (`catch (const std::out_of_range &)` with libc++ as a guest image)
+  leaves a reference to the class's `typeinfo` symbol in the landing pad, which the link of the library does not resolve
+  (`typeinfo for std::out_of_range` undefined; the link has `-U` only for the `__cxa_*` helpers). `catch (...)` links.
+- Whether the reCAPTCHA SDK reaches such a `throw` was not shown. Its images carry libc++ (`std::vector::at`, `std::string`
+  and others throw on error paths), so a C++ exception on an error path of the SDK would stop the process with the fault
+  above, and a path of the SDK that needs the exception to be caught cannot work. It is a task for the exceptions block
+  (block C), which owns the SjLj frames.
+
 ## Not done
 
 - No library with the real reCAPTCHA SDK: the fixture stands for it. The SDK's own translation is block A and B.

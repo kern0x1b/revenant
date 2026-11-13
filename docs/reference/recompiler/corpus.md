@@ -14,8 +14,8 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, library, exceptions, objectsplit, segmentlimit, absolutes, hostbridges and checkapi; `classpair` and `ordinal` are the device group's, which also runs the
-device part of `exceptions` and `hostbridges`. Their output goes to the
+int128, weakimport, lse, llsc, library, exceptions, libexceptions, objectsplit, segmentlimit, absolutes, hostbridges and checkapi; `classpair` and `ordinal` are the device group's, which also runs the
+device part of `exceptions`, `libexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
 
@@ -25,6 +25,7 @@ A check that also has a device part is run by hand, with the output folder as it
 ./xmakew l -P . recompiler/tests/weakimport/check.lua <out>
 ./xmakew l -P . recompiler/tests/classpair/check.lua <out>
 ./xmakew l -P . recompiler/tests/exceptions/check.lua <out>
+./xmakew l -P . recompiler/tests/libexceptions/check.lua <out>
 ./xmakew l -P . recompiler/tests/hostbridges/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftconformance/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftobjc/check.lua <out>
@@ -143,6 +144,21 @@ calls" line and no unreadable LSDA, the lifted module must carry `invoke`, `land
 the C++ personality, and the translated binary must import `_Unwind_SjLj_Register`. The device part runs the translated
 binary and compares its output with the Mac's. The program takes the number of loop rounds as its argument (2000
 by default), so a probe can run it deeper by hand.
+
+### libexceptions
+
+The same exception mechanism in a library (`XL_LIBRARY=1`), loaded by a small armv7 host (`host.m`, with the loader) that
+takes the class and the method to call, so each step runs in a process of its own and a fault in one hides none of the others.
+The guest (`fixture.mm`, class `LibExceptions`) has six steps: an `NSException` thrown in a guest frame and caught three
+frames up through frames with C++ destructors (4 destructors, `@finally` once); one raised by the host
+(`-objectAtIndex:` out of range, `NSRangeException`); `@catch` of a guest subclass of `NSException` before `NSException`;
+`@catch (id)` of a thrown string; a C++ `catch (...)` that takes an Objective-C exception, with its destructors and the
+case where nothing is thrown; and a function with a 20000-byte stack frame, which the compiler enters through
+`___chkstk_darwin` (its result is checked against the value a native program computes).
+
+The host part builds and translates the library and the host, and requires that the library registers SjLj frames
+(`_Unwind_SjLj_Register`). The device part runs each step and requires its `ok` names, `done` and `exit=0`. A C++ `throw`
+is not in the check, because it is the known limitation in `library-mode.md`.
 
 ### hostbridges
 
