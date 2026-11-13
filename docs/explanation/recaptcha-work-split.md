@@ -159,11 +159,11 @@ Test: the test app on the 4S; `vmmap`-style numbers from the phone's `/proc`-les
 Build on: how `recompiler/src/runtime/` starts a program (`xl_bridge_init`, `xl_run_initializers`), the Backports loader
 for how a dylib is loaded by an app.
 
-Done: `XL_LIBRARY=1` builds one dylib with the guest images in it, `xl_loader` reserves and loads it, and a fixture
-(Objective-C and Swift, public classes with `NSInteger`, object and block parameters) runs 11 of 11 checks on the 4S
-inside an 85 MB host, also with the Swift runtime of Telegram 13 preloaded and with 191 MB of the low addresses
-occupied the way Telegram's images occupy them (that needs `XL_BASE=0x2a000000`). Measured: the 119 MB Swift library
-adds 2.2 MB resident after its first calls and 143 MB virtual at reserve. Numbers, address maps and what is not done
+Done: `XL_LIBRARY=1` builds two dylibs, the library (the guest image is a section of it, the host part is placed by dyld anywhere)
+and a registry of the guest's Objective-C classes, `xl_loader` reserves the guest range and loads them, and a fixture
+(Objective-C and Swift, public classes with `NSInteger`, object and block parameters, a category) runs on the 4S inside an
+85 MB host in every launch of 130 (the heap of the host started at its random places, the reservation of the first design failed 3 launches of 20),
+also with a Swift runtime of its own in the host. Measured: the 162 MB Swift library adds 4.4 MB resident after its first calls. Numbers, address maps and what is not done
 (no dead-strip, no lazy loading, the real SDK not yet) are in
 [the library mode reference](../reference/recompiler/library-mode.md).
 

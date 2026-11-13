@@ -106,6 +106,10 @@ Measured on iOS 6.1.3, armv7:
   file offset `0x4000`).
 - A 119 MB dylib prints `dyld: F_ADDFILESIGS failed ... errno=7` (its signature is 1.5 MB) and loads.
 - Mapped code that is never run costs about no resident memory.
+- A library whose install name is `@executable_path/<leaf>` is found by dyld with no environment: the registry, which depends
+  on the library by that name, loads when the host is started without `DYLD_FALLBACK_LIBRARY_PATH` (12 checks in each of 10
+  launches and the 4 controls, `XL_LIBRARY_INSTALL_NAME=executable` of the check). A name `@rpath/<leaf>` is found only through
+  that variable.
 
 ## The check
 
@@ -243,8 +247,8 @@ frontier + 64 MiB  <=  XL_BASE  and  XL_BASE + guest size  <=  0x1c500000 - 16 M
 
 where `frontier` is the highest end of an image of the host app (the measured maximum for Telegram13 is `0x110bd000`, from
 20 launches; it moves by about 2 MB between launches, and a changed set of frameworks moves it more). For Telegram13 that
-is `[0x150bd000, 0x1b500000)`, 100 MB, and `XL_BASE=0x18000000` leaves 53 MB for the guest above the base (the Swift
-library's guest is 9.1 MB) and 40 MB below it. The default `0x10000000` is in the middle of Telegram13's images and is
+is `[0x150bd000, 0x1b500000)`, 100 MB, and `XL_BASE=0x18000000` leaves 53 MiB for the guest above the base (the Swift
+library's guest is 9.1 MB) and 47 MiB below it. The default `0x10000000` is in the middle of Telegram13's images and is
 for a host that is not Telegram13. The rule is for the person who builds the drop; whatever the base, a host whose images
 or heap hold the range gets `XL_LOAD_RANGE_BUSY` from `xl_reserve` with the name of the holder, never a crash.
 The check (`recompiler/tests/library/host.m`) calls `xl_reserve` before it grows its heap, as an app does from a
@@ -312,6 +316,8 @@ Not built; only measured and analysed.
 - The host's UI and its own use of the library were not run: the fixture host is a console tool, `Telegram13` was not
   modified.
 - The guest `libswiftCore` is not shared between two libraries.
-- Not run on the phone after the namespace: the `swiftobjc` fixture (the three name bridges now apply to executables
-  too, with a pass-through when there is no prefix) and a control with `XL_NAMESPACE=none` that shows the duplicate
-  warnings come back.
+- Not run on the phone: a control with `XL_NAMESPACE=none` that shows the duplicate warnings come back; the Swift host with
+  the Telegram13 runtime and Foundation overlay (`XL_LIBRARY_HOST_RUNTIME`, `XL_LIBRARY_HOST_BRIDGING`) on the new layout; a
+  category written in Swift (the Swift fixture has none, so the registry's category list is run by the Objective-C fixture only).
+- Telegram13 itself: the range rule above comes from 20 launches of it with a probe and from the fixture's 130 launches with
+  the heap of the host at its random starts; the 40 launches of the app with the library in its ipa wait for that ipa.

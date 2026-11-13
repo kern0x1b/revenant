@@ -387,16 +387,23 @@ which the guest does not have yet; the strings stay inside the library (`describ
 The host part, which `recompiler_corpus/library` runs, translates the `objc` fixture with `XL_LIBRARY=1`, then checks
 the dylib statically:
 
-- the segments are in ascending address order, which dyld requires, and `__LINKEDIT` is after the guest segments;
-- the dylib exports exactly `_xl_library_init` and `_xl_library_diagnostics`;
+- the library has no `__X<n>` segment, has `__XGUEST` and `__LINKEDIT`, and the guest image header (`magic`, `version`, a
+  granule-aligned range not below `XL_BASE`) is right;
+- the dylib exports exactly `_xl_library_init`, `_xl_library_diagnostics` and the `_xl_objc_category_<n>` of the guest's categories;
+- the registry `<name>-classes.dylib` has only the `__objc_*` sections, no code and no exports, and a category list entry for
+  each category;
 - the armv7 host app (`host.m` with `xl_loader.c`) builds and signs.
 
 The device part copies the dylib and the host to the claimed phone and runs the host. The host first grows its own
 resident set to the size given as an argument (85 MB by default, `XL_LIBRARY_RESIDENT_MB`), loads any dylibs named after
-it the way an app's frameworks are loaded, reserves the range, loads the library, and prints `ok <name>` for 11 checks:
+it the way an app's frameworks are loaded, reserves the guest range, loads the library, and prints `ok <name>` for 12 checks:
 `reserve`, `load`, `class` (`NSClassFromString`), `create`, `methods`, `describe` (a string built in the library),
 `bundle` (the library's `hostBundle` is the app's `mainBundle`), `bundle.path`, `token` (a value that depends on a
-static of the library), `completion` and `completion.thread` (a block called on another thread). It prints
+static of the library), `category` (a method that a category of the guest adds, found through the registry; the Objective-C
+variant only), `completion` and `completion.thread` (a block called on another thread). Four negative controls run first: a held
+range, a guest image format the loader does not read, a registry that is not next to the library, and an init without a
+reservation. `XL_LIBRARY_LAUNCHES` repeats the launch, and `XL_LIBRARY_INSTALL_NAME=executable` names the library by
+`@executable_path` and starts the host without `DYLD_FALLBACK_LIBRARY_PATH`. It prints
 `measure <step> resident=… virtual=… threads=…` after each step and the address map of the process (`map <step>
 <start>-<end> <protection>`). A watchdog `alarm` ends a hung host after 180 seconds.
 
