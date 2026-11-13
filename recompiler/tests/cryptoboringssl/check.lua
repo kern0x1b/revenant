@@ -2,7 +2,11 @@ local EXPECTED = {
     "sha256 abc", "sha256 1000 bytes", "sha1 abc",
     "aes-128-gcm 16 zero bytes ciphertext", "aes-128-gcm 16 zero bytes tag", "aes-128-gcm 16 zero bytes open", "aes-128-gcm 16 zero bytes tamper",
     "aes-256-gcm 16 zero bytes ciphertext", "aes-256-gcm 16 zero bytes tag", "aes-256-gcm 16 zero bytes open", "aes-256-gcm 16 zero bytes tamper",
-    "aes-256-gcm 1000 bytes ciphertext", "aes-256-gcm 1000 bytes tag", "aes-256-gcm 1000 bytes open", "aes-256-gcm 1000 bytes tamper"
+    "aes-256-gcm 1000 bytes ciphertext", "aes-256-gcm 1000 bytes tag", "aes-256-gcm 1000 bytes open", "aes-256-gcm 1000 bytes tamper",
+    "chacha20-poly1305 rfc 8439 ciphertext", "chacha20-poly1305 rfc 8439 tag", "chacha20-poly1305 rfc 8439 open", "chacha20-poly1305 rfc 8439 wrong aad",
+    "chacha20-poly1305 rfc 8439 tamper",
+    "chacha20-poly1305 16 zero bytes ciphertext", "chacha20-poly1305 16 zero bytes tag", "chacha20-poly1305 16 zero bytes open", "chacha20-poly1305 16 zero bytes tamper",
+    "chacha20-poly1305 1000 bytes ciphertext", "chacha20-poly1305 1000 bytes tag", "chacha20-poly1305 1000 bytes open", "chacha20-poly1305 1000 bytes tamper"
 }
 
 function main(out, ...)
@@ -58,5 +62,5 @@ function main(out, ...)
     if text:find("\nFAIL ", 1, true) or not text:find("\ndone failures=0\nexit=0", 1, true) then
         corpus.fail("the translated program reported a failure or did not run to its end")
     end
-    print("ok: BoringSSL's SHA-1, SHA-256 and AES-GCM take their ARMv8 Crypto paths on the device (%d vectors)", #EXPECTED)
+    print("ok: BoringSSL's SHA-1, SHA-256, AES-GCM and ChaCha20-Poly1305 take their ARMv8 paths on the device (%d vectors)", #EXPECTED)
 end

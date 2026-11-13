@@ -1,9 +1,11 @@
 #include <arm_neon.h>
+#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "../../src/runtime/crypto.c"
+#include "../../src/runtime/half.c"
 
 enum { ITERATIONS = 20000 };
 
@@ -149,14 +151,23 @@ static void test_sha1h(void) {
     }
 }
 
+static uint16_t carryless_product8(uint8_t n, uint8_t m) {
+    uint16_t product = 0;
+    for (unsigned bit = 0; bit < 8; bit++) {
+        product ^= (uint16_t)((uint16_t)n << bit) & (uint16_t)-((m >> bit) & 1);
+    }
+    return product;
+}
+
 static void test_pmull8(void) {
     for (unsigned i = 0; i < ITERATIONS; i++) {
         uint64_t n, m;
         uint16_t want[8], got[8];
         fill(&n, 8);
         fill(&m, 8);
-        poly8x8_t a = vcreate_p8(n), b = vcreate_p8(m);
-        vst1q_u16(want, vreinterpretq_u16_p16(vmull_p8(a, b)));
+        for (unsigned lane = 0; lane < 8; lane++) {
+            want[lane] = carryless_product8((uint8_t)(n >> (8 * lane)), (uint8_t)(m >> (8 * lane)));
+        }
         rellume_aarch64_pmull8(got, n, m);
         compare("pmull8", want, got, 16);
     }
@@ -208,6 +219,99 @@ static void vector_sha256su1(uint32_t *d, const uint32_t *n, const uint32_t *m) 
 
 #include "vectors.h"
 
+static uint16_t half_bits(_Float16 value) {
+    uint16_t bits;
+    memcpy(&bits, &value, sizeof(bits));
+    return bits;
+}
+
+static _Float16 half_of(uint16_t bits) {
+    _Float16 value;
+    memcpy(&value, &bits, sizeof(value));
+    return value;
+}
+
+static uint32_t single_bits(float value) {
+    uint32_t bits;
+    memcpy(&bits, &value, sizeof(bits));
+    return bits;
+}
+
+static float single_of(uint32_t bits) {
+    float value;
+    memcpy(&value, &bits, sizeof(value));
+    return value;
+}
+
+static uint64_t double_bits(double value) {
+    uint64_t bits;
+    memcpy(&bits, &value, sizeof(bits));
+    return bits;
+}
+
+static double double_of(uint64_t bits) {
+    double value;
+    memcpy(&value, &bits, sizeof(value));
+    return value;
+}
+
+static void compare_scalar(const char *name, uint64_t input, uint64_t want, uint64_t got) {
+    comparisons++;
+    if (want != got && failures++ < 10) {
+        printf("MISMATCH %s of %016llx\n  want %016llx\n  got  %016llx\n", name, (unsigned long long)input, (unsigned long long)want, (unsigned long long)got);
+    }
+}
+
+static void test_widen_every_half(void) {
+    for (uint32_t bits = 0; bits < 0x10000; bits++) {
+        compare_scalar("fcvt s, h", bits, single_bits((float)half_of((uint16_t)bits)), single_bits(rellume_aarch64_fcvt_s_h(bits)));
+        compare_scalar("fcvt d, h", bits, double_bits((double)half_of((uint16_t)bits)), double_bits(rellume_aarch64_fcvt_d_h(bits)));
+    }
+}
+
+static void check_single_to_half(float value) {
+    compare_scalar("fcvt h, s", single_bits(value), half_bits((_Float16)value), rellume_aarch64_fcvt_h_s(value));
+}
+
+static void check_double_to_half(double value) {
+    compare_scalar("fcvt h, d", double_bits(value), half_bits((_Float16)value), rellume_aarch64_fcvt_h_d(value));
+}
+
+static void test_narrow_around_every_half(void) {
+    for (uint32_t bits = 0; bits < 0x7c00; bits++) {
+        float low = (float)half_of((uint16_t)bits);
+        float high = (float)half_of((uint16_t)(bits + 1));
+        float middle = (float)((double)low / 2 + (double)high / 2);
+        double wide_low = (double)low, wide_middle = (double)middle;
+        float singles[] = {low, nextafterf(low, INFINITY), nextafterf(low, -INFINITY), middle, nextafterf(middle, INFINITY), nextafterf(middle, -INFINITY)};
+        double doubles[] = {wide_low, nextafter(wide_low, INFINITY), nextafter(wide_low, -INFINITY), wide_middle, nextafter(wide_middle, INFINITY),
+                            nextafter(wide_middle, -INFINITY)};
+        for (unsigned i = 0; i < 6; i++) {
+            check_single_to_half(singles[i]);
+            check_single_to_half(-singles[i]);
+            check_double_to_half(doubles[i]);
+            check_double_to_half(-doubles[i]);
+        }
+    }
+}
+
+static void test_narrow_random(void) {
+    static const uint32_t quiet_and_signaling[] = {0x7f800000u, 0xff800000u, 0x7f800001u, 0x7fa00000u, 0x7fc00000u, 0xff8abcdeu, 0x7fffffffu, 0x00000001u, 0x007fffffu, 0x80000001u};
+    for (unsigned i = 0; i < sizeof(quiet_and_signaling) / sizeof(*quiet_and_signaling); i++) {
+        check_single_to_half(single_of(quiet_and_signaling[i]));
+        check_double_to_half(double_of((uint64_t)quiet_and_signaling[i] << 32 | quiet_and_signaling[i]));
+    }
+    for (unsigned i = 0; i < 4 * ITERATIONS; i++) {
+        uint64_t random = next_random();
+        check_single_to_half(single_of((uint32_t)random));
+        check_double_to_half(double_of(random));
+        int exponent = (int)(next_random() >> 59) - 28;
+        uint64_t mantissa = next_random() & ((UINT64_C(1) << 52) - 1);
+        check_double_to_half(double_of((random & (UINT64_C(1) << 63)) | (uint64_t)(1023 + exponent) << 52 | mantissa));
+        check_single_to_half(single_of((uint32_t)((random >> 32) & 0x80000000u) | (uint32_t)(127 + exponent) << 23 | (uint32_t)(mantissa >> 29)));
+    }
+}
+
 int main(void) {
     test_aese();
     test_aesd();
@@ -230,6 +334,9 @@ int main(void) {
     test_fips197();
     test_sha256_abc();
     test_sha1_abc();
+    test_widen_every_half();
+    test_narrow_around_every_half();
+    test_narrow_random();
     printf("%lu comparisons, %lu failures\n", comparisons, failures);
     return failures != 0;
 }
