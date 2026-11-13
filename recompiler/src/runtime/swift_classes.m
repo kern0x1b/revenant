@@ -160,11 +160,46 @@ static void xl_table_set(CFMutableDictionaryRef table, uintptr_t key, const void
     OSSpinLockUnlock(&xl_table_lock);
 }
 
-static IMP xl_guest_method_imp(uint64_t guest, SEL selector)
+struct xl_word_kinds {
+    char argument[4];
+    char result;
+};
+
+static const char *xl_skip_type(const char *type);
+
+static char xl_word_kind(const char *type)
 {
+    while (*type && strchr("rnNoORV", *type))
+        type++;
+    if (*type == '@')
+        return 'O';
+    if (*type == '#')
+        return 'K';
+    return *type && strchr(":*^", *type) ? 'P' : 'I';
+}
+
+static struct xl_word_kinds xl_word_kinds_of(const char *types)
+{
+    struct xl_word_kinds kinds = {{'I', 'I', 'I', 'I'}, 'I'};
+    kinds.result = xl_word_kind(types);
+    unsigned index = 0;
+    for (const char *type = types; *type; index++) {
+        if (index >= 3 && index <= 6)
+            kinds.argument[index - 3] = xl_word_kind(type);
+        type = xl_skip_type(type);
+        while (*type >= '0' && *type <= '9')
+            type++;
+    }
+    return kinds;
+}
+
+static IMP xl_guest_method_imp(uint64_t guest, SEL selector, const char *types)
+{
+    struct xl_word_kinds kinds = xl_word_kinds_of(types);
     IMP imp = imp_implementationWithBlock(^uintptr_t(id self_, uintptr_t a, uintptr_t b, uintptr_t c, uintptr_t d) {
-        uint64_t arguments[6] = {xl_object_out((uintptr_t)self_), (uint64_t)(uintptr_t)selector, a, b, c, d};
-        return (uintptr_t)xl_invoke_n(guest, arguments, 6);
+        uint64_t arguments[6] = {xl_object_out((uintptr_t)self_), (uint64_t)(uintptr_t)selector, xl_kind_out(kinds.argument[0], a),
+                                 xl_kind_out(kinds.argument[1], b), xl_kind_out(kinds.argument[2], c), xl_kind_out(kinds.argument[3], d)};
+        return xl_kind_in(kinds.result, xl_invoke_n(guest, arguments, 6), "guest method result");
     });
     xl_table_set(xl_shadow_imps, (uintptr_t)imp, (const void *)(uintptr_t)guest);
     return imp;
@@ -236,7 +271,7 @@ IMP xl_host_imp_for_guest(uint64_t guest, SEL selector, const char *types)
     IMP imp = (IMP)CFDictionaryGetValue(xl_guest_imp_cache, key);
     OSSpinLockUnlock(&xl_table_lock);
     if (!imp) {
-        imp = xl_guest_method_imp(guest, selector);
+        imp = xl_guest_method_imp(guest, selector, types);
         OSSpinLockLock(&xl_table_lock);
         CFDictionarySetValue(xl_guest_imp_cache, key, imp);
         OSSpinLockUnlock(&xl_table_lock);
@@ -290,7 +325,7 @@ static int xl_add_guest_methods(Class target, uint64_t list, const char *class_n
             imp = *(const uint64_t *)(uintptr_t)(entry + 16);
         }
         const struct xl_swift_method *typed = xl_typed_method(imp);
-        IMP host_imp = typed ? (IMP)typed->host : xl_guest_method_imp(imp, selector);
+        IMP host_imp = typed ? (IMP)typed->host : xl_guest_method_imp(imp, selector, types);
         if (!class_addMethod(target, selector, host_imp, typed ? typed->types : types)) {
             xl_shadow_note("%s: method %s already defined", class_name, sel_getName(selector));
             continue;
@@ -642,6 +677,8 @@ void xl_shadow_register_listed(void)
 
 Class xl_class_in(uint64_t guest)
 {
+    if (!(guest >> 32) && (uintptr_t)guest - xl_alias_low < xl_alias_span)
+        guest = xl_alias_resolve((uintptr_t)guest);
     Class host = xl_class_from_guest(guest);
     if (xl_shadow_log_enabled() && (uintptr_t)host != (uintptr_t)guest)
         xl_shadow_note("in %llx -> %p", (unsigned long long)guest, host);

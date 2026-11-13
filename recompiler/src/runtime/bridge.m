@@ -927,7 +927,7 @@ void xl_format_marshal(struct xl_format *format, const char *text, void *object,
                 fprintf(stderr, "xlate: %s: pointer argument 0x%llx above 4 GiB\n", symbol, value);
                 abort();
             }
-            uint32_t pointer = (uint32_t)value;
+            uint32_t pointer = conversion == '@' ? (uint32_t)xl_object_in(value, symbol, next - 1) : (uint32_t)value;
             if (!pointer && (conversion == 's' || conversion == 'S')) {
                 static const char null_utf8[] = "(null)";
                 static const unsigned short null_utf16[] = {'(', 'n', 'u', 'l', 'l', ')', 0};

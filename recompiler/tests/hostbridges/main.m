@@ -26,6 +26,9 @@
 #include <xlocale.h>
 
 extern const char *__progname;
+extern id objc_initWeak(id *location, id value);
+extern id objc_loadWeakRetained(id *location);
+extern void objc_destroyWeak(id *location);
 extern void (^NSDataDeallocatorFree)(void *, NSUInteger);
 extern void (^NSDataDeallocatorUnmap)(void *, NSUInteger);
 extern void (^NSDataDeallocatorVM)(void *, NSUInteger);
@@ -452,6 +455,130 @@ static void copyfile_checks(void)
     unlink(to_path);
 }
 
+@interface AlignProbe : NSObject
+@property (nonatomic, assign) uintptr_t seen;
+- (void)see:(NSString *)value;
+@end
+
+@implementation AlignProbe
+- (void)see:(NSString *)value
+{
+    self.seen = (uintptr_t)value;
+}
+@end
+
+@interface NSString (AlignProbe)
+- (uintptr_t)alignProbeSelf;
+- (BOOL)alignProbeSuper;
+- (const char *)alignProbeSuperClass;
+@end
+
+@implementation NSString (AlignProbe)
+- (uintptr_t)alignProbeSelf
+{
+    return (uintptr_t)self;
+}
+
+- (BOOL)alignProbeSuper
+{
+    return [[super description] length] > 0;
+}
+
+- (const char *)alignProbeSuperClass
+{
+    return class_getName([super class]);
+}
+@end
+
+static uintptr_t see_function(id self, SEL command, id value)
+{
+    return (uintptr_t)value;
+}
+
+static int aligned(const void *pointer)
+{
+    return ((uintptr_t)pointer & 7) == 0;
+}
+
+static void alignment_checks(void)
+{
+    NSString *mode = NSDefaultRunLoopMode;
+    printf("align data import %d\n", aligned((const void *)mode));
+    printf("align core foundation data import %d\n", aligned(kCFRunLoopDefaultMode));
+    printf("align locale key %d\n", aligned((const void *)NSLocaleLanguageCode));
+    NSArray *array = [NSArray arrayWithObject:mode];
+    id fetched = [array objectAtIndex:0];
+    printf("align message return %d\n", aligned((const void *)fetched));
+    printf("align same constant twice %d\n", fetched == mode && [array objectAtIndex:0] == fetched);
+    int enumerated = 0;
+    for (id item in array)
+        enumerated += aligned((const void *)item) && item == mode;
+    printf("align fast enumeration %d\n", enumerated);
+    CFMutableDictionaryRef table = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+    CFDictionarySetValue(table, kCFBundleNameKey, kCFRunLoopDefaultMode);
+    const void *value = CFDictionaryGetValue(table, kCFBundleNameKey);
+    printf("align core foundation return %d %d\n", aligned(value), value == (const void *)kCFRunLoopDefaultMode);
+    CFRelease(table);
+    printf("align host sees the constant %s\n", class_getName(object_getClass(mode)));
+    printf("align host sees the constant %d\n", [mode isEqualToString:(NSString *)kCFRunLoopDefaultMode]);
+    AlignProbe *probe = [[AlignProbe alloc] init];
+    [[NSArray arrayWithObject:probe] makeObjectsPerformSelector:@selector(see:) withObject:mode];
+    printf("align guest method argument %d %d\n", aligned((const void *)probe.seen), probe.seen == (uintptr_t)mode);
+    Protocol *named = NSProtocolFromString(@"NSObject");
+    printf("align protocol %d %d %s\n", aligned((const void *)named), (int)protocol_isEqual(named, @protocol(NSObject)), protocol_getName(named));
+    id weak_slot = nil;
+    id stored = objc_initWeak(&weak_slot, mode);
+    id loaded = objc_loadWeakRetained(&weak_slot);
+    id plain = objc_loadWeak(&weak_slot);
+    id replaced = objc_storeWeak(&weak_slot, mode);
+    printf("align weak %d %d %d %d\n", aligned((const void *)stored) && stored == mode, aligned((const void *)loaded) && loaded == mode,
+           aligned((const void *)plain) && plain == mode, aligned((const void *)replaced) && replaced == mode);
+    [loaded release];
+    objc_destroyWeak(&weak_slot);
+    NSDictionary *pairs = [NSDictionary dictionaryWithObjectsAndKeys:mode, NSLocaleLanguageCode, nil];
+    id kept = [pairs objectForKey:NSLocaleLanguageCode];
+    printf("align variadic dictionary %d %d %d\n", aligned((const void *)kept), kept == mode, (int)([[pairs allValues] indexOfObjectIdenticalTo:mode] == 0));
+    NSArray *listed = [NSArray arrayWithObjects:mode, nil];
+    kept = [listed objectAtIndex:0];
+    printf("align variadic array %d %d %d\n", aligned((const void *)kept), kept == mode, (int)([listed indexOfObjectIdenticalTo:mode] == 0));
+    listed = [[NSArray alloc] initWithObjects:mode, nil];
+    kept = [listed objectAtIndex:0];
+    printf("align variadic init %d %d %d\n", aligned((const void *)kept), kept == mode, (int)([listed indexOfObjectIdenticalTo:mode] == 0));
+    NSSet *unique = [NSSet setWithObjects:mode, nil];
+    kept = [unique anyObject];
+    printf("align variadic set %d %d %d\n", aligned((const void *)kept), kept == mode, (int)([[unique allObjects] indexOfObjectIdenticalTo:mode] == 0));
+    NSString *formatted = [NSString stringWithFormat:@"%@", mode];
+    printf("align format argument %d %d\n", (int)[formatted isEqualToString:mode], (int)[formatted length]);    NSArray *two = [NSArray arrayWithObjects:mode, NSLocaleLanguageCode, nil];
+    __block int block_aligned = 0, block_same = 0;
+    [two enumerateObjectsUsingBlock:^(id obj, NSUInteger index, BOOL *stop) {
+        block_aligned += aligned((const void *)obj);
+        block_same += obj == (index == 0 ? mode : (id)NSLocaleLanguageCode);
+    }];
+    printf("align block arguments %d %d\n", block_aligned, block_same);
+    __block uintptr_t seen_in_block = 0;
+    IMP echo = imp_implementationWithBlock(^id(id self_, id value) {
+        seen_in_block = (uintptr_t)value;
+        return value;
+    });
+    class_addMethod([AlignProbe class], @selector(echo:), echo, "@@:@");
+    id echoed = ((id (*)(id, SEL, id))objc_msgSend)(probe, @selector(echo:), mode);
+    printf("align block result %d %d %d %d\n", aligned((const void *)echoed), echoed == mode, aligned((const void *)seen_in_block), seen_in_block == (uintptr_t)mode);
+    class_addMethod([AlignProbe class], @selector(seeFunction:), (IMP)see_function, "L@:@");
+    uintptr_t seen_by_function = ((uintptr_t (*)(id, SEL, id))objc_msgSend)(probe, @selector(seeFunction:), mode);
+    printf("align function imp argument %d %d\n", aligned((const void *)seen_by_function), seen_by_function == (uintptr_t)mode);
+    printf("align category self %d %d\n", aligned((const void *)[mode alignProbeSelf]), [mode alignProbeSelf] == (uintptr_t)mode);
+    printf("align category super %d %s\n", (int)[mode alignProbeSuper], [mode alignProbeSuperClass]);
+    uintptr_t *seen_by = calloc(64, sizeof *seen_by);
+    dispatch_apply(64, dispatch_get_global_queue(0, 0), ^(size_t index) {
+        seen_by[index] = (uintptr_t)[array objectAtIndex:0];
+    });
+    int same = 1;
+    for (int i = 0; i < 64; i++)
+        same &= seen_by[i] == (uintptr_t)fetched;
+    free(seen_by);
+    printf("align constant across threads %d\n", same);
+}
+
 static void source_checks(void)
 {
     dispatch_queue_t queue = dispatch_queue_create("hostbridges.source", NULL);
@@ -479,6 +606,7 @@ int main(void)
         wide_checks();
         copyfile_checks();
         source_checks();
+        alignment_checks();
     }
     return 0;
 }

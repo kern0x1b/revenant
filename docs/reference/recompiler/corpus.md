@@ -190,6 +190,46 @@ A program (`main.m`) that calls the host functions whose guest and host layouts 
   arguments are not ASCII; `_dispatch_source_type_vm` as the type of a dispatch source; `copyfile_state_alloc`,
   `fcopyfile` (a file descriptor copied into another) and `copyfile_state_free`.
 
+Alignment of host constants (the `align` lines): the guest must get a constant string or a `Protocol` of the host at a
+multiple of 8, the same pointer each time, and the host must see the original. One check for each path that carries a
+host pointer to the guest or a guest pointer back:
+
+| Path | Line |
+| --- | --- |
+| data import of an object (`NSDefaultRunLoopMode`, `NSLocaleLanguageCode`) | `data import`, `locale key` |
+| data import of a Core Foundation reference (`kCFRunLoopDefaultMode`) | `core foundation data import` |
+| message result (`objc_msgSend`, `objectAtIndex:`), the same constant twice | `message return`, `same constant twice` |
+| fast enumeration | `fast enumeration` |
+| a plain pointer returned by a C function (`CFDictionaryGetValue`) | `core foundation return` |
+| the host receives an alias (receiver, argument), the class the host sees | `host sees the constant` |
+| a guest method called by the host with a constant (`makeObjectsPerformSelector:`) | `guest method argument` |
+| `Protocol` (`NSProtocolFromString`, `protocol_isEqual`, `protocol_getName`) | `protocol` |
+| `objc_initWeak`, `objc_loadWeakRetained`, `objc_loadWeak`, `objc_storeWeak` | `weak` |
+| `dictionaryWithObjectsAndKeys:`, `arrayWithObjects:`, `initWithObjects:`, `setWithObjects:` | `variadic dictionary`, `variadic array`, `variadic init`, `variadic set` |
+| `%@` of a constant | `format argument` |
+| arguments of a guest block the host calls (`enumerateObjectsUsingBlock:`) | `block arguments` |
+| result of a guest block the host calls (`imp_implementationWithBlock`) | `block result` |
+| a guest category method on `NSString` (`self`, and `objc_msgSendSuper2`) | `category self`, `category super` |
+| one constant fetched by 64 threads | `constant across threads` |
+
+The Mac prints 1 everywhere, because its constants are aligned and its class names are the same; the 4S prints the same
+because of the aliases. Three controls on the 4S, each run with the program unchanged and one part of
+`src/runtime/alignment.m` switched off:
+
+- the aliases off (`xl_alias_pointer`, `xl_alias_object` and `xl_protocol_out` return the host pointer): the first value of
+  `data import`, `core foundation data import`, `locale key`, `message return`, `fast enumeration`, `core foundation
+  return`, `guest method argument`, `protocol`, the four `weak` values, the first value of the four `variadic` lines, of
+  `block arguments`, `function imp argument` and `category self`, and the first and third value of `block result`
+  print 0;
+- the way back off (`xl_alias_resolve` returns what it gets: an alias reaches the host as it is): `host sees the constant`
+  and `category super` name `__NSCFString` instead of `__NSCFConstantString`;
+- the cache off (`xl_alias_string` makes a new copy at every call): `same constant twice`, `fast enumeration`,
+  `constant across threads`, and the identity values of `core foundation return`, `guest method argument`, `weak`, the
+  `variadic` lines, `block arguments`, `block result` and `function imp argument` print 0.
+
+`format argument` has no control: the alias is a real copy with the same characters, so a `%@` that gets the alias formats
+the same text as one that gets the original, and nothing the program can observe tells the two apart.
+
 The check builds the program for this Mac and compares its output with `tests/data/hostbridges/expected.txt`, translates
 the arm64 build (which fails on any import without a bridge) and requires that the program imports each of the bridged
 functions. The device part runs the translated binary and compares its output with the Mac's.

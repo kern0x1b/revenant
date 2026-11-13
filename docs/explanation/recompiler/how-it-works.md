@@ -196,6 +196,28 @@ print on the iPad 2 what objc4 printed.
   point at host data, and `freeaddrinfo` finds the header by its magic and frees both lists.
 - **`class_copyMethodList`.** The host returns an array of 4-byte `Method` pointers; the bridge widens it into
   8-byte slots in place of the host array and stores the count.
+- **Pointers to host constants that are 4 mod 8.** The guest Swift runtime clears the low three bits of an object
+  pointer (a bridged `String`, an `Array` of objects keep tags there), so an object that the host hands out at an address
+  that is not a multiple of 8 comes back as another object. The host's `malloc` blocks, its singletons (`kCFNull`,
+  `kCFBooleanTrue`, `kCFBooleanFalse`, the `@YES` and `@NO` numbers, the `kCFAllocator*` allocators, the classes, the
+  dispatch queues) are measured 0 mod 8 on the 4S. What is not: the constant strings (`__NSCFConstantString`, the
+  `__DATA,__cfstring` section of an image whose section starts at 4 mod 8, which is every constant of CoreFoundation,
+  Security, SystemConfiguration, IOKit and of the app itself, `NSDefaultRunLoopMode`, `kCFRunLoopDefaultMode`,
+  `NSLocaleLanguageCode`, `NSInvalidArgumentException`) and some `Protocol` objects (`@protocol(NSObject)`).
+  `src/runtime/alignment.m` gives the guest an **alias** instead: for a constant string a copy made with a private
+  `CFAllocator` over a 4 MiB arena (CoreFoundation puts a 4-byte allocator word in front of the object, so the arena
+  hands out blocks at 4 mod 8 and the object lands on a multiple of 8; the copy is a real `__NSCFString` with the same
+  characters), for a `Protocol` a 16-byte shell that holds the isa word and the name, which is also what `xl_protocol`
+  reads. The cache constant to alias is made once under a lock and kept; the same constant is the same alias for every
+  caller and every thread. Each alias sits in the arena behind an 8-byte header that holds the original and a check word,
+  so the other direction is a range test of the arena (`xl_narrow_pointer`, `xl_object_in`): the host gets the original
+  constant back and never sees an alias. One funnel serves every host-to-guest path: `xl_object_out` for objects,
+  `xl_widen_pointer` for plain pointers (a value that is 4 mod 8 is looked up in the constant ranges of the loaded
+  images, which `_dyld_register_func_for_add_image` keeps current), and `xl_protocol_out` for `Protocol`; the generated
+  bridge (returns, out slots, record fields, data imports, callback and block slot arguments) and the bridges by hand
+  (dynamic message returns, fast enumeration, the weak-reference functions, the variadic collection constructors, the
+  arguments and result of a guest block the host calls, the word trampoline of a guest method) call them. An object at
+  4 mod 8 that is neither a constant string, nor a protocol, nor a class stops the program with its class named.
 - **What an import of a guest image becomes.** `xlgen` sorts every symbol that no guest image defines by what differs
   between the arm64 guest and the armv7 host, and a symbol it cannot place is `UNSUPPORTED` in `report.txt`, is
   printed by the translation, and aborts with its name if the guest reaches it: nothing is stubbed to look like it

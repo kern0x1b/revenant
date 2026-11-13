@@ -77,3 +77,26 @@ copyfile state 1
 copyfile state free 0
 fcopyfile 0 7 copy me
 vm dispatch source 1
+align data import 1
+align core foundation data import 1
+align locale key 1
+align message return 1
+align same constant twice 1
+align fast enumeration 1
+align core foundation return 1 1
+align host sees the constant __NSCFConstantString
+align host sees the constant 1
+align guest method argument 1 1
+align protocol 1 1 NSObject
+align weak 1 1 1 1
+align variadic dictionary 1 1 1
+align variadic array 1 1 1
+align variadic init 1 1 1
+align variadic set 1 1 1
+align format argument 1 21
+align block arguments 2 2
+align block result 1 1 1 1
+align function imp argument 1 1
+align category self 1 1
+align category super 1 __NSCFConstantString
+align constant across threads 1

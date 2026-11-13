@@ -558,6 +558,8 @@ std::string Generator::ScalarToGuest(const Value &value, const std::string &expr
       return value.is_signed ? "(uint64_t)(int64_t)" + expr : "(uint64_t)" + expr;
     case Kind::Floating:
       return "(double)" + expr;
+    case Kind::Protocol:
+      return "xl_protocol_out((uintptr_t)" + expr + ")";
     default:
       if (value.is_object)
         return "xl_object_out((uintptr_t)" + expr + ")";

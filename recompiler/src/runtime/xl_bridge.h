@@ -63,6 +63,11 @@ uint64_t xl_invoke(uint64_t address, uint64_t argument);
 uint64_t xl_invoke_n(uint64_t address, const uint64_t *arguments, unsigned count);
 uintptr_t xl_object_in(uint64_t guest, const char *symbol, unsigned index);
 uint64_t xl_object_out(uintptr_t host);
+extern uintptr_t xl_alias_low, xl_alias_span;
+uintptr_t xl_alias_resolve(uintptr_t pointer);
+uint64_t xl_alias_pointer(uintptr_t host);
+uint64_t xl_alias_object(uintptr_t host);
+uint64_t xl_protocol_out(uintptr_t host);
 unsigned xl_callback_slot(unsigned signature, uint64_t target);
 extern uint64_t xl_callback_targets[][32];
 
@@ -93,14 +98,42 @@ static inline uintptr_t xl_narrow_pointer(uint64_t value, const char *symbol, un
             return (uintptr_t)(uint32_t)value;
         xl_narrowing_fault(symbol, index, value);
     }
-    return (uintptr_t)value;
+    uintptr_t pointer = (uintptr_t)value;
+    if (pointer - xl_alias_low < xl_alias_span)
+        return xl_alias_resolve(pointer);
+    return pointer;
 }
 
-static inline uint64_t xl_widen_pointer(uintptr_t value)
+static inline uint64_t xl_widen_plain(uintptr_t value)
 {
     if (value >= 0xFFFFFF00u)
         return (uint64_t)(int64_t)(int32_t)value;
     return (uint64_t)value;
+}
+
+static inline uint64_t xl_widen_pointer(uintptr_t value)
+{
+    if ((value & 7) == 4)
+        return xl_alias_pointer(value);
+    return xl_widen_plain(value);
+}
+
+static inline uint64_t xl_kind_out(char kind, uintptr_t host)
+{
+    switch (kind) {
+    case 'O': case 'K': return xl_object_out(host);
+    case 'P': return xl_widen_pointer(host);
+    default: return (uint64_t)host;
+    }
+}
+
+static inline uintptr_t xl_kind_in(char kind, uint64_t guest, const char *symbol)
+{
+    switch (kind) {
+    case 'O': case 'K': return xl_object_in(guest, symbol, 0);
+    case 'P': return xl_narrow_pointer(guest, symbol, 0);
+    default: return (uintptr_t)guest;
+    }
 }
 
 static inline int64_t xl_widen_signed(int64_t value, int64_t host_min, int64_t host_max, int64_t guest_min, int64_t guest_max)
