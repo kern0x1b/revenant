@@ -25,6 +25,25 @@ FUNCTION poly16x8_t crypto_pmull2_16b(poly8x16_t a, poly8x16_t b) { return vmull
 FUNCTION poly128_t crypto_pmull_1d(poly64_t a, poly64_t b) { return vmull_p64(a, b); }
 FUNCTION poly128_t crypto_pmull2_2d(poly64x2_t a, poly64x2_t b) { return vmull_high_p64(a, b); }
 
+FUNCTION uint8x16_t crypto_trn1_16b(uint8x16_t a, uint8x16_t b) { return vtrn1q_u8(a, b); }
+FUNCTION uint8x16_t crypto_trn2_16b(uint8x16_t a, uint8x16_t b) { return vtrn2q_u8(a, b); }
+FUNCTION uint16x8_t crypto_trn1_8h(uint16x8_t a, uint16x8_t b) { return vtrn1q_u16(a, b); }
+FUNCTION uint16x8_t crypto_trn2_8h(uint16x8_t a, uint16x8_t b) { return vtrn2q_u16(a, b); }
+FUNCTION uint32x4_t crypto_trn1_4s(uint32x4_t a, uint32x4_t b) { return vtrn1q_u32(a, b); }
+FUNCTION uint32x4_t crypto_trn2_4s(uint32x4_t a, uint32x4_t b) { return vtrn2q_u32(a, b); }
+FUNCTION uint64x2_t crypto_trn1_2d(uint64x2_t a, uint64x2_t b) {
+    uint64x2_t result;
+    __asm__("trn1 %0.2d, %1.2d, %2.2d" : "=w"(result) : "w"(a), "w"(b));
+    return result;
+}
+FUNCTION uint64x2_t crypto_trn2_2d(uint64x2_t a, uint64x2_t b) {
+    uint64x2_t result;
+    __asm__("trn2 %0.2d, %1.2d, %2.2d" : "=w"(result) : "w"(a), "w"(b));
+    return result;
+}
+FUNCTION uint8x8_t crypto_trn1_8b(uint8x8_t a, uint8x8_t b) { return vtrn1_u8(a, b); }
+FUNCTION uint8x8_t crypto_trn2_8b(uint8x8_t a, uint8x8_t b) { return vtrn2_u8(a, b); }
+
 FUNCTION uint8x16_t crypto_round(uint8x16_t data, uint8x16_t key) { return vaesmcq_u8(vaeseq_u8(data, key)); }
 FUNCTION uint8x16_t crypto_rounds(uint8x16_t data, const uint8x16_t *keys, unsigned count) {
     for (unsigned i = 0; i < count; i++) {

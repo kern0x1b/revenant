@@ -62,11 +62,46 @@ The semantics are those of the Arm Architecture Reference Manual's pseudocode, w
 ## Timing
 
 The instructions take the same time for every operand, and the guest chose them for that reason, so the helpers must
-not give an operand any influence on the memory they touch or the branches they take. None indexes a table or
-branches on data. `AESE` and `AESD` compute SubBytes on all 16 bytes at once in bit-sliced form: each byte is
-inverted in GF(2^8) as its 254th power, and the bit-matrix of the S-box is applied to the eight bit-planes. The two
-loop counts of the multiplications are constants, and the permutation of ShiftRows is indexed by the byte position,
-which is public. That costs more than sixteen table loads: the S-box is the price of not leaking the key through the cache.
+not give an operand any influence on the memory they touch or the branches they take. None indexes memory by data or
+branches on data. `AESE` and `AESD` look every byte up in the 256-byte S-box with NEON table lookups: the table is
+read in eight windows of 32 bytes, each window answers `vtbl4` for the bytes whose index falls in it and 0 for the
+others, and the eight answers are OR-ed. All 256 entries are read at the same addresses for every input, so a
+cache-timing observer sees nothing of the key or the data. ShiftRows is a `vtbl2` with a constant permutation. The
+same source compiles for armv7 and arm64 (`vtbl4_u8` is in both), so the corpus check runs it on this Mac's hardware
+against the instruction itself.
+
+The first version of `AESE` and `AESD` computed the S-box bit-sliced, as the inverse in GF(2^8) of 16 bytes at once,
+with no table. It was also constant-time and cost 2851 ns per `AESE` on an iPhone 4S, about 99% of the 2965 ns of an
+`AESE` followed by an `AESMC` in lifted code: the call and the buffer traffic around it are 17 ns. The NEON lookup is
+11 times faster.
+
+### Cost on an iPhone 4S
+
+Measured on iPhone4,1 (A5) with iOS 6.1.3, by calling each helper in a loop from armv7 code compiled as the
+translation compiles it, and by running the arm64 fixture of `tests/cryptodevice` through xlate:
+
+| Helper | Time per call |
+|---|---|
+| a call that xors 16 bytes (the cost of calling a helper) | 17 ns |
+| `AESE`, `AESD` (NEON table lookup) | 252 ns |
+| `AESE`, `AESD` (bit-sliced, replaced) | 2851 and 2918 ns |
+| `AESMC` | 73 ns |
+| `AESIMC` | 163 ns |
+| `PMULL` on 64-bit lanes (`pmull64`) | 771 ns |
+| `PMULL` on 8-bit lanes (`pmull8`) | 202 ns |
+
+Through xlate, the lifted loops of `tests/cryptodevice` take 358 ns for an `AESE` followed by an `AESMC`, 453 ns for an
+`AESD` followed by an `AESIMC`, 781 ns for a `PMULL` on 64-bit lanes and 225 ns on 8-bit lanes (the bit-sliced version
+took 2965 ns for the first pair). A 10-round AES-128 block is about 3.6 us.
+
+BoringSSL, translated whole from `libswiftCryptoKit.dylib` (`tests/cryptoboringssl`, 256 KiB in 16 KiB pieces), runs
+SHA-256 at 10.9 MB/s and AES-256-GCM sealing at 2.1 MB/s on the same phone. A GHASH block takes
+two to four `pmull64`, so AES-GCM is bounded by `pmull64` before it is by `AES`. `pmull64` is the helper to speed up
+next: the NEON `vmull.p8` instruction multiplies eight bytes at once, and a 64x64 product from it needs eight of them
+and a few shifts, which should be about five times faster than the 64 masked shift-and-xor steps of the portable
+version (an estimate, not a measurement). It is not done, because the SDK's AES-GCM load is small.
+
+`crypto.c` uses NEON on the host, which every armv7 iOS device has (the 3GS and later).
 
 ## What is not covered
 

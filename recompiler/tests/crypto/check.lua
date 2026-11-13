@@ -26,6 +26,16 @@ local functions = {
     crypto_pmull2_16b = {mnemonic = "pmull2.8h", calls = {"pmull8"}},
     crypto_pmull_1d = {mnemonic = "pmull.1q", calls = {"pmull64"}},
     crypto_pmull2_2d = {mnemonic = "pmull2.1q", calls = {"pmull64"}},
+    crypto_trn1_16b = {mnemonic = "trn1.16b", calls = {}},
+    crypto_trn2_16b = {mnemonic = "trn2.16b", calls = {}},
+    crypto_trn1_8h = {mnemonic = "trn1.8h", calls = {}},
+    crypto_trn2_8h = {mnemonic = "trn2.8h", calls = {}},
+    crypto_trn1_4s = {mnemonic = "trn1.4s", calls = {}},
+    crypto_trn2_4s = {mnemonic = "trn2.4s", calls = {}},
+    crypto_trn1_2d = {mnemonic = "trn1.2d", calls = {}},
+    crypto_trn2_2d = {mnemonic = "trn2.2d", calls = {}},
+    crypto_trn1_8b = {mnemonic = "trn1.8b", calls = {}},
+    crypto_trn2_8b = {mnemonic = "trn2.8b", calls = {}},
     crypto_round = {mnemonic = "aesmc.16b", calls = {"aese", "aesmc"}},
 }
 
@@ -218,7 +228,7 @@ function main(out)
     local function o(file)
         return path.join(out, file)
     end
-    for _, name in ipairs({"crypto-arm64", "out.bc", "out.ll", "xlate.log", "lifted.h", "lifted-host.o", "lifted", "lifted-armv7.o", "runtime-armv7.o", "runtime-armv7.ll", "linked-armv7.o"}) do
+    for _, name in ipairs({"crypto-arm64", "out.bc", "out.ll", "xlate.log", "coverage.log", "coverage.txt", "lifted.h", "lifted-host.o", "lifted", "lifted-armv7.o", "runtime-armv7.o", "runtime-armv7.ll", "linked-armv7.o"}) do
         os.tryrm(o(name))
     end
 
@@ -260,6 +270,10 @@ function main(out)
     io.write(log)
     if not ok or not log:find(", 0 failures", 1, true) then
         corpus.fail("xlate did not lift every function of %s (see %s)", binary, o("xlate.log"))
+    end
+    local covered, coverage = corpus.run(e.xlate, {"--base", "0x10000000", "--coverage", o("coverage.txt"), binary}, o("coverage.log"))
+    if not covered or not coverage:find("coverage: 0 of ", 1, true) then
+        corpus.fail("xlate left an instruction of %s unlifted (see %s)", binary, o("coverage.txt"))
     end
     os.execv(path.join(e.llvmbin, "llvm-dis"), {o("out.bc"), "-o", o("out.ll")})
     local ir = io.readfile(o("out.ll"))
