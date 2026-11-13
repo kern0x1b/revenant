@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, exceptions, objectsplit and hostbridges; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, library, exceptions, objectsplit, hostbridges and checkapi; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -244,6 +244,15 @@ names that image. This holds for each kind of bind: the superclass pointer, a cl
 
 The image indices in xlate's JSON are 1-based in Lua: the app, libfrombx, `a/libcoll` (the app's link), then
 `b/libcoll` (libfrombx's).
+
+### checkapi
+
+The check scripts reach the tool modules (`corpus`, `translate`, `env`) through a local alias, and a call to a function
+the module no longer defines fails only when that script runs. The device group's scripts run rarely, so a rename in a
+module once left `ordinal` calling `corpus.sorted` for weeks after the helper moved to `env`. `checkapi` reads every
+`tests/*/check.lua`, takes each `local <alias> = import("<module>", {rootdir = <tools>})`, and fails for every
+`<alias>.<name>(` that `tools/<module>.lua` does not define as a function. It needs no phone and no build, and fails
+when it finds no call at all (the pattern that reads the scripts no longer matches).
 
 ### weakimport
 
