@@ -29,11 +29,23 @@ When the app is packaged, after the libraries are copied into `Frameworks/` and 
 6. The code signature is dropped, and the app's signing step signs the image with `ldid` after the rebind.
 7. The import check then runs on the rebound image against the release.
 
-An import the release exports is left as it is. A named image with no import the release lacks is reported as a warning, and nothing is changed.
+An import the release exports is left as it is, unless a provider carries an override marker for it (next section). A named image with no import to move is reported as a warning, and nothing is changed.
+
+## An override marker: moving an import the release does export
+
+Some symbols exist on every release and still need the Backports library's definition, because the release's one does not know a value that a newer SDK passes it. `dispatch_data_create` is the case: iOS 6.1.3 compares the destructor with the three sentinels it has (`free`, `none`, `vm_deallocate`), and takes any other block, including the `munmap` sentinel that iOS 7 added, for a user block to call with no arguments. The wrapper in `libSystemBackports.dylib` replaces the `munmap` sentinel by a block that unmaps the right range, and calls the release's function for everything else (`docs/reference/backports/libSystem/dispatch_data_destructor_munmap.md`).
+
+A provider declares that it replaces a symbol the release exports by exporting the marker `___revenant_override_<name>` beside the definition of `_<name>`, which source writes as `BACKPORT_OVERRIDES(name);` (`frameworks/Backports/src/revenant_impl.h`). `rebind_plan` then treats an import of `_<name>` that the release exports like one it lacks: it moves it to the first provider of the build that exports both `_<name>` and its marker. Nothing else names the symbol, and no table in the toolchain lists the overrides.
+
+The rule is general and carries a duty:
+
+- A library may declare a marker only for a function it implements to give the release's answer for every argument the release handles, and to add the answer for the arguments the release does not know. It reaches the release's function itself (`dlsym` on the libSystem handle), never by the public name, which is its own.
+- A marker moves every import of the symbol in a named image, whether or not that image passes the new argument. The cost is one more call and one pointer compare per call. A symbol whose override cannot be that cheap does not get a marker.
+- Only an image named in `revenant.rebind`, and an image that links the provider before the system library, reach the provider. Every other image keeps the release's function.
 
 ## The Backports libraries it uses
 
-`libSystemBackports.dylib` is the Darwin-level library of the package. Its one symbol, `__darwin_check_fd_set_overflow`, is the bounds check that the SDK's `FD_SET`, `FD_CLR` and `FD_ISSET` call. The SDK declares it for iOS 14 and later, and calls it only when its address is not NULL. On iOS 6 that address is NULL, so `FD_SET` runs unchecked.
+`libSystemBackports.dylib` is the Darwin-level library of the package. Besides the file, time, `memset_s`, dispatch data and dispatch class symbols its own reference pages list, it carries `__darwin_check_fd_set_overflow`, the bounds check that the SDK's `FD_SET`, `FD_CLR` and `FD_ISSET` call. The SDK declares it for iOS 14 and later, and calls it only when its address is not NULL. On iOS 6 that address is NULL, so `FD_SET` runs unchecked.
 
 The library defines the symbol, and it forwards to the system's definition when libSystem has one, looked up with `dlsym` on the libSystem handle. Otherwise it returns nonzero for a descriptor in `[0, FD_SETSIZE)` and zero outside it, so an out-of-range descriptor makes `FD_SET` a no-op rather than a write past the set. The SDK header does not document its third argument, so the library accepts it and ignores it.
 

@@ -132,6 +132,9 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Out-of-tree apps: the Backports an app links](guides/backports/out-of-tree.md) | how an app built outside the checkout takes the Backports from its package |
 | [Write and install the Backports package](guides/backports/package.md) | the commands that write `org.revenant.backports` and the Swift runtime, and install them on the phone |
 | [libSystem compatibility calls](reference/backports/libSystem/README.md) | the missing `clock_getres` and `*at` file operations, host comparisons, iOS 6 timestamp precision and path snapshot limitation |
+| [libSystem: memset_s](reference/backports/libSystem/memset_s.md) | the C11 `memset_s` that iOS 6 lacks, its Darwin answers, who gets it and what it costs |
+| [libSystem: OS_dispatch_queue and OS_dispatch_source](reference/backports/libSystem/OS_dispatch_classes.md) | the two dispatch classes iOS 6 registers but does not export, the proxies that bind them, and the limit of a bound symbol |
+| [libSystem: DISPATCH_DATA_DESTRUCTOR_MUNMAP](reference/backports/libSystem/dispatch_data_destructor_munmap.md) | the munmap sentinel of iOS 7, the `dispatch_data_create` wrapper and its override marker, who reaches it and who keeps the release's function, why dyld cannot interpose it |
 | [Crutches](reference/backports/crutches.md) | the stand-ins the Backports lowering uses, what each measured, and what removes it |
 | [GLSL ES 3.00 to 1.00 translator](reference/react-native/glsl-translator.md) | the glslang and SPIRV-Cross prototype on three.js's ES 3.00 programs: what translates on the host, the armv7 build, and what is still unmeasured |
 | [OpenGL ES 3 on iOS 6](reference/backports/opengles-es3.md) | the ES3 entry points on the ES2 driver: what is forwarded, emulated and refused, and why no ES3 EAGL context yet |

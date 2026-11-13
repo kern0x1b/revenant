@@ -74,9 +74,9 @@ static void names(void)
 {
     expect(__progname != NULL, "the program's name is there to read");
     expect(__progname && strcmp(__progname, getprogname()) == 0, "the program's name is the one the system gives");
-    Dl_info found;
-    expect(dladdr((const void *)&__progname, &found) != 0 && found.dli_fname != NULL &&
-           strstr(found.dli_fname, "/lib") == NULL,
+    Dl_info found, own;
+    expect(dladdr((const void *)&__progname, &found) != 0 && dladdr((const void *)&names, &own) != 0 &&
+           found.dli_fname != NULL && own.dli_fname != NULL && strcmp(found.dli_fname, own.dli_fname) == 0,
            "the name read is this program's own copy, not the system's");
 }
 
