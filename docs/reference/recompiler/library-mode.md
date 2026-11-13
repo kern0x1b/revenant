@@ -6,7 +6,7 @@ What `XL_LIBRARY=1` builds, the loader API, and what was measured on the iPhone 
 ## Build interface
 
 `XL_LIBRARY=1 ./xmakew l -P . recompiler/tools/translate.lua <input>.dylib includes.h out/ [guest images]` writes
-`out/<name>.dylib`.
+`out/<name>.dylib` and `out/<name>-classes.dylib`; the two files go into one folder, and the second is found by its name.
 
 | Variable | Meaning | Default |
 |---|---|---|
@@ -17,7 +17,7 @@ What `XL_LIBRARY=1` builds, the loader API, and what was measured on the iPhone 
 | `XL_REPLACES` | guest images that stand for system libraries | unset |
 | `XL_NAMESPACE` | prefix of the Objective-C class names of every guest image but the first (the runtime and the overlays); `none` leaves the names as they are | `XLG.` |
 
-The output is one dylib with two kinds of content:
+The output is two dylibs. The first, `<name>.dylib`, has two kinds of content:
 
 | Part | Where | Holds |
 |---|---|---|
@@ -25,8 +25,18 @@ The output is one dylib with two kinds of content:
 | `__XGUEST,__image` | a section in the file, read-only, aligned to 16 KiB; dyld maps it and nobody reads it there | the guest image: the guest's segments as bytes, to be mapped at the addresses the guest was linked at |
 
 There are no guest segments in the link any more (`__X<n>TEXT`, `__X<n>DATA` are gone), and no window under `XL_BASE`: the
-host part does not depend on where the guest is. Exports are exactly `_xl_library_init` and `_xl_library_diagnostics`;
-the check fails on anything else.
+host part does not depend on where the guest is. Exports are `_xl_library_init`, `_xl_library_diagnostics` and one
+`_xl_objc_category_<n>` for each Objective-C category of the guest (the registry refers to them); the check fails on
+anything else.
+
+The second, `<name>-classes.dylib`, is the registry: the lists that libobjc reads when it loads an image, and nothing
+else. It has `__DATA,__objc_classlist` (the guest's classes, by their guest address), `__objc_protolist` (its
+protocols, by address), `__objc_catlist` (the categories, which are the first dylib's `xl_objc_category_<n>` structures,
+bound by dyld) and `__objc_imageinfo`; no code, no exports, a dependency on the first dylib by its install name. It
+is separate because libobjc registers the classes of an image while `dlopen` loads it, and reads the class
+structures then: they are in the guest image, which the library maps only after dyld has placed the first dylib and
+relocated the slots that point into it. The first dylib has none of these lists. The registry is loaded after the
+guest image is in place and before the guest's initializers run.
 
 ### The guest image (`recompiler/include/xl_guest_image.h`)
 
@@ -52,13 +62,15 @@ ordinary bytes at their own addresses, and the generated code refers to them by 
    `[low, high)` with `vm_allocate` at the fixed address and `VM_PROT_NONE`, and takes the size of the host part
    (the sum of the dylib's own segments) anywhere with `VM_PROT_NONE`. If the guest range is held it fails with the
    region that holds it, its range, what it is (an image's path, `malloc`, `stack`, a memory tag) and its size.
+   It also refuses a library whose registry file (`<name>-classes.dylib` in the same folder) is not there.
 2. `xl_load` gives the host reservation back and `dlopen`s the dylib: dyld takes the first hole that fits, which is the one just
    given back. It calls `xl_library_init`.
 3. `xl_library_init` checks the header again (`magic`, `version`, that every segment is inside `[low, high)`, that every slot
    is inside it), checks that `[low, high)` is one untouched `VM_PROT_NONE` range (it writes nothing if it is not), then for
    each segment: `mmap(address, length, READ|WRITE, MAP_FIXED|MAP_PRIVATE)` of the file at the segment's `offset`, and
-   `vm_protect` read-write for the zero tail. It writes every slot, applies the segment's `protection`, runs the guest's
-   initializers (once, behind a lock) and returns.
+   `vm_protect` read-write for the zero tail. It writes every slot, applies the segment's `protection`, `dlopen`s the
+   registry (libobjc registers the guest's classes, protocols and categories), runs the guest's initializers (once, behind a
+   lock) and returns.
 
 Pages of the guest that nothing touches stay clean file pages: they are not in the resident set and the system can drop them.
 
@@ -71,8 +83,8 @@ Pages of the guest that nothing touches stay clean file pages: they are not in t
 | `xl_load_error()` | text of the last failure |
 
 Statuses: `XL_LOAD_OK`, `XL_LOAD_BAD_IMAGE` (not an armv7 dylib, no guest image, a `magic` or `version` that is not read: the message says which, and
-the version found), `XL_LOAD_RANGE_BUSY` (the guest range is held: the message names the holder; or the reservation is
-not an untouched inaccessible range when the library attaches; or no hole of the host's size), `XL_LOAD_DLOPEN_FAILED`,
+the version found; no registry next to the library), `XL_LOAD_RANGE_BUSY` (the guest range is held: the message names the holder; or the reservation is
+not an untouched inaccessible range when the library attaches; or no hole of the host's size), `XL_LOAD_DLOPEN_FAILED` (the library or its registry; the message has dyld's text),
 `XL_LOAD_MAP_FAILED` (`mmap` or `vm_protect` of the guest's segments failed). A status after the library's initialization has run is final: later
 calls return it, and the guest range is given back.
 
