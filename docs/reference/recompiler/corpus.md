@@ -570,6 +570,15 @@ The steps are `stepDictionary` (`[String: String]`), `stepDictionaryAny` (`[Stri
 the superclass's size and fields from the host layout: the runtime reconciles them when it registers the shadow, and a
 subclass smaller than its superclass stops the program with a message.
 
+The host part also reads `report.txt` of the translation. Swift declares the `NSRange` argument of the `NSString` methods that
+`__SharedStringStorage` overrides as `{?=qq}`, which no SDK declaration matches name for name, so the host IMP of
+`getCharacters:range:` was built from the guest encoding: a 16-byte struct of two `long long`, which the host's call
+(`NSRange` is two 32-bit words) read from the wrong registers and stack slots, and `NSURL(string:)` died in
+`String.UTF16View` with "String index is out of bounds". `xlgen` now matches a guest method with an SDK declaration by the
+shape of its encoding (struct names ignored, integers compared without their signedness), and the check requires the
+report to say that the IMP of `getCharacters:range:` comes from the SDK declaration and is `{_NSRange=II}`. On the 4S
+`URLRequest(url:)` of a Swift `String` runs after the fix and fails before it.
+
 Each fix has a step that fails without it (the 4S, one fix taken out at a time): without the image range `stepDictionary`
 exits 139 (so do `stepClosures`, `stepNested`, `stepSubstring` and `stepStress`); without the reconciliation
 `stepDictionary` and `stepDictionaryAny` still pass, and `stepClosures`, `stepNested`, `stepSubstring` and `stepStress`

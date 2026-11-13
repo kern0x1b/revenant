@@ -2043,12 +2043,35 @@ void Generator::EmitClasses(const json::Object &manifest) {
     auto selector = method.getString("selector")->str();
     auto types = method.getString("types")->str();
     Signature signature;
-    auto guest_types = types;
-    guest_types.erase(std::remove_if(guest_types.begin(), guest_types.end(), [](char ch) { return isdigit(static_cast<unsigned char>(ch)); }), guest_types.end());
+    auto shape = [](const std::string &encoding) {
+      std::string result;
+      for (size_t i = 0; i < encoding.size(); ++i) {
+        char ch = encoding[i];
+        if (isdigit(static_cast<unsigned char>(ch))) {
+          continue;
+        }
+        if (ch == '{') {
+          result += "{?";
+          while (i + 1 < encoding.size() && encoding[i + 1] != '=' && encoding[i + 1] != '}') {
+            ++i;
+          }
+          continue;
+        }
+        switch (ch) {
+          case 'Q': case 'L': case 'l': ch = 'q'; break;
+          case 'I': ch = 'i'; break;
+          case 'S': ch = 's'; break;
+          case 'C': ch = 'c'; break;
+          default: break;
+        }
+        result += ch;
+      }
+      return result;
+    };
+    auto guest_types = shape(types);
     if (auto found = guest_pool_.find(std::string(class_method ? "+" : "-") + selector); found != guest_pool_.end()) {
       for (auto guest : found->second) {
-        auto key = gc_.getObjCEncodingForMethodDecl(guest);
-        key.erase(std::remove_if(key.begin(), key.end(), [](char ch) { return isdigit(static_cast<unsigned char>(ch)); }), key.end());
+        auto key = shape(gc_.getObjCEncodingForMethodDecl(guest));
         if (key != guest_types) {
           continue;
         }
