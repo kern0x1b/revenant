@@ -33,6 +33,7 @@ static cl::opt<std::string> GuestProvidedPath("guest-provided", cl::desc("Symbol
 static cl::opt<std::string> WeakOnlyPath("weak-only", cl::desc("Imported symbols no image binds strongly"));
 static cl::opt<std::string> ManifestPath("objc-manifest", cl::desc("Objective-C manifest written by xlate"));
 static cl::opt<std::string> EntitlementsPath("entitlements", cl::desc("The input binary's entitlements plist, answered for getsectiondata(__TEXT,__entitlements)"));
+static cl::opt<bool> Library("library", cl::desc("The output is a library whose guest classes and protocols are bytes of its guest image at their addresses, not symbols"));
 static cl::opt<std::string> GuestOut("guest-out");
 static cl::opt<std::string> HostOut("host-out");
 static cl::opt<std::string> PassthroughOut("passthrough-out");
@@ -2089,12 +2090,16 @@ void Generator::EmitClasses(const json::Object &manifest) {
     meta << "}};\n";
     return "&" + symbol;
   };
-  auto protocol_symbol = [&](int64_t address) {
+  auto guest_object = [&](const char *kind, int64_t address) {
+    if (Library) {
+      return "(void *)" + hex(address);
+    }
     std::string symbol;
     raw_string_ostream name(symbol);
-    name << "xl_guest_protocol_" << format_hex_no_prefix(address, 8);
+    name << "xl_guest_" << kind << "_" << format_hex_no_prefix(address, 8);
     name.flush();
-    return symbol;
+    meta << "extern char " << symbol << ";\n";
+    return "&" + symbol;
   };
   auto emit_protocol_list = [&](const json::Array *protocols, const std::string &symbol) -> std::string {
     if (!protocols || protocols->empty()) {
@@ -2102,9 +2107,7 @@ void Generator::EmitClasses(const json::Object &manifest) {
     }
     std::string entries;
     for (auto &entry : *protocols) {
-      auto target = protocol_symbol(*entry.getAsInteger());
-      meta << "extern char " << target << ";\n";
-      entries += "&" + target + ", ";
+      entries += guest_object("protocol", *entry.getAsInteger()) + ", ";
     }
     meta << "struct { uintptr_t count; void *list[" << protocols->size() << "]; } " << symbol
          << " __attribute__((used, section(\"__DATA,__objc_const\"))) = {" << protocols->size() << ", {" << entries << "}};\n";
@@ -2150,9 +2153,7 @@ void Generator::EmitClasses(const json::Object &manifest) {
       emit_methods(protocol.getArray("optional_instance_methods"), false, base + "optional_instance", hint, false);
       emit_methods(protocol.getArray("optional_class_methods"), true, base + "optional_class", hint, false);
       emit_properties(protocol.getArray("properties"), base + "properties");
-      auto target = protocol_symbol(*protocol.getInteger("address"));
-      meta << "extern char " << target << ";\n";
-      protolist.push_back("&" + target);
+      protolist.push_back(guest_object("protocol", *protocol.getInteger("address")));
     }
     auto classes = image.getArray("classes");
     for (size_t c = 0; c < classes->size(); ++c) {
@@ -2181,14 +2182,7 @@ void Generator::EmitClasses(const json::Object &manifest) {
              << name_expression << ", " << methods << ", " << protocols << ", " << ivars << ", 0, "
              << properties << "};\n";
       }
-      {
-        std::string symbol;
-        raw_string_ostream name(symbol);
-        name << "xl_guest_class_" << format_hex_no_prefix(*cls.getInteger("address"), 8);
-        name.flush();
-        meta << "extern char " << symbol << ";\n";
-        classlist.push_back("&" + symbol);
-      }
+      classlist.push_back(guest_object("class", *cls.getInteger("address")));
       {
         auto &data = *cls.getObject("data");
         auto &super = *cls.getObject("superclass");

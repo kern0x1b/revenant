@@ -410,10 +410,11 @@ function translate(input, includes, out, images, opt)
     if os.execv("codesign", {"-d", "--entitlements", ":-", input}, {stdout = entitlements, stderr = os.nuldev(), try = true}) ~= 0 then
         io.writefile(entitlements, "")
     end
-    run(e.xlgen, {"--entitlements", entitlements, "--sdk", e.sdk, "--resource-dir", e.resourcedir, "--includes", includes,
-                  "--abi-header", path.join(lab, "src", "runtime", "objc_abi.h"), "--symbols", o("imports.txt"), "--guest-provided", o("provided.txt"),
-                  "--weak-only", o("weak-only.txt"), "--objc-manifest", o("manifest.json"), "--guest-out", o("guest.m"),
-                  "--host-out", o("host.m"), "--passthrough-out", o("passthrough.txt"), "--report-out", o("report.txt")})
+    run(e.xlgen, table.join({"--entitlements", entitlements, "--sdk", e.sdk, "--resource-dir", e.resourcedir, "--includes", includes,
+                             "--abi-header", path.join(lab, "src", "runtime", "objc_abi.h"), "--symbols", o("imports.txt"), "--guest-provided", o("provided.txt"),
+                             "--weak-only", o("weak-only.txt"), "--objc-manifest", o("manifest.json"), "--guest-out", o("guest.m"),
+                             "--host-out", o("host.m"), "--passthrough-out", o("passthrough.txt"), "--report-out", o("report.txt")},
+                            library and {"--library"} or {}))
 
     local need = {}
     for _, line in ipairs(imported) do
@@ -460,25 +461,12 @@ function translate(input, includes, out, images, opt)
         io.writefile(o("lift.stamp"), key)
     end
 
-    local library_flags, host_base = {}, 0
-    if library then
-        local bytes = 0
-        for _, object in ipairs(lifted_objs) do
-            bytes = bytes + filesize(object)
-        end
-        local window = math.ceil((bytes + 0x800000) / 0x1000000) * 0x1000000
-        host_base = tonumber(base) - window
-        if host_base < 0x100000 then
-            raise("the lifted code needs %d bytes below the guest base %s: raise XL_BASE", bytes, base)
-        end
-        library_flags = {"-DXL_LIBRARY", string.format("-DXL_LIBRARY_BASE=0x%xu", host_base)}
-    end
-    local extra_cflags = table.join(library_flags, words(getenv("XL_EXTRA_CFLAGS")))
+    local extra_cflags = table.join(library and {"-DXL_LIBRARY"} or {}, words(getenv("XL_EXTRA_CFLAGS")))
     local clang = path.join(e.llvmbin, "clang")
     local runtime = path.join(lab, "src", "runtime")
     run(clang, table.join(host, {"-I", out, "-I", runtime}, extra_cflags, {"-c", path.join(runtime, "runtime.c"), "-o", o("runtime.o")}))
     if library then
-        run(clang, table.join(host, {"-I", out, "-I", runtime}, extra_cflags, {"-c", path.join(runtime, "library.c"), "-o", o("library.o")}))
+        run(clang, table.join(host, {"-I", out, "-I", runtime, "-I", path.join(lab, "include")}, extra_cflags, {"-c", path.join(runtime, "library.c"), "-o", o("library.o")}))
         writelines(o("exports.txt"), {"_xl_library_init", "_xl_library_diagnostics"})
     end
     for _, source in ipairs({path.join(runtime, "bridge.m"), path.join(runtime, "objc_bridge.m"), path.join(runtime, "swift_classes.m"),
@@ -554,8 +542,7 @@ function translate(input, includes, out, images, opt)
     local binary = o(library and name .. ".dylib" or name)
     local kind = {"-Wl,-no_pie"}
     if library then
-        kind = {"-dynamiclib", "-install_name", getenv("XL_INSTALL_NAME") or "@rpath/" .. name .. ".dylib",
-                string.format("-Wl,-image_base,0x%x", host_base), "-Wl,-exported_symbols_list," .. o("exports.txt")}
+        kind = {"-dynamiclib", "-install_name", getenv("XL_INSTALL_NAME") or "@rpath/" .. name .. ".dylib", "-Wl,-exported_symbols_list," .. o("exports.txt")}
     end
     local function link(more)
         return os.execv("xcrun", table.join({"clang", "-target", "armv7-apple-ios6.0", "-isysroot", e.sdk, "-fuse-ld=" .. e.ld}, kind,

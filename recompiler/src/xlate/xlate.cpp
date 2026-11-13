@@ -3,6 +3,7 @@
 #include "objc.h"
 #include "tsd_scan.h"
 #include "unwind.h"
+#include "xl_guest_image.h"
 
 #include <llvm-c/Core.h>
 #include <llvm/Bitcode/BitcodeWriter.h>
@@ -45,7 +46,8 @@ static cl::opt<std::string> ResolvedOut("resolved-out", cl::desc("With --objc-ma
 static cl::opt<std::string> Output("output", cl::desc("Output bitcode"));
 static cl::opt<std::string> IROutput("ir", cl::desc("Optional textual IR output"));
 static cl::opt<std::string> LayoutOutput("layout", cl::desc("Linker arguments placing guest segments"));
-static cl::opt<bool> Library("library", cl::desc("With --layout: the output is a dylib, so __LINKEDIT is placed after the last guest segment"));
+static cl::opt<bool> Library("library", cl::desc("The output is a dylib whose guest segments are one image in a section (__XGUEST,__image) that the loader maps at their addresses, "
+                                                 "with a table of the slots that hold host addresses, instead of segments the linker places there"));
 static cl::opt<std::string> StateHeader("state-header", cl::desc("C header with guest register offsets and guest export addresses"));
 static cl::opt<std::string> PassthroughPath("passthrough", cl::desc("Host symbols guest data may bind directly"));
 static cl::opt<std::string> ObjCManifest("objc-manifest", cl::desc("Write the Objective-C metadata of the guest images as JSON"));
@@ -1241,7 +1243,7 @@ Overrides ObjCOverrides(Module &module, const std::vector<xlate::ObjCImage> &obj
   std::map<uint64_t, GlobalVariable *> classes;
   for (auto &image : objc) {
     for (auto &cls : image.classes) {
-      for (auto address : {cls.address, cls.metaclass}) {
+      for (auto address : Library ? std::vector<uint64_t>{} : std::vector<uint64_t>{cls.address, cls.metaclass}) {
         auto global = new GlobalVariable(module, class_type, false, GlobalValue::ExternalLinkage, nullptr,
                                          "xl_guest_class_" + Hex(address));
         global->setVisibility(GlobalValue::HiddenVisibility);
@@ -1276,13 +1278,13 @@ Overrides ObjCOverrides(Module &module, const std::vector<xlate::ObjCImage> &obj
       object.fields = {pointer(metaclass), pointer(cls.superclass), symbol("_objc_empty_cache"),
                        symbol("_objc_empty_vtable"), symbol("xl_objc_ro_" + suffix), padding(20)};
       object.size = 40;
-      object.global = classes[cls.address];
+      object.global = Library ? nullptr : classes[cls.address];
       overrides[cls.address] = object;
       Override meta;
       meta.fields = {pointer(cls.meta_isa), pointer(cls.meta_superclass), symbol("_objc_empty_cache"),
                      symbol("_objc_empty_vtable"), symbol("xl_objc_metaro_" + suffix), padding(20)};
       meta.size = 40;
-      meta.global = classes[cls.metaclass];
+      meta.global = Library ? nullptr : classes[cls.metaclass];
       overrides[cls.metaclass] = meta;
     }
     for (auto &protocol : objc[image].protocols) {
@@ -1307,9 +1309,11 @@ Overrides ObjCOverrides(Module &module, const std::vector<xlate::ObjCImage> &obj
                       ConstantInt::get(i32, 0),
                       padding(occupied - 44)};
       value.size = occupied;
-      value.global = new GlobalVariable(module, protocol_type, false, GlobalValue::ExternalLinkage, nullptr,
-                                        "xl_guest_protocol_" + Hex(protocol.address));
-      value.global->setVisibility(GlobalValue::HiddenVisibility);
+      if (!Library) {
+        value.global = new GlobalVariable(module, protocol_type, false, GlobalValue::ExternalLinkage, nullptr,
+                                          "xl_guest_protocol_" + Hex(protocol.address));
+        value.global->setVisibility(GlobalValue::HiddenVisibility);
+      }
       overrides[protocol.address] = value;
     }
     for (auto &string : objc[image].strings) {
@@ -1323,10 +1327,214 @@ Overrides ObjCOverrides(Module &module, const std::vector<xlate::ObjCImage> &obj
   return overrides;
 }
 
-bool EmitGuestData(Program &program, Module &module, std::vector<GuestSegment> &out, const Overrides &overrides) {
+bool SkippedSegment(const xlate::Segment &segment) {
+  return segment.name == "__PAGEZERO" || segment.name == "__LINKEDIT" || !segment.vmsize;
+}
+
+Overrides SegmentPieces(Program &program, Module &module, Image &image, const xlate::Segment &segment, const Overrides &overrides, bool &ok) {
   auto &context = module.getContext();
   auto i32 = Type::getInt32Ty(context);
   auto i64 = Type::getInt64Ty(context);
+  std::map<uint64_t, Constant *> slots;
+  for (auto &[vmaddr, target] : image.rebases()) {
+    if (vmaddr < segment.vmaddr || vmaddr >= segment.vmaddr + segment.vmsize) {
+      continue;
+    }
+    uint64_t value = target & 0x00FFFFFFFFFFFFFFull;
+    if (value < image.preferred_base() || value >= image.image_end()) {
+      errs() << "xlate: " << image.path() << ": rebase at 0x" << Hex(vmaddr) << " targets 0x" << Hex(value)
+             << " outside the image\n";
+      ok = false;
+      continue;
+    }
+    slots[vmaddr] = ConstantInt::get(i64, image.host(value));
+  }
+  for (auto &[vmaddr, bind] : image.binds()) {
+    if (vmaddr < segment.vmaddr || vmaddr >= segment.vmaddr + segment.vmsize) {
+      continue;
+    }
+    if (auto target = program.exports.Find(bind.library, bind.symbol)) {
+      slots[vmaddr] = ConstantInt::get(i64, *target + bind.addend);
+    } else if (program.passthrough.count(bind.symbol)) {
+      auto host = HostSymbol(module, bind.symbol);
+      if (bind.weak_import) {
+        if (auto global = dyn_cast<GlobalVariable>(host)) {
+          global->setLinkage(GlobalValue::ExternalWeakLinkage);
+        }
+      }
+      Constant *address = ConstantExpr::getPtrToInt(host, i32);
+      if (bind.addend) {
+        address = ConstantExpr::getAdd(address, ConstantInt::get(i32, bind.addend));
+      }
+      slots[vmaddr] = ConstantStruct::getAnon(context, {address, ConstantInt::get(i32, 0)}, true);
+    } else if (IsPersonality(bind.symbol)) {
+      slots[vmaddr] = ConstantInt::get(i64, 0);
+    } else if (bind.symbol == "dyld_stub_binder" || bind.weak_import || bind.symbol.rfind(kTrapPrefix, 0) == 0) {
+      if (bind.weak_import && program.exports.Find({}, bind.symbol)) {
+        errs() << "xlate: " << image.path() << ": weak import " << bind.symbol << " of " << bind.library
+               << " is left unbound although a guest image defines that name; a bind takes the library it names\n";
+      }
+      slots[vmaddr] = ConstantInt::get(i64, 0);
+    } else {
+      errs() << "xlate: " << image.path() << ": data bind to unresolved symbol " << bind.symbol << "\n";
+      ok = false;
+    }
+  }
+  Overrides pieces;
+  for (auto &[vmaddr, value] : slots) {
+    Override piece;
+    piece.fields = {value};
+    piece.size = 8;
+    pieces[vmaddr] = piece;
+  }
+  for (auto &[host, piece] : overrides) {
+    uint64_t vmaddr = host - image.slide();
+    if (vmaddr < segment.vmaddr || vmaddr >= segment.vmaddr + segment.vmsize) {
+      continue;
+    }
+    pieces.erase(pieces.lower_bound(vmaddr), pieces.lower_bound(vmaddr + piece.size));
+    pieces[vmaddr] = piece;
+  }
+  return pieces;
+}
+
+struct HostSlot {
+  uint64_t address;
+  Constant *value;
+};
+
+bool Flatten(const DataLayout &layout, Constant *constant, uint64_t offset, std::vector<uint8_t> &bytes, uint64_t address,
+             std::vector<HostSlot> &slots) {
+  uint64_t size = layout.getTypeAllocSize(constant->getType()).getFixedValue();
+  if (offset + size > bytes.size()) {
+    return false;
+  }
+  if (auto integer = dyn_cast<ConstantInt>(constant)) {
+    uint64_t value = integer->getZExtValue();
+    for (unsigned index = 0; index < layout.getTypeStoreSize(integer->getType()).getFixedValue(); ++index) {
+      bytes[offset + index] = value >> (8 * index);
+    }
+    return true;
+  }
+  if (isa<ConstantAggregateZero>(constant)) {
+    std::fill_n(bytes.begin() + offset, size, 0);
+    return true;
+  }
+  if (auto aggregate = dyn_cast<ConstantStruct>(constant)) {
+    auto &structure = *layout.getStructLayout(aggregate->getType());
+    for (unsigned index = 0; index < aggregate->getNumOperands(); ++index) {
+      if (!Flatten(layout, aggregate->getOperand(index), offset + structure.getElementOffset(index), bytes, address, slots)) {
+        return false;
+      }
+    }
+    return true;
+  }
+  if (constant->getType()->isIntegerTy(32)) {
+    slots.push_back({address + offset, constant});
+    return true;
+  }
+  return false;
+}
+
+template <typename T>
+void Store(std::vector<uint8_t> &blob, size_t offset, const T &value) {
+  std::memcpy(blob.data() + offset, &value, sizeof value);
+}
+
+bool EmitGuestImage(Program &program, Module &module, const Overrides &overrides) {
+  auto &context = module.getContext();
+  auto i32 = Type::getInt32Ty(context);
+  auto &layout = module.getDataLayout();
+  struct Record {
+    xl_guest_segment header;
+    std::vector<uint8_t> bytes;
+  };
+  std::vector<Record> records;
+  std::vector<HostSlot> slots;
+  bool ok = true;
+  for (auto &image : program.images) {
+    for (auto &segment : image->segments()) {
+      if (SkippedSegment(segment)) {
+        continue;
+      }
+      uint64_t address = image->host(segment.vmaddr);
+      if (address % XL_GUEST_GRANULE || segment.vmsize % XL_GUEST_GRANULE || address + segment.vmsize > UINT32_MAX) {
+        errs() << "xlate: " << image->path() << ": segment " << segment.name << " at 0x" << Hex(address) << " of 0x" << Hex(segment.vmsize)
+               << " bytes is not a whole number of 0x" << Hex(XL_GUEST_GRANULE) << " byte granules below 4 GB\n";
+        ok = false;
+        continue;
+      }
+      std::vector<uint8_t> bytes(segment.vmsize);
+      image->ReadBytes(image->host(segment.vmaddr), bytes.data(), bytes.size());
+      for (auto &[vmaddr, piece] : SegmentPieces(program, module, *image, segment, overrides, ok)) {
+        uint64_t offset = vmaddr - segment.vmaddr;
+        for (auto field : piece.fields) {
+          if (!Flatten(layout, field, offset, bytes, address, slots)) {
+            errs() << "xlate: " << image->path() << ": the field at 0x" << Hex(address + offset) << " is not a number or a host address\n";
+            ok = false;
+            break;
+          }
+          offset += layout.getTypeAllocSize(field->getType()).getFixedValue();
+        }
+      }
+      size_t length = bytes.size();
+      while (length && !bytes[length - 1]) {
+        --length;
+      }
+      length = std::min<uint64_t>(AlignUp(length, XL_GUEST_GRANULE), bytes.size());
+      bytes.resize(length);
+      Record record;
+      record.header = {static_cast<uint32_t>(address), static_cast<uint32_t>(segment.vmsize), 0, static_cast<uint32_t>(length),
+                       static_cast<uint32_t>(segment.initprot & (XL_GUEST_READ | XL_GUEST_WRITE))};
+      record.bytes = std::move(bytes);
+      records.push_back(std::move(record));
+    }
+  }
+  if (records.empty()) {
+    errs() << "xlate: no guest segment to put in the library\n";
+    return false;
+  }
+  if (!ok) {
+    return false;
+  }
+  xl_guest_header header = {XL_GUEST_MAGIC, XL_GUEST_VERSION, UINT32_MAX, 0, static_cast<uint32_t>(records.size())};
+  uint64_t cursor = AlignUp(sizeof header + records.size() * sizeof(xl_guest_segment), XL_GUEST_GRANULE);
+  for (auto &record : records) {
+    header.low = std::min(header.low, record.header.address);
+    header.high = std::max(header.high, record.header.address + record.header.size);
+    if (record.header.length) {
+      record.header.offset = cursor;
+      cursor += record.header.length;
+    }
+  }
+  std::vector<uint8_t> blob(cursor);
+  Store(blob, 0, header);
+  for (size_t index = 0; index < records.size(); ++index) {
+    Store(blob, sizeof header + index * sizeof(xl_guest_segment), records[index].header);
+    std::copy(records[index].bytes.begin(), records[index].bytes.end(), blob.begin() + records[index].header.offset);
+  }
+  auto array = ConstantDataArray::get(context, ArrayRef<uint8_t>(blob));
+  auto image = new GlobalVariable(module, array->getType(), true, GlobalValue::InternalLinkage, array, "xl_guest_image");
+  image->setSection(std::string(XL_GUEST_SEGMENT) + "," + XL_GUEST_SECTION);
+  image->setAlignment(Align(XL_GUEST_GRANULE));
+  appendToCompilerUsed(module, {image});
+
+  std::sort(slots.begin(), slots.end(), [](const HostSlot &a, const HostSlot &b) { return a.address < b.address; });
+  auto slot_type = StructType::get(context, {i32, i32});
+  std::vector<Constant *> entries;
+  for (auto &slot : slots) {
+    entries.push_back(ConstantStruct::get(slot_type, {ConstantInt::get(i32, slot.address), slot.value}));
+  }
+  auto table_type = ArrayType::get(slot_type, entries.size());
+  new GlobalVariable(module, table_type, true, GlobalValue::ExternalLinkage, ConstantArray::get(table_type, entries), "xl_guest_slots");
+  new GlobalVariable(module, i32, true, GlobalValue::ExternalLinkage, ConstantInt::get(i32, entries.size()), "xl_guest_slot_count");
+  errs() << "xlate: guest image 0x" << Hex(header.low) << "-0x" << Hex(header.high) << ", " << records.size() << " segments, " << blob.size()
+         << " bytes in the library, " << entries.size() << " slots hold host addresses\n";
+  return true;
+}
+
+bool EmitGuestData(Program &program, Module &module, std::vector<GuestSegment> &out, const Overrides &overrides) {
+  auto &context = module.getContext();
   bool ok = true;
   unsigned image_index = 0;
   for (auto &image : program.images) {
@@ -1346,7 +1554,7 @@ bool EmitGuestData(Program &program, Module &module, std::vector<GuestSegment> &
       }
     }
     for (auto &segment : image->segments()) {
-      if (segment.name == "__PAGEZERO" || segment.name == "__LINKEDIT" || !segment.vmsize) {
+      if (SkippedSegment(segment)) {
         continue;
       }
       std::string host_name = "__X" + std::to_string(image_index) +
@@ -1356,66 +1564,7 @@ bool EmitGuestData(Program &program, Module &module, std::vector<GuestSegment> &
       }
       std::vector<uint8_t> bytes(segment.vmsize);
       image->ReadBytes(image->host(segment.vmaddr), bytes.data(), bytes.size());
-      std::map<uint64_t, Constant *> slots;
-      for (auto &[vmaddr, target] : image->rebases()) {
-        if (vmaddr < segment.vmaddr || vmaddr >= segment.vmaddr + segment.vmsize) {
-          continue;
-        }
-        uint64_t value = target & 0x00FFFFFFFFFFFFFFull;
-        if (value < image->preferred_base() || value >= image->image_end()) {
-          errs() << "xlate: " << image->path() << ": rebase at 0x" << Hex(vmaddr) << " targets 0x" << Hex(value)
-                 << " outside the image\n";
-          ok = false;
-          continue;
-        }
-        slots[vmaddr] = ConstantInt::get(i64, image->host(value));
-      }
-      for (auto &[vmaddr, bind] : image->binds()) {
-        if (vmaddr < segment.vmaddr || vmaddr >= segment.vmaddr + segment.vmsize) {
-          continue;
-        }
-        if (auto target = program.exports.Find(bind.library, bind.symbol)) {
-          slots[vmaddr] = ConstantInt::get(i64, *target + bind.addend);
-        } else if (program.passthrough.count(bind.symbol)) {
-          auto host = HostSymbol(module, bind.symbol);
-          if (bind.weak_import) {
-            if (auto global = dyn_cast<GlobalVariable>(host)) {
-              global->setLinkage(GlobalValue::ExternalWeakLinkage);
-            }
-          }
-          Constant *address = ConstantExpr::getPtrToInt(host, i32);
-          if (bind.addend) {
-            address = ConstantExpr::getAdd(address, ConstantInt::get(i32, bind.addend));
-          }
-          slots[vmaddr] = ConstantStruct::getAnon(context, {address, ConstantInt::get(i32, 0)}, true);
-        } else if (IsPersonality(bind.symbol)) {
-          slots[vmaddr] = ConstantInt::get(i64, 0);
-        } else if (bind.symbol == "dyld_stub_binder" || bind.weak_import || bind.symbol.rfind(kTrapPrefix, 0) == 0) {
-          if (bind.weak_import && program.exports.Find({}, bind.symbol)) {
-            errs() << "xlate: " << image->path() << ": weak import " << bind.symbol << " of " << bind.library
-                   << " is left unbound although a guest image defines that name; a bind takes the library it names\n";
-          }
-          slots[vmaddr] = ConstantInt::get(i64, 0);
-        } else {
-          errs() << "xlate: " << image->path() << ": data bind to unresolved symbol " << bind.symbol << "\n";
-          ok = false;
-        }
-      }
-      Overrides pieces;
-      for (auto &[vmaddr, value] : slots) {
-        Override piece;
-        piece.fields = {value};
-        piece.size = 8;
-        pieces[vmaddr] = piece;
-      }
-      for (auto &[host, piece] : overrides) {
-        uint64_t vmaddr = host - image->slide();
-        if (vmaddr < segment.vmaddr || vmaddr >= segment.vmaddr + segment.vmsize) {
-          continue;
-        }
-        pieces.erase(pieces.lower_bound(vmaddr), pieces.lower_bound(vmaddr + piece.size));
-        pieces[vmaddr] = piece;
-      }
+      auto pieces = SegmentPieces(program, module, *image, segment, overrides, ok);
       std::vector<Constant *> fields;
       std::vector<Type *> types;
       uint64_t cursor = segment.vmaddr;
@@ -1588,11 +1737,7 @@ bool WriteLayout(const std::vector<GuestSegment> &segments) {
     os << "-Wl,-segprot," << name << "," << prot << "," << prot << "\n";
   }
   if (Library) {
-    uint64_t end = 0;
-    for (auto &entry : segments) {
-      end = std::max(end, entry.image->host(entry.segment.vmaddr) + entry.segment.vmsize);
-    }
-    os << "-Wl,-segaddr,__LINKEDIT,0x" << Hex(AlignUp(end, 0x10000)) << "\n";
+    os << "-Wl,-segprot," << XL_GUEST_SEGMENT << ",r,r\n";
   }
   return true;
 }
@@ -1840,7 +1985,8 @@ int main(int argc, char **argv) {
   auto invokes = pads.Lower(calls);
   errs() << "xlate: " << invokes << " call sites in " << pads.functions() << " functions unwind to " << pad_targets << " landing pads\n";
   std::vector<GuestSegment> segments;
-  if (!EmitGuestData(program, module, segments, ObjCOverrides(module, objc))) {
+  auto overrides = ObjCOverrides(module, objc);
+  if (!(Library ? EmitGuestImage(program, module, overrides) : EmitGuestData(program, module, segments, overrides))) {
     return 1;
   }
   EmitTables(program, lifter, module);
