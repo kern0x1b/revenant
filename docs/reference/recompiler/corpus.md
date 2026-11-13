@@ -131,24 +131,35 @@ A control for the ARMv8 Crypto extension that BoringSSL, and with it CryptoKit, 
 CPU: AESE, AESD, AESMC, AESIMC, SHA1C, SHA1P, SHA1M, SHA1H, SHA1SU0, SHA1SU1, SHA256H, SHA256H2, SHA256SU0 and
 SHA256SU1, plus the PMULL and PMULL2 that GHASH uses, in their 8-bit polynomial and 64-bit polynomial forms. armv7 has
 no instruction for any of them, so the lifter turns each into a call of a helper in `recompiler/src/runtime/crypto.c`;
-[Lifted helpers](lifted-helpers.md) is the contract between the two. The check also covers TRN1 and TRN2, which
-BoringSSL's AES-GCM kernel (`aes_gcm_enc_kernel`) uses to arrange its GHASH operands and which rellume did not lift: the
-translated kernel stopped at the first one.
+[Lifted helpers](lifted-helpers.md) is the contract between the two. The check also covers the instructions that
+BoringSSL's kernels use and that rellume did not lift or lifted wrongly: TRN1 and TRN2 (the AES-GCM kernel arranges its
+GHASH operands with them, and the translated kernel stopped at the first one); SLI and SRI, UADDLV and SADDLV (ChaCha20
+rotates with `USHR` and `SLI`); the conversions between half and single or double precision, which a Swift `Float16`
+meets (a helper in `recompiler/src/runtime/half.c`); and ADC, ADCS, SBC, SBCS and NGC, whose flags were computed from a
+wrapped operand.
 
-`main.c` defines 30 functions: one per instruction, a round of AESE with AESMC, a loop of rounds, and TRN1 and TRN2 in
-the 8-, 16-, 32- and 64-bit element forms of both vector widths. It is built for arm64 with `-march=armv8-a+crypto`,
-so clang emits each intrinsic as its instruction; the 64-bit TRN forms are inline assembly, because clang turns the
-intrinsic into ZIP. The check proves six things, all on the host, which is an Apple-Silicon Mac, so the oracle is the
-hardware itself:
+`main.c` defines 74 functions: one per instruction, a round of AESE with AESMC, a loop of rounds, TRN1 and TRN2, SLI and
+SRI, UADDLV and SADDLV, and FCVT in the element forms and vector widths of each, and the five carry instructions in
+their 32- and 64-bit forms with the flags they leave, and the final reduction of Poly1305 (an `ADDS`, two `SBCS` and
+three `CSEL`), whose wrong result on the phone found the flag bug. It is built for arm64 with `-march=armv8-a+crypto`,
+so clang emits each intrinsic as its instruction; the 64-bit TRN forms and the carry instructions are inline assembly
+(`carry.h`, which the oracle includes too, so both run the same instructions), because clang turns the TRN intrinsic
+into ZIP and does not pick the carry forms on its own. The check proves six things, all on the host, which is an
+Apple-Silicon Mac, so the oracle is the hardware itself:
 
 1. The helpers agree with the instructions. `driver.c` includes `crypto.c` and compares each helper with the ACLE
    intrinsic on 20000 random inputs each (`AESE` and `AESD` also on every byte value in every position). It also runs AES-128 and AES-256 from FIPS 197
    appendix C, encrypting and decrypting with the equivalent inverse cipher (the decryption round keys go through
-   AESIMC), and one SHA-1 and one SHA-256 block of `abc` from FIPS 180-4, built from the helpers alone.
-2. farmdec decodes what an assembler assembles. A sweep of 498688 words (every register combination of each Crypto and
-   PMULL encoding, and a spread of the SIMD space around them) is assembled with `llvm-objdump` as the oracle and
-   decoded; the operation, the registers and the arrangement must agree on all of them, and no word that
-   `llvm-objdump` rejects may decode as one of these operations.
+   AESIMC), and one SHA-1 and one SHA-256 block of `abc` from FIPS 180-4, built from the helpers alone. The half-precision
+   helpers are compared with the hardware conversion on all 65536 halves widened to single and double, and on the
+   neighbourhood of every half value narrowed (the neighbours, the midpoints, the ties, the values that round up to
+   infinity or down to zero, signalling NaNs). `pmull8` is compared with a bit-by-bit product, because on this Mac
+   `vmull_p8` is the instruction the helper is built from; `pmull64` with `vmull_p64`.
+2. farmdec decodes what an assembler assembles. A sweep of 516512 words (every register combination of each Crypto,
+   PMULL, SLI, SRI, SADDLV, UADDLV and FCVT encoding, and a spread of the SIMD space around them) is assembled with
+   `llvm-objdump` as the oracle and decoded; the operation, the registers and the arrangement must agree on all of them,
+   and no word that `llvm-objdump` rejects may decode as one of these operations (farmdec decodes 632 reserved
+   encodings of the last five that `llvm-objdump` rejects; the sweep counts them and no code holds one).
 3. xlate lifts every function with 0 failures and leaves no instruction of the fixture unlifted (`coverage: 0 of ...`),
    and each lifted function holds the helper calls of its instruction and no others. SHA1H, a rotate of one word, is
    one `llvm.fshl.i32`.
@@ -157,10 +168,18 @@ hardware itself:
 5. The lifted functions, compiled natively with the helpers and run on the host, give the hardware's result for every
    function on 4000 states each (the all-zero and all-one states first, then random ones), with the callee-saved
    registers untouched. This is what proves the register
-   mapping, the choice of the PMULL halves and the scalar operands, which the IR assertions only describe.
+   mapping, the choice of the PMULL halves and the scalar operands, which the IR assertions only describe. The carry
+   cases take their operands from a list of edge values (0, 1, 2, all ones, the signed limits, the 32-bit limits) and
+   a carry in, because random 64-bit operands almost never wrap: the 2431 mismatches this found in the first version
+   were `ADCS` and `SBCS` carry and overflow flags. The lifter's mutants (a mask one bit off in SLI and SRI, the signs
+   of UADDLV swapped, the helper names swapped in FCVT) fail this oracle or the IR assertions.
 6. The lifted code and the helpers compile for armv7 with the flags `recompiler/tools/translate.lua` uses and link: the
-   prototype of every `rellume_aarch64_` function the lifted code declares is the one `crypto.c` defines, and no such
+   prototype of every `rellume_aarch64_` function the lifted code declares is the one `crypto.c` and `half.c` define, and no such
    symbol stays undefined.
+
+`recompiler/tools/coverage.lua` measures the same thing on real images: it lists what xlate leaves unlifted in an SDK
+and which functions own it. What remains in the Recaptcha SDK and the libswift set, and why, is in
+[Lifted helpers](lifted-helpers.md).
 
 ### cryptodevice (device part by hand)
 
@@ -168,29 +187,37 @@ The Crypto extension run on a real armv7 phone. `tests/cryptodevice/main.c` take
 (`tests/crypto/vectors.h`: FIPS 197 AES-128 and AES-256 encryption and decryption, and one block each of SHA-1 and
 SHA-256 from FIPS 180-4) with the hardware intrinsics in place of the helpers, adds known products of PMULL and PMULL2,
 and times a round of AESE and AESMC, a round of AESD and AESIMC, and the two PMULL forms. It prints `ok <name>` or
-`FAIL <name>` for ten vectors, and `done`.
+`FAIL <name>` for each of its 51 checks, and `done`: the ten vectors above, SLI, SRI, UADDLV and SADDLV on known
+operands, the half-precision conversions at their boundaries, and the flags of `ADCS` and `SBCS` with an all-ones operand
+and of Poly1305's final reduction.
 
-`check.lua <out> --host-only` builds it for the Mac (where it must print the ten `ok` itself, so a wrong vector is
+`check.lua <out> --host-only` builds it for the Mac (where it must print all 51 `ok` itself, so a wrong vector is
 caught before the phone), compiles it for arm64 with `-march=armv8-a+crypto`, and translates it. `check.lua <out>
---device-only` copies the translated program to the claimed phone and requires the ten `ok` and exit 0. The times it
+--device-only` copies the translated program to the claimed phone and requires all 51 `ok` and exit 0. The times it
 prints are in [Lifted helpers](lifted-helpers.md).
 
 ### cryptoboringssl (device part by hand)
 
 BoringSSL's own ARMv8 paths run on a real armv7 phone. `tests/cryptoboringssl/main.c` is a C program that links the
 `libswiftCryptoKit.dylib` of `revenant@swift-crypto` and calls the BoringSSL functions that library exports
-(`CCryptoBoringSSL_SHA256`, `CCryptoBoringSSL_SHA1` and the `EVP_AEAD` interface of AES-128-GCM and AES-256-GCM). The
+(`CCryptoBoringSSL_SHA256`, `CCryptoBoringSSL_SHA1` and the `EVP_AEAD` interface of AES-128-GCM, AES-256-GCM and ChaCha20-Poly1305). The
 library takes its Crypto extension paths on an Apple arm64 CPU without asking the CPU, which the program shows by
-printing `OPENSSL_get_armcap()` (`0000003d`: NEON, AES, SHA-1, SHA-256, PMULL). It checks
+printing `OPENSSL_get_armcap()` (`0000003d`: NEON, AES, SHA-1, SHA-256, PMULL; the SHA-512 bit is clear). It checks
 
 - SHA-256 of `abc` and of 1000 bytes, and SHA-1 of `abc`, against known digests;
 - AES-128-GCM and AES-256-GCM seals of 16 zero bytes under a zero key and nonce (NIST's test cases) and AES-256-GCM of
   1000 bytes (the oracle for those 1000 bytes is CryptoKit on the Mac), each for the ciphertext, the tag, the open and
   the refusal of a tag with a flipped bit;
-- the throughput of SHA-256 and of AES-256-GCM over 256 KiB.
+- ChaCha20-Poly1305 of RFC 8439 section 2.8.2 (a 114-byte message with 12 bytes of associated data, key `80..9f`; CryptoKit's
+  `ChaChaPoly` on the Mac gives the same ciphertext and tag), and of 16 zero bytes and 1000 bytes under a zero key and
+  nonce (the oracle is CryptoKit on the Mac), each for the ciphertext, the tag, the open and the refusal of a tag with a
+  flipped bit, and for the RFC vector also the refusal of changed associated data. The 1000-byte message takes
+  BoringSSL's stitched NEON loop, and its tag came out wrong in its first byte (five too large) until the flags of
+  `SBCS` were fixed;
+- the throughput of SHA-256, AES-256-GCM and ChaCha20-Poly1305 over 256 KiB.
 
 The translated program imports `libswiftCryptoKit.dylib`, `libswiftCore.dylib` and the C++ runtime as guest images. The
-check wants all 15 names `ok`, `done failures=0`, and exit 0. `check.lua <out> --host-only` stops after the translation
+check wants all 28 names `ok`, `done failures=0`, and exit 0. `check.lua <out> --host-only` stops after the translation
 (about ten minutes), `--device-only` runs the result on the claimed phone. It needs `XL_SWIFTCRYPTO_LIBS`, the folder
 with `libswiftCryptoKit.dylib`, `libswiftCore.dylib`, `libc++.1.dylib` and `libc++abi.1.dylib`, and
 `XL_BORINGSSL_INCLUDE`, the `Sources/CCryptoBoringSSL/include` folder of the swift-crypto sources.
