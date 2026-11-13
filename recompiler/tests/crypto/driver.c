@@ -112,6 +112,23 @@ AES_BINARY(aese, vaeseq_u8)
 AES_BINARY(aesd, vaesdq_u8)
 AES_UNARY(aesmc, vaesmcq_u8)
 AES_UNARY(aesimc, vaesimcq_u8)
+
+#define AES_EVERY_BYTE(name, intrinsic)                                              \
+    static void test_every_byte_##name(void) {                                       \
+        for (unsigned offset = 0; offset < 256; offset++) {                          \
+            uint8_t d[16], n[16] = {0}, want[16], got[16];                           \
+            for (unsigned i = 0; i < 16; i++) {                                      \
+                d[i] = (uint8_t)(offset + i);                                        \
+            }                                                                        \
+            vst1q_u8(want, intrinsic(vld1q_u8(d), vld1q_u8(n)));                     \
+            memcpy(got, d, 16);                                                      \
+            rellume_aarch64_##name(got, n);                                          \
+            compare(#name " every byte", want, got, 16);                             \
+        }                                                                            \
+    }
+
+AES_EVERY_BYTE(aese, vaeseq_u8)
+AES_EVERY_BYTE(aesd, vaesdq_u8)
 SHA_ELEMENT(sha1c, vsha1cq_u32)
 SHA_ELEMENT(sha1p, vsha1pq_u32)
 SHA_ELEMENT(sha1m, vsha1mq_u32)
@@ -183,6 +200,11 @@ static void unhex(const char *text, uint8_t *bytes) {
     }
 }
 
+static uint32_t substitute_word(uint32_t word) {
+    uint8x16_t columns = vreinterpretq_u8_u32(vdupq_n_u32(word));
+    return vgetq_lane_u32(vreinterpretq_u32_u8(vaeseq_u8(columns, vdupq_n_u8(0))), 0);
+}
+
 static void expand_key(const uint8_t *key, unsigned key_words, uint8_t schedule[][16]) {
     uint32_t words[60];
     static const uint8_t round_constants[10] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36};
@@ -191,11 +213,10 @@ static void expand_key(const uint8_t *key, unsigned key_words, uint8_t schedule[
     for (unsigned i = key_words; i < 4 * (rounds + 1); i++) {
         uint32_t word = words[i - 1];
         if (i % key_words == 0) {
-            word = rotate_right(word, 8);
-            word = sbox[word & 255] | sbox[(word >> 8) & 255] << 8 | sbox[(word >> 16) & 255] << 16 | (uint32_t)sbox[word >> 24] << 24;
+            word = substitute_word(rotate_right(word, 8));
             word ^= round_constants[i / key_words - 1];
         } else if (key_words > 6 && i % key_words == 4) {
-            word = sbox[word & 255] | sbox[(word >> 8) & 255] << 8 | sbox[(word >> 16) & 255] << 16 | (uint32_t)sbox[word >> 24] << 24;
+            word = substitute_word(word);
         }
         words[i] = words[i - key_words] ^ word;
     }
@@ -374,6 +395,8 @@ static void test_sha1_abc(void) {
 int main(void) {
     test_aese();
     test_aesd();
+    test_every_byte_aese();
+    test_every_byte_aesd();
     test_aesmc();
     test_aesimc();
     test_sha1c();

@@ -59,6 +59,15 @@ The semantics are those of the Arm Architecture Reference Manual's pseudocode, w
   `PMULL2`. `pmull8` then multiplies the eight bytes pairwise into eight 16-bit lanes, and `pmull64` multiplies the two
   64-bit values into 128 bits, the low half at `vd[0]`.
 
+## Timing
+
+The instructions take the same time for every operand, and the guest chose them for that reason, so the helpers must
+not give an operand any influence on the memory they touch or the branches they take. None indexes a table or
+branches on data. `AESE` and `AESD` compute SubBytes on all 16 bytes at once in bit-sliced form: each byte is
+inverted in GF(2^8) as its 254th power, and the bit-matrix of the S-box is applied to the eight bit-planes. The two
+loop counts of the multiplications are constants, and the permutation of ShiftRows is indexed by the byte position,
+which is public. That costs more than sixteen table loads: the S-box is the price of not leaking the key through the cache.
+
 ## What is not covered
 
 SHA-512 and SHA-3 (`SHA512H`, `SHA512H2`, `SHA512SU0`, `SHA512SU1`, `EOR3`, `BCAX`, `RAX1`, `XAR`) are not decoded and
@@ -68,5 +77,5 @@ them there.
 ## How it is checked
 
 The `crypto` check of the corpus ([corpus.md](corpus.md)) compares every helper with the hardware instruction on
-random inputs, runs the FIPS 197 and FIPS 180-4 vectors through them, checks the lifter's declarations against the
+random inputs (`AESE` and `AESD` also on every byte value in every position), runs the FIPS 197 and FIPS 180-4 vectors through them, checks the lifter's declarations against the
 prototypes of `crypto.c`, and proves that the lifted code links against them for armv7.
