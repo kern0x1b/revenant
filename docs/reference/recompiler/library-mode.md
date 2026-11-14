@@ -16,6 +16,22 @@ What `XL_LIBRARY=1` builds, the loader API, and what was measured on the iPhone 
 | `XL_SWIFT_HOST_ANCESTORS` | Swift classes with an Objective-C ancestor are host objects with a twin | unset |
 | `XL_REPLACES` | guest images that stand for system libraries | unset |
 | `XL_NAMESPACE` | prefix of the Objective-C class names of every guest image but the first (the runtime and the overlays); `none` leaves the names as they are | `XLG.` |
+| `BACKPORTS_DIR` | folder with the `lib*Backports.dylib` of the app's build: the imports the iOS 6.1.3 shared cache lacks and the Backports export bind to them | unset |
+
+A library for an app that ships the Backports is translated with `BACKPORTS_DIR`. Without it every weak import the cache
+lacks (`NSURLComponents`, `NSURLQueryItem`, `NSURLSession`, `NSISO8601DateFormatter`, `WKWebView`, `NSDateInterval`, the
+`NSURL*Key` constants and the like) is left unbound and is nil or zero on the phone, even though the app carries the
+class; the translation lists them in `weak-absent.txt` and, for classes, in `uncovered-classes.txt`. With it the library
+gets one load command for each Backports library it uses (`-dead_strip_dylibs` drops the others), by that library's
+install name, `/usr/lib/revenant/org.revenant.backports/lib<Name>Backports.dylib`; the app has to have those files, as an
+app of revenant's build has through the package `org.revenant.backports`. The registry and the loader do not change.
+The reCAPTCHA Enterprise SDK needs it. Translated without `BACKPORTS_DIR` (2026-11-14, main 64fa5260a) its
+`uncovered-classes.txt` lists 66 class references, among them `NSURLComponents`, `NSURLQueryItem`, `NSURLSession`,
+`NSURLSessionConfiguration`, `NSISO8601DateFormatter`, `NSMeasurement`, `NSDimension`, `WKWebView`,
+`WKWebViewConfiguration` and `DCAppAttestService`, and `weak-absent.txt` lists 70 weak imports (`NSDateInterval`,
+`NSPersonNameComponents`, 25 `NSURL*` key constants and others). With it (main 7bdac1e30) the first list is empty, the second
+has 28 left that the Backports do not export, and the library has strong load commands for ten Backports libraries
+(AVFAudio, CoreData, CoreFoundation, CoreGraphics, DeviceCheck, Foundation, Security, System, UIKit, WebKit).
 
 The output is two dylibs. The first, `<name>.dylib`, has two kinds of content:
 
