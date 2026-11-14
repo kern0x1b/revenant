@@ -739,6 +739,12 @@ whose length is the `count` argument or the length of the `NSRange` is converted
 goes through the block bridge. Before that these methods had a host IMP of bare words, which wrote 8-byte pointers into the
 host's 4-byte arrays and passed the stack block as an object.
 
+`stepHostSequence` checks the same fast-enumeration path without a dictionary: `LibGenericsSequence` is a guest class that
+conforms to `NSFastEnumeration` and hands out 40 objects in batches of the buffer size, and `host.m` calls
+`countByEnumeratingWithState:objects:count:` on it directly. It checks the batches (16, 16 and 8), that every item the host reads
+is non-nil and distinct, that `mutationsPtr` is the host state's own `extra[0]` (the guest sets it to its own `extra[0]`, which
+is in the temporary record the wrapper converts the state through, so the wrapper maps it back) and that `for ... in` sees 40.
+
 What the steps do not cover: the keys and values of the bridged dictionary come to the host as `XLG.__SwiftValue` boxes
 and not as `NSString`, because the `_ObjectiveCBridgeable` conformance of `String` is in the Foundation overlay, which this
 fixture does not load. So the steps look up with a key that the dictionary gave, a lookup with a host `NSString` finds
