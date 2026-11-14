@@ -28,8 +28,10 @@ local STEPS = {
     {"stepHostGetObjects", {"host.getobjects"}},
     {"stepHostFast", {"host.fastenumeration"}},
     {"stepHostEnumerate", {"host.enumerate"}},
+    {"stepShortString", {"short.string"}},
     {"stepHostSequence", {"host.sequence.batch", "host.sequence.items", "host.sequence.mutations", "host.sequence.forin"}},
 }
+local BARE_CONTROLS = {"stepShortString"}
 local CONTROLS = {"stepProxyKind", "stepProxyDescription", "stepProxyIdentity", "stepProxyNested", "stepProxyAny", "stepProxyLifetime", "stepProxyUnique", "stepProxyWeak"}
 
 function main(out, ...)
@@ -86,8 +88,12 @@ function main(out, ...)
             corpus.fail("the report names no host IMP of getCharacters:range:")
         end
         local flags = {"-O2", "-w", "-fobjc-arc", "-I", path.join(e.recompiler, "include"), "-framework", "Foundation", "-framework", "UIKit"}
-        corpus.armv7(e, table.join(flags, {path.join(here, "host.m"), path.join(e.recompiler, "src", "loader", "xl_loader.c"), "-o", o("host")}))
+        local loader = path.join(e.recompiler, "src", "loader", "xl_loader.c")
+        local tagged = path.join(here, "..", "..", "..", "frameworks", "Backports", "src", "Foundation", "NSString+TaggedASCII.m")
+        corpus.armv7(e, table.join(flags, {path.join(here, "host.m"), loader, tagged, "-o", o("host")}))
         corpus.sign(e, o("host"))
+        corpus.armv7(e, table.join(flags, {path.join(here, "host.m"), loader, "-o", o("host_bare")}))
+        corpus.sign(e, o("host_bare"))
         if host_only then
             print("ok (host part)")
             return
@@ -102,6 +108,7 @@ function main(out, ...)
     device.copy(libraries, remote .. "/LibGenerics.dylib")
     device.copy(o("xl/LibGenerics-classes.dylib"), remote .. "/LibGenerics-classes.dylib")
     device.copy(o("host"), remote .. "/host")
+    device.copy(o("host_bare"), remote .. "/host_bare")
     local log = {}
     for _, step in ipairs(STEPS) do
         local output = try { function ()
@@ -130,6 +137,17 @@ function main(out, ...)
         if control:find("\ndone\nexit=0\n", 1, true) then
             io.write(control)
             corpus.fail("%s with XL_PROXY=0 ran to its end: the host reached an object of a generic class the guest allocated without a proxy and nothing failed", step)
+        end
+    end
+    for _, step in ipairs(BARE_CONTROLS) do
+        local control = try { function ()
+            return device.run("chmod +x " .. remote .. "/host_bare && cd " .. remote .. " && DYLD_FALLBACK_LIBRARY_PATH=" .. remote .. " ./host_bare " .. remote ..
+                              "/LibGenerics.dylib LibGenerics " .. step .. " 2>&1; echo exit=$?")
+        end } or ""
+        table.insert(log, control)
+        if control:find("\nok short.string\n", 1, true) or control:find("\ndone\nexit=0\n", 1, true) then
+            io.write(control)
+            corpus.fail("%s on a host without NSString+TaggedASCII ran to its end: the host has the factory the Swift runtime sends for a short ASCII string, so the backport is not what makes it work", step)
         end
     end
     device.run("rm -rf " .. remote)

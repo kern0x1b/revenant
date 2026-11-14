@@ -156,6 +156,12 @@ struct Box {
         report("proxy.enumerate", seen == 3)
     }
 
+    @objc public func stepShortString() {
+        let bridged: AnyObject = "abc"._bridgeToObjectiveCImpl()
+        let text = unsafeBitCast(bridged, to: NSString.self)
+        report("short.string", text.length == 3 && text.character(at: 1) == 98)
+    }
+
     @objc public func stepProxyKind() {
         report("proxy.kind", bridgedTable().isKind(of: NSDictionary.self))
     }
