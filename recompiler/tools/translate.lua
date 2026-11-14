@@ -448,20 +448,39 @@ function translate(input, includes, out, images, opt)
 
     local lifted_mode = env.lifted_mode(getenv("XL_LIFTED_MODE"))
     local duplicates = getenv("XL_REPORT_DUPLICATES") or ""
-    local key = lift_key(e, input, extra, out, replaces, base .. (library and " library" or "") .. " " .. lifted_mode .. " " .. duplicates)
+    local xi = getenv("XL_XI_THRESHOLD") or ""
+    local xi_except = {}
+    for _, part in ipairs(words(getenv("XL_XI_EXCEPT"))) do
+        table.join2(xi_except, {"--xi-except", part})
+    end
+    local key = lift_key(e, input, extra, out, replaces, base .. (library and " library" or "") .. " " .. lifted_mode .. " " .. duplicates .. " xi=" .. xi ..
+                                                           " except=" .. table.concat(xi_except, ","))
     local lifted_objs
     if os.isfile(o("lift.stamp")) and io.readfile(o("lift.stamp")) == key and os.isfile(o("lifted-objs.txt")) then
         print("lift inputs unchanged since the last run: reusing its lifted objects")
         lifted_objs = words(io.readfile(o("lifted-objs.txt")))
     else
         os.tryrm(o("lift.stamp"))
+        os.tryrm(o("flag-flow.txt"))
         run(e.xlate, table.join({"--base", base, "--output", o("lifted.bc"), "--layout", o("layout.txt"), "--passthrough", o("passthrough.txt"),
-                                 "--state-header", o("xl_state.h")}, library and {"--library"} or {}, duplicates == "1" and {"--report-duplicates"} or {},
+                                 "--state-header", o("xl_state.h"), "--flag-flow-summary", o("flag-flow.txt"), "--xi-out", o("xi.txt")}, library and {"--library"} or {},
+                                xi ~= "" and {"--xi-threshold", xi} or {}, xi_except, duplicates == "1" and {"--report-duplicates"} or {},
                                 replaces, {"--bridge", o("libxl-guest.dylib"), input}, extra,
                                 {o("libxl-guest.dylib")}))
         lifted_objs = compile_lifted(e, out, env.lifted_flags(lifted_mode, host))
         io.writefile(o("lifted-objs.txt"), table.concat(lifted_objs, " ") .. "\n")
         io.writefile(o("lift.stamp"), key)
+    end
+    local rewritten = {}
+    for _, line in ipairs(os.isfile(o("xi.txt")) and readlines(o("xi.txt")) or {}) do
+        table.insert(rewritten, "xi-compare: " .. line)
+    end
+    if #rewritten > 0 then
+        io.writefile(o("report.txt"), io.readfile(o("report.txt")) .. table.concat(rewritten, "\n") .. "\n")
+    end
+    print("xi: %d compares with 4 GB compare with the least valid pointer of the host", #rewritten)
+    if os.isfile(o("flag-flow.txt")) then
+        io.writefile(o("report.txt"), io.readfile(o("report.txt")) .. io.readfile(o("flag-flow.txt")))
     end
 
     local extra_cflags = table.join(library and {"-DXL_LIBRARY"} or {}, words(getenv("XL_EXTRA_CFLAGS")))
@@ -525,6 +544,13 @@ function translate(input, includes, out, images, opt)
     local stock_classes = path.join(e.dyld, "classes_armv7.json")
     local stock = os.isfile(stock_classes) and json.loadfile(stock_classes).classes or nil
     local undef_flags = {}
+    for _, object in ipairs(lifted_objs) do
+        for _, symbol in ipairs(unique(nm_undefined(object))) do
+            if symbol:find("^__ZTI") or symbol:find("^__ZTVN10__cxxabiv1") then
+                table.insert(undef_flags, "-Wl,-U," .. symbol)
+            end
+        end
+    end
     if stock then
         local wanted = classes_of(nm_undefined(input))
         for _, image in ipairs(extra) do

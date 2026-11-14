@@ -387,6 +387,9 @@ bool Image::ParseExports(std::string &error) {
     if (!name || name->empty()) {
       continue;
     }
+    if (kind == MachO::N_SECT) {
+      symbols_.emplace(raw.n_value, name->str());
+    }
     if (raw.n_type & MachO::N_EXT) {
       (kind == MachO::N_ABS ? absolutes_ : exports_)[name->str()] = raw.n_value;
     }

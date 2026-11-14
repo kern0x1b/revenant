@@ -80,6 +80,7 @@ class Image {
   const std::map<uint64_t, Bind> &binds() const { return binds_; }
   const std::map<uint64_t, uint64_t> &rebases() const { return rebases_; }
   const std::map<std::string, uint64_t> &exports() const { return exports_; }
+  const std::map<uint64_t, std::string> &symbols() const { return symbols_; }
   const std::map<std::string, uint64_t> &absolutes() const { return absolutes_; }
   const std::map<std::string, Reexport> &reexports() const { return reexports_; }
   const std::vector<std::string> &reexported_libraries() const { return reexported_libraries_; }
@@ -111,6 +112,7 @@ class Image {
   std::map<uint64_t, Bind> binds_;
   std::map<uint64_t, uint64_t> rebases_;
   std::map<std::string, uint64_t> exports_;
+  std::map<uint64_t, std::string> symbols_;
   std::map<std::string, uint64_t> absolutes_;
   std::map<std::string, Reexport> reexports_;
   std::vector<std::string> warnings_;

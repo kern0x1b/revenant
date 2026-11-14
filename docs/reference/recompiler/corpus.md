@@ -14,8 +14,8 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, switchtail, tailcalls, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, objectsplit, segmentlimit, absolutes, hostbridges, checkapi and proxytable; `classpair` and `ordinal` are the device group's, which also runs the
-device part of `exceptions`, `libexceptions` and `hostbridges`. Their output goes to the
+int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, flagflow, hostbridges, checkapi and proxytable; `classpair` and `ordinal` are the device group's, which also runs the
+device part of `exceptions`, `libexceptions`, `libcxxexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
 
@@ -26,6 +26,7 @@ A check that also has a device part is run by hand, with the output folder as it
 ./xmakew l -P . recompiler/tests/classpair/check.lua <out>
 ./xmakew l -P . recompiler/tests/exceptions/check.lua <out>
 ./xmakew l -P . recompiler/tests/libexceptions/check.lua <out>
+./xmakew l -P . recompiler/tests/libcxxexceptions/check.lua <out>
 ./xmakew l -P . recompiler/tests/hostbridges/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftconformance/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftobjc/check.lua <out>
@@ -341,7 +342,42 @@ targets of a jump table, so the step is also the exceptions test of the multi-en
 
 The host part builds and translates the library and the host, and requires that the library registers SjLj frames
 (`_Unwind_SjLj_Register`). The device part runs each step and requires its `ok` names, `done` and `exit=0`. A C++ `throw`
-is not in the check, because it is the known limitation in `library-mode.md`.
+of guest code is the check of [libcxxexceptions](#libcxxexceptions).
+
+### libcxxexceptions
+
+C++ exceptions thrown and caught by guest code in a library (`XL_LIBRARY=1`) that carries the arm64 `libc++` and
+`libc++abi` of `revenant@libcxx` (`XL_CXX_LIBS` names another folder of the two) as guest images, loaded by a small armv7 host
+(`host.mm`, with the loader) that takes the step to run, so each step runs in a process of its own with
+`MallocScribble=1 MallocGuardEdges=1`. The guest (`fixture.mm`, class `LibCxxExceptions`) has eleven steps:
+
+- `stepValue`: `throw` of an `int`, a `const char *`, a `std::string`, a `double`, `char`, `long`, `unsigned short` and
+  `bool` (each caught by its own type), and a 32-byte struct caught by value, by reference and by pointer; `throw 1` meets
+  `catch (long)` before `catch (int)` and must take the second.
+- `stepHierarchy`: a class caught by its exact type, a base, a base of a base, a base by value (sliced), each of the two
+  bases of multiple inheritance, a virtual base and a virtual sibling, and a `catch` of an unrelated class that must not
+  match.
+- `stepStandard`: `std::runtime_error` caught as `std::exception` and as a sibling of `std::logic_error` (which must not
+  match), `std::out_of_range` from `std::vector::at`, `std::logic_error`, `std::string::at`, `std::bad_function_call`,
+  `std::bad_cast` from `dynamic_cast`, `std::invalid_argument`.
+- `stepNested`: a handler that throws another type, `throw;` through a function (the object stays the same one),
+  `catch (...)` with `throw;` twice in a row, a `try` inside a handler, and `std::uncaught_exceptions` during unwinding and
+  after it.
+- `stepUnwind`: destructors run in the order of the frames, the destructors of the members of a constructor that throws,
+  a thrown object copied by a `catch` by value (live objects counted), rethrown, and a loop of 200 throws.
+- `stepPointer`: `std::current_exception`, `std::rethrow_exception`, copies and assignment of `std::exception_ptr`, the
+  object kept past the handler and released, comparison, and `std::throw_with_nested` with `std::rethrow_if_nested`.
+- `stepForeign`: the host throws a `std::runtime_error`, an `int`, an `NSException` and a class of its own through guest
+  frames; the guest's `catch (...)`, `catch (int)`, `throw;`, destructors and `std::current_exception` handle them.
+- `stepRoundTrip`: a guest block that throws, called by the host's `enumerateObjectsUsingBlock:`, caught by the guest that
+  called it (a class of the guest's and a `std::runtime_error`).
+- `stepEscape`, `stepEscapeInteger`, `stepEscapeStandard`: guest code throws a class, an `int` and a `std::runtime_error`
+  that no guest frame catches; the host's `catch (int)` must take the `int`, and for the class and the `std::runtime_error`
+  only the host's `catch (...)` matches (`host.caught.other`), because the host does not know the guest's classes.
+
+The host part builds and translates the library and the host and fails if `__cxa_throw` stays a fault in
+`report.txt`. The fixture is built with `-mno-outline`, so that the arm64 machine outliner does not hide the exceptions
+test behind a different problem (an outlined function that returns the flags).
 
 ### hostbridges
 
@@ -444,6 +480,26 @@ One dylib defines `absolute_value` as `0x123456789` with `.set`, another holds `
 lifts the second alone and requires the refusal "data bind to unresolved symbol _absolute_value"; lifts both and requires
 that no symbol is unresolved and that the data slot of the bind holds `0x123456789`, the value itself: a section symbol
 is slid with its image, an absolute value is not.
+
+### flagflow
+
+The lift gives a call no condition flags (see [Scope and limits](../../explanation/recompiler/how-it-works.md#scope-and-limits)),
+and xlate refuses an image where code depends on them: it scans every `bl` and `blr` for a flag read after the call and
+every callee for a flag read on entry. The check lifts small dylibs and reads the error and the `report.txt` summary
+(`--flag-flow-summary`):
+
+- refused, from assembly (`direct.S`, `indirect.S`, `entry.S`): an outlined function that ends in `cmp; ret` and a caller
+  that runs `cset` after `bl`; the same after `blr`; a callee that starts with `cset` after the caller's `cmp`. The error
+  names the function, the call, the callee and the reader.
+- refused, from the compiler (`notes.c` at `-Oz`): six functions that repeat one sequence, which Apple clang 21 outlines
+  into functions that return the result of `cmp w9, #0x3f` to a `b.hi`. If a compiler stops making that function, the
+  check fails and the fixture needs a new example.
+- translated (`clean.S`, `notes.c` at `-Oz -mno-outline`): a callee that sets the flags and a caller that ignores them and
+  compares again, and a read of the flags after a call to a function that is one `brk` (not counted as a site, and counted
+  once in the summary); the summary says that no call passes the flags.
+
+`xlate --flag-flow <file> <image>` lists the sites of an image without lifting it, which is how the SDK, `libswiftCore`
+and `libc++` were measured.
 
 ### objectsplit
 
@@ -787,6 +843,37 @@ ASCII bytes is bridged through `+[__StringStorage newTaggedNSStringWithASCIIByte
 `__StringStorage`, the path of the longer strings) and reports `ok short.string`; `host_bare` has not and stops with
 `unrecognized selector sent to class` (measured on the 4S on 2026-11-14, a control of `check.lua` that must not run to its end).
 The page [the tagged ASCII string factory](../backports/Foundation/TaggedASCIIString.md) has the reasoning.
+
+`stepDlsymFunction` calls two host CoreFoundation functions the way the Swift standard library does: it asks
+`dlsym(RTLD_DEFAULT, "CFStringGetTypeID")` and `"CFGetTypeID"` for the address and calls it. A call through such an address
+is guest code calling a host pointer, so before 2026-11-14 it stopped the process with "call to an address without translated
+code" and a host address (`0x310aaba9` is `CFStringGetTypeID` in CoreFoundation on the 4S; the same stop ended a
+`JSONSerialization` run of the reCAPTCHA fixture, because `_initializeBridgingFunctionsImpl` looks up `CFStringGetTypeID`,
+`CFGetTypeID`, `CFStringHashNSString` and `CFStringHashCString` this way). `xlgen` maps `dlsym` to `xl_shim_dlsym`, which
+answers the four names with an address of a slot in a table of the runtime and everything else with the host's answer; a
+call to a slot runs `xl_function_entry`, which narrows the arguments by the shape in `xl_host_functions` (`o` object, `p`
+pointer, `u` unsigned, anything else signed), calls the host function and widens the result. A further host function the
+guest may look up needs a line in that table. The control is a translation without the `dlsym` line of the shim map: the
+step then stops with the message above, naming `CFStringGetTypeID+0 of CoreFoundation`; with the line it reports
+`ok dlsym.typeid` and `ok dlsym.object` (measured on the 4S on 2026-11-14, runtime of main). The message of a call or jump to
+an address without code now says which host symbol and image the address belongs to, when it is one, and the host frames of a
+crash report carry the offset in their image.
+
+`stepExtraInhabitants`, `stepExtraInhabitantsStdlib` and `stepExtraInhabitantsBig` keep the contract of an extra inhabitant
+of a pointer ([extra-inhabitants.md](extra-inhabitants.md)). They round-trip store and get for a struct with a class field in
+an optional, an enumeration with a class payload and empty cases 0 to N, and an `Optional` of a class, once through code that
+knows the type and once through a generic function (the witnesses), and each of them *consumes* the values (`consume`,
+`removeAll`) and counts the deinits: the tag of the generic `Optional` reads anything but 1 as `.some`, while the outlined copy
+and destroy read `tag == 0`, so a wrong tag shows as a leak or a release too many, not as a wrong answer. `…Big` has 4095
+empty cases and the `nil` of the optional as the 4096th, the last index inside the contract. The steps report
+`xi.enum.*`, `xi.struct.*` (`generic`, `inline`, `copies`, `destroyed`, `balance`, `consumed`, `released`), `xi.class.released`,
+`xi.stdlib.*` and `xi.big.*`, and `check.lua` also requires `report.txt` to list the witnesses of `XiBox` and
+`AncestorRepresentation` as rewritten and `Plain`, `AnyHashable` and `SmallVectorBase` as not. Measured on the 4S on
+2026-11-14: with the runtime patched and the lift on, every name is `ok`; with `XL_XI_EXCEPT="Plain AnyHashable"`
+(`stepExtraInhabitantsControl`) `xi.control.struct`, `xi.control.enum` and `xi.control.stdlib` FAIL (the lift negative
+control); with the lift on and the runtime of main (`LeastValidPointerValue` 4 GB) only `xi.class.released` FAILs, because
+the runtime's own witness for an `Optional` of a class, which a generic function reaches, took a pointer for an extra
+inhabitant and the object was never released (the runtime negative control).
 
 A library on the device has no
 `dladdr` for the guest image, which the loader maps itself, so the runtime knows its range (`xl_guest_low`,

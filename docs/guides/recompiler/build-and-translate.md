@@ -90,6 +90,12 @@ different, per kind of function and per image; what the lift does so that the tw
 [what a lifted function is](../../explanation/recompiler/how-it-works.md#what-a-lifted-function-is). The setting is part
 of the key of the lifted objects.
 
+The lift rewrites the compare of Swift's extra-inhabitant test, which arm64 does with 4 GB, to the first page, because the
+pointers of a translated program are below 4 GB ([extra inhabitants](../../reference/recompiler/extra-inhabitants.md)).
+`XL_XI_THRESHOLD` sets the new value (default `0x1000`, `0` leaves the compares as they are) and `XL_XI_EXCEPT="Name ..."`
+keeps the compares of the functions whose name contains one of the words, which a negative control needs. Every rewritten
+compare is a line `xi-compare:` of `report.txt`; both settings are part of the key of the lifted objects.
+
 ## Translate a library
 
 An arm64 dylib (and the guest images it needs) becomes an armv7 dylib that an app loads into its own process. See

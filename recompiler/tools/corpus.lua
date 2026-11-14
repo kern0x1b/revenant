@@ -26,17 +26,25 @@ function swift_armv7()
     raise("no revenant@swift-runtime install under %s carries the armv7 Swift runtime", path.join(package.installdir(), "s", "swift-runtime"))
 end
 
-function libcxx_armv7()
+local function libcxx(architecture)
     local installs = os.dirs(path.join(package.installdir(), "l", "libcxx", "*", "*"))
     table.sort(installs)
     for index = #installs, 1, -1 do
         local lib = path.join(installs[index], "lib")
         if os.isfile(path.join(lib, "libc++.1.dylib")) and os.isfile(path.join(lib, "libc++abi.1.dylib")) and
-           os.iorunv("lipo", {"-info", path.join(lib, "libc++.1.dylib")}):find("armv7", 1, true) then
+           os.iorunv("lipo", {"-info", path.join(lib, "libc++.1.dylib")}):find(architecture, 1, true) then
             return lib
         end
     end
-    raise("no revenant@libcxx install under %s carries an armv7 libc++", path.join(package.installdir(), "l", "libcxx"))
+    raise("no revenant@libcxx install under %s carries a %s libc++", path.join(package.installdir(), "l", "libcxx"), architecture)
+end
+
+function libcxx_armv7()
+    return libcxx("armv7")
+end
+
+function libcxx_arm64()
+    return libcxx("arm64")
 end
 
 function setup(name, out)

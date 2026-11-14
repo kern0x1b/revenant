@@ -1,7 +1,10 @@
 #include "exports.h"
+#include "flagflow.h"
+#include "host_routed.h"
 #include "macho.h"
 #include "objc.h"
 #include "tsd_scan.h"
+#include "typeinfo.h"
 #include "unwind.h"
 #include "xl_guest_image.h"
 
@@ -55,6 +58,8 @@ static cl::opt<std::string> StateHeader("state-header", cl::desc("C header with 
 static cl::opt<std::string> PassthroughPath("passthrough", cl::desc("Host symbols guest data may bind directly"));
 static cl::opt<std::string> ObjCManifest("objc-manifest", cl::desc("Write the Objective-C metadata of the guest images as JSON"));
 static cl::opt<std::string> CoveragePath("coverage", cl::desc("Only lift every instruction and list unsupported ones"));
+static cl::opt<std::string> FlagFlowPath("flag-flow", cl::desc("Only list the calls after which the flags are read and the functions that read them on entry"));
+static cl::opt<std::string> FlagFlowSummary("flag-flow-summary", cl::desc("Where a lift that passed the check of the flags across calls writes what it checked"));
 static cl::opt<std::string> HostTriple("host-triple", cl::init("armv7-apple-ios6.0.0"));
 static cl::opt<std::string> HostLayout("host-datalayout", cl::init("e-m:o-p:32:32-Fi8-f64:32:64-v64:32:64-v128:32:128-a:0:32-n32-S32"));
 static cl::opt<uint64_t> Base("base", cl::init(0x10000000));
@@ -64,6 +69,13 @@ static cl::opt<bool> ReportDuplicates("report-duplicates", cl::init(false),
                                                "more than one lifted function carries"));
 static cl::opt<bool> SwiftHostAncestors("swift-host-ancestors", cl::init(false),
                                         cl::desc("Keep the guest's class layout for Swift classes that have a host ancestor"));
+static cl::opt<uint64_t> XiThreshold("xi-threshold", cl::init(0x1000),
+                                     cl::desc("The least valid pointer of the host. arm64 Darwin code tells a pointer from an extra inhabitant of the enumeration or "
+                                              "optional that holds it by a compare with 0xFFFFFFFF, since a pointer is at least 4 GB there; every pointer of the host "
+                                              "is below 4 GB, so the lift compares with this value instead. 0 leaves those compares as they are"));
+static cl::opt<std::string> XiOut("xi-out", cl::desc("Write the compares the lift rewrote to --xi-threshold, one line each"));
+static cl::list<std::string> XiExcept("xi-except", cl::desc("Leave the compares of a function whose name has this text: a negative control for the rewrite, which needs a type "
+                                                           "that is read the way the compiler wrote it next to the one that is not"));
 static cl::opt<std::string> NamespacePrefix("namespace-prefix", cl::init(""),
                                             cl::desc("The Objective-C classes of every guest image but the first (the runtime and overlays of a library) are "
                                                      "registered under this prefix, so a host that has its own copy of them keeps its names"));
@@ -126,6 +138,7 @@ struct Program {
   std::set<std::string> passthrough;
   std::set<uint64_t> functions;
   xlate::UnwindTable unwind;
+  xlate::TypeInfoTable typeinfos;
 
   const Image *ImageAt(uint64_t host) const {
     for (auto &image : images) {
@@ -142,6 +155,152 @@ static std::map<uint64_t, std::set<uint64_t>> g_lift_sets;
 static std::map<uint64_t, int> g_lift_kind;
 static int g_kind = 0;
 
+struct XiSite {
+  std::string image;
+  uint64_t vmaddr = 0;
+  std::string function;
+  std::string shape;
+  std::string reason;
+};
+static std::map<uint64_t, XiSite> g_xi_sites;
+
+uint32_t CodeWord(const Image &image, uint64_t address) {
+  uint8_t bytes[4];
+  if (!image.ReadBytes(address, bytes, 4)) {
+    return 0;
+  }
+  return bytes[0] | bytes[1] << 8 | bytes[2] << 16 | uint32_t(bytes[3]) << 24;
+}
+
+bool IsLoad64Into(uint32_t word, unsigned reg) {
+  unsigned rt = word & 31, rt2 = (word >> 10) & 31;
+  if ((word & 0xFFC00000) == 0xF9400000 || (word & 0xFFE00C00) == 0xF8400000 || (word & 0xFFE00C00) == 0xF8600800 ||
+      (word & 0xFFE00C00) == 0xF8400400 || (word & 0xFFE00C00) == 0xF8400C00) {
+    return rt == reg;
+  }
+  if ((word & 0xFFC00000) == 0xA9400000 || (word & 0xFFC00000) == 0xA8C00000 || (word & 0xFFC00000) == 0xA9C00000) {
+    return rt == reg || rt2 == reg;
+  }
+  return false;
+}
+
+bool IsWitnessName(std::string name) {
+  if (!name.empty() && name[0] == '_') {
+    name.erase(0, 1);
+  }
+  if (name.compare(0, 2, "$s") != 0) {
+    return false;
+  }
+  if (name.size() > 2 && name.compare(name.size() - 2, 2, "Tm") == 0) {
+    name.erase(name.size() - 2);
+  }
+  if (name.size() < 5) {
+    return false;
+  }
+  static const char *const kinds[] = {"et", "st", "xx", "cp", "ca", "CP", "tk", "ta", "ug", "up", "ui", "xs", "xg"};
+  if (name[name.size() - 3] == 'w') {
+    for (auto kind : kinds) {
+      if (name.compare(name.size() - 2, 2, kind) == 0) {
+        return true;
+      }
+    }
+  }
+  return name.compare(name.size() - 3, 2, "WO") == 0 && name.back() >= 'a' && name.back() <= 'z';
+}
+
+bool XiAdmit(const Image &image, uint64_t start, uint64_t address, unsigned n, bool loaded, XiSite &site) {
+  uint64_t function = start - image.slide();
+  auto symbol = image.symbols().find(function);
+  bool named = symbol != image.symbols().end();
+  if (named) {
+    if (!IsWitnessName(symbol->second) || llvm::any_of(XiExcept, [&](const std::string &part) { return symbol->second.find(part) != std::string::npos; })) {
+      return false;
+    }
+    site.reason = "by name";
+  } else {
+    bool found = false;
+    for (unsigned back = 1; loaded && back <= 32 && address - 4 * back >= start; ++back) {
+      found |= IsLoad64Into(CodeWord(image, address - 4 * back), n);
+    }
+    if (loaded && !found) {
+      return false;
+    }
+    site.reason = "by shape";
+  }
+  site.image = sys::path::filename(image.path()).str();
+  site.vmaddr = address - image.slide();
+  site.function = named ? symbol->second : "sub_" + Hex(function);
+  return true;
+}
+
+uint32_t XiRewrite(const Program &program, const Image &image, uint64_t address, uint32_t word, XiSite &site) {
+  auto after = program.functions.upper_bound(address);
+  uint64_t start = after == program.functions.begin() ? address : *std::prev(after);
+  uint64_t limit = after == program.functions.end() ? UINT64_MAX : *after;
+  if ((word & 0xFFFFFFE0) == 0xD2C00020) {
+    unsigned t = word & 31;
+    unsigned n = 31;
+    for (unsigned ahead = 1; ahead <= 8 && address + 4 * ahead < limit && n == 31; ++ahead) {
+      uint32_t step = CodeWord(image, address + 4 * ahead);
+      if ((step & 0xFFE0FC00) == 0xEB000000 && ((step >> 16) & 31) == t && ((step >> 5) & 31) != 31) {
+        unsigned candidate = (step >> 5) & 31;
+        for (unsigned branch = 1; branch <= 4 && address + 4 * (ahead + branch) < limit; ++branch) {
+          uint32_t jump = CodeWord(image, address + 4 * (ahead + branch));
+          if ((jump & 0xFF000010) == 0x54000000 && ((jump & 15) == 3 || (jump & 15) == 2)) {
+            n = candidate;
+          }
+        }
+        break;
+      }
+    }
+    if (n == 31 || !XiAdmit(image, start, address, n, true, site)) {
+      return 0;
+    }
+    site.shape = "constant";
+    return 0xD2800000 | uint32_t(XiThreshold) << 5 | t;
+  }
+  if ((word & 0xFFE0FC1F) != 0xEB00001F) {
+    return 0;
+  }
+  unsigned n = (word >> 5) & 31, m = (word >> 16) & 31;
+  if (n == 31 || m == 31 || n == m) {
+    return 0;
+  }
+  bool minus_one = false;
+  for (unsigned back = 1; back <= 3 && address - 4 * back >= start; ++back) {
+    minus_one |= CodeWord(image, address - 4 * back) == (0x12800000u | m);
+  }
+  if (!minus_one) {
+    return 0;
+  }
+  uint32_t next = CodeWord(image, address + 4);
+  bool clamp = (next & 0xFFE0FC00) == 0x9A803000 && ((next >> 5) & 31) == n && ((next >> 16) & 31) == m;
+  bool branch = (next & 0xFF000010) == 0x54000000 && ((next & 15) == 3 || (next & 15) == 2);
+  if (clamp) {
+    unsigned clamped = next & 31;
+    bool tag = false;
+    for (unsigned ahead = 2; ahead <= 3; ++ahead) {
+      uint32_t step = CodeWord(image, address + 4 * ahead);
+      tag |= ((step & 0xFFFFFC00) == 0x11000400 || (step & 0xFFFFFC00) == 0x51000400) && ((step >> 5) & 31) == clamped;
+    }
+    clamp = tag;
+  }
+  if (!clamp && !branch) {
+    return 0;
+  }
+  if (!XiAdmit(image, start, address, n, branch, site)) {
+    return 0;
+  }
+  site.shape = clamp ? "clamp" : "branch";
+  uint64_t threshold = XiThreshold;
+  uint32_t shift = 0;
+  if (threshold >= 0x1000) {
+    shift = 1;
+    threshold >>= 12;
+  }
+  return 0xF100001F | shift << 22 | uint32_t(threshold) << 10 | n << 5;
+}
+
 size_t ReadCode(size_t address, uint8_t *buffer, size_t size, void *user) {
   if (g_trace) {
     g_trace->insert(address);
@@ -155,7 +314,36 @@ size_t ReadCode(size_t address, uint8_t *buffer, size_t size, void *user) {
   auto section = image->SectionAt(address);
   auto end = image->host(section->addr + section->size);
   size = std::min<size_t>(size, end - address);
-  return image->ReadBytes(address, buffer, size) ? size : 0;
+  if (!image->ReadBytes(address, buffer, size)) {
+    return 0;
+  }
+  for (size_t at = XiThreshold && !(address & 3) ? 0 : size; at + 4 <= size; at += 4) {
+    uint32_t word = buffer[at] | buffer[at + 1] << 8 | buffer[at + 2] << 16 | uint32_t(buffer[at + 3]) << 24;
+    XiSite site;
+    if (uint32_t rewritten = XiRewrite(*program, *image, address + at, word, site)) {
+      g_xi_sites.emplace(address + at, std::move(site));
+      for (unsigned byte = 0; byte < 4; ++byte) {
+        buffer[at + byte] = rewritten >> (8 * byte);
+      }
+    }
+  }
+  return size;
+}
+
+bool WriteXi() {
+  if (XiOut.empty()) {
+    return true;
+  }
+  std::error_code ec;
+  raw_fd_ostream os(XiOut, ec);
+  if (ec) {
+    errs() << "xlate: " << XiOut << ": " << ec.message() << "\n";
+    return false;
+  }
+  for (auto &[address, site] : g_xi_sites) {
+    os << site.image << " 0x" << Hex(site.vmaddr) << " " << site.function << " " << site.shape << " " << site.reason << "\n";
+  }
+  return true;
 }
 
 bool LoadPassthrough(Program &program) {
@@ -234,6 +422,23 @@ bool LayoutAndResolve(Program &program, bool strict) {
       llvm::errs() << "xlate: " << error << "\n";
       return false;
     }
+  }
+  unsigned routed = 0;
+  for (auto &image : program.images) {
+    if (IsBridge(image->path())) {
+      continue;
+    }
+    for (auto &[name, vmaddr] : image->exports()) {
+      if (xlate::IsHostRouted(name)) {
+        auto address = image->host(vmaddr);
+        program.stub_to_host[address] = xlate::HostRoutedHandler(name);
+        program.functions.erase(address);
+        ++routed;
+      }
+    }
+  }
+  if (routed) {
+    errs() << "xlate: " << routed << " functions of the guest images that implement the C++ exception ABI are replaced by calls to the host\n";
   }
   bool ok = true;
   for (auto &image : program.images) {
@@ -990,10 +1195,121 @@ Constant *HostSymbol(Module &module, const std::string &symbol) {
                             nullptr, name);
 }
 
+class HostTypeInfos {
+ public:
+  HostTypeInfos(Program &program, Module &module) : program_(program), module_(module), context_(module.getContext()) {}
+
+  Constant *Get(uint64_t address) {
+    if (auto found = by_address_.find(address); found != by_address_.end()) {
+      return found->second;
+    }
+    auto info = program_.typeinfos.Find(address);
+    if (!info) {
+      return nullptr;
+    }
+    Constant *object = nullptr;
+    if (info->kind == xlate::GuestTypeInfo::Fundamental) {
+      if (auto symbol = xlate::TypeInfoTable::HostFundamental(info->text)) {
+        object = HostSymbol(module_, symbol);
+      }
+    }
+    if (!object) {
+      if (auto named = by_name_.find(info->text); named != by_name_.end()) {
+        object = named->second;
+      } else {
+        object = Make(*info);
+        by_name_[info->text] = object;
+      }
+    }
+    by_address_[address] = object;
+    return object;
+  }
+
+  void EmitTable() {
+    auto i32 = Type::getInt32Ty(context_);
+    auto ptr = PointerType::get(context_, 0);
+    auto entry_type = StructType::get(context_, {i32, ptr});
+    std::vector<Constant *> entries;
+    for (auto &[address, info] : program_.typeinfos.all()) {
+      if (auto object = Get(address)) {
+        entries.push_back(ConstantStruct::get(entry_type, {ConstantInt::get(i32, address), object}));
+      }
+    }
+    auto array_type = ArrayType::get(entry_type, entries.size());
+    new GlobalVariable(module_, array_type, true, GlobalValue::ExternalLinkage, ConstantArray::get(array_type, entries), "xl_typeinfos");
+    new GlobalVariable(module_, i32, true, GlobalValue::ExternalLinkage, ConstantInt::get(i32, entries.size()), "xl_typeinfo_count");
+    if (!entries.empty()) {
+      errs() << "xlate: " << entries.size() << " type_info objects of the guest images have a host layout for the exceptions that guest code throws\n";
+    }
+  }
+
+  bool ok() const { return ok_; }
+
+ private:
+  Constant *Reference(const xlate::TypeRef &ref, uint64_t from) {
+    if (!ref.symbol.empty()) {
+      return HostSymbol(module_, ref.symbol);
+    }
+    if (auto object = Get(ref.address)) {
+      return object;
+    }
+    errs() << "xlate: the type_info at 0x" << Hex(from) << " names a type_info at 0x" << Hex(ref.address) << " that is not one of the guest images' objects\n";
+    ok_ = false;
+    return ConstantPointerNull::get(PointerType::get(context_, 0));
+  }
+
+  Constant *Make(const xlate::GuestTypeInfo &info) {
+    auto ptr = PointerType::get(context_, 0);
+    auto i32 = Type::getInt32Ty(context_);
+    Constant *vtable = ConstantExpr::getPtrAdd(HostSymbol(module_, xlate::TypeInfoTable::VtableSymbol(info.kind)), ConstantInt::get(i32, 8));
+    Constant *name = ConstantExpr::getIntToPtr(ConstantInt::get(i32, info.name), ptr);
+    std::vector<Type *> types = {ptr, ptr};
+    std::vector<Constant *> values = {vtable, name};
+    switch (info.kind) {
+      case xlate::GuestTypeInfo::SingleInheritance:
+        types.push_back(ptr);
+        values.push_back(Reference(info.target, info.address));
+        break;
+      case xlate::GuestTypeInfo::MultipleInheritance: {
+        auto base_type = StructType::get(context_, {ptr, i32});
+        std::vector<Constant *> bases;
+        for (auto &base : info.bases) {
+          uint32_t packed = static_cast<uint32_t>((base.offset << 8) | base.flags);
+          bases.push_back(ConstantStruct::get(base_type, {Reference(base.type, info.address), ConstantInt::get(i32, packed)}));
+        }
+        auto array_type = ArrayType::get(base_type, bases.size());
+        types.insert(types.end(), {i32, i32, array_type});
+        values.insert(values.end(), {ConstantInt::get(i32, info.flags), ConstantInt::get(i32, bases.size()), ConstantArray::get(array_type, bases)});
+        break;
+      }
+      case xlate::GuestTypeInfo::Pointer:
+      case xlate::GuestTypeInfo::PointerToMember:
+        types.insert(types.end(), {i32, ptr});
+        values.insert(values.end(), {ConstantInt::get(i32, info.flags), Reference(info.target, info.address)});
+        if (info.kind == xlate::GuestTypeInfo::PointerToMember) {
+          types.push_back(ptr);
+          values.push_back(Reference(info.context, info.address));
+        }
+        break;
+      default:
+        break;
+    }
+    auto layout = StructType::get(context_, types);
+    return new GlobalVariable(module_, layout, true, GlobalValue::InternalLinkage, ConstantStruct::get(layout, values), "xl_typeinfo_" + Hex(info.address));
+  }
+
+  Program &program_;
+  Module &module_;
+  LLVMContext &context_;
+  std::map<uint64_t, Constant *> by_address_;
+  std::map<std::string, Constant *> by_name_;
+  bool ok_ = true;
+};
+
 class LandingPads {
  public:
-  LandingPads(Program &program, Lifter &lifter, Module &module)
-      : program_(program), lifter_(lifter), module_(module), context_(module.getContext()) {
+  LandingPads(Program &program, Lifter &lifter, Module &module, HostTypeInfos &typeinfos)
+      : program_(program), lifter_(lifter), module_(module), typeinfos_(typeinfos), context_(module.getContext()) {
     auto &offsets = StateOffsets();
     x30_ = offsets.at("x30");
     for (int n = 19; n <= 29; ++n) {
@@ -1042,6 +1358,9 @@ class LandingPads {
     EmitResume();
     for (auto &[reason, count] : unsupported_) {
       errs() << "xlate: " << count << " call site(s) with a landing pad were left as plain calls: " << reason << "\n";
+    }
+    if (!dropped_.empty()) {
+      errs() << "xlate: " << dropped_.size() << " catch clause(s) name a type_info that no guest image defines and were dropped\n";
     }
     return lowered;
   }
@@ -1131,16 +1450,23 @@ class LandingPads {
           clause = ConstantPointerNull::get(PointerType::get(context_, 0));
           break;
         case xlate::ExceptionType::Import:
-          clause = HostSymbol(module_, type.symbol);
+          if (auto guest = program_.exports.Find(type.library, type.symbol)) {
+            clause = typeinfos_.Get(*guest + type.addend);
+          } else {
+            clause = HostSymbol(module_, type.symbol);
+          }
           break;
         case xlate::ExceptionType::LocalObjC:
           clause = LocalType(type);
           break;
         case xlate::ExceptionType::LocalOther:
+          clause = typeinfos_.Get(type.address);
           break;
       }
       if (clause) {
         pad.catches.push_back({clause, filter});
+      } else {
+        dropped_.insert({landing.function->start, filter});
       }
     }
     if (!pad.cleanup && pad.catches.empty()) {
@@ -1349,9 +1675,11 @@ class LandingPads {
   Program &program_;
   Lifter &lifter_;
   Module &module_;
+  HostTypeInfos &typeinfos_;
   LLVMContext &context_;
   uint64_t x30_ = 0;
   std::vector<Saved> saved_;
+  std::set<std::pair<uint64_t, int64_t>> dropped_;
   std::set<uint64_t> continuations_;
   std::set<Function *> continuation_functions_;
   std::set<uint64_t> resumable_;
@@ -2022,6 +2350,134 @@ unsigned EnterEntries(Lifter &lifter, Module &module, const std::map<uint64_t, s
   return count;
 }
 
+xlate::FlagFlowResult ScanFlagFlow(Program &program) {
+  xlate::FlagFlow flow([&program](uint64_t address, uint32_t &word) {
+    auto image = program.ImageAt(address);
+    uint8_t bytes[4];
+    if (!image || !image->IsExecutable(address) || !image->ReadBytes(address, bytes, 4)) {
+      return false;
+    }
+    word = bytes[0] | bytes[1] << 8 | bytes[2] << 16 | (uint32_t)bytes[3] << 24;
+    return true;
+  }, [&program](uint64_t address) { return program.functions.count(address) != 0; });
+  xlate::FlagFlowResult result;
+  for (auto &image : program.images) {
+    for (auto &section : image->sections()) {
+      if ((section.flags & MachO::S_ATTR_PURE_INSTRUCTIONS) && section.sectname == "__text") {
+        flow.ScanRange(image->host(section.addr), image->host(section.addr + section.size), result);
+      }
+    }
+  }
+  return result;
+}
+
+bool CheckFlagFlow(Program &program) {
+  auto result = ScanFlagFlow(program);
+  auto vm = [&](uint64_t host) {
+    auto image = program.ImageAt(host);
+    return image ? host - image->slide() : host;
+  };
+  auto owner = [&](uint64_t host) {
+    auto start = program.functions.upper_bound(host);
+    return start == program.functions.begin() ? host : *std::prev(start);
+  };
+  auto path = [&](uint64_t host) {
+    auto image = program.ImageAt(host);
+    return image ? image->path() : std::string("?");
+  };
+  std::vector<std::string> errors;
+  for (auto &[callee, list] : result.live_after) {
+    for (auto &site : list) {
+      errors.push_back(path(site.site) + ": function 0x" + Hex(vm(owner(site.site))) + " calls 0x" + Hex(vm(callee)) + " at 0x" + Hex(vm(site.site)) +
+                       " and reads the flags (" + site.reader + ") after the call returns, which only the callee could have set");
+    }
+  }
+  for (auto &site : result.indirect) {
+    errors.push_back(path(site.site) + ": function 0x" + Hex(vm(owner(site.site))) + " calls through a register at 0x" + Hex(vm(site.site)) +
+                     " and reads the flags (" + site.reader + ") after the call returns, which only the callee could have set");
+  }
+  for (auto &[callee, list] : result.live_in) {
+    for (auto &site : list) {
+      errors.push_back(path(site.site) + ": function 0x" + Hex(vm(callee)) + " reads the flags (" + site.reader + ") on entry, and the call at 0x" +
+                       Hex(vm(site.site)) + " passes it the flags of its caller");
+    }
+  }
+  if (errors.empty()) {
+    if (!FlagFlowSummary.empty()) {
+      std::error_code ec;
+      raw_fd_ostream os(FlagFlowSummary, ec);
+      if (ec) {
+        errs() << "xlate: " << FlagFlowSummary << ": " << ec.message() << "\n";
+        return false;
+      }
+      uint64_t unresolved = 0;
+      for (auto &[callee, count] : result.unresolved) {
+        unresolved += count;
+      }
+      os << "flag-flow: " << program.images.size() << " image(s) checked, " << result.direct_calls << " direct and " << result.indirect_calls
+         << " indirect calls, 0 calls that pass the flags, " << result.no_return << " reads after a call that never returns ignored, " << unresolved
+         << " calls whose continuation has no flag access in the next 64 instructions\n";
+    }
+    return true;
+  }
+  for (size_t i = 0; i < errors.size() && i < 20; ++i) {
+    errs() << "xlate: error: " << errors[i] << "\n";
+  }
+  if (errors.size() > 20) {
+    errs() << "xlate: error: " << errors.size() - 20 << " more\n";
+  }
+  errs() << "xlate: error: " << errors.size() << " call(s) pass the condition flags across a call. The lift gives a call no flags (rellume's "
+         << "call_ret_clobber_flags), so a branch or select that reads them goes the wrong way. The arm64 machine outliner of newer compilers "
+         << "(Apple clang 21, Xcode 27.2) makes an outlined function that returns the flags; build the image with -mno-outline. "
+         << "See docs/explanation/recompiler/how-it-works.md, Scope and limits\n";
+  return false;
+}
+
+int ListFlagFlow(Program &program) {
+  std::error_code ec;
+  raw_fd_ostream os(FlagFlowPath, ec);
+  if (ec) {
+    errs() << "xlate: " << FlagFlowPath << ": " << ec.message() << "\n";
+    return 1;
+  }
+  auto result = ScanFlagFlow(program);
+  auto vm = [&](uint64_t host) {
+    auto image = program.ImageAt(host);
+    return image ? host - image->slide() : host;
+  };
+  std::map<std::string, uint64_t> readers;
+  uint64_t sites = 0;
+  for (auto &[callee, list] : result.live_after) {
+    sites += list.size();
+    os << "after 0x" << Hex(vm(callee)) << " sites " << list.size();
+    for (auto &site : list) {
+      ++readers[site.reader];
+      os << " 0x" << Hex(vm(site.site)) << ":" << site.reader;
+    }
+    os << "\n";
+  }
+  for (auto &site : result.indirect) {
+    os << "indirect 0x" << Hex(vm(site.site)) << " " << site.reader << "\n";
+  }
+  uint64_t entry_sites = 0;
+  for (auto &[callee, list] : result.live_in) {
+    entry_sites += list.size();
+    os << "entry 0x" << Hex(vm(callee)) << " sites " << list.size() << " " << list.front().reader << "\n";
+  }
+  uint64_t unresolved = 0;
+  for (auto &[callee, count] : result.unresolved) {
+    unresolved += count;
+  }
+  outs() << "flag-flow: " << result.direct_calls << " direct calls, " << result.indirect_calls << " indirect calls; flags read after "
+         << sites << " direct calls to " << result.live_after.size() << " functions, after " << result.indirect.size()
+         << " indirect calls; flags read on entry of " << result.live_in.size() << " functions (" << entry_sites << " sites); "
+         << unresolved << " calls with a continuation that was not resolved in the lookahead\n";
+  for (auto &[reader, count] : readers) {
+    outs() << "flag-flow: after-call reader " << reader << ": " << count << "\n";
+  }
+  return 0;
+}
+
 int Coverage(Program &program) {
   std::error_code ec;
   raw_fd_ostream os(CoveragePath, ec);
@@ -2077,6 +2533,10 @@ int Coverage(Program &program) {
 
 int main(int argc, char **argv) {
   cl::ParseCommandLineOptions(argc, argv, "xlate: arm64 Mach-O to armv7 LLVM bitcode");
+  if (XiThreshold && ((XiThreshold & 0xFFF) || XiThreshold > 0xF000)) {
+    errs() << "xlate: --xi-threshold is 0 or a multiple of 0x1000 up to 0xF000, the compare is `cmp x, #n, lsl #12` and the constant `mov x, #n`\n";
+    return 1;
+  }
   Program program;
   for (auto &path : Inputs) {
     std::string error;
@@ -2116,6 +2576,12 @@ int main(int argc, char **argv) {
     }
     return Coverage(program);
   }
+  if (!FlagFlowPath.empty()) {
+    if (!LayoutAndResolve(program, false)) {
+      return 1;
+    }
+    return ListFlagFlow(program);
+  }
   std::vector<xlate::ObjCImage> objc;
   std::vector<const Image *> images;
   if (!ObjCManifest.empty()) {
@@ -2149,6 +2615,9 @@ int main(int argc, char **argv) {
   if (Output.empty() || (!Library && !CheckExecutableSegmentLimit(program)) || !LoadPassthrough(program) || !LayoutAndResolve(program, true)) {
     return 1;
   }
+  if (!CheckFlagFlow(program)) {
+    return 1;
+  }
   for (auto &image : program.images) {
     objc.push_back(xlate::AnalyzeObjC(*image));
     for (auto &error : objc.back().errors) {
@@ -2171,8 +2640,16 @@ int main(int argc, char **argv) {
       errs() << "xlate: warning: " << image->path() << ": " << problem << "\n";
     }
   }
+  {
+    std::vector<std::string> problems;
+    program.typeinfos.Scan(program.images, program.exports, [&](uint64_t address) { return program.ImageAt(address); }, problems);
+    for (auto &problem : problems) {
+      errs() << "xlate: warning: " << problem << "\n";
+    }
+  }
+  HostTypeInfos typeinfos(program, module);
   Lifter lifter(program, module);
-  LandingPads pads(program, lifter, module);
+  LandingPads pads(program, lifter, module, typeinfos);
   unsigned failures = 0;
   JumpTables tables(program);
   std::set<uint64_t> pending(program.functions.begin(), program.functions.end());
@@ -2329,6 +2806,10 @@ int main(int argc, char **argv) {
   if (!(Library ? EmitGuestImage(program, module, overrides) : EmitGuestData(program, module, segments, overrides))) {
     return 1;
   }
+  typeinfos.EmitTable();
+  if (!typeinfos.ok()) {
+    return 1;
+  }
   EmitTables(program, lifter, module);
   if (verifyModule(module, &errs())) {
     errs() << "xlate: invalid module before optimization\n";
@@ -2348,5 +2829,8 @@ int main(int argc, char **argv) {
     raw_fd_ostream ir(IROutput, ec, sys::fs::OF_Text);
     module.print(ir, nullptr);
   }
-  return WriteLayout(segments) && WriteStateHeader(program) ? 0 : 1;
+  if (XiThreshold) {
+    errs() << "xlate: " << g_xi_sites.size() << " compares with 0xFFFFFFFF that tell a pointer from an extra inhabitant now compare with 0x" << Hex(XiThreshold) << "\n";
+  }
+  return WriteLayout(segments) && WriteStateHeader(program) && WriteXi() ? 0 : 1;
 }

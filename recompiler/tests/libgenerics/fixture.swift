@@ -61,6 +61,91 @@ class Base<T> {
 
 final class Derived<T>: Base<T> {}
 
+var xiDeinits = 0
+
+final class XiRoot {
+    deinit {
+        xiDeinits += 1
+    }
+}
+
+enum XiCase { case payload(XiRoot), c0, c1, c2, c3, c4, c5, c6, c7, c8, c9 }
+enum XiPlain { case payload(XiRoot), c0, c1, c2, c3, c4, c5, c6, c7, c8, c9 }
+struct XiBox { var root: XiRoot; var number: Int }
+struct XiBoxPlain { var root: XiRoot; var number: Int }
+
+@inline(never) func xiMake<T>(_ value: T, _ some: Bool) -> T? {
+    return some ? value : nil
+}
+
+@inline(never) func xiIsSome<T>(_ value: T?) -> Bool {
+    if case .some = value {
+        return true
+    }
+    return false
+}
+
+final class XiKey: Hashable {
+    deinit {
+        xiDeinits += 1
+    }
+
+    static func == (left: XiKey, right: XiKey) -> Bool {
+        return left === right
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(ObjectIdentifier(self))
+    }
+}
+
+@inline(never) func xiConsume<T>(_ value: consuming T?) {
+}
+
+@inline(never) func xiCopies<T>(_ value: T?, _ count: Int) -> [T?] {
+    var copies: [T?] = []
+    for _ in 0..<count {
+        copies.append(value)
+    }
+    return copies
+}
+
+@inline(never) func xiWord<T>(_ value: T?) -> UInt64 {
+    var copy = value
+    return withUnsafeBytes(of: &copy) { $0.load(as: UInt64.self) }
+}
+
+@inline(never) func xiName(_ value: XiCase?) -> Int {
+    switch value {
+    case .none: return -1
+    case .some(.payload): return 100
+    case .some(.c0): return 0
+    case .some(.c1): return 1
+    case .some(.c2): return 2
+    case .some(.c3): return 3
+    case .some(.c4): return 4
+    case .some(.c5): return 5
+    case .some(.c6): return 6
+    case .some(.c7): return 7
+    case .some(.c8): return 8
+    case .some(.c9): return 9
+    }
+}
+
+@inline(never) func xiAncestor(_ value: Mirror.AncestorRepresentation?) -> Int {
+    switch value {
+    case .none: return -1
+    case .some(.generated): return 0
+    case .some(.customized): return 1
+    case .some(.suppressed): return 2
+    @unknown default: return -3
+    }
+}
+
+@inline(never) func xiCases() -> [XiCase] {
+    return [.c0, .c1, .c2, .c3, .c4, .c5, .c6, .c7, .c8, .c9]
+}
+
 @objc(LibGenericsSequence) public final class LibGenericsSequence: NSObject, NSFastEnumeration {
     let members: [NSObject] = (0..<40).map { _ in NSObject() }
 
@@ -167,6 +252,134 @@ final class Derived<T>: Base<T> {}
             seen += 1
         }
         report("proxy.enumerate", seen == 3)
+    }
+
+    @objc public func stepDlsymFunction() {
+        let handle = UnsafeMutableRawPointer(bitPattern: -2)
+        typealias TypeID = @convention(c) () -> UInt
+        typealias GetTypeID = @convention(c) (UnsafeRawPointer?) -> UInt
+        let typeID = dlsym(handle, "CFStringGetTypeID").map { unsafeBitCast($0, to: TypeID.self) }
+        let getTypeID = dlsym(handle, "CFGetTypeID").map { unsafeBitCast($0, to: GetTypeID.self) }
+        let null = Unmanaged.passUnretained(NSNull()).toOpaque()
+        report("dlsym.typeid", typeID != nil && typeID!() == UInt(CFStringGetTypeID()))
+        report("dlsym.object", getTypeID != nil && getTypeID!(UnsafeRawPointer(null)) == UInt(CFNullGetTypeID()))
+    }
+
+    @objc public func stepExtraInhabitants() {
+        xiDeinits = 0
+        do {
+            let root = XiRoot()
+            var generic = true
+            var inline = true
+            var words = true
+            for (index, value) in xiCases().enumerated() {
+                let made = xiMake(value, true)
+                generic = generic && xiIsSome(made)
+                inline = inline && xiName(made) == index
+                words = words && xiWord(made) == UInt64(index)
+            }
+            let payload = xiMake(XiCase.payload(root), true)
+            let none = xiMake(XiCase.c0, false)
+            report("xi.enum.generic", generic && xiIsSome(payload) && !xiIsSome(none))
+            report("xi.enum.inline", inline && xiName(payload) == 100 && xiName(none) == -1)
+            report("xi.enum.word", words && xiWord(none) == 10)
+            var kept = xiCopies(payload, 8)
+            kept += xiCopies(xiMake(XiCase.c4, true), 8)
+            kept += xiCopies(none, 4)
+            var holding = 0
+            for entry in kept where xiName(entry) == 100 {
+                holding += 1
+            }
+            report("xi.enum.copies", kept.count == 20 && holding == 8 && xiDeinits == 0)
+            kept.removeAll()
+            report("xi.enum.destroyed", xiDeinits == 0)
+            withExtendedLifetime(root) {}
+        }
+        report("xi.enum.balance", xiDeinits == 1)
+        xiDeinits = 0
+        do {
+            let root = XiRoot()
+            xiConsume(Optional(XiCase.payload(root)))
+            report("xi.enum.consumed", xiDeinits == 0)
+            withExtendedLifetime(root) {}
+        }
+        report("xi.enum.released", xiDeinits == 1)
+        xiDeinits = 0
+        xiConsume(Optional(XiRoot()))
+        report("xi.class.released", xiDeinits == 1)
+        xiDeinits = 0
+        do {
+            let root = XiRoot()
+            let box = xiMake(XiBox(root: root, number: 7), true)
+            let none = xiMake(XiBox(root: root, number: 0), false)
+            var inline = false
+            if case .some(let value) = box {
+                inline = value.number == 7 && value.root === root
+            }
+            report("xi.struct.generic", xiIsSome(box) && !xiIsSome(none))
+            report("xi.struct.inline", inline && xiWord(none) == 0)
+            var kept = xiCopies(box, 8) + xiCopies(none, 4)
+            report("xi.struct.copies", kept.count == 12 && xiDeinits == 0)
+            kept.removeAll()
+            report("xi.struct.destroyed", xiDeinits == 0)
+            withExtendedLifetime(root) {}
+        }
+        report("xi.struct.balance", xiDeinits == 1)
+        xiDeinits = 0
+        do {
+            let root = XiRoot()
+            xiConsume(Optional(XiBox(root: root, number: 3)))
+            report("xi.struct.consumed", xiDeinits == 0)
+            withExtendedLifetime(root) {}
+        }
+        report("xi.struct.released", xiDeinits == 1)
+    }
+
+    @objc public func stepExtraInhabitantsStdlib() {
+        xiDeinits = 0
+        do {
+            let root = XiRoot()
+            let generated = xiMake(Mirror.AncestorRepresentation.generated, true)
+            let suppressed = xiMake(Mirror.AncestorRepresentation.suppressed, true)
+            let customized = xiMake(Mirror.AncestorRepresentation.customized({ withExtendedLifetime(root) { Mirror(reflecting: 7) } }), true)
+            let none = xiMake(Mirror.AncestorRepresentation.generated, false)
+            report("xi.stdlib.generic", xiIsSome(generated) && xiIsSome(suppressed) && xiIsSome(customized) && !xiIsSome(none))
+            report("xi.stdlib.inline", xiAncestor(generated) == 0 && xiAncestor(customized) == 1 && xiAncestor(suppressed) == 2 && xiAncestor(none) == -1)
+            var kept = xiCopies(customized, 8) + xiCopies(generated, 4) + xiCopies(none, 4)
+            report("xi.stdlib.copies", kept.count == 16 && xiDeinits == 0)
+            kept.removeAll()
+            report("xi.stdlib.destroyed", xiDeinits == 0)
+            withExtendedLifetime(customized) {}
+        }
+        report("xi.stdlib.balance", xiDeinits == 1)
+        xiDeinits = 0
+        do {
+            let root = XiRoot()
+            xiConsume(Optional(Mirror.AncestorRepresentation.customized({ withExtendedLifetime(root) { Mirror(reflecting: 7) } })))
+            report("xi.stdlib.consumed", xiDeinits == 0)
+            withExtendedLifetime(root) {}
+        }
+        report("xi.stdlib.released", xiDeinits == 1)
+    }
+
+    @objc public func stepExtraInhabitantsControl() {
+        xiDeinits = 0
+        do {
+            let root = XiRoot()
+            xiConsume(Optional(XiBoxPlain(root: root, number: 1)))
+            withExtendedLifetime(root) {}
+        }
+        report("xi.control.struct", xiDeinits == 1)
+        xiDeinits = 0
+        do {
+            let root = XiRoot()
+            xiConsume(Optional(XiPlain.payload(root)))
+            withExtendedLifetime(root) {}
+        }
+        report("xi.control.enum", xiDeinits == 1)
+        xiDeinits = 0
+        xiConsume(Optional(AnyHashable(XiKey())))
+        report("xi.control.stdlib", xiDeinits == 1)
     }
 
     @objc public func stepShortString() {
