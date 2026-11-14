@@ -1457,6 +1457,7 @@ class NSMorphologyPronoun
 class NSMutableArray
 class NSMutableAttributedString
 class NSMutableData
+class NSMutableDictionary
 class NSMutableOrderedSet
 class NSMutableParagraphStyle
 class NSMutableString
@@ -23738,6 +23739,8 @@ member NSDateIntervalFormatter -stringFromDateInterval:
 member NSDateIntervalFormatter -timeStyle
 member NSDateIntervalFormatter -timeZone
 member NSDictionary +dictionaryWithContentsOfURL:error:
+member NSDictionary -__swiftInitWithDictionary_NSDictionary:
+member NSDictionary -__swift_objectForKeyedSubscript:
 member NSDictionary -initWithContentsOfURL:error:
 member NSDictionary -writeToURL:error:
 member NSDiffableDataSourceSectionSnapshot -appendItems:
@@ -24341,6 +24344,8 @@ member NSMutableAttributedString -appendLocalizedFormat:
 member NSMutableAttributedString -readFromFileURL:options:documentAttributes:error:
 member NSMutableData -compressUsingAlgorithm:error:
 member NSMutableData -decompressUsingAlgorithm:error:
+member NSMutableDictionary -__swift_objectForKeyedSubscript:
+member NSMutableDictionary -__swift_setObject:forKeyedSubscript:
 member NSMutableOrderedSet -applyDifference:
 member NSMutableParagraphStyle -setAllowsDefaultTighteningForTruncation:
 member NSMutableParagraphStyle -setLineBreakStrategy:

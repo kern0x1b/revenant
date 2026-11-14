@@ -809,7 +809,16 @@ class (`PlainHashed`); both report `proxy.hash` and `plain.hash` as `ok` on the 
 lift of `64fa5260a`). Two steps of the same family are not in the check: `proxy.copy`
 (`dictionaryWithDictionary:` of the bridged dictionary) stops with `unsupported: $sSS10FoundationE19_bridgeToObjectiveCSo8NSStringCyF`
 because the library of this check has no Foundation overlay, and `proxy.json`
-(`JSONSerialization.isValidJSONObject` of the bridged dictionary) reports `FAIL` on the 4S; its cause is not found.
+(`JSONSerialization.isValidJSONObject` of the bridged dictionary) reports `FAIL` on the 4S, which is the right answer for a
+library without the overlay (cause measured on 2026-11-15). A spy on `+[NSJSONSerialization isValidJSONObject:]` (a library
+preloaded with `DYLD_INSERT_LIBRARIES`) saw the dictionary arrive as the proxy of `_SwiftDeferredNSDictionary<String, String>`
+with three entries, all of them an `XLG.__SwiftValue`: without the overlay `String` has no `_ObjectiveCBridgeable` conformance,
+so the elements of a deferred dictionary are boxed instead of bridged to `NSString`, and the system method, which wants strings
+for keys, refuses the boxes. A fixture with the overlay returns `true` for the same expression and for ten other shapes (a
+`[String: String]` of long and of short strings, a `[String: Any]`, arrays and numbers; `stepProbeV` of the reCAPTCHA-style
+fixture, 4S, 2026-11-15): its keys are `__SharedStringStorage` and `__StringStorage` objects of the type id of `CFString`, and
+`JSONSerialization.data(withJSONObject:options:)` of the same dictionaries writes the JSON. The step is not in the check, because
+its expectation holds only with the overlay.
 
 `stepVaListBuilder` calls `getVaList([Int32(7), Int32(8)])` of the standard library and reads the two words of the list, then
 returns. `getVaList` autoreleases its builder, an object of the static class `__VaListBuilder`, and the host's autorelease pool
