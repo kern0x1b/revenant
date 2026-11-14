@@ -28,6 +28,7 @@ local STEPS = {
     {"stepHostGetObjects", {"host.getobjects"}},
     {"stepHostFast", {"host.fastenumeration"}},
     {"stepHostEnumerate", {"host.enumerate"}},
+    {"stepHostSequence", {"host.sequence.batch", "host.sequence.items", "host.sequence.mutations", "host.sequence.forin"}},
 }
 local CONTROLS = {"stepProxyKind", "stepProxyDescription", "stepProxyIdentity", "stepProxyNested", "stepProxyAny", "stepProxyLifetime", "stepProxyUnique", "stepProxyWeak"}
 

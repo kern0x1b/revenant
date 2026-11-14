@@ -154,6 +154,46 @@ static void dictionary_probe(id runner, const char *step)
     }
 }
 
+static void sequence_probe(id runner)
+{
+    id sequence = ((id (*)(id, SEL))objc_msgSend)(runner, @selector(fastSequence));
+    @try {
+        NSFastEnumerationState state;
+        memset(&state, 0, sizeof state);
+        __unsafe_unretained id buffer[16];
+        NSUInteger total = 0;
+        NSUInteger batches = 0;
+        int firsts_ok = 0, items_ok = 1, mutations_ok = 1;
+        NSUInteger count;
+        while ((count = [sequence countByEnumeratingWithState:&state objects:buffer count:16]) > 0) {
+            if (batches == 0)
+                firsts_ok = count == 16 && state.state == 16;
+            batches++;
+            total += count;
+            if (!state.itemsPtr)
+                items_ok = 0;
+            for (NSUInteger index = 0; state.itemsPtr && index < count; index++) {
+                if (!state.itemsPtr[index] || (index > 0 && state.itemsPtr[index] == state.itemsPtr[index - 1]))
+                    items_ok = 0;
+            }
+            if (state.mutationsPtr != &state.extra[0] || *state.mutationsPtr != state.extra[0])
+                mutations_ok = 0;
+        }
+        check("sequence.batch", firsts_ok && total == 40 && batches == 3);
+        check("sequence.items", items_ok);
+        check("sequence.mutations", mutations_ok && batches > 0);
+        int seen = 0;
+        for (id each in sequence) {
+            if (each)
+                seen++;
+        }
+        check("sequence.forin", seen == 40);
+    } @catch (NSException *exception) {
+        printf("note exception %s: %s\n", [[exception name] UTF8String], [[exception reason] UTF8String]);
+        printf("FAIL host.sequence\n");
+    }
+}
+
 int main(int argc, char **argv)
 {
     setbuf(stdout, NULL);
@@ -189,7 +229,9 @@ int main(int argc, char **argv)
             printf("FAIL selector.absent %s\n", argv[3]);
             return 1;
         }
-        if (in_host)
+        if (strcmp(argv[3], "stepHostSequence") == 0)
+            sequence_probe(runner);
+        else if (in_host)
             dictionary_probe(runner, argv[3]);
         else if (strcmp(argv[3], "stepProxyRace") == 0)
             race(runner, argc > 4 ? atoi(argv[4]) : 100000);

@@ -48,7 +48,31 @@ struct Box {
     }
 }
 
+@objc(LibGenericsSequence) public final class LibGenericsSequence: NSObject, NSFastEnumeration {
+    let members: [NSObject] = (0..<40).map { _ in NSObject() }
+
+    public func countByEnumerating(with state: UnsafeMutablePointer<NSFastEnumerationState>, objects buffer: AutoreleasingUnsafeMutablePointer<AnyObject?>, count len: Int) -> Int {
+        let start = Int(state.pointee.state)
+        let batch = min(len, members.count - start)
+        if batch <= 0 {
+            return 0
+        }
+        let slots = unsafeBitCast(buffer, to: UnsafeMutablePointer<Unmanaged<AnyObject>?>.self)
+        for index in 0..<batch {
+            slots[index] = Unmanaged.passUnretained(members[start + index])
+        }
+        state.pointee.state = UInt(start + batch)
+        state.pointee.itemsPtr = buffer
+        state.pointee.mutationsPtr = withUnsafeMutablePointer(to: &state.pointee.extra.0) { $0 }
+        return batch
+    }
+}
+
 @objc(LibGenerics) public final class LibGenerics: NSObject {
+    @objc public func fastSequence() -> AnyObject {
+        return LibGenericsSequence()
+    }
+
     @objc public func sharedObject() -> AnyObject {
         if sharedHolder == nil {
             sharedHolder = Holder(7)
