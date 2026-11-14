@@ -17,6 +17,7 @@ struct revenant_alias {
 #define REVENANT_ALIAS_ANSWER(Name, own, released) (own)
 #define REVENANT_ALIAS_DECLARE(Name)
 #define REVENANT_ALIAS_INTERFACE(Name, Super, ...)
+#define REVENANT_ALIAS_ADOPTS(Name, ...)
 #define REVENANT_ALIAS_LINKAGE(Name)
 #else
 #define REVENANT_ALIAS_CLASS(Name) Revenant##Name
@@ -29,6 +30,15 @@ struct revenant_alias {
 #define REVENANT_ALIAS_INTERFACE(Name, Super, ...) \
     @interface REVENANT_ALIAS_CLASS(Name) : Super { __VA_ARGS__ } \
     @end
+#define REVENANT_ALIAS_ADOPTS(Name, ...) \
+    @interface REVENANT_ALIAS_CLASS(Name) (RevenantProtocols) <__VA_ARGS__> \
+    @end \
+    _Pragma("clang diagnostic push") \
+    _Pragma("clang diagnostic ignored \"-Wprotocol\"") \
+    _Pragma("clang diagnostic ignored \"-Wobjc-property-implementation\"") \
+    @implementation REVENANT_ALIAS_CLASS(Name) (RevenantProtocols) \
+    @end \
+    _Pragma("clang diagnostic pop")
 #define REVENANT_ALIAS_LINKAGE(Name) \
     __asm__(".globl _OBJC_CLASS_$_" #Name "\n"                                                                     \
             ".set _OBJC_CLASS_$_" #Name ", _OBJC_CLASS_$_Revenant" #Name "\n"                                        \
@@ -71,8 +81,14 @@ static Method revenant_alias_method(Class cls, SEL selector, BOOL class_methods)
     {                                                                                                              \
         if (!objc_getClass(#Name)) {                                                                               \
             Class made = objc_allocateClassPair(self, #Name, 0);                                                   \
-            if (made)                                                                                              \
+            if (made) {                                                                                            \
+                unsigned adopted = 0;                                                                              \
+                Protocol *__unsafe_unretained *protocols = class_copyProtocolList(self, &adopted);                 \
+                for (unsigned index = 0; index < adopted; index++)                                                 \
+                    class_addProtocol(made, protocols[index]);                                                     \
+                free(protocols);                                                                                   \
                 objc_registerClassPair(made);                                                                      \
+            }                                                                                                      \
         }                                                                                                          \
     }                                                                                                              \
                                                                                                                    \

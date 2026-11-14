@@ -7,6 +7,8 @@ REVENANT_ALIAS_STATE(NSDimension, NSUnit,
     NSUnitConverter *_converter;
 )
 
+REVENANT_ALIAS_ADOPTS(NSDimension, NSSecureCoding)
+
 @implementation REVENANT_ALIAS_CLASS(NSDimension) (RevenantBackport)
 
 + (BOOL)supportsSecureCoding

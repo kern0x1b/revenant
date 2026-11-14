@@ -50,7 +50,7 @@ local JOBS = {
         {name = "Configure the Backports component", argv = BACKPORTS_CONFIGURE},
         {name = "Extract the facts of every framework", argv = x("l", "-P", ".", "frameworks/Backports/tools/generate.lua")},
         {name = "Build the Backports component", argv = x("build", "-P", ".")},
-        {name = "Run the Backports tests", argv = x("test", "-P", ".", "backports_uikit/*", "--output-on-failure")},
+        {name = "Run the Backports tests", argv = x("test", "-P", ".", "backports_uikit/*", "backports_aliases/*", "--output-on-failure")},
         {name = "Link the probe app against the Backports libraries", argv = x("build", "-P", ".", "BackportsProbe")},
         {name = "Probe the Backports libraries", argv = x("l", "-P", ".", "frameworks/Backports/tools/probe.lua", "build/iphoneos/armv7/release/BackportsProbe")},
         {name = "Check the exports and count the implemented members", argv = x("l", "-P", ".", "frameworks/Backports/tools/exports.lua")},

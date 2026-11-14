@@ -5,6 +5,8 @@
 
 REVENANT_ALIAS(NSUUID)
 
+REVENANT_ALIAS_ADOPTS(NSUUID, NSCopying, NSSecureCoding)
+
 static char RevenantUUIDBytesKey;
 
 static NSUInteger revenant_uuid_hash(const uint8_t *bytes)

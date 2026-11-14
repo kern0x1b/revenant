@@ -11,6 +11,8 @@ REVENANT_ALIAS_STATE(NSPersonNameComponents, NSObject,
     NSPersonNameComponents *_phoneticRepresentation;
 )
 
+REVENANT_ALIAS_ADOPTS(NSPersonNameComponents, NSCopying, NSSecureCoding)
+
 @implementation REVENANT_ALIAS_CLASS(NSPersonNameComponents) (RevenantComponents)
 
 + (BOOL)supportsSecureCoding

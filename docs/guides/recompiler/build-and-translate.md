@@ -101,6 +101,10 @@ overlay refers to) needs the Backports at translation: `BACKPORTS_DIR=<folder wi
 ([how the Backports load](../../explanation/backports-loading.md)). Without it the class reference is weak and stays nil on the
 phone, so `URLComponents(string:)` returns nil (measured on the iPhone 4S on 2026-11-14: `components.create` and
 `components.items` fail without it and pass with it; `uncovered-classes.txt` of the translation lists the weak references).
+The Backports that the app loads have to be built from a source in which the class adopts the protocols the Swift overlay
+requires of it (`REVENANT_ALIAS_ADOPTS`, [the protocols of a class](../../explanation/backports-loading.md)): a
+`libFoundationBackports.dylib` from before 2026-11-14 lets `URLComponents(string:)` work and then kills the process when the
+value is released (signal 11, fault `0xfffffff0`), because `_MutableHandle<NSURLComponents>` cannot be instantiated.
 
 ## Translate a library
 

@@ -17,6 +17,8 @@ REVENANT_ALIAS_STATE(NSMeasurement, NSObject,
     double _doubleValue;
 )
 
+REVENANT_ALIAS_ADOPTS(NSMeasurement, NSCopying, NSSecureCoding)
+
 @implementation REVENANT_ALIAS_CLASS(NSMeasurement) (RevenantBackport)
 
 + (BOOL)supportsSecureCoding

@@ -76,6 +76,8 @@ REVENANT_ALIAS_STATE(NSURLComponents, NSObject,
     NSString *_percentEncodedFragment;
 )
 
+REVENANT_ALIAS_ADOPTS(NSURLComponents, NSCopying)
+
 @implementation REVENANT_ALIAS_CLASS(NSURLComponents) (RevenantComponents)
 
 
