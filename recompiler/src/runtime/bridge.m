@@ -711,26 +711,279 @@ void xl_manual__ZdaPv(void *pack) { struct xl_alloc_pack *p = pack; free((void *
 void xl_manual_NSGetUncaughtExceptionHandler(void *pack) { struct { uint64_t r; } *p = pack; p->r = 0; }
 
 extern void _Unwind_SjLj_Resume(struct _Unwind_Exception *exception);
+extern void *__cxa_allocate_exception(size_t size);
+extern void __cxa_free_exception(void *thrown);
+extern void __cxa_throw(void *thrown, const void *type, void (*destructor)(void *)) __attribute__((noreturn));
 extern void *__cxa_begin_catch(void *exception);
 extern void __cxa_end_catch(void);
 extern void __cxa_rethrow(void) __attribute__((noreturn));
+extern void *__cxa_get_exception_ptr(void *exception);
+extern const void *__cxa_current_exception_type(void);
+extern void *__cxa_current_primary_exception(void);
+extern void __cxa_rethrow_primary_exception(void *primary) __attribute__((noreturn));
+extern void __cxa_increment_exception_refcount(void *primary);
+extern void __cxa_decrement_exception_refcount(void *primary);
+extern _Bool __cxa_uncaught_exception(void);
+extern void *__cxa_get_globals(void);
 
-void xl_manual___cxa_begin_catch(void *pack)
+struct xl_typeinfo_entry {
+    uint32_t guest;
+    const void *host;
+};
+extern const struct xl_typeinfo_entry xl_typeinfos[];
+extern const uint32_t xl_typeinfo_count;
+extern uint32_t xl_guest_low, xl_guest_high;
+
+static const void *xl_host_typeinfo(uint64_t guest)
 {
-    struct __attribute__((packed)) { uint64_t a0, r; } *p = pack;
-    p->r = (uint64_t)(uintptr_t)__cxa_begin_catch((void *)(uintptr_t)p->a0);
+    uint32_t low = 0, high = xl_typeinfo_count;
+    while (low < high) {
+        uint32_t middle = low + (high - low) / 2;
+        if (xl_typeinfos[middle].guest < guest)
+            low = middle + 1;
+        else
+            high = middle;
+    }
+    if (low < xl_typeinfo_count && xl_typeinfos[low].guest == guest)
+        return xl_typeinfos[low].host;
+    if (guest < xl_guest_low || guest >= xl_guest_high)
+        return (const void *)(uintptr_t)guest;
+    char line[160];
+    snprintf(line, sizeof line, "xlate: a C++ exception is thrown with the type_info at 0x%llx, which the translator found in no guest image\n", guest);
+    fputs(line, stderr);
+    xl_diag(line);
+    abort();
 }
 
-void xl_manual___cxa_end_catch(void *pack)
+static uint64_t xl_guest_typeinfo(const void *host)
 {
-    (void)pack;
-    __cxa_end_catch();
+    for (uint32_t i = 0; i < xl_typeinfo_count; i++)
+        if (xl_typeinfos[i].host == host)
+            return xl_typeinfos[i].guest;
+    return 0;
 }
 
-void xl_manual___cxa_rethrow(void *pack)
+static pthread_mutex_t xl_exception_lock = PTHREAD_MUTEX_INITIALIZER;
+static struct xl_exception_entry { void *object; uint64_t destructor; } *xl_exceptions;
+static unsigned xl_exception_count, xl_exception_cap;
+
+static void xl_exception_destroy(void *object)
 {
-    (void)pack;
+    uint64_t destructor = 0;
+    pthread_mutex_lock(&xl_exception_lock);
+    for (unsigned i = 0; i < xl_exception_count; i++) {
+        if (xl_exceptions[i].object == object) {
+            destructor = xl_exceptions[i].destructor;
+            xl_exceptions[i] = xl_exceptions[--xl_exception_count];
+            break;
+        }
+    }
+    pthread_mutex_unlock(&xl_exception_lock);
+    if (destructor)
+        xl_invoke(destructor, (uint64_t)(uintptr_t)object);
+}
+
+static void xl_exception_remember(void *object, uint64_t destructor)
+{
+    pthread_mutex_lock(&xl_exception_lock);
+    if (xl_exception_count == xl_exception_cap) {
+        xl_exception_cap = xl_exception_cap ? xl_exception_cap * 2 : 16;
+        xl_exceptions = realloc(xl_exceptions, xl_exception_cap * sizeof *xl_exceptions);
+    }
+    xl_exceptions[xl_exception_count].object = object;
+    xl_exceptions[xl_exception_count].destructor = destructor;
+    xl_exception_count++;
+    pthread_mutex_unlock(&xl_exception_lock);
+}
+
+static void xl_exception_ptr_acquire(uint64_t *slot, uint64_t primary)
+{
+    *slot = primary;
+    if (primary)
+        __cxa_increment_exception_refcount((void *)(uintptr_t)primary);
+}
+
+static void xl_exception_ptr_release(uint64_t primary)
+{
+    if (primary)
+        __cxa_decrement_exception_refcount((void *)(uintptr_t)primary);
+}
+
+void xl_h___cxa_allocate_exception(State *state)
+{
+    XL_REG(state, X0) = (uint64_t)(uintptr_t)__cxa_allocate_exception((size_t)XL_REG(state, X0));
+    xl_return(state);
+}
+
+void xl_h___cxa_free_exception(State *state)
+{
+    __cxa_free_exception((void *)(uintptr_t)XL_REG(state, X0));
+    xl_return(state);
+}
+
+void xl_h___cxa_throw(State *state)
+{
+    void *object = (void *)(uintptr_t)XL_REG(state, X0);
+    const void *type = xl_host_typeinfo(XL_REG(state, X1));
+    uint64_t destructor = XL_REG(state, X2);
+    if (destructor)
+        xl_exception_remember(object, destructor);
+    __cxa_throw(object, type, destructor ? xl_exception_destroy : NULL);
+}
+
+void xl_h___cxa_rethrow(State *state)
+{
+    (void)state;
     __cxa_rethrow();
+}
+
+void xl_h___cxa_begin_catch(State *state)
+{
+    XL_REG(state, X0) = (uint64_t)(uintptr_t)__cxa_begin_catch((void *)(uintptr_t)XL_REG(state, X0));
+    xl_return(state);
+}
+
+void xl_h___cxa_end_catch(State *state)
+{
+    __cxa_end_catch();
+    xl_return(state);
+}
+
+void xl_h___cxa_get_exception_ptr(State *state)
+{
+    XL_REG(state, X0) = (uint64_t)(uintptr_t)__cxa_get_exception_ptr((void *)(uintptr_t)XL_REG(state, X0));
+    xl_return(state);
+}
+
+void xl_h___cxa_current_exception_type(State *state)
+{
+    XL_REG(state, X0) = xl_guest_typeinfo(__cxa_current_exception_type());
+    xl_return(state);
+}
+
+void xl_h___cxa_current_primary_exception(State *state)
+{
+    XL_REG(state, X0) = (uint64_t)(uintptr_t)__cxa_current_primary_exception();
+    xl_return(state);
+}
+
+void xl_h___cxa_rethrow_primary_exception(State *state)
+{
+    __cxa_rethrow_primary_exception((void *)(uintptr_t)XL_REG(state, X0));
+    xl_return(state);
+}
+
+void xl_h___cxa_increment_exception_refcount(State *state)
+{
+    __cxa_increment_exception_refcount((void *)(uintptr_t)XL_REG(state, X0));
+    xl_return(state);
+}
+
+void xl_h___cxa_decrement_exception_refcount(State *state)
+{
+    __cxa_decrement_exception_refcount((void *)(uintptr_t)XL_REG(state, X0));
+    xl_return(state);
+}
+
+static uint64_t xl_uncaught_exceptions(void)
+{
+    struct { void *caught; unsigned int uncaught; } *globals = __cxa_get_globals();
+    return globals->uncaught;
+}
+
+void xl_h___cxa_uncaught_exception(State *state)
+{
+    XL_REG(state, X0) = __cxa_uncaught_exception() ? 1 : 0;
+    xl_return(state);
+}
+
+void xl_h___cxa_uncaught_exceptions(State *state)
+{
+    XL_REG(state, X0) = xl_uncaught_exceptions();
+    xl_return(state);
+}
+
+void xl_h___cxa_init_primary_exception(State *state)
+{
+    (void)state;
+    xl_unsupported("__cxa_init_primary_exception: the host's libc++abi has no such function, so a libc++ that builds std::make_exception_ptr on it cannot run");
+}
+
+void xl_h___cxa_allocate_dependent_exception(State *state)
+{
+    (void)state;
+    xl_unsupported("__cxa_allocate_dependent_exception: the host's libc++abi has no such function");
+}
+
+void xl_h___cxa_free_dependent_exception(State *state)
+{
+    (void)state;
+    xl_unsupported("__cxa_free_dependent_exception: the host's libc++abi has no such function");
+}
+
+void xl_h__ZNSt13exception_ptr31__from_native_exception_pointerEPv(State *state)
+{
+    xl_exception_ptr_acquire((uint64_t *)(uintptr_t)XL_REG(state, X8), XL_REG(state, X0));
+    xl_return(state);
+}
+
+static void xl_exception_ptr_copy(State *state)
+{
+    uint64_t *self = (uint64_t *)(uintptr_t)XL_REG(state, X0);
+    uint64_t *other = (uint64_t *)(uintptr_t)XL_REG(state, X1);
+    xl_exception_ptr_acquire(self, *other);
+    xl_return(state);
+}
+
+void xl_h__ZNSt13exception_ptrC1ERKS_(State *state) { xl_exception_ptr_copy(state); }
+void xl_h__ZNSt13exception_ptrC2ERKS_(State *state) { xl_exception_ptr_copy(state); }
+
+static void xl_exception_ptr_destroy(State *state)
+{
+    xl_exception_ptr_release(*(uint64_t *)(uintptr_t)XL_REG(state, X0));
+    xl_return(state);
+}
+
+void xl_h__ZNSt13exception_ptrD1Ev(State *state) { xl_exception_ptr_destroy(state); }
+void xl_h__ZNSt13exception_ptrD2Ev(State *state) { xl_exception_ptr_destroy(state); }
+
+void xl_h__ZNSt13exception_ptraSERKS_(State *state)
+{
+    uint64_t *self = (uint64_t *)(uintptr_t)XL_REG(state, X0);
+    uint64_t incoming = *(uint64_t *)(uintptr_t)XL_REG(state, X1);
+    uint64_t previous = *self;
+    if (incoming)
+        __cxa_increment_exception_refcount((void *)(uintptr_t)incoming);
+    *self = incoming;
+    xl_exception_ptr_release(previous);
+    xl_return(state);
+}
+
+void xl_h__ZSt17current_exceptionv(State *state)
+{
+    *(uint64_t *)(uintptr_t)XL_REG(state, X8) = (uint64_t)(uintptr_t)__cxa_current_primary_exception();
+    xl_return(state);
+}
+
+void xl_h__ZSt17rethrow_exceptionSt13exception_ptr(State *state)
+{
+    uint64_t primary = *(uint64_t *)(uintptr_t)XL_REG(state, X0);
+    if (!primary)
+        xl_unsupported("std::rethrow_exception of a null exception_ptr");
+    __cxa_rethrow_primary_exception((void *)(uintptr_t)primary);
+    xl_unsupported("std::rethrow_exception: the host's __cxa_rethrow_primary_exception returned");
+}
+
+void xl_h__ZSt18uncaught_exceptionv(State *state)
+{
+    XL_REG(state, X0) = __cxa_uncaught_exception() ? 1 : 0;
+    xl_return(state);
+}
+
+void xl_h__ZSt19uncaught_exceptionsv(State *state)
+{
+    XL_REG(state, X0) = xl_uncaught_exceptions();
+    xl_return(state);
 }
 
 void xl_manual__Unwind_Resume(void *pack)

@@ -1,7 +1,9 @@
 #include "exports.h"
+#include "host_routed.h"
 #include "macho.h"
 #include "objc.h"
 #include "tsd_scan.h"
+#include "typeinfo.h"
 #include "unwind.h"
 #include "xl_guest_image.h"
 
@@ -126,6 +128,7 @@ struct Program {
   std::set<std::string> passthrough;
   std::set<uint64_t> functions;
   xlate::UnwindTable unwind;
+  xlate::TypeInfoTable typeinfos;
 
   const Image *ImageAt(uint64_t host) const {
     for (auto &image : images) {
@@ -234,6 +237,23 @@ bool LayoutAndResolve(Program &program, bool strict) {
       llvm::errs() << "xlate: " << error << "\n";
       return false;
     }
+  }
+  unsigned routed = 0;
+  for (auto &image : program.images) {
+    if (IsBridge(image->path())) {
+      continue;
+    }
+    for (auto &[name, vmaddr] : image->exports()) {
+      if (xlate::IsHostRouted(name)) {
+        auto address = image->host(vmaddr);
+        program.stub_to_host[address] = xlate::HostRoutedHandler(name);
+        program.functions.erase(address);
+        ++routed;
+      }
+    }
+  }
+  if (routed) {
+    errs() << "xlate: " << routed << " functions of the guest images that implement the C++ exception ABI are replaced by calls to the host\n";
   }
   bool ok = true;
   for (auto &image : program.images) {
@@ -990,10 +1010,121 @@ Constant *HostSymbol(Module &module, const std::string &symbol) {
                             nullptr, name);
 }
 
+class HostTypeInfos {
+ public:
+  HostTypeInfos(Program &program, Module &module) : program_(program), module_(module), context_(module.getContext()) {}
+
+  Constant *Get(uint64_t address) {
+    if (auto found = by_address_.find(address); found != by_address_.end()) {
+      return found->second;
+    }
+    auto info = program_.typeinfos.Find(address);
+    if (!info) {
+      return nullptr;
+    }
+    Constant *object = nullptr;
+    if (info->kind == xlate::GuestTypeInfo::Fundamental) {
+      if (auto symbol = xlate::TypeInfoTable::HostFundamental(info->text)) {
+        object = HostSymbol(module_, symbol);
+      }
+    }
+    if (!object) {
+      if (auto named = by_name_.find(info->text); named != by_name_.end()) {
+        object = named->second;
+      } else {
+        object = Make(*info);
+        by_name_[info->text] = object;
+      }
+    }
+    by_address_[address] = object;
+    return object;
+  }
+
+  void EmitTable() {
+    auto i32 = Type::getInt32Ty(context_);
+    auto ptr = PointerType::get(context_, 0);
+    auto entry_type = StructType::get(context_, {i32, ptr});
+    std::vector<Constant *> entries;
+    for (auto &[address, info] : program_.typeinfos.all()) {
+      if (auto object = Get(address)) {
+        entries.push_back(ConstantStruct::get(entry_type, {ConstantInt::get(i32, address), object}));
+      }
+    }
+    auto array_type = ArrayType::get(entry_type, entries.size());
+    new GlobalVariable(module_, array_type, true, GlobalValue::ExternalLinkage, ConstantArray::get(array_type, entries), "xl_typeinfos");
+    new GlobalVariable(module_, i32, true, GlobalValue::ExternalLinkage, ConstantInt::get(i32, entries.size()), "xl_typeinfo_count");
+    if (!entries.empty()) {
+      errs() << "xlate: " << entries.size() << " type_info objects of the guest images have a host layout for the exceptions that guest code throws\n";
+    }
+  }
+
+  bool ok() const { return ok_; }
+
+ private:
+  Constant *Reference(const xlate::TypeRef &ref, uint64_t from) {
+    if (!ref.symbol.empty()) {
+      return HostSymbol(module_, ref.symbol);
+    }
+    if (auto object = Get(ref.address)) {
+      return object;
+    }
+    errs() << "xlate: the type_info at 0x" << Hex(from) << " names a type_info at 0x" << Hex(ref.address) << " that is not one of the guest images' objects\n";
+    ok_ = false;
+    return ConstantPointerNull::get(PointerType::get(context_, 0));
+  }
+
+  Constant *Make(const xlate::GuestTypeInfo &info) {
+    auto ptr = PointerType::get(context_, 0);
+    auto i32 = Type::getInt32Ty(context_);
+    Constant *vtable = ConstantExpr::getPtrAdd(HostSymbol(module_, xlate::TypeInfoTable::VtableSymbol(info.kind)), ConstantInt::get(i32, 8));
+    Constant *name = ConstantExpr::getIntToPtr(ConstantInt::get(i32, info.name), ptr);
+    std::vector<Type *> types = {ptr, ptr};
+    std::vector<Constant *> values = {vtable, name};
+    switch (info.kind) {
+      case xlate::GuestTypeInfo::SingleInheritance:
+        types.push_back(ptr);
+        values.push_back(Reference(info.target, info.address));
+        break;
+      case xlate::GuestTypeInfo::MultipleInheritance: {
+        auto base_type = StructType::get(context_, {ptr, i32});
+        std::vector<Constant *> bases;
+        for (auto &base : info.bases) {
+          uint32_t packed = static_cast<uint32_t>((base.offset << 8) | base.flags);
+          bases.push_back(ConstantStruct::get(base_type, {Reference(base.type, info.address), ConstantInt::get(i32, packed)}));
+        }
+        auto array_type = ArrayType::get(base_type, bases.size());
+        types.insert(types.end(), {i32, i32, array_type});
+        values.insert(values.end(), {ConstantInt::get(i32, info.flags), ConstantInt::get(i32, bases.size()), ConstantArray::get(array_type, bases)});
+        break;
+      }
+      case xlate::GuestTypeInfo::Pointer:
+      case xlate::GuestTypeInfo::PointerToMember:
+        types.insert(types.end(), {i32, ptr});
+        values.insert(values.end(), {ConstantInt::get(i32, info.flags), Reference(info.target, info.address)});
+        if (info.kind == xlate::GuestTypeInfo::PointerToMember) {
+          types.push_back(ptr);
+          values.push_back(Reference(info.context, info.address));
+        }
+        break;
+      default:
+        break;
+    }
+    auto layout = StructType::get(context_, types);
+    return new GlobalVariable(module_, layout, true, GlobalValue::InternalLinkage, ConstantStruct::get(layout, values), "xl_typeinfo_" + Hex(info.address));
+  }
+
+  Program &program_;
+  Module &module_;
+  LLVMContext &context_;
+  std::map<uint64_t, Constant *> by_address_;
+  std::map<std::string, Constant *> by_name_;
+  bool ok_ = true;
+};
+
 class LandingPads {
  public:
-  LandingPads(Program &program, Lifter &lifter, Module &module)
-      : program_(program), lifter_(lifter), module_(module), context_(module.getContext()) {
+  LandingPads(Program &program, Lifter &lifter, Module &module, HostTypeInfos &typeinfos)
+      : program_(program), lifter_(lifter), module_(module), typeinfos_(typeinfos), context_(module.getContext()) {
     auto &offsets = StateOffsets();
     x30_ = offsets.at("x30");
     for (int n = 19; n <= 29; ++n) {
@@ -1042,6 +1173,9 @@ class LandingPads {
     EmitResume();
     for (auto &[reason, count] : unsupported_) {
       errs() << "xlate: " << count << " call site(s) with a landing pad were left as plain calls: " << reason << "\n";
+    }
+    if (!dropped_.empty()) {
+      errs() << "xlate: " << dropped_.size() << " catch clause(s) name a type_info that no guest image defines and were dropped\n";
     }
     return lowered;
   }
@@ -1131,16 +1265,23 @@ class LandingPads {
           clause = ConstantPointerNull::get(PointerType::get(context_, 0));
           break;
         case xlate::ExceptionType::Import:
-          clause = HostSymbol(module_, type.symbol);
+          if (auto guest = program_.exports.Find(type.library, type.symbol)) {
+            clause = typeinfos_.Get(*guest + type.addend);
+          } else {
+            clause = HostSymbol(module_, type.symbol);
+          }
           break;
         case xlate::ExceptionType::LocalObjC:
           clause = LocalType(type);
           break;
         case xlate::ExceptionType::LocalOther:
+          clause = typeinfos_.Get(type.address);
           break;
       }
       if (clause) {
         pad.catches.push_back({clause, filter});
+      } else {
+        dropped_.insert({landing.function->start, filter});
       }
     }
     if (!pad.cleanup && pad.catches.empty()) {
@@ -1349,9 +1490,11 @@ class LandingPads {
   Program &program_;
   Lifter &lifter_;
   Module &module_;
+  HostTypeInfos &typeinfos_;
   LLVMContext &context_;
   uint64_t x30_ = 0;
   std::vector<Saved> saved_;
+  std::set<std::pair<uint64_t, int64_t>> dropped_;
   std::set<uint64_t> continuations_;
   std::set<Function *> continuation_functions_;
   std::set<uint64_t> resumable_;
@@ -2171,8 +2314,16 @@ int main(int argc, char **argv) {
       errs() << "xlate: warning: " << image->path() << ": " << problem << "\n";
     }
   }
+  {
+    std::vector<std::string> problems;
+    program.typeinfos.Scan(program.images, program.exports, [&](uint64_t address) { return program.ImageAt(address); }, problems);
+    for (auto &problem : problems) {
+      errs() << "xlate: warning: " << problem << "\n";
+    }
+  }
+  HostTypeInfos typeinfos(program, module);
   Lifter lifter(program, module);
-  LandingPads pads(program, lifter, module);
+  LandingPads pads(program, lifter, module, typeinfos);
   unsigned failures = 0;
   JumpTables tables(program);
   std::set<uint64_t> pending(program.functions.begin(), program.functions.end());
@@ -2327,6 +2478,10 @@ int main(int argc, char **argv) {
   std::vector<GuestSegment> segments;
   auto overrides = ObjCOverrides(module, objc);
   if (!(Library ? EmitGuestImage(program, module, overrides) : EmitGuestData(program, module, segments, overrides))) {
+    return 1;
+  }
+  typeinfos.EmitTable();
+  if (!typeinfos.ok()) {
     return 1;
   }
   EmitTables(program, lifter, module);

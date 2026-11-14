@@ -1,3 +1,5 @@
+#include "host_routed.h"
+
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Attr.h>
 #include <clang/AST/Decl.h>
@@ -2842,7 +2844,7 @@ int main(int argc, const char **argv) {
       {"_objc_retainAutoreleaseReturnValue", 1}, {"_objc_unsafeClaimAutoreleasedReturnValue", 1},
       {"_objc_claimAutoreleasedReturnValue", 1}, {"_objc_retainBlock", 1},
       {"_objc_retain", 1}, {"_objc_release", 1}, {"_objc_autorelease", 1}, {"__objc_rootAutorelease", 1},
-      {"___cxa_atexit", 3}, {"__Unwind_Resume", 1}, {"___cxa_begin_catch", 1}, {"___cxa_end_catch", 0}, {"___cxa_rethrow", 0},
+      {"___cxa_atexit", 3}, {"__Unwind_Resume", 1},
       {"__Znwm", 1}, {"__Znam", 1}, {"__ZdlPv", 1}, {"__ZdaPv", 1},
       {"_NSGetUncaughtExceptionHandler", 0},
       {"_kevent", 6},
@@ -2863,9 +2865,13 @@ int main(int argc, const char **argv) {
       {"__NSGetArgv", 0}, {"_CGColorCreate", 2}, {"_CGColorGetComponents", 1}, {"_CGImageCreateWithMaskingColors", 2}};
   static const std::set<std::string> personalities = {"___objc_personality_v0", "___gxx_personality_v0",
                                                       "___gcc_personality_v0"};
-  static const std::set<std::string> faults = {"___cxa_throw", "__Unwind_RaiseException"};
+  static const std::set<std::string> faults = {"__Unwind_RaiseException"};
   for (auto &symbol : ReadLines(SymbolsPath)) {
     if (provided.count(symbol) || symbol == "dyld_stub_binder" || personalities.count(symbol)) {
+      continue;
+    }
+    if (xlate::IsHostRouted(symbol)) {
+      generator.EmitTrampoline(symbol, symbol.substr(1));
       continue;
     }
     if (StringRef(symbol).starts_with("_OBJC_CLASS_$_") || StringRef(symbol).starts_with("_OBJC_METACLASS_$_") ||
