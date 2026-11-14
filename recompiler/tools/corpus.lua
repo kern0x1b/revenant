@@ -71,9 +71,27 @@ function run(program, argv, log)
     return status == 0, text
 end
 
+function options(...)
+    local found = {host_only = false, device_only = false}
+    for _, argument in ipairs({...}) do
+        if type(argument) == "table" then
+            found.host_only = argument.host_only or found.host_only
+            found.device_only = argument.device_only or found.device_only
+        elseif argument == "--host-only" then
+            found.host_only = true
+        elseif argument == "--device-only" then
+            found.device_only = true
+        end
+    end
+    return found
+end
+
 function device()
     local module = import("@addon.revenant.device", {anonymous = true})
     local settings = module.bind(os.projectdir(), nil)
+    if not module.held(settings) then
+        raise("this check goes to the phone and this process (%s) does not hold it: claim it first with REVENANT_DEVICE_HOLDER set and `./xmakew device --minutes=N claim`, inside a window the coordinator gave you; a run without the phone is --host-only", module.holder_name() or "no REVENANT_DEVICE_HOLDER")
+    end
     return {
         copy = function (localfile, remote)
             module.copy(settings, localfile, remote)

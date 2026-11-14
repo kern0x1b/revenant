@@ -38,6 +38,12 @@ These need a claimed device (the skill `device`): `REVENANT_DEVICE_HOLDER` and `
 exported and the claim held. They reach the device through Revenant's `device` module. Without an argument, output goes
 to `build/recompiler/corpus/<name>`.
 
+A check that goes to the phone does not start unless its holder has claimed it: `corpus.device()` refuses with
+"does not hold it" when `REVENANT_DEVICE_HOLDER` is empty, when nobody has claimed the phone, and when somebody else has.
+The module alone only refuses a second holder, so a check run without a claim used to reach an unclaimed phone. The
+string `--host-only` and the table `{host_only = true}` (what `xmake test` passes) mean the same in every check, and so
+do `--device-only` and `{device_only = true}`: `corpus.options(...)` reads both.
+
 ## What each check proves
 
 ### jumptable
@@ -445,6 +451,14 @@ names that image. This holds for each kind of bind: the superclass pointer, a cl
 
 The image indices in xlate's JSON are 1-based in Lua: the app, libfrombx, `a/libcoll` (the app's link), then
 `b/libcoll` (libfrombx's).
+
+### devicegate
+
+No phone. It reads `--host-only`, `--device-only` and the two tables through `corpus.options` and checks six
+combinations, then points the lease folder at a temporary one and shows that `corpus.device()` refuses a holder that
+named nobody, a phone nobody claimed and a phone another holder claimed, and lets the holder of the claim through. Two
+checks (`hostbridges`, `libexceptions`) read only the table before this test; a build meant for the Mac took the string
+as nothing and ran on the phone.
 
 ### checkapi
 
