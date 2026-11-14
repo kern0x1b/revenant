@@ -54,7 +54,8 @@ The phone must be claimed by your holder name. The app is installed by its bundl
 (see [the isolated build](isolated-build.md)): `/var/stash/<holder>/<last part of the id>/<last part of the id>.app`, linked from
 `/Applications`. Only the app of that id is removed, so a colleague's app stays. With `--bundle` the JavaScript bundle and the
 configuration (`module=main`, that bundle and the `--conf` lines) are written inside the app as root-owned files, which is where the
-host reads them. The host's output goes to `/var/tmp/<last part of the id>/`.
+host reads them. The host's output goes to `/var/tmp/<last part of the id>/` (it runs as `mobile` and cannot write the claim's scratch folder; the host
+caps each file there at 1 MiB). The archive travels through the claim's scratch folder `/var/root/revenant-scratch/<holder>/` and is removed after unpacking.
 
 ## launch
 

@@ -17,7 +17,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
           from /Applications, registers it and, with --bundle, puts the JavaScript bundle at <that .app>/bundle.js and writes
           <that .app>/rnhost.conf with module=main and bundle=bundle.js (--conf adds lines: only module, bundle, engine and JSC_* keys).
           Both files are root-owned and read-only for everything else, which is what the host checks before it reads them. The
-          host's output goes to /var/tmp/<last part of the id>/, a folder of the app's user. With --packages FILE (the host-packages.json of
+          host's output goes to /var/tmp/<last part of the id>/, a folder of the app's user, each file capped at 1 MiB by the host; the archive passes through the claim's scratch folder and is removed. With --packages FILE (the host-packages.json of
           a shared stage) it first asks the phone for the version of each package and stops, naming it, when one is missing or another version; --provided names the packages that a launch with DYLD_LIBRARY_PATH supplies instead, which are not checked. It removes nothing of another bundle id.
   launch  wakes the phone and has SpringBoard start the app of the id. With --dyld FOLDER (a folder of the phone) the start sets DYLD_LIBRARY_PATH to it, so
           the libraries of that folder are loaded by file name before the installed ones; only that start sees them, not one from the home screen.
@@ -294,7 +294,7 @@ function signing_arguments(entitlements, index, file)
     return {"-S", file}
 end
 
-function install_command(holder, bundle_id)
+function install_command(holder, bundle_id, archive)
     local stash = stash_folder(holder, bundle_id)
     local name = app_name(bundle_id)
     local app = name .. ".app"
@@ -304,8 +304,8 @@ function install_command(holder, bundle_id)
         "cd " .. stash,
         "rm -rf unpack",
         "mkdir unpack",
-        "tar xzf /var/tmp/" .. name .. ".tgz -C unpack 2>/dev/null",
-        "rm /var/tmp/" .. name .. ".tgz",
+        "tar xzf " .. archive .. " -C unpack 2>/dev/null",
+        "rm " .. archive,
         "mv unpack/*.app " .. app,
         "rmdir unpack",
         "chown -R root:wheel " .. app,
@@ -624,8 +624,11 @@ function deploy(options)
             raise("the phone does not hold the packages this host is linked against:\n  %s", table.concat(problems, "\n  "))
         end
     end
-    device.copy(settings, path.absolute(options.archive), "/var/tmp/" .. name .. ".tgz")
-    device.run(settings, install_command(holder, id))
+    local scratch = device.scratch(holder)
+    local archive = scratch .. "/" .. name .. ".tgz"
+    device.run(settings, "mkdir -p " .. scratch)
+    device.copy(settings, path.absolute(options.archive), archive)
+    device.run(settings, install_command(holder, id, archive))
     local output = run_folder(id)
     device.run(settings, "mkdir -p " .. output .. " && chown mobile " .. output .. " && chmod 700 " .. output)
     if options.bundle then

@@ -6,7 +6,9 @@
 #import <signal.h>
 #import <string.h>
 #import <sys/ucontext.h>
+#import <fcntl.h>
 #import <stdio.h>
+#import <sys/stat.h>
 #import <unistd.h>
 #import "RNHostAppDelegate.h"
 #import "RNHostFiles.h"
@@ -57,8 +59,21 @@ static void RNHostFatalSignal(int signal, siginfo_t *info, void *context)
 int main(int argc, char *argv[])
 {
     if (RNHostAppFileExists(@"rnhost.log.on")) {
-        freopen(RNHostRunPath(@"rnhost.log").fileSystemRepresentation, "w", stderr);
+        int log = open(RNHostRunPath(@"rnhost.log").fileSystemRepresentation, O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0666);
+        if (log >= 0) {
+            dup2(log, STDERR_FILENO);
+            close(log);
+        }
         setvbuf(stderr, NULL, _IONBF, 0);
+        dispatch_source_t cap = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_LOW, 0));
+        dispatch_source_set_timer(cap, dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), 5 * NSEC_PER_SEC, NSEC_PER_SEC);
+        dispatch_source_set_event_handler(cap, ^{
+            struct stat info;
+            if (fstat(STDERR_FILENO, &info) == 0 && info.st_size > RNHostRunFileLimit) {
+                ftruncate(STDERR_FILENO, 0);
+            }
+        });
+        dispatch_resume(cap);
         const int fatal[] = {SIGSEGV, SIGBUS, SIGILL, SIGABRT, SIGTRAP};
         for (unsigned index = 0; index < sizeof(fatal) / sizeof(fatal[0]); index++) {
             struct sigaction action;
