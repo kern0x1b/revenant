@@ -211,6 +211,16 @@ static IMP xl_guest_method_imp(uint64_t guest, SEL selector, const char *types)
     return imp;
 }
 
+static IMP xl_block_method_imp(uint64_t guest, SEL selector, const char *types)
+{
+    return imp_implementationWithBlock(^uintptr_t(id self_) {
+        char why[256];
+        snprintf(why, sizeof why, "xlate: the guest method %s (function 0x%llx, type encoding %s) takes a block and the translation generated no typed host wrapper for it",
+                 sel_getName(selector), (unsigned long long)guest, types);
+        xl_unsupported(why);
+    });
+}
+
 static const char *xl_skip_type(const char *type)
 {
     while (*type && strchr("rnNoORV", *type))
@@ -253,7 +263,7 @@ static int xl_imp_types_are_words(const char *types)
         const char *plain = type;
         while (*plain && strchr("rnNoORV", *plain))
             plain++;
-        if (!*plain || !strchr("v@#:*^cCsSiIlLB", *plain) || (*plain == 'v' && count))
+        if (!*plain || !strchr("v@#:*^cCsSiIlLB", *plain) || (*plain == 'v' && count) || (plain[0] == '@' && plain[1] == '?'))
             return 0;
         type = xl_skip_type(type);
         while (*type >= '0' && *type <= '9')
@@ -331,7 +341,7 @@ static int xl_add_guest_methods(Class target, uint64_t list, const char *class_n
             imp = *(const uint64_t *)(uintptr_t)(entry + 16);
         }
         const struct xl_swift_method *typed = xl_typed_method(imp);
-        IMP host_imp = typed ? (IMP)typed->host : xl_guest_method_imp(imp, selector, types);
+        IMP host_imp = typed ? (IMP)typed->host : strstr(types, "@?") ? xl_block_method_imp(imp, selector, types) : xl_guest_method_imp(imp, selector, types);
         if (!class_addMethod(target, selector, host_imp, typed ? typed->types : types)) {
             xl_shadow_note("%s: method %s already defined", class_name, sel_getName(selector));
             continue;

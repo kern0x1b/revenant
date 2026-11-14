@@ -116,6 +116,7 @@ struct ObjCImage {
   std::vector<std::pair<uint64_t, Pointer>> clsrolist_superclass;
   std::vector<uint64_t> swift_listed_classes;
   std::vector<SwiftClassMethods> swift_methods;
+  std::vector<SwiftClassMethods> swift_generic_methods;
   uint64_t clsrolist_count = 0;
   uint64_t clsrolist_unowned = 0;
   std::vector<ObjCCategory> categories;

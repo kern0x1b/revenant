@@ -19,6 +19,19 @@ local STEPS = {
     {"stepHostClasses", {"hostclass.dictionary.literal", "hostclass.dictionary.mutable", "hostclass.dictionary.core", "hostclass.forced",
                          "hostclass.superclass", "hostclass.guest", "hostclass.number", "hostclass.control", "generic.dyncast",
                          "generic.superclass", "generic.subclass"}},
+    {"stepProxyObject", {"proxy.object"}},
+    {"stepProxyKeys", {"proxy.keys"}},
+    {"stepProxyValues", {"proxy.values"}},
+    {"stepProxyEnumerate", {"proxy.enumerate"}},
+    {"stepHostCount", {"host.count"}},
+    {"stepHostObject", {"host.object.found", "host.object.missing"}},
+    {"stepHostKeyEnumerator", {"host.keyenumerator"}},
+    {"stepHostAllKeys", {"host.allkeys"}},
+    {"stepHostAllValues", {"host.allvalues"}},
+    {"stepHostGetObjects", {"host.getobjects"}},
+    {"stepHostFast", {"host.fastenumeration"}},
+    {"stepHostEnumerate", {"host.enumerate"}},
+    {"stepHostSequence", {"host.sequence.batch", "host.sequence.items", "host.sequence.mutations", "host.sequence.forin"}},
 }
 local CONTROLS = {"stepProxyKind", "stepProxyDescription", "stepProxyIdentity", "stepProxyNested", "stepProxyAny", "stepProxyLifetime", "stepProxyUnique", "stepProxyWeak"}
 

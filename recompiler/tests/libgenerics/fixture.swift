@@ -58,7 +58,31 @@ class Base<T> {
 
 final class Derived<T>: Base<T> {}
 
+@objc(LibGenericsSequence) public final class LibGenericsSequence: NSObject, NSFastEnumeration {
+    let members: [NSObject] = (0..<40).map { _ in NSObject() }
+
+    public func countByEnumerating(with state: UnsafeMutablePointer<NSFastEnumerationState>, objects buffer: AutoreleasingUnsafeMutablePointer<AnyObject?>, count len: Int) -> Int {
+        let start = Int(state.pointee.state)
+        let batch = min(len, members.count - start)
+        if batch <= 0 {
+            return 0
+        }
+        let slots = unsafeBitCast(buffer, to: UnsafeMutablePointer<Unmanaged<AnyObject>?>.self)
+        for index in 0..<batch {
+            slots[index] = Unmanaged.passUnretained(members[start + index])
+        }
+        state.pointee.state = UInt(start + batch)
+        state.pointee.itemsPtr = buffer
+        state.pointee.mutationsPtr = withUnsafeMutablePointer(to: &state.pointee.extra.0) { $0 }
+        return batch
+    }
+}
+
 @objc(LibGenerics) public final class LibGenerics: NSObject {
+    @objc public func fastSequence() -> AnyObject {
+        return LibGenericsSequence()
+    }
+
     @objc public func sharedObject() -> AnyObject {
         if sharedHolder == nil {
             sharedHolder = Holder(7)
@@ -107,8 +131,39 @@ final class Derived<T>: Base<T> {}
         return unsafeBitCast(table._bridgeToObjectiveCImpl(), to: NSDictionary.self)
     }
 
+    @objc public func bridgedDictionary() -> AnyObject {
+        return bridgedTable()
+    }
+
     @objc public func stepProxyCount() {
         report("proxy.count", bridgedTable().count == 3)
+    }
+
+    @objc public func stepProxyObject() {
+        let table = bridgedTable()
+        let enumerator = table.perform(#selector(NSDictionary.keyEnumerator))!.takeUnretainedValue()
+        let key = enumerator.perform(#selector(NSEnumerator.nextObject))
+        let found = key == nil ? nil : table.perform(#selector(NSDictionary.object(forKey:)), with: key!.takeUnretainedValue())
+        let absent = table.perform(#selector(NSDictionary.object(forKey:)), with: "absent-key-0123456789"._bridgeToObjectiveCImpl())
+        report("proxy.object", found != nil && absent == nil)
+    }
+
+    @objc public func stepProxyKeys() {
+        let keys = bridgedTable().perform(#selector(getter: NSDictionary.allKeys))
+        report("proxy.keys", keys != nil && unsafeBitCast(keys!.takeUnretainedValue(), to: NSArray.self).count == 3)
+    }
+
+    @objc public func stepProxyValues() {
+        let values = bridgedTable().perform(#selector(getter: NSDictionary.allValues))
+        report("proxy.values", values != nil && unsafeBitCast(values!.takeUnretainedValue(), to: NSArray.self).count == 3)
+    }
+
+    @objc public func stepProxyEnumerate() {
+        var seen = 0
+        bridgedTable().enumerateKeysAndObjects { _, _, _ in
+            seen += 1
+        }
+        report("proxy.enumerate", seen == 3)
     }
 
     @objc public func stepProxyKind() {
