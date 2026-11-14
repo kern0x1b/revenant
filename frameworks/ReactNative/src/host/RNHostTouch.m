@@ -35,6 +35,7 @@
 
 static void RNHostCommandResult(NSString *line)
 {
+    RNHostCapRunFile(@"rnhost.cmd.out");
     NSString *path = RNHostRunPath(@"rnhost.cmd.out");
     NSFileHandle *handle = [NSFileHandle fileHandleForWritingAtPath:path];
     if (!handle) {
@@ -245,6 +246,7 @@ static void RNHostStackHandler(int signal)
 {
     void *frames[64];
     int count = backtrace(frames, 64);
+    RNHostCapRunFile(@"rnhost.stack");
     int fd = open(RNHostRunPath(@"rnhost.stack").fileSystemRepresentation, O_WRONLY | O_CREAT | O_APPEND, 0666);
     if (fd >= 0) {
         char name[64] = "";
@@ -269,6 +271,7 @@ static void RNHostProfileOnce(void)
     if (task_threads(mach_task_self(), &threads, &count) != KERN_SUCCESS) {
         return;
     }
+    RNHostCapRunFile(@"rnhost.prof.out");
     FILE *out = fopen(RNHostRunPath(@"rnhost.prof.out").fileSystemRepresentation, "a");
     if (out) {
         fprintf(out, "t=%.1f", CFAbsoluteTimeGetCurrent() - 0);

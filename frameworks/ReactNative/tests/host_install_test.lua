@@ -267,4 +267,11 @@ function main()
             and warnings[1]:find("0.8.18+9aa9b5ba", 1, true) == nil and warnings[1]:find("0.8.18+9772f8d3", 1, true) ~= nil, "the problems are " .. #problems .. ", the warnings " .. table.concat(warnings, " | "))
         os.vrunv("rm", {"-rf", base})
     end
+    do
+        local scratch = "/var/root/revenant-scratch/rn-holder"
+        local command = host.install_command("rn-holder", "space.example.rnhost", scratch .. "/rnhost.tgz")
+        expect("the install unpacks the archive from the scratch folder and removes it there", command:find("tar xzf " .. scratch .. "/rnhost.tgz -C unpack", 1, true) ~= nil
+            and command:find("rm " .. scratch .. "/rnhost.tgz", 1, true) ~= nil, command)
+        expect("the install leaves nothing in /var/tmp", command:find("/var/tmp", 1, true) == nil, command)
+    end
 end

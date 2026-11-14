@@ -91,6 +91,10 @@ id the build puts into `CFBundleIdentifier`.
   with `>>` and end the line with a newline. A rewrite in place with the same lines runs nothing; a replaced file (another inode) or
   one that no longer starts with the lines already run runs from its first line.
 * The host writes its output to `/var/tmp/<last part of the id>/` (the log, `rnhost.cmd.out`, `rnhost.stack`, `rnhost.prof.out`,
-  `rnhost.jsprof.out`). That folder belongs to the app's user, mode 700, and nothing the host writes there is read back.
+  `rnhost.jsprof.out`). That folder belongs to the app's user, mode 700, and nothing the host writes there is read back. It is
+  the one place on the phone that is not the claim's scratch folder, because the host runs as `mobile`, which cannot write
+  under `/var/root`. The host limits it itself: the log and every appended file (`rnhost.cmd.out`, `rnhost.stack`,
+  `rnhost.prof.out`) are truncated when they pass 1 MiB, and the log is truncated at each start. `host_install.lua deploy` is the
+  only tool that writes into the scratch folder (the archive, removed after unpacking); `release` erases the rest.
 * Two copies with the same bundle id share one `.app` and one `/var/tmp/<last part of the id>/`. The default id comes from the
   folder's name, so give a second folder of that name its own `--bundle-id`.

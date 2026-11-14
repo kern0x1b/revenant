@@ -15,6 +15,17 @@ static inline NSString *RNHostRunPath(NSString *file)
     return [[@"/var/tmp" stringByAppendingPathComponent:name] stringByAppendingPathComponent:file];
 }
 
+#define RNHostRunFileLimit (1024 * 1024)
+
+static inline void RNHostCapRunFile(NSString *file)
+{
+    const char *path = RNHostRunPath(file).fileSystemRepresentation;
+    struct stat info;
+    if (stat(path, &info) == 0 && info.st_size > RNHostRunFileLimit) {
+        truncate(path, 0);
+    }
+}
+
 static inline BOOL RNHostTrustedDirectory(const char *path)
 {
     struct stat info;

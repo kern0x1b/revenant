@@ -47,16 +47,19 @@ LDID_BINARY -S stage/lib/libc++abi.1.dylib
 
 ## 5. Claim the phone and run
 
-The device is one shared resource. Claim it under your own name, copy, run, and release it.
+The device is one shared resource. Claim it under your own name, copy, run, and release it. The files go into the claim's scratch folder `/var/root/revenant-scratch/<holder>/`, which `release` erases.
 
 ```sh
-REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew device -P . --minutes=15 claim
-REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew l -P . frameworks/SwiftUI/tools/device.lua copy stage/hermes_probe /var/tmp/hermes-probe/hermes_probe
-REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew l -P . frameworks/SwiftUI/tools/device.lua copy stage/bench.hbc /var/tmp/hermes-probe/bench.hbc
-REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew l -P . frameworks/SwiftUI/tools/device.lua copy stage/lib/libc++.1.dylib /var/tmp/hermes-probe/lib/libc++.1.dylib
-REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew l -P . frameworks/SwiftUI/tools/device.lua copy stage/lib/libc++abi.1.dylib /var/tmp/hermes-probe/lib/libc++abi.1.dylib
-REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew device -P . run 'chmod 755 /var/tmp/hermes-probe/hermes_probe; cd /var/tmp/hermes-probe; ./hermes_probe bench.hbc; echo EXIT=$?'
-REVENANT_DEVICE_HOLDER=rn-hermes ./xmakew device -P . release
+export REVENANT_DEVICE_HOLDER=rn-hermes
+./xmakew device -P . --minutes=15 claim
+SCRATCH=/var/root/revenant-scratch/$REVENANT_DEVICE_HOLDER/hermes-probe
+./xmakew device -P . run "mkdir -p $SCRATCH/lib"
+./xmakew l -P . frameworks/SwiftUI/tools/device.lua copy stage/hermes_probe $SCRATCH/hermes_probe
+./xmakew l -P . frameworks/SwiftUI/tools/device.lua copy stage/bench.hbc $SCRATCH/bench.hbc
+./xmakew l -P . frameworks/SwiftUI/tools/device.lua copy stage/lib/libc++.1.dylib $SCRATCH/lib/libc++.1.dylib
+./xmakew l -P . frameworks/SwiftUI/tools/device.lua copy stage/lib/libc++abi.1.dylib $SCRATCH/lib/libc++abi.1.dylib
+./xmakew device -P . run "chmod 755 $SCRATCH/hermes_probe; cd $SCRATCH; ./hermes_probe bench.hbc; echo EXIT=\$?"
+./xmakew device -P . release
 ```
 
 The output has one `PROBE` line with the sizes and the timings, and one with the benchmark result. A crash prints `PROBE signal`, the faulting address and the frames, which map to the probe's symbols through the image slide the line also prints.
