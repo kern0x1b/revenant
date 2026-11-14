@@ -452,6 +452,18 @@ because of the aliases. Three controls on the 4S, each run with the program unch
 `format argument` has no control: the alias is a real copy with the same characters, so a `%@` that gets the alias formats
 the same text as one that gets the original, and nothing the program can observe tells the two apart.
 
+`format locale nil`, `format locale posix` and `format locale unicode` call `-[NSString initWithFormat:locale:arguments:]`
+with a `va_list` the program builds. That selector is declared with `NS_FORMAT_FUNCTION(1,0)` and a `va_list` parameter, and
+until 2026-11-14 `xlgen` bridged the parameter as a plain pointer: the host read the guest's 8-byte argument words as 4-byte
+slots, so `String(format: "%d-%@", 7, "x")` of the Swift overlay (which calls this selector with a nil locale) gave `7-(null)`
+on the 4S and a `%@` after another argument read the high half of the previous word. `xlgen` now sends every method with a
+`va_list` parameter and a format attribute whose arguments index is 0 through `xl_format_marshal`, as it does the variadic
+ones, and the three lines print `7-x`, `a|5|b|12345678901| 3.14` and `é=7|ü` on the 4S as on the Mac (measured on 2026-11-14).
+The control is a translation with the `xlgen` of main: the program stops with a signal 11 on the 4S. The SDK has two more
+methods of this shape, `+[NSException raise:format:arguments:]` and `+[NSPredicate predicateWithFormat:arguments:]`; they take
+the same path and no line of the check calls them. The `%K` of a predicate format is not a conversion of `xl_format_marshal`
+and stops the program with its message.
+
 The check builds the program for this Mac and compares its output with `tests/data/hostbridges/expected.txt`, translates
 the arm64 build (which fails on any import without a bridge) and requires that the program imports each of the bridged
 functions. The device part runs the translated binary and compares its output with the Mac's.
@@ -792,6 +804,12 @@ the cast is nil for every dictionary, an empty one too, with the old runtime and
 `stepSwiftObjectHash` is the case of `-[_SwiftObject hash]`: an object of a Swift class that has no superclass of its own
 is hashed by the Objective-C method of `_SwiftObject`, which asks whether the object's class conforms to `Hashable` and
 walks the chain of superclasses to `_SwiftObject`, an Objective-C class of the guest's images whose layout the host kept.
+`stepProxyHash` asks the host for `hash` twice of the shared object of the fixture and `stepPlainHash` of a plain Swift
+class (`PlainHashed`); both report `proxy.hash` and `plain.hash` as `ok` on the 4S (measured on 2026-11-14, runtime and
+lift of `64fa5260a`). Two steps of the same family are not in the check: `proxy.copy`
+(`dictionaryWithDictionary:` of the bridged dictionary) stops with `unsupported: $sSS10FoundationE19_bridgeToObjectiveCSo8NSStringCyF`
+because the library of this check has no Foundation overlay, and `proxy.json`
+(`JSONSerialization.isValidJSONObject` of the bridged dictionary) reports `FAIL` on the 4S; its cause is not found.
 
 The proxy steps hand an object of such a class to the host and use it there. `stepProxyCount`, `stepProxyKind`,
 `stepProxyDescription`, `stepProxyIdentity` (`NSArray(object:)` gives back the object that went in), `stepProxyNested`,

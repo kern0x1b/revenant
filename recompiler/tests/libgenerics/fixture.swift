@@ -24,6 +24,9 @@ var uniqueBox: Box?
 var rooted: Rooted?
 final class Rooted {
 }
+var plainHashed: PlainHashed?
+final class PlainHashed {
+}
 
 final class Holder<T> {
     var value: T
@@ -459,6 +462,17 @@ final class XiKey: Hashable {
         rooted = Rooted()
         let object = unsafeBitCast(rooted! as AnyObject, to: NSObject.self)
         report("swiftobject.hash", object.hash == object.hash && object.isEqual(object))
+    }
+
+    @objc public func stepProxyHash() {
+        let object = unsafeBitCast(sharedObject(), to: NSObject.self)
+        report("proxy.hash", object.hash == object.hash)
+    }
+
+    @objc public func stepPlainHash() {
+        plainHashed = PlainHashed()
+        let object = unsafeBitCast(plainHashed! as AnyObject, to: NSObject.self)
+        report("plain.hash", object.hash == object.hash)
     }
 
     @objc public func stepDictionary() {

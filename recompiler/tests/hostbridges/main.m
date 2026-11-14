@@ -433,6 +433,23 @@ static void wide_checks(void)
            (unsigned)buffer[3], (unsigned)buffer[4]);
 }
 
+static NSString *format_with_locale(NSString *format, id locale, ...)
+{
+    va_list arguments;
+    va_start(arguments, locale);
+    NSString *text = [[[NSString alloc] initWithFormat:format locale:locale arguments:arguments] autorelease];
+    va_end(arguments);
+    return text;
+}
+
+static void format_checks(void)
+{
+    printf("format locale nil %s\n", [format_with_locale(@"%d-%@", nil, 7, @"x") UTF8String]);
+    id posix = [[[NSLocale alloc] initWithLocaleIdentifier:@"en_US_POSIX"] autorelease];
+    printf("format locale posix %s\n", [format_with_locale(@"%@|%d|%@|%ld|%5.2f", posix, @"a", 5, @"b", 12345678901L, 3.14159) UTF8String]);
+    printf("format locale unicode %s\n", [format_with_locale(@"é=%d|%@", nil, 7, @"ü") UTF8String]);
+}
+
 static void copyfile_checks(void)
 {
     char from_path[] = "hostbridges-from-XXXXXX";
@@ -645,6 +662,7 @@ int main(void)
         memory_checks();
         catalog_checks();
         wide_checks();
+        format_checks();
         copyfile_checks();
         source_checks();
         alignment_checks();
