@@ -115,6 +115,28 @@ its `largest_size` is the hole dyld has to choose from) and, after `reserve`, on
 
 The code is one header, `include/xl_vm_map.h`, that the loader and the runtime both include.
 
+### `XL_LOG` (the runtime's files on the phone)
+
+A translated process writes nothing under `/private/var/revenant` by default. `XL_LOG` in the environment, or the file
+`/private/var/revenant/xl-log` (for an application that SpringBoard launches, which has no environment of its own),
+turns on the files that every process used to append to: `xlate-crash.log` (the crash handler and `xl_fault`),
+`xl-exit.log` (each exit and each terminating signal, with the guest frames), `xlate-exception.log` (an uncaught
+exception), `xl-missing.log` (a selector the null object answered), `xlate-variant-miss.log` and `xlate-nobridge.log`.
+A file bigger than 1 MiB is emptied when the next process opens it, so none of them grows without bound. With
+the switch off the crash handler prints to stderr, which is where the test below reads it. The files that had a switch
+of their own (`xl-trace`, `xl-collect`, `xl-shadow-log`, `xl-trace-errno`, `xl-memlog`, `xl-exp-guide-superview`,
+`xl-stubs.txt`, `XL_INIT_TRACE`) still need it and are not limited by `XL_LOG`. The library test crashes the host with the
+switch (the crash handler's file has the `xlate: signal 6` lines) and without it (the lines are on stderr and the file
+is not created).
+
+The `xlate: no bridge for -[Class selector]` lines on stderr, with the receiver and the guest frames, belong to the same
+switch. They say that a guest message to a host object found no generated bridge, which is not a failure: the message
+is then sent through the host method's own type encoding (`xl_dynamic_send`), whose arguments and result may be
+objects, classes, selectors, pointers and integers of up to 64 bits, in at most eight arguments counting the receiver
+and the selector. A message whose method has a structure, a `float` or a `double` among them, or more arguments, stops
+with `xlate: message without a bridge (argument type)` (or `return type`, `stack-passed arguments`) followed by the
+class, the selector and the encoding, with the switch on or off.
+
 ### `XL_LOADER_HOST_RESERVE=0` (diagnostics)
 
 A diagnostic switch for comparing placements, not a mode to ship: with `XL_LOADER_HOST_RESERVE=0` in the environment

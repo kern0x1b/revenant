@@ -17,6 +17,9 @@ typedef struct Memory Memory;
 
 #define XL_REG(state, name) (*(uint64_t *)((char *)(state) + XL_OFFSET_##name))
 
+int xl_log_enabled(void);
+int xl_log_open(const char *name);
+
 static inline void xl_return(State *state)
 {
     XL_REG(state, PC) = XL_REG(state, X30);
