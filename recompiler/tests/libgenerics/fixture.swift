@@ -21,6 +21,9 @@ var keeper: AnyObject?
 var keptArray: NSArray?
 var sharedHolder: Holder<Int>?
 var uniqueBox: Box?
+var rooted: Rooted?
+final class Rooted {
+}
 
 final class Holder<T> {
     var value: T
@@ -47,6 +50,16 @@ struct Box {
         return unique
     }
 }
+
+class Base<T> {
+    let value: T
+
+    init(_ value: T) {
+        self.value = value
+    }
+}
+
+final class Derived<T>: Base<T> {}
 
 @objc(LibGenericsSequence) public final class LibGenericsSequence: NSObject, NSFastEnumeration {
     let members: [NSObject] = (0..<40).map { _ in NSObject() }
@@ -215,6 +228,35 @@ struct Box {
 
     @objc public func stepProxyLifetimeAfter() {
         report("proxy.released", holderDeinits == 1)
+    }
+
+    @objc public func stepClassesOfHost() {
+        let key = unsafeBitCast(NSNumber(value: 1).perform(#selector(getter: NSNumber.stringValue)).takeUnretainedValue(), to: NSString.self)
+        let literal = NSDictionary(object: NSNumber(value: 1), forKey: key)
+        let mutable = NSMutableDictionary()
+        mutable.setObject(NSNumber(value: 1), forKey: key)
+        let copied = mutable.copy() as AnyObject
+        let objects: [(String, AnyObject)] = [("literal", literal), ("mutable", mutable), ("copy", copied)]
+        for (label, object) in objects {
+            report("hostclass.guest." + label, (object as? LibGenerics) == nil && (object as? Holder<Int>) == nil && (object as? Base<Int>) == nil)
+            report("hostclass.metatype." + label, !((type(of: object) as Any.Type) is Base<Int>.Type))
+        }
+        report("hostclass.conforms", ((literal as AnyObject) as Any as? CustomStringConvertible).map { _ in true } ?? true)
+        report("hostclass.superclass", ((literal as AnyObject) as? NSMutableDictionary) == nil && ((mutable as AnyObject) as? NSDictionary) != nil)
+        report("hostclass.number", ((NSNumber(value: 3) as AnyObject) as? NSString) == nil && ((NSNumber(value: 3) as AnyObject) as? NSNumber) != nil)
+        let me: AnyObject = self
+        report("hostclass.control", (me as? NSObject) != nil && (me as? NSDictionary) == nil && (me as? LibGenerics) != nil)
+        let base: Any = Base(5)
+        report("generic.dyncast", (base as? Base<Int>)?.value == 5 && (base as? Base<String>) == nil)
+        report("generic.superclass", _getSuperclass(Derived<Int>.self) == Base<Int>.self && _getSuperclass(Derived<String>.self) == Base<String>.self)
+        let derived: Any = Derived("s")
+        report("generic.subclass", (derived as? Base<String>)?.value == "s" && (derived as? Base<Int>) == nil)
+    }
+
+    @objc public func stepSwiftObjectHash() {
+        rooted = Rooted()
+        let object = unsafeBitCast(rooted! as AnyObject, to: NSObject.self)
+        report("swiftobject.hash", object.hash == object.hash && object.isEqual(object))
     }
 
     @objc public func stepDictionary() {

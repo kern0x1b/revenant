@@ -1,0 +1,71 @@
+diff --git a/include/swift/ABI/Metadata.h b/include/swift/ABI/Metadata.h
+--- a/include/swift/ABI/Metadata.h
++++ b/include/swift/ABI/Metadata.h
+@@ -44,6 +44,17 @@
+ #include "llvm/ADT/STLExtras.h"
+ #include "llvm/Support/Casting.h"
+ 
++#if SWIFT_OBJC_INTEROP && defined(__aarch64__)
++// This runtime runs as the guest of a translated program, on a 32-bit host that has its own Objective-C runtime. The host
++// writes these words when it attaches the guest images (they are 0 until then, and where nothing translates the
++// program): the range of the addresses of the guest images, and the range of an arena that it reserves for the
++// metadata this runtime builds (the metadata allocator takes it from there, see Metadata.cpp). A class that lies in
++// neither is a class of the host, whose objc_class has 20 bytes, so the word that ClassMetadata keeps its `Data` in is
++// whatever follows the class in the host's memory.
++extern "C" unsigned long xl_guest_image_low, xl_guest_image_high, xl_guest_arena_low, xl_guest_arena_high;
++#include <objc/runtime.h>
++#endif
++
+ namespace swift {
+ 
+ template <typename Runtime> struct TargetGenericMetadataInstantiationCache;
+@@ -852,6 +863,14 @@
+   bool isPureObjC() const {
+     return !isTypeMetadata();
+   }
++  /// A class of the host (see TargetAnyClassMetadataObjCInterop): never, where nothing is translated.
++  bool isOfTheHost() const {
++    return false;
++  }
++  /// The superclass, whichever side the class is of (see TargetAnyClassMetadataObjCInterop).
++  const TargetClassMetadata *getSuperclassOfAnyClass() const {
++    return Superclass;
++  }
+ };
+ 
+ /// This is the class metadata object for all classes (Swift and ObjC) in a
+@@ -900,7 +919,34 @@
+   /// Is this object a valid swift type metadata?  That is, can it be
+   /// safely downcast to ClassMetadata?
+   bool isTypeMetadata() const {
++    // A class of the host: do not read what is not its Data.
++    if (isOfTheHost())
++      return false;
+     return (Data & SWIFT_CLASS_IS_SWIFT_MASK);
++  }
++  /// Is this a class of the host, not one of the guest? It lies in neither the guest images nor the arena.
++  bool isOfTheHost() const {
++#if SWIFT_OBJC_INTEROP && defined(__aarch64__)
++    if (xl_guest_image_high) {
++      uintptr_t address = reinterpret_cast<uintptr_t>(this);
++      return address - xl_guest_image_low >= xl_guest_image_high - xl_guest_image_low &&
++             address - xl_guest_arena_low >= xl_guest_arena_high - xl_guest_arena_low;
++    }
++#endif
++    return false;
++  }
++  /// The superclass of the class, whichever layout the class has: a class that is not Swift metadata is laid out by the
++  /// host (a class of the host, or an Objective-C class of the guest's images whose layout the host kept): the host
++  /// keeps its superclass in its own objc_class (the second word of 20 bytes), not where ClassMetadata has its
++  /// Superclass, so the field of such a class is some other words and the walk up its chain ends in a fault.
++  const TargetClassMetadataObjCInterop *getSuperclassOfAnyClass() const {
++#if SWIFT_OBJC_INTEROP && defined(__aarch64__)
++    if (isPureObjC())
++      return reinterpret_cast<const TargetClassMetadataObjCInterop *>(
++          class_getSuperclass(reinterpret_cast<Class>(
++              const_cast<TargetAnyClassMetadataObjCInterop *>(this))));
++#endif
++    return this->Superclass;
+   }
+   /// A different perspective on the same bit
+   bool isPureObjC() const {

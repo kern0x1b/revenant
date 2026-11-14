@@ -132,6 +132,42 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
   the block bridge), an `id *` buffer whose length is another argument (`count`, or the `length` of an `NSRange`), a
   record such as `NSFastEnumerationState`. A method with a block and no typed IMP stops with a message when it is called.
 
+- **The guest runtime tells a host class from its own by the address.** A class of the host's libobjc is a 20-byte
+  `objc_class` (isa, superclass, cache, vtable, bits), so the word that Swift's `ClassMetadata` keeps its `Data` in
+  (offset 32) is whatever follows the class in the host's memory, and `ClassMetadata::isTypeMetadata()` read it. For a
+  class of Foundation (`__NSCFDictionary`, the class a host `NSDictionary` has in `as! [String: Any]`) that was a
+  coin toss. The arm64 runtime therefore answers `false` for a class that lies neither in the range of the guest images
+  (`xl_guest_image_low`, `xl_guest_image_high`) nor in an arena the host reserved for the metadata the runtime builds
+  (`xl_guest_arena_low`, `xl_guest_arena_high`), and reads `Data` only in them
+  (`patches/a-class-outside-the-guest-images-is-not-class-metadata.patch`). The runtime defines the four words
+  (`runtime.c`), fills them when a library attaches (`library.c`, which reserves 64 MiB of address space with `vm_allocate`
+  for the arena; nothing is committed until a page is touched), and the generated bridge copies them into the guest like
+  any host data the guest imports (`common-includes.h` and `uikit-includes.h` declare them, the runtime's link allows the
+  undefined symbols). Until they are set, in a program that is not a library, and when the arena could not be
+  reserved, the runtime reads `Data` as before and allocates as before. A class the Swift runtime builds at run time
+  (`_ContiguousArrayStorage<T>`, a generic class of the program) lies in the arena, because the runtime's metadata
+  allocator takes everything beyond its first 64 KiB (the pool in `libswiftCore`'s image), and every allocation too
+  large for a pool page, from there instead of from the host's heap
+  (`patches/the-metadata-allocator-takes-the-guests-metadata-from-the-hosts-arena.patch`); a program that needs more
+  than the arena stops with "the metadata arena of the guest is exhausted". The arena is *not* in the range of the
+  images: the host's own tests of a class (`xl_class_in_image`) mean "a class the compiler laid out in a guest image", and
+  a class the runtime builds is not one. Every other read of the word and `isPureObjC()` goes through
+  `isTypeMetadata()`, so the one test covers Mirror and `swift_conformsToProtocol`. A class of the guest's own image whose
+  layout the host kept (an Objective-C class, a Swift class with a host ancestor) is inside the range and has no Swift
+  flag, as before.
+
+  The superclass is the other word of a host class that `ClassMetadata` puts elsewhere: the host's `objc_class` has it at
+  offset 4, `ClassMetadata::Superclass` at offset 8, and the walk of `_dynamicCastClassMetatype` (a failed cast of a
+  class that has a host ancestor) read two words of the host's class as one pointer and faulted. The same walk is in
+  `swift_conformsToProtocol`, the conformance lookup that `-[_SwiftObject hash]` makes for an object's class: it reaches
+  `_SwiftObject`, an Objective-C class inside the guest's images that keeps the host's 20-byte layout, so the address of
+  the class says nothing about which layout it has. `getSuperclassOfAnyClass()` therefore decides by layout: a class that
+  `isPureObjC()` (no Swift flag in the word where the guest's `Data` would be) answers with `class_getSuperclass`, any
+  other with the field. The three places that walk a chain of classes of any origin use it (`_dynamicCastClassMetatype`,
+  `_swift_class_getSuperclass` and the pure-Objective-C branch of `getSuperclassForMaybeIncompleteMetadata` in
+  `ProtocolConformance.cpp`; `patches/the-superclass-of-a-class-of-the-host-comes-from-the-host.patch`). The other reads
+  of `Superclass` are of a class that `isTypeMetadata()` has accepted.
+
 `tests/classpair` builds the cases as a program for macOS, where objc4 is the real thing, and the translation must
 print on the iPad 2 what objc4 printed.
 

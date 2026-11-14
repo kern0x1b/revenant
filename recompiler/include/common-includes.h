@@ -94,3 +94,5 @@ extern const char *__progname;
 #include <dispatch/dispatch.h>
 #include <copyfile.h>
 extern const struct dispatch_source_type_s _dispatch_source_type_vm;
+
+extern unsigned long xl_guest_image_low, xl_guest_image_high, xl_guest_arena_low, xl_guest_arena_high;

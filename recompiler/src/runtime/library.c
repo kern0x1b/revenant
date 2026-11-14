@@ -17,7 +17,10 @@ extern const uint32_t xl_guest_slot_count;
 extern void xl_run_initializers(void);
 extern void xl_install_diagnostics(void);
 extern uint32_t xl_guest_low, xl_guest_high;
+extern unsigned long xl_guest_image_low, xl_guest_image_high, xl_guest_arena_low, xl_guest_arena_high;
 _Noreturn void xl_unsupported(const char *message);
+
+#define XL_GUEST_ARENA_SIZE (64u << 20)
 
 enum { XL_LIBRARY_IDLE, XL_LIBRARY_ATTACHED, XL_LIBRARY_FAILED, XL_LIBRARY_READY };
 
@@ -98,6 +101,13 @@ static int xl_library_attach(void)
         *(volatile uint32_t *)(uintptr_t)xl_guest_slots[index].address = xl_guest_slots[index].value;
     xl_guest_low = header->low;
     xl_guest_high = header->high;
+    vm_address_t arena = 0;
+    if (vm_allocate(mach_task_self(), &arena, XL_GUEST_ARENA_SIZE, VM_FLAGS_ANYWHERE) == KERN_SUCCESS) {
+        xl_guest_arena_low = arena;
+        xl_guest_arena_high = arena + XL_GUEST_ARENA_SIZE;
+        xl_guest_image_low = header->low;
+        xl_guest_image_high = header->high;
+    }
     for (uint32_t index = 0; index < header->segment_count; index++) {
         const struct xl_guest_segment *segment = &segments[index];
         if (segment->protection != (XL_GUEST_READ | XL_GUEST_WRITE) &&

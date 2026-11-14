@@ -72,6 +72,13 @@ that size, and the pieces are compiled four at a time (`XL_COMPILE_JOBS`). A run
 whose guest images, bridge library and `xlate` are the last run's reuses its lifted objects and only recompiles and
 relinks the runtime, a few seconds.
 
+To get `<libs>`, build `revenant@swift-runtime` (`library_evolution=true`) and `revenant@libcxx` for `-p iphoneos -a arm64`
+from a small project of your own (`add_requires` of the two, a phony target that uses them) with
+`./xmakew f -P <project> -p iphoneos -a arm64 -y -c`, about four minutes, and link the dylibs of the two install
+directories into one folder. That configure writes the *worktree's* `.xmake` (`apple_minimum 7.0`, the iphoneos
+toolchain), and every `./xmakew l -P .` after it stops with `no target xlate: configure revenant for the host`:
+`./xmakew f -P . -y -c` in the worktree gives the host configuration back.
+
 The lifted code is compiled in Thumb-2 (`XL_LIFTED_MODE=thumb`, the default); `arm` compiles it in ARM mode, as it was
 before. Any other value is refused. The mode is part of the key of the lifted objects, so changing it lifts and compiles
 them again. The runtime, the crypto helpers and the bridge stay in ARM mode in every setting. LLVM's machine outliner is

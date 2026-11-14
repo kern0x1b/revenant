@@ -1,0 +1,38 @@
+diff --git a/stdlib/public/runtime/Casting.cpp b/stdlib/public/runtime/Casting.cpp
+--- a/stdlib/public/runtime/Casting.cpp
++++ b/stdlib/public/runtime/Casting.cpp
+@@ -463,7 +463,7 @@
+     if (sourceType == targetType) {
+       return sourceType;
+     }
+-    sourceType = sourceType->Superclass;
++    sourceType = sourceType->getSuperclassOfAnyClass();
+   } while (sourceType);
+   
+   return nullptr;
+@@ -1729,7 +1729,12 @@
+ SWIFT_CC(swift) SWIFT_RUNTIME_STDLIB_INTERNAL
+ const Metadata *swift::_swift_class_getSuperclass(const Metadata *theClass) {
+   if (const ClassMetadata *classType = theClass->getClassObject()) {
+-    if (classHasSuperclass(classType))
++    // A class the host laid out has no ClassMetadata::Superclass to compare with the root class: its objc_class has
++    // the superclass, which is null for a root class.
++    if (classType->isPureObjC()) {
++      if (auto superclass = classType->getSuperclassOfAnyClass())
++        return getMetadataForClass(superclass);
++    } else if (classHasSuperclass(classType))
+       return getMetadataForClass(classType->Superclass);
+   }
+ 
+diff --git a/stdlib/public/runtime/ProtocolConformance.cpp b/stdlib/public/runtime/ProtocolConformance.cpp
+--- a/stdlib/public/runtime/ProtocolConformance.cpp
++++ b/stdlib/public/runtime/ProtocolConformance.cpp
+@@ -233,7 +233,7 @@
+     // Pure ObjC classes are already set up, and the code below will not be
+     // happy with them.
+     if (!classMetadata->isTypeMetadata())
+-      return {classMetadata->Superclass, MetadataState::Complete};
++      return {classMetadata->getSuperclassOfAnyClass(), MetadataState::Complete};
+ #endif
+ 
+   MetadataState metadataState;

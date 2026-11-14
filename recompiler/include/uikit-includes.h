@@ -6,3 +6,5 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+
+extern unsigned long xl_guest_image_low, xl_guest_image_high, xl_guest_arena_low, xl_guest_arena_high;

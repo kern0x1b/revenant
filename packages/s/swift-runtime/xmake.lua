@@ -213,7 +213,11 @@ package("swift-runtime")
             configure("core", path.join(source, "Runtimes", "Core"), {
                 cxxflags = {"-DSWIFT_CLASS_IS_SWIFT_MASK=1ULL"},
                 swiftflags = {"-Xfrontend", "-disable-legacy-type-info"},
-                shflags = {path.absolute("mark.o")}
+                shflags = table.join({path.absolute("mark.o")},
+                                     package:is_arch("arm64") and {"-Xlinker", "-U", "-Xlinker", "_xl_guest_image_low",
+                                                                   "-Xlinker", "-U", "-Xlinker", "_xl_guest_image_high",
+                                                                   "-Xlinker", "-U", "-Xlinker", "_xl_guest_arena_low",
+                                                                   "-Xlinker", "-U", "-Xlinker", "_xl_guest_arena_high"} or {})
             }, {
                 "-DSwiftCore_SWIFTC_SOURCE_DIR=" .. source, gyb_command,
                 "-DSwiftCore_ARCH_SUBDIR=" .. package:arch(), "-DSwiftCore_PLATFORM_SUBDIR=iphoneos",
