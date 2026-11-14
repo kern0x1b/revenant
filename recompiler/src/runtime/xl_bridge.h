@@ -180,6 +180,7 @@ void xl_format_marshal_valist(struct xl_format *format, const char *text, void *
 void xl_format_release(struct xl_format *format);
 
 int xl_shim_openat(int dirfd, const char *path, int flags, int mode);
+void *xl_shim_dlsym(void *handle, const char *symbol);
 
 void xl_errno_trace(const char *name, int64_t result, uint64_t first_argument, uint64_t second_argument);
 double xl_shim_exp10(double x);

@@ -29,6 +29,7 @@ local STEPS = {
     {"stepHostFast", {"host.fastenumeration"}},
     {"stepHostEnumerate", {"host.enumerate"}},
     {"stepShortString", {"short.string"}},
+    {"stepDlsymFunction", {"dlsym.typeid", "dlsym.object"}},
     {"stepHostSequence", {"host.sequence.batch", "host.sequence.items", "host.sequence.mutations", "host.sequence.forin"}},
 }
 local BARE_CONTROLS = {"stepShortString"}

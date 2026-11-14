@@ -1653,7 +1653,7 @@ bool Generator::EmitFunction(const std::string &symbol, FunctionDecl *g, Functio
       {"symlinkat", "xl_shim_symlinkat"}, {"fdopendir", "xl_shim_fdopendir"},
       {"sqlite3_bind_blob64", "xl_shim_sqlite3_bind_blob64"}, {"sqlite3_bind_text64", "xl_shim_sqlite3_bind_text64"},
       {"sqlite3_malloc64", "xl_shim_sqlite3_malloc64"}, {"sqlite3_realloc64", "xl_shim_sqlite3_realloc64"},
-      {"CCRandomGenerateBytes", "xl_shim_CCRandomGenerateBytes"},
+      {"CCRandomGenerateBytes", "xl_shim_CCRandomGenerateBytes"}, {"dlsym", "xl_shim_dlsym"},
       {"clock_gettime", "xl_shim_clock_gettime"}, {"clock_getres", "xl_shim_clock_getres"},
       {"__exp10", "xl_shim_exp10"}, {"sqlite3_prepare_v3", "xl_shim_sqlite3_prepare_v3"},
       {"CGImageGetUTType", "xl_shim_CGImageGetUTType"},

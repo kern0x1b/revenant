@@ -156,6 +156,17 @@ struct Box {
         report("proxy.enumerate", seen == 3)
     }
 
+    @objc public func stepDlsymFunction() {
+        let handle = UnsafeMutableRawPointer(bitPattern: -2)
+        typealias TypeID = @convention(c) () -> UInt
+        typealias GetTypeID = @convention(c) (UnsafeRawPointer?) -> UInt
+        let typeID = dlsym(handle, "CFStringGetTypeID").map { unsafeBitCast($0, to: TypeID.self) }
+        let getTypeID = dlsym(handle, "CFGetTypeID").map { unsafeBitCast($0, to: GetTypeID.self) }
+        let null = Unmanaged.passUnretained(NSNull()).toOpaque()
+        report("dlsym.typeid", typeID != nil && typeID!() == UInt(CFStringGetTypeID()))
+        report("dlsym.object", getTypeID != nil && getTypeID!(UnsafeRawPointer(null)) == UInt(CFNullGetTypeID()))
+    }
+
     @objc public func stepShortString() {
         let bridged: AnyObject = "abc"._bridgeToObjectiveCImpl()
         let text = unsafeBitCast(bridged, to: NSString.self)

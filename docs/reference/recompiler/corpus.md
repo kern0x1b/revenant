@@ -768,6 +768,21 @@ ASCII bytes is bridged through `+[__StringStorage newTaggedNSStringWithASCIIByte
 `unrecognized selector sent to class` (measured on the 4S on 2026-11-14, a control of `check.lua` that must not run to its end).
 The page [the tagged ASCII string factory](../backports/Foundation/TaggedASCIIString.md) has the reasoning.
 
+`stepDlsymFunction` calls two host CoreFoundation functions the way the Swift standard library does: it asks
+`dlsym(RTLD_DEFAULT, "CFStringGetTypeID")` and `"CFGetTypeID"` for the address and calls it. A call through such an address
+is guest code calling a host pointer, so before 2026-11-14 it stopped the process with "call to an address without translated
+code" and a host address (`0x310aaba9` is `CFStringGetTypeID` in CoreFoundation on the 4S; the same stop ended a
+`JSONSerialization` run of the reCAPTCHA fixture, because `_initializeBridgingFunctionsImpl` looks up `CFStringGetTypeID`,
+`CFGetTypeID`, `CFStringHashNSString` and `CFStringHashCString` this way). `xlgen` maps `dlsym` to `xl_shim_dlsym`, which
+answers the four names with an address of a slot in a table of the runtime and everything else with the host's answer; a
+call to a slot runs `xl_function_entry`, which narrows the arguments by the shape in `xl_host_functions` (`o` object, `p`
+pointer, `u` unsigned, anything else signed), calls the host function and widens the result. A further host function the
+guest may look up needs a line in that table. The control is a translation without the `dlsym` line of the shim map: the
+step then stops with the message above, naming `CFStringGetTypeID+0 of CoreFoundation`; with the line it reports
+`ok dlsym.typeid` and `ok dlsym.object` (measured on the 4S on 2026-11-14, runtime of main). The message of a call or jump to
+an address without code now says which host symbol and image the address belongs to, when it is one, and the host frames of a
+crash report carry the offset in their image.
+
 A library on the device has no
 `dladdr` for the guest image, which the loader maps itself, so the runtime knows its range (`xl_guest_low`,
 `xl_guest_high`) and a class of the guest is a class of the library. A class that the Swift runtime builds at run time has

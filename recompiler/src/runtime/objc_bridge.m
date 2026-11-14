@@ -1533,8 +1533,100 @@ static void xl_imp_entry(State *state)
     pthread_setspecific(xl_imp_key, NULL);
 }
 
+#define XL_FUNCTION_SLOTS 32
+
+struct xl_function_slot {
+    void *host;
+    const char *name;
+    const char *shape;
+};
+
+static uint64_t xl_function_region[XL_FUNCTION_SLOTS];
+static struct xl_function_slot xl_function_slots[XL_FUNCTION_SLOTS];
+static unsigned xl_function_used;
+static pthread_mutex_t xl_function_lock = PTHREAD_MUTEX_INITIALIZER;
+
+static const struct {
+    const char *name;
+    const char *shape;
+} xl_host_functions[] = {
+    {"CFStringGetTypeID", "u"},
+    {"CFGetTypeID", "u:o"},
+    {"CFStringHashNSString", "u:o"},
+    {"CFStringHashCString", "u:pl"},
+    {NULL, NULL}
+};
+
+static struct xl_function_slot *xl_function_slot_at(uint64_t address)
+{
+    uint64_t base = (uintptr_t)xl_function_region;
+    if (address < base || address >= base + sizeof xl_function_region || (address - base) % sizeof xl_function_region[0])
+        return NULL;
+    unsigned index = (unsigned)((address - base) / sizeof xl_function_region[0]);
+    return index < __atomic_load_n(&xl_function_used, __ATOMIC_ACQUIRE) ? &xl_function_slots[index] : NULL;
+}
+
+void *xl_shim_dlsym(void *handle, const char *symbol)
+{
+    void *found = dlsym(handle, symbol);
+    if (!found || !symbol)
+        return found;
+    for (unsigned entry = 0; xl_host_functions[entry].name; entry++) {
+        if (strcmp(xl_host_functions[entry].name, symbol))
+            continue;
+        pthread_mutex_lock(&xl_function_lock);
+        unsigned slot = 0;
+        for (unsigned at = 0; at < xl_function_used && !slot; at++)
+            slot = xl_function_slots[at].host == found ? at + 1 : 0;
+        if (!slot) {
+            if (xl_function_used == XL_FUNCTION_SLOTS) {
+                pthread_mutex_unlock(&xl_function_lock);
+                xl_unsupported("xlate: more host functions than the guest may look up with dlsym");
+            }
+            slot = xl_function_used + 1;
+            xl_function_slots[slot - 1] = (struct xl_function_slot){found, xl_host_functions[entry].name, xl_host_functions[entry].shape};
+            __atomic_store_n(&xl_function_used, slot, __ATOMIC_RELEASE);
+        }
+        pthread_mutex_unlock(&xl_function_lock);
+        return &xl_function_region[slot - 1];
+    }
+    return found;
+}
+
+static void xl_function_entry(State *state)
+{
+    struct xl_function_slot *slot = xl_function_slot_at(XL_REG(state, PC));
+    const char *shape = slot->shape;
+    char result = *shape++;
+    if (*shape == ':')
+        shape++;
+    uintptr_t words[4] = {0, 0, 0, 0};
+    unsigned count = 0;
+    for (; *shape && count < 4; shape++, count++) {
+        uint64_t value = *(uint64_t *)((char *)state + XL_OFFSET_X0 + (XL_OFFSET_X1 - XL_OFFSET_X0) * count);
+        switch (*shape) {
+        case 'o': words[count] = xl_object_in(value, slot->name, count); break;
+        case 'p': words[count] = xl_narrow_pointer(value, slot->name, count); break;
+        case 'u': words[count] = (uintptr_t)xl_narrow_unsigned(value, UINT32_MAX, UINT64_MAX, slot->name, count); break;
+        default: words[count] = (uintptr_t)xl_narrow_signed((int64_t)value, INT32_MIN, INT32_MAX, INT64_MIN, INT64_MAX, slot->name, count); break;
+        }
+    }
+    uintptr_t returned = ((uintptr_t (*)(uintptr_t, uintptr_t, uintptr_t, uintptr_t))slot->host)(words[0], words[1], words[2], words[3]);
+    uint64_t widened = returned;
+    switch (result) {
+    case 'o': widened = xl_object_out(returned); break;
+    case 'p': widened = xl_widen_pointer(returned); break;
+    case 'l': widened = (uint64_t)(int64_t)(int32_t)returned; break;
+    default: break;
+    }
+    XL_REG(state, X0) = widened;
+    xl_return(state);
+}
+
 void (*xl_imp_lookup(uint64_t address))(State *)
 {
+    if (xl_function_slot_at(address))
+        return xl_function_entry;
     return xl_imp_slot_at(address) ? xl_imp_entry : NULL;
 }
 

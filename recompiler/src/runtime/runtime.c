@@ -237,7 +237,7 @@ static void xl_crash_handler(int signal, siginfo_t *info, void *context)
             Dl_info info;
             const char *name = dladdr((void *)(uintptr_t)hlr, &info) && info.dli_sname ? info.dli_sname : "?";
             const char *image = info.dli_fname ? strrchr(info.dli_fname, '/') : NULL;
-            dprintf(fd, "xlate: host frame %d lr=0x%x %s (%s)\n", depth, hlr, name, image ? image + 1 : "?");
+            dprintf(fd, "xlate: host frame %d lr=0x%x %s (%s +0x%lx)\n", depth, hlr, name, image ? image + 1 : "?", info.dli_fbase ? (unsigned long)(hlr - (uint32_t)(uintptr_t)info.dli_fbase) : 0ul);
             if (next <= hfp)
                 break;
             hfp = next;
@@ -359,11 +359,25 @@ xl_lifted xl_lookup(uint64_t address)
     return xl_imp_lookup(address);
 }
 
+static void xl_untranslated(State *state, const char *what)
+{
+    uint64_t pc = XL_REG(state, PC);
+    char why[320];
+    Dl_info info;
+    if (!(pc >> 32) && dladdr((const void *)(uintptr_t)pc, &info) && info.dli_sname && info.dli_fname) {
+        const char *image = strrchr(info.dli_fname, '/');
+        snprintf(why, sizeof why, "%s; 0x%llx is %s+%lu of %s, code of the host that reached translated code as an address", what, (unsigned long long)pc,
+                 info.dli_sname, (unsigned long)((uintptr_t)pc & ~(uintptr_t)1) - ((unsigned long)info.dli_saddr & ~1ul), image ? image + 1 : info.dli_fname);
+        xl_fault(state, why);
+    }
+    xl_fault(state, what);
+}
+
 void xl_call(State *state)
 {
     xl_lifted function = xl_lookup(XL_REG(state, PC));
     if (!function)
-        xl_fault(state, "call to an address without translated code (or an unsupported instruction)");
+        xl_untranslated(state, "call to an address without translated code (or an unsupported instruction)");
     function(state);
 }
 
@@ -371,7 +385,7 @@ void xl_tail(State *state)
 {
     xl_lifted function = xl_lookup(XL_REG(state, PC));
     if (!function)
-        xl_fault(state, "jump to an address that does not start a translated function (or an unsupported instruction)");
+        xl_untranslated(state, "jump to an address that does not start a translated function (or an unsupported instruction)");
     [[clang::musttail]] return function(state);
 }
 
