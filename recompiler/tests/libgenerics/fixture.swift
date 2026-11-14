@@ -21,6 +21,9 @@ var keeper: AnyObject?
 var keptArray: NSArray?
 var sharedHolder: Holder<Int>?
 var uniqueBox: Box?
+var rooted: Rooted?
+final class Rooted {
+}
 
 final class Holder<T> {
     var value: T
@@ -216,29 +219,30 @@ final class Derived<T>: Base<T> {}
         report("proxy.released", holderDeinits == 1)
     }
 
-    // The classes of the host (iOS 6's NSDictionary, its mutable and its Core Foundation class) and the generic classes the
-    // Swift runtime builds at run time: the runtime reads a class as Swift metadata only inside the guest images, so
-    // it must not read a host class as Swift metadata (the word that is a Swift class's flags is something else in a host
-    // class) nor take the classes it builds for the host's.
-    // (Not named stepHost...: host.m runs those on the host's side, with no guest code.)
+    // The classes of the host (iOS 6's NSDictionary and its mutable class) and the generic classes the Swift runtime
+    // builds at run time: the runtime reads a class as Swift metadata only inside the guest images and the arena it
+    // builds in, so it must not read a host class as Swift metadata (the word that is a Swift class's flags is something
+    // else in a host class), nor take its superclass from where ClassMetadata keeps it (a host class has it 4 bytes into
+    // 20, the cast of a host object to a class of the guest walked that chain and faulted).
+    // Not named stepHost...: host.m runs those on the host's side, with no guest code. The cast of a host dictionary to
+    // `[String: Any]` is not here: this library carries no Foundation overlay, which has the bridging conformance, so
+    // the cast is nil for every dictionary (an empty one too); the reCAPTCHA fixture, which has it, runs it.
     @objc public func stepClassesOfHost() {
-        // Made with the Objective-C methods: the dictionary literal is a Foundation overlay initializer, which this library does not carry.
-        // (The key is made by the bridging function, as the proxy steps do: an `as NSString` literal is another overlay
-        // initializer, and a short string is an immediate that bridges through a class method this library does not carry.)
-        let name = "first-key-0123456789"
-        let key = unsafeBitCast(name._bridgeToObjectiveCImpl(), to: NSString.self)
+        // Made with the Objective-C methods (the dictionary literal is a Foundation overlay initializer), and with a key
+        // the host made (a number's stringValue): a Swift string the host sends `hash` to is a guest object, which is
+        // stepSwiftObjectHash's case.
+        let key = unsafeBitCast(NSNumber(value: 1).perform(#selector(getter: NSNumber.stringValue)).takeUnretainedValue(), to: NSString.self)
         let literal = NSDictionary(object: NSNumber(value: 1), forKey: key)
         let mutable = NSMutableDictionary()
         mutable.setObject(NSNumber(value: 1), forKey: key)
-        // (A Core Foundation call such as CFDictionaryCreateMutableCopy is not bridged in this library.)
         let copied = mutable.copy() as AnyObject
         let objects: [(String, AnyObject)] = [("literal", literal), ("mutable", mutable), ("copy", copied)]
         for (label, object) in objects {
-            report("hostclass.dictionary." + label, (object as? [String: Any])?[name] as? Int == 1)
+            report("hostclass.guest." + label, (object as? LibGenerics) == nil && (object as? Holder<Int>) == nil && (object as? Base<Int>) == nil)
+            report("hostclass.metatype." + label, !((type(of: object) as Any.Type) is Base<Int>.Type))
         }
-        report("hostclass.forced", (copied as! [String: Any]).count == 1)
+        report("hostclass.conforms", ((literal as AnyObject) as Any as? CustomStringConvertible).map { _ in true } ?? true)
         report("hostclass.superclass", ((literal as AnyObject) as? NSMutableDictionary) == nil && ((mutable as AnyObject) as? NSDictionary) != nil)
-        report("hostclass.guest", ((literal as AnyObject) as? LibGenerics) == nil && (copied as? Holder<Int>) == nil)
         report("hostclass.number", ((NSNumber(value: 3) as AnyObject) as? NSString) == nil && ((NSNumber(value: 3) as AnyObject) as? NSNumber) != nil)
         let me: AnyObject = self
         report("hostclass.control", (me as? NSObject) != nil && (me as? NSDictionary) == nil && (me as? LibGenerics) != nil)
@@ -247,6 +251,15 @@ final class Derived<T>: Base<T> {}
         report("generic.superclass", _getSuperclass(Derived<Int>.self) == Base<Int>.self && _getSuperclass(Derived<String>.self) == Base<String>.self)
         let derived: Any = Derived("s")
         report("generic.subclass", (derived as? Base<String>)?.value == "s" && (derived as? Base<Int>) == nil)
+    }
+
+    // `hash` of an object of a Swift class that has no superclass of its own is the Objective-C method of `_SwiftObject`, an
+    // Objective-C class of the guest's images whose layout the host kept (its superclass is not where ClassMetadata keeps
+    // it): the method asks whether the class conforms to Hashable, and that walks the chain of superclasses from the class.
+    @objc public func stepSwiftObjectHash() {
+        rooted = Rooted()
+        let object = unsafeBitCast(rooted! as AnyObject, to: NSObject.self)
+        report("swiftobject.hash", object.hash == object.hash && object.isEqual(object))
     }
 
     @objc public func stepDictionary() {
