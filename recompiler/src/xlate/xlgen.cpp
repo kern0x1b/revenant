@@ -141,6 +141,8 @@ struct Value {
   std::string note;
   std::shared_ptr<Value> pointee;
   int count_index = -1;
+  int count_field = -1;
+  std::string count_member;
   bool writes_back = false;
   bool is_object = false;
 };
@@ -320,6 +322,33 @@ struct Signature {
   bool supported = true;
   std::string note;
 };
+
+std::string GuestScalarType(const Value &value) {
+  if (value.kind == Kind::Floating) {
+    return value.guest_bits == 32 ? "float" : "double";
+  }
+  if (value.kind == Kind::Integer) {
+    return (value.is_signed ? "int" : "uint") + std::to_string(value.guest_bits) + "_t";
+  }
+  return "uint64_t";
+}
+
+std::string CountExpression(const Value &array, bool host) {
+  auto name = "a" + std::to_string(array.count_index);
+  if (array.count_field < 0) {
+    return host ? name : "p->" + name;
+  }
+  return host ? name + "." + array.count_member : "p->" + name + ".f" + std::to_string(array.count_field);
+}
+
+bool IsFastEnumerationState(const Value &record) {
+  auto decl = record.host.getCanonicalType()->getAsRecordDecl();
+  if (!decl) {
+    return false;
+  }
+  auto named = decl->getTypedefNameForAnonDecl();
+  return (named ? named->getName() : decl->getName()) == "NSFastEnumerationState";
+}
 
 enum class CallKind { Function, Message };
 
@@ -817,10 +846,7 @@ std::string Generator::HostLoad(const Value &value, const std::string &expr, con
     case Kind::OutSlot: {
       auto temp = "slot" + std::to_string(index);
       auto &pointee = *value.pointee;
-      std::string guest_type = pointee.kind == Kind::Floating ? (pointee.guest_bits == 32 ? "float" : "double")
-                               : pointee.kind == Kind::Integer
-                                   ? (pointee.is_signed ? "int" : "uint") + std::to_string(pointee.guest_bits) + "_t"
-                                   : "uint64_t";
+      auto guest_type = GuestScalarType(pointee);
       prep += "    " + Spell(hc_, pointee.host, temp) + ";\n";
       prep += "    " + guest_type + " *" + temp + "_guest = (" + guest_type + " *)(uintptr_t)" + expr + ";\n";
       prep += "    if (" + temp + "_guest)\n        " + temp + " = " + ScalarToHost(pointee, "*" + temp + "_guest", where) + ";\n";
@@ -844,17 +870,18 @@ std::string Generator::HostLoad(const Value &value, const std::string &expr, con
     case Kind::Array: {
       auto temp = "array" + std::to_string(index);
       auto &element = *value.pointee;
-      std::string guest_type = element.kind == Kind::Floating ? (element.guest_bits == 32 ? "float" : "double")
-                               : element.kind == Kind::Integer
-                                   ? (element.is_signed ? "int" : "uint") + std::to_string(element.guest_bits) + "_t"
-                                   : "uint64_t";
-      auto count = "p->a" + std::to_string(value.count_index);
+      auto guest_type = GuestScalarType(element);
+      auto count = CountExpression(value, false);
       prep += "    " + guest_type + " *" + temp + "_guest = (" + guest_type + " *)(uintptr_t)" + expr + ";\n";
       prep += "    " + Spell(hc_, hc_.getPointerType(element.host.getUnqualifiedType()), temp) + " = " + temp + "_guest ? malloc(sizeof(*" + temp +
               ") * ((size_t)" + count + " + 1)) : 0;\n";
-      prep += "    for (uint64_t i = 0; " + temp + "_guest && i < " + count + "; i++)\n        " + temp + "[i] = " +
-              ScalarToHost(element, temp + "_guest[i]", where) + ";\n";
-      prep += "    if (" + temp + ")\n        " + temp + "[" + count + "] = 0;\n";
+      if (value.writes_back && element.is_object) {
+        prep += "    if (" + temp + ")\n        __builtin_memset(" + temp + ", 0, sizeof(*" + temp + ") * ((size_t)" + count + " + 1));\n";
+      } else {
+        prep += "    for (uint64_t i = 0; " + temp + "_guest && i < " + count + "; i++)\n        " + temp + "[i] = " +
+                ScalarToHost(element, temp + "_guest[i]", where) + ";\n";
+        prep += "    if (" + temp + ")\n        " + temp + "[" + count + "] = 0;\n";
+      }
       if (value.writes_back) {
         post += "    for (uint64_t i = 0; " + temp + "_guest && i < " + count + "; i++)\n        " + temp + "_guest[i] = (" +
                 guest_type + ")" + ScalarToGuest(element, temp + "[i]") + ";\n";
@@ -906,15 +933,22 @@ void DetectArrays(ASTContext &gc, ASTContext &hc, Decl *g, Decl *h, Signature &s
         continue;
       }
       auto param = g->getParamDecl(neighbour);
-      if (signature.params[neighbour].value.kind == Kind::Integer && count_like(param->getName())) {
-        auto &value = signature.params[i].value;
-        value.kind = Kind::Array;
-        value.pointee = std::make_shared<Value>(element);
-        value.count_index = neighbour;
-        value.writes_back = !gp.isConstQualified();
-        value.note.clear();
-        break;
+      auto &counter = signature.params[neighbour].value;
+      auto counter_record = counter.kind == Kind::Record ? counter.host.getCanonicalType()->getAsRecordDecl() : nullptr;
+      bool counted = counter.kind == Kind::Integer && count_like(param->getName());
+      bool ranged = element.is_object && counter_record && counter_record->getName() == "_NSRange" && param->getName().lower() == "range";
+      if (!counted && !ranged) {
+        continue;
       }
+      auto &value = signature.params[i].value;
+      value.kind = Kind::Array;
+      value.pointee = std::make_shared<Value>(element);
+      value.count_index = neighbour;
+      value.count_field = ranged ? 1 : -1;
+      value.count_member = ranged ? "length" : "";
+      value.writes_back = !gp.isConstQualified();
+      value.note.clear();
+      break;
     }
   }
   signature.supported = true;
@@ -1959,6 +1993,12 @@ std::string Generator::ImpWrapper(const Signature &signature, uint64_t imp, bool
   hs << "static " << Spell(hc_, has_result ? signature.result.host : hc_.VoidTy, name + "(" + args + ")") << "\n{\n";
   hs << "    struct " << invoke << "_pack p;\n    p.imp = 0x" << std::hex << imp << std::dec << "ull;\n";
   hs << "    p.self = " << (twin ? "xl_object_out((uintptr_t)self)" : "xl_self_out(self)") << ";\n    p.sel = (uint64_t)(uintptr_t)_cmd;\n";
+  const Parameter *enumeration = nullptr;
+  for (auto &param : signature.params) {
+    if (param.value.kind == Kind::RecordPointer && IsFastEnumerationState(*param.value.pointee)) {
+      enumeration = &param;
+    }
+  }
   for (auto &param : signature.params) {
     if (param.value.kind == Kind::Record) {
       hs << "    " << Mirror(param.value.guest, param.value.host) << "_to_guest(&p." << param.name << ", &" << param.name << ");\n";
@@ -1966,13 +2006,27 @@ std::string Generator::ImpWrapper(const Signature &signature, uint64_t imp, bool
       hs << "    p." << param.name << " = " << HostBlockBridge(param.value) << "(" << param.name << ");\n";
     } else if (param.value.kind == Kind::OutSlot) {
       auto &pointee = *param.value.pointee;
-      std::string guest_type = pointee.kind == Kind::Floating ? (pointee.guest_bits == 32 ? "float" : "double")
-                               : pointee.kind == Kind::Integer
-                                   ? (pointee.is_signed ? "int" : "uint") + std::to_string(pointee.guest_bits) + "_t"
-                                   : "uint64_t";
+      auto guest_type = GuestScalarType(pointee);
       hs << "    " << guest_type << " " << param.name << "_gslot = " << param.name << " ? (" << guest_type << ")"
          << ScalarToGuest(pointee, "*" + param.name) << " : 0;\n";
       hs << "    p." << param.name << " = " << param.name << " ? (uint64_t)(uintptr_t)&" << param.name << "_gslot : 0;\n";
+    } else if (param.value.kind == Kind::RecordPointer) {
+      auto mirror = Mirror(param.value.pointee->guest, param.value.pointee->host);
+      hs << "    struct " << mirror << " " << param.name << "_grecord;\n";
+      hs << "    __builtin_memset(&" << param.name << "_grecord, 0, sizeof " << param.name << "_grecord);\n";
+      hs << "    if (" << param.name << ")\n        " << mirror << "_to_guest(&" << param.name << "_grecord, " << param.name << ");\n";
+      hs << "    p." << param.name << " = " << param.name << " ? (uint64_t)(uintptr_t)&" << param.name << "_grecord : 0;\n";
+    } else if (param.value.kind == Kind::Array) {
+      auto &element = *param.value.pointee;
+      auto guest_type = GuestScalarType(element);
+      auto count = "(size_t)" + CountExpression(param.value, true);
+      auto buffer = param.name + "_garray";
+      hs << "    " << guest_type << " *" << buffer << " = " << param.name << " ? calloc(" << count << " + 1, sizeof(" << guest_type << ")) : 0;\n";
+      if (!param.value.writes_back || !element.is_object) {
+        hs << "    for (size_t i = 0; " << buffer << " && i < " << count << "; i++)\n        " << buffer << "[i] = (" << guest_type << ")"
+           << ScalarToGuest(element, param.name + "[i]") << ";\n";
+      }
+      hs << "    p." << param.name << " = (uint64_t)(uintptr_t)" << buffer << ";\n";
     } else if (param.value.kind == Kind::Callback) {
       hs << "    xl_unsupported(\"" << name << ": host passes a function pointer\");\n";
     } else {
@@ -1982,10 +2036,37 @@ std::string Generator::ImpWrapper(const Signature &signature, uint64_t imp, bool
   hs << "    xl_invoke(XL_GUEST_" << invoke << "_guest, (uintptr_t)&p);\n";
   for (size_t i = 0; i < signature.params.size(); ++i) {
     auto &param = signature.params[i];
+    auto where = "\"" + name + "\", " + std::to_string(i);
     if (param.value.kind == Kind::OutSlot) {
       auto &pointee = *param.value.pointee;
-      hs << "    if (" << param.name << ") *" << param.name << " = "
-         << ScalarToHost(pointee, param.name + "_gslot", "\"" + name + "\", " + std::to_string(i)) << ";\n";
+      hs << "    if (" << param.name << ") *" << param.name << " = " << ScalarToHost(pointee, param.name + "_gslot", where) << ";\n";
+    } else if (param.value.kind == Kind::RecordPointer && param.value.writes_back) {
+      auto mirror = Mirror(param.value.pointee->guest, param.value.pointee->host);
+      hs << "    if (" << param.name << ")\n        *" << param.name << " = " << mirror << "_to_host(&" << param.name << "_grecord);\n";
+    } else if (param.value.kind == Kind::Array) {
+      auto buffer = param.name + "_garray";
+      if (param.value.writes_back && !enumeration) {
+        hs << "    for (size_t i = 0; " << buffer << " && i < (size_t)" << CountExpression(param.value, true) << "; i++)\n        " << param.name
+           << "[i] = " << ScalarToHost(*param.value.pointee, buffer + "[i]", where) << ";\n";
+      }
+    }
+  }
+  if (enumeration) {
+    auto &state = *enumeration->value.pointee;
+    auto decl = state.guest.getCanonicalType()->getAsRecordDecl();
+    unsigned items = 0;
+    for (auto field : decl->fields()) {
+      if (field->getName() == "itemsPtr") {
+        break;
+      }
+      ++items;
+    }
+    hs << "    if (" << enumeration->name << ")\n        " << enumeration->name << "->itemsPtr = xl_fast_items(" << enumeration->name
+       << "_grecord.f" << items << ", p.r);\n";
+  }
+  for (auto &param : signature.params) {
+    if (param.value.kind == Kind::Array) {
+      hs << "    free(" << param.name << "_garray);\n";
     }
   }
   for (auto &param : signature.params) {
@@ -2392,7 +2473,14 @@ void Generator::EmitClasses(const json::Object &manifest) {
   meta << "0};\n";
   meta << "const struct xl_swift_method xl_swift_methods[] = {\n";
   for (auto &image : *manifest.getArray("images")) {
-    for (auto &item : *image.getAsObject()->getArray("swift_methods")) {
+    std::vector<const json::Value *> typed;
+    for (auto list : {"swift_methods", "swift_generic_methods"}) {
+      for (auto &item : *image.getAsObject()->getArray(list)) {
+        typed.push_back(&item);
+      }
+    }
+    for (auto item_pointer : typed) {
+      auto &item = *item_pointer;
       auto &cls = *item.getAsObject();
       for (bool class_method : {false, true}) {
         for (auto &entry : *cls.getArray(class_method ? "class_methods" : "instance_methods")) {
