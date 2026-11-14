@@ -18,7 +18,8 @@ function main()
     local library = path.join(backports, "..", "..", "build", "iphoneos", "armv7", "release", "libSystemBackports.dylib")
     local test_library = path.join(out, "libSystemBackports.dylib")
     os.cp(library, test_library)
-    os.vrunv("xcrun", {"install_name_tool", "-id", "/var/tmp/revenant-libSystemBackports-unfair.dylib", test_library})
+    local folder = device.scratch() .. "/backports-unfair"
+    os.vrunv("xcrun", {"install_name_tool", "-id", folder .. "/libSystemBackports.dylib", test_library})
     local binary = path.join(out, "libsystem_unfair")
     os.vrunv(clang, {"-target", "armv7-apple-ios6.0", "-miphoneos-version-min=6.0", "-isysroot", sdk, "-x", "c", "-std=gnu11", "-Wall", "-Werror",
                      "-Wno-deprecated-declarations", "-Wno-incompatible-sysroot", "-DREVENANT_DEVICE", "-L", out, "-lSystemBackports",
@@ -26,12 +27,11 @@ function main()
     os.vrunv(ldid, {"-S", binary})
     local settings = device.bind(os.projectdir())
     local panics_before = device.run(settings, "find /Library/Logs/CrashReporter/Panics -type f -print 2>/dev/null", {capture = true})
-    device.run(settings, "mkdir -p /var/tmp")
-    device.copy(settings, test_library, "/var/tmp/revenant-libSystemBackports-unfair.dylib")
-    local remote = "/var/tmp/revenant-libsystem-unfair"
-    device.copy(settings, binary, remote)
-    device.run(settings, "chmod 755 " .. remote .. " && " .. remote)
-    device.run(settings, "rm -f " .. remote .. " /var/tmp/revenant-libSystemBackports-unfair.dylib")
+    device.with_scratch(settings, "backports-unfair", function (remote)
+        device.copy(settings, test_library, remote .. "/libSystemBackports.dylib")
+        device.copy(settings, binary, remote .. "/libsystem_unfair")
+        device.run(settings, "chmod 755 " .. remote .. "/libsystem_unfair && " .. remote .. "/libsystem_unfair")
+    end)
     local panics_after = device.run(settings, "find /Library/Logs/CrashReporter/Panics -type f -print 2>/dev/null", {capture = true})
     assert(panics_after == panics_before, "the phone's kernel panic inventory changed after the unfair lock and clock fixture")
 end

@@ -46,9 +46,11 @@ function main()
             raise(table.concat(conflicts, "; "))
         end
         for _, written in ipairs(written_packages) do
-            local remote = "/tmp/" .. path.filename(written.deb)
+            local folder = device.staging()
+            device.run(settings, "mkdir -p " .. folder)
+            local remote = folder .. "/" .. path.filename(written.deb)
             device.copy(settings, written.deb, remote)
-            device.run(settings, string.format("dpkg -i %s && rm -f %s", remote, remote))
+            device.run(settings, string.format("dpkg -i %s; status=$?; rm -f %s; [ $status -eq 0 ]", remote, remote))
             cprint("${bright green}installed${clear} %s on %s", path.filename(written.deb), device.where(settings))
             refreshed = refreshed or (written.stage and os.isdir(path.join(written.stage, "Applications")))
         end

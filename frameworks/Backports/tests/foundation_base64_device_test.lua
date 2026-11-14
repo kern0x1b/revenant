@@ -49,10 +49,10 @@ function main()
         table.join2(arguments, {"-o", binary}, variant.sources)
         os.vrunv(clang, arguments)
         os.vrunv(ldid, {"-S", binary})
-        local remote = "/var/tmp/revenant-foundation-base64-" .. variant.name
-        device.copy(settings, binary, remote)
-        local output = device.run(settings, "chmod 755 " .. remote .. " && " .. remote, {capture = true})
-        device.run(settings, "rm -f " .. remote)
+        local output = device.with_scratch(settings, "backports-base64-" .. variant.name, function (remote)
+            device.copy(settings, binary, remote .. "/foundation_base64")
+            return device.run(settings, "chmod 755 " .. remote .. "/foundation_base64 && " .. remote .. "/foundation_base64", {capture = true})
+        end)
         results[variant.name] = output
         io.writefile(path.join(out, variant.name .. ".txt"), output)
     end

@@ -18,15 +18,15 @@ function main()
     local library = path.join(backports, "..", "..", "build", "iphoneos", "armv7", "release", "libSystemBackports.dylib")
     local test_library = path.join(out, "libSystemBackports.dylib")
     os.cp(library, test_library)
-    os.vrunv("xcrun", {"install_name_tool", "-id", "/var/tmp/revenant-libSystemBackports-dispatch.dylib", test_library})
+    local folder = device.scratch() .. "/backports-dispatch"
+    os.vrunv("xcrun", {"install_name_tool", "-id", folder .. "/libSystemBackports.dylib", test_library})
     local fixtures = {
         {name = "data", source = "main.c", language = {"-x", "c", "-std=gnu11", "-fblocks"}, extra = {"-DREVENANT_DEVICE", "-Wno-unguarded-availability-new"}},
         {name = "classes", source = "classes.m", language = {"-x", "objective-c", "-fno-objc-arc"}, extra = {"-framework", "Foundation", "-lobjc"}},
     }
     local settings = device.bind(os.projectdir())
     local panics_before = device.run(settings, "find /Library/Logs/CrashReporter/Panics -type f -print 2>/dev/null", {capture = true})
-    device.run(settings, "mkdir -p /var/tmp")
-    device.copy(settings, test_library, "/var/tmp/revenant-libSystemBackports-dispatch.dylib")
+    local binaries = {}
     for _, fixture in ipairs(fixtures) do
         local binary = path.join(out, "libsystem_dispatch_" .. fixture.name)
         local arguments = {"-target", "armv7-apple-ios6.0", "-miphoneos-version-min=6.0", "-isysroot", sdk, "-Wall", "-Werror",
@@ -35,12 +35,17 @@ function main()
         table.join2(arguments, {"-o", binary, path.join(backports, "tests", "libsystem_dispatch", fixture.source)})
         os.vrunv(clang, arguments)
         os.vrunv(ldid, {"-S", binary})
-        local remote = "/var/tmp/revenant-libsystem-dispatch-" .. fixture.name
-        device.copy(settings, binary, remote)
-        device.run(settings, "chmod 755 " .. remote .. " && " .. remote)
-        device.run(settings, "rm -f " .. remote)
+        table.insert(binaries, {name = fixture.name, file = binary})
     end
-    device.run(settings, "rm -f /var/tmp/revenant-libSystemBackports-dispatch.dylib")
+    device.with_scratch(settings, "backports-dispatch", function (remote)
+        device.copy(settings, test_library, remote .. "/libSystemBackports.dylib")
+        for _, built in ipairs(binaries) do
+            local program = remote .. "/libsystem_dispatch_" .. built.name
+            device.copy(settings, built.file, program)
+            device.run(settings, "chmod 755 " .. program .. " && " .. program)
+            device.run(settings, "rm -f " .. program)
+        end
+    end)
     local panics_after = device.run(settings, "find /Library/Logs/CrashReporter/Panics -type f -print 2>/dev/null", {capture = true})
     assert(panics_after == panics_before, "the phone's kernel panic inventory changed after the libSystem dispatch fixtures")
 end

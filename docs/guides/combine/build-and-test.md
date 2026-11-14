@@ -65,13 +65,13 @@ The Backports libraries the binary links, `libFoundationBackports.dylib`, `libCo
 
 ```
 ./xmakew device -P . claim
-./xmakew device -P . run 'mkdir /var/tmp/combine-helpers'
-./xmakew l -P . frameworks/SwiftUI/tools/device.lua copy build/iphoneos/armv7/release/CombineHelpersTests /var/tmp/combine-helpers/CombineHelpersTests
-./xmakew device -P . run 'cd /var/tmp/combine-helpers && DYLD_LIBRARY_PATH=/var/tmp/combine-helpers ./CombineHelpersTests'
-./xmakew device -P . run 'rm /var/tmp/combine-helpers/* && rmdir /var/tmp/combine-helpers'
+./xmakew device -P . run "mkdir -p /var/root/revenant-scratch/$REVENANT_DEVICE_HOLDER/combine-helpers"
+./xmakew l -P . frameworks/SwiftUI/tools/device.lua copy build/iphoneos/armv7/release/CombineHelpersTests /var/root/revenant-scratch/$REVENANT_DEVICE_HOLDER/combine-helpers/CombineHelpersTests
+./xmakew device -P . run "cd /var/root/revenant-scratch/$REVENANT_DEVICE_HOLDER/combine-helpers && DYLD_LIBRARY_PATH=/var/root/revenant-scratch/$REVENANT_DEVICE_HOLDER/combine-helpers ./CombineHelpersTests"
 ./xmakew device -P . release
 ```
 
-after the dylibs (`otool -L` of the binary lists them) are copied the same way. The run ends with
+after the dylibs (`otool -L` of the binary lists them) are copied the same way. The folder is the holder's scratch
+folder, which the release above erases, so nothing stays on the phone. The run ends with
 `combinehelpers: every check held` and exit status 0. With several phones attached, `-d NAME` picks one, as the
 skill `device-session` says.
