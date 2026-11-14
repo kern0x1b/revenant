@@ -16,6 +16,18 @@ local STEPS = {
     {"stepProxyUnique", {"proxy.unique.inplace", "proxy.unique.copied", "proxy.unique.values", "proxy.unique.balanced"}},
     {"stepProxyWeak", {"proxy.weak.alive", "proxy.weak.cleared", "proxy.weak.recreated", "proxy.weak.balanced"}},
     {"stepProxyRace", {"proxy.race", "proxy.race.balanced"}},
+    {"stepProxyObject", {"proxy.object"}},
+    {"stepProxyKeys", {"proxy.keys"}},
+    {"stepProxyValues", {"proxy.values"}},
+    {"stepProxyEnumerate", {"proxy.enumerate"}},
+    {"stepHostCount", {"host.count"}},
+    {"stepHostObject", {"host.object.found", "host.object.missing"}},
+    {"stepHostKeyEnumerator", {"host.keyenumerator"}},
+    {"stepHostAllKeys", {"host.allkeys"}},
+    {"stepHostAllValues", {"host.allvalues"}},
+    {"stepHostGetObjects", {"host.getobjects"}},
+    {"stepHostFast", {"host.fastenumeration"}},
+    {"stepHostEnumerate", {"host.enumerate"}},
 }
 local CONTROLS = {"stepProxyKind", "stepProxyDescription", "stepProxyIdentity", "stepProxyNested", "stepProxyAny", "stepProxyLifetime", "stepProxyUnique", "stepProxyWeak"}
 

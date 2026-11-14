@@ -87,6 +87,73 @@ static void weak_references(id runner)
     printf("%s proxy.weak.recreated\n", recreated ? "ok" : "FAIL");
 }
 
+static void check(const char *name, int passed)
+{
+    printf("%s host.%s\n", passed ? "ok" : "FAIL", name);
+}
+
+static int all_present(__unsafe_unretained id *items, unsigned count)
+{
+    for (unsigned index = 0; index < count; index++) {
+        if (!items[index])
+            return 0;
+    }
+    return 1;
+}
+
+static void dictionary_probe(id runner, const char *step)
+{
+    NSDictionary *table = ((id (*)(id, SEL))objc_msgSend)(runner, @selector(bridgedDictionary));
+    @try {
+        if (strcmp(step, "stepHostCount") == 0) {
+            check("count", [table count] == 3);
+        } else if (strcmp(step, "stepHostObject") == 0) {
+            id key = [[table keyEnumerator] nextObject];
+            check("object.found", key && [table objectForKey:key]);
+            check("object.missing", [table objectForKey:@"absent-key-0123456789"] == nil);
+        } else if (strcmp(step, "stepHostKeyEnumerator") == 0) {
+            NSEnumerator *enumerator = [table keyEnumerator];
+            int seen = 0;
+            id each;
+            while ((each = [enumerator nextObject]))
+                seen++;
+            check("keyenumerator", seen == 3);
+        } else if (strcmp(step, "stepHostAllKeys") == 0) {
+            NSArray *keys = [table allKeys];
+            __unsafe_unretained id items[3] = {nil, nil, nil};
+            check("allkeys", [keys count] == 3 && ([keys getObjects:items range:NSMakeRange(0, 3)], all_present(items, 3)));
+        } else if (strcmp(step, "stepHostAllValues") == 0) {
+            NSArray *values = [table allValues];
+            __unsafe_unretained id items[3] = {nil, nil, nil};
+            check("allvalues", [values count] == 3 && ([values getObjects:items range:NSMakeRange(0, 3)], all_present(items, 3)));
+        } else if (strcmp(step, "stepHostGetObjects") == 0) {
+            __unsafe_unretained id keys[3] = {nil, nil, nil};
+            __unsafe_unretained id objects[3] = {nil, nil, nil};
+            [table getObjects:objects andKeys:keys count:3];
+            check("getobjects", all_present(keys, 3) && all_present(objects, 3) && keys[0] != keys[1] && keys[1] != keys[2] && keys[0] != keys[2]);
+        } else if (strcmp(step, "stepHostFast") == 0) {
+            int seen = 0;
+            for (id each in table) {
+                if (each)
+                    seen++;
+            }
+            check("fastenumeration", seen == 3);
+        } else if (strcmp(step, "stepHostEnumerate") == 0) {
+            __block int seen = 0;
+            [table enumerateKeysAndObjectsUsingBlock:^(id each_key, id each_object, BOOL *stop) {
+                if (each_key && each_object)
+                    seen++;
+            }];
+            check("enumerate", seen == 3);
+        } else {
+            printf("FAIL host.step.absent %s\n", step);
+        }
+    } @catch (NSException *exception) {
+        printf("note exception %s: %s\n", [[exception name] UTF8String], [[exception reason] UTF8String]);
+        printf("FAIL host.%s\n", step + 8);
+    }
+}
+
 int main(int argc, char **argv)
 {
     setbuf(stdout, NULL);
@@ -117,11 +184,14 @@ int main(int argc, char **argv)
         }
         runner = [[cls alloc] init];
         SEL selector = NSSelectorFromString([NSString stringWithUTF8String:argv[3]]);
-        if (![runner respondsToSelector:selector]) {
+        int in_host = strncmp(argv[3], "stepHost", 8) == 0;
+        if (!in_host && ![runner respondsToSelector:selector]) {
             printf("FAIL selector.absent %s\n", argv[3]);
             return 1;
         }
-        if (strcmp(argv[3], "stepProxyRace") == 0)
+        if (in_host)
+            dictionary_probe(runner, argv[3]);
+        else if (strcmp(argv[3], "stepProxyRace") == 0)
             race(runner, argc > 4 ? atoi(argv[4]) : 100000);
         else if (strcmp(argv[3], "stepProxyWeak") == 0)
             weak_references(runner);

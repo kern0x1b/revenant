@@ -97,8 +97,39 @@ struct Box {
         return unsafeBitCast(table._bridgeToObjectiveCImpl(), to: NSDictionary.self)
     }
 
+    @objc public func bridgedDictionary() -> AnyObject {
+        return bridgedTable()
+    }
+
     @objc public func stepProxyCount() {
         report("proxy.count", bridgedTable().count == 3)
+    }
+
+    @objc public func stepProxyObject() {
+        let table = bridgedTable()
+        let enumerator = table.perform(#selector(NSDictionary.keyEnumerator))!.takeUnretainedValue()
+        let key = enumerator.perform(#selector(NSEnumerator.nextObject))
+        let found = key == nil ? nil : table.perform(#selector(NSDictionary.object(forKey:)), with: key!.takeUnretainedValue())
+        let absent = table.perform(#selector(NSDictionary.object(forKey:)), with: "absent-key-0123456789"._bridgeToObjectiveCImpl())
+        report("proxy.object", found != nil && absent == nil)
+    }
+
+    @objc public func stepProxyKeys() {
+        let keys = bridgedTable().perform(#selector(getter: NSDictionary.allKeys))
+        report("proxy.keys", keys != nil && unsafeBitCast(keys!.takeUnretainedValue(), to: NSArray.self).count == 3)
+    }
+
+    @objc public func stepProxyValues() {
+        let values = bridgedTable().perform(#selector(getter: NSDictionary.allValues))
+        report("proxy.values", values != nil && unsafeBitCast(values!.takeUnretainedValue(), to: NSArray.self).count == 3)
+    }
+
+    @objc public func stepProxyEnumerate() {
+        var seen = 0
+        bridgedTable().enumerateKeysAndObjects { _, _, _ in
+            seen += 1
+        }
+        report("proxy.enumerate", seen == 3)
     }
 
     @objc public func stepProxyKind() {
