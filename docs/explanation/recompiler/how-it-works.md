@@ -418,6 +418,23 @@ print on the iPad 2 what objc4 printed.
   belong to the backports.
 - Functions that cannot be lifted (hand-written assembly in crash reporters, for instance) become traps that fault only
   if they are actually called.
+- The condition flags do not cross a call. The lift treats a call and a return as clobbering NZCV (rellume's
+  `call_ret_clobber_flags`, which spares every call a store of the flags), as the arm64 procedure call standard allows.
+  The machine outliner of newer compilers breaks that: Apple clang 21 (Xcode 27.2) at `-Oz` outlines
+  `cmp w9, #0x3f` with the instructions before it into a function that returns, and the caller branches on the flags
+  the function left (`b.hi`). Lifted, the branch reads an undefined value and goes the wrong way without a fault.
+  xlate therefore scans every `bl` and `blr` of every guest image at every translation (`src/xlate/flagflow.cpp`) for
+  an instruction after the call that reads the flags before anything writes them (`b.cond`, `csel` and its aliases,
+  `adc`, `sbc`, `ccmp`, `fcsel`, looked for along both ways of a branch for up to 64 instructions), and for a function
+  that reads the flags on entry. One stops the translation, with the function, the call and the callee in the error;
+  a read after a call whose callee never returns (it ends in `brk`, with no `ret` or tail jump) is not one. A passing
+  translation says in `report.txt` how many calls it checked. Measured on 2026-11-14, with no site found: the
+  reCAPTCHA SDK that Xcode 26.2 built (319 objects), the guest `libswiftCore` with its thirteen overlays, `libc++` and
+  `libc++abi`, 145 thousand direct and 33 thousand indirect calls. The lift is not changed: it would lift a function
+  whose flags matter, and the functions that call it, with a second configuration of the lifter that does not clobber
+  the flags, and it waits for the first image that has such a call. Until then build the image with `-mno-outline`.
+  `recompiler/tests/flagflow` is the check; the `libcxxexceptions` fixture is built with `-mno-outline` for the same
+  reason.
 - The lift is deterministic: `xlate`, `llvm-split` and the linker give the same bytes for the same input. The final
   armv7 objects are not always. The stock LLVM's SjLj preparation (the armv7 iOS 6 unwinder) demotes the phis of a
   landing pad in the order of their addresses once there are more than eight, so the stack-slot order, and with it the

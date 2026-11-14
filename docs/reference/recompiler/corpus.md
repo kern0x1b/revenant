@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, switchtail, tailcalls, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, hostbridges, checkapi and proxytable; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, flagflow, hostbridges, checkapi and proxytable; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions`, `libexceptions`, `libcxxexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -480,6 +480,26 @@ One dylib defines `absolute_value` as `0x123456789` with `.set`, another holds `
 lifts the second alone and requires the refusal "data bind to unresolved symbol _absolute_value"; lifts both and requires
 that no symbol is unresolved and that the data slot of the bind holds `0x123456789`, the value itself: a section symbol
 is slid with its image, an absolute value is not.
+
+### flagflow
+
+The lift gives a call no condition flags (see [Scope and limits](../../explanation/recompiler/how-it-works.md#scope-and-limits)),
+and xlate refuses an image where code depends on them: it scans every `bl` and `blr` for a flag read after the call and
+every callee for a flag read on entry. The check lifts small dylibs and reads the error and the `report.txt` summary
+(`--flag-flow-summary`):
+
+- refused, from assembly (`direct.S`, `indirect.S`, `entry.S`): an outlined function that ends in `cmp; ret` and a caller
+  that runs `cset` after `bl`; the same after `blr`; a callee that starts with `cset` after the caller's `cmp`. The error
+  names the function, the call, the callee and the reader.
+- refused, from the compiler (`notes.c` at `-Oz`): six functions that repeat one sequence, which Apple clang 21 outlines
+  into functions that return the result of `cmp w9, #0x3f` to a `b.hi`. If a compiler stops making that function, the
+  check fails and the fixture needs a new example.
+- translated (`clean.S`, `notes.c` at `-Oz -mno-outline`): a callee that sets the flags and a caller that ignores them and
+  compares again, and a read of the flags after a call to a function that is one `brk` (not counted as a site, and counted
+  once in the summary); the summary says that no call passes the flags.
+
+`xlate --flag-flow <file> <image>` lists the sites of an image without lifting it, which is how the SDK, `libswiftCore`
+and `libc++` were measured.
 
 ### objectsplit
 
