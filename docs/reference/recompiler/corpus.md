@@ -34,8 +34,16 @@ A check that also has a device part is run by hand, with the output folder as it
 ./xmakew l -P . recompiler/tests/cryptoboringssl/check.lua <out>
 ```
 
-These need a claimed device (the skill `device`): `REVENANT_DEVICE_HOLDER` and `REVENANT_DEVICE`
-exported and the claim held. They reach the device through Revenant's `device` module. Without an argument, output goes
+A check translates with the `xlate` and `xlgen` that are in `build/`, and a script run with `./xmakew l -P .` does not build them
+(`./xmakew test -P .` does, they are dependencies of the targets). `env.lua` therefore stops a run whose `xlate` or `xlgen` is
+older than one of its sources (the files of the target, and for `xlate` the headers of `recompiler/src/xlate`), naming the
+command to run: `./xmakew build -P . xlate xlgen`. Before that, a worker that merged a change of the generator and translated
+the fixture with the old binary got a library without it: on 2026-11-14 a checkout of main translated libgenerics with an
+`xlgen` 16 hours older than `xlgen.cpp` and an `xlate` older than `objc.cpp`, and its report had 257 typed host IMPs where the
+rebuilt tools gave 272, so the steps that run on the generic classes' methods did not run the same code.
+`toolchain/tests/addon/recompiler_fresh_test.lua` tests the comparison.
+
+These need a claimed device (the skill `device`):xported and the claim held. They reach the device through Revenant's `device` module. Without an argument, output goes
 to `build/recompiler/corpus/<name>`.
 
 A check that goes to the phone does not start unless its holder has claimed it: `corpus.device()` refuses with
