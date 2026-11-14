@@ -72,6 +72,12 @@ that size, and the pieces are compiled four at a time (`XL_COMPILE_JOBS`). A run
 whose guest images, bridge library and `xlate` are the last run's reuses its lifted objects and only recompiles and
 relinks the runtime, a few seconds.
 
+The lifted code is compiled in Thumb-2 (`XL_LIFTED_MODE=thumb`, the default); `arm` compiles it in ARM mode, as it was
+before. Any other value is refused. The mode is part of the key of the lifted objects, so changing it lifts and compiles
+them again. The runtime, the crypto helpers and the bridge stay in ARM mode in every setting. LLVM's machine outliner is
+not an option: with this LLVM it miscompiles the lifted code
+([why](../../reference/recompiler/corpus.md#lifted-code-mode-thumb-2-and-the-outliner)).
+
 ## Translate a library
 
 An arm64 dylib (and the guest images it needs) becomes an armv7 dylib that an app loads into its own process. See

@@ -446,7 +446,8 @@ function translate(input, includes, out, images, opt)
     run("xcrun", table.join({"clang", "-target", "arm64-apple-ios12.0", "-isysroot", e.sdk, "-dynamiclib", "-install_name", "@rpath/libxl-guest.dylib",
                              o("guest.o")}, support, {"-o", o("libxl-guest.dylib")}, trapflags))
 
-    local key = lift_key(e, input, extra, out, replaces, base .. (library and " library" or ""))
+    local lifted_mode = env.lifted_mode(getenv("XL_LIFTED_MODE"))
+    local key = lift_key(e, input, extra, out, replaces, base .. (library and " library" or "") .. " " .. lifted_mode)
     local lifted_objs
     if os.isfile(o("lift.stamp")) and io.readfile(o("lift.stamp")) == key and os.isfile(o("lifted-objs.txt")) then
         print("lift inputs unchanged since the last run: reusing its lifted objects")
@@ -456,7 +457,7 @@ function translate(input, includes, out, images, opt)
         run(e.xlate, table.join({"--base", base, "--output", o("lifted.bc"), "--layout", o("layout.txt"), "--passthrough", o("passthrough.txt"),
                                  "--state-header", o("xl_state.h")}, library and {"--library"} or {}, replaces, {"--bridge", o("libxl-guest.dylib"), input}, extra,
                                 {o("libxl-guest.dylib")}))
-        lifted_objs = compile_lifted(e, out, host)
+        lifted_objs = compile_lifted(e, out, env.lifted_flags(lifted_mode, host))
         io.writefile(o("lifted-objs.txt"), table.concat(lifted_objs, " ") .. "\n")
         io.writefile(o("lift.stamp"), key)
     end

@@ -22,6 +22,35 @@ local function targetfile(name)
     return file
 end
 
+local LIFTED_MODES = {
+    arm = {"-marm"},
+    thumb = {"-mthumb"},
+}
+
+function lifted_mode(requested)
+    local mode = requested
+    if mode == nil or mode == "" then
+        mode = "thumb"
+    end
+    if not LIFTED_MODES[mode] then
+        raise("XL_LIFTED_MODE is %s, it must be arm or thumb", mode)
+    end
+    return mode
+end
+
+function lifted_flags(mode, flags)
+    local result = {}
+    for _, flag in ipairs(flags or {}) do
+        if flag ~= "-marm" and flag ~= "-mthumb" then
+            table.insert(result, flag)
+        end
+    end
+    for _, flag in ipairs(LIFTED_MODES[lifted_mode(mode)]) do
+        table.insert(result, flag)
+    end
+    return result
+end
+
 function sorted(list)
     import("@addon.revenant.byteorder", {anonymous = true}).sort(list)
     return list
