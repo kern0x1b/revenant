@@ -16,7 +16,7 @@ local STEPS = {
     {"stepProxyUnique", {"proxy.unique.inplace", "proxy.unique.copied", "proxy.unique.values", "proxy.unique.balanced"}},
     {"stepProxyWeak", {"proxy.weak.alive", "proxy.weak.cleared", "proxy.weak.recreated", "proxy.weak.balanced"}},
     {"stepProxyRace", {"proxy.race", "proxy.race.balanced"}},
-    {"stepHostClasses", {"hostclass.dictionary.literal", "hostclass.dictionary.mutable", "hostclass.dictionary.core", "hostclass.forced",
+    {"stepClassesOfHost", {"hostclass.dictionary.literal", "hostclass.dictionary.mutable", "hostclass.dictionary.core", "hostclass.forced",
                          "hostclass.superclass", "hostclass.guest", "hostclass.number", "hostclass.control", "generic.dyncast",
                          "generic.superclass", "generic.subclass"}},
     {"stepProxyObject", {"proxy.object"}},

@@ -709,7 +709,7 @@ The steps are `stepDictionary` (`[String: String]`), `stepDictionaryAny` (`[Stri
 `stepNested` (`[[Int]]`), `stepSubstring` (`[Substring]` appended to and split) and `stepStress` (10 000 appends to an
 `[Int]`, a `[String]`, a `[Substring]` and a `[String: Int]`, under `MallocScribble`).
 
-`stepHostClasses` is the control of the range test the guest runtime reads a class by (`ClassMetadata::isTypeMetadata`
+`stepClassesOfHost` is the control of the range test the guest runtime reads a class by (`ClassMetadata::isTypeMetadata`
 answers `false` outside the guest images, `how-it-works.md`): a literal `NSDictionary`, an `NSMutableDictionary` and the
 Core Foundation class that `CFDictionaryCreateMutableCopy` makes, each cast with `as? [String: Any]`
 (`hostclass.dictionary.*`) and one with `as!` (`hostclass.forced`); a host object cast to a host superclass, to a host
