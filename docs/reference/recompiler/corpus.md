@@ -524,7 +524,9 @@ No phone. It reads `--host-only`, `--device-only` and the two tables through `co
 combinations, then points the lease folder at a temporary one and shows that `corpus.device()` refuses a holder that
 named nobody, a phone nobody claimed and a phone another holder claimed, and lets the holder of the claim through with
 `/var/root/revenant-scratch/<holder>` as its `scratch` folder. The module refuses a holder name that is empty, has a
-slash, starts with a dot or holds `..`, and does not erase the folder of a holder without a claim. Two
+slash, starts with a dot or holds `..`, and does not erase the folder of a holder without a claim. It also claims the
+phone under one private cache and shows that a claim under another is refused, that the lease sits in
+`~/.revenant/devices` and that neither cache gets a `devices` folder. Two
 checks (`hostbridges`, `libexceptions`) read only the table before this test; a build meant for the Mac took the string
 as nothing and ran on the phone.
 
