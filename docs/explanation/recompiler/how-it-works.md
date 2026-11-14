@@ -23,6 +23,28 @@ Rellume is built for AArch64 only, the one architecture xlate lifts.
 The guest keeps its arm64 memory image, rebased below 4 GiB. Code runs natively as armv7. Only the crossings into
 the system frameworks go through bridges.
 
+## What a lifted function is
+
+Rellume lifts a function from its start with every block that its direct branches reach, so the unit of lifting is the
+control-flow graph, not the symbol. Two cases made the same code appear in many lifted functions, and both are handled
+in xlate with changes to Rellume ([patches 0012 and 0013](../../../packages/r/rellume/patches)):
+
+- **A jump table's targets are entries of the function that holds the table.** A `switch` compiles to an indirect jump
+  whose targets are not function starts, so each one used to be lifted as a function of its own, with a copy of the
+  tail that all the cases share. Now the function has several entries: its first block loads `pc` and switches to a
+  stub per entry that unpacks the registers and branches to the entry's block, and a block that several entries reach
+  exists once. An indirect jump that can still reach such a target enters the function again with a `switch` on `pc`.
+- **A branch to the start of another function is a tail call.** The decoder stops at an address that
+  `LC_FUNCTION_STARTS` lists, and the branch becomes a call of that function that keeps the stack constant (`musttail`,
+  through `xl_tail` when the address is not known to be a function). Without this, a chain of N functions that each end
+  in a `b` to the next was N(N+1)/2 copies. In a function that has landing pads the call is a plain call; see the
+  exceptions entry of [decisions in the translator](#decisions-in-the-translator) for why that does not change which
+  pad an exception reaches.
+
+In the reCAPTCHA Enterprise SDK with its guest images the two changes took the lifted code from 6.84 million guest
+instructions for 2.10 million different ones to 2.11 million, and the library from 142.96 to 51.76 MiB. `xlate
+--report-duplicates` prints the numbers for any input.
+
 ## Status
 
 - OneBusAway 2.3.2, the official arm64 App Store IPA, recompiles to armv7 and iOS 6 and reaches its full, interactive
@@ -148,7 +170,10 @@ print on the iPad 2 what objc4 printed.
   unwind to how many landing pads, and counts the ones it left as plain calls (an exception specification, an
   unknown personality, a function that mixes personalities). A `throw` of translated C++ code (`__cxa_throw`) is a
   fault, and a catch of a C++ class the guest itself defines cannot match a host exception, so that clause is dropped.
-  `recompiler/tests/exceptions` is the regression test.
+  A tail call (`musttail`) in a function that has landing pads becomes a plain call, and a plain call has the call-site
+  index -1 in the SjLj context, so an exception that leaves the callee does not dispatch to a pad of the caller: the
+  native branch that made the call a tail call had already given the caller's frame back
+  (`recompiler/tests/libexceptions`, `stepTail`). `recompiler/tests/exceptions` is the regression test.
 - **Callbacks into the guest.** A thread has one set of guest registers, and host code that calls a guest function runs
   it on that set: a method libobjc dispatches (`+initialize`, a delegate method, `+class` of a guest root class), a
   block, a C callback, a hook. Every such call goes through `xl_invoke` or `xl_invoke_n`, which restore the program
