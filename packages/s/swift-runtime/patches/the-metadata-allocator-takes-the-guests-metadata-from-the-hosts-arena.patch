@@ -1,0 +1,90 @@
+diff --git a/stdlib/public/runtime/Metadata.cpp b/stdlib/public/runtime/Metadata.cpp
+--- a/stdlib/public/runtime/Metadata.cpp
++++ b/stdlib/public/runtime/Metadata.cpp
+@@ -8196,7 +8196,38 @@
+ static swift::atomic<PoolRange>
+ AllocationPool{PoolRange{InitialAllocationPool.Pool,
+                          sizeof(InitialAllocationPool.Pool)}};
++
++#if SWIFT_OBJC_INTEROP && defined(__aarch64__)
++// As the guest of a translated program on a 32-bit host, this runtime tells a class that it laid out from a class of
++// the host's own Objective-C runtime by the address (ClassMetadata::isTypeMetadata), so the metadata it builds must lie
++// in the guest images or in the arena that the host reserved for it (xl_guest_arena_low and _high, which are 0 where
++// there is no host to do so, and then the allocator is the original). Memory beyond the initial pool, and an
++// allocation too large for a pool page, is taken from the arena, which does not grow: its end is a fatal error.
++#define SWIFT_METADATA_ARENA_FROM_HOST 1
++static std::atomic<uintptr_t> ArenaNext{0};
++
++static inline bool arenaReserved() {
++  return xl_guest_arena_high != 0;
++}
+ 
++static inline bool inArena(const void *allocation) {
++  return reinterpret_cast<uintptr_t>(allocation) - xl_guest_arena_low < xl_guest_arena_high - xl_guest_arena_low;
++}
++
++static void *allocateFromArena(size_t size) {
++  size = (size + 15) & ~size_t(15);
++  uintptr_t current = ArenaNext.load(std::memory_order_relaxed);
++  while (true) {
++    uintptr_t begin = current ? current : xl_guest_arena_low;
++    if (xl_guest_arena_high - begin < size)
++      swift::fatalError(0, "the metadata arena of the guest (%lu bytes) is exhausted\n",
++                        xl_guest_arena_high - xl_guest_arena_low);
++    if (ArenaNext.compare_exchange_weak(current, begin + size, std::memory_order_relaxed, std::memory_order_relaxed))
++      return reinterpret_cast<void *>(begin);
++  }
++}
++#endif
++
+ std::tuple<const void *, size_t> MetadataAllocator::InitialPoolLocation() {
+   return {InitialAllocationPool.Pool, sizeof(InitialAllocationPool.Pool)};
+ }
+@@ -8296,7 +8327,11 @@
+ 
+   // If the size is larger than the maximum, just do a normal heap allocation.
+   if (size > PoolRange::MaxPoolAllocationSize) {
++#if SWIFT_METADATA_ARENA_FROM_HOST
++    void *allocation = arenaReserved() ? allocateFromArena(size) : swift_slowAlloc(size, alignment - 1);
++#else
+     void *allocation = swift_slowAlloc(size, alignment - 1);
++#endif
+     memsetScribble(allocation, size);
+     return allocation;
+   }
+@@ -8322,6 +8357,11 @@
+       if (SWIFT_UNLIKELY(_swift_debug_metadataAllocationIterationEnabled))
+         poolSize -= sizeof(PoolTrailer);
+       allocatedNewPage = true;
++#if SWIFT_METADATA_ARENA_FROM_HOST
++      if (arenaReserved())
++        allocation = reinterpret_cast<char *>(allocateFromArena(PoolRange::PageSize));
++      else
++#endif
+       allocation = reinterpret_cast<char *>(swift_slowAlloc(PoolRange::PageSize,
+                                                             alignof(char) - 1));
+       memsetScribble(allocation, PoolRange::PageSize);
+@@ -8398,7 +8438,12 @@
+     }
+ 
+     // If it failed, go back to a neutral state and try again.
++#if SWIFT_METADATA_ARENA_FROM_HOST
++    // The arena does not give a page back.
++    if (allocatedNewPage && !inArena(allocation)) {
++#else
+     if (allocatedNewPage) {
++#endif
+       swift_slowDealloc(allocation, PoolRange::PageSize, alignof(char) - 1);
+     }
+   }
+@@ -8409,6 +8454,10 @@
+   __asan_poison_memory_region(allocation, size);
+ 
+   if (size > PoolRange::MaxPoolAllocationSize) {
++#if SWIFT_METADATA_ARENA_FROM_HOST
++    if (inArena(allocation))
++      return;
++#endif
+     swift_slowDealloc(const_cast<void *>(allocation), size, Alignment - 1);
+     return;
+   }

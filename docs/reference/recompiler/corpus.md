@@ -716,8 +716,8 @@ Core Foundation class that `CFDictionaryCreateMutableCopy` makes, each cast with
 subclass, to a guest class and to a host class it is not (`hostclass.superclass`, `hostclass.guest`,
 `hostclass.number`); a guest class instance cast to host and guest classes (`hostclass.control`); and two generic Swift
 classes the runtime builds at run time (`Base<T>`, `Derived<T>`), cast and asked for their superclass (`generic.dyncast`,
-`generic.superclass`, `generic.subclass`), which need the pool the runtime's metadata allocator takes them from to lie in
-the image.
+`generic.superclass`, `generic.subclass`), which need the arena the runtime's metadata allocator takes them from to be
+one the test accepts.
 
 The proxy steps hand an object of such a class to the host and use it there. `stepProxyCount`, `stepProxyKind`,
 `stepProxyDescription`, `stepProxyIdentity` (`NSArray(object:)` gives back the object that went in), `stepProxyNested`,

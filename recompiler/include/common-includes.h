@@ -95,6 +95,7 @@ extern const char *__progname;
 #include <copyfile.h>
 extern const struct dispatch_source_type_s _dispatch_source_type_vm;
 
-/* The range of the guest images, which the runtime writes into the words the guest Swift runtime reads to tell a class it
-   laid out from a class of the host (packages/s/swift-runtime/patches/a-class-outside-the-guest-images-is-not-class-metadata.patch). */
-extern unsigned long xl_guest_image_low, xl_guest_image_high;
+/* The range of the guest images and the arena for the metadata the guest Swift runtime builds, which the runtime writes into the
+   words that runtime reads to tell a class it laid out from a class of the host
+   (packages/s/swift-runtime/patches/a-class-outside-the-guest-images-is-not-class-metadata.patch). */
+extern unsigned long xl_guest_image_low, xl_guest_image_high, xl_guest_arena_low, xl_guest_arena_high;

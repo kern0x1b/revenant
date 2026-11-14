@@ -1,0 +1,26 @@
+diff --git a/stdlib/public/runtime/Casting.cpp b/stdlib/public/runtime/Casting.cpp
+--- a/stdlib/public/runtime/Casting.cpp
++++ b/stdlib/public/runtime/Casting.cpp
+@@ -463,7 +463,7 @@
+     if (sourceType == targetType) {
+       return sourceType;
+     }
+-    sourceType = sourceType->Superclass;
++    sourceType = sourceType->getSuperclassOfAnyClass();
+   } while (sourceType);
+   
+   return nullptr;
+@@ -1729,7 +1729,12 @@
+ SWIFT_CC(swift) SWIFT_RUNTIME_STDLIB_INTERNAL
+ const Metadata *swift::_swift_class_getSuperclass(const Metadata *theClass) {
+   if (const ClassMetadata *classType = theClass->getClassObject()) {
+-    if (classHasSuperclass(classType))
++    // A class of the host has no ClassMetadata::Superclass to compare with the root class: its objc_class has the
++    // superclass, which is null for a root class.
++    if (classType->isOfTheHost()) {
++      if (auto superclass = classType->getSuperclassOfAnyClass())
++        return getMetadataForClass(superclass);
++    } else if (classHasSuperclass(classType))
+       return getMetadataForClass(classType->Superclass);
+   }
+ 

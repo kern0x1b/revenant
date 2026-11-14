@@ -160,15 +160,18 @@ final class Derived<T>: Base<T> {}
     // it must not read a host class as Swift metadata (the word that is a Swift class's flags is something else in a host
     // class) nor take the classes it builds for the host's.
     @objc public func stepHostClasses() {
-        let literal: NSDictionary = ["a": 1, "b": "two"]
+        // Made with the Objective-C methods: the dictionary literal is a Foundation overlay initializer, which this library does not carry.
+        // (The key is made by the bridging function: a `as NSString` literal is another overlay initializer.)
+        let key = unsafeBitCast("a"._bridgeToObjectiveCImpl(), to: NSString.self)
+        let literal = NSDictionary(object: NSNumber(value: 1), forKey: key)
         let mutable = NSMutableDictionary()
-        mutable["a"] = 1
+        mutable.setObject(NSNumber(value: 1), forKey: key)
         let core = CFDictionaryCreateMutableCopy(nil, 0, literal as CFDictionary)!
         let objects: [(String, AnyObject)] = [("literal", literal), ("mutable", mutable), ("core", core as AnyObject)]
         for (name, object) in objects {
             report("hostclass.dictionary." + name, (object as? [String: Any])?["a"] as? Int == 1)
         }
-        report("hostclass.forced", ((core as AnyObject) as! [String: Any]).count == 2)
+        report("hostclass.forced", ((core as AnyObject) as! [String: Any]).count == 1)
         report("hostclass.superclass", ((literal as AnyObject) as? NSMutableDictionary) == nil && ((mutable as AnyObject) as? NSDictionary) != nil)
         report("hostclass.guest", ((literal as AnyObject) as? LibGenerics) == nil && ((core as AnyObject) as? Holder<Int>) == nil)
         report("hostclass.number", ((NSNumber(value: 3) as AnyObject) as? NSString) == nil && ((NSNumber(value: 3) as AnyObject) as? NSNumber) != nil)
