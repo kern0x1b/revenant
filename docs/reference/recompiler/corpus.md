@@ -709,15 +709,25 @@ The steps are `stepDictionary` (`[String: String]`), `stepDictionaryAny` (`[Stri
 `stepNested` (`[[Int]]`), `stepSubstring` (`[Substring]` appended to and split) and `stepStress` (10 000 appends to an
 `[Int]`, a `[String]`, a `[Substring]` and a `[String: Int]`, under `MallocScribble`).
 
-`stepClassesOfHost` is the control of the range test the guest runtime reads a class by (`ClassMetadata::isTypeMetadata`
-answers `false` outside the guest images, `how-it-works.md`): a literal `NSDictionary`, an `NSMutableDictionary` and the
-immutable copy of it, each cast with `as? [String: Any]`
-(`hostclass.dictionary.*`) and one with `as!` (`hostclass.forced`); a host object cast to a host superclass, to a host
-subclass, to a guest class and to a host class it is not (`hostclass.superclass`, `hostclass.guest`,
-`hostclass.number`); a guest class instance cast to host and guest classes (`hostclass.control`); and two generic Swift
-classes the runtime builds at run time (`Base<T>`, `Derived<T>`), cast and asked for their superclass (`generic.dyncast`,
-`generic.superclass`, `generic.subclass`), which need the arena the runtime's metadata allocator takes them from to be
-one the test accepts.
+`stepClassesOfHost` is the control of the two things the guest runtime does with a class of the host (`how-it-works.md`):
+it does not read the class as Swift metadata (`ClassMetadata::isTypeMetadata` answers `false` outside the guest images and
+the arena), and it takes its superclass from the host, not from where `ClassMetadata` keeps it. A literal `NSDictionary`,
+an `NSMutableDictionary` and the immutable copy of it (made with Objective-C methods and a key the host made) are each cast
+to three classes of the guest, which walks their chain of superclasses (`hostclass.guest.*`: `LibGenerics`, `Holder<Int>`
+and the generic `Base<Int>`), and their metatype is cast to a generic class's (`hostclass.metatype.*`); a host object is
+asked for a protocol it may conform to, which walks the same chain in the conformance lookup (`hostclass.conforms`); a host
+object is cast to a host superclass, to a host subclass and to a host class it is not (`hostclass.superclass`,
+`hostclass.number`); a guest class instance is cast to host and guest classes (`hostclass.control`); and two generic Swift
+classes the runtime builds at run time (`Base<T>`, `Derived<T>`) are cast and asked for their superclass
+(`generic.dyncast`, `generic.superclass`, `generic.subclass`), which need the arena the runtime's metadata allocator
+takes them from to be one the test accepts. The cast of a host dictionary to `[String: Any]` is not a step of this
+library: the bridging conformance of `Dictionary` is in the Foundation overlay, which the library does not carry, so
+the cast is nil for every dictionary, an empty one too, with the old runtime and the new. A fixture with the overlay
+(the reCAPTCHA SDK's, `JSONSerialization.jsonObject(with:) as! [String: Any]`) runs it.
+
+`stepSwiftObjectHash` is the case of `-[_SwiftObject hash]`: an object of a Swift class that has no superclass of its own
+is hashed by the Objective-C method of `_SwiftObject`, which asks whether the object's class conforms to `Hashable` and
+walks the chain of superclasses to `_SwiftObject`, an Objective-C class of the guest's images whose layout the host kept.
 
 The proxy steps hand an object of such a class to the host and use it there. `stepProxyCount`, `stepProxyKind`,
 `stepProxyDescription`, `stepProxyIdentity` (`NSArray(object:)` gives back the object that went in), `stepProxyNested`,

@@ -157,12 +157,16 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
   flag, as before.
 
   The superclass is the other word of a host class that `ClassMetadata` puts elsewhere: the host's `objc_class` has it at
-  offset 4, `ClassMetadata::Superclass` at offset 8, and the walk of `_dynamicCastClassMetatype` (the cast of a host
-  `NSDictionary` to `[String: Any]` failed in it, and so did any failed cast of a class that has a host ancestor) read
-  two words of the host's class as one pointer and faulted. `getSuperclassOfAnyClass()` answers with `class_getSuperclass`
-  for a class of the host and with the field for any other, and the two places that walk a chain of classes of any
-  origin use it (`patches/the-superclass-of-a-class-of-the-host-comes-from-the-host.patch`). The other reads of
-  `Superclass` are of a class that `isTypeMetadata()` has accepted.
+  offset 4, `ClassMetadata::Superclass` at offset 8, and the walk of `_dynamicCastClassMetatype` (a failed cast of a
+  class that has a host ancestor) read two words of the host's class as one pointer and faulted. The same walk is in
+  `swift_conformsToProtocol`, the conformance lookup that `-[_SwiftObject hash]` makes for an object's class: it reaches
+  `_SwiftObject`, an Objective-C class inside the guest's images that keeps the host's 20-byte layout, so the address of
+  the class says nothing about which layout it has. `getSuperclassOfAnyClass()` therefore decides by layout: a class that
+  `isPureObjC()` (no Swift flag in the word where the guest's `Data` would be) answers with `class_getSuperclass`, any
+  other with the field. The three places that walk a chain of classes of any origin use it (`_dynamicCastClassMetatype`,
+  `_swift_class_getSuperclass` and the pure-Objective-C branch of `getSuperclassForMaybeIncompleteMetadata` in
+  `ProtocolConformance.cpp`; `patches/the-superclass-of-a-class-of-the-host-comes-from-the-host.patch`). The other reads
+  of `Superclass` are of a class that `isTypeMetadata()` has accepted.
 
 `tests/classpair` builds the cases as a program for macOS, where objc4 is the real thing, and the translation must
 print on the iPad 2 what objc4 printed.
