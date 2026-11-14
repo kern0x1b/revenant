@@ -310,3 +310,10 @@ print on the iPad 2 what objc4 printed.
   belong to the backports.
 - Functions that cannot be lifted (hand-written assembly in crash reporters, for instance) become traps that fault only
   if they are actually called.
+- The lift is deterministic: `xlate`, `llvm-split` and the linker give the same bytes for the same input. The final
+  armv7 objects are not always. The stock LLVM's SjLj preparation (the armv7 iOS 6 unwinder) demotes the phis of a
+  landing pad in the order of their addresses once there are more than eight, so the stack-slot order, and with it the
+  frame layout and the size of the object, differ from run to run for a function with such a landing pad. Two builds of
+  the same reCAPTCHA Enterprise SDK image differed by 448 bytes of `__text` (36,007,928 and 36,007,480) and behaved
+  the same. Compare two builds by what they do, not by their hashes, until the llvm package carries a fix. The fix is a
+  one-function patch to LLVM; it moves the package's key, so it waits for a prebuilt release of the new key.
