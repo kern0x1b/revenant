@@ -10,6 +10,8 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
           to @executable_path/Frameworks, and signs every Mach-O file with ldid. With --bundle-id it refuses a built app whose
           CFBundleIdentifier is another id (rebuild it from a copy made with isolate.lua copy --bundle-id), and it renames the
           executable to RNHost-<last part of the id> (and CFBundleExecutable with it), so that no two installed hosts share a process name.
+          Without --backports the weak imports of the frameworks iOS 6 lacks (UserNotifications, Contacts, LocalAuthentication) are retargeted to the
+          absolute install name of the Backports library of the same name, when it exports every symbol the host imports from them, and stay on the framework otherwise, which the stage prints.
           Without --backports the host takes its libraries from the shared packages the phone holds: stage carries no Frameworks, refuses a host that loads
           a library from its own Frameworks, and writes OUT/host-packages.json, each package folder under /usr/lib/revenant that the host loads with the
           version the build's description in --packages, and the Backports symbols that the host and those packages import (the share/shared-packages folders of the packages it was linked against) names.
@@ -123,7 +125,7 @@ function change_arguments(otool_text, library_names)
     return arguments
 end
 
-function framework_retargets(otool_text, imports_text, exports, library_names)
+function framework_retargets(otool_text, imports_text, exports, library_names, prefix)
     local sdk = "/System/Library/Frameworks/"
     local imports = {}
     local seen = {}
@@ -157,7 +159,7 @@ function framework_retargets(otool_text, imports_text, exports, library_names)
             if #missing == 0 then
                 table.insert(arguments, "-change")
                 table.insert(arguments, old)
-                table.insert(arguments, NEW_PREFIX .. "/" .. name .. ".dylib")
+                table.insert(arguments, (prefix or NEW_PREFIX) .. "/" .. name .. ".dylib")
             else
                 table.insert(notes, string.format("%s stays on the device's framework: %s does not export %d of the %d symbols the host imports from it, e.g. %s",
                     framework, name, #missing, #imports[framework], missing[1]))
@@ -350,18 +352,19 @@ function shared_packages(otool_text, store)
     table.sort(found)
     local packages = {}
     for _, name in ipairs(found) do
-        local description
+        local description, where
         for _, folder in ipairs(store) do
             local candidate = path.join(path.absolute(folder), name .. ".json")
             if os.isfile(candidate) then
                 description = import("core.base.json").loadfile(candidate)
+                where = path.absolute(folder)
                 break
             end
         end
         if not description then
             raise("the host loads a library of the package %s, and no folder of --packages holds %s.json: name the shared-packages folder of the build that links it", name, name)
         end
-        table.insert(packages, {name = name, version = description.version, store = path.absolute(folder)})
+        table.insert(packages, {name = name, version = description.version, store = where})
     end
     return packages
 end
@@ -439,8 +442,11 @@ local function stage_shared(options)
     end
     local packages = shared_packages(otool, string.split(options.packages or "", ",", {plain = true}))
     local imports = backport_imports((os.iorunv("nm", {"-m", "-arch", "armv7", binary})))
+    local backports_root
     for _, package in ipairs(packages) do
-        if package.name ~= BACKPORTS then
+        if package.name == BACKPORTS then
+            backports_root = path.join(path.directory(package.store), "root", "usr", "lib", "revenant", package.name)
+        else
             local folder = path.join(path.directory(package.store), "root", "usr", "lib", "revenant", package.name)
             for _, library in ipairs(os.files(path.join(folder, "*.dylib"))) do
                 backport_imports((os.iorunv("nm", {"-m", "-arch", "armv7", library})), imports)
@@ -462,6 +468,23 @@ local function stage_shared(options)
         executable = executable_name(options["bundle-id"])
         os.vrunv("mv", {path.join(target, path.basename(built)), path.join(target, executable)})
         os.vrunv("plutil", {"-replace", "CFBundleExecutable", "-string", executable, path.join(target, "Info.plist")})
+    end
+    local staged = path.join(target, executable)
+    local held = {}
+    for _, library in ipairs(os.files(path.join(backports_root, "*Backports.dylib"))) do
+        table.insert(held, path.basename(library))
+    end
+    local exports = {}
+    for _, name in ipairs(held) do
+        exports[name] = os.iorunv("nm", {"-gU", "-arch", "armv7", path.join(backports_root, name .. ".dylib")})
+    end
+    local retargets, notes = framework_retargets(os.iorunv("otool", {"-L", staged}), os.iorunv("nm", {"-m", "-arch", "armv7", staged}), exports, held, OLD_PREFIX)
+    for _, note in ipairs(notes) do
+        print(note)
+    end
+    if #retargets > 0 then
+        table.insert(retargets, staged)
+        os.vrunv("install_name_tool", retargets)
     end
     local ldid = os.iorunv("sh", {"-c", "ls \"$1\"/xmake-global/.xmake/packages/l/ldid/*/*/bin/ldid | head -1", "sh", os.getenv("REVENANT_CACHE") or ""}):trim()
     if ldid ~= "" then

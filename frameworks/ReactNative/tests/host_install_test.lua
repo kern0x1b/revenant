@@ -55,6 +55,10 @@ function main()
         #arguments == 3 and arguments[1] == "-change" and arguments[2] == sdk and arguments[3] == "@executable_path/Frameworks/libUserNotificationsBackports.dylib" and #notes == 0,
         "got " .. table.concat(arguments, " ") .. " notes " .. table.concat(notes, "; "))
 
+    arguments = host.framework_retargets(linked, weak, defined, {"libUserNotificationsBackports"}, "/usr/lib/revenant/org.revenant.backports")
+    expect("a shared stage retargets the weak import to the absolute install name of the shared package",
+        #arguments == 3 and arguments[3] == "/usr/lib/revenant/org.revenant.backports/libUserNotificationsBackports.dylib", "got " .. table.concat(arguments, " "))
+
     local partial = weak .. "(undefined) weak external _UNMissingSymbol (from UserNotifications)\n"
     arguments, notes = host.framework_retargets(linked, partial, defined, {"libUserNotificationsBackports"})
     expect("a framework the backports library does not fully export stays on the device's framework",
@@ -226,6 +230,8 @@ function main()
             #packages == 2 and packages[1].name == "org.revenant.backports" and packages[1].version == "0.8.18+9772f8d3"
             and packages[2].name == "org.revenant.swift-runtime-8e5fdec8" and packages[2].version == "0.8.18+8e5fdec8",
             "the package list is " .. #packages .. " entries long or has other names or versions")
+        expect("each shared package keeps the folder whose description named it", packages[1].store == path.absolute(base) and packages[2].store == path.absolute(base),
+            "the stores are " .. tostring(packages[1].store) .. " and " .. tostring(packages[2].store))
         local message = refusal(function () host.shared_packages(listing, {path.join(base, "none")}) end)
         expect("a package without a description is refused by name", message ~= nil and message:find("org.revenant.backports", 1, true) ~= nil,
             "a package with no description was accepted or the refusal does not name it")
