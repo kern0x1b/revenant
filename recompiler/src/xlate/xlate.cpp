@@ -26,9 +26,12 @@
 #include <llvm/IR/GetElementPtrTypeIterator.h>
 #include <llvm/Transforms/InstCombine/InstCombine.h>
 #include <llvm/Transforms/Scalar/GVN.h>
+#include <llvm/IR/CFG.h>
+#include <llvm/Transforms/Utils/BasicBlockUtils.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 #include <llvm/Transforms/Utils/Local.h>
 #include <llvm/Transforms/Utils/ModuleUtils.h>
+#include <llvm/Transforms/Utils/ValueMapper.h>
 #include <rellume/rellume.h>
 
 #include <algorithm>
@@ -56,6 +59,19 @@ static cl::opt<std::string> HostTriple("host-triple", cl::init("armv7-apple-ios6
 static cl::opt<std::string> HostLayout("host-datalayout", cl::init("e-m:o-p:32:32-Fi8-f64:32:64-v64:32:64-v128:32:128-a:0:32-n32-S32"));
 static cl::opt<uint64_t> Base("base", cl::init(0x10000000));
 static cl::opt<bool> Optimize("optimize", cl::init(true));
+static cl::opt<std::string> LiftTargets("lift-targets", cl::init("entries"),
+                                        cl::desc("entries: a jump table target that is not a function start becomes an entry of the function that holds the table, "
+                                                 "and the code the targets share is lifted once; functions: every target is a function of its own, with its own copy "
+                                                 "of the code it reaches"));
+static cl::opt<bool> TailCalls("tail-calls", cl::init(true),
+                               cl::desc("A branch to the start of another function, and a fall through into it, is a tail call to that function; "
+                                        "false lifts the code the branch reaches into the function that branches, as it was"));
+static cl::opt<bool> DevirtExits("devirt-exits", cl::init(false),
+                                 cl::desc("A jump out of a function to the constant address of another function (a tail call) calls that function directly, "
+                                          "with a copy of the function's exit block of its own, instead of through xl_tail and its search of the function table"));
+static cl::opt<bool> ReportDuplicates("report-duplicates", cl::init(false),
+                                      cl::desc("Report how many guest instructions the lift decoded in all and how many different ones: the rest is code that "
+                                               "more than one lifted function carries"));
 static cl::opt<bool> SwiftHostAncestors("swift-host-ancestors", cl::init(false),
                                         cl::desc("Keep the guest's class layout for Swift classes that have a host ancestor"));
 static cl::opt<std::string> NamespacePrefix("namespace-prefix", cl::init(""),
@@ -131,7 +147,15 @@ struct Program {
   }
 };
 
+static std::set<uint64_t> *g_trace = nullptr;
+static std::map<uint64_t, std::set<uint64_t>> g_lift_sets;
+static std::map<uint64_t, int> g_lift_kind;
+static int g_kind = 0;
+
 size_t ReadCode(size_t address, uint8_t *buffer, size_t size, void *user) {
+  if (g_trace) {
+    g_trace->insert(address);
+  }
   auto program = static_cast<Program *>(user);
   auto image = program->ImageAt(address);
   if (!image || !image->IsExecutable(address) || program->stub_to_guest.count(address) ||
@@ -288,13 +312,30 @@ class Lifter {
     ll_config_set_call_ret_clobber_flags(config_, true);
     ll_config_set_call_func(config_, wrap(call_));
     ll_config_set_tail_func(config_, wrap(tail_));
+    if (TailCalls) {
+      ll_config_set_function_start_cb(
+          config_, [](uintptr_t address, void *user) { return static_cast<Program *>(user)->functions.count(address) != 0; }, &program_);
+    }
   }
 
   ~Lifter() { ll_config_free(config_); }
 
-  Function *Lift(uint64_t address) {
+  Function *Lift(uint64_t address, const std::vector<uint64_t> &entries = {}) {
     auto func = ll_func_new(wrap(&module_), config_);
-    int failed = ll_func_decode_cfg(func, address, ReadCode, &program_);
+    std::set<uint64_t> seen;
+    g_trace = ReportDuplicates ? &seen : nullptr;
+    int failed = entries.empty() ? ll_func_decode_cfg(func, address, ReadCode, &program_)
+                                 : ll_func_decode_entry(func, address, ReadCode, &program_);
+    for (auto entry : entries) {
+      if (!failed) {
+        failed = ll_func_decode_entry(func, entry, ReadCode, &program_);
+      }
+    }
+    g_trace = nullptr;
+    if (!failed && ReportDuplicates) {
+      g_lift_sets[address] = std::move(seen);
+      g_lift_kind[address] = g_kind;
+    }
     Function *lifted = nullptr;
     if (!failed) {
       LLVMValueRef raw = ll_func_lift(func);
@@ -308,7 +349,23 @@ class Lifter {
     lifted->setLinkage(GlobalValue::ExternalLinkage);
     lifted->setVisibility(GlobalValue::HiddenVisibility);
     functions[address] = lifted;
+    for (auto entry : entries) {
+      functions[entry] = lifted;
+    }
     return lifted;
+  }
+
+  void Discard(uint64_t address, const std::vector<uint64_t> &entries) {
+    auto found = functions.find(address);
+    if (found == functions.end()) {
+      return;
+    }
+    auto function = found->second;
+    functions.erase(found);
+    for (auto entry : entries) {
+      functions.erase(entry);
+    }
+    function->eraseFromParent();
   }
 
   Function *Handler(const std::string &name) {
@@ -352,6 +409,74 @@ class Lifter {
   }
 
   Function *Tail() { return tail_; }
+
+  unsigned SplitExits() {
+    unsigned count = 0;
+    std::set<Function *> done;
+    for (auto &[address, function] : functions) {
+      if (!done.insert(function).second) {
+        continue;
+      }
+      std::vector<CallInst *> jumps;
+      for (auto &block : *function) {
+        for (auto &inst : block) {
+          if (auto call = dyn_cast<CallInst>(&inst); call && call->getCalledFunction() == tail_) {
+            jumps.push_back(call);
+          }
+        }
+      }
+      for (auto call : jumps) {
+        BasicBlock *exit = call->getParent();
+        StoreInst *store = nullptr;
+        for (auto it = call->getReverseIterator(); it != exit->rend(); ++it) {
+          if (auto candidate = dyn_cast<StoreInst>(&*it); candidate && candidate->getPointerOperand() == call->getArgOperand(0)) {
+            store = candidate;
+            break;
+          }
+        }
+        auto pc = store ? dyn_cast<PHINode>(store->getValueOperand()) : nullptr;
+        if (!pc || pc->getParent() != exit) {
+          continue;
+        }
+        std::vector<BasicBlock *> sources;
+        for (unsigned i = 0; i < pc->getNumIncomingValues(); ++i) {
+          auto constant = dyn_cast<ConstantInt>(pc->getIncomingValue(i));
+          BasicBlock *source = pc->getIncomingBlock(i);
+          if (constant && Target(constant->getZExtValue()) && std::find(sources.begin(), sources.end(), source) == sources.end()) {
+            sources.push_back(source);
+          }
+        }
+        for (auto source : sources) {
+          ValueToValueMapTy map;
+          for (auto &phi : exit->phis()) {
+            map[&phi] = phi.getIncomingValueForBlock(source);
+          }
+          BasicBlock *copy = BasicBlock::Create(context_, "xl.exit", function);
+          for (auto &inst : *exit) {
+            if (isa<PHINode>(inst)) {
+              continue;
+            }
+            Instruction *clone = inst.clone();
+            clone->setName(inst.getName());
+            map[&inst] = clone;
+            clone->insertInto(copy, copy->end());
+            RemapInstruction(clone, map, RF_NoModuleLevelChanges | RF_IgnoreMissingLocals);
+          }
+          source->getTerminator()->replaceSuccessorWith(exit, copy);
+          for (auto &phi : exit->phis()) {
+            while (phi.getBasicBlockIndex(source) >= 0) {
+              phi.removeIncomingValue(source, false);
+            }
+          }
+          ++count;
+        }
+        if (!sources.empty() && pred_empty(exit)) {
+          DeleteDeadBlock(exit);
+        }
+      }
+    }
+    return count;
+  }
 
   unsigned Devirtualize() {
     unsigned count = 0;
@@ -405,7 +530,7 @@ class JumpTables {
  public:
   explicit JumpTables(Program &program) : program_(program), starts_(program.functions) {}
 
-  std::set<uint64_t> Targets(Function &lifted, uint64_t start) {
+  std::set<uint64_t> Targets(Function &lifted, uint64_t start, uint64_t address = 0, const std::vector<uint64_t> *variants = nullptr) {
     std::set<uint64_t> targets;
     auto tail = lifted.getParent()->getFunction("xl_tail");
     if (!tail) {
@@ -419,6 +544,18 @@ class JumpTables {
     if (!indirect || !HasIndirectBranch(start)) {
       return targets;
     }
+    if (!variants) {
+      Analyze(lifted, start, std::nullopt, address, targets);
+      return targets;
+    }
+    for (auto variant : *variants) {
+      Analyze(lifted, start, variant, address, targets);
+    }
+    return targets;
+  }
+
+ private:
+  void Analyze(Function &lifted, uint64_t start, std::optional<uint64_t> variant, uint64_t address, std::set<uint64_t> &targets) {
     Module scratch("jump-tables", lifted.getContext());
     scratch.setDataLayout(lifted.getParent()->getDataLayout());
     dl_ = &scratch.getDataLayout();
@@ -430,6 +567,21 @@ class JumpTables {
     }
     SmallVector<ReturnInst *, 4> returns;
     CloneFunctionInto(clone, &lifted, map, CloneFunctionChangeType::DifferentModule, returns);
+    if (variant) {
+      auto &first = clone->getEntryBlock();
+      if (auto dispatch = dyn_cast<SwitchInst>(first.getTerminator())) {
+        auto destination = dispatch->getDefaultDest();
+        if (*variant != address) {
+          auto found = dispatch->findCaseValue(ConstantInt::get(cast<IntegerType>(dispatch->getCondition()->getType()), *variant));
+          if (found != dispatch->case_default()) {
+            destination = found->getCaseSuccessor();
+          }
+        }
+        dispatch->eraseFromParent();
+        BranchInst::Create(destination, &first);
+        removeUnreachableBlocks(*clone);
+      }
+    }
     PreserveCalleeSaved(*clone);
     LoopAnalysisManager lam;
     FunctionAnalysisManager fam;
@@ -473,10 +625,8 @@ class JumpTables {
         }
       }
     }
-    return targets;
   }
 
- private:
   uint64_t NextFunction(uint64_t start) {
     auto next = starts_.upper_bound(start);
     return next == starts_.end() ? start + 0x100000 : *next;
@@ -883,7 +1033,7 @@ class LandingPads {
 
   unsigned Lower(const std::vector<CallInst *> &calls) {
     for (auto address : continuations_) {
-      if (auto found = lifter_.functions.find(address); found != lifter_.functions.end()) {
+      if (auto found = lifter_.functions.find(address); found != lifter_.functions.end() && found->second->getName() == "sub_" + Hex(address)) {
         continuation_functions_.insert(found->second);
       }
     }
@@ -1115,6 +1265,7 @@ class LandingPads {
       auto block = BasicBlock::Create(context_, "pad." + Hex(address), resume_);
       select->addCase(ConstantInt::get(i32, address), block);
       IRBuilder<> call(block);
+      call.CreateAlignedStore(ConstantInt::get(i64, address), state, Align(16));
       call.CreateCall(target->getFunctionType(), target, {state})->setIsNoInline();
       call.CreateBr(check);
     }
@@ -1833,6 +1984,56 @@ void RunPipeline(Module &module) {
   builder.buildPerModuleDefaultPipeline(OptimizationLevel::O2).run(module, mam);
 }
 
+unsigned EnterEntries(Lifter &lifter, Module &module, const std::map<uint64_t, std::vector<uint64_t>> &merged) {
+  auto tail = module.getFunction("xl_tail");
+  if (!tail) {
+    return 0;
+  }
+  auto &context = module.getContext();
+  auto i64 = Type::getInt64Ty(context);
+  unsigned count = 0;
+  for (auto &[address, entries] : merged) {
+    Function *parent = lifter.functions.at(address);
+    std::vector<CallInst *> jumps;
+    for (auto &block : *parent) {
+      for (auto &inst : block) {
+        if (auto call = dyn_cast<CallInst>(&inst); call && call->getCalledFunction() == tail) {
+          jumps.push_back(call);
+        }
+      }
+    }
+    for (auto call : jumps) {
+      auto state = call->getArgOperand(0);
+      Value *pc = nullptr;
+      for (auto it = call->getReverseIterator(); it != call->getParent()->rend(); ++it) {
+        if (auto store = dyn_cast<StoreInst>(&*it); store && store->getPointerOperand() == state) {
+          pc = store->getValueOperand();
+          break;
+        }
+      }
+      if (!pc || isa<ConstantInt>(pc) || pc->getType() != i64) {
+        continue;
+      }
+      BasicBlock *block = call->getParent();
+      BasicBlock *original = block->splitBasicBlock(call, "xl.jump");
+      block->getTerminator()->eraseFromParent();
+      BasicBlock *enter = BasicBlock::Create(context, "xl.enter", parent);
+      IRBuilder<> inside(enter);
+      CallInst *again = inside.CreateCall(parent->getFunctionType(), parent, {state});
+      again->setCallingConv(call->getCallingConv());
+      again->setTailCallKind(call->getTailCallKind());
+      inside.CreateRetVoid();
+      IRBuilder<> before(block);
+      SwitchInst *dispatch = before.CreateSwitch(pc, original, entries.size());
+      for (auto entry : entries) {
+        dispatch->addCase(ConstantInt::get(i64, entry), enter);
+      }
+      ++count;
+    }
+  }
+  return count;
+}
+
 int Coverage(Program &program) {
   std::error_code ec;
   raw_fd_ostream os(CoveragePath, ec);
@@ -1990,10 +2191,68 @@ int main(int argc, char **argv) {
   unsigned table_targets = 0;
   unsigned pad_targets = 0;
   unsigned table_data = 0;
+  if (LiftTargets != "entries" && LiftTargets != "functions") {
+    errs() << "xlate: --lift-targets is entries or functions, not " << LiftTargets << "\n";
+    return 1;
+  }
+  std::map<uint64_t, std::vector<uint64_t>> merged;
+  std::map<uint64_t, uint64_t> claimed;
+  int round = 0;
   while (!pending.empty()) {
     std::set<uint64_t> discovered;
+    g_kind = round++ == 0 ? 0 : 1;
     for (auto address : pending) {
-      auto lifted = lifter.Lift(address);
+      std::vector<uint64_t> entries;
+      bool merge = LiftTargets == "entries";
+      Function *lifted = nullptr;
+      std::set<uint64_t> analyzed;
+      for (;;) {
+        lifted = lifter.Lift(address, entries);
+        if (!lifted && !entries.empty()) {
+          for (auto entry : entries) {
+            claimed.erase(entry);
+            discovered.insert(entry);
+          }
+          entries.clear();
+          analyzed.clear();
+          merge = false;
+          continue;
+        }
+        if (!lifted) {
+          break;
+        }
+        bool grew = false;
+        std::vector<uint64_t> variants;
+        for (auto entry : entries) {
+          if (analyzed.insert(entry).second) {
+            variants.push_back(entry);
+          }
+        }
+        analyzed.insert(address);
+        auto found_targets = tables.Targets(*lifted, tables.Owner(address), address, entries.empty() ? nullptr : &variants);
+        for (auto target : found_targets) {
+          if (program.functions.count(target) || lifter.functions.count(target) || claimed.count(target)) {
+            continue;
+          }
+          if (merge) {
+            claimed[target] = address;
+            entries.push_back(target);
+            ++table_targets;
+            grew = true;
+          } else if (discovered.insert(target).second) {
+            ++table_targets;
+          }
+        }
+        for (auto target : pads.Targets(*lifted)) {
+          if (!program.functions.count(target) && !lifter.functions.count(target) && !claimed.count(target) && discovered.insert(target).second) {
+            ++pad_targets;
+          }
+        }
+        if (!grew) {
+          break;
+        }
+        lifter.Discard(address, entries);
+      }
       if (!lifted) {
         if (tables.IsData(address)) {
           ++table_data;
@@ -2003,15 +2262,8 @@ int main(int argc, char **argv) {
         ++failures;
         continue;
       }
-      for (auto target : tables.Targets(*lifted, tables.Owner(address))) {
-        if (!program.functions.count(target) && !lifter.functions.count(target) && discovered.insert(target).second) {
-          ++table_targets;
-        }
-      }
-      for (auto target : pads.Targets(*lifted)) {
-        if (!program.functions.count(target) && !lifter.functions.count(target) && discovered.insert(target).second) {
-          ++pad_targets;
-        }
+      if (!entries.empty()) {
+        merged[address] = entries;
       }
     }
     for (auto target : discovered) {
@@ -2019,10 +2271,75 @@ int main(int argc, char **argv) {
     }
     pending = discovered;
   }
+  if (ReportDuplicates) {
+    std::map<uint64_t, unsigned> cover;
+    uint64_t total = 0;
+    for (auto &[a, s] : g_lift_sets) {
+      total += s.size();
+      for (auto i : s) {
+        ++cover[i];
+      }
+    }
+    errs() << "xlate: duplicates:" << g_lift_sets.size() << " lifts, " << total << " instructions lifted, " << cover.size() << " unique\n";
+    uint64_t histogram[6] = {};
+    for (auto &[i, n] : cover) {
+      ++histogram[n == 1 ? 0 : n == 2 ? 1 : n <= 4 ? 2 : n <= 8 ? 3 : n <= 16 ? 4 : 5];
+    }
+    errs() << "xlate: duplicates:addresses covered by 1, 2, 3-4, 5-8, 9-16, 17+ functions:";
+    for (auto h : histogram) {
+      errs() << " " << h;
+    }
+    errs() << "\n";
+    struct Acc {
+      uint64_t functions = 0, lifted = 0, redundant = 0;
+    };
+    std::map<std::string, Acc> by_image;
+    std::map<int, Acc> by_kind;
+    std::vector<std::tuple<uint64_t, uint64_t, uint64_t, std::string>> worst;
+    for (auto &[a, s] : g_lift_sets) {
+      double redundant = 0;
+      for (auto i : s) {
+        redundant += 1.0 - 1.0 / cover[i];
+      }
+      std::string name = "?";
+      if (auto image = program.ImageAt(a)) {
+        name = image->path();
+        name = name.substr(name.rfind('/') + 1);
+      }
+      for (auto *acc : {&by_image[name], &by_kind[g_lift_kind[a]]}) {
+        ++acc->functions;
+        acc->lifted += s.size();
+        acc->redundant += static_cast<uint64_t>(redundant);
+      }
+      worst.push_back({static_cast<uint64_t>(redundant), a, s.size(), name});
+    }
+    for (auto &[kind, acc] : by_kind) {
+      errs() << "xlate: duplicates:kind " << (kind ? "discovered" : "function start") << ": " << acc.functions << " lifts, " << acc.lifted << " instructions, " << acc.redundant << " redundant\n";
+    }
+    for (auto &[name, acc] : by_image) {
+      errs() << "xlate: duplicates:image " << name << ": " << acc.functions << " lifts, " << acc.lifted << " instructions, " << acc.redundant << " redundant\n";
+    }
+    std::sort(worst.rbegin(), worst.rend());
+    for (size_t i = 0; i < worst.size() && i < 15; ++i) {
+      auto &[redundant, a, size, name] = worst[i];
+      errs() << "xlate: duplicates:worst 0x" << Hex(a) << " " << name << " " << size << " instructions, " << redundant << " redundant\n";
+    }
+  }
+  unsigned split = DevirtExits ? lifter.SplitExits() : 0;
+  auto jumps = EnterEntries(lifter, module, merged);
+  std::set<Function *> distinct;
+  for (auto &[address, function] : lifter.functions) {
+    distinct.insert(function);
+  }
   auto calls = lifter.Calls();
   auto devirtualized = lifter.Devirtualize();
-  errs() << "xlate: lifted " << lifter.functions.size() << " functions, " << devirtualized << " direct calls, " << table_targets << " jump table targets, "
+  errs() << "xlate: lifted " << distinct.size() << " functions, " << devirtualized << " direct calls, " << table_targets << " jump table targets, "
          << failures << " failures, " << table_data << " jump table data words that the linker listed as function starts\n";
+  errs() << "xlate: " << claimed.size() << " jump table targets are entries of " << merged.size() << " functions, which " << jumps
+         << " indirect jumps enter again\n";
+  if (DevirtExits) {
+    errs() << "xlate: " << split << " jumps out of functions to the address of a function got an exit block of their own\n";
+  }
   auto invokes = pads.Lower(calls);
   errs() << "xlate: " << invokes << " call sites in " << pads.functions() << " functions unwind to " << pad_targets << " landing pads\n";
   std::vector<GuestSegment> segments;

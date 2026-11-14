@@ -14,7 +14,9 @@ package("rellume")
                      "0008-Lift-the-AArch64-TRN1-and-TRN2-instructions.patch",
                      "0009-Lift-the-AArch64-SLI-SRI-SADDLV-and-UADDLV-instructi.patch",
                      "0010-Lift-the-half-precision-forms-of-the-AArch64-FCVT-in.patch",
-                     "0011-Compute-the-flags-of-the-AArch64-ADC-and-SBC-instruc.patch"}
+                     "0011-Compute-the-flags-of-the-AArch64-ADC-and-SBC-instruc.patch",
+                     "0012-Lift-a-function-with-more-than-one-entry.patch",
+                     "0013-Stop-decoding-at-the-start-of-another-function.patch"}
     add_urls("https://github.com/aengelke/rellume.git", {submodules = false})
     add_versions("2026.09.10", commit)
     local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}

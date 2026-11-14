@@ -1,0 +1,191 @@
+Subject: [PATCH] Lift a function with more than one entry
+
+ll_func_decode_entry decodes the CFG from an address like ll_func_decode_cfg and
+makes the address an entry of the function. A function with several entries
+starts by loading the guest PC from the CPU struct and branches to the stub of
+the entry whose address it equals, to the main entry if none does; each stub
+unpacks the registers and goes to its own block, and the blocks the entries
+reach in common are lifted once, with the registers of each entry as phi
+operands. OptimizePacks starts from every stub.
+
+---
+diff --git a/include/rellume/rellume.h b/include/rellume/rellume.h
+index b77522d16..b1530d1e8 100644
+--- a/include/rellume/rellume.h
++++ b/include/rellume/rellume.h
+@@ -83,6 +83,8 @@ RELLUME_API int ll_func_decode_block(LLFunc* func, uintptr_t addr,
+                                      RellumeMemAccessCb cb, void* user_arg);
+ RELLUME_API int ll_func_decode_cfg(LLFunc* func, uintptr_t addr,
+                                    RellumeMemAccessCb cb, void* user_arg);
++RELLUME_API int ll_func_decode_entry(LLFunc* func, uintptr_t addr,
++                                     RellumeMemAccessCb cb, void* user_arg);
+ 
+ struct RellumeCodeRange {
+     uint64_t start, end;
+diff --git a/src/callconv.cc b/src/callconv.cc
+index fbce5185e..65d6e1aa9 100644
+--- a/src/callconv.cc
++++ b/src/callconv.cc
+@@ -266,14 +266,16 @@ llvm::CallInst* CallConv::Call(llvm::Function* fn, ArchBasicBlock* bb,
+     return call;
+ }
+ 
+-void CallConv::OptimizePacks(FunctionInfo& fi, ArchBasicBlock* entry) {
++void CallConv::OptimizePacks(FunctionInfo& fi, llvm::ArrayRef<ArchBasicBlock*> entries) {
+     // Map of basic block to dirty register at (beginning, end) of the block.
+     llvm::DenseMap<ArchBasicBlock*, std::pair<RegisterSet, RegisterSet>> bb_map;
+ 
+     llvm::SmallPtrSet<ArchBasicBlock*, 16> queue;
+     llvm::SmallVector<ArchBasicBlock*, 16> queue_vec;
+-    queue.insert(entry);
+-    queue_vec.push_back(entry);
++    for (ArchBasicBlock* entry : entries) {
++        queue.insert(entry);
++        queue_vec.push_back(entry);
++    }
+ 
+     while (!queue.empty()) {
+         llvm::SmallVector<ArchBasicBlock*, 16> new_queue_vec;
+diff --git a/src/callconv.h b/src/callconv.h
+index 61b587487..26d3ae6fc 100644
+--- a/src/callconv.h
++++ b/src/callconv.h
+@@ -28,6 +28,7 @@
+ #include "basicblock.h"
+ #include "regfile.h"
+ 
++#include <llvm/ADT/ArrayRef.h>
+ #include <llvm/IR/DerivedTypes.h>
+ #include <llvm/IR/Instructions.h>
+ #include <llvm/IR/Type.h>
+@@ -75,7 +76,7 @@ public:
+ 
+     /// Optimize a function's CallConvPacks to minimize the number of store
+     /// instructions passed to the LLVM optimizer.
+-    void OptimizePacks(FunctionInfo& fi, ArchBasicBlock* entry);
++    void OptimizePacks(FunctionInfo& fi, llvm::ArrayRef<ArchBasicBlock*> entries);
+ 
+     CallConv() = default;
+     constexpr CallConv(Value value) : value(value) {}
+diff --git a/src/function.cc b/src/function.cc
+index 5572feccb..8d2c894ae 100644
+--- a/src/function.cc
++++ b/src/function.cc
+@@ -39,6 +39,7 @@
+ #include <llvm/IR/DerivedTypes.h>
+ #include <llvm/IR/Function.h>
+ #include <llvm/IR/GlobalValue.h>
++#include <llvm/IR/IRBuilder.h>
+ #include <llvm/IR/InstIterator.h>
+ #include <llvm/IR/Instructions.h>
+ #include <llvm/IR/Intrinsics.h>
+@@ -99,6 +100,13 @@ llvm::Function* LiftHelper::Lift() {
+ 
+     uint64_t entry_ip = func->instrs[0].inst.start();
+     func->instr_map[entry_ip].preds++;
++    std::vector<uint64_t> entry_ips = {entry_ip};
++    for (uint64_t extra : func->entries) {
++        if (extra == entry_ip)
++            continue;
++        func->instr_map[extra].preds++;
++        entry_ips.push_back(extra);
++    }
+ 
+     using LiftFn = bool(const Instr&, FunctionInfo&, const LLConfig&, ArchBasicBlock&) noexcept;
+ 
+@@ -137,9 +145,27 @@ llvm::Function* LiftHelper::Lift() {
+     auto entry_block = std::make_unique<ArchBasicBlock>(fn, 0);
+     // Initialize the sptr pointers in the function info.
+     cfg->callconv.InitSptrs(entry_block.get(), fi);
+-    // And initially fill register file.
+-    cfg->callconv.UnpackParams(entry_block.get(), fi);
+-    entry_block->BranchTo(ResolveAddr(entry_ip));
++    std::vector<std::unique_ptr<ArchBasicBlock>> extra_entries;
++    std::vector<ArchBasicBlock*> pack_entries;
++    if (entry_ips.size() == 1) {
++        // And initially fill register file.
++        cfg->callconv.UnpackParams(entry_block.get(), fi);
++        entry_block->BranchTo(ResolveAddr(entry_ip));
++        pack_entries.push_back(entry_block.get());
++    } else {
++        for (uint64_t ip : entry_ips) {
++            auto stub = std::make_unique<ArchBasicBlock>(fn, 0);
++            cfg->callconv.UnpackParams(stub.get(), fi);
++            stub->BranchTo(ResolveAddr(ip));
++            pack_entries.push_back(stub.get());
++            extra_entries.push_back(std::move(stub));
++        }
++        llvm::IRBuilder<> irb(entry_block->BeginBlock());
++        llvm::Value* pc = irb.CreateLoad(irb.getInt64Ty(), fi.sptr_raw);
++        llvm::SwitchInst* dispatch = irb.CreateSwitch(pc, extra_entries[0]->BeginBlock(), entry_ips.size() - 1);
++        for (size_t i = 1; i < entry_ips.size(); i++)
++            dispatch->addCase(irb.getInt64(entry_ips[i]), extra_entries[i]->BeginBlock());
++    }
+ 
+     exit_block = std::make_unique<ArchBasicBlock>(fn, SIZE_MAX);
+ 
+@@ -151,7 +177,7 @@ llvm::Function* LiftHelper::Lift() {
+         if (!cfg->position_independent_code) {
+             fi.pc_base_value = nullptr;
+         } else {
+-            RegFile* entry_rf = entry_block->GetRegFile();
++            RegFile* entry_rf = pack_entries[0]->GetRegFile();
+             fi.pc_base_value = entry_rf->GetPCValue(nullptr, 0);
+         }
+     }
+@@ -220,7 +246,7 @@ llvm::Function* LiftHelper::Lift() {
+         cfg->callconv.Return(exit_block.get(), fi);
+     }
+ 
+-    cfg->callconv.OptimizePacks(fi, entry_block.get());
++    cfg->callconv.OptimizePacks(fi, pack_entries);
+ 
+     // Walk over blocks as long as phi nodes could have been added. We stop when
+     // alls phis are filled.
+diff --git a/src/function.h b/src/function.h
+index a46ca1378..eda1de0d0 100644
+--- a/src/function.h
++++ b/src/function.h
+@@ -68,6 +68,13 @@ public:
+         return code_ranges.data();
+     }
+ 
++    void AddEntry(uint64_t addr) {
++        for (uint64_t entry : entries)
++            if (entry == addr)
++                return;
++        entries.push_back(addr);
++    }
++
+ private:
+     llvm::Module* mod;
+     LLConfig* cfg;
+@@ -81,6 +88,8 @@ private:
+ 
+     std::vector<DecodedInstr> instrs;
+ 
++    std::vector<uint64_t> entries;
++
+     struct InstrMapEntry {
+         unsigned preds = 0;
+         /// Indicate whether the instruction was successfully decoded
+diff --git a/src/rellume.cc b/src/rellume.cc
+index 8bb6226f4..0b3cdfd29 100644
+--- a/src/rellume.cc
++++ b/src/rellume.cc
+@@ -170,6 +170,15 @@ int ll_func_decode_cfg(LLFunc* func, uintptr_t addr, RellumeMemAccessCb mem_acc,
+                           mem_acc, user_arg);
+ }
+ 
++int ll_func_decode_entry(LLFunc* func, uintptr_t addr, RellumeMemAccessCb mem_acc,
++                         void* user_arg) {
++    int result = ll_func_decode(func, addr, rellume::Function::DecodeStop::ALL,
++                                mem_acc, user_arg);
++    if (result == 0)
++        unwrap(func)->AddEntry(addr);
++    return result;
++}
++
+ const struct RellumeCodeRange* ll_func_ranges(LLFunc* func) {
+     return reinterpret_cast<const RellumeCodeRange*>(unwrap(func)->CodeRanges());
+ }

@@ -1,0 +1,99 @@
+Subject: [PATCH] Stop decoding at the start of another function
+
+ll_config_set_function_start_cb tells the decoder which addresses start a function.
+A branch to such an address, and a fall through into one, is not followed unless the
+address is the one being decoded: the lifted code leaves through the exit block with
+the address as the next PC, which is a tail call. Without it every function that ends
+in a branch to another function (a chain of tail calls, a cold part, outlined code)
+carries a copy of everything that function reaches.
+
+---
+diff --git a/include/rellume/rellume.h b/include/rellume/rellume.h
+index b1530d1..3b443b2 100644
+--- a/include/rellume/rellume.h
++++ b/include/rellume/rellume.h
+@@ -54,6 +54,7 @@ RELLUME_API void ll_config_set_instr_impl(LLConfig*, unsigned,
+                                           LLVMValueRef) RELLUME_DEPRECATED;
+ RELLUME_API void ll_config_set_tail_func(LLConfig*, LLVMValueRef);
+ RELLUME_API void ll_config_set_call_func(LLConfig*, LLVMValueRef);
++RELLUME_API void ll_config_set_function_start_cb(LLConfig*, bool (*cb)(uintptr_t addr, void* user_arg), void* user_arg);
+ RELLUME_API void ll_config_set_syscall_impl(LLConfig*, LLVMValueRef);
+ RELLUME_API void ll_config_set_cpuinfo_func(LLConfig*, LLVMValueRef);
+ RELLUME_API void ll_config_set_instr_marker(LLConfig*, LLVMValueRef);
+diff --git a/src/config.h b/src/config.h
+index c848820..7a5f121 100644
+--- a/src/config.h
++++ b/src/config.h
+@@ -74,6 +74,12 @@ struct LLConfig {
+     /// Base address value for PC-relative addressing.
+     llvm::Value* pc_base_value = nullptr;
+ 
++    /// Tells whether an address starts another function. The decoder does not
++    /// follow a branch to it, nor fall through into it; the lifted code leaves
++    /// through the exit block with the address as the next PC.
++    bool (*function_start)(uintptr_t addr, void* user_arg) = nullptr;
++    void* function_start_arg = nullptr;
++
+     /// Overridden implementations for specific instruction. The function must
+     /// take a pointer to the CPU state as a single argument.
+     std::unordered_map<uint32_t, llvm::Function*> instr_overrides;
+diff --git a/src/lldecoder.cc b/src/lldecoder.cc
+index 16a346e..4b5d01a 100644
+--- a/src/lldecoder.cc
++++ b/src/lldecoder.cc
+@@ -151,6 +151,10 @@ std::pair<InstrKind, uint64_t> classifyInstr(Arch arch, const Instr& inst) {
+     }
+ }
+ 
++bool StartsFunction(const LLConfig* cfg, uint64_t addr) {
++    return cfg->function_start && cfg->function_start(addr, cfg->function_start_arg);
++}
++
+ } // end anonymous namespace
+ 
+ int Function::Decode(uintptr_t addr, DecodeStop stop, MemReader memacc) {
+@@ -194,11 +198,15 @@ int Function::Decode(uintptr_t addr, DecodeStop stop, MemReader memacc) {
+             // For branches, enqueue jump target. NB: this doesn't include calls
+             if (jmp_target) {
+                 auto& target_entry = instr_map.try_emplace(jmp_target).first->second;
+-                target_entry.preds++;
+-                if (!target_entry.decoded)
+-                    addr_stack.push_back(jmp_target);
+-                else
+-                    instrs[target_entry.instr_idx].new_block = true;
++                if (!target_entry.decoded && jmp_target != addr && StartsFunction(cfg, jmp_target)) {
++                    // A tail call, left through the exit block.
++                } else {
++                    target_entry.preds++;
++                    if (!target_entry.decoded)
++                        addr_stack.push_back(jmp_target);
++                    else
++                        instrs[target_entry.instr_idx].new_block = true;
++                }
+             }
+ 
+             if (kind == InstrKind::CALL && !cfg->call_function)
+@@ -219,6 +227,8 @@ int Function::Decode(uintptr_t addr, DecodeStop stop, MemReader memacc) {
+             }
+ 
+             instr_map_entry = &instr_map.try_emplace(cur_addr).first->second;
++            if (!instr_map_entry->decoded && cur_addr != addr && StartsFunction(cfg, cur_addr))
++                break;
+             instr_map_entry->preds++;
+         }
+ 
+diff --git a/src/rellume.cc b/src/rellume.cc
+index 0b3cdfd..ef5586c 100644
+--- a/src/rellume.cc
++++ b/src/rellume.cc
+@@ -84,6 +84,10 @@ void ll_config_set_call_func(LLConfig* cfg, LLVMValueRef value) {
+     llvm::Value* uw_value = llvm::unwrap(value);
+     unwrap(cfg)->call_function = llvm::cast_or_null<llvm::Function>(uw_value);
+ }
++void ll_config_set_function_start_cb(LLConfig* cfg, bool (*cb)(uintptr_t, void*), void* user_arg) {
++    unwrap(cfg)->function_start = cb;
++    unwrap(cfg)->function_start_arg = user_arg;
++}
+ void ll_config_set_syscall_impl(LLConfig* cfg, LLVMValueRef value) {
+     unwrap(cfg)->syscall_implementation = llvm::unwrap<llvm::Function>(value);
+ }
