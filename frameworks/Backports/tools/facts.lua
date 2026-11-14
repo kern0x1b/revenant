@@ -154,6 +154,36 @@ local function target_of(version)
     return "arm64-apple-ios" .. version
 end
 
+function checked_dump(command, umbrella, text, errors)
+    if text == nil or #text == 0 then
+        local stderr = errors ~= nil and errors:trim() or ""
+        raise("clang exited with status 0 but its AST dump of %s is %s%s\ncommand: %s", umbrella, text == nil and "unreadable" or "empty",
+              #stderr > 0 and ("; stderr: " .. stderr) or "", command)
+    end
+    return text
+end
+
+function ast_dump(sdk, version, umbrella)
+    local arguments = {"-target", target_of(version), "-isysroot", sdk, "-fobjc-arc", "-w", "-fsyntax-only",
+        "-Xclang", "-ast-dump", "-x", "objective-c", "/dev/null", "-include", umbrella}
+    local command = CLANG .. " " .. os.args(arguments)
+    local text, errors, failure
+    try {
+        function ()
+            text, errors = os.iorunv(CLANG, arguments)
+        end,
+        catch {
+            function (raised)
+                failure = tostring(type(raised) == "table" and raised.errors or raised)
+            end
+        }
+    }
+    if failure ~= nil then
+        raise("clang failed to dump the declarations of %s: %s\ncommand: %s", umbrella, failure, command)
+    end
+    return checked_dump(command, umbrella, text, errors)
+end
+
 function objc_facts(sdk, name, version)
     local umbrella = sdkfiles.umbrella_header(sdk, name)
     local state = {rows = {}, seen = {}}
@@ -164,8 +194,7 @@ function objc_facts(sdk, name, version)
     local function inside(file)
         return file ~= nil and string.sub(file, 1, #prefix) == prefix
     end
-    local text = os.iorunv(CLANG, {"-target", target_of(version), "-isysroot", sdk, "-fobjc-arc", "-w", "-fsyntax-only",
-        "-Xclang", "-ast-dump", "-x", "objective-c", "/dev/null", "-include", umbrella})
+    local text = ast_dump(sdk, version, umbrella)
     ast.scan(lines_of(text), function (top)
         if inside(top.file) then
             objc_top(state, top)
@@ -194,8 +223,7 @@ function constant_intros(sdk)
     for _, name in ipairs(sdkfiles.framework_names(sdk)) do
         local umbrella = sdkfiles.umbrella_header(sdk, name)
         if umbrella ~= nil then
-            local text = os.iorunv(CLANG, {"-target", target_of(sdkfiles.sdk_version(sdk)), "-isysroot", sdk, "-fobjc-arc", "-w", "-fsyntax-only",
-                "-Xclang", "-ast-dump", "-x", "objective-c", "/dev/null", "-include", umbrella})
+            local text = ast_dump(sdk, sdkfiles.sdk_version(sdk), umbrella)
             ast.scan(lines_of(text), function (top)
                 if top.kind == "VarDecl" and top.name and top.flags.extern then
                     note(top.name, ast.ios_intro(top), "extern")
