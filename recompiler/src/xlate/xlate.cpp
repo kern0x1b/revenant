@@ -64,6 +64,13 @@ static cl::opt<bool> ReportDuplicates("report-duplicates", cl::init(false),
                                                "more than one lifted function carries"));
 static cl::opt<bool> SwiftHostAncestors("swift-host-ancestors", cl::init(false),
                                         cl::desc("Keep the guest's class layout for Swift classes that have a host ancestor"));
+static cl::opt<uint64_t> XiThreshold("xi-threshold", cl::init(0x1000),
+                                     cl::desc("The least valid pointer of the host. arm64 Darwin code tells a pointer from an extra inhabitant of the enumeration or "
+                                              "optional that holds it by a compare with 0xFFFFFFFF, since a pointer is at least 4 GB there; every pointer of the host "
+                                              "is below 4 GB, so the lift compares with this value instead. 0 leaves those compares as they are"));
+static cl::opt<std::string> XiOut("xi-out", cl::desc("Write the compares the lift rewrote to --xi-threshold, one line each"));
+static cl::list<std::string> XiExcept("xi-except", cl::desc("Leave the compares of a function whose name has this text: a negative control for the rewrite, which needs a type "
+                                                           "that is read the way the compiler wrote it next to the one that is not"));
 static cl::opt<std::string> NamespacePrefix("namespace-prefix", cl::init(""),
                                             cl::desc("The Objective-C classes of every guest image but the first (the runtime and overlays of a library) are "
                                                      "registered under this prefix, so a host that has its own copy of them keeps its names"));
@@ -142,6 +149,152 @@ static std::map<uint64_t, std::set<uint64_t>> g_lift_sets;
 static std::map<uint64_t, int> g_lift_kind;
 static int g_kind = 0;
 
+struct XiSite {
+  std::string image;
+  uint64_t vmaddr = 0;
+  std::string function;
+  std::string shape;
+  std::string reason;
+};
+static std::map<uint64_t, XiSite> g_xi_sites;
+
+uint32_t CodeWord(const Image &image, uint64_t address) {
+  uint8_t bytes[4];
+  if (!image.ReadBytes(address, bytes, 4)) {
+    return 0;
+  }
+  return bytes[0] | bytes[1] << 8 | bytes[2] << 16 | uint32_t(bytes[3]) << 24;
+}
+
+bool IsLoad64Into(uint32_t word, unsigned reg) {
+  unsigned rt = word & 31, rt2 = (word >> 10) & 31;
+  if ((word & 0xFFC00000) == 0xF9400000 || (word & 0xFFE00C00) == 0xF8400000 || (word & 0xFFE00C00) == 0xF8600800 ||
+      (word & 0xFFE00C00) == 0xF8400400 || (word & 0xFFE00C00) == 0xF8400C00) {
+    return rt == reg;
+  }
+  if ((word & 0xFFC00000) == 0xA9400000 || (word & 0xFFC00000) == 0xA8C00000 || (word & 0xFFC00000) == 0xA9C00000) {
+    return rt == reg || rt2 == reg;
+  }
+  return false;
+}
+
+bool IsWitnessName(std::string name) {
+  if (!name.empty() && name[0] == '_') {
+    name.erase(0, 1);
+  }
+  if (name.compare(0, 2, "$s") != 0) {
+    return false;
+  }
+  if (name.size() > 2 && name.compare(name.size() - 2, 2, "Tm") == 0) {
+    name.erase(name.size() - 2);
+  }
+  if (name.size() < 5) {
+    return false;
+  }
+  static const char *const kinds[] = {"et", "st", "xx", "cp", "ca", "CP", "tk", "ta", "ug", "up", "ui", "xs", "xg"};
+  if (name[name.size() - 3] == 'w') {
+    for (auto kind : kinds) {
+      if (name.compare(name.size() - 2, 2, kind) == 0) {
+        return true;
+      }
+    }
+  }
+  return name.compare(name.size() - 3, 2, "WO") == 0 && name.back() >= 'a' && name.back() <= 'z';
+}
+
+bool XiAdmit(const Image &image, uint64_t start, uint64_t address, unsigned n, bool loaded, XiSite &site) {
+  uint64_t function = start - image.slide();
+  auto symbol = image.symbols().find(function);
+  bool named = symbol != image.symbols().end();
+  if (named) {
+    if (!IsWitnessName(symbol->second) || llvm::any_of(XiExcept, [&](const std::string &part) { return symbol->second.find(part) != std::string::npos; })) {
+      return false;
+    }
+    site.reason = "by name";
+  } else {
+    bool found = false;
+    for (unsigned back = 1; loaded && back <= 32 && address - 4 * back >= start; ++back) {
+      found |= IsLoad64Into(CodeWord(image, address - 4 * back), n);
+    }
+    if (loaded && !found) {
+      return false;
+    }
+    site.reason = "by shape";
+  }
+  site.image = sys::path::filename(image.path()).str();
+  site.vmaddr = address - image.slide();
+  site.function = named ? symbol->second : "sub_" + Hex(function);
+  return true;
+}
+
+uint32_t XiRewrite(const Program &program, const Image &image, uint64_t address, uint32_t word, XiSite &site) {
+  auto after = program.functions.upper_bound(address);
+  uint64_t start = after == program.functions.begin() ? address : *std::prev(after);
+  uint64_t limit = after == program.functions.end() ? UINT64_MAX : *after;
+  if ((word & 0xFFFFFFE0) == 0xD2C00020) {
+    unsigned t = word & 31;
+    unsigned n = 31;
+    for (unsigned ahead = 1; ahead <= 8 && address + 4 * ahead < limit && n == 31; ++ahead) {
+      uint32_t step = CodeWord(image, address + 4 * ahead);
+      if ((step & 0xFFE0FC00) == 0xEB000000 && ((step >> 16) & 31) == t && ((step >> 5) & 31) != 31) {
+        unsigned candidate = (step >> 5) & 31;
+        for (unsigned branch = 1; branch <= 4 && address + 4 * (ahead + branch) < limit; ++branch) {
+          uint32_t jump = CodeWord(image, address + 4 * (ahead + branch));
+          if ((jump & 0xFF000010) == 0x54000000 && ((jump & 15) == 3 || (jump & 15) == 2)) {
+            n = candidate;
+          }
+        }
+        break;
+      }
+    }
+    if (n == 31 || !XiAdmit(image, start, address, n, true, site)) {
+      return 0;
+    }
+    site.shape = "constant";
+    return 0xD2800000 | uint32_t(XiThreshold) << 5 | t;
+  }
+  if ((word & 0xFFE0FC1F) != 0xEB00001F) {
+    return 0;
+  }
+  unsigned n = (word >> 5) & 31, m = (word >> 16) & 31;
+  if (n == 31 || m == 31 || n == m) {
+    return 0;
+  }
+  bool minus_one = false;
+  for (unsigned back = 1; back <= 3 && address - 4 * back >= start; ++back) {
+    minus_one |= CodeWord(image, address - 4 * back) == (0x12800000u | m);
+  }
+  if (!minus_one) {
+    return 0;
+  }
+  uint32_t next = CodeWord(image, address + 4);
+  bool clamp = (next & 0xFFE0FC00) == 0x9A803000 && ((next >> 5) & 31) == n && ((next >> 16) & 31) == m;
+  bool branch = (next & 0xFF000010) == 0x54000000 && ((next & 15) == 3 || (next & 15) == 2);
+  if (clamp) {
+    unsigned clamped = next & 31;
+    bool tag = false;
+    for (unsigned ahead = 2; ahead <= 3; ++ahead) {
+      uint32_t step = CodeWord(image, address + 4 * ahead);
+      tag |= ((step & 0xFFFFFC00) == 0x11000400 || (step & 0xFFFFFC00) == 0x51000400) && ((step >> 5) & 31) == clamped;
+    }
+    clamp = tag;
+  }
+  if (!clamp && !branch) {
+    return 0;
+  }
+  if (!XiAdmit(image, start, address, n, branch, site)) {
+    return 0;
+  }
+  site.shape = clamp ? "clamp" : "branch";
+  uint64_t threshold = XiThreshold;
+  uint32_t shift = 0;
+  if (threshold >= 0x1000) {
+    shift = 1;
+    threshold >>= 12;
+  }
+  return 0xF100001F | shift << 22 | uint32_t(threshold) << 10 | n << 5;
+}
+
 size_t ReadCode(size_t address, uint8_t *buffer, size_t size, void *user) {
   if (g_trace) {
     g_trace->insert(address);
@@ -155,7 +308,36 @@ size_t ReadCode(size_t address, uint8_t *buffer, size_t size, void *user) {
   auto section = image->SectionAt(address);
   auto end = image->host(section->addr + section->size);
   size = std::min<size_t>(size, end - address);
-  return image->ReadBytes(address, buffer, size) ? size : 0;
+  if (!image->ReadBytes(address, buffer, size)) {
+    return 0;
+  }
+  for (size_t at = XiThreshold && !(address & 3) ? 0 : size; at + 4 <= size; at += 4) {
+    uint32_t word = buffer[at] | buffer[at + 1] << 8 | buffer[at + 2] << 16 | uint32_t(buffer[at + 3]) << 24;
+    XiSite site;
+    if (uint32_t rewritten = XiRewrite(*program, *image, address + at, word, site)) {
+      g_xi_sites.emplace(address + at, std::move(site));
+      for (unsigned byte = 0; byte < 4; ++byte) {
+        buffer[at + byte] = rewritten >> (8 * byte);
+      }
+    }
+  }
+  return size;
+}
+
+bool WriteXi() {
+  if (XiOut.empty()) {
+    return true;
+  }
+  std::error_code ec;
+  raw_fd_ostream os(XiOut, ec);
+  if (ec) {
+    errs() << "xlate: " << XiOut << ": " << ec.message() << "\n";
+    return false;
+  }
+  for (auto &[address, site] : g_xi_sites) {
+    os << site.image << " 0x" << Hex(site.vmaddr) << " " << site.function << " " << site.shape << " " << site.reason << "\n";
+  }
+  return true;
 }
 
 bool LoadPassthrough(Program &program) {
@@ -2077,6 +2259,10 @@ int Coverage(Program &program) {
 
 int main(int argc, char **argv) {
   cl::ParseCommandLineOptions(argc, argv, "xlate: arm64 Mach-O to armv7 LLVM bitcode");
+  if (XiThreshold && ((XiThreshold & 0xFFF) || XiThreshold > 0xF000)) {
+    errs() << "xlate: --xi-threshold is 0 or a multiple of 0x1000 up to 0xF000, the compare is `cmp x, #n, lsl #12` and the constant `mov x, #n`\n";
+    return 1;
+  }
   Program program;
   for (auto &path : Inputs) {
     std::string error;
@@ -2348,5 +2534,8 @@ int main(int argc, char **argv) {
     raw_fd_ostream ir(IROutput, ec, sys::fs::OF_Text);
     module.print(ir, nullptr);
   }
-  return WriteLayout(segments) && WriteStateHeader(program) ? 0 : 1;
+  if (XiThreshold) {
+    errs() << "xlate: " << g_xi_sites.size() << " compares with 0xFFFFFFFF that tell a pointer from an extra inhabitant now compare with 0x" << Hex(XiThreshold) << "\n";
+  }
+  return WriteLayout(segments) && WriteStateHeader(program) && WriteXi() ? 0 : 1;
 }

@@ -803,6 +803,22 @@ step then stops with the message above, naming `CFStringGetTypeID+0 of CoreFound
 an address without code now says which host symbol and image the address belongs to, when it is one, and the host frames of a
 crash report carry the offset in their image.
 
+`stepExtraInhabitants`, `stepExtraInhabitantsStdlib` and `stepExtraInhabitantsBig` keep the contract of an extra inhabitant
+of a pointer ([extra-inhabitants.md](extra-inhabitants.md)). They round-trip store and get for a struct with a class field in
+an optional, an enumeration with a class payload and empty cases 0 to N, and an `Optional` of a class, once through code that
+knows the type and once through a generic function (the witnesses), and each of them *consumes* the values (`consume`,
+`removeAll`) and counts the deinits: the tag of the generic `Optional` reads anything but 1 as `.some`, while the outlined copy
+and destroy read `tag == 0`, so a wrong tag shows as a leak or a release too many, not as a wrong answer. `…Big` has 4095
+empty cases and the `nil` of the optional as the 4096th, the last index inside the contract. The steps report
+`xi.enum.*`, `xi.struct.*` (`generic`, `inline`, `copies`, `destroyed`, `balance`, `consumed`, `released`), `xi.class.released`,
+`xi.stdlib.*` and `xi.big.*`, and `check.lua` also requires `report.txt` to list the witnesses of `XiBox` and
+`AncestorRepresentation` as rewritten and `Plain`, `AnyHashable` and `SmallVectorBase` as not. Measured on the 4S on
+2026-11-14: with the runtime patched and the lift on, every name is `ok`; with `XL_XI_EXCEPT="Plain AnyHashable"`
+(`stepExtraInhabitantsControl`) `xi.control.struct`, `xi.control.enum` and `xi.control.stdlib` FAIL (the lift negative
+control); with the lift on and the runtime of main (`LeastValidPointerValue` 4 GB) only `xi.class.released` FAILs, because
+the runtime's own witness for an `Optional` of a class, which a generic function reaches, took a pointer for an extra
+inhabitant and the object was never released (the runtime negative control).
+
 A library on the device has no
 `dladdr` for the guest image, which the loader maps itself, so the runtime knows its range (`xl_guest_low`,
 `xl_guest_high`) and a class of the guest is a class of the library. A class that the Swift runtime builds at run time has

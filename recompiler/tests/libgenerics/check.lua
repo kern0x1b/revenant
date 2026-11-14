@@ -34,6 +34,12 @@ local STEPS = {
     {"stepHostEnumerate", {"host.enumerate"}},
     {"stepShortString", {"short.string"}},
     {"stepDlsymFunction", {"dlsym.typeid", "dlsym.object"}},
+    {"stepExtraInhabitants", {"xi.enum.generic", "xi.enum.inline", "xi.enum.word", "xi.enum.copies", "xi.enum.destroyed", "xi.enum.balance",
+                              "xi.struct.generic", "xi.struct.inline", "xi.struct.copies", "xi.struct.destroyed", "xi.struct.balance",
+                              "xi.struct.consumed", "xi.struct.released", "xi.enum.consumed", "xi.enum.released", "xi.class.released"}},
+    {"stepExtraInhabitantsBig", {"xi.big.generic", "xi.big.inline", "xi.big.word", "xi.big.copies", "xi.big.balance"}},
+    {"stepExtraInhabitantsStdlib", {"xi.stdlib.generic", "xi.stdlib.inline", "xi.stdlib.copies", "xi.stdlib.destroyed", "xi.stdlib.balance",
+                                  "xi.stdlib.consumed", "xi.stdlib.released"}},
     {"stepHostSequence", {"host.sequence.batch", "host.sequence.items", "host.sequence.mutations", "host.sequence.forin"}},
 }
 local BARE_CONTROLS = {"stepShortString"}
@@ -68,15 +74,73 @@ function main(out, ...)
             raise("XL_SWIFTOBJC_LIBS must name the folder with libswiftCore.dylib (the arm64 runtime of revenant@swift-runtime), libc++.1.dylib and libc++abi.1.dylib the fixture is translated with")
         end
         local swift, layouts = corpus.swift()
+        local empties = {}
+        for index = 0, 4094 do
+            table.insert(empties, "c" .. index)
+        end
+        io.writefile(o("xibig.swift"), table.concat({
+            "import Foundation",
+            "enum XiBig { case payload(XiRoot), " .. table.concat(empties, ", ") .. " }",
+            "@inline(never) func xiBigName(_ value: XiBig?) -> Int {",
+            "    switch value {",
+            "    case .none: return -1",
+            "    case .some(.payload): return -2",
+            "    case .some(.c0): return 0",
+            "    case .some(.c4094): return 4094",
+            "    default: return -3",
+            "    }",
+            "}",
+            "extension LibGenerics {",
+            "    @objc public func stepExtraInhabitantsBig() {",
+            "        xiDeinits = 0",
+            "        do {",
+            "            let root = XiRoot()",
+            "            let first = xiMake(XiBig.c0, true)",
+            "            let last = xiMake(XiBig.c4094, true)",
+            "            let none = xiMake(XiBig.c0, false)",
+            "            let payload = xiMake(XiBig.payload(root), true)",
+            "            report(\"xi.big.generic\", xiIsSome(first) && xiIsSome(last) && xiIsSome(payload) && !xiIsSome(none))",
+            "            report(\"xi.big.inline\", xiBigName(first) == 0 && xiBigName(last) == 4094 && xiBigName(payload) == -2 && xiBigName(none) == -1)",
+            "            report(\"xi.big.word\", xiWord(first) == 0 && xiWord(last) == 4094 && xiWord(none) == 4095)",
+            "            let kept = xiCopies(payload, 6) + xiCopies(last, 6) + xiCopies(none, 6)",
+            "            report(\"xi.big.copies\", kept.count == 18 && xiDeinits == 0)",
+            "            withExtendedLifetime(root) {}",
+            "        }",
+            "        report(\"xi.big.balance\", xiDeinits == 1)",
+            "    }",
+            "}",
+            ""}, "\n"))
         os.execv(path.join(swift, "bin", "swiftc"), {"-target", "arm64-apple-ios12.0", "-sdk", e.sdk, "-Xfrontend", "-read-legacy-type-info-path=" .. layouts,
                                                      "-runtime-compatibility-version", "none", "-emit-library", "-module-name", "LibGenerics",
                                                      "-Xlinker", "-install_name", "-Xlinker", "@rpath/LibGenerics.dylib", "-o", o("LibGenerics.dylib"),
-                                                     path.join(here, "fixture.swift")})
+                                                     path.join(here, "fixture.swift"), o("xibig.swift")})
         local includes = o("includes.h")
         io.writefile(includes, string.format('#include "%s"\n#include <Foundation/Foundation.h>\n', path.join(e.recompiler, "include", "swiftdemo-includes.h")))
         local images = {path.join(libs, "libswiftCore.dylib"), path.join(libs, "libc++.1.dylib"), path.join(libs, "libc++abi.1.dylib")}
         translate.translate(o("LibGenerics.dylib"), includes, o("xl"), images,
-                            {XL_LIBRARY = "1", XL_REPLACES = "/usr/lib/libc++.1.dylib=" .. path.join(libs, "libc++.1.dylib"), XL_SWIFT_HOST_ANCESTORS = "1"})
+                            {XL_LIBRARY = "1", XL_REPLACES = "/usr/lib/libc++.1.dylib=" .. path.join(libs, "libc++.1.dylib"), XL_SWIFT_HOST_ANCESTORS = "1",
+                             XL_XI_EXCEPT = "Plain AnyHashable"})
+        local touched = {}
+        for _, line in ipairs(io.readfile(o("xl/report.txt")):split("\n", {plain = true})) do
+            local site = line:match("^xi%-compare: (.*)$")
+            if site then
+                for _, name in ipairs({"XiBox", "Plain", "AnyHashable", "AncestorRepresentation", "SmallVectorBase"}) do
+                    if site:find(name, 1, true) then
+                        touched[name] = (touched[name] or 0) + 1
+                    end
+                end
+            end
+        end
+        for _, name in ipairs({"XiBox", "AncestorRepresentation"}) do
+            if not touched[name] then
+                corpus.fail("the report of the translation names no compare with 4 GB rewritten in a witness of %s (xi-compare lines)", name)
+            end
+        end
+        for _, name in ipairs({"Plain", "AnyHashable", "SmallVectorBase"}) do
+            if touched[name] then
+                corpus.fail("the lift rewrote %d compares of %s, which must keep the compiler's compare with 4 GB (the control, or an integer clamp)", touched[name], name)
+            end
+        end
         if not os.isfile(libraries) or not os.isfile(o("xl/LibGenerics-classes.dylib")) then
             corpus.fail("the library or its registry was not built")
         end
@@ -142,6 +206,19 @@ function main(out, ...)
         if control:find("\ndone\nexit=0\n", 1, true) then
             io.write(control)
             corpus.fail("%s with XL_PROXY=0 ran to its end: the host reached an object of a generic class the guest allocated without a proxy and nothing failed", step)
+        end
+    end
+    do
+        local control = try { function ()
+            return device.run("cd " .. remote .. " && DYLD_FALLBACK_LIBRARY_PATH=" .. remote .. " ./host " .. remote .. "/LibGenerics.dylib LibGenerics stepExtraInhabitantsControl 2>&1; echo exit=$?")
+        end } or ""
+        table.insert(log, control)
+        local text = "\n" .. control:gsub("\r", "")
+        for _, name in ipairs({"xi.control.struct", "xi.control.enum", "xi.control.stdlib"}) do
+            if not text:find("\nFAIL " .. name .. "\n", 1, true) then
+                io.write(control)
+                corpus.fail("%s on witnesses that keep the compiler's compare with 4 GB did not fail: the destroy of the optional released its class although the witness reads the pointer of the host as an extra inhabitant, so the rewrite is not what makes xi.struct.released and xi.stdlib.released work", name)
+            end
         end
     end
     for _, step in ipairs(BARE_CONTROLS) do

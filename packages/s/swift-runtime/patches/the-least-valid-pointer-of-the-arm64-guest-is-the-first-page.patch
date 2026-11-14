@@ -1,0 +1,17 @@
+diff --git a/stdlib/public/SwiftShims/swift/shims/System.h b/stdlib/public/SwiftShims/swift/shims/System.h
+index 328f81e..dc5264a 100644
+--- a/stdlib/public/SwiftShims/swift/shims/System.h
++++ b/stdlib/public/SwiftShims/swift/shims/System.h
+@@ -149,8 +149,10 @@
+ 
+ /*********************************** arm64 ************************************/
+ 
+-/// Darwin reserves the low 4GB of address space.
+-#define SWIFT_ABI_DARWIN_ARM64_LEAST_VALID_POINTER 0x100000000ULL
++/// Darwin reserves the low 4GB of address space. The arm64 code of this port runs as 32-bit ARM code whose pointers all lie
++/// below 4GB, so an arm64 Darwin value below 4GB is a pointer here and only a value below the first page is not one: the
++/// least valid pointer is the page size of the 32-bit platforms (SWIFT_ABI_DEFAULT_LEAST_VALID_POINTER).
++#define SWIFT_ABI_DARWIN_ARM64_LEAST_VALID_POINTER 0x1000ULL
+ 
+ // Android AArch64 reserves the top byte for pointer tagging since Android 11,
+ // so shift the spare bits tag to the second byte and zero the ObjC tag.
