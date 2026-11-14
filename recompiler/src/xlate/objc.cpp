@@ -248,6 +248,15 @@ ObjCImage AnalyzeObjC(const Image &image) {
       }
     }
     objc.clsrolist_unowned = ros.size() - owned.size();
+    for (uint64_t ro : ros) {
+      if (owned.count(ro)) {
+        continue;
+      }
+      auto data = ReadData(reader, ro, errors);
+      SwiftClassMethods generic{data.name.empty() ? "generic Swift class" : data.name, {}, {}};
+      (data.flags & 1 ? generic.class_methods : generic.instance_methods) = data.methods;
+      objc.swift_generic_methods.push_back(generic);
+    }
   }
   if (auto list = reader.SectionNamed("__objc_catlist")) {
     for (uint64_t offset = 0; offset < list->size; offset += 8) {
@@ -545,6 +554,15 @@ void WriteManifest(llvm::raw_ostream &os, const std::vector<const Image *> &imag
           });
           json.attributeArray("swift_methods", [&] {
             for (auto &cls : info.swift_methods) {
+              json.object([&] {
+                json.attribute("name", cls.name);
+                WriteMethods(json, "instance_methods", cls.instance_methods);
+                WriteMethods(json, "class_methods", cls.class_methods);
+              });
+            }
+          });
+          json.attributeArray("swift_generic_methods", [&] {
+            for (auto &cls : info.swift_generic_methods) {
               json.object([&] {
                 json.attribute("name", cls.name);
                 WriteMethods(json, "instance_methods", cls.instance_methods);
