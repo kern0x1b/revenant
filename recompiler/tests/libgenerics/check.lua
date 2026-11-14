@@ -22,6 +22,7 @@ local STEPS = {
     {"stepSwiftObjectHash", {"swiftobject.hash"}},
     {"stepProxyHash", {"proxy.hash"}},
     {"stepPlainHash", {"plain.hash"}},
+    {"stepVaListBuilder", {"valist.builder"}},
     {"stepProxyObject", {"proxy.object"}},
     {"stepProxyKeys", {"proxy.keys"}},
     {"stepProxyValues", {"proxy.values"}},

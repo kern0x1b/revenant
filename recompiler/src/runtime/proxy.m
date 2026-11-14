@@ -176,6 +176,18 @@ uintptr_t xl_proxy_in(uintptr_t guest)
     return (uintptr_t)objc_autorelease(xl_proxy_for(guest, proxy_class));
 }
 
+uintptr_t xl_proxy_hold(uintptr_t guest)
+{
+    pthread_once(&xl_proxy_once, xl_proxy_setup);
+    if (xl_proxy_disabled || (guest & 7) || guest < 0x4000)
+        return 0;
+    uintptr_t guest_class = *(const uint32_t *)guest;
+    if (!xl_proxy_shadow_of(guest_class))
+        return 0;
+    xl_proxy_note_class(guest_class);
+    return xl_proxy_in(guest);
+}
+
 uint64_t xl_proxy_out(uintptr_t host)
 {
     if (!xl_proxy_classes_active || !host)

@@ -105,6 +105,10 @@ The Backports that the app loads have to be built from a source in which the cla
 requires of it (`REVENANT_ALIAS_ADOPTS`, [the protocols of a class](../../explanation/backports-loading.md)): a
 `libFoundationBackports.dylib` from before 2026-11-14 lets `URLComponents(string:)` work and then kills the process when the
 value is released (signal 11, fault `0xfffffff0`), because `_MutableHandle<NSURLComponents>` cannot be instantiated.
+A `libFoundationBackports.dylib` from before 2026-11-15 also leaves `JSONSerialization.data(withJSONObject:options: [.sortedKeys])` of a
+translated library unsorted (measured on the iPhone 4S: 16 keys come back in hash order): the library binds to the proxy class of
+`NSJSONSerialization`, and the wrapper that honours the option was set on the system class only
+([wrappers of a system method](../../explanation/backports-loading.md)). With the fix the same fixture returns the keys in byte order.
 
 ## Translate a library
 

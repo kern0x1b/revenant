@@ -287,6 +287,15 @@ print on the iPad 2 what objc4 printed.
   crosses back (`xl_object_out`, the `self` of an implementation wrapper) the guest gets its own pointer again, so identity
   holds on a round trip guest, host, guest (`NSArray(object: x).object(at: 0) === x`).
 
+  An instance of a *static* class that the guest allocated (its first word is the address of the class in the image, as in
+  `__VaListBuilder`) needs the proxy when the guest autoreleases it, though nothing sends it a host message. `getVaList` retains
+  its builder and autoreleases it, which reaches `_objc_rootAutorelease`; the raw object went into the host's autorelease
+  pool, and the pool's pop sent it `release` with the guest's class read as a host class: signal 11 at the end of the step
+  that called `NSString(format:)` or `String(format:)` through `getVaList` (a Swift `String` as `%@`, `NSString(format: "%d-%@", 7, "x")`
+  measured on the 4S on 2026-11-14). `xl_proxy_hold` notes the object's class on that first autorelease when it has a host
+  shadow, and `_objc_rootAutorelease` puts the object's proxy in the pool in its place and drops the guest's own +1, the same
+  exchange it makes for a dynamic class.
+
   The proxy belongs to the host and is counted like any host object, so the proxy class replaces `retain`, `release`,
   `autorelease`, `retainCount`, `_tryRetain`, `_isDeallocating`, `allowsWeakReference` and `retainWeakReference` with
   `NSObject`'s: the shadow carries the guest's own ones (a Swift object's `-autorelease` calls `_objc_rootAutorelease`,

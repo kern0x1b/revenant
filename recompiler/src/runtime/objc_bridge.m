@@ -1735,7 +1735,7 @@ void xl_manual__objc_rootAutorelease(struct xl_arc_pack *p)
 {
     if (p->a0 && !xl_is_guest_block(p->a0)) {
         uintptr_t guest = xl_narrow_pointer(p->a0, "_objc_rootAutorelease", 0);
-        if (xl_proxy_in(guest)) {
+        if (xl_proxy_in(guest) || xl_proxy_hold(guest)) {
             xl_proxy_guest_release(guest);
             p->r = p->a0;
             return;

@@ -7,6 +7,21 @@ local REQUIRED = {
     {framework = "Foundation", class = "NSUUID", protocols = {"NSCopying", "NSSecureCoding"}},
 }
 
+local EXPORTS = {
+    {framework = "Foundation", symbol = "_OBJC_CLASS_$_NSMutableDictionary"},
+}
+
+local function exported(library, symbol)
+    local text = os.iorunv("xcrun", {"nm", "-arch", "armv7", "-gU", library})
+    local escaped = symbol:gsub("%p", "%%%0")
+    for line in text:gmatch("[^\n]+") do
+        if line:match("%sS%s" .. escaped .. "$") then
+            return true
+        end
+    end
+    return false
+end
+
 local function listed(source)
     local found = {}
     for _, file in ipairs(os.files(path.join(source, "**.m"))) do
@@ -70,5 +85,12 @@ function main()
         end
     end
     assert(#errors == 0, table.concat(errors, "\n"))
+    for _, required in ipairs(EXPORTS) do
+        local library = path.join(folder, "lib" .. required.framework .. "Backports.dylib")
+        assert(os.isfile(library), library .. " is not built: build the Backports component first")
+        assert(not exported(library, "_OBJC_CLASS_$_RevenantNoSuchExport"), "the export check must refuse a symbol that the library does not export")
+        assert(exported(library, required.symbol), path.filename(library) .. " no longer exports " .. required.symbol ..
+               ": a library translated against an earlier build binds it strongly and stops at load with 'Symbol not found'")
+    end
     print("alias adoption: %d classes carry the protocols their source lists", #entries)
 end

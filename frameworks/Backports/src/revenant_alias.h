@@ -70,6 +70,25 @@ static Method revenant_alias_method(Class cls, SEL selector, BOOL class_methods)
     return NULL;
 }
 
+static inline IMP revenant_alias_wrap_class_method(Class system, const char *proxy, SEL selector, IMP wrapper)
+{
+    Method method = system ? class_getClassMethod(system, selector) : NULL;
+    if (method == NULL) {
+        return NULL;
+    }
+    IMP original = method_getImplementation(method);
+    method_setImplementation(method, wrapper);
+    Class held = objc_getClass(proxy);
+    Method adopted = held ? class_getClassMethod(held, selector) : NULL;
+    if (adopted && adopted != method) {
+        method_setImplementation(adopted, wrapper);
+    }
+    return original;
+}
+
+#define REVENANT_ALIAS_WRAP(Name, selector, wrapper) \
+    revenant_alias_wrap_class_method(objc_getClass(#Name), "Revenant" #Name, selector, wrapper)
+
 #define REVENANT_ALIAS_STATE(Name, Super, ...)                                                                               \
     REVENANT_ALIAS_DECLARE(Name) \
                                                                                                                    \

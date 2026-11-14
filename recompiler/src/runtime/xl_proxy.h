@@ -6,6 +6,7 @@
 extern volatile int xl_proxy_classes_active;
 
 uintptr_t xl_proxy_in(uintptr_t guest);
+uintptr_t xl_proxy_hold(uintptr_t guest);
 uint64_t xl_proxy_out(uintptr_t host);
 void xl_proxy_note_class(uintptr_t guest_class);
 

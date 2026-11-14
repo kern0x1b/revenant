@@ -1121,6 +1121,7 @@ local FOUNDATION_TESTS = {
     url_cache_since = {"NSURLCache+Since8.m"},
     formatting_context = {"NSFormattingContext8.m"},
     tagged_ascii = {"NSString+TaggedASCII.m"},
+    swift_overlay_dictionary = {"NSDictionary+SwiftOverlay.m"},
     file_items = {"NSFileManager+Trash11.m", "NSURL+AliasFile8.m", "NSFileVersion+Properties8.m", "NSString+VariantWidth9.m"},
     header_bytes = {"RevenantHeaderBytes.m"},
     metadata_items = {"NSMetadataQuery+Items7.m"},
