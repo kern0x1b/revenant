@@ -12,7 +12,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
           executable to RNHost-<last part of the id> (and CFBundleExecutable with it), so that no two installed hosts share a process name.
           Without --backports the host takes its libraries from the shared packages the phone holds: stage carries no Frameworks, refuses a host that loads
           a library from its own Frameworks, and writes OUT/host-packages.json, each package folder under /usr/lib/revenant that the host loads with the
-          version the build's description in --packages (the share/shared-packages folders of the packages it was linked against) names.
+          version the build's description in --packages, and the Backports symbols that the host and those packages import (the share/shared-packages folders of the packages it was linked against) names.
   deploy  installs the archive on the claimed phone as /var/stash/<claim holder>/<last part of the id>/<last part of the id>.app, linked
           from /Applications, registers it and, with --bundle, puts the JavaScript bundle at <that .app>/bundle.js and writes
           <that .app>/rnhost.conf with module=main and bundle=bundle.js (--conf adds lines: only module, bundle, engine and JSC_* keys).
@@ -361,23 +361,73 @@ function shared_packages(otool_text, store)
         if not description then
             raise("the host loads a library of the package %s, and no folder of --packages holds %s.json: name the shared-packages folder of the build that links it", name, name)
         end
-        table.insert(packages, {name = name, version = description.version})
+        table.insert(packages, {name = name, version = description.version, store = path.absolute(folder)})
     end
     return packages
 end
 
-function version_mismatches(packages, installed, provided)
+local BACKPORTS = "org.revenant.backports"
+
+function backport_imports(nm_text, into)
+    into = into or {}
+    for line in nm_text:gmatch("[^\n]+") do
+        local symbol, library = line:match("%(undefined%).- external (%S+) %(from (%S+Backports)%)")
+        if symbol then
+            into[library] = into[library] or {}
+            into[library][symbol] = true
+        end
+    end
+    return into
+end
+
+function sorted_imports(imports)
+    local listed = {}
+    for _, library in ipairs(table.orderkeys(imports)) do
+        listed[library] = table.orderkeys(imports[library])
+    end
+    return listed
+end
+
+function exported_symbols(nm_text)
+    local exported = {}
+    for line in nm_text:gmatch("[^\n]+") do
+        local symbol = line:match("^%x+ %a (%S+)$")
+        if symbol then
+            exported[symbol] = true
+        end
+    end
+    return exported
+end
+
+function missing_exports(imports, exports)
     local problems = {}
+    for _, library in ipairs(table.orderkeys(imports)) do
+        local held = exports[library]
+        for _, symbol in ipairs(imports[library]) do
+            if not held then
+                table.insert(problems, string.format("%s is not installed in the phone's %s, and the host imports %s", library, BACKPORTS, symbol))
+                break
+            elseif not held[symbol] then
+                table.insert(problems, string.format("%s does not export %s, which the host or a shared package imports", library, symbol))
+            end
+        end
+    end
+    return problems
+end
+
+function version_mismatches(packages, installed, provided, tolerated)
+    local problems, warnings = {}, {}
     for _, package in ipairs(packages) do
         local held = installed[package.name]
+        local report = (tolerated and tolerated[package.name]) and warnings or problems
         if provided and provided[package.name] then
         elseif not held or held == "" then
             table.insert(problems, string.format("%s %s is not installed on the phone", package.name, package.version))
         elseif held ~= package.version then
-            table.insert(problems, string.format("%s is %s on the phone, and the host is linked against %s", package.name, held, package.version))
+            table.insert(report, string.format("%s is %s on the phone, and the host is linked against %s", package.name, held, package.version))
         end
     end
-    return problems
+    return problems, warnings
 end
 
 local function stage_shared(options)
@@ -388,6 +438,16 @@ local function stage_shared(options)
         raise("%s loads a library from its own Frameworks folder, and without --backports stage keeps no Frameworks: a host that carries libraries is staged with --backports", built)
     end
     local packages = shared_packages(otool, string.split(options.packages or "", ",", {plain = true}))
+    local imports = backport_imports((os.iorunv("nm", {"-m", "-arch", "armv7", binary})))
+    for _, package in ipairs(packages) do
+        if package.name ~= BACKPORTS then
+            local folder = path.join(path.directory(package.store), "root", "usr", "lib", "revenant", package.name)
+            for _, library in ipairs(os.files(path.join(folder, "*.dylib"))) do
+                backport_imports((os.iorunv("nm", {"-m", "-arch", "armv7", library})), imports)
+            end
+        end
+        package.store = nil
+    end
     if #packages == 0 then
         raise("%s loads no library of a shared package, so there is nothing for the phone to hold: stage it with --backports", built)
     end
@@ -407,7 +467,7 @@ local function stage_shared(options)
     if ldid ~= "" then
         os.vrunv(ldid, signing_arguments(path.join(os.scriptdir(), "data", "rnhost.entitlements"), 1, path.join(target, executable)))
     end
-    import("core.base.json").savefile(path.join(output, "host-packages.json"), {packages = packages})
+    import("core.base.json").savefile(path.join(output, "host-packages.json"), {packages = packages, backport_imports = sorted_imports(imports)})
     local archive = path.join(output, "host.tgz")
     os.execv("tar", {"czf", archive, "-C", output, path.filename(built)}, {envs = {COPYFILE_DISABLE = "1"}})
     print("wrote " .. archive .. " and " .. path.join(output, "host-packages.json"))
@@ -535,7 +595,8 @@ function deploy(options)
     local name = app_name(id)
     local app = app_folder(holder, id)
     if options.packages then
-        local packages = import("core.base.json").loadfile(path.absolute(options.packages)).packages
+        local description = import("core.base.json").loadfile(path.absolute(options.packages))
+        local packages = description.packages
         local installed, provided = {}, {}
         for _, name in ipairs(string.split(options.provided or "", ",", {plain = true})) do
             provided[name] = true
@@ -543,7 +604,22 @@ function deploy(options)
         for _, package in ipairs(packages) do
             installed[package.name] = device.run(settings, "dpkg-query -W -f='${Version}' " .. package.name .. " 2>/dev/null ; true", {capture = true}):trim()
         end
-        local problems = version_mismatches(packages, installed, provided)
+        local problems, warnings = version_mismatches(packages, installed, provided, {[BACKPORTS] = true})
+        for _, warning in ipairs(warnings) do
+            wprint("%s: the symbols are checked instead", warning)
+        end
+        if not provided[BACKPORTS] then
+            local imports = description.backport_imports or {}
+            local exports = {}
+            for _, library in ipairs(table.orderkeys(imports)) do
+                local local_file = os.tmpfile()
+                if device.fetch(settings, "/usr/lib/revenant/" .. BACKPORTS .. "/" .. library .. ".dylib", local_file) then
+                    exports[library] = exported_symbols((os.iorunv("nm", {"-gU", "-arch", "armv7", local_file})))
+                end
+                os.tryrm(local_file)
+            end
+            table.join2(problems, missing_exports(imports, exports))
+        end
         if #problems > 0 then
             raise("the phone does not hold the packages this host is linked against:\n  %s", table.concat(problems, "\n  "))
         end
