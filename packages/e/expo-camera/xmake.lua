@@ -1,0 +1,20 @@
+package("expo-camera")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-camera")
+    set_description("expo-camera 57.0.6, the Expo SDK camera and barcode scanner, from its npm tarball: the sources of its iOS half, which the isolated host builds")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-camera/-/expo-camera-$(version).tgz")
+    add_versions("57.0.6", "394c5e20536b39dfe39484b4e4b8febdc7cc5193d3cb8432087e16361758910f")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-camera" and manifest.version == "57.0.6", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-camera has no expo-module.config.json")
+    end)

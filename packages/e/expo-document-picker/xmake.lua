@@ -1,0 +1,20 @@
+package("expo-document-picker")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-document-picker")
+    set_description("expo-document-picker 57.0.3, the Expo SDK document picker over UIDocumentPickerViewController, from its npm tarball: the sources of its iOS half, which the isolated host builds")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-document-picker/-/expo-document-picker-$(version).tgz")
+    add_versions("57.0.3", "4367cc78ec732094fb2a53c75be1f18c0dc9161966ff7c12d5502b9144c15719")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-document-picker" and manifest.version == "57.0.3", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-document-picker has no expo-module.config.json")
+    end)

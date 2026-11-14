@@ -1,0 +1,20 @@
+package("expo-image")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-image")
+    set_description("expo-image 57.0.5, the Expo SDK image view over SDWebImage, from its npm tarball: the sources of its iOS half, which the isolated host builds")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-image/-/expo-image-$(version).tgz")
+    add_versions("57.0.5", "3c159badf00196d31c1b22f6bfeaea703382e2512dd70b39404210198b35e9d5")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-image" and manifest.version == "57.0.5", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-image has no expo-module.config.json")
+    end)

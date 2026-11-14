@@ -1,0 +1,20 @@
+package("expo-image-manipulator")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-image-manipulator")
+    set_description("expo-image-manipulator 57.0.21, the Expo SDK image manipulator (resize, crop, rotate, flip, save), from its npm tarball: the sources of its iOS half, which the isolated host builds")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-image-manipulator/-/expo-image-manipulator-$(version).tgz")
+    add_versions("57.0.21", "cc7989289aa055887c622a5ec53faa5e483f1b4018ba7f1e09ad9be0889f0542")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-image-manipulator" and manifest.version == "57.0.21", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-image-manipulator has no expo-module.config.json")
+    end)
