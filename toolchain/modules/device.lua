@@ -192,6 +192,35 @@ function wipe_scratch(settings, holder)
     return erased
 end
 
+function with_scratch(settings, name, body)
+    local folder = scratch() .. "/" .. name
+    run(settings, "rm -rf " .. folder .. " && mkdir -p " .. folder)
+    local failure
+    local result = try {
+        function ()
+            return body(folder)
+        end,
+        catch {
+            function (errors)
+                failure = errors
+            end
+        }
+    }
+    try { function () run(settings, "rm -rf " .. folder) end }
+    if failure then
+        raise("%s", tostring(failure))
+    end
+    return result
+end
+
+function staging()
+    local name = holder_name()
+    if name and name ~= "" then
+        return scratch(name)
+    end
+    return SCRATCH_ROOT .. "/unclaimed"
+end
+
 local function admitted(settings)
     local key = settings.udid
     if key == "" then
@@ -475,7 +504,7 @@ function app_archive(app, archive)
 end
 
 function app_install_command(name, archive)
-    return string.format("cd /Applications && rm -rf /Applications/%s && tar xzf %s && rm -f %s && chmod -R 755 /Applications/%s", name, archive, archive, name)
+    return string.format("cd /Applications && rm -rf /Applications/%s && tar xzf %s; status=$?; rm -f %s; [ $status -eq 0 ] && chmod -R 755 /Applications/%s", name, archive, archive, name)
 end
 
 local function same_identity(settings, app)
@@ -516,9 +545,11 @@ local function install_file(settings, localfile, remote)
     if not plain_path(remote) then
         raise("%s is not a plain destination for a support file: give its exact path, such as /usr/lib/revenant/org.revenant.backports/libName.dylib", remote)
     end
-    local staged = "/var/tmp/" .. path.filename(remote)
+    local folder = staging()
+    run(settings, "mkdir -p " .. folder)
+    local staged = folder .. "/" .. path.filename(remote)
     copy(settings, localfile, staged)
-    run(settings, string.format("mv -f %s %s && chown root:wheel %s && chmod 755 %s", staged, remote, remote, remote))
+    run(settings, string.format("mv -f %s %s && chown root:wheel %s && chmod 755 %s; status=$?; rm -f %s; [ $status -eq 0 ]", staged, remote, remote, remote, staged))
 end
 
 function install_app(settings, app, opt)
@@ -529,7 +560,9 @@ function install_app(settings, app, opt)
     same_identity(settings, app)
     local archive = os.tmpfile() .. ".tgz"
     app_archive(app, archive)
-    local remote = "/var/tmp/" .. name .. ".tgz"
+    local folder = staging()
+    run(settings, "mkdir -p " .. folder)
+    local remote = folder .. "/" .. name .. ".tgz"
     copy(settings, archive, remote)
     os.rm(archive)
     run(settings, app_install_command(name, remote))

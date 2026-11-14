@@ -65,9 +65,23 @@ function failures(opt)
     if provenance ~= "0" then
         table.insert(found, "an app archive must carry no provenance headers, found " .. provenance)
     end
-    if device.refused_command(device.app_install_command("Demo.app", "/var/tmp/Demo.app.tgz")) then
+    local install = device.app_install_command("Demo.app", "/var/root/revenant-scratch/guard-a/Demo.app.tgz")
+    if device.refused_command(install) then
         table.insert(found, "a single named app must install through the guard")
     end
+    if not install:find("; status=$?; rm -f /var/root/revenant-scratch/guard-a/Demo.app.tgz; [ $status -eq 0 ]", 1, true) then
+        table.insert(found, "the archive of an app must be removed whether or not tar succeeded: " .. install)
+    end
+    local holder = os.getenv("REVENANT_DEVICE_HOLDER")
+    os.setenv("REVENANT_DEVICE_HOLDER", "guard-a")
+    if device.staging() ~= "/var/root/revenant-scratch/guard-a" then
+        table.insert(found, "files staged on the phone must go to the folder of the holder, not " .. tostring(device.staging()))
+    end
+    os.setenv("REVENANT_DEVICE_HOLDER", "")
+    if device.staging() ~= "/var/root/revenant-scratch/unclaimed" then
+        table.insert(found, "files staged without a holder must go to the unclaimed folder, not " .. tostring(device.staging()))
+    end
+    os.setenv("REVENANT_DEVICE_HOLDER", holder)
     errors = fixtures.refusal(function () device.install_app(settings, path.join(scratch, "Demo")) end)
     if not errors or not errors:find("install_app takes one Name.app directory", 1, true) then
         table.insert(found, "install_app must refuse a path that is not a Name.app directory: " .. tostring(errors))
