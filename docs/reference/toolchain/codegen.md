@@ -35,7 +35,7 @@ set by a recipe or a rule and never compared with an alternative on a workload.
 | Dead stripping | `-Wl,-dead_strip` on release binaries and shared libraries whose `strip` was not set, which the rule then sets to `none` | `toolchain/rules/apple-ios/xmake.lua:63-69`, `frameworks/WebKit/xmake.lua:91` | no |
 | Hot-cold splitting | off in libcxx and WebKit. Applied where it takes effect it grew `__TEXT` by 1.0 to 1.6% and was reverted | `packages/l/libcxx/xmake.lua`, [WebKit measurements](../webkit/measurements.md) | size only |
 | `-fomit-frame-pointer` | not set anywhere; clang's default for the target applies, not verified | none | no |
-| `-mthumb`, `-marm` | not set by the toolchain; the recompiler's tests use `-marm` | `recompiler/tests/perf/build.lua` | no |
+| `-mthumb`, `-marm` | not set by the toolchain. The recompiler compiles the lifted code in the mode `XL_LIFTED_MODE` names (`arm` or `thumb`, default `thumb`); its runtime and helpers stay `-marm` | `recompiler/tools/env.lua`, `recompiler/tools/translate.lua`, `recompiler/tests/perf/build.lua` | size and speed: [the recompiler's measurements](../recompiler/corpus.md#lifted-code-mode-thumb-2-and-the-outliner) |
 | objc_msgSend call sites, ARC | no toolchain flag; ARC is per target (`-fobjc-arc` in the Backports rows) | `frameworks/Backports/xmake.lua:119-362` | no |
 | Objective-C `BOOL` | `-D__OBJC_BOOL_IS_BOOL=1` when a target names `apple.objc_bool` | `toolchain/rules/apple-ios/xmake.lua` | n/a (correctness) |
 

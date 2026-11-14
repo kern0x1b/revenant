@@ -1,9 +1,9 @@
 import("core.base.json")
 
-function main(out, opt)
-    opt = type(opt) == "table" and opt or {}
+function main(out, ...)
     local scripts = path.join(os.scriptdir(), "..", "..", "tools")
     local corpus = import("corpus", {rootdir = scripts, anonymous = true})
+    local opt = corpus.options(...)
     local translate = import("translate", {rootdir = scripts, anonymous = true})
     local e
     e, out = corpus.setup("classpair", out)

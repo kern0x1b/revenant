@@ -72,6 +72,12 @@ that size, and the pieces are compiled four at a time (`XL_COMPILE_JOBS`). A run
 whose guest images, bridge library and `xlate` are the last run's reuses its lifted objects and only recompiles and
 relinks the runtime, a few seconds.
 
+The lifted code is compiled in Thumb-2 (`XL_LIFTED_MODE=thumb`, the default); `arm` compiles it in ARM mode, as it was
+before. Any other value is refused. The mode is part of the key of the lifted objects, so changing it lifts and compiles
+them again. The runtime, the crypto helpers and the bridge stay in ARM mode in every setting. LLVM's machine outliner is
+not an option: with this LLVM it miscompiles the lifted code
+([why](../../reference/recompiler/corpus.md#lifted-code-mode-thumb-2-and-the-outliner)).
+
 ## Translate a library
 
 An arm64 dylib (and the guest images it needs) becomes an armv7 dylib that an app loads into its own process. See
@@ -97,6 +103,10 @@ folder; the registry depends on the library by the library's install name, which
 - `XL_NAMESPACE` is the prefix of the Objective-C class names of every guest image but the first (default `XLG.`; `none`
   leaves the names). It keeps the guest's Swift runtime from taking the names of a Swift runtime the host has loaded; the
   guest still sees its own names. [What it changes](../../explanation/recompiler/library-mode.md).
+- The library is stripped of its local symbols (`strip -x`) after it is linked; the symbol table the linker left, from
+  `nm -n`, goes next to it as `out/<name>.symbols.txt`. The crash handler prints the image, its base and the offset of the
+  faulting host address (`xlate: host pc in … image … base 0x… offset 0x…`), and the offset looked up in that file names the
+  lifted function (`sub_<guest address>`). `XL_KEEP_LOCALS=1` keeps the symbols in the library.
 - The app links `recompiler/src/loader/xl_loader.c` (headers `recompiler/include/xl_loader.h` and
   `recompiler/include/xl_guest_image.h`), reserves the guest range as early as it can, and loads the library when it first
   needs it:

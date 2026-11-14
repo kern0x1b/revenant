@@ -38,6 +38,12 @@ These need a claimed device (the skill `device`): `REVENANT_DEVICE_HOLDER` and `
 exported and the claim held. They reach the device through Revenant's `device` module. Without an argument, output goes
 to `build/recompiler/corpus/<name>`.
 
+A check that goes to the phone does not start unless its holder has claimed it: `corpus.device()` refuses with
+"does not hold it" when `REVENANT_DEVICE_HOLDER` is empty, when nobody has claimed the phone, and when somebody else has.
+The module alone only refuses a second holder, so a check run without a claim used to reach an unclaimed phone. The
+string `--host-only` and the table `{host_only = true}` (what `xmake test` passes) mean the same in every check, and so
+do `--device-only` and `{device_only = true}`: `corpus.options(...)` reads both.
+
 ## What each check proves
 
 ### jumptable
@@ -446,6 +452,14 @@ names that image. This holds for each kind of bind: the superclass pointer, a cl
 The image indices in xlate's JSON are 1-based in Lua: the app, libfrombx, `a/libcoll` (the app's link), then
 `b/libcoll` (libfrombx's).
 
+### devicegate
+
+No phone. It reads `--host-only`, `--device-only` and the two tables through `corpus.options` and checks six
+combinations, then points the lease folder at a temporary one and shows that `corpus.device()` refuses a holder that
+named nobody, a phone nobody claimed and a phone another holder claimed, and lets the holder of the claim through. Two
+checks (`hostbridges`, `libexceptions`) read only the table before this test; a build meant for the Mac took the string
+as nothing and ran on the phone.
+
 ### checkapi
 
 The check scripts reach the tool modules (`corpus`, `translate`, `env`) through a local alias, and a call to a function
@@ -676,3 +690,49 @@ normal armv7 iOS command-line executable that links libSystem and libm.
 3. The native kernels, the dispatch and the timing main are compiled.
 4. Everything is linked with the guest segments fixed at their vmaddrs (`-no_pie` and the layout), and with libSystem
    for `mach_absolute_time`, `task_info`, `printf` and libm.
+
+### Lifted-code mode: Thumb-2 and the outliner
+
+The lifted code is compiled in the mode `XL_LIFTED_MODE` names: `thumb` (default) or `arm`; the benchmark's
+`./xmakew l -P . recompiler/tests/perf/build.lua <out>` takes the same variable. Measured on an iPhone 4S (A5), the same
+kernels three times per mode, with every result equal to the native one:
+
+| | arm | thumb |
+|---|---|---|
+| geomean xl/native, three runs | 1.91, 1.89, 1.91 | 1.89, 1.90, 1.90 |
+| crc32, ms (median of three) | 0.796 | 0.793 |
+| sha256 | 4.807 | 5.145 |
+| fnv64 | 1.018 | 1.016 |
+| sort | 14.554 | 12.920 |
+| list | 10.171 | 10.101 |
+| geometry | 8.809 | 8.902 |
+| matrix | 7.923 | 7.921 |
+| text | 3.546 | 3.707 |
+
+Thumb-2 leaves the geomean where it was (per kernel, sort is 11% faster, sha256 7% and text 5% slower in all three runs,
+the rest within 1%) and takes a third out of the code: the `__text` of three pieces of the reCAPTCHA SDK's lifted code (about 6 MB of bitcode
+each) is 7.59, 7.63 and 7.72 MB in ARM mode and 5.03, 5.09 and 5.09 MB in Thumb-2 (33 to 34% less); a translated
+library of the libexceptions check is 382,048 bytes in ARM mode and 348,784 in Thumb-2. The `hostbridges` and
+`libexceptions` checks pass on the phone in both modes.
+
+LLVM's machine outliner (`-mllvm -enable-machine-outliner=always`, Thumb-2 only) would take another 10.5 to 12.5% off
+the same pieces (4.47, 4.46 and 4.55 MB), but with LLVM 23.1.3 it miscompiles the lifted code, and the translator does not
+offer it. The same two checks, built with it, fail on the phone: `libexceptions` ends with SIGSEGV in its first step and
+`hostbridges` with a fault at address 0x1a0 inside an outlined function. What the compiler does: a call to an outlined
+function that needs `lr` saves it with `str lr, [sp, #-8]!` and restores it with `ldr lr, [sp], #4`, so `sp` is 4 bytes
+lower after every such call, and the body of the outlined function reads the stack at an offset adjusted by 4 (`ldr.w
+r4, [sp, #0x910]` where the code it replaced read `[sp, #0x90c]`) while `sp` has moved by 8, so it takes the neighbouring
+slot. There is no option that chooses another call construction (`-mllvm -help-hidden` lists none).
+
+`recompiler/tests/outliner/repro.ll` is one lifted function (`sub_10106460` of the `hostbridges` check, 20 KB of IR) in
+which the outliner makes two such calls. After a change of the LLVM package, one command says whether the compiler still
+does it:
+
+```sh
+./xmakew l -P . recompiler/tests/outliner/check.lua <out>
+```
+
+It compiles `repro.ll` with the outliner, writes the assembly to `<out>/repro.s`, and compares the amount `lr` is saved
+and restored by at each call. It prints the compiler's version and either that the amounts still differ, or that they
+agree and the outliner can be tried again (the flags above, then the `hostbridges` and `libexceptions` checks on the
+phone). It is not in the corpus's test list, because both of its answers are a pass.

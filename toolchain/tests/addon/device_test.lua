@@ -32,9 +32,15 @@ function claim_failures(device, folder)
     if fixtures.refusal(function () device.tunnel(phone) end) then
         table.insert(found, "the holder reaches the device it claimed")
     end
+    if not device.held(phone, "first") or device.held(phone, "second") or device.held(phone, "") or not device.held(phone, nil) then
+        table.insert(found, "held must be true for the holder of a live claim, named or from REVENANT_DEVICE_HOLDER, and for nobody else")
+    end
     device.release(phone, "first")
     if device.lease("abc123") then
         table.insert(found, "a released device has no claim")
+    end
+    if device.held(phone, "first") then
+        table.insert(found, "a released device is held by nobody")
     end
     device.claim(phone, "second", 30)
     io.writefile(path.join(folder, "leases", "abc123.lease", "holder"), "second\n" .. (os.time() - 1) .. "\n")

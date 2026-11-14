@@ -3,6 +3,7 @@ local ORDER = {"crc32", "sha256", "fnv64", "sort", "list", "geometry", "matrix",
 function main(out)
     local scripts = path.join(os.scriptdir(), "..", "..", "tools")
     local corpus = import("corpus", {rootdir = scripts, anonymous = true})
+    local lifting = import("env", {rootdir = scripts, anonymous = true})
     local e
     e, out = corpus.setup("devtime", out)
     local here = os.scriptdir()
@@ -16,7 +17,7 @@ function main(out)
     local kernels = o("kernels-arm64.dylib")
     corpus.ios(e, table.join(flags, {"-dynamiclib", "-install_name", "@rpath/libkernels.dylib", path.join(here, "kernels.c"), "-o", kernels}))
     os.execv(e.xlate, {"--output", o("lifted.bc"), "--layout", o("layout.txt"), "--state-header", o("xl_state.h"), kernels})
-    os.execv(clang, {"-target", "armv7-apple-ios6.0", "-marm", "-O2", "-c", o("lifted.bc"), "-o", o("lifted.o")})
+    os.execv(clang, table.join(lifting.lifted_flags(os.getenv("XL_LIFTED_MODE"), {"-target", "armv7-apple-ios6.0", "-O2"}), {"-c", o("lifted.bc"), "-o", o("lifted.o")}))
 
     local addresses = {}
     for _, line in ipairs(os.iorunv("nm", {"-gU", kernels}):split("\n")) do

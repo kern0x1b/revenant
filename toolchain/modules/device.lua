@@ -129,6 +129,12 @@ local function identified(settings)
     raise("claiming the device on %s needs its UDID, because that port can serve any attached device: set DEVICE_UDID in device.env or the environment; xmake device list shows the attached ones", where(settings))
 end
 
+function held(settings, holder)
+    local current = lease(identified(settings))
+    local name = holder_name(holder)
+    return current ~= nil and name ~= nil and name ~= "" and current.holder == name
+end
+
 function claim(settings, holder, minutes)
     local udid = identified(settings)
     if not holder or holder == "" then

@@ -12,6 +12,7 @@
 
 #define XL_VM_MAP_MIN_HOLE 0x100000ul
 #define XL_VM_MAP_LOW_LIMIT 0x30000000ul
+#define XL_VM_MAP_USER_END 0x40000000ul
 
 __attribute__((unused)) static int xl_vm_map_enabled(void)
 {
@@ -85,6 +86,8 @@ static const char *xl_share_name(unsigned char mode)
 static void xl_vm_hole(int fd, const char *phase, uintptr_t start, uintptr_t end, uintptr_t *largest_start, uintptr_t *largest_size,
                        uintptr_t *free_total, uintptr_t *free_low)
 {
+    if (end > XL_VM_MAP_USER_END)
+        end = XL_VM_MAP_USER_END;
     if (end <= start)
         return;
     uintptr_t size = end - start;
@@ -128,7 +131,7 @@ __attribute__((unused)) static void xl_vm_map_dump(int fd, const char *phase)
         cursor = end;
         address = end;
     }
-    xl_vm_hole(fd, phase, cursor, (uintptr_t)VM_MAX_ADDRESS, &largest_start, &largest_size, &free_total, &free_low);
+    xl_vm_hole(fd, phase, cursor, XL_VM_MAP_USER_END, &largest_start, &largest_size, &free_total, &free_low);
     dprintf(fd, "xl-map %s summary mapped=0x%lx free=0x%lx largest_start=0x%08lx largest_size=0x%lx free_below_0x30000000=0x%lx\n", phase,
             (unsigned long)mapped, (unsigned long)free_total, (unsigned long)largest_start, (unsigned long)largest_size, (unsigned long)free_low);
     dprintf(fd, "xl-map %s end\n", phase);
