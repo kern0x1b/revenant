@@ -86,7 +86,9 @@ local function provision(device, settings, file, remote)
     end
     local current = (on_device(device, settings, "sha256sum " .. remote .. " | cut -d' ' -f1") or ""):match("%x+")
     if current ~= hash.sha256(file) then
-        local staged = "/var/tmp/" .. path.filename(remote)
+        local folder = device.staging()
+        local staged = folder .. "/" .. path.filename(remote)
+        device.run(settings, "mkdir -p " .. folder)
         device.copy(settings, file, staged)
         device.run(settings, "mv " .. staged .. " " .. remote)
     end
@@ -148,10 +150,13 @@ local function install(device, settings)
     local scratch = tree.fresh("device-install")
     local archive = path.join(scratch, "swiftui-demo.tgz")
     device.app_archive(app, archive)
-    device.copy(settings, archive, "/var/tmp/swiftui-demo.tgz")
+    local folder = device.staging()
+    local staged = folder .. "/swiftui-demo.tgz"
+    device.run(settings, "mkdir -p " .. folder)
+    device.copy(settings, archive, staged)
     os.tryrm(scratch)
     local name = path.filename(app)
-    device.run(settings, "cd /Applications && tar xzf /var/tmp/swiftui-demo.tgz && rm /var/tmp/swiftui-demo.tgz && chmod -R 755 " .. name
+    device.run(settings, "cd /Applications && tar xzf " .. staged .. "; status=$?; rm -f " .. staged .. "; [ $status -eq 0 ] && chmod -R 755 " .. name
                .. " && su mobile -c 'uicache -p /Applications/" .. name .. "'")
 end
 
