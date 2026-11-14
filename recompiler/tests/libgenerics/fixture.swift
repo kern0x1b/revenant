@@ -219,18 +219,7 @@ final class Derived<T>: Base<T> {}
         report("proxy.released", holderDeinits == 1)
     }
 
-    // The classes of the host (iOS 6's NSDictionary and its mutable class) and the generic classes the Swift runtime
-    // builds at run time: the runtime reads a class as Swift metadata only inside the guest images and the arena it
-    // builds in, so it must not read a host class as Swift metadata (the word that is a Swift class's flags is something
-    // else in a host class), nor take its superclass from where ClassMetadata keeps it (a host class has it 4 bytes into
-    // 20, the cast of a host object to a class of the guest walked that chain and faulted).
-    // Not named stepHost...: host.m runs those on the host's side, with no guest code. The cast of a host dictionary to
-    // `[String: Any]` is not here: this library carries no Foundation overlay, which has the bridging conformance, so
-    // the cast is nil for every dictionary (an empty one too); the reCAPTCHA fixture, which has it, runs it.
     @objc public func stepClassesOfHost() {
-        // Made with the Objective-C methods (the dictionary literal is a Foundation overlay initializer), and with a key
-        // the host made (a number's stringValue): a Swift string the host sends `hash` to is a guest object, which is
-        // stepSwiftObjectHash's case.
         let key = unsafeBitCast(NSNumber(value: 1).perform(#selector(getter: NSNumber.stringValue)).takeUnretainedValue(), to: NSString.self)
         let literal = NSDictionary(object: NSNumber(value: 1), forKey: key)
         let mutable = NSMutableDictionary()
@@ -253,9 +242,6 @@ final class Derived<T>: Base<T> {}
         report("generic.subclass", (derived as? Base<String>)?.value == "s" && (derived as? Base<Int>) == nil)
     }
 
-    // `hash` of an object of a Swift class that has no superclass of its own is the Objective-C method of `_SwiftObject`, an
-    // Objective-C class of the guest's images whose layout the host kept (its superclass is not where ClassMetadata keeps
-    // it): the method asks whether the class conforms to Hashable, and that walks the chain of superclasses from the class.
     @objc public func stepSwiftObjectHash() {
         rooted = Rooted()
         let object = unsafeBitCast(rooted! as AnyObject, to: NSObject.self)
