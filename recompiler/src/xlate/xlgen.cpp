@@ -1304,7 +1304,7 @@ std::string Generator::EmitBridge(const std::string &id, const Signature &signat
       types += ", " + Spell(hc_, param.value.host);
       super_types += ", " + Spell(hc_, param.value.host);
     }
-    if (format.present) {
+    if (format.present && format.va_param < 0) {
       types += ", va_list";
       super_types += ", va_list";
     }
@@ -1315,7 +1315,7 @@ std::string Generator::EmitBridge(const std::string &id, const Signature &signat
     std::string plain = "((" + types + ")" + (stret ? "objc_msgSend_stret" : "objc_msgSend") + ")((id)xl_receiver_in(p->self), (SEL)(uintptr_t)p->sel" + call_args + ")";
     std::string super = "((" + super_types + ")" + (stret ? "objc_msgSendSuper2_stret" : "objc_msgSendSuper2") + ")(&super_receiver, (SEL)(uintptr_t)p->sel" + call_args + ")";
     std::string forced = "((" + types + ")forced_imp)((id)xl_receiver_in(p->self), (SEL)(uintptr_t)p->sel" + call_args + ")";
-    if (format.present) {
+    if (format.present && format.va_param < 0) {
       plain = callee + "((id)xl_receiver_in(p->self), (SEL)(uintptr_t)p->sel" + call_args + ")";
       super = plain;
       forced = plain;
@@ -1894,6 +1894,19 @@ void Generator::EmitSelectors(const std::set<std::string> &selectors, const std:
       format.object = true;
       format.format_index = attr->getFormatIdx() - 1;
       callee = variant->second;
+    } else if (auto attr = guest->getAttr<FormatAttr>(); attr && manual_handler.empty() && attr->getFirstArg() == 0 &&
+                                                         attr->getType()->getName() == "NSString") {
+      for (unsigned i = guest->param_size(); i-- > 0;) {
+        if (guest->parameters()[i]->getType().getAsString().find("va_list") != std::string::npos) {
+          format.va_param = static_cast<int>(i);
+          break;
+        }
+      }
+      if (format.va_param >= 0) {
+        format.present = true;
+        format.object = true;
+        format.format_index = attr->getFormatIdx() - 1;
+      }
     }
     if (!signature.supported && manual_handler.empty()) {
       Report("selector " + selector + ": UNSUPPORTED: " + signature.note);

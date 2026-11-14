@@ -96,6 +96,12 @@ pointers of a translated program are below 4 GB ([extra inhabitants](../../refer
 keeps the compares of the functions whose name contains one of the words, which a negative control needs. Every rewritten
 compare is a line `xi-compare:` of `report.txt`; both settings are part of the key of the lifted objects.
 
+A guest that uses a class which iOS 6.1.3 lacks (`NSURLComponents`, `NSURLQueryItem` and the other iOS 7+ classes the Foundation
+overlay refers to) needs the Backports at translation: `BACKPORTS_DIR=<folder with lib*Backports.dylib>`
+([how the Backports load](../../explanation/backports-loading.md)). Without it the class reference is weak and stays nil on the
+phone, so `URLComponents(string:)` returns nil (measured on the iPhone 4S on 2026-11-14: `components.create` and
+`components.items` fail without it and pass with it; `uncovered-classes.txt` of the translation lists the weak references).
+
 ## Translate a library
 
 An arm64 dylib (and the guest images it needs) becomes an armv7 dylib that an app loads into its own process. See

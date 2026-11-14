@@ -20,6 +20,8 @@ local STEPS = {
                          "hostclass.metatype.mutable", "hostclass.metatype.copy", "hostclass.conforms", "hostclass.superclass",
                          "hostclass.number", "hostclass.control", "generic.dyncast", "generic.superclass", "generic.subclass"}},
     {"stepSwiftObjectHash", {"swiftobject.hash"}},
+    {"stepProxyHash", {"proxy.hash"}},
+    {"stepPlainHash", {"plain.hash"}},
     {"stepProxyObject", {"proxy.object"}},
     {"stepProxyKeys", {"proxy.keys"}},
     {"stepProxyValues", {"proxy.values"}},
