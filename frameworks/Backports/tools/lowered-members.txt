@@ -24721,6 +24721,7 @@ member NSSortDescriptor -allowsEvaluation
 member NSStream +getBoundStreamsWithBufferSize:inputStream:outputStream:
 member NSStream +getStreamsToHostWithName:port:inputStream:outputStream:
 member NSString +localizedStringWithValidatedFormat:validFormatSpecifiers:error:
+member NSString +newTaggedNSStringWithASCIIBytes_:length_:
 member NSString +objectWithItemProviderData:typeIdentifier:error:
 member NSString +readableTypeIdentifiersForItemProvider
 member NSString +stringEncodingForData:encodingOptions:convertedString:usedLossyConversion:
