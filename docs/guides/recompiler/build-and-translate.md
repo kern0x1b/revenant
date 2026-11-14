@@ -103,6 +103,10 @@ folder; the registry depends on the library by the library's install name, which
 - `XL_NAMESPACE` is the prefix of the Objective-C class names of every guest image but the first (default `XLG.`; `none`
   leaves the names). It keeps the guest's Swift runtime from taking the names of a Swift runtime the host has loaded; the
   guest still sees its own names. [What it changes](../../explanation/recompiler/library-mode.md).
+- The library is stripped of its local symbols (`strip -x`) after it is linked; the symbol table the linker left, from
+  `nm -n`, goes next to it as `out/<name>.symbols.txt`. The crash handler prints the image, its base and the offset of the
+  faulting host address (`xlate: host pc in … image … base 0x… offset 0x…`), and the offset looked up in that file names the
+  lifted function (`sub_<guest address>`). `XL_KEEP_LOCALS=1` keeps the symbols in the library.
 - The app links `recompiler/src/loader/xl_loader.c` (headers `recompiler/include/xl_loader.h` and
   `recompiler/include/xl_guest_image.h`), reserves the guest range as early as it can, and loads the library when it first
   needs it:

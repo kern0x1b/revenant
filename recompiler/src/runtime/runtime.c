@@ -190,8 +190,12 @@ static void xl_crash_handler(int signal, siginfo_t *info, void *context)
             dprintf(fd, "xlate: host r%d=0x%x\n", i, ss->__r[i]);
         {
             Dl_info info;
+            if (dladdr((void *)(uintptr_t)ss->__pc, &info) && info.dli_fbase) {
+                const char *image = info.dli_fname ? strrchr(info.dli_fname, '/') : NULL;
+                dprintf(fd, "xlate: host pc in %s image %s base 0x%lx offset 0x%lx\n", info.dli_sname ? info.dli_sname : "?", image ? image + 1 : info.dli_fname ? info.dli_fname : "?",
+                        (unsigned long)info.dli_fbase, (unsigned long)(ss->__pc - (uint32_t)(uintptr_t)info.dli_fbase));
+            }
             if (dladdr((void *)(uintptr_t)ss->__pc, &info) && info.dli_sname) {
-                dprintf(fd, "xlate: host pc in %s\n", info.dli_sname);
                 vm_size_t got = 0;
                 uint32_t words[4] = {0, 0, 0, 0};
                 if (!strncmp(info.dli_sname, "objc_msgSend", 12) && ss->__r[0] > 0x1000 &&

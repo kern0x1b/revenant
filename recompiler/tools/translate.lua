@@ -593,6 +593,10 @@ function translate(input, includes, out, images, opt)
             print("weakened %d symtab + %d bind-opcode entries", macho.weaken_classrefs(binary, uncovered))
         end
     end
+    if library and getenv("XL_KEEP_LOCALS") ~= "1" then
+        io.writefile(o(name .. ".symbols.txt"), iorun("nm", {"-n", binary}))
+        run("xcrun", {"strip", "-x", binary})
+    end
     run(e.ldid, {"-S", binary})
     if library then
         local registry = o(name .. "-classes.dylib")
