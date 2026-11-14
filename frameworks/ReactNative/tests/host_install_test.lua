@@ -235,6 +235,36 @@ function main()
         expect("another version and a missing package are each reported by name", #problems == 2 and problems[1]:find("0.8.18+2396e86d", 1, true) ~= nil
             and problems[2]:find("swift-runtime-8e5fdec8", 1, true) ~= nil and problems[2]:find("not installed", 1, true) ~= nil,
             "the problems are " .. table.concat(problems, " | "))
+        expect("a package that the launch supplies by DYLD_LIBRARY_PATH is not checked", #host.version_mismatches(packages,
+            {["org.revenant.swift-runtime-8e5fdec8"] = "0.8.18+8e5fdec8"}, {["org.revenant.backports"] = true}) == 0, "a provided package was reported")
+        expect("a launch with --dyld sets DYLD_LIBRARY_PATH for that start only, and a plain launch sets none", host.launch_command("a.b", "/var/mobile/rn-host/bp"):find("--env DYLD_LIBRARY_PATH=/var/mobile/rn-host/bp a.b", 1, true) ~= nil
+            and host.launch_command("a.b") == "/usr/libexec/revenant-sblaunch a.b", "the launch command is wrong")
+        expect("a --dyld folder with a space or .. is refused", refusal(function () host.launch_command("a.b", "/var/x y") end) ~= nil
+            and refusal(function () host.launch_command("a.b", "/var/../x") end) ~= nil, "an unsafe folder was accepted")
+        local nm = table.concat({
+            "                 (undefined) external _OBJC_CLASS_$_NSUserActivity (from libFoundationBackports)",
+            "                 (undefined) external _NSLog (from libFoundation)",
+            "                 (undefined) external _revenant_probe (from libUIKitBackports)",
+            "0000a000 (__TEXT,__text) external _main",
+            ""}, "\n")
+        local imports = host.sorted_imports(host.backport_imports(nm))
+        expect("the Backports imports of a binary are listed by library, and a system library's are not",
+            #table.orderkeys(imports) == 2 and imports.libFoundationBackports[1] == "_OBJC_CLASS_$_NSUserActivity" and imports.libUIKitBackports[1] == "_revenant_probe",
+            "the imports are " .. #table.orderkeys(imports) .. " libraries long or name other symbols")
+        local exported = host.exported_symbols("0000a000 T _revenant_probe\n0000a010 S _OBJC_CLASS_$_NSUserActivity\n         U _other\n")
+        expect("a library's exports are read from the defined global symbols", exported._revenant_probe and exported["_OBJC_CLASS_$_NSUserActivity"] and not exported._other,
+            "the exports are wrong")
+        expect("every import exported by the installed library raises no problem", #host.missing_exports(imports,
+            {libFoundationBackports = exported, libUIKitBackports = exported}) == 0, "an exported symbol was reported")
+        local missing = host.missing_exports(imports, {libFoundationBackports = exported, libUIKitBackports = host.exported_symbols("0000a000 T _x\n")})
+        expect("a symbol the installed library lacks is an error naming the library and the symbol", #missing == 1 and missing[1]:find("libUIKitBackports", 1, true) ~= nil
+            and missing[1]:find("_revenant_probe", 1, true) ~= nil, "the problems are " .. table.concat(missing, " | "))
+        expect("a library missing from the phone is an error naming it", #host.missing_exports(imports, {libFoundationBackports = exported}) == 1,
+            "a missing library was accepted")
+        local problems, warnings = host.version_mismatches(packages, {["org.revenant.backports"] = "0.8.18+2396e86d", ["org.revenant.swift-runtime-8e5fdec8"] = "0.8.18+8e5fdec8"},
+            nil, {["org.revenant.backports"] = true})
+        expect("another Backports version is a warning with both versions, not an error", #problems == 0 and #warnings == 1 and warnings[1]:find("0.8.18+2396e86d", 1, true) ~= nil
+            and warnings[1]:find("0.8.18+9aa9b5ba", 1, true) == nil and warnings[1]:find("0.8.18+9772f8d3", 1, true) ~= nil, "the problems are " .. #problems .. ", the warnings " .. table.concat(warnings, " | "))
         os.vrunv("rm", {"-rf", base})
     end
 end

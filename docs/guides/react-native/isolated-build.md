@@ -36,6 +36,11 @@ a copy whose `xmake.lua` lacks these lines and names the one missing; such a cop
 added under `if not os.getenv("RN_WEBKIT")`, so an application's own `RN_WEBKIT` declaration (with `carried`) applies when that is set
 and the whole one applies when it is not.
 
+The host declares `libcxx` in `app.frameworks`, so that a build without the shared package carries libc++. The copy adds an
+`after_load` rule to its `RNHost` target that removes `libcxx` from `app.frameworks`, because the shared `libcxx` package installs
+libc++ and libc++abi, and the host loads them from `/usr/lib/revenant/org.revenant.libcxx-<hash>`. It is `after_load`, not `on_load`:
+a second `on_load` replaces the host's own, which also holds its weak links.
+
 The private cache is made with `./xmakew l -P . tools/private_cache.lua <your private cache>`. A cache made before the manifests were
 rewritten is repaired with `./xmakew l -P . tools/private_cache.lua --repair <your private cache>`; without it the Swift compile does not
 find the package modules such as Combine.

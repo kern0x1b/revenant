@@ -1,7 +1,7 @@
 local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stage --app BUILT.app --backports DIR|STORE [--key BUILDHASH] --manifest DIR --output DIR [--bundle-id ID]
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stage --app BUILT.app --packages DIR[,DIR...] --manifest DIR --output DIR [--bundle-id ID]
-       ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua deploy --archive FILE --bundle-id ID [--bundle FILE] [--conf KEY=VALUE,...] [--packages FILE]
-       ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua launch --bundle-id ID
+       ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua deploy --archive FILE --bundle-id ID [--bundle FILE] [--conf KEY=VALUE,...] [--packages FILE] [--provided NAME]
+       ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua launch --bundle-id ID [--dyld FOLDER]
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stop --bundle-id ID
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua diagnostics --bundle-id ID [--output DIR]
   stage  makes DIR/<app name>.app and DIR/host.tgz from a built host: it adds the manifest folder (EXConstants.bundle from app_config.lua),
@@ -12,14 +12,15 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
           executable to RNHost-<last part of the id> (and CFBundleExecutable with it), so that no two installed hosts share a process name.
           Without --backports the host takes its libraries from the shared packages the phone holds: stage carries no Frameworks, refuses a host that loads
           a library from its own Frameworks, and writes OUT/host-packages.json, each package folder under /usr/lib/revenant that the host loads with the
-          version the build's description in --packages (the share/shared-packages folders of the packages it was linked against) names.
+          version the build's description in --packages, and the Backports symbols that the host and those packages import (the share/shared-packages folders of the packages it was linked against) names.
   deploy  installs the archive on the claimed phone as /var/stash/<claim holder>/<last part of the id>/<last part of the id>.app, linked
           from /Applications, registers it and, with --bundle, puts the JavaScript bundle at <that .app>/bundle.js and writes
           <that .app>/rnhost.conf with module=main and bundle=bundle.js (--conf adds lines: only module, bundle, engine and JSC_* keys).
           Both files are root-owned and read-only for everything else, which is what the host checks before it reads them. The
           host's output goes to /var/tmp/<last part of the id>/, a folder of the app's user. With --packages FILE (the host-packages.json of
-          a shared stage) it first asks the phone for the version of each package and stops, naming it, when one is missing or another version. It removes nothing of another bundle id.
-  launch  wakes the phone and has SpringBoard start the app of the id.
+          a shared stage) it first asks the phone for the version of each package and stops, naming it, when one is missing or another version; --provided names the packages that a launch with DYLD_LIBRARY_PATH supplies instead, which are not checked. It removes nothing of another bundle id.
+  launch  wakes the phone and has SpringBoard start the app of the id. With --dyld FOLDER (a folder of the phone) the start sets DYLD_LIBRARY_PATH to it, so
+          the libraries of that folder are loaded by file name before the installed ones; only that start sees them, not one from the home screen.
   stop    ends the running process of the app of the id and of no other id: it finds the process by the launchd label of the app.
   diagnostics  copies what the phone keeps of the app of the id into DIR (build/diagnostics/<last part of the id> by default): the app's
           version, the iOS version, the launchd state, the crash reports of RNHost-<last part of the id> (in crash/), the host's
@@ -360,22 +361,73 @@ function shared_packages(otool_text, store)
         if not description then
             raise("the host loads a library of the package %s, and no folder of --packages holds %s.json: name the shared-packages folder of the build that links it", name, name)
         end
-        table.insert(packages, {name = name, version = description.version})
+        table.insert(packages, {name = name, version = description.version, store = path.absolute(folder)})
     end
     return packages
 end
 
-function version_mismatches(packages, installed)
+local BACKPORTS = "org.revenant.backports"
+
+function backport_imports(nm_text, into)
+    into = into or {}
+    for line in nm_text:gmatch("[^\n]+") do
+        local symbol, library = line:match("%(undefined%).- external (%S+) %(from (%S+Backports)%)")
+        if symbol then
+            into[library] = into[library] or {}
+            into[library][symbol] = true
+        end
+    end
+    return into
+end
+
+function sorted_imports(imports)
+    local listed = {}
+    for _, library in ipairs(table.orderkeys(imports)) do
+        listed[library] = table.orderkeys(imports[library])
+    end
+    return listed
+end
+
+function exported_symbols(nm_text)
+    local exported = {}
+    for line in nm_text:gmatch("[^\n]+") do
+        local symbol = line:match("^%x+ %a (%S+)$")
+        if symbol then
+            exported[symbol] = true
+        end
+    end
+    return exported
+end
+
+function missing_exports(imports, exports)
     local problems = {}
-    for _, package in ipairs(packages) do
-        local held = installed[package.name]
-        if not held or held == "" then
-            table.insert(problems, string.format("%s %s is not installed on the phone", package.name, package.version))
-        elseif held ~= package.version then
-            table.insert(problems, string.format("%s is %s on the phone, and the host is linked against %s", package.name, held, package.version))
+    for _, library in ipairs(table.orderkeys(imports)) do
+        local held = exports[library]
+        for _, symbol in ipairs(imports[library]) do
+            if not held then
+                table.insert(problems, string.format("%s is not installed in the phone's %s, and the host imports %s", library, BACKPORTS, symbol))
+                break
+            elseif not held[symbol] then
+                table.insert(problems, string.format("%s does not export %s, which the host or a shared package imports", library, symbol))
+            end
         end
     end
     return problems
+end
+
+function version_mismatches(packages, installed, provided, tolerated)
+    local problems, warnings = {}, {}
+    for _, package in ipairs(packages) do
+        local held = installed[package.name]
+        local report = (tolerated and tolerated[package.name]) and warnings or problems
+        if provided and provided[package.name] then
+        elseif not held or held == "" then
+            table.insert(problems, string.format("%s %s is not installed on the phone", package.name, package.version))
+        elseif held ~= package.version then
+            table.insert(report, string.format("%s is %s on the phone, and the host is linked against %s", package.name, held, package.version))
+        end
+    end
+    return problems, warnings
 end
 
 local function stage_shared(options)
@@ -386,6 +438,16 @@ local function stage_shared(options)
         raise("%s loads a library from its own Frameworks folder, and without --backports stage keeps no Frameworks: a host that carries libraries is staged with --backports", built)
     end
     local packages = shared_packages(otool, string.split(options.packages or "", ",", {plain = true}))
+    local imports = backport_imports((os.iorunv("nm", {"-m", "-arch", "armv7", binary})))
+    for _, package in ipairs(packages) do
+        if package.name ~= BACKPORTS then
+            local folder = path.join(path.directory(package.store), "root", "usr", "lib", "revenant", package.name)
+            for _, library in ipairs(os.files(path.join(folder, "*.dylib"))) do
+                backport_imports((os.iorunv("nm", {"-m", "-arch", "armv7", library})), imports)
+            end
+        end
+        package.store = nil
+    end
     if #packages == 0 then
         raise("%s loads no library of a shared package, so there is nothing for the phone to hold: stage it with --backports", built)
     end
@@ -405,7 +467,7 @@ local function stage_shared(options)
     if ldid ~= "" then
         os.vrunv(ldid, signing_arguments(path.join(os.scriptdir(), "data", "rnhost.entitlements"), 1, path.join(target, executable)))
     end
-    import("core.base.json").savefile(path.join(output, "host-packages.json"), {packages = packages})
+    import("core.base.json").savefile(path.join(output, "host-packages.json"), {packages = packages, backport_imports = sorted_imports(imports)})
     local archive = path.join(output, "host.tgz")
     os.execv("tar", {"czf", archive, "-C", output, path.filename(built)}, {envs = {COPYFILE_DISABLE = "1"}})
     print("wrote " .. archive .. " and " .. path.join(output, "host-packages.json"))
@@ -533,12 +595,31 @@ function deploy(options)
     local name = app_name(id)
     local app = app_folder(holder, id)
     if options.packages then
-        local packages = import("core.base.json").loadfile(path.absolute(options.packages)).packages
-        local installed = {}
+        local description = import("core.base.json").loadfile(path.absolute(options.packages))
+        local packages = description.packages
+        local installed, provided = {}, {}
+        for _, name in ipairs(string.split(options.provided or "", ",", {plain = true})) do
+            provided[name] = true
+        end
         for _, package in ipairs(packages) do
             installed[package.name] = device.run(settings, "dpkg-query -W -f='${Version}' " .. package.name .. " 2>/dev/null ; true", {capture = true}):trim()
         end
-        local problems = version_mismatches(packages, installed)
+        local problems, warnings = version_mismatches(packages, installed, provided, {[BACKPORTS] = true})
+        for _, warning in ipairs(warnings) do
+            wprint("%s: the symbols are checked instead", warning)
+        end
+        if not provided[BACKPORTS] then
+            local imports = description.backport_imports or {}
+            local exports = {}
+            for _, library in ipairs(table.orderkeys(imports)) do
+                local local_file = os.tmpfile()
+                if device.fetch(settings, "/usr/lib/revenant/" .. BACKPORTS .. "/" .. library .. ".dylib", local_file) then
+                    exports[library] = exported_symbols((os.iorunv("nm", {"-gU", "-arch", "armv7", local_file})))
+                end
+                os.tryrm(local_file)
+            end
+            table.join2(problems, missing_exports(imports, exports))
+        end
         if #problems > 0 then
             raise("the phone does not hold the packages this host is linked against:\n  %s", table.concat(problems, "\n  "))
         end
@@ -558,12 +639,22 @@ function deploy(options)
     print("installed " .. id .. " as " .. app)
 end
 
+function launch_command(bundle_id, dyld)
+    if not dyld then
+        return "/usr/libexec/revenant-sblaunch " .. bundle_id
+    end
+    if not dyld:match("^/[%w%._/%-]+$") or dyld:find("..", 1, true) then
+        raise("--dyld takes an absolute folder of the phone without spaces or .., not %s", dyld)
+    end
+    return "/usr/libexec/revenant-sblaunch --wait 10 --env DYLD_LIBRARY_PATH=" .. dyld .. " " .. bundle_id
+end
+
 function launch(options)
     if not options["bundle-id"] then
         raise("launch needs --bundle-id")
     end
     local device, settings = phone()
-    device.run(settings, "/usr/libexec/revenant-sblaunch " .. options["bundle-id"])
+    device.run(settings, launch_command(options["bundle-id"], options.dyld))
 end
 
 function stop(options)
@@ -654,7 +745,7 @@ end
 
 function main(...)
     local shared = import("@addon.revenant.member", {anonymous = true})
-    local options, words = shared.arguments({...}, {app = "value", backports = "value", packages = "value", key = "value", manifest = "value", output = "value", archive = "value",
+    local options, words = shared.arguments({...}, {app = "value", backports = "value", packages = "value", provided = "value", dyld = "value", key = "value", manifest = "value", output = "value", archive = "value",
                                                     ["bundle-id"] = "value", bundle = "value", conf = "value", help = "switch"})
     local command = words[1]
     if options.help then

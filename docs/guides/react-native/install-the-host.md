@@ -34,10 +34,19 @@ A host built against the shared packages (`swift-runtime`, `libcxx`, `backports`
 
 `--packages` takes the `share/shared-packages` folders of the packages the host was linked against. Stage refuses a host that loads a
 library from its own `Frameworks` (two copies of a library in one process crash it at launch), refuses a package folder the host
-loads and no description names, and writes `OUT/host-packages.json` with the version each description gives. `deploy --packages`
-asks the phone for each version with `dpkg-query` and stops, naming the package, when one is missing or another version; install
-the packages of the build first. The Backports package has one name on every phone, so its version is the one a colleague may
-depend on: build the host against that version rather than replacing the package.
+loads and no description names, and writes `OUT/host-packages.json` with the version each description gives and every Backports
+symbol that the host and the packages it loads import, by library. `deploy --packages` asks the phone for each version with
+`dpkg-query` and stops, naming the package, when one is missing or another version; install the packages of the build first. The
+Backports package is the exception: it has one name on every phone and a colleague depends on its version, so another version only
+prints a warning with both versions. What `deploy` checks instead is the state the phone is in: it copies the Backports libraries the host
+loads from the phone, reads their exported symbols and stops, naming the library and the symbol, when one of the imports is not
+exported. A host built against another Backports build starts when the installed libraries export everything it imports.
+
+When the phone's Backports package is an older build than the host's, a folder with the libraries of the host's build can stand in for
+it for one start: copy the folder to the phone, pass `--provided org.revenant.backports` to `deploy` (that package is then not
+checked, nor are its symbols) and start with `launch --dyld FOLDER`. dyld looks for each library by file name in `DYLD_LIBRARY_PATH` before the install
+name, so the folder's libraries load instead of the installed ones; a start from the home screen sets no variable and loads the
+installed package. Remove the folder when the run is over.
 
 ## deploy
 
