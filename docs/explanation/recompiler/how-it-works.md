@@ -146,10 +146,18 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
   (`patches/the-metadata-allocator-takes-the-guests-metadata-from-the-hosts-arena.patch`); a program that needs more
   than the arena stops with "the metadata arena of the guest is exhausted". The arena is *not* in the range of the
   images: the host's own tests of a class (`xl_class_in_image`) mean "a class the compiler laid out in a guest image", and
-  a class the runtime builds is not one. Every other read of the word, `isPureObjC()` and the walks up a
-  superclass chain, goes through `isTypeMetadata()`, so the one test covers Mirror, `swift_conformsToProtocol` and
-  the casts. A class of the guest's own image whose layout the host kept (an Objective-C class, a Swift class with a host
-  ancestor) is inside the range and has no Swift flag, as before.
+  a class the runtime builds is not one. Every other read of the word and `isPureObjC()` goes through
+  `isTypeMetadata()`, so the one test covers Mirror and `swift_conformsToProtocol`. A class of the guest's own image whose
+  layout the host kept (an Objective-C class, a Swift class with a host ancestor) is inside the range and has no Swift
+  flag, as before.
+
+  The superclass is the other word of a host class that `ClassMetadata` puts elsewhere: the host's `objc_class` has it at
+  offset 4, `ClassMetadata::Superclass` at offset 8, and the walk of `_dynamicCastClassMetatype` (the cast of a host
+  `NSDictionary` to `[String: Any]` failed in it, and so did any failed cast of a class that has a host ancestor) read
+  two words of the host's class as one pointer and faulted. `getSuperclassOfAnyClass()` answers with `class_getSuperclass`
+  for a class of the host and with the field for any other, and the two places that walk a chain of classes of any
+  origin use it (`patches/the-superclass-of-a-class-of-the-host-comes-from-the-host.patch`). The other reads of
+  `Superclass` are of a class that `isTypeMetadata()` has accepted.
 
 `tests/classpair` builds the cases as a program for macOS, where objc4 is the real thing, and the translation must
 print on the iPad 2 what objc4 printed.
