@@ -114,6 +114,12 @@ SystemConfiguration; connections and listeners are not built, and the backports 
 is exported by the built dylibs (`nm -gU` against `nm -u` of the SDK image). The unresolved-name measurement is made
 (next section); the fixtures on the 4S are still to do.
 
+The path monitor calls `SCNetworkReachabilityCreateWithAddress`, `GetFlags`, `SetCallback` and `SetDispatchQueue`, which
+iOS 6.1.3 has. A translation whose includes file lacks `SystemConfiguration` has no declaration for them, so `xlate`
+reports the four as `UNSUPPORTED: no declaration in the SDK headers` and the first `NWPathMonitor` aborts with
+`xlate: unsupported: SCNetworkReachabilityCreateWithAddress`. `recompiler/include/recaptcha-includes.h` imports
+`SystemConfiguration/SystemConfiguration.h` for that reason; a fixture that starts a path monitor needs the same line.
+
 ### Measuring the unresolved names without a lift
 
 `xlate` reports every import no guest image resolves before it lifts anything, so the list costs about 0.1 second and under
