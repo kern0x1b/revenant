@@ -753,8 +753,12 @@ and a lookup by string need a fixture that loads the guest's Foundation overlay.
 `+[NSDictionary dictionaryWithDictionary:]` of the bridged dictionary stops the process, the cause is not yet established;
 `hash` sent from the host to a Swift object, a proxied one or an instance of a plain Swift class alike, stops in
 `swift_conformsToProtocolCommon` (`_swift_class_getSuperclass` reads a null class at +0x20); and a Swift string of up to 15
-bytes is bridged through `+[__StringStorage newTaggedNSStringWithASCIIBytes_:length_:]`, which iOS 6 does not have, so the
-strings of the steps are longer than that.
+ASCII bytes is bridged through `+[__StringStorage newTaggedNSStringWithASCIIBytes_:length_:]`, which iOS 6 does not have.
+`stepShortString` bridges `"abc"` and reads its length and a character. It runs on two hosts: `host` has
+`NSString+TaggedASCII.m` of the Backports compiled in (the library answers nil, and the Swift runtime then makes a heap
+`__StringStorage`, the path of the longer strings) and reports `ok short.string`; `host_bare` has not and stops with
+`unrecognized selector sent to class` (measured on the 4S on 2026-11-14, a control of `check.lua` that must not run to its end).
+The page [the tagged ASCII string factory](../backports/Foundation/TaggedASCIIString.md) has the reasoning.
 
 A library on the device has no
 `dladdr` for the guest image, which the loader maps itself, so the runtime knows its range (`xl_guest_low`,

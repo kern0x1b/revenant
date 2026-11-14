@@ -250,8 +250,7 @@ print on the iPad 2 what objc4 printed.
   keeps in a cycle with itself leaks as a host object in a cycle does. `XL_PROXY=0` in the environment turns the proxies
   off, which is how the tests check that they are needed: the host reaches the raw guest object and the process stops
   with a signal 11. The proxy gives the host an object to send messages to; what the messages carry is a separate matter,
-  and the gaps measured so far (`hash`, `dictionaryWithDictionary:`, the keys that need the guest's Foundation overlay and
-  the short strings) are listed with the steps in [the corpus](../../reference/recompiler/corpus.md).
+  and the gaps measured so far (`hash`, `dictionaryWithDictionary:` and the keys that need the guest's Foundation overlay) are listed with the steps in [the corpus](../../reference/recompiler/corpus.md).
 - **Method implementations (`IMP`).** An `IMP` is a bare code address, and the guest and the host disagree on what one
   means. A guest method's `IMP` is the guest function, and the host reaches it through a block `IMP` that
   `class_addMethod`, `class_replaceMethod` and `method_setImplementation` build (`xl_host_imp_for_guest`, cached per
