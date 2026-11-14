@@ -39,6 +39,12 @@ asks the phone for each version with `dpkg-query` and stops, naming the package,
 the packages of the build first. The Backports package has one name on every phone, so its version is the one a colleague may
 depend on: build the host against that version rather than replacing the package.
 
+When the phone's Backports package is an older build than the host's, a folder with the libraries of the host's build can stand in for
+it for one start: copy the folder to the phone, pass `--provided org.revenant.backports` to `deploy` (that package is then not
+checked) and start with `launch --dyld FOLDER`. dyld looks for each library by file name in `DYLD_LIBRARY_PATH` before the install
+name, so the folder's libraries load instead of the installed ones; a start from the home screen sets no variable and loads the
+installed package. Remove the folder when the run is over.
+
 ## deploy
 
 The phone must be claimed by your holder name. The app is installed by its bundle id, which `isolate.lua copy` gave your copy

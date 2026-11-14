@@ -235,6 +235,12 @@ function main()
         expect("another version and a missing package are each reported by name", #problems == 2 and problems[1]:find("0.8.18+2396e86d", 1, true) ~= nil
             and problems[2]:find("swift-runtime-8e5fdec8", 1, true) ~= nil and problems[2]:find("not installed", 1, true) ~= nil,
             "the problems are " .. table.concat(problems, " | "))
+        expect("a package that the launch supplies by DYLD_LIBRARY_PATH is not checked", #host.version_mismatches(packages,
+            {["org.revenant.swift-runtime-8e5fdec8"] = "0.8.18+8e5fdec8"}, {["org.revenant.backports"] = true}) == 0, "a provided package was reported")
+        expect("a launch with --dyld sets DYLD_LIBRARY_PATH for that start only, and a plain launch sets none", host.launch_command("a.b", "/var/mobile/rn-host/bp"):find("--env DYLD_LIBRARY_PATH=/var/mobile/rn-host/bp a.b", 1, true) ~= nil
+            and host.launch_command("a.b") == "/usr/libexec/revenant-sblaunch a.b", "the launch command is wrong")
+        expect("a --dyld folder with a space or .. is refused", refusal(function () host.launch_command("a.b", "/var/x y") end) ~= nil
+            and refusal(function () host.launch_command("a.b", "/var/../x") end) ~= nil, "an unsafe folder was accepted")
         os.vrunv("rm", {"-rf", base})
     end
 end
