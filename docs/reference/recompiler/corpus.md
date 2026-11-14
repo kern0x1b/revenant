@@ -44,6 +44,11 @@ The module alone only refuses a second holder, so a check run without a claim us
 string `--host-only` and the table `{host_only = true}` (what `xmake test` passes) mean the same in every check, and so
 do `--device-only` and `{device_only = true}`: `corpus.options(...)` reads both.
 
+Every file a check puts on the phone goes into one folder, `/var/root/revenant-scratch/<holder>/`, which
+`corpus.device()` returns as `scratch` and creates before the first copy or run. A check deletes its own binaries
+right after the run, and `xmake device release` erases the folder, so a finished window leaves nothing on the phone's
+internal partition. Nothing in the corpus writes to `/var/tmp` or `/tmp` on the phone.
+
 ## What each check proves
 
 ### jumptable
@@ -517,7 +522,9 @@ The image indices in xlate's JSON are 1-based in Lua: the app, libfrombx, `a/lib
 
 No phone. It reads `--host-only`, `--device-only` and the two tables through `corpus.options` and checks six
 combinations, then points the lease folder at a temporary one and shows that `corpus.device()` refuses a holder that
-named nobody, a phone nobody claimed and a phone another holder claimed, and lets the holder of the claim through. Two
+named nobody, a phone nobody claimed and a phone another holder claimed, and lets the holder of the claim through with
+`/var/root/revenant-scratch/<holder>` as its `scratch` folder. The module refuses a holder name that is empty, has a
+slash, starts with a dot or holds `..`, and does not erase the folder of a holder without a claim. Two
 checks (`hostbridges`, `libexceptions`) read only the table before this test; a build meant for the Mac took the string
 as nothing and ran on the phone.
 

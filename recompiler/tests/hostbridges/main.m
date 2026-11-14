@@ -435,8 +435,8 @@ static void wide_checks(void)
 
 static void copyfile_checks(void)
 {
-    char from_path[] = "/var/tmp/hostbridges-from-XXXXXX";
-    char to_path[] = "/var/tmp/hostbridges-to-XXXXXX";
+    char from_path[] = "hostbridges-from-XXXXXX";
+    char to_path[] = "hostbridges-to-XXXXXX";
     int from = mkstemp(from_path);
     int to = mkstemp(to_path);
     write(from, "copy me", 7);

@@ -287,12 +287,13 @@ function main(out, ...)
     end
 
     local device = corpus.device()
-    device.run("mkdir -p /var/tmp/xl-library")
-    device.copy(library, "/var/tmp/xl-library/RCFixture.dylib")
-    device.copy(registry, "/var/tmp/xl-library/RCFixture-classes.dylib")
-    device.run("mkdir -p /var/tmp/xl-library/alone")
-    device.copy(library, "/var/tmp/xl-library/alone/RCFixture.dylib")
-    device.copy(o("host"), "/var/tmp/xl-library/xl-library-host")
+    local remote = device.scratch .. "/xl-library"
+    device.run("rm -rf " .. remote .. " && mkdir -p " .. remote)
+    device.copy(library, remote .. "/RCFixture.dylib")
+    device.copy(registry, remote .. "/RCFixture-classes.dylib")
+    device.run("mkdir -p " .. remote .. "/alone")
+    device.copy(library, remote .. "/alone/RCFixture.dylib")
+    device.copy(o("host"), remote .. "/xl-library-host")
     if runtime and not host_runtime then
         local found = {}
         dependencies(o("host"), {path.join(runtime, "lib", "swift", "iphoneos"), corpus.libcxx_armv7()}, found)
@@ -300,18 +301,18 @@ function main(out, ...)
             os.cp(file, o("runtime-" .. leaf))
             os.runv("chmod", {"u+w", o("runtime-" .. leaf)})
             corpus.sign(e, o("runtime-" .. leaf))
-            device.copy(o("runtime-" .. leaf), "/var/tmp/xl-library/" .. leaf)
+            device.copy(o("runtime-" .. leaf), remote .. "/" .. leaf)
         end
     end
     local resident = os.getenv("XL_LIBRARY_RESIDENT_MB") or "85"
     local launches = tonumber(os.getenv("XL_LIBRARY_LAUNCHES") or "1")
-    local environment = "DYLD_FALLBACK_LIBRARY_PATH=" .. (host_runtime or "/var/tmp/xl-library")
+    local environment = "DYLD_FALLBACK_LIBRARY_PATH=" .. (host_runtime or remote)
     if os.getenv("XL_LIBRARY_INSTALL_NAME") == "executable" and variant == "objc" then
         environment = "XL_LIBRARY_NO_FALLBACK=1"
     end
     local function launch(arguments, extra)
         return try { function ()
-            return device.run("chmod +x /var/tmp/xl-library/xl-library-host && cd /var/tmp/xl-library && " .. (extra or "") .. environment .. " ./xl-library-host " .. arguments .. " 2>&1; echo exit=$?")
+            return device.run("chmod +x " .. remote .. "/xl-library-host && cd " .. remote .. " && " .. (extra or "") .. environment .. " ./xl-library-host " .. arguments .. " 2>&1; echo exit=$?")
         end } or ""
     end
     local function verify(output, names, what)
@@ -338,13 +339,13 @@ function main(out, ...)
     io.writefile(newer, patched, {encoding = "binary"})
     os.runv("chmod", {"u+w", newer})
     corpus.sign(e, newer)
-    device.copy(newer, "/var/tmp/xl-library/RCFixtureV2.dylib")
+    device.copy(newer, remote .. "/RCFixtureV2.dylib")
 
     local controls = {
-        {"a guest range another mapping holds", "/var/tmp/xl-library/RCFixture.dylib 20 @" .. range .. " --expect=busy", {"occupy", "reserve.refused", "load.refused", "class.absent", "occupant.intact"}},
-        {"a library with a guest image format this loader does not read", "/var/tmp/xl-library/RCFixtureV2.dylib 20 --expect=image", {"reserve.refused", "load.refused", "class.absent"}},
-        {"a library whose registry is not next to it", "/var/tmp/xl-library/alone/RCFixture.dylib 20 --expect=registry", {"reserve.refused", "load.refused", "class.absent"}},
-        {"an init without a reservation, over a mapping with data", "/var/tmp/xl-library/RCFixture.dylib 20 +" .. range .. " --expect=direct", {"occupy", "dlopen", "init.refused", "init.final", "occupant.intact"}},
+        {"a guest range another mapping holds", remote .. "/RCFixture.dylib 20 @" .. range .. " --expect=busy", {"occupy", "reserve.refused", "load.refused", "class.absent", "occupant.intact"}},
+        {"a library with a guest image format this loader does not read", remote .. "/RCFixtureV2.dylib 20 --expect=image", {"reserve.refused", "load.refused", "class.absent"}},
+        {"a library whose registry is not next to it", remote .. "/alone/RCFixture.dylib 20 --expect=registry", {"reserve.refused", "load.refused", "class.absent"}},
+        {"an init without a reservation, over a mapping with data", remote .. "/RCFixture.dylib 20 +" .. range .. " --expect=direct", {"occupy", "dlopen", "init.refused", "init.final", "occupant.intact"}},
     }
     local outputs = {}
     for _, control in ipairs(controls) do
@@ -354,7 +355,7 @@ function main(out, ...)
     end
     local output
     for launch_number = 1, launches do
-        output = launch("/var/tmp/xl-library/RCFixture.dylib " .. resident)
+        output = launch(remote .. "/RCFixture.dylib " .. resident)
         if launches > 1 then
             io.writefile(o(string.format("run-%02d.txt", launch_number)), output)
         end
@@ -374,7 +375,7 @@ function main(out, ...)
         end
     end
     local host_size = last - first
-    local mapped = launch("/var/tmp/xl-library/RCFixture.dylib " .. resident, "XL_LOADER_MAP=1 ")
+    local mapped = launch(remote .. "/RCFixture.dylib " .. resident, "XL_LOADER_MAP=1 ")
     verify(mapped, expected, "launch with XL_LOADER_MAP=1")
     local found = check_map(corpus, mapped, {"before-reserve", "reserve", "before-dlopen", "load"}, "XL_LOADER_MAP=1")
     if not mapped:find("\nxl-map reserve config host_reserve=1 host_size=0x" .. string.format("%x", host_size), 1, true) or
@@ -425,7 +426,7 @@ function main(out, ...)
         corpus.fail("the map after xl_load shows no readable guest segment, or the library's own image is not where it should be (reserve: %s, load: %s)",
                     tostring(names_library(found.reserve)), tostring(names_library(found.load)))
     end
-    local unreserved = launch("/var/tmp/xl-library/RCFixture.dylib " .. resident, "XL_LOADER_MAP=1 XL_LOADER_HOST_RESERVE=0 ")
+    local unreserved = launch(remote .. "/RCFixture.dylib " .. resident, "XL_LOADER_MAP=1 XL_LOADER_HOST_RESERVE=0 ")
     verify(unreserved, expected, "launch with XL_LOADER_HOST_RESERVE=0")
     local bare = check_map(corpus, unreserved, {"before-reserve", "reserve", "before-dlopen", "load"}, "XL_LOADER_HOST_RESERVE=0")
     local _, bare_held = map_overlap(bare.reserve, guest.low, guest.high)
@@ -443,7 +444,7 @@ function main(out, ...)
     local crash_log = "/private/var/revenant/xlate-crash.log"
     local function crash(extra)
         device.run("rm -f " .. crash_log)
-        local text = launch("/var/tmp/xl-library/RCFixture.dylib " .. resident .. " --abort", extra)
+        local text = launch(remote .. "/RCFixture.dylib " .. resident .. " --abort", extra)
         return text .. "\n" .. (try { function ()
             return device.run("cat " .. crash_log .. " 2>/dev/null; true")
         end } or "")
@@ -468,7 +469,7 @@ function main(out, ...)
         io.write(silent)
         corpus.fail("the crash handler did not run, or printed a map with XL_LOADER_MAP unset")
     end
-    device.run("rm -rf /var/tmp/xl-library")
+    device.run("rm -rf " .. remote)
     io.writefile(o("run.txt"), output .. table.concat(outputs, "\n") .. mapped .. crashed)
     print("ok: a translated library loads into a %s MB host and answers (%d checks in each of %d launches, %d negative controls)", resident, #expected, launches, #controls)
 end

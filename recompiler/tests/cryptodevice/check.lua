@@ -62,9 +62,10 @@ function main(out, ...)
         return
     end
     local device = corpus.device()
-    device.copy(o("xl/cryptodevice"), "/var/tmp/xl-cryptodevice")
+    local remote = device.scratch .. "/xl-cryptodevice"
+    device.copy(o("xl/cryptodevice"), remote)
     local output = try { function ()
-        return device.run("chmod +x /var/tmp/xl-cryptodevice && /var/tmp/xl-cryptodevice; echo exit=$?; rm -f /var/tmp/xl-cryptodevice")
+        return device.run(string.format("chmod +x %s && %s; echo exit=$?; rm -f %s", remote, remote, remote))
     end } or ""
     io.writefile(o("run.txt"), output)
     io.write(output)

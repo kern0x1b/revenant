@@ -42,9 +42,10 @@ function main(out, ...)
     end
 
     local device = corpus.device()
-    device.copy(path.join(out, "xl", "fixture"), "/var/tmp/xl-fixture-swiftobjc")
+    local remote = device.scratch .. "/xl-fixture-swiftobjc"
+    device.copy(path.join(out, "xl", "fixture"), remote)
     local output = try { function ()
-        return device.run("chmod +x /var/tmp/xl-fixture-swiftobjc && /var/tmp/xl-fixture-swiftobjc; echo exit=$?; rm -f /var/tmp/xl-fixture-swiftobjc")
+        return device.run(string.format("chmod +x %s && %s; echo exit=$?; rm -f %s", remote, remote, remote))
     end } or ""
     io.writefile(path.join(out, "run.txt"), output)
     local text = "\n" .. output:gsub("\r", "")

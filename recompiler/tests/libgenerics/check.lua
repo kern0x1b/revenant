@@ -72,7 +72,7 @@ function main(out, ...)
     end
 
     local device = corpus.device()
-    local remote = "/var/tmp/xl-libgenerics"
+    local remote = device.scratch .. "/xl-libgenerics"
     device.run("rm -rf " .. remote .. " && mkdir -p " .. remote)
     device.copy(libraries, remote .. "/LibGenerics.dylib")
     device.copy(o("xl/LibGenerics-classes.dylib"), remote .. "/LibGenerics-classes.dylib")

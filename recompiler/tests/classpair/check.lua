@@ -32,8 +32,9 @@ function main(out, ...)
     end
 
     local device = corpus.device()
-    device.copy(o("xl/ClassPair"), "/var/tmp/ClassPair")
-    io.writefile(o("run.txt"), device.run("chmod +x /var/tmp/ClassPair && /var/tmp/ClassPair 2>/dev/null; rm -f /var/tmp/ClassPair"))
+    local remote = device.scratch .. "/ClassPair"
+    device.copy(o("xl/ClassPair"), remote)
+    io.writefile(o("run.txt"), device.run(string.format("chmod +x %s && %s 2>/dev/null; rm -f %s", remote, remote, remote)))
     corpus.same(expected, o("run.txt"), "the translated program prints something else than objc4 does")
     print("ok")
 end

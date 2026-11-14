@@ -24,9 +24,10 @@ function main(out)
 
     local device = corpus.device()
     local function on_device(binary, name, log)
-        device.copy(binary, "/var/tmp/" .. name)
+        local remote = device.scratch .. "/" .. name
+        device.copy(binary, remote)
         local output = try { function ()
-            return device.run(string.format("chmod +x /var/tmp/%s && /var/tmp/%s; echo exit=$?; rm -f /var/tmp/%s", name, name, name))
+            return device.run(string.format("chmod +x %s && %s; echo exit=$?; rm -f %s", remote, remote, remote))
         end } or ""
         io.writefile(log, output)
         return output

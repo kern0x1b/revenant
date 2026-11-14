@@ -43,7 +43,7 @@ function main(out, ...)
     end
 
     local device = corpus.device()
-    local remote = "/var/tmp/xl-libexceptions"
+    local remote = device.scratch .. "/xl-libexceptions"
     device.run("rm -rf " .. remote .. " && mkdir -p " .. remote)
     device.copy(library, remote .. "/LibExceptions.dylib")
     device.copy(registry, remote .. "/LibExceptions-classes.dylib")

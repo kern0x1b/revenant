@@ -18,7 +18,11 @@ function main()
         local expires = device.claim(settings, holder, tonumber(option.get("minutes")))
         cprint("${bright green}claimed${clear} %s for %s until %s", settings.udid, holder, os.date("%H:%M:%S", expires))
     elseif action == "release" then
-        device.release(settings, device.holder_name(option.get("holder")))
+        local holder = device.holder_name(option.get("holder"))
+        if device.wipe_scratch(settings, holder) then
+            cprint("erased %s on the phone", device.scratch(holder))
+        end
+        device.release(settings, holder)
         cprint("${bright green}released${clear} %s", settings.udid)
     elseif action == "where" then
         print(device.where(settings))

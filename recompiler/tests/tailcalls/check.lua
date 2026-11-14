@@ -89,8 +89,9 @@ function main(out, ...)
     end
 
     local device = corpus.device()
-    device.copy(o("xl/tailcalls"), "/var/tmp/tailcalls")
-    io.writefile(o("run.txt"), device.run("chmod +x /var/tmp/tailcalls && /var/tmp/tailcalls 2>/dev/null; rm -f /var/tmp/tailcalls"))
+    local remote = device.scratch .. "/tailcalls"
+    device.copy(o("xl/tailcalls"), remote)
+    io.writefile(o("run.txt"), device.run(string.format("chmod +x %s && %s 2>/dev/null; rm -f %s", remote, remote, remote)))
     corpus.same(o("run-mac.txt"), o("run.txt"), "the translated program prints something else than the Mac does")
     print("ok")
 end

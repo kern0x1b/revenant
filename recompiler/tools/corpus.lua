@@ -92,11 +92,22 @@ function device()
     if not module.held(settings) then
         raise("this check goes to the phone and this process (%s) does not hold it: claim it first with REVENANT_DEVICE_HOLDER set and `./xmakew device --minutes=N claim`, inside a window the coordinator gave you; a run without the phone is --host-only", module.holder_name() or "no REVENANT_DEVICE_HOLDER")
     end
+    local folder = module.scratch()
+    local made = false
+    local function made_folder()
+        if not made then
+            module.run(settings, "mkdir -p " .. folder, {capture = true})
+            made = true
+        end
+    end
     return {
+        scratch = folder,
         copy = function (localfile, remote)
+            made_folder()
             module.copy(settings, localfile, remote)
         end,
         run = function (command)
+            made_folder()
             return module.run(settings, command, {capture = true})
         end
     }

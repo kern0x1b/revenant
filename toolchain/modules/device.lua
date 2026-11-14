@@ -167,6 +167,31 @@ function release(settings, holder)
     os.tryrm(path.join(leases(), udid .. ".lease"))
 end
 
+SCRATCH_ROOT = "/var/root/revenant-scratch"
+
+function scratch(holder)
+    local name = holder_name(holder)
+    if not name or not name:match("^%w[%w%.%-_]*$") or name:find("..", 1, true) then
+        raise("the scratch folder on the phone is named after the holder, which must be letters, digits, dots, dashes and underscores: set REVENANT_DEVICE_HOLDER or --holder (got %s)", tostring(name))
+    end
+    return SCRATCH_ROOT .. "/" .. name
+end
+
+function wipe_scratch(settings, holder)
+    if not held(settings, holder) then
+        return false
+    end
+    local folder = scratch(holder)
+    local erased = try { function ()
+        run(settings, "rm -rf " .. folder)
+        return true
+    end }
+    if not erased then
+        wprint("could not erase %s on the phone; release again when it answers, or erase it by hand", folder)
+    end
+    return erased
+end
+
 local function admitted(settings)
     local key = settings.udid
     if key == "" then

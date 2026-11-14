@@ -16,7 +16,7 @@ Every device action refuses a phone that another holder has claimed, so claim fi
 - `export REVENANT_DEVICE_HOLDER=<your name>` for the whole shell.
 - `./xmakew device list`: attached devices, their UDID, tunnel port and claim.
 - `./xmakew device --minutes=30 claim`: lasts 30 minutes unless released or claimed again by the same name. `-d NAME` (or `REVENANT_DEVICE=NAME`) picks `device.NAME.env`.
-- `./xmakew device release`.
+- `./xmakew device release`: erases `/var/root/revenant-scratch/<holder>/` on the phone, then drops the claim. A phone that does not answer leaves the folder and a warning; the claim is released all the same.
 
 A claim held by another name fails until it is released or expires. Claims live in `~/.revenant/devices` (`REVENANT_DEVICE_LEASES` moves them), shared by every worktree and private cache, so a claim made in one checkout is refused in another. Check the exit code of `claim` before a run, and run on the phone only when it succeeded.
 
@@ -38,6 +38,10 @@ A session that unlocked the phone locks it before it ends: `./xmakew device run 
 - Through the module, with the same claim and tunnel: `./xmakew l frameworks/SwiftUI/tools/device.lua copy LOCAL REMOTE` and `fetch REMOTE LOCAL`.
 
 Local files go under `.cache/scratch/<task>/`, not into the checkout.
+
+## Files on the phone
+
+The phone's internal partition is small and every holder shares it. A holder keeps its test binaries, libraries, logs and images in one folder, `/var/root/revenant-scratch/<holder>/` (`REVENANT_DEVICE_HOLDER` names it), and nowhere else: not `/var/tmp`, not `/tmp`, not `/var/mobile`. `corpus.device()` in `recompiler/tools/corpus.lua` creates the folder and hands it out as `device.scratch`; a script outside the corpus asks the module (`device.scratch(holder)`). `xmake device release` erases the folder, so a run that has to keep a file for the next claim copies it back to the Mac first. A check removes its own big files right after the run as well, because the claim can last an hour. Files of other holders, of the owner (Photos, TCC, the emoji font) and of installed packages are not touched.
 
 ## Snapshots
 

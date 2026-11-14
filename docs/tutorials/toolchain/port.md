@@ -51,7 +51,7 @@ Pick the target kind to match what the program is: a MobileSubstrate dylib (`twe
 
 The phone is named in `device.env`, with `DEVICE_HOST`, `DEVICE_PORT`, `DEVICE_UDID` and `DEVICE_PASSWORD`. A port with several phones keeps `device.NAME.env` beside it and picks one with `-d NAME`, or with `REVENANT_DEVICE=NAME` for a whole shell. Keep `device.env` out of git: it is gitignored, and so are the other `device.*.env` names.
 
-`xmake device claim` holds the phone for one session, so another session's commands on it are refused until the release or the expiry (default 30 minutes). `--holder` names the session, or `REVENANT_DEVICE_HOLDER` does it for a shell.
+`xmake device claim` holds the phone for one session, so another session's commands on it are refused until the release or the expiry (default 30 minutes). `--holder` names the session, or `REVENANT_DEVICE_HOLDER` does it for a shell. `xmake device release` also erases `/var/root/revenant-scratch/<holder>/`, the one folder a holder keeps its files in on the phone.
 
 ### Universal applications
 

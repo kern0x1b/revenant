@@ -37,8 +37,9 @@ function main(out, ...)
     end
 
     local device = corpus.device()
-    device.copy(o("xl/HostBridges"), "/var/tmp/HostBridges")
-    io.writefile(o("run.txt"), device.run("chmod +x /var/tmp/HostBridges && /var/tmp/HostBridges 2>/dev/null; rm -f /var/tmp/HostBridges"))
+    local remote = device.scratch .. "/HostBridges"
+    device.copy(o("xl/HostBridges"), remote)
+    io.writefile(o("run.txt"), device.run(string.format("cd %s && chmod +x %s && %s 2>/dev/null; rm -f %s", device.scratch, remote, remote, remote)))
     corpus.same(expected, o("run.txt"), "the translated program prints something else than the Mac does")
     print("ok")
 end

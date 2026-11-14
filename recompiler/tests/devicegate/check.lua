@@ -58,10 +58,21 @@ function main(out)
         table.insert(problems, "a check reached the phone another holder claimed: " .. tostring(text))
     end
     module.release(settings, "gate-b")
+    if module.wipe_scratch(settings, "gate-b") then
+        table.insert(problems, "the scratch folder of a holder without a claim was erased")
+    end
     module.claim(settings, "gate-a", 5)
-    text = refusal(function () corpus.device() end)
+    local folder_given
+    text = refusal(function () folder_given = corpus.device().scratch end)
     if text then
         table.insert(problems, "the holder of the claim was refused: " .. text)
+    elseif folder_given ~= "/var/root/revenant-scratch/gate-a" then
+        table.insert(problems, "the scratch folder of gate-a is " .. tostring(folder_given) .. ", not /var/root/revenant-scratch/gate-a")
+    end
+    for _, name in ipairs({"", "../gate", "a/b", ".hidden", "gate..a"}) do
+        if not refusal(function () module.scratch(name) end) then
+            table.insert(problems, "the scratch folder accepted the holder name " .. name)
+        end
     end
     os.setenv("REVENANT_DEVICE_HOLDER", "")
     text = refusal(function () corpus.device() end)

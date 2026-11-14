@@ -63,3 +63,5 @@ No debugger on an arm64 host talks to an armv7 guest. `xmake emulate debug` ther
 ## Why sessions wait for the phone
 
 Several sessions can run against one phone. `xmake device claim` holds it for one holder for a time; every other holder's command on it is refused until the release or the expiry, so one session's install is not overwritten by another's. The holder is named by `--holder` or `REVENANT_DEVICE_HOLDER`, so a shell can carry it. The claim is a folder under `~/.revenant/devices`, outside every cache: workers run with a cache of their own, and a claim kept in the cache would be invisible to the others, so two sessions would hold the same phone at once.
+
+The holder's name also names its one folder on the phone, `/var/root/revenant-scratch/<holder>/`, for every file a check puts there. The release erases it, so a session that ends leaves nothing on the phone's small internal partition, and a stray file has a holder to ask. A claim that expires without a release leaves the folder until the holder's next release.
