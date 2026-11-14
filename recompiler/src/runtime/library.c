@@ -20,8 +20,6 @@ extern uint32_t xl_guest_low, xl_guest_high;
 extern unsigned long xl_guest_image_low, xl_guest_image_high, xl_guest_arena_low, xl_guest_arena_high;
 _Noreturn void xl_unsupported(const char *message);
 
-/* The address space the guest Swift runtime's metadata allocator takes its metadata from beyond its first 64 KiB. Nothing is
-   committed until a page is touched. */
 #define XL_GUEST_ARENA_SIZE (64u << 20)
 
 enum { XL_LIBRARY_IDLE, XL_LIBRARY_ATTACHED, XL_LIBRARY_FAILED, XL_LIBRARY_READY };
@@ -105,7 +103,6 @@ static int xl_library_attach(void)
     xl_guest_high = header->high;
     vm_address_t arena = 0;
     if (vm_allocate(mach_task_self(), &arena, XL_GUEST_ARENA_SIZE, VM_FLAGS_ANYWHERE) == KERN_SUCCESS) {
-        /* Without the arena the guest runtime cannot tell the classes it builds from the host's, so it gets neither word. */
         xl_guest_arena_low = arena;
         xl_guest_arena_high = arena + XL_GUEST_ARENA_SIZE;
         xl_guest_image_low = header->low;
