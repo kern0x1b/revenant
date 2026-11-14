@@ -475,6 +475,12 @@ final class XiKey: Hashable {
         report("plain.hash", object.hash == object.hash)
     }
 
+    @objc public func stepVaListBuilder() {
+        let list = getVaList([Int32(7), Int32(8)])
+        let words = unsafeBitCast(list, to: UnsafeMutablePointer<Int>.self)
+        report("valist.builder", words[0] == 7 && words[1] == 8)
+    }
+
     @objc public func stepDictionary() {
         var names = [String: String]()
         names["a"] = "alpha"

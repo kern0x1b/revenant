@@ -811,6 +811,13 @@ lift of `64fa5260a`). Two steps of the same family are not in the check: `proxy.
 because the library of this check has no Foundation overlay, and `proxy.json`
 (`JSONSerialization.isValidJSONObject` of the bridged dictionary) reports `FAIL` on the 4S; its cause is not found.
 
+`stepVaListBuilder` calls `getVaList([Int32(7), Int32(8)])` of the standard library and reads the two words of the list, then
+returns. `getVaList` autoreleases its builder, an object of the static class `__VaListBuilder`, and the host's autorelease pool
+drains after the step: the step reports `valist.builder` as `ok` and runs to `done` (4S, 2026-11-14). With `XL_PROXY=0` the
+same library reports `ok valist.builder` and then stops with signal 11 in `objc_msgSend` at the pool's pop, the receiver's first
+word being the address of `$ss15__VaListBuilderCN`; that is the control, and it is the failure that `NSString(format: "%d-%@", 7, "x")` and
+`NSString(format:arguments: getVaList(...))` had on the 4S before `xl_proxy_hold` (the translated app fixture, probes U5, U7 and F3). The 41 steps of this check except `stepProxyRace` ran to `done` on the 4S with it.
+
 The proxy steps hand an object of such a class to the host and use it there. `stepProxyCount`, `stepProxyKind`,
 `stepProxyDescription`, `stepProxyIdentity` (`NSArray(object:)` gives back the object that went in), `stepProxyNested`,
 `stepProxyMutation` and `stepProxyAny` bridge a `[String: String]` or a `[AnyHashable: Any]` (`_SwiftDeferredNSDictionary`) and have
