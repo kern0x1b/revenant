@@ -2061,8 +2061,14 @@ std::string Generator::ImpWrapper(const Signature &signature, uint64_t imp, bool
       }
       ++items;
     }
-    hs << "    if (" << enumeration->name << ")\n        " << enumeration->name << "->itemsPtr = xl_fast_items(" << enumeration->name
-       << "_grecord.f" << items << ", p.r);\n";
+    auto state_name = enumeration->name;
+    auto extra = std::to_string(items + 2);
+    hs << "    if (" << state_name << ") {\n";
+    hs << "        " << state_name << "->itemsPtr = xl_fast_items(" << state_name << "_grecord.f" << items << ", p.r);\n";
+    hs << "        uint64_t own = " << state_name << "_grecord.f" << items + 1 << " - (uint64_t)(uintptr_t)&" << state_name << "_grecord;\n";
+    hs << "        if (own >= 8 * " << extra << " && own < sizeof " << state_name << "_grecord)\n";
+    hs << "            " << state_name << "->mutationsPtr = &" << state_name << "->extra[own / 8 - " << extra << "];\n";
+    hs << "    }\n";
   }
   for (auto &param : signature.params) {
     if (param.value.kind == Kind::Array) {
