@@ -77,7 +77,7 @@ from a small project of your own (`add_requires` of the two, a phony target that
 `./xmakew f -P <project> -p iphoneos -a arm64 -y -c`, about four minutes, and link the dylibs of the two install
 directories into one folder. That configure writes the *worktree's* `.xmake` (`apple_minimum 7.0`, the iphoneos
 toolchain), and every `./xmakew l -P .` after it stops with `no target xlate: configure revenant for the host`:
-`./xmakew f -y -c` in the worktree gives the host configuration back.
+`./xmakew f -P . -y -c` in the worktree gives the host configuration back.
 
 The lifted code is compiled in Thumb-2 (`XL_LIFTED_MODE=thumb`, the default); `arm` compiles it in ARM mode, as it was
 before. Any other value is refused. The mode is part of the key of the lifted objects, so changing it lifts and compiles
