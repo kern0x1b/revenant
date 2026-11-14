@@ -442,14 +442,14 @@ function main(out, ...)
         corpus.fail("with XL_LOADER_HOST_RESERVE=0 the loader still holds room for the host part, lost the guest reservation, or the library did not load")
     end
     local crash_log = "/private/var/revenant/xlate-crash.log"
-    local function crash(extra)
+    local function crash(extra, logged)
         device.run("rm -f " .. crash_log)
-        local text = launch(remote .. "/RCFixture.dylib " .. resident .. " --abort", extra)
+        local text = launch(remote .. "/RCFixture.dylib " .. resident .. " --abort", (logged and "XL_LOG=1 " or "") .. extra)
         return text .. "\n" .. (try { function ()
             return device.run("cat " .. crash_log .. " 2>/dev/null; true")
         end } or "")
     end
-    local crashed = crash("XL_LOADER_MAP=1 ")
+    local crashed = crash("XL_LOADER_MAP=1 ", true)
     if not crashed:find("\nok diagnostics\n", 1, true) or not crashed:find("xlate: signal 6", 1, true) then
         io.write(crashed)
         corpus.fail("the host that aborts did not reach the crash handler of the runtime")
@@ -464,10 +464,16 @@ function main(out, ...)
         io.write(crashed)
         corpus.fail("the map in the crash handler shows no readable guest segment")
     end
-    local silent = crash("")
+    local silent = crash("", true)
     if not silent:find("xlate: signal 6", 1, true) or silent:find("xl-map", 1, true) then
         io.write(silent)
         corpus.fail("the crash handler did not run, or printed a map with XL_LOADER_MAP unset")
+    end
+    local unlogged = crash("", false)
+    local written = device.run("test -e " .. crash_log .. " && echo present || echo absent")
+    if not unlogged:find("xlate: signal 6", 1, true) or not written:find("absent", 1, true) then
+        io.write(unlogged)
+        corpus.fail("without XL_LOG the crash handler did not print to stderr, or it wrote %s on the phone (%s)", crash_log, written:trim())
     end
     device.run("rm -rf " .. remote)
     io.writefile(o("run.txt"), output .. table.concat(outputs, "\n") .. mapped .. crashed)

@@ -88,7 +88,7 @@ void xl_manual_kevent(void *pack)
 }
 static void xl_diag(const char *line)
 {
-    int fd = open("/private/var/revenant/xlate-crash.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+    int fd = xl_log_open("xlate-crash.log");
     if (fd >= 0) { dprintf(fd, "%s", line); close(fd); }
 }
 

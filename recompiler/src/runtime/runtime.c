@@ -14,6 +14,7 @@ void xl_thread_altstack(void);
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 #include <sys/ucontext.h>
 #include <unistd.h>
 
@@ -92,6 +93,31 @@ State *xl_current_state(void)
     return state;
 }
 
+#define XL_LOG_DIR "/private/var/revenant/"
+#define XL_LOG_LIMIT (1 << 20)
+
+int xl_log_enabled(void)
+{
+    static int enabled = -1;
+    if (enabled < 0)
+        enabled = getenv("XL_LOG") != NULL || access(XL_LOG_DIR "xl-log", F_OK) == 0;
+    return enabled;
+}
+
+int xl_log_open(const char *name)
+{
+    if (!xl_log_enabled())
+        return -1;
+    char file[128];
+    strlcpy(file, XL_LOG_DIR, sizeof file);
+    strlcat(file, name, sizeof file);
+    int fd = open(file, O_WRONLY | O_CREAT | O_APPEND, 0666);
+    struct stat info;
+    if (fd >= 0 && fstat(fd, &info) == 0 && info.st_size > XL_LOG_LIMIT)
+        ftruncate(fd, 0);
+    return fd;
+}
+
 static void xl_walk_frames(State *state, int fd);
 
 static void xl_dump(State *state)
@@ -107,14 +133,14 @@ static void xl_dump(State *state)
 void xl_fault(State *state, const char *reason)
 {
     fprintf(stderr, "xlate: %s\n", reason);
-    int log_fd = open("/private/var/revenant/xlate-crash.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+    int log_fd = xl_log_open("xlate-crash.log");
     if (log_fd >= 0) {
         dprintf(log_fd, "xlate: %s\n", reason);
         close(log_fd);
     }
     xl_dump(state);
     if (!pthread_main_np() && access("/private/var/revenant/xl-fault-ends-thread", F_OK) == 0) {
-        int fd = open("/private/var/revenant/xlate-crash.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+        int fd = xl_log_open("xlate-crash.log");
         if (fd >= 0) {
             dprintf(fd, "xlate: worker thread ended by the fault above (xl-fault-ends-thread)\n");
             close(fd);
@@ -164,7 +190,7 @@ void xl_log_guest_frames(const char *why)
 
 static int xl_crash_fd(void)
 {
-    int fd = open("/private/var/revenant/xlate-crash.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+    int fd = xl_log_open("xlate-crash.log");
     return fd >= 0 ? fd : fileno(stderr);
 }
 
@@ -230,7 +256,7 @@ static void xl_crash_handler(int signal, siginfo_t *info, void *context)
 
 static void xl_note_exit(void)
 {
-    int fd = open("/private/var/revenant/xl-exit.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+    int fd = xl_log_open("xl-exit.log");
     if (fd < 0)
         return;
     dprintf(fd, "xlate: process exiting normally (pid %d)\n", (int)getpid());
@@ -241,7 +267,7 @@ static void xl_note_exit(void)
 static void xl_signal_note(int signal, siginfo_t *info, void *context)
 {
     (void)info; (void)context;
-    int fd = open("/private/var/revenant/xl-exit.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+    int fd = xl_log_open("xl-exit.log");
     if (fd >= 0) {
         dprintf(fd, "xlate: terminated by signal %d (pid %d)\n", signal, (int)getpid());
         xl_walk_guest(fd);

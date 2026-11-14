@@ -43,7 +43,8 @@ static void xl_load_rules(void);
 
 static void xl_uncaught(NSException *exception)
 {
-    FILE *log = fopen("/private/var/revenant/xlate-exception.log", "a");
+    int log_fd = xl_log_open("xlate-exception.log");
+    FILE *log = log_fd >= 0 ? fdopen(log_fd, "a") : NULL;
     if (log) {
         fprintf(log, "uncaught %s: %s\n", [[exception name] UTF8String] ?: "?", [[exception reason] UTF8String] ?: "?");
         for (NSString *frame in [exception callStackSymbols]) {
@@ -90,7 +91,7 @@ static id xl_null_missing(id self_, SEL forwarding_sel, SEL missing)
     @synchronized (seen) {
         if (![seen containsObject:key]) {
             [seen addObject:key];
-            int fd = open("/private/var/revenant/xl-missing.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+            int fd = xl_log_open("xl-missing.log");
             if (fd >= 0) { dprintf(fd, "%s\n", [key UTF8String]); close(fd); }
         }
     }
@@ -454,7 +455,8 @@ static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp,
                     CFDictionarySetValue(xl_variant_cache, imp, (void *)variant);
                 return variant;
             }
-            FILE *f = fopen("/private/var/revenant/xlate-variant-miss.log", "a");
+            int miss_fd = xl_log_open("xlate-variant-miss.log");
+            FILE *f = miss_fd >= 0 ? fdopen(miss_fd, "a") : NULL;
             if (f) {
                 fprintf(f, "-[%s %s] enc=%s: no variant match, using default\n",
                         class_getName(lookup), sel_getName(selector), stripped);
@@ -465,7 +467,8 @@ static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp,
     guest = (uintptr_t)CFDictionaryGetValue(xl_selector_table, selector);
     if (!guest) {
         fprintf(stderr, "xlate: no bridge for -[%s %s]\n", class_getName(lookup), sel_getName(selector));
-        FILE *nb = fopen("/private/var/revenant/xlate-nobridge.log", "a");
+        int nb_fd = xl_log_open("xlate-nobridge.log");
+        FILE *nb = nb_fd >= 0 ? fdopen(nb_fd, "a") : NULL;
         if (nb) {
             fprintf(nb, "%c[%s %s]\n", class_isMetaClass(lookup) ? '+' : '-', class_getName(lookup), sel_getName(selector));
             fclose(nb);
