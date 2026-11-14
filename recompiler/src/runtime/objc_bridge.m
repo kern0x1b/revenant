@@ -466,17 +466,19 @@ static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp,
     }
     guest = (uintptr_t)CFDictionaryGetValue(xl_selector_table, selector);
     if (!guest) {
-        fprintf(stderr, "xlate: no bridge for -[%s %s]\n", class_getName(lookup), sel_getName(selector));
-        int nb_fd = xl_log_open("xlate-nobridge.log");
-        FILE *nb = nb_fd >= 0 ? fdopen(nb_fd, "a") : NULL;
-        if (nb) {
-            fprintf(nb, "%c[%s %s]\n", class_isMetaClass(lookup) ? '+' : '-', class_getName(lookup), sel_getName(selector));
-            fclose(nb);
+        if (xl_log_enabled()) {
+            fprintf(stderr, "xlate: no bridge for -[%s %s]\n", class_getName(lookup), sel_getName(selector));
+            int nb_fd = xl_log_open("xlate-nobridge.log");
+            FILE *nb = nb_fd >= 0 ? fdopen(nb_fd, "a") : NULL;
+            if (nb) {
+                fprintf(nb, "%c[%s %s]\n", class_isMetaClass(lookup) ? '+' : '-', class_getName(lookup), sel_getName(selector));
+                fclose(nb);
+            }
+            fprintf(stderr, "xlate:   receiver=%p isa=0x%x lookup=%p(%s) isMeta=%d imp=%p\n",
+                    (void *)receiver, receiver ? *(uint32_t *)receiver : 0, (void *)lookup, class_getName(lookup),
+                    class_isMetaClass(lookup), (void *)imp);
+            xl_report_guest_frame();
         }
-        fprintf(stderr, "xlate:   receiver=%p isa=0x%x lookup=%p(%s) isMeta=%d imp=%p\n",
-                (void *)receiver, receiver ? *(uint32_t *)receiver : 0, (void *)lookup, class_getName(lookup),
-                class_isMetaClass(lookup), (void *)imp);
-        xl_report_guest_frame();
         if (getenv("XL_COLLECT") || access("/private/var/revenant/xl-collect", F_OK) == 0) {
             FILE *log = fopen("/private/var/revenant/xlate-missing.log", "a");
             if (log) { fprintf(log, "-[%s %s]\n", class_getName(lookup), sel_getName(selector)); fclose(log); }
@@ -493,6 +495,14 @@ static int xl_is_guest_block(uint64_t guest);
 static struct xl_block_wrapper *xl_wrapper_for(uint64_t guest);
 uint64_t xl_object_out(uintptr_t host);
 
+static void xl_dynamic_fault(State *state, id receiver, SEL selector, const char *what, const char *detail)
+{
+    char message[320];
+    snprintf(message, sizeof message, "message without a bridge (%s): -[%s %s], %s", what,
+             class_getName(object_getClass(receiver)), sel_getName(selector), detail);
+    xl_fault(state, message);
+}
+
 static void xl_dynamic_send(State *state, id receiver, Method method, SEL selector, IMP forced)
 {
     if (!method) {
@@ -508,8 +518,11 @@ static void xl_dynamic_send(State *state, id receiver, Method method, SEL select
     unsigned used = 2;
     words[0] = (uint32_t)(uintptr_t)receiver;
     words[1] = (uint32_t)(uintptr_t)selector;
-    if (argc > 8)
-        xl_fault(state, "message without a bridge (stack-passed arguments)");
+    if (argc > 8) {
+        char detail[96];
+        snprintf(detail, sizeof detail, "%u arguments, encoding %s", argc, method_getTypeEncoding(method));
+        xl_dynamic_fault(state, receiver, selector, "stack-passed arguments", detail);
+    }
     for (unsigned i = 2; i < argc; i++) {
         char *type = method_copyArgumentType(method, i);
         uint64_t value = *(uint64_t *)((char *)state + XL_OFFSET_X0 + i * 8);
@@ -528,9 +541,12 @@ static void xl_dynamic_send(State *state, id receiver, Method method, SEL select
             word = (uint32_t)value;
             break;
         case 'q': case 'Q': wide = 1; break;
-        default:
+        default: {
+            char detail[96];
+            snprintf(detail, sizeof detail, "argument %u has encoding %s", i, type);
             free(type);
-            xl_fault(state, "message without a bridge (argument type)");
+            xl_dynamic_fault(state, receiver, selector, "argument type", detail);
+        }
         }
         if (wide) {
             if (used & 1)
@@ -571,9 +587,12 @@ static void xl_dynamic_send(State *state, id receiver, Method method, SEL select
         }
         break;
     }
-    default:
+    default: {
+        char detail[96];
+        snprintf(detail, sizeof detail, "result has encoding %s", ret);
         free(ret);
-        xl_fault(state, "message without a bridge (return type)");
+        xl_dynamic_fault(state, receiver, selector, "return type", detail);
+    }
     }
     free(ret);
     XL_REG(state, X0) = result;
