@@ -708,7 +708,7 @@ void xl_h_objc_msgSend(State *state)
         xl_shadow_note("msg %p %s: isa %x, class %p (%s), target %llx", (void *)receiver, sel_getName(selector),
                        receiver ? *(uint32_t *)receiver : 0, receiver_class, class_getName(receiver_class), (unsigned long long)target);
     if (target == XL_NO_BRIDGE) {
-        id host_receiver = (id)xl_class_in((uintptr_t)receiver);
+        id host_receiver = (id)xl_receiver_in((uintptr_t)receiver);
         Method method = class_getInstanceMethod(receiver_class, selector);
         xl_arguments_restore(state, &arguments);
         xl_dynamic_send(state, host_receiver, method, selector, NULL);
@@ -931,12 +931,12 @@ void xl_manual_objc_initWeak(struct xl_weak_pack *p)
 {
     id *slot = xl_weak_slot(p->a0);
     *(uint64_t *)slot = 0;
-    p->r = xl_object_out((uintptr_t)objc_initWeak(slot, (id)xl_object_in(p->a1, "objc_initWeak", 1)));
+    p->r = xl_object_out((uintptr_t)objc_initWeak(slot, (id)xl_object_in_raw(p->a1, "objc_initWeak", 1)));
 }
 
 void xl_manual_objc_storeWeak(struct xl_weak_pack *p)
 {
-    p->r = xl_object_out((uintptr_t)objc_storeWeak(xl_weak_slot(p->a0), (id)xl_object_in(p->a1, "objc_storeWeak", 1)));
+    p->r = xl_object_out((uintptr_t)objc_storeWeak(xl_weak_slot(p->a0), (id)xl_object_in_raw(p->a1, "objc_storeWeak", 1)));
 }
 
 void xl_manual_objc_destroyWeak(struct xl_weak_pack1 *p)
@@ -1167,7 +1167,7 @@ static struct xl_block_wrapper *xl_wrapper_of(uintptr_t host)
 
 void xl_report_guest_frame(void);
 
-uintptr_t xl_object_in(uint64_t guest, const char *symbol, unsigned index)
+uintptr_t xl_object_in_raw(uint64_t guest, const char *symbol, unsigned index)
 {
     if (guest && guest < 0x4000) {
         fprintf(stderr, "xlate: %s argument %u is 0x%llx, not an object pointer\n", symbol, index, guest);
@@ -1179,11 +1179,28 @@ uintptr_t xl_object_in(uint64_t guest, const char *symbol, unsigned index)
     return (uintptr_t)objc_autorelease((id)xl_wrapper_for(guest));
 }
 
+uintptr_t xl_object_in(uint64_t guest, const char *symbol, unsigned index)
+{
+    if (guest && guest < 0x4000) {
+        fprintf(stderr, "xlate: %s argument %u is 0x%llx, not an object pointer\n", symbol, index, guest);
+        xl_report_guest_frame();
+        abort();
+    }
+    if (xl_is_guest_block(guest))
+        return (uintptr_t)objc_autorelease((id)xl_wrapper_for(guest));
+    uintptr_t narrowed = xl_narrow_pointer(guest, symbol, index);
+    uintptr_t proxy = xl_proxy_in(narrowed);
+    return proxy ? proxy : (uintptr_t)xl_class_in(narrowed);
+}
+
 uint64_t xl_object_out(uintptr_t host)
 {
     struct xl_block_wrapper *w = xl_wrapper_of(host);
     if (w)
         return w->guest;
+    uint64_t proxied = xl_proxy_out(host);
+    if (proxied)
+        return proxied;
     if ((host & 7) == 4) {
         uint64_t alias = xl_alias_object(host);
         if (alias)
@@ -1466,7 +1483,7 @@ static void xl_imp_entry(State *state)
     xl_arguments_save(state, &arguments);
     uint64_t target = xl_bridge_for(state, slot->cls, slot->selector, slot->imp, slot->method, receiver, Nil);
     if (target == XL_NO_BRIDGE) {
-        id host_receiver = (id)xl_class_in((uintptr_t)receiver);
+        id host_receiver = (id)xl_receiver_in((uintptr_t)receiver);
         xl_arguments_restore(state, &arguments);
         xl_dynamic_send(state, host_receiver, slot->method, slot->selector, slot->imp);
         return;
@@ -1587,6 +1604,19 @@ void xl_manual_objc_autorelease(struct xl_arc_pack *p)
         p->r = xl_block_autorelease(p->a0);
     else
         p->r = xl_host_autorelease(p->a0, "objc_autorelease");
+}
+
+void xl_manual__objc_rootAutorelease(struct xl_arc_pack *p)
+{
+    if (p->a0 && !xl_is_guest_block(p->a0)) {
+        uintptr_t guest = xl_narrow_pointer(p->a0, "_objc_rootAutorelease", 0);
+        if (xl_proxy_in(guest)) {
+            xl_proxy_guest_release(guest);
+            p->r = p->a0;
+            return;
+        }
+    }
+    p->r = xl_object_out((uintptr_t)_objc_rootAutorelease((id)xl_object_in(p->a0, "_objc_rootAutorelease", 0)));
 }
 
 extern const struct xl_class_layout xl_class_layouts[];

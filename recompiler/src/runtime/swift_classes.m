@@ -80,6 +80,7 @@ static CFMutableDictionaryRef xl_twin_host;
 static CFMutableDictionaryRef xl_twin_published;
 static CFMutableDictionaryRef xl_tail_of_shadow;
 static CFMutableDictionaryRef xl_destructors;
+static CFMutableDictionaryRef xl_static_class_set;
 static SEL xl_cxx_destruct_selector;
 static pthread_mutex_t xl_build_lock;
 static pthread_once_t xl_shadow_once = PTHREAD_ONCE_INIT;
@@ -125,6 +126,11 @@ static void xl_shadow_setup(void)
     xl_tail_of_shadow = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_destructors = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_cxx_destruct_selector = sel_registerName(".cxx_destruct");
+    xl_static_class_set = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+    for (const uint32_t *object = xl_swift_static_classes; *object; object++)
+        CFDictionarySetValue(xl_static_class_set, (const void *)(uintptr_t)*object, (const void *)(uintptr_t)*object);
+    for (const uint32_t *object = xl_swift_listed_classes; *object; object++)
+        CFDictionarySetValue(xl_static_class_set, (const void *)(uintptr_t)*object, (const void *)(uintptr_t)*object);
     for (const uint32_t *object = xl_swift_static_classes; *object; object++) {
         struct xl_guest_class *c = (struct xl_guest_class *)(uintptr_t)*object;
         const struct xl_guest_ro *ro = (const struct xl_guest_ro *)(uintptr_t)(c->bits & ~7ull);
@@ -738,7 +744,47 @@ static uintptr_t xl_register_class(uintptr_t guest, const char *call)
     Class shadow = xl_build_shadow(guest);
     if (xl_table_get(xl_tail_of_shadow, (uintptr_t)shadow))
         xl_sync_tail((const struct xl_guest_class *)guest, shadow);
+#ifdef XL_GUEST_swift_retain
+    if (!xl_table_get(xl_static_class_set, guest))
+        xl_proxy_note_class(guest);
+#endif
     return (uintptr_t)shadow;
+}
+
+Class xl_proxy_shadow_of(uintptr_t guest_class)
+{
+    return (Class)xl_table_get(xl_guest_to_host, guest_class);
+}
+
+#ifdef XL_GUEST_swift_retain
+void xl_proxy_guest_retain(uintptr_t guest)
+{
+    xl_invoke(XL_GUEST_swift_retain, guest);
+}
+
+void xl_proxy_guest_release(uintptr_t guest)
+{
+    xl_invoke(XL_GUEST_swift_release, guest);
+}
+#else
+void xl_proxy_guest_retain(uintptr_t guest)
+{
+    (void)guest;
+    xl_unsupported("xlate: a proxy for a guest object needs the guest's swift_retain, which this image does not link");
+}
+
+void xl_proxy_guest_release(uintptr_t guest)
+{
+    (void)guest;
+    xl_unsupported("xlate: a proxy for a guest object needs the guest's swift_release, which this image does not link");
+}
+#endif
+
+uintptr_t xl_receiver_in(uint64_t guest)
+{
+    uintptr_t narrow = (uintptr_t)guest;
+    uintptr_t proxy = (uint64_t)narrow == guest ? xl_proxy_in(narrow) : 0;
+    return proxy ? proxy : (uintptr_t)xl_class_in(guest);
 }
 
 struct __attribute__((packed)) xl_pair_pack {
