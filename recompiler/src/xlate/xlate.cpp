@@ -1,4 +1,5 @@
 #include "exports.h"
+#include "flagflow.h"
 #include "host_routed.h"
 #include "macho.h"
 #include "objc.h"
@@ -57,6 +58,8 @@ static cl::opt<std::string> StateHeader("state-header", cl::desc("C header with 
 static cl::opt<std::string> PassthroughPath("passthrough", cl::desc("Host symbols guest data may bind directly"));
 static cl::opt<std::string> ObjCManifest("objc-manifest", cl::desc("Write the Objective-C metadata of the guest images as JSON"));
 static cl::opt<std::string> CoveragePath("coverage", cl::desc("Only lift every instruction and list unsupported ones"));
+static cl::opt<std::string> FlagFlowPath("flag-flow", cl::desc("Only list the calls after which the flags are read and the functions that read them on entry"));
+static cl::opt<std::string> FlagFlowSummary("flag-flow-summary", cl::desc("Where a lift that passed the check of the flags across calls writes what it checked"));
 static cl::opt<std::string> HostTriple("host-triple", cl::init("armv7-apple-ios6.0.0"));
 static cl::opt<std::string> HostLayout("host-datalayout", cl::init("e-m:o-p:32:32-Fi8-f64:32:64-v64:32:64-v128:32:128-a:0:32-n32-S32"));
 static cl::opt<uint64_t> Base("base", cl::init(0x10000000));
@@ -2347,6 +2350,134 @@ unsigned EnterEntries(Lifter &lifter, Module &module, const std::map<uint64_t, s
   return count;
 }
 
+xlate::FlagFlowResult ScanFlagFlow(Program &program) {
+  xlate::FlagFlow flow([&program](uint64_t address, uint32_t &word) {
+    auto image = program.ImageAt(address);
+    uint8_t bytes[4];
+    if (!image || !image->IsExecutable(address) || !image->ReadBytes(address, bytes, 4)) {
+      return false;
+    }
+    word = bytes[0] | bytes[1] << 8 | bytes[2] << 16 | (uint32_t)bytes[3] << 24;
+    return true;
+  }, [&program](uint64_t address) { return program.functions.count(address) != 0; });
+  xlate::FlagFlowResult result;
+  for (auto &image : program.images) {
+    for (auto &section : image->sections()) {
+      if ((section.flags & MachO::S_ATTR_PURE_INSTRUCTIONS) && section.sectname == "__text") {
+        flow.ScanRange(image->host(section.addr), image->host(section.addr + section.size), result);
+      }
+    }
+  }
+  return result;
+}
+
+bool CheckFlagFlow(Program &program) {
+  auto result = ScanFlagFlow(program);
+  auto vm = [&](uint64_t host) {
+    auto image = program.ImageAt(host);
+    return image ? host - image->slide() : host;
+  };
+  auto owner = [&](uint64_t host) {
+    auto start = program.functions.upper_bound(host);
+    return start == program.functions.begin() ? host : *std::prev(start);
+  };
+  auto path = [&](uint64_t host) {
+    auto image = program.ImageAt(host);
+    return image ? image->path() : std::string("?");
+  };
+  std::vector<std::string> errors;
+  for (auto &[callee, list] : result.live_after) {
+    for (auto &site : list) {
+      errors.push_back(path(site.site) + ": function 0x" + Hex(vm(owner(site.site))) + " calls 0x" + Hex(vm(callee)) + " at 0x" + Hex(vm(site.site)) +
+                       " and reads the flags (" + site.reader + ") after the call returns, which only the callee could have set");
+    }
+  }
+  for (auto &site : result.indirect) {
+    errors.push_back(path(site.site) + ": function 0x" + Hex(vm(owner(site.site))) + " calls through a register at 0x" + Hex(vm(site.site)) +
+                     " and reads the flags (" + site.reader + ") after the call returns, which only the callee could have set");
+  }
+  for (auto &[callee, list] : result.live_in) {
+    for (auto &site : list) {
+      errors.push_back(path(site.site) + ": function 0x" + Hex(vm(callee)) + " reads the flags (" + site.reader + ") on entry, and the call at 0x" +
+                       Hex(vm(site.site)) + " passes it the flags of its caller");
+    }
+  }
+  if (errors.empty()) {
+    if (!FlagFlowSummary.empty()) {
+      std::error_code ec;
+      raw_fd_ostream os(FlagFlowSummary, ec);
+      if (ec) {
+        errs() << "xlate: " << FlagFlowSummary << ": " << ec.message() << "\n";
+        return false;
+      }
+      uint64_t unresolved = 0;
+      for (auto &[callee, count] : result.unresolved) {
+        unresolved += count;
+      }
+      os << "flag-flow: " << program.images.size() << " image(s) checked, " << result.direct_calls << " direct and " << result.indirect_calls
+         << " indirect calls, 0 calls that pass the flags, " << result.no_return << " reads after a call that never returns ignored, " << unresolved
+         << " calls whose continuation has no flag access in the next 64 instructions\n";
+    }
+    return true;
+  }
+  for (size_t i = 0; i < errors.size() && i < 20; ++i) {
+    errs() << "xlate: error: " << errors[i] << "\n";
+  }
+  if (errors.size() > 20) {
+    errs() << "xlate: error: " << errors.size() - 20 << " more\n";
+  }
+  errs() << "xlate: error: " << errors.size() << " call(s) pass the condition flags across a call. The lift gives a call no flags (rellume's "
+         << "call_ret_clobber_flags), so a branch or select that reads them goes the wrong way. The arm64 machine outliner of newer compilers "
+         << "(Apple clang 21, Xcode 27.2) makes an outlined function that returns the flags; build the image with -mno-outline. "
+         << "See docs/explanation/recompiler/how-it-works.md, Scope and limits\n";
+  return false;
+}
+
+int ListFlagFlow(Program &program) {
+  std::error_code ec;
+  raw_fd_ostream os(FlagFlowPath, ec);
+  if (ec) {
+    errs() << "xlate: " << FlagFlowPath << ": " << ec.message() << "\n";
+    return 1;
+  }
+  auto result = ScanFlagFlow(program);
+  auto vm = [&](uint64_t host) {
+    auto image = program.ImageAt(host);
+    return image ? host - image->slide() : host;
+  };
+  std::map<std::string, uint64_t> readers;
+  uint64_t sites = 0;
+  for (auto &[callee, list] : result.live_after) {
+    sites += list.size();
+    os << "after 0x" << Hex(vm(callee)) << " sites " << list.size();
+    for (auto &site : list) {
+      ++readers[site.reader];
+      os << " 0x" << Hex(vm(site.site)) << ":" << site.reader;
+    }
+    os << "\n";
+  }
+  for (auto &site : result.indirect) {
+    os << "indirect 0x" << Hex(vm(site.site)) << " " << site.reader << "\n";
+  }
+  uint64_t entry_sites = 0;
+  for (auto &[callee, list] : result.live_in) {
+    entry_sites += list.size();
+    os << "entry 0x" << Hex(vm(callee)) << " sites " << list.size() << " " << list.front().reader << "\n";
+  }
+  uint64_t unresolved = 0;
+  for (auto &[callee, count] : result.unresolved) {
+    unresolved += count;
+  }
+  outs() << "flag-flow: " << result.direct_calls << " direct calls, " << result.indirect_calls << " indirect calls; flags read after "
+         << sites << " direct calls to " << result.live_after.size() << " functions, after " << result.indirect.size()
+         << " indirect calls; flags read on entry of " << result.live_in.size() << " functions (" << entry_sites << " sites); "
+         << unresolved << " calls with a continuation that was not resolved in the lookahead\n";
+  for (auto &[reader, count] : readers) {
+    outs() << "flag-flow: after-call reader " << reader << ": " << count << "\n";
+  }
+  return 0;
+}
+
 int Coverage(Program &program) {
   std::error_code ec;
   raw_fd_ostream os(CoveragePath, ec);
@@ -2445,6 +2576,12 @@ int main(int argc, char **argv) {
     }
     return Coverage(program);
   }
+  if (!FlagFlowPath.empty()) {
+    if (!LayoutAndResolve(program, false)) {
+      return 1;
+    }
+    return ListFlagFlow(program);
+  }
   std::vector<xlate::ObjCImage> objc;
   std::vector<const Image *> images;
   if (!ObjCManifest.empty()) {
@@ -2476,6 +2613,9 @@ int main(int argc, char **argv) {
     return 0;
   }
   if (Output.empty() || (!Library && !CheckExecutableSegmentLimit(program)) || !LoadPassthrough(program) || !LayoutAndResolve(program, true)) {
+    return 1;
+  }
+  if (!CheckFlagFlow(program)) {
     return 1;
   }
   for (auto &image : program.images) {

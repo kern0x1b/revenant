@@ -461,8 +461,9 @@ function translate(input, includes, out, images, opt)
         lifted_objs = words(io.readfile(o("lifted-objs.txt")))
     else
         os.tryrm(o("lift.stamp"))
+        os.tryrm(o("flag-flow.txt"))
         run(e.xlate, table.join({"--base", base, "--output", o("lifted.bc"), "--layout", o("layout.txt"), "--passthrough", o("passthrough.txt"),
-                                 "--state-header", o("xl_state.h"), "--xi-out", o("xi.txt")}, library and {"--library"} or {},
+                                 "--state-header", o("xl_state.h"), "--flag-flow-summary", o("flag-flow.txt"), "--xi-out", o("xi.txt")}, library and {"--library"} or {},
                                 xi ~= "" and {"--xi-threshold", xi} or {}, xi_except, duplicates == "1" and {"--report-duplicates"} or {},
                                 replaces, {"--bridge", o("libxl-guest.dylib"), input}, extra,
                                 {o("libxl-guest.dylib")}))
@@ -478,6 +479,9 @@ function translate(input, includes, out, images, opt)
         io.writefile(o("report.txt"), io.readfile(o("report.txt")) .. table.concat(rewritten, "\n") .. "\n")
     end
     print("xi: %d compares with 4 GB compare with the least valid pointer of the host", #rewritten)
+    if os.isfile(o("flag-flow.txt")) then
+        io.writefile(o("report.txt"), io.readfile(o("report.txt")) .. io.readfile(o("flag-flow.txt")))
+    end
 
     local extra_cflags = table.join(library and {"-DXL_LIBRARY"} or {}, words(getenv("XL_EXTRA_CFLAGS")))
     local clang = path.join(e.llvmbin, "clang")
