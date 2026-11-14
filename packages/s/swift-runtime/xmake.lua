@@ -213,9 +213,6 @@ package("swift-runtime")
             configure("core", path.join(source, "Runtimes", "Core"), {
                 cxxflags = {"-DSWIFT_CLASS_IS_SWIFT_MASK=1ULL"},
                 swiftflags = {"-Xfrontend", "-disable-legacy-type-info"},
-                -- The arm64 runtime reads the ranges of the guest images and of its metadata arena in a translated program
-                -- from four words that the translator's runtime supplies
-                -- (patches/a-class-outside-the-guest-images-is-not-class-metadata.patch).
                 shflags = table.join({path.absolute("mark.o")},
                                      package:is_arch("arm64") and {"-Xlinker", "-U", "-Xlinker", "_xl_guest_image_low",
                                                                    "-Xlinker", "-U", "-Xlinker", "_xl_guest_image_high",
