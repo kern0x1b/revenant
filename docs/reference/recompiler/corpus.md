@@ -711,7 +711,7 @@ The steps are `stepDictionary` (`[String: String]`), `stepDictionaryAny` (`[Stri
 
 `stepClassesOfHost` is the control of the range test the guest runtime reads a class by (`ClassMetadata::isTypeMetadata`
 answers `false` outside the guest images, `how-it-works.md`): a literal `NSDictionary`, an `NSMutableDictionary` and the
-Core Foundation class that `CFDictionaryCreateMutableCopy` makes, each cast with `as? [String: Any]`
+immutable copy of it, each cast with `as? [String: Any]`
 (`hostclass.dictionary.*`) and one with `as!` (`hostclass.forced`); a host object cast to a host superclass, to a host
 subclass, to a guest class and to a host class it is not (`hostclass.superclass`, `hostclass.guest`,
 `hostclass.number`); a guest class instance cast to host and guest classes (`hostclass.control`); and two generic Swift

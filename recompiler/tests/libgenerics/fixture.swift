@@ -230,14 +230,15 @@ final class Derived<T>: Base<T> {}
         let literal = NSDictionary(object: NSNumber(value: 1), forKey: key)
         let mutable = NSMutableDictionary()
         mutable.setObject(NSNumber(value: 1), forKey: key)
-        let core = CFDictionaryCreateMutableCopy(nil, 0, literal as CFDictionary)!
-        let objects: [(String, AnyObject)] = [("literal", literal), ("mutable", mutable), ("core", core as AnyObject)]
+        // (A Core Foundation call such as CFDictionaryCreateMutableCopy is not bridged in this library.)
+        let copied = mutable.copy() as AnyObject
+        let objects: [(String, AnyObject)] = [("literal", literal), ("mutable", mutable), ("copy", copied)]
         for (label, object) in objects {
             report("hostclass.dictionary." + label, (object as? [String: Any])?[name] as? Int == 1)
         }
-        report("hostclass.forced", ((core as AnyObject) as! [String: Any]).count == 1)
+        report("hostclass.forced", (copied as! [String: Any]).count == 1)
         report("hostclass.superclass", ((literal as AnyObject) as? NSMutableDictionary) == nil && ((mutable as AnyObject) as? NSDictionary) != nil)
-        report("hostclass.guest", ((literal as AnyObject) as? LibGenerics) == nil && ((core as AnyObject) as? Holder<Int>) == nil)
+        report("hostclass.guest", ((literal as AnyObject) as? LibGenerics) == nil && (copied as? Holder<Int>) == nil)
         report("hostclass.number", ((NSNumber(value: 3) as AnyObject) as? NSString) == nil && ((NSNumber(value: 3) as AnyObject) as? NSNumber) != nil)
         let me: AnyObject = self
         report("hostclass.control", (me as? NSObject) != nil && (me as? NSDictionary) == nil && (me as? LibGenerics) != nil)
