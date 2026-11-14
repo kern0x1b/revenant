@@ -20,6 +20,8 @@ REVENANT_ALIAS_STATE(NSOrderedCollectionDifference, NSObject,
     NSArray *_ordered;
 )
 
+REVENANT_ALIAS_ADOPTS(NSOrderedCollectionDifference, NSFastEnumeration)
+
 @interface REVENANT_ALIAS_CLASS(NSOrderedCollectionDifference) (RevenantBackport)
 - (instancetype)revenant_initWithInsertions:(NSArray *)insertions removals:(NSArray *)removals __attribute__((objc_method_family(init)));
 @end

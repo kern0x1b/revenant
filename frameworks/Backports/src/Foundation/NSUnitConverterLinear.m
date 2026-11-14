@@ -6,6 +6,8 @@ REVENANT_ALIAS_STATE(NSUnitConverterLinear, NSUnitConverter,
     double _constant;
 )
 
+REVENANT_ALIAS_ADOPTS(NSUnitConverterLinear, NSSecureCoding)
+
 @implementation REVENANT_ALIAS_CLASS(NSUnitConverterLinear) (RevenantBackport)
 
 + (BOOL)supportsSecureCoding

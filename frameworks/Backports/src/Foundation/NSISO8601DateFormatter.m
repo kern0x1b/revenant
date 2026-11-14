@@ -7,6 +7,8 @@ REVENANT_ALIAS_STATE(NSISO8601DateFormatter, NSFormatter,
     NSISO8601DateFormatOptions _formatOptions;
 )
 
+REVENANT_ALIAS_ADOPTS(NSISO8601DateFormatter, NSSecureCoding)
+
 static NSString *revenant_without_offset_colon(NSString *written)
 {
     NSUInteger length = written.length;

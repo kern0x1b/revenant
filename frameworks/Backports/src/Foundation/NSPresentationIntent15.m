@@ -103,6 +103,8 @@ static NSPresentationIntent *revenant_intent(NSPresentationIntentKind kind, NSIn
 
 REVENANT_ALIAS(NSPresentationIntent)
 
+REVENANT_ALIAS_ADOPTS(NSPresentationIntent, NSCopying, NSSecureCoding)
+
 @implementation REVENANT_ALIAS_CLASS(NSPresentationIntent) (RevenantBackport)
 
 + (BOOL)supportsSecureCoding

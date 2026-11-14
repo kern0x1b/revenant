@@ -6,6 +6,8 @@ REVENANT_ALIAS_STATE(NSURLQueryItem, NSObject,
     NSString *_revenantValue;
 )
 
+REVENANT_ALIAS_ADOPTS(NSURLQueryItem, NSSecureCoding, NSCopying)
+
 @implementation REVENANT_ALIAS_CLASS(NSURLQueryItem) (RevenantQueryItem)
 
 + (instancetype)queryItemWithName:(NSString *)name value:(NSString *)value

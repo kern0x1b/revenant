@@ -6,6 +6,8 @@ REVENANT_ALIAS_STATE(NSDateInterval, NSObject,
     NSTimeInterval _duration;
 )
 
+REVENANT_ALIAS_ADOPTS(NSDateInterval, NSCopying, NSSecureCoding)
+
 @implementation REVENANT_ALIAS_CLASS(NSDateInterval) (RevenantBackport)
 
 + (BOOL)supportsSecureCoding
