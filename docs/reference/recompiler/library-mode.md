@@ -106,7 +106,7 @@ fact, fields separated by single spaces, addresses and sizes in hex:
 |---|---|
 | `xl-map PHASE begin`, `xl-map PHASE end` | the walk of one phase |
 | `xl-map PHASE region START END SIZE PROT/MAX SHARE TAG NAME` | one mapping from `vm_region_recurse_64` (submaps are entered): `PROT` and `MAX` as `rwx` with `-` for a missing bit, `SHARE` the share mode (`cow`, `private`, `empty`, `shared`, `true_shared`, `private_aliased`, `shared_aliased`), `TAG` the `user_tag` in decimal, `NAME` the path of the image whose segment overlaps it, else `malloc`, `malloc small`, `malloc large`, `malloc tiny` or `stack`, else `-` |
-| `xl-map PHASE hole START END SIZE` | a free range of 1 MB or more between two mappings, up to `VM_MAX_ADDRESS` |
+| `xl-map PHASE hole START END SIZE` | a free range of 1 MB or more between two mappings, counted up to `0x40000000` (`XL_VM_MAP_USER_END`), where a 4S process's address space ends; a range above that is not free, it is not there |
 | `xl-map PHASE summary mapped=… free=… largest_start=… largest_size=… free_below_0x30000000=…` | totals over the walk (the holes of every size count in `free`) |
 
 Besides the phases above the loader prints `before-dlopen` (after `xl_load` gave the host's room back, right before `dlopen`:
@@ -258,6 +258,7 @@ that lands between `0x10000000` and `0x30000000` with the frames of its caller.
 | free | from the top of the heap (at most `0x21300000` at `xl_reserve`) to the stack | 233 MB at that heap top |
 | stack | top `0x2fe00000`, bottom `0x2fc02000` or higher | the main thread's 1 MB stack plus a random pad of up to 2 MB |
 | dyld, shared cache | `0x2fe00000` and above | the shared region `0x30000000` to `0x40000000` is the kernel's |
+| end of the address space | `0x40000000` | the process's user addresses end here, 1 GB in all: its own `0x00001000` to `0x30000000` (768 MB) and the kernel's shared region of 256 MB above it (the dyld cache, about 239 MB, and its submap), which the app cannot map into or allocate in. Measured on the 4S by the Telegram13 session (`vm_region` and `vm_allocate` probes): there is no free space above the cache |
 
 When an allocation lands on a reserved range the allocator goes on above it, and once its hint is used up the new
 regions go to the lowest holes, which is how a process with a large reservation runs on.
