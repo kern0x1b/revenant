@@ -725,13 +725,30 @@ same guest object 100 000 times each; both end with the guest checking that nobo
 class (the controls of `check.lua`, measured on the 4S). `stepProxyCount` and `stepProxyMutation` pass without a proxy as
 well, so they only guard against a regression.
 
-What the steps do not cover, measured on the 4S on 2026-11-14 while the steps were written: `object(forKey:)` on the
-bridged dictionary does not return the stored string; `allKeys` stops with `-[__NSPlaceholderArray initWithObjects:count:]:
-attempt to insert nil`; `enumerateKeysAndObjectsUsingBlock:` and `JSONSerialization.isValidJSONObject` stop with a null
-dereference in the guest's `_Block_copy_internal`; `hash` sent from the host to a Swift object, a proxied one or an
-instance of a plain Swift class alike, stops in `swift_conformsToProtocolCommon` (`_swift_class_getSuperclass` reads a null
-class at +0x20); and a Swift string of up to 15 bytes is bridged through `+[__StringStorage
-newTaggedNSStringWithASCIIBytes_:length_:]`, which iOS 6 does not have, so the strings of the steps are longer than that.
+`stepProxyObject`, `stepProxyKeys`, `stepProxyValues` and `stepProxyEnumerate` use the same dictionary from the guest's
+side: a lookup with a key that the dictionary gave (and none for an absent key), `allKeys` and `allValues` as arrays of
+three, and `enumerateKeysAndObjects`, a block that goes from the guest to the host's `NSDictionary` code and back. The
+`stepHost` steps (`Count`, `Object`, `KeyEnumerator`, `AllKeys`, `AllValues`, `GetObjects`, `Fast`, `Enumerate`) are done by
+`host.m` itself, in armv7 code, with the messages that the host's own code sends to such a dictionary:
+`-getObjects:andKeys:count:` into arrays of three, `-getObjects:range:` on the arrays that `allKeys` and `allValues` return,
+`for ... in` (`countByEnumeratingWithState:objects:count:`) and `enumerateKeysAndObjectsUsingBlock:` with a stack block. The
+methods of `_SwiftDeferredNSDictionary` are in the `ro` of a generic class, which the image gives no class object, so they
+are found through `swift_generic_methods` of the manifest and their host IMPs are typed like the others: an `id *` buffer
+whose length is the `count` argument or the length of the `NSRange` is converted element by element, the
+`NSFastEnumerationState` is converted as a record and its items are given to the host as 32-bit objects, and a block
+goes through the block bridge. Before that these methods had a host IMP of bare words, which wrote 8-byte pointers into the
+host's 4-byte arrays and passed the stack block as an object.
+
+What the steps do not cover: the keys and values of the bridged dictionary come to the host as `XLG.__SwiftValue` boxes
+and not as `NSString`, because the `_ObjectiveCBridgeable` conformance of `String` is in the Foundation overlay, which this
+fixture does not load. So the steps look up with a key that the dictionary gave, a lookup with a host `NSString` finds
+nothing, and `JSONSerialization` refuses the dictionary for its non-string key, as it should. JSON, `NSDictionary(dictionary:)`
+and a lookup by string need a fixture that loads the guest's Foundation overlay. Measured on the 4S on 2026-11-14:
+`+[NSDictionary dictionaryWithDictionary:]` of the bridged dictionary stops the process, the cause is not yet established;
+`hash` sent from the host to a Swift object, a proxied one or an instance of a plain Swift class alike, stops in
+`swift_conformsToProtocolCommon` (`_swift_class_getSuperclass` reads a null class at +0x20); and a Swift string of up to 15
+bytes is bridged through `+[__StringStorage newTaggedNSStringWithASCIIBytes_:length_:]`, which iOS 6 does not have, so the
+strings of the steps are longer than that.
 
 A library on the device has no
 `dladdr` for the guest image, which the loader maps itself, so the runtime knows its range (`xl_guest_low`,

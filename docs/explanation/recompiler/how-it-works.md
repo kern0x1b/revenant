@@ -125,7 +125,12 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
   it does an `id`. A shadow carries
   no protocols, properties or ivars yet; a class that has any says so in the shadow log (create
   `/private/var/revenant/xl-shadow-log` on the device, then read `xlate-shadow.log`). A method a shadow adds is a block
-  IMP that carries `self`, the selector and four more words to the guest method.
+  IMP that carries `self`, the selector and four more words to the guest method, unless the method has a typed host IMP:
+  `xlgen` builds one from the SDK's declaration for every method of a class in the class list and of the `ro` of a
+  generic class (`swift_generic_methods` in the manifest, since the image has no class object for it), and the runtime
+  finds it by the guest function (`xl_swift_methods`). The typed IMP converts what words cannot carry: a block (through
+  the block bridge), an `id *` buffer whose length is another argument (`count`, or the `length` of an `NSRange`), a
+  record such as `NSFastEnumerationState`. A method with a block and no typed IMP stops with a message when it is called.
 
 `tests/classpair` builds the cases as a program for macOS, where objc4 is the real thing, and the translation must
 print on the iPad 2 what objc4 printed.
@@ -245,8 +250,8 @@ print on the iPad 2 what objc4 printed.
   keeps in a cycle with itself leaks as a host object in a cycle does. `XL_PROXY=0` in the environment turns the proxies
   off, which is how the tests check that they are needed: the host reaches the raw guest object and the process stops
   with a signal 11. The proxy gives the host an object to send messages to; what the messages carry is a separate matter,
-  and the gaps measured so far (a block passed to `enumerateKeysAndObjectsUsingBlock:`, `hash`, `objectForKey:`, `allKeys`
-  and the short strings) are listed with the steps in [the corpus](../../reference/recompiler/corpus.md).
+  and the gaps measured so far (`hash`, `dictionaryWithDictionary:`, the keys that need the guest's Foundation overlay and
+  the short strings) are listed with the steps in [the corpus](../../reference/recompiler/corpus.md).
 - **Method implementations (`IMP`).** An `IMP` is a bare code address, and the guest and the host disagree on what one
   means. A guest method's `IMP` is the guest function, and the host reaches it through a block `IMP` that
   `class_addMethod`, `class_replaceMethod` and `method_setImplementation` build (`xl_host_imp_for_guest`, cached per
