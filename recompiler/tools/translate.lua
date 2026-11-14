@@ -447,11 +447,8 @@ function translate(input, includes, out, images, opt)
                              o("guest.o")}, support, {"-o", o("libxl-guest.dylib")}, trapflags))
 
     local lifted_mode = env.lifted_mode(getenv("XL_LIFTED_MODE"))
-    local lift_targets = getenv("XL_LIFT_TARGETS") or ""
-    local tail_calls = getenv("XL_TAIL_CALLS") or ""
     local duplicates = getenv("XL_REPORT_DUPLICATES") or ""
-    local devirt = getenv("XL_DEVIRT_EXITS") or ""
-    local key = lift_key(e, input, extra, out, replaces, base .. (library and " library" or "") .. " " .. lifted_mode .. " " .. lift_targets .. " " .. tail_calls .. " " .. duplicates .. " " .. devirt)
+    local key = lift_key(e, input, extra, out, replaces, base .. (library and " library" or "") .. " " .. lifted_mode .. " " .. duplicates)
     local lifted_objs
     if os.isfile(o("lift.stamp")) and io.readfile(o("lift.stamp")) == key and os.isfile(o("lifted-objs.txt")) then
         print("lift inputs unchanged since the last run: reusing its lifted objects")
@@ -459,8 +456,7 @@ function translate(input, includes, out, images, opt)
     else
         os.tryrm(o("lift.stamp"))
         run(e.xlate, table.join({"--base", base, "--output", o("lifted.bc"), "--layout", o("layout.txt"), "--passthrough", o("passthrough.txt"),
-                                 "--state-header", o("xl_state.h")}, library and {"--library"} or {}, lift_targets ~= "" and {"--lift-targets", lift_targets} or {},
-                                tail_calls == "0" and {"--tail-calls=false"} or {}, duplicates == "1" and {"--report-duplicates"} or {}, devirt == "1" and {"--devirt-exits"} or {},
+                                 "--state-header", o("xl_state.h")}, library and {"--library"} or {}, duplicates == "1" and {"--report-duplicates"} or {},
                                 replaces, {"--bridge", o("libxl-guest.dylib"), input}, extra,
                                 {o("libxl-guest.dylib")}))
         lifted_objs = compile_lifted(e, out, env.lifted_flags(lifted_mode, host))

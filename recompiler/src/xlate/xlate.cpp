@@ -59,16 +59,6 @@ static cl::opt<std::string> HostTriple("host-triple", cl::init("armv7-apple-ios6
 static cl::opt<std::string> HostLayout("host-datalayout", cl::init("e-m:o-p:32:32-Fi8-f64:32:64-v64:32:64-v128:32:128-a:0:32-n32-S32"));
 static cl::opt<uint64_t> Base("base", cl::init(0x10000000));
 static cl::opt<bool> Optimize("optimize", cl::init(true));
-static cl::opt<std::string> LiftTargets("lift-targets", cl::init("entries"),
-                                        cl::desc("entries: a jump table target that is not a function start becomes an entry of the function that holds the table, "
-                                                 "and the code the targets share is lifted once; functions: every target is a function of its own, with its own copy "
-                                                 "of the code it reaches"));
-static cl::opt<bool> TailCalls("tail-calls", cl::init(true),
-                               cl::desc("A branch to the start of another function, and a fall through into it, is a tail call to that function; "
-                                        "false lifts the code the branch reaches into the function that branches, as it was"));
-static cl::opt<bool> DevirtExits("devirt-exits", cl::init(false),
-                                 cl::desc("A jump out of a function to the constant address of another function (a tail call) calls that function directly, "
-                                          "with a copy of the function's exit block of its own, instead of through xl_tail and its search of the function table"));
 static cl::opt<bool> ReportDuplicates("report-duplicates", cl::init(false),
                                       cl::desc("Report how many guest instructions the lift decoded in all and how many different ones: the rest is code that "
                                                "more than one lifted function carries"));
@@ -312,10 +302,8 @@ class Lifter {
     ll_config_set_call_ret_clobber_flags(config_, true);
     ll_config_set_call_func(config_, wrap(call_));
     ll_config_set_tail_func(config_, wrap(tail_));
-    if (TailCalls) {
-      ll_config_set_function_start_cb(
-          config_, [](uintptr_t address, void *user) { return static_cast<Program *>(user)->functions.count(address) != 0; }, &program_);
-    }
+    ll_config_set_function_start_cb(
+        config_, [](uintptr_t address, void *user) { return static_cast<Program *>(user)->functions.count(address) != 0; }, &program_);
   }
 
   ~Lifter() { ll_config_free(config_); }
@@ -2191,10 +2179,6 @@ int main(int argc, char **argv) {
   unsigned table_targets = 0;
   unsigned pad_targets = 0;
   unsigned table_data = 0;
-  if (LiftTargets != "entries" && LiftTargets != "functions") {
-    errs() << "xlate: --lift-targets is entries or functions, not " << LiftTargets << "\n";
-    return 1;
-  }
   std::map<uint64_t, std::vector<uint64_t>> merged;
   std::map<uint64_t, uint64_t> claimed;
   int round = 0;
@@ -2203,7 +2187,7 @@ int main(int argc, char **argv) {
     g_kind = round++ == 0 ? 0 : 1;
     for (auto address : pending) {
       std::vector<uint64_t> entries;
-      bool merge = LiftTargets == "entries";
+      bool merge = true;
       Function *lifted = nullptr;
       std::set<uint64_t> analyzed;
       for (;;) {
@@ -2325,7 +2309,7 @@ int main(int argc, char **argv) {
       errs() << "xlate: duplicates:worst 0x" << Hex(a) << " " << name << " " << size << " instructions, " << redundant << " redundant\n";
     }
   }
-  unsigned split = DevirtExits ? lifter.SplitExits() : 0;
+  unsigned split = lifter.SplitExits();
   auto jumps = EnterEntries(lifter, module, merged);
   std::set<Function *> distinct;
   for (auto &[address, function] : lifter.functions) {
@@ -2337,9 +2321,7 @@ int main(int argc, char **argv) {
          << failures << " failures, " << table_data << " jump table data words that the linker listed as function starts\n";
   errs() << "xlate: " << claimed.size() << " jump table targets are entries of " << merged.size() << " functions, which " << jumps
          << " indirect jumps enter again\n";
-  if (DevirtExits) {
-    errs() << "xlate: " << split << " jumps out of functions to the address of a function got an exit block of their own\n";
-  }
+  errs() << "xlate: " << split << " jumps out of functions to the address of a function got an exit block of their own\n";
   auto invokes = pads.Lower(calls);
   errs() << "xlate: " << invokes << " call sites in " << pads.functions() << " functions unwind to " << pad_targets << " landing pads\n";
   std::vector<GuestSegment> segments;

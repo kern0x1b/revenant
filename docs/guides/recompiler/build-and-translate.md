@@ -78,16 +78,10 @@ them again. The runtime, the crypto helpers and the bridge stay in ARM mode in e
 not an option: with this LLVM it miscompiles the lifted code
 ([why](../../reference/recompiler/corpus.md#lifted-code-mode-thumb-2-and-the-outliner)).
 
-Two settings decide how much code the lift produces; both are part of the key of the lifted objects.
-
-- `XL_TAIL_CALLS` (default on, `0` turns it off): a branch to the address that `LC_FUNCTION_STARTS` lists as another
-  function, and a fall through into one, is a tail call to that function. With `0` the code such a branch reaches is
-  lifted into the function that branches, so a chain of functions that end in a `b` to the next carries all the later
-  ones in each (the reCAPTCHA Enterprise SDK with its guest images: 6.84 million guest instructions lifted for 2.10
-  million different ones, and 2.11 million with tail calls).
-- `XL_LIFT_TARGETS` (`entries` by default, `functions` for the old lift): a jump table's target that is not a function
-  start is an entry of the function that holds the table, not a function of its own
-  ([switchtail](../../reference/recompiler/corpus.md#switchtail)).
+`XL_REPORT_DUPLICATES=1` makes the lift print how many guest instructions it decoded in all and how many of them were
+different, per kind of function and per image; what the lift does so that the two are close is described in
+[what a lifted function is](../../explanation/recompiler/how-it-works.md#what-a-lifted-function-is). The setting is part
+of the key of the lifted objects.
 
 ## Translate a library
 

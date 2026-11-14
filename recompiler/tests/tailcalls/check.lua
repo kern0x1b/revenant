@@ -1,5 +1,7 @@
+local MOST_CHAIN_LINES = 9000
+
 local function lifted_size(e, bitcode, wanted)
-    local functions, lines, chosen = 0, 0, 0
+    local functions, chosen, dispatches = 0, 0, 0
     local inside, counted = false, false
     for line in os.iorunv(path.join(e.llvmbin, "llvm-dis"), {bitcode, "-o", "-"}):gmatch("[^\n]+") do
         local name = line:match("^define .-@(sub_%x+)%(")
@@ -8,17 +10,17 @@ local function lifted_size(e, bitcode, wanted)
             counted = wanted[name] or false
             functions = functions + 1
         end
-        if inside then
-            lines = lines + 1
-            if counted then
-                chosen = chosen + 1
-            end
-            if line == "}" then
-                inside = false
+        if inside and counted then
+            chosen = chosen + 1
+            if line:find("@xl_tail(", 1, true) then
+                dispatches = dispatches + 1
             end
         end
+        if inside and line == "}" then
+            inside = false
+        end
     end
-    return functions, lines, chosen
+    return functions, chosen, dispatches
 end
 
 local function chain_names(binary)
@@ -28,7 +30,7 @@ local function chain_names(binary)
         local address, name = line:match("^(%x+) %a (%S+)$")
         if address and name == "__mh_execute_header" then
             header = tonumber(address, 16)
-        elseif address and name:match("^_link%d+$") then
+        elseif address and name:match("^_link%d+$") and name ~= "_link50" then
             names[address] = name
         end
     end
@@ -65,31 +67,29 @@ function main(out, ...)
         corpus.fail("the arm64 program has %d branches from one link of the chain to the next, the check needs at least 40: the compiler did not emit the tail calls", branches)
     end
     local wanted, links = chain_names(o("tailcalls-arm64"))
-    if links ~= 51 then
-        corpus.fail("the arm64 program has %d functions link<N>, there must be 51", links)
+    if links ~= 50 then
+        corpus.fail("the arm64 program has %d functions link0 to link49 that end in a tail call, there must be 50", links)
     end
 
-    translate.translate(o("tailcalls-arm64"), path.join(here, "includes.h"), o("tail"), {}, {})
-    translate.translate(o("tailcalls-arm64"), path.join(here, "includes.h"), o("inline"), {}, {XL_TAIL_CALLS = "0"})
-    local tail, _, tail_chain = lifted_size(e, o("tail/lifted.bc"), wanted)
-    local inline, _, inline_chain = lifted_size(e, o("inline/lifted.bc"), wanted)
-    if tail_chain == 0 then
-        corpus.fail("none of the 51 functions of the chain is a lifted function of its own with tail calls: the names of the lifted functions do not match the symbols")
+    translate.translate(o("tailcalls-arm64"), path.join(here, "includes.h"), o("xl"), {}, {})
+    local _, chain_lines, dispatches = lifted_size(e, o("xl/lifted.bc"), wanted)
+    if chain_lines == 0 then
+        corpus.fail("none of the 50 functions of the chain is a lifted function of its own: the names of the lifted functions do not match the symbols")
     end
-    if tail ~= inline then
-        corpus.fail("tail calls lift %d functions and the old lift %d: both lift every function start once", tail, inline)
+    if dispatches > 0 then
+        corpus.fail("%d jumps from one link of the chain to the next go through xl_tail and its search of the function table, not to the function", dispatches)
     end
-    if tail_chain * 4 > inline_chain then
-        corpus.fail("the 51 functions of the chain are %d lines of IR with tail calls and %d lines without: a function that ends in a branch to the next still carries it", tail_chain, inline_chain)
+    if chain_lines > MOST_CHAIN_LINES then
+        corpus.fail("the 50 functions of the chain are %d lines of IR, at most %d are expected: a function that ends in a branch to the next carries it again", chain_lines, MOST_CHAIN_LINES)
     end
-    print("ok: a chain of 51 functions that branch to the next is %d lines of IR with tail calls, %d without", tail_chain, inline_chain)
+    print("ok: a chain of 50 functions that branch to the next is %d lines of IR and calls each next function directly", chain_lines)
     if opt.host_only then
         print("ok (host part)")
         return
     end
 
     local device = corpus.device()
-    device.copy(o("tail/tailcalls"), "/var/tmp/tailcalls")
+    device.copy(o("xl/tailcalls"), "/var/tmp/tailcalls")
     io.writefile(o("run.txt"), device.run("chmod +x /var/tmp/tailcalls && /var/tmp/tailcalls 2>/dev/null; rm -f /var/tmp/tailcalls"))
     corpus.same(o("run-mac.txt"), o("run.txt"), "the translated program prints something else than the Mac does")
     print("ok")

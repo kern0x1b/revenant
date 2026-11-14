@@ -92,42 +92,48 @@ A control for the lift of the targets of a jump table as entries of the function
 of their own. Rellume lifts every function with the whole control-flow graph that is reachable from its start, so a
 function that was lifted once for the function and once for each case of its `switch` carried the code that all the
 cases share (the tail after the `switch`) as many times as there were cases. In the reCAPTCHA Enterprise SDK this was a
-quarter of the lifted code (libc++'s `num_get` alone, 13 copies of about 260 KB). `--lift-targets entries`, the default
-of `xlate` (`XL_LIFT_TARGETS` of the translate script), lifts the targets as additional entries of the function
-(rellume patch 0012, `ll_func_decode_entry`): the entry block loads `pc` from the state and switches to one stub per
-entry, which unpacks the registers from the state and branches to its own block; blocks reached from several entries
-exist once. An indirect jump that can still reach such a target (its `pc` is not a constant) becomes a `switch` on `pc`
-whose cases call the function again with `musttail`, and whose default is the old `xl_tail`. The runtime table of
-functions maps the address of every entry to the function, so a call from outside enters at the right place.
-`--lift-targets functions` returns to the old lift.
+quarter of the lifted code (libc++'s `num_get` alone, 13 copies of about 260 KB). `xlate` lifts the targets as additional
+entries of the function (rellume patch 0012, `ll_func_decode_entry`): the entry block loads `pc` from the state and
+switches to one stub per entry, which unpacks the registers from the state and branches to its own block; blocks reached
+from several entries exist once. An indirect jump that can still reach such a target (its `pc` is not a constant)
+becomes a `switch` on `pc` whose cases call the function again with `musttail`, and whose default is the old `xl_tail`.
+The runtime table of functions maps the address of every entry to the function, so a call from outside enters at the
+right place.
 
 `main.c` is a `switch` of 24 cases (each calls its own function) followed by a tail of 48 unrolled steps. The check builds
-it for the Mac and for iOS, translates the iOS binary with each setting and requires that the 24 targets leave at least
-20 functions out of the lift, that the lifted functions are at most 60 % of the IR lines (8,698 against 22,375 on the
-author's machine), and, with `--host-only` left out, that the translated program prints on the phone what the Mac
-program prints.
+it for the Mac and for iOS, translates the iOS binary and requires at most 80 lifted functions and at most 12,000 lines
+of IR in them (70 functions and 7,530 lines on the author's machine; with the 24 targets as functions of their own it
+was 94 or more and 21,100), and, with `--host-only` left out, that the translated program prints on the phone what the
+Mac program prints.
 
 ### tailcalls
 
 A control for the lift of a branch to the start of another function as a tail call. `Function::Decode` of rellume follows
 every direct branch, so a function that ends in `b other` carried a copy of `other`, and of everything `other` branches
 to, so a chain of N functions that branch to the next was N(N+1)/2 copies; in the reCAPTCHA Enterprise SDK this was 69 %
-of the lifted code. With `--tail-calls`, the default of `xlate` (`XL_TAIL_CALLS=0` of the translate script returns the
-old lift), the decoder stops at an address that starts another function (rellume patch 0013,
+of the lifted code. The decoder stops at an address that starts another function (rellume patch 0013,
 `ll_config_set_function_start_cb`; the fall-through into such an address stops too) and the branch becomes a `musttail`
 call of that function with the state, so the stack does not grow. In a function with landing pads the lowering turns
 that `musttail` into a plain call, which in SjLj has call-site index -1: an exception that leaves the callee passes the
 frame of the caller and is not dispatched to the caller's pads, which is what the native frame, already gone after the
 branch, would do.
 
+A function has one exit block, whose `pc` is a phi of the `pc` of every jump out of it, so a jump to the constant address
+of a function went through `xl_tail` and its binary search of the function table, not to the function. Every such jump
+now gets a copy of the exit block with a constant `pc` (`Lifter::SplitExits`), and the call is direct. Measured on an
+iPhone 4S, a pipeline of eight stages that each hand over with a tail call (the `tailchain` kernel of
+[devtime](#perf-devtime)) takes 19.0 ms through `xl_tail` and 2.93 ms with direct calls, which is what the code of the
+old lift, with the stages inlined into each other, takes too; the SDK image grows by 2.4 % for it (55,567,600 bytes
+against 54,271,808).
+
 `main.c` has a chain of 51 functions, each with a frame of its own, a mark in memory that `main` reads (so that the lift
 cannot fold the chain away) and a `musttail` call of the next one; two functions that call each other 300,000 times with
 `musttail` (the host stack must stay constant, or the program dies of a stack overflow); and a call through a table of
 function pointers. The check builds it for the Mac and for iOS, requires at least 40 `b link<N>` branches from one link
-to the next in the arm64 code (so the compiler did emit the tail calls), translates it with and without
-`XL_TAIL_CALLS=0`, requires the same number of lifted functions and that the 51 functions of the chain are at most 25 %
-of the IR lines of the old lift (2,957 lines against 33,704 on the author's machine), and, with `--host-only` left out,
-that the translated program prints on the phone what the Mac program prints. The exception side (a function with a landing pad that ends in
+to the next in the arm64 code (so the compiler did emit the tail calls), translates it and requires that none of the 50
+functions that end in a tail call reaches the next through `xl_tail` and that together they are at most 9,000 lines of IR
+(4,177 on the author's machine; the old lift made them 33,704), and, with `--host-only` left out, that the translated
+program prints on the phone what the Mac program prints. The exception side (a function with a landing pad that ends in
 a tail jump into a function with a landing pad of its own, and a throw that leaves the second) is `stepTail` of
 [libexceptions](#libexceptions).
 
