@@ -56,7 +56,7 @@ expect("the root's own declarations are already whole", #isolate.whole_missing(R
        "the root's text is rewritten or reported missing")
 local carried = isolate.whole_requirements(CARRIED)
 expect("a webkit-engine that RN_WEBKIT declares keeps its own line, and the whole one is added unless RN_WEBKIT is set", #isolate.whole_missing(CARRIED) == 3
-       and #isolate.whole_missing(carried) == 0 and carried:find('if not os.getenv("RN_WEBKIT") then add_requires("webkit-engine"', 1, true) ~= nil
+       and #isolate.whole_missing(carried) == 0 and carried:find('if not os.getenv("RN_WEBKIT") and not os.getenv("RN_HERMES") then add_requires("webkit-engine"', 1, true) ~= nil
        and isolate.whole_requirements(carried) == carried, "the RN_WEBKIT line is not kept beside the whole one, or a second pass changes the copy")
 
 local OTHER = 'add_requires("revenant@swift-runtime", {alias = "swift-runtime", configs = {shared = false}})\n'

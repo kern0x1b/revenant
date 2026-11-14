@@ -33,8 +33,9 @@ lines into those forms and adds the lines it lacks; an application that declares
 refused, because the packages would not be the ones the whole configuration builds. The install probes of `copy` and of `--real`
 packages carry the same libc++ and Swift runtime lines, so the packages they install are the ones the copy links. `build` refuses
 a copy whose `xmake.lua` lacks these lines and names the one missing; such a copy is made again with `copy`. The `webkit-engine` line is
-added under `if not os.getenv("RN_WEBKIT")`, so an application's own `RN_WEBKIT` declaration (with `carried`) applies when that is set
-and the whole one applies when it is not.
+added under `if not os.getenv("RN_WEBKIT") and not os.getenv("RN_HERMES")`, so an application's own `RN_WEBKIT` declaration (with `carried`)
+applies when that is set, and the whole one applies when neither is set. A Hermes host (`RN_HERMES=1`) links neither WebKit nor
+JavaScriptCore, so it does not require the engine package, and a build does not wait for a prebuilt of it or compile WebKit.
 
 The host declares `libcxx` in `app.frameworks`, so that a build without the shared package carries libc++. The copy adds an
 `after_load` rule to its `RNHost` target that removes `libcxx` from `app.frameworks`, because the shared `libcxx` package installs
