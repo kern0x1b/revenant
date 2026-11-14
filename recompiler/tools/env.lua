@@ -19,6 +19,17 @@ local function targetfile(name)
     if not os.isfile(file) then
         raise("%s is not built: ./xmakew build xlate xlgen", file)
     end
+    local sources = {}
+    for _, source in ipairs(target:sourcefiles()) do
+        table.insert(sources, path.absolute(source, os.projectdir()))
+    end
+    if name == "xlate" then
+        table.join2(sources, os.files(path.join(os.projectdir(), "recompiler", "src", "xlate", "*.h")))
+    end
+    local newer = import("fresh", {rootdir = os.scriptdir(), anonymous = true}).newer_source(file, sources)
+    if newer then
+        raise("%s is older than %s: ./xmakew build xlate xlgen, the translation would run with a tool that lacks the change", file, newer)
+    end
     return file
 end
 
