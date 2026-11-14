@@ -1029,11 +1029,9 @@ static id revenant_json_object_with_stream(id self, SEL _cmd, NSInputStream *str
 
 static void revenant_json_wrap(SEL selector, IMP wrapper, IMP *original)
 {
-    Method method = class_getClassMethod([NSJSONSerialization class], selector);
-    if (method == NULL)
-        return;
-    *original = method_getImplementation(method);
-    method_setImplementation(method, wrapper);
+    IMP system = REVENANT_ALIAS_WRAP(NSJSONSerialization, selector, wrapper);
+    if (system)
+        *original = system;
 }
 
 __attribute__((constructor)) static void revenant_json_options_install(void)

@@ -15,4 +15,9 @@ function main()
     local negative = path.join(out, "alias_protocols_negative.txt")
     local refused = os.execv(program, {"--negative"}, {try = true, stdout = negative, stderr = negative})
     assert(refused ~= 0, "the negative run asks for a protocol the alias does not adopt and must fail:\n" .. (io.readfile(negative) or ""))
+    local unwrapped = path.join(out, "alias_protocols_negative_wrap.txt")
+    local stale = os.execv(program, {"--negative-wrap"}, {try = true, stdout = unwrapped, stderr = unwrapped})
+    local seen = io.readfile(unwrapped) or ""
+    assert(stale ~= 0 and seen:find("FAIL the proxy, which an app or a translated library binds to, runs the wrapper too", 1, true),
+           "wrapping only the system method must leave the proxy on the system implementation, and the check must say so:\n" .. seen)
 end
