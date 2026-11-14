@@ -13,7 +13,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ./xmakew build -P . recompiler_cxxinit recompiler_refrepro recompiler_blockid recompiler_devtime
 ```
 
-`recompiler_corpus` runs the host part of every check it declares: jumptable, tsdscan, tsdguard,
+`recompiler_corpus` runs the host part of every check it declares: jumptable, switchtail, tailcalls, tsdscan, tsdguard,
 int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, objectsplit, segmentlimit, absolutes, hostbridges and checkapi; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions`, `libexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
@@ -85,6 +85,51 @@ with "jump to an address that does not start a translated function", for example
 they were before it, which is what the AAPCS64 promises, then runs `GVN` so that the loads after the call take the
 values before it. The check requires exactly `4 jump table targets`. On the guest `libswiftCore` the lift finds 44
 more targets than before (2413 against 2369).
+
+### switchtail
+
+A control for the lift of the targets of a jump table as entries of the function that holds the table, not as functions
+of their own. Rellume lifts every function with the whole control-flow graph that is reachable from its start, so a
+function that was lifted once for the function and once for each case of its `switch` carried the code that all the
+cases share (the tail after the `switch`) as many times as there were cases. In the reCAPTCHA Enterprise SDK this was a
+quarter of the lifted code (libc++'s `num_get` alone, 13 copies of about 260 KB). `--lift-targets entries`, the default
+of `xlate` (`XL_LIFT_TARGETS` of the translate script), lifts the targets as additional entries of the function
+(rellume patch 0012, `ll_func_decode_entry`): the entry block loads `pc` from the state and switches to one stub per
+entry, which unpacks the registers from the state and branches to its own block; blocks reached from several entries
+exist once. An indirect jump that can still reach such a target (its `pc` is not a constant) becomes a `switch` on `pc`
+whose cases call the function again with `musttail`, and whose default is the old `xl_tail`. The runtime table of
+functions maps the address of every entry to the function, so a call from outside enters at the right place.
+`--lift-targets functions` returns to the old lift.
+
+`main.c` is a `switch` of 24 cases (each calls its own function) followed by a tail of 48 unrolled steps. The check builds
+it for the Mac and for iOS, translates the iOS binary with each setting and requires that the 24 targets leave at least
+20 functions out of the lift, that the lifted functions are at most 60 % of the IR lines (8,698 against 22,375 on the
+author's machine), and, with `--host-only` left out, that the translated program prints on the phone what the Mac
+program prints.
+
+### tailcalls
+
+A control for the lift of a branch to the start of another function as a tail call. `Function::Decode` of rellume follows
+every direct branch, so a function that ends in `b other` carried a copy of `other`, and of everything `other` branches
+to, so a chain of N functions that branch to the next was N(N+1)/2 copies; in the reCAPTCHA Enterprise SDK this was 69 %
+of the lifted code. With `--tail-calls`, the default of `xlate` (`XL_TAIL_CALLS=0` of the translate script returns the
+old lift), the decoder stops at an address that starts another function (rellume patch 0013,
+`ll_config_set_function_start_cb`; the fall-through into such an address stops too) and the branch becomes a `musttail`
+call of that function with the state, so the stack does not grow. In a function with landing pads the lowering turns
+that `musttail` into a plain call, which in SjLj has call-site index -1: an exception that leaves the callee passes the
+frame of the caller and is not dispatched to the caller's pads, which is what the native frame, already gone after the
+branch, would do.
+
+`main.c` has a chain of 51 functions, each with a frame of its own, a mark in memory that `main` reads (so that the lift
+cannot fold the chain away) and a `musttail` call of the next one; two functions that call each other 300,000 times with
+`musttail` (the host stack must stay constant, or the program dies of a stack overflow); and a call through a table of
+function pointers. The check builds it for the Mac and for iOS, requires at least 40 `b link<N>` branches from one link
+to the next in the arm64 code (so the compiler did emit the tail calls), translates it with and without
+`XL_TAIL_CALLS=0`, requires the same number of lifted functions and that the 51 functions of the chain are at most 25 %
+of the IR lines of the old lift (2,957 lines against 33,704 on the author's machine), and, with `--host-only` left out,
+that the translated program prints on the phone what the Mac program prints. The exception side (a function with a landing pad that ends in
+a tail jump into a function with a landing pad of its own, and a throw that leaves the second) is `stepTail` of
+[libexceptions](#libexceptions).
 
 ### lse
 
@@ -258,12 +303,22 @@ by default), so a probe can run it deeper by hand.
 
 The same exception mechanism in a library (`XL_LIBRARY=1`), loaded by a small armv7 host (`host.m`, with the loader) that
 takes the class and the method to call, so each step runs in a process of its own and a fault in one hides none of the others.
-The guest (`fixture.mm`, class `LibExceptions`) has six steps: an `NSException` thrown in a guest frame and caught three
+The guest (`fixture.mm`, class `LibExceptions`) has eight steps: an `NSException` thrown in a guest frame and caught three
 frames up through frames with C++ destructors (4 destructors, `@finally` once); one raised by the host
 (`-objectAtIndex:` out of range, `NSRangeException`); `@catch` of a guest subclass of `NSException` before `NSException`;
 `@catch (id)` of a thrown string; a C++ `catch (...)` that takes an Objective-C exception, with its destructors and the
-case where nothing is thrown; and a function with a 20000-byte stack frame, which the compiler enters through
-`___chkstk_darwin` (its result is checked against the value a native program computes).
+case where nothing is thrown; a `switch` of twelve cases, each a nested `@try` in an `@catch` (the handler of the first
+throw throws again, caught by the inner `@catch` or, in every fourth case, `@throw;` out of the function), followed by a
+tail shared by all cases that has its own `@try`/`@catch` and a throw that leaves the function (`stepSwitch`: sum of the
+results, number of exceptions that escaped and number of destructors run, each checked against a reference function
+without exceptions in the same file); a function with a landing pad (an `@try` that has ended) that leaves with a
+`[[clang::musttail]]` call of a second function with its own `@try`, which leaves the same way into a third one that
+throws every fifth value (`stepTail`: the two jumps are `b`, so the frames of the first two are gone when the throw
+starts, and it must reach the `@catch` of the caller, not the pads that the first two left behind; checked like
+`stepSwitch`); and a function with a 20000-byte stack frame, which the compiler enters through
+`___chkstk_darwin` (its result is checked against the value a native program computes). The twelve cases are the
+targets of a jump table, so the step is also the exceptions test of the multi-entry functions described under
+[switchtail](#switchtail).
 
 The host part builds and translates the library and the host, and requires that the library registers SjLj frames
 (`_Unwind_SjLj_Register`). The device part runs each step and requires its `ok` names, `done` and `exit=0`. A C++ `throw`
@@ -690,6 +745,11 @@ normal armv7 iOS command-line executable that links libSystem and libm.
 3. The native kernels, the dispatch and the timing main are compiled.
 4. Everything is linked with the guest segments fixed at their vmaddrs (`-no_pie` and the layout), and with libSystem
    for `mach_absolute_time`, `task_info`, `printf` and libm.
+
+The ninth kernel, `tailchain`, is a pipeline of eight stages that each hand over to the next with a tail call (what a
+compiler makes of functions that end in a call). The other eight kernels have no jump to the start of another function,
+so a change in how the lift treats such jumps (see [tailcalls](#tailcalls)) leaves their lifted code byte for byte as
+it was and can only show in this one.
 
 ### Lifted-code mode: Thumb-2 and the outliner
 
