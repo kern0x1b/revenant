@@ -139,6 +139,8 @@ struct Slot {
   enum Kind { Null, Bind, Rebase } kind = Null;
   uint64_t target = 0;
   std::string symbol;
+  std::string library;
+  int64_t addend = 0;
 };
 
 Slot ReadSlot(const Image &image, Reader &reader, uint64_t address) {
@@ -147,6 +149,8 @@ Slot ReadSlot(const Image &image, Reader &reader, uint64_t address) {
   if (auto bind = image.binds().find(vmaddr); bind != image.binds().end()) {
     slot.kind = Slot::Bind;
     slot.symbol = bind->second.symbol;
+    slot.library = bind->second.library;
+    slot.addend = bind->second.addend;
     return slot;
   }
   if (auto rebase = image.rebases().find(vmaddr); rebase != image.rebases().end()) {
@@ -189,11 +193,14 @@ ExceptionType DecodeType(const Image &image, Reader &reader, uint8_t encoding, u
   if (target.kind == Slot::Bind) {
     type.kind = ExceptionType::Import;
     type.symbol = target.symbol;
+    type.library = target.library;
+    type.addend = target.addend;
     return type;
   }
   auto vtable = ReadSlot(image, reader, target.target);
   if (vtable.kind != Slot::Bind || vtable.symbol != "_objc_ehtype_vtable") {
     type.kind = ExceptionType::LocalOther;
+    type.address = target.target;
     return type;
   }
   type.kind = ExceptionType::LocalObjC;

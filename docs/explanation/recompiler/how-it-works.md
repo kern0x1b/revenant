@@ -205,16 +205,43 @@ print on the iPad 2 what objc4 printed.
   callee-saved registers and the stack pointer come back from a snapshot taken before the call, and the guest's landing
   pad runs as a lifted function with the exception in `x0` and the selector in `x1`. A pad inside such a continuation
   does not nest another host frame: it leaves a marker in the program counter and returns, and one loop calls the next
-  continuation, so a loop that catches thousands of exceptions keeps a constant stack. `objc_begin_catch`,
-  `__cxa_begin_catch`, `__cxa_end_catch`, `__cxa_rethrow` and `__Unwind_Resume` go to the host; the last one calls
-  `_Unwind_SjLj_Resume`, because iOS 6 has no `_Unwind_Resume`. xlate prints how many call sites in how many functions
-  unwind to how many landing pads, and counts the ones it left as plain calls (an exception specification, an
-  unknown personality, a function that mixes personalities). A `throw` of translated C++ code (`__cxa_throw`) is a
-  fault, and a catch of a C++ class the guest itself defines cannot match a host exception, so that clause is dropped.
+  continuation, so a loop that catches thousands of exceptions keeps a constant stack. `objc_begin_catch` and
+  `__Unwind_Resume` go to the host; the last one calls `_Unwind_SjLj_Resume`, because iOS 6 has no `_Unwind_Resume`.
+  xlate prints how many call sites in how many functions unwind to how many landing pads, and counts the ones it left as
+  plain calls (an exception specification, an unknown personality, a function that mixes personalities).
+
+  A C++ `throw` of guest code goes to the host's libc++abi, whose personality routine reads the exception; the guest's own
+  `__cxa_exception` of arm64 layout is never built. The whole exception ABI that a guest image imports or defines
+  (`__cxa_allocate_exception`, `__cxa_throw`, `__cxa_begin_catch`, `__cxa_end_catch`, `__cxa_rethrow`,
+  `__cxa_current_exception_type`, `__cxa_current_primary_exception`, `__cxa_rethrow_primary_exception`, the refcount
+  functions, `__cxa_get_exception_ptr`, `__cxa_uncaught_exception(s)` and `std::exception_ptr`, `std::current_exception`,
+  `std::rethrow_exception` and `std::uncaught_exception(s)`) is a function of the runtime that calls the host's own. The
+  list is `src/xlate/host_routed.h`. When a guest image carries libc++abi, xlate replaces the body of each of those
+  functions in the guest image too (a call inside the image does not go through an import), and xlgen gives every one
+  of them a trampoline in the bridge for the data slots that name it. `std::exception_ptr` of the guest is eight bytes that
+  hold the thrown object, as it is for the host, so the handlers keep a reference count with the host's
+  `__cxa_increment_exception_refcount`. The host has no `__cxa_uncaught_exceptions`, `__cxa_init_primary_exception`
+  and dependent exceptions on iOS 6.1.3: the first reads the host's per-thread globals, the others are loud faults.
+
+  The `type_info` is what the host's personality compares. xlate finds the `type_info` objects of every guest image
+  (a slot that binds or rebases to the vtable of an `__cxxabiv1` class, plus 16), decodes them by their arm64 layout
+  (`class`, `si_class`, `vmi_class`, `pointer`, `fundamental`, `array`, `enum`) and builds for each distinct name one
+  object of the host's armv7 layout, with the vtable of the host's libc++abi, the guest's name string and the base
+  classes (the offset of a virtual base is read at the same negative offset of the vtable, whose slot is eight bytes). The
+  fixed-size fundamental types map to the host's own `__ZTIi`, `__ZTIc` and the rest, so `catch (int)` takes an `int` that
+  the host throws; `long`, `unsigned long` and pointers are built, because they differ in size. The table of guest address
+  to host `type_info` (`xl_typeinfos`) is what `__cxa_throw` and `__cxa_current_exception_type` look up, and
+  the landing pads' catch clauses use the same objects. The destructor of a thrown object is a guest function, so
+  `__cxa_throw` passes a host thunk and remembers which guest function it calls. A host exception that passes through guest
+  frames reaches a `catch (...)`, a cleanup and a rethrow; a guest typed `catch` of a class that the host defines, and a host
+  typed `catch` of a class that the guest defines, do not match, because the two layouts are different (`catch (int)` and the
+  other fundamental types do). An exception that no guest frame catches goes on to the host.
+
   A tail call (`musttail`) in a function that has landing pads becomes a plain call, and a plain call has the call-site
   index -1 in the SjLj context, so an exception that leaves the callee does not dispatch to a pad of the caller: the
   native branch that made the call a tail call had already given the caller's frame back
-  (`recompiler/tests/libexceptions`, `stepTail`). `recompiler/tests/exceptions` is the regression test.
+  (`recompiler/tests/libexceptions`, `stepTail`). `recompiler/tests/exceptions` and `recompiler/tests/libexceptions` are
+  the regression tests for Objective-C exceptions, `recompiler/tests/libcxxexceptions` the one for C++.
 - **Callbacks into the guest.** A thread has one set of guest registers, and host code that calls a guest function runs
   it on that set: a method libobjc dispatches (`+initialize`, a delegate method, `+class` of a guest root class), a
   block, a C callback, a hook. Every such call goes through `xl_invoke` or `xl_invoke_n`, which restore the program
@@ -368,9 +395,9 @@ print on the iPad 2 what objc4 printed.
     lifted code runs on the host thread's stack, which has the same guard page; a frame that fits behaves the same
     without the probe, and one that overflows stops at a page below the guard or in memory beside the stack instead of
     at the guard itself.
-  - *Not implemented, and loud*: `__Unwind_RaiseException`, which libc++abi's `__cxa_throw` calls. A C++ exception
-    thrown by guest code has a `__cxa_exception` of arm64 layout that the host's personality cannot read, so the
-    throw is a fault, as `__cxa_throw` of an imported libc++ is.
+  - *Not implemented, and loud*: `__Unwind_RaiseException`. The functions of a guest libc++abi that call it are
+    replaced by the host's exception functions (see the exceptions entry above), so only a guest that raises an exception
+    of its own without libc++abi reaches the fault.
 
 ## Scope and limits
 

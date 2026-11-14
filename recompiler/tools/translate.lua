@@ -540,6 +540,13 @@ function translate(input, includes, out, images, opt)
     local stock_classes = path.join(e.dyld, "classes_armv7.json")
     local stock = os.isfile(stock_classes) and json.loadfile(stock_classes).classes or nil
     local undef_flags = {}
+    for _, object in ipairs(lifted_objs) do
+        for _, symbol in ipairs(unique(nm_undefined(object))) do
+            if symbol:find("^__ZTI") or symbol:find("^__ZTVN10__cxxabiv1") then
+                table.insert(undef_flags, "-Wl,-U," .. symbol)
+            end
+        end
+    end
     if stock then
         local wanted = classes_of(nm_undefined(input))
         for _, image in ipairs(extra) do

@@ -375,25 +375,28 @@ Not built; only measured and analysed.
   relative references; an unsafe one fails at run time with a trap in a function that was stripped.
 - Lazy loading (lifting a function when first called) needs the compiler on the phone and is not planned.
 
-## Known limitation: C++ exceptions from guest code
+## C++ exceptions from guest code
 
-Objective-C exceptions work in a library as they do in an executable: `@throw` in a guest frame, an `NSException` the host
-raises, `@catch` of a guest subclass, of `NSException` and of `id`, `@finally`, and C++ destructors and `catch (...)` on
-the way (`recompiler/tests/libexceptions`, green on the 4S). A C++ exception that guest code throws does not work:
+Objective-C and C++ exceptions work in a library as they do in an executable: `@throw` in a guest frame, an `NSException`
+the host raises, `@catch` of a guest subclass, of `NSException` and of `id`, `@finally`, and a C++ `throw` in guest code
+with `catch` by value, by reference, by a base class, by `...`, destructors on the way, `std::rethrow_exception` and a
+`std::exception_ptr` kept past the handler. A guest image that carries libc++ and libc++abi (the reCAPTCHA SDK does)
+throws and catches through the host's libc++abi: [how it works](../../explanation/recompiler/how-it-works.md#decisions-in-the-translator)
+describes the routing, and `recompiler/tests/libcxxexceptions` (11 steps, green on the 4S) and `recompiler/tests/libexceptions`
+are the checks.
 
-- `throw` ends in `__cxa_throw`, and guest libc++abi's `__cxa_throw` calls `_Unwind_RaiseException`; the call is a loud
-  fault, `xlate: unsupported: _Unwind_RaiseException: a C++ exception thrown by translated code is not implemented`, and
-  the process stops there. It was seen on the 4S on 2026-11-13 with a fixture of three translated guest functions: `throw 42`
-  caught by `catch (...)` in the same function, a `std::runtime_error` thrown three frames down through destructors, and
-  `std::vector::at` out of range. The guest `__cxa_exception` has the arm64 layout, which the host's personality routine
-  cannot read, so the call cannot simply be handed to the host's `_Unwind_SjLj_RaiseException`.
-- A typed `catch` of a class that a guest image defines (`catch (const std::out_of_range &)` with libc++ as a guest image)
-  leaves a reference to the class's `typeinfo` symbol in the landing pad, which the link of the library does not resolve
-  (`typeinfo for std::out_of_range` undefined; the link has `-U` only for the `__cxa_*` helpers). `catch (...)` links.
-- Whether the reCAPTCHA SDK reaches such a `throw` was not shown. Its images carry libc++ (`std::vector::at`, `std::string`
-  and others throw on error paths), so a C++ exception on an error path of the SDK would stop the process with the fault
-  above, and a path of the SDK that needs the exception to be caught cannot work. It is a task for the exceptions block
-  (block C), which owns the SjLj frames.
+What does not work:
+
+- A host `catch` of a type that a guest image defines (`catch (const std::exception &)` in the host, for a
+  `std::runtime_error` that guest libc++ built) does not match, because the guest's `type_info` has no host layout that
+  the host's `catch` compares equal to its own; the host's `catch (...)` takes it (`stepEscapeStandard`). A guest `catch` of
+  a class that the host throws is not tried by a test: a guest `catch (int)` takes a host `int` and a guest `catch (...)`
+  takes a host `std::runtime_error`, an `int`, an `NSException` and a class of the host's own (`stepForeign`), and a guest
+  typed `catch` of a host class is not expected to match.
+- `__cxa_init_primary_exception`, `__cxa_allocate_dependent_exception` and `__cxa_free_dependent_exception`, which
+  libc++'s `std::make_exception_ptr` uses, are absent from iOS 6.1.3's libc++abi; a call is a loud fault.
+- A landing pad whose catch names a `type_info` that no guest image defines is dropped, and xlate says how many; a function
+  with an exception specification keeps plain calls.
 
 ## Not done
 

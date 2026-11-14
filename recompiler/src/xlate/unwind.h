@@ -13,6 +13,9 @@ namespace xlate {
 struct ExceptionType {
   enum Kind { CatchAll, Import, LocalObjC, LocalOther } kind = CatchAll;
   std::string symbol;
+  std::string library;
+  int64_t addend = 0;
+  uint64_t address = 0;
   uint64_t name = 0;
   uint64_t cls = 0;
   std::string cls_symbol;
