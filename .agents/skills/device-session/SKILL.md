@@ -18,7 +18,7 @@ Every device action refuses a phone that another holder has claimed, so claim fi
 - `./xmakew device --minutes=30 claim`: lasts 30 minutes unless released or claimed again by the same name. `-d NAME` (or `REVENANT_DEVICE=NAME`) picks `device.NAME.env`.
 - `./xmakew device release`: erases `/var/root/revenant-scratch/<holder>/` on the phone, then drops the claim. A phone that does not answer leaves the folder and a warning; the claim is released all the same.
 
-A claim held by another name fails until it is released or expires. Claims live in `~/.revenant/devices` (`REVENANT_DEVICE_LEASES` moves them), shared by every worktree and private cache, so a claim made in one checkout is refused in another. Check the exit code of `claim` before a run, and run on the phone only when it succeeded.
+A claim held by another name fails until it is released or expires. Claims live in `~/.revenant/devices` (`REVENANT_DEVICE_LEASES` moves them), shared by every worktree and private cache, so a claim made in one checkout is refused in another, whatever `REVENANT_CACHE` that checkout runs with. A checkout from before 2026-11-12 (commit 971297bde) keeps its claims in `<cache>/devices` and neither sees nor is seen by these: merge main into it before it touches the phone, and `xmake device list` shows who holds which phone. Check the exit code of `claim` before a run, and run on the phone only when it succeeded.
 
 ## Lock the phone again
 

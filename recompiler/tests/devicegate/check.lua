@@ -80,6 +80,36 @@ function main(out)
         table.insert(problems, "a check reached the phone with no holder named: " .. tostring(text))
     end
     module.release(settings, "gate-a")
+
+    local home = path.join(folder, "home")
+    local cache_a, cache_b = path.join(folder, "cache-a"), path.join(folder, "cache-b")
+    local more = {"HOME", "REVENANT_CACHE"}
+    for _, name in ipairs(more) do
+        saved[name] = os.getenv(name) or false
+    end
+    os.setenv("REVENANT_DEVICE_LEASES", "")
+    os.setenv("HOME", home)
+    os.setenv("REVENANT_CACHE", cache_a)
+    module.claim(settings, "gate-c", 5)
+    local shared = path.join(home, ".revenant", "devices", "devicegate-test.lease", "holder")
+    if not os.isfile(shared) then
+        table.insert(problems, "a claim made with one private cache is not in ~/.revenant/devices: " .. shared)
+    end
+    os.setenv("REVENANT_CACHE", cache_b)
+    text = refusal(function () module.claim(settings, "gate-d", 5) end)
+    if not text or not text:find("is held by gate-c", 1, true) then
+        table.insert(problems, "a claim made under another private cache was not refused: " .. tostring(text))
+    end
+    for _, root in ipairs({cache_a, cache_b}) do
+        if os.isdir(path.join(root, "devices")) then
+            table.insert(problems, "a claim left a lease folder inside the cache " .. root)
+        end
+    end
+    module.release(settings, "gate-c")
+    for _, name in ipairs(more) do
+        os.setenv(name, saved[name] or nil)
+    end
+    os.setenv("REVENANT_DEVICE_LEASES", saved.REVENANT_DEVICE_LEASES or nil)
     for _, name in ipairs(names) do
         os.setenv(name, saved[name] or nil)
     end
