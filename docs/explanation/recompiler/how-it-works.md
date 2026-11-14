@@ -206,6 +206,47 @@ print on the iPad 2 what objc4 printed.
   copy, and everything it captured, until some pool drained, and Swift's `withoutActuallyEscaping`, which
   `DispatchQueue.sync` is written with, checks that the closure context is unique after the body and stops the process
   if it is not. `recompiler/tests/hostbridges` has both cases (the `block sync` and `block async` lines).
+- **Guest objects of classes the Swift runtime builds at run time.** The guest allocates an instance of a generic class
+  (`_DictionaryStorage<AnyHashable, Any>`, `_SwiftDeferredNSDictionary<String, String>`, `Holder<Int>`) with
+  `swift_allocObject`, and its first word is the guest metadata, which the host's `objc_msgSend` cannot read: handing such
+  an object to `NSArray(object:)` or `isKind(of:)` crashed the process. The class has a
+  host shadow class, built when the Swift runtime registers it (`objc_readClassPair` or `_objc_realizeClassFromSwift`,
+  `xl_register_class`), and every class that is not in the translator's static or listed classes is noted as dynamic
+  (`xl_proxy_note_class`). When a pointer to an instance of such a class crosses to the host (`xl_object_in`, the receiver of
+  a host message, `xl_receiver_in`), `proxy.m` gives the host a proxy: an instance of `XLProxy.<shadow name>`, a subclass of
+  the shadow made once per guest class, whose extra bytes hold the guest pointer. The host sends its messages to the proxy
+  and every guest implementation the shadow carries is entered with the guest pointer (`xl_self_out`); when the proxy
+  crosses back (`xl_object_out`, the `self` of an implementation wrapper) the guest gets its own pointer again, so identity
+  holds on a round trip guest, host, guest (`NSArray(object: x).object(at: 0) === x`).
+
+  The proxy belongs to the host and is counted like any host object, so the proxy class replaces `retain`, `release`,
+  `autorelease`, `retainCount`, `_tryRetain`, `_isDeallocating`, `allowsWeakReference` and `retainWeakReference` with
+  `NSObject`'s: the shadow carries the guest's own ones (a Swift object's `-autorelease` calls `_objc_rootAutorelease`,
+  whose argument is converted into a proxy again), and a host that retained through them would run guest code on every
+  reference-count change and recurse. `-class` answers the shadow, so `isKind(of:)` and `-class` look like the Swift type.
+  `_objc_rootAutorelease` of a proxied guest object is bridged by hand: the guest's reference is handed to the pool as the
+  proxy, and the guest's own count is released at once, because the proxy already holds one.
+
+  Two tables answer the questions, under two locks (`proxy.m` has no other dependency than the guest's `swift_retain` and
+  `swift_release` and the lookup of a shadow, so `recompiler/tests/proxytable` runs it on the Mac with counters in their
+  place): the classes (guest class to proxy class, a read-write lock) and the proxies (guest pointer to a weak reference to
+  the live proxy and the proxy that owns the entry, a mutex). A lookup takes the weak reference with
+  `objc_loadWeakRetained` under the lock, which returns nil for a proxy that is already deallocating, so a second thread
+  that finds one dying makes a new proxy rather than reviving the old; the dying proxy clears its weak references first,
+  takes the lock, and removes the entry only if it still owns it. At most one proxy of a guest object is alive at a time,
+  and a dying one never takes the entry of its successor.
+
+  **What the guest sees of this.** A live proxy holds a count of +1 on the guest object (`swift_retain` in the guest, and
+  `swift_release` in the proxy's `dealloc`), so while the host holds the object `isKnownUniquelyReferenced` is false in the
+  guest, and a copy-on-write value whose storage was handed out is copied on its next mutation. The host sees a snapshot of
+  what it was given, never a half-changed structure, and the guest sees its own, changed value: after `table["d"] = "w"`
+  the host's dictionary still has three entries and the guest's has four. The guest object's `deinit` is delayed until the
+  proxy dies, which is when the host's pool drains or the host releases its last reference. A guest object that the host
+  keeps in a cycle with itself leaks as a host object in a cycle does. `XL_PROXY=0` in the environment turns the proxies
+  off, which is how the tests check that they are needed: the host reaches the raw guest object and the process stops
+  with a signal 11. The proxy gives the host an object to send messages to; what the messages carry is a separate matter,
+  and the gaps measured so far (a block passed to `enumerateKeysAndObjectsUsingBlock:`, `hash`, `objectForKey:`, `allKeys`
+  and the short strings) are listed with the steps in [the corpus](../../reference/recompiler/corpus.md).
 - **Method implementations (`IMP`).** An `IMP` is a bare code address, and the guest and the host disagree on what one
   means. A guest method's `IMP` is the guest function, and the host reaches it through a block `IMP` that
   `class_addMethod`, `class_replaceMethod` and `method_setImplementation` build (`xl_host_imp_for_guest`, cached per

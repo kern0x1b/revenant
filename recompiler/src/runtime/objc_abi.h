@@ -9,6 +9,7 @@ void __stack_chk_fail(void) __attribute__((noreturn));
 id objc_retain(id value);
 void objc_release(id value);
 id objc_autorelease(id value);
+id _objc_rootAutorelease(id value);
 id objc_retainAutorelease(id value);
 id objc_retainAutoreleasedReturnValue(id value);
 id objc_autoreleaseReturnValue(id value);

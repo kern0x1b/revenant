@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, switchtail, tailcalls, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, objectsplit, segmentlimit, absolutes, hostbridges and checkapi; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, objectsplit, segmentlimit, absolutes, hostbridges, checkapi and proxytable; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions`, `libexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -660,6 +660,34 @@ It needs the arm64 runtime, so `XL_SWIFTOBJC_LIBS` names the folder with `libswi
 target marks a Swift class with bit 0 of the class data, the bit the guest's libswiftCore tests. A class compiled for
 iOS 12.2 or later (bit 1) is accepted too, because the runtime rewrites that bit when it sets the class up.
 
+### proxytable
+
+A control for the proxies of guest objects ([how it works](../../explanation/recompiler/how-it-works.md)), run on the Mac:
+`tests/proxytable/main.m` links `src/runtime/proxy.m` as it is, and gives it what the translated library gives it, a
+shadow class whose `retain`, `release`, `autorelease`, `retainCount`, `_tryRetain`, `_isDeallocating`, `allowsWeakReference`
+and `retainWeakReference` stop the process, and a guest object that is a counted block (`swift_retain` and `swift_release`
+are atomic counters). The check builds it with `MallocScribble` and `MallocGuardEdges` and requires `ok` for each of:
+
+- `proxy.in`, `proxy.shape`: a proxy is made for a noted guest class, its class is `XLProxy.<shadow>`, `-class` is the
+  shadow, and it is a kind of the shadow and of `NSObject`, and of no other class.
+- `proxy.roundtrip`, `proxy.identity`: `xl_proxy_out` and `xl_self_out` give the guest pointer, a host object that is not a
+  proxy comes back unchanged, and a second lookup finds the same proxy.
+- `proxy.holds-guest`, `proxy.memory-selectors`, `proxy.released`: a live proxy holds one count on its guest object,
+  `retain` and `release` on the proxy leave the guest count alone and never reach the shadow's implementations, and the
+  count is back to zero when the pool drains.
+- `proxy.renote`, `proxy.unknown`: noting a class again keeps its proxy class (no second class named `XLProxy.<shadow>@<address>`),
+  and a pointer of a class that was never noted, a low pointer and `nil` give no proxy.
+- `proxy.weak.alive`, `proxy.weak.cleared`, `proxy.weak.recreated`, `proxy.weak.balanced`: a `__weak` reference to a proxy
+  loads while it lives and is `nil` after it died, the next lookup makes a new proxy, and the counts balance.
+- `proxy.race.single`, `proxy.race.balanced`: four threads make, find and drop proxies of eight guest objects for 100 000
+  rounds each. In no round do two threads hold different proxies of one guest object at once, a second lookup in a pool
+  finds the proxy the first made, and every count taken is given back (the argument of the binary sets the number of rounds).
+
+A control with `XL_PROXY=0` must fail at `proxy.in`. Each of these was also checked to fail when the code is broken in
+one place at a time: the entry removed by a dying proxy that no longer owns it (10 223 violations in 800 000 rounds), a lookup
+without `objc_loadWeakRetained` (signal 11), a lookup outside the lock (signal 11), no guest retain or no guest release (the
+count checks), no replacement of the memory selectors (abort in the shadow's `retain`).
+
 ### libgenerics (device part by hand)
 
 The generic classes that the guest Swift runtime instantiates at run time, in a library (`XL_LIBRARY=1`) with the guest
@@ -679,7 +707,33 @@ XL_SWIFTOBJC_LIBS=<folder> ./xmakew l -P . recompiler/tests/libgenerics/check.lu
 
 The steps are `stepDictionary` (`[String: String]`), `stepDictionaryAny` (`[String: Any]`), `stepClosures` (`[() -> Int]`),
 `stepNested` (`[[Int]]`), `stepSubstring` (`[Substring]` appended to and split) and `stepStress` (10 000 appends to an
-`[Int]`, a `[String]`, a `[Substring]` and a `[String: Int]`, under `MallocScribble`). A library on the device has no
+`[Int]`, a `[String]`, a `[Substring]` and a `[String: Int]`, under `MallocScribble`).
+
+The proxy steps hand an object of such a class to the host and use it there. `stepProxyCount`, `stepProxyKind`,
+`stepProxyDescription`, `stepProxyIdentity` (`NSArray(object:)` gives back the object that went in), `stepProxyNested`,
+`stepProxyMutation` and `stepProxyAny` bridge a `[String: String]` or a `[AnyHashable: Any]` (`_SwiftDeferredNSDictionary`) and have
+the host ask `count`, `isKind(of:)` and `description`; a dictionary that the guest mutates after the host got it keeps three
+entries on the host's side and has four on the guest's. `stepProxyLifetime` and `stepProxyUnique` (each
+has an `After` step that `host.m` runs in a new autorelease pool) show the count of +1: a `Holder<Int>` the host keeps is not
+destroyed when the guest drops it, the guest's `isKnownUniquelyReferenced` is false while the host holds it, a value whose
+storage was handed out is copied on the next mutation (the host's side reads the old value through a round trip back to the
+guest, the guest reads the new one), and both the uniqueness and the `deinit` are back after the proxy is gone.
+`stepProxyWeak` has the host keep a `__weak` reference to a proxy and `stepProxyRace` has four host threads ask for the
+same guest object 100 000 times each; both end with the guest checking that nobody holds the object but its own global.
+`XL_PROXY=0` makes `stepProxyKind`, `stepProxyDescription`, `stepProxyIdentity`, `stepProxyNested`, `stepProxyAny`,
+`stepProxyLifetime`, `stepProxyUnique` and `stepProxyWeak` stop with a signal 11 where the host reads the guest's metadata as a
+class (the controls of `check.lua`, measured on the 4S). `stepProxyCount` and `stepProxyMutation` pass without a proxy as
+well, so they only guard against a regression.
+
+What the steps do not cover, measured on the 4S on 2026-11-14 while the steps were written: `object(forKey:)` on the
+bridged dictionary does not return the stored string; `allKeys` stops with `-[__NSPlaceholderArray initWithObjects:count:]:
+attempt to insert nil`; `enumerateKeysAndObjectsUsingBlock:` and `JSONSerialization.isValidJSONObject` stop with a null
+dereference in the guest's `_Block_copy_internal`; `hash` sent from the host to a Swift object, a proxied one or an
+instance of a plain Swift class alike, stops in `swift_conformsToProtocolCommon` (`_swift_class_getSuperclass` reads a null
+class at +0x20); and a Swift string of up to 15 bytes is bridged through `+[__StringStorage
+newTaggedNSStringWithASCIIBytes_:length_:]`, which iOS 6 does not have, so the strings of the steps are longer than that.
+
+A library on the device has no
 `dladdr` for the guest image, which the loader maps itself, so the runtime knows its range (`xl_guest_low`,
 `xl_guest_high`) and a class of the guest is a class of the library. A class that the Swift runtime builds at run time has
 the superclass's size and fields from the host layout: the runtime reconciles them when it registers the shadow, and a

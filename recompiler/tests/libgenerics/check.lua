@@ -5,7 +5,19 @@ local STEPS = {
     {"stepNested", {"array.nested"}},
     {"stepSubstring", {"substring.split"}},
     {"stepStress", {"stress.append"}},
+    {"stepProxyCount", {"proxy.count"}},
+    {"stepProxyKind", {"proxy.kind"}},
+    {"stepProxyDescription", {"proxy.description"}},
+    {"stepProxyIdentity", {"proxy.identity"}},
+    {"stepProxyNested", {"proxy.nested"}},
+    {"stepProxyMutation", {"proxy.mutation"}},
+    {"stepProxyAny", {"proxy.any"}},
+    {"stepProxyLifetime", {"proxy.alive", "proxy.released"}},
+    {"stepProxyUnique", {"proxy.unique.inplace", "proxy.unique.copied", "proxy.unique.values", "proxy.unique.balanced"}},
+    {"stepProxyWeak", {"proxy.weak.alive", "proxy.weak.cleared", "proxy.weak.recreated", "proxy.weak.balanced"}},
+    {"stepProxyRace", {"proxy.race", "proxy.race.balanced"}},
 }
+local CONTROLS = {"stepProxyKind", "stepProxyDescription", "stepProxyIdentity", "stepProxyNested", "stepProxyAny", "stepProxyLifetime", "stepProxyUnique", "stepProxyWeak"}
 
 function main(out, ...)
     local host_only, device_only = false, false
@@ -94,6 +106,17 @@ function main(out, ...)
         if text:find("\nFAIL ", 1, true) or text:find("malloc: ***", 1, true) or not text:find("\ndone\nexit=0\n", 1, true) then
             io.write(output)
             corpus.fail("%s: the library reported a failure, the heap was corrupted, or the process did not run to its end", step[1])
+        end
+    end
+    for _, step in ipairs(CONTROLS) do
+        local control = try { function ()
+            return device.run("cd " .. remote .. " && XL_PROXY=0 DYLD_FALLBACK_LIBRARY_PATH=" .. remote .. " ./host " .. remote .. "/LibGenerics.dylib LibGenerics " .. step ..
+                              " 2>&1; echo exit=$?")
+        end } or ""
+        table.insert(log, control)
+        if control:find("\ndone\nexit=0\n", 1, true) then
+            io.write(control)
+            corpus.fail("%s with XL_PROXY=0 ran to its end: the host reached an object of a generic class the guest allocated without a proxy and nothing failed", step)
         end
     end
     device.run("rm -rf " .. remote)

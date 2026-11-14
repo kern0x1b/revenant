@@ -1,6 +1,7 @@
 #pragma once
 
 #include "xl_state.h"
+#include "xl_proxy.h"
 
 #include <stdarg.h>
 #include <stddef.h>
@@ -65,7 +66,9 @@ _Noreturn void xl_narrowing_fault(const char *symbol, unsigned index, uint64_t v
 uint64_t xl_invoke(uint64_t address, uint64_t argument);
 uint64_t xl_invoke_n(uint64_t address, const uint64_t *arguments, unsigned count);
 uintptr_t xl_object_in(uint64_t guest, const char *symbol, unsigned index);
+uintptr_t xl_object_in_raw(uint64_t guest, const char *symbol, unsigned index);
 uint64_t xl_object_out(uintptr_t host);
+uintptr_t xl_receiver_in(uint64_t guest);
 extern uintptr_t xl_alias_low, xl_alias_span;
 uintptr_t xl_alias_resolve(uintptr_t pointer);
 uint64_t xl_alias_pointer(uintptr_t host);

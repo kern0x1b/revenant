@@ -1275,12 +1275,12 @@ std::string Generator::EmitBridge(const std::string &id, const Signature &signat
     types += ")";
     super_types += ")";
     bool stret = has_result && signature.result.kind == Kind::Record && hc_.getTypeSize(signature.result.host) > 32;
-    prep += "    Class super_class = xl_take_super_class(state);\n    void *forced_imp = xl_take_forced_imp(state);\n    struct objc_super super_receiver = {(id)xl_class_in(p->self), super_class};\n";
-    std::string plain = "((" + types + ")" + (stret ? "objc_msgSend_stret" : "objc_msgSend") + ")((id)xl_class_in(p->self), (SEL)(uintptr_t)p->sel" + call_args + ")";
+    prep += "    Class super_class = xl_take_super_class(state);\n    void *forced_imp = xl_take_forced_imp(state);\n    struct objc_super super_receiver = {(id)xl_receiver_in(p->self), super_class};\n";
+    std::string plain = "((" + types + ")" + (stret ? "objc_msgSend_stret" : "objc_msgSend") + ")((id)xl_receiver_in(p->self), (SEL)(uintptr_t)p->sel" + call_args + ")";
     std::string super = "((" + super_types + ")" + (stret ? "objc_msgSendSuper2_stret" : "objc_msgSendSuper2") + ")(&super_receiver, (SEL)(uintptr_t)p->sel" + call_args + ")";
-    std::string forced = "((" + types + ")forced_imp)((id)xl_class_in(p->self), (SEL)(uintptr_t)p->sel" + call_args + ")";
+    std::string forced = "((" + types + ")forced_imp)((id)xl_receiver_in(p->self), (SEL)(uintptr_t)p->sel" + call_args + ")";
     if (format.present) {
-      plain = callee + "((id)xl_class_in(p->self), (SEL)(uintptr_t)p->sel" + call_args + ")";
+      plain = callee + "((id)xl_receiver_in(p->self), (SEL)(uintptr_t)p->sel" + call_args + ")";
       super = plain;
       forced = plain;
     }
@@ -1958,7 +1958,7 @@ std::string Generator::ImpWrapper(const Signature &signature, uint64_t imp, bool
   std::ostringstream hs;
   hs << "static " << Spell(hc_, has_result ? signature.result.host : hc_.VoidTy, name + "(" + args + ")") << "\n{\n";
   hs << "    struct " << invoke << "_pack p;\n    p.imp = 0x" << std::hex << imp << std::dec << "ull;\n";
-  hs << "    p.self = " << (twin ? "xl_object_out((uintptr_t)self)" : "(uint64_t)(uintptr_t)self") << ";\n    p.sel = (uint64_t)(uintptr_t)_cmd;\n";
+  hs << "    p.self = " << (twin ? "xl_object_out((uintptr_t)self)" : "xl_self_out(self)") << ";\n    p.sel = (uint64_t)(uintptr_t)_cmd;\n";
   for (auto &param : signature.params) {
     if (param.value.kind == Kind::Record) {
       hs << "    " << Mirror(param.value.guest, param.value.host) << "_to_guest(&p." << param.name << ", &" << param.name << ");\n";
@@ -2747,7 +2747,7 @@ int main(int argc, const char **argv) {
       {"_objc_autoreleaseReturnValue", 1}, {"_objc_retainAutoreleasedReturnValue", 1},
       {"_objc_retainAutoreleaseReturnValue", 1}, {"_objc_unsafeClaimAutoreleasedReturnValue", 1},
       {"_objc_claimAutoreleasedReturnValue", 1}, {"_objc_retainBlock", 1},
-      {"_objc_retain", 1}, {"_objc_release", 1}, {"_objc_autorelease", 1},
+      {"_objc_retain", 1}, {"_objc_release", 1}, {"_objc_autorelease", 1}, {"__objc_rootAutorelease", 1},
       {"___cxa_atexit", 3}, {"__Unwind_Resume", 1}, {"___cxa_begin_catch", 1}, {"___cxa_end_catch", 0}, {"___cxa_rethrow", 0},
       {"__Znwm", 1}, {"__Znam", 1}, {"__ZdlPv", 1}, {"__ZdaPv", 1},
       {"_NSGetUncaughtExceptionHandler", 0},

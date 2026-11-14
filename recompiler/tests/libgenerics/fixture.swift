@@ -9,7 +9,142 @@ import Foundation
     line((passed ? "ok " : "FAIL ") + name)
 }
 
+@inline(never) func textLength(_ text: Unmanaged<AnyObject>!) -> Int {
+    guard let text = text else {
+        return 0
+    }
+    return unsafeBitCast(text.takeUnretainedValue(), to: NSString.self).length
+}
+
+var holderDeinits = 0
+var keeper: AnyObject?
+var keptArray: NSArray?
+var sharedHolder: Holder<Int>?
+var uniqueBox: Box?
+
+final class Holder<T> {
+    var value: T
+
+    init(_ value: T) {
+        self.value = value
+    }
+
+    deinit {
+        holderDeinits += 1
+    }
+}
+
+struct Box {
+    var storage: Holder<Int>
+
+    mutating func set(_ value: Int) -> Bool {
+        let unique = isKnownUniquelyReferenced(&storage)
+        if unique {
+            storage.value = value
+        } else {
+            storage = Holder(value)
+        }
+        return unique
+    }
+}
+
 @objc(LibGenerics) public final class LibGenerics: NSObject {
+    @objc public func sharedObject() -> AnyObject {
+        if sharedHolder == nil {
+            sharedHolder = Holder(7)
+        }
+        return sharedHolder!
+    }
+
+    @objc public func stepProxyRace() {
+        _ = sharedObject()
+    }
+
+    @objc public func stepProxyRaceAfter() {
+        report("proxy.race.balanced", isKnownUniquelyReferenced(&sharedHolder) && holderDeinits == 0)
+    }
+
+    @objc public func stepProxyWeak() {
+        _ = sharedObject()
+    }
+
+    @objc public func stepProxyWeakAfter() {
+        report("proxy.weak.balanced", isKnownUniquelyReferenced(&sharedHolder) && holderDeinits == 0)
+    }
+
+    @objc public func stepProxyUnique() {
+        var box = Box(storage: Holder(1))
+        let inPlace = box.set(2)
+        let originalID = ObjectIdentifier(box.storage)
+        keptArray = NSArray(object: box.storage)
+        let copied = !box.set(3)
+        let seen = unsafeBitCast(keptArray!.object(at: 0) as AnyObject, to: Holder<Int>.self)
+        report("proxy.unique.inplace", inPlace)
+        report("proxy.unique.copied", copied && ObjectIdentifier(box.storage) != originalID)
+        report("proxy.unique.values", seen.value == 2 && box.storage.value == 3 && ObjectIdentifier(seen) == originalID)
+        uniqueBox = box
+        keptArray = nil
+    }
+
+    @objc public func stepProxyUniqueAfter() {
+        let unique = uniqueBox!.set(4)
+        report("proxy.unique.balanced", unique && uniqueBox!.storage.value == 4 && holderDeinits == 1)
+    }
+
+    @inline(never) func bridgedTable() -> NSDictionary {
+        let table: [String: String] = ["first-key-0123456789": "first-value-0123456789", "second-key-0123456789": "second-value-0123456789",
+                                       "third-key-0123456789": "third-value-0123456789"]
+        return unsafeBitCast(table._bridgeToObjectiveCImpl(), to: NSDictionary.self)
+    }
+
+    @objc public func stepProxyCount() {
+        report("proxy.count", bridgedTable().count == 3)
+    }
+
+    @objc public func stepProxyKind() {
+        report("proxy.kind", bridgedTable().isKind(of: NSDictionary.self))
+    }
+
+    @objc public func stepProxyDescription() {
+        report("proxy.description", textLength(bridgedTable().perform(#selector(getter: NSObjectProtocol.description))) > 20)
+    }
+
+    @objc public func stepProxyIdentity() {
+        let bridged: AnyObject = bridgedTable()
+        report("proxy.identity", (NSArray(object: bridged).object(at: 0) as AnyObject) === bridged)
+    }
+
+    @objc public func stepProxyNested() {
+        report("proxy.nested", textLength(NSArray(object: bridgedTable()).perform(#selector(getter: NSObjectProtocol.description))) > 20)
+    }
+
+    @objc public func stepProxyMutation() {
+        var table: [String: String] = ["first-key-0123456789": "first-value-0123456789", "second-key-0123456789": "second-value-0123456789",
+                                       "third-key-0123456789": "third-value-0123456789"]
+        let dictionary = unsafeBitCast(table._bridgeToObjectiveCImpl(), to: NSDictionary.self)
+        table["fourth-key-0123456789"] = "fourth-value-0123456789"
+        report("proxy.mutation", dictionary.count == 3 && table.count == 4 && dictionary.object(forKey: "fourth-key-0123456789"._bridgeToObjectiveCImpl()) == nil)
+    }
+
+    @objc public func stepProxyAny() {
+        let loose: [AnyHashable: Any] = [AnyHashable(1): "one", AnyHashable(2): "two"]
+        let looseBridged: AnyObject = loose._bridgeToObjectiveCImpl()
+        let looseDictionary = unsafeBitCast(looseBridged, to: NSDictionary.self)
+        report("proxy.any", looseDictionary.count == 2 && looseDictionary.isKind(of: NSDictionary.self) && (NSArray(object: looseBridged).object(at: 0) as AnyObject) === looseBridged)
+    }
+
+    @objc public func stepProxyLifetime() {
+        var holder: Holder<Int>? = Holder(41)
+        keeper = NSArray(object: holder!)
+        holder = nil
+        report("proxy.alive", holderDeinits == 0)
+        keeper = nil
+    }
+
+    @objc public func stepProxyLifetimeAfter() {
+        report("proxy.released", holderDeinits == 1)
+    }
+
     @objc public func stepDictionary() {
         var names = [String: String]()
         names["a"] = "alpha"
