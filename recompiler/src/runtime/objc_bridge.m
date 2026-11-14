@@ -1209,6 +1209,17 @@ uint64_t xl_object_out(uintptr_t host)
     return xl_class_out(host);
 }
 
+void *xl_fast_items(uint64_t items, uint64_t count)
+{
+    if (!items || !count)
+        return 0;
+    const uint64_t *guest = (const uint64_t *)xl_narrow_pointer(items, "fast enumeration items", 0);
+    id *host = (id *)[[NSMutableData dataWithLength:(NSUInteger)count * sizeof(id)] mutableBytes];
+    for (uint64_t i = 0; i < count; i++)
+        host[i] = (id)xl_object_in(guest[i], "fast enumeration item", (unsigned)i);
+    return host;
+}
+
 uint64_t xl_block_retain(uint64_t guest)
 {
     xl_wrapper_for(guest);

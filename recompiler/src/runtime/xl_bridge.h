@@ -66,6 +66,7 @@ uintptr_t xl_object_in(uint64_t guest, const char *symbol, unsigned index);
 uintptr_t xl_object_in_raw(uint64_t guest, const char *symbol, unsigned index);
 uint64_t xl_object_out(uintptr_t host);
 uintptr_t xl_receiver_in(uint64_t guest);
+void *xl_fast_items(uint64_t items, uint64_t count);
 extern uintptr_t xl_alias_low, xl_alias_span;
 uintptr_t xl_alias_resolve(uintptr_t pointer);
 uint64_t xl_alias_pointer(uintptr_t host);
