@@ -208,3 +208,27 @@ uint64_t k_text(uint8_t *arena, uint64_t size)
     }
     return count * 1000003 + longest + hash;
 }
+
+#define STAGE(n, next) \
+    __attribute__((noinline)) static uint32_t stage##n(uint32_t x, uint32_t y) \
+    { \
+        x = (x ^ (x >> 15)) * 0x2c1b3c6du + y + n; \
+        x ^= x >> 12; \
+        __attribute__((musttail)) return stage##next(x, y + x); \
+    }
+
+__attribute__((noinline)) static uint32_t stage8(uint32_t x, uint32_t y)
+{
+    return (x ^ y) * 0x297a2d39u;
+}
+
+STAGE(7, 8) STAGE(6, 7) STAGE(5, 6) STAGE(4, 5) STAGE(3, 4) STAGE(2, 3) STAGE(1, 2) STAGE(0, 1)
+
+uint64_t k_tailchain(uint8_t *arena, uint64_t size)
+{
+    const uint32_t *words = (const uint32_t *)arena;
+    uint64_t sum = 0;
+    for (size_t i = 0; i < size / 4; i++)
+        sum += stage0(words[i], (uint32_t)i);
+    return sum;
+}

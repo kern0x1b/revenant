@@ -1,4 +1,4 @@
-local ORDER = {"crc32", "sha256", "fnv64", "sort", "list", "geometry", "matrix", "text"}
+local ORDER = {"crc32", "sha256", "fnv64", "sort", "list", "geometry", "matrix", "text", "tailchain"}
 
 function main(out)
     local scripts = path.join(os.scriptdir(), "..", "..", "tools")

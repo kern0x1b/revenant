@@ -47,7 +47,7 @@ uint64_t native_run(unsigned which, uint8_t *arena, uint32_t size);
 #define ARENA (8u * 1024u * 1024u)
 #define STACK (2u * 1024u * 1024u)
 
-static const uint32_t kernel_size[] = { 1u<<16, 1u<<16, 1u<<16, 20000, 20000, 20000, 60, 1u<<16 };
+static const uint32_t kernel_size[] = { 1u<<16, 1u<<16, 1u<<16, 20000, 20000, 20000, 60, 1u<<16, 1u<<16 };
 
 static void fill(uint8_t *arena, uint32_t size)
 {

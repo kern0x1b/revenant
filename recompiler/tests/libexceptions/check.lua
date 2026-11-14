@@ -4,6 +4,8 @@ local STEPS = {
     {"stepSubclass", {"subclass.throw", "subclass.finally"}},
     {"stepObject", {"object.throw", "object.finally"}},
     {"stepCatchAll", {"catchall.throw", "catchall.destructors", "catchall.none"}},
+    {"stepSwitch", {"switch.sum", "switch.escaped", "switch.destructors"}},
+    {"stepTail", {"tail.sum", "tail.escaped", "tail.destructors"}},
     {"stepFrame", {"frame.stack"}},
 }
 

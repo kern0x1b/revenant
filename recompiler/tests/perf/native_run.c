@@ -8,6 +8,7 @@ uint64_t k_list(uint8_t *, uint64_t);
 uint64_t k_geometry(uint8_t *, uint64_t);
 uint64_t k_matrix(uint8_t *, uint64_t);
 uint64_t k_text(uint8_t *, uint64_t);
+uint64_t k_tailchain(uint8_t *, uint64_t);
 
 uint64_t native_run(unsigned which, uint8_t *arena, uint32_t size)
 {
@@ -20,6 +21,7 @@ uint64_t native_run(unsigned which, uint8_t *arena, uint32_t size)
     case 5: return k_geometry(arena, size);
     case 6: return k_matrix(arena, size);
     case 7: return k_text(arena, size);
+    case 8: return k_tailchain(arena, size);
     }
     return 0;
 }
