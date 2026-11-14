@@ -709,6 +709,16 @@ The steps are `stepDictionary` (`[String: String]`), `stepDictionaryAny` (`[Stri
 `stepNested` (`[[Int]]`), `stepSubstring` (`[Substring]` appended to and split) and `stepStress` (10 000 appends to an
 `[Int]`, a `[String]`, a `[Substring]` and a `[String: Int]`, under `MallocScribble`).
 
+`stepHostClasses` is the control of the range test the guest runtime reads a class by (`ClassMetadata::isTypeMetadata`
+answers `false` outside the guest images, `how-it-works.md`): a literal `NSDictionary`, an `NSMutableDictionary` and the
+Core Foundation class that `CFDictionaryCreateMutableCopy` makes, each cast with `as? [String: Any]`
+(`hostclass.dictionary.*`) and one with `as!` (`hostclass.forced`); a host object cast to a host superclass, to a host
+subclass, to a guest class and to a host class it is not (`hostclass.superclass`, `hostclass.guest`,
+`hostclass.number`); a guest class instance cast to host and guest classes (`hostclass.control`); and two generic Swift
+classes the runtime builds at run time (`Base<T>`, `Derived<T>`), cast and asked for their superclass (`generic.dyncast`,
+`generic.superclass`, `generic.subclass`), which need the pool the runtime's metadata allocator takes them from to lie in
+the image.
+
 The proxy steps hand an object of such a class to the host and use it there. `stepProxyCount`, `stepProxyKind`,
 `stepProxyDescription`, `stepProxyIdentity` (`NSArray(object:)` gives back the object that went in), `stepProxyNested`,
 `stepProxyMutation` and `stepProxyAny` bridge a `[String: String]` or a `[AnyHashable: Any]` (`_SwiftDeferredNSDictionary`) and have

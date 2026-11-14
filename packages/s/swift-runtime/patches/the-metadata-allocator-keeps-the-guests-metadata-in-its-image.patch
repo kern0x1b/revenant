@@ -1,0 +1,50 @@
+diff --git a/stdlib/public/runtime/Metadata.cpp b/stdlib/public/runtime/Metadata.cpp
+--- a/stdlib/public/runtime/Metadata.cpp
++++ b/stdlib/public/runtime/Metadata.cpp
+@@ -8158,11 +8158,23 @@
+ /***************************************************************************/
+ 
+ #if !SWIFT_STDLIB_PASSTHROUGH_METADATA_ALLOCATOR
++
++// As the guest of a translated program, on a 32-bit host, this runtime tells a class that it laid out from a class of
++// the host's own Objective-C runtime by the address (ClassMetadata::isTypeMetadata): the classes it builds must lie
++// in the guest images, so it takes all its metadata from a pool in this image, which is zero-filled and costs a
++// program nothing until it touches it. The pool does not grow: its end is a fatal error.
++#if SWIFT_OBJC_INTEROP && defined(__aarch64__)
++#define SWIFT_METADATA_ARENA_IN_IMAGE 1
++#endif
+ 
+ namespace {
+   struct alignas(sizeof(uintptr_t) * 2) PoolRange {
+     static constexpr uintptr_t PageSize = 16 * 1024;
++#if SWIFT_METADATA_ARENA_IN_IMAGE
++    static constexpr uintptr_t MaxPoolAllocationSize = UINTPTR_MAX;
++#else
+     static constexpr uintptr_t MaxPoolAllocationSize = PageSize / 2;
++#endif
+ 
+     /// The start of the allocation.
+     char *Begin;
+@@ -8178,7 +8190,11 @@
+     size_t PoolSize;
+   };
+ 
++#if SWIFT_METADATA_ARENA_IN_IMAGE
++  static constexpr size_t InitialPoolSize = 16 * 1024 * 1024;
++#else
+   static constexpr size_t InitialPoolSize = 64 * 1024;
++#endif
+ 
+   /// The header placed before each allocation, used when
+   /// SWIFT_DEBUG_ENABLE_METADATA_ALLOCATION_ITERATION is on.
+@@ -8322,6 +8338,10 @@
+       if (SWIFT_UNLIKELY(_swift_debug_metadataAllocationIterationEnabled))
+         poolSize -= sizeof(PoolTrailer);
+       allocatedNewPage = true;
++#if SWIFT_METADATA_ARENA_IN_IMAGE
++      swift::fatalError(0, "the metadata arena of the guest image (%zu bytes) is exhausted: raise InitialPoolSize\n",
++                        (size_t)InitialPoolSize);
++#endif
+       allocation = reinterpret_cast<char *>(swift_slowAlloc(PoolRange::PageSize,
+                                                             alignof(char) - 1));
+       memsetScribble(allocation, PoolRange::PageSize);

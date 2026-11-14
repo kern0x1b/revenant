@@ -1,0 +1,33 @@
+diff --git a/include/swift/ABI/Metadata.h b/include/swift/ABI/Metadata.h
+--- a/include/swift/ABI/Metadata.h
++++ b/include/swift/ABI/Metadata.h
+@@ -43,6 +43,16 @@
+ #include "swift/shims/HeapObject.h"
+ #include "llvm/ADT/STLExtras.h"
+ #include "llvm/Support/Casting.h"
++
++#if SWIFT_OBJC_INTEROP && defined(__aarch64__)
++// This runtime runs as the guest of a translated program, on a 32-bit host that has its own Objective-C runtime.
++// These two words hold the range of the addresses of the guest images (the host writes them when it attaches
++// them; they are 0 until then, and where nothing translates the program). A guest image holds every class that is
++// laid out as a ClassMetadata, the classes that the runtime builds included (the metadata allocator takes them from
++// an arena in this image). A class outside the range is a class of the host, whose objc_class has 20 bytes, so the
++// word that ClassMetadata keeps its `Data` in is whatever follows the class in the host's memory.
++extern "C" unsigned long xl_guest_image_low, xl_guest_image_high;
++#endif
+ 
+ namespace swift {
+ 
+@@ -900,6 +910,12 @@
+   /// Is this object a valid swift type metadata?  That is, can it be
+   /// safely downcast to ClassMetadata?
+   bool isTypeMetadata() const {
++#if SWIFT_OBJC_INTEROP && defined(__aarch64__)
++    // A class outside the guest images is the host's: do not read what is not its Data.
++    if (xl_guest_image_high &&
++        reinterpret_cast<uintptr_t>(this) - xl_guest_image_low >= xl_guest_image_high - xl_guest_image_low)
++      return false;
++#endif
+     return (Data & SWIFT_CLASS_IS_SWIFT_MASK);
+   }
+   /// A different perspective on the same bit

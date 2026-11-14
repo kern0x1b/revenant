@@ -48,6 +48,16 @@ struct Box {
     }
 }
 
+class Base<T> {
+    let value: T
+
+    init(_ value: T) {
+        self.value = value
+    }
+}
+
+final class Derived<T>: Base<T> {}
+
 @objc(LibGenerics) public final class LibGenerics: NSObject {
     @objc public func sharedObject() -> AnyObject {
         if sharedHolder == nil {
@@ -143,6 +153,32 @@ struct Box {
 
     @objc public func stepProxyLifetimeAfter() {
         report("proxy.released", holderDeinits == 1)
+    }
+
+    // The classes of the host (iOS 6's NSDictionary, its mutable and its Core Foundation class) and the generic classes the
+    // Swift runtime builds at run time: the runtime reads a class as Swift metadata only inside the guest images, so
+    // it must not read a host class as Swift metadata (the word that is a Swift class's flags is something else in a host
+    // class) nor take the classes it builds for the host's.
+    @objc public func stepHostClasses() {
+        let literal: NSDictionary = ["a": 1, "b": "two"]
+        let mutable = NSMutableDictionary()
+        mutable["a"] = 1
+        let core = CFDictionaryCreateMutableCopy(nil, 0, literal as CFDictionary)!
+        let objects: [(String, AnyObject)] = [("literal", literal), ("mutable", mutable), ("core", core as AnyObject)]
+        for (name, object) in objects {
+            report("hostclass.dictionary." + name, (object as? [String: Any])?["a"] as? Int == 1)
+        }
+        report("hostclass.forced", ((core as AnyObject) as! [String: Any]).count == 2)
+        report("hostclass.superclass", ((literal as AnyObject) as? NSMutableDictionary) == nil && ((mutable as AnyObject) as? NSDictionary) != nil)
+        report("hostclass.guest", ((literal as AnyObject) as? LibGenerics) == nil && ((core as AnyObject) as? Holder<Int>) == nil)
+        report("hostclass.number", ((NSNumber(value: 3) as AnyObject) as? NSString) == nil && ((NSNumber(value: 3) as AnyObject) as? NSNumber) != nil)
+        let me: AnyObject = self
+        report("hostclass.control", (me as? NSObject) != nil && (me as? NSDictionary) == nil && (me as? LibGenerics) != nil)
+        let base: Any = Base(5)
+        report("generic.dyncast", (base as? Base<Int>)?.value == 5 && (base as? Base<String>) == nil)
+        report("generic.superclass", _getSuperclass(Derived<Int>.self) == Base<Int>.self && _getSuperclass(Derived<String>.self) == Base<String>.self)
+        let derived: Any = Derived("s")
+        report("generic.subclass", (derived as? Base<String>)?.value == "s" && (derived as? Base<Int>) == nil)
     }
 
     @objc public func stepDictionary() {

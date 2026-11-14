@@ -127,6 +127,25 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
   `/private/var/revenant/xl-shadow-log` on the device, then read `xlate-shadow.log`). A method a shadow adds is a block
   IMP that carries `self`, the selector and four more words to the guest method.
 
+- **The guest runtime tells a host class from its own by the address.** A class of the host's libobjc is a 20-byte
+  `objc_class` (isa, superclass, cache, vtable, bits), so the word that Swift's `ClassMetadata` keeps its `Data` in
+  (offset 32) is whatever follows the class in the host's memory, and `ClassMetadata::isTypeMetadata()` read it. For a
+  class of Foundation (`__NSCFDictionary`, the class a host `NSDictionary` has in `as! [String: Any]`) that was a
+  coin toss. The arm64 runtime therefore answers `false` for a class outside
+  `[xl_guest_image_low, xl_guest_image_high)` and reads `Data` only inside it (`patches/a-class-outside-the-guest-images-is-not-class-metadata.patch`).
+  Those two words are the range of the guest images; the runtime defines them (`runtime.c`), fills them when a library
+  attaches (`library.c`), and the generated bridge copies them into the guest like any host data the guest imports
+  (`common-includes.h` and `uikit-includes.h` declare them, the runtime's link allows the undefined symbols). Until the
+  range is set, and in a program that is not a library, the runtime reads `Data` as before. A class the Swift runtime
+  builds at run time (`_ContiguousArrayStorage<T>`, a generic class of the program) must lie in the range too, so
+  the runtime's metadata allocator takes all its metadata from a 16 MiB pool in `libswiftCore`'s image, which is zero-filled
+  and costs nothing until it is touched, instead of from the host's heap after its first 64 KiB
+  (`patches/the-metadata-allocator-keeps-the-guests-metadata-in-its-image.patch`); a program that needs more stops with
+  "the metadata arena of the guest image is exhausted". Every other read of the word, `isPureObjC()` and the walks up a
+  superclass chain, goes through `isTypeMetadata()`, so the one test covers Mirror, `swift_conformsToProtocol` and
+  the casts. A class of the guest's own image whose layout the host kept (an Objective-C class, a Swift class with a host
+  ancestor) is inside the range and has no Swift flag, as before.
+
 `tests/classpair` builds the cases as a program for macOS, where objc4 is the real thing, and the translation must
 print on the iPad 2 what objc4 printed.
 

@@ -6,3 +6,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+
+/* The range of the guest images (see common-includes.h): a translated Swift runtime imports it. */
+extern unsigned long xl_guest_image_low, xl_guest_image_high;
