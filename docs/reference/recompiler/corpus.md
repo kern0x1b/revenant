@@ -14,8 +14,8 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, switchtail, tailcalls, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, objectsplit, segmentlimit, absolutes, hostbridges, checkapi and proxytable; `classpair` and `ordinal` are the device group's, which also runs the
-device part of `exceptions`, `libexceptions` and `hostbridges`. Their output goes to the
+int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, hostbridges, checkapi and proxytable; `classpair` and `ordinal` are the device group's, which also runs the
+device part of `exceptions`, `libexceptions`, `libcxxexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
 
@@ -26,6 +26,7 @@ A check that also has a device part is run by hand, with the output folder as it
 ./xmakew l -P . recompiler/tests/classpair/check.lua <out>
 ./xmakew l -P . recompiler/tests/exceptions/check.lua <out>
 ./xmakew l -P . recompiler/tests/libexceptions/check.lua <out>
+./xmakew l -P . recompiler/tests/libcxxexceptions/check.lua <out>
 ./xmakew l -P . recompiler/tests/hostbridges/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftconformance/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftobjc/check.lua <out>
@@ -341,7 +342,42 @@ targets of a jump table, so the step is also the exceptions test of the multi-en
 
 The host part builds and translates the library and the host, and requires that the library registers SjLj frames
 (`_Unwind_SjLj_Register`). The device part runs each step and requires its `ok` names, `done` and `exit=0`. A C++ `throw`
-is not in the check, because it is the known limitation in `library-mode.md`.
+of guest code is the check of [libcxxexceptions](#libcxxexceptions).
+
+### libcxxexceptions
+
+C++ exceptions thrown and caught by guest code in a library (`XL_LIBRARY=1`) that carries the arm64 `libc++` and
+`libc++abi` of `revenant@libcxx` (`XL_CXX_LIBS` names another folder of the two) as guest images, loaded by a small armv7 host
+(`host.mm`, with the loader) that takes the step to run, so each step runs in a process of its own with
+`MallocScribble=1 MallocGuardEdges=1`. The guest (`fixture.mm`, class `LibCxxExceptions`) has eleven steps:
+
+- `stepValue`: `throw` of an `int`, a `const char *`, a `std::string`, a `double`, `char`, `long`, `unsigned short` and
+  `bool` (each caught by its own type), and a 32-byte struct caught by value, by reference and by pointer; `throw 1` meets
+  `catch (long)` before `catch (int)` and must take the second.
+- `stepHierarchy`: a class caught by its exact type, a base, a base of a base, a base by value (sliced), each of the two
+  bases of multiple inheritance, a virtual base and a virtual sibling, and a `catch` of an unrelated class that must not
+  match.
+- `stepStandard`: `std::runtime_error` caught as `std::exception` and as a sibling of `std::logic_error` (which must not
+  match), `std::out_of_range` from `std::vector::at`, `std::logic_error`, `std::string::at`, `std::bad_function_call`,
+  `std::bad_cast` from `dynamic_cast`, `std::invalid_argument`.
+- `stepNested`: a handler that throws another type, `throw;` through a function (the object stays the same one),
+  `catch (...)` with `throw;` twice in a row, a `try` inside a handler, and `std::uncaught_exceptions` during unwinding and
+  after it.
+- `stepUnwind`: destructors run in the order of the frames, the destructors of the members of a constructor that throws,
+  a thrown object copied by a `catch` by value (live objects counted), rethrown, and a loop of 200 throws.
+- `stepPointer`: `std::current_exception`, `std::rethrow_exception`, copies and assignment of `std::exception_ptr`, the
+  object kept past the handler and released, comparison, and `std::throw_with_nested` with `std::rethrow_if_nested`.
+- `stepForeign`: the host throws a `std::runtime_error`, an `int`, an `NSException` and a class of its own through guest
+  frames; the guest's `catch (...)`, `catch (int)`, `throw;`, destructors and `std::current_exception` handle them.
+- `stepRoundTrip`: a guest block that throws, called by the host's `enumerateObjectsUsingBlock:`, caught by the guest that
+  called it (a class of the guest's and a `std::runtime_error`).
+- `stepEscape`, `stepEscapeInteger`, `stepEscapeStandard`: guest code throws a class, an `int` and a `std::runtime_error`
+  that no guest frame catches; the host's `catch (int)` must take the `int`, and for the class and the `std::runtime_error`
+  only the host's `catch (...)` matches (`host.caught.other`), because the host does not know the guest's classes.
+
+The host part builds and translates the library and the host and fails if `__cxa_throw` stays a fault in
+`report.txt`. The fixture is built with `-mno-outline`, so that the arm64 machine outliner does not hide the exceptions
+test behind a different problem (an outlined function that returns the flags).
 
 ### hostbridges
 
