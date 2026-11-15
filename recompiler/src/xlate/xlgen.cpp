@@ -381,6 +381,7 @@ class Generator {
   void EmitManualFunction(const std::string &symbol, unsigned arguments, const std::string &handler);
   void EmitLazyClassNamer(const std::string &symbol);
   void EmitImageNameHook(const std::string &symbol);
+  void EmitGetClassHook(const std::string &symbol);
   void EmitExec(const std::string &symbol);
   std::set<std::string> exec_emitted_;
   std::string variant_alias_;
@@ -1516,6 +1517,23 @@ void Generator::EmitImageNameHook(const std::string &symbol) {
       "void xl_h_xl_default_class_getImageName(State *state)\n{\n"
       "    xl_manual_default_class_getImageName(xl_argument(state));\n    xl_return(state);\n}\n\n";
   Report(symbol + ": manual bridge xl_manual_objc_setHook_getImageName (class_getImageName asks the hook first)");
+}
+
+void Generator::EmitGetClassHook(const std::string &symbol) {
+  guest_ +=
+      "extern void xl_trap_objc_setHook_getClass(void *);\n"
+      "static BOOL xl_no_class_hook(const char *name, Class *outClass) { return NO; }\n"
+      "void objc_setHook_getClass(objc_hook_getClass newValue, objc_hook_getClass *outOldValue)\n{\n"
+      "    struct __attribute__((packed)) { uint64_t new_hook, old_out, none; } p;\n"
+      "    p.new_hook = (uint64_t)(uintptr_t)newValue;\n"
+      "    p.old_out = (uint64_t)(uintptr_t)outOldValue;\n"
+      "    p.none = (uint64_t)(uintptr_t)xl_no_class_hook;\n"
+      "    xl_trap_objc_setHook_getClass(&p);\n}\n\n";
+  host_ +=
+      "void xl_manual_objc_setHook_getClass(void *pack);\n"
+      "void xl_h_objc_setHook_getClass(State *state)\n{\n"
+      "    xl_manual_objc_setHook_getClass(xl_argument(state));\n    xl_return(state);\n}\n\n";
+  Report(symbol + ": manual bridge xl_manual_objc_setHook_getClass (the runtime keeps the hook and asks it for a name it has no class of: objc_getClass, objc_lookUpClass, NSClassFromString and xl_library_class)");
 }
 
 void Generator::EmitExec(const std::string &symbol) {
@@ -2929,7 +2947,7 @@ int main(int argc, const char **argv) {
       {"_exit", 1}, {"__exit", 1},
       {"_objc_copyImageNames", 1}, {"_objc_copyClassNamesForImage", 2}, {"_objc_copyClassList", 1},
       {"_objc_readClassPair", 2}, {"__objc_realizeClassFromSwift", 2}, {"_class_getImageName", 1},
-      {"_objc_getClass", 1}, {"_objc_lookUpClass", 1}, {"_class_getName", 1},
+      {"_objc_getClass", 1}, {"_objc_lookUpClass", 1}, {"_NSClassFromString", 1}, {"_class_getName", 1},
       {"_class_getMethodImplementation", 2}, {"_method_getImplementation", 1}, {"_method_setImplementation", 2},
       {"_class_addMethod", 4}, {"_class_replaceMethod", 4}, {"_imp_implementationWithBlock", 1},
       {"_imp_getBlock", 1}, {"_imp_removeBlock", 1}, {"_class_copyMethodList", 2},
@@ -2980,6 +2998,10 @@ int main(int argc, const char **argv) {
     }
     if (symbol == "_objc_setHook_getImageName") {
       generator.EmitImageNameHook(symbol);
+      continue;
+    }
+    if (symbol == "_objc_setHook_getClass") {
+      generator.EmitGetClassHook(symbol);
       continue;
     }
     if (auto weak = weak_functions.find(symbol); weak != weak_functions.end()) {

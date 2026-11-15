@@ -162,3 +162,12 @@ void xl_library_diagnostics(void)
 {
     xl_install_diagnostics();
 }
+
+extern void *xl_find_guest_class(const char *name);
+
+void *xl_library_class(const char *name)
+{
+    if (!name || __atomic_load_n(&xl_library_state, __ATOMIC_ACQUIRE) != XL_LIBRARY_READY)
+        return NULL;
+    return xl_find_guest_class(name);
+}

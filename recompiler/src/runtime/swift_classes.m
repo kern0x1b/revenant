@@ -891,7 +891,7 @@ static int xl_in_namespace_modules(const char *name)
     return 0;
 }
 
-static Class xl_lookup_class(const char *name, Class (*lookup)(const char *))
+static Class xl_lookup_registered(const char *name, Class (*lookup)(const char *))
 {
     if (!name || !xl_namespace_prefix[0] || xl_has_prefix(name))
         return lookup(name);
@@ -905,10 +905,70 @@ static Class xl_lookup_class(const char *name, Class (*lookup)(const char *))
     return lookup(name);
 }
 
+static uint64_t xl_class_hook;
+static pthread_key_t xl_class_hook_key;
+static pthread_once_t xl_class_hook_once = PTHREAD_ONCE_INIT;
+
+static void xl_class_hook_setup(void) { pthread_key_create(&xl_class_hook_key, NULL); }
+
+struct __attribute__((packed)) xl_class_hook_pack {
+    uint64_t new_hook;
+    uint64_t old_out;
+    uint64_t none;
+};
+
+void xl_manual_objc_setHook_getClass(void *pack)
+{
+    struct xl_class_hook_pack *p = pack;
+    uint64_t *old = (uint64_t *)xl_narrow_pointer(p->old_out, "objc_setHook_getClass", 1);
+    uint64_t previous = __atomic_load_n(&xl_class_hook, __ATOMIC_ACQUIRE);
+    if (old)
+        *old = previous ? previous : p->none;
+    __atomic_store_n(&xl_class_hook, p->new_hook, __ATOMIC_RELEASE);
+}
+
+static Class xl_hook_class(const char *name)
+{
+    uint64_t hook = __atomic_load_n(&xl_class_hook, __ATOMIC_ACQUIRE);
+    if (!hook || !name)
+        return Nil;
+    pthread_once(&xl_class_hook_once, xl_class_hook_setup);
+    if (pthread_getspecific(xl_class_hook_key))
+        return Nil;
+    uint64_t found = 0;
+    uint64_t arguments[2] = {(uint64_t)(uintptr_t)name, (uint64_t)(uintptr_t)&found};
+    pthread_setspecific(xl_class_hook_key, (void *)1);
+    uint64_t result = xl_invoke_n(hook, arguments, 2);
+    pthread_setspecific(xl_class_hook_key, NULL);
+    return (result & 0xff) && found ? xl_class_in(found) : Nil;
+}
+
+static Class xl_lookup_class(const char *name, Class (*lookup)(const char *))
+{
+    Class found = xl_lookup_registered(name, lookup);
+    return found ? found : xl_hook_class(name);
+}
+
+void *xl_find_guest_class(const char *name)
+{
+    return (void *)xl_lookup_class(name, objc_lookUpClass);
+}
+
 struct __attribute__((packed)) xl_class_name_pack {
     uint64_t a0;
     uint64_t r;
 };
+
+void xl_manual_NSClassFromString(void *pack)
+{
+    struct xl_class_name_pack *p = pack;
+    if (!p->a0) {
+        p->r = 0;
+        return;
+    }
+    NSString *name = (NSString *)xl_object_in(p->a0, "NSClassFromString", 0);
+    p->r = xl_object_out((uintptr_t)xl_lookup_class([name UTF8String], objc_lookUpClass));
+}
 
 void xl_manual_objc_getClass(void *pack)
 {
