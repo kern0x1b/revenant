@@ -181,6 +181,10 @@ static char xl_word_kind(const char *type)
         return 'O';
     if (*type == '#')
         return 'K';
+    if (*type == 'q')
+        return 'S';
+    if (*type == 'Q')
+        return 'U';
     return *type && strchr(":*^", *type) ? 'P' : 'I';
 }
 

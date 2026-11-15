@@ -1058,8 +1058,10 @@ static char xl_type_token(const char **p)
     char c = **p;
     switch (c) {
     case 'v': (*p)++; return 'V';
-    case 'c': case 'i': case 's': case 'l': case 'q':
-    case 'C': case 'I': case 'S': case 'L': case 'Q': case 'B': (*p)++; return 'I';
+    case 'q': (*p)++; return 'S';
+    case 'Q': (*p)++; return 'U';
+    case 'c': case 'i': case 's': case 'l':
+    case 'C': case 'I': case 'S': case 'L': case 'B': (*p)++; return 'I';
     case '@':
         (*p)++;
         if (**p == '?') (*p)++;
