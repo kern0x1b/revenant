@@ -68,6 +68,8 @@ uint64_t xl_invoke_n(uint64_t address, const uint64_t *arguments, unsigned count
 uintptr_t xl_object_in(uint64_t guest, const char *symbol, unsigned index);
 uintptr_t xl_object_in_raw(uint64_t guest, const char *symbol, unsigned index);
 uint64_t xl_object_out(uintptr_t host);
+uintptr_t xl_object_in_word(uint64_t guest, const char *symbol, unsigned index);
+uint64_t xl_object_out_word(uintptr_t host);
 uintptr_t xl_receiver_in(uint64_t guest);
 void *xl_fast_items(uint64_t items, uint64_t count);
 extern uintptr_t xl_alias_low, xl_alias_span;
@@ -75,8 +77,14 @@ uintptr_t xl_alias_resolve(uintptr_t pointer);
 uint64_t xl_alias_pointer(uintptr_t host);
 uint64_t xl_alias_object(uintptr_t host);
 uint64_t xl_protocol_out(uintptr_t host);
-unsigned xl_callback_slot(unsigned signature, uint64_t target);
-extern uint64_t xl_callback_targets[][32];
+enum { XL_CALLBACK_PINNED, XL_CALLBACK_CALL, XL_CALLBACK_ONCE };
+#define XL_CALLBACK_SLOTS 32
+unsigned xl_callback_slot(unsigned signature, uint64_t target, unsigned life);
+void xl_callback_release(unsigned signature, unsigned slot);
+void xl_callback_done(unsigned signature, unsigned slot);
+extern uint64_t xl_callback_targets[][XL_CALLBACK_SLOTS];
+extern uint32_t xl_callback_uses[][XL_CALLBACK_SLOTS];
+extern uint8_t xl_callback_life[][XL_CALLBACK_SLOTS];
 
 static inline int64_t xl_narrow_signed(int64_t value, int64_t host_min, int64_t host_max, int64_t guest_min, int64_t guest_max, const char *symbol, unsigned index)
 {
@@ -109,6 +117,18 @@ static inline uintptr_t xl_narrow_pointer(uint64_t value, const char *symbol, un
     if (pointer - xl_alias_low < xl_alias_span)
         return xl_alias_resolve(pointer);
     return pointer;
+}
+
+extern uintptr_t xl_word_low, xl_word_span;
+void xl_word_init(void);
+uintptr_t xl_word_slot(uint64_t word, const char *symbol, unsigned index);
+uint64_t xl_word_value(uintptr_t slot);
+
+static inline uintptr_t xl_narrow_word(uint64_t value, const char *symbol, unsigned index)
+{
+    if ((value >> 32) && value < 0xFFFFFFFFFFFFFF00ull)
+        return xl_word_slot(value, symbol, index);
+    return xl_narrow_pointer(value, symbol, index);
 }
 
 static inline uint64_t xl_widen_plain(uintptr_t value)

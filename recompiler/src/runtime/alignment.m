@@ -212,6 +212,8 @@ static uint64_t xl_alias_protocol_shell(uintptr_t original)
 
 uint64_t xl_alias_pointer(uintptr_t host)
 {
+    if (host - xl_word_low < xl_word_span)
+        return xl_word_value(host);
     pthread_once(&xl_alias_once, xl_alias_setup);
     if (xl_constant_string(host))
         return xl_alias_string(host);

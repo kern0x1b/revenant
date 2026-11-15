@@ -8,6 +8,7 @@ State *xl_current_state(void);
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 #include <unwind.h>
 
 _Static_assert(sizeof(va_list) == sizeof(char *), "host va_list must be a pointer");
@@ -673,6 +674,84 @@ void xl_narrowing_fault(const char *symbol, unsigned index, uint64_t value)
     abort();
 }
 
+#define XL_WORD_SLOTS 262144u
+#define XL_WORD_STRIDE 16u
+#define XL_WORD_OFFSET 4u
+
+uintptr_t xl_word_low;
+uintptr_t xl_word_span;
+static pthread_once_t xl_word_once = PTHREAD_ONCE_INIT;
+static pthread_mutex_t xl_word_lock = PTHREAD_MUTEX_INITIALIZER;
+static uint64_t *xl_word_words;
+static uint32_t *xl_word_index;
+static volatile unsigned xl_word_used;
+
+static void xl_word_setup(void)
+{
+    void *region = mmap(NULL, (size_t)XL_WORD_SLOTS * XL_WORD_STRIDE, PROT_NONE, MAP_ANON | MAP_PRIVATE, -1, 0);
+    void *words = mmap(NULL, (size_t)XL_WORD_SLOTS * sizeof(uint64_t), PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+    void *index = mmap(NULL, (size_t)XL_WORD_SLOTS * 2 * sizeof(uint32_t), PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+    if (region == MAP_FAILED || words == MAP_FAILED || index == MAP_FAILED)
+        xl_unsupported("the table of opaque 64-bit words cannot be mapped");
+    xl_word_words = words;
+    xl_word_index = index;
+    xl_word_low = (uintptr_t)region;
+    __sync_synchronize();
+    xl_word_span = (uintptr_t)XL_WORD_SLOTS * XL_WORD_STRIDE;
+}
+
+void xl_word_init(void)
+{
+    pthread_once(&xl_word_once, xl_word_setup);
+}
+
+uintptr_t xl_word_slot(uint64_t word, const char *symbol, unsigned index)
+{
+    pthread_once(&xl_word_once, xl_word_setup);
+    const uint32_t mask = XL_WORD_SLOTS * 2 - 1;
+    uint32_t at = (uint32_t)((word * 0x9E3779B97F4A7C15ull) >> 40) & mask;
+    pthread_mutex_lock(&xl_word_lock);
+    for (; xl_word_index[at]; at = (at + 1) & mask) {
+        uint32_t known = xl_word_index[at] - 1;
+        if (xl_word_words[known] == word) {
+            pthread_mutex_unlock(&xl_word_lock);
+            return xl_word_low + (uintptr_t)known * XL_WORD_STRIDE + XL_WORD_OFFSET;
+        }
+    }
+    unsigned next = xl_word_used;
+    if (next == XL_WORD_SLOTS) {
+        pthread_mutex_unlock(&xl_word_lock);
+        char buf[320];
+        snprintf(buf, sizeof buf,
+                 "xlate: %s argument %u value 0x%llx needs a slot of the table of opaque 64-bit words, which holds %u distinct words and is full\n",
+                 symbol, index, word, XL_WORD_SLOTS);
+        fprintf(stderr, "%s", buf);
+        xl_diag(buf);
+        xl_report_guest_frame();
+        abort();
+    }
+    xl_word_words[next] = word;
+    xl_word_index[at] = next + 1;
+    __sync_synchronize();
+    xl_word_used = next + 1;
+    pthread_mutex_unlock(&xl_word_lock);
+    return xl_word_low + (uintptr_t)next * XL_WORD_STRIDE + XL_WORD_OFFSET;
+}
+
+uint64_t xl_word_value(uintptr_t slot)
+{
+    uintptr_t offset = slot - xl_word_low;
+    if (offset % XL_WORD_STRIDE != XL_WORD_OFFSET || offset / XL_WORD_STRIDE >= xl_word_used) {
+        char buf[200];
+        snprintf(buf, sizeof buf, "xlate: the host address %p lies in the table of opaque 64-bit words but no slot was handed out there\n", (void *)slot);
+        fprintf(stderr, "%s", buf);
+        xl_diag(buf);
+        xl_report_guest_frame();
+        abort();
+    }
+    return xl_word_words[offset / XL_WORD_STRIDE];
+}
+
 static pthread_mutex_t xl_cxa_lock = PTHREAD_MUTEX_INITIALIZER;
 static struct xl_cxa_entry { uint64_t func, arg; } *xl_cxa_list;
 static unsigned xl_cxa_count, xl_cxa_cap, xl_cxa_armed;
@@ -1045,21 +1124,54 @@ void xl_manual__tlv_bootstrap(void *pack)
 
 static pthread_mutex_t xl_callback_lock = PTHREAD_MUTEX_INITIALIZER;
 
-unsigned xl_callback_slot(unsigned signature, uint64_t target)
+unsigned xl_callback_slot(unsigned signature, uint64_t target, unsigned life)
 {
     pthread_mutex_lock(&xl_callback_lock);
-    unsigned slot = 0;
-    for (; slot < 32; slot++) {
-        if (xl_callback_targets[signature][slot] == target || !xl_callback_targets[signature][slot])
+    unsigned found = XL_CALLBACK_SLOTS, vacant = XL_CALLBACK_SLOTS;
+    for (unsigned slot = 0; slot < XL_CALLBACK_SLOTS; slot++) {
+        if (!xl_callback_uses[signature][slot]) {
+            if (vacant == XL_CALLBACK_SLOTS)
+                vacant = slot;
+        } else if (xl_callback_targets[signature][slot] == target && xl_callback_life[signature][slot] == life) {
+            found = slot;
             break;
+        }
     }
-    if (slot == 32) {
-        fprintf(stderr, "xlate: callback pool %u exhausted\n", signature);
+    if (found != XL_CALLBACK_SLOTS) {
+        if (life != XL_CALLBACK_PINNED)
+            xl_callback_uses[signature][found]++;
+        pthread_mutex_unlock(&xl_callback_lock);
+        return found;
+    }
+    if (vacant == XL_CALLBACK_SLOTS) {
+        unsigned held[3] = {0, 0, 0};
+        for (unsigned slot = 0; slot < XL_CALLBACK_SLOTS; slot++)
+            held[xl_callback_life[signature][slot]]++;
+        fprintf(stderr, "xlate: callback pool %u exhausted: every slot holds a live guest function (%u pinned, %u in a host call, %u waiting to run once), and a function pointer passed for a call of the host is held until the call returns or the function has run\n",
+                signature, held[XL_CALLBACK_PINNED], held[XL_CALLBACK_CALL], held[XL_CALLBACK_ONCE]);
         abort();
     }
-    xl_callback_targets[signature][slot] = target;
+    xl_callback_targets[signature][vacant] = target;
+    xl_callback_life[signature][vacant] = (uint8_t)life;
+    xl_callback_uses[signature][vacant] = 1;
     pthread_mutex_unlock(&xl_callback_lock);
-    return slot;
+    return vacant;
+}
+
+void xl_callback_release(unsigned signature, unsigned slot)
+{
+    if (slot >= XL_CALLBACK_SLOTS)
+        return;
+    pthread_mutex_lock(&xl_callback_lock);
+    if (xl_callback_life[signature][slot] != XL_CALLBACK_PINNED && xl_callback_uses[signature][slot])
+        xl_callback_uses[signature][slot]--;
+    pthread_mutex_unlock(&xl_callback_lock);
+}
+
+void xl_callback_done(unsigned signature, unsigned slot)
+{
+    if (xl_callback_life[signature][slot] == XL_CALLBACK_ONCE)
+        xl_callback_release(signature, slot);
 }
 
 struct xl_buffer {

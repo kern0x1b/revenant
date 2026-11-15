@@ -465,6 +465,41 @@ methods of this shape, `+[NSException raise:format:arguments:]` and `+[NSPredica
 the same path and no line of the check calls them. The `%K` of a predicate format is not a conversion of `xl_format_marshal`
 and stops the program with its message.
 
+- a C function pointer the guest passes to the host: forty distinct functions through `dispatch_once_f` (twice each, they run
+  once), `dispatch_sync_f` and `dispatch_async_f` (each waited for before the next). The host holds a trampoline per
+  distinct guest function, 32 for each signature, and a function pointer passed for `dispatch_once_f`, `dispatch_sync_f`
+  and the like is held until the call returns, one for `dispatch_async_f` until it has run, so the reCAPTCHA SDK's
+  `swift_once`, which passes the initializer of every lazy global to `dispatch_once_f`, no longer ends with "callback pool
+  4 exhausted" at the 33rd global. The host part requires that the wrappers of the three hold the slot with the life that
+  fits them and that the two that run the function during the call release it.
+- a key built from a 64-bit constant: `objc_setAssociatedObject` and `objc_getAssociatedObject` with `0x636861726f6e4143` and
+  a second constant that differs in the last byte (and with the address of a static, as before), and
+  `dispatch_queue_set_specific`, `dispatch_queue_get_specific` and `dispatch_get_specific` with the same constant. Two
+  constants stay two keys, clearing one leaves the other, and the address key still works. Before, the reCAPTCHA SDK's
+  `charonAC` association key ended the program with "objc_getAssociatedObject argument 1 value 0x636861726f6e4143 does not
+  fit the host type". The same step stores the plain words 1 and 3 with the policy assign and reads them back (before, the
+  SDK's flag of 1 ended the program with "objc_setAssociatedObject argument 2 is 0x1, not an object pointer"); the host
+  part requires that the wrapper of the setter takes its value with `xl_object_in_word` and that of the getter gives it
+  back with `xl_object_out_word`.
+- the opaque 64-bit words of `recompiler/src/xlate/opaque_words.h`, one check for each position class, with `WORD(n)` =
+  `0x4d4e636572 + n` ("recNM", the context a Swift program hands to `dispatch_once_f`): the contexts of `dispatch_once_f`,
+  `dispatch_sync_f`, `dispatch_barrier_sync_f`, `dispatch_async_f`, `dispatch_barrier_async_f`, `dispatch_after_f`,
+  `dispatch_apply_f`, `dispatch_group_async_f` and `dispatch_group_notify_f` (each function receives the very word, and a
+  small word and an address still pass as they are); `dispatch_set_context` and `dispatch_get_context`; the value of
+  `dispatch_queue_set_specific` read back by `dispatch_queue_get_specific` and inside the queue by `dispatch_get_specific`;
+  `pthread_setspecific` and `pthread_getspecific`, the argument and the result of a thread made with `pthread_create` and
+  joined with `pthread_join` (an out slot that the guest has not set), the value of `pthread_exit`, and the value that a key
+  destructor receives; the thunk of `qsort_r`; a value of more than 32 bits stored with the policy assign; the arguments of
+  `performSelector:withObject:` and
+  `performSelector:withObject:withObject:`; the keys, values and contexts of a Core Foundation dictionary, set and array with
+  NULL callbacks (set, get, contains, `GetValueIfPresent`, apply, and the arrays that `CFDictionaryCreate` and `CFArrayCreate`
+  take); the key and value of an `NSMapTable` and a member of an `NSHashTable` with the pointer personality; the `info` of the
+  context of a `CFRunLoopTimer`, which the callback receives and `CFRunLoopTimerGetContext` gives back. The host part
+  requires the wrapper of one function of each class to narrow with `xl_narrow_word`, the wrapper of `pthread_join` not to read
+  the result slot, and `report.txt` to hold no line "opaque word table" (a row that does not match the SDK). The device part
+  also runs the program with `word-overflow`, which passes 300000 distinct words to `dispatch_sync_f`, and requires that it
+  stops with "holds 262144 distinct words and is full" and a non-zero status instead of reusing a slot.
+
 The check builds the program for this Mac and compares its output with `tests/data/hostbridges/expected.txt`, translates
 the arm64 build (which fails on any import without a bridge) and requires that the program imports each of the bridged
 functions. The device part runs the translated binary and compares its output with the Mac's.

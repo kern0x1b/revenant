@@ -1,4 +1,5 @@
 #include "host_routed.h"
+#include "opaque_words.h"
 
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Attr.h>
@@ -147,6 +148,8 @@ struct Value {
   std::string count_member;
   bool writes_back = false;
   bool is_object = false;
+  bool is_word = false;
+  bool out_only = false;
 };
 
 struct Leaf {
@@ -350,6 +353,9 @@ struct Signature {
   std::string note;
 };
 
+bool CallbackResultIsWord(const FunctionProtoType *proto);
+bool OpaqueField(const RecordDecl *record, StringRef field);
+
 std::string GuestScalarType(const Value &value) {
   if (value.kind == Kind::Floating) {
     return value.guest_bits == 32 ? "float" : "double";
@@ -545,9 +551,17 @@ bool Generator::Leaves(QualType g, QualType h, const std::string &gpath, const s
       if (gf->isBitField()) {
         return false;
       }
+      auto before = out.size();
       if (!Leaves(gf->getType(), hf->getType(), gpath + "." + gf->getNameAsString(), hpath + "." + hf->getNameAsString(),
                   base + layout.getFieldOffset(gf->getFieldIndex()) / 8, out)) {
         return false;
+      }
+      if (OpaqueField(gr, gf->getName())) {
+        if (out.size() != before + 1 || out.back().value.kind != Kind::Pointer || out.back().value.is_object) {
+          Report("opaque word table: the field " + gf->getNameAsString() + " of " + Spell(gc_, g) + " is no plain pointer in the SDK");
+          return false;
+        }
+        out.back().value.is_word = true;
       }
     }
     return gf == gr->field_end() && hf == hr->field_end();
@@ -596,8 +610,8 @@ std::string Generator::ScalarToHost(const Value &value, const std::string &expr,
       return "(" + Spell(hc_, value.host) + ")" + expr;
     default:
       if (value.is_object)
-        return "(" + Spell(hc_, value.host) + ")xl_object_in((uint64_t)" + expr + ", " + where + ")";
-      return "(" + Spell(hc_, value.host) + ")xl_narrow_pointer((uint64_t)" + expr + ", " + where + ")";
+        return "(" + Spell(hc_, value.host) + ")" + (value.is_word ? "xl_object_in_word" : "xl_object_in") + "((uint64_t)" + expr + ", " + where + ")";
+      return "(" + Spell(hc_, value.host) + ")" + (value.is_word ? "xl_narrow_word" : "xl_narrow_pointer") + "((uint64_t)" + expr + ", " + where + ")";
   }
 }
 
@@ -620,7 +634,7 @@ std::string Generator::ScalarToGuest(const Value &value, const std::string &expr
       return "xl_protocol_out((uintptr_t)" + expr + ")";
     default:
       if (value.is_object)
-        return "xl_object_out((uintptr_t)" + expr + ")";
+        return std::string(value.is_word ? "xl_object_out_word" : "xl_object_out") + "((uintptr_t)" + expr + ")";
       return "xl_widen_pointer((uintptr_t)" + expr + ")";
   }
 }
@@ -796,6 +810,20 @@ std::string Generator::HostBlockBridge(const Value &value) {
   return name + "_wrap";
 }
 
+std::string CallbackLife(const std::string &where) {
+  static const std::set<std::string> call = {"dispatch_once_f", "dispatch_sync_f", "dispatch_barrier_sync_f", "dispatch_apply_f", "pthread_once",
+                                             "qsort", "qsort_r", "bsearch", "CFArraySortValues", "CFArrayBSearchValues", "CFArrayApplyFunction",
+                                             "CFSetApplyFunction", "CFDictionaryApplyFunction", "CFBagApplyFunction", "CFTreeApplyFunctionToChildren"};
+  static const std::set<std::string> once = {"dispatch_async_f", "dispatch_after_f", "dispatch_barrier_async_f", "dispatch_group_async_f",
+                                             "dispatch_group_notify_f"};
+  auto end = where.find('"', 1);
+  if (where.empty() || where[0] != '"' || end == std::string::npos) {
+    return "";
+  }
+  auto symbol = where.substr(1, end - 1);
+  return call.count(symbol) ? "XL_CALLBACK_CALL" : once.count(symbol) ? "XL_CALLBACK_ONCE" : "";
+}
+
 std::string Generator::CallbackBridge(const Value &value) {
   auto gproto = value.guest.getCanonicalType()->getPointeeType()->getAs<FunctionProtoType>();
   auto hproto = value.host.getCanonicalType()->getPointeeType()->getAs<FunctionProtoType>();
@@ -811,6 +839,9 @@ std::string Generator::CallbackBridge(const Value &value) {
     params.push_back({Classify(gc_, gproto->getParamType(i), hc_, hproto->getParamType(i), true), "c" + std::to_string(i)});
   }
   auto result = Classify(gc_, gproto->getReturnType(), hc_, hproto->getReturnType(), false);
+  if (result.kind == Kind::Pointer && !result.is_object && CallbackResultIsWord(gproto)) {
+    result.is_word = true;
+  }
   bool has_result = result.kind != Kind::Void;
   std::string gfields = " uint64_t function;", hfields = " uint64_t function;";
   for (auto &param : params) {
@@ -838,6 +869,7 @@ std::string Generator::CallbackBridge(const Value &value) {
     hs << "    p." << param.name << " = " << ScalarToGuest(param.value, param.name) << ";\n";
   }
   hs << "    xl_invoke(XL_GUEST_" << name << "_guest, (uintptr_t)&p);\n";
+  hs << "    xl_callback_done(" << id << ", slot);\n";
   if (has_result) {
     hs << "    return " << ScalarToHost(result, "p.r", "\"" + name + "\", 99") << ";\n";
   }
@@ -846,12 +878,14 @@ std::string Generator::CallbackBridge(const Value &value) {
     hs << "static " << Spell(hc_, hproto->getReturnType(), name + "_" + std::to_string(slot) + "(" + (args.empty() ? "void" : args) + ")")
        << "\n{\n    " << (has_result ? "return " : "") << name << "_enter(" << slot << (names.empty() ? "" : ", " + names) << ");\n}\n\n";
   }
-  hs << "static " << Spell(hc_, value.host, name + "_host(uint64_t target)") << "\n{\n    static " << Spell(hc_, value.host, "const slots[32]") << " = {";
+  hs << "static " << Spell(hc_, value.host, name + "_hold(uint64_t target, unsigned life, unsigned *slot)") << "\n{\n    static " << Spell(hc_, value.host, "const slots[32]") << " = {";
   for (unsigned slot = 0; slot < 32; ++slot) {
     hs << (slot ? ", " : "") << name << "_" << slot;
   }
-  hs << "};\n    if (target >= 0xFFFFFFFFFFFFFF00ull)\n        return (" << Spell(hc_, value.host) << ")(uintptr_t)(uint32_t)target;\n"
-     << "    return target ? slots[xl_callback_slot(" << id << ", target)] : 0;\n}\n\n";
+  hs << "};\n    *slot = XL_CALLBACK_SLOTS;\n    if (target >= 0xFFFFFFFFFFFFFF00ull)\n        return (" << Spell(hc_, value.host) << ")(uintptr_t)(uint32_t)target;\n"
+     << "    if (!target)\n        return 0;\n    *slot = xl_callback_slot(" << id << ", target, life);\n    return slots[*slot];\n}\n\n";
+  hs << "static __attribute__((unused)) " << Spell(hc_, value.host, name + "_host(uint64_t target)") << "\n{\n    unsigned slot;\n    return " << name
+     << "_hold(target, XL_CALLBACK_PINNED, &slot);\n}\n\n";
   guest_ += gs.str();
   host_ += hs.str();
   return name + "_host";
@@ -870,15 +904,33 @@ std::string Generator::HostLoad(const Value &value, const std::string &expr, con
       post += "    [(id)" + temp + " release];\n";
       return temp;
     }
-    case Kind::Callback:
-      return CallbackBridge(value) + "(" + expr + ")";
+    case Kind::Callback: {
+      auto bridge = CallbackBridge(value);
+      auto life = CallbackLife(where);
+      if (life.empty()) {
+        return bridge + "(" + expr + ")";
+      }
+      auto stem = bridge.substr(0, bridge.size() - 5);
+      auto id = stem.substr(std::string("xl_callback_").size());
+      auto temp = "callback" + std::to_string(index);
+      prep += "    unsigned " + temp + "_slot;\n";
+      prep += "    " + Spell(hc_, value.host, temp) + " = " + stem + "_hold(" + expr + ", " + life + ", &" + temp + "_slot);\n";
+      if (life == "XL_CALLBACK_CALL") {
+        post += "    xl_callback_release(" + id + ", " + temp + "_slot);\n";
+      }
+      return temp;
+    }
     case Kind::OutSlot: {
       auto temp = "slot" + std::to_string(index);
       auto &pointee = *value.pointee;
       auto guest_type = GuestScalarType(pointee);
       prep += "    " + Spell(hc_, pointee.host, temp) + ";\n";
       prep += "    " + guest_type + " *" + temp + "_guest = (" + guest_type + " *)(uintptr_t)" + expr + ";\n";
-      prep += "    if (" + temp + "_guest)\n        " + temp + " = " + ScalarToHost(pointee, "*" + temp + "_guest", where) + ";\n";
+      if (pointee.out_only) {
+        prep += "    " + temp + " = 0;\n";
+      } else {
+        prep += "    if (" + temp + "_guest)\n        " + temp + " = " + ScalarToHost(pointee, "*" + temp + "_guest", where) + ";\n";
+      }
       post += "    if (" + temp + "_guest)\n        *" + temp + "_guest = (" + guest_type + ")" + ScalarToGuest(pointee, temp) + ";\n";
       return temp + "_guest ? &" + temp + " : 0";
     }
@@ -994,6 +1046,91 @@ void DetectArrays(ASTContext &gc, ASTContext &hc, Decl *g, Decl *h, Signature &s
   }
 }
 
+void OpaqueWordMismatch(Signature &signature, const std::string &api, int index, const char *meaning, const std::string &what) {
+  signature.supported = false;
+  signature.note = "opaque word table: " + api + (index == opaque::Result ? " result" : " argument " + std::to_string(index)) + " (" +
+                   meaning + ") " + what;
+}
+
+void MarkOpaqueWord(Signature &signature, const std::string &api, int index, opaque::Role role, bool out, const char *meaning) {
+  Value *value = nullptr;
+  if (index == opaque::Result) {
+    value = &signature.result;
+  } else if (index >= 0 && static_cast<size_t>(index) < signature.params.size()) {
+    value = &signature.params[index].value;
+  } else {
+    OpaqueWordMismatch(signature, api, index, meaning, "does not exist in the declaration of the SDK");
+    return;
+  }
+  bool id = role == opaque::Role::Id;
+  if (value->kind == Kind::Array && !out && !id && value->pointee) {
+    value = value->pointee.get();
+  } else if (value->kind == Kind::OutSlot && out && !id && value->pointee) {
+    value = value->pointee.get();
+    value->out_only = true;
+  } else if (out) {
+    OpaqueWordMismatch(signature, api, index, meaning, "is no pointer to a word that the host writes");
+    return;
+  }
+  if (value->kind != Kind::Pointer || value->is_object != id) {
+    OpaqueWordMismatch(signature, api, index, meaning, id ? "is no id" : "is no plain pointer");
+    return;
+  }
+  value->is_word = true;
+}
+
+void ApplyOpaqueFunctionWords(const std::string &api, Signature &signature) {
+  for (auto &row : opaque::functions) {
+    if (api == row.api) {
+      MarkOpaqueWord(signature, api, row.index, row.role, row.out, row.meaning);
+    }
+  }
+  for (auto &row : opaque::inputs) {
+    if (api != row.api) {
+      continue;
+    }
+    if (row.index < 0 || static_cast<size_t>(row.index) >= signature.params.size()) {
+      OpaqueWordMismatch(signature, api, row.index, "the context record", "does not exist in the declaration of the SDK");
+    } else if (auto &value = signature.params[row.index].value; value.kind == Kind::RecordPointer) {
+      value.writes_back = false;
+    } else {
+      OpaqueWordMismatch(signature, api, row.index, "the context record", "is no pointer to a record");
+    }
+  }
+}
+
+void ApplyOpaqueMethodWords(const std::string &selector, Signature &signature) {
+  for (auto &row : opaque::methods) {
+    if (selector == row.selector) {
+      MarkOpaqueWord(signature, selector, row.index, opaque::Role::Id, false, row.meaning);
+    }
+  }
+}
+
+bool CallbackResultIsWord(const FunctionProtoType *proto) {
+  if (!proto || proto->getNumParams() != 1) {
+    return false;
+  }
+  auto void_pointer = [](QualType type) {
+    type = type.getCanonicalType();
+    return type->isPointerType() && type->getPointeeType().getCanonicalType()->isVoidType();
+  };
+  return void_pointer(proto->getReturnType()) && void_pointer(proto->getParamType(0));
+}
+
+bool OpaqueField(const RecordDecl *record, StringRef field) {
+  StringRef name = record->getName();
+  if (name.empty() && record->getTypedefNameForAnonDecl()) {
+    name = record->getTypedefNameForAnonDecl()->getName();
+  }
+  for (auto &row : opaque::fields) {
+    if (name == row.record && field == row.field) {
+      return true;
+    }
+  }
+  return false;
+}
+
 Signature Generator::FromFunction(FunctionDecl *g, FunctionDecl *h) {
   Signature signature;
   for (unsigned i = 0; i < g->getNumParams(); ++i) {
@@ -1012,6 +1149,7 @@ Signature Generator::FromFunction(FunctionDecl *g, FunctionDecl *h) {
     signature.note = "result: " + (signature.result.note.empty() ? std::string("unsupported kind") : signature.result.note);
   }
   DetectArrays(gc_, hc_, g, h, signature);
+  ApplyOpaqueFunctionWords(g->getName().str(), signature);
   return signature;
 }
 
@@ -1033,6 +1171,7 @@ Signature Generator::FromMethod(ObjCMethodDecl *g, ObjCMethodDecl *h) {
     signature.note = "result: " + (signature.result.note.empty() ? std::string("unsupported kind") : signature.result.note);
   }
   DetectArrays(gc_, hc_, g, h, signature);
+  ApplyOpaqueMethodWords(g->getSelector().getAsString(), signature);
   if (signature.result.kind == Kind::Block) {
     signature.supported = false;
     signature.note = "block result";
@@ -1377,8 +1516,10 @@ std::string Generator::EmitBridge(const std::string &id, const Signature &signat
   if (has_result) {
     hs << HostStore(signature.result, call, "p->r");
     if (!message && signature.result.kind == Kind::Integer && signature.result.is_signed && !signature.params.empty()) {
-      hs << "    xl_errno_trace(\"" << id << "\", (int64_t)p->r, (uint64_t)p->" << signature.params[0].name << ", "
-         << (signature.params.size() > 1 ? "(uint64_t)p->" + signature.params[1].name : std::string("0")) << ");\n";
+      auto traced = [&](size_t i) {
+        return i < signature.params.size() && signature.params[i].value.kind != Kind::Record ? "(uint64_t)p->" + signature.params[i].name : std::string("0");
+      };
+      hs << "    xl_errno_trace(\"" << id << "\", (int64_t)p->r, " << traced(0) << ", " << traced(1) << ");\n";
     }
   } else {
     hs << "    " << call << ";\n";
@@ -2668,7 +2809,9 @@ bool Generator::Write() {
   }
   host << (*includes)->getBuffer() << "\n" << (*abi)->getBuffer() << "\n#include <objc/message.h>\n#include <objc/runtime.h>\n#include \"xl_bridge.h\"\n#include \"xl_host.h\"\n\n";
   host << "#define XL_CALLBACK_COUNT " << std::max<size_t>(1, callbacks_.size()) << "\n";
-  host << "uint64_t xl_callback_targets[XL_CALLBACK_COUNT][32];\n\n";
+  host << "uint64_t xl_callback_targets[XL_CALLBACK_COUNT][XL_CALLBACK_SLOTS];\n"
+       << "uint32_t xl_callback_uses[XL_CALLBACK_COUNT][XL_CALLBACK_SLOTS];\n"
+       << "uint8_t xl_callback_life[XL_CALLBACK_COUNT][XL_CALLBACK_SLOTS];\n\n";
   host << "void xl_manual_hblock_generic(void *pack);\nvoid xl_h_xl_hblock_generic(State *state)\n{\n    xl_manual_hblock_generic(xl_argument(state));\n    xl_return(state);\n}\n\n";
   host << host_record_defs_ << host_types_ << host_ << tables_;
   host << "const struct xl_selector_shim xl_selector_shims[] = {\n";
