@@ -6,7 +6,7 @@ diff -ruN a/ios/FileHandleBackports.swift b/ios/FileHandleBackports.swift
 +
 +extension FileHandle {
 +  func read(upToCount count: Int) throws -> Data? {
-+    let data = try self.__readDataUpToLength(count)
++    let data = try self.__readDataUp(toLength: count)
 +    return data.isEmpty ? nil : data
 +  }
 +
