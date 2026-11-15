@@ -514,7 +514,7 @@ static void xl_dynamic_send(State *state, id receiver, Method method, SEL select
         return;
     }
     unsigned argc = method_getNumberOfArguments(method);
-    uint32_t words[16];
+    uint32_t words[16] = {0};
     unsigned used = 2;
     words[0] = (uint32_t)(uintptr_t)receiver;
     words[1] = (uint32_t)(uintptr_t)selector;
@@ -549,8 +549,6 @@ static void xl_dynamic_send(State *state, id receiver, Method method, SEL select
         }
         }
         if (wide) {
-            if (used & 1)
-                words[used++] = 0;
             words[used++] = (uint32_t)value;
             words[used++] = (uint32_t)(value >> 32);
         } else {
