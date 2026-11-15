@@ -33,13 +33,27 @@ local POD_REQUIRES = {
     {name = "zxingobjc", version = "3.6.4", modules = {"expo-camera"}}
 }
 
-for _, pod in ipairs(POD_REQUIRES) do
+function pod_requirement(pod)
     local line = string.format('add_requires("revenant@%s %s", {alias = "%s"})', pod.name, pod.version, pod.name)
     local tests = {}
     for _, module in ipairs(pod.modules) do
         table.insert(tests, string.format('(",".. (os.getenv("RN_EXPO_REAL") or "") .. ","):find(",%s,", 1, true)', module))
     end
-    table.insert(WHOLE, {line = line, emit = "if " .. table.concat(tests, " or ") .. " then " .. line .. " end"})
+    return "if " .. table.concat(tests, " or ") .. " then " .. line .. " end"
+end
+
+function pod_requirements(text)
+    local added = {}
+    for _, pod in ipairs(POD_REQUIRES) do
+        local emit = pod_requirement(pod)
+        if not text:find(emit, 1, true) then
+            table.insert(added, emit)
+        end
+    end
+    if #added > 0 then
+        text = text .. "\n" .. table.concat(added, "\n") .. "\n"
+    end
+    return text
 end
 
 local SHARED_PACKAGES = {"swiftui", "cryptokit", "uniformtypeidentifiers", "swift-crypto"}
@@ -319,7 +333,7 @@ function copy_project(project, folder, bundle_id)
     end
     local xmake = path.join(folder, "xmake.lua")
     local text = io.readfile(xmake)
-    local carried = host_libcxx(shared_packages(whole_requirements(text)))
+    local carried = pod_requirements(host_libcxx(shared_packages(whole_requirements(text))))
     if carried ~= text then
         io.writefile(xmake, carried)
     end
@@ -440,6 +454,12 @@ end
 function build(folder, cache, options)
     folder = path.absolute(folder)
     check_copy(folder)
+    local carried = io.readfile(path.join(folder, "xmake.lua"))
+    for _, pod in ipairs(POD_REQUIRES) do
+        if not carried:find(pod_requirement(pod), 1, true) then
+            raise("%s does not require %s for the modules that use it, so nothing is built; make the copy again", folder, pod.name)
+        end
+    end
     local shared = options.shared or path.join(os.getenv("HOME"), "Git", "projects", "ios", "revenant", ".cache")
     local ci_backports = path.join(shared, "scratch", "rn-swift", "ci-backports", "libWebKitBackports.dylib")
     local pkgdirs = {ENRICHED_MARKDOWN.name .. "=" .. install_recipe(folder, path.absolute(cache), ENRICHED_MARKDOWN.name, ENRICHED_MARKDOWN.version)}

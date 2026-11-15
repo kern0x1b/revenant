@@ -52,6 +52,12 @@ expect("the copy declares the component option and the combine rule", whole:find
        "the component option or the combine requireconf is missing from the copy")
 expect("a plain application lacks all six whole requirements", #isolate.whole_missing(APPLICATION) == 6,
        "expected 6 missing, found " .. #isolate.whole_missing(APPLICATION))
+local pods = isolate.pod_requirements(whole)
+expect("the image and camera libraries are required only when a module that uses them is real",
+       pods:find('if (",".. (os.getenv("RN_EXPO_REAL") or "") .. ","):find(",expo-image,", 1, true) or (",".. (os.getenv("RN_EXPO_REAL") or "") .. ","):find(",expo-image-manipulator,", 1, true) then add_requires("revenant@sdwebimage 5.21.7", {alias = "sdwebimage"}) end', 1, true) ~= nil
+       and pods:find(',expo-camera,", 1, true) then add_requires("revenant@zxingobjc 3.6.4", {alias = "zxingobjc"}) end', 1, true) ~= nil
+       and isolate.pod_requirements(pods) == pods and #isolate.whole_missing(pods) == 0,
+       "the SDWebImage or ZXingObjC requirement is missing, not conditional on its modules or carried twice")
 expect("the root's own declarations are already whole", #isolate.whole_missing(ROOT_TEXT) == 0 and isolate.whole_requirements(ROOT_TEXT) == ROOT_TEXT,
        "the root's text is rewritten or reported missing")
 local carried = isolate.whole_requirements(CARRIED)
