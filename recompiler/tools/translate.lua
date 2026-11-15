@@ -134,6 +134,160 @@ local function classes_of(symbols)
     return result
 end
 
+local BACKPORTS_LEAF = "^lib.*Backports$"
+local OVERRIDE_MARKER = "___revenant_override"
+
+local function class_import(symbol)
+    return symbol:match("^_OBJC_CLASS_%$_(.+)$") or symbol:match("^_OBJC_METACLASS_%$_(.+)$")
+end
+
+local function nm_import_libraries(file)
+    local result = {}
+    for _, line in ipairs(lines(tryiorun("nm", {"-m", file}))) do
+        local symbol, library = line:match("%(undefined%) [%w ]-external (%S+) %(from (.-)%)")
+        if symbol then
+            result[symbol] = library
+        end
+    end
+    return result
+end
+
+local function packed_version(text)
+    local major, minor, patch = text:match("^(%d+)%.?(%d*)%.?(%d*)$")
+    return (tonumber(major) << 16) | ((tonumber(minor) or 0) << 8) | (tonumber(patch) or 0)
+end
+
+local function library_installs(file)
+    local installs = {}
+    for _, line in ipairs(lines(tryiorun("otool", {"-L", file}))) do
+        local install, compatibility, current = line:match("^%s+(%S+) %(compatibility version ([%d%.]+), current version ([%d%.]+)%)")
+        if install then
+            local leaf = path.filename(install)
+            local stem = leaf:gsub("%.dylib$", "")
+            local short = stem:gsub("%.%w+$", "")
+            installs[install] = {leaf = leaf, stem = stem, short = short, compatibility = packed_version(compatibility), current = packed_version(current)}
+        end
+    end
+    return installs
+end
+
+local function system_library_of(installs, leaf)
+    for install, entry in pairs(installs) do
+        if entry.leaf == leaf or entry.stem == leaf or entry.short == leaf then
+            return install
+        end
+    end
+end
+
+local function probe_system_libraries(e, out, symbols, flags)
+    if #symbols == 0 then
+        return {}, {}, {}
+    end
+    local source = path.join(out, "system-classes-probe.c")
+    local binary = path.join(out, "system-classes-probe.dylib")
+    local log = path.join(out, "system-classes-probe.err")
+    local declared, referenced = {}, {}
+    for _, symbol in ipairs(symbols) do
+        table.insert(declared, "extern char " .. symbol:sub(2) .. ";")
+        table.insert(referenced, "&" .. symbol:sub(2))
+    end
+    io.writefile(source, table.concat(declared, "\n") .. "\nvoid *const probe[] = {" .. table.concat(referenced, ", ") .. "};\n")
+    local linked = os.execv("xcrun", table.join({"clang", "-target", "armv7-apple-ios6.0", "-isysroot", e.sdk, "-fuse-ld=" .. e.ld, "-dynamiclib", source}, flags,
+                                                {"-o", binary}), {stderr = log, try = true}) == 0
+    if linked then
+        local installs = library_installs(binary)
+        local from = nm_import_libraries(binary)
+        local moves, libraries, missing = {}, {}, {}
+        for _, symbol in ipairs(symbols) do
+            local install = from[symbol] and system_library_of(installs, from[symbol])
+            if install then
+                moves[symbol] = install
+                libraries[install] = {current = installs[install].current, compatibility = installs[install].compatibility}
+            else
+                table.insert(missing, symbol)
+            end
+        end
+        return moves, libraries, missing
+    end
+    local refused = {}
+    for symbol in io.readfile(log):gmatch('"(_OBJC_[%w_$]+)", referenced') do
+        refused[symbol] = true
+    end
+    local kept, rest = {}, {}
+    for _, symbol in ipairs(symbols) do
+        table.insert(refused[symbol] and rest or kept, symbol)
+    end
+    if #rest == 0 then
+        io.stderr:write(io.readfile(log))
+        raise("linking %s, which finds the system library of each class the Backports shadow, failed", binary)
+    end
+    local moves, libraries, missing = probe_system_libraries(e, out, kept, flags)
+    return moves, libraries, table.join(missing, rest)
+end
+
+local function bind_system_classes(e, out, binary, cachefile, stock, exports, shadowed, flags, keep_proxies)
+    local exported = set(exports)
+    local imported = nm_import_libraries(binary)
+    local symbols = {}
+    for symbol in pairs(imported) do
+        table.insert(symbols, symbol)
+    end
+    local candidates, proxies = {}, {}
+    for _, symbol in ipairs(env.sorted(symbols)) do
+        local class, library = class_import(symbol), imported[symbol]
+        if class and library:match(BACKPORTS_LEAF) then
+            local reason
+            if stock[class] == nil then
+                reason = "absent from the iOS 6 cache"
+            elseif keep_proxies then
+                reason = "XL_PROXY_CLASSES=1"
+            elseif shadowed[class] then
+                reason = "shadowed: the system class lacks members of the proxy"
+            elseif exported[OVERRIDE_MARKER .. "_OBJC_CLASS_$_" .. class] then
+                reason = "overridden: the Backports export the override marker"
+            end
+            if reason then
+                table.insert(proxies, string.format("%s %s %s", symbol, library, reason))
+            else
+                table.insert(candidates, symbol)
+            end
+        end
+    end
+    local moves, libraries, missing = probe_system_libraries(e, out, candidates, flags)
+    local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
+    local cache = dyld.load(cachefile)
+    local blocked = {}
+    for _, symbol in ipairs(candidates) do
+        local install = moves[symbol]
+        if install and not dyld.exported_by(cache, install, symbol) then
+            moves[symbol] = nil
+            blocked[class_import(symbol)] = true
+            table.insert(proxies, string.format("%s %s the iOS 6 cache does not export it from %s", symbol, imported[symbol], path.filename(install)))
+        end
+    end
+    for _, symbol in ipairs(candidates) do
+        if moves[symbol] and blocked[class_import(symbol)] then
+            moves[symbol] = nil
+            table.insert(proxies, string.format("%s %s its class or metaclass stays on the Backports", symbol, imported[symbol]))
+        end
+    end
+    for _, symbol in ipairs(missing) do
+        table.insert(proxies, string.format("%s %s the SDK links no system library for it", symbol, imported[symbol]))
+    end
+    local rebound = {}
+    for _, symbol in ipairs(candidates) do
+        if moves[symbol] then
+            table.insert(rebound, string.format("%s %s %s", symbol, imported[symbol], moves[symbol]))
+        end
+    end
+    writelines(path.join(out, "system-classes.txt"), rebound)
+    writelines(path.join(out, "proxy-classes.txt"), proxies)
+    if #rebound > 0 then
+        import("@addon.revenant.apple.macho", {anonymous = true}).rebind(binary, moves, libraries)
+    end
+    print("system classes: %d import(s) of classes the iOS 6 cache has rebound from the Backports to the system library, %d left on the Backports", #rebound, #proxies)
+end
+
 local function otool_libraries(input)
     local result = {}
     for _, line in ipairs(lines(iorun("otool", {"-L", input}))) do
@@ -373,14 +527,14 @@ function translate(input, includes, out, images, opt)
     local resolved = readlines(o("guest-resolved.txt"))
     writelines(o("provided.txt"), unique(table.join(readlines(o("provided.txt")), resolved)))
 
-    local backport_libs, strip_dylibs = {}, {}
+    local backport_libs, backport_flags = {}, {}
     local backports = getenv("BACKPORTS_DIR")
     if backports ~= nil then
         backport_libs = backports ~= "" and env.sorted(os.files(path.join(backports, "lib*Backports.dylib"))) or {}
         if #backport_libs == 0 then
             raise("BACKPORTS_DIR='%s' holds no lib*Backports.dylib; unset it to translate without backports", backports)
         end
-        strip_dylibs = {"-Wl,-dead_strip_dylibs"}
+        backport_flags = {"-Wl,-dead_strip_dylibs", "-Wl,-headerpad,0x400"}
     end
 
     local imported = without(resolved, readlines(o("all-imports.txt")))
@@ -491,7 +645,7 @@ function translate(input, includes, out, images, opt)
     run(clang, table.join(host, extra_cflags, {"-c", path.join(runtime, "half.c"), "-o", o("half.o")}))
     if library then
         run(clang, table.join(host, {"-I", out, "-I", runtime, "-I", path.join(lab, "include")}, extra_cflags, {"-c", path.join(runtime, "library.c"), "-o", o("library.o")}))
-        writelines(o("exports.txt"), table.join({"_xl_library_init", "_xl_library_diagnostics"}, readlines(o("registry-exports.txt"))))
+        writelines(o("exports.txt"), table.join({"_xl_library_init", "_xl_library_diagnostics", "_xl_library_class"}, readlines(o("registry-exports.txt"))))
     end
     for _, source in ipairs({path.join(runtime, "bridge.m"), path.join(runtime, "objc_bridge.m"), path.join(runtime, "swift_classes.m"),
                              path.join(runtime, "proxy.m"), path.join(runtime, "alignment.m"), path.join(runtime, "objc_compat.m"), o("host.m")}) do
@@ -543,6 +697,11 @@ function translate(input, includes, out, images, opt)
 
     local stock_classes = path.join(e.dyld, "classes_armv7.json")
     local stock = os.isfile(stock_classes) and json.loadfile(stock_classes).classes or nil
+    local stock_names = {}
+    for class in pairs(stock or {}) do
+        table.insert(stock_names, class)
+    end
+    stock_names = env.sorted(stock_names)
     local undef_flags = {}
     for _, object in ipairs(lifted_objs) do
         for _, symbol in ipairs(unique(nm_undefined(object))) do
@@ -558,9 +717,9 @@ function translate(input, includes, out, images, opt)
         end
         wanted = unique(wanted)
         writelines(o("imported-classes-pre.txt"), wanted)
-        local covered = table.join(#stock > 0 and stock or {""})
+        local covered = table.join(#stock_names > 0 and stock_names or {""})
         for _, library in ipairs(backport_libs) do
-            table.join2(covered, classes_of(lines(tryiorun("nm", {"-gj", library}))))
+            table.join2(covered, classes_of(lines(tryiorun("nm", {"-gUj", library}))))
         end
         table.join2(covered, classes_of(resolved))
         covered = unique(covered)
@@ -577,7 +736,7 @@ function translate(input, includes, out, images, opt)
     end
     local function link(more)
         return os.execv("xcrun", table.join({"clang", "-target", "armv7-apple-ios6.0", "-isysroot", e.sdk, "-fuse-ld=" .. e.ld}, kind,
-                                            strip_dylibs, {"-Wl,-no_objc_category_merging", "-Wl,-no_deduplicate"}, words(io.readfile(o("layout.txt"))),
+                                            backport_flags, {"-Wl,-no_objc_category_merging", "-Wl,-no_deduplicate"}, words(io.readfile(o("layout.txt"))),
                                             lifted_objs, {o("runtime.o"), o("crypto.o"), o("half.o"), o("bridge.o"), o("objc_bridge.o"), o("swift_classes.o"), o("proxy.o"), o("alignment.o"), o("objc_compat.o"), o("host.o")},
                                             library and {o("library.o")} or {},
                                             words(getenv("XL_EXTRA_OBJ")), backport_libs, framework_flags, undef_flags, more or {},
@@ -602,19 +761,47 @@ function translate(input, includes, out, images, opt)
     end
     print("renamed %d sections", macho.rename_sections(binary, false))
 
+    if stock and #backport_libs > 0 then
+        local shadowed = {}
+        local shadow_list = path.join(e.root, "frameworks", "Backports", "tools", "shadowed-classes.txt")
+        if os.isfile(shadow_list) then
+            for _, line in ipairs(readlines(shadow_list)) do
+                local class = line:match("^shadow (%S+) %S+ %S+$")
+                if class then
+                    shadowed[class] = true
+                end
+            end
+        else
+            print("warning: %s is missing, so no class counts as shadowed and every class of the iOS 6 cache binds to the system", shadow_list)
+        end
+        bind_system_classes(e, out, binary, path.join(e.dyld, "dyld_shared_cache_armv7"), stock, exports, shadowed,
+                            table.join(framework_flags, {"-framework", "Foundation", "-framework", "CoreGraphics", "-framework", "UIKit", "-lobjc", "-lz"}, extra_libs),
+                            getenv("XL_PROXY_CLASSES") == "1")
+    end
+
     if stock then
         local wanted = unique(classes_of(nm_undefined(binary)))
         writelines(o("imported-classes.txt"), wanted)
-        local covered = table.join(#stock > 0 and stock or {""})
-        for _, library in ipairs(backport_libs) do
-            table.join2(covered, classes_of(lines(tryiorun("nm", {"-gj", library}))))
+        local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
+        local cache = dyld.load(path.join(e.dyld, "dyld_shared_cache_armv7"))
+        local from = nm_import_libraries(binary)
+        local installs = library_installs(binary)
+        local covered, uncovered = {}, {}
+        for _, class in ipairs(wanted) do
+            local symbol = "_OBJC_CLASS_$_" .. class
+            local bound = from[symbol]
+            local install = bound and system_library_of(installs, bound)
+            local present
+            if bound and bound:match(BACKPORTS_LEAF) then
+                present = true
+            elseif install then
+                present = dyld.exported_by(cache, install, symbol)
+            else
+                present = stock[class] ~= nil
+            end
+            table.insert(present and covered or uncovered, present and class or symbol)
         end
-        covered = unique(covered)
         writelines(o("covered-classes.txt"), covered)
-        local uncovered = {}
-        for _, class in ipairs(difference(wanted, covered)) do
-            table.insert(uncovered, "_OBJC_CLASS_$_" .. class)
-        end
         writelines(o("uncovered-classes.txt"), uncovered)
         if #uncovered > 0 then
             print("weak-binding %d uncovered class ref(s)", #uncovered)

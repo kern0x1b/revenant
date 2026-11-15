@@ -11,3 +11,5 @@ typedef enum {
 xl_load_status xl_reserve(const char *path);
 xl_load_status xl_load(const char *path);
 const char *xl_load_error(void);
+
+void *xl_find_class(const char *name);

@@ -177,10 +177,16 @@ static char xl_word_kind(const char *type)
 {
     while (*type && strchr("rnNoORV", *type))
         type++;
+    if (type[0] == '@' && type[1] == '?')
+        return 'B';
     if (*type == '@')
         return 'O';
     if (*type == '#')
         return 'K';
+    if (*type == 'q')
+        return 'S';
+    if (*type == 'Q')
+        return 'U';
     return *type && strchr(":*^", *type) ? 'P' : 'I';
 }
 
@@ -211,14 +217,57 @@ static IMP xl_guest_method_imp(uint64_t guest, SEL selector, const char *types)
     return imp;
 }
 
+static const char *xl_skip_type(const char *type);
+
+static int xl_block_method_words(const char *types)
+{
+    unsigned count = 0;
+    for (const char *type = types; *type; count++) {
+        const char *plain = type;
+        while (*plain && strchr("rnNoORV", *plain))
+            plain++;
+        int block = plain[0] == '@' && plain[1] == '?';
+        if (!*plain || !strchr("v@#:*^cCsSiIlLBqQ", *plain) || (*plain == 'v' && count) || (block && count < 3))
+            return 0;
+        type = xl_skip_type(type);
+        while (*type >= '0' && *type <= '9')
+            type++;
+    }
+    return count >= 3 && count <= 7;
+}
+
 static IMP xl_block_method_imp(uint64_t guest, SEL selector, const char *types)
 {
-    return imp_implementationWithBlock(^uintptr_t(id self_) {
-        char why[256];
-        snprintf(why, sizeof why, "xlate: the guest method %s (function 0x%llx, type encoding %s) takes a block and the translation generated no typed host wrapper for it",
-                 sel_getName(selector), (unsigned long long)guest, types);
-        xl_unsupported(why);
+    if (!xl_block_method_words(types)) {
+        return imp_implementationWithBlock(^uintptr_t(id self_) {
+            char why[256];
+            snprintf(why, sizeof why, "xlate: the guest method %s (function 0x%llx, type encoding %s) takes a block and has a type the bridge cannot marshal (self, _cmd and up to four arguments of objects, blocks, pointers and integers of at most one word, no block result)",
+                     sel_getName(selector), (unsigned long long)guest, types);
+            xl_unsupported(why);
+        });
+    }
+    struct xl_word_kinds kinds = xl_word_kinds_of(types);
+    IMP imp = imp_implementationWithBlock(^uintptr_t(id self_, uintptr_t a, uintptr_t b, uintptr_t c, uintptr_t d) {
+        const uintptr_t host[4] = {a, b, c, d};
+        uint64_t arguments[6] = {xl_object_out((uintptr_t)self_), (uint64_t)(uintptr_t)selector, 0, 0, 0, 0};
+        uint64_t proxies[4] = {0, 0, 0, 0};
+        for (unsigned i = 0; i < 4; i++) {
+            if (kinds.argument[i] == 'B') {
+                proxies[i] = xl_host_block_wrap((id)host[i], XL_GUEST_xl_hblock_generic_invoke, XL_GUEST_xl_hblock_generic_descriptor);
+                arguments[2 + i] = proxies[i];
+            } else {
+                arguments[2 + i] = xl_kind_out(kinds.argument[i], host[i]);
+            }
+        }
+        uint64_t result = xl_invoke_n(guest, arguments, 6);
+        for (unsigned i = 0; i < 4; i++) {
+            if (proxies[i])
+                xl_invoke(XL_GUEST__Block_release, proxies[i]);
+        }
+        return xl_kind_in(kinds.result, result, "guest method result");
     });
+    xl_table_set(xl_shadow_imps, (uintptr_t)imp, (const void *)(uintptr_t)guest);
+    return imp;
 }
 
 static const char *xl_skip_type(const char *type)
@@ -891,7 +940,7 @@ static int xl_in_namespace_modules(const char *name)
     return 0;
 }
 
-static Class xl_lookup_class(const char *name, Class (*lookup)(const char *))
+static Class xl_lookup_registered(const char *name, Class (*lookup)(const char *))
 {
     if (!name || !xl_namespace_prefix[0] || xl_has_prefix(name))
         return lookup(name);
@@ -905,10 +954,70 @@ static Class xl_lookup_class(const char *name, Class (*lookup)(const char *))
     return lookup(name);
 }
 
+static uint64_t xl_class_hook;
+static pthread_key_t xl_class_hook_key;
+static pthread_once_t xl_class_hook_once = PTHREAD_ONCE_INIT;
+
+static void xl_class_hook_setup(void) { pthread_key_create(&xl_class_hook_key, NULL); }
+
+struct __attribute__((packed)) xl_class_hook_pack {
+    uint64_t new_hook;
+    uint64_t old_out;
+    uint64_t none;
+};
+
+void xl_manual_objc_setHook_getClass(void *pack)
+{
+    struct xl_class_hook_pack *p = pack;
+    uint64_t *old = (uint64_t *)xl_narrow_pointer(p->old_out, "objc_setHook_getClass", 1);
+    uint64_t previous = __atomic_load_n(&xl_class_hook, __ATOMIC_ACQUIRE);
+    if (old)
+        *old = previous ? previous : p->none;
+    __atomic_store_n(&xl_class_hook, p->new_hook, __ATOMIC_RELEASE);
+}
+
+static Class xl_hook_class(const char *name)
+{
+    uint64_t hook = __atomic_load_n(&xl_class_hook, __ATOMIC_ACQUIRE);
+    if (!hook || !name)
+        return Nil;
+    pthread_once(&xl_class_hook_once, xl_class_hook_setup);
+    if (pthread_getspecific(xl_class_hook_key))
+        return Nil;
+    uint64_t found = 0;
+    uint64_t arguments[2] = {(uint64_t)(uintptr_t)name, (uint64_t)(uintptr_t)&found};
+    pthread_setspecific(xl_class_hook_key, (void *)1);
+    uint64_t result = xl_invoke_n(hook, arguments, 2);
+    pthread_setspecific(xl_class_hook_key, NULL);
+    return (result & 0xff) && found ? xl_class_in(found) : Nil;
+}
+
+static Class xl_lookup_class(const char *name, Class (*lookup)(const char *))
+{
+    Class found = xl_lookup_registered(name, lookup);
+    return found ? found : xl_hook_class(name);
+}
+
+void *xl_find_guest_class(const char *name)
+{
+    return (void *)xl_lookup_class(name, objc_lookUpClass);
+}
+
 struct __attribute__((packed)) xl_class_name_pack {
     uint64_t a0;
     uint64_t r;
 };
+
+void xl_manual_NSClassFromString(void *pack)
+{
+    struct xl_class_name_pack *p = pack;
+    if (!p->a0) {
+        p->r = 0;
+        return;
+    }
+    NSString *name = (NSString *)xl_object_in(p->a0, "NSClassFromString", 0);
+    p->r = xl_object_out((uintptr_t)xl_lookup_class([name UTF8String], objc_lookUpClass));
+}
 
 void xl_manual_objc_getClass(void *pack)
 {

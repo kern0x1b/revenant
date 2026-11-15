@@ -79,8 +79,16 @@ and the numbers that stand for guest addresses made it fail with a crash.
 The host dylib exports the structures of the guest's categories (`xl_objc_category_<n>`), because the registry's category
 list refers to them by symbol and dyld binds them when the registry is loaded.
 
-The only other exports of the library are `xl_library_init` and `xl_library_diagnostics`. The guest's symbols stay inside, so a
-library never takes a name from the host's own images or the other way round.
+The only other exports of the library are `xl_library_init`, `xl_library_diagnostics` and `xl_library_class`. The guest's
+symbols stay inside, so a library never takes a name from the host's own images or the other way round.
+
+`xl_library_class` exists because a Swift class cannot be found by the name Swift gives it through the host's own
+`NSClassFromString`: iOS 6 has no `objc_setHook_getClass`, which is how a newer Swift runtime answers `"Module.Class"`.
+The library supplies that call to its guest `libswiftCore`, keeps the hook, and offers the lookup to the host as this
+export, which the loader's `xl_find_class(name)` calls. The guest's own `objc_getClass`, `objc_lookUpClass` and
+`NSClassFromString` ask the hook the same way. A fixed list of class names that the translation or the host would carry
+instead would be a contract of its own for each library; the hook is the one Apple defined, and the library's Swift
+runtime already knows the answer.
 
 ## The runtime inside someone else's process
 

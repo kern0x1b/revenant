@@ -56,6 +56,10 @@ private var created = 0
         performSelector(inBackground: #selector(finish), with: nil)
     }
 
+    @objc(probeWithValue:completion:) private func probe(value: Int, completion: @escaping (Token?, NSError?) -> Void) {
+        completion(token(action: value), nil)
+    }
+
     @objc private func finish() {
         let completion = pendingCompletion
         pendingCompletion = nil

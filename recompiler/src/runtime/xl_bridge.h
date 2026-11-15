@@ -130,6 +130,8 @@ static inline uint64_t xl_kind_out(char kind, uintptr_t host)
     switch (kind) {
     case 'O': case 'K': return xl_object_out(host);
     case 'P': return xl_widen_pointer(host);
+    case 'S': return (int32_t)host == INT32_MAX ? (uint64_t)INT64_MAX : (int32_t)host == INT32_MIN ? (uint64_t)INT64_MIN : (uint64_t)(int64_t)(int32_t)host;
+    case 'U': return (uint32_t)host == UINT32_MAX ? UINT64_MAX : (uint64_t)(uint32_t)host;
     default: return (uint64_t)host;
     }
 }
@@ -139,6 +141,8 @@ static inline uintptr_t xl_kind_in(char kind, uint64_t guest, const char *symbol
     switch (kind) {
     case 'O': case 'K': return xl_object_in(guest, symbol, 0);
     case 'P': return xl_narrow_pointer(guest, symbol, 0);
+    case 'S': return (int64_t)guest == INT64_MAX ? (uintptr_t)INT32_MAX : (int64_t)guest == INT64_MIN ? (uintptr_t)INT32_MIN : (uintptr_t)(uint32_t)guest;
+    case 'U': return guest == UINT64_MAX ? (uintptr_t)UINT32_MAX : (uintptr_t)(uint32_t)guest;
     default: return (uintptr_t)guest;
     }
 }

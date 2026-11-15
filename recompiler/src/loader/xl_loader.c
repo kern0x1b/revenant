@@ -292,3 +292,14 @@ const char *xl_load_error(void)
 {
     return xl_loader_message;
 }
+
+void *xl_find_class(const char *name)
+{
+    pthread_mutex_lock(&xl_loader_lock);
+    void *handle = xl_loaded_handle;
+    pthread_mutex_unlock(&xl_loader_lock);
+    if (!handle || !name)
+        return NULL;
+    void *(*find)(const char *) = (void *(*)(const char *))dlsym(handle, "xl_library_class");
+    return find ? find(name) : NULL;
+}

@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import <objc/runtime.h>
 
 @interface RCFToken : NSObject
 @property (nonatomic, readonly) NSInteger value;
@@ -18,4 +19,11 @@
 
 @interface RCFClient (RCFExtra)
 - (NSInteger)categoryValue;
+@end
+
+@interface RCFHooked : NSObject
+@end
+
+@interface RCFHook : NSObject
++ (NSArray *)run;
 @end

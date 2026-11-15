@@ -139,7 +139,9 @@ local function check_map(corpus, text, phases, what)
 end
 
 local EXPECTED = {"reserve", "load", "class", "create", "methods", "describe", "bundle", "bundle.path", "token", "category", "completion", "completion.thread"}
-local SWIFT_HOST_EXPECTED = {"host.bridge.before", "host.names", "names.disjoint", "host.bridge.after"}
+local SWIFT_HOST_EXPECTED = {"host.bridge.before", "host.names", "names.disjoint", "host.bridge.after", "find.swift", "find.host", "block.generic"}
+local HOOK_EXPECTED = {"find.before", "hook.absent", "hook.old", "hook.guest", "hook.exact", "hook.unknown", "find.hook"}
+local FIND_EXPECTED = {"find.unloaded", "find.exact", "find.unknown", "find.thread"}
 
 local function build_objc(e, corpus, o, here)
     corpus.ios(e, {"-fuse-ld=" .. e.ld, "-Wl,-no_objc_category_merging", "-O2", "-w", "-fobjc-arc", "-dynamiclib", "-install_name", "@rpath/RCFixture.dylib", "-framework", "Foundation", "-I", here,
@@ -228,8 +230,8 @@ function main(out, ...)
             table.insert(symbols, symbol)
         end
     end
-    if table.concat(symbols, " ") ~= "_xl_library_diagnostics _xl_library_init" then
-        corpus.fail("the library exports %s, not exactly its two entry points and the category structures the registry lists", table.concat(symbols, " "))
+    if table.concat(symbols, " ") ~= "_xl_library_class _xl_library_diagnostics _xl_library_init" then
+        corpus.fail("the library exports %s, not exactly its three entry points and the category structures the registry lists", table.concat(symbols, " "))
     end
     local registry = o("xl/RCFixture-classes.dylib")
     if not os.isfile(registry) then
@@ -252,7 +254,7 @@ function main(out, ...)
 
     local host_sources = {path.join(here, "host.m"), path.join(e.recompiler, "src", "loader", "xl_loader.c")}
     local host_flags = {"-O2", "-w", "-fobjc-arc", "-I", path.join(e.recompiler, "include"), "-framework", "Foundation", "-framework", "UIKit"}
-    local expected = EXPECTED
+    local expected = table.join(EXPECTED, FIND_EXPECTED, HOOK_EXPECTED)
     local runtime
     local bridging = (os.getenv("XL_LIBRARY_HOST_BRIDGING") or "") ~= ""
     local host_runtime = os.getenv("XL_LIBRARY_HOST_RUNTIME")
@@ -277,7 +279,7 @@ function main(out, ...)
                 table.insert(expected, name)
             end
         end
-        expected = table.join(expected, SWIFT_HOST_EXPECTED)
+        expected = table.join(expected, FIND_EXPECTED, SWIFT_HOST_EXPECTED)
     end
     corpus.armv7(e, table.join(host_flags, host_sources, {"-o", o("host")}))
     corpus.sign(e, o("host"))

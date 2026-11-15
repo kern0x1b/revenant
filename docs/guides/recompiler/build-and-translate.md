@@ -109,6 +109,9 @@ A `libFoundationBackports.dylib` from before 2026-11-15 also leaves `JSONSeriali
 translated library unsorted (measured on the iPhone 4S: 16 keys come back in hash order): the library binds to the proxy class of
 `NSJSONSerialization`, and the wrapper that honours the option was set on the system class only
 ([wrappers of a system method](../../explanation/backports-loading.md)). With the fix the same fixture returns the keys in byte order.
+A library translated since 2026-11-15 binds the classes the iOS 6 cache has (`NSJSONSerialization`, `NSMutableDictionary` and 20 more for the
+reCAPTCHA Enterprise SDK) to the system library, and only the classes the cache lacks to the Backports; `system-classes.txt` and
+`proxy-classes.txt` of the translation list both ([which class binds where](../../reference/recompiler/library-mode.md)).
 
 ## Translate a library
 
@@ -153,6 +156,10 @@ if (xl_load(path) == XL_LOAD_OK) {
 
   `xl_load_error()` says why a load failed. The classes of the library are found by name only after `xl_load`
   succeeded; before that `NSClassFromString` answers `Nil`.
+- `void *xl_find_class(const char *name)` returns the class of a name that the library answers to, or `NULL`. It finds
+  what `NSClassFromString` finds and a Swift class by `"Module.Class"` (and its mangled name), which the host's own
+  `NSClassFromString` does not on iOS 6 ([the contract](../../reference/recompiler/library-mode.md#the-class-of-a-name-xl_find_class-xl_library_class-objc_sethook_getclass)).
+  Try `NSClassFromString`, then `xl_find_class`, when the name could be either.
 - `xl_library_diagnostics()` (found with `dlsym`) installs the crash handlers and the exit note for a debugging session;
   an app that has its own crash reporter does not call it.
 

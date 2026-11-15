@@ -17,6 +17,7 @@ What `XL_LIBRARY=1` builds, the loader API, and what was measured on the iPhone 
 | `XL_REPLACES` | guest images that stand for system libraries | unset |
 | `XL_NAMESPACE` | prefix of the Objective-C class names of every guest image but the first (the runtime and the overlays); `none` leaves the names as they are | `XLG.` |
 | `BACKPORTS_DIR` | folder with the `lib*Backports.dylib` of the app's build: the imports the iOS 6.1.3 shared cache lacks and the Backports export bind to them | unset |
+| `XL_PROXY_CLASSES` | `1` keeps every class the Backports export bound to them, also one the iOS 6 cache has (the binding before 2026-11-15; a negative control) | unset |
 
 A library for an app that ships the Backports is translated with `BACKPORTS_DIR`. Without it every weak import the cache
 lacks (`NSURLComponents`, `NSURLQueryItem`, `NSURLSession`, `NSISO8601DateFormatter`, `WKWebView`, `NSDateInterval`, the
@@ -25,13 +26,72 @@ class; the translation lists them in `weak-absent.txt` and, for classes, in `unc
 gets one load command for each Backports library it uses (`-dead_strip_dylibs` drops the others), by that library's
 install name, `/usr/lib/revenant/org.revenant.backports/lib<Name>Backports.dylib`; the app has to have those files, as an
 app of revenant's build has through the package `org.revenant.backports`. The registry and the loader do not change.
-The reCAPTCHA Enterprise SDK needs it. Translated without `BACKPORTS_DIR` (2026-11-14, main 64fa5260a) its
-`uncovered-classes.txt` lists 66 class references, among them `NSURLComponents`, `NSURLQueryItem`, `NSURLSession`,
-`NSURLSessionConfiguration`, `NSISO8601DateFormatter`, `NSMeasurement`, `NSDimension`, `WKWebView`,
-`WKWebViewConfiguration` and `DCAppAttestService`, and `weak-absent.txt` lists 70 weak imports (`NSDateInterval`,
-`NSPersonNameComponents`, 25 `NSURL*` key constants and others). With it (main 7bdac1e30) the first list is empty, the second
-has 28 left that the Backports do not export, and the library has strong load commands for ten Backports libraries
-(AVFAudio, CoreData, CoreFoundation, CoreGraphics, DeviceCheck, Foundation, Security, System, UIKit, WebKit).
+The reCAPTCHA Enterprise SDK needs it. Translated without `BACKPORTS_DIR` (2026-11-15, main e54eefda5 with the check
+below) its `uncovered-classes.txt` lists 14 class references: `NSURLComponents`, `NSURLQueryItem`, `NSURLSession`,
+`NSURLSessionConfiguration`, `NSISO8601DateFormatter`, `NSMeasurement`, `NSDimension`, the two
+`NSAttributedStringMarkdown*` classes, `WKWebView`, `WKWebViewConfiguration`, `DCAppAttestService`, and `OS_dispatch_queue`
+and `OS_dispatch_source`, which the cache has but its `libSystem` does not export as symbols. `weak-absent.txt` lists 70 weak
+imports (`NSDateInterval`, `NSPersonNameComponents`, 25 `NSURL*` key constants and others). With it (main 7bdac1e30) the first
+list is empty, the second has 28 left that the Backports do not export, and the library has strong load commands for ten
+Backports libraries (AVFAudio, CoreData, CoreFoundation, CoreGraphics, DeviceCheck, Foundation, Security, System, UIKit, WebKit).
+
+A class reference is covered, and bound strongly, when it is bound to a Backports library, or to a system library whose
+copy in the iOS 6.0 cache exports the symbol (`dyld.exported_by`, the check the import check of the translation applies), or,
+for a flat lookup, when the class is in `classes_armv7.json` of that cache. The others are uncovered: the translation
+imports them weakly (`macho.weaken_classrefs`), so a phone that lacks them has nil and not a failed load. Until 2026-11-15
+the check read the class list as an array, which a JSON object is not (`#` is 0), so the cache's classes never counted and
+the same translation listed 66 references, every class the library imports, `NSObject` and `NSString` among them; a Backports
+library counted as covering a class it only imported, not one it exports. Every one of the 14 is exported by a Backports library
+of main 7bdac1e30, so `BACKPORTS_DIR` covers all of them.
+
+### Which class binds to the proxy and which to the system library
+
+The Backports come first in the link, so every class symbol they export binds to them, whether or not the iOS 6 cache has the
+class: a Backports library exports `_OBJC_CLASS_$_X` as an alias of its proxy `RevenantX`
+([how the Backports load](../../explanation/backports-loading.md)). After the link the translator moves part of those
+binds back, in `bind_system_classes` of `recompiler/tools/translate.lua`, with `rebind` of
+`toolchain/modules/apple/macho.lua`: a class symbol (`_OBJC_CLASS_$_X` and `_OBJC_METACLASS_$_X`) that the library imports from
+a Backports library is rebound to the system library the SDK links it from, unless one of these holds, in this order:
+
+| Kept on the Backports because | Why |
+|---|---|
+| the class is not in `classes_armv7.json` of the iOS 6.0 cache (the deployment floor, `e.dyld`) | the system has no such class; the proxy registers one (`+load`) |
+| `XL_PROXY_CLASSES=1` | the negative control |
+| the class is in `frameworks/Backports/tools/shadowed-classes.txt` (`CASpringAnimation`) | the system class lacks members the proxy has, and the proxy is the one that has them |
+| a Backports library exports `___revenant_override_OBJC_CLASS_$_X` | the same marker `revenant.rebind` reads: the library says it replaces the system symbol |
+| the iOS 6.0 cache does not export the symbol from the library the SDK links it from (`OS_dispatch_queue`, `OS_dispatch_source` from `libSystem.B.dylib`) | the class exists, but a strong bind to a library that does not export it fails when dyld loads the image; the import check of the translation names it |
+| the SDK links no system library for the symbol | nothing to rebind to |
+
+The system library is found by linking a probe object with a reference to each class symbol, against the frameworks of the
+real link and without the Backports, and reading which library each symbol is imported from. A library that the
+`-dead_strip_dylibs` link dropped (`UIKit`, when only `UIDevice` came from the Backports) gets its load command from `rebind`,
+with the versions the probe link recorded; the link has `-Wl,-headerpad,0x400` for the room. The load commands of the
+Backports libraries stay, because `attach.c` runs when such a library loads, and adds to the system class what the proxy
+has and the system class lacks (the members of the newer SDK, protocols, properties) and reparents a proxy that has no
+instance variables under the system class. A caller bound to the system class therefore gets the same members, and a guest
+class whose superclass is `NSMutableDictionary` inherits from the system class, not from a proxy.
+
+`system-classes.txt` lists the rebound symbols (`symbol`, the Backports library it left, the install name it moved to) and
+`proxy-classes.txt` those that stay (`symbol`, library, reason). The reCAPTCHA Enterprise SDK (2026-11-15, main 78e295235
+with this change): 23 binds move to the system library (`NSMutableDictionary` with its metaclass, `NSSet`, `NSNumber`,
+`NSNull`, `NSTimeZone`, `NSUUID`, `NSJSONSerialization`, `NSPropertyListSerialization`, `NSRegularExpression`, `NSLock`,
+`NSRecursiveLock`, `NSIndexSet`, `NSMutableIndexSet`, `NSNotification`, `NSException`, `NSInvocation`, `NSMethodSignature`,
+`NSEnumerator`, `NSDecimalNumber`, `NSAssertionHandler`, `NSFileSecurity` and `UIDevice`), 21 stay (19 absent from the
+cache, among them `NSURLComponents`, `NSURLQueryItem`, `NSURLSession`, `NSMeasurement`, `WKWebView` and `DCAppAttestService`,
+and the two dispatch classes). The binary has one load command more than before, for `UIKit`, and 92,480 bytes more of bind
+opcodes (`rebind` writes the bind stream without the compression of the linker); the registry and the guest image are byte
+for byte those of the translation without the change (drop6), because only the host part's binds moved.
+
+Why: `RCAx_GPBAutocreatedDictionary`, a guest class of the SDK, has `NSMutableDictionary` as its superclass, and with the
+Backports first its superclass bind named `RevenantNSMutableDictionary`, whose declared superclass is `NSDictionary`. The
+Backports repair that at load when the proxy has no instance variables (`revenant_reparent`), but the binding should not
+depend on that. The ObjC categories of the guest images were scanned (2026-11-15, the SDK and the guest `libswiftCore` and
+`libswiftFoundation` of main 78e295235): 10 categories in two images, the five of `libswiftFoundation` (on `NSKeyedUnarchiver`,
+`NSDictionary`, `NSMutableDictionary`, `NSObject` and `NSBundle`) and the five of `libswiftCore` (on guest classes); only
+`NSMutableDictionary` is a class that a Backports library exports and the cache has, and the
+Backports carry its dictionary selectors as a category of their own (`NSDictionary+SwiftOverlay.m`). The SDK itself
+declares no category. The superclasses of its guest classes are `NSObject`, `_SwiftObject`, `NSData`, `NSError`,
+`NSMutableArray` and `NSMutableDictionary`; only the last is exported by a Backports library.
 
 The output is two dylibs. The first, `<name>.dylib`, has two kinds of content:
 
@@ -41,9 +101,9 @@ The output is two dylibs. The first, `<name>.dylib`, has two kinds of content:
 | `__XGUEST,__image` | a section in the file, read-only, aligned to 16 KiB; dyld maps it and nobody reads it there | the guest image: the guest's segments as bytes, to be mapped at the addresses the guest was linked at |
 
 There are no guest segments in the link any more (`__X<n>TEXT`, `__X<n>DATA` are gone), and no window under `XL_BASE`: the
-host part does not depend on where the guest is. Exports are `_xl_library_init`, `_xl_library_diagnostics` and one
-`_xl_objc_category_<n>` for each Objective-C category of the guest (the registry refers to them); the check fails on
-anything else.
+host part does not depend on where the guest is. Exports are `_xl_library_class`, `_xl_library_diagnostics`,
+`_xl_library_init` and one `_xl_objc_category_<n>` for each Objective-C category of the guest (the registry refers to
+them); the check fails on anything else.
 
 The second, `<name>-classes.dylib`, is the registry: the lists that libobjc reads when it loads an image, and nothing
 else. It has `__DATA,__objc_classlist` (the guest's classes, by their guest address), `__objc_protolist` (its
@@ -53,6 +113,86 @@ is separate because libobjc registers the classes of an image while `dlopen` loa
 structures then: they are in the guest image, which the library maps only after dyld has placed the first dylib and
 relocated the slots that point into it. The first dylib has none of these lists. The registry is loaded after the
 guest image is in place and before the guest's initializers run.
+
+### The integer width of a method the SDK does not declare
+
+The guest's methods reach the armv7 host through stubs (`xl_imp_<n>`) that the host runtime registers in its Objective-C
+tables, so that a message sent by host code runs guest code. A stub has the host's calling convention, so it needs the
+host's type of each parameter. For a method that an SDK header declares, the types are the header's (`NSInteger` is `int`
+on armv7). For a method that no header declares the translator has only the guest's type encoding, and the arm64
+encoding does not tell `Int`, `NSInteger` and `long` (all of them `q`, `Q` unsigned) from `Int64` and `long long`
+(also `q`): the armv7 callers pass the first group in one register and the second in two (low word in `r3`, high word at
+`[sp]`, no alignment to an even register on iOS).
+
+A stub that reads two words where the caller passed one takes a high word from the caller's stack. It was the crash of
+the real RecaptchaEnterprise SDK on the 4S: the Swift runtime of the app (armv7, `Int` is 32 bits) sends
+`+newTaggedNSStringWithASCIIBytes_:length_:` to `__StringStorage`; the guest's `NSObject` category
+(`createTaggedString(bytes:count:)`, the stub reads `count` as `q`) answers, and `CFStringCreateWithBytes` got
+`0x<garbage>00000006` for a count of 6 (`argument 2 value … does not fit the host type`). A caller in the guest does not
+pass through the stub: the guest finds the guest implementation itself.
+
+The rule of `xlgen` (`HostScalar`) for a method with no SDK declaration takes the host type from the class that carries it:
+
+- a category on a system class (any class the guest imports, `NSObject` included), a class that has a system class other than
+  `NSObject` among its ancestors, and a Swift class (its name begins with `_Tt`) can be called by host code with the host's
+  headers or the host's Swift. A top-level `q` is the host's `long`, `Q` the `unsigned long`, `^q` and `^Q` (not const) a
+  pointer to one (an out slot, converted as for `NSInteger *`). The report line says so: `host IMP from guest type
+  encoding Q24@0:8q16 (q/Q as 32-bit long: category on system class NSObject) as L12@0:4l8`.
+- any other class (an Objective-C class of the guest that derives from `NSObject` alone, such as the protobuf runtime of
+  the SDK) is reached by host code only through methods that an SDK header declares, so the guest's own 64-bit type stays:
+  `q24@0:8q16` becomes `q16@0:4q8`. The 280 methods with a `q` or `Q` in that group in the report of drop8 include real
+  `int64_t` and `uint64_t` parameters (`-[RCAx_GPBInt64Array valueAtIndex:]`, `-[RCAx_GPBUInt64Array addValue:]`,
+  `-[RCAx_GPBCodedInputStream readInt64]`).
+
+The limit: a method in the first group that takes a real `Int64`/`UInt64`/`long long` and that no header declares would be
+read as one word. The encoding cannot tell them apart; the Swift symbol of the `@objc` thunk can. The methods of the
+first group in the SDK image and its overlays (`libswiftCore`, `libswiftFoundation`; the 15 report lines of drop8), each read
+from the mangled name of the thunk (`nm`, `xcrun swift-demangle`; the name of the `@objc` thunk ends in `To`):
+
+| method | class that carries it | parameter or result | Swift type |
+| --- | --- | --- | --- |
+| `newTaggedNSStringWithASCIIBytes_:length_:` | category on `NSObject` (`createTaggedString(bytes:count:)`) | `count` | `Int` |
+| `initWithBytes:length:` | `__NSSwiftData`, a subclass of `NSData` | `length` | `Int` |
+| `insertObjects:count:atIndex:` | `_SwiftNSMutableArray` | `count`, `at` | `Int`, `Int` |
+| `initWithObjects:forKeys:count:` | `__EmptyDictionarySingleton` | `count` | `Int` |
+| `initWithObjects:forKeys:count:` | the generic Swift dictionary storage (same selector and encoding; its thunk has no symbol) | `count` | `Int` (the `NSDictionary` initializer's `NSUInteger`) |
+| `getCString:maxLength:encoding:` | `__StringStorage`, `__SharedStringStorage` | `maxLength`, `encoding` | `Int`, `UInt` |
+| `_fastUTF8StringContents:utf8Length:` | `__StringStorage`, `__SharedStringStorage` | `utf8Length` | `UnsafeMutablePointer<UInt>` |
+| `retainCount` (class and instance), `_cfTypeID` | `_SwiftObject` | result | `NSUInteger`, `CFTypeID` (unsigned long; the thunks have no symbol, the Objective-C declarations decide) |
+| `initWithAction:` | `RecaptchaAction` | `action` | `RecaptchaActionType`, an `@objc` enum with the default raw type `Int` (`init(action:)` in the symbol table) |
+| `errorCode` | `RecaptchaError` | result | `RecaptchaErrorCode`, an `@objc` enum of raw type `Int` |
+| `rcbxd:` | `RCbwz` | result | `Int` (`rcbxd([Int]) -> Int`) |
+
+None of them takes an `Int64` or `UInt64`. A new image has to be checked the same way: translate it, take the lines of
+`report.txt` that say `q/Q as 32-bit long`, find the guest address of each stub's `imp` in the manifest, and read the
+symbol of the thunk.
+
+A guest block that the host calls (a completion handler, `enumerateObjectsUsingBlock:`) and a guest method that the
+host calls through the word trampoline of a Swift class (a method with no typed stub, only parameters of one word) have the
+same ambiguity, and the same answer: a `q` is a host `NSInteger` of one word, a `Q` an `NSUInteger`. The word the host passes
+is widened to the guest's register by its sign: `-5` is `-5`, the host's `NSNotFound` (`0x7fffffff`, `INT_MAX`) is the arm64
+`NSNotFound` (`INT64_MAX`), `INT_MIN` is `INT64_MIN`; a `Q` is zero-extended and the host's `UINT_MAX` is `UINT64_MAX`. A
+`q` result of the guest comes back as its low word, with `INT64_MAX` and `INT64_MIN` mapped to the host's `INT_MAX` and
+`INT_MIN` and `UINT64_MAX` to `UINT_MAX`. The word used to be zero-extended whatever its sign: a block that took an
+`NSInteger` got `4294967291` for `-5`. A block whose signature has an `i`, `s`, `c` or `B` is unchanged (the guest reads
+the low bits of the register).
+
+### A block that the host passes to a guest method that no header declares
+
+The host reaches a guest Swift class's `@objc` method through a host IMP. For a method that an SDK header declares,
+`xlgen` types every parameter, a block included (the header gives the block's parameter types). For a method that no
+header declares (`+fetchClientWithSiteKey:completion:` and `-executeWithAction:completion:` of the real SDK: the report says
+`generic host IMP, block parameter of a method the SDK does not declare`) the guest's encoding is `v32@0:8@16@?24`, which
+does not say what the block takes. The host block does: a block that clang or the Swift compiler makes carries its
+signature in its descriptor (`BLOCK_HAS_SIGNATURE`, for a Swift closure `v24@?0@8@"NSError"16`). So the runtime makes, for
+such a method, a guest block that holds the host block (the same proxy as the typed one: a guest `Block_copy` of it works, the host
+block is released when the guest block is) whose invoke function is one generic function that `xlgen` emits in every
+translation (`xl_hblock_generic_invoke` and `xl_hblock_generic_descriptor` in `guest.m`). When the guest calls the block,
+the runtime reads the host block's signature, converts each of up to four arguments by its kind (an object through
+`xl_object_in`, a pointer, an integer of one word: a `q`/`Q` in a host block is a real 64-bit value and is refused) and
+widens the result. A method with a `double`, `float` or structure parameter, a block result, or more than four
+arguments after `self` and `_cmd` still stops with a message that names its selector and encoding when the host calls it:
+`-executeWithAction:withTimeout:completion:` of the SDK has a `Double` and is one of them.
 
 ### The guest image (`recompiler/include/xl_guest_image.h`)
 
@@ -97,6 +237,7 @@ Pages of the guest that nothing touches stay clean file pages: they are not in t
 | `xl_reserve(path)` | reads the guest image's header from the file and takes the guest range and room for the host part, `VM_PROT_NONE` (the load order above) |
 | `xl_load(path)` | reserves if that was not done, gives the host room back, `dlopen`s, calls `xl_library_init`; the library owns the guest range from then on |
 | `xl_load_error()` | text of the last failure |
+| `void *xl_find_class(const char *name)` | the Objective-C class (a `Class`, as a pointer) that the loaded library answers to for `name`, or `NULL`: before `xl_load` succeeded, for a `NULL` name, for a name the library has no class of. Calls the library's export `xl_library_class` (found with `dlsym` on the handle of `xl_load`) |
 
 Statuses: `XL_LOAD_OK`, `XL_LOAD_BAD_IMAGE` (not an armv7 dylib, no guest image, a `magic` or `version` that is not read: the message says which, and
 the version found; no registry next to the library), `XL_LOAD_RANGE_BUSY` (the guest range is held: the message names the holder; or the reservation is
@@ -108,6 +249,44 @@ The library reports `XL_LIBRARY_OK`, `XL_LIBRARY_BAD_FORMAT`, `XL_LIBRARY_NOT_RE
 `xl_library_init` (`xl_guest_image.h`); the loader turns them into the statuses above. Called before `xl_load`
 by a host that never reserved, `xl_library_init` answers `XL_LIBRARY_NOT_RESERVED` and maps nothing, and any entry of the
 library aborts with "the guest image of the translated library is not attached".
+
+### The class of a name (`xl_find_class`, `xl_library_class`, `objc_setHook_getClass`)
+
+`NSClassFromString(@"RCFClient")` finds a class the library registered under that Objective-C name. It does not find a
+Swift class by the name Swift gives it, `"Module.Class"` or the mangled name (`_TtC…`, `$s…`): a Swift class without an
+`@objc(name)` is registered under its mangled Objective-C name, and iOS 6 has no `objc_setHook_getClass`, the call that
+lets the Swift runtime (`libswiftCore`, iOS 12 and later) answer those names to `NSClassFromString`. The library
+provides the call itself, as a bridge (`_objc_setHook_getClass` in `src/runtime/bridge-provides.txt`; the translation
+report says `manual bridge xl_manual_objc_setHook_getClass`), so a guest `libswiftCore` installs its
+`getObjCClassByMangledName` there. The runtime keeps the hook and asks it as Apple's libobjc does, after its own table
+and only for a name the table does not have:
+
+| Who asks | Order |
+|---|---|
+| the guest's `objc_getClass`, `objc_lookUpClass` and `NSClassFromString` | the registered name (with the `XLG.` prefix rule of the namespaced images), then the installed hook; the answer is the class's shadow |
+| the host's `xl_find_class(name)`, through the library's `void *xl_library_class(const char *name)` | the same lookup (`objc_lookUpClass` semantics: the class is not initialized, no class handler) |
+| the host's own `NSClassFromString` | the host's libobjc alone: it has no hook, so it does not find a Swift class by `"Module.Class"`; this is the reason for `xl_find_class` |
+
+The first hook a guest installs gets, in `*outOldValue`, a guest function that answers `NO` (Apple's libobjc gives the
+default there), so a hook can chain to the one before it. A hook that asks the lookup again from inside itself is not
+called a second time on that thread. What the hook answers with is a guest `Class`; the runtime turns it into the host
+class (`xl_class_in`) before the host sees it.
+
+The signatures, which are the contract of a host that uses them (`recompiler/include/xl_loader.h`, and the library's
+export):
+
+```c
+void *xl_find_class(const char *name);       /* loader (xl_loader.c): Class or NULL */
+void *xl_library_class(const char *name);    /* export of the library, found with dlsym; the loader calls it */
+```
+
+`xl_find_class` is the call a host makes. `xl_library_class` is the library's end of it and is named here because the
+list of exports is checked exactly. A host that built its own loader reads the class with `dlsym(handle,
+"xl_library_class")`, with the handle of its `dlopen` of the library, after `xl_load` returned `XL_LOAD_OK`; the export
+answers `NULL` before the library is ready.
+
+The library check ([below](#the-check)) proves it on the claimed phone: the Objective-C variant installs a hook of its
+own in the guest (`RCFHook`) and the Swift variant uses the guest's real `libswiftCore` hook (`xl_find_class("RCFixture.Client")`).
 
 ### The address-space map (`XL_LOADER_MAP`)
 
@@ -191,8 +370,8 @@ otherwise). The fixture is linked with `-no_objc_category_merging`: ld64 merges 
 one dylib, which leaves the category list empty and the check of the registry with nothing to prove.
 
 The host part of the check is the layout of the output (no `__X<n>` segment, `__LINKEDIT` and `__XGUEST` present, the header
-(`magic`, `version`, a range that is granule-aligned and not below `XL_BASE`), exports that are the two entry points and the
-`_xl_objc_category_<n>` names and nothing else, a registry with only the `__objc_*` sections, no code and no exports). On the
+(`magic`, `version`, a range that is granule-aligned and not below `XL_BASE`), exports that are the three entry points
+(`_xl_library_class`, `_xl_library_diagnostics`, `_xl_library_init`) and the `_xl_objc_category_<n>` names and nothing else, a registry with only the `__objc_*` sections, no code and no exports). On the
 claimed phone the check copies the library and its registry into one folder, runs four negative controls, then grows the
 host to `XL_LIBRARY_RESIDENT_MB` (85) `XL_LIBRARY_LAUNCHES` times (1) and expects these names `ok`, then `done` and `exit=0`
 in every launch:
@@ -222,9 +401,16 @@ handler's output has the `crash` map and the guest range is readable in it; with
 | `token` | an object result of a public method |
 | `category` | a method that a category of the guest adds to a guest class is found (the category is in the registry) |
 | `completion`, `completion.thread` | a host block called from the library, on a thread that is not the main one |
+| `find.unloaded` | negative control: `xl_find_class` answers `NULL` after `xl_reserve` and before `xl_load` |
+| `find.exact` | `xl_find_class("RCFClient")` is the class `NSClassFromString` finds |
+| `find.unknown` | negative control: a name that no class and no hook answers (`"RCFixture.Nothing"`) and a `NULL` name give `NULL` |
+| `find.thread` | `xl_find_class` from a global-queue thread that is not the one that loaded the library finds the class that needs the hook (`"RCFixture.Hooked"`, `"RCFixture.Client"` in the Swift variant): the hook runs on the thread's own guest stack and state |
+| `find.before`, `hook.absent` (Objective-C variant) | negative control: before the guest installs a hook, `"RCFixture.Hooked"` is not found, by `xl_find_class` or by the guest's `objc_getClass`, `objc_lookUpClass` and `NSClassFromString` |
+| `hook.old`, `hook.guest`, `hook.exact`, `hook.unknown` (Objective-C variant) | the guest installs a hook (`objc_setHook_getClass`) that answers `"RCFixture.Hooked"` with its class `RCFHooked`: `*outOldValue` is a function that answers `NO`; the guest's three lookups now find the class; a registered name (`RCFClient`, `RCFHooked`) does not call the hook; two unknown names call it twice and stay `Nil` |
+| `find.hook` (Objective-C variant) | `xl_find_class("RCFixture.Hooked")` is `RCFHooked`, and the host's own `NSClassFromString(@"RCFixture.Hooked")` is still `Nil` |
 
 The `swift` variant builds the host with Swift code of its own (`hostswift.swift`, armv7, iOS 6.0) and its own
-`libswiftCore`, and expects four names more. The host's Swift makes a struct boxed as `AnyObject`, an `[Any]` and a
+`libswiftCore`, and expects six names more. The host's Swift makes a struct boxed as `AnyObject`, an `[Any]` and a
 `String`; `host.m` keeps the class of each and the class of every name in the host's `libswiftCore`:
 
 | Name | Proves |
@@ -233,6 +419,9 @@ The `swift` variant builds the host with Swift code of its own (`hostswift.swift
 | `host.names` | after `xl_load`, every name of the host runtime answers with the host's class |
 | `names.disjoint` | the registry registered classes (the host takes the classes of the library's image and of its registry), and none has the name of a class of the host runtime |
 | `host.bridge.after` | after the calls, the three are the same classes with the same contents, and the names still hold |
+| `find.swift` | the guest's own `libswiftCore` installed its hook through the bridge: `xl_find_class("RCFixture.Client")` is the class that `NSClassFromString(@"RCFClient")` finds (the Swift name of a class that has an `@objc(RCFClient)` name) |
+| `block.generic` | the host sends a private `@objc` method of the Swift class (`probeWithValue:completion:`, in no header) `5` and `-5` with a block `^(id<RCFToken>, NSError *)`: the guest calls the block synchronously with a token of the value, and the host checks `7051` and `6951`; the argument is an `Int` (`q`), so the negative one proves its sign too. A runtime without the generic block bridge stops the host with `the guest method probeWithValue:completion: … takes a block and the translation generated no typed host wrapper for it` |
+| `find.host` | negative control: the host's `NSClassFromString(@"RCFixture.Client")` is `Nil` |
 
 | Variable | Meaning |
 |---|---|

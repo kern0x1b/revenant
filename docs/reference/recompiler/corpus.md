@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, switchtail, tailcalls, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, flagflow, hostbridges, checkapi and proxytable; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, flagflow, hostbridges, checkapi, proxytable and systemclasses; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions`, `libexceptions`, `libcxxexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -28,6 +28,7 @@ A check that also has a device part is run by hand, with the output folder as it
 ./xmakew l -P . recompiler/tests/libexceptions/check.lua <out>
 ./xmakew l -P . recompiler/tests/libcxxexceptions/check.lua <out>
 ./xmakew l -P . recompiler/tests/hostbridges/check.lua <out>
+./xmakew l -P . recompiler/tests/systemclasses/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftconformance/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftobjc/check.lua <out>
 ./xmakew l -P . recompiler/tests/libgenerics/check.lua <out>
@@ -764,6 +765,72 @@ one place at a time: the entry removed by a dying proxy that no longer owns it (
 without `objc_loadWeakRetained` (signal 11), a lookup outside the lock (signal 11), no guest retain or no guest release (the
 count checks), no replacement of the memory selectors (abort in the shadow's `retain`).
 
+### systemclasses (device part by hand)
+
+A library translated with `BACKPORTS_DIR` binds a class the iOS 6 cache has to the system library, not to the proxy
+that a Backports library exports under the same symbol ([library mode](library-mode.md)). The fixture is a guest
+`SCDict : NSMutableDictionary` that implements the five primitives of the class cluster and nothing else, and
+`SCFixture`, whose `+run` reports `ok <name>` or `FAIL <name>` for each of:
+
+- `superclass`: the superclass of `SCDict` is the system `NSMutableDictionary`, not a proxy that stands between them.
+- `kind`: an `SCDict` is a kind of `NSMutableDictionary` by the class the guest names and by the class `objc_getClass` finds,
+  and of `NSDictionary`.
+- `addEntriesFromDictionary`, `removeAllObjects`, `setDictionary`: the three mutators that `NSMutableDictionary` implements
+  and `NSDictionary` does not work on an `SCDict`.
+- `absent`, `shadowed`, `dispatch`: the guest still gets a class of its name for `NSURLQueryItem`, which the cache lacks, for
+  `CASpringAnimation`, which `shadowed-classes.txt` lists, and for `OS_dispatch_queue`, which the cache has but its `libSystem`
+  does not export as a symbol.
+- `wide`: the guest sends host class `SCHostWide` four messages through a cast `objc_msgSend`, whose parameters are
+  `int, long long`, `long long, long long`, `int, int, int, long long` (the last on the stack) and `unsigned char,
+  unsigned long long`. The armv7 iOS ABI does not align a `long long` argument to an even register: the low word goes in
+  `r3` and the high word at `[sp]`, and stack arguments are consecutive 4-byte words (`clang -target armv7-apple-ios6.0`
+  shows it). `xl_dynamic_send` once padded to the even register as AAPCS does, so the host method read a wrong high word.
+  A fixture built with that runtime reports `FAIL wide` on the 4S.
+- `native`: the host calls `-[NSObject scNative:]`, a method the fixture adds as a category on the system class `NSObject`
+  and the SDK does not declare, with an `NSInteger` (a 32-bit `int` on armv7), and checks `-5`, `0x40000000` and `-1`
+  (`NSNotFound`, `0x7fffffff`, is widened to the arm64 `NSNotFound` by design). The stub reads that argument as the armv7
+  caller passes it, one word ([method widths](library-mode.md#the-integer-width-of-a-method-the-sdk-does-not-declare)).
+- `blocks`: the guest hands host class `SCHostWide` a block `NSInteger (^)(NSInteger)` and a block `NSUInteger
+  (^)(NSUInteger)`, and the host calls them with `-5`, `NSNotFound` and `7`, and `0xfffffff0` and `7`. The guest block
+  records what it was given: the signed arguments have to arrive as `-5`, the arm64 `NSNotFound` and `7`, the unsigned ones
+  as `0xfffffff0` and `7`; the host checks what the block returned (`-5`, its own `NSNotFound`, `7`). A runtime that
+  zero-extends every `q` reports `FAIL blocks` on the 4S (`-5` arrives as `4294967291`).
+
+The host part needs no Backports build. It compiles two stand-in libraries for the armv7 target, `libFoundationBackports`
+from the sources of `NSMutableDictionaryAlias.m` (the proxy `RevenantNSMutableDictionary` and the alias symbols) and a
+class `NSURLQueryItem`, `libUIKitBackports` with `REVENANT_ALIAS(CASpringAnimation)` and `libSystemBackports` with
+`REVENANT_ALIAS(OS_dispatch_queue)`, under the install names of the
+real ones. It translates the fixture with `BACKPORTS_DIR` naming them, and requires of the library:
+
+- `_OBJC_CLASS_$_NSMutableDictionary` and `_OBJC_METACLASS_$_NSMutableDictionary` are imported from a library that is not a
+  Backports library, in the symbol table and in every bind entry of the dyld info (there are at least two: the class
+  reference and the superclass of `SCDict`), and `system-classes.txt` lists both with the system library they moved to;
+- `_OBJC_CLASS_$_NSURLQueryItem`, `_OBJC_CLASS_$_CASpringAnimation` and `_OBJC_CLASS_$_OS_dispatch_queue` stay on their Backports libraries, which `otool -L`
+  still lists, and `proxy-classes.txt` says why (`absent from the iOS 6 cache`, `shadowed`, `the iOS 6 cache does not export it from libSystem.B.dylib`);
+- `report.txt` gives the host method `-[SCNative scNative:]`, a category on `NSObject`, `L12@0:4l8` for the guest encoding `Q24@0:8q16`
+  (the `q` and `Q` as the 32-bit `long`), and the host method `-[SCGuestWide scBig:]`, of a guest class that derives only from
+  `NSObject`, `q16@0:4q8` for `q24@0:8q16` (the 64-bit type kept).
+
+The control translates the same fixture with `XL_PROXY_CLASSES=1`, which keeps every class on the Backports as the
+translator did before, and requires that `NSMutableDictionary` binds to `libFoundationBackports` and that
+`system-classes.txt` is empty.
+
+A third translation leaves `BACKPORTS_DIR` out and checks the `uncovered-classes.txt` report. It must list exactly
+`NSURLQueryItem`, which the iOS 6 cache lacks, and `OS_dispatch_queue`, which the cache's `libSystem` does not export, and
+the library must import those two weakly and `NSMutableDictionary` and `CASpringAnimation` strongly. A report that lists
+every imported class, or none, fails here: `classes_armv7.json` holds its classes as a JSON object, and a check that
+takes its length instead of its keys sees an empty set. The translation with the Backports must report no uncovered class.
+
+The device part (`--device-only`) translates the fixture against the Backports build that `REVENANT_ALIAS_LIBRARIES` names
+(default `build/iphoneos/armv7/release`), loads it in a small armv7 host with the loader, and requires `ok` for each name
+above. The control with `XL_PROXY_CLASSES=1` must report `FAIL superclass`: the Backports reparent a proxy that has no
+instance variables under the system class when they load, so the other names may pass there, and `superclass` is the one
+that shows the proxy still between the guest class and the system class.
+
+```sh
+./xmakew l -P . recompiler/tests/systemclasses/check.lua <out>
+```
+
 ### libgenerics (device part by hand)
 
 The generic classes that the guest Swift runtime instantiates at run time, in a library (`XL_LIBRARY=1`) with the guest
@@ -943,18 +1010,23 @@ the dylib statically:
 
 - the library has no `__X<n>` segment, has `__XGUEST` and `__LINKEDIT`, and the guest image header (`magic`, `version`, a
   granule-aligned range not below `XL_BASE`) is right;
-- the dylib exports exactly `_xl_library_init`, `_xl_library_diagnostics` and the `_xl_objc_category_<n>` of the guest's categories;
+- the dylib exports exactly `_xl_library_class`, `_xl_library_diagnostics`, `_xl_library_init` and the `_xl_objc_category_<n>` of the guest's categories;
 - the registry `<name>-classes.dylib` has only the `__objc_*` sections, no code and no exports, and a category list entry for
   each category;
 - the armv7 host app (`host.m` with `xl_loader.c`) builds and signs.
 
 The device part copies the dylib and the host to the claimed phone and runs the host. The host first grows its own
 resident set to the size given as an argument (85 MB by default, `XL_LIBRARY_RESIDENT_MB`), loads any dylibs named after
-it the way an app's frameworks are loaded, reserves the guest range, loads the library, and prints `ok <name>` for 12 checks:
+it the way an app's frameworks are loaded, reserves the guest range, loads the library, and prints `ok <name>` for 23 checks (22 in the Swift variant):
 `reserve`, `load`, `class` (`NSClassFromString`), `create`, `methods`, `describe` (a string built in the library),
 `bundle` (the library's `hostBundle` is the app's `mainBundle`), `bundle.path`, `token` (a value that depends on a
 static of the library), `category` (a method that a category of the guest adds, found through the registry; the Objective-C
-variant only), `completion` and `completion.thread` (a block called on another thread). Four negative controls run first: a held
+variant only), `completion` and `completion.thread` (a block called on another thread), and the class lookup by name
+(`find.unloaded`, `find.exact`, `find.unknown`, `find.thread`; `find.before`, `hook.absent`, `hook.old`, `hook.guest`, `hook.exact`,
+`hook.unknown`, `find.hook` in the Objective-C variant, where the guest installs a hook through `objc_setHook_getClass`;
+`find.swift`, `find.host` and `block.generic` in the Swift variant, where the guest's own `libswiftCore` installed it: `xl_find_class`
+finds `"RCFixture.Client"` and the host's `NSClassFromString` does not; [the contract](library-mode.md#the-class-of-a-name-xl_find_class-xl_library_class-objc_sethook_getclass)).
+Four negative controls run first: a held
 range, a guest image format the loader does not read, a registry that is not next to the library, and an init without a
 reservation. `XL_LIBRARY_LAUNCHES` repeats the launch, and `XL_LIBRARY_INSTALL_NAME=executable` names the library by
 `@executable_path` and starts the host without `DYLD_FALLBACK_LIBRARY_PATH`. It prints
