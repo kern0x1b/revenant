@@ -145,6 +145,24 @@ final class XiKey: Hashable {
     }
 }
 
+typealias XiChild = (label: String?, value: Any)
+
+struct XiPair {
+    var x = 1
+    var y = 2
+}
+
+@inline(never) func xiStoreNone<T>(_ pointer: UnsafeMutablePointer<T?>) {
+    pointer.initialize(to: nil)
+}
+
+@inline(never) func xiChildIsNone(_ pointer: UnsafePointer<XiChild?>) -> Bool {
+    if case .none = pointer.pointee {
+        return true
+    }
+    return false
+}
+
 @inline(never) func xiCases() -> [XiCase] {
     return [.c0, .c1, .c2, .c3, .c4, .c5, .c6, .c7, .c8, .c9]
 }
@@ -363,6 +381,22 @@ final class XiKey: Hashable {
             withExtendedLifetime(root) {}
         }
         report("xi.stdlib.released", xiDeinits == 1)
+    }
+
+    @objc public func stepExtraInhabitantsTuple() {
+        let size = MemoryLayout<XiChild?>.size
+        let memory = UnsafeMutableRawPointer.allocate(byteCount: size, alignment: 8)
+        memory.initializeMemory(as: UInt8.self, repeating: 0xAA, count: size)
+        let pointer = memory.assumingMemoryBound(to: XiChild?.self)
+        xiStoreNone(pointer)
+        report("xi.tuple.none", xiChildIsNone(pointer))
+        memory.deallocate()
+        var labels: [String] = []
+        for child in Mirror(reflecting: XiPair()).children {
+            labels.append(child.label ?? "")
+        }
+        report("xi.tuple.children", labels == ["x", "y"])
+        report("xi.tuple.describe", String(describing: XiPair()) == "XiPair(x: 1, y: 2)")
     }
 
     @objc public func stepExtraInhabitantsControl() {
