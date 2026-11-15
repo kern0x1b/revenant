@@ -79,13 +79,13 @@ function main()
     edit_file(unlisted, "frameworks/ReactNative/src/stubs.json", function (data)
         local kept = {}
         for _, stub in ipairs(data.stubs) do
-            if stub.name ~= "StubDocumentPickerModule" then
+            if stub.name ~= "StubSQLiteModule" then
                 table.insert(kept, stub)
             end
         end
         data.stubs = kept
     end)
-    expect_fail("a stub class missing from stubs.json", unlisted, "declares StubDocumentPickerModule, which stubs.json does not list")
+    expect_fail("a stub class missing from stubs.json", unlisted, "declares StubSQLiteModule, which stubs.json does not list")
 
     local orphan = fixture("stub-without-entry")
     edit_file(orphan, "frameworks/ReactNative/src/coverage.json", function (data)
