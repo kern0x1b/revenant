@@ -7,7 +7,7 @@ package("expo-camera")
 
     add_urls("https://registry.npmjs.org/expo-camera/-/expo-camera-$(version).tgz")
     add_versions("57.0.6", "394c5e20536b39dfe39484b4e4b8febdc7cc5193d3cb8432087e16361758910f")
-    add_patches("57.0.6", path.join(os.scriptdir(), "patches", "camera-module.patch"), "53ecfc71229d303014676803c7450d64db0fa057a6085a4a2b1f09ca489092ff")
+    add_patches("57.0.6", path.join(os.scriptdir(), "patches", "camera-module.patch"), "0faedbdae0c2360d3e5b7beed2478298a6ad9888f9dc601d3a940cfea7bfd32c")
 
     on_install(function (package)
         os.cp("*", package:installdir() .. "/")
