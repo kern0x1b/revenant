@@ -287,6 +287,33 @@ print on the iPad 2 what objc4 printed.
   crosses back (`xl_object_out`, the `self` of an implementation wrapper) the guest gets its own pointer again, so identity
   holds on a round trip guest, host, guest (`NSArray(object: x).object(at: 0) === x`).
 
+  The proxy is made only where the generated wrapper takes the argument through `xl_object_in`. A parameter that the
+  header types as an Objective-C object does. A parameter typed as a Core Foundation reference did not: the record
+  `__CFDictionary` is an incomplete type, so `xlgen` classified `CFDictionaryRef` as a plain pointer and the wrapper only
+  narrowed it. The Swift code of the reCAPTCHA Enterprise SDK builds the query of its keychain call as a `[String: Any]`
+  and passes `query as CFDictionary`, which is a `_SwiftDeferredNSDictionary`; `SecItemCopyMatching` then called
+  `CFDictionaryGetValue(query, kSecValueRef)`, Core Foundation saw a class it does not know and sent `objectForKey:`, and
+  the host's `objc_msgSend` read the arm64 class (`isa` 0x186e42f8 in the guest image, its superclass word as the cache)
+  and faulted (Telegram's M4 on drop10, 2026-11-15, `EXC_BAD_ACCESS` at 0xfdeeb8dc).
+
+  Now a parameter whose type is a Core Foundation record that the header marks as bridged to a Foundation class goes
+  through `xl_object_in` like an `id`. The test is the attribute
+  that `CF_BRIDGED_TYPE(NSDictionary)` and `CF_BRIDGED_MUTABLE_TYPE(NSMutableDictionary)` expand to
+  (`objc_bridge`, `objc_bridge_mutable`), read from the SDK headers by `xlgen`; a record that is bridged to `id`
+  (`CFAllocator`, `CFRunLoop`, `CFUUID` and the others) is not toll-free and stays a plain pointer. In the iOS 26.2 SDK the
+  set is `CFArray`, `CFAttributedString`, `CFBoolean`, `CFCalendar`, `CFCharacterSet`, `CFData`, `CFDate`,
+  `CFDictionary`, `CFError`, `CFFileSecurity`, `CFLocale`, `CFMachPort`, `CFMessagePort`, `CFNull`, `CFNumber`,
+  `CFReadStream`, `CFRunLoopTimer`, `CFSet`, `CFString`, `CFTimeZone`, `CFURL` and `CFWriteStream`.
+
+  Three cases are not covered, because the type does not say there is an object: a result of such a type, a value
+  inside a collection that the guest fills through `CFDictionarySetValue`, `CFDictionaryCreate` or
+  `CFArrayAppendValue` (the arguments are `const void *`), and an `inout` slot such as `CFErrorRef *`. They carry the
+  guest pointer as it is. The reCAPTCHA Enterprise SDK imports `CFDictionaryCreateMutable`, `CFDictionarySetValue` and
+  `CFDictionaryGetValue`, but only for the registries of its protobuf runtime, which hold classes and Objective-C
+  objects whose classes the host knows. Its calls that take a dictionary, data or a string from Swift
+  (`SecItemAdd`, `SecItemCopyMatching`, `SecItemDelete`, `SecKeyCreateWithData`, `SecKeyVerifySignature`,
+  `CFStringGetCStringPtr`) are all of the covered kind, and its `CFErrorRef *` slots are only written by the host.
+
   An instance of a *static* class that the guest allocated (its first word is the address of the class in the image, as in
   `__VaListBuilder`) needs the proxy when the guest autoreleases it, though nothing sends it a host message. `getVaList` retains
   its builder and autoreleases it, which reaches `_objc_rootAutorelease`; the raw object went into the host's autorelease
