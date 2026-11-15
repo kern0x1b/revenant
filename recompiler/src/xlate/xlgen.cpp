@@ -205,6 +205,30 @@ bool SameLayout(ASTContext &gc, QualType g, ASTContext &hc, QualType h, std::set
   return true;
 }
 
+bool BridgesToClass(const IdentifierInfo *bridged) {
+  return bridged && bridged->getName() != "id";
+}
+
+bool BridgedCoreFoundation(QualType pointee) {
+  auto record = pointee.getCanonicalType()->getAsRecordDecl();
+  if (!record) {
+    return false;
+  }
+  for (auto *redecl : record->redecls()) {
+    for (auto *attr : redecl->specific_attrs<ObjCBridgeAttr>()) {
+      if (BridgesToClass(attr->getBridgedType())) {
+        return true;
+      }
+    }
+    for (auto *attr : redecl->specific_attrs<ObjCBridgeMutableAttr>()) {
+      if (BridgesToClass(attr->getBridgedType())) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 Value Classify(ASTContext &gc, QualType g, ASTContext &hc, QualType h, bool parameter) {
   Value value;
   value.guest = g;
@@ -254,6 +278,7 @@ Value Classify(ASTContext &gc, QualType g, ASTContext &hc, QualType h, bool para
     auto hp = hcanon->getPointeeType();
     if (SameLayout(gc, gp, hc, hp, seen)) {
       value.kind = Kind::Pointer;
+      value.is_object = parameter && BridgedCoreFoundation(gp);
       return value;
     }
     if (auto record = gp->getAsRecordDecl(); record && (record->getName() == "__sFILE" || record->getName() == "__sFILEX")) {
