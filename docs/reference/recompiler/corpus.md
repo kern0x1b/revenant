@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, switchtail, tailcalls, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, flagflow, hostbridges, checkapi, proxytable and systemclasses; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, rebasetag, flagflow, hostbridges, checkapi, proxytable and systemclasses; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions`, `libexceptions`, `libcxxexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -493,6 +493,19 @@ One dylib defines `absolute_value` as `0x123456789` with `.set`, another holds `
 lifts the second alone and requires the refusal "data bind to unresolved symbol _absolute_value"; lifts both and requires
 that no symbol is unresolved and that the data slot of the bind holds `0x123456789`, the value itself: a section symbol
 is slid with its image, an absolute value is not.
+
+### rebasetag
+
+dyld adds the slide to the whole 64-bit word at a rebase, so the top byte of the word stays. It is data: the object word
+of a Swift `String` whose literal lives in the image is `0x8000000000000000` plus the address of the bytes less `0x20`,
+and `swift_bridgeObjectRetain` leaves a word with bit 63 alone. `xlate` wrote every rebased word as `target &
+0x00FFFFFFFFFFFFFF`, so a global `let` string of the reCAPTCHA SDK (`"www.recaptcha.net"`, at `0x15dc80`) became a
+native-looking pointer into `__cstring`, and the first `String.append` of it made the guest retain that read-only page
+(SIGBUS, KERN_PROTECTION_FAILURE, a write at guest `0x180f9398`).
+
+The image holds a global `{marker, (unsigned long long)text + 0x8000000000000000, marker}`, which the linker emits as a
+rebase with a top byte. The check lifts it with `--library` and requires the eight bytes of the word in the lifted
+image to end in `0x80` and not in zero.
 
 ### flagflow
 

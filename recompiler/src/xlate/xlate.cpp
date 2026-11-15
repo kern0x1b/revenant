@@ -1814,7 +1814,7 @@ Overrides SegmentPieces(Program &program, Module &module, Image &image, const xl
       ok = false;
       continue;
     }
-    slots[vmaddr] = ConstantInt::get(i64, image.host(value));
+    slots[vmaddr] = ConstantInt::get(i64, (target & ~0x00FFFFFFFFFFFFFFull) | image.host(value));
   }
   for (auto &[vmaddr, bind] : image.binds()) {
     if (vmaddr < segment.vmaddr || vmaddr >= segment.vmaddr + segment.vmsize) {
