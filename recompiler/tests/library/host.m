@@ -325,6 +325,7 @@ int main(int argc, char **argv)
 #ifdef RC_SWIFT_HOST
         report("find.swift", cls != Nil && xl_find_class("RCFixture.Client") == (__bridge void *)cls);
         report("find.host", NSClassFromString(@"RCFixture.Client") == Nil);
+
 #else
         report("find.before", xl_find_class("RCFixture.Hooked") == NULL);
         for (NSString *result in [NSClassFromString(@"RCFHook") performSelector:@selector(run)])
@@ -332,6 +333,21 @@ int main(int argc, char **argv)
         Class hooked = NSClassFromString(@"RCFHooked");
         report("find.hook", hooked != Nil && xl_find_class("RCFixture.Hooked") == (__bridge void *)hooked && NSClassFromString(@"RCFixture.Hooked") == Nil);
 #endif
+#ifdef RC_SWIFT_HOST
+        const char *threadName = "RCFixture.Client";
+        void *threadWant = (__bridge void *)cls;
+#else
+        const char *threadName = "RCFixture.Hooked";
+        void *threadWant = (__bridge void *)hooked;
+#endif
+        __block void *threadFound = NULL;
+        dispatch_semaphore_t threadDone = dispatch_semaphore_create(0);
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            threadFound = xl_find_class(threadName);
+            dispatch_semaphore_signal(threadDone);
+        });
+        BOOL threadArrived = dispatch_semaphore_wait(threadDone, dispatch_time(DISPATCH_TIME_NOW, 10 * NSEC_PER_SEC)) == 0;
+        report("find.thread", threadArrived && threadWant != NULL && threadFound == threadWant);
         id<RCFClient> client = ((id (*)(id, SEL, NSInteger))objc_msgSend)(cls, @selector(clientWithSeed:), 7);
         report("create", client != nil);
         report("methods", [client bump] == 1 && [client bump] == 2);
@@ -357,6 +373,16 @@ int main(int argc, char **argv)
         report("completion", arrived && async == 7091);
         report("completion.thread", arrived && !main_thread);
         measure("threaded");
+#ifdef RC_SWIFT_HOST
+        __block NSInteger probed = 0, probedNegative = 0;
+        ((void (*)(id, SEL, NSInteger, id))objc_msgSend)(client, sel_registerName("probeWithValue:completion:"), 5, ^(id<RCFToken> token, NSError *error) {
+            probed = [token value];
+        });
+        ((void (*)(id, SEL, NSInteger, id))objc_msgSend)(client, sel_registerName("probeWithValue:completion:"), -5, ^(id<RCFToken> token, NSError *error) {
+            probedNegative = [token value];
+        });
+        report("block.generic", probed == 7051 && probedNegative == 6951);
+#endif
 #ifdef RC_SWIFT_HOST
         report("host.bridge.after", hostBridges(NO) && hostNamesUnchanged());
 #endif

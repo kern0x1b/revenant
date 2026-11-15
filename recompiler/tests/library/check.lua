@@ -139,9 +139,9 @@ local function check_map(corpus, text, phases, what)
 end
 
 local EXPECTED = {"reserve", "load", "class", "create", "methods", "describe", "bundle", "bundle.path", "token", "category", "completion", "completion.thread"}
-local SWIFT_HOST_EXPECTED = {"host.bridge.before", "host.names", "names.disjoint", "host.bridge.after", "find.swift", "find.host"}
+local SWIFT_HOST_EXPECTED = {"host.bridge.before", "host.names", "names.disjoint", "host.bridge.after", "find.swift", "find.host", "block.generic"}
 local HOOK_EXPECTED = {"find.before", "hook.absent", "hook.old", "hook.guest", "hook.exact", "hook.unknown", "find.hook"}
-local FIND_EXPECTED = {"find.unloaded", "find.exact", "find.unknown"}
+local FIND_EXPECTED = {"find.unloaded", "find.exact", "find.unknown", "find.thread"}
 
 local function build_objc(e, corpus, o, here)
     corpus.ios(e, {"-fuse-ld=" .. e.ld, "-Wl,-no_objc_category_merging", "-O2", "-w", "-fobjc-arc", "-dynamiclib", "-install_name", "@rpath/RCFixture.dylib", "-framework", "Foundation", "-I", here,
