@@ -1,0 +1,59 @@
+diff -ru a/ios/DocumentPickerModule.swift b/ios/DocumentPickerModule.swift
+--- a/ios/DocumentPickerModule.swift
++++ b/ios/DocumentPickerModule.swift
+@@ -2,31 +2,31 @@
+ import MobileCoreServices
+ import UIKit
+ 
+-struct PickingContext {
++struct DocumentPickingContext {
+   let promise: Promise
+   let options: DocumentPickerOptions
+   let delegate: DocumentPickingDelegate
+ }
+ 
+ public class DocumentPickerModule: Module, PickingResultHandler {
+-  private var pickingContext: PickingContext?
++  private var pickingContext: DocumentPickingContext?
+ 
+   public func definition() -> ModuleDefinition {
+     Name("ExpoDocumentPicker")
+ 
+     AsyncFunction("getDocumentAsync") { (options: DocumentPickerOptions, promise: Promise) in
+       if pickingContext != nil {
+-        throw PickingInProgressException()
++        throw DocumentPickingInProgressException()
+       }
+ 
+       guard let currentVc = appContext?.utilities?.currentViewController() else {
+-        throw MissingViewControllerException()
++        throw DocumentPickerMissingViewControllerException()
+       }
+ 
+       let documentPickerVC = createDocumentPicker(with: options)
+       let pickerDelegate = DocumentPickingDelegate(resultHandler: self)
+ 
+-      pickingContext = PickingContext(promise: promise, options: options, delegate: pickerDelegate)
++      pickingContext = DocumentPickingContext(promise: promise, options: options, delegate: pickerDelegate)
+ 
+       documentPickerVC.delegate = pickerDelegate
+       documentPickerVC.presentationController?.delegate = pickerDelegate
+diff -ru a/ios/Exceptions.swift b/ios/Exceptions.swift
+--- a/ios/Exceptions.swift
++++ b/ios/Exceptions.swift
+@@ -6,13 +6,13 @@
+   }
+ }
+ 
+-internal final class PickingInProgressException: Exception {
++internal final class DocumentPickingInProgressException: Exception {
+   override var reason: String {
+     "Different document picking in progress. Await other document picking first"
+   }
+ }
+ 
+-internal final class MissingViewControllerException: Exception {
++internal final class DocumentPickerMissingViewControllerException: Exception {
+   override var reason: String {
+     "Could not find the current ViewController"
+   }

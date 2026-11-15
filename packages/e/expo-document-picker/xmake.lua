@@ -1,12 +1,13 @@
 package("expo-document-picker")
     set_kind("library", {headeronly = true})
     set_homepage("https://github.com/expo/expo/tree/main/packages/expo-document-picker")
-    set_description("expo-document-picker 57.0.3, the Expo SDK document picker over UIDocumentPickerViewController, from its npm tarball: the sources of its iOS half, which the isolated host builds")
+    set_description("expo-document-picker 57.0.3, the Expo SDK document picker over UIDocumentPickerViewController, from its npm tarball, with the types it shares by name with expo-file-system and expo-image-picker renamed (PickingContext, PickingInProgressException, MissingViewControllerException), so that the Expo modules compile as one Swift module: the sources of its iOS half, which the isolated host builds")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://registry.npmjs.org/expo-document-picker/-/expo-document-picker-$(version).tgz")
     add_versions("57.0.3", "4367cc78ec732094fb2a53c75be1f18c0dc9161966ff7c12d5502b9144c15719")
+    add_patches("57.0.3", path.join(os.scriptdir(), "patches", "documentpicker-names.patch"), "e8a58eb5bdcccaf2017d808a4f7c195f962aba2027b4c57d55721cdf2daad83d")
 
     on_install(function (package)
         os.cp("*", package:installdir() .. "/")
