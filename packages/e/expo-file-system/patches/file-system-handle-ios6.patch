@@ -1,40 +1,28 @@
 diff -ruN a/ios/FileHandleBackports.swift b/ios/FileHandleBackports.swift
 --- a/ios/FileHandleBackports.swift
 +++ b/ios/FileHandleBackports.swift
-@@ -0,0 +1,36 @@
+@@ -0,0 +1,24 @@
 +import Foundation
 +
 +extension FileHandle {
 +  func read(upToCount count: Int) throws -> Data? {
-+    var failure: NSError?
-+    guard let data = self.__readData(upToLength: UInt(count), error: &failure) else {
-+      throw failure ?? CocoaError(.fileReadUnknown)
-+    }
++    let data = try self.__readData(upToLength: count)
 +    return data.isEmpty ? nil : data
 +  }
 +
 +  func write(contentsOf data: Data) throws {
-+    var failure: NSError?
-+    if !self.__write(data, error: &failure) {
-+      throw failure ?? CocoaError(.fileWriteUnknown)
-+    }
++    try self.__write(data, error: ())
 +  }
 +
 +  func offset() throws -> UInt64 {
 +    var position: UInt64 = 0
-+    var failure: NSError?
-+    if !self.__getOffset(&position, error: &failure) {
-+      throw failure ?? CocoaError(.fileReadUnknown)
-+    }
++    try self.__getOffset(&position)
 +    return position
 +  }
 +
 +  func seekToEnd() throws -> UInt64 {
 +    var position: UInt64 = 0
-+    var failure: NSError?
-+    if !self.__seek(toEndReturningOffset: &position, error: &failure) {
-+      throw failure ?? CocoaError(.fileReadUnknown)
-+    }
++    try self.__seek(toEndReturningOffset: &position)
 +    return position
 +  }
 +}
