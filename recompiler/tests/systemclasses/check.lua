@@ -91,6 +91,15 @@ local function host_part(e, corpus, translate, o, here)
     if #bound[CLASS] < 2 then
         corpus.fail("the translation binds %s %d time(s): the superclass of SCDict and the class reference of the fixture are two binds", CLASS, #bound[CLASS])
     end
+    local report = io.readfile(o("xl/report.txt"))
+    local widths = {
+        "-[SCNative scNative:]: host IMP from guest type encoding Q24@0:8q16 (q/Q as 32-bit long: category on system class NSObject) as L12@0:4l8",
+        "-[SCGuestWide scBig:]: host IMP from guest type encoding q24@0:8q16 as q16@0:4q8"}
+    for _, line in ipairs(widths) do
+        if not report:find(line, 1, true) then
+            corpus.fail("report.txt lacks the line\n%s\nA method added to a system class takes its q and Q as the 32-bit long of the armv7 caller, a method of a guest class keeps the 64-bit type:\n%s", line, report:gsub("[^\n]*\n", function(l) return l:find("SC", 1, true) and l or "" end))
+        end
+    end
     local rebound = io.readfile(o("xl/system-classes.txt"))
     local kept = io.readfile(o("xl/proxy-classes.txt"))
     for _, symbol in ipairs({CLASS, META}) do
@@ -189,7 +198,7 @@ function main(out, ...)
         io.writefile(o(variant .. ".txt"), text)
         return "\n" .. text:gsub("\r", "")
     end
-    local names = {"superclass", "kind", "addEntriesFromDictionary", "removeAllObjects", "setDictionary", "absent", "shadowed", "dispatch"}
+    local names = {"superclass", "kind", "addEntriesFromDictionary", "removeAllObjects", "setDictionary", "absent", "shadowed", "dispatch", "wide", "native"}
     local text = launch("device")
     for _, name in ipairs(names) do
         if not text:find("\nok " .. name .. "\n", 1, true) then
