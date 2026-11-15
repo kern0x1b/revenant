@@ -198,7 +198,7 @@ function main(out, ...)
         io.writefile(o(variant .. ".txt"), text)
         return "\n" .. text:gsub("\r", "")
     end
-    local names = {"superclass", "kind", "addEntriesFromDictionary", "removeAllObjects", "setDictionary", "absent", "shadowed", "dispatch", "wide", "native"}
+    local names = {"superclass", "kind", "addEntriesFromDictionary", "removeAllObjects", "setDictionary", "absent", "shadowed", "dispatch", "wide", "native", "blocks"}
     local text = launch("device")
     for _, name in ipairs(names) do
         if not text:find("\nok " .. name .. "\n", 1, true) then

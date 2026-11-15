@@ -33,6 +33,18 @@
 {
     return b + a;
 }
+
++ (NSInteger)scCall:(NSInteger (^)(NSInteger))block
+{
+    NSInteger a = block(-5), b = block(NSNotFound), c = block(7);
+    return a == -5 && b == NSNotFound && c == 7 ? 1 : 0;
+}
+
++ (NSUInteger)scCountCall:(NSUInteger (^)(NSUInteger))block
+{
+    NSUInteger a = block(0xfffffff0u), b = block(7);
+    return a == 0xfffffff0u && b == 7 ? 1 : 0;
+}
 @end
 
 int main(int argc, char **argv)

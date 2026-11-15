@@ -67,6 +67,37 @@ static BOOL wideSends(void)
     return good;
 }
 
+static NSInteger blockSeen[3];
+static int blockCalls;
+static NSUInteger blockUnsignedSeen[2];
+static int blockUnsignedCalls;
+
+static BOOL blockSends(void)
+{
+    Class host = objc_getClass("SCHostWide");
+    if (!host)
+        return NO;
+    NSInteger (^record)(NSInteger) = ^NSInteger(NSInteger n) {
+        if (blockCalls < 3)
+            blockSeen[blockCalls] = n;
+        blockCalls++;
+        return n;
+    };
+    NSUInteger (^count)(NSUInteger) = ^NSUInteger(NSUInteger n) {
+        if (blockUnsignedCalls < 2)
+            blockUnsignedSeen[blockUnsignedCalls] = n;
+        blockUnsignedCalls++;
+        return n;
+    };
+    NSInteger (*call)(id, SEL, NSInteger (^)(NSInteger)) = (NSInteger (*)(id, SEL, NSInteger (^)(NSInteger)))objc_msgSend;
+    NSUInteger (*countCall)(id, SEL, NSUInteger (^)(NSUInteger)) = (NSUInteger (*)(id, SEL, NSUInteger (^)(NSUInteger)))objc_msgSend;
+    BOOL good = call(host, sel_registerName("scCall:"), record) == 1;
+    good = good && blockCalls == 3 && blockSeen[0] == -5 && blockSeen[1] == NSNotFound && blockSeen[2] == 7;
+    good = good && countCall(host, sel_registerName("scCountCall:"), count) == 1;
+    good = good && blockUnsignedCalls == 2 && blockUnsignedSeen[0] == 0xfffffff0u && blockUnsignedSeen[1] == 7;
+    return good;
+}
+
 @interface NSObject (SCNative)
 - (NSUInteger)scNative:(NSInteger)n;
 - (NSInteger)scMix:(NSInteger)a with:(NSInteger)b and:(NSInteger)c;
@@ -114,6 +145,7 @@ static BOOL wideSends(void)
     Class queue = (__bridge Class)(void *)&OBJC_CLASS_$_OS_dispatch_queue;
     note(lines, @"dispatch", queue != Nil && class_getName(queue) != NULL && [NSStringFromClass(queue) length] > 0);
     note(lines, @"wide", wideSends());
+    note(lines, @"blocks", blockSends());
     return lines;
 }
 @end
