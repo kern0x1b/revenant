@@ -1,0 +1,33 @@
+diff -ru a/ios/ImageManipulatorArguments.swift b/ios/ImageManipulatorArguments.swift
+--- a/ios/ImageManipulatorArguments.swift
++++ b/ios/ImageManipulatorArguments.swift
+@@ -46,7 +46,7 @@
+   var compress: Double = 1.0
+ 
+   @Field
+-  var format: ImageFormat = .jpeg
++  var format: ManipulatorImageFormat = .jpeg
+ }
+ 
+ /**
+@@ -60,7 +60,7 @@
+ /**
+  Enum with supported image formats.
+  */
+-internal enum ImageFormat: String, Enumerable {
++internal enum ManipulatorImageFormat: String, Enumerable {
+   case jpeg
+   case jpg
+   case png
+diff -ru a/ios/ImageManipulatorUtils.swift b/ios/ImageManipulatorUtils.swift
+--- a/ios/ImageManipulatorUtils.swift
++++ b/ios/ImageManipulatorUtils.swift
+@@ -70,7 +70,7 @@
+ /**
+  Returns pixel data representation of the image.
+  */
+-func imageData(from image: UIImage, format: ImageFormat, compression: Double) -> Data? {
++func imageData(from image: UIImage, format: ManipulatorImageFormat, compression: Double) -> Data? {
+   switch format {
+   case .jpeg, .jpg:
+     return image.jpegData(compressionQuality: compression)

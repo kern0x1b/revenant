@@ -7,6 +7,7 @@ package("expo-image-manipulator")
 
     add_urls("https://registry.npmjs.org/expo-image-manipulator/-/expo-image-manipulator-$(version).tgz")
     add_versions("57.0.21", "cc7989289aa055887c622a5ec53faa5e483f1b4018ba7f1e09ad9be0889f0542")
+    add_patches("57.0.21", path.join(os.scriptdir(), "patches", "manipulator-names.patch"), "967f2596765c475691baaadb51eb08d55cb1d2461cb15b94ebf73661be9a5b5e")
 
     on_install(function (package)
         os.cp("*", package:installdir() .. "/")

@@ -27,6 +27,21 @@ local WHOLE = {
     {line = 'add_requireconfs("combine", {override = true, configs = {shared = get_config("component") == "" or nil}})'}
 }
 
+local POD_REQUIRES = {
+    {name = "sdwebimage", version = "5.21.7", modules = {"expo-image", "expo-image-manipulator"}},
+    {name = "sdwebimage-webp", version = "0.14.6", modules = {"expo-image", "expo-image-manipulator"}},
+    {name = "zxingobjc", version = "3.6.4", modules = {"expo-camera"}}
+}
+
+for _, pod in ipairs(POD_REQUIRES) do
+    local line = string.format('add_requires("revenant@%s %s", {alias = "%s"})', pod.name, pod.version, pod.name)
+    local tests = {}
+    for _, module in ipairs(pod.modules) do
+        table.insert(tests, string.format('(",".. (os.getenv("RN_EXPO_REAL") or "") .. ","):find(",%s,", 1, true)', module))
+    end
+    table.insert(WHOLE, {line = line, emit = "if " .. table.concat(tests, " or ") .. " then " .. line .. " end"})
+end
+
 local SHARED_PACKAGES = {"swiftui", "cryptokit", "uniformtypeidentifiers", "swift-crypto"}
 
 function shared_packages(text)

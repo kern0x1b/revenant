@@ -34,6 +34,23 @@ end
 
 local SQLITE_DEFINES = {"HAVE_USLEEP=1", "SQLITE_ENABLE_LOCKING_STYLE=0", "SQLITE_ENABLE_BYTECODE_VTAB=1", "SQLITE_TEMP_STORE=2", "SQLITE_ENABLE_SESSION=1", "SQLITE_ENABLE_PREUPDATE_HOOK=1", "SQLITE_ENABLE_MATH_FUNCTIONS=1", "SQLITE_ENABLE_FTS4=1", "SQLITE_ENABLE_FTS3_PARENTHESIS=1", "SQLITE_ENABLE_FTS5=1"}
 
+local POD_MODULES = {
+    {alias = "sdwebimage", framework = "SDWebImage", users = {"expo-image", "expo-image-manipulator"}},
+    {alias = "sdwebimage-webp", framework = "SDWebImageWebPCoder", users = {"expo-image", "expo-image-manipulator"}},
+    {alias = "zxingobjc", framework = "ZXingObjC", users = {"expo-camera"}}
+}
+
+local function pod_wanted(pod)
+    for _, token in ipairs(string.split(os.getenv("RN_EXPO_REAL") or "", ",", {plain = true})) do
+        for _, user in ipairs(pod.users) do
+            if token == user then
+                return true
+            end
+        end
+    end
+    return false
+end
+
 local function expo_dir(package)
     if PKG_DIRS[package] then
         return PKG_DIRS[package]
@@ -336,6 +353,11 @@ target("expo-app-modules")
     add_deps("expo-core-probe")
     add_packages("swift-runtime", "libcxx", "combine", "cryptokit", "swiftui", "uniformtypeidentifiers")
     add_packages("folly")
+    for _, pod in ipairs(POD_MODULES) do
+        if pod_wanted(pod) then
+            add_packages(pod.alias)
+        end
+    end
     local proj = os.projectdir()
     local nm = path.join(proj, "build", "ref", "paseo", "node_modules")
     local ecore = path.join(proj, "build", "expo-core")
@@ -372,6 +394,15 @@ target("expo-app-modules")
             io.writefile(pair[2], text)
             target:add("files", pair[2])
         end
+        local pod_flags = {}
+        for _, pod in ipairs(POD_MODULES) do
+            if pod_wanted(pod) then
+                local include = path.join(target:pkg(pod.alias):installdir(), "include")
+                local map = path.join(proj, "build", "expo-pods-modules", pod.framework, "module.modulemap")
+                io.writefile(map, string.format("module %s {\n  header \"%s\"\n  export *\n}\n", pod.framework, path.join(include, pod.framework, pod.framework .. ".h")))
+                table.join2(pod_flags, {"-Xcc", "-I" .. include, "-Xcc", "-fmodule-map-file=" .. map})
+            end
+        end
         local macros = path.join(nm, "@expo", "expo-modules-macros-plugin", "apple", "ExpoModulesMacros-tool")
         local bridging = path.join(ecore, "bridging.h")
         local lines = {}
@@ -393,7 +424,7 @@ target("expo-app-modules")
             target:add("defines", SQLITE_DEFINES)
         end
         io.writefile(bridging, "#import <Foundation/Foundation.h>\n" .. table.concat(lines, "\n") .. "\n")
-        io.writefile(path.join(ecore, "implicit.rsp"), "-Xfrontend\n-import-module\n-Xfrontend\nFoundation\n-Xfrontend\n-import-module\n-Xfrontend\nUIKit\n-Xfrontend\n-import-module\n-Xfrontend\nCoreText\n-Xcc\n-I" .. path.join(proj, "build", "expo-pods") .. "\n-import-objc-header\n" .. bridging .. "\n-load-plugin-executable\n" .. macros .. "#ExpoModulesMacros\n")
+        io.writefile(path.join(ecore, "implicit.rsp"), "-Xfrontend\n-import-module\n-Xfrontend\nFoundation\n-Xfrontend\n-import-module\n-Xfrontend\nUIKit\n-Xfrontend\n-import-module\n-Xfrontend\nCoreText\n-Xcc\n-I" .. path.join(proj, "build", "expo-pods") .. "\n-import-objc-header\n" .. bridging .. "\n-load-plugin-executable\n" .. macros .. "#ExpoModulesMacros\n" .. table.concat(pod_flags, "\n") .. (#pod_flags > 0 and "\n" or ""))
         local classes = {}
         for _, package in ipairs(expo) do
             local config = io.readfile(path.join(expo_dir(package), "expo-module.config.json"))
