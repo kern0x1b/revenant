@@ -694,6 +694,12 @@ static void key_checks(void)
     objc_setAssociatedObject(owner, wide_key, nil, OBJC_ASSOCIATION_ASSIGN);
     printf("associated after clearing one: %s, other kept: %s\n", objc_getAssociatedObject(owner, wide_key) ? "found" : "none",
            [objc_getAssociatedObject(owner, other_key) UTF8String]);
+    objc_setAssociatedObject(owner, wide_key, (id)(uintptr_t)1, OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(owner, &narrow_key, (id)(uintptr_t)3, OBJC_ASSOCIATION_ASSIGN);
+    printf("associated plain words with assign: %lu, %lu\n", (unsigned long)(uintptr_t)objc_getAssociatedObject(owner, wide_key),
+           (unsigned long)(uintptr_t)objc_getAssociatedObject(owner, &narrow_key));
+    objc_setAssociatedObject(owner, wide_key, nil, OBJC_ASSOCIATION_ASSIGN);
+    objc_setAssociatedObject(owner, &narrow_key, nil, OBJC_ASSOCIATION_ASSIGN);
     dispatch_queue_t queue = dispatch_queue_create("hostbridges.keys", NULL);
     static int context = 7;
     dispatch_queue_set_specific(queue, wide_key, &context, NULL);

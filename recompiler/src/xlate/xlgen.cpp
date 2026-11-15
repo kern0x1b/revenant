@@ -148,6 +148,7 @@ struct Value {
   bool writes_back = false;
   bool is_object = false;
   bool is_key = false;
+  bool is_word = false;
 };
 
 struct Leaf {
@@ -597,7 +598,7 @@ std::string Generator::ScalarToHost(const Value &value, const std::string &expr,
       return "(" + Spell(hc_, value.host) + ")" + expr;
     default:
       if (value.is_object)
-        return "(" + Spell(hc_, value.host) + ")xl_object_in((uint64_t)" + expr + ", " + where + ")";
+        return "(" + Spell(hc_, value.host) + ")" + (value.is_word ? "xl_object_in_word" : "xl_object_in") + "((uint64_t)" + expr + ", " + where + ")";
       if (value.is_key)
         return "(" + Spell(hc_, value.host) + ")xl_narrow_key((uint64_t)" + expr + ", " + where + ")";
       return "(" + Spell(hc_, value.host) + ")xl_narrow_pointer((uint64_t)" + expr + ", " + where + ")";
@@ -623,7 +624,7 @@ std::string Generator::ScalarToGuest(const Value &value, const std::string &expr
       return "xl_protocol_out((uintptr_t)" + expr + ")";
     default:
       if (value.is_object)
-        return "xl_object_out((uintptr_t)" + expr + ")";
+        return std::string(value.is_word ? "xl_object_out_word" : "xl_object_out") + "((uintptr_t)" + expr + ")";
       return "xl_widen_pointer((uintptr_t)" + expr + ")";
   }
 }
@@ -1749,6 +1750,12 @@ bool Generator::EmitFunction(const std::string &symbol, FunctionDecl *g, Functio
       {"dispatch_queue_set_specific", 1}, {"dispatch_queue_get_specific", 1}, {"dispatch_get_specific", 0}};
   if (auto key = identity_keys.find(name); key != identity_keys.end() && key->second < signature.params.size()) {
     signature.params[key->second].value.is_key = true;
+  }
+  if (name == "objc_setAssociatedObject" && signature.params.size() > 2) {
+    signature.params[2].value.is_word = true;
+  }
+  if (name == "objc_getAssociatedObject") {
+    signature.result.is_word = true;
   }
   static const std::map<std::string, std::string> shim_callee = {
       {"malloc_type_malloc", "xl_shim_malloc_type_malloc"},

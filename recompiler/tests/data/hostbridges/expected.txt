@@ -111,5 +111,6 @@ dispatch_async_f ran 40 distinct functions, sum 820
 associated before set: none
 associated by wide keys: first 1, second 2, by address: third 3
 associated after clearing one: none, other kept: second 2
+associated plain words with assign: 1, 3
 dispatch specific by wide key: found, other key: none
 dispatch_get_specific inside the queue: found

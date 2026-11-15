@@ -1271,6 +1271,20 @@ uint64_t xl_object_out(uintptr_t host)
     return xl_class_out(host);
 }
 
+uintptr_t xl_object_in_word(uint64_t guest, const char *symbol, unsigned index)
+{
+    if (guest < 0x4000)
+        return (uintptr_t)guest;
+    return xl_object_in(guest, symbol, index);
+}
+
+uint64_t xl_object_out_word(uintptr_t host)
+{
+    if (host < 0x4000)
+        return host;
+    return xl_object_out(host);
+}
+
 void *xl_fast_items(uint64_t items, uint64_t count)
 {
     if (!items || !count)

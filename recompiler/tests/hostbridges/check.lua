@@ -53,6 +53,14 @@ function main(out, ...)
             corpus.fail("the host wrapper of %s does not narrow its key as an identity, so a key the guest builds from a 64-bit constant stops the program", name)
         end
     end
+    local setter = host_source:match("xl_h_objc_setAssociatedObject%b()%s*(%b{})")
+    if not setter or not setter:find("xl_object_in_word(", 1, true) then
+        corpus.fail("the host wrapper of objc_setAssociatedObject does not take its value as a word that may be no object, so a plain word with the policy assign (a flag of 1) stops the program with \"not an object pointer\"")
+    end
+    local getter = host_source:match("xl_h_objc_getAssociatedObject%b()%s*(%b{})")
+    if not getter or not getter:find("xl_object_out_word(", 1, true) then
+        corpus.fail("the host wrapper of objc_getAssociatedObject does not give back a plain word as it is, so a flag stored with the policy assign is looked up as an object")
+    end
     if opt.host_only then
         print("ok (host part)")
         return

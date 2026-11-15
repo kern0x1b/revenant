@@ -478,6 +478,9 @@ and stops the program with its message.
   constants stay two keys, clearing one leaves the other, and the address key still works. Before, the reCAPTCHA SDK's
   `charonAC` association key ended the program with "objc_getAssociatedObject argument 1 value 0x636861726f6e4143 does not
   fit the host type". The host part requires that the wrapper of each of the five narrows its key with `xl_narrow_key`.
+  The same step stores the plain words 1 and 3 with the policy assign and reads them back (before, the SDK's flag of 1 ended
+  the program with "objc_setAssociatedObject argument 2 is 0x1, not an object pointer"); the host part requires that the
+  wrapper of the setter takes its value with `xl_object_in_word` and that of the getter gives it back with `xl_object_out_word`.
 
 The check builds the program for this Mac and compares its output with `tests/data/hostbridges/expected.txt`, translates
 the arm64 build (which fails on any import without a bridge) and requires that the program imports each of the bridged
