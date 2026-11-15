@@ -157,16 +157,77 @@ diff -ru a/ios/CameraViewModule.swift b/ios/CameraViewModule.swift
 +    return []
    }
  }
+diff -ru a/ios/Current/BarcodeRecord.swift b/ios/Current/BarcodeRecord.swift
+--- a/ios/Current/BarcodeRecord.swift
++++ b/ios/Current/BarcodeRecord.swift
+@@ -1,5 +1,4 @@
+ import ExpoModulesCore
+-import Vision
+ 
+ struct BarcodeSettings: Record {
+   @Field var barcodeTypes: [BarcodeType]
+@@ -111,38 +110,6 @@
+   case codabar
+   case code128
+   case upc_a
+-
+-  @available(iOS 16.0, *)
+-  func toSymbology() -> VNBarcodeSymbology {
+-    switch self {
+-    case .aztec:
+-      return .aztec
+-    case .codabar:
+-      return .codabar
+-    case .qr:
+-      return .qr
+-    case .ean13:
+-      return .ean13
+-    case .ean8:
+-      return .ean8
+-    case .pdf417:
+-      return .pdf417
+-    case .itf14:
+-      return .itf14
+-    case .upc_a:
+-      return .ean13
+-    case .upc_e:
+-      return .upce
+-    case .code39:
+-      return .code39
+-    case .code93:
+-      return .code93
+-    case .datamatrix:
+-      return .dataMatrix
+-    case .code128:
+-      return .code128
+-    }
+-  }
+ }
+ 
+ struct VisionScannerOptions: Record {
+@@ -150,11 +117,4 @@
+   @Field var isPinchToZoomEnabled: Bool?
+   @Field var isGuidanceEnabled: Bool?
+   @Field var isHighlightingEnabled: Bool?
+-
+-  @available(iOS 16.0, *)
+-  func toSymbology() -> [VNBarcodeSymbology] {
+-    barcodeTypes.map {
+-      $0.toSymbology()
+-    }
+-  }
+ }
 diff -ru a/ios/Current/BarcodeScannerUtils.swift b/ios/Current/BarcodeScannerUtils.swift
 --- a/ios/Current/BarcodeScannerUtils.swift
 +++ b/ios/Current/BarcodeScannerUtils.swift
-@@ -1,5 +1,4 @@
+@@ -1,6 +1,4 @@
  import AVFoundation
 -import VisionKit
- import Vision
+-import Vision
  
  class BarcodeScannerUtils {
-@@ -57,29 +56,6 @@
+   static func getDefaultSettings() -> [String: [AVMetadataObject.ObjectType]] {
+@@ -57,29 +55,6 @@
      } else {
        addEmptyCornerPoints(to: &result)
      }
