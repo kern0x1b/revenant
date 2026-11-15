@@ -790,6 +790,11 @@ that a Backports library exports under the same symbol ([library mode](library-m
   and the SDK does not declare, with an `NSInteger` (a 32-bit `int` on armv7), and checks `-5`, `0x40000000` and `-1`
   (`NSNotFound`, `0x7fffffff`, is widened to the arm64 `NSNotFound` by design). The stub reads that argument as the armv7
   caller passes it, one word ([method widths](library-mode.md#the-integer-width-of-a-method-the-sdk-does-not-declare)).
+- `blocks`: the guest hands host class `SCHostWide` a block `NSInteger (^)(NSInteger)` and a block `NSUInteger
+  (^)(NSUInteger)`, and the host calls them with `-5`, `NSNotFound` and `7`, and `0xfffffff0` and `7`. The guest block
+  records what it was given: the signed arguments have to arrive as `-5`, the arm64 `NSNotFound` and `7`, the unsigned ones
+  as `0xfffffff0` and `7`; the host checks what the block returned (`-5`, its own `NSNotFound`, `7`). A runtime that
+  zero-extends every `q` reports `FAIL blocks` on the 4S (`-5` arrives as `4294967291`).
 
 The host part needs no Backports build. It compiles two stand-in libraries for the armv7 target, `libFoundationBackports`
 from the sources of `NSMutableDictionaryAlias.m` (the proxy `RevenantNSMutableDictionary` and the alias symbols) and a
@@ -1012,14 +1017,14 @@ the dylib statically:
 
 The device part copies the dylib and the host to the claimed phone and runs the host. The host first grows its own
 resident set to the size given as an argument (85 MB by default, `XL_LIBRARY_RESIDENT_MB`), loads any dylibs named after
-it the way an app's frameworks are loaded, reserves the guest range, loads the library, and prints `ok <name>` for 22 checks (20 in the Swift variant):
+it the way an app's frameworks are loaded, reserves the guest range, loads the library, and prints `ok <name>` for 23 checks (22 in the Swift variant):
 `reserve`, `load`, `class` (`NSClassFromString`), `create`, `methods`, `describe` (a string built in the library),
 `bundle` (the library's `hostBundle` is the app's `mainBundle`), `bundle.path`, `token` (a value that depends on a
 static of the library), `category` (a method that a category of the guest adds, found through the registry; the Objective-C
 variant only), `completion` and `completion.thread` (a block called on another thread), and the class lookup by name
-(`find.unloaded`, `find.exact`, `find.unknown`; `find.before`, `hook.absent`, `hook.old`, `hook.guest`, `hook.exact`,
+(`find.unloaded`, `find.exact`, `find.unknown`, `find.thread`; `find.before`, `hook.absent`, `hook.old`, `hook.guest`, `hook.exact`,
 `hook.unknown`, `find.hook` in the Objective-C variant, where the guest installs a hook through `objc_setHook_getClass`;
-`find.swift` and `find.host` in the Swift variant, where the guest's own `libswiftCore` installed it: `xl_find_class`
+`find.swift`, `find.host` and `block.generic` in the Swift variant, where the guest's own `libswiftCore` installed it: `xl_find_class`
 finds `"RCFixture.Client"` and the host's `NSClassFromString` does not; [the contract](library-mode.md#the-class-of-a-name-xl_find_class-xl_library_class-objc_sethook_getclass)).
 Four negative controls run first: a held
 range, a guest image format the loader does not read, a registry that is not next to the library, and an init without a

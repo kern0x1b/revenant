@@ -167,6 +167,33 @@ None of them takes an `Int64` or `UInt64`. A new image has to be checked the sam
 `report.txt` that say `q/Q as 32-bit long`, find the guest address of each stub's `imp` in the manifest, and read the
 symbol of the thunk.
 
+A guest block that the host calls (a completion handler, `enumerateObjectsUsingBlock:`) and a guest method that the
+host calls through the word trampoline of a Swift class (a method with no typed stub, only parameters of one word) have the
+same ambiguity, and the same answer: a `q` is a host `NSInteger` of one word, a `Q` an `NSUInteger`. The word the host passes
+is widened to the guest's register by its sign: `-5` is `-5`, the host's `NSNotFound` (`0x7fffffff`, `INT_MAX`) is the arm64
+`NSNotFound` (`INT64_MAX`), `INT_MIN` is `INT64_MIN`; a `Q` is zero-extended and the host's `UINT_MAX` is `UINT64_MAX`. A
+`q` result of the guest comes back as its low word, with `INT64_MAX` and `INT64_MIN` mapped to the host's `INT_MAX` and
+`INT_MIN` and `UINT64_MAX` to `UINT_MAX`. The word used to be zero-extended whatever its sign: a block that took an
+`NSInteger` got `4294967291` for `-5`. A block whose signature has an `i`, `s`, `c` or `B` is unchanged (the guest reads
+the low bits of the register).
+
+### A block that the host passes to a guest method that no header declares
+
+The host reaches a guest Swift class's `@objc` method through a host IMP. For a method that an SDK header declares,
+`xlgen` types every parameter, a block included (the header gives the block's parameter types). For a method that no
+header declares (`+fetchClientWithSiteKey:completion:` and `-executeWithAction:completion:` of the real SDK: the report says
+`generic host IMP, block parameter of a method the SDK does not declare`) the guest's encoding is `v32@0:8@16@?24`, which
+does not say what the block takes. The host block does: a block that clang or the Swift compiler makes carries its
+signature in its descriptor (`BLOCK_HAS_SIGNATURE`, for a Swift closure `v24@?0@8@"NSError"16`). So the runtime makes, for
+such a method, a guest block that holds the host block (the same proxy as the typed one: a guest `Block_copy` of it works, the host
+block is released when the guest block is) whose invoke function is one generic function that `xlgen` emits in every
+translation (`xl_hblock_generic_invoke` and `xl_hblock_generic_descriptor` in `guest.m`). When the guest calls the block,
+the runtime reads the host block's signature, converts each of up to four arguments by its kind (an object through
+`xl_object_in`, a pointer, an integer of one word: a `q`/`Q` in a host block is a real 64-bit value and is refused) and
+widens the result. A method with a `double`, `float` or structure parameter, a block result, or more than four
+arguments after `self` and `_cmd` still stops with a message that names its selector and encoding when the host calls it:
+`-executeWithAction:withTimeout:completion:` of the SDK has a `Double` and is one of them.
+
 ### The guest image (`recompiler/include/xl_guest_image.h`)
 
 The loader, the runtime and `xlate` include one header, which is the format. All numbers are little-endian 32-bit words,
@@ -377,6 +404,7 @@ handler's output has the `crash` map and the guest range is readable in it; with
 | `find.unloaded` | negative control: `xl_find_class` answers `NULL` after `xl_reserve` and before `xl_load` |
 | `find.exact` | `xl_find_class("RCFClient")` is the class `NSClassFromString` finds |
 | `find.unknown` | negative control: a name that no class and no hook answers (`"RCFixture.Nothing"`) and a `NULL` name give `NULL` |
+| `find.thread` | `xl_find_class` from a global-queue thread that is not the one that loaded the library finds the class that needs the hook (`"RCFixture.Hooked"`, `"RCFixture.Client"` in the Swift variant): the hook runs on the thread's own guest stack and state |
 | `find.before`, `hook.absent` (Objective-C variant) | negative control: before the guest installs a hook, `"RCFixture.Hooked"` is not found, by `xl_find_class` or by the guest's `objc_getClass`, `objc_lookUpClass` and `NSClassFromString` |
 | `hook.old`, `hook.guest`, `hook.exact`, `hook.unknown` (Objective-C variant) | the guest installs a hook (`objc_setHook_getClass`) that answers `"RCFixture.Hooked"` with its class `RCFHooked`: `*outOldValue` is a function that answers `NO`; the guest's three lookups now find the class; a registered name (`RCFClient`, `RCFHooked`) does not call the hook; two unknown names call it twice and stay `Nil` |
 | `find.hook` (Objective-C variant) | `xl_find_class("RCFixture.Hooked")` is `RCFHooked`, and the host's own `NSClassFromString(@"RCFixture.Hooked")` is still `Nil` |
@@ -392,6 +420,7 @@ The `swift` variant builds the host with Swift code of its own (`hostswift.swift
 | `names.disjoint` | the registry registered classes (the host takes the classes of the library's image and of its registry), and none has the name of a class of the host runtime |
 | `host.bridge.after` | after the calls, the three are the same classes with the same contents, and the names still hold |
 | `find.swift` | the guest's own `libswiftCore` installed its hook through the bridge: `xl_find_class("RCFixture.Client")` is the class that `NSClassFromString(@"RCFClient")` finds (the Swift name of a class that has an `@objc(RCFClient)` name) |
+| `block.generic` | the host sends a private `@objc` method of the Swift class (`probeWithValue:completion:`, in no header) `5` and `-5` with a block `^(id<RCFToken>, NSError *)`: the guest calls the block synchronously with a token of the value, and the host checks `7051` and `6951`; the argument is an `Int` (`q`), so the negative one proves its sign too. A runtime without the generic block bridge stops the host with `the guest method probeWithValue:completion: … takes a block and the translation generated no typed host wrapper for it` |
 | `find.host` | negative control: the host's `NSClassFromString(@"RCFixture.Client")` is `Nil` |
 
 | Variable | Meaning |
