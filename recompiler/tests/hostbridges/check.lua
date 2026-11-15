@@ -26,9 +26,24 @@ function main(out, ...)
                            "CGImageCreateWithMaskingColors", "_NSGetArgv", "_NSGetArgc", "_progname", "getifaddrs", "freeifaddrs", "getservbyname",
                            "localeconv_l", "class_copyIvarList", "malloc_default_zone", "malloc_zone_from_ptr", "malloc_zone_malloc",
                            "malloc_zone_free", "catopen", "swprintf", "NSDataDeallocatorFree", "NSDataDeallocatorUnmap", "NSDataDeallocatorVM",
-                           "_dispatch_source_type_vm", "dispatch_sync", "dispatch_async", "copyfile_state_alloc", "copyfile_state_free", "fcopyfile"}) do
+                           "_dispatch_source_type_vm", "dispatch_sync", "dispatch_async", "copyfile_state_alloc", "copyfile_state_free", "fcopyfile",
+                           "dispatch_once_f", "dispatch_sync_f", "dispatch_async_f"}) do
         if not imports:find("_" .. name .. "\n", 1, true) then
             corpus.fail("the program does not import %s, so the check proves nothing about it", name)
+        end
+    end
+    local host_source = io.readfile(o("xl/host.m"))
+    for _, case in ipairs({{"dispatch_once_f", "XL_CALLBACK_CALL", true}, {"dispatch_sync_f", "XL_CALLBACK_CALL", true}, {"dispatch_async_f", "XL_CALLBACK_ONCE", false}}) do
+        local name, life, released = case[1], case[2], case[3]
+        local wrapper = host_source:match("void xl_h_" .. name .. "%b()%s*(%b{})")
+        if not wrapper then
+            corpus.fail("the translation has no host wrapper for %s, so the check of the slots of a function pointer proves nothing", name)
+        end
+        if not wrapper:find("_hold(", 1, true) or not wrapper:find(life, 1, true) then
+            corpus.fail("the host wrapper of %s does not hold the slot of its function pointer as %s, so every distinct function the guest passes takes a slot of the pool for good", name, life)
+        end
+        if released and not wrapper:find("xl_callback_release(", 1, true) then
+            corpus.fail("the host wrapper of %s does not release the slot of its function pointer when the call returns, though the host runs the function only during the call", name)
         end
     end
     if opt.host_only then

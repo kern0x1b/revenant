@@ -646,6 +646,36 @@ static void block_lifetime_checks(void)
     printf("block async ran %d, captured object released %d\n", async_ran, __atomic_load_n(&tracked_released, __ATOMIC_SEQ_CST));
 }
 
+#define CALLBACK_LIST(X) X(0) X(1) X(2) X(3) X(4) X(5) X(6) X(7) X(8) X(9) X(10) X(11) X(12) X(13) X(14) X(15) X(16) X(17) X(18) X(19) \
+    X(20) X(21) X(22) X(23) X(24) X(25) X(26) X(27) X(28) X(29) X(30) X(31) X(32) X(33) X(34) X(35) X(36) X(37) X(38) X(39)
+#define CALLBACK_FUNCTION(n) static void callback_function_##n(void *context) { __atomic_fetch_add((int *)context, n + 1, __ATOMIC_SEQ_CST); }
+#define CALLBACK_ENTRY(n) callback_function_##n,
+CALLBACK_LIST(CALLBACK_FUNCTION)
+static void (*const callback_functions[])(void *) = {CALLBACK_LIST(CALLBACK_ENTRY)};
+#define CALLBACK_COUNT (sizeof callback_functions / sizeof callback_functions[0])
+
+static void callback_checks(void)
+{
+    static dispatch_once_t once[CALLBACK_COUNT];
+    int once_total = 0;
+    for (int pass = 0; pass < 2; pass++)
+        for (size_t i = 0; i < CALLBACK_COUNT; i++)
+            dispatch_once_f(&once[i], &once_total, callback_functions[i]);
+    printf("dispatch_once_f ran %zu distinct functions once each, sum %d\n", CALLBACK_COUNT, once_total);
+    dispatch_queue_t queue = dispatch_queue_create("hostbridges.callbacks", NULL);
+    int sync_total = 0;
+    for (size_t i = 0; i < CALLBACK_COUNT; i++)
+        dispatch_sync_f(queue, &sync_total, callback_functions[i]);
+    printf("dispatch_sync_f ran %zu distinct functions, sum %d\n", CALLBACK_COUNT, sync_total);
+    int async_total = 0;
+    for (size_t i = 0; i < CALLBACK_COUNT; i++) {
+        dispatch_async_f(queue, &async_total, callback_functions[i]);
+        dispatch_sync(queue, ^{
+        });
+    }
+    printf("dispatch_async_f ran %zu distinct functions, sum %d\n", CALLBACK_COUNT, async_total);
+}
+
 int main(void)
 {
     @autoreleasepool {
@@ -667,6 +697,7 @@ int main(void)
         source_checks();
         alignment_checks();
         block_lifetime_checks();
+        callback_checks();
     }
     return 0;
 }

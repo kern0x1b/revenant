@@ -272,6 +272,18 @@ print on the iPad 2 what objc4 printed.
   `recompiler/tests/classpair` has both cases: the first message to a class laid out only in `__objc_clsrolist` under a
   guest root class, and a first message with integer, floating-point and structure-result registers to a class whose
   `+initialize` is guest code.
+- **Function pointers the guest hands to the host.** The host cannot call a guest address, so a function pointer
+  parameter becomes one of 32 host trampolines of its signature, each bound to the guest function it was given. The
+  slot is counted: it belongs to the call for the functions the host runs only while the call lasts (`dispatch_once_f`,
+  `dispatch_sync_f`, `dispatch_barrier_sync_f`, `dispatch_apply_f`, `pthread_once`, `qsort`, `bsearch` and the Core
+  Foundation apply and sort functions) and is freed when the call returns; it belongs to the pending call for the
+  functions that run once later (`dispatch_async_f`, `dispatch_after_f`, `dispatch_barrier_async_f`,
+  `dispatch_group_async_f`, `dispatch_group_notify_f`) and is freed when the trampoline has run the function; for every
+  other function (a `pthread_key` destructor, an event handler, a signal handler, `atexit`) it is held for good, as the
+  host may call it at any time. Two registrations of one function share a slot. Without this, the slots filled with the
+  initializers that `swift_once` hands to `dispatch_once_f`, one for every lazy global the code touches, and the 33rd
+  ended the process with "callback pool 4 exhausted" (the number is the index of the signature, `void (*)(void *)`). A
+  function with all 32 slots live still stops the program, with the count of each kind in its message.
 - **Blocks the guest hands to the host.** A block parameter of a host function is converted into a host block that holds a
   copy of the guest block (`Block_copy` in the guest) and invokes it. The host block is the callee's for the call: the
   generated stub takes it with a count of +1, and the one holder of the guest copy belongs to that block alone, so both

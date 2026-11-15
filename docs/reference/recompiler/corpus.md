@@ -465,6 +465,14 @@ methods of this shape, `+[NSException raise:format:arguments:]` and `+[NSPredica
 the same path and no line of the check calls them. The `%K` of a predicate format is not a conversion of `xl_format_marshal`
 and stops the program with its message.
 
+- a C function pointer the guest passes to the host: forty distinct functions through `dispatch_once_f` (twice each, they run
+  once), `dispatch_sync_f` and `dispatch_async_f` (each waited for before the next). The host holds a trampoline per
+  distinct guest function, 32 for each signature, and a function pointer passed for `dispatch_once_f`, `dispatch_sync_f`
+  and the like is held until the call returns, one for `dispatch_async_f` until it has run, so the reCAPTCHA SDK's
+  `swift_once`, which passes the initializer of every lazy global to `dispatch_once_f`, no longer ends with "callback pool
+  4 exhausted" at the 33rd global. The host part requires that the wrappers of the three hold the slot with the life that
+  fits them and that the two that run the function during the call release it.
+
 The check builds the program for this Mac and compares its output with `tests/data/hostbridges/expected.txt`, translates
 the arm64 build (which fails on any import without a bridge) and requires that the program imports each of the bridged
 functions. The device part runs the translated binary and compares its output with the Mac's.

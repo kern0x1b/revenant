@@ -75,8 +75,14 @@ uintptr_t xl_alias_resolve(uintptr_t pointer);
 uint64_t xl_alias_pointer(uintptr_t host);
 uint64_t xl_alias_object(uintptr_t host);
 uint64_t xl_protocol_out(uintptr_t host);
-unsigned xl_callback_slot(unsigned signature, uint64_t target);
-extern uint64_t xl_callback_targets[][32];
+enum { XL_CALLBACK_PINNED, XL_CALLBACK_CALL, XL_CALLBACK_ONCE };
+#define XL_CALLBACK_SLOTS 32
+unsigned xl_callback_slot(unsigned signature, uint64_t target, unsigned life);
+void xl_callback_release(unsigned signature, unsigned slot);
+void xl_callback_done(unsigned signature, unsigned slot);
+extern uint64_t xl_callback_targets[][XL_CALLBACK_SLOTS];
+extern uint32_t xl_callback_uses[][XL_CALLBACK_SLOTS];
+extern uint8_t xl_callback_life[][XL_CALLBACK_SLOTS];
 
 static inline int64_t xl_narrow_signed(int64_t value, int64_t host_min, int64_t host_max, int64_t guest_min, int64_t guest_max, const char *symbol, unsigned index)
 {

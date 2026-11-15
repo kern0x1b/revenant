@@ -796,6 +796,20 @@ std::string Generator::HostBlockBridge(const Value &value) {
   return name + "_wrap";
 }
 
+std::string CallbackLife(const std::string &where) {
+  static const std::set<std::string> call = {"dispatch_once_f", "dispatch_sync_f", "dispatch_barrier_sync_f", "dispatch_apply_f", "pthread_once",
+                                             "qsort", "qsort_r", "bsearch", "CFArraySortValues", "CFArrayBSearchValues", "CFArrayApplyFunction",
+                                             "CFSetApplyFunction", "CFDictionaryApplyFunction", "CFBagApplyFunction", "CFTreeApplyFunctionToChildren"};
+  static const std::set<std::string> once = {"dispatch_async_f", "dispatch_after_f", "dispatch_barrier_async_f", "dispatch_group_async_f",
+                                             "dispatch_group_notify_f"};
+  auto end = where.find('"', 1);
+  if (where.empty() || where[0] != '"' || end == std::string::npos) {
+    return "";
+  }
+  auto symbol = where.substr(1, end - 1);
+  return call.count(symbol) ? "XL_CALLBACK_CALL" : once.count(symbol) ? "XL_CALLBACK_ONCE" : "";
+}
+
 std::string Generator::CallbackBridge(const Value &value) {
   auto gproto = value.guest.getCanonicalType()->getPointeeType()->getAs<FunctionProtoType>();
   auto hproto = value.host.getCanonicalType()->getPointeeType()->getAs<FunctionProtoType>();
@@ -838,6 +852,7 @@ std::string Generator::CallbackBridge(const Value &value) {
     hs << "    p." << param.name << " = " << ScalarToGuest(param.value, param.name) << ";\n";
   }
   hs << "    xl_invoke(XL_GUEST_" << name << "_guest, (uintptr_t)&p);\n";
+  hs << "    xl_callback_done(" << id << ", slot);\n";
   if (has_result) {
     hs << "    return " << ScalarToHost(result, "p.r", "\"" + name + "\", 99") << ";\n";
   }
@@ -846,12 +861,14 @@ std::string Generator::CallbackBridge(const Value &value) {
     hs << "static " << Spell(hc_, hproto->getReturnType(), name + "_" + std::to_string(slot) + "(" + (args.empty() ? "void" : args) + ")")
        << "\n{\n    " << (has_result ? "return " : "") << name << "_enter(" << slot << (names.empty() ? "" : ", " + names) << ");\n}\n\n";
   }
-  hs << "static " << Spell(hc_, value.host, name + "_host(uint64_t target)") << "\n{\n    static " << Spell(hc_, value.host, "const slots[32]") << " = {";
+  hs << "static " << Spell(hc_, value.host, name + "_hold(uint64_t target, unsigned life, unsigned *slot)") << "\n{\n    static " << Spell(hc_, value.host, "const slots[32]") << " = {";
   for (unsigned slot = 0; slot < 32; ++slot) {
     hs << (slot ? ", " : "") << name << "_" << slot;
   }
-  hs << "};\n    if (target >= 0xFFFFFFFFFFFFFF00ull)\n        return (" << Spell(hc_, value.host) << ")(uintptr_t)(uint32_t)target;\n"
-     << "    return target ? slots[xl_callback_slot(" << id << ", target)] : 0;\n}\n\n";
+  hs << "};\n    *slot = XL_CALLBACK_SLOTS;\n    if (target >= 0xFFFFFFFFFFFFFF00ull)\n        return (" << Spell(hc_, value.host) << ")(uintptr_t)(uint32_t)target;\n"
+     << "    if (!target)\n        return 0;\n    *slot = xl_callback_slot(" << id << ", target, life);\n    return slots[*slot];\n}\n\n";
+  hs << "static __attribute__((unused)) " << Spell(hc_, value.host, name + "_host(uint64_t target)") << "\n{\n    unsigned slot;\n    return " << name
+     << "_hold(target, XL_CALLBACK_PINNED, &slot);\n}\n\n";
   guest_ += gs.str();
   host_ += hs.str();
   return name + "_host";
@@ -870,8 +887,22 @@ std::string Generator::HostLoad(const Value &value, const std::string &expr, con
       post += "    [(id)" + temp + " release];\n";
       return temp;
     }
-    case Kind::Callback:
-      return CallbackBridge(value) + "(" + expr + ")";
+    case Kind::Callback: {
+      auto bridge = CallbackBridge(value);
+      auto life = CallbackLife(where);
+      if (life.empty()) {
+        return bridge + "(" + expr + ")";
+      }
+      auto stem = bridge.substr(0, bridge.size() - 5);
+      auto id = stem.substr(std::string("xl_callback_").size());
+      auto temp = "callback" + std::to_string(index);
+      prep += "    unsigned " + temp + "_slot;\n";
+      prep += "    " + Spell(hc_, value.host, temp) + " = " + stem + "_hold(" + expr + ", " + life + ", &" + temp + "_slot);\n";
+      if (life == "XL_CALLBACK_CALL") {
+        post += "    xl_callback_release(" + id + ", " + temp + "_slot);\n";
+      }
+      return temp;
+    }
     case Kind::OutSlot: {
       auto temp = "slot" + std::to_string(index);
       auto &pointee = *value.pointee;
@@ -2668,7 +2699,9 @@ bool Generator::Write() {
   }
   host << (*includes)->getBuffer() << "\n" << (*abi)->getBuffer() << "\n#include <objc/message.h>\n#include <objc/runtime.h>\n#include \"xl_bridge.h\"\n#include \"xl_host.h\"\n\n";
   host << "#define XL_CALLBACK_COUNT " << std::max<size_t>(1, callbacks_.size()) << "\n";
-  host << "uint64_t xl_callback_targets[XL_CALLBACK_COUNT][32];\n\n";
+  host << "uint64_t xl_callback_targets[XL_CALLBACK_COUNT][XL_CALLBACK_SLOTS];\n"
+       << "uint32_t xl_callback_uses[XL_CALLBACK_COUNT][XL_CALLBACK_SLOTS];\n"
+       << "uint8_t xl_callback_life[XL_CALLBACK_COUNT][XL_CALLBACK_SLOTS];\n\n";
   host << "void xl_manual_hblock_generic(void *pack);\nvoid xl_h_xl_hblock_generic(State *state)\n{\n    xl_manual_hblock_generic(xl_argument(state));\n    xl_return(state);\n}\n\n";
   host << host_record_defs_ << host_types_ << host_ << tables_;
   host << "const struct xl_selector_shim xl_selector_shims[] = {\n";

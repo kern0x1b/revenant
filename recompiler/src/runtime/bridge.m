@@ -1045,21 +1045,54 @@ void xl_manual__tlv_bootstrap(void *pack)
 
 static pthread_mutex_t xl_callback_lock = PTHREAD_MUTEX_INITIALIZER;
 
-unsigned xl_callback_slot(unsigned signature, uint64_t target)
+unsigned xl_callback_slot(unsigned signature, uint64_t target, unsigned life)
 {
     pthread_mutex_lock(&xl_callback_lock);
-    unsigned slot = 0;
-    for (; slot < 32; slot++) {
-        if (xl_callback_targets[signature][slot] == target || !xl_callback_targets[signature][slot])
+    unsigned found = XL_CALLBACK_SLOTS, vacant = XL_CALLBACK_SLOTS;
+    for (unsigned slot = 0; slot < XL_CALLBACK_SLOTS; slot++) {
+        if (!xl_callback_uses[signature][slot]) {
+            if (vacant == XL_CALLBACK_SLOTS)
+                vacant = slot;
+        } else if (xl_callback_targets[signature][slot] == target && xl_callback_life[signature][slot] == life) {
+            found = slot;
             break;
+        }
     }
-    if (slot == 32) {
-        fprintf(stderr, "xlate: callback pool %u exhausted\n", signature);
+    if (found != XL_CALLBACK_SLOTS) {
+        if (life != XL_CALLBACK_PINNED)
+            xl_callback_uses[signature][found]++;
+        pthread_mutex_unlock(&xl_callback_lock);
+        return found;
+    }
+    if (vacant == XL_CALLBACK_SLOTS) {
+        unsigned held[3] = {0, 0, 0};
+        for (unsigned slot = 0; slot < XL_CALLBACK_SLOTS; slot++)
+            held[xl_callback_life[signature][slot]]++;
+        fprintf(stderr, "xlate: callback pool %u exhausted: every slot holds a live guest function (%u pinned, %u in a host call, %u waiting to run once), and a function pointer passed for a call of the host is held until the call returns or the function has run\n",
+                signature, held[XL_CALLBACK_PINNED], held[XL_CALLBACK_CALL], held[XL_CALLBACK_ONCE]);
         abort();
     }
-    xl_callback_targets[signature][slot] = target;
+    xl_callback_targets[signature][vacant] = target;
+    xl_callback_life[signature][vacant] = (uint8_t)life;
+    xl_callback_uses[signature][vacant] = 1;
     pthread_mutex_unlock(&xl_callback_lock);
-    return slot;
+    return vacant;
+}
+
+void xl_callback_release(unsigned signature, unsigned slot)
+{
+    if (slot >= XL_CALLBACK_SLOTS)
+        return;
+    pthread_mutex_lock(&xl_callback_lock);
+    if (xl_callback_life[signature][slot] != XL_CALLBACK_PINNED && xl_callback_uses[signature][slot])
+        xl_callback_uses[signature][slot]--;
+    pthread_mutex_unlock(&xl_callback_lock);
+}
+
+void xl_callback_done(unsigned signature, unsigned slot)
+{
+    if (xl_callback_life[signature][slot] == XL_CALLBACK_ONCE)
+        xl_callback_release(signature, slot);
 }
 
 struct xl_buffer {

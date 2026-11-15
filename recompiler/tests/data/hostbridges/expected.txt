@@ -105,3 +105,6 @@ align category super 1 __NSCFConstantString
 align constant across threads 1
 block sync ran 3, captured object released at return 1
 block async ran 5, captured object released 2
+dispatch_once_f ran 40 distinct functions once each, sum 820
+dispatch_sync_f ran 40 distinct functions, sum 820
+dispatch_async_f ran 40 distinct functions, sum 820
