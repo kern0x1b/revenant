@@ -26,13 +26,23 @@ class; the translation lists them in `weak-absent.txt` and, for classes, in `unc
 gets one load command for each Backports library it uses (`-dead_strip_dylibs` drops the others), by that library's
 install name, `/usr/lib/revenant/org.revenant.backports/lib<Name>Backports.dylib`; the app has to have those files, as an
 app of revenant's build has through the package `org.revenant.backports`. The registry and the loader do not change.
-The reCAPTCHA Enterprise SDK needs it. Translated without `BACKPORTS_DIR` (2026-11-14, main 64fa5260a) its
-`uncovered-classes.txt` lists 66 class references, among them `NSURLComponents`, `NSURLQueryItem`, `NSURLSession`,
-`NSURLSessionConfiguration`, `NSISO8601DateFormatter`, `NSMeasurement`, `NSDimension`, `WKWebView`,
-`WKWebViewConfiguration` and `DCAppAttestService`, and `weak-absent.txt` lists 70 weak imports (`NSDateInterval`,
-`NSPersonNameComponents`, 25 `NSURL*` key constants and others). With it (main 7bdac1e30) the first list is empty, the second
-has 28 left that the Backports do not export, and the library has strong load commands for ten Backports libraries
-(AVFAudio, CoreData, CoreFoundation, CoreGraphics, DeviceCheck, Foundation, Security, System, UIKit, WebKit).
+The reCAPTCHA Enterprise SDK needs it. Translated without `BACKPORTS_DIR` (2026-11-15, main e54eefda5 with the check
+below) its `uncovered-classes.txt` lists 14 class references: `NSURLComponents`, `NSURLQueryItem`, `NSURLSession`,
+`NSURLSessionConfiguration`, `NSISO8601DateFormatter`, `NSMeasurement`, `NSDimension`, the two
+`NSAttributedStringMarkdown*` classes, `WKWebView`, `WKWebViewConfiguration`, `DCAppAttestService`, and `OS_dispatch_queue`
+and `OS_dispatch_source`, which the cache has but its `libSystem` does not export as symbols. `weak-absent.txt` lists 70 weak
+imports (`NSDateInterval`, `NSPersonNameComponents`, 25 `NSURL*` key constants and others). With it (main 7bdac1e30) the first
+list is empty, the second has 28 left that the Backports do not export, and the library has strong load commands for ten
+Backports libraries (AVFAudio, CoreData, CoreFoundation, CoreGraphics, DeviceCheck, Foundation, Security, System, UIKit, WebKit).
+
+A class reference is covered, and bound strongly, when it is bound to a Backports library, or to a system library whose
+copy in the iOS 6.0 cache exports the symbol (`dyld.exported_by`, the check the import check of the translation applies), or,
+for a flat lookup, when the class is in `classes_armv7.json` of that cache. The others are uncovered: the translation
+imports them weakly (`macho.weaken_classrefs`), so a phone that lacks them has nil and not a failed load. Until 2026-11-15
+the check read the class list as an array, which a JSON object is not (`#` is 0), so the cache's classes never counted and
+the same translation listed 66 references, every class the library imports, `NSObject` and `NSString` among them; a Backports
+library counted as covering a class it only imported, not one it exports. Every one of the 14 is exported by a Backports library
+of main 7bdac1e30, so `BACKPORTS_DIR` covers all of them.
 
 ### Which class binds to the proxy and which to the system library
 

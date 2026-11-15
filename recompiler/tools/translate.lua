@@ -697,6 +697,11 @@ function translate(input, includes, out, images, opt)
 
     local stock_classes = path.join(e.dyld, "classes_armv7.json")
     local stock = os.isfile(stock_classes) and json.loadfile(stock_classes).classes or nil
+    local stock_names = {}
+    for class in pairs(stock or {}) do
+        table.insert(stock_names, class)
+    end
+    stock_names = env.sorted(stock_names)
     local undef_flags = {}
     for _, object in ipairs(lifted_objs) do
         for _, symbol in ipairs(unique(nm_undefined(object))) do
@@ -712,9 +717,9 @@ function translate(input, includes, out, images, opt)
         end
         wanted = unique(wanted)
         writelines(o("imported-classes-pre.txt"), wanted)
-        local covered = table.join(#stock > 0 and stock or {""})
+        local covered = table.join(#stock_names > 0 and stock_names or {""})
         for _, library in ipairs(backport_libs) do
-            table.join2(covered, classes_of(lines(tryiorun("nm", {"-gj", library}))))
+            table.join2(covered, classes_of(lines(tryiorun("nm", {"-gUj", library}))))
         end
         table.join2(covered, classes_of(resolved))
         covered = unique(covered)
@@ -777,16 +782,26 @@ function translate(input, includes, out, images, opt)
     if stock then
         local wanted = unique(classes_of(nm_undefined(binary)))
         writelines(o("imported-classes.txt"), wanted)
-        local covered = table.join(#stock > 0 and stock or {""})
-        for _, library in ipairs(backport_libs) do
-            table.join2(covered, classes_of(lines(tryiorun("nm", {"-gj", library}))))
+        local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
+        local cache = dyld.load(path.join(e.dyld, "dyld_shared_cache_armv7"))
+        local from = nm_import_libraries(binary)
+        local installs = library_installs(binary)
+        local covered, uncovered = {}, {}
+        for _, class in ipairs(wanted) do
+            local symbol = "_OBJC_CLASS_$_" .. class
+            local bound = from[symbol]
+            local install = bound and system_library_of(installs, bound)
+            local present
+            if bound and bound:match(BACKPORTS_LEAF) then
+                present = true
+            elseif install then
+                present = dyld.exported_by(cache, install, symbol)
+            else
+                present = stock[class] ~= nil
+            end
+            table.insert(present and covered or uncovered, present and class or symbol)
         end
-        covered = unique(covered)
         writelines(o("covered-classes.txt"), covered)
-        local uncovered = {}
-        for _, class in ipairs(difference(wanted, covered)) do
-            table.insert(uncovered, "_OBJC_CLASS_$_" .. class)
-        end
         writelines(o("uncovered-classes.txt"), uncovered)
         if #uncovered > 0 then
             print("weak-binding %d uncovered class ref(s)", #uncovered)

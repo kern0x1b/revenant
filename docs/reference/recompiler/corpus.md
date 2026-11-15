@@ -797,6 +797,12 @@ The control translates the same fixture with `XL_PROXY_CLASSES=1`, which keeps e
 translator did before, and requires that `NSMutableDictionary` binds to `libFoundationBackports` and that
 `system-classes.txt` is empty.
 
+A third translation leaves `BACKPORTS_DIR` out and checks the `uncovered-classes.txt` report. It must list exactly
+`NSURLQueryItem`, which the iOS 6 cache lacks, and `OS_dispatch_queue`, which the cache's `libSystem` does not export, and
+the library must import those two weakly and `NSMutableDictionary` and `CASpringAnimation` strongly. A report that lists
+every imported class, or none, fails here: `classes_armv7.json` holds its classes as a JSON object, and a check that
+takes its length instead of its keys sees an empty set. The translation with the Backports must report no uncovered class.
+
 The device part (`--device-only`) translates the fixture against the Backports build that `REVENANT_ALIAS_LIBRARIES` names
 (default `build/iphoneos/armv7/release`), loads it in a small armv7 host with the loader, and requires `ok` for each name
 above. The control with `XL_PROXY_CLASSES=1` must report `FAIL superclass`: the Backports reparent a proxy that has no

@@ -1,14 +1,15 @@
 local BACKPORTS = "/usr/lib/revenant/org.revenant.backports/"
 
 local function imports(file)
-    local found = {}
+    local found, weak = {}, {}
     for line in os.iorunv("nm", {"-m", file}):gmatch("[^\n]+") do
         local symbol, library = line:match("%(undefined%) [%w ]-external (%S+) %(from (.-)%)")
         if symbol then
             found[symbol] = library
+            weak[symbol] = line:find("weak external", 1, true) ~= nil
         end
     end
-    return found
+    return found, weak
 end
 
 local function binds(file)
@@ -118,7 +119,27 @@ local function host_part(e, corpus, translate, o, here)
     if #io.readfile(o("xl-proxy/system-classes.txt")) ~= 0 then
         corpus.fail("the control with XL_PROXY_CLASSES=1 rebound classes to the system library")
     end
-    print("ok (host part): NSMutableDictionary binds to the system library and NSURLQueryItem and CASpringAnimation to the Backports; the control with XL_PROXY_CLASSES=1 binds them all to the Backports")
+    os.cp(o("xl"), o("xl-plain"))
+    translate.translate(o("SCFixture.dylib"), o("includes.h"), o("xl-plain"), {}, {XL_LIBRARY = "1"})
+    local uncovered = io.readfile(o("xl-plain/uncovered-classes.txt"))
+    if uncovered ~= "_OBJC_CLASS_$_NSURLQueryItem\n_OBJC_CLASS_$_OS_dispatch_queue\n" then
+        corpus.fail("the translation without BACKPORTS_DIR lists these classes as uncovered, not exactly NSURLQueryItem, which the iOS 6 cache lacks, and OS_dispatch_queue, which its libSystem does not export:\n%s", uncovered)
+    end
+    local _, weak = imports(o("xl-plain/SCFixture.dylib"))
+    for _, symbol in ipairs({"_OBJC_CLASS_$_NSURLQueryItem", "_OBJC_CLASS_$_OS_dispatch_queue"}) do
+        if weak[symbol] ~= true then
+            corpus.fail("the translation without BACKPORTS_DIR does not import %s weakly, so a phone that does not export it stops at load", symbol)
+        end
+    end
+    for _, symbol in ipairs({CLASS, META, "_OBJC_CLASS_$_CASpringAnimation"}) do
+        if weak[symbol] ~= false then
+            corpus.fail("the translation without BACKPORTS_DIR imports %s weakly or not at all, but the iOS 6 cache exports it", symbol)
+        end
+    end
+    if io.readfile(o("xl/uncovered-classes.txt")) ~= "" then
+        corpus.fail("the translation with the Backports lists uncovered classes:\n%s", io.readfile(o("xl/uncovered-classes.txt")))
+    end
+    print("ok (host part): NSMutableDictionary binds to the system library and NSURLQueryItem and CASpringAnimation to the Backports; the control with XL_PROXY_CLASSES=1 binds them all to the Backports; without BACKPORTS_DIR only the classes the cache lacks or does not export are uncovered and weak")
 end
 
 function main(out, ...)
