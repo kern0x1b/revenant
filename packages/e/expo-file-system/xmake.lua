@@ -8,7 +8,7 @@ package("expo-file-system")
     add_urls("https://registry.npmjs.org/expo-file-system/-/expo-file-system-$(version).tgz")
     add_versions("57.0.7", "6e6c41298ef68fff2e894ca85517d8c494c40b16e5032501575769717b0a29a9")
     add_patches("57.0.7", path.join(os.scriptdir(), "patches", "file-system-ios6.patch"), "e8a21e0b924c67194335a52c043956b87e49335ceaceb67537e7dc6bf8cf3a1f")
-    add_patches("57.0.7", path.join(os.scriptdir(), "patches", "file-system-handle-ios6.patch"), "fda625e4fc72f7eb6af742f6b54a8394d50a79c1ceabb1ae3f8b000139c50524")
+    add_patches("57.0.7", path.join(os.scriptdir(), "patches", "file-system-handle-ios6.patch"), "08f1044f13548896a2485df6e79da397bdc19871784371032c6050da5a378392")
     add_configs("revision", {description = "Raised when the install script changes, since the script is not part of the install path.", default = "1", readonly = true})
 
     on_install(function (package)
