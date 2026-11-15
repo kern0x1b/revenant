@@ -16,6 +16,7 @@
 #include <net/if_var.h>
 #include <netdb.h>
 #include <nl_types.h>
+#include <pthread.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -712,8 +713,237 @@ static void key_checks(void)
     printf("dispatch_get_specific inside the queue: %s\n", inside == &context ? "found" : "none");
 }
 
-int main(void)
+#define WORD(n) ((void *)(uintptr_t)(0x4d4e636572ull + (n)))
+
+static volatile uintptr_t word_last;
+static uintptr_t word_applied[3];
+static volatile int word_thunk_wrong;
+static pthread_key_t word_key;
+static volatile uintptr_t word_destroyed;
+static volatile int word_thread_specific;
+static volatile uintptr_t word_timer_info;
+
+static void word_note(void *context)
 {
+    word_last = (uintptr_t)context;
+}
+
+static void word_apply(void *context, size_t index)
+{
+    word_applied[index] = (uintptr_t)context;
+}
+
+static int word_compare(void *thunk, const void *a, const void *b)
+{
+    if (thunk != WORD(14))
+        word_thunk_wrong = 1;
+    return *(const int *)a - *(const int *)b;
+}
+
+static void word_destroy(void *value)
+{
+    word_destroyed = (uintptr_t)value;
+}
+
+static void *word_thread(void *argument)
+{
+    pthread_setspecific(word_key, argument);
+    word_thread_specific = pthread_getspecific(word_key) == argument;
+    return (void *)((uintptr_t)argument + 1);
+}
+
+static void *word_exit_thread(void *argument)
+{
+    pthread_exit((void *)((uintptr_t)argument + 2));
+    return NULL;
+}
+
+static void word_timer(CFRunLoopTimerRef timer, void *info)
+{
+    word_timer_info = (uintptr_t)info;
+}
+
+static void word_each(const void *key, const void *value, void *context)
+{
+    word_applied[0] += (uintptr_t)key + (uintptr_t)value + (uintptr_t)context - 3 * 0x4d4e636572ull;
+}
+
+@interface WordProbe : NSObject
+- (id)takeWord:(id)word;
+- (id)takeWord:(id)first and:(id)second;
+@end
+
+static uintptr_t word_first, word_second;
+
+@implementation WordProbe
+- (id)takeWord:(id)word
+{
+    word_first = (uintptr_t)word;
+    return nil;
+}
+- (id)takeWord:(id)first and:(id)second
+{
+    word_first = (uintptr_t)first;
+    word_second = (uintptr_t)second;
+    return nil;
+}
+@end
+
+static void word_report(const char *label, int ok)
+{
+    printf("word %s: %s\n", label, ok ? "ok" : "WRONG");
+}
+
+static void word_wait_for(void *expected)
+{
+    for (int i = 0; i < 500 && word_last != (uintptr_t)expected; i++)
+        usleep(10000);
+}
+
+static void word_checks(void)
+{
+    dispatch_queue_t queue = dispatch_queue_create("hostbridges.words", NULL);
+    static dispatch_once_t once, once_small, once_pointer;
+    static int local;
+    dispatch_once_f(&once, WORD(1), word_note);
+    word_report("dispatch_once_f context", word_last == (uintptr_t)WORD(1));
+    dispatch_once_f(&once_small, (void *)5, word_note);
+    word_report("dispatch_once_f small word", word_last == 5);
+    dispatch_once_f(&once_pointer, &local, word_note);
+    word_report("dispatch_once_f address", word_last == (uintptr_t)&local);
+    dispatch_sync_f(queue, WORD(2), word_note);
+    word_report("dispatch_sync_f context", word_last == (uintptr_t)WORD(2));
+    dispatch_barrier_sync_f(queue, WORD(3), word_note);
+    word_report("dispatch_barrier_sync_f context", word_last == (uintptr_t)WORD(3));
+    dispatch_async_f(queue, WORD(4), word_note);
+    word_wait_for(WORD(4));
+    word_report("dispatch_async_f context", word_last == (uintptr_t)WORD(4));
+    dispatch_barrier_async_f(queue, WORD(5), word_note);
+    word_wait_for(WORD(5));
+    word_report("dispatch_barrier_async_f context", word_last == (uintptr_t)WORD(5));
+    dispatch_after_f(dispatch_time(DISPATCH_TIME_NOW, 2000000), queue, WORD(6), word_note);
+    word_wait_for(WORD(6));
+    word_report("dispatch_after_f context", word_last == (uintptr_t)WORD(6));
+    dispatch_apply_f(3, queue, WORD(7), word_apply);
+    word_report("dispatch_apply_f context", word_applied[0] == (uintptr_t)WORD(7) && word_applied[1] == (uintptr_t)WORD(7) && word_applied[2] == (uintptr_t)WORD(7));
+    dispatch_group_t group = dispatch_group_create();
+    dispatch_group_async_f(group, queue, WORD(8), word_note);
+    dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+    word_report("dispatch_group_async_f context", word_last == (uintptr_t)WORD(8));
+    dispatch_group_notify_f(group, queue, WORD(9), word_note);
+    word_wait_for(WORD(9));
+    word_report("dispatch_group_notify_f context", word_last == (uintptr_t)WORD(9));
+    dispatch_queue_t holder = dispatch_queue_create("hostbridges.words.context", NULL);
+    word_report("dispatch_get_context before set", dispatch_get_context(holder) == NULL);
+    dispatch_set_context(holder, WORD(10));
+    word_report("dispatch_set_context and get_context", dispatch_get_context(holder) == WORD(10));
+    dispatch_set_context(holder, &local);
+    word_report("dispatch_set_context address", dispatch_get_context(holder) == &local);
+    const void *key = (const void *)0x636861726f6e5741ull;
+    dispatch_queue_set_specific(queue, key, WORD(11), NULL);
+    __block void *inside = NULL;
+    dispatch_sync(queue, ^{
+        inside = dispatch_get_specific(key);
+    });
+    word_report("dispatch_queue_set_specific value", dispatch_queue_get_specific(queue, key) == WORD(11) && inside == WORD(11));
+
+    pthread_key_create(&word_key, word_destroy);
+    pthread_setspecific(word_key, WORD(12));
+    word_report("pthread_setspecific and getspecific", pthread_getspecific(word_key) == WORD(12));
+    pthread_setspecific(word_key, NULL);
+    pthread_t thread;
+    void *result = NULL;
+    pthread_create(&thread, NULL, word_thread, WORD(13));
+    pthread_join(thread, &result);
+    word_report("pthread_create argument and result", result == (void *)((uintptr_t)WORD(13) + 1) && word_thread_specific);
+    word_report("pthread key destructor value", word_destroyed == (uintptr_t)WORD(13));
+    result = NULL;
+    pthread_create(&thread, NULL, word_exit_thread, WORD(15));
+    pthread_join(thread, &result);
+    word_report("pthread_exit value", result == (void *)((uintptr_t)WORD(15) + 2));
+
+    int values[5] = {5, 3, 4, 1, 2};
+    qsort_r(values, 5, sizeof(int), WORD(14), word_compare);
+    word_report("qsort_r thunk", !word_thunk_wrong && values[0] == 1 && values[4] == 5);
+
+    id owner = [[NSObject alloc] init];
+    objc_setAssociatedObject(owner, WORD(16), (id)WORD(17), OBJC_ASSOCIATION_ASSIGN);
+    word_report("assign association with a word of more than 32 bits", objc_getAssociatedObject(owner, WORD(16)) == (id)WORD(17));
+    [owner release];
+
+    WordProbe *probe = [[WordProbe alloc] init];
+    [probe performSelector:@selector(takeWord:) withObject:(id)WORD(18)];
+    word_report("performSelector:withObject:", word_first == (uintptr_t)WORD(18));
+    [probe performSelector:@selector(takeWord:and:) withObject:(id)WORD(19) withObject:(id)WORD(20)];
+    word_report("performSelector:withObject:withObject:", word_first == (uintptr_t)WORD(19) && word_second == (uintptr_t)WORD(20));
+    [probe release];
+
+    CFMutableDictionaryRef dictionary = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+    CFDictionarySetValue(dictionary, WORD(21), WORD(22));
+    const void *found = NULL;
+    word_report("CFDictionary set, get and contains by words",
+                CFDictionaryGetValue(dictionary, WORD(21)) == WORD(22) && CFDictionaryContainsKey(dictionary, WORD(21)) &&
+                    CFDictionaryContainsValue(dictionary, WORD(22)) && !CFDictionaryContainsKey(dictionary, WORD(23)) &&
+                    CFDictionaryGetValueIfPresent(dictionary, WORD(21), &found) && found == WORD(22));
+    word_applied[0] = 0;
+    CFDictionaryApplyFunction(dictionary, word_each, WORD(24));
+    word_report("CFDictionaryApplyFunction context", word_applied[0] == (uintptr_t)WORD(21) + (uintptr_t)WORD(22) + (uintptr_t)WORD(24) - 3 * 0x4d4e636572ull);
+    CFRelease(dictionary);
+    const void *keys[2] = {WORD(25), WORD(26)};
+    const void *objects[2] = {WORD(27), WORD(28)};
+    CFDictionaryRef created = CFDictionaryCreate(NULL, keys, objects, 2, NULL, NULL);
+    word_report("CFDictionaryCreate with arrays of words", CFDictionaryGetCount(created) == 2 && CFDictionaryGetValue(created, WORD(26)) == WORD(28));
+    CFRelease(created);
+    CFMutableSetRef set = CFSetCreateMutable(NULL, 0, NULL);
+    CFSetAddValue(set, WORD(29));
+    word_report("CFSet add, contains and get", CFSetContainsValue(set, WORD(29)) && CFSetGetValue(set, WORD(29)) == WORD(29) && !CFSetContainsValue(set, WORD(30)));
+    CFRelease(set);
+    CFMutableArrayRef array = CFArrayCreateMutable(NULL, 0, NULL);
+    CFArrayAppendValue(array, WORD(31));
+    CFArrayAppendValue(array, WORD(32));
+    word_report("CFArray append, get and index", CFArrayGetValueAtIndex(array, 1) == WORD(32) &&
+                    CFArrayGetFirstIndexOfValue(array, CFRangeMake(0, 2), WORD(32)) == 1 && CFArrayContainsValue(array, CFRangeMake(0, 2), WORD(31)));
+    CFRelease(array);
+    const void *elements[2] = {WORD(33), WORD(34)};
+    CFArrayRef created_array = CFArrayCreate(NULL, elements, 2, NULL);
+    word_report("CFArrayCreate with an array of words", CFArrayGetCount(created_array) == 2 && CFArrayGetValueAtIndex(created_array, 0) == WORD(33));
+    CFRelease(created_array);
+
+    NSMapTable *map = NSCreateMapTable(NSNonOwnedPointerMapKeyCallBacks, NSNonOwnedPointerMapValueCallBacks, 4);
+    NSMapInsert(map, WORD(35), WORD(36));
+    word_report("NSMapTable insert and get by words", NSMapGet(map, WORD(35)) == WORD(36) && NSMapGet(map, WORD(37)) == NULL);
+    NSFreeMapTable(map);
+    NSHashTable *hash = NSCreateHashTable(NSNonOwnedPointerHashCallBacks, 4);
+    NSHashInsert(hash, WORD(38));
+    word_report("NSHashTable insert and get by words", NSHashGet(hash, WORD(38)) == WORD(38) && NSHashGet(hash, WORD(39)) == NULL);
+    NSFreeHashTable(hash);
+
+    CFRunLoopTimerContext timer_context = {0, WORD(40), NULL, NULL, NULL};
+    CFRunLoopTimerRef timer = CFRunLoopTimerCreate(NULL, CFAbsoluteTimeGetCurrent() + 0.01, 0, 0, 0, word_timer, &timer_context);
+    CFRunLoopAddTimer(CFRunLoopGetCurrent(), timer, kCFRunLoopDefaultMode);
+    CFRunLoopTimerContext timer_back = {0};
+    CFRunLoopTimerGetContext(timer, &timer_back);
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.3, false);
+    word_report("CFRunLoopTimer info given to the callback", word_timer_info == (uintptr_t)WORD(40));
+    word_report("CFRunLoopTimerGetContext info", timer_back.info == WORD(40));
+    CFRunLoopTimerInvalidate(timer);
+    CFRelease(timer);
+}
+
+static void word_overflow_checks(void)
+{
+    dispatch_queue_t queue = dispatch_queue_create("hostbridges.words.overflow", NULL);
+    for (uint64_t n = 0; n < 300000; n++)
+        dispatch_sync_f(queue, (void *)(uintptr_t)(0x100000000ull + n), word_note);
+    printf("the table of words did not overflow, last 0x%llx\n", (unsigned long long)word_last);
+}
+
+int main(int argc, char **argv)
+{
+    if (argc > 1 && !strcmp(argv[1], "word-overflow")) {
+        word_overflow_checks();
+        return 0;
+    }
     @autoreleasepool {
         scanf_checks();
         address_checks();
@@ -735,6 +965,7 @@ int main(void)
         block_lifetime_checks();
         callback_checks();
         key_checks();
+        word_checks();
     }
     return 0;
 }

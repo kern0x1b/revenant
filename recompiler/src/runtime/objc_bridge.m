@@ -280,6 +280,7 @@ void xl_run_initializers(void)
 
 void xl_bridge_init(void)
 {
+    xl_word_init();
     pthread_once(&xl_setup_once, xl_setup);
     xl_shadow_register_listed();
 }
@@ -503,6 +504,16 @@ static void xl_dynamic_fault(State *state, id receiver, SEL selector, const char
     xl_fault(state, message);
 }
 
+static int xl_selector_word_argument(SEL selector, unsigned index)
+{
+    const char *name = sel_getName(selector);
+    if (!strcmp(name, "performSelector:withObject:"))
+        return index == 1;
+    if (!strcmp(name, "performSelector:withObject:withObject:"))
+        return index == 1 || index == 2;
+    return 0;
+}
+
 static void xl_dynamic_send(State *state, id receiver, Method method, SEL selector, IMP forced)
 {
     if (!method) {
@@ -532,7 +543,10 @@ static void xl_dynamic_send(State *state, id receiver, Method method, SEL select
         int wide = 0;
         uint32_t word = 0;
         switch (*t) {
-        case '@': word = (uint32_t)xl_object_in(value, "dynamic message", i); break;
+        case '@':
+            word = (uint32_t)(xl_selector_word_argument(selector, i - 2) ? xl_object_in_word(value, "dynamic message", i)
+                                                                          : xl_object_in(value, "dynamic message", i));
+            break;
         case '#': word = (uint32_t)(uintptr_t)xl_class_in(xl_narrow_pointer(value, "dynamic message", i)); break;
         case ':': case '^': case '*':
             word = (uint32_t)xl_narrow_pointer(value, "dynamic message", i);
@@ -1257,6 +1271,8 @@ uintptr_t xl_object_in(uint64_t guest, const char *symbol, unsigned index)
 
 uint64_t xl_object_out(uintptr_t host)
 {
+    if (host - xl_word_low < xl_word_span)
+        return xl_word_value(host);
     struct xl_block_wrapper *w = xl_wrapper_of(host);
     if (w)
         return w->guest;
@@ -1275,6 +1291,8 @@ uintptr_t xl_object_in_word(uint64_t guest, const char *symbol, unsigned index)
 {
     if (guest < 0x4000)
         return (uintptr_t)guest;
+    if ((guest >> 32) && guest < 0xFFFFFFFFFFFFFF00ull)
+        return xl_word_slot(guest, symbol, index);
     return xl_object_in(guest, symbol, index);
 }
 

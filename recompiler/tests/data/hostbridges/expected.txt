@@ -114,3 +114,36 @@ associated after clearing one: none, other kept: second 2
 associated plain words with assign: 1, 3
 dispatch specific by wide key: found, other key: none
 dispatch_get_specific inside the queue: found
+word dispatch_once_f context: ok
+word dispatch_once_f small word: ok
+word dispatch_once_f address: ok
+word dispatch_sync_f context: ok
+word dispatch_barrier_sync_f context: ok
+word dispatch_async_f context: ok
+word dispatch_barrier_async_f context: ok
+word dispatch_after_f context: ok
+word dispatch_apply_f context: ok
+word dispatch_group_async_f context: ok
+word dispatch_group_notify_f context: ok
+word dispatch_get_context before set: ok
+word dispatch_set_context and get_context: ok
+word dispatch_set_context address: ok
+word dispatch_queue_set_specific value: ok
+word pthread_setspecific and getspecific: ok
+word pthread_create argument and result: ok
+word pthread key destructor value: ok
+word pthread_exit value: ok
+word qsort_r thunk: ok
+word assign association with a word of more than 32 bits: ok
+word performSelector:withObject:: ok
+word performSelector:withObject:withObject:: ok
+word CFDictionary set, get and contains by words: ok
+word CFDictionaryApplyFunction context: ok
+word CFDictionaryCreate with arrays of words: ok
+word CFSet add, contains and get: ok
+word CFArray append, get and index: ok
+word CFArrayCreate with an array of words: ok
+word NSMapTable insert and get by words: ok
+word NSHashTable insert and get by words: ok
+word CFRunLoopTimer info given to the callback: ok
+word CFRunLoopTimerGetContext info: ok

@@ -284,16 +284,31 @@ print on the iPad 2 what objc4 printed.
   initializers that `swift_once` hands to `dispatch_once_f`, one for every lazy global the code touches, and the 33rd
   ended the process with "callback pool 4 exhausted" (the number is the index of the signature, `void (*)(void *)`). A
   function with all 32 slots live still stops the program, with the count of each kind in its message.
-- **Keys the guest hands to the host.** The key of `objc_getAssociatedObject`, `objc_setAssociatedObject`,
-  `dispatch_queue_set_specific`, `dispatch_queue_get_specific` and `dispatch_get_specific` is a pointer the host only
-  compares, so the guest may build it from any 64-bit constant (a string of eight characters, as an SDK does for its
-  association keys). A key below 4 GB passes as the pointer it is; a key above takes a host address of its own, one byte
-  of the heap per distinct value for the life of the process, and the same value always takes the same address. Every
-  other pointer parameter that does not fit 32 bits still stops the program with "does not fit the host type". The value of
-  `objc_setAssociatedObject` and the result of `objc_getAssociatedObject` may be a plain word: with the policy
-  `OBJC_ASSOCIATION_ASSIGN` the runtime neither retains nor reads it, and an SDK stores a flag of 1 there. A word below
-  0x4000 passes as it is in both directions and everything else is converted as an object; a word above 4 GB is not
-  supported.
+- **Opaque words the guest hands to the host.** A pointer position of the host is 32 bits wide, so a guest value above
+  4 GB there stops the program with "does not fit the host type". Some positions only carry a word that the host stores,
+  compares or hands back and never reads through, and the guest fills them with words that are no pointers: the key of an
+  association built from eight characters, the context of `dispatch_once_f` that is a Swift small string (`recNM`), a flag
+  of 1 stored with the policy assign. `recompiler/src/xlate/opaque_words.h` lists these positions explicitly, each as a
+  function (or selector) and an index with the meaning the SDK headers give it: the keys and values of the associations
+  and of the specifics of a queue, the contexts of every `dispatch_*_f` function and of `dispatch_set_context` and
+  `dispatch_get_context`, the value, argument and result of the thread functions (`pthread_setspecific`,
+  `pthread_getspecific`, `pthread_create`, `pthread_exit`, `pthread_join`), the thunk of `qsort_r`, the keys, values and
+  contexts of the Foundation tables with the pointer personality and of the Core Foundation collections with NULL
+  callbacks (including the elements of an array that creates one), the `info` of the context record of a timer, source,
+  observer, stream, socket or port, the two arguments of `performSelector:withObject:` and `...withObject:withObject:`
+  (also for a message without a bridge), and the result of a callback of the shape `void *(*)(void *)` (the start routine
+  of `pthread_create`). Nothing is picked by the name of a parameter. A word that fits passes as the pointer it is (an
+  address, or a word below 0x4000 for an id); a word that does not takes a slot of the table of opaque words, and the same
+  word always takes the same slot. The slot is a 16-byte stride of a region reserved without access rights, 4 modulo 8, so
+  a host that reads through it faults at once; every widening of a host pointer (`xl_widen_pointer` through
+  `xl_alias_pointer`, `xl_object_out`) maps a slot back to its word, so the callback, the getter or the specific lookup
+  gets the very word the guest passed in. The table holds 262144 distinct words, never reuses a slot for another word, and is
+  guarded by a mutex; the 262145th distinct word stops the program with "holds 262144 distinct words and is full". The
+  table is checked against the SDK declaration when a function is bridged: a row that names a parameter that does not
+  exist or is not the plain pointer (or id) it says makes the function "UNSUPPORTED: opaque word table: ..." in
+  `report.txt`. Every pointer position that is not in the table keeps the strict check. The positions the table leaves
+  out on purpose are the ones where the host retains or messages the value: an object-personality collection, the
+  asynchronous `performSelector` forms, `NSThread` and `NSTimer` arguments; a word above 4 GB there is still refused.
 - **Blocks the guest hands to the host.** A block parameter of a host function is converted into a host block that holds a
   copy of the guest block (`Block_copy` in the guest) and invokes it. The host block is the callee's for the call: the
   generated stub takes it with a count of +1, and the one holder of the guest copy belongs to that block alone, so both

@@ -119,12 +119,15 @@ static inline uintptr_t xl_narrow_pointer(uint64_t value, const char *symbol, un
     return pointer;
 }
 
-uintptr_t xl_key_slot(uint64_t key);
+extern uintptr_t xl_word_low, xl_word_span;
+void xl_word_init(void);
+uintptr_t xl_word_slot(uint64_t word, const char *symbol, unsigned index);
+uint64_t xl_word_value(uintptr_t slot);
 
-static inline uintptr_t xl_narrow_key(uint64_t value, const char *symbol, unsigned index)
+static inline uintptr_t xl_narrow_word(uint64_t value, const char *symbol, unsigned index)
 {
     if ((value >> 32) && value < 0xFFFFFFFFFFFFFF00ull)
-        return xl_key_slot(value);
+        return xl_word_slot(value, symbol, index);
     return xl_narrow_pointer(value, symbol, index);
 }
 
