@@ -92,7 +92,7 @@ target("recompiler_corpus")
     set_default(false)
     add_deps("xlate", "xlgen")
     add_packages("blocksruntime", "iphoneos-sdk", "ld64", "ldid")
-    add_tests("jumptable", "switchtail", "tailcalls", "tsdscan", "tsdguard", "int128", "weakimport", "lse", "llsc", "crypto", "library", "exceptions", "libexceptions", "libcxxexceptions", "objectsplit", "segmentlimit", "absolutes", "flagflow", "hostbridges", "checkapi", "devicegate", "proxytable", "systemclasses")
+    add_tests("jumptable", "switchtail", "tailcalls", "tsdscan", "tsdguard", "int128", "weakimport", "lse", "llsc", "crypto", "library", "exceptions", "libexceptions", "libcxxexceptions", "objectsplit", "segmentlimit", "absolutes", "rebasetag", "flagflow", "hostbridges", "checkapi", "devicegate", "proxytable", "systemclasses")
     on_test(corpus)
 target_end()
 

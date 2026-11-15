@@ -23,6 +23,12 @@ Rellume is built for AArch64 only, the one architecture xlate lifts.
 The guest keeps its arm64 memory image, rebased below 4 GiB. Code runs natively as armv7. Only the crossings into
 the system frameworks go through bridges.
 
+A rebased word is slid as dyld slides it, as a whole 64-bit value: the address part moves to the guest base and the
+top byte stays. The top byte is data. A Swift `String` whose literal lives in the image has `0x80` (immortal) in its
+object word, and the runtime (`swift_bridgeObjectRetain` tests bit 63) uses that bit to leave the literal alone; a word
+that lost it is taken for a native object and retained, which writes into `__cstring`. The reCAPTCHA SDK's global
+`let` strings are such words, and so are the static strings in libswiftCore's own `__DATA`.
+
 ## What a lifted function is
 
 Rellume lifts a function from its start with every block that its direct branches reach, so the unit of lifting is the
