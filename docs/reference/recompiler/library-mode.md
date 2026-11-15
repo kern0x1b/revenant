@@ -101,9 +101,9 @@ The output is two dylibs. The first, `<name>.dylib`, has two kinds of content:
 | `__XGUEST,__image` | a section in the file, read-only, aligned to 16 KiB; dyld maps it and nobody reads it there | the guest image: the guest's segments as bytes, to be mapped at the addresses the guest was linked at |
 
 There are no guest segments in the link any more (`__X<n>TEXT`, `__X<n>DATA` are gone), and no window under `XL_BASE`: the
-host part does not depend on where the guest is. Exports are `_xl_library_init`, `_xl_library_diagnostics` and one
-`_xl_objc_category_<n>` for each Objective-C category of the guest (the registry refers to them); the check fails on
-anything else.
+host part does not depend on where the guest is. Exports are `_xl_library_class`, `_xl_library_diagnostics`,
+`_xl_library_init` and one `_xl_objc_category_<n>` for each Objective-C category of the guest (the registry refers to
+them); the check fails on anything else.
 
 The second, `<name>-classes.dylib`, is the registry: the lists that libobjc reads when it loads an image, and nothing
 else. It has `__DATA,__objc_classlist` (the guest's classes, by their guest address), `__objc_protolist` (its
@@ -210,6 +210,7 @@ Pages of the guest that nothing touches stay clean file pages: they are not in t
 | `xl_reserve(path)` | reads the guest image's header from the file and takes the guest range and room for the host part, `VM_PROT_NONE` (the load order above) |
 | `xl_load(path)` | reserves if that was not done, gives the host room back, `dlopen`s, calls `xl_library_init`; the library owns the guest range from then on |
 | `xl_load_error()` | text of the last failure |
+| `void *xl_find_class(const char *name)` | the Objective-C class (a `Class`, as a pointer) that the loaded library answers to for `name`, or `NULL`: before `xl_load` succeeded, for a `NULL` name, for a name the library has no class of. Calls the library's export `xl_library_class` (found with `dlsym` on the handle of `xl_load`) |
 
 Statuses: `XL_LOAD_OK`, `XL_LOAD_BAD_IMAGE` (not an armv7 dylib, no guest image, a `magic` or `version` that is not read: the message says which, and
 the version found; no registry next to the library), `XL_LOAD_RANGE_BUSY` (the guest range is held: the message names the holder; or the reservation is
@@ -221,6 +222,44 @@ The library reports `XL_LIBRARY_OK`, `XL_LIBRARY_BAD_FORMAT`, `XL_LIBRARY_NOT_RE
 `xl_library_init` (`xl_guest_image.h`); the loader turns them into the statuses above. Called before `xl_load`
 by a host that never reserved, `xl_library_init` answers `XL_LIBRARY_NOT_RESERVED` and maps nothing, and any entry of the
 library aborts with "the guest image of the translated library is not attached".
+
+### The class of a name (`xl_find_class`, `xl_library_class`, `objc_setHook_getClass`)
+
+`NSClassFromString(@"RCFClient")` finds a class the library registered under that Objective-C name. It does not find a
+Swift class by the name Swift gives it, `"Module.Class"` or the mangled name (`_TtC…`, `$s…`): a Swift class without an
+`@objc(name)` is registered under its mangled Objective-C name, and iOS 6 has no `objc_setHook_getClass`, the call that
+lets the Swift runtime (`libswiftCore`, iOS 12 and later) answer those names to `NSClassFromString`. The library
+provides the call itself, as a bridge (`_objc_setHook_getClass` in `src/runtime/bridge-provides.txt`; the translation
+report says `manual bridge xl_manual_objc_setHook_getClass`), so a guest `libswiftCore` installs its
+`getObjCClassByMangledName` there. The runtime keeps the hook and asks it as Apple's libobjc does, after its own table
+and only for a name the table does not have:
+
+| Who asks | Order |
+|---|---|
+| the guest's `objc_getClass`, `objc_lookUpClass` and `NSClassFromString` | the registered name (with the `XLG.` prefix rule of the namespaced images), then the installed hook; the answer is the class's shadow |
+| the host's `xl_find_class(name)`, through the library's `void *xl_library_class(const char *name)` | the same lookup (`objc_lookUpClass` semantics: the class is not initialized, no class handler) |
+| the host's own `NSClassFromString` | the host's libobjc alone: it has no hook, so it does not find a Swift class by `"Module.Class"`; this is the reason for `xl_find_class` |
+
+The first hook a guest installs gets, in `*outOldValue`, a guest function that answers `NO` (Apple's libobjc gives the
+default there), so a hook can chain to the one before it. A hook that asks the lookup again from inside itself is not
+called a second time on that thread. What the hook answers with is a guest `Class`; the runtime turns it into the host
+class (`xl_class_in`) before the host sees it.
+
+The signatures, which are the contract of a host that uses them (`recompiler/include/xl_loader.h`, and the library's
+export):
+
+```c
+void *xl_find_class(const char *name);       /* loader (xl_loader.c): Class or NULL */
+void *xl_library_class(const char *name);    /* export of the library, found with dlsym; the loader calls it */
+```
+
+`xl_find_class` is the call a host makes. `xl_library_class` is the library's end of it and is named here because the
+list of exports is checked exactly. A host that built its own loader reads the class with `dlsym(handle,
+"xl_library_class")`, with the handle of its `dlopen` of the library, after `xl_load` returned `XL_LOAD_OK`; the export
+answers `NULL` before the library is ready.
+
+The library check ([below](#the-check)) proves it on the claimed phone: the Objective-C variant installs a hook of its
+own in the guest (`RCFHook`) and the Swift variant uses the guest's real `libswiftCore` hook (`xl_find_class("RCFixture.Client")`).
 
 ### The address-space map (`XL_LOADER_MAP`)
 
@@ -304,8 +343,8 @@ otherwise). The fixture is linked with `-no_objc_category_merging`: ld64 merges 
 one dylib, which leaves the category list empty and the check of the registry with nothing to prove.
 
 The host part of the check is the layout of the output (no `__X<n>` segment, `__LINKEDIT` and `__XGUEST` present, the header
-(`magic`, `version`, a range that is granule-aligned and not below `XL_BASE`), exports that are the two entry points and the
-`_xl_objc_category_<n>` names and nothing else, a registry with only the `__objc_*` sections, no code and no exports). On the
+(`magic`, `version`, a range that is granule-aligned and not below `XL_BASE`), exports that are the three entry points
+(`_xl_library_class`, `_xl_library_diagnostics`, `_xl_library_init`) and the `_xl_objc_category_<n>` names and nothing else, a registry with only the `__objc_*` sections, no code and no exports). On the
 claimed phone the check copies the library and its registry into one folder, runs four negative controls, then grows the
 host to `XL_LIBRARY_RESIDENT_MB` (85) `XL_LIBRARY_LAUNCHES` times (1) and expects these names `ok`, then `done` and `exit=0`
 in every launch:
@@ -335,9 +374,15 @@ handler's output has the `crash` map and the guest range is readable in it; with
 | `token` | an object result of a public method |
 | `category` | a method that a category of the guest adds to a guest class is found (the category is in the registry) |
 | `completion`, `completion.thread` | a host block called from the library, on a thread that is not the main one |
+| `find.unloaded` | negative control: `xl_find_class` answers `NULL` after `xl_reserve` and before `xl_load` |
+| `find.exact` | `xl_find_class("RCFClient")` is the class `NSClassFromString` finds |
+| `find.unknown` | negative control: a name that no class and no hook answers (`"RCFixture.Nothing"`) and a `NULL` name give `NULL` |
+| `find.before`, `hook.absent` (Objective-C variant) | negative control: before the guest installs a hook, `"RCFixture.Hooked"` is not found, by `xl_find_class` or by the guest's `objc_getClass`, `objc_lookUpClass` and `NSClassFromString` |
+| `hook.old`, `hook.guest`, `hook.exact`, `hook.unknown` (Objective-C variant) | the guest installs a hook (`objc_setHook_getClass`) that answers `"RCFixture.Hooked"` with its class `RCFHooked`: `*outOldValue` is a function that answers `NO`; the guest's three lookups now find the class; a registered name (`RCFClient`, `RCFHooked`) does not call the hook; two unknown names call it twice and stay `Nil` |
+| `find.hook` (Objective-C variant) | `xl_find_class("RCFixture.Hooked")` is `RCFHooked`, and the host's own `NSClassFromString(@"RCFixture.Hooked")` is still `Nil` |
 
 The `swift` variant builds the host with Swift code of its own (`hostswift.swift`, armv7, iOS 6.0) and its own
-`libswiftCore`, and expects four names more. The host's Swift makes a struct boxed as `AnyObject`, an `[Any]` and a
+`libswiftCore`, and expects six names more. The host's Swift makes a struct boxed as `AnyObject`, an `[Any]` and a
 `String`; `host.m` keeps the class of each and the class of every name in the host's `libswiftCore`:
 
 | Name | Proves |
@@ -346,6 +391,8 @@ The `swift` variant builds the host with Swift code of its own (`hostswift.swift
 | `host.names` | after `xl_load`, every name of the host runtime answers with the host's class |
 | `names.disjoint` | the registry registered classes (the host takes the classes of the library's image and of its registry), and none has the name of a class of the host runtime |
 | `host.bridge.after` | after the calls, the three are the same classes with the same contents, and the names still hold |
+| `find.swift` | the guest's own `libswiftCore` installed its hook through the bridge: `xl_find_class("RCFixture.Client")` is the class that `NSClassFromString(@"RCFClient")` finds (the Swift name of a class that has an `@objc(RCFClient)` name) |
+| `find.host` | negative control: the host's `NSClassFromString(@"RCFixture.Client")` is `Nil` |
 
 | Variable | Meaning |
 |---|---|
