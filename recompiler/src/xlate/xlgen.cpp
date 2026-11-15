@@ -411,8 +411,9 @@ class Generator {
   std::string CallbackBridge(const Value &value);
   Signature FromFunction(FunctionDecl *g, FunctionDecl *h);
   Signature FromMethod(ObjCMethodDecl *g, ObjCMethodDecl *h);
-  Signature FromEncoding(const std::string &encoding, std::string &error);
+  Signature FromEncoding(const std::string &encoding, std::string &error, bool pointer_sized = false);
   QualType EncodedType(ASTContext &context, StringRef &text, bool guest, std::string &error);
+  QualType HostScalar(StringRef &text, bool pointer_sized, std::string &error);
   QualType SynthesizeRecord(ASTContext &context, StringRef fields, bool guest, std::string &error);
   std::string EmitBridge(const std::string &id, const Signature &signature, CallKind kind, const std::string &guest_name,
                          const std::string &callee, const FormatInfo &format, const std::string &manual);
@@ -1130,13 +1131,35 @@ QualType Generator::SynthesizeRecord(ASTContext &context, StringRef fields, bool
   return type;
 }
 
-Signature Generator::FromEncoding(const std::string &encoding, std::string &error) {
+QualType Generator::HostScalar(StringRef &text, bool pointer_sized, std::string &error) {
+  if (pointer_sized) {
+    StringRef bare = text;
+    bool is_const = false;
+    while (!bare.empty() && strchr("rnNoORV", bare[0])) {
+      is_const |= bare[0] == 'r';
+      bare = bare.drop_front();
+    }
+    if (bare.starts_with("q") || bare.starts_with("Q")) {
+      bool is_signed = bare[0] == 'q';
+      text = bare.drop_front();
+      return is_signed ? hc_.LongTy : hc_.UnsignedLongTy;
+    }
+    if (!is_const && (bare.starts_with("^q") || bare.starts_with("^Q"))) {
+      bool is_signed = bare[1] == 'q';
+      text = bare.drop_front(2);
+      return hc_.getPointerType(is_signed ? hc_.LongTy : hc_.UnsignedLongTy);
+    }
+  }
+  return EncodedType(hc_, text, false, error);
+}
+
+Signature Generator::FromEncoding(const std::string &encoding, std::string &error, bool pointer_sized) {
   Signature signature;
   StringRef text(encoding);
   auto skip_offset = [&] { text = text.drop_while([](char ch) { return isdigit(static_cast<unsigned char>(ch)) || ch == '-'; }); };
   auto g = EncodedType(gc_, text, true, error);
   StringRef host_text(encoding);
-  auto h = EncodedType(hc_, host_text, false, error);
+  auto h = HostScalar(host_text, pointer_sized, error);
   if (g.isNull() || h.isNull()) {
     signature.supported = false;
     signature.note = error;
@@ -1148,7 +1171,7 @@ Signature Generator::FromEncoding(const std::string &encoding, std::string &erro
     StringRef before = text;
     auto gp = EncodedType(gc_, text, true, error);
     StringRef host_param = before;
-    auto hp = EncodedType(hc_, host_param, false, error);
+    auto hp = HostScalar(host_param, pointer_sized, error);
     skip_offset();
     if (gp.isNull() || hp.isNull()) {
       signature.supported = false;
@@ -2145,7 +2168,7 @@ void Generator::EmitClasses(const json::Object &manifest) {
     os << "0x" << std::hex << value << "u";
     return os.str();
   };
-  auto resolve_signature = [&](const json::Object &method, bool class_method, std::string &origin) -> Signature {
+  auto resolve_signature = [&](const json::Object &method, bool class_method, std::string &origin, const std::string &width) -> Signature {
     auto selector = method.getString("selector")->str();
     auto types = method.getString("types")->str();
     Signature signature;
@@ -2191,13 +2214,16 @@ void Generator::EmitClasses(const json::Object &manifest) {
     }
     if (origin.empty()) {
       std::string error;
-      signature = FromEncoding(types, error);
+      signature = FromEncoding(types, error, !width.empty());
       origin = "guest type encoding " + types;
+      if (!width.empty() && types.find_first_of("qQ") != std::string::npos) {
+        origin += " (q/Q as 32-bit long: " + width + ")";
+      }
     }
     return signature;
   };
   auto emit_methods = [&](const json::Array *methods, bool class_method, const std::string &symbol,
-                          const std::string &superclass_hint, bool implementations = true) -> std::string {
+                          const std::string &superclass_hint, bool implementations = true, const std::string &width = std::string()) -> std::string {
     if (!methods || methods->empty()) {
       return "0";
     }
@@ -2217,7 +2243,7 @@ void Generator::EmitClasses(const json::Object &manifest) {
         continue;
       }
       std::string origin;
-      auto signature = resolve_signature(method, class_method, origin);
+      auto signature = resolve_signature(method, class_method, origin, width);
       std::string wrapper;
       std::string host_types;
       if (!signature.supported) {
@@ -2298,6 +2324,35 @@ void Generator::EmitClasses(const json::Object &manifest) {
       namespaced_modules.insert("_TtG" + module.substr(3));
     }
   };
+  std::map<uint64_t, const json::Object *> local_classes;
+  for (auto &image_value : *manifest.getArray("images")) {
+    for (auto &entry : *image_value.getAsObject()->getArray("classes")) {
+      local_classes[*entry.getAsObject()->getInteger("address")] = entry.getAsObject();
+    }
+  }
+  auto system_width = [&](const json::Object &cls) -> std::string {
+    std::string swift = StringRef(cls.getObject("data")->getString("name")->str()).starts_with("_Tt") ? "Swift class" : "";
+    const json::Object *current = &cls;
+    for (unsigned depth = 0; depth < 64; ++depth) {
+      auto &super = *current->getObject("superclass");
+      auto kind = *super.getString("kind");
+      if (kind == "import") {
+        auto symbol = super.getString("symbol")->str();
+        auto n = symbol.rfind("_OBJC_CLASS_$_");
+        auto name = n == std::string::npos ? symbol : symbol.substr(n + 14);
+        return name == "NSObject" ? swift : "subclass of system class " + name;
+      }
+      if (kind != "local") {
+        return swift;
+      }
+      auto found = local_classes.find(*super.getInteger("address"));
+      if (found == local_classes.end()) {
+        return swift;
+      }
+      current = found->second;
+    }
+    return swift;
+  };
   for (auto &image_value : *manifest.getArray("images")) {
     auto &image = *image_value.getAsObject();
     auto index = std::to_string(*image.getInteger("index"));
@@ -2338,7 +2393,7 @@ void Generator::EmitClasses(const json::Object &manifest) {
         auto &data = *cls.getObject(is_meta ? "meta_data" : "data");
         auto base = std::string(is_meta ? "xl_objc_meta_" : "xl_objc_") + suffix;
         auto name = data.getString("name")->str();
-        auto methods = emit_methods(data.getArray("methods"), is_meta, base + "_methods", name);
+        auto methods = emit_methods(data.getArray("methods"), is_meta, base + "_methods", name, true, system_width(cls));
         auto ivars = emit_ivars(data.getArray("ivars"), base + "_ivars");
         auto properties = emit_properties(data.getArray("properties"), base + "_properties");
         auto protocols = emit_protocol_list(data.getArray("protocols"), base + "_protocols");
@@ -2396,19 +2451,24 @@ void Generator::EmitClasses(const json::Object &manifest) {
       auto &category = *(*categories)[c].getAsObject();
       auto suffix = index + "_" + std::to_string(c);
       auto &cls = *category.getObject("class");
-      std::string cls_expr;
+      std::string cls_expr, category_width;
       if (*cls.getString("kind") == "import") {
         auto symbol = cls.getString("symbol")->str();
+        auto n = symbol.rfind("_OBJC_CLASS_$_");
+        category_width = "category on system class " + (n == std::string::npos ? symbol : symbol.substr(n + 14));
         Passthrough(symbol);
         auto ir = symbol.substr(1);
         meta << "extern struct objc_class " << Sanitize(ir) << " __asm(\"_" << ir << "\");\n";
         cls_expr = "&" + Sanitize(ir);
       } else {
         cls_expr = "(Class)" + hex(*cls.getInteger("address"));
+        if (auto found = local_classes.find(*cls.getInteger("address")); found != local_classes.end()) {
+          category_width = system_width(*found->second);
+        }
       }
       auto hint = category.getString("name")->str();
-      auto instance = emit_methods(category.getArray("instance_methods"), false, "xl_objc_category_" + suffix + "_instance", hint);
-      auto klass = emit_methods(category.getArray("class_methods"), true, "xl_objc_category_" + suffix + "_class", hint);
+      auto instance = emit_methods(category.getArray("instance_methods"), false, "xl_objc_category_" + suffix + "_instance", hint, true, category_width);
+      auto klass = emit_methods(category.getArray("class_methods"), true, "xl_objc_category_" + suffix + "_class", hint, true, category_width);
       auto properties = emit_properties(category.getArray("properties"), "xl_objc_category_" + suffix + "_properties");
       auto protocols = emit_protocol_list(category.getArray("protocols"), "xl_objc_category_" + suffix + "_protocols");
       meta << "struct xl_category_t xl_objc_category_" << suffix << " __attribute__((used, section(\"__DATA,__objc_const\"))) = {(const char *)"
@@ -2508,7 +2568,7 @@ void Generator::EmitClasses(const json::Object &manifest) {
           auto &method = *entry.getAsObject();
           auto label = std::string(class_method ? "+[" : "-[") + cls.getString("name")->str() + " " + method.getString("selector")->str() + "]";
           std::string origin;
-          auto signature = resolve_signature(method, class_method, origin);
+          auto signature = resolve_signature(method, class_method, origin, "Swift class");
           if (!signature.supported) {
             Report(label + ": generic host IMP, " + signature.note);
             continue;
