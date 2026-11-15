@@ -2629,6 +2629,12 @@ bool Generator::Write() {
         << "struct xl_host_block_descriptor { unsigned long reserved; unsigned long size; void (*copy)(void *, void *); void (*dispose)(void *); };\n"
         << "extern void xl_trap_xl_host_block_release(uint64_t host);\n"
         << "static void xl_host_block_dispose(void *block) { xl_trap_xl_host_block_release(((struct xl_host_block *)block)->host); }\n\n"
+        << "extern void xl_trap_xl_hblock_generic(void *);\n"
+        << "struct __attribute__((packed)) xl_hblock_generic_pack { uint64_t host, a0, a1, a2, a3, r; };\n"
+        << "uint64_t xl_hblock_generic_invoke(struct xl_host_block *self, uint64_t a0, uint64_t a1, uint64_t a2, uint64_t a3)\n{\n"
+        << "    struct xl_hblock_generic_pack p;\n    p.host = self->host;\n    p.a0 = a0;\n    p.a1 = a1;\n    p.a2 = a2;\n    p.a3 = a3;\n    p.r = 0;\n"
+        << "    xl_trap_xl_hblock_generic(&p);\n    return p.r;\n}\n"
+        << "const struct xl_host_block_descriptor xl_hblock_generic_descriptor = {0, sizeof(struct xl_host_block), 0, xl_host_block_dispose};\n\n"
         << guest_record_defs_ << guest_;
   raw_fd_ostream host(HostOut, ec);
   if (ec) {
@@ -2638,6 +2644,7 @@ bool Generator::Write() {
   host << (*includes)->getBuffer() << "\n" << (*abi)->getBuffer() << "\n#include <objc/message.h>\n#include <objc/runtime.h>\n#include \"xl_bridge.h\"\n#include \"xl_host.h\"\n\n";
   host << "#define XL_CALLBACK_COUNT " << std::max<size_t>(1, callbacks_.size()) << "\n";
   host << "uint64_t xl_callback_targets[XL_CALLBACK_COUNT][32];\n\n";
+  host << "void xl_manual_hblock_generic(void *pack);\nvoid xl_h_xl_hblock_generic(State *state)\n{\n    xl_manual_hblock_generic(xl_argument(state));\n    xl_return(state);\n}\n\n";
   host << host_record_defs_ << host_types_ << host_ << tables_;
   host << "const struct xl_selector_shim xl_selector_shims[] = {\n";
   for (auto &[selector, macro] : selector_shims_) {

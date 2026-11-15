@@ -467,7 +467,7 @@ static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp,
     guest = (uintptr_t)CFDictionaryGetValue(xl_selector_table, selector);
     if (!guest) {
         if (xl_log_enabled()) {
-            fprintf(stderr, "xlate: no bridge for -[%s %s]\n", class_getName(lookup), sel_getName(selector));
+            fprintf(stderr, "xlate: no bridge for -[%s %s], sent dynamically with the signature of the host method\n", class_getName(lookup), sel_getName(selector));
             int nb_fd = xl_log_open("xlate-nobridge.log");
             FILE *nb = nb_fd >= 0 ? fdopen(nb_fd, "a") : NULL;
             if (nb) {
@@ -1051,15 +1051,15 @@ static int xl_is_guest_block(uint64_t guest)
            isa == XL_GUEST__NSConcreteGlobalBlock || isa == XL_GUEST__NSConcreteAutoBlock;
 }
 
-static char xl_type_token(const char **p)
+static char xl_type_token(const char **p, int host_side)
 {
     while (**p == 'r' || **p == 'n' || **p == 'N' || **p == 'o' || **p == 'O' || **p == 'R' || **p == 'V')
         (*p)++;
     char c = **p;
     switch (c) {
     case 'v': (*p)++; return 'V';
-    case 'q': (*p)++; return 'S';
-    case 'Q': (*p)++; return 'U';
+    case 'q': (*p)++; return host_side ? 'X' : 'S';
+    case 'Q': (*p)++; return host_side ? 'X' : 'U';
     case 'c': case 'i': case 's': case 'l':
     case 'C': case 'I': case 'S': case 'L': case 'B': (*p)++; return 'I';
     case '@':
@@ -1069,28 +1069,28 @@ static char xl_type_token(const char **p)
         return 'O';
     case '#': (*p)++; return 'K';
     case ':': case '*': (*p)++; return 'P';
-    case '^': (*p)++; xl_type_token(p); return 'P';
+    case '^': (*p)++; xl_type_token(p, host_side); return 'P';
     default: return 'X';
     }
 }
 
-static int xl_block_simple_args(const char *sig, char *kinds, char *result)
+static int xl_block_simple_args(const char *sig, char *kinds, char *result, int host_side)
 {
     if (!sig)
         return -1;
     const char *p = sig;
-    char ret = xl_type_token(&p);
+    char ret = xl_type_token(&p, host_side);
     if (ret == 'X')
         return -1;
     *result = ret;
     while (*p >= '0' && *p <= '9') p++;
-    char self_kind = xl_type_token(&p);
+    char self_kind = xl_type_token(&p, host_side);
     if (self_kind != 'O' && self_kind != 'P' && self_kind != 'K')
         return -1;
     while (*p >= '0' && *p <= '9') p++;
     int count = 0;
     while (*p) {
-        char t = xl_type_token(&p);
+        char t = xl_type_token(&p, host_side);
         if (t == 'X' || t == 'V')
             return -1;
         while (*p >= '0' && *p <= '9') p++;
@@ -1133,6 +1133,46 @@ static const char *xl_guest_block_signature(uint64_t guest)
     return (signature && signature >> 32 == 0) ? (const char *)(uintptr_t)signature : 0;
 }
 
+struct xl_host_block_layout {
+    void *isa;
+    int32_t flags;
+    int32_t reserved;
+    void *invoke;
+    const uintptr_t *descriptor;
+};
+
+static const char *xl_host_block_signature(const struct xl_host_block_layout *block)
+{
+    if (!(block->flags & XL_BLOCK_HAS_SIGNATURE) || !block->descriptor)
+        return NULL;
+    return (const char *)block->descriptor[(block->flags & XL_BLOCK_HAS_COPY_DISPOSE) ? 4 : 2];
+}
+
+struct __attribute__((packed)) xl_hblock_generic_pack {
+    uint64_t host, a0, a1, a2, a3, r;
+};
+
+void xl_manual_hblock_generic(void *pack)
+{
+    struct xl_hblock_generic_pack *p = pack;
+    const struct xl_host_block_layout *block = (const struct xl_host_block_layout *)(uintptr_t)p->host;
+    const char *signature = xl_host_block_signature(block);
+    char kinds[4], result = 'V';
+    int count = xl_block_simple_args(signature, kinds, &result, 1);
+    if (count < 0) {
+        char why[256];
+        snprintf(why, sizeof why, "xlate: a host block that the guest calls has %s%s, which the bridge cannot marshal (up to four arguments, each an object, a pointer or a 32-bit integer)",
+                 signature ? "the signature " : "no signature", signature ? signature : "");
+        xl_unsupported(why);
+    }
+    const uint64_t arguments[4] = {p->a0, p->a1, p->a2, p->a3};
+    uintptr_t words[4] = {0, 0, 0, 0};
+    for (int i = 0; i < count; i++)
+        words[i] = xl_kind_in(kinds[i], arguments[i], "host block argument");
+    uintptr_t returned = ((uintptr_t (*)(const void *, uintptr_t, uintptr_t, uintptr_t, uintptr_t))block->invoke)(block, words[0], words[1], words[2], words[3]);
+    p->r = result == 'V' ? 0 : xl_kind_out(result, returned);
+}
+
 static void xl_block_copy_helper(void *dst, const void *src) { (void)dst; (void)src; }
 
 static void xl_block_dispose_helper(const void *b)
@@ -1165,7 +1205,7 @@ static struct xl_block_wrapper *xl_wrapper_for(uint64_t guest)
     w->flags = XL_BLOCK_NEEDS_FREE | XL_BLOCK_HAS_COPY_DISPOSE | XL_BLOCK_HAS_SIGNATURE | 2;
     w->descriptor = &xl_block_descriptor;
     w->guest = xl_invoke(XL_GUEST__Block_copy, guest);
-    int args = xl_block_simple_args(xl_guest_block_signature(guest), w->kinds, &w->result);
+    int args = xl_block_simple_args(xl_guest_block_signature(guest), w->kinds, &w->result, 0);
     switch (args) {
     case 0: w->invoke = (void *)xl_block_t0; break;
     case 1: w->invoke = (void *)xl_block_t1; break;
