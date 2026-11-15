@@ -1,0 +1,46 @@
+diff -ruN a/ios/FileHandleBackports.swift b/ios/FileHandleBackports.swift
+--- a/ios/FileHandleBackports.swift
++++ b/ios/FileHandleBackports.swift
+@@ -0,0 +1,24 @@
++import Foundation
++
++extension FileHandle {
++  func read(upToCount count: Int) throws -> Data? {
++    let data = try __readData(upToLength: UInt(count))
++    return data.isEmpty ? nil : data
++  }
++
++  func write(contentsOf data: Data) throws {
++    try __write(data)
++  }
++
++  func offset() throws -> UInt64 {
++    var position: UInt64 = 0
++    try __getOffset(&position)
++    return position
++  }
++
++  func seekToEnd() throws -> UInt64 {
++    var position: UInt64 = 0
++    try __seekToEndReturningOffset(&position)
++    return position
++  }
++}
+diff -ruN a/ios/Legacy/FileSystemLegacyModule.swift b/ios/Legacy/FileSystemLegacyModule.swift
+--- a/ios/Legacy/FileSystemLegacyModule.swift
++++ b/ios/Legacy/FileSystemLegacyModule.swift
+@@ -316,11 +316,11 @@
+     AsyncFunction("getFreeDiskStorageAsync") { () -> Int64 in
+     // Uses required reason API based on the following reason: E174.1 85F4.1
+ #if !os(tvOS)
+-      let resourceValues = try getResourceValues(from: documentDirectory, forKeys: [.volumeAvailableCapacityForImportantUsageKey])
+-      guard let availableCapacity = resourceValues?.volumeAvailableCapacityForImportantUsage else {
++      let resourceValues = try getResourceValues(from: documentDirectory, forKeys: [.volumeAvailableCapacityKey])
++      guard let availableCapacity = resourceValues?.volumeAvailableCapacity else {
+         throw CannotDetermineDiskCapacity()
+       }
+-      return availableCapacity
++      return Int64(availableCapacity)
+ #else
+       let resourceValues = try getResourceValues(from: cacheDirectory, forKeys: [.volumeAvailableCapacityKey])
+       guard let availableCapacity = resourceValues?.volumeAvailableCapacity else {
