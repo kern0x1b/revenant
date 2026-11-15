@@ -117,6 +117,15 @@ static inline uintptr_t xl_narrow_pointer(uint64_t value, const char *symbol, un
     return pointer;
 }
 
+uintptr_t xl_key_slot(uint64_t key);
+
+static inline uintptr_t xl_narrow_key(uint64_t value, const char *symbol, unsigned index)
+{
+    if ((value >> 32) && value < 0xFFFFFFFFFFFFFF00ull)
+        return xl_key_slot(value);
+    return xl_narrow_pointer(value, symbol, index);
+}
+
 static inline uint64_t xl_widen_plain(uintptr_t value)
 {
     if (value >= 0xFFFFFF00u)

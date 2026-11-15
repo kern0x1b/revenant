@@ -108,3 +108,8 @@ block async ran 5, captured object released 2
 dispatch_once_f ran 40 distinct functions once each, sum 820
 dispatch_sync_f ran 40 distinct functions, sum 820
 dispatch_async_f ran 40 distinct functions, sum 820
+associated before set: none
+associated by wide keys: first 1, second 2, by address: third 3
+associated after clearing one: none, other kept: second 2
+dispatch specific by wide key: found, other key: none
+dispatch_get_specific inside the queue: found

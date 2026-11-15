@@ -27,7 +27,8 @@ function main(out, ...)
                            "localeconv_l", "class_copyIvarList", "malloc_default_zone", "malloc_zone_from_ptr", "malloc_zone_malloc",
                            "malloc_zone_free", "catopen", "swprintf", "NSDataDeallocatorFree", "NSDataDeallocatorUnmap", "NSDataDeallocatorVM",
                            "_dispatch_source_type_vm", "dispatch_sync", "dispatch_async", "copyfile_state_alloc", "copyfile_state_free", "fcopyfile",
-                           "dispatch_once_f", "dispatch_sync_f", "dispatch_async_f"}) do
+                           "dispatch_once_f", "dispatch_sync_f", "dispatch_async_f", "objc_getAssociatedObject", "objc_setAssociatedObject",
+                           "dispatch_queue_set_specific", "dispatch_queue_get_specific", "dispatch_get_specific"}) do
         if not imports:find("_" .. name .. "\n", 1, true) then
             corpus.fail("the program does not import %s, so the check proves nothing about it", name)
         end
@@ -44,6 +45,12 @@ function main(out, ...)
         end
         if released and not wrapper:find("xl_callback_release(", 1, true) then
             corpus.fail("the host wrapper of %s does not release the slot of its function pointer when the call returns, though the host runs the function only during the call", name)
+        end
+    end
+    for _, name in ipairs({"objc_getAssociatedObject", "objc_setAssociatedObject", "dispatch_queue_set_specific", "dispatch_queue_get_specific", "dispatch_get_specific"}) do
+        local wrapper = host_source:match("xl_h_" .. name .. "%b()%s*(%b{})")
+        if not wrapper or not wrapper:find("xl_narrow_key(", 1, true) then
+            corpus.fail("the host wrapper of %s does not narrow its key as an identity, so a key the guest builds from a 64-bit constant stops the program", name)
         end
     end
     if opt.host_only then

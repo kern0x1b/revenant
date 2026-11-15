@@ -472,6 +472,12 @@ and stops the program with its message.
   `swift_once`, which passes the initializer of every lazy global to `dispatch_once_f`, no longer ends with "callback pool
   4 exhausted" at the 33rd global. The host part requires that the wrappers of the three hold the slot with the life that
   fits them and that the two that run the function during the call release it.
+- a key built from a 64-bit constant: `objc_setAssociatedObject` and `objc_getAssociatedObject` with `0x636861726f6e4143` and
+  a second constant that differs in the last byte (and with the address of a static, as before), and
+  `dispatch_queue_set_specific`, `dispatch_queue_get_specific` and `dispatch_get_specific` with the same constant. Two
+  constants stay two keys, clearing one leaves the other, and the address key still works. Before, the reCAPTCHA SDK's
+  `charonAC` association key ended the program with "objc_getAssociatedObject argument 1 value 0x636861726f6e4143 does not
+  fit the host type". The host part requires that the wrapper of each of the five narrows its key with `xl_narrow_key`.
 
 The check builds the program for this Mac and compares its output with `tests/data/hostbridges/expected.txt`, translates
 the arm64 build (which fails on any import without a bridge) and requires that the program imports each of the bridged

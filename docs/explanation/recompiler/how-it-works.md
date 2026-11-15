@@ -284,6 +284,12 @@ print on the iPad 2 what objc4 printed.
   initializers that `swift_once` hands to `dispatch_once_f`, one for every lazy global the code touches, and the 33rd
   ended the process with "callback pool 4 exhausted" (the number is the index of the signature, `void (*)(void *)`). A
   function with all 32 slots live still stops the program, with the count of each kind in its message.
+- **Keys the guest hands to the host.** The key of `objc_getAssociatedObject`, `objc_setAssociatedObject`,
+  `dispatch_queue_set_specific`, `dispatch_queue_get_specific` and `dispatch_get_specific` is a pointer the host only
+  compares, so the guest may build it from any 64-bit constant (a string of eight characters, as an SDK does for its
+  association keys). A key below 4 GB passes as the pointer it is; a key above takes a host address of its own, one byte
+  of the heap per distinct value for the life of the process, and the same value always takes the same address. Every
+  other pointer parameter that does not fit 32 bits still stops the program with "does not fit the host type".
 - **Blocks the guest hands to the host.** A block parameter of a host function is converted into a host block that holds a
   copy of the guest block (`Block_copy` in the guest) and invokes it. The host block is the callee's for the call: the
   generated stub takes it with a count of +1, and the one holder of the guest copy belongs to that block alone, so both

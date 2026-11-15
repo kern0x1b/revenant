@@ -147,6 +147,7 @@ struct Value {
   std::string count_member;
   bool writes_back = false;
   bool is_object = false;
+  bool is_key = false;
 };
 
 struct Leaf {
@@ -597,6 +598,8 @@ std::string Generator::ScalarToHost(const Value &value, const std::string &expr,
     default:
       if (value.is_object)
         return "(" + Spell(hc_, value.host) + ")xl_object_in((uint64_t)" + expr + ", " + where + ")";
+      if (value.is_key)
+        return "(" + Spell(hc_, value.host) + ")xl_narrow_key((uint64_t)" + expr + ", " + where + ")";
       return "(" + Spell(hc_, value.host) + ")xl_narrow_pointer((uint64_t)" + expr + ", " + where + ")";
   }
 }
@@ -1740,6 +1743,12 @@ bool Generator::EmitFunction(const std::string &symbol, FunctionDecl *g, Functio
   if (!signature.supported) {
     Fault(symbol, signature.note);
     return false;
+  }
+  static const std::map<std::string, unsigned> identity_keys = {
+      {"objc_getAssociatedObject", 1}, {"objc_setAssociatedObject", 1},
+      {"dispatch_queue_set_specific", 1}, {"dispatch_queue_get_specific", 1}, {"dispatch_get_specific", 0}};
+  if (auto key = identity_keys.find(name); key != identity_keys.end() && key->second < signature.params.size()) {
+    signature.params[key->second].value.is_key = true;
   }
   static const std::map<std::string, std::string> shim_callee = {
       {"malloc_type_malloc", "xl_shim_malloc_type_malloc"},

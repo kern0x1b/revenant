@@ -673,6 +673,32 @@ void xl_narrowing_fault(const char *symbol, unsigned index, uint64_t value)
     abort();
 }
 
+static pthread_mutex_t xl_key_lock = PTHREAD_MUTEX_INITIALIZER;
+static struct xl_key_entry { uint64_t key; void *slot; } *xl_key_table;
+static unsigned xl_key_count, xl_key_cap;
+
+uintptr_t xl_key_slot(uint64_t key)
+{
+    pthread_mutex_lock(&xl_key_lock);
+    for (unsigned i = 0; i < xl_key_count; i++) {
+        if (xl_key_table[i].key == key) {
+            void *slot = xl_key_table[i].slot;
+            pthread_mutex_unlock(&xl_key_lock);
+            return (uintptr_t)slot;
+        }
+    }
+    if (xl_key_count == xl_key_cap) {
+        xl_key_cap = xl_key_cap ? xl_key_cap * 2 : 16;
+        xl_key_table = realloc(xl_key_table, xl_key_cap * sizeof *xl_key_table);
+    }
+    void *slot = malloc(1);
+    xl_key_table[xl_key_count].key = key;
+    xl_key_table[xl_key_count].slot = slot;
+    xl_key_count++;
+    pthread_mutex_unlock(&xl_key_lock);
+    return (uintptr_t)slot;
+}
+
 static pthread_mutex_t xl_cxa_lock = PTHREAD_MUTEX_INITIALIZER;
 static struct xl_cxa_entry { uint64_t func, arg; } *xl_cxa_list;
 static unsigned xl_cxa_count, xl_cxa_cap, xl_cxa_armed;

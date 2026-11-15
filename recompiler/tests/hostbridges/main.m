@@ -676,6 +676,36 @@ static void callback_checks(void)
     printf("dispatch_async_f ran %zu distinct functions, sum %d\n", CALLBACK_COUNT, async_total);
 }
 
+static void key_checks(void)
+{
+    const void *wide_key = (const void *)0x636861726f6e4143ull;
+    const void *other_key = (const void *)0x636861726f6e4144ull;
+    static char narrow_key;
+    id owner = [[NSObject alloc] init];
+    NSString *first = [NSString stringWithFormat:@"first %d", 1];
+    NSString *second = [NSString stringWithFormat:@"second %d", 2];
+    NSString *third = [NSString stringWithFormat:@"third %d", 3];
+    printf("associated before set: %s\n", objc_getAssociatedObject(owner, wide_key) ? "found" : "none");
+    objc_setAssociatedObject(owner, wide_key, first, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(owner, other_key, second, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    objc_setAssociatedObject(owner, &narrow_key, third, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    printf("associated by wide keys: %s, %s, by address: %s\n", [objc_getAssociatedObject(owner, wide_key) UTF8String],
+           [objc_getAssociatedObject(owner, other_key) UTF8String], [objc_getAssociatedObject(owner, &narrow_key) UTF8String]);
+    objc_setAssociatedObject(owner, wide_key, nil, OBJC_ASSOCIATION_ASSIGN);
+    printf("associated after clearing one: %s, other kept: %s\n", objc_getAssociatedObject(owner, wide_key) ? "found" : "none",
+           [objc_getAssociatedObject(owner, other_key) UTF8String]);
+    dispatch_queue_t queue = dispatch_queue_create("hostbridges.keys", NULL);
+    static int context = 7;
+    dispatch_queue_set_specific(queue, wide_key, &context, NULL);
+    printf("dispatch specific by wide key: %s, other key: %s\n", dispatch_queue_get_specific(queue, wide_key) == &context ? "found" : "none",
+           dispatch_queue_get_specific(queue, other_key) ? "found" : "none");
+    __block void *inside = NULL;
+    dispatch_sync(queue, ^{
+        inside = dispatch_get_specific(wide_key);
+    });
+    printf("dispatch_get_specific inside the queue: %s\n", inside == &context ? "found" : "none");
+}
+
 int main(void)
 {
     @autoreleasepool {
@@ -698,6 +728,7 @@ int main(void)
         alignment_checks();
         block_lifetime_checks();
         callback_checks();
+        key_checks();
     }
     return 0;
 }
