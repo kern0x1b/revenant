@@ -114,6 +114,59 @@ structures then: they are in the guest image, which the library maps only after 
 relocated the slots that point into it. The first dylib has none of these lists. The registry is loaded after the
 guest image is in place and before the guest's initializers run.
 
+### The integer width of a method the SDK does not declare
+
+The guest's methods reach the armv7 host through stubs (`xl_imp_<n>`) that the host runtime registers in its Objective-C
+tables, so that a message sent by host code runs guest code. A stub has the host's calling convention, so it needs the
+host's type of each parameter. For a method that an SDK header declares, the types are the header's (`NSInteger` is `int`
+on armv7). For a method that no header declares the translator has only the guest's type encoding, and the arm64
+encoding does not tell `Int`, `NSInteger` and `long` (all of them `q`, `Q` unsigned) from `Int64` and `long long`
+(also `q`): the armv7 callers pass the first group in one register and the second in two (low word in `r3`, high word at
+`[sp]`, no alignment to an even register on iOS).
+
+A stub that reads two words where the caller passed one takes a high word from the caller's stack. It was the crash of
+the real RecaptchaEnterprise SDK on the 4S: the Swift runtime of the app (armv7, `Int` is 32 bits) sends
+`+newTaggedNSStringWithASCIIBytes_:length_:` to `__StringStorage`; the guest's `NSObject` category
+(`createTaggedString(bytes:count:)`, the stub reads `count` as `q`) answers, and `CFStringCreateWithBytes` got
+`0x<garbage>00000006` for a count of 6 (`argument 2 value … does not fit the host type`). A caller in the guest does not
+pass through the stub: the guest finds the guest implementation itself.
+
+The rule of `xlgen` (`HostScalar`) for a method with no SDK declaration takes the host type from the class that carries it:
+
+- a category on a system class (any class the guest imports, `NSObject` included), a class that has a system class other than
+  `NSObject` among its ancestors, and a Swift class (its name begins with `_Tt`) can be called by host code with the host's
+  headers or the host's Swift. A top-level `q` is the host's `long`, `Q` the `unsigned long`, `^q` and `^Q` (not const) a
+  pointer to one (an out slot, converted as for `NSInteger *`). The report line says so: `host IMP from guest type
+  encoding Q24@0:8q16 (q/Q as 32-bit long: category on system class NSObject) as L12@0:4l8`.
+- any other class (an Objective-C class of the guest that derives from `NSObject` alone, such as the protobuf runtime of
+  the SDK) is reached by host code only through methods that an SDK header declares, so the guest's own 64-bit type stays:
+  `q24@0:8q16` becomes `q16@0:4q8`. The 280 methods with a `q` or `Q` in that group in the report of drop8 include real
+  `int64_t` and `uint64_t` parameters (`-[RCAx_GPBInt64Array valueAtIndex:]`, `-[RCAx_GPBUInt64Array addValue:]`,
+  `-[RCAx_GPBCodedInputStream readInt64]`).
+
+The limit: a method in the first group that takes a real `Int64`/`UInt64`/`long long` and that no header declares would be
+read as one word. The encoding cannot tell them apart; the Swift symbol of the `@objc` thunk can. The methods of the
+first group in the SDK image and its overlays (`libswiftCore`, `libswiftFoundation`; the 15 report lines of drop8), each read
+from the mangled name of the thunk (`nm`, `xcrun swift-demangle`; the name of the `@objc` thunk ends in `To`):
+
+| method | class that carries it | parameter or result | Swift type |
+| --- | --- | --- | --- |
+| `newTaggedNSStringWithASCIIBytes_:length_:` | category on `NSObject` (`createTaggedString(bytes:count:)`) | `count` | `Int` |
+| `initWithBytes:length:` | `__NSSwiftData`, a subclass of `NSData` | `length` | `Int` |
+| `insertObjects:count:atIndex:` | `_SwiftNSMutableArray` | `count`, `at` | `Int`, `Int` |
+| `initWithObjects:forKeys:count:` | `__EmptyDictionarySingleton` | `count` | `Int` |
+| `initWithObjects:forKeys:count:` | the generic Swift dictionary storage (same selector and encoding; its thunk has no symbol) | `count` | `Int` (the `NSDictionary` initializer's `NSUInteger`) |
+| `getCString:maxLength:encoding:` | `__StringStorage`, `__SharedStringStorage` | `maxLength`, `encoding` | `Int`, `UInt` |
+| `_fastUTF8StringContents:utf8Length:` | `__StringStorage`, `__SharedStringStorage` | `utf8Length` | `UnsafeMutablePointer<UInt>` |
+| `retainCount` (class and instance), `_cfTypeID` | `_SwiftObject` | result | `NSUInteger`, `CFTypeID` (unsigned long; the thunks have no symbol, the Objective-C declarations decide) |
+| `initWithAction:` | `RecaptchaAction` | `action` | `RecaptchaActionType`, an `@objc` enum with the default raw type `Int` (`init(action:)` in the symbol table) |
+| `errorCode` | `RecaptchaError` | result | `RecaptchaErrorCode`, an `@objc` enum of raw type `Int` |
+| `rcbxd:` | `RCbwz` | result | `Int` (`rcbxd([Int]) -> Int`) |
+
+None of them takes an `Int64` or `UInt64`. A new image has to be checked the same way: translate it, take the lines of
+`report.txt` that say `q/Q as 32-bit long`, find the guest address of each stub's `imp` in the manifest, and read the
+symbol of the thunk.
+
 ### The guest image (`recompiler/include/xl_guest_image.h`)
 
 The loader, the runtime and `xlate` include one header, which is the format. All numbers are little-endian 32-bit words,

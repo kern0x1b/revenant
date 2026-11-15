@@ -780,6 +780,16 @@ that a Backports library exports under the same symbol ([library mode](library-m
 - `absent`, `shadowed`, `dispatch`: the guest still gets a class of its name for `NSURLQueryItem`, which the cache lacks, for
   `CASpringAnimation`, which `shadowed-classes.txt` lists, and for `OS_dispatch_queue`, which the cache has but its `libSystem`
   does not export as a symbol.
+- `wide`: the guest sends host class `SCHostWide` four messages through a cast `objc_msgSend`, whose parameters are
+  `int, long long`, `long long, long long`, `int, int, int, long long` (the last on the stack) and `unsigned char,
+  unsigned long long`. The armv7 iOS ABI does not align a `long long` argument to an even register: the low word goes in
+  `r3` and the high word at `[sp]`, and stack arguments are consecutive 4-byte words (`clang -target armv7-apple-ios6.0`
+  shows it). `xl_dynamic_send` once padded to the even register as AAPCS does, so the host method read a wrong high word.
+  A fixture built with that runtime reports `FAIL wide` on the 4S.
+- `native`: the host calls `-[NSObject scNative:]`, a method the fixture adds as a category on the system class `NSObject`
+  and the SDK does not declare, with an `NSInteger` (a 32-bit `int` on armv7), and checks `-5`, `0x40000000` and `-1`
+  (`NSNotFound`, `0x7fffffff`, is widened to the arm64 `NSNotFound` by design). The stub reads that argument as the armv7
+  caller passes it, one word ([method widths](library-mode.md#the-integer-width-of-a-method-the-sdk-does-not-declare)).
 
 The host part needs no Backports build. It compiles two stand-in libraries for the armv7 target, `libFoundationBackports`
 from the sources of `NSMutableDictionaryAlias.m` (the proxy `RevenantNSMutableDictionary` and the alias symbols) and a
@@ -791,7 +801,10 @@ real ones. It translates the fixture with `BACKPORTS_DIR` naming them, and requi
   Backports library, in the symbol table and in every bind entry of the dyld info (there are at least two: the class
   reference and the superclass of `SCDict`), and `system-classes.txt` lists both with the system library they moved to;
 - `_OBJC_CLASS_$_NSURLQueryItem`, `_OBJC_CLASS_$_CASpringAnimation` and `_OBJC_CLASS_$_OS_dispatch_queue` stay on their Backports libraries, which `otool -L`
-  still lists, and `proxy-classes.txt` says why (`absent from the iOS 6 cache`, `shadowed`, `the iOS 6 cache does not export it from libSystem.B.dylib`).
+  still lists, and `proxy-classes.txt` says why (`absent from the iOS 6 cache`, `shadowed`, `the iOS 6 cache does not export it from libSystem.B.dylib`);
+- `report.txt` gives the host method `-[SCNative scNative:]`, a category on `NSObject`, `L12@0:4l8` for the guest encoding `Q24@0:8q16`
+  (the `q` and `Q` as the 32-bit `long`), and the host method `-[SCGuestWide scBig:]`, of a guest class that derives only from
+  `NSObject`, `q16@0:4q8` for `q24@0:8q16` (the 64-bit type kept).
 
 The control translates the same fixture with `XL_PROXY_CLASSES=1`, which keeps every class on the Backports as the
 translator did before, and requires that `NSMutableDictionary` binds to `libFoundationBackports` and that
