@@ -72,3 +72,43 @@ static NSInteger RCFCreated;
     return [self seed] + 35;
 }
 @end
+
+@implementation RCFHooked
+@end
+
+static objc_hook_getClass RCFOldHook;
+static NSInteger RCFHookCalls;
+
+static BOOL RCFClassHook(const char *name, Class *outClass)
+{
+    RCFHookCalls++;
+    if (strcmp(name, "RCFixture.Hooked") == 0) {
+        *outClass = [RCFHooked class];
+        return YES;
+    }
+    return RCFOldHook ? RCFOldHook(name, outClass) : NO;
+}
+
+static void RCFNote(NSMutableArray *lines, NSString *name, BOOL passed)
+{
+    [lines addObject:[NSString stringWithFormat:@"%@ %@", passed ? @"ok" : @"FAIL", name]];
+}
+
+@implementation RCFHook
++ (NSArray *)run
+{
+    NSMutableArray *lines = [NSMutableArray array];
+    const char *dotted = "RCFixture.Hooked";
+    RCFNote(lines, @"hook.absent", objc_getClass(dotted) == Nil && objc_lookUpClass(dotted) == Nil && NSClassFromString(@"RCFixture.Hooked") == Nil);
+    objc_setHook_getClass(RCFClassHook, &RCFOldHook);
+    Class sink = Nil;
+    RCFNote(lines, @"hook.old", RCFOldHook != NULL && !RCFOldHook(dotted, &sink) && sink == Nil);
+    Class hooked = [RCFHooked class];
+    RCFNote(lines, @"hook.guest", objc_getClass(dotted) == hooked && objc_lookUpClass(dotted) == hooked && NSClassFromString(@"RCFixture.Hooked") == hooked);
+    NSInteger asked = RCFHookCalls;
+    BOOL exact = objc_getClass("RCFClient") == [RCFClient class] && NSClassFromString(@"RCFHooked") == hooked;
+    RCFNote(lines, @"hook.exact", exact && RCFHookCalls == asked);
+    RCFNote(lines, @"hook.unknown", objc_getClass("RCFixture.Nothing") == Nil && NSClassFromString(@"RCFixture.Nothing") == Nil && RCFHookCalls == asked + 2);
+    return lines;
+}
+@end

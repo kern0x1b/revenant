@@ -303,6 +303,7 @@ int main(int argc, char **argv)
         if (reserved != XL_LOAD_OK)
             line([NSString stringWithFormat:@"error %s", xl_load_error()]);
         measure("reserved");
+        report("find.unloaded", xl_find_class("RCFClient") == NULL);
 
         xl_load_status loaded = xl_load(path);
         report("load", loaded == XL_LOAD_OK);
@@ -319,6 +320,18 @@ int main(int argc, char **argv)
 
         Class cls = NSClassFromString(@"RCFClient");
         report("class", cls != Nil);
+        report("find.exact", cls != Nil && xl_find_class("RCFClient") == (__bridge void *)cls);
+        report("find.unknown", xl_find_class("RCFixture.Nothing") == NULL && xl_find_class(NULL) == NULL);
+#ifdef RC_SWIFT_HOST
+        report("find.swift", cls != Nil && xl_find_class("RCFixture.Client") == (__bridge void *)cls);
+        report("find.host", NSClassFromString(@"RCFixture.Client") == Nil);
+#else
+        report("find.before", xl_find_class("RCFixture.Hooked") == NULL);
+        for (NSString *result in [NSClassFromString(@"RCFHook") performSelector:@selector(run)])
+            line(result);
+        Class hooked = NSClassFromString(@"RCFHooked");
+        report("find.hook", hooked != Nil && xl_find_class("RCFixture.Hooked") == (__bridge void *)hooked && NSClassFromString(@"RCFixture.Hooked") == Nil);
+#endif
         id<RCFClient> client = ((id (*)(id, SEL, NSInteger))objc_msgSend)(cls, @selector(clientWithSeed:), 7);
         report("create", client != nil);
         report("methods", [client bump] == 1 && [client bump] == 2);
