@@ -37,7 +37,7 @@ local SQLITE_DEFINES = {"HAVE_USLEEP=1", "SQLITE_ENABLE_LOCKING_STYLE=0", "SQLIT
 local POD_MODULES = {
     {alias = "sdwebimage", framework = "SDWebImage", users = {"expo-image", "expo-image-manipulator"}},
     {alias = "sdwebimage-webp", framework = "SDWebImageWebPCoder", users = {"expo-image", "expo-image-manipulator"}},
-    {alias = "zxingobjc", framework = "ZXingObjC", users = {"expo-camera"}}
+    {alias = "zxingobjc", framework = "ZXingObjC", users = {"expo-camera"}, defines = {"ZXINGOBJC_USE_SUBSPECS", "ZXINGOBJC_ONED", "ZXINGOBJC_PDF417"}}
 }
 
 local function pod_wanted(pod)
@@ -401,6 +401,9 @@ target("expo-app-modules")
                 local map = path.join(proj, "build", "expo-pods-modules", pod.framework, "module.modulemap")
                 io.writefile(map, string.format("module %s {\n  header \"%s\"\n  export *\n}\n", pod.framework, path.join(include, pod.framework, pod.framework .. ".h")))
                 table.join2(pod_flags, {"-Xcc", "-I" .. include, "-Xcc", "-fmodule-map-file=" .. map})
+                for _, define in ipairs(pod.defines or {}) do
+                    table.join2(pod_flags, {"-Xcc", "-D" .. define})
+                end
             end
         end
         local macros = path.join(nm, "@expo", "expo-modules-macros-plugin", "apple", "ExpoModulesMacros-tool")
