@@ -1,0 +1,21 @@
+diff -ru a/ios/ImageModule.swift b/ios/ImageModule.swift
+--- a/ios/ImageModule.swift
++++ b/ios/ImageModule.swift
+@@ -2,8 +2,6 @@
+ 
+ import ExpoModulesCore
+ internal import SDWebImage
+-internal import SDWebImageAVIFCoder
+-internal import SDWebImageSVGCoder
+ 
+ public final class ImageModule: Module {
+   lazy var prefetcher = SDWebImagePrefetcher.shared
+@@ -352,8 +350,6 @@
+   static func registerCoders() {
+     SDImageCodersManager.shared.addCoder(WebPCoder.shared)
+     SDImageCodersManager.shared.addCoder(PSDCoder.shared)
+-    SDImageCodersManager.shared.addCoder(SDImageAVIFCoder.shared)
+-    SDImageCodersManager.shared.addCoder(SDImageSVGCoder.shared)
+     SDImageCodersManager.shared.addCoder(SDImageHEICCoder.shared)
+   }
+ 
