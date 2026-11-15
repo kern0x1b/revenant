@@ -1,0 +1,10 @@
+diff -ru a/ios/barcode-scanning/ExpoCameraZXingProvider.swift b/ios/barcode-scanning/ExpoCameraZXingProvider.swift
+--- a/ios/barcode-scanning/ExpoCameraZXingProvider.swift
++++ b/ios/barcode-scanning/ExpoCameraZXingProvider.swift
+@@ -1,6 +1,5 @@
+ import AVFoundation
+ internal import ZXingObjC
+-import ExpoCamera
+ 
+ @objc(ExpoCameraZXingProvider)
+ class ExpoCameraZXingProvider: NSObject, ExpoBarcodeScannerProvider {
