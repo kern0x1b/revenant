@@ -2,8 +2,12 @@ local EXPECTED = {
     "client.bump", "client.make", "client.block", "client.dyncast", "client.sametype", "objc.responds", "objc.perform", "objc.kind",
     "objc.hash", "sub.vtable", "sub.dispatch", "sub.dyncast", "sub.superclass", "ivars.released", "ivars.released.sub",
     "host.create", "host.dispatch", "host.subtype", "host.init", "name.plain", "name.client",
-    "anycollection.int", "anycollection.string", "mirror.children", "describe.struct", "describe.class"
+    "anycollection.int", "anycollection.string", "mirror.children", "describe.struct", "describe.class",
+    "cf.dictionary.count", "cf.dictionary.contains", "cf.dictionary.missing", "cf.dictionary.value", "cf.array.count", "cf.data.length",
+    "cf.string.length"
 }
+
+local BRIDGED_WRAPPERS = {"CFDictionaryGetCount", "CFDictionaryContainsKey", "CFDictionaryGetValue", "CFArrayGetCount", "CFDataGetLength", "CFStringGetLength"}
 
 function main(out, ...)
     local host_only, device_only = false, false
@@ -33,6 +37,16 @@ function main(out, ...)
         local images = {path.join(libs, "libswiftCore.dylib"), path.join(libs, "libc++.1.dylib"), path.join(libs, "libc++abi.1.dylib")}
         translate.translate(path.join(out, "fixture-arm64"), includes, path.join(out, "xl"), images,
                             {XL_REPLACES = "/usr/lib/libc++.1.dylib=" .. path.join(libs, "libc++.1.dylib"), XL_SWIFT_HOST_ANCESTORS = "1"})
+        local host_source = io.readfile(path.join(out, "xl", "host.m"))
+        for _, name in ipairs(BRIDGED_WRAPPERS) do
+            local wrapper = host_source:match("void xl_h_" .. name .. "%b()%s*(%b{})")
+            if not wrapper then
+                corpus.fail("the translation has no host wrapper for %s, so the check of a Swift object passed to Core Foundation proves nothing", name)
+            end
+            if not wrapper:find("xl_object_in", 1, true) then
+                corpus.fail("the host wrapper of %s does not take its object argument through xl_object_in, so a Swift object of a guest class would reach Core Foundation as a raw guest pointer", name)
+            end
+        end
         if host_only then
             print("ok (host part)")
             return

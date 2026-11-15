@@ -708,7 +708,7 @@ Objective-C runtime (here `NSObject`), translated with `XL_SWIFT_HOST_ANCESTORS=
 
 The fixture has three classes: `Client`, an `NSObject` subclass with stored properties (a `String`, an `[String]`, an
 optional reference, a closure); `Sub`, a final subclass of `Client` that overrides `bump` and calls `super`; and
-`Token`, a final `NSObject` subclass whose Swift `deinit` prints. It prints `ok <name>` or `FAIL <name>` for 26
+`Token`, a final `NSObject` subclass whose Swift `deinit` prints. It prints `ok <name>` or `FAIL <name>` for 33
 checks, among them:
 
 - construction through `Client()` (the Swift `init` of an ObjC ancestor runs `objc_msgSendSuper2` with the class from
@@ -724,12 +724,20 @@ checks, among them:
 - `_typeName` of the classes;
 - the stdlib's own statically laid out classes, which the host first meets through a message: `AnyCollection` of an
   array and of a `String` (the prespecialized `_IndexBox<Int>` and `_IndexBox<String.Index>`), the children of a
-  `Mirror`, and `String(describing:)` of a struct and of a class.
+  `Mirror`, and `String(describing:)` of a struct and of a class;
+- a Swift value passed to Core Foundation (`cf.dictionary.*`, `cf.array.count`, `cf.data.length`, `cf.string.length`): `["alpha": 1,
+  "beta": "two"] as [String: Any] as CFDictionary` is a `_SwiftDeferredNSDictionary` of the guest, and
+  `CFDictionaryGetCount`, `CFDictionaryContainsKey` and `CFDictionaryGetValue` make Core Foundation send it
+  `count`, `objectForKey:` and the like, which only works when the host got a proxy of the object and not its raw
+  pointer (the crash of the reCAPTCHA Enterprise SDK's keychain query in `SecItemCopyMatching`, 2026-11-15); the same
+  for a bridged array, data and string.
 
-The check wants every name `ok`, no `FAIL`, the `deinit` line, and exit 0.
+The check wants every name `ok`, no `FAIL`, the `deinit` line, and exit 0. The host part also reads the generated
+`host.m` and requires that the wrappers of `CFDictionaryGetCount`, `CFDictionaryContainsKey`, `CFDictionaryGetValue`,
+`CFArrayGetCount`, `CFDataGetLength` and `CFStringGetLength` take their object argument through `xl_object_in`.
 
 The translation takes about ten minutes and needs no phone: `check.lua <out> --host-only` stops after it, and
-`check.lua <out> --device-only` runs the fixture that run left in `<out>/xl` on the claimed phone (26 names `ok`).
+`check.lua <out> --device-only` runs the fixture that run left in `<out>/xl` on the claimed phone (33 names `ok`).
 
 It needs the arm64 runtime, so `XL_SWIFTOBJC_LIBS` names the folder with `libswiftCore.dylib` (the one that
 `revenant@swift-runtime` built for arm64, which carries `-DSWIFT_CLASS_IS_SWIFT_MASK=1ULL`), `libc++.1.dylib` and

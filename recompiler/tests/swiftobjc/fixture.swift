@@ -133,7 +133,21 @@ release()
     report("describe.class", String(describing: Plain.self) == "Plain")
 }
 
+@inline(never) func corefoundation() {
+    let alpha = "alpha" as NSString
+    let gamma = "gamma" as NSString
+    let dictionary = ["alpha": 1, "beta": "two"] as [String: Any] as CFDictionary
+    report("cf.dictionary.count", CFDictionaryGetCount(dictionary) == 2)
+    report("cf.dictionary.contains", CFDictionaryContainsKey(dictionary, Unmanaged.passUnretained(alpha).toOpaque()))
+    report("cf.dictionary.missing", !CFDictionaryContainsKey(dictionary, Unmanaged.passUnretained(gamma).toOpaque()))
+    report("cf.dictionary.value", CFDictionaryGetValue(dictionary, Unmanaged.passUnretained(alpha).toOpaque()) != nil)
+    report("cf.array.count", CFArrayGetCount(["a", "b", "c"] as CFArray) == 3)
+    report("cf.data.length", CFDataGetLength(Data([1, 2, 3, 4]) as CFData) == 4)
+    report("cf.string.length", CFStringGetLength("hello" as CFString) == 5)
+}
+
 host()
 names()
 reflection()
+corefoundation()
 line("done")
