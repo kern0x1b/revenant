@@ -1026,8 +1026,8 @@ function rebind(file, moves, libraries)
     local tail, tail_size, cut_at, cut_end = "", 0, limit, limit
     if rewrite then
         local stream = encoded_binds(binds)
-        tail_size = #stream
         tail = stream .. string.rep("\0", (-#stream) & 7)
+        tail_size = #tail
         if found.bind[2] > 0 then
             cut_at, cut_end = found.bind[1], found.bind[1] + found.bind[2]
         else

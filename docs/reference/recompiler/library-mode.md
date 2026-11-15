@@ -17,6 +17,7 @@ What `XL_LIBRARY=1` builds, the loader API, and what was measured on the iPhone 
 | `XL_REPLACES` | guest images that stand for system libraries | unset |
 | `XL_NAMESPACE` | prefix of the Objective-C class names of every guest image but the first (the runtime and the overlays); `none` leaves the names as they are | `XLG.` |
 | `BACKPORTS_DIR` | folder with the `lib*Backports.dylib` of the app's build: the imports the iOS 6.1.3 shared cache lacks and the Backports export bind to them | unset |
+| `XL_PROXY_CLASSES` | `1` keeps every class the Backports export bound to them, also one the iOS 6 cache has (the binding before 2026-11-15; a negative control) | unset |
 
 A library for an app that ships the Backports is translated with `BACKPORTS_DIR`. Without it every weak import the cache
 lacks (`NSURLComponents`, `NSURLQueryItem`, `NSURLSession`, `NSISO8601DateFormatter`, `WKWebView`, `NSDateInterval`, the
@@ -32,6 +33,55 @@ The reCAPTCHA Enterprise SDK needs it. Translated without `BACKPORTS_DIR` (2026-
 `NSPersonNameComponents`, 25 `NSURL*` key constants and others). With it (main 7bdac1e30) the first list is empty, the second
 has 28 left that the Backports do not export, and the library has strong load commands for ten Backports libraries
 (AVFAudio, CoreData, CoreFoundation, CoreGraphics, DeviceCheck, Foundation, Security, System, UIKit, WebKit).
+
+### Which class binds to the proxy and which to the system library
+
+The Backports come first in the link, so every class symbol they export binds to them, whether or not the iOS 6 cache has the
+class: a Backports library exports `_OBJC_CLASS_$_X` as an alias of its proxy `RevenantX`
+([how the Backports load](../../explanation/backports-loading.md)). After the link the translator moves part of those
+binds back, in `bind_system_classes` of `recompiler/tools/translate.lua`, with `rebind` of
+`toolchain/modules/apple/macho.lua`: a class symbol (`_OBJC_CLASS_$_X` and `_OBJC_METACLASS_$_X`) that the library imports from
+a Backports library is rebound to the system library the SDK links it from, unless one of these holds, in this order:
+
+| Kept on the Backports because | Why |
+|---|---|
+| the class is not in `classes_armv7.json` of the iOS 6.0 cache (the deployment floor, `e.dyld`) | the system has no such class; the proxy registers one (`+load`) |
+| `XL_PROXY_CLASSES=1` | the negative control |
+| the class is in `frameworks/Backports/tools/shadowed-classes.txt` (`CASpringAnimation`) | the system class lacks members the proxy has, and the proxy is the one that has them |
+| a Backports library exports `___revenant_override_OBJC_CLASS_$_X` | the same marker `revenant.rebind` reads: the library says it replaces the system symbol |
+| the iOS 6.0 cache does not export the symbol from the library the SDK links it from (`OS_dispatch_queue`, `OS_dispatch_source` from `libSystem.B.dylib`) | the class exists, but a strong bind to a library that does not export it fails when dyld loads the image; the import check of the translation names it |
+| the SDK links no system library for the symbol | nothing to rebind to |
+
+The system library is found by linking a probe object with a reference to each class symbol, against the frameworks of the
+real link and without the Backports, and reading which library each symbol is imported from. A library that the
+`-dead_strip_dylibs` link dropped (`UIKit`, when only `UIDevice` came from the Backports) gets its load command from `rebind`,
+with the versions the probe link recorded; the link has `-Wl,-headerpad,0x400` for the room. The load commands of the
+Backports libraries stay, because `attach.c` runs when such a library loads, and adds to the system class what the proxy
+has and the system class lacks (the members of the newer SDK, protocols, properties) and reparents a proxy that has no
+instance variables under the system class. A caller bound to the system class therefore gets the same members, and a guest
+class whose superclass is `NSMutableDictionary` inherits from the system class, not from a proxy.
+
+`system-classes.txt` lists the rebound symbols (`symbol`, the Backports library it left, the install name it moved to) and
+`proxy-classes.txt` those that stay (`symbol`, library, reason). The reCAPTCHA Enterprise SDK (2026-11-15, main 78e295235
+with this change): 23 binds move to the system library (`NSMutableDictionary` with its metaclass, `NSSet`, `NSNumber`,
+`NSNull`, `NSTimeZone`, `NSUUID`, `NSJSONSerialization`, `NSPropertyListSerialization`, `NSRegularExpression`, `NSLock`,
+`NSRecursiveLock`, `NSIndexSet`, `NSMutableIndexSet`, `NSNotification`, `NSException`, `NSInvocation`, `NSMethodSignature`,
+`NSEnumerator`, `NSDecimalNumber`, `NSAssertionHandler`, `NSFileSecurity` and `UIDevice`), 21 stay (19 absent from the
+cache, among them `NSURLComponents`, `NSURLQueryItem`, `NSURLSession`, `NSMeasurement`, `WKWebView` and `DCAppAttestService`,
+and the two dispatch classes). The binary has one load command more than before, for `UIKit`, and 92,480 bytes more of bind
+opcodes (`rebind` writes the bind stream without the compression of the linker); the registry and the guest image are byte
+for byte those of the translation without the change (drop6), because only the host part's binds moved.
+
+Why: `RCAx_GPBAutocreatedDictionary`, a guest class of the SDK, has `NSMutableDictionary` as its superclass, and with the
+Backports first its superclass bind named `RevenantNSMutableDictionary`, whose declared superclass is `NSDictionary`. The
+Backports repair that at load when the proxy has no instance variables (`revenant_reparent`), but the binding should not
+depend on that. The ObjC categories of the guest images were scanned (2026-11-15, the SDK and the guest `libswiftCore` and
+`libswiftFoundation` of main 78e295235): 10 categories in two images, the five of `libswiftFoundation` (on `NSKeyedUnarchiver`,
+`NSDictionary`, `NSMutableDictionary`, `NSObject` and `NSBundle`) and the five of `libswiftCore` (on guest classes); only
+`NSMutableDictionary` is a class that a Backports library exports and the cache has, and the
+Backports carry its dictionary selectors as a category of their own (`NSDictionary+SwiftOverlay.m`). The SDK itself
+declares no category. The superclasses of its guest classes are `NSObject`, `_SwiftObject`, `NSData`, `NSError`,
+`NSMutableArray` and `NSMutableDictionary`; only the last is exported by a Backports library.
 
 The output is two dylibs. The first, `<name>.dylib`, has two kinds of content:
 

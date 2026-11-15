@@ -159,6 +159,29 @@ function failures(opt)
         end
     end
     kept("rebound")
+    local function strip_keeps(label, file)
+        local copy = file .. ".stripped"
+        os.cp(file, copy)
+        local refused = fixtures.refusal(function () fixtures.run(folder, "xcrun", {"strip", "-S", "-x", copy}) end)
+        if refused then
+            table.insert(found, label .. " must strip: " .. refused)
+            return
+        end
+        local data = macho.read(file)
+        local image = macho.images(data)[1]
+        local stripped_data = macho.read(copy)
+        local stripped_image = macho.images(stripped_data)[1]
+        for _, stream in ipairs({{"bind", false}, {"lazy_bind", true}}) do
+            local old = bindings(macho, data, image, image[stream[1]], stream[2])
+            local new = bindings(macho, stripped_data, stripped_image, stripped_image[stream[1]], stream[2])
+            for name, entry in pairs(old) do
+                if described(new[name]) ~= described(entry) then
+                    table.insert(found, string.format("%s: after strip the %s stream binds %s as %s, and it bound it as %s", label, stream[1], name, described(new[name]), described(entry)))
+                end
+            end
+        end
+    end
+    strip_keeps("the rebound image", rebound)
     local stripped = path.join(folder, "stripped.dylib")
     os.cp(rebound, stripped)
     local unstrippable = fixtures.refusal(function () fixtures.run(folder, "xcrun", {"strip", "-S", "-x", stripped}) end)
@@ -204,6 +227,7 @@ function failures(opt)
     local wide_rebound = path.join(folder, "wide_rebound.dylib")
     os.cp(wide, wide_rebound)
     macho.rebind(wide_rebound, wide_moves, wide_libraries)
+    strip_keeps("the wide image rebound", wide_rebound)
     local wide_after_data = macho.read(wide_rebound)
     local wide_after_image = macho.images(wide_after_data)[1]
     if not before_entry then

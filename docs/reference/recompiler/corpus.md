@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, switchtail, tailcalls, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, flagflow, hostbridges, checkapi and proxytable; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, flagflow, hostbridges, checkapi, proxytable and systemclasses; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions`, `libexceptions`, `libcxxexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -28,6 +28,7 @@ A check that also has a device part is run by hand, with the output folder as it
 ./xmakew l -P . recompiler/tests/libexceptions/check.lua <out>
 ./xmakew l -P . recompiler/tests/libcxxexceptions/check.lua <out>
 ./xmakew l -P . recompiler/tests/hostbridges/check.lua <out>
+./xmakew l -P . recompiler/tests/systemclasses/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftconformance/check.lua <out>
 ./xmakew l -P . recompiler/tests/swiftobjc/check.lua <out>
 ./xmakew l -P . recompiler/tests/libgenerics/check.lua <out>
@@ -763,6 +764,48 @@ A control with `XL_PROXY=0` must fail at `proxy.in`. Each of these was also chec
 one place at a time: the entry removed by a dying proxy that no longer owns it (10 223 violations in 800 000 rounds), a lookup
 without `objc_loadWeakRetained` (signal 11), a lookup outside the lock (signal 11), no guest retain or no guest release (the
 count checks), no replacement of the memory selectors (abort in the shadow's `retain`).
+
+### systemclasses (device part by hand)
+
+A library translated with `BACKPORTS_DIR` binds a class the iOS 6 cache has to the system library, not to the proxy
+that a Backports library exports under the same symbol ([library mode](library-mode.md)). The fixture is a guest
+`SCDict : NSMutableDictionary` that implements the five primitives of the class cluster and nothing else, and
+`SCFixture`, whose `+run` reports `ok <name>` or `FAIL <name>` for each of:
+
+- `superclass`: the superclass of `SCDict` is the system `NSMutableDictionary`, not a proxy that stands between them.
+- `kind`: an `SCDict` is a kind of `NSMutableDictionary` by the class the guest names and by the class `objc_getClass` finds,
+  and of `NSDictionary`.
+- `addEntriesFromDictionary`, `removeAllObjects`, `setDictionary`: the three mutators that `NSMutableDictionary` implements
+  and `NSDictionary` does not work on an `SCDict`.
+- `absent`, `shadowed`, `dispatch`: the guest still gets a class of its name for `NSURLQueryItem`, which the cache lacks, for
+  `CASpringAnimation`, which `shadowed-classes.txt` lists, and for `OS_dispatch_queue`, which the cache has but its `libSystem`
+  does not export as a symbol.
+
+The host part needs no Backports build. It compiles two stand-in libraries for the armv7 target, `libFoundationBackports`
+from the sources of `NSMutableDictionaryAlias.m` (the proxy `RevenantNSMutableDictionary` and the alias symbols) and a
+class `NSURLQueryItem`, `libUIKitBackports` with `REVENANT_ALIAS(CASpringAnimation)` and `libSystemBackports` with
+`REVENANT_ALIAS(OS_dispatch_queue)`, under the install names of the
+real ones. It translates the fixture with `BACKPORTS_DIR` naming them, and requires of the library:
+
+- `_OBJC_CLASS_$_NSMutableDictionary` and `_OBJC_METACLASS_$_NSMutableDictionary` are imported from a library that is not a
+  Backports library, in the symbol table and in every bind entry of the dyld info (there are at least two: the class
+  reference and the superclass of `SCDict`), and `system-classes.txt` lists both with the system library they moved to;
+- `_OBJC_CLASS_$_NSURLQueryItem`, `_OBJC_CLASS_$_CASpringAnimation` and `_OBJC_CLASS_$_OS_dispatch_queue` stay on their Backports libraries, which `otool -L`
+  still lists, and `proxy-classes.txt` says why (`absent from the iOS 6 cache`, `shadowed`, `the iOS 6 cache does not export it from libSystem.B.dylib`).
+
+The control translates the same fixture with `XL_PROXY_CLASSES=1`, which keeps every class on the Backports as the
+translator did before, and requires that `NSMutableDictionary` binds to `libFoundationBackports` and that
+`system-classes.txt` is empty.
+
+The device part (`--device-only`) translates the fixture against the Backports build that `REVENANT_ALIAS_LIBRARIES` names
+(default `build/iphoneos/armv7/release`), loads it in a small armv7 host with the loader, and requires `ok` for each name
+above. The control with `XL_PROXY_CLASSES=1` must report `FAIL superclass`: the Backports reparent a proxy that has no
+instance variables under the system class when they load, so the other names may pass there, and `superclass` is the one
+that shows the proxy still between the guest class and the system class.
+
+```sh
+./xmakew l -P . recompiler/tests/systemclasses/check.lua <out>
+```
 
 ### libgenerics (device part by hand)
 

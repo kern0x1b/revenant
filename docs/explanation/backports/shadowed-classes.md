@@ -51,6 +51,9 @@ it to the Backports library that exports `<symbol>`. Check the exporter from the
 The rebind changes only the classes in the list. A class that is available on the device with all its members is
 not moved.
 
+The recompiler's translator is a consumer: with `BACKPORTS_DIR` it binds a class that the iOS 6 cache has to the system
+library, and keeps the classes of this list on the Backports ([library mode](../../reference/recompiler/library-mode.md)).
+
 ## Regenerating and testing
 
     ./xmakew l -P . frameworks/Backports/tools/shadowed_classes.lua
