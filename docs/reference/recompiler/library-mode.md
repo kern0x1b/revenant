@@ -319,7 +319,7 @@ turns on the files that every process used to append to: `xlate-crash.log` (the 
 exception), `xl-missing.log` (a selector the null object answered), `xlate-variant-miss.log` and `xlate-nobridge.log`.
 A file bigger than 1 MiB is emptied when the next process opens it, so none of them grows without bound. With
 the switch off the crash handler prints to stderr, which is where the test below reads it. The files that had a switch
-of their own (`xl-trace`, `xl-collect`, `xl-shadow-log`, `xl-trace-errno`, `xl-memlog`, `xl-exp-guide-superview`,
+of their own (`xl-trace`, whose ARC lines are now events of the journal below, `xl-collect`, `xl-shadow-log`, `xl-trace-errno`, `xl-memlog`, `xl-exp-guide-superview`,
 `xl-stubs.txt`, `XL_INIT_TRACE`) still need it and are not limited by `XL_LOG`. The library test crashes the host with the
 switch (the crash handler's file has the `xlate: signal 6` lines) and without it (the lines are on stderr and the file
 is not created).
@@ -331,6 +331,27 @@ objects, classes, selectors, pointers and integers of up to 64 bits, in at most 
 and the selector. A message whose method has a structure, a `float` or a `double` among them, or more arguments, stops
 with `xlate: message without a bridge (argument type)` (or `return type`, `stack-passed arguments`) followed by the
 class, the selector and the encoding, with the switch on or off.
+
+### `XL_POOLCHECK` (the journal of object lifetimes)
+
+`XL_POOLCHECK` in the environment, or the file `/private/var/revenant/xl-poolcheck`, turns on a journal of the events that decide
+whether an object is released twice or too early: `proxy-new`, `proxy-live` (a proxy that already stood for the guest object),
+`proxy-retain`, `proxy-release` and `proxy-autorelease` (with the retain count and the caller's address), `proxy-dealloc`
+and `proxy-free` (with the block's size), the `retain`, `release` and `autorelease` the guest sends through the bridge, `pool-push`,
+`pool-pop`, the entries of the pool that a `pool-pop` drains (`pool-entry`, read from the pages of the autorelease pool of iOS 6: a
+token whose page has not the pool's magic is `pool-pop-bad-token`), `alloc-object`, `create-instance` and `object-dispose`. The events go into a
+ring of 262,144 entries (about 7 MiB of zero pages that nothing touches while the switch is off). The ring is written to stderr and to
+`/private/var/revenant/xl-journal.log` when the process gets `SIGABRT`, `SIGSEGV` or `SIGBUS` (the handler runs once, then the signal
+takes its way as before): a header line with the thread and the counts, the last 3,000 events, and every event of the objects that the last
+`pool-pop` of the crashing thread drained, one line each: `xlate-journal: #SEQUENCE t=THREAD OP POINTER extra=… caller=… isa=… CLASS`, ended
+by `xlate-journal: end`. `xl_journal_dump(why)` writes the same dump on request.
+
+With the switch off the cost is a flag test: the proxy classes keep `NSObject`'s memory methods (the journal's versions are installed
+only when the switch is on, when a proxy class is made), and each journal call tests the flag first and does nothing else. The code
+is `src/runtime/journal.m`; `recompiler/tests/proxytable` runs it on the Mac (a run without the switch writes no `xlate-journal` line; a
+run with it has the proxy events and the end line). The first use found the drop16 double release of a result that a guest method returns at
++1 (`xl_proxy_owned`, `docs/explanation/recompiler/how-it-works.md`); the pool pages are read only on the device (`vm_read_overwrite`, the layout of
+iOS 6's 32-bit `AutoreleasePoolPage`).
 
 ### `XL_LOADER_HOST_RESERVE=0` (diagnostics)
 

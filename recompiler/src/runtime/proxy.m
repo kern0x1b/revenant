@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <malloc/malloc.h>
 
 #include "xl_proxy.h"
 
@@ -51,10 +52,31 @@ static void xl_proxy_setup(void)
     xl_proxy_disabled = proxy_switch && strcmp(proxy_switch, "0") == 0;
 }
 
+static IMP xl_proxy_root_retain, xl_proxy_root_release, xl_proxy_root_autorelease;
+
+static id xl_proxy_retain(id self, SEL selector)
+{
+    xl_journal_note3("proxy-retain", (uintptr_t)self, (uintptr_t)[self retainCount], (uintptr_t)__builtin_return_address(0));
+    return ((id (*)(id, SEL))xl_proxy_root_retain)(self, selector);
+}
+
+static void xl_proxy_release(id self, SEL selector)
+{
+    xl_journal_note3("proxy-release", (uintptr_t)self, (uintptr_t)[self retainCount], (uintptr_t)__builtin_return_address(0));
+    ((void (*)(id, SEL))xl_proxy_root_release)(self, selector);
+}
+
+static id xl_proxy_autorelease(id self, SEL selector)
+{
+    xl_journal_note3("proxy-autorelease", (uintptr_t)self, (uintptr_t)[self retainCount], (uintptr_t)__builtin_return_address(0));
+    return ((id (*)(id, SEL))xl_proxy_root_autorelease)(self, selector);
+}
+
 static void xl_proxy_dealloc(id self, SEL selector)
 {
     struct xl_proxy_data *data = (struct xl_proxy_data *)object_getIndexedIvars(self);
     uintptr_t guest = data->guest;
+    xl_journal_note("proxy-dealloc", (uintptr_t)self, guest);
     objc_removeAssociatedObjects(self);
     objc_clear_deallocating(self);
     pthread_mutex_lock(&xl_proxy_lock);
@@ -66,6 +88,8 @@ static void xl_proxy_dealloc(id self, SEL selector)
     }
     pthread_mutex_unlock(&xl_proxy_lock);
     xl_proxy_guest_release(guest);
+    if (xl_journal_enabled())
+        xl_journal_note("proxy-free", (uintptr_t)self, malloc_size((const void *)self));
     free(self);
 }
 
@@ -96,8 +120,21 @@ static Class xl_proxy_make_class(uintptr_t guest_class, Class shadow)
     for (size_t index = 0; index < sizeof xl_proxy_memory_selectors / sizeof *xl_proxy_memory_selectors; index++) {
         SEL selector = sel_registerName(xl_proxy_memory_selectors[index]);
         Method root = class_getInstanceMethod([NSObject class], selector);
+        IMP imp = root ? method_getImplementation(root) : NULL;
+        if (root && xl_journal_enabled()) {
+            if (selector == @selector(retain)) {
+                xl_proxy_root_retain = imp;
+                imp = (IMP)xl_proxy_retain;
+            } else if (selector == @selector(release)) {
+                xl_proxy_root_release = imp;
+                imp = (IMP)xl_proxy_release;
+            } else if (selector == @selector(autorelease)) {
+                xl_proxy_root_autorelease = imp;
+                imp = (IMP)xl_proxy_autorelease;
+            }
+        }
         if (root)
-            class_addMethod(proxy_class, selector, method_getImplementation(root), method_getTypeEncoding(root));
+            class_addMethod(proxy_class, selector, imp, method_getTypeEncoding(root));
     }
     objc_registerClassPair(proxy_class);
     CFDictionarySetValue(xl_proxy_class_shadows, (const void *)proxy_class, (const void *)shadow);
@@ -133,6 +170,7 @@ static id xl_proxy_for(uintptr_t guest, Class proxy_class)
         id live = objc_loadWeakRetained(&entry->weak);
         if (live) {
             pthread_mutex_unlock(&xl_proxy_lock);
+            xl_journal_note("proxy-live", (uintptr_t)live, guest);
             return live;
         }
     }
@@ -149,6 +187,7 @@ static id xl_proxy_for(uintptr_t guest, Class proxy_class)
     objc_storeWeak(&entry->weak, proxy);
     entry->owner = proxy;
     pthread_mutex_unlock(&xl_proxy_lock);
+    xl_journal_note("proxy-new", (uintptr_t)proxy, guest);
     return proxy;
 }
 

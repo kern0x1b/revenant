@@ -648,7 +648,7 @@ function translate(input, includes, out, images, opt)
         writelines(o("exports.txt"), table.join({"_xl_library_init", "_xl_library_diagnostics", "_xl_library_class"}, readlines(o("registry-exports.txt"))))
     end
     for _, source in ipairs({path.join(runtime, "bridge.m"), path.join(runtime, "objc_bridge.m"), path.join(runtime, "swift_classes.m"),
-                             path.join(runtime, "proxy.m"), path.join(runtime, "alignment.m"), path.join(runtime, "objc_compat.m"), o("host.m")}) do
+                             path.join(runtime, "proxy.m"), path.join(runtime, "journal.m"), path.join(runtime, "alignment.m"), path.join(runtime, "objc_compat.m"), o("host.m")}) do
         local object = o(path.basename(source) .. ".o")
         run(clang, table.join(host, {"-fno-objc-arc", "-fblocks", "-I", out, "-I", runtime, "-iquote", incdir}, extra_cflags, {"-c", source, "-o", object}))
         print("renamed %d sections", macho.rename_sections(object, true))

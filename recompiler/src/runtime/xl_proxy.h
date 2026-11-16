@@ -24,3 +24,10 @@ static inline uint64_t xl_self_out(void *self)
     }
     return (uint64_t)(uintptr_t)self;
 }
+
+int xl_journal_enabled(void);
+void xl_journal_note(const char *op, uintptr_t pointer, uintptr_t extra);
+void xl_journal_note3(const char *op, uintptr_t pointer, uintptr_t extra, uintptr_t caller);
+const char *xl_journal_class_name(uint32_t cls);
+void xl_journal_dump(const char *why);
+void xl_journal_pool_pop(uintptr_t token);
