@@ -3129,6 +3129,8 @@ int main(int argc, const char **argv) {
       {"_objc_retainAutoreleaseReturnValue", 1}, {"_objc_unsafeClaimAutoreleasedReturnValue", 1},
       {"_objc_claimAutoreleasedReturnValue", 1}, {"_objc_retainBlock", 1},
       {"_objc_retain", 1}, {"_objc_release", 1}, {"_objc_autorelease", 1}, {"__objc_rootAutorelease", 1},
+      {"_objc_autoreleasePoolPush", 0}, {"_objc_autoreleasePoolPop", 1}, {"_NSAllocateObject", 3},
+      {"_object_dispose", 1}, {"_class_createInstance", 2},
       {"___cxa_atexit", 3}, {"__Unwind_Resume", 1},
       {"__Znwm", 1}, {"__Znam", 1}, {"__ZdlPv", 1}, {"__ZdaPv", 1},
       {"_NSGetUncaughtExceptionHandler", 0},

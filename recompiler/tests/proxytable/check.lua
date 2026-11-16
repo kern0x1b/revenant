@@ -6,8 +6,25 @@ function main(out)
     local binary = path.join(out, "proxytable")
     local flags = {"-O1", "-Wall", "-fno-objc-arc", "-fobjc-weak", "-I", runtime}
     os.execv("cc", table.join(flags, {"-c", path.join(runtime, "proxy.m"), "-o", path.join(out, "proxy.o")}))
-    os.execv("cc", table.join(flags, {path.join(os.scriptdir(), "main.m"), path.join(out, "proxy.o"), "-framework", "Foundation", "-o", binary}))
+    os.execv("cc", table.join(flags, {"-c", path.join(runtime, "journal.m"), "-o", path.join(out, "journal.o")}))
+    os.execv("cc", table.join(flags, {path.join(os.scriptdir(), "main.m"), path.join(out, "proxy.o"), path.join(out, "journal.o"), "-framework", "Foundation", "-o", binary}))
     os.execv(binary, {}, {envs = {MallocScribble = "1", MallocGuardEdges = "1"}, timeout = 600000})
+    local quiet = path.join(out, "journal-off.txt")
+    os.execv(binary, {"200"}, {stdout = quiet, stderr = quiet})
+    if io.readfile(quiet):find("xlate-journal", 1, true) then
+        corpus.fail("the journal wrote lines without XL_POOLCHECK")
+    end
+    local journal = path.join(out, "journal.txt")
+    os.execv(binary, {"200"}, {envs = {XL_POOLCHECK = "1"}, stdout = journal, stderr = journal})
+    local written = io.readfile(journal)
+    for _, op in ipairs({"proxy-new", "proxy-live", "proxy-release", "proxy-autorelease", "proxy-dealloc", "proxy-free"}) do
+        if not written:find(" " .. op .. " ", 1, true) then
+            corpus.fail("the journal of the test has no %s event:\n%s", op, written:sub(1, 2000))
+        end
+    end
+    if not written:find("xlate-journal: end", 1, true) then
+        corpus.fail("the journal has no end line")
+    end
     local log = path.join(out, "control.txt")
     local code = os.execv(binary, {"1000"}, {envs = {XL_PROXY = "0"}, stdout = log, stderr = log, try = true})
     if code == 0 then

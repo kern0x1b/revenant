@@ -20,6 +20,7 @@
 #include <dlfcn.h>
 #include <mach/mach.h>
 #include <mach-o/dyld.h>
+#include <malloc/malloc.h>
 
 extern const struct xl_selector_shim xl_selector_shims[];
 extern const struct xl_selector_variant xl_selector_variants[];
@@ -646,8 +647,8 @@ void xl_h_objc_msgSend(State *state)
                 state_s = "mapped";
                 uint32_t isa = *(uint32_t *)(uintptr_t)receiver;
                 if (isa && write(xl_nf, (void *)(uintptr_t)isa, 4) == 4) {
-                    const char *cn = class_getName((Class)(uintptr_t)isa);
-                    long rc = class_isMetaClass((Class)(uintptr_t)isa) ? -1 : CFGetRetainCount((CFTypeRef)receiver);
+                    const char *cn = xl_journal_class_name(isa);
+                    long rc = (cn[0] == '?' || cn[0] == 'u') ? -2 : class_isMetaClass((Class)(uintptr_t)isa) ? -1 : CFGetRetainCount((CFTypeRef)receiver);
                     snprintf(cls, sizeof cls, " isa=0x%x class=%s rc=%ld", isa, cn ? cn : "?", rc);
                 } else {
                     snprintf(cls, sizeof cls, " isa=0x%x(BADISA)", isa);
@@ -1430,8 +1431,11 @@ struct __attribute__((packed)) xl_arc_pack {
     uint64_t r;
 };
 
+static void xl_arc_trace(uint64_t obj, const char *op);
+
 static uintptr_t xl_host_retain(uint64_t guest, const char *symbol)
 {
+    xl_arc_trace(guest, symbol);
     id object = (id)xl_narrow_pointer(guest, symbol, 0);
     uint64_t result;
     return xl_guest_send(object, @selector(retain), &result) ? (uintptr_t)result : (uintptr_t)objc_retain(object);
@@ -1439,6 +1443,7 @@ static uintptr_t xl_host_retain(uint64_t guest, const char *symbol)
 
 static uintptr_t xl_host_autorelease(uint64_t guest, const char *symbol)
 {
+    xl_arc_trace(guest, symbol);
     id object = (id)xl_narrow_pointer(guest, symbol, 0);
     uint64_t result;
     return xl_guest_send(object, @selector(autorelease), &result) ? (uintptr_t)result : (uintptr_t)objc_autorelease(object);
@@ -1446,6 +1451,7 @@ static uintptr_t xl_host_autorelease(uint64_t guest, const char *symbol)
 
 static void xl_host_release(uint64_t guest, const char *symbol)
 {
+    xl_arc_trace(guest, symbol);
     id object = (id)xl_narrow_pointer(guest, symbol, 0);
     uint64_t ignored;
     if (!xl_guest_send(object, @selector(release), &ignored))
@@ -1489,32 +1495,67 @@ void xl_manual_objc_retainBlock(struct xl_arc_pack *p)
 
 static void xl_arc_trace(uint64_t obj, const char *op)
 {
-    if (access("/private/var/revenant/xl-trace", F_OK) != 0)
+    if (!xl_journal_enabled())
         return;
-    static int fd = -1, nf = -1;
-    if (fd < 0) fd = open("/private/var/revenant/xlate-msgtrace.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
-    if (nf < 0) nf = open("/dev/null", O_WRONLY);
-    if (fd < 0) return;
-    const char *st = "UNMAPPED";
-    char cls[128]; cls[0] = 0;
-    if (obj && xl_is_guest_block(obj)) {
-        st = "guest-block";
-    } else if (obj && nf >= 0 && write(nf, (void *)(uintptr_t)obj, 4) == 4) {
-        st = "mapped";
-        uint32_t isa = *(uint32_t *)(uintptr_t)obj;
-        if (isa && write(nf, (void *)(uintptr_t)isa, 4) == 4) {
-            const char *cn = class_getName((Class)(uintptr_t)isa);
-            snprintf(cls, sizeof cls, " isa=0x%x class=%s rc=%ld", isa, cn ? cn : "?", CFGetRetainCount((CFTypeRef)(uintptr_t)obj));
-        } else {
-            snprintf(cls, sizeof cls, " isa=0x%x(BADISA)", isa);
-        }
-    } else if (!obj) {
-        st = "nil";
-    }
-    char line[256];
-    int n = snprintf(line, sizeof line, "ARC %s %p [%s%s]\n", op, (void *)(uintptr_t)obj, st, cls);
-    if (n > (int)sizeof line) n = (int)sizeof line;
-    write(fd, line, n);
+    uintptr_t pointer = (uintptr_t)obj;
+    xl_journal_note(op, pointer, pointer >= 0x1000 && pointer < 0xFFFFF000u ? malloc_size((const void *)pointer) : 0);
+}
+
+struct __attribute__((packed)) xl_pool_push_pack {
+    uint64_t r;
+};
+
+void xl_manual_objc_autoreleasePoolPush(struct xl_pool_push_pack *p)
+{
+    void *token = objc_autoreleasePoolPush();
+    xl_journal_note("pool-push", (uintptr_t)token, 0);
+    p->r = xl_widen_pointer((uintptr_t)token);
+}
+
+void xl_manual_objc_autoreleasePoolPop(struct xl_arc_pack *p)
+{
+    void *token = (void *)xl_narrow_pointer(p->a0, "objc_autoreleasePoolPop", 0);
+    if (xl_journal_enabled())
+        xl_journal_pool_pop((uintptr_t)token);
+    objc_autoreleasePoolPop(token);
+}
+
+struct __attribute__((packed)) xl_allocate_pack {
+    uint64_t a0;
+    uint64_t a1;
+    uint64_t a2;
+    uint64_t r;
+};
+
+void xl_manual_NSAllocateObject(struct xl_allocate_pack *p)
+{
+    id object = NSAllocateObject((Class)xl_object_in((uint64_t)p->a0, "NSAllocateObject", 0),
+                                 (unsigned int)xl_narrow_unsigned((uint64_t)p->a1, (uint64_t)((1ull << 32) - 1), UINT64_MAX, "NSAllocateObject", 1),
+                                 (struct _NSZone *)xl_narrow_pointer((uint64_t)p->a2, "NSAllocateObject", 2));
+    xl_journal_note("alloc-object", (uintptr_t)object, (uintptr_t)p->a1);
+    p->r = xl_object_out((uintptr_t)object);
+}
+
+void xl_manual_object_dispose(struct xl_arc_pack *p)
+{
+    id object = (id)xl_object_in((uint64_t)p->a0, "object_dispose", 0);
+    if (xl_journal_enabled())
+        xl_journal_note("object-dispose", (uintptr_t)object, (uintptr_t)malloc_size((const void *)object));
+    p->r = xl_object_out((uintptr_t)object_dispose(object));
+}
+
+struct __attribute__((packed)) xl_create_pack {
+    uint64_t a0;
+    uint64_t a1;
+    uint64_t r;
+};
+
+void xl_manual_class_createInstance(struct xl_create_pack *p)
+{
+    id object = class_createInstance((Class)xl_object_in((uint64_t)p->a0, "class_createInstance", 0),
+                                     (unsigned long)xl_narrow_unsigned((uint64_t)p->a1, (uint64_t)((1ull << 32) - 1), UINT64_MAX, "class_createInstance", 1));
+    xl_journal_note("create-instance", (uintptr_t)object, (uintptr_t)p->a1);
+    p->r = xl_object_out((uintptr_t)object);
 }
 
 uint32_t xl_guest_imp_address(IMP imp)
@@ -1858,7 +1899,6 @@ void xl_manual_class_copyMethodList(void *pack)
 
 void xl_manual_objc_retain(struct xl_arc_pack *p)
 {
-    xl_arc_trace(p->a0, "retain");
     if (p->a0 && xl_is_guest_block(p->a0))
         p->r = xl_block_retain(p->a0);
     else
@@ -1867,7 +1907,6 @@ void xl_manual_objc_retain(struct xl_arc_pack *p)
 
 void xl_manual_objc_release(struct xl_arc_pack *p)
 {
-    xl_arc_trace(p->a0, "release");
     if (p->a0 && xl_is_guest_block(p->a0))
         xl_block_release(p->a0);
     else

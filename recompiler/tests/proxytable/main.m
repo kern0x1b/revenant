@@ -262,5 +262,7 @@ int main(int argc, char **argv)
     race(rounds);
     free(first);
     free(second);
+    if (xl_journal_enabled())
+        xl_journal_dump("the end of the test");
     return failures ? 1 : 0;
 }
