@@ -75,7 +75,8 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   50 GB (`REVENANT_CACHE_GB`): a write that would pass it evicts old entries first, and `./xmakew l tools/cache.lua status`
   shows what is there. It is in `docs/guides/machine.md`.
   A linked worktree has no cache of its own, and `./xmakew` refuses to run there without `REVENANT_CACHE`: it would otherwise use
-  the main checkout's `.cache`, which every worker shares. Make the private cache with `./xmakew l -P . tools/private_cache.lua <worktree>/.cache-private`
+  the main checkout's `.cache`, which every worker shares. Make the private cache with `./xmakew l -P . tools/private_cache.lua <worktree>/.cache-private` (never an empty folder: a linked
+  worktree's `./xmakew` refuses a `REVENANT_CACHE` without the `.private-cache` marker, and a cold cache costs about an hour)
   (`docs/guides/machine.md`, "A private cache"), set `REVENANT_CACHE` to the folder it prints for each run, echo it first,
   and never point it at the main checkout's `.cache`. Remove it with `tools/private_cache.lua --remove` when the worktree is done.
 - Tests: `./xmakew test -P .` is the one test entry point. It runs every test a host with the prebuilt packages can

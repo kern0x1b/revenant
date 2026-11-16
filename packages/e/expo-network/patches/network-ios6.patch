@@ -1,0 +1,196 @@
+diff -ru a/ios/NetworkModule.swift b/ios/NetworkModule.swift
+--- a/ios/NetworkModule.swift
++++ b/ios/NetworkModule.swift
+@@ -1,11 +1,11 @@
+ import ExpoModulesCore
+-import Network
++import SystemConfiguration
+ 
+ let onNetworkStateChanged = "onNetworkStateChanged"
+ 
+ public final class NetworkModule: Module {
+-  private var monitor: NWPathMonitor?
+-  private let monitorQueue = DispatchQueue.global(qos: .default)
++  private var reachability: SCNetworkReachability?
++  private let monitorQueue = DispatchQueue(label: "expo.network.reachability")
+ 
+   public func definition() -> ModuleDefinition {
+     Name("ExpoNetwork")
+@@ -33,39 +33,57 @@
+     }
+   }
+ 
++  private func makeReachability() -> SCNetworkReachability? {
++    var address = sockaddr_in()
++    address.sin_len = UInt8(MemoryLayout<sockaddr_in>.size)
++    address.sin_family = sa_family_t(AF_INET)
++    return withUnsafePointer(to: &address) { pointer in
++      pointer.withMemoryRebound(to: sockaddr.self, capacity: 1) { SCNetworkReachabilityCreateWithAddress(nil, $0) }
++    }
++  }
++
+   private func setupNetworkMonitoring() {
+     stopNetworkMonitoring()
+-    let monitor = NWPathMonitor()
+-    monitor.pathUpdateHandler = { [weak self] path in
+-      guard let self else {
++    guard let reachability = makeReachability() else {
++      NSLog("expo-network: SCNetworkReachabilityCreateWithAddress returned no reachability, so network changes are not reported")
++      return
++    }
++    var context = SCNetworkReachabilityContext(version: 0, info: Unmanaged.passUnretained(self).toOpaque(), retain: nil, release: nil, copyDescription: nil)
++    let callback: SCNetworkReachabilityCallBack = { _, flags, info in
++      guard let info else {
+         return
+       }
+-      self.emitNetworkStateChange(path: path)
++      Unmanaged<NetworkModule>.fromOpaque(info).takeUnretainedValue().emitNetworkStateChange(flags: flags)
+     }
+-    monitor.start(queue: monitorQueue)
+-    self.monitor = monitor
++    guard SCNetworkReachabilitySetCallback(reachability, callback, &context),
++          SCNetworkReachabilitySetDispatchQueue(reachability, monitorQueue) else {
++      NSLog("expo-network: the reachability callback could not be set, so network changes are not reported")
++      return
++    }
++    self.reachability = reachability
+   }
+ 
+   private func stopNetworkMonitoring() {
+-    monitor?.cancel()
+-    monitor = nil
++    guard let reachability else {
++      return
++    }
++    SCNetworkReachabilitySetCallback(reachability, nil, nil)
++    SCNetworkReachabilitySetDispatchQueue(reachability, nil)
++    self.reachability = nil
+   }
+ 
+-  private func emitNetworkStateChange(path: NWPath) {
+-    let networkState = getNetworkStateAsync(path: path)
++  private func emitNetworkStateChange(flags: SCNetworkReachabilityFlags) {
++    let networkState = getNetworkStateAsync(flags: flags)
+     sendEvent(onNetworkStateChanged, networkState)
+   }
+ 
+   private func getIPAddress() throws -> String {
+     var address = "0.0.0.0"
+     var ifaddr: UnsafeMutablePointer<ifaddrs>?
+-
+     let error = getifaddrs(&ifaddr)
+-
+     guard error == 0 else {
+       throw IpAddressException(error)
+     }
+-
+     guard let firstAddr = ifaddr else {
+       return address
+     }
+@@ -73,7 +91,6 @@
+     for ifptr in sequence(first: firstAddr, next: { $0.pointee.ifa_next }) {
+       let temp = ifptr.pointee
+       let family = temp.ifa_addr.pointee.sa_family
+-
+       if family == UInt8(AF_INET) {
+         let name = String(cString: temp.ifa_name)
+         if name.starts(with: "en") {
+@@ -90,44 +107,24 @@
+         }
+       }
+     }
+-
+     freeifaddrs(ifaddr)
+     return address
+   }
+ 
+-  private func getNetworkPathAsync() -> NWPath? {
+-    // create a temporary monitor to avoid interfering with the module's monitor
+-    // since we want to wait for the result to be updated once:
+-    let tempMonitor = NWPathMonitor()
+-    var tempPath: NWPath?
+-
+-    let semaphore = DispatchSemaphore(value: 0)
+-
+-    tempMonitor.pathUpdateHandler = { updatedPath in
+-      tempPath = updatedPath
+-      semaphore.signal() // Notify that we got the path
++  private func currentReachabilityFlags() -> SCNetworkReachabilityFlags? {
++    guard let reachability = makeReachability() else {
++      return nil
+     }
+-
+-    tempMonitor.start(queue: monitorQueue)
+-
+-    // Wait max 5 seconds to avoid any locking issues if the monitor
+-    // doesn't get an update in time.
+-    let result = semaphore.wait(timeout: .now() + 5)
+-    tempMonitor.cancel()
+-
+-    if result == .timedOut {
+-      // Handle the timeout case
+-      print("Timeout waiting for network path.")
++    var flags = SCNetworkReachabilityFlags()
++    guard SCNetworkReachabilityGetFlags(reachability, &flags) else {
+       return nil
+     }
+-
+-    return tempPath
++    return flags
+   }
+ 
+-  private func getNetworkStateAsync(path: NWPath? = nil) -> [String: Any] {
+-    let currentPath = path ?? getNetworkPathAsync()
+-    let isConnected = currentPath?.status == .satisfied
+-
++  private func getNetworkStateAsync(flags: SCNetworkReachabilityFlags? = nil) -> [String: Any] {
++    let currentFlags = flags ?? currentReachabilityFlags()
++    let isConnected = currentFlags.map { $0.contains(.reachable) && !$0.contains(.connectionRequired) } ?? false
+     if !isConnected {
+       return [
+         "type": NetworkType.none.description,
+@@ -136,24 +133,7 @@
+       ]
+     }
+ 
+-    let connectionType = NWInterface
+-      .InterfaceType
+-      .allCases
+-      .filter { currentPath?.usesInterfaceType($0) == true }
+-      .first
+-
+-    var currentNetworkType = NetworkType.unknown
+-    switch connectionType {
+-    case .wifi:
+-      currentNetworkType = .wifi
+-    case .cellular:
+-      currentNetworkType = .cellular
+-    case .wiredEthernet:
+-      currentNetworkType = .wiredEthernet
+-    default:
+-      currentNetworkType = .unknown
+-    }
+-
++    let currentNetworkType: NetworkType = currentFlags?.contains(.isWWAN) == true ? .cellular : .wifi
+     return [
+       "type": currentNetworkType.description,
+       "isConnected": isConnected,
+diff -ru a/ios/NetworkType.swift b/ios/NetworkType.swift
+--- a/ios/NetworkType.swift
++++ b/ios/NetworkType.swift
+@@ -1,15 +1,3 @@
+-import Network
+-
+-extension NWInterface.InterfaceType: CaseIterable {
+-  public static var allCases: [NWInterface.InterfaceType] = [
+-    .other,
+-    .wifi,
+-    .cellular,
+-    .loopback,
+-    .wiredEthernet
+-  ]
+-}
+-
+ enum NetworkType: CustomStringConvertible {
+   case unknown, wifi, none, cellular, wiredEthernet
+ 

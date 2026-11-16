@@ -1,0 +1,130 @@
+diff -ru a/ios/SecureStoreExceptions.swift b/ios/SecureStoreExceptions.swift
+--- a/ios/SecureStoreExceptions.swift
++++ b/ios/SecureStoreExceptions.swift
+@@ -68,3 +68,15 @@
+     }
+   }
+ }
++
++internal final class AuthenticationUnavailableException: Exception {
++  override var reason: String {
++    "requireAuthentication needs biometric access control, which iOS 8 introduced; this iOS has none, so no value was stored"
++  }
++}
++
++internal final class PasscodeAccessibilityUnavailableException: Exception {
++  override var reason: String {
++    "WHEN_PASSCODE_SET_THIS_DEVICE_ONLY needs the passcode-bound keychain class that iOS 8 introduced; this iOS has none, so no value was stored"
++  }
++}
+diff -ru a/ios/SecureStoreModule.swift b/ios/SecureStoreModule.swift
+--- a/ios/SecureStoreModule.swift
++++ b/ios/SecureStoreModule.swift
+@@ -1,7 +1,4 @@
+ import ExpoModulesCore
+-#if !os(tvOS)
+-import LocalAuthentication
+-#endif
+ import Security
+ 
+ public final class SecureStoreModule: Module {
+@@ -51,18 +48,7 @@
+     }
+ 
+     Function("canUseBiometricAuthentication") {() -> Bool in
+-      #if os(tvOS)
+       return false
+-      #else
+-      let context = LAContext()
+-      var error: NSError?
+-      let isBiometricsSupported: Bool = context.canEvaluatePolicy(LAPolicy.deviceOwnerAuthenticationWithBiometrics, error: &error)
+-
+-      if error != nil {
+-        return false
+-      }
+-      return isBiometricsSupported
+-      #endif
+     }
+   }
+ 
+@@ -87,28 +73,17 @@
+   }
+ 
+   private func set(value: String, with key: String, options: SecureStoreOptions) throws -> Bool {
+-    var setItemQuery = query(with: key, options: options, requireAuthentication: options.requireAuthentication)
++    if options.requireAuthentication {
++      throw AuthenticationUnavailableException()
++    }
+ 
++    var setItemQuery = query(with: key, options: options, requireAuthentication: false)
++
+     let valueData = value.data(using: .utf8)
+     setItemQuery[kSecValueData as String] = valueData
+ 
+-    let accessibility = attributeWith(options: options)
++    setItemQuery[kSecAttrAccessible as String] = try attributeWith(options: options)
+ 
+-    if !options.requireAuthentication {
+-      setItemQuery[kSecAttrAccessible as String] = accessibility
+-    } else {
+-      guard let _ = Bundle.main.infoDictionary?["NSFaceIDUsageDescription"] as? String else {
+-        throw MissingPlistKeyException()
+-      }
+-
+-      var error: Unmanaged<CFError>? = nil
+-      guard let accessOptions = SecAccessControlCreateWithFlags(kCFAllocatorDefault, accessibility, .biometryCurrentSet, &error) else {
+-        let errorCode = error.map { CFErrorGetCode($0.takeRetainedValue()) }
+-        throw SecAccessControlError(errorCode)
+-      }
+-      setItemQuery[kSecAttrAccessControl as String] = accessOptions
+-    }
+-
+     let status = SecItemAdd(setItemQuery as CFDictionary, nil)
+ 
+     switch status {
+@@ -125,15 +100,11 @@
+   }
+ 
+   private func update(value: String, with key: String, options: SecureStoreOptions) throws -> Bool {
+-    var query = query(with: key, options: options, requireAuthentication: options.requireAuthentication)
++    let query = query(with: key, options: options, requireAuthentication: false)
+ 
+     let valueData = value.data(using: .utf8)
+     let updateDictionary = [kSecValueData as String: valueData]
+ 
+-    if let authPrompt = options.authenticationPrompt {
+-      query[kSecUseOperationPrompt as String] = authPrompt
+-    }
+-
+     let status = SecItemUpdate(query as CFDictionary, updateDictionary as CFDictionary)
+ 
+     if status == errSecSuccess {
+@@ -149,10 +120,6 @@
+     query[kSecMatchLimit as String] = kSecMatchLimitOne
+     query[kSecReturnData as String] = kCFBooleanTrue
+ 
+-    if let authPrompt = options.authenticationPrompt {
+-      query[kSecUseOperationPrompt as String] = authPrompt
+-    }
+-
+     var item: CFTypeRef?
+     let status = SecItemCopyMatching(query as CFDictionary, &item)
+ 
+@@ -191,7 +158,7 @@
+     return query
+   }
+ 
+-  private func attributeWith(options: SecureStoreOptions) -> CFString {
++  private func attributeWith(options: SecureStoreOptions) throws -> CFString {
+     switch options.keychainAccessible {
+     case .afterFirstUnlock:
+       return kSecAttrAccessibleAfterFirstUnlock
+@@ -200,7 +167,7 @@
+     case .always:
+       return kSecAttrAccessibleAlways
+     case .whenPasscodeSetThisDeviceOnly:
+-      return kSecAttrAccessibleWhenPasscodeSetThisDeviceOnly
++      throw PasscodeAccessibilityUnavailableException()
+     case .whenUnlocked:
+       return kSecAttrAccessibleWhenUnlocked
+     case .alwaysThisDeviceOnly:

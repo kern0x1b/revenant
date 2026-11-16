@@ -1,0 +1,21 @@
+package("expo-store-review")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-store-review")
+    set_description("expo-store-review 57.0.3, the store review prompt of the Expo SDK, from its npm tarball: the Swift sources of its iOS half without the in-app review request (SKStoreReviewController, iOS 10.3, and window scenes, iOS 13), so that isAvailableAsync answers false and the JavaScript falls back to opening the store page, on iOS 6")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-store-review/-/expo-store-review-$(version).tgz")
+    add_versions("57.0.3", "aeec52217a7123e810efb5e96c7cf2db0d02069e8e8fb2f13ba4f08cf690717b")
+    add_patches("57.0.3", path.join(os.scriptdir(), "patches", "store-review-ios6.patch"), "fd37aa8e87decd20f7d47fa56b1cb67fa025eced0169c7318f3575f872c51792")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-store-review" and manifest.version == "57.0.3", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-store-review has no expo-module.config.json")
+    end)
