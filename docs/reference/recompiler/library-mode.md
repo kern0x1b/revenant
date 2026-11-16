@@ -375,7 +375,7 @@ guest address and a different drop moves them. An example, a made-up profile of 
 
     window 1: 247 samples, 3100 messages (12 dynamic), routing 41000 us, host call 150 us
         160  _sub_18fb9358+0x10  guest 0x18fb9358 (Foundation overlay)
-         70  _sub_193b0ab0.island.2+0x0  guest 0x193b0ab0 (libxl-guest stubs)
+         70  _sub_193b0ab0.island.2+0x0  guest 0x193b0ab0 (Foundation overlay)
          17  libobjc.A.dylib+0x6a40 objc_msgSend
     window 2: 3 samples, 20 messages (0 dynamic), routing 90 us, host call 0 us
           3  _xl_imp_2861+0x4  host code of the library
