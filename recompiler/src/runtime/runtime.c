@@ -56,6 +56,7 @@ struct xl_thread {
     void *stack;
     void *tsd_pages;
     size_t stack_size;
+    size_t guard_size;
 };
 
 #define XL_THREAD_HEADER 32u
@@ -92,17 +93,11 @@ State *xl_current_state(void)
     if (posix_memalign((void **)&thread, 16, XL_THREAD_HEADER + XL_STATE_SIZE))
         xl_thread_state_failed("the allocation of the state", XL_THREAD_HEADER + XL_STATE_SIZE);
     memset(thread, 0, XL_THREAD_HEADER + XL_STATE_SIZE);
-    size_t size = pthread_main_np() ? XL_GUEST_STACK_MAIN : XL_GUEST_STACK_THREAD;
-    for (;;) {
-        thread->stack = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
-        if (thread->stack != MAP_FAILED)
-            break;
-        if (size <= XL_GUEST_STACK_FLOOR)
-            xl_thread_state_failed("the mapping of the guest stack", size);
-        fprintf(stderr, "xlate: the guest stack of a thread could not be mapped with %lu bytes (errno %d), trying half\n", (unsigned long)size, errno);
-        size >>= 1;
-    }
-    thread->stack_size = size;
+    size_t first = pthread_main_np() ? XL_GUEST_STACK_MAIN : XL_GUEST_STACK_THREAD;
+    thread->stack = xl_stack_map(first, XL_GUEST_STACK_FLOOR, xl_map_anonymous, &thread->stack_size, &thread->guard_size);
+    if (thread->stack == MAP_FAILED)
+        xl_thread_state_failed("the mapping of the guest stack", XL_GUEST_STACK_FLOOR);
+    size_t size = thread->stack_size;
     thread->tsd_pages = xl_tsd_alloc();
     state = (State *)((char *)thread + XL_THREAD_HEADER);
     XL_REG(state, TPIDRRO_EL0) = xl_tsd_base(thread->tsd_pages);
@@ -228,6 +223,16 @@ static void xl_crash_handler(int signal, siginfo_t *info, void *context)
     xl_crashing = 1;
     int fd = xl_crash_fd();
     dprintf(fd, "xlate: signal %d at fault 0x%lx\n", signal, (unsigned long)(info ? info->si_addr : 0));
+    if (info && (signal == SIGSEGV || signal == SIGBUS) && xl_diagnostics_installed) {
+        void *current = pthread_getspecific(xl_state_key);
+        if (current) {
+            struct xl_thread *thread = (struct xl_thread *)((char *)current - XL_THREAD_HEADER);
+            uintptr_t low = (uintptr_t)thread->stack, fault = (uintptr_t)info->si_addr;
+            if (thread->guard_size && fault >= low && fault < low + thread->guard_size)
+                dprintf(fd, "xlate: the guest stack of this thread overflowed: it holds %lu bytes (0x%lx to 0x%lx) and the fault is in its guard page; guest frames deeper than that need a larger XL_GUEST_STACK_THREAD (XL_GUEST_STACK_MAIN for the main thread) in runtime.c\n",
+                        (unsigned long)thread->stack_size, (unsigned long)low, (unsigned long)(low + thread->stack_size));
+        }
+    }
     ucontext_t *uc = context;
     if (uc) {
         _STRUCT_ARM_THREAD_STATE *ss = &uc->uc_mcontext->__ss;
