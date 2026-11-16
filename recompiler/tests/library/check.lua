@@ -477,6 +477,16 @@ function main(out, ...)
         io.write(unlogged)
         corpus.fail("without XL_LOG the crash handler did not print to stderr, or it wrote %s on the phone (%s)", crash_log, written:trim())
     end
+    local by_switch = crash("XL_CRASH=1 XL_HOST_SKIPS_DIAGNOSTICS=1 ", false)
+    if not by_switch:find("xlate: signal 6", 1, true) or not by_switch:find("xlate: guest pc=", 1, true) then
+        io.write(by_switch)
+        corpus.fail("with XL_CRASH and a host that never calls xl_library_diagnostics the crash handler did not run or printed no guest frame")
+    end
+    local without_switch = crash("XL_HOST_SKIPS_DIAGNOSTICS=1 ", false)
+    if without_switch:find("xlate: signal 6", 1, true) then
+        io.write(without_switch)
+        corpus.fail("the crash handler ran in a host that neither called xl_library_diagnostics nor set XL_CRASH")
+    end
     device.run("rm -rf " .. remote)
     io.writefile(o("run.txt"), output .. table.concat(outputs, "\n") .. mapped .. crashed)
     print("ok: a translated library loads into a %s MB host and answers (%d checks in each of %d launches, %d negative controls)", resident, #expected, launches, #controls)

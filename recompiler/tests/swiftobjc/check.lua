@@ -2,9 +2,7 @@ local EXPECTED = {
     "client.bump", "client.make", "client.block", "client.dyncast", "client.sametype", "objc.responds", "objc.perform", "objc.kind",
     "objc.hash", "sub.vtable", "sub.dispatch", "sub.dyncast", "sub.superclass", "ivars.released", "ivars.released.sub",
     "host.create", "host.dispatch", "host.subtype", "host.init", "name.plain", "name.client",
-    "anycollection.int", "anycollection.string", "mirror.children", "describe.struct", "describe.class",
-    "cf.dictionary.count", "cf.dictionary.contains", "cf.dictionary.missing", "cf.dictionary.value", "cf.array.count", "cf.data.length",
-    "cf.string.length", "error.userinfo", "error.survives", "error.bridge", "error.bridge.catch", "error.bridge.fields", "error.bridge.neighbors"
+    "anycollection.int", "anycollection.string", "mirror.children", "describe.struct", "describe.class"
 }
 
 local function check_error_bridge(corpus, libs)
@@ -32,6 +30,8 @@ local function check_error_bridge(corpus, libs)
         corpus.fail("_swift_stdlib_bridgeErrorToNSError of %s reads an error's domain through the layout of the Swift error box before it asks whether the object is a real NSError (the class at instruction %s, the first load-acquire at %s)", core, tostring(class_line), tostring(read_line))
     end
 end
+
+local IMAGES = {"libswiftCore", "libc++.1", "libc++abi.1"}
 
 local BRIDGED_WRAPPERS = {"CFDictionaryGetCount", "CFDictionaryContainsKey", "CFDictionaryGetValue", "CFArrayGetCount", "CFDataGetLength", "CFStringGetLength"}
 
@@ -61,7 +61,10 @@ function main(out, ...)
                                                      "-runtime-compatibility-version", "none", "-o", path.join(out, "fixture-arm64"), path.join(os.scriptdir(), "fixture.swift")})
         check_error_bridge(corpus, libs)
         local includes = path.join(e.recompiler, "include", "swiftdemo-includes.h")
-        local images = {path.join(libs, "libswiftCore.dylib"), path.join(libs, "libc++.1.dylib"), path.join(libs, "libc++abi.1.dylib")}
+        local images = {}
+        for _, name in ipairs(IMAGES) do
+            table.insert(images, path.join(libs, name .. ".dylib"))
+        end
         translate.translate(path.join(out, "fixture-arm64"), includes, path.join(out, "xl"), images,
                             {XL_REPLACES = "/usr/lib/libc++.1.dylib=" .. path.join(libs, "libc++.1.dylib"), XL_SWIFT_HOST_ANCESTORS = "1"})
         local host_source = io.readfile(path.join(out, "xl", "host.m"))

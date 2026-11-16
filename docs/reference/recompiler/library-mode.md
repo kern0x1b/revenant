@@ -294,7 +294,11 @@ With `XL_LOADER_MAP` set in the environment to anything but `0`, the loader prin
 `stderr` (the runtime's crash handler to the crash log or `stderr`, where its other lines go) in the phases
 `before-reserve` (before `xl_reserve` takes anything), `reserve` (after it), `load` (after `xl_load`; a failed call prints
 `reserve-failed` or `load-failed`), and, once `xl_library_diagnostics` has installed the handlers, `crash` (a fatal
-signal) and `fault` (a guest fault). With the variable unset nothing is printed and no region is read. One line per
+signal) and `fault` (a guest fault). A host that does not call `xl_library_diagnostics` gets the same handlers from
+`xl_library_init` when the environment has `XL_CRASH` or the phone has the flag file `/private/var/revenant/xl-crash`:
+a fatal signal then prints the host registers and frames and, from the translated thread's own state, the guest pc, the
+registers `x0` to `x7` and the chain of guest frames, which says what guest code called the host function that
+crashed. With the variable unset nothing is printed and no region is read. One line per
 fact, fields separated by single spaces, addresses and sizes in hex:
 
 | Line | Fields |
@@ -319,10 +323,21 @@ turns on the files that every process used to append to: `xlate-crash.log` (the 
 exception), `xl-missing.log` (a selector the null object answered), `xlate-variant-miss.log` and `xlate-nobridge.log`.
 A file bigger than 1 MiB is emptied when the next process opens it, so none of them grows without bound. With
 the switch off the crash handler prints to stderr, which is where the test below reads it. The files that had a switch
-of their own (`xl-trace`, whose ARC lines are now events of the journal below, `xl-collect`, `xl-shadow-log`, `xl-trace-errno`, `xl-memlog`, `xl-exp-guide-superview`,
+of their own (`xl-trace`, whose ARC lines are now events of the journal below, `xl-collect`, `xl-shadow-log`, `xl-trace-errno`, `xl-sysctl-trace` (a line of `xl-sysctl.log` for each of the first 50 `sysctl`/`sysctlbyname` calls and for every thousandth after them: the name, the class the bridge translates it as, the length before and after, the result and `errno`), `xl-memlog`, `xl-exp-guide-superview`,
 `xl-stubs.txt`, `XL_INIT_TRACE`) still need it and are not limited by `XL_LOG`. The library test crashes the host with the
 switch (the crash handler's file has the `xlate: signal 6` lines) and without it (the lines are on stderr and the file
 is not created).
+
+`xl-trace` is a tool for diagnosing the host, not a way to observe the guest unchanged: it writes a line to
+`xlate-msgtrace.log` for every message the guest sends to a host object, and for each one probes the receiver and its
+class with two `write` calls to `/dev/null`, so it slows the guest by two system calls and one write per message and
+shifts every race and every timing loop (a run with it can pass a place that an untraced run does not, or the other
+way round). The flag file is read once, at the first message of the process, so it has to exist before the process
+starts; removing it later does not stop a running process. The `rc=` field (the receiver's retain count) is off by
+default, because `CFGetRetainCount` sends `retainCount` to every receiver and so is itself a call that can fault on an
+object that is being freed; `/private/var/revenant/xl-trace-rc` next to `xl-trace` turns it on. A crash that appears
+only in a traced run is not a finding about the guest until it also appears without `xl-trace` (with `xl-crash`, which
+prints the host registers and the guest frames and does not change the timing).
 
 The `xlate: no bridge for -[Class selector]` lines on stderr, with the receiver and the guest frames, belong to the same
 switch. They say that a guest message to a host object found no generated bridge, which is not a failure: the message

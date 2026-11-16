@@ -409,7 +409,8 @@ class Generator {
   void EmitReturn(const std::string &symbol, const std::string &why);
   void EmitDataDeallocator(const std::string &symbol);
   bool data_deallocator_emitted_ = false;
-  void EmitManualFunction(const std::string &symbol, unsigned arguments, const std::string &handler);
+  void EmitManualFunction(const std::string &symbol, unsigned arguments, const std::string &handler,
+                          const std::string &declared = std::string());
   void EmitLazyClassNamer(const std::string &symbol);
   void EmitImageNameHook(const std::string &symbol);
   void EmitGetClassHook(const std::string &symbol);
@@ -1623,9 +1624,11 @@ void Generator::EmitDataDeallocator(const std::string &symbol) {
   Report(symbol + ": guest block that calls " + kind.second + " (Foundation's deallocator of that name is not in iOS 6.1.3)");
 }
 
-void Generator::EmitManualFunction(const std::string &symbol, unsigned arguments, const std::string &handler) {
+void Generator::EmitManualFunction(const std::string &symbol, unsigned arguments, const std::string &handler,
+                                   const std::string &declared) {
   auto name = symbol.substr(1);
-  auto functions = gc_.getTranslationUnitDecl()->lookup(DeclarationName(&gc_.Idents.get(name)));
+  auto declared_name = declared.empty() ? name : declared.substr(1);
+  auto functions = gc_.getTranslationUnitDecl()->lookup(DeclarationName(&gc_.Idents.get(declared_name)));
   FunctionDecl *decl = nullptr;
   for (auto candidate : functions) {
     decl = decl ? decl : dyn_cast<FunctionDecl>(candidate);
@@ -3149,6 +3152,7 @@ int main(int argc, const char **argv) {
       {"_imp_getBlock", 1}, {"_imp_removeBlock", 1}, {"_class_copyMethodList", 2},
       {"_getaddrinfo", 4}, {"_freeaddrinfo", 1},
       {"_getifaddrs", 1}, {"_freeifaddrs", 1}, {"_getservbyname", 2}, {"_localeconv_l", 1}, {"_class_copyIvarList", 2},
+      {"_sysctl", 6}, {"_sysctlbyname", 5},
       {"__NSGetArgv", 0}, {"_CGColorCreate", 2}, {"_CGColorGetComponents", 1}, {"_CGImageCreateWithMaskingColors", 2}};
   static const std::set<std::string> personalities = {"___objc_personality_v0", "___gxx_personality_v0",
                                                       "___gcc_personality_v0"};
@@ -3202,6 +3206,14 @@ int main(int argc, const char **argv) {
     }
     if (auto weak = weak_functions.find(symbol); weak != weak_functions.end()) {
       generator.EmitManualFunction(symbol, weak->second, "xl_manual_" + symbol.substr(1));
+      continue;
+    }
+    if (static const std::map<std::string, std::string> underscored = {
+            {"__objc_autoreleasePoolPush", "_objc_autoreleasePoolPush"},
+            {"__objc_autoreleasePoolPop", "_objc_autoreleasePoolPop"}};
+        underscored.count(symbol)) {
+      auto declared = underscored.at(symbol);
+      generator.EmitManualFunction(symbol, weak_functions.at(declared), "xl_manual_" + declared.substr(1), declared);
       continue;
     }
     if (faults.count(symbol)) {

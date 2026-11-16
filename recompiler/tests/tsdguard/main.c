@@ -63,6 +63,22 @@ static const char *Describe(int r)
     }
 }
 
+static void *limited_mapper(size_t length)
+{
+    if (length > (1u << 20)) {
+        errno = ENOMEM;
+        return MAP_FAILED;
+    }
+    return xl_map_anonymous(length);
+}
+
+static void *refusing_mapper(size_t length)
+{
+    (void)length;
+    errno = ENOMEM;
+    return MAP_FAILED;
+}
+
 int main(void)
 {
     void *pages = xl_tsd_alloc();
@@ -98,6 +114,36 @@ int main(void)
     }
 
     xl_tsd_free(pages);
+
+    size_t size = 0, guard = 0;
+    size_t page = (size_t)sysconf(_SC_PAGESIZE);
+    void *stack = xl_stack_map(4u << 20, 256u << 10, limited_mapper, &size, &guard);
+    if (stack == MAP_FAILED || size != (1u << 20) || guard != page) {
+        fprintf(stderr, "FAIL: a mapper that refuses more than 1 MB gave size %lu and guard %lu for a first try of 4 MB, wanted 1 MB and one page\n",
+                (unsigned long)size, (unsigned long)guard);
+        fail = 1;
+    } else {
+        struct { uintptr_t offset; int want_fault; } stack_cases[] = {
+            {0, 1},
+            {page - 8, 1},
+            {page, 0},
+            {size - 8, 0},
+        };
+        for (size_t i = 0; i < sizeof(stack_cases) / sizeof(stack_cases[0]); i++) {
+            int r = try_read((uintptr_t)stack + stack_cases[i].offset);
+            if ((r != 0 && r != 1) || (r == 1) != stack_cases[i].want_fault) {
+                fprintf(stderr, "FAIL: guest stack offset 0x%lx: wanted %s, got %s\n", (unsigned long)stack_cases[i].offset,
+                        stack_cases[i].want_fault ? "fault" : "clean read", Describe(r));
+                fail = 1;
+            }
+        }
+        munmap(stack, size);
+    }
+    stack = xl_stack_map(4u << 20, 256u << 10, refusing_mapper, &size, &guard);
+    if (stack != MAP_FAILED) {
+        fprintf(stderr, "FAIL: a mapper that refuses everything still gave a stack\n");
+        fail = 1;
+    }
     if (fail)
         return 1;
     printf("ok (pagesize=%ld)\n", (long)sysconf(_SC_PAGESIZE));

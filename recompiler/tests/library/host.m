@@ -391,7 +391,7 @@ int main(int argc, char **argv)
             void *handle = dlopen(path, RTLD_NOW | RTLD_NOLOAD);
             void (*diagnostics)(void) = handle ? (void (*)(void))dlsym(handle, "xl_library_diagnostics") : NULL;
             report("diagnostics", diagnostics != NULL);
-            if (diagnostics)
+            if (diagnostics && !getenv("XL_HOST_SKIPS_DIAGNOSTICS"))
                 diagnostics();
             fflush(stdout);
             abort();

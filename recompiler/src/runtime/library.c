@@ -8,6 +8,7 @@
 #include <mach/mach.h>
 #include <pthread.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <sys/mman.h>
 #include <unistd.h>
 
@@ -146,6 +147,8 @@ void xl_library_ensure(void)
 
 int xl_library_init(void)
 {
+    if (getenv("XL_CRASH") || access("/private/var/revenant/xl-crash", F_OK) == 0)
+        xl_install_diagnostics();
     pthread_mutex_lock(&xl_library_lock);
     if (xl_library_state == XL_LIBRARY_IDLE) {
         xl_library_failure = xl_library_attach();

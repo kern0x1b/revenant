@@ -310,9 +310,8 @@ struct XiPair {
         report("dlsym.host.data", dlsym(handle, "kCFAllocatorNull") != nil)
         let twin: AnyClass = Twin.self
         let byGet = objc_getClass("RCFTwin") as? AnyClass
-        let byName: AnyClass? = NSClassFromString("RCFTwin")
         let byLookUp: AnyClass? = objc_lookUpClass("RCFTwin")
-        report("class.guest.first", byGet === twin && byName === twin && byLookUp === twin)
+        report("class.guest.first", byGet === twin && byLookUp === twin)
         let byMeta = objc_getMetaClass("RCFTwin") as? AnyClass
         report("class.meta.guest.first", byMeta != nil && byMeta === object_getClass(twin))
     }

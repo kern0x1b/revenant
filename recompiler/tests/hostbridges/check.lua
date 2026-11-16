@@ -37,7 +37,7 @@ function main(out, ...)
                            "CFDictionaryCreate", "CFSetAddValue", "CFSetContainsValue", "CFSetGetValue", "CFArrayAppendValue",
                            "CFArrayGetValueAtIndex", "CFArrayGetFirstIndexOfValue", "CFArrayContainsValue", "CFArrayCreate",
                            "NSMapInsert", "NSMapGet", "NSHashInsert", "NSHashGet", "CFRunLoopTimerCreate",
-                           "CFRunLoopTimerGetContext"}) do
+                           "CFRunLoopTimerGetContext", "sysctl", "sysctlbyname"}) do
         if not imports:find("_" .. name .. "\n", 1, true) then
             corpus.fail("the program does not import %s, so the check proves nothing about it", name)
         end
@@ -91,6 +91,12 @@ function main(out, ...)
         return lines
     end
     local report = io.readfile(o("xl/report.txt"))
+    for _, name in ipairs({"sysctl", "sysctlbyname"}) do
+        local wrapper = host_source:match("void xl_h_" .. name .. "%b()%s*(%b{})")
+        if not wrapper or not wrapper:find("xl_manual_" .. name .. "(", 1, true) then
+            corpus.fail("the host wrapper of %s is not the manual bridge, so the value of an mib is handed to the guest in the layout of the host (a timeval of 8 bytes where the guest reads 16, a kinfo_proc of 492 bytes where it reads 648)", name)
+        end
+    end
     local bad = word_records(report)
     if #bad > 0 then
         corpus.fail("a row of the table of opaque words does not match the SDK declaration:\n%s", table.concat(bad, "\n"))
@@ -112,6 +118,8 @@ function main(out, ...)
     local remote = device.scratch .. "/HostBridges"
     device.copy(o("xl/HostBridges"), remote)
     io.writefile(o("run.txt"), device.run(string.format("cd %s && chmod +x %s && %s 2>/dev/null", device.scratch, remote, remote)))
+    local unmapped = device.run(string.format("cd %s && %s sysctl-unmapped 2>&1", device.scratch, remote))
+    io.writefile(o("sysctl-unmapped.txt"), unmapped)
     local log = device.scratch .. "/word-overflow.txt"
     local overflow = device.run(string.format(
         "cd %s && (%s word-overflow > %s 2>&1 & pid=$!; i=0; while kill -0 $pid 2>/dev/null && [ $i -lt 120 ]; do sleep 1; i=$((i+1)); done; " ..
@@ -119,6 +127,10 @@ function main(out, ...)
         "killall HostBridges 2>&1; rm -f %s %s", device.scratch, remote, log, log, log, remote))
     io.writefile(o("overflow.txt"), overflow)
     corpus.same(expected, o("run.txt"), "the translated program prints something else than the Mac does")
+    if not unmapped:find("sysctl net.inet.tcp.pcblist exists on this system but the bridge has no arm64 layout", 1, true) or
+       not unmapped:find("sysctlbyname net.inet.tcp.pcblist status -1 errno 45", 1, true) then
+        corpus.fail("a sysctl of a structure the bridge has no arm64 layout for is not refused with a message that names it and ENOTSUP:\n%s", unmapped)
+    end
     if not overflow:find("holds 262144 distinct words and is full", 1, true) or overflow:find("did not overflow", 1, true) or
        overflow:find("status=0", 1, true) or overflow:find("watchdog=killed", 1, true) then
         corpus.fail("the program that hands the guest's table of opaque words 300000 distinct words does not stop with the message that the table is full:\n%s", overflow)

@@ -400,7 +400,14 @@ A program (`main.m`) that calls the host functions whose guest and host layouts 
   `CGFloat` arrays are `double` in the guest and `float` in the host; `_NSGetArgv` and `__progname`; `getifaddrs` and
   `freeifaddrs` for `lo0` (the address, the netmask, the flags, and the `if_data` of the link entry with its time
   stamp); `getservbyname` for a known and an unknown service; `localeconv_l` of the C locale (strings, numbers, the
-  same pointer for the same locale); `class_copyIvarList` of a guest class with an `int`, an object and a `double`, and
+  same pointer for the same locale); `sysctl` and `sysctlbyname` of `kern.boottime` (read twice into buffers with
+  different contents, which have to give the same `timeval` as the loop of `clock_gettime` needs, by number and by name,
+  a size probe, a buffer that is too small giving `ENOMEM` and length 0), `kern.proc.pid` and `kern.proc.all`
+  (`kinfo_proc` of the process itself: pid, parent, group, user, name, start time; the list holds the process; a buffer of
+  one element gives `ENOMEM`), `vm.loadavg`, `hw.ncpu`, `hw.memsize`, `kern.ostype`, `hw.machine`, `kern.argmax` and two
+  names that do not exist; the device part also runs `HostBridges sysctl-unmapped`, which asks for
+  `net.inet.tcp.pcblist` (a structure with no guest layout in the bridge) and expects the message that names it and
+  `ENOTSUP`; `class_copyIvarList` of a guest class with an `int`, an object and a `double`, and
   of a class without ivars; `malloc_default_zone`, `malloc_zone_from_ptr` (a heap block and a stack address) and
   `malloc_zone_malloc`/`malloc_zone_free` with the zone the guest got; `NSDataDeallocatorUnmap`, `NSDataDeallocatorVM`
   and `NSDataDeallocatorFree` called by the guest, the first two checked by asking the kernel whether the page is
@@ -793,12 +800,21 @@ checks, among them:
   pointer (the crash of the reCAPTCHA Enterprise SDK's keychain query in `SecItemCopyMatching`, 2026-11-15); the same
   for a bridged array, data and string.
 
+The groups `error.*` and `cf.*` (9 + 7 of the names) need the Foundation overlay: `error as NSError` calls
+`_convertErrorToNSError` and a `String`, a `Dictionary` or an `Array` reaches Core Foundation through `_bridgeToObjectiveC`,
+all of them in `libswiftFoundation`, which the translation of this executable does not carry (it would hold 24 guest segments
+of 12 images, and dyld's bind opcodes name a segment with 4 bits), so the translated functions stop the program with
+`unsupported: $sSS10FoundationE19_bridgeToObjectiveCSo8NSStringCyF` (measured on the 4S on 2026-11-16, and
+`__objc_autoreleasePoolPush`, which the Swift `autoreleasepool` calls, had no bridge: it is a manual bridge now, as is
+`_objc_autoreleasePoolPush`). The fixture runs those groups only when it is given an argument, the device part gives none
+and wants the other 28 names, and the host part still translates the code of both and requires its checks.
+
 The check wants every name `ok`, no `FAIL`, the `deinit` line, and exit 0. The host part also reads the generated
 `host.m` and requires that the wrappers of `CFDictionaryGetCount`, `CFDictionaryContainsKey`, `CFDictionaryGetValue`,
 `CFArrayGetCount`, `CFDataGetLength` and `CFStringGetLength` take their object argument through `xl_object_in`.
 
 The translation takes about ten minutes and needs no phone: `check.lua <out> --host-only` stops after it, and
-`check.lua <out> --device-only` runs the fixture that run left in `<out>/xl` on the claimed phone (37 names `ok`).
+`check.lua <out> --device-only` runs the fixture that run left in `<out>/xl` on the claimed phone (28 names `ok`).
 
 It needs the arm64 runtime, so `XL_SWIFTOBJC_LIBS` names the folder with `libswiftCore.dylib` (the one that
 `revenant@swift-runtime` built for arm64, which carries `-DSWIFT_CLASS_IS_SWIFT_MASK=1ULL`), `libc++.1.dylib` and
@@ -1048,8 +1064,11 @@ to the guest, since a call to it stops the process at an address without transla
 function the host does not have, and `xl-dlsym.log` (with `xl-log`) names it. `dlsym.host.refused` looks up `getpid` and
 `dispatch_get_specific`, `dlsym.host.data` a data symbol (`kCFAllocatorNull`), which is handed over as before. The same step
 checks the classes: `RCFTwin` is a class of the guest (`@objc(RCFTwin)`) and of the host, and `objc_getClass`,
-`objc_lookUpClass`, `NSClassFromString` and `objc_getMetaClass` (a manual bridge since 2026-11-16, the host's function looked
+`objc_lookUpClass` and `objc_getMetaClass` (a manual bridge since 2026-11-16, the host's function looked
 for the name without the namespace prefix) answer the guest's class (`class.guest.first`, `class.meta.guest.first`).
+`NSClassFromString` is not in the step: it takes a `String`, and the bridge of a `String` to `NSString` is in the Foundation
+overlay, which the library of this check does not carry (the step stopped on the 4S with
+`unsupported: $sSS10FoundationE19_bridgeToObjectiveCSo8NSStringCyF`, measured on 2026-11-16).
 
 What the audit of the guest images' call sites of `dlsym`, `dlopen`, `dladdr`, `objc_getProtocol` and the class lookups (2026-11-16, the
 SDK with its twelve Swift libraries) left as it is: `dladdr` of a guest address answers 0 (the guest range is in no host image;
