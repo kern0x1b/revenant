@@ -721,8 +721,8 @@
    "version": "~57.0.4",
    "native": true,
    "status": "partial",
-   "verified": "build",
-   "note": "Recipe packages\/e\/expo-secure-store (npm 57.0.4, patch secure-store-ios6.patch) installs and its patch applies; the module is compiled into the host (links, not yet exercised on the phone). The patch removes LocalAuthentication, SecAccessControl and the passcode-bound class (iOS 8): canUseBiometricAuthentication answers false, requireAuthentication true and WHEN_PASSCODE_SET_THIS_DEVICE_ONLY reject with an exception that names iOS 8; the other keychain classes use SecItem as before. On the iPhone 4S (2026-11-16) the module is registered, but setValueWithKeyAsync fails in the whenUnlocked, afterFirstUnlock and always classes with errSecInteractionNotAllowed: the host was signed without keychain entitlements. The host now carries entitlements.xml (application-identifier, keychain-access-groups); not yet verified."
+   "verified": "phone",
+   "note": "Recipe packages\/e\/expo-secure-store (npm 57.0.4, patch secure-store-ios6.patch) installs and its patch applies; the module is compiled into the host (links, not yet exercised on the phone). The patch removes LocalAuthentication, SecAccessControl and the passcode-bound class (iOS 8): canUseBiometricAuthentication answers false, requireAuthentication true and WHEN_PASSCODE_SET_THIS_DEVICE_ONLY reject with an exception that names iOS 8; the other keychain classes use SecItem as before. On the iPhone 4S (2026-11-17) the module is registered, but setValueWithKeyAsync fails in the whenUnlocked, afterFirstUnlock and always classes with errSecInteractionNotAllowed (-25308), also with application-identifier and keychain-access-groups in the signature. It is the device, not the module: the Backports Security probe gets -25308 from every keychain call on the iPad 2 as well (docs\/reference\/backports\/Security\/README.md), with the phone unlocked, without a passcode and without keybagd. The module raises the KeyChainException to JavaScript."
   },
   {
    "id": "expo-sensors",

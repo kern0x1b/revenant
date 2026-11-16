@@ -19,8 +19,9 @@ patches in `packages/e/<name>/patches/`, into the one Swift module `ExpoAppModul
 These packages are recipes with their iOS 6 patches (`packages/e/<name>/patches/`); each installs, its patch applies, and the host
 (Swift module `ExpoAppModules`) compiles and links them, and the phone window of 2026-11-16 ran a probe in it (`frameworks/ReactNative/src/probe/modules.js`). expo-brightness,
 expo-device, expo-network and expo-store-review answered their calls (`real`, `phone`); expo-linear-gradient is registered (`partial`, `phone`);
-expo-secure-store is registered but the keychain refuses every write with errSecInteractionNotAllowed because the host was signed
-without `keychain-access-groups`; `src/host/entitlements.xml` adds it and the row stays `partial`, `build` until a window shows the round trip.
+expo-secure-store is registered but the keychain refuses every write with errSecInteractionNotAllowed (-25308), with or without
+`keychain-access-groups` in the signature: the iPad 2 and the iPhone 4S return it for every keychain call (see
+`docs/reference/backports/Security/README.md`), so the row is `partial`, `phone`.
 
 | Module | Removed or replaced | Why | What JS sees |
 | --- | --- | --- | --- |
