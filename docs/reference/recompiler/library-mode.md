@@ -354,6 +354,14 @@ of bridged strings with `String ==`, which sends `-[NSString _fastCStringContent
 one run on the 4S) wrote 18.8 MB of the full lines before this limit and kept the process busy for about 20 s; the loop is
 finite (the same chain of guest return addresses 9,161 times for each of the two call sites) and the time was the writing. The `xl-collect` flag file is read once, at the first message that has no bridge.
 
+Every table of the runtime that a thread changes after the library has loaded (the proxy tables, the IMP slots, the block
+wrappers, the shadow-class tables, the guest IMP cache, the counts above and the variant cache) is read and written under a
+lock. The variant cache (`xl_variant_cache`, the guest variant chosen for a host IMP by its type encoding) was the one that
+was not: threads of the SDK that sent their first message to the same host method together ran `CFDictionarySetValue` on one
+`CFMutableDictionary`, and 3 of the first 30 launches of the real SDK in separate processes on the 4S aborted with
+`malloc: *** error for object …: double free` inside it, each with the same host frames (`xl_h_objc_msgSend`, `xl_route`,
+`xl_bridge_for`) and the same guest return address in the Foundation image.
+
 ### `XL_POOLCHECK` (the journal of object lifetimes)
 
 `XL_POOLCHECK` in the environment, or the file `/private/var/revenant/xl-poolcheck`, turns on a journal of the events that decide

@@ -36,6 +36,7 @@ extern void xl_fault(State *state, const char *reason);
 static CFMutableDictionaryRef xl_selector_table;
 static CFMutableDictionaryRef xl_selector_variant_table;
 static CFMutableDictionaryRef xl_variant_cache;
+static pthread_mutex_t xl_variant_lock = PTHREAD_MUTEX_INITIALIZER;
 static CFMutableDictionaryRef xl_guest_imps;
 static CFMutableDictionaryRef xl_variadic_table;
 static pthread_once_t xl_setup_once = PTHREAD_ONCE_INIT;
@@ -460,7 +461,9 @@ static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp,
 {
     uintptr_t guest;
     if (imp) {
+        pthread_mutex_lock(&xl_variant_lock);
         uintptr_t cached = (uintptr_t)CFDictionaryGetValue(xl_variant_cache, imp);
+        pthread_mutex_unlock(&xl_variant_lock);
         if (cached)
             return cached;
     }
@@ -488,8 +491,11 @@ static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp,
             uintptr_t variant = (uintptr_t)CFDictionaryGetValue(by_enc, key);
             CFRelease(key);
             if (variant) {
-                if (imp)
+                if (imp) {
+                    pthread_mutex_lock(&xl_variant_lock);
                     CFDictionarySetValue(xl_variant_cache, imp, (void *)variant);
+                    pthread_mutex_unlock(&xl_variant_lock);
+                }
                 return variant;
             }
             int miss_fd = xl_log_open("xlate-variant-miss.log");
