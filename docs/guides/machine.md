@@ -369,6 +369,17 @@ all libraries (about six minutes on a 12-core Mac), a later one only what change
 others. `./xmakew l -P . tools/ci_local.lua backports` runs the same build from a fresh configuration and goes on to the Backports
 tests, the probe app and the exports check.
 
+Order and flags. The cheap checks run first and the heavy ones (`lowered members`, `lowered exports`, `light suites`,
+`backports build`) last, and the run stops at the first check that fails, so a two-second `layout` failure does not wait
+behind a build. `--keep-going` runs every check regardless (the old behaviour), `--list` prints the names with the heavy ones
+marked, and `--only <check,...>` runs just those (names with a space are quoted: `--only "layout,light suites"`) for iterations;
+an unknown name is an error, and a run with `--only` says that a push needs all checks. The full run before a push stays
+without flags. Keep the caches (`.cache`/`REVENANT_CACHE`, `build/backports-gate`) between runs: a cold `backports build`
+took 48 minutes on 2026-11-16 and a warm one 58 seconds, and a deleted cache leaves references in the checkout's `.xmake`
+that make a later check fail, so remove `.xmake` together with a cache it names. The gate's copy stays per checkout: its
+own `.xmake` records the cache paths of the run that configured it, so a copy shared between checkouts would point at another
+checkout's cache.
+
 `recipe digests` is never remembered: it regenerates the digests and compares them with the committed ones, so it runs on
 every prepush, and a second prepush on the same tree runs only that check. `./xmakew l -P . tools/prepush.lua test` checks the
 keys: an edit, an untracked file, a deleted file, an environment variable and a new commit each change a key, restoring them
