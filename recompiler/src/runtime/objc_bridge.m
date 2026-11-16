@@ -19,6 +19,7 @@
 #include <ctype.h>
 #include <dlfcn.h>
 #include <mach/mach.h>
+#include <mach/mach_time.h>
 #include <mach-o/dyld.h>
 #include <malloc/malloc.h>
 
@@ -36,6 +37,7 @@ extern void xl_fault(State *state, const char *reason);
 static CFMutableDictionaryRef xl_selector_table;
 static CFMutableDictionaryRef xl_selector_variant_table;
 static CFMutableDictionaryRef xl_variant_cache;
+static pthread_mutex_t xl_variant_lock = PTHREAD_MUTEX_INITIALIZER;
 static CFMutableDictionaryRef xl_guest_imps;
 static CFMutableDictionaryRef xl_variadic_table;
 static pthread_once_t xl_setup_once = PTHREAD_ONCE_INIT;
@@ -388,6 +390,126 @@ void xl_report_guest_frame(void);
 
 #define XL_NO_BRIDGE ((uint64_t)-1)
 
+#define XL_NOBRIDGE_SLOTS 4096
+#define XL_NOBRIDGE_FULL 3
+#define XL_NOBRIDGE_EVERY 10000
+
+static uint32_t xl_nobridge_seen(Class lookup, SEL selector)
+{
+    static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+    static struct { uintptr_t cls, sel; uint32_t count; } slots[XL_NOBRIDGE_SLOTS];
+    uint32_t at = (uint32_t)(((uintptr_t)lookup * 31u + (uintptr_t)selector) % XL_NOBRIDGE_SLOTS);
+    uint32_t seen = UINT32_MAX;
+    pthread_mutex_lock(&lock);
+    for (uint32_t probe = 0; probe < XL_NOBRIDGE_SLOTS; probe++) {
+        uint32_t index = (at + probe) % XL_NOBRIDGE_SLOTS;
+        if (!slots[index].count) {
+            slots[index].cls = (uintptr_t)lookup;
+            slots[index].sel = (uintptr_t)selector;
+        }
+        if (slots[index].cls == (uintptr_t)lookup && slots[index].sel == (uintptr_t)selector) {
+            seen = ++slots[index].count;
+            break;
+        }
+    }
+    pthread_mutex_unlock(&lock);
+    return seen;
+}
+
+static int xl_collect_enabled(void)
+{
+    static int enabled = -1;
+    if (enabled < 0)
+        enabled = getenv("XL_COLLECT") != NULL || access("/private/var/revenant/xl-collect", F_OK) == 0;
+    return enabled;
+}
+
+#define XL_STATS_SLOTS 256
+#define XL_STATS_EVERY 20000u
+#define XL_STATS_TOP 4
+
+struct xl_stats_slot {
+    uintptr_t cls;
+    uintptr_t sel;
+    uint32_t count;
+    uint64_t ticks;
+};
+
+static struct xl_stats_slot xl_stats_slots[XL_STATS_SLOTS];
+static pthread_mutex_t xl_stats_lock = PTHREAD_MUTEX_INITIALIZER;
+static uint32_t xl_stats_messages;
+static uint32_t xl_stats_dynamic;
+static uint64_t xl_stats_routing_ticks;
+static uint64_t xl_stats_call_ticks;
+
+static uint64_t xl_stats_us(uint64_t ticks)
+{
+    static mach_timebase_info_data_t base;
+    if (!base.denom)
+        mach_timebase_info(&base);
+    return ticks * base.numer / base.denom / 1000u;
+}
+
+static void xl_stats_message(uint64_t started)
+{
+    uint64_t ticks = mach_absolute_time() - started;
+    pthread_mutex_lock(&xl_stats_lock);
+    xl_stats_messages++;
+    xl_stats_routing_ticks += ticks;
+    pthread_mutex_unlock(&xl_stats_lock);
+}
+
+static void xl_stats_report_locked(void)
+{
+    const struct xl_stats_slot *top[XL_STATS_TOP] = {0};
+    for (unsigned i = 0; i < XL_STATS_SLOTS; i++) {
+        const struct xl_stats_slot *slot = &xl_stats_slots[i];
+        if (!slot->count)
+            continue;
+        for (unsigned t = 0; t < XL_STATS_TOP; t++) {
+            if (!top[t] || slot->ticks > top[t]->ticks) {
+                for (unsigned m = XL_STATS_TOP - 1; m > t; m--)
+                    top[m] = top[m - 1];
+                top[t] = slot;
+                break;
+            }
+        }
+    }
+    dprintf(2, "xlate: messages: %u in all, %u of them dynamic; routing %llu us in all, host call %llu us in the dynamic ones (%llu us each)\n",
+            xl_stats_messages, xl_stats_dynamic, (unsigned long long)xl_stats_us(xl_stats_routing_ticks),
+            (unsigned long long)xl_stats_us(xl_stats_call_ticks),
+            (unsigned long long)xl_stats_us(xl_stats_routing_ticks + xl_stats_call_ticks) / (xl_stats_dynamic ? xl_stats_dynamic : 1));
+    for (unsigned t = 0; t < XL_STATS_TOP && top[t]; t++)
+        dprintf(2, "xlate:   dynamic %c[%s %s] %u times, %llu us\n", class_isMetaClass((Class)top[t]->cls) ? '+' : '-',
+                class_getName((Class)top[t]->cls), sel_getName((SEL)top[t]->sel), top[t]->count,
+                (unsigned long long)xl_stats_us(top[t]->ticks));
+}
+
+static void xl_stats_dynamic_send(uint64_t routing, uint64_t call, Class lookup, SEL selector)
+{
+    pthread_mutex_lock(&xl_stats_lock);
+    xl_stats_messages++;
+    xl_stats_dynamic++;
+    xl_stats_routing_ticks += routing;
+    xl_stats_call_ticks += call;
+    unsigned start = (unsigned)((((uintptr_t)selector >> 2) ^ ((uintptr_t)lookup >> 4)) * 2654435761u) % XL_STATS_SLOTS;
+    for (unsigned probe = 0; probe < XL_STATS_SLOTS; probe++) {
+        struct xl_stats_slot *slot = &xl_stats_slots[(start + probe) % XL_STATS_SLOTS];
+        if (!slot->count) {
+            slot->cls = (uintptr_t)lookup;
+            slot->sel = (uintptr_t)selector;
+        }
+        if (slot->cls == (uintptr_t)lookup && slot->sel == (uintptr_t)selector) {
+            slot->count++;
+            slot->ticks += routing + call;
+            break;
+        }
+    }
+    if (xl_stats_dynamic % XL_STATS_EVERY == 0)
+        xl_stats_report_locked();
+    pthread_mutex_unlock(&xl_stats_lock);
+}
+
 struct xl_arguments {
     uint64_t words[(XL_OFFSET_X9 - XL_OFFSET_X0) / sizeof(uint64_t)];
     uint64_t vectors[(XL_OFFSET_V8 - XL_OFFSET_V0) / sizeof(uint64_t)];
@@ -426,7 +548,9 @@ static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp,
 {
     uintptr_t guest;
     if (imp) {
+        pthread_mutex_lock(&xl_variant_lock);
         uintptr_t cached = (uintptr_t)CFDictionaryGetValue(xl_variant_cache, imp);
+        pthread_mutex_unlock(&xl_variant_lock);
         if (cached)
             return cached;
     }
@@ -454,8 +578,11 @@ static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp,
             uintptr_t variant = (uintptr_t)CFDictionaryGetValue(by_enc, key);
             CFRelease(key);
             if (variant) {
-                if (imp)
+                if (imp) {
+                    pthread_mutex_lock(&xl_variant_lock);
                     CFDictionarySetValue(xl_variant_cache, imp, (void *)variant);
+                    pthread_mutex_unlock(&xl_variant_lock);
+                }
                 return variant;
             }
             int miss_fd = xl_log_open("xlate-variant-miss.log");
@@ -470,19 +597,26 @@ static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp,
     guest = (uintptr_t)CFDictionaryGetValue(xl_selector_table, selector);
     if (!guest) {
         if (xl_log_enabled()) {
-            fprintf(stderr, "xlate: no bridge for -[%s %s], sent dynamically with the signature of the host method\n", class_getName(lookup), sel_getName(selector));
-            int nb_fd = xl_log_open("xlate-nobridge.log");
-            FILE *nb = nb_fd >= 0 ? fdopen(nb_fd, "a") : NULL;
-            if (nb) {
-                fprintf(nb, "%c[%s %s]\n", class_isMetaClass(lookup) ? '+' : '-', class_getName(lookup), sel_getName(selector));
-                fclose(nb);
+            uint32_t seen = xl_nobridge_seen(lookup, selector);
+            if (seen <= XL_NOBRIDGE_FULL) {
+                fprintf(stderr, "xlate: no bridge for -[%s %s], sent dynamically with the signature of the host method\n", class_getName(lookup), sel_getName(selector));
+                if (seen == 1) {
+                    int nb_fd = xl_log_open("xlate-nobridge.log");
+                    FILE *nb = nb_fd >= 0 ? fdopen(nb_fd, "a") : NULL;
+                    if (nb) {
+                        fprintf(nb, "%c[%s %s]\n", class_isMetaClass(lookup) ? '+' : '-', class_getName(lookup), sel_getName(selector));
+                        fclose(nb);
+                    }
+                }
+                fprintf(stderr, "xlate:   receiver=%p isa=0x%x lookup=%p(%s) isMeta=%d imp=%p\n",
+                        (void *)receiver, receiver ? *(uint32_t *)receiver : 0, (void *)lookup, class_getName(lookup),
+                        class_isMetaClass(lookup), (void *)imp);
+                xl_report_guest_frame();
+            } else if (seen % XL_NOBRIDGE_EVERY == 0) {
+                fprintf(stderr, "xlate: no bridge for -[%s %s]: %u messages so far, the next ones are not written one by one\n", class_getName(lookup), sel_getName(selector), seen);
             }
-            fprintf(stderr, "xlate:   receiver=%p isa=0x%x lookup=%p(%s) isMeta=%d imp=%p\n",
-                    (void *)receiver, receiver ? *(uint32_t *)receiver : 0, (void *)lookup, class_getName(lookup),
-                    class_isMetaClass(lookup), (void *)imp);
-            xl_report_guest_frame();
         }
-        if (getenv("XL_COLLECT") || access("/private/var/revenant/xl-collect", F_OK) == 0) {
+        if (xl_collect_enabled()) {
             FILE *log = fopen("/private/var/revenant/xlate-missing.log", "a");
             if (log) { fprintf(log, "-[%s %s]\n", class_getName(lookup), sel_getName(selector)); fclose(log); }
             return 0;
@@ -729,6 +863,10 @@ void xl_h_objc_msgSend(State *state)
         xl_return(state);
         return;
     }
+    static int stats_on = -1;
+    if (stats_on < 0)
+        stats_on = xl_stats_enabled();
+    uint64_t stats_started = stats_on ? mach_absolute_time() : 0;
     id receiver = (id)xl_narrow_pointer(self, "objc_msgSend", 0);
     SEL selector = (SEL)(uintptr_t)XL_REG(state, X1);
     if (xl_watch_ready >= 0)
@@ -871,6 +1009,13 @@ void xl_h_objc_msgSend(State *state)
         id host_receiver = (id)xl_receiver_in((uintptr_t)receiver);
         Method method = class_getInstanceMethod(receiver_class, selector);
         xl_arguments_restore(state, &arguments);
+        if (stats_started) {
+            uint64_t called = mach_absolute_time();
+            xl_dynamic_send(state, host_receiver, method, selector, NULL);
+            uint64_t returned = mach_absolute_time();
+            xl_stats_dynamic_send(called - stats_started, returned - called, receiver_class, selector);
+            return;
+        }
         xl_dynamic_send(state, host_receiver, method, selector, NULL);
         return;
     }
@@ -880,6 +1025,8 @@ void xl_h_objc_msgSend(State *state)
         xl_return(state);
         return;
     }
+    if (stats_started)
+        xl_stats_message(stats_started);
     XL_REG(state, PC) = target;
     [[clang::musttail]] return xl_tail(state);
 }

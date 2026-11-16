@@ -139,6 +139,24 @@ int main(void)
         }
         munmap(stack, size);
     }
+    struct { size_t host, want; } firsts[] = {
+        {512u << 10, 1u << 20},
+        {1u << 20, 2u << 20},
+        {2u << 20, 4u << 20},
+        {8u << 20, 4u << 20},
+        {(size_t)-1 / 4, 4u << 20},
+        {64u << 10, 256u << 10},
+        {0, 256u << 10},
+        {(300u << 10) + 1, (640u << 10)},
+    };
+    for (size_t i = 0; i < sizeof(firsts) / sizeof(firsts[0]); i++) {
+        size_t got = xl_stack_first(firsts[i].host, 256u << 10, 4u << 20);
+        if (got != firsts[i].want) {
+            fprintf(stderr, "FAIL: a thread with a host stack of %lu bytes first tries %lu bytes of guest stack, wanted %lu\n",
+                    (unsigned long)firsts[i].host, (unsigned long)got, (unsigned long)firsts[i].want);
+            fail = 1;
+        }
+    }
     stack = xl_stack_map(4u << 20, 256u << 10, refusing_mapper, &size, &guard);
     if (stack != MAP_FAILED) {
         fprintf(stderr, "FAIL: a mapper that refuses everything still gave a stack\n");
