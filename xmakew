@@ -17,6 +17,16 @@ fi
 gitdir=$(git -C "$root" rev-parse --path-format=absolute --git-dir 2>/dev/null || true)
 if [ -n "${REVENANT_CACHE:-}" ]; then
     cache=$REVENANT_CACHE
+    if [ -n "$common" ] && [ "$gitdir" != "$common" ]; then
+        case $cache in
+            /*) absolute=$cache ;;
+            *) absolute=$(pwd)/$cache ;;
+        esac
+        if [ ! -f "$absolute/.private-cache" ] && [ "$(basename "$absolute")" != ".cache-boot" ]; then
+            echo "xmakew: $absolute is not a private cache (it has no .private-cache marker): an empty or hand-made folder starts a cold build of every package (63 minutes on 2026-11-16). Make the cache by cloning the main checkout's: REVENANT_CACHE=$root/.cache-boot ./xmakew l -P . tools/private_cache.lua $root/.cache-private, then rm -rf $root/.cache-boot and set REVENANT_CACHE=$root/.cache-private (docs/guides/machine.md, 'A private cache')" >&2
+            exit 1
+        fi
+    fi
 elif [ -n "$common" ] && [ "$gitdir" != "$common" ]; then
     echo "xmakew: $root is a linked worktree, and its cache must not fall back to the main checkout's $checkout/.cache: set REVENANT_CACHE to a directory of this worktree" >&2
     exit 1

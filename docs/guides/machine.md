@@ -143,6 +143,12 @@ from there; each emulator image after that is a clone of it.
 
 ## A private cache
 
+**A new cache is made with `tools/private_cache.lua`, never as an empty folder.** An empty `REVENANT_CACHE` starts a cold build of every
+package: on 2026-11-16 a prepush in a hand-made cache took 63 minutes (46 of them packages, `tessdata` 12, `libcxx` 10) where the clone of
+the main `.cache` takes under a minute and the same configure 28 seconds. In a linked worktree `./xmakew` refuses a `REVENANT_CACHE` that has
+no `.private-cache` marker, except a folder named `.cache-boot` (the tool's own first run), and says how to make one. A warm
+cache that predates the rule gets the marker by hand (`echo adopted > <cache>/.private-cache`); `--remove` then deletes it like any other.
+
 A worker that builds from its own worktree must not write into the main checkout's `.cache`, and a CMake cache that names
 the shared folder would send a later build back into it. `tools/private_cache.lua` makes a private cache for a worktree: an
 APFS clone of the main checkout's `.cache`, in which every absolute link into the source and every absolute path in a
