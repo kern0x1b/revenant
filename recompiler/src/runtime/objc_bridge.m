@@ -613,6 +613,90 @@ static void xl_dynamic_send(State *state, id receiver, Method method, SEL select
     xl_return(state);
 }
 
+#define XL_WATCH_FILE "/private/var/revenant/xl-watch"
+#define XL_WATCH_LIMIT 16
+
+static int xl_watch_ready;
+static char xl_watch_selector[96];
+static unsigned xl_watch_offset;
+static int xl_watch_fd = -1;
+static uintptr_t xl_watched[XL_WATCH_LIMIT];
+static uint32_t xl_watched_word[XL_WATCH_LIMIT];
+static int xl_watched_count;
+
+static void xl_watch_line(const char *format, ...) __attribute__((format(printf, 1, 2)));
+
+static void xl_watch_line(const char *format, ...)
+{
+    char line[512];
+    va_list arguments;
+    va_start(arguments, format);
+    int n = vsnprintf(line, sizeof line, format, arguments);
+    va_end(arguments);
+    if (n < 0)
+        return;
+    if (n > (int)sizeof line - 2)
+        n = (int)sizeof line - 2;
+    line[n++] = '\n';
+    write(2, line, n);
+    if (xl_watch_fd >= 0)
+        write(xl_watch_fd, line, n);
+}
+
+static int xl_watch_enabled(void)
+{
+    if (xl_watch_ready)
+        return xl_watch_ready > 0;
+    xl_watch_ready = -1;
+    FILE *file = fopen(XL_WATCH_FILE, "r");
+    if (!file)
+        return 0;
+    char selector[sizeof xl_watch_selector];
+    unsigned offset = 0;
+    int read = fscanf(file, "%95s %u", selector, &offset);
+    fclose(file);
+    if (read < 1)
+        return 0;
+    strlcpy(xl_watch_selector, selector, sizeof xl_watch_selector);
+    xl_watch_offset = read == 2 ? offset : 16;
+    xl_watch_fd = open("/private/var/revenant/xlate-watch.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+    xl_watch_ready = 1;
+    xl_watch_line("xl-watch: watching the word at +%u of every receiver of %s", xl_watch_offset, xl_watch_selector);
+    return 1;
+}
+
+static void xl_watch_note(State *state, id receiver, SEL selector, const char *kind)
+{
+    if (!xl_watch_enabled())
+        return;
+    const char *name = sel_getName(selector);
+    for (int i = 0; i < xl_watched_count; i++) {
+        uint32_t word = *(volatile uint32_t *)(xl_watched[i] + xl_watch_offset);
+        if (word != xl_watched_word[i]) {
+            xl_watch_line("xl-watch: the word at +%u of %p changed 0x%x -> 0x%x before %s %s on %p (%s), guest return address 0x%llx",
+                          xl_watch_offset, (void *)xl_watched[i], xl_watched_word[i], word, kind, name ? name : "?", (void *)receiver,
+                          receiver ? object_getClassName(receiver) : "nil", (unsigned long long)XL_REG(state, X30));
+            xl_watched_word[i] = word;
+        }
+    }
+    if (!receiver || !name || strcmp(name, xl_watch_selector))
+        return;
+    for (int i = 0; i < xl_watched_count; i++) {
+        if (xl_watched[i] == (uintptr_t)receiver)
+            return;
+    }
+    uint32_t *words = (uint32_t *)receiver;
+    xl_watch_line("xl-watch: %s %s on %p (%s), raw arguments x2=0x%llx x3=0x%llx x4=0x%llx x5=0x%llx, words %08x %08x %08x %08x %08x %08x, guest return address 0x%llx",
+                  kind, name, (void *)receiver, object_getClassName(receiver), (unsigned long long)XL_REG(state, X2), (unsigned long long)XL_REG(state, X3),
+                  (unsigned long long)XL_REG(state, X4), (unsigned long long)XL_REG(state, X5), words[0], words[1], words[2], words[3], words[4], words[5],
+                  (unsigned long long)XL_REG(state, X30));
+    if (xl_watched_count < XL_WATCH_LIMIT) {
+        xl_watched[xl_watched_count] = (uintptr_t)receiver;
+        xl_watched_word[xl_watched_count] = *(volatile uint32_t *)((uintptr_t)receiver + xl_watch_offset);
+        xl_watched_count++;
+    }
+}
+
 void xl_h_objc_msgSend(State *state)
 {
     uint64_t self = XL_REG(state, X0);
@@ -633,6 +717,8 @@ void xl_h_objc_msgSend(State *state)
     }
     id receiver = (id)xl_narrow_pointer(self, "objc_msgSend", 0);
     SEL selector = (SEL)(uintptr_t)XL_REG(state, X1);
+    if (xl_watch_ready >= 0)
+        xl_watch_note(state, receiver, selector, "message");
     if (access("/private/var/revenant/xl-trace", F_OK) == 0) {
         static int xl_tfd = -1;
         if (xl_tfd < 0)
@@ -769,6 +855,8 @@ void xl_h_objc_msgSendSuper2(State *state)
     id receiver = (id)xl_narrow_pointer(guest_receiver, "objc_msgSendSuper2", 1);
     Class current = xl_class_in(guest_super[1]);
     SEL selector = (SEL)(uintptr_t)XL_REG(state, X1);
+    if (xl_watch_ready >= 0)
+        xl_watch_note(state, receiver, selector, "super message");
     if (selector == @selector(dealloc))
         xl_swift_super_dealloc(receiver, current);
     uint64_t target = xl_route(state, class_getSuperclass(current), selector, receiver, current);
