@@ -42,6 +42,12 @@ prints a warning with both versions. What `deploy` checks instead is the state t
 loads from the phone, reads their exported symbols and stops, naming the library and the symbol, when one of the imports is not
 exported. A host built against another Backports build starts when the installed libraries export everything it imports.
 
+`deploy --packages` also reads which Swift runtime the packages on the phone link. Every package the process loads has to link the
+runtime the host links: two runtimes in one process load two `libswiftCore`, and a string of the second stops the host with
+`-[__SharedStringStorage _fastCharacterContents]: unrecognized selector`. A package that links another runtime, or one that is not
+installed, stops the deploy naming the file, the package and both keys; install the package from a deb built against the host's
+runtime. `xmake device runtimes` runs the same check over everything installed.
+
 When the phone's Backports package is an older build than the host's, a folder with the libraries of the host's build can stand in for
 it for one start: copy the folder to the phone, pass `--provided org.revenant.backports` to `deploy` (that package is then not
 checked, nor are its symbols) and start with `launch --dyld FOLDER`. dyld looks for each library by file name in `DYLD_LIBRARY_PATH` before the install

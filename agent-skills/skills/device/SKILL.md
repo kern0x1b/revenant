@@ -158,7 +158,24 @@ xmake device --keep uninstall <package>          # dpkg -r of the named packages
 
 It never removes `org.revenant.backports`: other programs built with the toolchain use it.
 
-## 8. root and mobile
+## 8. One Swift runtime per process
+
+```
+xmake device runtimes                           # which Swift runtime each installed org.revenant.* package links
+```
+
+After every `install` the same audit runs on its own. Every package loaded into one process has to link the same
+`org.revenant.swift-runtime-<key>`: two keys load two `libswiftCore`, libobjc registers the classes of the first only, and the
+first string of the second stops the app with `-[__SharedStringStorage _fastCharacterContents]: unrecognized selector` (libobjc
+printed `Class ... is implemented in both` before). The consumer packages (`swift-crypto`, `cryptokit`, `uniformtypeidentifiers`) keep
+their own key when the runtime key changes, so one left over from the old runtime is the usual cause. The audit reads the dylibs of
+the installed packages on the phone and names each file with the runtime it links and the images. It fails when a package links a
+runtime that is not installed, and prints a warning naming the files when the installed packages link more than one runtime key (the
+mix that only a program loading both turns into a crash). The key of the host is known to the program that deploys it, not to
+`xmake device`: `frameworks/ReactNative/tools/host_install.lua deploy` fails on a package that links another key than the host's. Fix
+either by installing the named packages from debs built against the host's runtime.
+
+## 9. root and mobile
 
 - SSH, and so every `xmake device` command, runs as **root**. An app started by SpringBoard runs as
   **mobile**.
@@ -171,7 +188,7 @@ It never removes `org.revenant.backports`: other programs built with the toolcha
 
 - `uicache` runs as mobile (`su mobile -c uicache`), which is what `xmake device install` does.
 
-## 9. Privacy — never lifted
+## 10. Privacy — never lifted
 
 - Read, copy or log only the app's own files, its own log and its own crash reports. Never open
   messages, mail, contacts, call history, photos, notes, accounts, keychains or other apps' data,
@@ -181,7 +198,7 @@ It never removes `org.revenant.backports`: other programs built with the toolcha
 - Leave the device as you found it: remove the probes and test stands you installed (step 7); ask
   before removing anything you did not install.
 
-## 10. Record
+## 11. Record
 
 Update `PROJECT.md` `## Progress`, line `device`: the package and version installed, the model and
 release it runs on (no UDID, no address), how it was launched, and the evidence — the log file you

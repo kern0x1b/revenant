@@ -20,7 +20,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
           <that .app>/rnhost.conf with module=main and bundle=bundle.js (--conf adds lines: only module, bundle, engine and JSC_* keys).
           Both files are root-owned and read-only for everything else, which is what the host checks before it reads them. The
           host's output goes to /var/tmp/<last part of the id>/, a folder of the app's user, each file capped at 1 MiB by the host; the archive passes through the claim's scratch folder and is removed. With --packages FILE (the host-packages.json of
-          a shared stage) it first asks the phone for the version of each package and stops, naming it, when one is missing or another version; --provided names the packages that a launch with DYLD_LIBRARY_PATH supplies instead, which are not checked. It removes nothing of another bundle id.
+          a shared stage) it first asks the phone for the version of each package and stops, naming it, when one is missing or another version, or when a library of those packages (and of the packages they load) links a Swift runtime other than the one the host links, naming the file and both keys; --provided names the packages that a launch with DYLD_LIBRARY_PATH supplies instead, which are not checked. It removes nothing of another bundle id.
   launch  wakes the phone and has SpringBoard start the app of the id. With --dyld FOLDER (a folder of the phone) the start sets DYLD_LIBRARY_PATH to it, so
           the libraries of that folder are loaded by file name before the installed ones; only that start sees them, not one from the home screen.
   stop    ends the running process of the app of the id and of no other id: it finds the process by the launchd label of the app.
@@ -433,6 +433,26 @@ function version_mismatches(packages, installed, provided, tolerated)
     return problems, warnings
 end
 
+function runtime_mixes(device, settings, packages, provided)
+    local problems, roots, host_key = {}, {}, nil
+    for _, package in ipairs(packages) do
+        local key = device.runtime_key(package.name)
+        if not key then
+            table.insert(roots, package.name)
+        elseif provided and provided[package.name] then
+            return problems
+        elseif host_key and host_key ~= key then
+            table.insert(problems, string.format("the host links org.revenant.swift-runtime-%s and org.revenant.swift-runtime-%s, and a process holds one Swift runtime", host_key, key))
+        else
+            host_key = key
+        end
+    end
+    if host_key then
+        table.join2(problems, (device.runtime_audit(settings, roots, host_key)))
+    end
+    return problems
+end
+
 local function stage_shared(options)
     local built = path.absolute(options.app)
     local binary = path.join(built, path.basename(built))
@@ -628,6 +648,7 @@ function deploy(options)
             installed[package.name] = device.run(settings, "dpkg-query -W -f='${Version}' " .. package.name .. " 2>/dev/null ; true", {capture = true}):trim()
         end
         local problems, warnings = version_mismatches(packages, installed, provided, {[BACKPORTS] = true})
+        table.join2(problems, runtime_mixes(device, settings, packages, provided))
         for _, warning in ipairs(warnings) do
             wprint("%s: the symbols are checked instead", warning)
         end

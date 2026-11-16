@@ -243,6 +243,30 @@ function main()
             "the problems are " .. table.concat(problems, " | "))
         expect("a package that the launch supplies by DYLD_LIBRARY_PATH is not checked", #host.version_mismatches(packages,
             {["org.revenant.swift-runtime-8e5fdec8"] = "0.8.18+8e5fdec8"}, {["org.revenant.backports"] = true}) == 0, "a provided package was reported")
+        local phone_device = import("@addon.revenant.device", {anonymous = true})
+        local asked
+        local audited = {
+            runtime_key = phone_device.runtime_key,
+            runtime_audit = function (settings, roots, key)
+                asked = {settings = settings, roots = roots, key = key}
+                return {"/usr/lib/revenant/org.revenant.uniformtypeidentifiers-f72850ed/libswiftUniformTypeIdentifiers.dylib links org.revenant.swift-runtime-0a2b76cd"}, {}
+            end
+        }
+        local shared = {{name = "org.revenant.backports", version = "1"}, {name = "org.revenant.swift-runtime-8e5fdec8", version = "1"},
+                        {name = "org.revenant.swift-runtime-ui-8e5fdec8", version = "1"}, {name = "org.revenant.swift-crypto-91c43b24", version = "1"}}
+        local mixes = host.runtime_mixes(audited, "settings", shared, nil)
+        expect("the host's runtime key and the other packages it loads go to the phone's runtime audit, and its problems are the deploy's",
+            #mixes == 1 and mixes[1]:find("swift-runtime-0a2b76cd", 1, true) ~= nil and asked.settings == "settings" and asked.key == "8e5fdec8"
+            and #asked.roots == 2 and asked.roots[1] == "org.revenant.backports" and asked.roots[2] == "org.revenant.swift-crypto-91c43b24",
+            "the problems are " .. table.concat(mixes, " | ") .. ", the audit was asked for " .. tostring(asked and asked.key))
+        asked = nil
+        expect("a runtime that the launch supplies by DYLD_LIBRARY_PATH is not audited", #host.runtime_mixes(audited, "settings", shared,
+            {["org.revenant.swift-runtime-8e5fdec8"] = true}) == 0 and asked == nil, "a provided runtime was audited")
+        expect("a host that loads no runtime package is not audited", #host.runtime_mixes(audited, "settings", {shared[1], shared[4]}, nil) == 0 and asked == nil,
+            "a host without a runtime was audited")
+        local two = host.runtime_mixes(audited, "settings", {shared[2], {name = "org.revenant.swift-runtime-ui-0a2b76cd", version = "1"}}, nil)
+        expect("a host that links the packages of two runtime keys is refused, naming both", #two >= 1 and two[1]:find("8e5fdec8", 1, true) ~= nil
+            and two[1]:find("0a2b76cd", 1, true) ~= nil, "the problems are " .. table.concat(two, " | "))
         expect("a launch with --dyld sets DYLD_LIBRARY_PATH for that start only, and a plain launch sets none", host.launch_command("a.b", "/var/mobile/rn-host/bp"):find("--env DYLD_LIBRARY_PATH=/var/mobile/rn-host/bp a.b", 1, true) ~= nil
             and host.launch_command("a.b") == "/usr/libexec/revenant-sblaunch a.b", "the launch command is wrong")
         expect("a --dyld folder with a space or .. is refused", refusal(function () host.launch_command("a.b", "/var/x y") end) ~= nil
