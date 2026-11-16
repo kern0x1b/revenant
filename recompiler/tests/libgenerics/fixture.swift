@@ -5,6 +5,12 @@ import Foundation
     fflush(nil)
 }
 
+@_cdecl("rcf_dlsym_own")
+public func dlsymOwn() -> Int32 { 41 }
+
+@_cdecl("rcf_dlsym_shadow")
+public func dlsymShadow() -> Int32 { 1 }
+
 @inline(never) func report(_ name: String, _ passed: Bool) {
     line((passed ? "ok " : "FAIL ") + name)
 }
@@ -266,6 +272,15 @@ final class XiKey: Hashable {
         let null = Unmanaged.passUnretained(NSNull()).toOpaque()
         report("dlsym.typeid", typeID != nil && typeID!() == UInt(CFStringGetTypeID()))
         report("dlsym.object", getTypeID != nil && getTypeID!(UnsafeRawPointer(null)) == UInt(CFNullGetTypeID()))
+    }
+
+    @objc public func stepDlsymGuest() {
+        let handle = UnsafeMutableRawPointer(bitPattern: -2)
+        typealias Answer = @convention(c) () -> Int32
+        let own = dlsym(handle, "rcf_dlsym_own").map { unsafeBitCast($0, to: Answer.self) }
+        let shadowed = dlsym(handle, "rcf_dlsym_shadow").map { unsafeBitCast($0, to: Answer.self) }
+        report("dlsym.guest.own", own != nil && own!() == 41)
+        report("dlsym.guest.first", shadowed != nil && shadowed!() == 1)
     }
 
     @objc public func stepExtraInhabitants() {

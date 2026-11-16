@@ -1007,7 +1007,7 @@ is guest code calling a host pointer, so before 2026-11-14 it stopped the proces
 code" and a host address (`0x310aaba9` is `CFStringGetTypeID` in CoreFoundation on the 4S; the same stop ended a
 `JSONSerialization` run of the reCAPTCHA fixture, because `_initializeBridgingFunctionsImpl` looks up `CFStringGetTypeID`,
 `CFGetTypeID`, `CFStringHashNSString` and `CFStringHashCString` this way). `xlgen` maps `dlsym` to `xl_shim_dlsym`, which
-answers the four names with an address of a slot in a table of the runtime and everything else with the host's answer; a
+answers a name that a guest image exports with the guest's address (`stepDlsymGuest`), the four names with an address of a slot in a table of the runtime and everything else with the host's answer; a
 call to a slot runs `xl_function_entry`, which narrows the arguments by the shape in `xl_host_functions` (`o` object, `p`
 pointer, `u` unsigned, anything else signed), calls the host function and widens the result. A further host function the
 guest may look up needs a line in that table. The control is a translation without the `dlsym` line of the shim map: the
@@ -1015,6 +1015,20 @@ step then stops with the message above, naming `CFStringGetTypeID+0 of CoreFound
 `ok dlsym.typeid` and `ok dlsym.object` (measured on the 4S on 2026-11-14, runtime of main). The message of a call or jump to
 an address without code now says which host symbol and image the address belongs to, when it is one, and the host frames of a
 crash report carry the offset in their image.
+
+`stepDlsymGuest` is the other half of `dlsym`: a name that a guest image exports is answered with the guest's address, not the
+host's. The Swift runtime looks up `$sSo10CFErrorRefas5Error10FoundationMc` (the conformance of `CFError` to `Error`),
+`$sSo8NSObjectCSH10ObjectiveCMc` and three Foundation functions of the `NSError` bridge with `dlsym(RTLD_DEFAULT, ...)`; a
+host that carries its own armv7 `libswiftFoundation` has the same names, the guest took those, followed the type reference of
+the conformance to the host's metadata accessor `$sSo10CFErrorRefaMa` and called armv7 code (the stop of drop17 of the
+reCAPTCHA SDK, `libswiftFoundation +0xa9bb8` in the host). `xlate` writes `xl_dlsym.h`: the exports of every guest image in the
+order of the images (the first image that exports a name answers it, as dyld does), without the exports of the bridge image,
+as a sorted pool of names with a table of offsets and addresses (no relocations; 31,000 names for the reCAPTCHA SDK with its
+Swift libraries, 2 MB). `xl_shim_dlsym` searches it first when the handle is `RTLD_DEFAULT` and asks the host only when the
+name is not found, so `CFStringGetTypeID` and the other host functions above are unchanged. The step looks up `rcf_dlsym_own`, which
+only the guest exports (`dlsym.guest.own`), and `rcf_dlsym_shadow`, which the guest and the host executable both export
+(`dlsym.guest.first`: the guest's answer 1, not the host's 2). A handle other than `RTLD_DEFAULT` (one that the guest got from a
+host `dlopen`) goes to the host as before.
 
 `stepExtraInhabitants`, `stepExtraInhabitantsStdlib` and `stepExtraInhabitantsBig` keep the contract of an extra inhabitant
 of a pointer ([extra-inhabitants.md](extra-inhabitants.md)). They round-trip store and get for a struct with a class field in

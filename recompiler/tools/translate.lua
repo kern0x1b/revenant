@@ -617,7 +617,7 @@ function translate(input, includes, out, images, opt)
         os.tryrm(o("lift.stamp"))
         os.tryrm(o("flag-flow.txt"))
         run(e.xlate, table.join({"--base", base, "--output", o("lifted.bc"), "--layout", o("layout.txt"), "--passthrough", o("passthrough.txt"),
-                                 "--state-header", o("xl_state.h"), "--flag-flow-summary", o("flag-flow.txt"), "--xi-out", o("xi.txt")}, library and {"--library"} or {},
+                                 "--state-header", o("xl_state.h"), "--dlsym-table", o("xl_dlsym.h"), "--flag-flow-summary", o("flag-flow.txt"), "--xi-out", o("xi.txt")}, library and {"--library"} or {},
                                 xi ~= "" and {"--xi-threshold", xi} or {}, xi_except, duplicates == "1" and {"--report-duplicates"} or {},
                                 replaces, {"--bridge", o("libxl-guest.dylib"), input}, extra,
                                 {o("libxl-guest.dylib")}))

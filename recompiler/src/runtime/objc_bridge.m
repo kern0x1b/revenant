@@ -8,6 +8,7 @@
 
 #include "xl_bridge.h"
 #include "xl_host.h"
+#include "xl_dlsym.h"
 
 #include <pthread.h>
 #include <stdio.h>
@@ -1656,8 +1657,29 @@ static struct xl_function_slot *xl_function_slot_at(uint64_t address)
     return index < __atomic_load_n(&xl_function_used, __ATOMIC_ACQUIRE) ? &xl_function_slots[index] : NULL;
 }
 
+static void *xl_guest_dlsym_find(const char *symbol)
+{
+    unsigned low = 0, high = xl_guest_dlsym_count;
+    while (low < high) {
+        unsigned middle = low + (high - low) / 2;
+        int order = strcmp(symbol, xl_guest_dlsym_names + xl_guest_dlsym_offsets[middle]);
+        if (!order)
+            return (void *)(uintptr_t)xl_guest_dlsym_addresses[middle];
+        if (order < 0)
+            high = middle;
+        else
+            low = middle + 1;
+    }
+    return NULL;
+}
+
 void *xl_shim_dlsym(void *handle, const char *symbol)
 {
+    if (symbol && handle == RTLD_DEFAULT) {
+        void *guest = xl_guest_dlsym_find(symbol);
+        if (guest)
+            return guest;
+    }
     void *found = dlsym(handle, symbol);
     if (!found || !symbol)
         return found;

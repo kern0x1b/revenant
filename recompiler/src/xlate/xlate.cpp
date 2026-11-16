@@ -55,6 +55,7 @@ static cl::opt<std::string> LayoutOutput("layout", cl::desc("Linker arguments pl
 static cl::opt<bool> Library("library", cl::desc("The output is a dylib whose guest segments are one image in a section (__XGUEST,__image) that the loader maps at their addresses, "
                                                  "with a table of the slots that hold host addresses, instead of segments the linker places there"));
 static cl::opt<std::string> StateHeader("state-header", cl::desc("C header with guest register offsets and guest export addresses"));
+static cl::opt<std::string> DlsymTable("dlsym-table", cl::desc("C header with the exports of every guest image, which the guest's dlsym answers before the host does"));
 static cl::opt<std::string> PassthroughPath("passthrough", cl::desc("Host symbols guest data may bind directly"));
 static cl::opt<std::string> ObjCManifest("objc-manifest", cl::desc("Write the Objective-C metadata of the guest images as JSON"));
 static cl::opt<std::string> CoveragePath("coverage", cl::desc("Only lift every instruction and list unsupported ones"));
@@ -2250,6 +2251,44 @@ bool WriteLayout(const std::vector<GuestSegment> &segments) {
   return true;
 }
 
+bool WriteDlsymTable(const Program &program) {
+  if (DlsymTable.empty()) {
+    return true;
+  }
+  std::map<std::string, uint64_t> exported;
+  for (auto &image : program.images) {
+    if (IsBridge(image->path())) {
+      continue;
+    }
+    for (auto &[name, vmaddr] : image->exports()) {
+      if (name.size() > 1 && name.find_first_of("\"\\") == std::string::npos) {
+        exported.emplace(name.substr(1), image->host(vmaddr));
+      }
+    }
+  }
+  std::error_code ec;
+  raw_fd_ostream os(DlsymTable, ec);
+  if (ec) {
+    errs() << "xlate: " << DlsymTable << ": " << ec.message() << "\n";
+    return false;
+  }
+  os << "#pragma once\n";
+  os << "static const char xl_guest_dlsym_names[] =\n";
+  uint64_t offset = 0;
+  std::string offsets, addresses;
+  for (auto &[name, address] : exported) {
+    os << "\"" << name << "\\0\"\n";
+    offsets += "  " + std::to_string(offset) + "u,\n";
+    addresses += "  0x" + Hex(address) + "ul,\n";
+    offset += name.size() + 1;
+  }
+  os << ";\n";
+  os << "static const unsigned xl_guest_dlsym_offsets[] = {\n" << offsets << "  0u\n};\n";
+  os << "static const unsigned long xl_guest_dlsym_addresses[] = {\n" << addresses << "  0ul\n};\n";
+  os << "static const unsigned xl_guest_dlsym_count = " << exported.size() << "u;\n";
+  return true;
+}
+
 bool WriteStateHeader(const Program &program) {
   if (StateHeader.empty()) {
     return true;
@@ -2832,5 +2871,5 @@ int main(int argc, char **argv) {
   if (XiThreshold) {
     errs() << "xlate: " << g_xi_sites.size() << " compares with 0xFFFFFFFF that tell a pointer from an extra inhabitant now compare with 0x" << Hex(XiThreshold) << "\n";
   }
-  return WriteLayout(segments) && WriteStateHeader(program) && WriteXi() ? 0 : 1;
+  return WriteLayout(segments) && WriteStateHeader(program) && WriteDlsymTable(program) && WriteXi() ? 0 : 1;
 }
