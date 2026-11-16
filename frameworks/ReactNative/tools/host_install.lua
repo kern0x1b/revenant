@@ -889,7 +889,7 @@ function window(options)
         step("put the probe bundle")
     end
     local log_file = run_folder(id) .. "/rnhost.log"
-    device.run(settings, "rm -f " .. log_file)
+    device.run(settings, "touch " .. app .. "/rnhost.log.on; rm -f " .. log_file)
     stop({["bundle-id"] = id})
     launch({["bundle-id"] = id})
     step("launched " .. id .. ", waiting " .. PROBE_WAIT_SECONDS .. " s")
@@ -906,6 +906,7 @@ function window(options)
         put_bundle(device, settings, app, options["restore-bundle"], options.conf)
         step("restored the application bundle")
     end
+    device.run(settings, "rm -f " .. app .. "/rnhost.log.on")
     stop({["bundle-id"] = id})
     device.run(settings, "rm -rf " .. scratch)
     io.writefile(path.join(path.absolute(options.output), "window.json"), json.encode(result, {pretty = true}) .. "\n")
