@@ -57,6 +57,17 @@ its recipe is wired.
 
 There is no CI, so nothing makes a new release. A release that exists is fetched when `REVENANT_PREBUILT` is set and the key matches; a package whose key moved is built locally. `prebuilt.pack` refuses an install that names its own install folder in a file or a symbolic link, since that archive would not work under another one.
 
+Publishing one by hand: with `REVENANT_PREBUILT_OUT=<folder>` set, building the package packs it (`prebuilt.pack`), so
+`REVENANT_PREBUILT_OUT=/tmp/out REVENANT_CACHE=<cache> ./xmakew require --force -y revenant@<name>` builds it from source once and
+leaves `<name>-<key>-<plat>-<arch>.tar.xz`, its `.sha256` and `<name>.tag` in the folder; then
+`gh release create "$(cat /tmp/out/<name>.tag)" /tmp/out/<name>-*.tar.xz /tmp/out/<name>-*.sha256 -R kern0x1b/revenant --prerelease`.
+Check it with `REVENANT_PREBUILT=kern0x1b/revenant REVENANT_PREBUILT_ONLY=<name> ./xmakew require --force -y revenant@<name>`, which
+prints `installed the prebuilt <key>`. The owner allows pre-releases of prebuilt packages without asking (2026-11-16). `ld64` 956.6
+is published this way (key e912c374, 0.8 MB; built from source it took about 2.5 minutes with cmake and ninja, from the release 18 s).
+
+The libcxx the Backports gate requires is the `packaged = true` one (`xmake.lua`, line 36), which is not wired, so it
+is built from source on every cold cache (about 10 minutes on 2026-11-16) although releases of the unpackaged one exist.
+
 ## The official LLVM release instead of the `libraries` build
 
 `LLVM-23.1.3-macOS-ARM64.tar.zst` (871 MB; 1.57 GB as `.tar.xz`) was read for what the `libraries` config

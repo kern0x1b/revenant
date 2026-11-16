@@ -380,6 +380,12 @@ that make a later check fail, so remove `.xmake` together with a cache it names.
 own `.xmake` records the cache paths of the run that configured it, so a copy shared between checkouts would point at another
 checkout's cache.
 
+Where a cold `backports build` spends its time (2026-11-16, 63 minutes by the install times of the packages): the packages
+46 minutes (`libcxx` 10, `tessdata` with every language 12, `openssl-host` 5, `tesseract`, `leptonica`, `zxing-cpp`,
+`ffmpeg-hevc` and `boringssl` about 12 together, `ld64` 2.5), the Backports libraries 17. Only `llvm`, `swift`, `ld64` and `libcxx` of
+these have a prebuilt hook (`docs/guides/prebuilt.md`); the rest build from source on a machine without the cache, which is why a
+warm cache is kept.
+
 `recipe digests` is never remembered: it regenerates the digests and compares them with the committed ones, so it runs on
 every prepush, and a second prepush on the same tree runs only that check. `./xmakew l -P . tools/prepush.lua test` checks the
 keys: an edit, an untracked file, a deleted file, an environment variable and a new commit each change a key, restoring them
