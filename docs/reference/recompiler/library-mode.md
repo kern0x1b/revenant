@@ -339,6 +339,17 @@ object that is being freed; `/private/var/revenant/xl-trace-rc` next to `xl-trac
 only in a traced run is not a finding about the guest until it also appears without `xl-trace` (with `xl-crash`, which
 prints the host registers and the guest frames and does not change the timing).
 
+`xl-stats` (the flag file `/private/var/revenant/xl-stats`, or `XL_STATS` in the environment; read once, so it has to exist
+before the process starts) measures what the bridge costs without a line per message. For every thread that starts or
+ends it prints `xlate: threads: created|ended (guest stack N KiB, host stack M KiB): L live, C created, E ended, S KiB of
+guest stack live`. Each message that the guest sends to a host object is timed from the entry of `xl_h_objc_msgSend` to the
+decision (the routing); a message sent dynamically is timed again across the host call, and after every 20,000th dynamic
+message the process prints `xlate: messages: N in all, D of them dynamic; routing R us in all, host call H us in the dynamic
+ones (A us each)`, followed by the four dynamic messages (class and selector) that took the most time, with their counts.
+It costs two `mach_absolute_time` calls and one lock per message while it is on, and nothing while it is off. It
+exists to answer one question that a log cannot, because `XL_LOG` slows the loop it measures: how long one message of a
+guest loop takes, and which message it is.
+
 The `xlate: no bridge for -[Class selector]` lines on stderr, with the receiver and the guest frames, belong to the same
 switch. They say that a guest message to a host object found no generated bridge, which is not a failure: the message
 is then sent through the host method's own type encoding (`xl_dynamic_send`), whose arguments and result may be
@@ -410,6 +421,16 @@ page prints, before the crash dump, `xlate: the guest stack of this thread overf
 fault is in its guard page; …`, so a stack overflow is told from a bad pointer. The mapping, the halving and the guard are one
 function, `xl_stack_map` in `src/runtime/xl_tsd_guard.h`, which the `tsdguard` check runs on the host with a mapper that
 fails above a limit and a mapper that always fails.
+
+The stack, the thread-specific page and the state of a thread are released together when the thread ends: they hang on a
+`pthread_key_t` whose destructor (`xl_state_destroy`) unmaps the stack, unmaps the page and frees the state, so a thread
+that came and went (an `NSURLSession` or `WebThread` worker, a Dispatch worker that the system retires) leaves nothing
+behind. A guest call that runs on the thread after the destructor, from the destructor of another key, makes a new state
+that the next round of destructors (the system runs up to four) releases in turn. The runtime counts the threads it set up
+(`created`, `ended`, the guest stack of the live ones); the count is printed with every stack that had to be halved and with
+the failure of a thread's setup, and for every thread that starts or ends under the `xl-stats` flag (below), where
+`created - ended` is the number of live threads, to be compared with the thread count of the process: a difference that
+grows with each `execute` would be a leak.
 
 The reason for the sizes is the address space of a 32-bit process of iOS 6, about 768 MB below the shared cache, which the
 lifted library, the guest arena, the heap and the stacks of every worker share. The real SDK runs more than a dozen threads

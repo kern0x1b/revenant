@@ -19,6 +19,7 @@
 #include <ctype.h>
 #include <dlfcn.h>
 #include <mach/mach.h>
+#include <mach/mach_time.h>
 #include <mach-o/dyld.h>
 #include <malloc/malloc.h>
 
@@ -423,6 +424,92 @@ static int xl_collect_enabled(void)
     return enabled;
 }
 
+#define XL_STATS_SLOTS 256
+#define XL_STATS_EVERY 20000u
+#define XL_STATS_TOP 4
+
+struct xl_stats_slot {
+    uintptr_t cls;
+    uintptr_t sel;
+    uint32_t count;
+    uint64_t ticks;
+};
+
+static struct xl_stats_slot xl_stats_slots[XL_STATS_SLOTS];
+static pthread_mutex_t xl_stats_lock = PTHREAD_MUTEX_INITIALIZER;
+static uint32_t xl_stats_messages;
+static uint32_t xl_stats_dynamic;
+static uint64_t xl_stats_routing_ticks;
+static uint64_t xl_stats_call_ticks;
+
+static uint64_t xl_stats_us(uint64_t ticks)
+{
+    static mach_timebase_info_data_t base;
+    if (!base.denom)
+        mach_timebase_info(&base);
+    return ticks * base.numer / base.denom / 1000u;
+}
+
+static void xl_stats_message(uint64_t started)
+{
+    uint64_t ticks = mach_absolute_time() - started;
+    pthread_mutex_lock(&xl_stats_lock);
+    xl_stats_messages++;
+    xl_stats_routing_ticks += ticks;
+    pthread_mutex_unlock(&xl_stats_lock);
+}
+
+static void xl_stats_report_locked(void)
+{
+    const struct xl_stats_slot *top[XL_STATS_TOP] = {0};
+    for (unsigned i = 0; i < XL_STATS_SLOTS; i++) {
+        const struct xl_stats_slot *slot = &xl_stats_slots[i];
+        if (!slot->count)
+            continue;
+        for (unsigned t = 0; t < XL_STATS_TOP; t++) {
+            if (!top[t] || slot->ticks > top[t]->ticks) {
+                for (unsigned m = XL_STATS_TOP - 1; m > t; m--)
+                    top[m] = top[m - 1];
+                top[t] = slot;
+                break;
+            }
+        }
+    }
+    dprintf(2, "xlate: messages: %u in all, %u of them dynamic; routing %llu us in all, host call %llu us in the dynamic ones (%llu us each)\n",
+            xl_stats_messages, xl_stats_dynamic, (unsigned long long)xl_stats_us(xl_stats_routing_ticks),
+            (unsigned long long)xl_stats_us(xl_stats_call_ticks),
+            (unsigned long long)xl_stats_us(xl_stats_routing_ticks + xl_stats_call_ticks) / (xl_stats_dynamic ? xl_stats_dynamic : 1));
+    for (unsigned t = 0; t < XL_STATS_TOP && top[t]; t++)
+        dprintf(2, "xlate:   dynamic %c[%s %s] %u times, %llu us\n", class_isMetaClass((Class)top[t]->cls) ? '+' : '-',
+                class_getName((Class)top[t]->cls), sel_getName((SEL)top[t]->sel), top[t]->count,
+                (unsigned long long)xl_stats_us(top[t]->ticks));
+}
+
+static void xl_stats_dynamic_send(uint64_t routing, uint64_t call, Class lookup, SEL selector)
+{
+    pthread_mutex_lock(&xl_stats_lock);
+    xl_stats_messages++;
+    xl_stats_dynamic++;
+    xl_stats_routing_ticks += routing;
+    xl_stats_call_ticks += call;
+    unsigned start = (unsigned)((((uintptr_t)selector >> 2) ^ ((uintptr_t)lookup >> 4)) * 2654435761u) % XL_STATS_SLOTS;
+    for (unsigned probe = 0; probe < XL_STATS_SLOTS; probe++) {
+        struct xl_stats_slot *slot = &xl_stats_slots[(start + probe) % XL_STATS_SLOTS];
+        if (!slot->count) {
+            slot->cls = (uintptr_t)lookup;
+            slot->sel = (uintptr_t)selector;
+        }
+        if (slot->cls == (uintptr_t)lookup && slot->sel == (uintptr_t)selector) {
+            slot->count++;
+            slot->ticks += routing + call;
+            break;
+        }
+    }
+    if (xl_stats_dynamic % XL_STATS_EVERY == 0)
+        xl_stats_report_locked();
+    pthread_mutex_unlock(&xl_stats_lock);
+}
+
 struct xl_arguments {
     uint64_t words[(XL_OFFSET_X9 - XL_OFFSET_X0) / sizeof(uint64_t)];
     uint64_t vectors[(XL_OFFSET_V8 - XL_OFFSET_V0) / sizeof(uint64_t)];
@@ -776,6 +863,10 @@ void xl_h_objc_msgSend(State *state)
         xl_return(state);
         return;
     }
+    static int stats_on = -1;
+    if (stats_on < 0)
+        stats_on = xl_stats_enabled();
+    uint64_t stats_started = stats_on ? mach_absolute_time() : 0;
     id receiver = (id)xl_narrow_pointer(self, "objc_msgSend", 0);
     SEL selector = (SEL)(uintptr_t)XL_REG(state, X1);
     if (xl_watch_ready >= 0)
@@ -918,6 +1009,13 @@ void xl_h_objc_msgSend(State *state)
         id host_receiver = (id)xl_receiver_in((uintptr_t)receiver);
         Method method = class_getInstanceMethod(receiver_class, selector);
         xl_arguments_restore(state, &arguments);
+        if (stats_started) {
+            uint64_t called = mach_absolute_time();
+            xl_dynamic_send(state, host_receiver, method, selector, NULL);
+            uint64_t returned = mach_absolute_time();
+            xl_stats_dynamic_send(called - stats_started, returned - called, receiver_class, selector);
+            return;
+        }
         xl_dynamic_send(state, host_receiver, method, selector, NULL);
         return;
     }
@@ -927,6 +1025,8 @@ void xl_h_objc_msgSend(State *state)
         xl_return(state);
         return;
     }
+    if (stats_started)
+        xl_stats_message(stats_started);
     XL_REG(state, PC) = target;
     [[clang::musttail]] return xl_tail(state);
 }
