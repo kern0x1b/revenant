@@ -294,7 +294,11 @@ With `XL_LOADER_MAP` set in the environment to anything but `0`, the loader prin
 `stderr` (the runtime's crash handler to the crash log or `stderr`, where its other lines go) in the phases
 `before-reserve` (before `xl_reserve` takes anything), `reserve` (after it), `load` (after `xl_load`; a failed call prints
 `reserve-failed` or `load-failed`), and, once `xl_library_diagnostics` has installed the handlers, `crash` (a fatal
-signal) and `fault` (a guest fault). With the variable unset nothing is printed and no region is read. One line per
+signal) and `fault` (a guest fault). A host that does not call `xl_library_diagnostics` gets the same handlers from
+`xl_library_init` when the environment has `XL_CRASH` or the phone has the flag file `/private/var/revenant/xl-crash`:
+a fatal signal then prints the host registers and frames and, from the translated thread's own state, the guest pc, the
+registers `x0` to `x7` and the chain of guest frames, which says what guest code called the host function that
+crashed. With the variable unset nothing is printed and no region is read. One line per
 fact, fields separated by single spaces, addresses and sizes in hex:
 
 | Line | Fields |
