@@ -299,6 +299,9 @@ local function run_steps(steps, opt)
             print("%s %s %ds", ok and "ok" or "FAIL", step.name, os.time() - started)
             if not ok then
                 table.insert(failed, step.name)
+                if not opt.keep_going then
+                    break
+                end
             end
         end
     end
@@ -315,15 +318,15 @@ local STEPS = {
     {name = "credentials", run = function () return lua("agent-skills/tests/credentials.lua", "test") end},
     {name = "copied_text", run = function () return lua("agent-skills/tests/copied_text.lua", "test") end},
     {name = "recipe digests", cache = false, run = digests_stable},
-    {name = "lowered members", run = function () return lua("frameworks/Backports/tests/lowered_members_test.lua") end},
-    {name = "lowered exports", run = function () return lua("frameworks/Backports/tests/lowered_exports_test.lua") end},
     {name = "negative shape", run = negative_shape},
     {name = "ci errors test", run = function () return lua("tools/ci_errors.lua", "test") end},
     {name = "ci replay test", run = function () return lua("tools/ci_swiftc_replay.lua", "test") end},
-    {name = "light suites", run = function () return lua("toolchain/tests/light_suites.lua") end},
     {name = "host install test", run = function () return lua("frameworks/ReactNative/tests/host_install_test.lua") end},
     {name = "isolate test", run = function () return lua("frameworks/ReactNative/tests/isolate_test.lua") end},
-    {name = "backports build", run = backports_build},
+    {name = "lowered members", heavy = true, run = function () return lua("frameworks/Backports/tests/lowered_members_test.lua") end},
+    {name = "lowered exports", heavy = true, run = function () return lua("frameworks/Backports/tests/lowered_exports_test.lua") end},
+    {name = "light suites", heavy = true, run = function () return lua("toolchain/tests/light_suites.lua") end},
+    {name = "backports build", heavy = true, run = backports_build},
 }
 
 local function test_suite()
@@ -415,7 +418,7 @@ local function test_cache()
         {name = "c", cache = false, run = function () runs.c = runs.c + 1; return true end},
     }
     local function pass()
-        return run_steps(steps, {store = store, key = function (name) return key_of(inputs(repo), name) end})
+        return run_steps(steps, {keep_going = true, store = store, key = function (name) return key_of(inputs(repo), name) end})
     end
     check("a failing step is reported", table.concat(pass(), ","), "b")
     pass()
@@ -430,16 +433,120 @@ local function test_cache()
     print("prepush cache: %d tests passed", count)
 end
 
-function main(command)
+local function parse_arguments(arguments)
+    local parsed = {keep_going = false, list = false, only = nil}
+    local index = 1
+    while index <= #arguments do
+        local argument = arguments[index]
+        if argument == "--keep-going" then
+            parsed.keep_going = true
+        elseif argument == "--list" then
+            parsed.list = true
+        elseif argument == "--only" then
+            index = index + 1
+            assert(arguments[index], "--only needs a comma-separated list of check names; --list prints them")
+            parsed.only = {}
+            for name in arguments[index]:gmatch("[^,]+") do
+                table.insert(parsed.only, name)
+            end
+        else
+            raise("unknown argument %s; the arguments are test, --list, --only <check,...> and --keep-going", argument)
+        end
+        index = index + 1
+    end
+    return parsed
+end
+
+local function select_steps(steps, only)
+    if not only then
+        return steps
+    end
+    local wanted = {}
+    for _, name in ipairs(only) do
+        wanted[name] = true
+    end
+    local selected = {}
+    for _, step in ipairs(steps) do
+        if wanted[step.name] then
+            table.insert(selected, step)
+            wanted[step.name] = nil
+        end
+    end
+    local unknown = table.keys(wanted)
+    table.sort(unknown)
+    assert(#unknown == 0, "no such check: " .. table.concat(unknown, ", ") .. "; --list prints the names")
+    return selected
+end
+
+local function test_arguments()
+    local count = 0
+    local function check(name, got, want)
+        count = count + 1
+        assert(got == want, string.format("prepush arguments test %s: got %s, want %s", name, tostring(got), tostring(want)))
+    end
+    local function raises(arguments)
+        return try {function () parse_arguments(arguments); return true end} == nil
+    end
+    check("no argument stops at the first failure", parse_arguments({}).keep_going, false)
+    check("--keep-going keeps going", parse_arguments({"--keep-going"}).keep_going, true)
+    check("--list lists", parse_arguments({"--list"}).list, true)
+    check("--only splits on commas and keeps the spaces of a name", table.concat(parse_arguments({"--only", "layout,light suites"}).only, "|"), "layout|light suites")
+    check("--only without a value is an error", raises({"--only"}), true)
+    check("an unknown argument is an error", raises({"--fast"}), true)
+
+    local steps = {{name = "a"}, {name = "b"}, {name = "c"}}
+    check("no selection keeps every check", #select_steps(steps, nil), 3)
+    check("a selection keeps the checks in their own order", select_steps(steps, {"c", "a"})[2].name, "c")
+    check("an unknown check name is an error", try {function () select_steps(steps, {"a", "z"}); return true end} == nil, true)
+
+    local ordered = {}
+    local seen_heavy = false
+    for _, step in ipairs(STEPS) do
+        if step.heavy then
+            seen_heavy = true
+        elseif seen_heavy then
+            table.insert(ordered, step.name)
+        end
+    end
+    check("every heavy check comes after every cheap one: " .. table.concat(ordered, ","), #ordered, 0)
+
+    local runs = {}
+    local function recording(name, ok)
+        return {name = name, cache = false, run = function () table.insert(runs, name); return ok end}
+    end
+    local plan = {recording("cheap", false), recording("heavy", true)}
+    local failed = run_steps(plan, {keep_going = false})
+    check("a failed check stops the run before the next one", table.concat(runs, ",") .. "/" .. table.concat(failed, ","), "cheap/cheap")
+    runs = {}
+    failed = run_steps(plan, {keep_going = true})
+    check("--keep-going runs the next check after a failure", table.concat(runs, ",") .. "/" .. table.concat(failed, ","), "cheap,heavy/cheap")
+    print("prepush arguments: %d tests passed", count)
+end
+
+function main(command, ...)
     if command == "test" then
         test_suite()
         test_cache()
+        test_arguments()
         return
     end
-    local input = inputs(root)
-    local failed = run_steps(STEPS, {store = path.join(cache().root(), "prepush"), key = function (name) return key_of(input, name) end})
-    if #failed > 0 then
-        raise("%d of %d checks failed: %s", #failed, #STEPS, table.concat(failed, ", "))
+    local arguments = command and table.join({command}, {...}) or {}
+    local parsed = parse_arguments(arguments)
+    if parsed.list then
+        for _, step in ipairs(STEPS) do
+            print("%s%s", step.name, step.heavy and " (heavy)" or "")
+        end
+        return
     end
-    print("prepush: %d checks passed", #STEPS)
+    local steps = select_steps(STEPS, parsed.only)
+    local input = inputs(root)
+    local failed = run_steps(steps, {keep_going = parsed.keep_going, store = path.join(cache().root(), "prepush"), key = function (name) return key_of(input, name) end})
+    if #failed > 0 then
+        raise("%d of %d checks failed: %s", #failed, #steps, table.concat(failed, ", "))
+    end
+    if parsed.only then
+        print("prepush: %d of %d checks passed (--only); a push needs all of them", #steps, #STEPS)
+    else
+        print("prepush: %d checks passed", #steps)
+    end
 end

@@ -102,6 +102,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   the project's flags (`backports build`, in a configuration and a build folder of its own, so the checkout's host
   configuration stays). The host checks take about 15 seconds with the caches warm; the Backports build takes about six
   minutes the first time and builds only what changed after that. It must print
-  `prepush: 17 checks passed`; `./xmakew l -P . tools/prepush.lua test` tests the tool itself.
+  `prepush: 18 checks passed`; `--list`, `--only <check,...>` and `--keep-going` select and order the run (it stops at the first
+  failure by default, the cheap checks first; see `docs/guides/machine.md`); `./xmakew l -P . tools/prepush.lua test` tests the tool itself.
 - Before handing a change over: `./xmakew test -P .`, then that component's gate (the backports gate is gone until
   `./xmakew test -P .` replaces it; for the emulator, the skill `emulator-session`).
