@@ -347,6 +347,13 @@ and the selector. A message whose method has a structure, a `float` or a `double
 with `xlate: message without a bridge (argument type)` (or `return type`, `stack-passed arguments`) followed by the
 class, the selector and the encoding, with the switch on or off.
 
+The lines are written in full (the line, the receiver and the guest registers and frames) for the first three messages of
+each class and selector, and the first one also adds the selector to `xlate-nobridge.log`; after that one line says
+`N messages so far` for every 10,000th. A guest loop that sends one selector thousands of times (the SDK compares two arrays
+of bridged strings with `String ==`, which sends `-[NSString _fastCStringContents:]` twice for each scalar, 18,322 messages in
+one run on the 4S) wrote 18.8 MB of the full lines before this limit and kept the process busy for about 20 s; the loop is
+finite (the same chain of guest return addresses 9,161 times for each of the two call sites) and the time was the writing. The `xl-collect` flag file is read once, at the first message that has no bridge.
+
 ### `XL_POOLCHECK` (the journal of object lifetimes)
 
 `XL_POOLCHECK` in the environment, or the file `/private/var/revenant/xl-poolcheck`, turns on a journal of the events that decide

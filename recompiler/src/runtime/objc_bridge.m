@@ -388,6 +388,40 @@ void xl_report_guest_frame(void);
 
 #define XL_NO_BRIDGE ((uint64_t)-1)
 
+#define XL_NOBRIDGE_SLOTS 4096
+#define XL_NOBRIDGE_FULL 3
+#define XL_NOBRIDGE_EVERY 10000
+
+static uint32_t xl_nobridge_seen(Class lookup, SEL selector)
+{
+    static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+    static struct { uintptr_t cls, sel; uint32_t count; } slots[XL_NOBRIDGE_SLOTS];
+    uint32_t at = (uint32_t)(((uintptr_t)lookup * 31u + (uintptr_t)selector) % XL_NOBRIDGE_SLOTS);
+    uint32_t seen = UINT32_MAX;
+    pthread_mutex_lock(&lock);
+    for (uint32_t probe = 0; probe < XL_NOBRIDGE_SLOTS; probe++) {
+        uint32_t index = (at + probe) % XL_NOBRIDGE_SLOTS;
+        if (!slots[index].count) {
+            slots[index].cls = (uintptr_t)lookup;
+            slots[index].sel = (uintptr_t)selector;
+        }
+        if (slots[index].cls == (uintptr_t)lookup && slots[index].sel == (uintptr_t)selector) {
+            seen = ++slots[index].count;
+            break;
+        }
+    }
+    pthread_mutex_unlock(&lock);
+    return seen;
+}
+
+static int xl_collect_enabled(void)
+{
+    static int enabled = -1;
+    if (enabled < 0)
+        enabled = getenv("XL_COLLECT") != NULL || access("/private/var/revenant/xl-collect", F_OK) == 0;
+    return enabled;
+}
+
 struct xl_arguments {
     uint64_t words[(XL_OFFSET_X9 - XL_OFFSET_X0) / sizeof(uint64_t)];
     uint64_t vectors[(XL_OFFSET_V8 - XL_OFFSET_V0) / sizeof(uint64_t)];
@@ -470,19 +504,26 @@ static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp,
     guest = (uintptr_t)CFDictionaryGetValue(xl_selector_table, selector);
     if (!guest) {
         if (xl_log_enabled()) {
-            fprintf(stderr, "xlate: no bridge for -[%s %s], sent dynamically with the signature of the host method\n", class_getName(lookup), sel_getName(selector));
-            int nb_fd = xl_log_open("xlate-nobridge.log");
-            FILE *nb = nb_fd >= 0 ? fdopen(nb_fd, "a") : NULL;
-            if (nb) {
-                fprintf(nb, "%c[%s %s]\n", class_isMetaClass(lookup) ? '+' : '-', class_getName(lookup), sel_getName(selector));
-                fclose(nb);
+            uint32_t seen = xl_nobridge_seen(lookup, selector);
+            if (seen <= XL_NOBRIDGE_FULL) {
+                fprintf(stderr, "xlate: no bridge for -[%s %s], sent dynamically with the signature of the host method\n", class_getName(lookup), sel_getName(selector));
+                if (seen == 1) {
+                    int nb_fd = xl_log_open("xlate-nobridge.log");
+                    FILE *nb = nb_fd >= 0 ? fdopen(nb_fd, "a") : NULL;
+                    if (nb) {
+                        fprintf(nb, "%c[%s %s]\n", class_isMetaClass(lookup) ? '+' : '-', class_getName(lookup), sel_getName(selector));
+                        fclose(nb);
+                    }
+                }
+                fprintf(stderr, "xlate:   receiver=%p isa=0x%x lookup=%p(%s) isMeta=%d imp=%p\n",
+                        (void *)receiver, receiver ? *(uint32_t *)receiver : 0, (void *)lookup, class_getName(lookup),
+                        class_isMetaClass(lookup), (void *)imp);
+                xl_report_guest_frame();
+            } else if (seen % XL_NOBRIDGE_EVERY == 0) {
+                fprintf(stderr, "xlate: no bridge for -[%s %s]: %u messages so far, the next ones are not written one by one\n", class_getName(lookup), sel_getName(selector), seen);
             }
-            fprintf(stderr, "xlate:   receiver=%p isa=0x%x lookup=%p(%s) isMeta=%d imp=%p\n",
-                    (void *)receiver, receiver ? *(uint32_t *)receiver : 0, (void *)lookup, class_getName(lookup),
-                    class_isMetaClass(lookup), (void *)imp);
-            xl_report_guest_frame();
         }
-        if (getenv("XL_COLLECT") || access("/private/var/revenant/xl-collect", F_OK) == 0) {
+        if (xl_collect_enabled()) {
             FILE *log = fopen("/private/var/revenant/xlate-missing.log", "a");
             if (log) { fprintf(log, "-[%s %s]\n", class_getName(lookup), sel_getName(selector)); fclose(log); }
             return 0;
