@@ -344,11 +344,22 @@ before the process starts) measures what the bridge costs without a line per mes
 ends it prints `xlate: threads: created|ended (guest stack N KiB, host stack M KiB): L live, C created, E ended, S KiB of
 guest stack live`. Each message that the guest sends to a host object is timed from the entry of `xl_h_objc_msgSend` to the
 decision (the routing); a message sent dynamically is timed again across the host call, and after the 1,000th, the
-5,000th and every 10,000th dynamic message the process prints `xlate: messages: N in all, D of them dynamic; routing R us in all, host call H us in the dynamic
-ones (A us each)`, followed by the four dynamic messages (class and selector) that took the most time, with their counts.
-It costs two `mach_absolute_time` calls and one lock per message while it is on, and nothing while it is off. It
-exists to answer one question that a log cannot, because `XL_LOG` slows the loop it measures: how long one message of a
-guest loop takes, and which message it is.
+5,000th and every 10,000th dynamic message the process prints `xlate: messages: N in all, D of them dynamic; routing R us
+in all (A us each), host call H us in the dynamic ones (B us each)`, followed by the four dynamic messages (class and
+selector) that took the most time, with their counts. A message of the 4S costs about 11 us of routing, and a dynamic one
+another 12 us in the host call (measured in a 300 s run of the Telegram app). The dynamic ones are not all of them: a
+message with a generated bridge, and a call that does not go through `xl_h_objc_msgSend` at all, are not counted there.
+A thread of the library, started with the flag, wakes every 20 ms, looks at the threads of the process that are running
+(`task_threads`, `thread_info`, then `thread_suspend`, `thread_get_state`, `thread_resume` for each), keeps the host `pc`
+of each in a table of 64-byte buckets, and every 5 s that had a running thread or a message prints `xlate: profile: S
+samples of running threads in 5 s, M messages (D dynamic), routing R us, host call of the dynamic ones H us` and the ten
+buckets with most samples: `N samples at 0xADDRESS (image+0xOFFSET symbol) [the library]`. The offset in the library
+resolves against `build/recompiler/corpus/recaptcha-dropN/xl/RecaptchaEnterprise.symbols.txt` (the lifted function is
+the greatest symbol at or below the address, `_sub_<guest address>`), so the window of a CPU spike shows whether the
+time is in the guest code, in the bridge or in the system. It costs two `mach_absolute_time` calls and one lock per
+message and a few system calls per sample while it is on, and nothing while it is off. It exists to answer what a log
+cannot, because `XL_LOG` slows the loop it measures: how long one message of a guest loop takes, which message it is,
+and where the time goes when it is not in messages.
 
 The `xlate: no bridge for -[Class selector]` lines on stderr, with the receiver and the guest frames, belong to the same
 switch. They say that a guest message to a host object found no generated bridge, which is not a failure: the message

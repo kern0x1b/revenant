@@ -444,12 +444,24 @@ static uint32_t xl_stats_dynamic;
 static uint64_t xl_stats_routing_ticks;
 static uint64_t xl_stats_call_ticks;
 
-static uint64_t xl_stats_us(uint64_t ticks)
+uint64_t xl_stats_microseconds(uint64_t ticks)
 {
     static mach_timebase_info_data_t base;
     if (!base.denom)
         mach_timebase_info(&base);
     return ticks * base.numer / base.denom / 1000u;
+}
+
+#define xl_stats_us xl_stats_microseconds
+
+void xl_stats_snapshot(uint32_t *messages, uint32_t *dynamic, uint64_t *routing_ticks, uint64_t *call_ticks)
+{
+    pthread_mutex_lock(&xl_stats_lock);
+    *messages = xl_stats_messages;
+    *dynamic = xl_stats_dynamic;
+    *routing_ticks = xl_stats_routing_ticks;
+    *call_ticks = xl_stats_call_ticks;
+    pthread_mutex_unlock(&xl_stats_lock);
 }
 
 static void xl_stats_message(uint64_t started)
@@ -477,10 +489,11 @@ static void xl_stats_report_locked(void)
             }
         }
     }
-    dprintf(2, "xlate: messages: %u in all, %u of them dynamic; routing %llu us in all, host call %llu us in the dynamic ones (%llu us each)\n",
+    dprintf(2, "xlate: messages: %u in all, %u of them dynamic; routing %llu us in all (%llu us each), host call %llu us in the dynamic ones (%llu us each)\n",
             xl_stats_messages, xl_stats_dynamic, (unsigned long long)xl_stats_us(xl_stats_routing_ticks),
+            (unsigned long long)xl_stats_us(xl_stats_routing_ticks) / (xl_stats_messages ? xl_stats_messages : 1),
             (unsigned long long)xl_stats_us(xl_stats_call_ticks),
-            (unsigned long long)xl_stats_us(xl_stats_routing_ticks + xl_stats_call_ticks) / (xl_stats_dynamic ? xl_stats_dynamic : 1));
+            (unsigned long long)xl_stats_us(xl_stats_call_ticks) / (xl_stats_dynamic ? xl_stats_dynamic : 1));
     for (unsigned t = 0; t < XL_STATS_TOP && top[t]; t++)
         dprintf(2, "xlate:   dynamic %c[%s %s] %u times, %llu us\n", class_isMetaClass((Class)top[t]->cls) ? '+' : '-',
                 class_getName((Class)top[t]->cls), sel_getName((SEL)top[t]->sel), top[t]->count,

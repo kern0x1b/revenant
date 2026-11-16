@@ -17,6 +17,8 @@ extern const struct xl_guest_slot xl_guest_slots[];
 extern const uint32_t xl_guest_slot_count;
 extern void xl_run_initializers(void);
 extern void xl_install_diagnostics(void);
+extern int xl_stats_enabled(void);
+extern void xl_profile_start(void);
 extern uint32_t xl_guest_low, xl_guest_high;
 extern unsigned long xl_guest_image_low, xl_guest_image_high, xl_guest_arena_low, xl_guest_arena_high;
 _Noreturn void xl_unsupported(const char *message);
@@ -149,6 +151,8 @@ int xl_library_init(void)
 {
     if (getenv("XL_CRASH") || access("/private/var/revenant/xl-crash", F_OK) == 0)
         xl_install_diagnostics();
+    if (xl_stats_enabled())
+        xl_profile_start();
     pthread_mutex_lock(&xl_library_lock);
     if (xl_library_state == XL_LIBRARY_IDLE) {
         xl_library_failure = xl_library_attach();
