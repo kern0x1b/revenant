@@ -396,8 +396,13 @@ measure whether one is there. The library test runs the host with the switch and
 
 ## The guest stack of a thread
 
-A thread that enters the guest maps its own stack: 16 MiB for the main thread (`XL_GUEST_STACK_MAIN`) and 4 MiB for every
-other (`XL_GUEST_STACK_THREAD`), both in `src/runtime/runtime.c`. The mapping is virtual and touched on use. When it fails
+A thread that enters the guest maps its own stack: 16 MiB for the main thread (`XL_GUEST_STACK_MAIN`) and, for every other,
+twice the stack the thread itself has (`pthread_get_stacksize_np`: 512 KiB for a libdispatch worker, so 1 MiB), rounded up
+to 64 KiB, at least 256 KiB and at most 4 MiB (`XL_GUEST_STACK_THREAD`), in `src/runtime/runtime.c` and
+`xl_stack_first` in `xl_tsd_guard.h`. The host stack bounds the depth of a guest call chain first, because every lifted call
+is a host call, so twice it leaves a margin. Before this rule every worker took 4 MiB: in a 10-execute run of the Telegram
+app (38 threads, 1.05 GB virtual) three mappings failed with errno 12 and the last stack was 1 MiB anyway. The mapping is
+virtual and touched on use. When it fails
 the runtime says so on stderr (`xlate: the guest stack of a thread could not be mapped with N bytes (errno E), trying half`)
 and tries half the size, down to 256 KiB (`XL_GUEST_STACK_FLOOR`); below that the thread stops with a message that names
 the call. The lowest page of each stack is `PROT_NONE`, a guard page. A `SIGSEGV` or `SIGBUS` whose address is in that

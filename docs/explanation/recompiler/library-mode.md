@@ -105,8 +105,8 @@ The runtime was written for a process of its own. Under `XL_LIBRARY` its process
 
 ## The guest in a foreign process
 
-- **Threads.** A thread that enters the guest gets its own `State` with a guest stack (16 MB for the main thread, 4 MB
-  for any other, virtual, touched on use; a mapping that fails is tried again with half the size down to 256 KB and
+- **Threads.** A thread that enters the guest gets its own `State` with a guest stack (16 MB for the main thread, twice
+  the thread's own stack for any other, between 256 KB and 4 MB, virtual, touched on use; a mapping that fails is tried again with half the size down to 256 KB and
   said on stderr, because a 32-bit process of iOS 6 has about 768 MB of address space below the shared cache, which
   the lifted library, the guest arena, the heap and the stacks of every worker share) and a fake thread-specific data
   block for `TPIDRRO_EL0`, as in an executable. A thread whose state cannot be set up names the call that failed

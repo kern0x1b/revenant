@@ -607,6 +607,9 @@ Proves the page-protection scheme of `src/runtime/xl_tsd_guard.h` on the build h
 `TPIDRRO_EL0` workaround. mmap, mprotect and SIGSEGV are POSIX, so `main.c` is compiled for the host and run directly. There
 is no device, lift or translation.
 
+It also checks `xl_stack_first`, the size a thread first tries for its guest stack (twice its own stack, rounded up to 64 KiB,
+between 256 KiB and 4 MiB), for eight host stack sizes from 0 to the largest `size_t`.
+
 It proves the arithmetic at this machine's page size, which `main.c` prints: 16384 on Apple Silicon. The 4 KiB device
 case rests on `xl_tsd_guard.h` reading the page size from `sysconf`. Each check in `main.c` forks with its own `alarm()`,
 a bounded parent-side wait and a SIGKILL fallback, after a real hang on a device. The outer 60-second limit in

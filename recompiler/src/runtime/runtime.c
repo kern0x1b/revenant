@@ -93,7 +93,8 @@ State *xl_current_state(void)
     if (posix_memalign((void **)&thread, 16, XL_THREAD_HEADER + XL_STATE_SIZE))
         xl_thread_state_failed("the allocation of the state", XL_THREAD_HEADER + XL_STATE_SIZE);
     memset(thread, 0, XL_THREAD_HEADER + XL_STATE_SIZE);
-    size_t first = pthread_main_np() ? XL_GUEST_STACK_MAIN : XL_GUEST_STACK_THREAD;
+    size_t first = pthread_main_np() ? XL_GUEST_STACK_MAIN
+                                     : xl_stack_first(pthread_get_stacksize_np(pthread_self()), XL_GUEST_STACK_FLOOR, XL_GUEST_STACK_THREAD);
     thread->stack = xl_stack_map(first, XL_GUEST_STACK_FLOOR, xl_map_anonymous, &thread->stack_size, &thread->guard_size);
     if (thread->stack == MAP_FAILED)
         xl_thread_state_failed("the mapping of the guest stack", XL_GUEST_STACK_FLOOR);

@@ -32,6 +32,13 @@ static inline void *xl_map_anonymous(size_t length)
     return mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
 }
 
+static inline size_t xl_stack_first(size_t host_stack, size_t floor, size_t cap)
+{
+    size_t twice = host_stack > cap ? cap : host_stack * 2;
+    twice = (twice + 0xffffu) & ~(size_t)0xffffu;
+    return twice < floor ? floor : twice > cap ? cap : twice;
+}
+
 static inline void *xl_stack_map(size_t first, size_t floor, void *(*mapper)(size_t), size_t *size, size_t *guard)
 {
     size_t length = first;
