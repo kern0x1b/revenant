@@ -733,10 +733,30 @@ void xl_h_objc_msgSend(State *state)
     SEL selector = (SEL)(uintptr_t)XL_REG(state, X1);
     if (xl_watch_ready >= 0)
         xl_watch_note(state, receiver, selector, "message");
-    if (access("/private/var/revenant/xl-trace", F_OK) == 0) {
-        static int xl_tfd = -1;
-        if (xl_tfd < 0)
-            xl_tfd = open("/private/var/revenant/xlate-msgtrace.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+    static int xl_trace_flags = -1;
+    static int xl_trace_fd = -1;
+    int trace_flags = __atomic_load_n(&xl_trace_flags, __ATOMIC_ACQUIRE);
+    if (trace_flags < 0) {
+        static pthread_mutex_t xl_trace_lock = PTHREAD_MUTEX_INITIALIZER;
+        pthread_mutex_lock(&xl_trace_lock);
+        trace_flags = __atomic_load_n(&xl_trace_flags, __ATOMIC_ACQUIRE);
+        if (trace_flags < 0) {
+            trace_flags = 0;
+            if (access("/private/var/revenant/xl-trace", F_OK) == 0) {
+                int fd = open("/private/var/revenant/xlate-msgtrace.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+                if (fd >= 0) {
+                    xl_trace_fd = fd;
+                    trace_flags = 1;
+                    if (access("/private/var/revenant/xl-trace-rc", F_OK) == 0)
+                        trace_flags |= 2;
+                }
+            }
+            __atomic_store_n(&xl_trace_flags, trace_flags, __ATOMIC_RELEASE);
+        }
+        pthread_mutex_unlock(&xl_trace_lock);
+    }
+    if (trace_flags & 1) {
+        int xl_tfd = xl_trace_fd;
         if (xl_tfd >= 0) {
             const char *sn = sel_getName(selector);
             static int xl_nf = -1;
@@ -748,8 +768,12 @@ void xl_h_objc_msgSend(State *state)
                 uint32_t isa = *(uint32_t *)(uintptr_t)receiver;
                 if (isa && write(xl_nf, (void *)(uintptr_t)isa, 4) == 4) {
                     const char *cn = xl_journal_class_name(isa);
-                    long rc = (cn[0] == '?' || cn[0] == 'u') ? -2 : class_isMetaClass((Class)(uintptr_t)isa) ? -1 : CFGetRetainCount((CFTypeRef)receiver);
-                    snprintf(cls, sizeof cls, " isa=0x%x class=%s rc=%ld", isa, cn ? cn : "?", rc);
+                    if (trace_flags & 2) {
+                        long rc = (cn[0] == '?' || cn[0] == 'u') ? -2 : class_isMetaClass((Class)(uintptr_t)isa) ? -1 : CFGetRetainCount((CFTypeRef)receiver);
+                        snprintf(cls, sizeof cls, " isa=0x%x class=%s rc=%ld", isa, cn ? cn : "?", rc);
+                    } else {
+                        snprintf(cls, sizeof cls, " isa=0x%x class=%s", isa, cn ? cn : "?");
+                    }
                 } else {
                     snprintf(cls, sizeof cls, " isa=0x%x(BADISA)", isa);
                 }

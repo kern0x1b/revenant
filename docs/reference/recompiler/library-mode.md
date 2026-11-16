@@ -328,6 +328,17 @@ of their own (`xl-trace`, whose ARC lines are now events of the journal below, `
 switch (the crash handler's file has the `xlate: signal 6` lines) and without it (the lines are on stderr and the file
 is not created).
 
+`xl-trace` is a tool for diagnosing the host, not a way to observe the guest unchanged: it writes a line to
+`xlate-msgtrace.log` for every message the guest sends to a host object, and for each one probes the receiver and its
+class with two `write` calls to `/dev/null`, so it slows the guest by two system calls and one write per message and
+shifts every race and every timing loop (a run with it can pass a place that an untraced run does not, or the other
+way round). The flag file is read once, at the first message of the process, so it has to exist before the process
+starts; removing it later does not stop a running process. The `rc=` field (the receiver's retain count) is off by
+default, because `CFGetRetainCount` sends `retainCount` to every receiver and so is itself a call that can fault on an
+object that is being freed; `/private/var/revenant/xl-trace-rc` next to `xl-trace` turns it on. A crash that appears
+only in a traced run is not a finding about the guest until it also appears without `xl-trace` (with `xl-crash`, which
+prints the host registers and the guest frames and does not change the timing).
+
 The `xlate: no bridge for -[Class selector]` lines on stderr, with the receiver and the guest frames, belong to the same
 switch. They say that a guest message to a host object found no generated bridge, which is not a failure: the message
 is then sent through the host method's own type encoding (`xl_dynamic_send`), whose arguments and result may be
