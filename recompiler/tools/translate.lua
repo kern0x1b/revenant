@@ -737,7 +737,7 @@ function translate(input, includes, out, images, opt)
     local function link(more)
         return os.execv("xcrun", table.join({"clang", "-target", "armv7-apple-ios6.0", "-isysroot", e.sdk, "-fuse-ld=" .. e.ld}, kind,
                                             backport_flags, {"-Wl,-no_objc_category_merging", "-Wl,-no_deduplicate"}, words(io.readfile(o("layout.txt"))),
-                                            lifted_objs, {o("runtime.o"), o("crypto.o"), o("half.o"), o("bridge.o"), o("objc_bridge.o"), o("swift_classes.o"), o("proxy.o"), o("alignment.o"), o("objc_compat.o"), o("host.o")},
+                                            lifted_objs, {o("runtime.o"), o("crypto.o"), o("half.o"), o("bridge.o"), o("objc_bridge.o"), o("swift_classes.o"), o("proxy.o"), o("journal.o"), o("alignment.o"), o("objc_compat.o"), o("host.o")},
                                             library and {o("library.o")} or {},
                                             words(getenv("XL_EXTRA_OBJ")), backport_libs, framework_flags, undef_flags, more or {},
                                             {"-framework", "Foundation", "-framework", "CoreGraphics", "-framework", "UIKit", "-lobjc", "-lz"},
@@ -746,6 +746,10 @@ function translate(input, includes, out, images, opt)
     if not link() then
         local retry = {}
         for symbol in io.readfile(o("link.err")):gmatch('"(_[%w_$]+)", referenced') do
+            if symbol:find("^_xl_") then
+                io.stderr:write(io.readfile(o("link.err")))
+                raise("linking %s failed: %s belongs to the runtime this build links, so it must not be left to resolve at load", binary, symbol)
+            end
             table.insert(retry, "-Wl,-U," .. symbol)
         end
         retry = unique(retry)
