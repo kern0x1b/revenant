@@ -67,6 +67,8 @@ uint64_t xl_invoke(uint64_t address, uint64_t argument);
 uint64_t xl_invoke_n(uint64_t address, const uint64_t *arguments, unsigned count);
 uintptr_t xl_object_in(uint64_t guest, const char *symbol, unsigned index);
 uintptr_t xl_object_in_raw(uint64_t guest, const char *symbol, unsigned index);
+uintptr_t xl_object_in_owned(uint64_t guest, const char *symbol, unsigned index);
+int xl_selector_returns_owned(const char *name);
 uint64_t xl_object_out(uintptr_t host);
 uintptr_t xl_object_in_word(uint64_t guest, const char *symbol, unsigned index);
 uint64_t xl_object_out_word(uintptr_t host);

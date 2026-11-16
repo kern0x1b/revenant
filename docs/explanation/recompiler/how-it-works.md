@@ -374,6 +374,15 @@ print on the iPad 2 what objc4 printed.
   `_objc_rootAutorelease` of a proxied guest object is bridged by hand: the guest's reference is handed to the pool as the
   proxy, and the guest's own count is released at once, because the proxy already holds one.
 
+  A guest method that the host calls hands its result back at the count its selector promises. An object the host receives
+  from a selector of the `alloc`, `new`, `copy` or `mutableCopy` family is owned by the host, the guest's implementation
+  returns it at +1, and the host will release it once. The proxy that `xl_object_in` makes of such a result sits in the pool
+  as every proxy does, so the result of those selectors goes through `xl_object_in_owned` (`xl_selector_returns_owned` in
+  the generic implementations, the selector's name in the generated ones): `xl_proxy_owned` retains the proxy for the host
+  and releases the guest's returned +1, which the proxy's own count replaces. Without it the proxy of `[userInfo copy]`,
+  which `-[NSError initWithDomain:code:userInfo:]` stores and `-[NSError dealloc]` releases, reached the pool at the count of
+  its two conversions with the host's release taken from the pool's share, and the pool's drain released a freed proxy.
+
   Two tables answer the questions, under two locks (`proxy.m` has no other dependency than the guest's `swift_retain` and
   `swift_release` and the lookup of a shadow, so `recompiler/tests/proxytable` runs it on the Mac with counters in their
   place): the classes (guest class to proxy class, a read-write lock) and the proxies (guest pointer to a weak reference to
