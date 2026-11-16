@@ -52,8 +52,6 @@ var destroyed = 0
     @objc required init?(coder: NSCoder) { super.init(coder: coder) }
 }
 
-/// An NSError of the host with stored fields of its own, as the SDK's errors have: the host lays out the NSError (the
-/// guest's words are wider), and the guest's runtime must not read it through the layout of its own error box.
 @objc(FixtureTrio) final class Trio: NSError {
     let label: String
     let amount: Int
@@ -182,9 +180,6 @@ struct Point {
     throw Trio(number: number)
 }
 
-/// The Error of an NSError becomes an NSError again (the runtime's _bridgeErrorToNSError): the NSError the host made is
-/// the one it returns, and nothing of it or of the objects around it changes. The plain NSErrors are made between the
-/// Trio, so a write past the end of one lands in the next.
 @inline(never) func bridged() {
     var trios: [Trio] = []
     var plains: [NSError] = []

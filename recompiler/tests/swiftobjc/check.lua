@@ -7,10 +7,6 @@ local EXPECTED = {
     "cf.string.length", "error.userinfo", "error.survives", "error.bridge", "error.bridge.catch", "error.bridge.fields", "error.bridge.neighbors"
 }
 
--- The guest runtime turns an Error into an NSError with _swift_stdlib_bridgeErrorToNSError. It must tell a real NSError
--- (the host's, laid out as the host does) from a box of its own before it reads the domain where the box keeps it:
--- read through the box's layout, the domain of a host NSError is past the object, and the lazy initialization writes the
--- code over the NSError's user info. The runtime of the earlier recipe read the domain first.
 local function check_error_bridge(corpus, libs)
     local core = path.join(libs, "libswiftCore.dylib")
     local text = os.iorunv("otool", {"-arch", "arm64", "-tV", core})
