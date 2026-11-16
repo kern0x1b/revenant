@@ -35,7 +35,9 @@ unsigned long xl_guest_image_low, xl_guest_image_high, xl_guest_arena_low, xl_gu
 xl_lifted xl_imp_lookup(uint64_t address);
 
 #define XL_REG(state, name) (*(uint64_t *)((char *)(state) + XL_OFFSET_##name))
-#define XL_GUEST_STACK_SIZE (16u << 20)
+#define XL_GUEST_STACK_MAIN (16u << 20)
+#define XL_GUEST_STACK_THREAD (4u << 20)
+#define XL_GUEST_STACK_FLOOR (256u << 10)
 
 #ifdef XL_LIBRARY
 extern void xl_library_ensure(void);
@@ -53,17 +55,26 @@ static int xl_map_on;
 struct xl_thread {
     void *stack;
     void *tsd_pages;
+    size_t stack_size;
 };
 
-#define XL_THREAD_HEADER 16u
+#define XL_THREAD_HEADER 32u
 #include "xl_tsd_guard.h"
 
 static void xl_state_destroy(void *value)
 {
     struct xl_thread *thread = (struct xl_thread *)((char *)value - XL_THREAD_HEADER);
-    munmap(thread->stack, XL_GUEST_STACK_SIZE);
+    munmap(thread->stack, thread->stack_size);
     xl_tsd_free(thread->tsd_pages);
     free(thread);
+}
+
+static void xl_thread_state_failed(const char *what, size_t size)
+{
+    int error = errno;
+    fprintf(stderr, "xlate: cannot set up a thread for translated code: %s of %lu bytes failed, errno %d\n", what, (unsigned long)size, error);
+    xl_vm_map_dump(fileno(stderr), "thread state");
+    abort();
 }
 
 static void xl_state_key_create(void)
@@ -79,15 +90,23 @@ State *xl_current_state(void)
         return state;
     struct xl_thread *thread;
     if (posix_memalign((void **)&thread, 16, XL_THREAD_HEADER + XL_STATE_SIZE))
-        abort();
+        xl_thread_state_failed("the allocation of the state", XL_THREAD_HEADER + XL_STATE_SIZE);
     memset(thread, 0, XL_THREAD_HEADER + XL_STATE_SIZE);
-    thread->stack = mmap(NULL, XL_GUEST_STACK_SIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
-    if (thread->stack == MAP_FAILED)
-        abort();
+    size_t size = pthread_main_np() ? XL_GUEST_STACK_MAIN : XL_GUEST_STACK_THREAD;
+    for (;;) {
+        thread->stack = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+        if (thread->stack != MAP_FAILED)
+            break;
+        if (size <= XL_GUEST_STACK_FLOOR)
+            xl_thread_state_failed("the mapping of the guest stack", size);
+        fprintf(stderr, "xlate: the guest stack of a thread could not be mapped with %lu bytes (errno %d), trying half\n", (unsigned long)size, errno);
+        size >>= 1;
+    }
+    thread->stack_size = size;
     thread->tsd_pages = xl_tsd_alloc();
     state = (State *)((char *)thread + XL_THREAD_HEADER);
     XL_REG(state, TPIDRRO_EL0) = xl_tsd_base(thread->tsd_pages);
-    XL_REG(state, SP) = ((uintptr_t)thread->stack + XL_GUEST_STACK_SIZE) & ~15u;
+    XL_REG(state, SP) = ((uintptr_t)thread->stack + size) & ~15u;
     pthread_setspecific(xl_state_key, state);
     if (xl_diagnostics_installed)
         xl_thread_altstack();

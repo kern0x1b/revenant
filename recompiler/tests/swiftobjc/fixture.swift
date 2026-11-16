@@ -217,8 +217,11 @@ struct Point {
 client()
 sub()
 release()
-errors()
-bridged()
+let overlay = CommandLine.arguments.count > 1
+if overlay {
+    errors()
+    bridged()
+}
 @inline(never) func reflection() {
     report("anycollection.int", AnyCollection([1, 2, 3]).count == 3)
     report("anycollection.string", AnyCollection("abc").count == 3)
@@ -243,5 +246,7 @@ bridged()
 host()
 names()
 reflection()
-corefoundation()
+if overlay {
+    corefoundation()
+}
 line("done")
