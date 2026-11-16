@@ -647,11 +647,13 @@ function translate(input, includes, out, images, opt)
         run(clang, table.join(host, {"-I", out, "-I", runtime, "-I", path.join(lab, "include")}, extra_cflags, {"-c", path.join(runtime, "library.c"), "-o", o("library.o")}))
         writelines(o("exports.txt"), table.join({"_xl_library_init", "_xl_library_diagnostics", "_xl_library_class"}, readlines(o("registry-exports.txt"))))
     end
+    local runtime_objects = {o("runtime.o"), o("crypto.o"), o("half.o")}
     for _, source in ipairs({path.join(runtime, "bridge.m"), path.join(runtime, "objc_bridge.m"), path.join(runtime, "swift_classes.m"),
                              path.join(runtime, "proxy.m"), path.join(runtime, "journal.m"), path.join(runtime, "alignment.m"), path.join(runtime, "objc_compat.m"), o("host.m")}) do
         local object = o(path.basename(source) .. ".o")
         run(clang, table.join(host, {"-fno-objc-arc", "-fblocks", "-I", out, "-I", runtime, "-iquote", incdir}, extra_cflags, {"-c", source, "-o", object}))
         print("renamed %d sections", macho.rename_sections(object, true))
+        table.insert(runtime_objects, object)
     end
 
     local libraries = otool_libraries(input)
@@ -737,7 +739,7 @@ function translate(input, includes, out, images, opt)
     local function link(more)
         return os.execv("xcrun", table.join({"clang", "-target", "armv7-apple-ios6.0", "-isysroot", e.sdk, "-fuse-ld=" .. e.ld}, kind,
                                             backport_flags, {"-Wl,-no_objc_category_merging", "-Wl,-no_deduplicate"}, words(io.readfile(o("layout.txt"))),
-                                            lifted_objs, {o("runtime.o"), o("crypto.o"), o("half.o"), o("bridge.o"), o("objc_bridge.o"), o("swift_classes.o"), o("proxy.o"), o("journal.o"), o("alignment.o"), o("objc_compat.o"), o("host.o")},
+                                            lifted_objs, runtime_objects,
                                             library and {o("library.o")} or {},
                                             words(getenv("XL_EXTRA_OBJ")), backport_libs, framework_flags, undef_flags, more or {},
                                             {"-framework", "Foundation", "-framework", "CoreGraphics", "-framework", "UIKit", "-lobjc", "-lz"},
