@@ -1161,6 +1161,11 @@ two sha256 and, when `telegram-build/tools/recaptcha_sdk.lua` is there, verifies
 digests. It needs `XL_SWIFTOBJC_LIBS` and `BACKPORTS_DIR` in the environment (and `REVENANT_CACHE` in a worktree); the second translation of an
 unchanged lift reuses the lifted objects (`lift.stamp`).
 
+The library link takes the runtime objects from the same loop that compiles them (`runtime_objects` in `tools/translate.lua`), and a
+link that fails on an undefined `_xl_*` symbol is not retried with `-U`: those symbols are the runtime's own, nothing in the application
+defines them, and a lazy binding would stop the program at its first call. `drop.lua` also reads `nm -u` of the library before it
+writes the drop and stops on any `_xl_*` import (drop20 shipped five `_xl_journal_*` imports because `journal.o` was not in the link).
+
 ### cxxinit and refrepro
 
 These build targets each translate an app to an `.app`, for a device or the emulator.
