@@ -270,9 +270,9 @@
    "group": "sdk",
    "version": "~57.0.2",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Recipe packages\/e\/expo-brightness (npm 57.0.2, no patch) installs; the sources use only UIScreen brightness (iOS 5) and are not compiled into the host yet."
+   "status": "partial",
+   "verified": "build",
+   "note": "Recipe packages\/e\/expo-brightness (npm 57.0.2, no patch) installs; the sources use only UIScreen brightness (iOS 5); compiled into the host (links, not yet exercised on the phone)."
   },
   {
    "id": "expo-brownfield",
@@ -378,9 +378,9 @@
    "group": "sdk",
    "version": "~57.0.2",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Recipe packages\/e\/expo-device (npm 57.0.2, patch device-ios6.patch) installs and its patch applies; not compiled into the host yet. The patch removes the Mac Catalyst and iOS-app-on-Mac checks (iOS 13, 14) and adds the model names of the devices iOS 6 runs on (iPhone 3GS to 5, iPod touch 4 and 5, iPad 2 to 4, iPad mini)."
+   "status": "partial",
+   "verified": "build",
+   "note": "Recipe packages\/e\/expo-device (npm 57.0.2, patch device-ios6.patch) installs and its patch applies; compiled into the host (links, not yet exercised on the phone). The patch removes the Mac Catalyst and iOS-app-on-Mac checks (iOS 13, 14) and adds the model names of the devices iOS 6 runs on (iPhone 3GS to 5, iPod touch 4 and 5, iPad 2 to 4, iPad mini)."
   },
   {
    "id": "expo-document-picker",
@@ -522,9 +522,9 @@
    "group": "sdk",
    "version": "~57.0.2",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Recipe packages\/e\/expo-linear-gradient (npm 57.0.2, no patch) installs; the sources are CAGradientLayer and UIKit and are not compiled into the host yet."
+   "status": "partial",
+   "verified": "build",
+   "note": "Recipe packages\/e\/expo-linear-gradient (npm 57.0.2, no patch) installs; the sources are CAGradientLayer and UIKit and are compiled into the host (links, not yet exercised on the phone)."
   },
   {
    "id": "expo-linking",
@@ -648,9 +648,9 @@
    "group": "sdk",
    "version": "~57.0.2",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Recipe packages\/e\/expo-network (npm 57.0.3, patch network-ios6.patch) installs and its patch applies; not compiled into the host yet. The Network.framework path monitor (iOS 12) is replaced by SCNetworkReachability (callback on its own queue): the state is WIFI, CELLULAR (WWAN flag) or NONE, never ETHERNET or UNKNOWN, and isInternetReachable equals isConnected as upstream."
+   "status": "partial",
+   "verified": "build",
+   "note": "Recipe packages\/e\/expo-network (npm 57.0.3, patch network-ios6.patch) installs and its patch applies; compiled into the host (links, not yet exercised on the phone). The Network.framework path monitor (iOS 12) is replaced by SCNetworkReachability (callback on its own queue): the state is WIFI, CELLULAR (WWAN flag) or NONE, never ETHERNET or UNKNOWN, and isInternetReachable equals isConnected as upstream."
   },
   {
    "id": "expo-notifications",
@@ -720,9 +720,9 @@
    "group": "sdk",
    "version": "~57.0.4",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Recipe packages\/e\/expo-secure-store (npm 57.0.4, patch secure-store-ios6.patch) installs and its patch applies; the module is not compiled into the host yet. The patch removes LocalAuthentication, SecAccessControl and the passcode-bound class (iOS 8): canUseBiometricAuthentication answers false, requireAuthentication true and WHEN_PASSCODE_SET_THIS_DEVICE_ONLY reject with an exception that names iOS 8; the other keychain classes use SecItem as before."
+   "status": "partial",
+   "verified": "build",
+   "note": "Recipe packages\/e\/expo-secure-store (npm 57.0.4, patch secure-store-ios6.patch) installs and its patch applies; the module is compiled into the host (links, not yet exercised on the phone). The patch removes LocalAuthentication, SecAccessControl and the passcode-bound class (iOS 8): canUseBiometricAuthentication answers false, requireAuthentication true and WHEN_PASSCODE_SET_THIS_DEVICE_ONLY reject with an exception that names iOS 8; the other keychain classes use SecItem as before."
   },
   {
    "id": "expo-sensors",
@@ -801,9 +801,9 @@
    "group": "sdk",
    "version": "~57.0.3",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Recipe packages\/e\/expo-store-review (npm 57.0.3, patch store-review-ios6.patch) installs and its patch applies; not compiled into the host yet. SKStoreReviewController (iOS 10.3) and window scenes (iOS 13) are removed: isAvailableAsync answers false, there is no native requestReview, so the module's JavaScript opens the store page by URL."
+   "status": "partial",
+   "verified": "build",
+   "note": "Recipe packages\/e\/expo-store-review (npm 57.0.3, patch store-review-ios6.patch) installs and its patch applies; compiled into the host (links, not yet exercised on the phone). SKStoreReviewController (iOS 10.3) and window scenes (iOS 13) are removed: isAvailableAsync answers false, there is no native requestReview, so the module's JavaScript opens the store page by URL."
   },
   {
    "id": "expo-symbols",

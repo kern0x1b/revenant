@@ -7,7 +7,7 @@ package("expo-network")
 
     add_urls("https://registry.npmjs.org/expo-network/-/expo-network-$(version).tgz")
     add_versions("57.0.3", "4a11d96e93022307170e62f2ff35febd7c1fe3b813fb8a134ecf53567d51d2f1")
-    add_patches("57.0.3", path.join(os.scriptdir(), "patches", "network-ios6.patch"), "6ee67f0f5a717c0b05abca2424ad1034f5ca8126efda5e8705195691bb9f3ff1")
+    add_patches("57.0.3", path.join(os.scriptdir(), "patches", "network-ios6.patch"), "e3d211bed1ad153a06aa385fad178f69b48789cf3d534f55c73dbf40dd6170f1")
 
     on_install(function (package)
         os.cp("*", package:installdir() .. "/")
