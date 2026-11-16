@@ -394,6 +394,49 @@ measure whether one is there. The library test runs the host with the switch and
 `ok` names, a config line with `host_reserve=0` and `host_low=0x0`, no inaccessible region of the host part's size after
 `xl_reserve`, the guest range still held, and the library's image after `xl_load`.
 
+## The guest stack of a thread
+
+A thread that enters the guest maps its own stack: 16 MiB for the main thread (`XL_GUEST_STACK_MAIN`) and 4 MiB for every
+other (`XL_GUEST_STACK_THREAD`), both in `src/runtime/runtime.c`. The mapping is virtual and touched on use. When it fails
+the runtime says so on stderr (`xlate: the guest stack of a thread could not be mapped with N bytes (errno E), trying half`)
+and tries half the size, down to 256 KiB (`XL_GUEST_STACK_FLOOR`); below that the thread stops with a message that names
+the call. The lowest page of each stack is `PROT_NONE`, a guard page. A `SIGSEGV` or `SIGBUS` whose address is in that
+page prints, before the crash dump, `xlate: the guest stack of this thread overflowed: it holds N bytes (0x… to 0x…) and the
+fault is in its guard page; …`, so a stack overflow is told from a bad pointer. The mapping, the halving and the guard are one
+function, `xl_stack_map` in `src/runtime/xl_tsd_guard.h`, which the `tsdguard` check runs on the host with a mapper that
+fails above a limit and a mapper that always fails.
+
+The reason for the sizes is the address space of a 32-bit process of iOS 6, about 768 MB below the shared cache, which the
+lifted library, the guest arena, the heap and the stacks of every worker share. The real SDK runs more than a dozen threads
+(a crash report of the 4S numbers 18), and each takes a stack, so the size of a worker's stack is paid that many times.
+
+## `sysctl` and `sysctlbyname`
+
+`sysctl` and `sysctlbyname` are manual bridges (`src/runtime/sysctl_bridge.m`): the guest's structures are not the host's, so a
+value is translated by the layout of its name and not by a size. The kind of a name comes from a table by number and, for
+every other name, from the format string that the kernel itself reports (`sysctl` with `{0, 4, mib…}`, the format of an
+object), cached for 64 names:
+
+| name | host value | guest value | what the bridge does |
+| --- | --- | --- | --- |
+| `kern.boottime` | `timeval`, 8 bytes | `timeval`, 16 bytes | `tv_sec` widened to 64 bits, `tv_usec` to 32 plus padding |
+| `vm.loadavg` (`S,loadavg`) | `loadavg`, 16 bytes | 24 bytes | the three `fixpt_t` and the scale, widened |
+| `kern.proc.all`, `.pid`, `.pgrp`, `.session`, `.tty`, `.uid`, `.ruid`, `.lcid` | `kinfo_proc`, 492 bytes | 648 bytes | every field converted (`extern_proc` 296 bytes, `eproc` 352; pointers zero-extended); the whole list is fetched on the host and `ENOMEM` with length 0 is decided there, because the iOS 6 kernel answers a small buffer with success and no bytes |
+| `S,timeval` of another name | 8 bytes | 16 bytes | as `kern.boottime` |
+| a format `L` or `LU` (`long`, `unsigned long`) | 4 bytes | 8 bytes | widened, signed or unsigned |
+| `S,clockinfo`, `S,xsw_usage`, the `CTL_SYSCTL` tree, `kern.procargs`, `kern.procargs2`, `CTL_NET` `PF_ROUTE` with `NET_RT_DUMP` or `NET_RT_FLAGS` (any other `PF_ROUTE` name is the last row) | the same in both | the same | passed through |
+| an `int`, a quad, a string or a node (`hw.ncpu`, `hw.memsize`, `hw.machine`, `kern.ostype`, `kern.osversion`, `kern.hostname`, `kern.argmax`, …) | the same in both | the same | passed through |
+| a name that does not exist | | | the host's own error (`ENOENT`), returned as it is |
+| any other structure that exists | | | stderr `xlate: sysctl NAME exists on this system but the bridge has no arm64 layout for its value …` and `ENOTSUP` |
+
+A buffer that is too small for a translated value gives `ENOMEM` and a length of 0, as the 64-bit kernel does; a size probe
+(no buffer) gives the guest size. A write (`newp`) to a translated name gives `ENOTSUP`. The class of failure that this
+replaces: the guest's `_revenant_clock_gettime` (in `libc++.1` and `libswift_Concurrency`) loops until two reads of
+`kern.boottime` agree; the 8-byte answer left the second half of the 16-byte buffer as it was, they never agreed, and four
+threads spun at full speed. `xl-sysctl-trace` (above) writes a line for each of the first 50 calls and every thousandth after
+them. `hostbridges` checks the classes of the table against the Mac's answers (`recompiler/tests/data/hostbridges/expected.txt`)
+and on the phone, and `sysctl-unmapped` the last row.
+
 ## What the phone's dyld and kernel do
 
 Measured on iOS 6.1.3, armv7:
