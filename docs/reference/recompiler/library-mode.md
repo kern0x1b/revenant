@@ -343,12 +343,55 @@ prints the host registers and the guest frames and does not change the timing).
 before the process starts) measures what the bridge costs without a line per message. For every thread that starts or
 ends it prints `xlate: threads: created|ended (guest stack N KiB, host stack M KiB): L live, C created, E ended, S KiB of
 guest stack live`. Each message that the guest sends to a host object is timed from the entry of `xl_h_objc_msgSend` to the
-decision (the routing); a message sent dynamically is timed again across the host call, and after every 20,000th dynamic
-message the process prints `xlate: messages: N in all, D of them dynamic; routing R us in all, host call H us in the dynamic
-ones (A us each)`, followed by the four dynamic messages (class and selector) that took the most time, with their counts.
-It costs two `mach_absolute_time` calls and one lock per message while it is on, and nothing while it is off. It
-exists to answer one question that a log cannot, because `XL_LOG` slows the loop it measures: how long one message of a
-guest loop takes, and which message it is.
+decision (the routing); a message sent dynamically is timed again across the host call, and after the 1,000th, the
+5,000th and every 10,000th dynamic message the process prints `xlate: messages: N in all, D of them dynamic; routing R us
+in all (A us each), host call H us in the dynamic ones (B us each)`, followed by the four dynamic messages (class and
+selector) that took the most time, with their counts. A message of the 4S costs about 11 us of routing, and a dynamic one
+another 12 us in the host call (measured in a 300 s run of the Telegram app). The dynamic ones are not all of them: a
+message with a generated bridge, and a call that does not go through `xl_h_objc_msgSend` at all, are not counted there.
+A thread of the library, started with the flag, wakes every 20 ms, looks at the threads of the process that are running
+(`task_threads`, `thread_info`, then `thread_suspend`, `thread_get_state`, `thread_resume` for each), keeps the host `pc`
+of each in a table of 64-byte buckets, and every 5 s that had a running thread or a message prints `xlate: profile: S
+samples of running threads in 5 s, M messages (D dynamic), routing R us, host call of the dynamic ones H us` and the ten
+buckets with most samples: `N samples at 0xADDRESS (image+0xOFFSET symbol) [the library]`, then the eight pairs of receiver
+class and selector that the guest sent most often in the window, dynamic or not, with their count and the routing time:
+`sent -[Class selector] N times, T us` (the 5 s window is the one a spike falls into, so a loop of 320,000 messages of one
+selector names itself). The offset in the library
+resolves against `build/recompiler/corpus/recaptcha-dropN/xl/RecaptchaEnterprise.symbols.txt` (the lifted function is
+the greatest symbol at or below the address, `_sub_<guest address>`), so the window of a CPU spike shows whether the
+time is in the guest code, in the bridge or in the system. It costs two `mach_absolute_time` calls and one lock per
+message and a few system calls per sample while it is on, and nothing while it is off. It exists to answer what a log
+cannot, because `XL_LOG` slows the loop it measures: how long one message of a guest loop takes, which message it is,
+and where the time goes when it is not in messages.
+
+`recompiler/tools/profile_symbols.lua` reads those lines and does the lookup: `./xmakew l -P . recompiler/tools/profile_symbols.lua
+build/recompiler/corpus/recaptcha-dropN/xl/RecaptchaEnterprise.symbols.txt STDERR.txt` takes every `samples at … (Image+0xOFFSET …)`
+line whose image name contains `RecaptchaEnterprise` (a third argument names another part), finds the greatest text symbol of
+the symbols file at or below the offset, and prints it with the distance into the function, the guest address a `_sub_<address>`
+symbol stands for and the guest image that address is in (`0x18000000` the SDK, `0x18200000` libswiftCore, `0x18800000` libc++,
+`0x18a00000` CoreFoundation, `0x18f00000` the Foundation overlay, `0x19600000` the libxl-guest stubs: the layout of the
+reCAPTCHA drops). Lines of a system image keep the name the process gave them. The report has one block per window of 5 s
+and then the functions with their samples added up over all windows. The offsets are exact only to the 64-byte bucket, so
+a function is named, not an instruction. `--self-test` runs it on a made-up profile. The symbols file is the one
+`translate.lua` writes before `strip -x`, of the same drop as the library that ran, because the symbol names carry the
+guest address and a different drop moves them. An example, a made-up profile of two windows against the symbols of drop33:
+
+    window 1: 247 samples, 3100 messages (12 dynamic), routing 41000 us, host call 150 us
+        160  _sub_18fb9358+0x10  guest 0x18fb9358 (Foundation overlay)
+         70  _sub_193b0ab0.island.2+0x0  guest 0x193b0ab0 (Foundation overlay)
+         17  libobjc.A.dylib+0x6a40 objc_msgSend
+    window 2: 3 samples, 20 messages (0 dynamic), routing 90 us, host call 0 us
+          3  _xl_imp_2861+0x4  host code of the library
+
+    by function over all windows:
+        160  _sub_18fb9358
+         70  _sub_193b0ab0.island.2
+         17  libobjc.A.dylib objc_msgSend
+          3  _xl_imp_2861
+
+Reading a window: many samples and few messages is guest code (or code of the system that no message reaches); many
+messages and the samples in `objc_msgSend`, `CFDictionaryGetValue` or in `_xl_*` symbols is the bridge; samples in `_sub_*`
+of the Foundation overlay or libswiftCore with few messages is the guest's own Swift code.
 
 The `xlate: no bridge for -[Class selector]` lines on stderr, with the receiver and the guest frames, belong to the same
 switch. They say that a guest message to a host object found no generated bridge, which is not a failure: the message
@@ -684,6 +727,35 @@ Not covered: protocols are not namespaced (`objc_getProtocol` is not bridged); `
 `NSStringFromClass` are not bridged, so a guest that goes through them meets the prefixed names; the secondary guest
 images of an SDK (not the runtime) are namespaced like the runtime, so a host reaches by name only the classes of the
 first image.
+
+### The burst of CPU in a long run of the SDK
+
+In the soak of the Telegram app (10 `execute` calls, then one asynchronous `execute` every 30 s for 300 s, a wrong site key,
+no log) the process idles at 2 % CPU, each `execute` costs 0.4 to 0.5 s of wall time, and once, about 110 to 120 s after the
+start, one thread runs flat out for about 5 s: 7.9 s of CPU in the 10 s window on drop31, 5.96 s on drop32, 5.77 s and 5.68 s
+on drop33 and drop34, at the same place in every run, with no growth of memory and two to four more threads. It is finite, it
+does not repeat, and it is not an effect of the log or of the stack size (it appears without `XL_LOG` and with the adaptive
+stacks).
+
+The `xl-stats` window of that burst (drop34, 236 samples in 5 s, so one thread running 94 % of the time) shows 334,304
+messages, 248 of them dynamic, and one selector in 85 % of them: `-[__NSCFString characterAtIndex:]` 283,395 times, 1,786 ms
+of routing (6.3 us each), then `-[RCAx_GPBFieldDescriptor fieldType]` 12,465, `-[__NSArrayM objectAtIndexedSubscript:]`
+5,871, `countByEnumeratingWithState:objects:count:` 3,387 and `-[__NSCFString lengthOfBytesUsingEncoding:]` 2,876, which are the
+Protocol Buffers walk of every other window. So the SDK, once, reads a long `NSString` one UTF-16 unit at a time, which is how
+Swift indexes a bridged string, about 57,000 reads a second. The top program counters of the window are the bridge, not the
+guest: `mach_absolute_time` (the timer of `xl-stats` itself, 20 % of the samples), `CFDictionaryGetValue` (the lookups of the
+route) and `_xl_tail`. An ordinary asynchronous `execute` in the same run is 14,000 to 23,000 messages, 1,000 to 1,700 of
+them dynamic.
+
+What one message costs, measured with the flag on (so with its two timer reads): 8 us of routing on average over the 160,848
+messages of a window of the first 10 `execute` calls of the harness, 11 us over the first 30,000, 6.3 us for
+`characterAtIndex:`; a dynamic message costs another 12 to 28 us in the host call. That is the whole bridge, for a message
+that returns an integer: no string is converted, so a cache of bridged strings has nothing to cache. A fast path that
+skipped the routing of this one selector would save at most the routing share of the burst, about a third of 5 s, once per
+run. The measurements do not justify it: it adds a second route to a bridge that has one, the burst ends by itself, and the
+cost on the phone is a few seconds of one core in the background. If it ever has to be cut, the places are the five
+dictionary lookups and the lock of `xl_h_objc_msgSend` and `xl_route` (the variadic table, the guest imps, the shadow imps,
+the variant cache under `xl_variant_lock`), and the `getenv("XL_TRACK_DIAG")` that the function calls on every message.
 
 ## Dead-strip and lazy loading
 

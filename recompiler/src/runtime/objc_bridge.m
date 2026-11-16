@@ -425,7 +425,9 @@ static int xl_collect_enabled(void)
 }
 
 #define XL_STATS_SLOTS 256
-#define XL_STATS_EVERY 20000u
+#define XL_STATS_EVERY 10000u
+#define XL_STATS_FIRST 1000u
+#define XL_STATS_SECOND 5000u
 #define XL_STATS_TOP 4
 
 struct xl_stats_slot {
@@ -442,7 +444,7 @@ static uint32_t xl_stats_dynamic;
 static uint64_t xl_stats_routing_ticks;
 static uint64_t xl_stats_call_ticks;
 
-static uint64_t xl_stats_us(uint64_t ticks)
+uint64_t xl_stats_microseconds(uint64_t ticks)
 {
     static mach_timebase_info_data_t base;
     if (!base.denom)
@@ -450,12 +452,72 @@ static uint64_t xl_stats_us(uint64_t ticks)
     return ticks * base.numer / base.denom / 1000u;
 }
 
-static void xl_stats_message(uint64_t started)
+#define xl_stats_us xl_stats_microseconds
+
+void xl_stats_snapshot(uint32_t *messages, uint32_t *dynamic, uint64_t *routing_ticks, uint64_t *call_ticks)
+{
+    pthread_mutex_lock(&xl_stats_lock);
+    *messages = xl_stats_messages;
+    *dynamic = xl_stats_dynamic;
+    *routing_ticks = xl_stats_routing_ticks;
+    *call_ticks = xl_stats_call_ticks;
+    pthread_mutex_unlock(&xl_stats_lock);
+}
+
+#define XL_STATS_WINDOW_SLOTS 1024
+#define XL_STATS_WINDOW_TOP 8
+
+static struct xl_stats_slot xl_stats_window[XL_STATS_WINDOW_SLOTS];
+
+static void xl_stats_window_note_locked(Class lookup, SEL selector, uint64_t ticks)
+{
+    unsigned start = (unsigned)((((uintptr_t)selector >> 2) ^ ((uintptr_t)lookup >> 4)) * 2654435761u) % XL_STATS_WINDOW_SLOTS;
+    for (unsigned probe = 0; probe < XL_STATS_WINDOW_SLOTS; probe++) {
+        struct xl_stats_slot *slot = &xl_stats_window[(start + probe) % XL_STATS_WINDOW_SLOTS];
+        if (!slot->count) {
+            slot->cls = (uintptr_t)lookup;
+            slot->sel = (uintptr_t)selector;
+        }
+        if (slot->cls == (uintptr_t)lookup && slot->sel == (uintptr_t)selector) {
+            slot->count++;
+            slot->ticks += ticks;
+            return;
+        }
+    }
+}
+
+void xl_stats_window_report(void)
+{
+    pthread_mutex_lock(&xl_stats_lock);
+    const struct xl_stats_slot *top[XL_STATS_WINDOW_TOP] = {0};
+    for (unsigned i = 0; i < XL_STATS_WINDOW_SLOTS; i++) {
+        const struct xl_stats_slot *slot = &xl_stats_window[i];
+        if (!slot->count)
+            continue;
+        for (unsigned t = 0; t < XL_STATS_WINDOW_TOP; t++) {
+            if (!top[t] || slot->count > top[t]->count) {
+                for (unsigned m = XL_STATS_WINDOW_TOP - 1; m > t; m--)
+                    top[m] = top[m - 1];
+                top[t] = slot;
+                break;
+            }
+        }
+    }
+    for (unsigned t = 0; t < XL_STATS_WINDOW_TOP && top[t]; t++)
+        dprintf(2, "xlate:   sent %c[%s %s] %u times, %llu us\n", class_isMetaClass((Class)top[t]->cls) ? '+' : '-',
+                class_getName((Class)top[t]->cls), sel_getName((SEL)top[t]->sel), top[t]->count,
+                (unsigned long long)xl_stats_us(top[t]->ticks));
+    memset(xl_stats_window, 0, sizeof xl_stats_window);
+    pthread_mutex_unlock(&xl_stats_lock);
+}
+
+static void xl_stats_message(uint64_t started, Class lookup, SEL selector)
 {
     uint64_t ticks = mach_absolute_time() - started;
     pthread_mutex_lock(&xl_stats_lock);
     xl_stats_messages++;
     xl_stats_routing_ticks += ticks;
+    xl_stats_window_note_locked(lookup, selector, ticks);
     pthread_mutex_unlock(&xl_stats_lock);
 }
 
@@ -475,10 +537,11 @@ static void xl_stats_report_locked(void)
             }
         }
     }
-    dprintf(2, "xlate: messages: %u in all, %u of them dynamic; routing %llu us in all, host call %llu us in the dynamic ones (%llu us each)\n",
+    dprintf(2, "xlate: messages: %u in all, %u of them dynamic; routing %llu us in all (%llu us each), host call %llu us in the dynamic ones (%llu us each)\n",
             xl_stats_messages, xl_stats_dynamic, (unsigned long long)xl_stats_us(xl_stats_routing_ticks),
+            (unsigned long long)xl_stats_us(xl_stats_routing_ticks) / (xl_stats_messages ? xl_stats_messages : 1),
             (unsigned long long)xl_stats_us(xl_stats_call_ticks),
-            (unsigned long long)xl_stats_us(xl_stats_routing_ticks + xl_stats_call_ticks) / (xl_stats_dynamic ? xl_stats_dynamic : 1));
+            (unsigned long long)xl_stats_us(xl_stats_call_ticks) / (xl_stats_dynamic ? xl_stats_dynamic : 1));
     for (unsigned t = 0; t < XL_STATS_TOP && top[t]; t++)
         dprintf(2, "xlate:   dynamic %c[%s %s] %u times, %llu us\n", class_isMetaClass((Class)top[t]->cls) ? '+' : '-',
                 class_getName((Class)top[t]->cls), sel_getName((SEL)top[t]->sel), top[t]->count,
@@ -492,6 +555,7 @@ static void xl_stats_dynamic_send(uint64_t routing, uint64_t call, Class lookup,
     xl_stats_dynamic++;
     xl_stats_routing_ticks += routing;
     xl_stats_call_ticks += call;
+    xl_stats_window_note_locked(lookup, selector, routing + call);
     unsigned start = (unsigned)((((uintptr_t)selector >> 2) ^ ((uintptr_t)lookup >> 4)) * 2654435761u) % XL_STATS_SLOTS;
     for (unsigned probe = 0; probe < XL_STATS_SLOTS; probe++) {
         struct xl_stats_slot *slot = &xl_stats_slots[(start + probe) % XL_STATS_SLOTS];
@@ -505,7 +569,7 @@ static void xl_stats_dynamic_send(uint64_t routing, uint64_t call, Class lookup,
             break;
         }
     }
-    if (xl_stats_dynamic % XL_STATS_EVERY == 0)
+    if (xl_stats_dynamic == XL_STATS_FIRST || xl_stats_dynamic == XL_STATS_SECOND || xl_stats_dynamic % XL_STATS_EVERY == 0)
         xl_stats_report_locked();
     pthread_mutex_unlock(&xl_stats_lock);
 }
@@ -1026,7 +1090,7 @@ void xl_h_objc_msgSend(State *state)
         return;
     }
     if (stats_started)
-        xl_stats_message(stats_started);
+        xl_stats_message(stats_started, receiver_class, selector);
     XL_REG(state, PC) = target;
     [[clang::musttail]] return xl_tail(state);
 }

@@ -170,8 +170,8 @@ function main(out, ...)
         table.insert(flags, "touch " .. flag)
     end
     local prefix = #flags > 0 and table.concat(flags, " && ") .. " && " or ""
-    local command = string.format("chmod +x %s/rcsdk && %scd %s && DYLD_INSERT_LIBRARIES=/usr/lib/revenant/org.revenant.backports/libSystemBackports.dylib:/usr/lib/revenant/org.revenant.backports/libFoundationBackports.dylib DYLD_FALLBACK_LIBRARY_PATH=%s ./rcsdk %s/RecaptchaEnterprise.dylib - %s --rounds %s --seconds %s 2>&1; echo exit=$?",
-                                  remote, prefix, remote, remote, remote, execute and "--execute" or "", rounds, seconds)
+    local command = string.format("chmod +x %s/rcsdk && %scd %s && DYLD_INSERT_LIBRARIES=/usr/lib/revenant/org.revenant.backports/libSystemBackports.dylib:/usr/lib/revenant/org.revenant.backports/libFoundationBackports.dylib DYLD_FALLBACK_LIBRARY_PATH=%s ./rcsdk %s/RecaptchaEnterprise.dylib %s %s --rounds %s --seconds %s 2>&1; echo exit=$?",
+                                  remote, prefix, remote, remote, remote, key, execute and "--execute" or "", rounds, seconds)
     if stress then
         io.writefile(o("stress.sh"), stress_script(remote, budget, stress, key, seconds))
         device.copy(o("stress.sh"), remote .. "/stress.sh")

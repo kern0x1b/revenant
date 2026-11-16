@@ -83,6 +83,153 @@ static void xl_threads_report(const char *what, size_t stack, size_t host_stack)
             (unsigned long)(__atomic_load_n(&xl_threads_stack_live, __ATOMIC_RELAXED) >> 10));
 }
 
+#define XL_PROFILE_BUCKETS 1024
+#define XL_PROFILE_INTERVAL_US 20000u
+#define XL_PROFILE_WINDOW_US 5000000u
+#define XL_PROFILE_TOP 10
+#define XL_PROFILE_THREADS 64
+
+struct xl_profile_bucket {
+    uint32_t address;
+    uint32_t count;
+};
+
+static struct xl_profile_bucket xl_profile_buckets[XL_PROFILE_BUCKETS];
+static pthread_once_t xl_profile_once = PTHREAD_ONCE_INIT;
+
+void xl_stats_snapshot(uint32_t *messages, uint32_t *dynamic, uint64_t *routing_ticks, uint64_t *call_ticks);
+uint64_t xl_stats_microseconds(uint64_t ticks);
+void xl_stats_window_report(void);
+
+static void xl_profile_note(uint32_t pc)
+{
+    uint32_t address = pc & ~0x3fu;
+    unsigned start = (address >> 6) * 2654435761u % XL_PROFILE_BUCKETS;
+    for (unsigned probe = 0; probe < XL_PROFILE_BUCKETS; probe++) {
+        struct xl_profile_bucket *bucket = &xl_profile_buckets[(start + probe) % XL_PROFILE_BUCKETS];
+        if (!bucket->count)
+            bucket->address = address;
+        if (bucket->address == address) {
+            bucket->count++;
+            return;
+        }
+    }
+}
+
+static unsigned xl_profile_sample(mach_port_t self)
+{
+    thread_act_array_t threads;
+    mach_msg_type_number_t count;
+    if (task_threads(mach_task_self(), &threads, &count) != KERN_SUCCESS)
+        return 0;
+    uint32_t pcs[XL_PROFILE_THREADS];
+    unsigned found = 0;
+    for (mach_msg_type_number_t i = 0; i < count; i++) {
+        thread_t thread = threads[i];
+        if (thread == self || found == XL_PROFILE_THREADS)
+            continue;
+        thread_basic_info_data_t info;
+        mach_msg_type_number_t info_count = THREAD_BASIC_INFO_COUNT;
+        if (thread_info(thread, THREAD_BASIC_INFO, (thread_info_t)&info, &info_count) != KERN_SUCCESS ||
+            info.run_state != TH_STATE_RUNNING)
+            continue;
+        if (thread_suspend(thread) != KERN_SUCCESS)
+            continue;
+        arm_thread_state_t state;
+        mach_msg_type_number_t state_count = ARM_THREAD_STATE_COUNT;
+        kern_return_t result = thread_get_state(thread, ARM_THREAD_STATE, (thread_state_t)&state, &state_count);
+        thread_resume(thread);
+        if (result == KERN_SUCCESS)
+            pcs[found++] = state.__pc;
+    }
+    for (mach_msg_type_number_t i = 0; i < count; i++)
+        mach_port_deallocate(mach_task_self(), threads[i]);
+    vm_deallocate(mach_task_self(), (vm_address_t)threads, count * sizeof *threads);
+    for (unsigned i = 0; i < found; i++)
+        xl_profile_note(pcs[i]);
+    return found;
+}
+
+static void xl_profile_report(unsigned samples, uint32_t window_messages, uint32_t window_dynamic, uint64_t window_routing, uint64_t window_call)
+{
+    char line[320];
+    int length = snprintf(line, sizeof line,
+                          "xlate: profile: %u samples of running threads in 5 s, %u messages (%u dynamic), routing %llu us, host call of the dynamic ones %llu us\n",
+                          samples, window_messages, window_dynamic, (unsigned long long)xl_stats_microseconds(window_routing),
+                          (unsigned long long)xl_stats_microseconds(window_call));
+    write(2, line, (size_t)length);
+    Dl_info own;
+    uintptr_t base = dladdr((const void *)xl_threads_report, &own) ? (uintptr_t)own.dli_fbase : 0;
+    for (unsigned rank = 0; rank < XL_PROFILE_TOP; rank++) {
+        struct xl_profile_bucket *best = NULL;
+        for (unsigned i = 0; i < XL_PROFILE_BUCKETS; i++) {
+            struct xl_profile_bucket *bucket = &xl_profile_buckets[i];
+            if (bucket->count && (!best || bucket->count > best->count))
+                best = bucket;
+        }
+        if (!best)
+            break;
+        Dl_info where;
+        const char *image = "?";
+        const char *symbol = "";
+        uintptr_t offset = 0;
+        if (dladdr((const void *)(uintptr_t)best->address, &where)) {
+            image = where.dli_fname ? strrchr(where.dli_fname, '/') : NULL;
+            image = image ? image + 1 : where.dli_fname ? where.dli_fname : "?";
+            symbol = where.dli_sname ? where.dli_sname : "";
+            offset = best->address - (uintptr_t)where.dli_fbase;
+        }
+        length = snprintf(line, sizeof line, "xlate:   %5u samples at 0x%08x (%s+0x%lx%s%s)%s\n", best->count, best->address, image,
+                          (unsigned long)offset, *symbol ? " " : "", symbol,
+                          base && (uintptr_t)best->address - base < (104u << 20) ? " [the library]" : "");
+        write(2, line, (size_t)length);
+        best->count = 0;
+    }
+    xl_stats_window_report();
+    memset(xl_profile_buckets, 0, sizeof xl_profile_buckets);
+}
+
+static void *xl_profile_thread(void *unused)
+{
+    (void)unused;
+    mach_port_t self = mach_thread_self();
+    uint32_t seen_messages = 0, seen_dynamic = 0;
+    uint64_t seen_routing = 0, seen_call = 0;
+    unsigned samples = 0;
+    unsigned elapsed = 0;
+    for (;;) {
+        usleep(XL_PROFILE_INTERVAL_US);
+        samples += xl_profile_sample(self);
+        elapsed += XL_PROFILE_INTERVAL_US;
+        if (elapsed < XL_PROFILE_WINDOW_US)
+            continue;
+        elapsed = 0;
+        uint32_t messages, dynamic;
+        uint64_t routing, call;
+        xl_stats_snapshot(&messages, &dynamic, &routing, &call);
+        if (samples || messages != seen_messages)
+            xl_profile_report(samples, messages - seen_messages, dynamic - seen_dynamic, routing - seen_routing, call - seen_call);
+        seen_messages = messages;
+        seen_dynamic = dynamic;
+        seen_routing = routing;
+        seen_call = call;
+        samples = 0;
+    }
+    return NULL;
+}
+
+static void xl_profile_launch(void)
+{
+    pthread_t thread;
+    if (pthread_create(&thread, NULL, xl_profile_thread, NULL) == 0)
+        pthread_detach(thread);
+}
+
+void xl_profile_start(void)
+{
+    pthread_once(&xl_profile_once, xl_profile_launch);
+}
+
 static void xl_state_destroy(void *value)
 {
     struct xl_thread *thread = (struct xl_thread *)((char *)value - XL_THREAD_HEADER);
