@@ -1112,6 +1112,31 @@ It also builds the host with Swift code of its own (`hostswift.swift`, against t
 library loads (`host.bridge.before`, `host.names`, `names.disjoint`, `host.bridge.after`), and that the Objective-C
 runtime reports no class implemented twice. [The names and variables](library-mode.md#the-check).
 
+### recaptchareal (device part by hand; needs the real SDK)
+
+The reCAPTCHA Enterprise SDK is not in the repository. The check runs it when the SDK is at hand and says `skip:` and ends
+without an error when it is not: `XL_RECAPTCHA_SDK` names the file, or `telegram-build/.agent-work/recaptcha-sdk/RecaptchaEnterprise.dylib`
+is found by walking up from the checkout; its sha256 is pinned in `recompiler/tools/recaptcha_build.lua` and another file is
+refused. `XL_SWIFTOBJC_LIBS` names the folder with the arm64 Swift runtime of `revenant@swift-runtime`, `libc++.1.dylib` and
+`libc++abi.1.dylib`.
+
+`./xmakew l -P . recompiler/tests/recaptchareal/check.lua <out> [--drop recaptcha-sdk.txt] [--execute] [--rounds N] [--seconds N] [--host-only]`
+translates the SDK in library mode (or takes the library of a drop's `recaptcha-sdk.txt`), builds `rcsdk`, a host program of
+the shape of an app that has its own armv7 Swift runtime (`hostswift.swift` runs `Locale`, `Data`, `URL`, a Swift `Error` as `NSError` and an
+`NSDictionary` of the host's libswiftFoundation before the library is loaded), and runs it on the claimed phone: `xl_reserve`, `xl_load`, `xl_find_class` of `RecaptchaEnterprise.Recaptcha` and `RecaptchaAction`,
+`fetchClientWithSiteKey:completion:` with an empty key and no network (the answer is an error, not a crash), with `--execute`
+`executeWithAction:completion:`, `--rounds` times, then three seconds for the pools of the guest threads. It prints a line for
+each step with the resident size. It fails when a step is missing, when the fetch does not answer in `--seconds`, or when the
+process does not end with exit 0. A run takes 16 s on the 4S; the drop17 stop (`dlsym` answered with the host's `CFError: Error`
+conformance, see `stepDlsymGuest` above) and the double free of drop16 both reproduced in it.
+
+`recompiler/tools/drop.sh NAME [--out DIR] [--no-verify]` builds a drop in one command and stops at the first step that
+fails: it builds `xlate` and `xlgen`, translates the SDK with the same recipe as the check, copies the library, its registry,
+the loader files and the reports to `telegram-build/.agent-work/recaptcha-real/NAME` (or DIR), writes `recaptcha-sdk.txt` with the
+two sha256 and, when `telegram-build/tools/recaptcha_sdk.lua` is there, verifies the drop with it. It prints the path and both
+digests. It needs `REVENANT_CACHE`, `XL_SWIFTOBJC_LIBS` and `BACKPORTS_DIR` in the environment; the second translation of an
+unchanged lift reuses the lifted objects (`lift.stamp`).
+
 ### cxxinit and refrepro
 
 These build targets each translate an app to an `.app`, for a device or the emulator.

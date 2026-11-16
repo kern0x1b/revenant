@@ -1,0 +1,71 @@
+local LOADER_FILES = {"src/loader/xl_loader.c", "include/xl_loader.h", "include/xl_guest_image.h", "include/xl_vm_map.h"}
+local PRODUCT_FILES = {"proxy-classes.txt", "report.txt", "system-classes.txt"}
+
+function main(name, ...)
+    local scripts = os.scriptdir()
+    local corpus = import("corpus", {rootdir = scripts, anonymous = true})
+    local build = import("recaptcha_build", {rootdir = scripts, anonymous = true})
+    local arguments = {...}
+    local destination, verify = nil, true
+    for index, argument in ipairs(arguments) do
+        if argument == "--out" then
+            destination = arguments[index + 1]
+        elseif argument == "--no-verify" then
+            verify = false
+        end
+    end
+    if not name or name == "" then
+        raise("usage: drop.lua NAME [--out DIR] [--no-verify]")
+    end
+    local sdk = build.sdk_file()
+    if not sdk then
+        raise("no SDK: set XL_RECAPTCHA_SDK or put RecaptchaEnterprise.dylib in telegram-build/.agent-work/recaptcha-sdk beside this checkout")
+    end
+    local libs = build.libraries_folder()
+    if not libs then
+        raise("XL_SWIFTOBJC_LIBS must name the folder with the arm64 Swift runtime libraries, libc++.1.dylib and libc++abi.1.dylib")
+    end
+    if not os.getenv("BACKPORTS_DIR") or os.getenv("BACKPORTS_DIR") == "" then
+        raise("BACKPORTS_DIR must name the folder with the lib*Backports.dylib the library links against")
+    end
+    local telegram = build.telegram_build()
+    destination = destination or (telegram and path.join(telegram, ".agent-work", "recaptcha-real", name))
+    if not destination then
+        raise("no destination: pass --out DIR, or place this checkout beside telegram-build")
+    end
+    local e, out = corpus.setup("recaptcha-" .. name)
+    local xl = build.translate_sdk(e, out, sdk, libs)
+    local library = path.join(xl, "RecaptchaEnterprise.dylib")
+    local registry = path.join(xl, "RecaptchaEnterprise-classes.dylib")
+    if not os.isfile(library) or not os.isfile(registry) then
+        raise("the translation left no %s or %s", library, registry)
+    end
+    os.tryrm(destination)
+    os.mkdir(destination)
+    for _, file in ipairs({"RecaptchaEnterprise.dylib", "RecaptchaEnterprise-classes.dylib"}) do
+        os.cp(path.join(xl, file), path.join(destination, file))
+    end
+    for _, file in ipairs(PRODUCT_FILES) do
+        if os.isfile(path.join(xl, file)) then
+            os.cp(path.join(xl, file), path.join(destination, file))
+        end
+    end
+    for _, relative in ipairs(LOADER_FILES) do
+        local source = path.join(e.recompiler, relative)
+        if os.isfile(source) then
+            os.cp(source, path.join(destination, path.filename(relative)))
+        end
+    end
+    local sha, registry_sha = hash.sha256(path.join(destination, "RecaptchaEnterprise.dylib")), hash.sha256(path.join(destination, "RecaptchaEnterprise-classes.dylib"))
+    local entry = path.join(destination, "recaptcha-sdk.txt")
+    io.writefile(entry, string.format("dir=%s\nlibrary=RecaptchaEnterprise.dylib\nsha256=%s\nregistry_sha256=%s\nbase=0x18000000\ninstall=Frameworks/RecaptchaEnterprise.dylib\n",
+                                      destination, sha, registry_sha))
+    if verify and telegram and os.isfile(path.join(telegram, "tools", "recaptcha_sdk.lua")) then
+        local sdk_module = import("recaptcha_sdk", {rootdir = path.join(telegram, "tools"), anonymous = true})
+        sdk_module.verify(sdk_module.read(entry))
+        print("drop verified: %s", entry)
+    end
+    print("drop: %s", destination)
+    print("sha256: %s", sha)
+    print("registry_sha256: %s", registry_sha)
+end
