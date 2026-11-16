@@ -44,6 +44,7 @@ local STEPS = {
     {"stepExtraInhabitantsBig", {"xi.big.generic", "xi.big.inline", "xi.big.word", "xi.big.copies", "xi.big.balance"}},
     {"stepExtraInhabitantsStdlib", {"xi.stdlib.generic", "xi.stdlib.inline", "xi.stdlib.copies", "xi.stdlib.destroyed", "xi.stdlib.balance",
                                   "xi.stdlib.consumed", "xi.stdlib.released"}},
+    {"stepExtraInhabitantsTuple", {"xi.tuple.none", "xi.tuple.children", "xi.tuple.describe"}},
     {"stepHostSequence", {"host.sequence.batch", "host.sequence.items", "host.sequence.mutations", "host.sequence.forin"}},
 }
 local BARE_CONTROLS = {"stepShortString"}

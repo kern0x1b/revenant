@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, switchtail, tailcalls, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, rebasetag, flagflow, hostbridges, checkapi, proxytable and systemclasses; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, rebasetag, flagflow, hostbridges, checkapi, proxytable, systemclasses and dropkey; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions`, `libexceptions`, `libcxxexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -1063,6 +1063,13 @@ control); with the lift on and the runtime of main (`LeastValidPointerValue` 4 G
 the runtime's own witness for an `Optional` of a class, which a generic function reaches, took a pointer for an extra
 inhabitant and the object was never released (the runtime negative control).
 
+`stepExtraInhabitantsTuple` keeps the count of an extra inhabitant: generic code stores the `nil` of an
+`Optional<(label: String?, value: Any)>` (the element of `Mirror.children`) into memory filled with `0xAA`, and code that
+knows the type reads it back as `nil` (`xi.tuple.none`); the runtime and the compiler agree on which element of the tuple
+holds the extra inhabitant only when they count the same for `Any` and `String?`. The step then walks the children of a
+structure (`xi.tuple.children`) and prints it (`xi.tuple.describe`), which stopped the program in `swift_retain(1)` at the end
+of the loop while the runtime counted 4096 for `Any`.
+
 A library on the device has no
 `dladdr` for the guest image, which the loader maps itself, so the runtime knows its range (`xl_guest_low`,
 `xl_guest_high`) and a class of the guest is a class of the library. A class that the Swift runtime builds at run time has
@@ -1153,6 +1160,16 @@ the loader files and the reports to `telegram-build/.agent-work/recaptcha-real/N
 two sha256 and, when `telegram-build/tools/recaptcha_sdk.lua` is there, verifies the drop with it. It prints the path and both
 digests. It needs `XL_SWIFTOBJC_LIBS` and `BACKPORTS_DIR` in the environment (and `REVENANT_CACHE` in a worktree); the second translation of an
 unchanged lift reuses the lifted objects (`lift.stamp`).
+
+The guest Swift runtime of a drop is the install of the current recipe and nothing else (drop17 to drop21 were lifted from the install of an
+older recipe, because the scratch folder of libraries still pointed at it). `drop.lua` resolves the real path of every runtime library in
+`XL_SWIFTOBJC_LIBS` and stops unless they all lie in one `swift-runtime` install whose `manifest.txt` carries the `recipe` of
+`packages/s/swift-runtime/port/digest.lua`, or whose build hash is the one `--runtime-key BUILDHASH` names; a `libswiftCryptoKit` or
+`libswiftNetwork` of the folder built against another runtime stops it too. After the translation it reads the `revenant_swift_runtime_<hash>`
+mark the guest `libswiftCore` leaves in the library and stops unless that is the only mark and the key of the runtime it was given. The drop gets
+a `runtime.txt` beside `recaptcha-sdk.txt` (`runtime_key`, `runtime_recipe`, `libswiftcore_sha256`; the reader of `recaptcha-sdk.txt` in
+telegram-build refuses a key it does not know, so those lines are not in it). The check `dropkey` builds a store of two fake installs and
+runs every one of those refusals.
 
 The library link takes the runtime objects from the same loop that compiles them (`runtime_objects` in `tools/translate.lua`), and a
 link that fails on an undefined `_xl_*` symbol is not retried with `-U`: those symbols are the runtime's own, nothing in the application

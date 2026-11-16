@@ -24,13 +24,22 @@ Three things must agree for a pointer type, and they now do:
 | --- | --- | --- | --- |
 | **get** | the index of the extra inhabitant a word holds, or "not one" | the runtime's `swift_getHeapObjectExtraInhabitantIndex` and the compiled `Vwet`/`Owxx`/`WOe` witnesses and outlined copies | a word below 0x1000 (the first page) is an extra inhabitant, anything else is a pointer |
 | **store** | writes the index of an extra inhabitant | the runtime's `swift_storeHeapObjectExtraInhabitant`, the compiled `Vwst` | the index itself, as the word; it has no threshold, so it is as the compiler wrote it |
-| **count** | how many extra inhabitants the type has | `numExtraInhabitants` of the value witness table, `swift_getHeapObjectExtraInhabitantCount` | the compiler wrote `0x7FFFFFFF` for a pointer; the runtime derives `LeastValidPointerValue` |
+| **count** | how many extra inhabitants the type has | `numExtraInhabitants` of the value witness table, `swift_getHeapObjectExtraInhabitantCount` | the compiler wrote `0x7FFFFFFF` for a pointer; the runtime reports the same, from the 4 GB of the compiler and not from `LeastValidPointerValue` |
 
 - The runtime is built with `LeastValidPointerValue = 0x1000`
   (`packages/s/swift-runtime/patches/the-least-valid-pointer-of-the-arm64-guest-is-the-first-page.patch`, the value the
   runtime has for every 32-bit platform). That changes the XI test of the runtime's own witnesses
   (`swift_getHeapObjectExtraInhabitantIndex`, the function-pointer variant, the witnesses of the built-in pointer types) and
-  `_isValidAddress` of the standard library; the runtime reports 4096 as the count of a heap object pointer.
+  `_isValidAddress` of the standard library. The count is not that value: the runtime reports `0x7FFFFFFF` for a heap object
+  pointer and a function pointer, as the compiler does
+  (`packages/s/swift-runtime/patches/the-extra-inhabitant-count-of-a-pointer-is-the-compilers-not-the-first-pages.patch`).
+  The count decides which element of a tuple, which payload of an optional, which field of a structure the runtime picks
+  as the provider of the extra inhabitants (the one with the most, the first on a tie), and the compiled code made the same
+  choice from its counts. With the 4096 of the first version of the patch, `Any` (the metadata pointer of its container) had
+  4096 in the runtime and `0x7FFFFFFF` in the compiled code, `String?` had `0x7FFFFFFE` in both, so the runtime chose the
+  label of `Optional<(label: String?, value: Any)>` where the compiled code chose the metadata word of the `Any`, and the
+  `nil` that the runtime wrote at the end of `Mirror.children` read as a value to the compiled loop (`String(describing:)`
+  of a structure, `dump`, every `for child in Mirror(…).children`).
 - The lift (`xlate`) rewrites the compare of the *compiled* code from `0xFFFFFFFF` to `0x1000`, below.
 - Only the first 4096 indices are told from a pointer: a word of 4096 or more is a pointer. **An enumeration with a class
   payload and more than 4095 empty cases (4096 with the `nil` of its optional) is outside the contract**: the compiler

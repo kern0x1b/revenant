@@ -6,16 +6,18 @@ function main(name, ...)
     local corpus = import("corpus", {rootdir = scripts, anonymous = true})
     local build = import("recaptcha_build", {rootdir = scripts, anonymous = true})
     local arguments = {...}
-    local destination, verify = nil, true
+    local destination, verify, runtime_key = nil, true, nil
     for index, argument in ipairs(arguments) do
         if argument == "--out" then
             destination = arguments[index + 1]
         elseif argument == "--no-verify" then
             verify = false
+        elseif argument == "--runtime-key" then
+            runtime_key = arguments[index + 1]
         end
     end
     if not name or name == "" then
-        raise("usage: drop.lua NAME [--out DIR] [--no-verify]")
+        raise("usage: drop.lua NAME [--out DIR] [--no-verify] [--runtime-key BUILDHASH]")
     end
     local sdk = build.sdk_file()
     if not sdk then
@@ -28,6 +30,7 @@ function main(name, ...)
     if not os.getenv("BACKPORTS_DIR") or os.getenv("BACKPORTS_DIR") == "" then
         raise("BACKPORTS_DIR must name the folder with the lib*Backports.dylib the library links against")
     end
+    local runtime = build.check_runtime(libs, path.absolute(path.join(scripts, "..", "..")), runtime_key)
     local telegram = build.telegram_build()
     destination = destination or (telegram and path.join(telegram, ".agent-work", "recaptcha-real", name))
     if not destination then
@@ -47,6 +50,7 @@ function main(name, ...)
     if not os.isfile(library) or not os.isfile(registry) then
         raise("the translation left no %s or %s", library, registry)
     end
+    build.check_artifact_runtime(library, runtime.key)
     local leftover = {}
     for line in os.iorunv("nm", {"-u", library}):gmatch("[^\r\n]+") do
         local symbol = line:match("^%s*(_xl_%S+)")
@@ -74,6 +78,7 @@ function main(name, ...)
         end
     end
     local sha, registry_sha = hash.sha256(path.join(destination, "RecaptchaEnterprise.dylib")), hash.sha256(path.join(destination, "RecaptchaEnterprise-classes.dylib"))
+    io.writefile(path.join(destination, "runtime.txt"), string.format("runtime_key=%s\nruntime_recipe=%s\nlibswiftcore_sha256=%s\n", runtime.key, tostring(runtime.recipe), runtime.core_sha256))
     local entry = path.join(destination, "recaptcha-sdk.txt")
     io.writefile(entry, string.format("dir=%s\nlibrary=RecaptchaEnterprise.dylib\nsha256=%s\nregistry_sha256=%s\nbase=0x18000000\ninstall=Frameworks/RecaptchaEnterprise.dylib\n",
                                       destination, sha, registry_sha))

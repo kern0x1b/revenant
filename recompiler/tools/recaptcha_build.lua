@@ -58,6 +58,76 @@ function libraries_folder()
     end
 end
 
+local function real_path(file)
+    return (os.iorunv("readlink", {"-f", file}):gsub("%s+$", ""))
+end
+
+local function manifest_value(install, pattern)
+    for _, folder in ipairs({install, (install:gsub("%.g%x+$", ""))}) do
+        local manifest = path.join(folder, "manifest.txt")
+        if os.isfile(manifest) then
+            return io.readfile(manifest):match(pattern)
+        end
+    end
+end
+
+function runtime_recipe(root)
+    local digest = io.readfile(path.join(root, "packages", "s", "swift-runtime", "port", "digest.lua"))
+    return digest:match('swift_runtime_sources_digest%s*=%s*"(%x+)"') or raise("no swift_runtime_sources_digest in %s", path.join(root, "packages", "s", "swift-runtime", "port", "digest.lua"))
+end
+
+function check_runtime(libs, root, explicit)
+    local recipe = runtime_recipe(root)
+    local installs = {}
+    for _, name in ipairs(RUNTIME_LIBRARIES) do
+        local file = path.join(libs, name .. ".dylib")
+        if os.isfile(file) then
+            local install, hash = real_path(file):match("^(.*/swift%-runtime/[^/]+/(%x+)%.?g?%x*)/lib/")
+            if install then
+                installs[hash] = install
+            end
+        end
+    end
+    local found = table.keys(installs)
+    table.sort(found)
+    if #found ~= 1 then
+        raise("the guest Swift runtime of %s must come from one revenant@swift-runtime install, and it comes from %d: %s", libs, #found, table.concat(found, ", "))
+    end
+    local key = found[1]
+    local install = installs[key]
+    local built = manifest_value(install, 'recipe%s*=%s*"(%x+)"')
+    if explicit and explicit ~= "" then
+        if key ~= explicit then
+            raise("the guest Swift runtime of %s is the install %s, not the key %s that was asked for", libs, key, explicit)
+        end
+    elseif built ~= recipe then
+        raise("the guest Swift runtime of %s is the install %s, built from the recipe %s, and this checkout's recipe is %s: point XL_SWIFTOBJC_LIBS at the install of the current recipe, or name the key with --runtime-key", libs, key, tostring(built), recipe)
+    end
+    for _, name in ipairs({"libswiftCryptoKit", "libswiftNetwork"}) do
+        local file = path.join(libs, name .. ".dylib")
+        if os.isfile(file) then
+            local dependent = real_path(file):match("^(.*)/lib/[^/]+$")
+            local against = dependent and manifest_value(dependent,'%["swift%-runtime"%]%s*=%s*{%s*buildhash%s*=%s*"(%x+)"')
+            if against and against ~= key then
+                raise("%s of %s was built against the Swift runtime %s, and the guest runtime is %s", name, libs, against, key)
+            end
+        end
+    end
+    return {key = key, recipe = built, core_sha256 = hash.sha256(path.join(libs, "libswiftCore.dylib"))}
+end
+
+function check_artifact_runtime(library, key)
+    local marks = {}
+    for mark in io.readfile(library, {encoding = "binary"}):gmatch("revenant_swift_runtime_(%x+)") do
+        marks[mark] = true
+    end
+    local names = table.keys(marks)
+    table.sort(names)
+    if #names ~= 1 or names[1] ~= key then
+        raise("%s carries the Swift runtime marks [%s], and the runtime it was translated against is %s", library, table.concat(names, ", "), key)
+    end
+end
+
 function translate_sdk(e, out, sdk, libs, extra)
     local actual = hash.sha256(sdk)
     if actual ~= SDK_SHA256 then
