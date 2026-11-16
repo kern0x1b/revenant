@@ -343,8 +343,8 @@ prints the host registers and the guest frames and does not change the timing).
 before the process starts) measures what the bridge costs without a line per message. For every thread that starts or
 ends it prints `xlate: threads: created|ended (guest stack N KiB, host stack M KiB): L live, C created, E ended, S KiB of
 guest stack live`. Each message that the guest sends to a host object is timed from the entry of `xl_h_objc_msgSend` to the
-decision (the routing); a message sent dynamically is timed again across the host call, and after every 20,000th dynamic
-message the process prints `xlate: messages: N in all, D of them dynamic; routing R us in all, host call H us in the dynamic
+decision (the routing); a message sent dynamically is timed again across the host call, and after the 1,000th, the
+5,000th and every 10,000th dynamic message the process prints `xlate: messages: N in all, D of them dynamic; routing R us in all, host call H us in the dynamic
 ones (A us each)`, followed by the four dynamic messages (class and selector) that took the most time, with their counts.
 It costs two `mach_absolute_time` calls and one lock per message while it is on, and nothing while it is off. It
 exists to answer one question that a log cannot, because `XL_LOG` slows the loop it measures: how long one message of a

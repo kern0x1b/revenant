@@ -425,7 +425,9 @@ static int xl_collect_enabled(void)
 }
 
 #define XL_STATS_SLOTS 256
-#define XL_STATS_EVERY 20000u
+#define XL_STATS_EVERY 10000u
+#define XL_STATS_FIRST 1000u
+#define XL_STATS_SECOND 5000u
 #define XL_STATS_TOP 4
 
 struct xl_stats_slot {
@@ -505,7 +507,7 @@ static void xl_stats_dynamic_send(uint64_t routing, uint64_t call, Class lookup,
             break;
         }
     }
-    if (xl_stats_dynamic % XL_STATS_EVERY == 0)
+    if (xl_stats_dynamic == XL_STATS_FIRST || xl_stats_dynamic == XL_STATS_SECOND || xl_stats_dynamic % XL_STATS_EVERY == 0)
         xl_stats_report_locked();
     pthread_mutex_unlock(&xl_stats_lock);
 }
