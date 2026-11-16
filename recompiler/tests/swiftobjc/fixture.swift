@@ -52,6 +52,26 @@ var destroyed = 0
     @objc required init?(coder: NSCoder) { super.init(coder: coder) }
 }
 
+/// An NSError of the host with stored fields of its own, as the SDK's errors have: the host lays out the NSError (the
+/// guest's words are wider), and the guest's runtime must not read it through the layout of its own error box.
+@objc(FixtureTrio) final class Trio: NSError {
+    let label: String
+    let amount: Int
+    let extra: Any?
+    @objc init(number: Int) {
+        label = "label" + String(number)
+        amount = number * 3
+        extra = number % 2 == 0 ? "even" : nil
+        super.init(domain: "TrioDomain", code: number, userInfo: ["number": number, "text": "n" + String(number)])
+    }
+    @objc required init?(coder: NSCoder) {
+        label = ""
+        amount = 0
+        extra = nil
+        super.init(coder: coder)
+    }
+}
+
 @objc(FixtureSub) final class Sub: Client {
     var extra = 40
     @objc override func bump() -> Int {
@@ -154,10 +174,56 @@ struct Point {
     report("error.survives", survivors)
 }
 
+@inline(never) func asNSError(_ error: Error) -> NSError {
+    return error as NSError
+}
+
+@inline(never) func fail(_ number: Int) throws {
+    throw Trio(number: number)
+}
+
+/// The Error of an NSError becomes an NSError again (the runtime's _bridgeErrorToNSError): the NSError the host made is
+/// the one it returns, and nothing of it or of the objects around it changes. The plain NSErrors are made between the
+/// Trio, so a write past the end of one lands in the next.
+@inline(never) func bridged() {
+    var trios: [Trio] = []
+    var plains: [NSError] = []
+    var same = true
+    var thrown = true
+    for number in 0..<24 {
+        plains.append(NSError(domain: "PlainDomain", code: number + 1000, userInfo: ["plain": number]))
+        let trio = Trio(number: number)
+        trios.append(trio)
+        let back = asNSError(trio)
+        same = same && back === trio && back.code == number && back.domain == "TrioDomain" && back.userInfo["number"] as? Int == number
+        do {
+            try fail(number + 100)
+        } catch {
+            let caught = asNSError(error)
+            thrown = thrown && caught.code == number + 100 && caught.domain == "TrioDomain" && caught.userInfo["text"] as? String == "n" + String(number + 100)
+        }
+    }
+    var fields = true
+    for (number, trio) in trios.enumerated() {
+        fields = fields && trio.label == "label" + String(number) && trio.amount == number * 3
+        fields = fields && (number % 2 == 0 ? (trio.extra as? String) == "even" : trio.extra == nil)
+        fields = fields && trio.code == number && trio.domain == "TrioDomain" && trio.userInfo["text"] as? String == "n" + String(number)
+    }
+    var neighbors = true
+    for (number, plain) in plains.enumerated() {
+        neighbors = neighbors && plain.code == number + 1000 && plain.domain == "PlainDomain" && plain.userInfo["plain"] as? Int == number
+    }
+    report("error.bridge", same)
+    report("error.bridge.catch", thrown)
+    report("error.bridge.fields", fields)
+    report("error.bridge.neighbors", neighbors)
+}
+
 client()
 sub()
 release()
 errors()
+bridged()
 @inline(never) func reflection() {
     report("anycollection.int", AnyCollection([1, 2, 3]).count == 3)
     report("anycollection.string", AnyCollection("abc").count == 3)

@@ -1,0 +1,18 @@
+--- a/stdlib/public/runtime/ErrorObject.mm
++++ b/stdlib/public/runtime/ErrorObject.mm
+@@ -485,6 +485,15 @@
+ swift::_swift_stdlib_bridgeErrorToNSError(SwiftError *errorObject) {
+   id ns = reinterpret_cast<id>(errorObject);
+ 
++  // A real NSError is already what this returns: Cocoa and Core Foundation initialized it. Only a box of this runtime
++  // (a __SwiftNativeNSError) computes its code, domain and user info lazily, and only a box has them where
++  // SwiftErrorHeader puts them. When the runtime is a guest of another architecture, the NSError a host allocated lays
++  // its instance variables out as the host does, narrower than the header's words: the domain read through the
++  // header is then past the object or another instance variable, it reads as nil, and the lazy initialization below
++  // stores the code over the NSError's user info and the user info and the domain after its end.
++  if (errorObject->isPureNSError())
++    return ns;
++
+   // If we already have a domain set, then we've already initialized.
+   // If this is a real NSError, then Cocoa and Core Foundation's initializers
+   // guarantee that the domain is never nil, so if this test fails, we can

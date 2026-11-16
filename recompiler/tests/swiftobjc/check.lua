@@ -4,8 +4,38 @@ local EXPECTED = {
     "host.create", "host.dispatch", "host.subtype", "host.init", "name.plain", "name.client",
     "anycollection.int", "anycollection.string", "mirror.children", "describe.struct", "describe.class",
     "cf.dictionary.count", "cf.dictionary.contains", "cf.dictionary.missing", "cf.dictionary.value", "cf.array.count", "cf.data.length",
-    "cf.string.length", "error.userinfo", "error.survives"
+    "cf.string.length", "error.userinfo", "error.survives", "error.bridge", "error.bridge.catch", "error.bridge.fields", "error.bridge.neighbors"
 }
+
+-- The guest runtime turns an Error into an NSError with _swift_stdlib_bridgeErrorToNSError. It must tell a real NSError
+-- (the host's, laid out as the host does) from a box of its own before it reads the domain where the box keeps it:
+-- read through the box's layout, the domain of a host NSError is past the object, and the lazy initialization writes the
+-- code over the NSError's user info. The runtime of the earlier recipe read the domain first.
+local function check_error_bridge(corpus, libs)
+    local core = path.join(libs, "libswiftCore.dylib")
+    local text = os.iorunv("otool", {"-arch", "arm64", "-tV", core})
+    local _, label = text:find("\n__swift_stdlib_bridgeErrorToNSError:\n", 1, true)
+    if not label then
+        corpus.fail("%s has no _swift_stdlib_bridgeErrorToNSError", core)
+    end
+    local class_line, read_line
+    local index = 0
+    for line in text:sub(label + 1, label + 20000):gmatch("[^\n]+") do
+        index = index + 1
+        if line:match("^%S+:$") then
+            break
+        end
+        if not class_line and line:find("_swift_getClass", 1, true) then
+            class_line = index
+        end
+        if not read_line and line:match("\tldar\t") then
+            read_line = index
+        end
+    end
+    if not class_line or not read_line or class_line > read_line then
+        corpus.fail("_swift_stdlib_bridgeErrorToNSError of %s reads an error's domain through the layout of the Swift error box before it asks whether the object is a real NSError (the class at instruction %s, the first load-acquire at %s)", core, tostring(class_line), tostring(read_line))
+    end
+end
 
 local BRIDGED_WRAPPERS = {"CFDictionaryGetCount", "CFDictionaryContainsKey", "CFDictionaryGetValue", "CFArrayGetCount", "CFDataGetLength", "CFStringGetLength"}
 
@@ -33,6 +63,7 @@ function main(out, ...)
         local swift, layouts = corpus.swift()
         os.execv(path.join(swift, "bin", "swiftc"), {"-target", "arm64-apple-ios12.0", "-sdk", e.sdk, "-Xfrontend", "-read-legacy-type-info-path=" .. layouts,
                                                      "-runtime-compatibility-version", "none", "-o", path.join(out, "fixture-arm64"), path.join(os.scriptdir(), "fixture.swift")})
+        check_error_bridge(corpus, libs)
         local includes = path.join(e.recompiler, "include", "swiftdemo-includes.h")
         local images = {path.join(libs, "libswiftCore.dylib"), path.join(libs, "libc++.1.dylib"), path.join(libs, "libc++abi.1.dylib")}
         translate.translate(path.join(out, "fixture-arm64"), includes, path.join(out, "xl"), images,

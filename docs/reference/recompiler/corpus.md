@@ -756,8 +756,21 @@ Objective-C runtime (here `NSObject`), translated with `XL_SWIFT_HOST_ANCESTORS=
 
 The fixture has three classes: `Client`, an `NSObject` subclass with stored properties (a `String`, an `[String]`, an
 optional reference, a closure); `Sub`, a final subclass of `Client` that overrides `bump` and calls `super`; and
-`Token`, a final `NSObject` subclass whose Swift `deinit` prints. It prints `ok <name>` or `FAIL <name>` for 33
+`Token`, a final `NSObject` subclass whose Swift `deinit` prints; and two subclasses of `NSError`, `FixtureError` and
+`Trio` (three stored fields: a `String`, an `Int` and an `Any?`). It prints `ok <name>` or `FAIL <name>` for 37
 checks, among them:
+
+- an `Error` that is an `NSError` the host made becomes an `NSError` again (`error.bridge*`: `error as NSError` of a
+  `Trio`, one thrown and caught, 24 of them made between plain `NSError`s): the NSError that comes back is the same
+  object, its code, domain and user info are the ones it was made with, its three fields and the plain `NSError`s
+  around it do not change. The guest runtime's `_swift_stdlib_bridgeErrorToNSError` read the domain of the error at
+  the offset the Swift error box keeps it (24 on arm64), where the host's armv7 `NSError` (`_reserved` 4, `_code` 8,
+  `_domain` 12, `_userInfo` 16, 20 bytes) has the tail of its allocation: it read nil, took the error for a box that was
+  not computed yet and stored the code at 16 (the host's `_userInfo`: the reCAPTCHA Enterprise SDK's error had 0x2
+  there, its code), the domain at 24 and the user info at 32, past the object. The recipe's patch
+  `a-real-nserror-is-not-read-through-the-layout-of-the-swift-error-box.patch` asks first whether the object is a real
+  `NSError`. The host part reads the disassembly of the runtime that `XL_SWIFTOBJC_LIBS` names and requires the class
+  check before the first load-acquire of that function, so a runtime of the older recipe stops it with no phone;
 
 - construction through `Client()` (the Swift `init` of an ObjC ancestor runs `objc_msgSendSuper2` with the class from
   `swift_getObjectType`, which must be the guest's own metadata);
@@ -785,7 +798,7 @@ The check wants every name `ok`, no `FAIL`, the `deinit` line, and exit 0. The h
 `CFArrayGetCount`, `CFDataGetLength` and `CFStringGetLength` take their object argument through `xl_object_in`.
 
 The translation takes about ten minutes and needs no phone: `check.lua <out> --host-only` stops after it, and
-`check.lua <out> --device-only` runs the fixture that run left in `<out>/xl` on the claimed phone (33 names `ok`).
+`check.lua <out> --device-only` runs the fixture that run left in `<out>/xl` on the claimed phone (37 names `ok`).
 
 It needs the arm64 runtime, so `XL_SWIFTOBJC_LIBS` names the folder with `libswiftCore.dylib` (the one that
 `revenant@swift-runtime` built for arm64, which carries `-DSWIFT_CLASS_IS_SWIFT_MASK=1ULL`), `libc++.1.dylib` and
