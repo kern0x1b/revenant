@@ -1,0 +1,21 @@
+package("expo-network")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-network")
+    set_description("expo-network 57.0.3, the network state and IP address of the Expo SDK, from its npm tarball: the Swift sources of its iOS half with the Network.framework path monitor (iOS 12) replaced by SCNetworkReachability, so that they run on iOS 6")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-network/-/expo-network-$(version).tgz")
+    add_versions("57.0.3", "4a11d96e93022307170e62f2ff35febd7c1fe3b813fb8a134ecf53567d51d2f1")
+    add_patches("57.0.3", path.join(os.scriptdir(), "patches", "network-ios6.patch"), "6ee67f0f5a717c0b05abca2424ad1034f5ca8126efda5e8705195691bb9f3ff1")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-network" and manifest.version == "57.0.3", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-network has no expo-module.config.json")
+    end)

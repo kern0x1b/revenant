@@ -1,0 +1,21 @@
+package("expo-device")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-device")
+    set_description("expo-device 57.0.2, the device model, memory and uptime of the Expo SDK, from its npm tarball: the Swift sources of its iOS half without the Mac Catalyst and iOS-app-on-Mac checks (iOS 13 and 14) and with the model identifiers of the devices iOS 6 runs on, so that they run on iOS 6")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-device/-/expo-device-$(version).tgz")
+    add_versions("57.0.2", "73985d4589895149cfe5d7944e9ef28c7ea2b199bbec9a68cafb561a20395f80")
+    add_patches("57.0.2", path.join(os.scriptdir(), "patches", "device-ios6.patch"), "b385bd58d7e3ad13124c37cd72a3aa2693486206a5d9a2735129b6ec2a909754")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-device" and manifest.version == "57.0.2", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-device has no expo-module.config.json")
+    end)

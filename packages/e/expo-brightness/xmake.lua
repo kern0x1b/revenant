@@ -1,0 +1,20 @@
+package("expo-brightness")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-brightness")
+    set_description("expo-brightness 57.0.2, the screen brightness of the Expo SDK over UIScreen, from its npm tarball: the Swift sources of its iOS half, which the isolated host builds as they are")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-brightness/-/expo-brightness-$(version).tgz")
+    add_versions("57.0.2", "ba4b0e708c9d23a1c4941de79575e309cde2ba00d175414dc7e1b6247b404055")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-brightness" and manifest.version == "57.0.2", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-brightness has no expo-module.config.json")
+    end)

@@ -1,0 +1,52 @@
+diff -ru a/ios/DeviceModule.swift b/ios/DeviceModule.swift
+--- a/ios/DeviceModule.swift
++++ b/ios/DeviceModule.swift
+@@ -78,18 +78,6 @@
+ }
+ 
+ func getDeviceType() -> Int {
+-  // if it's a macOS Catalyst app
+-  if ProcessInfo.processInfo.isMacCatalystApp {
+-    return DeviceType.desktop.rawValue
+-  }
+-
+-  // if it's built for iPad running on a Mac
+-  if #available(iOS 14.0, tvOS 14.0, *) {
+-    if ProcessInfo.processInfo.isiOSAppOnMac {
+-      return DeviceType.desktop.rawValue
+-    }
+-  }
+-
+   switch UIDevice.current.userInterfaceIdiom {
+   case UIUserInterfaceIdiom.phone:
+     return DeviceType.phone.rawValue
+diff -ru a/ios/UIDevice.swift b/ios/UIDevice.swift
+--- a/ios/UIDevice.swift
++++ b/ios/UIDevice.swift
+@@ -28,6 +28,26 @@
+ 
+ #if os(iOS)
+       switch identifier {
++      case "iPod4,1":
++        return ExpoDeviceType(modelName: "iPod touch (4th generation)", deviceYearClass: 2010)
++      case "iPod5,1":
++        return ExpoDeviceType(modelName: "iPod touch (5th generation)", deviceYearClass: 2012)
++      case "iPhone2,1":
++        return ExpoDeviceType(modelName: "iPhone 3GS", deviceYearClass: 2009)
++      case "iPhone3,1", "iPhone3,2", "iPhone3,3":
++        return ExpoDeviceType(modelName: "iPhone 4", deviceYearClass: 2010)
++      case "iPhone4,1":
++        return ExpoDeviceType(modelName: "iPhone 4S", deviceYearClass: 2011)
++      case "iPhone5,1", "iPhone5,2":
++        return ExpoDeviceType(modelName: "iPhone 5", deviceYearClass: 2012)
++      case "iPad2,1", "iPad2,2", "iPad2,3", "iPad2,4":
++        return ExpoDeviceType(modelName: "iPad 2", deviceYearClass: 2011)
++      case "iPad2,5", "iPad2,6", "iPad2,7":
++        return ExpoDeviceType(modelName: "iPad mini", deviceYearClass: 2012)
++      case "iPad3,1", "iPad3,2", "iPad3,3":
++        return ExpoDeviceType(modelName: "iPad (3rd generation)", deviceYearClass: 2012)
++      case "iPad3,4", "iPad3,5", "iPad3,6":
++        return ExpoDeviceType(modelName: "iPad (4th generation)", deviceYearClass: 2012)
+       case "iPod9,1":
+         return ExpoDeviceType(modelName: "iPod touch (7th generation)", deviceYearClass: 2019)
+       case "iPhone8,1":

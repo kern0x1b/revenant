@@ -1,0 +1,20 @@
+package("expo-linear-gradient")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-linear-gradient")
+    set_description("expo-linear-gradient 57.0.2, the linear gradient view of the Expo SDK over CAGradientLayer, from its npm tarball: the Swift sources of its iOS half, which the isolated host builds as they are")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-linear-gradient/-/expo-linear-gradient-$(version).tgz")
+    add_versions("57.0.2", "8178b089d3d9641fadad69d5fc63033471cab30193b6f9515964c65dadd93b6c")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-linear-gradient" and manifest.version == "57.0.2", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-linear-gradient has no expo-module.config.json")
+    end)

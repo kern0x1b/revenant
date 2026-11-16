@@ -14,6 +14,24 @@ patches in `packages/e/<name>/patches/`, into the one Swift module `ExpoAppModul
 | expo-image | AVIF and SVG coders, HEIC coder, Apple WebP codec, SF Symbol effects and transitions, Live Text | the frameworks (CoreSVG, Symbols, VisionKit) or codecs do not exist on iOS 6 | `enableLiveTextInteraction` and SF Symbol effects log "needs iOS 16/17; this iOS has none" and do nothing visible; AVIF and SVG sources fail to decode and raise the image `onError` event; WebP decodes through SDWebImageWebPCoder (libwebp 1.6.0) |
 | expo-camera | VisionKit scanner, `import Vision` symbology conversion, video codec enumeration, `NotificationCenter.notifications` | VisionKit and Vision are iOS 11/13; the async notification stream is iOS 15 | `isModernBarcodeScannerAvailable` is `false`; `launchScanner` throws `CameraScannerUnavailableException`; `getAvailableVideoCodecs` returns `[]`; a requested codec rejects with `CameraRecordingException`; `CameraView` barcodes scan through ZXingObjC (QR, 1D, PDF417) |
 
+## Modules outside the Paseo application (block 3)
+
+These packages are recipes with their iOS 6 patches (`packages/e/<name>/patches/`); each installs and its patch applies, but none is
+compiled into a host yet, so their coverage rows stay `missing`, checked `none`, until the next host build.
+
+| Module | Removed or replaced | Why | What JS sees |
+| --- | --- | --- | --- |
+| expo-secure-store | LocalAuthentication, `SecAccessControl`, the passcode-bound keychain class | iOS 8 | `canUseBiometricAuthentication` is `false`; `requireAuthentication: true` and `WHEN_PASSCODE_SET_THIS_DEVICE_ONLY` reject with an exception that names iOS 8; the rest is SecItem as upstream |
+| expo-network | `NWPathMonitor` (Network.framework) | iOS 12 | the state comes from `SCNetworkReachability`: `WIFI`, `CELLULAR` or `NONE`; `ETHERNET` and `UNKNOWN` never appear; `isInternetReachable` equals `isConnected`, as upstream |
+| expo-device | Mac Catalyst and iOS-app-on-Mac checks | iOS 13, 14 | the module as published, with the model names of the devices iOS 6 runs on added |
+| expo-store-review | `SKStoreReviewController`, window scenes | iOS 10.3, 13 | `isAvailableAsync` is `false` and there is no native `requestReview`, so the JavaScript opens the store page by URL |
+| expo-brightness, expo-linear-gradient | nothing | `UIScreen` brightness and `CAGradientLayer` exist on iOS 6 | the modules as published |
+
+Not started because each needs a rewrite and a compiler to check it: expo-web-browser (`SFSafariViewController` is iOS 9 and
+`ASWebAuthenticationSession` iOS 12: opening a URL in Safari is possible, an authentication session is not), expo-blur
+(`UIVisualEffectView` is iOS 8; a blur on iOS 6 means rendering a snapshot through Core Image) and expo-screen-orientation (window
+scenes and `requestGeometryUpdate` are iOS 13 and 16; the view-controller orientation path is the analog).
+
 ## AVIF and SVG decision (2026-11-16)
 
 - SVG: not feasible. SDWebImageSVGCoder renders through CoreSVG, which iOS 6 does not have. A different renderer would be a new
