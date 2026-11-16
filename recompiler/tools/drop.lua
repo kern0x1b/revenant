@@ -33,7 +33,14 @@ function main(name, ...)
     if not destination then
         raise("no destination: pass --out DIR, or place this checkout beside telegram-build")
     end
+    local started = os.time()
+    local function step(text)
+        print("drop: %s (%d s)", text, os.time() - started)
+    end
+    step("build xlate and xlgen")
+    os.execv("nice", {"-n", "15", "./xmakew", "build", "-P", ".", "-r", "xlate", "xlgen"}, {curdir = path.directory(path.directory(scripts))})
     local e, out = corpus.setup("recaptcha-" .. name)
+    step("translate")
     local xl = build.translate_sdk(e, out, sdk, libs)
     local library = path.join(xl, "RecaptchaEnterprise.dylib")
     local registry = path.join(xl, "RecaptchaEnterprise-classes.dylib")
@@ -65,6 +72,7 @@ function main(name, ...)
         sdk_module.verify(sdk_module.read(entry))
         print("drop verified: %s", entry)
     end
+    step("ready")
     print("drop: %s", destination)
     print("sha256: %s", sha)
     print("registry_sha256: %s", registry_sha)

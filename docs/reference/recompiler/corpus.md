@@ -1130,11 +1130,11 @@ each step with the resident size. It fails when a step is missing, when the fetc
 process does not end with exit 0. A run takes 16 s on the 4S; the drop17 stop (`dlsym` answered with the host's `CFError: Error`
 conformance, see `stepDlsymGuest` above) and the double free of drop16 both reproduced in it.
 
-`recompiler/tools/drop.sh NAME [--out DIR] [--no-verify]` builds a drop in one command and stops at the first step that
+`./xmakew l -P . recompiler/tools/drop.lua NAME [--out DIR] [--no-verify]` builds a drop in one command and stops at the first step that
 fails: it builds `xlate` and `xlgen`, translates the SDK with the same recipe as the check, copies the library, its registry,
 the loader files and the reports to `telegram-build/.agent-work/recaptcha-real/NAME` (or DIR), writes `recaptcha-sdk.txt` with the
 two sha256 and, when `telegram-build/tools/recaptcha_sdk.lua` is there, verifies the drop with it. It prints the path and both
-digests. It needs `REVENANT_CACHE`, `XL_SWIFTOBJC_LIBS` and `BACKPORTS_DIR` in the environment; the second translation of an
+digests. It needs `XL_SWIFTOBJC_LIBS` and `BACKPORTS_DIR` in the environment (and `REVENANT_CACHE` in a worktree); the second translation of an
 unchanged lift reuses the lifted objects (`lift.stamp`).
 
 ### cxxinit and refrepro
