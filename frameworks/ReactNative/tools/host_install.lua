@@ -4,6 +4,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua launch --bundle-id ID [--dyld FOLDER]
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stop --bundle-id ID
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua diagnostics --bundle-id ID [--output DIR]
+       ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua window --archive FILE --bundle-id ID --output DIR [--debs FILE,...] [--packages FILE] [--probe FILE] [--expect NAME,...] [--restore-bundle FILE]
   stage  makes DIR/<app name>.app and DIR/host.tgz from a built host: it adds the manifest folder (EXConstants.bundle from app_config.lua),
           the backports libraries in DIR of --backports (with --key, the generation of that store which the key names; no other
           generation is picked), refusing a built host that loads a library DIR lacks and naming each one, retargets the library references from /usr/lib/revenant/org.revenant.backports
@@ -24,6 +25,12 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
   launch  wakes the phone and has SpringBoard start the app of the id. With --dyld FOLDER (a folder of the phone) the start sets DYLD_LIBRARY_PATH to it, so
           the libraries of that folder are loaded by file name before the installed ones; only that start sees them, not one from the home screen.
   stop    ends the running process of the app of the id and of no other id: it finds the process by the launchd label of the app.
+  window  one short phone window on the claimed phone: installs only the packages of --debs (org.revenant.<name>_<version>_<arch>.deb) whose version
+          the phone does not hold, one by one with a 3 s pause between them; installs the host archive only when its sha256 differs from the one
+          recorded beside the app on the phone; with --probe puts that bundle in the app and launches it, waits 25 s, reads rnhost.log for the lines
+          `rn-probe <module> <json>` (the json has "ok" and a value or an error; probe.js in src/probe prints them through nativeLoggingHook), takes the
+          diagnostics (crash reports, log, screenshot) and writes OUT/window.json with the probe answers, the names of --expect that never answered, and the steps;
+          with --restore-bundle puts the application's own bundle back; stops the app and erases the claim's scratch folder. It does not claim, lock or release the phone.
   diagnostics  copies what the phone keeps of the app of the id into DIR (build/diagnostics/<last part of the id> by default): the app's
           version, the iOS version, the launchd state, the crash reports of RNHost-<last part of the id> (in crash/), the host's
           rnhost.log and a screenshot (screen.png), with a summary in diagnostics.txt. It changes nothing on the phone except one
@@ -629,6 +636,15 @@ function stage(options)
     print("wrote " .. archive)
 end
 
+function put_bundle(device, settings, app, bundle, extra)
+    local conf = os.tmpfile()
+    io.writefile(conf, conf_text(CONF_BUNDLE, extra))
+    device.copy(settings, path.absolute(bundle), app .. "/" .. CONF_BUNDLE)
+    device.copy(settings, conf, app .. "/rnhost.conf")
+    os.rm(conf)
+    device.run(settings, "chown root:wheel " .. app .. "/" .. CONF_BUNDLE .. " " .. app .. "/rnhost.conf && chmod 644 " .. app .. "/" .. CONF_BUNDLE .. " " .. app .. "/rnhost.conf")
+end
+
 function deploy(options)
     if not (options.archive and options["bundle-id"]) then
         raise("deploy needs \"--archive\" and \"--bundle-id\"")
@@ -676,12 +692,7 @@ function deploy(options)
     local output = run_folder(id)
     device.run(settings, "mkdir -p " .. output .. " && chown mobile " .. output .. " && chmod 700 " .. output)
     if options.bundle then
-        local conf = os.tmpfile()
-        io.writefile(conf, conf_text(CONF_BUNDLE, options.conf))
-        device.copy(settings, path.absolute(options.bundle), app .. "/" .. CONF_BUNDLE)
-        device.copy(settings, conf, app .. "/rnhost.conf")
-        os.rm(conf)
-        device.run(settings, "chown root:wheel " .. app .. "/" .. CONF_BUNDLE .. " " .. app .. "/rnhost.conf && chmod 644 " .. app .. "/" .. CONF_BUNDLE .. " " .. app .. "/rnhost.conf")
+        put_bundle(device, settings, app, options.bundle, options.conf)
     end
     print("installed " .. id .. " as " .. app)
 end
@@ -790,9 +801,128 @@ function diagnostics(options)
     print("diagnostics of " .. id .. " in " .. output)
 end
 
+local DEB_NAME = "^(org%.revenant%.[%w%-]+)_([^_]+)_[^_]+%.deb$"
+
+function deb_package(file)
+    local name, version = path.filename(file):match(DEB_NAME)
+    if not name then
+        raise("%s is not a package file named org.revenant.<name>_<version>_<architecture>.deb", file)
+    end
+    return {name = name, version = version, file = file}
+end
+
+function delta_plan(wanted, installed)
+    local todo = {}
+    for _, package in ipairs(wanted) do
+        if installed[package.name] ~= package.version then
+            table.insert(todo, package)
+        end
+    end
+    return todo
+end
+
+function archive_unchanged(local_sha, remote_text)
+    return remote_text ~= nil and remote_text:trim() == local_sha
+end
+
+function probe_results(log_text, expected)
+    local json = import("core.base.json")
+    local modules, missing = {}, {}
+    for module, body in (log_text or ""):gmatch("rn%-probe ([%w%._%-]+) ([^\n]+)") do
+        local decoded = try { function () return json.decode(body) end }
+        modules[module] = decoded or {ok = false, error = "unreadable probe line: " .. body}
+    end
+    for _, name in ipairs(expected or {}) do
+        if not modules[name] then
+            table.insert(missing, name)
+        end
+    end
+    return {modules = modules, missing = missing}
+end
+
+local PAUSE_SECONDS = 3
+local PROBE_WAIT_SECONDS = 25
+
+function window(options)
+    local json = import("core.base.json")
+    if not (options.archive and options["bundle-id"] and options.output) then
+        raise("window needs \"--archive\", \"--bundle-id\" and \"--output\"")
+    end
+    local device, settings, holder = phone()
+    local id = options["bundle-id"]
+    local report = {steps = {}}
+    local function step(text)
+        table.insert(report.steps, text)
+        print(text)
+    end
+    local installed = {}
+    local wanted = {}
+    for _, file in ipairs(string.split(options.debs or "", ",", {plain = true})) do
+        if file ~= "" then
+            table.insert(wanted, deb_package(file))
+        end
+    end
+    for _, package in ipairs(wanted) do
+        installed[package.name] = device.run(settings, "dpkg-query -W -f='${Version}' " .. package.name .. " 2>/dev/null ; true", {capture = true}):trim()
+    end
+    local scratch = device.scratch(holder)
+    device.run(settings, "mkdir -p " .. scratch)
+    for _, package in ipairs(delta_plan(wanted, installed)) do
+        device.copy(settings, path.absolute(package.file), scratch .. "/" .. path.filename(package.file))
+        device.run(settings, "dpkg -i " .. scratch .. "/" .. path.filename(package.file) .. " && rm " .. scratch .. "/" .. path.filename(package.file))
+        step("installed " .. package.name .. " " .. package.version .. " (was " .. (installed[package.name] ~= "" and installed[package.name] or "absent") .. ")")
+        os.sleep(PAUSE_SECONDS * 1000)
+    end
+    local local_sha = hash.sha256(path.absolute(options.archive))
+    local sha_file = stash_folder(holder, id) .. "/" .. app_name(id) .. ".archive.sha256"
+    local remote_sha = device.run(settings, "cat " .. sha_file .. " 2>/dev/null ; true", {capture = true})
+    if archive_unchanged(local_sha, remote_sha) then
+        step("the host archive is the one on the phone (sha256 " .. local_sha:sub(1, 12) .. "), not copied")
+    else
+        deploy({archive = options.archive, ["bundle-id"] = id, packages = options.packages, provided = options.provided})
+        device.run(settings, "echo " .. local_sha .. " > " .. sha_file)
+        step("installed the host archive (sha256 " .. local_sha:sub(1, 12) .. ")")
+    end
+    local app = app_folder(holder, id)
+    if options.probe then
+        put_bundle(device, settings, app, options.probe, options.conf)
+        step("put the probe bundle")
+    end
+    local log_file = run_folder(id) .. "/rnhost.log"
+    device.run(settings, "rm -f " .. log_file)
+    stop({["bundle-id"] = id})
+    launch({["bundle-id"] = id})
+    step("launched " .. id .. ", waiting " .. PROBE_WAIT_SECONDS .. " s")
+    os.sleep(PROBE_WAIT_SECONDS * 1000)
+    local expected = {}
+    for name in (options.expect or ""):gmatch("[^,]+") do
+        table.insert(expected, name)
+    end
+    local log_text = device.run(settings, "cat " .. log_file .. " 2>/dev/null ; true", {capture = true})
+    local result = probe_results(log_text, expected)
+    result.steps = report.steps
+    diagnostics({["bundle-id"] = id, output = path.join(path.absolute(options.output), "diagnostics")})
+    if options["restore-bundle"] then
+        put_bundle(device, settings, app, options["restore-bundle"], options.conf)
+        step("restored the application bundle")
+    end
+    stop({["bundle-id"] = id})
+    device.run(settings, "rm -rf " .. scratch)
+    io.writefile(path.join(path.absolute(options.output), "window.json"), json.encode(result, {pretty = true}) .. "\n")
+    local answered, failed = 0, {}
+    for name, value in pairs(result.modules) do
+        answered = answered + 1
+        if not value.ok then
+            table.insert(failed, name)
+        end
+    end
+    table.sort(failed)
+    print("window: %d probe lines, %d failed (%s), %d expected modules missing (%s); %s", answered, #failed, table.concat(failed, ","), #result.missing, table.concat(result.missing, ","), path.join(options.output, "window.json"))
+end
+
 function main(...)
     local shared = import("@addon.revenant.member", {anonymous = true})
-    local options, words = shared.arguments({...}, {app = "value", backports = "value", packages = "value", provided = "value", dyld = "value", key = "value", manifest = "value", output = "value", archive = "value",
+    local options, words = shared.arguments({...}, {app = "value", backports = "value", packages = "value", provided = "value", dyld = "value", key = "value", manifest = "value", output = "value", archive = "value", debs = "value", probe = "value", expect = "value", ["restore-bundle"] = "value",
                                                     ["bundle-id"] = "value", bundle = "value", conf = "value", help = "switch"})
     local command = words[1]
     if options.help then
@@ -807,6 +937,8 @@ function main(...)
         stop(options)
     elseif command == "diagnostics" then
         diagnostics(options)
+    elseif command == "window" then
+        window(options)
     else
         print(USAGE)
     end

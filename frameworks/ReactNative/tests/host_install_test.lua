@@ -304,4 +304,24 @@ function main()
             and command:find("rm " .. scratch .. "/rnhost.tgz", 1, true) ~= nil, command)
         expect("the install leaves nothing in /var/tmp", command:find("/var/tmp", 1, true) == nil, command)
     end
+    do
+        local package = host.deb_package("/tmp/x/org.revenant.swift-crypto-91c43b24_0.8.18+91c43b24_iphoneos-arm.deb")
+        expect("a package file gives its name and version", package.name == "org.revenant.swift-crypto-91c43b24" and package.version == "0.8.18+91c43b24", package.name .. " " .. package.version)
+        expect("a file that is not a package is refused naming the file", (refusal(function () host.deb_package("/tmp/x/notes.txt") end) or ""):find("notes.txt", 1, true) ~= nil, "no refusal")
+        local wanted = {{name = "a", version = "1"}, {name = "b", version = "2"}, {name = "c", version = "3"}}
+        local todo = host.delta_plan(wanted, {a = "1", b = "1", c = ""})
+        expect("the delta installs only the packages whose version differs or is absent", #todo == 2 and todo[1].name == "b" and todo[2].name == "c", #todo .. " packages")
+        expect("the delta of an unchanged phone is empty", #host.delta_plan(wanted, {a = "1", b = "2", c = "3"}) == 0, "not empty")
+        expect("an archive with the recorded sha is not copied again", host.archive_unchanged("abc", "abc\n") == true, "copied")
+        expect("an archive with another sha is copied", host.archive_unchanged("abc", "abd\n") == false and host.archive_unchanged("abc", "") == false and host.archive_unchanged("abc", nil) == false, "not copied")
+        local log = "x rn-host: heartbeat\n"
+            .. "2026 RNHost[1:2] rn-probe ExpoNetwork {\"ok\":true,\"value\":{\"type\":\"WIFI\"}}\n"
+            .. "2026 RNHost[1:2] rn-probe ExpoSecureStore {\"ok\":false,\"error\":\"boom\"}\n"
+            .. "2026 RNHost[1:2] rn-probe ExpoBroken not json\n"
+        local result = host.probe_results(log, {"ExpoNetwork", "ExpoSecureStore", "ExpoDevice"})
+        expect("a probe line gives its module's answer", result.modules.ExpoNetwork.ok == true and result.modules.ExpoNetwork.value.type == "WIFI", "no answer")
+        expect("a failed probe keeps its error", result.modules.ExpoSecureStore.ok == false and result.modules.ExpoSecureStore.error == "boom", "no error")
+        expect("a probe line that is not json is a failed answer naming the line", result.modules.ExpoBroken.ok == false and result.modules.ExpoBroken.error:find("not json", 1, true) ~= nil, "no error")
+        expect("an expected module that never answered is listed", #result.missing == 1 and result.missing[1] == "ExpoDevice", #result.missing .. " missing")
+    end
 end

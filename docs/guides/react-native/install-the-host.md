@@ -73,3 +73,24 @@ your app if the phone is short of memory.
 Ends the running process of the app of the id and of no other. The phone has no `ps` or `pkill`, so the tool reads the process id from
 the `launchctl` entry `UIKitApplication:<id>[...]` and kills that one process. It prints `stopped <pid>` or `not running`. Never use
 `killall RNHost`: it kills every host on the phone, those of other workers too.
+
+## A short window: `window`
+
+`host_install.lua window` is the whole phone window in one command, so that the claim lasts about 20 minutes: claim the phone first
+(`./xmakew device -P . --minutes=20 claim`), then
+
+```
+./xmakew l -P . frameworks/ReactNative/tools/host_install.lua window --archive host.tgz --bundle-id space.kern0x1b.paseo-ios6.rnhost \
+  --packages host-packages.json --debs DEBS/org.revenant.swift-runtime-KEY_..._iphoneos-arm.deb,... \
+  --probe probe.hbc --expect FileSystem,ExpoCamera,ExpoImage,ExpoSecureStore --restore-bundle bundle.hbc --output build/window
+```
+
+It installs only the packages of `--debs` whose version the phone lacks, one at a time with a 3 s pause (the phone has dropped off USB after
+heavy writes), copies the host archive only when its sha256 differs from the one recorded beside the app (`<stash>/<name>.archive.sha256`),
+puts the probe bundle in the app, launches it, waits 25 s and reads `rnhost.log` for the lines `rn-probe <module> <json>`. The probe is
+`frameworks/ReactNative/src/probe/modules.js`: for each Expo module it reports whether the module is registered and its exports, and calls the
+ones whose behaviour is known (a keychain round trip, the network state, the device model, the brightness, the store-review flag). It is compiled
+with the package's `hermesc`: `hermesc -O -emit-binary -out probe.hbc modules.js`. `OUT/window.json` holds the answers, the modules of `--expect` that
+never answered and the steps; `OUT/diagnostics/` holds the crash reports, the log and a screenshot. With `--restore-bundle` the application's own
+bundle goes back, and the app is stopped. The command does not claim, lock or release the phone: the session does, with `revenant-unlock lock`
+and `./xmakew device -P . release` right after it.
