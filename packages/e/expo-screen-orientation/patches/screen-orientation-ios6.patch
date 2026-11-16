@@ -1,0 +1,192 @@
+diff -ru a/ios/ScreenOrientationModule.swift b/ios/ScreenOrientationModule.swift
+--- a/ios/ScreenOrientationModule.swift
++++ b/ios/ScreenOrientationModule.swift
+@@ -99,16 +99,14 @@
+   // MARK: - ScreenOrientationController
+ 
+   public func screenOrientationDidChange(_ orientation: UIInterfaceOrientation) {
+-    guard let currentTraitCollection = screenOrientationRegistry.currentTraitCollection else {
+-      return
+-    }
++    let classes = sizeClasses(for: orientation)
+ 
+     sendEvent(ScreenOrientationModule.didUpdateDimensionsEvent, [
+       "orientationLock": ModuleOrientationLock.from(mask: screenOrientationRegistry.currentOrientationMask).rawValue,
+       "orientationInfo": [
+         "orientation": ModuleOrientation.from(orientation: orientation).rawValue,
+-        "verticalSizeClass": currentTraitCollection.verticalSizeClass.rawValue,
+-        "horizontalSizeClass": currentTraitCollection.horizontalSizeClass.rawValue
++        "verticalSizeClass": classes.vertical,
++        "horizontalSizeClass": classes.horizontal
+       ] as [String: Any]
+     ])
+   }
+diff -ru a/ios/ScreenOrientationRegistry.swift b/ios/ScreenOrientationRegistry.swift
+--- a/ios/ScreenOrientationRegistry.swift
++++ b/ios/ScreenOrientationRegistry.swift
+@@ -20,21 +20,9 @@
+   var controllerInterfaceMasks: [ObjectIdentifier: UIInterfaceOrientationMask] = [:]
+   private let queue = DispatchQueue(label: "expo.screenorientationregistry", attributes: .concurrent)
+   private let notificationQueue = DispatchQueue(label: "expo.screenorientationregistry.notifications")
+-  private var _currentTraitCollection: UITraitCollection?
+-  @objc
+-  public var currentTraitCollection: UITraitCollection? {
+-    get { queue.sync { _currentTraitCollection } }
+-    set { queue.async(flags: .barrier) { self._currentTraitCollection = newValue } }
+-  }
+   var lastOrientationMask: UIInterfaceOrientationMask
+   var rootViewController: UIViewController? {
+-    let keyWindow = UIApplication
+-      .shared
+-      .connectedScenes
+-      .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
+-      .last { $0.isKeyWindow }
+-
+-    return keyWindow?.rootViewController
++    return UIApplication.shared.keyWindow?.rootViewController
+   }
+ 
+   public var currentOrientationMask: UIInterfaceOrientationMask {
+@@ -48,7 +36,6 @@
+ 
+   private override init() {
+     self.currentScreenOrientation = .unknown
+-    self._currentTraitCollection = nil
+     self.lastOrientationMask = []
+ 
+     super.init()
+@@ -63,7 +50,7 @@
+    Called by ScreenOrientationAppDelegate in order to set initial interface orientation.
+    */
+   public func updateCurrentScreenOrientation() {
+-      self.currentScreenOrientation = rootViewController?.view.window?.windowScene?.interfaceOrientation ?? .unknown
++      self.currentScreenOrientation = UIApplication.shared.statusBarOrientation
+   }
+ 
+   deinit {
+@@ -94,11 +81,6 @@
+         return
+       }
+ 
+-      if #available(iOS 16.0, *) {
+-        let windowScene = self.rootViewController?.view.window?.windowScene
+-        windowScene?.requestGeometryUpdate(.iOS(interfaceOrientations: orientationMask))
+-        self.rootViewController?.setNeedsUpdateOfSupportedInterfaceOrientations()
+-      }
+       UIDevice.current.setValue(newOrientation.rawValue, forKey: "orientation")
+       UIViewController.attemptRotationToDeviceOrientation()
+ 
+@@ -195,11 +177,6 @@
+       }
+     }
+     screenOrientationDidChange(newScreenOrientation)
+-  }
+-
+-  @objc
+-  public func traitCollectionDidChange(to traitCollection: UITraitCollection) {
+-    currentTraitCollection = traitCollection
+   }
+ 
+   /**
+diff -ru a/ios/ScreenOrientationUtilities.swift b/ios/ScreenOrientationUtilities.swift
+--- a/ios/ScreenOrientationUtilities.swift
++++ b/ios/ScreenOrientationUtilities.swift
+@@ -4,14 +4,7 @@
+   return UIDevice.current.userInterfaceIdiom == .pad
+ }
+ 
+-// https://medium.com/@cafielo/how-to-detect-notch-screen-in-swift-56271827625d
+-internal var doesDeviceHaveNotch = {
+-  var bottomSafeAreaInsetIsPositive = false
+-  EXUtilities.performSynchronously {
+-    bottomSafeAreaInsetIsPositive = (UIApplication.shared.delegate?.window??.safeAreaInsets.bottom ?? 0.0) > 0.0
+-  }
+-  return bottomSafeAreaInsetIsPositive
+-}()
++internal let doesDeviceHaveNotch = false
+ 
+ extension UIInterfaceOrientationMask {
+   internal func toUIInterfaceOrientation() -> UIInterfaceOrientation {
+@@ -112,14 +105,12 @@
+   }
+ }
+ 
+-extension UITraitCollection {
+-  internal func isPortrait() -> Bool {
+-    return verticalSizeClass == .regular && horizontalSizeClass == .compact
+-  }
++internal let regularSizeClass = 2
++internal let compactSizeClass = 1
+ 
+-  internal func isLandscape() -> Bool {
+-    return (verticalSizeClass == .compact && horizontalSizeClass == .compact)
+-    || (verticalSizeClass == .regular && horizontalSizeClass == .regular)
+-    || (verticalSizeClass == .compact && horizontalSizeClass == .regular)
++internal func sizeClasses(for orientation: UIInterfaceOrientation) -> (vertical: Int, horizontal: Int) {
++  if isPad() {
++    return (regularSizeClass, regularSizeClass)
+   }
++  return orientation.isPortrait ? (regularSizeClass, compactSizeClass) : (compactSizeClass, compactSizeClass)
+ }
+diff -ru a/ios/ScreenOrientationViewController.swift b/ios/ScreenOrientationViewController.swift
+--- a/ios/ScreenOrientationViewController.swift
++++ b/ios/ScreenOrientationViewController.swift
+@@ -8,25 +8,10 @@
+   let screenOrientationRegistry = ScreenOrientationRegistry.shared
+   private var defaultOrientationMask: UIInterfaceOrientationMask
+   private var previousInterfaceOrientation: UIInterfaceOrientation = .unknown
+-  private var windowInterfaceOrientation: UIInterfaceOrientation? {
+-    let keyWindow = UIApplication
+-      .shared
+-      .connectedScenes
+-      .flatMap { ($0 as? UIWindowScene)?.windows ?? [] }
+-      .last { $0.isKeyWindow }
+ 
+-    return keyWindow?.windowScene?.interfaceOrientation
+-  }
+-
+   init(defaultOrientationMask: UIInterfaceOrientationMask = doesDeviceHaveNotch ? .allButUpsideDown : .all) {
+     self.defaultOrientationMask = defaultOrientationMask
+     super.init(nibName: nil, bundle: nil)
+-
+-    // For iPads traitCollectionDidChange will not be called (it's always in the same size class). It is necessary
+-    // to init it in here, so it's possible to return it in the didUpdateDimensionsEvent of the module
+-    if self.screenOrientationRegistry.currentTraitCollection == nil {
+-      self.screenOrientationRegistry.traitCollectionDidChange(to: self.traitCollection)
+-    }
+   }
+ 
+   convenience init(defaultScreenOrientationFromPlist: Void) {
+@@ -81,26 +66,14 @@
+     return !mask.isEmpty ? mask : defaultOrientationMask
+   }
+ 
+-  override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+-    super.traitCollectionDidChange(previousTraitCollection)
+-    screenOrientationRegistry.traitCollectionDidChange(to: traitCollection)
+-  }
++  override func didRotate(from fromInterfaceOrientation: UIInterfaceOrientation) {
++    super.didRotate(from: fromInterfaceOrientation)
+ 
+-  override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+-    super.viewWillTransition(to: size, with: coordinator)
+-
+-    // Use the completion block, windowScene.interfaceOrientation is still stale during the
+-    // alongside-transition closure, which makes viewDidTransition read .unknown.
+-    coordinator.animate(alongsideTransition: nil) { [weak self] _ in
+-      guard let self = self, let windowInterfaceOrientation = self.windowInterfaceOrientation else {
+-        return
+-      }
+-
+-      if windowInterfaceOrientation != self.previousInterfaceOrientation {
+-        self.screenOrientationRegistry.viewDidTransition(toOrientation: windowInterfaceOrientation)
+-      }
+-      self.previousInterfaceOrientation = windowInterfaceOrientation
++    let windowInterfaceOrientation = UIApplication.shared.statusBarOrientation
++    if windowInterfaceOrientation != previousInterfaceOrientation {
++      screenOrientationRegistry.viewDidTransition(toOrientation: windowInterfaceOrientation)
+     }
++    previousInterfaceOrientation = windowInterfaceOrientation
+   }
+ 
+   /// Finds the VC whose subtree has a react-native-screens screen with orientation set.

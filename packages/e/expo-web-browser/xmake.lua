@@ -1,0 +1,21 @@
+package("expo-web-browser")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-web-browser")
+    set_description("expo-web-browser 57.0.3, the system browser of the Expo SDK, from its npm tarball: the Swift sources of its iOS half with SFSafariViewController (iOS 9) replaced by opening the URL in Safari and ASWebAuthenticationSession (iOS 12) replaced by a rejection, so that they run on iOS 6")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-web-browser/-/expo-web-browser-$(version).tgz")
+    add_versions("57.0.3", "31ff16fe7840b18a755f0032ecf8e7c066eaf8dec4fa752f18073e517b89ecd7")
+    add_patches("57.0.3", path.join(os.scriptdir(), "patches", "web-browser-ios6.patch"), "041a2bb6a78bf95b023ecb5b9f49f35c69bbdc20f80c8de60434394c59d909c2")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-web-browser" and manifest.version == "57.0.3", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-web-browser has no expo-module.config.json")
+    end)

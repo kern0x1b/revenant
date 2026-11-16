@@ -1,0 +1,21 @@
+package("expo-screen-orientation")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-screen-orientation")
+    set_description("expo-screen-orientation 57.0.3, the orientation lock of the Expo SDK, from its npm tarball: the Swift sources of its iOS half with trait collections (iOS 8), window scenes (iOS 13), requestGeometryUpdate (iOS 16) and the safe-area notch test (iOS 11) replaced by the status-bar orientation and the size classes of the device idiom, so that they run on iOS 6")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-screen-orientation/-/expo-screen-orientation-$(version).tgz")
+    add_versions("57.0.3", "b9fb4b3c430142550be41ad27206d31b3aa10708261079103d4678bb194baba7")
+    add_patches("57.0.3", path.join(os.scriptdir(), "patches", "screen-orientation-ios6.patch"), "4ad034eff4a0d93644110bf7d10ecb46a02416cf4c7350fe8ac0bd045e1c35c3")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-screen-orientation" and manifest.version == "57.0.3", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-screen-orientation has no expo-module.config.json")
+    end)

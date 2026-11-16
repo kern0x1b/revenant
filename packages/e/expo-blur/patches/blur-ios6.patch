@@ -1,0 +1,232 @@
+diff -ru a/ios/BlurEffectView.swift b/ios/BlurEffectView.swift
+--- a/ios/BlurEffectView.swift
++++ b/ios/BlurEffectView.swift
+@@ -1,66 +1,87 @@
+ // Copyright 2015-present 650 Industries. All rights reserved.
+ 
+ import UIKit
++import CoreImage
+ import ExpoModulesCore
+ 
+-/**
+- This class is based on https://gist.github.com/darrarski/29a2a4515508e385c90b3ffe6f975df7
+- */
+-final class BlurEffectView: UIVisualEffectView {
++final class BlurEffectView: UIView {
++  private static let maximumRadius = 20.0
++
+   @Clamping(lowerBound: 0.01, upperBound: 1)
+   var intensity: Double = 0.5 {
+     didSet {
+-      setNeedsDisplay()
++      refresh()
+     }
+   }
+ 
+   var tint: TintStyle = .light {
+     didSet {
+-      visualEffect = UIBlurEffect(style: tint.toBlurEffect())
++      overlay.backgroundColor = tint.toOverlayColor()
+     }
+   }
+ 
+-  private var visualEffect: UIVisualEffect = UIBlurEffect(style: TintStyle.default.toBlurEffect()) {
+-    didSet {
+-      setNeedsDisplay()
+-    }
+-  }
+-  private var animator: UIViewPropertyAnimator?
++  private let snapshot = UIImageView()
++  private let overlay = UIView()
++  private let context = CIContext(options: nil)
++  private var refreshing = false
++  private var renderedBounds = CGRect.zero
+ 
+   init() {
+-    super.init(effect: nil)
++    super.init(frame: .zero)
++    snapshot.autoresizingMask = [.flexibleWidth, .flexibleHeight]
++    overlay.autoresizingMask = [.flexibleWidth, .flexibleHeight]
++    overlay.backgroundColor = tint.toOverlayColor()
++    addSubview(snapshot)
++    addSubview(overlay)
+   }
+ 
+   required init?(coder aDecoder: NSCoder) { nil }
+ 
+-  deinit {
+-    animator?.stopAnimation(true)
++  override func layoutSubviews() {
++    super.layoutSubviews()
++    snapshot.frame = bounds
++    overlay.frame = bounds
++    if !refreshing && bounds != renderedBounds {
++      refresh()
++    }
+   }
+ 
+-  override func draw(_ rect: CGRect) {
+-    super.draw(rect)
++  override func didMoveToSuperview() {
++    super.didMoveToSuperview()
++    refresh()
++  }
+ 
+-    // BlurView intensity relies on running an animation and making it partially complete. This means that there
+-    // is a continually running animation, which makes detox hang (it waits for the animation to finish indefinitely).
+-    // We can detect if detoxServer is running and in that case replace smooth intensity value with an on/off behaviour.
+-    if isDetoxPresent() {
+-      effect = intensity > 0 ? visualEffect : nil
++  private func refresh() {
++    guard !refreshing, let host = superview, bounds.width > 0, bounds.height > 0 else {
+       return
+     }
+-
+-    effect = nil
+-    animator?.stopAnimation(true)
+-    animator = UIViewPropertyAnimator(duration: 1, curve: .linear) { [unowned self] in
+-      self.effect = visualEffect
++    refreshing = true
++    defer { refreshing = false }
++    renderedBounds = bounds
++    isHidden = true
++    UIGraphicsBeginImageContextWithOptions(bounds.size, false, 0)
++    guard let drawing = UIGraphicsGetCurrentContext() else {
++      UIGraphicsEndImageContext()
++      isHidden = false
++      return
+     }
+-    animator?.fractionComplete = CGFloat(intensity)
++    drawing.translateBy(x: -frame.origin.x, y: -frame.origin.y)
++    host.layer.render(in: drawing)
++    let image = UIGraphicsGetImageFromCurrentImageContext()
++    UIGraphicsEndImageContext()
++    isHidden = false
++    guard let input = image.flatMap({ CIImage(image: $0) }),
++          let filter = CIFilter(name: "CIGaussianBlur") else {
++      return
++    }
++    filter.setValue(input, forKey: kCIInputImageKey)
++    filter.setValue(intensity * BlurEffectView.maximumRadius * Double(UIScreen.main.scale), forKey: kCIInputRadiusKey)
++    guard let output = filter.outputImage,
++          let blurred = context.createCGImage(output, from: input.extent) else {
++      return
++    }
++    snapshot.image = UIImage(cgImage: blurred, scale: UIScreen.main.scale, orientation: .up)
+   }
+-}
+-
+-private func isDetoxPresent() -> Bool {
+-  let args = ProcessInfo.processInfo.arguments
+-
+-  return args.contains("-detoxServer") && args.contains("-detoxSessionId")
+ }
+ 
+ /**
+diff -ru a/ios/TintStyle.swift b/ios/TintStyle.swift
+--- a/ios/TintStyle.swift
++++ b/ios/TintStyle.swift
+@@ -23,97 +23,14 @@
+   case systemThickMaterialDark
+   case systemChromeMaterialDark
+ 
+-  func toBlurEffect() -> UIBlurEffect.Style {
+-#if os(tvOS)
++  func toOverlayColor() -> UIColor {
+     switch self {
+-    case .default:
+-      return .regular
+     case .extraLight:
+-      return .extraLight
+-    case .light:
+-      return .light
+-    case .regular:
+-      return .regular
+-    case .dark:
+-      return .dark
+-    case .prominent:
+-      return .prominent
+-    case .systemUltraThinMaterial:
+-      return .regular
+-    case .systemThinMaterial:
+-      return .regular
+-    case .systemMaterial:
+-      return .regular
+-    case .systemThickMaterial:
+-      return .regular
+-    case .systemChromeMaterial:
+-      return .regular
+-    case .systemUltraThinMaterialLight:
+-      return .light
+-    case .systemThinMaterialLight:
+-      return .light
+-    case .systemMaterialLight:
+-      return .light
+-    case .systemThickMaterialLight:
+-      return .light
+-    case .systemChromeMaterialLight:
+-      return .light
+-    case .systemUltraThinMaterialDark:
+-      return .dark
+-    case .systemThinMaterialDark:
+-      return .dark
+-    case .systemMaterialDark:
+-      return .dark
+-    case .systemThickMaterialDark:
+-      return .dark
+-    case .systemChromeMaterialDark:
+-      return .dark
++      return UIColor(white: 1, alpha: 0.5)
++    case .dark, .systemUltraThinMaterialDark, .systemThinMaterialDark, .systemMaterialDark, .systemThickMaterialDark, .systemChromeMaterialDark:
++      return UIColor(white: 0, alpha: 0.4)
++    default:
++      return UIColor(white: 1, alpha: 0.3)
+     }
+-#else
+-    switch self {
+-    case .default:
+-      return .regular
+-    case .extraLight:
+-      return .extraLight
+-    case .light:
+-      return .light
+-    case .regular:
+-      return .regular
+-    case .dark:
+-      return .dark
+-    case .prominent:
+-      return .prominent
+-    case .systemUltraThinMaterial:
+-      return .systemUltraThinMaterial
+-    case .systemThinMaterial:
+-      return .systemThinMaterial
+-    case .systemMaterial:
+-      return .systemMaterial
+-    case .systemThickMaterial:
+-      return .systemThickMaterial
+-    case .systemChromeMaterial:
+-      return .systemChromeMaterial
+-    case .systemUltraThinMaterialLight:
+-      return .systemUltraThinMaterialLight
+-    case .systemThickMaterialLight:
+-      return .systemThickMaterialLight
+-    case .systemThinMaterialLight:
+-      return .systemThinMaterialLight
+-    case .systemMaterialLight:
+-      return .systemMaterialLight
+-    case .systemChromeMaterialLight:
+-      return .systemChromeMaterialLight
+-    case .systemUltraThinMaterialDark:
+-      return .systemUltraThinMaterialDark
+-    case .systemThinMaterialDark:
+-      return .systemThinMaterialDark
+-    case .systemMaterialDark:
+-      return .systemMaterialDark
+-    case .systemThickMaterialDark:
+-      return .systemThickMaterialDark
+-    case .systemChromeMaterialDark:
+-      return .systemChromeMaterialDark
+-    }
+-#endif
+   }
+ }

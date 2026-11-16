@@ -2,7 +2,7 @@
 
 expo-file-system, expo-document-picker, expo-image-manipulator, expo-image and expo-camera build from their npm tarballs, with
 patches in `packages/e/<name>/patches/`, into the one Swift module `ExpoAppModules`. Their coverage rows are `partial`, verified
-`build`: the host links them and starts under the old runtime; their calls are not yet exercised on the phone.
+`phone`: on the iPhone 4S (2026-11-16) the host registers each of them with its exports; their calls are not yet exercised.
 
 ## What each patch removes, why, and what JS sees
 
@@ -17,8 +17,10 @@ patches in `packages/e/<name>/patches/`, into the one Swift module `ExpoAppModul
 ## Modules outside the Paseo application (block 3)
 
 These packages are recipes with their iOS 6 patches (`packages/e/<name>/patches/`); each installs, its patch applies, and the host
-(Swift module `ExpoAppModules`) compiles and links them, so their coverage rows are `partial`, verified `build`; their calls are not yet
-exercised on the phone.
+(Swift module `ExpoAppModules`) compiles and links them, and the phone window of 2026-11-16 ran a probe in it (`frameworks/ReactNative/src/probe/modules.js`). expo-brightness,
+expo-device, expo-network and expo-store-review answered their calls (`real`, `phone`); expo-linear-gradient is registered (`partial`, `phone`);
+expo-secure-store is registered but the keychain refuses every write with errSecInteractionNotAllowed because the host was signed
+without `keychain-access-groups`; `src/host/entitlements.xml` adds it and the row stays `partial`, `build` until a window shows the round trip.
 
 | Module | Removed or replaced | Why | What JS sees |
 | --- | --- | --- | --- |
@@ -50,5 +52,5 @@ fails with "make the copy again" when a copy predates that. `src/expo/xmake.lua`
 ## How to check
 
 `./xmakew l -P . frameworks/ReactNative/tools/coverage.lua` regenerates `docs/reference/react-native/coverage.md`;
-`frameworks/ReactNative/tests/coverage_test.lua` and `isolate_test.lua` check the rules. On the phone the log shows no module
-errors at start (A/B run under swift-runtime 0a2b76cd).
+`frameworks/ReactNative/tests/coverage_test.lua` and `isolate_test.lua` check the rules. On the phone the probe of
+`host_install.lua window` reports each module's registration, exports and the calls above.

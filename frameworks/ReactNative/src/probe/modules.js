@@ -14,14 +14,27 @@ function present(name) {
 
 var CHECKS = {
   ExpoSecureStore: function (module) {
-    var options = {keychainService: 'rn-probe', requireAuthentication: false};
-    return module.setValueWithKeyAsync('probe-value', 'probe-key', options)
-      .then(function () { return module.getValueWithKeyAsync('probe-key', options); })
-      .then(function (value) {
-        return module.deleteValueWithKeyAsync('probe-key', options).then(function () {
-          return {roundTrip: value === 'probe-value', biometrics: module.canUseBiometricAuthentication()};
-        });
+    function roundTrip(accessible) {
+      var options = {keychainService: 'rn-probe', requireAuthentication: false};
+      if (accessible !== undefined) {
+        options.keychainAccessible = accessible;
+      }
+      return module.setValueWithKeyAsync('probe-value', 'probe-key', options)
+        .then(function () { return module.getValueWithKeyAsync('probe-key', options); })
+        .then(function (value) {
+          return module.deleteValueWithKeyAsync('probe-key', options).then(function () { return value === 'probe-value'; });
+        })
+        .catch(function (error) { return String(error && error.message || error); });
+    }
+    var classes = {whenUnlocked: undefined, afterFirstUnlock: 0, always: 2};
+    var names = Object.keys(classes);
+    return names.reduce(function (chain, name) {
+      return chain.then(function (answers) {
+        return roundTrip(classes[name]).then(function (answer) { answers[name] = answer; return answers; });
       });
+    }, Promise.resolve({})).then(function (answers) {
+      return {roundTrip: answers, biometrics: module.canUseBiometricAuthentication()};
+    });
   },
   ExpoNetwork: function (module) {
     return module.getNetworkStateAsync();

@@ -1,0 +1,21 @@
+package("expo-blur")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-blur")
+    set_description("expo-blur 57.0.3, the blur view of the Expo SDK, from its npm tarball: the Swift sources of its iOS half with UIVisualEffectView (iOS 8) replaced by a Core Image Gaussian blur of a snapshot of the view behind it, so that they run on iOS 6")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-blur/-/expo-blur-$(version).tgz")
+    add_versions("57.0.3", "b9e528965684e8e7fc90cae2e06399088091b89c84ab05eb3e809f69f82f29df")
+    add_patches("57.0.3", path.join(os.scriptdir(), "patches", "blur-ios6.patch"), "4ff9e0b9e6a8e22b43738c6ca81637ebd9cabea9a7034ae3ef80805c475f5ad2")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-blur" and manifest.version == "57.0.3", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-blur has no expo-module.config.json")
+    end)
