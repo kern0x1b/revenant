@@ -44,7 +44,7 @@ diff -ru a/ios/NetworkModule.swift b/ios/NetworkModule.swift
          return
        }
 -      self.emitNetworkStateChange(path: path)
-+      Unmanaged<NetworkModule>.fromOpaque(info).takeUnretainedValue().emitNetworkStateChange(flags: flags)
++      Unmanaged<NetworkModule>.fromOpaque(info).takeUnretainedValue().emitNetworkStateChange(flags: SCNetworkReachabilityFlags(rawValue: flags))
      }
 -    monitor.start(queue: monitorQueue)
 -    self.monitor = monitor
@@ -130,13 +130,13 @@ diff -ru a/ios/NetworkModule.swift b/ios/NetworkModule.swift
 -    if result == .timedOut {
 -      // Handle the timeout case
 -      print("Timeout waiting for network path.")
-+    var flags = SCNetworkReachabilityFlags()
-+    guard SCNetworkReachabilityGetFlags(reachability, &flags) else {
++    var rawFlags: UInt32 = 0
++    guard SCNetworkReachabilityGetFlags(reachability, &rawFlags) else {
        return nil
      }
 -
 -    return tempPath
-+    return flags
++    return SCNetworkReachabilityFlags(rawValue: rawFlags)
    }
  
 -  private func getNetworkStateAsync(path: NWPath? = nil) -> [String: Any] {

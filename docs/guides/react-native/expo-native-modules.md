@@ -16,8 +16,9 @@ patches in `packages/e/<name>/patches/`, into the one Swift module `ExpoAppModul
 
 ## Modules outside the Paseo application (block 3)
 
-These packages are recipes with their iOS 6 patches (`packages/e/<name>/patches/`); each installs and its patch applies, but none is
-compiled into a host yet, so their coverage rows stay `missing`, checked `none`, until the next host build.
+These packages are recipes with their iOS 6 patches (`packages/e/<name>/patches/`); each installs, its patch applies, and the host
+(Swift module `ExpoAppModules`) compiles and links them, so their coverage rows are `partial`, verified `build`; their calls are not yet
+exercised on the phone.
 
 | Module | Removed or replaced | Why | What JS sees |
 | --- | --- | --- | --- |
