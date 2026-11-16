@@ -361,6 +361,35 @@ message and a few system calls per sample while it is on, and nothing while it i
 cannot, because `XL_LOG` slows the loop it measures: how long one message of a guest loop takes, which message it is,
 and where the time goes when it is not in messages.
 
+`recompiler/tools/profile_symbols.lua` reads those lines and does the lookup: `./xmakew l -P . recompiler/tools/profile_symbols.lua
+build/recompiler/corpus/recaptcha-dropN/xl/RecaptchaEnterprise.symbols.txt STDERR.txt` takes every `samples at … (Image+0xOFFSET …)`
+line whose image name contains `RecaptchaEnterprise` (a third argument names another part), finds the greatest text symbol of
+the symbols file at or below the offset, and prints it with the distance into the function, the guest address a `_sub_<address>`
+symbol stands for and the guest image that address is in (`0x18000000` the SDK, `0x18200000` libswiftCore, `0x18800000` libc++,
+`0x18a00000` CoreFoundation, `0x18f00000` the Foundation overlay, `0x19600000` the libxl-guest stubs: the layout of the
+reCAPTCHA drops). Lines of a system image keep the name the process gave them. The report has one block per window of 5 s
+and then the functions with their samples added up over all windows. The offsets are exact only to the 64-byte bucket, so
+a function is named, not an instruction. `--self-test` runs it on a made-up profile. The symbols file is the one
+`translate.lua` writes before `strip -x`, of the same drop as the library that ran, because the symbol names carry the
+guest address and a different drop moves them. An example, a made-up profile of two windows against the symbols of drop33:
+
+    window 1: 247 samples, 3100 messages (12 dynamic), routing 41000 us, host call 150 us
+        160  _sub_18fb9358+0x10  guest 0x18fb9358 (Foundation overlay)
+         70  _sub_193b0ab0.island.2+0x0  guest 0x193b0ab0 (libxl-guest stubs)
+         17  libobjc.A.dylib+0x6a40 objc_msgSend
+    window 2: 3 samples, 20 messages (0 dynamic), routing 90 us, host call 0 us
+          3  _xl_imp_2861+0x4  host code of the library
+
+    by function over all windows:
+        160  _sub_18fb9358
+         70  _sub_193b0ab0.island.2
+         17  libobjc.A.dylib objc_msgSend
+          3  _xl_imp_2861
+
+Reading a window: many samples and few messages is guest code (or code of the system that no message reaches); many
+messages and the samples in `objc_msgSend`, `CFDictionaryGetValue` or in `_xl_*` symbols is the bridge; samples in `_sub_*`
+of the Foundation overlay or libswiftCore with few messages is the guest's own Swift code.
+
 The `xlate: no bridge for -[Class selector]` lines on stderr, with the receiver and the guest frames, belong to the same
 switch. They say that a guest message to a host object found no generated bridge, which is not a failure: the message
 is then sent through the host method's own type encoding (`xl_dynamic_send`), whose arguments and result may be
