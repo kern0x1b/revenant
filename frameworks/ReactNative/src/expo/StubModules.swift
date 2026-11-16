@@ -8,44 +8,12 @@ enum StubReport {
   }
 }
 
-public final class StubDocumentPickerModule: Module {
-  public func definition() -> ModuleDefinition { Name("ExpoDocumentPicker") }
-}
-
-public final class StubFileSystemModule: Module {
-  public func definition() -> ModuleDefinition {
-    Name("FileSystem")
-    Constants {
-      let documents = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first ?? ""
-      let caches = NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first ?? ""
-      return [
-        "documentDirectory": "file://" + documents + "/",
-        "cacheDirectory": "file://" + caches + "/",
-        "bundleDirectory": "file://" + Bundle.main.bundlePath + "/"
-      ]
-    }
-    Class("FileSystemFile") { Constructor { () in } }
-    Class("FileSystemDirectory") { Constructor { () in } }
-    Class("FileSystemDownloadTask") { Constructor { () in } }
-    Class("FileSystemUploadTask") { Constructor { () in } }
-    Class("FileSystemWatcher") { Constructor { () in } }
-  }
-}
-
 public final class StubTwoWayAudioModule: Module {
   public func definition() -> ModuleDefinition { Name("ExpoTwoWayAudio") }
 }
 
 public final class StubHardwareKeyboardModule: Module {
   public func definition() -> ModuleDefinition { Name("PaseoHardwareKeyboard") }
-}
-
-public final class StubCameraModule: Module {
-  public func definition() -> ModuleDefinition { Name("ExpoCamera") }
-}
-
-public final class StubImageManipulatorModule: Module {
-  public func definition() -> ModuleDefinition { Name("ExpoImageManipulator") }
 }
 
 public final class StubSQLiteModule: Module {

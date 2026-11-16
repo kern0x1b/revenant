@@ -1,20 +1,6 @@
 {
   "stubs": [
     {
-      "name": "StubDocumentPickerModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoDocumentPicker",
-      "owner": "expo-document-picker",
-      "reason": "Name only."
-    },
-    {
-      "name": "StubFileSystemModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "FileSystem",
-      "owner": "expo-file-system",
-      "reason": "Constants for the directories and empty class shells; no file operation exists."
-    },
-    {
       "name": "StubTwoWayAudioModule",
       "file": "src/expo/StubModules.swift",
       "module": "ExpoTwoWayAudio",
@@ -27,20 +13,6 @@
       "module": "PaseoHardwareKeyboard",
       "owner": "PaseoHardwareKeyboard",
       "reason": "Name only; a module of the spike app that no package provides and the paseo app does not use."
-    },
-    {
-      "name": "StubCameraModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoCamera",
-      "owner": "expo-camera",
-      "reason": "Name only."
-    },
-    {
-      "name": "StubImageManipulatorModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoImageManipulator",
-      "owner": "expo-image-manipulator",
-      "reason": "Name only."
     },
     {
       "name": "StubSQLiteModule",

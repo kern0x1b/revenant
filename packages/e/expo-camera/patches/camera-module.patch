@@ -66,7 +66,7 @@ diff -ru a/ios/CameraViewModule.swift b/ios/CameraViewModule.swift
  
      AsyncFunction("getCameraPermissionsAsync") { (promise: Promise) in
        EXPermissionsMethodsDelegate.getPermissionWithPermissionsManager(
-@@ -390,54 +367,12 @@
+@@ -390,88 +367,14 @@
      }
    }
  
@@ -121,17 +121,113 @@ diff -ru a/ios/CameraViewModule.swift b/ios/CameraViewModule.swift
 +  func onScannerDismissed() {}
  
    private func getAvailableVideoCodecs() -> [String] {
-     let session = AVCaptureSession()
+-    let session = AVCaptureSession()
+-
+-    session.beginConfiguration()
+-
+-    guard let captureDevice = ExpoCameraUtils.device(
+-      with: AVMediaType.video,
+-      preferring: AVCaptureDevice.Position.front) else {
+-      session.commitConfiguration()
+-      return []
+-    }
+-    guard let deviceInput = try? AVCaptureDeviceInput(device: captureDevice) else {
+-      session.commitConfiguration()
+-      return []
+-    }
+-    if session.canAddInput(deviceInput) {
+-      session.addInput(deviceInput)
+-    }
+-
+-    let movieFileOutput = AVCaptureMovieFileOutput()
+-    if session.canAddOutput(movieFileOutput) {
+-      session.addOutput(movieFileOutput)
+-    }
+-
+-    session.commitConfiguration()
+-
+-    let codecs = movieFileOutput.availableVideoCodecTypes.map { $0.rawValue }
+-
+-    session.beginConfiguration()
+-    session.removeOutput(movieFileOutput)
+-    session.removeInput(deviceInput)
+-    session.commitConfiguration()
+-
+-    return codecs
++    return []
+   }
+ }
+diff -ru a/ios/Current/BarcodeRecord.swift b/ios/Current/BarcodeRecord.swift
+--- a/ios/Current/BarcodeRecord.swift
++++ b/ios/Current/BarcodeRecord.swift
+@@ -1,5 +1,4 @@
+ import ExpoModulesCore
+-import Vision
+ 
+ struct BarcodeSettings: Record {
+   @Field var barcodeTypes: [BarcodeType]
+@@ -111,38 +110,6 @@
+   case codabar
+   case code128
+   case upc_a
+-
+-  @available(iOS 16.0, *)
+-  func toSymbology() -> VNBarcodeSymbology {
+-    switch self {
+-    case .aztec:
+-      return .aztec
+-    case .codabar:
+-      return .codabar
+-    case .qr:
+-      return .qr
+-    case .ean13:
+-      return .ean13
+-    case .ean8:
+-      return .ean8
+-    case .pdf417:
+-      return .pdf417
+-    case .itf14:
+-      return .itf14
+-    case .upc_a:
+-      return .ean13
+-    case .upc_e:
+-      return .upce
+-    case .code39:
+-      return .code39
+-    case .code93:
+-      return .code93
+-    case .datamatrix:
+-      return .dataMatrix
+-    case .code128:
+-      return .code128
+-    }
+-  }
+ }
+ 
+ struct VisionScannerOptions: Record {
+@@ -150,11 +117,4 @@
+   @Field var isPinchToZoomEnabled: Bool?
+   @Field var isGuidanceEnabled: Bool?
+   @Field var isHighlightingEnabled: Bool?
+-
+-  @available(iOS 16.0, *)
+-  func toSymbology() -> [VNBarcodeSymbology] {
+-    barcodeTypes.map {
+-      $0.toSymbology()
+-    }
+-  }
+ }
 diff -ru a/ios/Current/BarcodeScannerUtils.swift b/ios/Current/BarcodeScannerUtils.swift
 --- a/ios/Current/BarcodeScannerUtils.swift
 +++ b/ios/Current/BarcodeScannerUtils.swift
-@@ -1,5 +1,4 @@
+@@ -1,6 +1,4 @@
  import AVFoundation
 -import VisionKit
- import Vision
+-import Vision
  
  class BarcodeScannerUtils {
-@@ -57,29 +56,6 @@
+   static func getDefaultSettings() -> [String: [AVMetadataObject.ObjectType]] {
+@@ -57,29 +55,6 @@
      } else {
        addEmptyCornerPoints(to: &result)
      }
@@ -197,6 +293,96 @@ diff -ru a/ios/Current/CameraSessionManager.swift b/ios/Current/CameraSessionMan
    var mode: CameraMode { get }
    var pictureSize: PictureSize { get }
    var isMuted: Bool { get }
+@@ -33,7 +33,7 @@
+   private var captureDeviceInput: AVCaptureDeviceInput?
+   private var photoOutput: AVCapturePhotoOutput?
+   private var videoFileOutput: AVCaptureMovieFileOutput?
+-  private var runtimeErrorTask: Task<Void, Never>?
++  private var runtimeErrorObserver: NSObjectProtocol?
+ 
+   init(delegate: CameraSessionManagerDelegate) {
+     self.delegate = delegate
+@@ -275,8 +275,7 @@
+   }
+ 
+   func stopSession() {
+-    runtimeErrorTask?.cancel()
+-    runtimeErrorTask = nil
++    removeErrorNotification()
+ 
+     // Stop before deconfiguring. Removing inputs and outputs from a session that is still
+     // running rebuilds the capture graph just to tear it down, and that rebuild waits out
+@@ -305,24 +304,30 @@
+       return
+     }
+ 
+-    runtimeErrorTask?.cancel()
+-    runtimeErrorTask = Task {
+-      let errors = NotificationCenter.default.notifications(named: .AVCaptureSessionRuntimeError, object: self.session)
+-        .compactMap({ $0.userInfo?[AVCaptureSessionErrorKey] as? AVError })
+-      for await error in errors where error.code == .mediaServicesWereReset {
+-        delegate.sessionQueue.async {
+-          if !self.session.isRunning {
+-            self.session.startRunning()
+-          }
+-          self.updateSessionAudioIsMuted()
++    removeErrorNotification()
++    runtimeErrorObserver = NotificationCenter.default.addObserver(forName: .AVCaptureSessionRuntimeError, object: self.session, queue: nil) { [weak self] notification in
++      guard let self, let error = notification.userInfo?[AVCaptureSessionErrorKey] as? AVError, error.code == .mediaServicesWereReset else {
++        return
++      }
++      delegate.sessionQueue.async {
++        if !self.session.isRunning {
++          self.session.startRunning()
+         }
+-        delegate.onMountError(["message": "Camera session was reset"])
++        self.updateSessionAudioIsMuted()
+       }
++      delegate.onMountError(["message": "Camera session was reset"])
+     }
+   }
+ 
++  private func removeErrorNotification() {
++    if let observer = runtimeErrorObserver {
++      NotificationCenter.default.removeObserver(observer)
++      runtimeErrorObserver = nil
++    }
++  }
++
+   deinit {
+-    runtimeErrorTask?.cancel()
++    removeErrorNotification()
+   }
+ 
+   var currentPhotoOutput: AVCapturePhotoOutput? { photoOutput }
+diff -ru a/ios/Current/CameraVideoRecording.swift b/ios/Current/CameraVideoRecording.swift
+--- a/ios/Current/CameraVideoRecording.swift
++++ b/ios/Current/CameraVideoRecording.swift
+@@ -89,20 +89,10 @@
+       connection.preferredVideoStabilizationMode = avMode
+     }
+ 
+-    if let codec = options.codec {
+-      let codecType = codec.codecType()
+-      if videoFileOutput.availableVideoCodecTypes.contains(codecType) {
+-        var outputSettings: [String: Any] = [AVVideoCodecKey: codecType]
+-        if let videoBitrate = delegate?.videoBitrate {
+-          outputSettings[AVVideoCompressionPropertiesKey] = [AVVideoAverageBitRateKey: videoBitrate]
+-        }
+-        videoFileOutput.setOutputSettings(outputSettings, for: connection)
+-        self.videoCodecType = codecType
+-      } else {
+-        promise.reject(CameraRecordingException(options.codec?.rawValue))
+-        videoRecordedPromise = nil
+-        isValidVideoOptions = false
+-      }
++    if options.codec != nil {
++      promise.reject(CameraRecordingException(options.codec?.rawValue))
++      videoRecordedPromise = nil
++      isValidVideoOptions = false
+     }
+   }
+ 
 diff -ru a/ios/Current/CameraView.swift b/ios/Current/CameraView.swift
 --- a/ios/Current/CameraView.swift
 +++ b/ios/Current/CameraView.swift

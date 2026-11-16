@@ -306,9 +306,9 @@
    "group": "sdk",
    "version": "~57.0.6",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Not built: its barcode scanning needs the ZXingObjC package, which is not packaged yet (the media worker 5a213326 packages it)."
+   "status": "partial",
+   "verified": "build",
+   "note": "Built into the host from the npm 57.0.6 sources with ZXingObjC (packages/z/zxingobjc, Core, OneD and PDF417) for barcode scanning. camera-module.patch: the ZXing provider joins the host's one Swift module; VideoQuality and CameraType are renamed (expo-image-picker declares both); the system data scanner (VisionKit, iOS 16) throws CameraScannerUnavailableException from launchScanner, and isModernBarcodeScannerAvailable is false; a requested video codec is rejected with CameraRecordingException and getAvailableVideoCodecs is empty (per-codec output settings are iOS 10); the session-reset notification uses a block observer, not the async sequence of iOS 15. Linked into the host that started on the phone; not exercised yet."
   },
   {
    "id": "expo-cellular",
@@ -387,9 +387,9 @@
    "group": "sdk",
    "version": "~57.0.3",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Not built. Its picker is UIDocumentPickerViewController, which iOS 6 lacks (the SDK header marks it iOS 8.0), so the Backports library carries it: a file browser over the app's folders with copy, open and move modes and UTType acceptance, in frameworks/Backports/src/UIKit. It has no access to other apps' files on iOS 6, which is the part that stays partial once built. The package is not pinned yet."
+   "status": "partial",
+   "verified": "build",
+   "note": "Built into the host from the npm 57.0.3 sources; documentpicker-names.patch renames three types that expo-file-system and expo-image-picker also declare, because every Expo module is one Swift module in the host. The picker is the Backports' UIDocumentPickerViewController (a file browser over the app's folders; no access to other apps' files on iOS 6, which is what stays partial). Linked into the host that started on the phone; the picker is not exercised yet."
   },
   {
    "id": "expo-eas-client",
@@ -405,9 +405,9 @@
    "group": "sdk",
    "version": "~57.0.7",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Does not build for iOS 6 unpatched: the file handle uses FileHandle read, offset and seekToEnd (iOS 13), the watcher uses activate() (iOS 10) and the legacy module uses volumeAvailableCapacityForImportantUsage (iOS 11) (build log of expo-file-system 57.0.7). Source patched, not built: packages/e/expo-file-system, expo-file-system 57.0.7 from its npm tarball, with patches/file-system-ios6.patch. The five iOS 14 class gates are removed by the patch (not staged copies). The six URL file-handle initialisers (iOS 13: three in FileSystemFileHandle, two in FileSystemFile, one in the legacy module) are replaced by the path initialisers FileHandle(forReadingAtPath:) and its siblings (iOS 2); FileSystemFileHandle's offset, seekToEnd, read, write and close go to NSFileHandle members that Backports lower. Open: Backports has no +fileHandleForWritingToURL:error: (NSURLSession.m calls it on the resume path); DispatchSource.makeFileSystemObjectSource (watcher) and the UIAdaptivePresentationControllerDelegate conformance (FilePickingUtils) are not checked. Not compiled, not run on the phone."
+   "status": "partial",
+   "verified": "build",
+   "note": "Built into the host from the npm 57.0.7 sources with two recipe patches (packages/e/expo-file-system/patches): file-system-ios6.patch (iOS 14 gates removed, file handles opened by path) and file-system-handle-ios6.patch (an extension that reads, writes, seeks and reports the offset through the Backports' NSFileHandle members, and the free-space query through volumeAvailableCapacity, not the iOS 11 important-usage key). Linked into the host that started on the phone; the file API is not exercised yet."
   },
   {
    "id": "expo-font",
@@ -459,9 +459,9 @@
    "group": "sdk",
    "version": "~57.0.5",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Swift only (25 files plus the SDWebImage coders). Not compiled: needs expo-modules-core Swift for iOS 6 and the SDWebImage package; SF Symbols loader in it is a separate question."
+   "status": "partial",
+   "verified": "build",
+   "note": "Built into the host from the npm 57.0.5 sources against the packaged SDWebImage and its WebP coder. What iOS 6 lacks is left out, and each case reports an error: the SVG coder needs CoreSVG (iOS 13), so SVG is not decoded (SDWebImage reports a decoding failure to onError); the AVIF coder needs libavif and dav1d, which are not packaged (a separate task, not infeasible); the HEIC coder and the Apple WebP codec need ImageIO of iOS 13 and 14, so WebP goes through libwebp; SF Symbols and their effects (iOS 13 and 17) log an error when a source or effect asks for them; Live Text (iOS 16) logs an error when enableLiveTextInteraction is set. Patches: image-coders.patch, image-ios6.patch. Linked into the host that started on the phone; not exercised yet."
   },
   {
    "id": "expo-image-loader",
@@ -477,9 +477,9 @@
    "group": "sdk",
    "version": "~57.0.21",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Not built: it needs the SDWebImageWebPCoder package, which is not packaged yet (the media worker 5a213326 packages it)."
+   "status": "partial",
+   "verified": "build",
+   "note": "Built into the host from the npm 57.0.21 sources against the packaged SDWebImageWebPCoder (packages/s/sdwebimage-webp, with libwebp and SDWebImage); manipulator-names.patch renames its ImageFormat, which expo-clipboard also declares. Linked into the host that started on the phone; not exercised yet."
   },
   {
    "id": "expo-image-picker",

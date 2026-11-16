@@ -8,7 +8,7 @@ package("expo-image")
     add_urls("https://registry.npmjs.org/expo-image/-/expo-image-$(version).tgz")
     add_versions("57.0.5", "3c159badf00196d31c1b22f6bfeaea703382e2512dd70b39404210198b35e9d5")
     add_patches("57.0.5", path.join(os.scriptdir(), "patches", "image-coders.patch"), "b820ffb461a1d3db3a17ef4a50ca68796bbe9ae7cc0689ae94263191b9a6f63f")
-    add_patches("57.0.5", path.join(os.scriptdir(), "patches", "image-ios6.patch"), "859106eb6c3597271cdccdb9c234cd8fe1cb423ddf654caf19d963b8f9e5893c")
+    add_patches("57.0.5", path.join(os.scriptdir(), "patches", "image-ios6.patch"), "b16b36ed4197a4041ce0bbdd80d368e328013cb14d1da1df3abb000b94310bf9")
 
     on_install(function (package)
         os.cp("*", package:installdir() .. "/")
