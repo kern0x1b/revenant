@@ -618,15 +618,18 @@ static void xl_dynamic_send(State *state, id receiver, Method method, SEL select
 
 static int xl_watch_ready;
 static char xl_watch_selector[96];
+static char xl_watch_thunk_selector[96];
 static unsigned xl_watch_offset;
 static int xl_watch_fd = -1;
 static uintptr_t xl_watched[XL_WATCH_LIMIT];
 static uint32_t xl_watched_word[XL_WATCH_LIMIT];
 static int xl_watched_count;
 
-static void xl_watch_line(const char *format, ...) __attribute__((format(printf, 1, 2)));
+void xl_watch_log(const char *format, ...) __attribute__((format(printf, 1, 2)));
 
-static void xl_watch_line(const char *format, ...)
+#define xl_watch_line xl_watch_log
+
+void xl_watch_log(const char *format, ...)
 {
     char line[512];
     va_list arguments;
@@ -651,18 +654,29 @@ static int xl_watch_enabled(void)
     FILE *file = fopen(XL_WATCH_FILE, "r");
     if (!file)
         return 0;
-    char selector[sizeof xl_watch_selector];
+    char selector[sizeof xl_watch_selector], thunk[sizeof xl_watch_thunk_selector];
     unsigned offset = 0;
-    int read = fscanf(file, "%95s %u", selector, &offset);
+    thunk[0] = 0;
+    int read = fscanf(file, "%95s %u %95s", selector, &offset, thunk);
     fclose(file);
     if (read < 1)
         return 0;
     strlcpy(xl_watch_selector, selector, sizeof xl_watch_selector);
-    xl_watch_offset = read == 2 ? offset : 16;
+    strlcpy(xl_watch_thunk_selector, read == 3 ? thunk : "", sizeof xl_watch_thunk_selector);
+    xl_watch_offset = read >= 2 ? offset : 16;
     xl_watch_fd = open("/private/var/revenant/xlate-watch.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
     xl_watch_ready = 1;
-    xl_watch_line("xl-watch: watching the word at +%u of every receiver of %s", xl_watch_offset, xl_watch_selector);
+    xl_watch_line("xl-watch: watching the word at +%u of every receiver of %s, and the calls of the host into the guest of %s", xl_watch_offset, xl_watch_selector,
+                  xl_watch_thunk_selector[0] ? xl_watch_thunk_selector : "(none)");
     return 1;
+}
+
+int xl_watch_thunk_wanted(SEL selector)
+{
+    if (xl_watch_ready < 0 || !xl_watch_enabled() || !xl_watch_thunk_selector[0])
+        return 0;
+    const char *name = sel_getName(selector);
+    return name && !strcmp(name, xl_watch_thunk_selector);
 }
 
 static void xl_watch_note(State *state, id receiver, SEL selector, const char *kind)

@@ -23,8 +23,8 @@ local function raises(corpus, what, run, expected)
     end
 end
 
-local function install(store, key, recipe)
-    local folder = path.join(store, "s", "swift-runtime", "6.4.0", key)
+local function install(store, key, recipe, generation)
+    local folder = path.join(store, "s", "swift-runtime", "6.4.0", key .. (generation or ""))
     os.mkdir(path.join(folder, "lib", "swift", "iphoneos"))
     io.writefile(path.join(folder, "manifest.txt"), string.format('{\n    configs = {\n        recipe = "%s"\n    }\n}\n', recipe))
     for _, name in ipairs({"libswiftCore", "libswiftFoundation"}) do
@@ -60,7 +60,7 @@ function main(out)
     local store = path.join(out, "store")
     os.tryrm(store)
     local old = install(store, KEY_OLD, RECIPE_OLD)
-    local new = install(store, KEY_NEW, RECIPE_NEW)
+    local new = install(store, KEY_NEW, RECIPE_NEW, ".gda1de88d")
     local root = path.join(out, "root")
     os.tryrm(root)
     os.mkdir(path.join(root, "packages", "s", "swift-runtime", "port"))

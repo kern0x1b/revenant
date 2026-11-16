@@ -14,6 +14,8 @@ void xl_manual_fast_enumeration(void *pack);
 void xl_manual_init_with_format_arguments(void *pack);
 void xl_manual__tlv_bootstrap(void *pack);
 uint64_t xl_host_block_wrap(id block, uint32_t invoke, uint32_t descriptor);
+int xl_watch_thunk_wanted(SEL selector);
+void xl_watch_log(const char *format, ...) __attribute__((format(printf, 1, 2)));
 void xl_unsupported_imp(id self, SEL selector);
 id xl_format_string_with_format(id self, SEL selector, id format, va_list arguments);
 id xl_format_init_with_format(id self, SEL selector, id format, va_list arguments);

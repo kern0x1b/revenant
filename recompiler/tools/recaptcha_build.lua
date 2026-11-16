@@ -63,9 +63,11 @@ local function real_path(file)
 end
 
 local function manifest_value(install, pattern)
-    local manifest = path.join(install, "manifest.txt")
-    if os.isfile(manifest) then
-        return io.readfile(manifest):match(pattern)
+    for _, folder in ipairs({install, (install:gsub("%.g%x+$", ""))}) do
+        local manifest = path.join(folder, "manifest.txt")
+        if os.isfile(manifest) then
+            return io.readfile(manifest):match(pattern)
+        end
     end
 end
 
@@ -80,9 +82,9 @@ function check_runtime(libs, root, explicit)
     for _, name in ipairs(RUNTIME_LIBRARIES) do
         local file = path.join(libs, name .. ".dylib")
         if os.isfile(file) then
-            local install = real_path(file):match("^(.*/swift%-runtime/[^/]+/%x+)/lib/")
+            local install, hash = real_path(file):match("^(.*/swift%-runtime/[^/]+/(%x+)%.?g?%x*)/lib/")
             if install then
-                installs[install] = true
+                installs[hash] = install
             end
         end
     end
@@ -91,8 +93,8 @@ function check_runtime(libs, root, explicit)
     if #found ~= 1 then
         raise("the guest Swift runtime of %s must come from one revenant@swift-runtime install, and it comes from %d: %s", libs, #found, table.concat(found, ", "))
     end
-    local install = found[1]
-    local key = path.filename(install)
+    local key = found[1]
+    local install = installs[key]
     local built = manifest_value(install, 'recipe%s*=%s*"(%x+)"')
     if explicit and explicit ~= "" then
         if key ~= explicit then
@@ -105,7 +107,7 @@ function check_runtime(libs, root, explicit)
         local file = path.join(libs, name .. ".dylib")
         if os.isfile(file) then
             local dependent = real_path(file):match("^(.*)/lib/[^/]+$")
-            local against = dependent and manifest_value(dependent, '%["swift%-runtime"%]%s*=%s*{%s*buildhash%s*=%s*"(%x+)"')
+            local against = dependent and manifest_value(dependent,'%["swift%-runtime"%]%s*=%s*{%s*buildhash%s*=%s*"(%x+)"')
             if against and against ~= key then
                 raise("%s of %s was built against the Swift runtime %s, and the guest runtime is %s", name, libs, against, key)
             end

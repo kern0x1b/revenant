@@ -212,8 +212,16 @@ static IMP xl_guest_method_imp(uint64_t guest, SEL selector, const char *types)
     IMP imp = imp_implementationWithBlock(^uintptr_t(id self_, uintptr_t a, uintptr_t b, uintptr_t c, uintptr_t d) {
         uint64_t arguments[6] = {xl_object_out((uintptr_t)self_), (uint64_t)(uintptr_t)selector, xl_kind_out(kinds.argument[0], a),
                                  xl_kind_out(kinds.argument[1], b), xl_kind_out(kinds.argument[2], c), xl_kind_out(kinds.argument[3], d)};
+        int traced = xl_watch_thunk_wanted(selector);
+        if (traced)
+            xl_watch_log("xl-watch: the host calls the guest %s on %p (%s) with 0x%lx 0x%lx 0x%lx 0x%lx, the guest receives x2=0x%llx x3=0x%llx x4=0x%llx x5=0x%llx", sel_getName(selector),
+                         (void *)self_, self_ ? object_getClassName(self_) : "nil", (unsigned long)a, (unsigned long)b, (unsigned long)c, (unsigned long)d,
+                         (unsigned long long)arguments[2], (unsigned long long)arguments[3], (unsigned long long)arguments[4], (unsigned long long)arguments[5]);
         uint64_t result = xl_invoke_n(guest, arguments, 6);
-        return owned ? xl_object_in_owned(result, "guest method result", 0) : xl_kind_in(kinds.result, result, "guest method result");
+        uintptr_t converted = owned ? (uintptr_t)xl_object_in_owned(result, "guest method result", 0) : (uintptr_t)xl_kind_in(kinds.result, result, "guest method result");
+        if (traced)
+            xl_watch_log("xl-watch: the guest %s on %p returned 0x%llx, the host gets 0x%lx", sel_getName(selector), (void *)self_, (unsigned long long)result, (unsigned long)converted);
+        return converted;
     });
     xl_table_set(xl_shadow_imps, (uintptr_t)imp, (const void *)(uintptr_t)guest);
     return imp;
