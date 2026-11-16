@@ -233,6 +233,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Why Hermes is built this way](explanation/react-native/hermes-engine.md) | the version, the JSI copy, no Boost.Context on ARM32, and the 32-bit heap encoding |
 | [Build inputs](guides/react-native/build-inputs.md) | making the host's `build/` inputs from the packages, and comparing them with the spike |
 | [Expo manifest for the host](guides/react-native/app-config.md) | giving the host the application's own `EXConstants.bundle/app.config` |
+| [Expo native modules for iOS 6](guides/react-native/expo-native-modules.md) | what the patches of expo-file-system, expo-image, expo-camera and the others remove, what JavaScript sees instead, and the AVIF and SVG decision |
 | [Installing the host](guides/react-native/install-the-host.md) | staging a built host and putting it on the claimed phone under its own bundle id |
 | [Missing components and stubs](guides/react-native/loud-components.md) | the loud provider for Fabric components and the log line of a stub that is called |
 | [JavaScriptCore startup on the Paseo bundle](explanation/react-native/jsc-startup.md) | where the nine seconds of `evaluateJavaScript` go on the iPhone 4S: parsing first, then lazy parsing, the collector and the compiler |
