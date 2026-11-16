@@ -603,6 +603,144 @@ done
 done]]
 end
 
+function runtime_key(package)
+    return package:match("^org%.revenant%.swift%-runtime%-(%x+)$") or package:match("^org%.revenant%.swift%-runtime%-ui%-(%x+)$")
+end
+
+function revenant_links(listing)
+    local links = {}
+    for line in listing:gmatch("[^\r\n]+") do
+        local package, image = line:match("^%s*/usr/lib/revenant/([^/%s]+)/([^/%s]+)")
+        if package then
+            table.insert(links, {package = package, image = image})
+        end
+    end
+    return links
+end
+
+function runtime_links(listing)
+    local links = {}
+    for _, link in ipairs(revenant_links(listing)) do
+        if runtime_key(link.package) then
+            table.insert(links, link)
+        end
+    end
+    return links
+end
+
+function runtime_problems(scanned, installed, host_key)
+    local problems, warnings, used = {}, {}, {}
+    for _, item in ipairs(scanned) do
+        local images = {}
+        for _, link in ipairs(item.links) do
+            images[link.package] = images[link.package] or {}
+            table.insert(images[link.package], link.image)
+        end
+        for _, package in ipairs(table.orderkeys(images)) do
+            local key = runtime_key(package)
+            used[key] = used[key] or {}
+            if used[key][#used[key]] ~= item.file then
+                table.insert(used[key], item.file)
+            end
+            local named = string.format("%s links %s (%s)", item.file, package, table.concat(images[package], ", "))
+            if not installed[package] then
+                table.insert(problems, named .. ", which is not installed on the phone")
+            elseif host_key and key ~= host_key then
+                table.insert(problems, string.format("%s, and the host links org.revenant.swift-runtime-%s: a process that loads both holds two Swift runtimes, libobjc registers the classes of the first only, and a string of the second stops with '-[__SharedStringStorage _fastCharacterContents]: unrecognized selector'",
+                                                     named, host_key))
+            end
+        end
+    end
+    local keys = table.orderkeys(used)
+    if not host_key and #keys > 1 then
+        local parts = {}
+        for _, key in ipairs(keys) do
+            table.insert(parts, string.format("%s by %s", key, table.concat(used[key], ", ")))
+        end
+        table.insert(warnings, string.format("the installed packages link %d Swift runtimes (%s): a program that loads libraries of two of them holds two Swift runtimes", #keys, table.concat(parts, "; ")))
+    end
+    return problems, warnings
+end
+
+function installed_packages(settings)
+    local installed = {}
+    for line in run(settings, [[dpkg-query -W -f='${Package}|${Status}\n' 2>/dev/null; true]], {capture = true}):gmatch("[^\r\n]+") do
+        local name, status = line:match("^([^|]+)|(.*)$")
+        if name and status:find("install ok installed", 1, true) then
+            installed[name] = true
+        end
+    end
+    return installed
+end
+
+local function listing_of(settings, remote)
+    local file = os.tmpfile()
+    local fetched = fetch(settings, remote, file) and os.isfile(file)
+    local text = fetched and os.iorunv("otool", {"-arch", "armv7", "-L", file})
+    os.tryrm(file)
+    if not text then
+        raise("cannot read %s from the phone, so the Swift runtime it links is not known", remote)
+    end
+    return text
+end
+
+local function followed(package)
+    return package:startswith("org.revenant.") and package ~= "org.revenant.backports" and not package:startswith("org.revenant.libcxx-") and
+           not package:match("^org%.revenant%.swift%-runtime%-%x+$")
+end
+
+function runtime_scan(settings, roots)
+    local scanned, queue, seen = {}, {}, {}
+    local function files_of(command)
+        local files = {}
+        for line in run(settings, command, {capture = true}):gmatch("[^\r\n]+") do
+            if line:match("^/usr/lib/revenant/[^/]+/[^/]+%.dylib$") then
+                table.insert(files, line)
+            end
+        end
+        return files
+    end
+    local function scan(file)
+        local listing = listing_of(settings, file)
+        table.insert(scanned, {file = file, package = file:match("^/usr/lib/revenant/([^/]+)/"), links = runtime_links(listing)})
+        return revenant_links(listing)
+    end
+    if not roots then
+        for _, file in ipairs(files_of([[for d in /usr/lib/revenant/org.revenant.*-*; do case "$d" in */org.revenant.swift-runtime-[0-9a-f]*|*/org.revenant.libcxx-*) ;; *) grep -l 'org.revenant.swift-runtime-' "$d"/*.dylib 2>/dev/null;; esac; done; true]])) do
+            scan(file)
+        end
+        return scanned
+    end
+    for _, package in ipairs(roots) do
+        queue[#queue + 1] = package
+    end
+    local index = 1
+    while queue[index] do
+        local package = queue[index]
+        index = index + 1
+        if not seen[package] and followed(package) then
+            seen[package] = true
+            for _, file in ipairs(files_of(string.format("ls /usr/lib/revenant/%s/*.dylib 2>/dev/null; true", package))) do
+                for _, link in ipairs(scan(file)) do
+                    if link.package ~= package then
+                        queue[#queue + 1] = link.package
+                    end
+                end
+            end
+        end
+    end
+    return scanned
+end
+
+function runtime_audit(settings, roots, host_key)
+    for _, package in ipairs(roots or {}) do
+        if not package:match("^[%w%.%+%-]+$") then
+            raise("%s is not a Debian package name", package)
+        end
+    end
+    return runtime_problems(runtime_scan(settings, roots), installed_packages(settings), host_key)
+end
+
 function identity_conflicts(settings, stage)
     import("apple.bundle")
     local conflicts = {}

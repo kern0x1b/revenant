@@ -2,6 +2,15 @@ import("core.base.option")
 import("@self.device")
 import("@self.packaging")
 
+local function report_runtimes(problems, warnings)
+    for _, warning in ipairs(warnings) do
+        wprint("%s", warning)
+    end
+    if #problems > 0 then
+        raise("the packages on the phone link a Swift runtime that is not the one they are loaded with:\n  %s", table.concat(problems, "\n  "))
+    end
+end
+
 function main()
     local action = option.get("action")
     if action == "list" then
@@ -35,6 +44,7 @@ function main()
         device.log(settings, tonumber(option.get("seconds")), arguments)
     elseif action == "install" then
         local refreshed = false
+        local installed_names = {}
         local written_packages = packaging.write()
         local conflicts = {}
         for _, written in ipairs(written_packages) do
@@ -52,17 +62,21 @@ function main()
             device.copy(settings, written.deb, remote)
             device.run(settings, string.format("dpkg -i %s; status=$?; rm -f %s; [ $status -eq 0 ]", remote, remote))
             cprint("${bright green}installed${clear} %s on %s", path.filename(written.deb), device.where(settings))
+            table.insert(installed_names, (path.filename(written.deb):gsub("_.*", "")))
             refreshed = refreshed or (written.stage and os.isdir(path.join(written.stage, "Applications")))
         end
         if refreshed then
             device.run(settings, "su mobile -c uicache")
         end
+        report_runtimes(device.runtime_audit(settings, installed_names))
+    elseif action == "runtimes" then
+        report_runtimes(device.runtime_audit(settings))
     elseif action == "uninstall" then
         if arguments == "" then
             raise("xmake device uninstall needs the packages to remove")
         end
         device.run(settings, device.uninstall_command(option.get("arguments"), {keep = option.get("keep")}))
     else
-        raise("xmake device takes install, uninstall, log, run, where, list, claim or release")
+        raise("xmake device takes install, uninstall, runtimes, log, run, where, list, claim or release")
     end
 end

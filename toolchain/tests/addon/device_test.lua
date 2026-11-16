@@ -131,11 +131,88 @@ local function pruning_failures(device, folder)
     return found
 end
 
+local OLD, NEW = "0a2b76cd", "5fa6884c"
+
+local function runtime_failures(device, folder, opt)
+    local found = {}
+    local function fail(message)
+        table.insert(found, message)
+    end
+    local work = path.join(folder, "runtime")
+    os.mkdir(work)
+    io.writefile(path.join(work, "libSystem.tbd"), fixtures.system_stub())
+    local function runtime(key)
+        local source = "core_" .. key .. ".c"
+        io.writefile(path.join(work, source), string.format("int core_%s(void) { return 1; }\n", key))
+        return fixtures.link(work, opt.ld64, "libswiftCore-" .. key .. ".dylib", "armv7-apple-ios6.0", source,
+                             {"-dynamiclib", "-install_name", "/usr/lib/revenant/org.revenant.swift-runtime-" .. key .. "/libswiftCore.dylib"})
+    end
+    local function consumer(package, name, key, core)
+        local source = name .. "-" .. key .. ".c"
+        io.writefile(path.join(work, source), string.format("extern int core_%s(void);\nint %s_%s(void) { return core_%s(); }\n", key, name, key, key))
+        local library = fixtures.link(work, opt.ld64, name .. "-" .. key .. ".dylib", "armv7-apple-ios6.0", source,
+                                      {"-dynamiclib", "-install_name", "/usr/lib/revenant/" .. package .. "/" .. name .. ".dylib", core})
+        return {file = "/usr/lib/revenant/" .. package .. "/" .. name .. ".dylib",
+                links = device.runtime_links(fixtures.run(work, "xcrun", {"otool", "-arch", "armv7", "-L", library}))}
+    end
+    local old, new = runtime(OLD), runtime(NEW)
+    local utility = consumer("org.revenant.uniformtypeidentifiers-f72850ed", "libswiftUniformTypeIdentifiers", OLD, old)
+    local crypto = consumer("org.revenant.swift-crypto-91c43b24", "libswiftCrypto", OLD, old)
+    local interface = consumer("org.revenant.swift-runtime-ui-" .. NEW, "libswiftUIKit", NEW, new)
+    if #utility.links ~= 1 or utility.links[1].package ~= "org.revenant.swift-runtime-" .. OLD or utility.links[1].image ~= "libswiftCore.dylib" then
+        fail("the Swift runtime a library links is read from its otool -L listing as the package folder and the library: " .. #utility.links .. " links")
+    end
+    for name, key in pairs({["org.revenant.swift-runtime-" .. NEW] = NEW, ["org.revenant.swift-runtime-ui-" .. NEW] = NEW}) do
+        if device.runtime_key(name) ~= key then
+            fail(name .. " carries the runtime key " .. key .. ", read " .. tostring(device.runtime_key(name)))
+        end
+    end
+    for _, name in ipairs({"org.revenant.backports", "org.revenant.libcxx-341c5c30", "org.revenant.swift-crypto-91c43b24", "org.revenant.cryptokit-45dc94fc"}) do
+        if device.runtime_key(name) then
+            fail(name .. " is not a Swift runtime package")
+        end
+    end
+    local installed = {}
+    for _, name in ipairs({"org.revenant.swift-runtime-" .. OLD, "org.revenant.swift-runtime-" .. NEW, "org.revenant.swift-runtime-ui-" .. NEW}) do
+        installed[name] = true
+    end
+    local mixed = {utility, crypto, interface}
+    local problems, warnings = device.runtime_problems(mixed, installed, NEW)
+    if #problems ~= 2 or not problems[1]:find(utility.file, 1, true) or not problems[1]:find(OLD, 1, true) or not problems[1]:find(NEW, 1, true)
+       or not problems[2]:find(crypto.file, 1, true) or #warnings ~= 0 then
+        fail("a library of a package the host loads that links another runtime than the host's is an error naming the file and both keys: " .. table.concat(problems, " | "))
+    end
+    problems, warnings = device.runtime_problems(mixed, installed, nil)
+    if #problems ~= 0 or #warnings ~= 1 or not warnings[1]:find(OLD, 1, true) or not warnings[1]:find(NEW, 1, true) or not warnings[1]:find(utility.file, 1, true) then
+        fail("without a host, packages that link two runtimes are a warning naming both keys and the files: " .. table.concat(problems, " | ") .. " / " .. table.concat(warnings, " | "))
+    end
+    problems, warnings = device.runtime_problems({interface}, installed, NEW)
+    if #problems ~= 0 or #warnings ~= 0 then
+        fail("a library that links the host's runtime is no problem: " .. table.concat(problems, " | "))
+    end
+    problems = device.runtime_problems({utility}, {["org.revenant.swift-runtime-" .. NEW] = true}, nil)
+    if #problems ~= 1 or not problems[1]:find("not installed", 1, true) or not problems[1]:find(OLD, 1, true) then
+        fail("a library that links a runtime the phone does not hold is an error: " .. table.concat(problems, " | "))
+    end
+    problems = device.runtime_problems({{file = "/usr/lib/revenant/x/libX.dylib", links = {{package = "org.revenant.swift-runtime-" .. NEW, image = "libswiftCore.dylib"},
+                                                                                         {package = "org.revenant.swift-runtime-ui-" .. NEW, image = "libswiftUIKit.dylib"}}}}, installed, NEW)
+    if #problems ~= 0 then
+        fail("a library that links the runtime and its UI package of one key is no problem: " .. table.concat(problems, " | "))
+    end
+    local paths = device.revenant_links(table.concat({"x.dylib:", "\t/usr/lib/revenant/org.revenant.backports/libFoundationBackports.dylib (compatibility version 1.0.0, current version 1.0.0)",
+                                                      "\t/System/Library/Frameworks/UIKit.framework/UIKit (compatibility version 1.0.0, current version 1.0.0)", ""}, "\n"))
+    if #paths ~= 1 or paths[1].package ~= "org.revenant.backports" or #device.runtime_links("\t/usr/lib/revenant/org.revenant.backports/libFoundationBackports.dylib (x)") ~= 0 then
+        fail("only the packages of /usr/lib/revenant are listed, and the Backports are not a runtime")
+    end
+    return found
+end
+
 function failures(opt)
     local device = import("device", {rootdir = opt.modules, anonymous = true})
     local found = {}
     local folder = fixtures.scratch()
     table.join2(found, pruning_failures(device, folder))
+    table.join2(found, runtime_failures(device, folder, opt))
     io.writefile(path.join(folder, "device.env"), table.concat({
         "# the phone on the desk",
         "export DEVICE_HOST=10.0.0.7",
