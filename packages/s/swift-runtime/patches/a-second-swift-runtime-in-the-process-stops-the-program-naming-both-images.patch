@@ -1,0 +1,40 @@
+--- a/stdlib/public/stubs/SwiftNativeNSXXXBase.mm.gyb
++++ b/stdlib/public/stubs/SwiftNativeNSXXXBase.mm.gyb
+@@ -38,12 +38,15 @@
+ #include <objc/NSObject.h>
+ #include <objc/runtime.h>
+ #include <objc/objc.h>
++#include "swift/Runtime/Debug.h"
+ #include "swift/Runtime/HeapObject.h"
+ #include "swift/Runtime/Metadata.h"
+ #include "swift/Runtime/ObjCBridge.h"
+ #include "llvm/ADT/DenseMap.h"
++#include <dlfcn.h>
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <string.h>
+ 
+ using namespace swift;
+ 
+@@ -90,6 +93,21 @@
+ SWIFT_CC(swift) SWIFT_RUNTIME_STDLIB_SPI
+ bool
+ swift_stdlib_connectNSBaseClasses() {
++#if !defined(__aarch64__)
++  // libobjc keeps the first of two images that define a class of this name,
++  // and the classes of the other image are never registered, so the lookups
++  // below would reparent the first image's classes and leave this image's
++  // __SwiftNativeNS*Base under NSObject. The strings it then bridges answer
++  // none of the NSString methods the system sends (_fastCharacterContents).
++  // A process holds one Swift runtime.
++  Class registeredBase = objc_lookUpClass("__SwiftNativeNSStringBase");
++  const char *registeredImage = registeredBase ? class_getImageName(registeredBase) : nullptr;
++  Dl_info ownImage;
++  if (registeredImage && dladdr((const void *)&swift_stdlib_connectNSBaseClasses, &ownImage) && ownImage.dli_fname &&
++      strcmp(registeredImage, ownImage.dli_fname) != 0) {
++    swift::fatalError(0, "two Swift runtimes loaded: %s and %s\n", registeredImage, ownImage.dli_fname);
++  }
++#endif
+ % for Class in ('Array', 'MutableArray', 'Dictionary', 'Set', 'String', 'Enumerator'):
+   Class NS${Class}Super = objc_lookUpClass("NS${Class}");
+   if (!NS${Class}Super) return false;

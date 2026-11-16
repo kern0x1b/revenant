@@ -1063,6 +1063,13 @@ control); with the lift on and the runtime of main (`LeastValidPointerValue` 4 G
 the runtime's own witness for an `Optional` of a class, which a generic function reaches, took a pointer for an extra
 inhabitant and the object was never released (the runtime negative control).
 
+`stepExtraInhabitantsTuple` keeps the count of an extra inhabitant: generic code stores the `nil` of an
+`Optional<(label: String?, value: Any)>` (the element of `Mirror.children`) into memory filled with `0xAA`, and code that
+knows the type reads it back as `nil` (`xi.tuple.none`); the runtime and the compiler agree on which element of the tuple
+holds the extra inhabitant only when they count the same for `Any` and `String?`. The step then walks the children of a
+structure (`xi.tuple.children`) and prints it (`xi.tuple.describe`), which stopped the program in `swift_retain(1)` at the end
+of the loop while the runtime counted 4096 for `Any`.
+
 A library on the device has no
 `dladdr` for the guest image, which the loader maps itself, so the runtime knows its range (`xl_guest_low`,
 `xl_guest_high`) and a class of the guest is a class of the library. A class that the Swift runtime builds at run time has

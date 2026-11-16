@@ -1,0 +1,53 @@
+--- a/include/swift/Runtime/Metadata.h
++++ b/include/swift/Runtime/Metadata.h
+@@ -937,6 +937,16 @@
+   *dest = reinterpret_cast<HeapObject*>(value);
+ }
+ 
++/// The number of extra inhabitants of a pointer is part of the layout the compiler gave every type that holds one, and the
++/// compiler of arm64 Darwin counts every value below 4GB. The runtime tells an extra inhabitant from a pointer by
++/// LeastValidPointerValue, which this port lowers to the first page, but it must report the count of the compiler: a
++/// tuple, an optional or an enumeration the runtime lays out then picks the extra inhabitant the compiled code reads.
++#if defined(__APPLE__) && defined(__arm64__)
++inline constexpr uintptr_t ExtraInhabitantPointerLimit = 0x100000000ULL;
++#else
++inline constexpr uintptr_t ExtraInhabitantPointerLimit = heap_object_abi::LeastValidPointerValue;
++#endif
++
+ /// Return the number of extra inhabitants in a heap object pointer.
+ inline constexpr unsigned swift_getHeapObjectExtraInhabitantCount() {
+   // This must be consistent with the getHeapObjectExtraInhabitantCount
+@@ -946,15 +956,15 @@
+ 
+   // The runtime needs no more than INT_MAX inhabitants.
+ #if SWIFT_OBJC_INTEROP
+-  return (LeastValidPointerValue >> ObjCReservedLowBits) > INT_MAX
++  return (ExtraInhabitantPointerLimit >> ObjCReservedLowBits) > INT_MAX
+     ? (unsigned)INT_MAX
+-    : (unsigned)(LeastValidPointerValue >> ObjCReservedLowBits);
+-#else
+-  return (LeastValidPointerValue) > INT_MAX
++    : (unsigned)(ExtraInhabitantPointerLimit >> ObjCReservedLowBits);
++#else
++  return (ExtraInhabitantPointerLimit) > INT_MAX
+     ? unsigned(INT_MAX)
+-    : unsigned(LeastValidPointerValue);
++    : unsigned(ExtraInhabitantPointerLimit);
+ #endif
+-}  
++}
+ 
+ /// Calculate the numeric index of an extra inhabitant of a function
+ /// pointer in memory.
+@@ -982,9 +992,9 @@
+   using namespace heap_object_abi;
+ 
+   // The runtime needs no more than INT_MAX inhabitants.
+-  return (LeastValidPointerValue) > INT_MAX
++  return (ExtraInhabitantPointerLimit) > INT_MAX
+     ? (unsigned)INT_MAX
+-    : (unsigned)(LeastValidPointerValue);
++    : (unsigned)(ExtraInhabitantPointerLimit);
+ }
+ 
+ /// Return the type name for a given type metadata.
