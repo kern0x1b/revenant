@@ -9,6 +9,17 @@
 
 #define RACE_THREADS 4
 
+@interface RCFTwin : NSObject
++ (NSInteger)which;
+@end
+
+@implementation RCFTwin
++ (NSInteger)which
+{
+    return 2;
+}
+@end
+
 __attribute__((visibility("default"), used, noinline)) int rcf_dlsym_shadow(void)
 {
     return 2;

@@ -1027,8 +1027,25 @@ as a sorted pool of names with a table of offsets and addresses (no relocations;
 Swift libraries, 2 MB). `xl_shim_dlsym` searches it first when the handle is `RTLD_DEFAULT` and asks the host only when the
 name is not found, so `CFStringGetTypeID` and the other host functions above are unchanged. The step looks up `rcf_dlsym_own`, which
 only the guest exports (`dlsym.guest.own`), and `rcf_dlsym_shadow`, which the guest and the host executable both export
-(`dlsym.guest.first`: the guest's answer 1, not the host's 2). A handle other than `RTLD_DEFAULT` (one that the guest got from a
-host `dlopen`) goes to the host as before.
+(`dlsym.guest.first`: the guest's answer 1, not the host's 2). `RTLD_NEXT` and `RTLD_SELF` take the same way. A handle that the guest got
+from a host `dlopen` (the Swift overlays open `libdispatch`, `libicucore`, `libresolv` and `libSystem` and look functions up in them)
+goes to the host. What the host answers is checked: an address in a section of code (`S_ATTR_PURE_INSTRUCTIONS` or
+`S_ATTR_SOME_INSTRUCTIONS` of the image `dladdr` names, Thumb bit ignored) that has no slot of `xl_host_functions` is not given
+to the guest, since a call to it stops the process at an address without translated code; `dlsym` answers `NULL` as for a
+function the host does not have, and `xl-dlsym.log` (with `xl-log`) names it. `dlsym.host.refused` looks up `getpid` and
+`dispatch_get_specific`, `dlsym.host.data` a data symbol (`kCFAllocatorNull`), which is handed over as before. The same step
+checks the classes: `RCFTwin` is a class of the guest (`@objc(RCFTwin)`) and of the host, and `objc_getClass`,
+`objc_lookUpClass`, `NSClassFromString` and `objc_getMetaClass` (a manual bridge since 2026-11-16, the host's function looked
+for the name without the namespace prefix) answer the guest's class (`class.guest.first`, `class.meta.guest.first`).
+
+What the audit of the guest images' call sites of `dlsym`, `dlopen`, `dladdr`, `objc_getProtocol` and the class lookups (2026-11-16, the
+SDK with its twelve Swift libraries) left as it is: `dladdr` of a guest address answers 0 (the guest range is in no host image;
+the Swift runtime uses it for diagnostics); `__dyld_is_objc_constant` of a guest address answers false; `_dyld_register_func_for_add_image`
+calls back for guest images only in library mode, and no guest image imports `_dyld_image_count`, `_dyld_get_image_header` or
+`_dyld_get_image_name`; the CoreFoundation names of `__initializeAvailabilityCheck` (`CFPropertyListCreateWithData` and others) are
+reached only when `dlsym` finds no `_availability_version_check`, which the guest's own `dlsym` answers; `objc_getProtocol` looks a name up in
+the host's runtime, where the registry registers the guest's protocols under their own names, so a protocol of the same name in
+the host and in the guest is the one that registered first.
 
 `stepExtraInhabitants`, `stepExtraInhabitantsStdlib` and `stepExtraInhabitantsBig` keep the contract of an extra inhabitant
 of a pointer ([extra-inhabitants.md](extra-inhabitants.md)). They round-trip store and get for a struct with a class field in

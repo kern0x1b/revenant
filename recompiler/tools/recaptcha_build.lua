@@ -23,7 +23,7 @@ function sdk_sha256()
 end
 
 function telegram_build()
-    local directory = os.scriptdir()
+    local directory = path.absolute(os.scriptdir())
     for _ = 1, 12 do
         local candidate = path.join(directory, "telegram-build")
         if os.isdir(path.join(candidate, ".agent-work")) then

@@ -3141,7 +3141,7 @@ int main(int argc, const char **argv) {
       {"_exit", 1}, {"__exit", 1},
       {"_objc_copyImageNames", 1}, {"_objc_copyClassNamesForImage", 2}, {"_objc_copyClassList", 1},
       {"_objc_readClassPair", 2}, {"__objc_realizeClassFromSwift", 2}, {"_class_getImageName", 1},
-      {"_objc_getClass", 1}, {"_objc_lookUpClass", 1}, {"_NSClassFromString", 1}, {"_class_getName", 1},
+      {"_objc_getClass", 1}, {"_objc_getMetaClass", 1}, {"_objc_lookUpClass", 1}, {"_NSClassFromString", 1}, {"_class_getName", 1},
       {"_class_getMethodImplementation", 2}, {"_method_getImplementation", 1}, {"_method_setImplementation", 2},
       {"_class_addMethod", 4}, {"_class_replaceMethod", 4}, {"_imp_implementationWithBlock", 1},
       {"_imp_getBlock", 1}, {"_imp_removeBlock", 1}, {"_class_copyMethodList", 2},

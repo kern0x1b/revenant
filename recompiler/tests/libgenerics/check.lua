@@ -37,7 +37,7 @@ local STEPS = {
     {"stepHostEnumerate", {"host.enumerate"}},
     {"stepShortString", {"short.string"}},
     {"stepDlsymFunction", {"dlsym.typeid", "dlsym.object"}},
-    {"stepDlsymGuest", {"dlsym.guest.own", "dlsym.guest.first"}},
+    {"stepDlsymGuest", {"dlsym.guest.own", "dlsym.guest.first", "dlsym.guest.self", "dlsym.host.refused", "dlsym.host.data", "class.guest.first", "class.meta.guest.first"}},
     {"stepExtraInhabitants", {"xi.enum.generic", "xi.enum.inline", "xi.enum.word", "xi.enum.copies", "xi.enum.destroyed", "xi.enum.balance",
                               "xi.struct.generic", "xi.struct.inline", "xi.struct.copies", "xi.struct.destroyed", "xi.struct.balance",
                               "xi.struct.consumed", "xi.struct.released", "xi.enum.consumed", "xi.enum.released", "xi.class.released"}},

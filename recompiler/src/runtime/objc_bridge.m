@@ -1673,9 +1673,41 @@ static void *xl_guest_dlsym_find(const char *symbol)
     return NULL;
 }
 
+static int xl_host_code_address(const void *address)
+{
+    Dl_info info;
+    if (!dladdr(address, &info) || !info.dli_fbase)
+        return 0;
+    const struct mach_header *header = info.dli_fbase;
+    if (header->magic != MH_MAGIC)
+        return 0;
+    const struct load_command *command = (const struct load_command *)(header + 1);
+    uintptr_t slide = 0;
+    for (uint32_t index = 0; index < header->ncmds; index++, command = (const struct load_command *)((const char *)command + command->cmdsize)) {
+        if (command->cmd == LC_SEGMENT && strcmp(((const struct segment_command *)command)->segname, "__TEXT") == 0) {
+            slide = (uintptr_t)header - ((const struct segment_command *)command)->vmaddr;
+            break;
+        }
+    }
+    uintptr_t target = (uintptr_t)address & ~(uintptr_t)1;
+    command = (const struct load_command *)(header + 1);
+    for (uint32_t index = 0; index < header->ncmds; index++, command = (const struct load_command *)((const char *)command + command->cmdsize)) {
+        if (command->cmd != LC_SEGMENT)
+            continue;
+        const struct segment_command *segment = (const struct segment_command *)command;
+        const struct section *section = (const struct section *)(segment + 1);
+        for (uint32_t at = 0; at < segment->nsects; at++, section++) {
+            uintptr_t start = section->addr + slide;
+            if (target >= start && target - start < section->size)
+                return (section->flags & (S_ATTR_PURE_INSTRUCTIONS | S_ATTR_SOME_INSTRUCTIONS)) != 0;
+        }
+    }
+    return 0;
+}
+
 void *xl_shim_dlsym(void *handle, const char *symbol)
 {
-    if (symbol && handle == RTLD_DEFAULT) {
+    if (symbol && (handle == RTLD_DEFAULT || handle == RTLD_NEXT || handle == RTLD_SELF)) {
         void *guest = xl_guest_dlsym_find(symbol);
         if (guest)
             return guest;
@@ -1701,6 +1733,14 @@ void *xl_shim_dlsym(void *handle, const char *symbol)
         }
         pthread_mutex_unlock(&xl_function_lock);
         return &xl_function_region[slot - 1];
+    }
+    if (xl_host_code_address(found)) {
+        int fd = xl_log_open("xl-dlsym.log");
+        if (fd >= 0) {
+            dprintf(fd, "dlsym refused the host function %s: guest code cannot call it\n", symbol);
+            close(fd);
+        }
+        return NULL;
     }
     return found;
 }
