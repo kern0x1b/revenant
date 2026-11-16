@@ -1007,7 +1007,7 @@ is guest code calling a host pointer, so before 2026-11-14 it stopped the proces
 code" and a host address (`0x310aaba9` is `CFStringGetTypeID` in CoreFoundation on the 4S; the same stop ended a
 `JSONSerialization` run of the reCAPTCHA fixture, because `_initializeBridgingFunctionsImpl` looks up `CFStringGetTypeID`,
 `CFGetTypeID`, `CFStringHashNSString` and `CFStringHashCString` this way). `xlgen` maps `dlsym` to `xl_shim_dlsym`, which
-answers the four names with an address of a slot in a table of the runtime and everything else with the host's answer; a
+answers a name that a guest image exports with the guest's address (`stepDlsymGuest`), the four names with an address of a slot in a table of the runtime and everything else with the host's answer; a
 call to a slot runs `xl_function_entry`, which narrows the arguments by the shape in `xl_host_functions` (`o` object, `p`
 pointer, `u` unsigned, anything else signed), calls the host function and widens the result. A further host function the
 guest may look up needs a line in that table. The control is a translation without the `dlsym` line of the shim map: the
@@ -1015,6 +1015,37 @@ step then stops with the message above, naming `CFStringGetTypeID+0 of CoreFound
 `ok dlsym.typeid` and `ok dlsym.object` (measured on the 4S on 2026-11-14, runtime of main). The message of a call or jump to
 an address without code now says which host symbol and image the address belongs to, when it is one, and the host frames of a
 crash report carry the offset in their image.
+
+`stepDlsymGuest` is the other half of `dlsym`: a name that a guest image exports is answered with the guest's address, not the
+host's. The Swift runtime looks up `$sSo10CFErrorRefas5Error10FoundationMc` (the conformance of `CFError` to `Error`),
+`$sSo8NSObjectCSH10ObjectiveCMc` and three Foundation functions of the `NSError` bridge with `dlsym(RTLD_DEFAULT, ...)`; a
+host that carries its own armv7 `libswiftFoundation` has the same names, the guest took those, followed the type reference of
+the conformance to the host's metadata accessor `$sSo10CFErrorRefaMa` and called armv7 code (the stop of drop17 of the
+reCAPTCHA SDK, `libswiftFoundation +0xa9bb8` in the host). `xlate` writes `xl_dlsym.h`: the exports of every guest image in the
+order of the images (the first image that exports a name answers it, as dyld does), without the exports of the bridge image,
+as a sorted pool of names with a table of offsets and addresses (no relocations; 31,000 names for the reCAPTCHA SDK with its
+Swift libraries, 2 MB). `xl_shim_dlsym` searches it first when the handle is `RTLD_DEFAULT` and asks the host only when the
+name is not found, so `CFStringGetTypeID` and the other host functions above are unchanged. The step looks up `rcf_dlsym_own`, which
+only the guest exports (`dlsym.guest.own`), and `rcf_dlsym_shadow`, which the guest and the host executable both export
+(`dlsym.guest.first`: the guest's answer 1, not the host's 2). `RTLD_NEXT` and `RTLD_SELF` take the same way. A handle that the guest got
+from a host `dlopen` (the Swift overlays open `libdispatch`, `libicucore`, `libresolv` and `libSystem` and look functions up in them)
+goes to the host. What the host answers is checked: an address in a section of code (`S_ATTR_PURE_INSTRUCTIONS` or
+`S_ATTR_SOME_INSTRUCTIONS` of the image `dladdr` names, Thumb bit ignored) that has no slot of `xl_host_functions` is not given
+to the guest, since a call to it stops the process at an address without translated code; `dlsym` answers `NULL` as for a
+function the host does not have, and `xl-dlsym.log` (with `xl-log`) names it. `dlsym.host.refused` looks up `getpid` and
+`dispatch_get_specific`, `dlsym.host.data` a data symbol (`kCFAllocatorNull`), which is handed over as before. The same step
+checks the classes: `RCFTwin` is a class of the guest (`@objc(RCFTwin)`) and of the host, and `objc_getClass`,
+`objc_lookUpClass`, `NSClassFromString` and `objc_getMetaClass` (a manual bridge since 2026-11-16, the host's function looked
+for the name without the namespace prefix) answer the guest's class (`class.guest.first`, `class.meta.guest.first`).
+
+What the audit of the guest images' call sites of `dlsym`, `dlopen`, `dladdr`, `objc_getProtocol` and the class lookups (2026-11-16, the
+SDK with its twelve Swift libraries) left as it is: `dladdr` of a guest address answers 0 (the guest range is in no host image;
+the Swift runtime uses it for diagnostics); `__dyld_is_objc_constant` of a guest address answers false; `_dyld_register_func_for_add_image`
+calls back for guest images only in library mode, and no guest image imports `_dyld_image_count`, `_dyld_get_image_header` or
+`_dyld_get_image_name`; the CoreFoundation names of `__initializeAvailabilityCheck` (`CFPropertyListCreateWithData` and others) are
+reached only when `dlsym` finds no `_availability_version_check`, which the guest's own `dlsym` answers; `objc_getProtocol` looks a name up in
+the host's runtime, where the registry registers the guest's protocols under their own names, so a protocol of the same name in
+the host and in the guest is the one that registered first.
 
 `stepExtraInhabitants`, `stepExtraInhabitantsStdlib` and `stepExtraInhabitantsBig` keep the contract of an extra inhabitant
 of a pointer ([extra-inhabitants.md](extra-inhabitants.md)). They round-trip store and get for a struct with a class field in
@@ -1097,6 +1128,31 @@ It also builds the host with Swift code of its own (`hostswift.swift`, against t
 `revenant@swift-runtime`) and checks that the host's Swift names and bridging are the same before and after the
 library loads (`host.bridge.before`, `host.names`, `names.disjoint`, `host.bridge.after`), and that the Objective-C
 runtime reports no class implemented twice. [The names and variables](library-mode.md#the-check).
+
+### recaptchareal (device part by hand; needs the real SDK)
+
+The reCAPTCHA Enterprise SDK is not in the repository. The check runs it when the SDK is at hand and says `skip:` and ends
+without an error when it is not: `XL_RECAPTCHA_SDK` names the file, or `telegram-build/.agent-work/recaptcha-sdk/RecaptchaEnterprise.dylib`
+is found by walking up from the checkout; its sha256 is pinned in `recompiler/tools/recaptcha_build.lua` and another file is
+refused. `XL_SWIFTOBJC_LIBS` names the folder with the arm64 Swift runtime of `revenant@swift-runtime`, `libc++.1.dylib` and
+`libc++abi.1.dylib`.
+
+`./xmakew l -P . recompiler/tests/recaptchareal/check.lua <out> [--drop recaptcha-sdk.txt] [--execute] [--rounds N] [--seconds N] [--host-only]`
+translates the SDK in library mode (or takes the library of a drop's `recaptcha-sdk.txt`), builds `rcsdk`, a host program of
+the shape of an app that has its own armv7 Swift runtime (`hostswift.swift` runs `Locale`, `Data`, `URL`, a Swift `Error` as `NSError` and an
+`NSDictionary` of the host's libswiftFoundation before the library is loaded), and runs it on the claimed phone: `xl_reserve`, `xl_load`, `xl_find_class` of `RecaptchaEnterprise.Recaptcha` and `RecaptchaAction`,
+`fetchClientWithSiteKey:completion:` with an empty key and no network (the answer is an error, not a crash), with `--execute`
+`executeWithAction:completion:`, `--rounds` times, then three seconds for the pools of the guest threads. It prints a line for
+each step with the resident size. It fails when a step is missing, when the fetch does not answer in `--seconds`, or when the
+process does not end with exit 0. A run takes 16 s on the 4S; the drop17 stop (`dlsym` answered with the host's `CFError: Error`
+conformance, see `stepDlsymGuest` above) and the double free of drop16 both reproduced in it.
+
+`./xmakew l -P . recompiler/tools/drop.lua NAME [--out DIR] [--no-verify]` builds a drop in one command and stops at the first step that
+fails: it builds `xlate` and `xlgen`, translates the SDK with the same recipe as the check, copies the library, its registry,
+the loader files and the reports to `telegram-build/.agent-work/recaptcha-real/NAME` (or DIR), writes `recaptcha-sdk.txt` with the
+two sha256 and, when `telegram-build/tools/recaptcha_sdk.lua` is there, verifies the drop with it. It prints the path and both
+digests. It needs `XL_SWIFTOBJC_LIBS` and `BACKPORTS_DIR` in the environment (and `REVENANT_CACHE` in a worktree); the second translation of an
+unchanged lift reuses the lifted objects (`lift.stamp`).
 
 ### cxxinit and refrepro
 

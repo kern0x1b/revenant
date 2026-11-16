@@ -1028,6 +1028,13 @@ void xl_manual_objc_getClass(void *pack)
     p->r = xl_object_out((uintptr_t)xl_lookup_class((const char *)xl_narrow_pointer(p->a0, "objc_getClass", 0), objc_getClass));
 }
 
+void xl_manual_objc_getMetaClass(void *pack)
+{
+    struct xl_class_name_pack *p = pack;
+    Class found = xl_lookup_class((const char *)xl_narrow_pointer(p->a0, "objc_getMetaClass", 0), objc_getClass);
+    p->r = xl_object_out((uintptr_t)(found ? object_getClass((id)found) : Nil));
+}
+
 void xl_manual_objc_lookUpClass(void *pack)
 {
     struct xl_class_name_pack *p = pack;

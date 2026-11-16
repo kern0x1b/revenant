@@ -5,6 +5,17 @@ import Foundation
     fflush(nil)
 }
 
+@objc(RCFTwin)
+public final class Twin: NSObject {
+    @objc public class func which() -> Int { 1 }
+}
+
+@_cdecl("rcf_dlsym_own")
+public func dlsymOwn() -> Int32 { 41 }
+
+@_cdecl("rcf_dlsym_shadow")
+public func dlsymShadow() -> Int32 { 1 }
+
 @inline(never) func report(_ name: String, _ passed: Bool) {
     line((passed ? "ok " : "FAIL ") + name)
 }
@@ -266,6 +277,26 @@ final class XiKey: Hashable {
         let null = Unmanaged.passUnretained(NSNull()).toOpaque()
         report("dlsym.typeid", typeID != nil && typeID!() == UInt(CFStringGetTypeID()))
         report("dlsym.object", getTypeID != nil && getTypeID!(UnsafeRawPointer(null)) == UInt(CFNullGetTypeID()))
+    }
+
+    @objc public func stepDlsymGuest() {
+        let handle = UnsafeMutableRawPointer(bitPattern: -2)
+        typealias Answer = @convention(c) () -> Int32
+        let own = dlsym(handle, "rcf_dlsym_own").map { unsafeBitCast($0, to: Answer.self) }
+        let shadowed = dlsym(handle, "rcf_dlsym_shadow").map { unsafeBitCast($0, to: Answer.self) }
+        report("dlsym.guest.own", own != nil && own!() == 41)
+        report("dlsym.guest.first", shadowed != nil && shadowed!() == 1)
+        let current = dlsym(UnsafeMutableRawPointer(bitPattern: -3), "rcf_dlsym_shadow").map { unsafeBitCast($0, to: Answer.self) }
+        report("dlsym.guest.self", current != nil && current!() == 1)
+        report("dlsym.host.refused", dlsym(handle, "getpid") == nil && dlsym(handle, "dispatch_get_specific") == nil)
+        report("dlsym.host.data", dlsym(handle, "kCFAllocatorNull") != nil)
+        let twin: AnyClass = Twin.self
+        let byGet = objc_getClass("RCFTwin") as? AnyClass
+        let byName: AnyClass? = NSClassFromString("RCFTwin")
+        let byLookUp: AnyClass? = objc_lookUpClass("RCFTwin")
+        report("class.guest.first", byGet === twin && byName === twin && byLookUp === twin)
+        let byMeta = objc_getMetaClass("RCFTwin") as? AnyClass
+        report("class.meta.guest.first", byMeta != nil && byMeta === object_getClass(twin))
     }
 
     @objc public func stepExtraInhabitants() {
