@@ -232,6 +232,33 @@ int main(int argc, char **argv)
         report("proxy.weak.recreated", proxy != nil && [(Shadow *)proxy guestPointer] == (uintptr_t)first && references(first) == 1);
     }
     report("proxy.weak.balanced", references(first) == 0);
+    const char *owned_switch = getenv("XL_OWNED");
+    int owned = !owned_switch || strcmp(owned_switch, "0") != 0;
+    struct guest_object *copied = guest_new(FIRST_CLASS);
+    xl_proxy_guest_retain((uintptr_t)copied);
+    id kept = nil;
+    __weak id watcher = nil;
+    @autoreleasepool {
+        id argument = (id)xl_proxy_in((uintptr_t)copied);
+        uintptr_t result = xl_proxy_in((uintptr_t)copied);
+        kept = (id)(owned ? xl_proxy_owned(result) : result);
+        watcher = kept;
+        report("proxy.owned.same", kept == argument && xl_proxy_owned((uintptr_t)[[NSObject new] autorelease]) != 0);
+        report("proxy.owned.guest", references(copied) == (owned ? 1 : 2));
+    }
+    int alive = 0;
+    @autoreleasepool {
+        alive = watcher != nil;
+    }
+    report("proxy.owned.alive", alive && references(copied) == 1 && [kept retainCount] == 1);
+    if (!owned)
+        return 1;
+    [kept release];
+    @autoreleasepool {
+        alive = watcher != nil;
+    }
+    report("proxy.owned.released", !alive && references(copied) == 0);
+    free(copied);
     race(rounds);
     free(first);
     free(second);

@@ -208,10 +208,12 @@ static struct xl_word_kinds xl_word_kinds_of(const char *types)
 static IMP xl_guest_method_imp(uint64_t guest, SEL selector, const char *types)
 {
     struct xl_word_kinds kinds = xl_word_kinds_of(types);
+    int owned = kinds.result == 'O' && xl_selector_returns_owned(sel_getName(selector));
     IMP imp = imp_implementationWithBlock(^uintptr_t(id self_, uintptr_t a, uintptr_t b, uintptr_t c, uintptr_t d) {
         uint64_t arguments[6] = {xl_object_out((uintptr_t)self_), (uint64_t)(uintptr_t)selector, xl_kind_out(kinds.argument[0], a),
                                  xl_kind_out(kinds.argument[1], b), xl_kind_out(kinds.argument[2], c), xl_kind_out(kinds.argument[3], d)};
-        return xl_kind_in(kinds.result, xl_invoke_n(guest, arguments, 6), "guest method result");
+        uint64_t result = xl_invoke_n(guest, arguments, 6);
+        return owned ? xl_object_in_owned(result, "guest method result", 0) : xl_kind_in(kinds.result, result, "guest method result");
     });
     xl_table_set(xl_shadow_imps, (uintptr_t)imp, (const void *)(uintptr_t)guest);
     return imp;
@@ -247,6 +249,7 @@ static IMP xl_block_method_imp(uint64_t guest, SEL selector, const char *types)
         });
     }
     struct xl_word_kinds kinds = xl_word_kinds_of(types);
+    int owned = kinds.result == 'O' && xl_selector_returns_owned(sel_getName(selector));
     IMP imp = imp_implementationWithBlock(^uintptr_t(id self_, uintptr_t a, uintptr_t b, uintptr_t c, uintptr_t d) {
         const uintptr_t host[4] = {a, b, c, d};
         uint64_t arguments[6] = {xl_object_out((uintptr_t)self_), (uint64_t)(uintptr_t)selector, 0, 0, 0, 0};
@@ -264,7 +267,7 @@ static IMP xl_block_method_imp(uint64_t guest, SEL selector, const char *types)
             if (proxies[i])
                 xl_invoke(XL_GUEST__Block_release, proxies[i]);
         }
-        return xl_kind_in(kinds.result, result, "guest method result");
+        return owned ? xl_object_in_owned(result, "guest method result", 0) : xl_kind_in(kinds.result, result, "guest method result");
     });
     xl_table_set(xl_shadow_imps, (uintptr_t)imp, (const void *)(uintptr_t)guest);
     return imp;

@@ -4,7 +4,7 @@ local EXPECTED = {
     "host.create", "host.dispatch", "host.subtype", "host.init", "name.plain", "name.client",
     "anycollection.int", "anycollection.string", "mirror.children", "describe.struct", "describe.class",
     "cf.dictionary.count", "cf.dictionary.contains", "cf.dictionary.missing", "cf.dictionary.value", "cf.array.count", "cf.data.length",
-    "cf.string.length"
+    "cf.string.length", "error.userinfo", "error.survives"
 }
 
 local BRIDGED_WRAPPERS = {"CFDictionaryGetCount", "CFDictionaryContainsKey", "CFDictionaryGetValue", "CFArrayGetCount", "CFDataGetLength", "CFStringGetLength"}
@@ -46,6 +46,25 @@ function main(out, ...)
             if not wrapper:find("xl_object_in", 1, true) then
                 corpus.fail("the host wrapper of %s does not take its object argument through xl_object_in, so a Swift object of a guest class would reach Core Foundation as a raw guest pointer", name)
             end
+        end
+        local _, owned = host_source:gsub("xl_object_in_owned%(", "")
+        local expected_owned, listed = 0, {}
+        for line in io.readfile(path.join(out, "xl", "report.txt")):gmatch("[^\n]+") do
+            local class, selector, result = line:match("^[-+]%[(%S+) (%S+)%]: host IMP from .* as (.)")
+            if selector then
+                local name = selector:gsub("^_+", "")
+                local family = name:match("^alloc") or name:match("^new") or name:match("^copy") or name:match("^mutableCopy")
+                if family and not name:sub(#family + 1, #family + 1):match("%l") and result == "@" then
+                    expected_owned = expected_owned + 1
+                    listed[class .. " " .. selector] = true
+                end
+            end
+        end
+        if not listed["FixtureClient copyMade:"] or not listed["FixtureClient newToken:"] or listed["FixtureClient make:"] then
+            corpus.fail("the report does not list the host IMPs of copyMade: and newToken: of FixtureClient as owned results, or lists make: as one")
+        end
+        if owned ~= expected_owned then
+            corpus.fail("the translation has %d host wrappers that take the result of the guest as owned, the report lists %d selectors of the alloc, new, copy and mutableCopy families with an object result, so one of them hands a result to the host at the wrong count", owned, expected_owned)
         end
         if host_only then
             print("ok (host part)")

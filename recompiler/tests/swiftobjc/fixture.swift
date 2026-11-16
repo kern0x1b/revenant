@@ -41,6 +41,15 @@ var destroyed = 0
         return token
     }
     @objc func run(_ done: @escaping (Token?) -> Void) { done(make(counter)) }
+    @objc func copyMade(_ value: Int) -> Token { return Token(value: value) }
+    @objc func newToken(_ value: Int) -> Token { return Token(value: value) }
+}
+
+@objc(FixtureError) final class FixtureError: NSError {
+    @objc init(number: Int) {
+        super.init(domain: "FixtureDomain", code: number, userInfo: ["number": number, "text": "n" + String(number)])
+    }
+    @objc required init?(coder: NSCoder) { super.init(coder: coder) }
 }
 
 @objc(FixtureSub) final class Sub: Client {
@@ -122,9 +131,33 @@ struct Point {
     report("name.client", _typeName(Client.self, qualified: false) == "Client")
 }
 
+@inline(never) func errors() {
+    var kept: [FixtureError] = []
+    var fine = true
+    autoreleasepool {
+        for number in 0..<40 {
+            let error = FixtureError(number: number)
+            fine = fine && error.code == number && error.userInfo["number"] as? Int == number
+            if number % 4 == 0 { kept.append(error) }
+        }
+    }
+    var survivors = true
+    for error in kept {
+        survivors = survivors && error.userInfo["text"] as? String == "n" + String(error.code)
+    }
+    kept.removeAll()
+    autoreleasepool {
+        let again = FixtureError(number: 7)
+        _ = again.userInfo
+    }
+    report("error.userinfo", fine)
+    report("error.survives", survivors)
+}
+
 client()
 sub()
 release()
+errors()
 @inline(never) func reflection() {
     report("anycollection.int", AnyCollection([1, 2, 3]).count == 3)
     report("anycollection.string", AnyCollection("abc").count == 3)

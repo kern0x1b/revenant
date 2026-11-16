@@ -436,7 +436,7 @@ class Generator {
   std::string HostLoad(const Value &value, const std::string &expr, const std::string &where, std::string &prep,
                        std::string &post, unsigned index);
   std::string HostStore(const Value &value, const std::string &expr, const std::string &target);
-  std::string ScalarToHost(const Value &value, const std::string &expr, const std::string &where);
+  std::string ScalarToHost(const Value &value, const std::string &expr, const std::string &where, bool owned = false);
   std::string ScalarToGuest(const Value &value, const std::string &expr);
   std::string BlockBridge(const Value &value);
   std::string HostBlockBridge(const Value &value);
@@ -451,7 +451,7 @@ class Generator {
                          const std::string &callee, const FormatInfo &format, const std::string &manual);
   std::string HostEncoding(const Signature &signature);
   std::string InvokeShim(const Signature &signature);
-  std::string ImpWrapper(const Signature &signature, uint64_t imp, bool class_method, bool twin = false);
+  std::string ImpWrapper(const Signature &signature, uint64_t imp, bool class_method, bool twin = false, bool owned_result = false);
   std::string StubImpWrapper(uint64_t imp);
 
   ASTContext &gc_;
@@ -593,7 +593,24 @@ bool Generator::Leaves(QualType g, QualType h, const std::string &gpath, const s
   return true;
 }
 
-std::string Generator::ScalarToHost(const Value &value, const std::string &expr, const std::string &where) {
+static bool SelectorReturnsOwned(const std::string &selector) {
+  size_t start = selector.find_first_not_of('_');
+  if (start == std::string::npos) {
+    return false;
+  }
+  for (const char *family : {"alloc", "new", "copy", "mutableCopy"}) {
+    std::string name = family;
+    if (selector.compare(start, name.size(), name) == 0) {
+      size_t next = start + name.size();
+      if (next >= selector.size() || selector[next] < 'a' || selector[next] > 'z') {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+std::string Generator::ScalarToHost(const Value &value, const std::string &expr, const std::string &where, bool owned) {
   switch (value.kind) {
     case Kind::Integer:
       if (value.host_bits < value.guest_bits) {
@@ -609,8 +626,10 @@ std::string Generator::ScalarToHost(const Value &value, const std::string &expr,
     case Kind::Floating:
       return "(" + Spell(hc_, value.host) + ")" + expr;
     default:
-      if (value.is_object)
-        return "(" + Spell(hc_, value.host) + ")" + (value.is_word ? "xl_object_in_word" : "xl_object_in") + "((uint64_t)" + expr + ", " + where + ")";
+      if (value.is_object) {
+        auto convert = value.is_word ? "xl_object_in_word" : owned ? "xl_object_in_owned" : "xl_object_in";
+        return "(" + Spell(hc_, value.host) + ")" + convert + "((uint64_t)" + expr + ", " + where + ")";
+      }
       return "(" + Spell(hc_, value.host) + ")" + (value.is_word ? "xl_narrow_word" : "xl_narrow_pointer") + "((uint64_t)" + expr + ", " + where + ")";
   }
 }
@@ -2203,7 +2222,7 @@ static bool GenericImpSuffices(const Signature &signature) {
   return true;
 }
 
-std::string Generator::ImpWrapper(const Signature &signature, uint64_t imp, bool class_method, bool twin) {
+std::string Generator::ImpWrapper(const Signature &signature, uint64_t imp, bool class_method, bool twin, bool owned_result) {
   auto invoke = InvokeShim(signature);
   auto name = "xl_imp_" + std::to_string(counter_++);
   bool has_result = signature.result.kind != Kind::Void;
@@ -2306,7 +2325,7 @@ std::string Generator::ImpWrapper(const Signature &signature, uint64_t imp, bool
     if (signature.result.kind == Kind::Record) {
       hs << "    return " << Mirror(signature.result.guest, signature.result.host) << "_to_host(&p.r);\n";
     } else {
-      hs << "    return " << ScalarToHost(signature.result, "p.r", "\"" + name + "\", 99") << ";\n";
+      hs << "    return " << ScalarToHost(signature.result, "p.r", "\"" + name + "\", 99", owned_result) << ";\n";
     }
   }
   hs << "}\n\n";
@@ -2436,7 +2455,7 @@ void Generator::EmitClasses(const json::Object &manifest) {
         wrapper = StubImpWrapper(imp);
         host_types = types;
       } else {
-        wrapper = ImpWrapper(signature, imp, class_method);
+        wrapper = ImpWrapper(signature, imp, class_method, false, SelectorReturnsOwned(selector));
         host_types = HostEncoding(signature);
         Report(std::string(class_method ? "+[" : "-[") + superclass_hint + " " + selector + "]: host IMP from " + origin + " as " + host_types);
       }
@@ -2762,7 +2781,7 @@ void Generator::EmitClasses(const json::Object &manifest) {
             continue;
           }
           auto host_types = HostEncoding(signature);
-          auto wrapper = ImpWrapper(signature, *method.getInteger("imp"), class_method, true);
+          auto wrapper = ImpWrapper(signature, *method.getInteger("imp"), class_method, true, SelectorReturnsOwned(method.getString("selector")->str()));
           Report(label + ": host IMP from " + origin + " as " + host_types);
           meta << "    {" << hex(*method.getInteger("imp")) << ", (void *)" << wrapper << ", \"" << host_types << "\"},\n";
         }

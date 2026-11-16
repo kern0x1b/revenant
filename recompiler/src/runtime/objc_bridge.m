@@ -1269,6 +1269,24 @@ uintptr_t xl_object_in(uint64_t guest, const char *symbol, unsigned index)
     return proxy ? proxy : (uintptr_t)xl_class_in(narrowed);
 }
 
+uintptr_t xl_object_in_owned(uint64_t guest, const char *symbol, unsigned index)
+{
+    return xl_proxy_owned(xl_object_in(guest, symbol, index));
+}
+
+int xl_selector_returns_owned(const char *name)
+{
+    static const char *const families[] = {"alloc", "new", "copy", "mutableCopy"};
+    while (*name == '_')
+        name++;
+    for (size_t i = 0; i < sizeof families / sizeof *families; i++) {
+        size_t length = strlen(families[i]);
+        if (strncmp(name, families[i], length) == 0 && !(name[length] >= 'a' && name[length] <= 'z'))
+            return 1;
+    }
+    return 0;
+}
+
 uint64_t xl_object_out(uintptr_t host)
 {
     if (host - xl_word_low < xl_word_span)

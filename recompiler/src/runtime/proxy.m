@@ -188,6 +188,16 @@ uintptr_t xl_proxy_hold(uintptr_t guest)
     return xl_proxy_in(guest);
 }
 
+uintptr_t xl_proxy_owned(uintptr_t host)
+{
+    uint64_t guest = xl_proxy_out(host);
+    if (guest) {
+        [(id)host retain];
+        xl_proxy_guest_release((uintptr_t)guest);
+    }
+    return host;
+}
+
 uint64_t xl_proxy_out(uintptr_t host)
 {
     if (!xl_proxy_classes_active || !host)
