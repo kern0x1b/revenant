@@ -3152,6 +3152,7 @@ int main(int argc, const char **argv) {
       {"_imp_getBlock", 1}, {"_imp_removeBlock", 1}, {"_class_copyMethodList", 2},
       {"_getaddrinfo", 4}, {"_freeaddrinfo", 1},
       {"_getifaddrs", 1}, {"_freeifaddrs", 1}, {"_getservbyname", 2}, {"_localeconv_l", 1}, {"_class_copyIvarList", 2},
+      {"_sysctl", 6}, {"_sysctlbyname", 5},
       {"__NSGetArgv", 0}, {"_CGColorCreate", 2}, {"_CGColorGetComponents", 1}, {"_CGImageCreateWithMaskingColors", 2}};
   static const std::set<std::string> personalities = {"___objc_personality_v0", "___gxx_personality_v0",
                                                       "___gcc_personality_v0"};

@@ -22,6 +22,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <sys/sysctl.h>
+#include <sys/time.h>
 #include <unistd.h>
 #include <wchar.h>
 #include <xlocale.h>
@@ -377,6 +379,102 @@ static void locale_checks(void)
            conv->thousands_sep, conv->grouping, conv->frac_digits, conv->int_frac_digits, conv->p_cs_precedes, conv->n_sign_posn);
     printf("localeconv_l stable %d\n", localeconv_l(locale) == conv);
     freelocale(locale);
+}
+
+static void sysctl_checks(void)
+{
+    int boot_mib[2] = {CTL_KERN, KERN_BOOTTIME};
+    struct timeval boot, again, now;
+    memset(&boot, 0xA5, sizeof boot);
+    memset(&again, 0x5A, sizeof again);
+    size_t length = sizeof boot;
+    int status = sysctl(boot_mib, 2, &boot, &length, NULL, 0);
+    gettimeofday(&now, NULL);
+    printf("sysctl kern.boottime status %d length %d sec %d usec %d\n", status, length == sizeof boot, boot.tv_sec > 1000000000 && boot.tv_sec <= now.tv_sec,
+           boot.tv_usec >= 0 && boot.tv_usec < 1000000);
+    length = sizeof again;
+    sysctl(boot_mib, 2, &again, &length, NULL, 0);
+    printf("sysctl kern.boottime twice equal %d\n", boot.tv_sec == again.tv_sec && boot.tv_usec == again.tv_usec);
+    length = 0;
+    status = sysctl(boot_mib, 2, NULL, &length, NULL, 0);
+    printf("sysctl kern.boottime size probe %d length %d\n", status, length == sizeof boot);
+    length = sizeof boot / 2;
+    status = sysctl(boot_mib, 2, &again, &length, NULL, 0);
+    printf("sysctl kern.boottime small buffer %d errno %d length zero %d\n", status, errno == ENOMEM, length == 0);
+
+
+    int proc_mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()};
+    struct kinfo_proc info;
+    memset(&info, 0, sizeof info);
+    length = sizeof info;
+    status = sysctl(proc_mib, 4, &info, &length, NULL, 0);
+    printf("sysctl kern.proc.pid status %d length %d pid %d ppid %d pgid %d uid %d\n", status, length == sizeof info, info.kp_proc.p_pid == getpid(),
+           info.kp_eproc.e_ppid == getppid(), info.kp_eproc.e_pgid == getpgrp(), info.kp_eproc.e_ucred.cr_uid == getuid());
+    printf("sysctl kern.proc.pid comm %d traced %d start %d stat %d\n", strncmp(info.kp_proc.p_comm, "HostBridges", 11) == 0, (info.kp_proc.p_flag & P_TRACED) != 0,
+           info.kp_proc.p_un.__p_starttime.tv_sec > 1000000000 && info.kp_proc.p_un.__p_starttime.tv_sec <= now.tv_sec, info.kp_proc.p_stat != 0);
+    int all_mib[3] = {CTL_KERN, KERN_PROC, KERN_PROC_ALL};
+    length = 0;
+    status = sysctl(all_mib, 3, NULL, &length, NULL, 0);
+    size_t capacity = length + length / 4;
+    struct kinfo_proc *list = malloc(capacity);
+    size_t listed = capacity;
+    int all_status = sysctl(all_mib, 3, list, &listed, NULL, 0);
+    int found = 0, whole = listed % sizeof(struct kinfo_proc) == 0;
+    for (size_t i = 0; i < listed / sizeof(struct kinfo_proc); i++)
+        found |= list[i].kp_proc.p_pid == getpid() && list[i].kp_eproc.e_ppid == getppid();
+    printf("sysctl kern.proc.all probe %d list %d whole elements %d own process %d\n", status, all_status, whole, found);
+    free(list);
+    struct kinfo_proc tiny[1];
+    length = sizeof tiny;
+    status = sysctl(all_mib, 3, tiny, &length, NULL, 0);
+    printf("sysctl kern.proc.all one element buffer %d errno %d length zero %d\n", status, errno == ENOMEM, length == 0);
+
+    int load_mib[2] = {CTL_VM, VM_LOADAVG};
+    struct loadavg load;
+    memset(&load, 0, sizeof load);
+    length = sizeof load;
+    status = sysctl(load_mib, 2, &load, &length, NULL, 0);
+    printf("sysctl vm.loadavg status %d length %d fscale %d sane %d\n", status, length == sizeof load, load.fscale == 2048, load.ldavg[0] < 1000u * 2048u);
+
+    int cpus = 0;
+    length = sizeof cpus;
+    status = sysctlbyname("hw.ncpu", &cpus, &length, NULL, 0);
+    printf("sysctlbyname hw.ncpu status %d length %d positive %d\n", status, length == sizeof cpus, cpus > 0);
+    uint64_t memory = 0;
+    length = sizeof memory;
+    status = sysctlbyname("hw.memsize", &memory, &length, NULL, 0);
+    printf("sysctlbyname hw.memsize status %d length %d positive %d\n", status, length == sizeof memory, memory > 0);
+    char text[64];
+    memset(text, 'x', sizeof text);
+    length = sizeof text;
+    status = sysctlbyname("kern.ostype", text, &length, NULL, 0);
+    printf("sysctlbyname kern.ostype status %d length %d text %s\n", status, length == strlen(text) + 1, text);
+    length = 0;
+    status = sysctlbyname("hw.machine", NULL, &length, NULL, 0);
+    printf("sysctlbyname hw.machine size probe %d positive %d\n", status, length > 1);
+    int argmax = 0;
+    length = sizeof argmax;
+    status = sysctlbyname("kern.argmax", &argmax, &length, NULL, 0);
+    printf("sysctlbyname kern.argmax status %d positive %d\n", status, argmax > 0);
+    length = sizeof boot;
+    memset(&again, 0x3C, sizeof again);
+    status = sysctlbyname("kern.boottime", &again, &length, NULL, 0);
+    printf("sysctlbyname kern.boottime status %d length %d same as by number %d\n", status, length == sizeof again, again.tv_sec == boot.tv_sec && again.tv_usec == boot.tv_usec);
+    length = sizeof cpus;
+    status = sysctlbyname("xlate.no.such.name", &cpus, &length, NULL, 0);
+    printf("sysctlbyname missing name %d errno %d\n", status, errno == ENOENT);
+    int missing_mib[2] = {CTL_KERN, 100000};
+    length = sizeof cpus;
+    status = sysctl(missing_mib, 2, &cpus, &length, NULL, 0);
+    printf("sysctl missing number %d errno %d\n", status, errno == ENOENT || errno == EOPNOTSUPP || errno == ENOTSUP);
+}
+
+static void sysctl_unmapped_checks(void)
+{
+    char buffer[16];
+    size_t length = sizeof buffer;
+    int status = sysctlbyname("net.inet.tcp.pcblist", buffer, &length, NULL, 0);
+    printf("sysctlbyname net.inet.tcp.pcblist status %d errno %d\n", status, errno);
 }
 
 static void ivar_checks(void)
@@ -944,6 +1042,10 @@ int main(int argc, char **argv)
         word_overflow_checks();
         return 0;
     }
+    if (argc > 1 && !strcmp(argv[1], "sysctl-unmapped")) {
+        sysctl_unmapped_checks();
+        return 0;
+    }
     @autoreleasepool {
         scanf_checks();
         address_checks();
@@ -954,6 +1056,7 @@ int main(int argc, char **argv)
         interface_checks();
         service_checks();
         locale_checks();
+        sysctl_checks();
         ivar_checks();
         memory_checks();
         catalog_checks();

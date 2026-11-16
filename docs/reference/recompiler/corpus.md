@@ -400,7 +400,14 @@ A program (`main.m`) that calls the host functions whose guest and host layouts 
   `CGFloat` arrays are `double` in the guest and `float` in the host; `_NSGetArgv` and `__progname`; `getifaddrs` and
   `freeifaddrs` for `lo0` (the address, the netmask, the flags, and the `if_data` of the link entry with its time
   stamp); `getservbyname` for a known and an unknown service; `localeconv_l` of the C locale (strings, numbers, the
-  same pointer for the same locale); `class_copyIvarList` of a guest class with an `int`, an object and a `double`, and
+  same pointer for the same locale); `sysctl` and `sysctlbyname` of `kern.boottime` (read twice into buffers with
+  different contents, which have to give the same `timeval` as the loop of `clock_gettime` needs, by number and by name,
+  a size probe, a buffer that is too small giving `ENOMEM` and length 0), `kern.proc.pid` and `kern.proc.all`
+  (`kinfo_proc` of the process itself: pid, parent, group, user, name, start time; the list holds the process; a buffer of
+  one element gives `ENOMEM`), `vm.loadavg`, `hw.ncpu`, `hw.memsize`, `kern.ostype`, `hw.machine`, `kern.argmax` and two
+  names that do not exist; the device part also runs `HostBridges sysctl-unmapped`, which asks for
+  `net.inet.tcp.pcblist` (a structure with no guest layout in the bridge) and expects the message that names it and
+  `ENOTSUP`; `class_copyIvarList` of a guest class with an `int`, an object and a `double`, and
   of a class without ivars; `malloc_default_zone`, `malloc_zone_from_ptr` (a heap block and a stack address) and
   `malloc_zone_malloc`/`malloc_zone_free` with the zone the guest got; `NSDataDeallocatorUnmap`, `NSDataDeallocatorVM`
   and `NSDataDeallocatorFree` called by the guest, the first two checked by asking the kernel whether the page is

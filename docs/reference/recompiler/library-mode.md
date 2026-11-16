@@ -319,7 +319,7 @@ turns on the files that every process used to append to: `xlate-crash.log` (the 
 exception), `xl-missing.log` (a selector the null object answered), `xlate-variant-miss.log` and `xlate-nobridge.log`.
 A file bigger than 1 MiB is emptied when the next process opens it, so none of them grows without bound. With
 the switch off the crash handler prints to stderr, which is where the test below reads it. The files that had a switch
-of their own (`xl-trace`, whose ARC lines are now events of the journal below, `xl-collect`, `xl-shadow-log`, `xl-trace-errno`, `xl-memlog`, `xl-exp-guide-superview`,
+of their own (`xl-trace`, whose ARC lines are now events of the journal below, `xl-collect`, `xl-shadow-log`, `xl-trace-errno`, `xl-sysctl-trace` (a line of `xl-sysctl.log` for each of the first 50 `sysctl`/`sysctlbyname` calls and for every thousandth after them: the name, the class the bridge translates it as, the length before and after, the result and `errno`), `xl-memlog`, `xl-exp-guide-superview`,
 `xl-stubs.txt`, `XL_INIT_TRACE`) still need it and are not limited by `XL_LOG`. The library test crashes the host with the
 switch (the crash handler's file has the `xlate: signal 6` lines) and without it (the lines are on stderr and the file
 is not created).

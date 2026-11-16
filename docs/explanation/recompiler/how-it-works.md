@@ -465,7 +465,12 @@ print on the iPad 2 what objc4 printed.
     as the colour does); `__NSGetArgv` (a 64-bit copy of `argv`, made at the first call, so a store through the
     returned pointer changes the copy); `getifaddrs`/`freeifaddrs` and `getservbyname` (guest-layout lists behind a
     header, as `getaddrinfo`; the `if_data` of a link entry is copied with the 8-byte `timeval`); `localeconv_l` (one
-    guest `struct lconv` per locale); `class_copyIvarList` (8-byte slots, as `class_copyMethodList`); `swprintf` (the
+    guest `struct lconv` per locale); `sysctl` and `sysctlbyname` (the value of a name is in the layout of the host
+    kernel, so the bridge asks the host for the format of the name (`CTL_SYSCTL`, `OIDFMT`) and translates by it: an
+    `int`, a quad, a string or a node as it is, a `long` from 4 to 8 bytes, `struct timeval` (`kern.boottime`) from 8 to
+    16, `struct loadavg` from 16 to 24, the `struct kinfo_proc` of `kern.proc.*` field by field from 492 to 648 bytes;
+    a name whose value is another structure is refused with a message that names it and `ENOTSUP`, never answered in
+    the layout of the host; a buffer that is too small gives `ENOMEM` and length 0, as the 64-bit kernel does); `class_copyIvarList` (8-byte slots, as `class_copyMethodList`); `swprintf` (the
     format and the arguments are read as `printf` reads them, through UTF-8, and `vswprintf` gets the host's).
   - *Opaque handles*: `catopen` returns an `nl_catd`, `malloc_default_zone` and `malloc_zone_from_ptr` return a
     `malloc_zone_t *`, and `copyfile_state_alloc` a `copyfile_state_t`, which the guest only hands back (libswiftCore's

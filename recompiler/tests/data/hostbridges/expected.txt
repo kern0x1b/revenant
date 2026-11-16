@@ -57,6 +57,23 @@ getservbyname http port 80 proto tcp
 getservbyname missing 1
 localeconv_l decimal '.' thousands '' grouping '' frac 127 int_frac 127 p_cs 127 n_sign 127
 localeconv_l stable 1
+sysctl kern.boottime status 0 length 1 sec 1 usec 1
+sysctl kern.boottime twice equal 1
+sysctl kern.boottime size probe 0 length 1
+sysctl kern.boottime small buffer -1 errno 1 length zero 1
+sysctl kern.proc.pid status 0 length 1 pid 1 ppid 1 pgid 1 uid 1
+sysctl kern.proc.pid comm 1 traced 0 start 1 stat 1
+sysctl kern.proc.all probe 0 list 0 whole elements 1 own process 1
+sysctl kern.proc.all one element buffer -1 errno 1 length zero 1
+sysctl vm.loadavg status 0 length 1 fscale 1 sane 1
+sysctlbyname hw.ncpu status 0 length 1 positive 1
+sysctlbyname hw.memsize status 0 length 1 positive 1
+sysctlbyname kern.ostype status 0 length 1 text Darwin
+sysctlbyname hw.machine size probe 0 positive 1
+sysctlbyname kern.argmax status 0 positive 1
+sysctlbyname kern.boottime status 0 length 1 same as by number 1
+sysctlbyname missing name -1 errno 1
+sysctl missing number -1 errno 1
 IvarProbe ivars 3
   alpha i
   beta @
