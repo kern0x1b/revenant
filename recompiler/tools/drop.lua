@@ -47,6 +47,16 @@ function main(name, ...)
     if not os.isfile(library) or not os.isfile(registry) then
         raise("the translation left no %s or %s", library, registry)
     end
+    local leftover = {}
+    for line in os.iorunv("nm", {"-u", library}):gmatch("[^\r\n]+") do
+        local symbol = line:match("^%s*(_xl_%S+)")
+        if symbol then
+            table.insert(leftover, symbol)
+        end
+    end
+    if #leftover > 0 then
+        raise("%s imports the runtime's own symbols, which nothing in the application defines: %s", library, table.concat(leftover, " "))
+    end
     os.tryrm(destination)
     os.mkdir(destination)
     for _, file in ipairs({"RecaptchaEnterprise.dylib", "RecaptchaEnterprise-classes.dylib"}) do
