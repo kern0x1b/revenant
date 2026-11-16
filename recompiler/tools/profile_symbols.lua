@@ -75,9 +75,13 @@ local function read_profile(lines, symbols, image_pattern)
             line:match("xlate: profile: (%d+) samples of running threads in 5 s, (%d+) messages %((%d+) dynamic%), routing (%d+) us, host call of the dynamic ones (%d+) us")
         if samples then
             current = {samples = tonumber(samples), messages = tonumber(messages), dynamic = tonumber(dynamic),
-                       routing = tonumber(routing), call = tonumber(call), buckets = {}}
+                       routing = tonumber(routing), call = tonumber(call), buckets = {}, sent = {}}
             table.insert(windows, current)
         else
+            local name, times, us = line:match("xlate:%s+sent ([+-]%[%S+ %S+%]) (%d+) times, (%d+) us")
+            if name and current then
+                table.insert(current.sent, {name = name, times = tonumber(times), us = tonumber(us)})
+            end
             local count, address, inside = line:match("xlate:%s+(%d+) samples at 0x(%x+) %((.-)%)")
             if count and current then
                 local image, offset, rest = inside:match("^([^%s+]+)%+0x(%x+)%s*(.*)$")
@@ -103,6 +107,9 @@ local function report(windows)
         for _, bucket in ipairs(window.buckets) do
             table.insert(out, string.format("  %5d  %s", bucket.count, bucket.text))
             totals[bucket.function_name] = (totals[bucket.function_name] or 0) + bucket.count
+        end
+        for _, sent in ipairs(window.sent) do
+            table.insert(out, string.format("  %7d sent %s, %d us", sent.times, sent.name, sent.us))
         end
     end
     local ranked = {}
@@ -142,6 +149,8 @@ local function self_test()
         "xlate:     180 samples at 0x10fb1440 (RecaptchaEnterprise.dylib+0x1440) [the library]",
         "xlate:      40 samples at 0x10fb1480 (RecaptchaEnterprise.dylib+0x1480) [the library]",
         "xlate:      20 samples at 0x3010aa40 (libobjc.A.dylib+0x6a40 objc_msgSend)",
+        "xlate:   sent -[__NSCFString characterAtIndex:] 300000 times, 1800000 us",
+        "xlate:   sent +[NSString stringWithUTF8String:] 40 times, 90 us",
         "xlate: profile: 10 samples of running threads in 5 s, 5 messages (0 dynamic), routing 60 us, host call of the dynamic ones 0 us",
         "xlate:      10 samples at 0x10fb2040 (RecaptchaEnterprise.dylib+0x2040) [the library]",
     }), symbols, DEFAULT_IMAGE)
@@ -151,6 +160,9 @@ local function self_test()
         end
     end
     expect(#windows == 2, "two windows")
+    expect(#windows[1].sent == 2 and windows[1].sent[1].times == 300000 and windows[1].sent[1].name == "-[__NSCFString characterAtIndex:]",
+           "the sent lines of a window are read")
+    expect(#windows[2].sent == 0, "a window without sent lines has none")
     expect(windows[1].buckets[1].function_name == "_sub_18200200", "an offset inside _sub_18200200 resolves to it, got " .. tostring(windows[1].buckets[1].function_name))
     expect(windows[1].buckets[1].text:find("libswiftCore", 1, true), "guest 0x18200200 is in libswiftCore")
     expect(windows[1].buckets[2].function_name == "_sub_18200200", "the next bucket is the same function")

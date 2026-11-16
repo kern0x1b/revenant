@@ -353,7 +353,10 @@ A thread of the library, started with the flag, wakes every 20 ms, looks at the 
 (`task_threads`, `thread_info`, then `thread_suspend`, `thread_get_state`, `thread_resume` for each), keeps the host `pc`
 of each in a table of 64-byte buckets, and every 5 s that had a running thread or a message prints `xlate: profile: S
 samples of running threads in 5 s, M messages (D dynamic), routing R us, host call of the dynamic ones H us` and the ten
-buckets with most samples: `N samples at 0xADDRESS (image+0xOFFSET symbol) [the library]`. The offset in the library
+buckets with most samples: `N samples at 0xADDRESS (image+0xOFFSET symbol) [the library]`, then the eight pairs of receiver
+class and selector that the guest sent most often in the window, dynamic or not, with their count and the routing time:
+`sent -[Class selector] N times, T us` (the 5 s window is the one a spike falls into, so a loop of 320,000 messages of one
+selector names itself). The offset in the library
 resolves against `build/recompiler/corpus/recaptcha-dropN/xl/RecaptchaEnterprise.symbols.txt` (the lifted function is
 the greatest symbol at or below the address, `_sub_<guest address>`), so the window of a CPU spike shows whether the
 time is in the guest code, in the bridge or in the system. It costs two `mach_absolute_time` calls and one lock per

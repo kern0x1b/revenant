@@ -99,6 +99,7 @@ static pthread_once_t xl_profile_once = PTHREAD_ONCE_INIT;
 
 void xl_stats_snapshot(uint32_t *messages, uint32_t *dynamic, uint64_t *routing_ticks, uint64_t *call_ticks);
 uint64_t xl_stats_microseconds(uint64_t ticks);
+void xl_stats_window_report(void);
 
 static void xl_profile_note(uint32_t pc)
 {
@@ -184,6 +185,7 @@ static void xl_profile_report(unsigned samples, uint32_t window_messages, uint32
         write(2, line, (size_t)length);
         best->count = 0;
     }
+    xl_stats_window_report();
     memset(xl_profile_buckets, 0, sizeof xl_profile_buckets);
 }
 
