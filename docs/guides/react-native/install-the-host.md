@@ -87,10 +87,10 @@ the `launchctl` entry `UIKitApplication:<id>[...]` and kills that one process. I
 
 It installs only the packages of `--debs` whose version the phone lacks, one at a time with a 3 s pause (the phone has dropped off USB after
 heavy writes), copies the host archive only when its sha256 differs from the one recorded beside the app (`<stash>/<name>.archive.sha256`),
-puts the probe bundle in the app, launches it, waits 25 s and reads `rnhost.log` for the lines `rn-probe <module> <json>`. The probe is
+puts the probe bundle in the app, creates the empty `rnhost.log.on` that makes the host write `rnhost.log` (and removes it at the end), launches it, waits 25 s and reads `rnhost.log` for the lines `rn-probe <module> <json>`. The probe is
 `frameworks/ReactNative/src/probe/modules.js`: for each Expo module it reports whether the module is registered and its exports, and calls the
 ones whose behaviour is known (a keychain round trip, the network state, the device model, the brightness, the store-review flag). It is compiled
-with the package's `hermesc`: `hermesc -O -emit-binary -out probe.hbc modules.js`. `OUT/window.json` holds the answers, the modules of `--expect` that
+with the package's `hermesc` together with the application's own bundle, not alone: `cat modules.js bundle.js > probe-app.js; hermesc -O -emit-binary -out probe.hbc probe-app.js`. A probe bundle without the application never registers it, and the host stops with `RCTFatal` at start. `OUT/window.json` holds the answers, the modules of `--expect` that
 never answered and the steps; `OUT/diagnostics/` holds the crash reports, the log and a screenshot. With `--restore-bundle` the application's own
-bundle goes back, and the app is stopped. The command does not claim, lock or release the phone: the session does, with `revenant-unlock lock`
+bundle goes back, and the app is stopped. A package of `--debs` is skipped when the phone has its version, even if its dylibs link another runtime key; the command then stops with "the phone does not hold the packages this host is linked against" and names them. Remove the named packages (`dpkg -r`, dependants first: cryptokit before swift-crypto) and run it again with `--debs` ordered swift-crypto before cryptokit. The command does not claim, lock or release the phone: the session does, with `revenant-unlock lock`
 and `./xmakew device -P . release` right after it.
