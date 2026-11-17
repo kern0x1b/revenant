@@ -244,7 +244,7 @@ target("rn-pods-objc")
                     for _, f in ipairs(os.files(path.join(base, ext))) do
                         local key = f:lower()
                         local rel = path.relative(f, root)
-                        if not added[key] and not test_path(rel) and not rel:find("Example") and (os.getenv("RN_HERMES") or not f:find("WorkletHermesRuntime")) and not f:find("react-native-screens/ios/gamma/", 1, true) and not f:find("UIImage+ImageEffects", 1, true) then
+                        if not added[key] and not test_path(rel) and not rel:find("Example") and (os.getenv("RN_HERMES") or not f:find("WorkletHermesRuntime")) and not (pod.package == "react-native-screens" and rel:startswith("ios/gamma/")) and not f:find("UIImage+ImageEffects", 1, true) then
                             added[key] = true
                             add_files(f)
                         end
