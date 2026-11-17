@@ -1,3 +1,3 @@
 #import <Foundation/Foundation.h>
 
-extern NSString *const RevenantVoiceServicesPath;
+static NSString *const RevenantVoiceServicesPath = @"/System/Library/PrivateFrameworks/VoiceServices.framework/VoiceServices";

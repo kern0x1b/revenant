@@ -7,8 +7,6 @@
 + (NSArray *)availableVoicesForLanguageCode:(NSString *)languageCode;
 @end
 
-NSString *const RevenantVoiceServicesPath = @"/System/Library/PrivateFrameworks/VoiceServices.framework/VoiceServices";
-
 static NSDictionary *RevenantHostIdentifiers(void)
 {
     static NSDictionary *table;
