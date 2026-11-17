@@ -61,68 +61,8 @@ static void xl_uncaught(NSException *exception)
 
 static void xl_fix_layouts(void);
 
-@interface XLNullObject : NSObject
-@end
-@implementation XLNullObject
-- (NSMethodSignature *)methodSignatureForSelector:(SEL)sel
-{
-    const char *n = sel_getName(sel);
-    char enc[80] = "@@:";
-    for (; *n && strlen(enc) < 70; n++)
-        if (*n == ':')
-            strcat(enc, "@");
-    return [NSMethodSignature signatureWithObjCTypes:enc];
-}
-- (void)forwardInvocation:(NSInvocation *)invocation
-{
-    id nothing = nil;
-    if ([[invocation methodSignature] methodReturnLength] == sizeof(id))
-        [invocation setReturnValue:&nothing];
-}
-@end
-
-static id xl_null_missing(id self_, SEL forwarding_sel, SEL missing)
-{
-    static NSMutableSet *seen;
-    static XLNullObject *null_object;
-    static dispatch_once_t once;
-    dispatch_once(&once, ^{ seen = [[NSMutableSet alloc] init]; null_object = [[XLNullObject alloc] init]; });
-    if (missing == @selector(forwardInvocation:) || missing == @selector(methodSignatureForSelector:) ||
-        missing == @selector(_isDeallocating) || missing == @selector(_tryRetain))
-        return nil;
-    NSString *key = [NSString stringWithFormat:@"%s%s %s", class_isMetaClass(object_getClass(self_)) ? "+" : "-",
-                     object_getClassName(self_), sel_getName(missing)];
-    @synchronized (seen) {
-        if (![seen containsObject:key]) {
-            [seen addObject:key];
-            int fd = xl_log_open("xl-missing.log");
-            if (fd >= 0) { dprintf(fd, "%s\n", [key UTF8String]); close(fd); }
-        }
-    }
-    return null_object;
-}
-
-static void *xl_memlog_thread(void *arg)
-{
-    (void)arg;
-    int fd = open("/private/var/revenant/xl-mem.log", O_WRONLY | O_CREAT | O_TRUNC, 0666);
-    if (fd < 0)
-        return NULL;
-    for (unsigned tick = 0;; tick++) {
-        struct task_basic_info info;
-        mach_msg_type_number_t count = TASK_BASIC_INFO_COUNT;
-        if (task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&info, &count) == KERN_SUCCESS)
-            dprintf(fd, "t=%u.%u resident=%lu KB virtual=%lu MB\n", tick / 10, tick % 10, (unsigned long)(info.resident_size / 1024),
-                    (unsigned long)(info.virtual_size / (1024 * 1024)));
-        usleep(100000);
-    }
-    return NULL;
-}
-
 static void xl_wrap_layout_subviews(void)
 {
-    if (access("/private/var/revenant/xl-no-layout-super", F_OK) == 0)
-        return;
     const char *main_image = _dyld_get_image_name(0);
     Class view_class = [UIView class];
     unsigned count = 0;
@@ -161,15 +101,6 @@ static void xl_setup_application(void)
     NSSetUncaughtExceptionHandler(xl_uncaught);
     xl_load_rules();
     xl_wrap_layout_subviews();
-    if (access("/private/var/revenant/xl-memlog", F_OK) == 0) {
-        pthread_t thread;
-        pthread_create(&thread, NULL, xl_memlog_thread, NULL);
-    }
-    if (access("/private/var/revenant/xl-exp-null-missing", F_OK) == 0) {
-        IMP imp = imp_implementationWithBlock(^id(id self_, SEL missing) { return xl_null_missing(self_, 0, missing); });
-        class_replaceMethod([NSObject class], @selector(forwardingTargetForSelector:), imp, "@@::");
-        class_replaceMethod(object_getClass([NSObject class]), @selector(forwardingTargetForSelector:), imp, "@@::");
-    }
     FILE *stubs = fopen("/private/var/revenant/xl-stubs.txt", "r");
     if (stubs) {
         char line[256];
@@ -190,29 +121,6 @@ static void xl_setup_application(void)
             if (fd >= 0) { dprintf(fd, "stub %c%s %s\n", kind, cls, sel); close(fd); }
         }
         fclose(stubs);
-    }
-    if (access("/private/var/revenant/xl-exp-guide-superview", F_OK) == 0) {
-        Class guide = NSClassFromString(@"UILayoutGuide");
-        if (guide && !class_getInstanceMethod(guide, @selector(superview))) {
-            IMP imp = imp_implementationWithBlock(^id(id self_) { return [self_ performSelector:@selector(owningView)]; });
-            class_addMethod(guide, @selector(superview), imp, "@@:");
-        }
-        if (guide) {
-            IMP no = imp_implementationWithBlock(^BOOL(id self_) { return NO; });
-            class_addMethod(guide, NSSelectorFromString(@"_supportsContentDimensionVariables"), no, "c@:");
-        }
-        if (guide) {
-            IMP fwd = imp_implementationWithBlock(^id(id self_, SEL sel) {
-                id owner = [self_ performSelector:@selector(owningView)];
-                if (owner && [owner respondsToSelector:sel]) {
-                    int fd = open("/private/var/revenant/xl-exp.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
-                    if (fd >= 0) { dprintf(fd, "UILayoutGuide forwarded -%s to owningView\n", sel_getName(sel)); close(fd); }
-                    return owner;
-                }
-                return nil;
-            });
-            class_replaceMethod(guide, @selector(forwardingTargetForSelector:), fwd, "@@::");
-        }
     }
 }
 
@@ -1073,15 +981,6 @@ void xl_h_objc_msgSend(State *state)
                 if (tn > (int)sizeof tl) tn = (int)sizeof tl;
                 write(xl_tfd, tl, tn);
             }
-        }
-    }
-    if (getenv("XL_TRACK_DIAG")) {
-        const char *sn = sel_getName(selector);
-        if (sn && (!strcmp(sn, "trackAction:") || !strcmp(sn, "defaultTracker") || !strcmp(sn, "sharedInstance"))) {
-            uint32_t classref = *(uint32_t *)(uintptr_t)0x1010ee60u;
-            fprintf(stderr, "xlate: DIAG %s self=%p isa=0x%x class=%s classref[0x1010ee60]=0x%x\n",
-                    sn, (void *)receiver, receiver ? *(uint32_t *)receiver : 0,
-                    class_getName(object_getClass(receiver)), classref);
         }
     }
     struct xl_arguments arguments;

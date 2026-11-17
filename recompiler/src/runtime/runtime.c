@@ -334,14 +334,6 @@ void xl_fault(State *state, const char *reason)
         close(log_fd);
     }
     xl_dump(state);
-    if (!pthread_main_np() && access("/private/var/revenant/xl-fault-ends-thread", F_OK) == 0) {
-        int fd = xl_log_open("xlate-crash.log");
-        if (fd >= 0) {
-            dprintf(fd, "xlate: worker thread ended by the fault above (xl-fault-ends-thread)\n");
-            close(fd);
-        }
-        pthread_exit(NULL);
-    }
     abort();
 }
 
