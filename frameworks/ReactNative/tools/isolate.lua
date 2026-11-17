@@ -451,6 +451,35 @@ function recipe_version(name)
     return version
 end
 
+function application_version(folder, name)
+    for _, base in ipairs({{"packages", "app", "node_modules"}, {"node_modules"}}) do
+        local file = path.join(folder, "build", "ref", "app", path.join(table.unpack(base)), name, "package.json")
+        if os.isfile(file) then
+            return json.decode(io.readfile(file)).version
+        end
+    end
+    return nil
+end
+
+function patched_pods(folder, cache, manifest, taken)
+    local found = {}
+    for _, entry in ipairs(manifest.pods or {}) do
+        local package = entry:match("^(.-):") or entry
+        local name = package:gsub("^@[^/]+/", "")
+        local recipe = path.join(checkout(), "packages", name:sub(1, 1), name, "xmake.lua")
+        if os.isfile(recipe) and not taken[name] then
+            local version = recipe_version(name)
+            local used = application_version(folder, package)
+            if used == version then
+                table.insert(found, name .. "=" .. install_recipe(folder, cache, name, version))
+            else
+                print(string.format("%s: the application has %s, the patched package is %s; the application's own unpatched copy is built", package, tostring(used), version))
+            end
+        end
+    end
+    return found
+end
+
 function build(folder, cache, options)
     folder = path.absolute(folder)
     check_copy(folder)
@@ -469,8 +498,16 @@ function build(folder, cache, options)
     for _, name in ipairs(default_patched(folder, options.real)) do
         table.insert(pkgdirs, name .. "=" .. install_recipe(folder, path.absolute(cache), name, recipe_version(name)))
     end
+    local taken = {[ENRICHED_MARKDOWN.name] = true}
+    for _, entry in ipairs(pkgdirs) do
+        taken[entry:match("^([^=]+)=")] = true
+    end
+    for _, entry in ipairs(patched_pods(folder, path.absolute(cache), read_app_manifest(folder), taken)) do
+        table.insert(pkgdirs, entry)
+        taken[entry:match("^([^=]+)=")] = true
+    end
     local hermes = os.getenv("RN_HERMES") and true or nil
-    if hermes then
+    if hermes and not taken["react-native-worklets"] then
         table.insert(pkgdirs, "react-native-worklets=" .. install_recipe(folder, path.absolute(cache), "react-native-worklets", recipe_version("react-native-worklets")))
     end
     local env = build_environment({
