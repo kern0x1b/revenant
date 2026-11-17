@@ -1,0 +1,21 @@
+package("expo-print")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-print")
+    set_description("expo-print 57.0.2, the printing of the Expo SDK, from its npm tarball: the iOS sources render HTML to PDF with UIMarkupTextPrintFormatter (iOS 4.2) instead of WKWebView, replace URLSession with NSURLConnection, and guard the iOS 7 and iOS 8 printer APIs, so that they run on iOS 6")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-print/-/expo-print-$(version).tgz")
+    add_versions("57.0.2", "51bf0ef20cfe171e8296f237d93cd0824e7cf132f712f3555cf2c20c439e0f5d")
+    add_patches("57.0.2", path.join(os.scriptdir(), "patches", "print-ios6.patch"), "ffe933b353ea22aad836b78be7bd6646c327b038e25a9714a6fb0a8bc8192df9")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-print" and manifest.version == "57.0.2", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-print has no expo-module.config.json")
+    end)

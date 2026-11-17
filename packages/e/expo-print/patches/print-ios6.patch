@@ -1,0 +1,417 @@
+diff -ru a/ios/ExpoPrintExceptions.swift b/ios/ExpoPrintExceptions.swift
+--- a/ios/ExpoPrintExceptions.swift	2026-11-17 18:37:26
++++ b/ios/ExpoPrintExceptions.swift	2026-11-17 19:49:05
+@@ -42,7 +42,7 @@
+   }
+ }
+ 
+-internal final class InvalidUrlException: Exception {
++internal final class PrintInvalidUrlException: Exception {
+   override var reason: String {
+     "The specified url is not valid for printing"
+   }
+diff -ru a/ios/ExpoPrintModule.swift b/ios/ExpoPrintModule.swift
+--- a/ios/ExpoPrintModule.swift	2026-11-17 18:37:26
++++ b/ios/ExpoPrintModule.swift	2026-11-17 18:45:49
+@@ -45,8 +45,7 @@
+   }
+ }
+ 
+-// ExpoPrintModule cannot inherit from UIPrinterPickerControllerDelegate due to inheritance conflicts with Module. Create a helper class
+-class ExpoPrintModuleDelegate: NSObject, UIPrinterPickerControllerDelegate, UIPrintInteractionControllerDelegate {
++class ExpoPrintModuleDelegate: NSObject, UIPrintInteractionControllerDelegate {
+   private func getViewController() -> UIViewController? {
+     let provider = ModuleRegistryProvider()
+     let moduleRegistry = provider.moduleRegistry()
+@@ -54,12 +53,14 @@
+     return utils?.currentViewController()
+   }
+ 
+-  func printerPickerControllerParentViewController(_ printerPickerController: UIPrinterPickerController) -> UIViewController? {
++  func printInteractionControllerParentViewController(_ printInteractionController: UIPrintInteractionController) -> UIViewController? {
+     return getViewController()
+   }
++}
+ 
+-  // UIPrintInteractionControllerDelegate
+-  func printInteractionControllerParentViewController(_ printInteractionController: UIPrintInteractionController) -> UIViewController? {
++@available(iOS 8, *)
++extension ExpoPrintModuleDelegate: UIPrinterPickerControllerDelegate {
++  func printerPickerControllerParentViewController(_ printerPickerController: UIPrinterPickerController) -> UIViewController? {
+     return getViewController()
+   }
+ }
+diff -ru a/ios/ExpoPrintToFile.swift b/ios/ExpoPrintToFile.swift
+--- a/ios/ExpoPrintToFile.swift	2026-11-17 18:37:26
++++ b/ios/ExpoPrintToFile.swift	2026-11-17 21:16:45
+@@ -1,5 +1,33 @@
+ import ExpoModulesCore
+ 
++private func printBase64EncodedData(_ data: Data) -> String {
++  let alphabet = Array("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/")
++  let bytes = Array(data)
++  var result = ""
++  var index = 0
++  while index + 2 < bytes.count {
++    let value = (Int(bytes[index]) << 16) | (Int(bytes[index + 1]) << 8) | Int(bytes[index + 2])
++    result.append(alphabet[(value >> 18) & 63])
++    result.append(alphabet[(value >> 12) & 63])
++    result.append(alphabet[(value >> 6) & 63])
++    result.append(alphabet[value & 63])
++    index += 3
++  }
++  if bytes.count - index == 1 {
++    let value = Int(bytes[index]) << 16
++    result.append(alphabet[(value >> 18) & 63])
++    result.append(alphabet[(value >> 12) & 63])
++    result.append("==")
++  } else if bytes.count - index == 2 {
++    let value = (Int(bytes[index]) << 16) | (Int(bytes[index + 1]) << 8)
++    result.append(alphabet[(value >> 18) & 63])
++    result.append(alphabet[(value >> 12) & 63])
++    result.append(alphabet[(value >> 6) & 63])
++    result.append("=")
++  }
++  return result
++}
++
+ public class ExpoPrintToFile {
+   var renderTasks: [ExpoWKPDFRenderer] = []
+   weak var appContext: AppContext?
+@@ -40,7 +68,16 @@
+       }
+       do {
+         try data.write(to: uri)
+-        let base64Data = options.base64 ? data.base64EncodedString(options: Data.Base64EncodingOptions.endLineWithLineFeed) : nil
++        let base64Data: String?
++        if options.base64 {
++          if #available(iOS 7, *) {
++            base64Data = data.base64EncodedString(options: Data.Base64EncodingOptions.endLineWithLineFeed)
++          } else {
++            base64Data = printBase64EncodedData(data)
++          }
++        } else {
++          base64Data = nil
++        }
+         let result = FilePrintResult(uri: uri.absoluteString, numberOfPages: pagesNumber, base64: base64Data)
+         promise.resolve(result)
+       } catch {
+diff -ru a/ios/ExpoPrintWithPrinter.swift b/ios/ExpoPrintWithPrinter.swift
+--- a/ios/ExpoPrintWithPrinter.swift	2026-11-17 18:37:26
++++ b/ios/ExpoPrintWithPrinter.swift	2026-11-17 20:48:25
+@@ -1,11 +1,57 @@
+ import ExpoModulesCore
+ 
++private final class PrintDataConnection: NSObject, NSURLConnectionDataDelegate {
++  private var completion: ((Data?) -> Void)?
++  private var connection: NSURLConnection?
++  private var received = NSMutableData()
++  private var keepAlive: PrintDataConnection?
++
++  static func fetch(_ request: URLRequest, completion: @escaping (Data?) -> Void) -> PrintDataConnection {
++    let loader = PrintDataConnection(completion: completion)
++    loader.keepAlive = loader
++    DispatchQueue.main.async {
++      loader.connection = NSURLConnection(request: request, delegate: loader, startImmediately: true)
++      if loader.connection == nil {
++        loader.finish(nil)
++      }
++    }
++    return loader
++  }
++
++  private init(completion: @escaping (Data?) -> Void) {
++    self.completion = completion
++    super.init()
++  }
++
++  func connection(_ connection: NSURLConnection, didReceive data: Data) {
++    received.append(data)
++  }
++
++  func connection(_ connection: NSURLConnection, didFailWithError error: Error) {
++    finish(nil)
++  }
++
++  func connectionDidFinishLoading(_ connection: NSURLConnection) {
++    finish(received as Data)
++  }
++
++  private func finish(_ data: Data?) {
++    guard let completion else {
++      return
++    }
++    self.completion = nil
++    connection?.cancel()
++    connection = nil
++    keepAlive = nil
++    completion(data)
++  }
++}
++
+ public class ExpoPrintWithPrinter {
+   var renderTasks: [ExpoWKPDFRenderer] = []
+   var cachedPrinters: [String: UIPrinter] = [:]
+   let delegate: ExpoPrintModuleDelegate
+-  let printURLSession = URLSession(configuration: .default)
+-  var dataTask: URLSessionDataTask?
++  fileprivate var connection: PrintDataConnection?
+ 
+   init(delegate: ExpoPrintModuleDelegate) {
+     self.delegate = delegate
+@@ -17,13 +63,12 @@
+         if let self = self, let printingData = data {
+           self.printWithData(printingData: printingData, options: options, promise: promise)
+         } else {
+-          promise.reject(InvalidUrlException())
++          promise.reject(PrintInvalidUrlException())
+         }
+       }
+       return
+     }
+ 
+-    // Do this for compatibility with deprecated markup formatter option
+     guard let htmlString = options.markupFormatterIOS ?? options.html else {
+       promise.reject(NoPrintDataException())
+       return
+@@ -96,13 +141,10 @@
+     }
+ 
+     if !printerUrl.isEmpty {
+-      // Found by @tsapeta
+-      // In older versions of iOS there is a bug, where finding the printer using UIPrinter(url:) will fail
+-      // https://stackoverflow.com/questions/34602302/creating-a-working-uiprinter-object-from-url-for-dialogue-free-printing
+-      // the workaround is to use a printer saved during picking, fall back to this method if the regular one fails
+-
+-      // Also on ios 16 there is a bug when printing multiple files https://github.com/expo/expo/issues/19399.
+-      // Caching the previously used printer fixes the bug
++      guard #available(iOS 8, *) else {
++        promise.reject(PrintingJobFailedException("Printing to a printer URL needs iOS 8; this iOS has none"))
++        return
++      }
+       let printer = self.cachedPrinters[printerUrl] ?? UIPrinter(url: candidateUrl)
+       self.cachedPrinters[printerUrl] = printer
+ 
+@@ -121,21 +163,24 @@
+   }
+ 
+   private func makePrintInteractionController(options: PrintOptions) -> UIPrintInteractionController {
+-    let uri = options.uri ?? ""
+     let printInteractionController = UIPrintInteractionController()
+     printInteractionController.delegate = self.delegate
+ 
+     let printInfo = UIPrintInfo.printInfo()
+     printInfo.outputType = UIPrintInfo.OutputType.general
+     if let uri = options.uri {
+-      printInfo.jobName = uri.components(separatedBy: "/").last ?? uri
++      printInfo.jobName = (uri as NSString).lastPathComponent
+     }
+     printInfo.duplex = UIPrintInfo.Duplex.longEdge
+     printInfo.orientation = options.toUIPrintInfoOrientation()
+ 
+     printInteractionController.printInfo = printInfo
+-    printInteractionController.showsNumberOfCopies = true
+-    printInteractionController.showsPaperSelectionForLoadedPapers = true
++    if #available(iOS 7, *) {
++      printInteractionController.showsNumberOfCopies = true
++    }
++    if #available(iOS 8, *) {
++      printInteractionController.showsPaperSelectionForLoadedPapers = true
++    }
+ 
+     return printInteractionController
+   }
+@@ -145,31 +190,16 @@
+       completion(nil)
+       return
+     }
+-
+-    // Assume that URLs without a scheme eq. /home/user/file.pdf will be local file urls
+     if url.scheme == nil {
+       url = URL(fileURLWithPath: uri)
+     }
+-
+-    // process http and https requests asynchronously
+     if url.scheme == "http" || url.scheme == "https" {
+-      dataTask = printURLSession.dataTask(with: URLRequest(url: url)) { [weak self] data, response, error in
+-        defer {
+-          self?.dataTask = nil
+-        }
+-
+-        if error == nil, let response = response as? HTTPURLResponse, response.statusCode == 200 {
+-          DispatchQueue.main.async {
+-            completion(data)
+-          }
+-          return
+-        }
+-        completion(nil)
++      connection = PrintDataConnection.fetch(URLRequest(url: url)) { [weak self] data in
++        self?.connection = nil
++        completion(data)
+       }
+-      dataTask?.resume()
+     } else {
+-      let data = try? Data(contentsOf: url)
+-      completion(data)
++      completion(try? Data(contentsOf: url))
+     }
+   }
+ }
+diff -ru a/ios/ExpoPrinterSelector.swift b/ios/ExpoPrinterSelector.swift
+--- a/ios/ExpoPrinterSelector.swift	2026-11-17 18:37:26
++++ b/ios/ExpoPrinterSelector.swift	2026-11-17 18:45:40
+@@ -10,6 +10,10 @@
+   }
+ 
+   func selectPrinter(promise: Promise) {
++    guard #available(iOS 8, *) else {
++      promise.reject(PrinterPickerException("Printer selection needs iOS 8; this iOS has none"))
++      return
++    }
+     guard let rootController = UIApplication.shared.keyWindow?.rootViewController else {
+       promise.reject(ViewControllerNotFoundException())
+       return
+@@ -34,9 +38,9 @@
+         name: selectedPrinter.displayName))
+     }
+ 
+-    if UIDevice.current.userInterfaceIdiom == UIUserInterfaceIdiom.pad { // iPad
++    if UIDevice.current.userInterfaceIdiom == UIUserInterfaceIdiom.pad {
+       picker.present(from: rootController.view.frame, in: rootController.view, animated: true, completionHandler: completionHandler)
+-    } else { // iPhone
++    } else {
+       picker.present(animated: true, completionHandler: completionHandler)
+     }
+   }
+diff -ru a/ios/ExpoWKPDFRenderer.swift b/ios/ExpoWKPDFRenderer.swift
+--- a/ios/ExpoWKPDFRenderer.swift	2026-11-17 18:37:26
++++ b/ios/ExpoWKPDFRenderer.swift	2026-11-17 18:45:12
+@@ -1,14 +1,10 @@
+ import Foundation
+-import WebKit
+ 
+-public class ExpoWKPDFRenderer: NSObject, WKNavigationDelegate {
++public class ExpoWKPDFRenderer: NSObject {
+   let htmlString: String
+   let pageSize: CGSize
++  let printableRect: CGRect
+   let renderer: ExpoWKViewPrintPDFRenderer
+-  var htmlNavigation: WKNavigation?
+-
+-  lazy var webView: WKWebView = createWebView()
+-
+   let onRenderingFinished: (_: Data?, _: Int, _: Error?, _ task: ExpoWKPDFRenderer) -> Void
+ 
+   public init(
+@@ -19,46 +15,13 @@
+   ) {
+     self.htmlString = htmlString
+     self.pageSize = pageSize
++    self.printableRect = printableRect
+     onRenderingFinished = completionHandler
+     renderer = ExpoWKViewPrintPDFRenderer(pageSize: pageSize, printableRect: printableRect)
+   }
+ 
+   public func pdfWithHtml() {
+-    htmlNavigation = webView.loadHTMLString(htmlString, baseURL: Bundle.main.resourceURL)
+-  }
+-
+-// for WKNavigationDelegate
+-  public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation) {
+-    guard htmlNavigation == navigation else {
+-      return
+-    }
+-    renderer.PDFFromWebView(webView: webView) { data, pagesCount, error -> Void in
+-      self.onRenderingFinished(data, pagesCount, error, self)
+-    }
+-  }
+-
+-  public func webView(webView: WKWebView, navigation: WKNavigation) {
+-    guard htmlNavigation == navigation else {
+-      return
+-    }
+-    renderer.PDFFromWebView(webView: webView, completionHandler: { (data: Data, pagesCount: Int, error: Error?) -> Void in
+-      self.onRenderingFinished(data, pagesCount, error, self)
+-    })
+-  }
+-
+-  public func webView(_ webView: WKWebView, didFail navigation: WKNavigation, withError error: Error) {
+-    self.onRenderingFinished(nil, 0, error, self)
+-  }
+-
+-  private func createWebView() -> WKWebView {
+-    let configuration = WKWebViewConfiguration()
+-    let frame = CGRect(x: 0, y: 0, width: pageSize.width, height: pageSize.height)
+-    let webView = WKWebView(frame: frame, configuration: configuration)
+-    webView.navigationDelegate = self
+-    webView.backgroundColor = UIColor.clear
+-    webView.scrollView.showsHorizontalScrollIndicator = false
+-    webView.scrollView.showsVerticalScrollIndicator = false
+-
+-    return webView
++    let data = renderer.pdfFromHtml(htmlString)
++    onRenderingFinished(data, renderer.pageCount, nil, self)
+   }
+ }
+diff -ru a/ios/ExpoWKViewPrintPDFRenderer.swift b/ios/ExpoWKViewPrintPDFRenderer.swift
+--- a/ios/ExpoWKViewPrintPDFRenderer.swift	2026-11-17 18:37:26
++++ b/ios/ExpoWKViewPrintPDFRenderer.swift	2026-11-17 18:45:19
+@@ -1,39 +1,36 @@
+ import Foundation
+-import WebKit
+ 
+ public class ExpoWKViewPrintPDFRenderer {
+   private let pageSize: CGSize
+   private let printableRect: CGRect
++  private(set) var pageCount: Int = 0
+ 
+   init(pageSize: CGSize, printableRect: CGRect) {
+     self.pageSize = pageSize
+     self.printableRect = printableRect
+   }
+ 
+-  public func PDFFromWebView(webView: WKWebView, completionHandler: @escaping (_: Data, _: Int, _: Error?) -> Void) {
+-    webView.evaluateJavaScript("document.body.scrollHeight", completionHandler: { _, error in
+-      let renderer = UIPrintPageRenderer()
+-      renderer.addPrintFormatter(webView.viewPrintFormatter(), startingAtPageAt: 0)
++  public func pdfFromHtml(_ html: String) -> Data {
++    let formatter = UIMarkupTextPrintFormatter(markupText: html)
++    let renderer = UIPrintPageRenderer()
++    renderer.addPrintFormatter(formatter, startingAtPageAt: 0)
+ 
+-      // Setting paperRect has no effect on actual page size, but HTML will not render
+-      // without both paperRect and printableRect.
+-      let paperRect = CGRect(x: 0, y: 0, width: self.pageSize.width, height: self.pageSize.height)
+-      renderer.setValue(paperRect, forKey: "paperRect")
++    let paperRect = CGRect(x: 0, y: 0, width: pageSize.width, height: pageSize.height)
++    renderer.setValue(paperRect, forKey: "paperRect")
++    renderer.setValue(printableRect, forKey: "printableRect")
+ 
+-      renderer.setValue(self.printableRect, forKey: "printableRect")
+-
+-      let data = NSMutableData()
+-      UIGraphicsBeginPDFContextToData(data, CGRect.zero, nil)
+-      renderer.prepare(forDrawingPages: NSRange(location: 0, length: renderer.numberOfPages))
+-      if renderer.numberOfPages > 0 {
+-        for i in 0...renderer.numberOfPages - 1 {
+-          UIGraphicsBeginPDFPageWithInfo(paperRect, nil)
+-          renderer.drawPage(at: i, in: UIGraphicsGetPDFContextBounds())
+-        }
++    let data = NSMutableData()
++    UIGraphicsBeginPDFContextToData(data, paperRect, nil)
++    renderer.prepare(forDrawingPages: NSRange(location: 0, length: renderer.numberOfPages))
++    if renderer.numberOfPages > 0 {
++      for i in 0..<renderer.numberOfPages {
++        UIGraphicsBeginPDFPageWithInfo(paperRect, nil)
++        renderer.drawPage(at: i, in: UIGraphicsGetPDFContextBounds())
+       }
+-      UIGraphicsEndPDFContext()
++    }
++    UIGraphicsEndPDFContext()
+ 
+-      completionHandler(data as Data, renderer.numberOfPages, error)
+-    })
++    pageCount = renderer.numberOfPages
++    return data as Data
+   }
+ }

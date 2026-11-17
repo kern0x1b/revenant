@@ -675,9 +675,9 @@
    "group": "sdk",
    "version": "~57.0.2",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "UIPrintInteractionController is present in the iOS 6.1.3 cache (iOS 4.2). Not built."
+   "status": "real",
+   "verified": "build",
+   "note": "Recipe packages/e/expo-print (npm 57.0.2, patch print-ios6.patch) installs and its patch applies; compiled into the host alongside expo-mail-composer and expo-sms (links, not exercised on the phone). The patch renders HTML to PDF with UIMarkupTextPrintFormatter and UIPrintPageRenderer (iOS 4.2) instead of WKWebView (iOS 8, absent from the Hermes host), replaces URLSession with NSURLConnection for http URIs, guards the iOS 7 and iOS 8 printer options, rejects selectPrinter and printer-URL printing with an exception naming iOS 8, and uses a small base64 encoder where the iOS 7 NSData method is unavailable. UIPrintInteractionController and the print dialog are present on iOS 6."
   },
   {
    "id": "expo-live-photo",
