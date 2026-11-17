@@ -138,16 +138,36 @@ function control_text(control, version, root, depends)
     return fields, text .. "\nVersion: " .. version .. "\nInstalled-Size: " .. installed_size(root) .. "\n"
 end
 
+local function restart_postinst(processes)
+    local lines = {"#!/bin/sh"}
+    for _, process in ipairs(processes) do
+        assert(process:match("^[%w_-]+$"), "%q is not a process name", process)
+        table.insert(lines, string.format("killall %s 2>/dev/null || true", process))
+    end
+    table.insert(lines, "exit 0")
+    return table.concat(lines, "\n") .. "\n"
+end
+
 function write(opt)
     local fields, control = control_text(opt.control, opt.version, opt.root, opt.depends)
     local control_members = {{name = "./", directory = true}, {name = "./control", mode = 420, data = control}}
+    local script_names = {["./control"] = true}
+    local function add_script(name, data)
+        if script_names[name] then
+            raise("%s is named by both the maintainer scripts and the package options", name:sub(3))
+        end
+        script_names[name] = true
+        table.insert(control_members, {name = name, mode = 493, data = data})
+    end
     if opt.scripts and os.isdir(opt.scripts) then
         local names = os.files(path.join(opt.scripts, "*"))
         byteorder.sort(names)
         for _, script in ipairs(names) do
-            table.insert(control_members, {name = "./" .. path.filename(script), mode = 493,
-                                           data = io.readfile(script, {encoding = "binary"})})
+            add_script("./" .. path.filename(script), io.readfile(script, {encoding = "binary"}))
         end
+    end
+    if opt.restart and #opt.restart > 0 then
+        add_script("./postinst", restart_postinst(opt.restart))
     end
     local parts = {
         {"debian-binary", "2.0\n"},
