@@ -1113,6 +1113,49 @@ struct xl_guest_enumeration {
     uint64_t extra[5];
 };
 
+#define XL_ITEMS_SLOTS 32
+
+static struct {
+    uint64_t state;
+    uint64_t *items;
+} xl_items_slots[XL_ITEMS_SLOTS];
+static unsigned xl_items_next;
+static pthread_mutex_t xl_items_lock = PTHREAD_MUTEX_INITIALIZER;
+
+static uint64_t *xl_items_buffer(uint64_t state, NSUInteger count)
+{
+    pthread_mutex_lock(&xl_items_lock);
+    unsigned slot = XL_ITEMS_SLOTS;
+    for (unsigned i = 0; i < XL_ITEMS_SLOTS; i++) {
+        if (xl_items_slots[i].state == state) {
+            slot = i;
+            break;
+        }
+    }
+    if (slot == XL_ITEMS_SLOTS) {
+        if (!count) {
+            pthread_mutex_unlock(&xl_items_lock);
+            return NULL;
+        }
+        slot = xl_items_next++ % XL_ITEMS_SLOTS;
+    }
+    free(xl_items_slots[slot].items);
+    xl_items_slots[slot].items = NULL;
+    xl_items_slots[slot].state = 0;
+    uint64_t *items = NULL;
+    if (count) {
+        items = malloc(count * sizeof(uint64_t));
+        if (!items) {
+            pthread_mutex_unlock(&xl_items_lock);
+            xl_unsupported("fast enumeration: no memory for the item list of a guest enumeration state");
+        }
+        xl_items_slots[slot].state = state;
+        xl_items_slots[slot].items = items;
+    }
+    pthread_mutex_unlock(&xl_items_lock);
+    return items;
+}
+
 void xl_manual_fast_enumeration(void *pack)
 {
     struct xl_fast_enumeration_pack *p = pack;
@@ -1122,8 +1165,8 @@ void xl_manual_fast_enumeration(void *pack)
     NSUInteger length = p->length < 16 ? (NSUInteger)p->length : 16;
     id enumerated = (id)xl_object_in(p->self, "countByEnumeratingWithState:objects:count:", 0);
     NSUInteger count = [enumerated countByEnumeratingWithState:host objects:buffer count:length];
+    uint64_t *items = xl_items_buffer(p->state, count);
     if (count) {
-        uint64_t *items = [[NSMutableData dataWithLength:count * sizeof(uint64_t)] mutableBytes];
         for (NSUInteger i = 0; i < count; i++)
             items[i] = xl_object_out((uintptr_t)host->itemsPtr[i]);
         guest->items = (uintptr_t)items;
