@@ -9,12 +9,12 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 | real | built from the module's own sources, with no stub and no substitute | 45 |
 | partial | built and running, with a named part left out or rewritten | 28 |
 | js | no native code of its own, so it runs with the bundle | 12 |
-| stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 3 |
+| stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 1 |
 | missing | native code that is not built yet | 30 |
 | evaluate | not attempted; the note says what iOS 6 offers | 26 |
 | impossible | the system service does not exist before the iOS release the note names | 7 |
 | n/a | build, web or Android only: nothing to run on the phone | 11 |
-| total | | 162 |
+| total | | 160 |
 
 Checked: phone: seen working on the phone; build: compiles and links; not exercised; none: not checked.
 
@@ -192,8 +192,6 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | Module | Version | Native | Status | Checked | Note |
 | --- | --- | --- | --- | --- | --- |
 | react-native-paste-input | 2.0.1 | yes | partial | build | Package packages/r/react-native-paste-input (npm 2.0.1) with patch 0001 (@import UIKit and Accelerate as #import). Compiles for armv7 iOS 6 with the real flags (library probe, build ok), so the ImageEffects category is in. The earlier phone check predates it and is not repeated; the iOS 11 UITextSmartDashesType use is a warning, not an error. |
-| @getpaseo/expo-two-way-audio |  | yes | stub | none | Paseo's own Expo module, not an Expo SDK package; the app uses it for two-way audio. Name-only stub StubTwoWayAudioModule in src/expo/StubModules.swift (stubs.json); nothing of it is built. |
-| PaseoHardwareKeyboard |  | yes | stub | none | A module of the spike app that no package provides and the paseo app does not use. Name-only stub StubHardwareKeyboardModule in src/expo/StubModules.swift (stubs.json). |
 
 ## Stubs
 
@@ -201,6 +199,4 @@ What the build stands in with for a module it does not build. Each is listed in 
 
 | Stub | Module | File | Owner | Reason |
 | --- | --- | --- | --- | --- |
-| StubTwoWayAudioModule | ExpoTwoWayAudio | src/expo/StubModules.swift | @getpaseo/expo-two-way-audio | Name only; the module belongs to the Paseo package @getpaseo/expo-two-way-audio, which is not built. |
-| StubHardwareKeyboardModule | PaseoHardwareKeyboard | src/expo/StubModules.swift | PaseoHardwareKeyboard | Name only; a module of the spike app that no package provides and the paseo app does not use. |
 | StubSQLiteModule | ExpoSQLite | src/expo/StubModules.swift | expo-sqlite | Name only. |

@@ -2,7 +2,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/inputs.lua m
        ./xmakew l -P . frameworks/ReactNative/tools/inputs.lua compare <reference build> <built build> [--only name,...]
   make     writes the hand-made inputs of the React Native host into <project>/build, from the packages of this checkout and
            the application's node_modules: codegen (the application's codegen), rn-codegen (its component specs), rn-src (the
-           react-native package with all its patches). <project> is the folder of the host; it holds ref/paseo, the application,
+           react-native package with all its patches). <project> is the folder of the host; it holds ref/app, the application,
            or a link to it. The inputs are: codegen, rn-codegen, rn-headers, lib-headers, expo-core, expo-jsi, expo-pods, expo-src,
            nitro, unistyles, keyboard, screens, app-assets, app-components. --only makes the named ones. app-components takes the optionalComponents of the application's host.json (--manifest FILE, default <project>/host.json) and needs codegen. The Expo inputs take the packages that
            coverage.json marks real or partial and that the application's node_modules has; --real replaces them with the parity list of the spike (RN_EXPO_REAL).
@@ -184,7 +184,7 @@ end
 
 function context(options)
     local build = path.absolute(options.build or path.join(options.project, "build"))
-    local ref = path.absolute(options.app or path.join(build, "ref", "paseo"))
+    local ref = path.absolute(options.app or path.join(build, "ref", "app"))
     local packages = install_packages()
     return {
         build = build,

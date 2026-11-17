@@ -22,7 +22,7 @@ local LIBCXX_DEPS = 'add_requireconfs("**.libcxx", {configs = {packaged = true}}
 local WEBKIT = 'add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed"}})'
 
 local APPLICATION = table.concat({
-    'set_project("paseo-ios6")',
+    'set_project("example-host")',
     'if not os.getenv("RN_ONLY") or os.getenv("RN_EXPO") then',
     '    add_requires("revenant@swift-runtime", {alias = "swift-runtime"})',
     'end',

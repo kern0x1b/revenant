@@ -189,7 +189,7 @@ function default_patched(folder, real)
     if real and real ~= "" then
         return {}
     end
-    local ref = path.join(folder, "build", "ref", "paseo")
+    local ref = path.join(folder, "build", "ref", "app")
     local found = {}
     for _, name in ipairs(DEFAULT_PATCHED) do
         if os.isdir(path.join(ref, "packages", "app", "node_modules", name)) or os.isdir(path.join(ref, "node_modules", name)) then

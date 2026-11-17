@@ -8,14 +8,6 @@ enum StubReport {
   }
 }
 
-public final class StubTwoWayAudioModule: Module {
-  public func definition() -> ModuleDefinition { Name("ExpoTwoWayAudio") }
-}
-
-public final class StubHardwareKeyboardModule: Module {
-  public func definition() -> ModuleDefinition { Name("PaseoHardwareKeyboard") }
-}
-
 public final class StubSQLiteModule: Module {
   public func definition() -> ModuleDefinition { Name("ExpoSQLite") }
 }

@@ -1443,24 +1443,6 @@
    "status": "partial",
    "verified": "build",
    "note": "Package packages/r/react-native-paste-input (npm 2.0.1) with patch 0001 (@import UIKit and Accelerate as #import). Compiles for armv7 iOS 6 with the real flags (library probe, build ok), so the ImageEffects category is in. The earlier phone check predates it and is not repeated; the iOS 11 UITextSmartDashesType use is a warning, not an error."
-  },
-  {
-   "id": "@getpaseo/expo-two-way-audio",
-   "group": "community",
-   "version": "",
-   "native": true,
-   "status": "stub",
-   "verified": "none",
-   "note": "Paseo's own Expo module, not an Expo SDK package; the app uses it for two-way audio. Name-only stub StubTwoWayAudioModule in src/expo/StubModules.swift (stubs.json); nothing of it is built."
-  },
-  {
-   "id": "PaseoHardwareKeyboard",
-   "group": "community",
-   "version": "",
-   "native": true,
-   "status": "stub",
-   "verified": "none",
-   "note": "A module of the spike app that no package provides and the paseo app does not use. Name-only stub StubHardwareKeyboardModule in src/expo/StubModules.swift (stubs.json)."
   }
  ]
 }

@@ -72,8 +72,8 @@ function failures(opt)
     end
 
     local same = install.bundle_identifier_error("org.revenant.rnhost.iso", "org.revenant.rnhost.iso")
-    local other = install.bundle_identifier_error("space.kern0x1b.paseo-ios6.rnhost", "org.revenant.rnhost.iso")
-    if same ~= nil or other == nil or not other:find("space.kern0x1b.paseo-ios6.rnhost", 1, true) or not other:find("org.revenant.rnhost.iso", 1, true) then
+    local other = install.bundle_identifier_error("org.example.rnhost", "org.revenant.rnhost.iso")
+    if same ~= nil or other == nil or not other:find("org.example.rnhost", 1, true) or not other:find("org.revenant.rnhost.iso", 1, true) then
         table.insert(found, "stage must refuse a built app whose bundle id is not the id it is given, and name both ids")
     end
 

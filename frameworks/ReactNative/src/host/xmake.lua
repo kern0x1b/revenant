@@ -7,7 +7,7 @@ option("rn-bundle")
 option_end()
 
 local RN_JSC_FRAMEWORK = (not os.getenv("RN_LINK_ALL")) and (not os.getenv("RN_HERMES")) and (not os.getenv("RN_JSC_BUNDLE")) and (not os.getenv("RN_WEBKIT")) and "JavaScriptCore" or nil
-local RN_SOURCE = os.getenv("RN_SRC") or path.join(os.projectdir(), "build", "ref", "paseo", "node_modules", "react-native")
+local RN_SOURCE = os.getenv("RN_SRC") or path.join(os.projectdir(), "build", "ref", "app", "node_modules", "react-native")
 if os.getenv("RN_HERMES") then
     add_requires("revenant@hermes", {alias = "hermes"})
 end
@@ -75,7 +75,7 @@ target("RNHost")
             add_deps("expo-core-objc", "expo-app-modules", "nitro-objc", "nitro-probe", "unistyles-objc", "unistyles-probe", "rn-pods-objc")
             add_packages("swift-runtime", "combine", "cryptokit", "swift-crypto", "swiftui", "uniformtypeidentifiers")
             local ecore = path.join(os.projectdir(), "build", "expo-core")
-            local nm = path.join(os.projectdir(), "build", "ref", "paseo", "node_modules")
+            local nm = path.join(os.projectdir(), "build", "ref", "app", "node_modules")
             local jsisrc = path.join(nm, "expo-modules-jsi", "apple", "Sources", "ExpoModulesJSI-Cxx", "include")
             add_includedirs(path.join(ecore, "include"), path.join(ecore, "include", "ExpoModulesCore"), path.join(nm, "expo-modules-core", "ios"), jsisrc, path.join(jsisrc, "Public"))
             on_config(function (target)

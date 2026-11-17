@@ -1,9 +1,8 @@
 # Building the React Native host in your own folder
 
-The host is built by `frameworks/ReactNative/tools/isolate.lua` from the application project (`paseo-app`, whose root `xmake.lua`
-includes the host). `isolate.lua` makes a build that shares no path with anyone else's, so several workers can build at once:
-`copy` makes the copy and `build` builds from it. The spike's scripts `isolate.sh` and `build-isolated.sh` were removed from
-paseo-app (5321a86); their last state is at e6522b0.
+The host is built by `frameworks/ReactNative/tools/isolate.lua` from an application project (any folder whose root `xmake.lua`
+includes the host and which holds the application's manifest). `isolate.lua` makes a build that shares no path with anyone else's, so several workers can build at once:
+`copy` makes the copy and `build` builds from it.
 
 ## 1. Make the copy
 
@@ -55,7 +54,7 @@ find the package modules such as Combine.
 The build is made against the stubs of the Expo modules. A module you are porting is built as real by naming it:
 `--real expo-battery` for Expo packages (comma separated), `--pods react-native-pager-view:RNCViewPager` for community libraries
 (`package:codegenModule`). The community pods named in the application's manifest (`build/app-manifest/host.json`, made from
-`manifest/host.json` of paseo-app) are built as real without `--pods`; `--pods` replaces that list. The command prints the exit code, the log
+the project's `--manifest` file) are built as real without `--pods`; `--pods` replaces that list. The command prints the exit code, the log
 path and the errors it holds. The log is `<folder>/build/isolated.log` unless `--log` names another file. The sources of a
 module come from its package in `packages/`, never from another worker's folder.
 
