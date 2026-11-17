@@ -2,6 +2,8 @@ local function cache()
     return import("@addon.revenant.cache", {anonymous = true})
 end
 
+local USAGE = "usage: ./xmakew l tools/cache.lua [status | prune [--dry-run] | guard | record]"
+
 local function stamp(seconds)
     if not seconds or seconds == 0 then
         return "-"
@@ -54,7 +56,7 @@ function main(command, ...)
         if argument == "--dry-run" or argument == "-n" then
             dry = true
         else
-            raise("usage: ./xmakew l tools/cache.lua [status | prune [--dry-run]]")
+            raise(USAGE)
         end
     end
     if command == nil or command == "status" then
@@ -62,6 +64,6 @@ function main(command, ...)
     elseif command == "prune" then
         prune(dry)
     else
-        raise("usage: ./xmakew l tools/cache.lua [status | prune [--dry-run] | guard | record]")
+        raise(USAGE)
     end
 end

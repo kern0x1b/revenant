@@ -1,10 +1,18 @@
 # Snapshot and restore of a booted emulator
 
 A test or a Telegram run boots a firmware from its root filesystem before it does anything, and a boot to SpringBoard
-takes most of a minute on an idle Mac and longer under load. The emulator has no machine snapshot: `grep` finds none,
-and the control channel's `snapshot PATH` writes one display frame (`src/runtime/emulator_session.cpp:2912-2922`).
-This page says what a snapshot would have to hold, what it cannot hold, what a booted machine weighs, and what a
-restore would cost. It is a design from measurements, not an implementation.
+takes most of a minute on an idle Mac and longer under load. The emulator saves and restores a booted machine as data:
+`--snapshot-out FILE` writes a snapshot at a `--ticks` boundary and `--snapshot-in FILE` loads one
+(`src/app/main.cpp:93,1163-1175`), logging `[snapshot] written=` and `[snapshot] restored=`
+(`src/runtime/emulator_session.cpp:4821,2201`). State travels in per-owner `snapshot_members()` lists checked by a
+coverage ledger (`src/kernel/include/kernel/snapshot_ledger.hpp`), and `tools/snapshot_round_trip.lua` drives a save
+and restore round trip. The control channel's separate `snapshot PATH` command writes one display frame
+(`src/runtime/emulator_session.cpp:3006-3013`); that is a screenshot, not a machine snapshot.
+
+This page records that implemented design and the measurements that set its scope: what a snapshot holds and how it is
+saved, what cannot be carried over, what a booted machine weighs, and what a restore costs. Numbers reported as
+measured come from runs on this Mac under load; the per-member tables, the quiescence rules and the stage plans are
+design reasoning, not measurements.
 
 Paths are relative to `emulator/`. Entries marked † come from a read-only survey of the source and were not re-read one
 by one; every other entry was read at the line given.
@@ -335,8 +343,9 @@ negative control are the check for a missed field, not this table.
 
 ## Stages
 
-The owner decides the stages. Each lists what it touches, what it costs in measured terms, and what it risks. Stage 0
-is built (see its results below). Stages 1 to 4 have not been started.
+The owner decided the stages. Each lists what it touches, what it costs in measured terms, and what it risks. Stage 0
+is built (see its results below). Whole-machine save and restore, its round-trip tool and the member descriptors have
+since landed on main; the stages below record the original sequence and the measurements still to take.
 
 - **Stage 0: measurement.** Define the ready point for a plain boot: a settled display that is not the logo, or the
   control channel's `settle` (`docs/reference/emulator/control-surface.md`) on a non-logo frame. Add a counter of
