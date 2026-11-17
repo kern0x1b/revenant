@@ -391,6 +391,16 @@ static void RNHostMemoryMapMilestone(UIView *root, NSUInteger views)
     }
 }
 
+- (NSUInteger)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window
+{
+    for (id<UIApplicationDelegate> subscriber in RNHostExpoSubscribers()) {
+        if ([subscriber respondsToSelector:@selector(application:supportedInterfaceOrientationsForWindow:)]) {
+            return [subscriber application:application supportedInterfaceOrientationsForWindow:window];
+        }
+    }
+    return UIInterfaceOrientationMaskAllButUpsideDown;
+}
+
 #pragma clang diagnostic pop
 #endif
 
@@ -422,6 +432,13 @@ static void RNHostMemoryMapMilestone(UIView *root, NSUInteger views)
 #endif
     [self.window makeKeyAndVisible];
     [_factory startReactNativeWithModuleName:module inWindow:self.window];
+#ifdef RN_EXPO
+    for (id<UIApplicationDelegate> subscriber in RNHostExpoSubscribers()) {
+        if ([subscriber respondsToSelector:@selector(application:didFinishLaunchingWithOptions:)]) {
+            [subscriber application:application didFinishLaunchingWithOptions:launchOptions];
+        }
+    }
+#endif
     NSLog(@"rn-host: react started, rss %.1f MB", [RNHostRuntime residentMegabytes]);
     return YES;
 }
