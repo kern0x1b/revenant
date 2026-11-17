@@ -73,18 +73,20 @@ for _, app in ipairs({{"recompiler_cxxinit", "tests/cxxinit/build.lua"}, {"recom
         set_values("recompiler.script", script)
 end
 
-local function corpus(target, opt)
-    local name = path.filename(opt.name)
-    local check = import("check", {rootdir = path.join(target:scriptdir(), "tests", name), anonymous = true})
-    local passed, errors = true, nil
-    try {
-        function () check(path.join(target:autogendir(), "tests", name), {host_only = true}) end,
-        catch { function (raised) passed, errors = false, raised end }
-    }
-    if not passed then
-        opt.errors = tostring(errors)
+local function corpus_runner(host_only)
+    return function (target, opt)
+        local name = path.filename(opt.name)
+        local check = import("check", {rootdir = path.join(target:scriptdir(), "tests", name), anonymous = true})
+        local passed, errors = true, nil
+        try {
+            function () check(path.join(target:autogendir(), "tests", name), {host_only = host_only}) end,
+            catch { function (raised) passed, errors = false, raised end }
+        }
+        if not passed then
+            opt.errors = tostring(errors)
+        end
+        return passed
     end
-    return passed
 end
 
 target("recompiler_corpus")
@@ -93,7 +95,7 @@ target("recompiler_corpus")
     add_deps("xlate", "xlgen")
     add_packages("blocksruntime", "iphoneos-sdk", "ld64", "ldid")
     add_tests("jumptable", "switchtail", "tailcalls", "tsdscan", "tsdguard", "int128", "weakimport", "lse", "llsc", "crypto", "library", "exceptions", "libexceptions", "libcxxexceptions", "objectsplit", "segmentlimit", "absolutes", "rebasetag", "flagflow", "hostbridges", "checkapi", "devicegate", "proxytable", "systemclasses", "dropkey")
-    on_test(corpus)
+    on_test(corpus_runner(true))
 target_end()
 
 if get_config("tests") == "device" then
@@ -104,6 +106,6 @@ if get_config("tests") == "device" then
         add_deps("xlate", "xlgen")
         add_packages("blocksruntime", "iphoneos-sdk", "ld64", "ldid")
         add_tests("classpair", "ordinal", "exceptions", "libexceptions", "libcxxexceptions", "hostbridges")
-        on_test(corpus)
+        on_test(corpus_runner(false))
     target_end()
 end
