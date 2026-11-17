@@ -1933,7 +1933,11 @@ bool EmitGuestImage(Program &program, Module &module, const Overrides &overrides
         continue;
       }
       std::vector<uint8_t> bytes(segment.vmsize);
-      image->ReadBytes(image->host(segment.vmaddr), bytes.data(), bytes.size());
+      if (segment.vmsize && !image->ReadBytes(image->host(segment.vmaddr), bytes.data(), bytes.size())) {
+        errs() << "xlate: " << image->path() << ": segment " << segment.name << " cannot be read\n";
+        ok = false;
+        continue;
+      }
       for (auto &[vmaddr, piece] : SegmentPieces(program, module, *image, segment, overrides, ok)) {
         uint64_t offset = vmaddr - segment.vmaddr;
         for (auto field : piece.fields) {
@@ -2072,7 +2076,11 @@ bool EmitGuestData(Program &program, Module &module, std::vector<GuestSegment> &
       }
       std::string host_name = HostSegmentName(image_index, merge_data, segment);
       std::vector<uint8_t> bytes(segment.vmsize);
-      image->ReadBytes(image->host(segment.vmaddr), bytes.data(), bytes.size());
+      if (segment.vmsize && !image->ReadBytes(image->host(segment.vmaddr), bytes.data(), bytes.size())) {
+        errs() << "xlate: " << image->path() << ": segment " << segment.name << " cannot be read\n";
+        ok = false;
+        continue;
+      }
       auto pieces = SegmentPieces(program, module, *image, segment, overrides, ok);
       std::vector<Constant *> fields;
       std::vector<Type *> types;
@@ -2533,8 +2541,10 @@ int Coverage(Program &program) {
       }
       for (uint64_t offset = 0; offset + 4 <= section.size; offset += 4) {
         uint64_t address = image->host(section.addr + offset);
-        uint8_t bytes[4];
-        image->ReadBytes(address, bytes, 4);
+        uint8_t bytes[4] = {};
+        if (!image->ReadBytes(address, bytes, 4)) {
+          continue;
+        }
         uint32_t word = bytes[0] | bytes[1] << 8 | bytes[2] << 16 | (uint32_t)bytes[3] << 24;
         auto func = ll_func_new(wrap(&module), config);
         bool decoded = ll_func_decode_instr(func, address, ReadCode, &program) == 0;

@@ -56,9 +56,11 @@ instructions for 2.10 million different ones to 2.11 million, and the library fr
 - OneBusAway 2.3.2, the official arm64 App Store IPA, recompiles to armv7 and iOS 6 and reaches its full, interactive
   main screen: map view, search bar, tab bar, a native `UIAlertView`, and touch input. It has no app-specific rules
   and no source changes.
-- On an iPhone 4S (A5) the translated compute kernels run at a geometric mean of about 1.9 times native armv7 (1.05
-  times for memory-bound hashes, up to about 2.9 times for pointer-chasing). The translation machinery adds a few
-  hundred KB resident.
+- Measured by the number of instructions executed in an emulated Cortex-A9 (`tests/perf/`), the translated compute
+  kernels execute 1.22 to 3.59 times the instructions of the native armv7 build of the same source (1.22 to 1.40 times
+  for the hashes, 3.4 to 3.6 times for pointer-chasing and geometry). That is an estimate of 1.2 to 3.6 times slower on
+  an A4 or A5; no CPU cycles were measured on a device ([the table](research.md#6-performance)). The translation
+  machinery adds a few hundred KB resident.
 - A second app, an xkcd reader that statically links Realm and a crash reporter, drove out several universal
   translator fixes: resilient lifting, floating-point data-symbol bridging and automatic long-call fallback for large
   binaries. They are described under [decisions in the translator](#decisions-in-the-translator).

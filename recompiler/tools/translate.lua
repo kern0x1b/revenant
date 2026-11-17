@@ -65,10 +65,6 @@ local function without(remove, list)
     return result
 end
 
-local function difference(list, remove)
-    return without(remove, list)
-end
-
 local function iorun(program, argv)
     return os.iorunv(program, argv)
 end
@@ -726,7 +722,7 @@ function translate(input, includes, out, images, opt)
         table.join2(covered, classes_of(resolved))
         covered = unique(covered)
         writelines(o("covered-pre.txt"), covered)
-        for _, class in ipairs(difference(wanted, covered)) do
+        for _, class in ipairs(without(covered, wanted)) do
             table.insert(undef_flags, "-Wl,-U,_OBJC_CLASS_$_" .. class)
         end
     end

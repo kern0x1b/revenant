@@ -1,10 +1,10 @@
 #include "objc_abi.h"
+#include "xl_diag.h"
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
 #include <Block.h>
 #include <dlfcn.h>
-#include <libkern/OSAtomic.h>
 #include <pthread.h>
 #include <fcntl.h>
 #include <stdarg.h>
@@ -69,7 +69,7 @@ static int xl_namespaced_class(uintptr_t guest, const char *name)
 }
 
 static volatile int xl_shadows_active;
-static OSSpinLock xl_table_lock = OS_SPINLOCK_INIT;
+static pthread_mutex_t xl_table_lock = PTHREAD_MUTEX_INITIALIZER;
 static CFMutableDictionaryRef xl_guest_to_host;
 static CFMutableDictionaryRef xl_host_to_guest;
 static CFMutableDictionaryRef xl_unbuilt_static;
@@ -86,22 +86,24 @@ static pthread_mutex_t xl_build_lock;
 static pthread_once_t xl_shadow_once = PTHREAD_ONCE_INIT;
 static uint64_t xl_lazy_namer;
 
-static int xl_shadow_logging = -1;
+static struct xl_diag_flag xl_shadow_logging = {"xl-shadow-log", 0};
 
 int xl_shadow_log_enabled(void)
 {
-    if (xl_shadow_logging < 0)
-        xl_shadow_logging = access("/private/var/revenant/xl-shadow-log", F_OK) == 0;
-    return xl_shadow_logging;
+    return xl_diag_on(&xl_shadow_logging);
 }
 
 void xl_shadow_note(const char *format, ...)
 {
     if (!xl_shadow_log_enabled())
         return;
-    FILE *log = fopen("/private/var/revenant/xlate-shadow.log", "a");
-    if (!log)
+    int descriptor = xl_diag_open("xlate-shadow.log", O_APPEND);
+    FILE *log = descriptor >= 0 ? fdopen(descriptor, "a") : NULL;
+    if (!log) {
+        if (descriptor >= 0)
+            close(descriptor);
         return;
+    }
     va_list arguments;
     va_start(arguments, format);
     vfprintf(log, format, arguments);
@@ -153,17 +155,17 @@ void xl_shadow_init(void)
 
 static const void *xl_table_get(CFMutableDictionaryRef table, uintptr_t key)
 {
-    OSSpinLockLock(&xl_table_lock);
+    pthread_mutex_lock(&xl_table_lock);
     const void *value = CFDictionaryGetValue(table, (const void *)key);
-    OSSpinLockUnlock(&xl_table_lock);
+    pthread_mutex_unlock(&xl_table_lock);
     return value;
 }
 
 static void xl_table_set(CFMutableDictionaryRef table, uintptr_t key, const void *value)
 {
-    OSSpinLockLock(&xl_table_lock);
+    pthread_mutex_lock(&xl_table_lock);
     CFDictionarySetValue(table, (const void *)key, value);
-    OSSpinLockUnlock(&xl_table_lock);
+    pthread_mutex_unlock(&xl_table_lock);
 }
 
 struct xl_word_kinds {
@@ -227,16 +229,8 @@ static IMP xl_guest_method_imp(uint64_t guest, SEL selector, const char *types)
         }
         uint64_t arguments[6] = {xl_object_out((uintptr_t)self_), (uint64_t)(uintptr_t)selector, xl_kind_out(kinds.argument[0], a),
                                  xl_kind_out(kinds.argument[1], b), xl_kind_out(kinds.argument[2], c), xl_kind_out(kinds.argument[3], d)};
-        int traced = xl_watch_thunk_wanted(selector);
-        if (traced)
-            xl_watch_log("xl-watch: the host calls the guest %s on %p (%s) with 0x%lx 0x%lx 0x%lx 0x%lx, the guest receives x2=0x%llx x3=0x%llx x4=0x%llx x5=0x%llx", sel_getName(selector),
-                         (void *)self_, self_ ? object_getClassName(self_) : "nil", (unsigned long)a, (unsigned long)b, (unsigned long)c, (unsigned long)d,
-                         (unsigned long long)arguments[2], (unsigned long long)arguments[3], (unsigned long long)arguments[4], (unsigned long long)arguments[5]);
         uint64_t result = xl_invoke_n(guest, arguments, 6);
-        uintptr_t converted = owned ? (uintptr_t)xl_object_in_owned(result, "guest method result", 0) : (uintptr_t)xl_kind_in(kinds.result, result, "guest method result");
-        if (traced)
-            xl_watch_log("xl-watch: the guest %s on %p returned 0x%llx, the host gets 0x%lx", sel_getName(selector), (void *)self_, (unsigned long long)result, (unsigned long)converted);
-        return converted;
+        return owned ? (uintptr_t)xl_object_in_owned(result, "guest method result", 0) : (uintptr_t)xl_kind_in(kinds.result, result, "guest method result");
     });
     xl_table_set(xl_shadow_imps, (uintptr_t)imp, (const void *)(uintptr_t)guest);
     return imp;
@@ -385,16 +379,16 @@ IMP xl_host_imp_for_guest(uint64_t guest, SEL selector, const char *types)
         xl_unsupported(why);
     }
     CFNumberRef key = CFNumberCreate(NULL, kCFNumberSInt64Type, &(int64_t){(int64_t)((guest << 32) | (uint32_t)(uintptr_t)selector)});
-    OSSpinLockLock(&xl_table_lock);
+    pthread_mutex_lock(&xl_table_lock);
     if (!xl_guest_imp_cache)
         xl_guest_imp_cache = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, NULL);
     IMP imp = (IMP)CFDictionaryGetValue(xl_guest_imp_cache, key);
-    OSSpinLockUnlock(&xl_table_lock);
+    pthread_mutex_unlock(&xl_table_lock);
     if (!imp) {
         imp = xl_guest_method_imp(guest, selector, types);
-        OSSpinLockLock(&xl_table_lock);
+        pthread_mutex_lock(&xl_table_lock);
         CFDictionarySetValue(xl_guest_imp_cache, key, imp);
-        OSSpinLockUnlock(&xl_table_lock);
+        pthread_mutex_unlock(&xl_table_lock);
     }
     CFRelease(key);
     return imp;
@@ -493,17 +487,17 @@ static uint64_t xl_twin_of(Class host)
         return twin;
     struct xl_guest_class *made = calloc(1, 64);
     made->superclass = xl_twin_of(class_getSuperclass(host));
-    OSSpinLockLock(&xl_table_lock);
+    pthread_mutex_lock(&xl_table_lock);
     twin = (uintptr_t)CFDictionaryGetValue(xl_host_twin, (const void *)host);
     if (twin) {
-        OSSpinLockUnlock(&xl_table_lock);
+        pthread_mutex_unlock(&xl_table_lock);
         free(made);
         return twin;
     }
     twin = (uintptr_t)made;
     CFDictionarySetValue(xl_host_twin, (const void *)host, (const void *)twin);
     CFDictionarySetValue(xl_twin_host, (const void *)twin, (const void *)host);
-    OSSpinLockUnlock(&xl_table_lock);
+    pthread_mutex_unlock(&xl_table_lock);
     return twin;
 }
 
@@ -740,7 +734,7 @@ static Class xl_build_shadow(uintptr_t guest)
                        (unsigned long long)ro->base_protocols, (unsigned long long)ro->ivars, (unsigned long long)ro->base_properties);
     objc_registerClassPair(shadow);
 
-    OSSpinLockLock(&xl_table_lock);
+    pthread_mutex_lock(&xl_table_lock);
     CFDictionarySetValue(xl_guest_to_host, (const void *)guest, shadow);
     CFDictionarySetValue(xl_host_to_guest, shadow, (const void *)guest);
     CFDictionaryRemoveValue(xl_unbuilt_static, (const void *)guest);
@@ -750,7 +744,7 @@ static Class xl_build_shadow(uintptr_t guest)
         CFDictionaryRemoveValue(xl_unbuilt_static, (const void *)(uintptr_t)c->isa);
     }
     xl_shadows_active = 1;
-    OSSpinLockUnlock(&xl_table_lock);
+    pthread_mutex_unlock(&xl_table_lock);
     if (extent) {
         xl_table_set(xl_tail_of_shadow, (uintptr_t)shadow, (const void *)(uintptr_t)extent);
         xl_sync_tail(c, shadow);
@@ -850,11 +844,10 @@ int xl_guest_send(id object, SEL selector, uint64_t *result)
     return 1;
 }
 
-static uintptr_t xl_register_class(uintptr_t guest, const char *call)
+static uintptr_t xl_register_class(uintptr_t guest)
 {
     if (!guest)
         return 0;
-    (void)call;
     Class shadow = xl_build_shadow(guest);
     if (xl_table_get(xl_tail_of_shadow, (uintptr_t)shadow))
         xl_sync_tail((const struct xl_guest_class *)guest, shadow);
@@ -911,7 +904,7 @@ void xl_manual_objc_readClassPair(void *pack)
 {
     struct xl_pair_pack *p = pack;
     xl_shadow_init();
-    xl_register_class(xl_narrow_pointer(p->a0, "objc_readClassPair", 0), "objc_readClassPair");
+    xl_register_class(xl_narrow_pointer(p->a0, "objc_readClassPair", 0));
     p->r = p->a0;
 }
 
@@ -926,7 +919,7 @@ void xl_manual__objc_realizeClassFromSwift(void *pack)
         snprintf(why, sizeof why, "Swift requested that class %p be ignored, but libobjc does not support that", (void *)previously);
         xl_unsupported(why);
     }
-    Class shadow = (Class)xl_register_class(cls, "_objc_realizeClassFromSwift");
+    Class shadow = (Class)xl_register_class(cls);
     if (previously && previously != cls)
         xl_table_set(xl_guest_to_host, previously, shadow);
     p->r = p->a0;
