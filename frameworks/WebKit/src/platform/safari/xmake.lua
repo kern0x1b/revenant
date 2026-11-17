@@ -21,7 +21,7 @@ local version = "0.1.0"
 local function packaged(target)
     target:set("values", "revenant.version", version)
     target:set("values", "revenant.control", path.join(webkit, "src", "packaging", "safari", "control"))
-    target:set("values", "revenant.maintainer-scripts", path.join(webkit, "src", "packaging", "DEBIAN"))
+    target:set("values", "revenant.restart", "MobileSafari", "Preferences")
     target:set("values", "revenant.licenses", path.join(webkit, "LICENSE"), path.join(webkit, "..", "..", "docs", "reference", "webkit", "third-party.md"))
 end
 
