@@ -113,8 +113,9 @@ the `RevPrefs` target in `xmake.lua`, like the dylibs beside it — that writes 
 - Package: `./xmakew deb -P .` writes `space.kern0x1b.rev_<version>_iphoneos-arm.deb` with the compat dylib, TLS and
   the Settings pane. `./xmakew deb -P frameworks/WebKit/src/platform/safari` writes
   `space.kern0x1b.rev-safari_<version>_iphoneos-arm.deb` with the loader and the engine frameworks; it depends on the
-  first. `src/packaging/` holds the two `control` files, `safari/control` for the loader, and the `DEBIAN/postinst`
-  script that both share. The versions are `version` in `frameworks/WebKit/xmake.lua` and in the loader's `xmake.lua`.
+  first. `src/packaging/` holds the two `control` files, `safari/control` for the loader. Both packages declare
+  `revenant.restart` for MobileSafari and Preferences; the packaging tool writes the `postinst` that kills them.
+  The versions are `version` in `frameworks/WebKit/xmake.lua` and in the loader's `xmake.lua`.
 - Deploy: `./xmakew device install -P .`, then `./xmakew device install -P frameworks/WebKit/src/platform/safari`.
   Each builds its package, runs `dpkg -i` on the phone `device.env` names, and refuses a .deb whose app would replace
   another bundle id. The root first: the loader depends on it.
@@ -136,7 +137,7 @@ src/                    The port's code: its packages, modules, compat library, 
   compat/       Symbols iOS 6 does not have, built into libios6compat.a
   device-tools/ The webkit-device-tools package: the phone's probes, their C sources and entitlements
   modules/      What the engine package does: options, checks, staging, the carry manifest
-  packaging/    The package's control file and DEBIAN scripts
+  packaging/    The package's control file; the postinst is generated from revenant.restart
   platform/     The tweak, compat and TLS dylibs and the Settings bundle, xmake targets
     safari/     The Safari substitution: the loader, the compat/hooks, WebAssembly and TLS sources
     prefs/      The RevWebKit Settings PreferenceBundle
