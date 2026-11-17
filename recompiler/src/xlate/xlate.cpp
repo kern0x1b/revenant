@@ -2533,8 +2533,10 @@ int Coverage(Program &program) {
       }
       for (uint64_t offset = 0; offset + 4 <= section.size; offset += 4) {
         uint64_t address = image->host(section.addr + offset);
-        uint8_t bytes[4];
-        image->ReadBytes(address, bytes, 4);
+        uint8_t bytes[4] = {};
+        if (!image->ReadBytes(address, bytes, 4)) {
+          continue;
+        }
         uint32_t word = bytes[0] | bytes[1] << 8 | bytes[2] << 16 | (uint32_t)bytes[3] << 24;
         auto func = ll_func_new(wrap(&module), config);
         bool decoded = ll_func_decode_instr(func, address, ReadCode, &program) == 0;

@@ -1430,8 +1430,7 @@ std::string Generator::EmitBridge(const std::string &id, const Signature &signat
   }
   std::string name = message ? "xl_" + id : guest_name;
   std::string definition = message ? name : "xl_fn_" + id;
-  gs << (message ? "" : "")
-     << Spell(gc_, has_result ? signature.result.guest : gc_.VoidTy, definition + "(" + args + ")") << "\n{\n";
+  gs << Spell(gc_, has_result ? signature.result.guest : gc_.VoidTy, definition + "(" + args + ")") << "\n{\n";
   gs << "    struct " << pack << " p;\n";
   if (message) {
     gs << "    p.self = (uint64_t)(uintptr_t)self;\n    p.sel = (uint64_t)(uintptr_t)_cmd;\n";
@@ -2802,6 +2801,14 @@ bool Generator::Write() {
   }
   auto includes = MemoryBuffer::getFile(IncludesPath);
   auto abi = MemoryBuffer::getFile(AbiHeader);
+  if (!includes) {
+    errs() << "xlgen: " << IncludesPath << ": " << includes.getError().message() << "\n";
+    return false;
+  }
+  if (!abi) {
+    errs() << "xlgen: " << AbiHeader << ": " << abi.getError().message() << "\n";
+    return false;
+  }
   std::error_code ec;
   raw_fd_ostream guest(GuestOut, ec);
   if (ec) {
@@ -2875,8 +2882,16 @@ bool Generator::Write() {
     exports << registry_exports_;
   }
   raw_fd_ostream passthrough(PassthroughOut, ec);
+  if (ec) {
+    errs() << "xlgen: " << PassthroughOut << ": " << ec.message() << "\n";
+    return false;
+  }
   passthrough << passthrough_.str();
   raw_fd_ostream report(ReportOut, ec);
+  if (ec) {
+    errs() << "xlgen: " << ReportOut << ": " << ec.message() << "\n";
+    return false;
+  }
   report << report_.str();
   errs() << "xlgen: " << unsupported_ << " unsupported items, see " << ReportOut << "\n";
   return true;
