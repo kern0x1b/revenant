@@ -48,7 +48,7 @@ the reference path before the hash is taken, so a folder made elsewhere is compa
 more string on the built side.
 
 The spike's build read its packages from the shared cache of the checkout, and a worktree's build reads its private cache. The
-store paths in `expo-jsi` (`libcxx.rsp`) are then rewritten to the shared cache. `<reference build>` is a folder of inputs made for
+store paths in `expo-jsi` (`jsi.rsp`) are then rewritten to the shared cache. `<reference build>` is a folder of inputs made for
 the same application:
 
 ```sh
@@ -69,7 +69,7 @@ Each input was compared with the hand-made build of the first application the ho
 | `rn-src` | A link to the `react-native` package sources of the store. The spike's link names another install of the same version (`rn-modules`), whose `ReactCommon/jsc/JSCRuntime.cpp` differs, so the link stays a difference. |
 | `rn-headers` | Made from the podspec rules. Identical to the spike: 761 entries, including the Swift header of keyboard. The curated `react.modulemap` list (109 names) is data in `tools/data/expo-core-react-headers.txt`, not derived from a rule. |
 | `lib-headers` | Made. Identical to the spike (64 entries). |
-| `expo-jsi` | Made. Identical to the spike (6 entries) once the private cache is rewritten to the shared cache: `libcxx.rsp` names the store the build used. |
+| `expo-jsi` | Made. Identical to the spike (6 entries) once the private cache is rewritten to the shared cache: `jsi.rsp` names the store the build used. |
 | `expo-pods` | Made. Identical to the spike (43 entries) in the parity mode (`--real`); the default mode makes the pods of the coverage list. |
 | `expo-core` | Made. `swift-header`, the module maps, `include/ExpoModulesCore` and `react.modulemap` are identical to the spike. `flags.rsp` names the `react-native` root as the store package, where the spike names the application's copy in `node_modules`. `ExpoModulesProvider.swift` and `bridging.h` follow the packages of the mode (the stubs and the real modules, as the spike's `on_load` writes them); the spike's copies on disk predate its list. Every other entry is identical. |
 | `expo-src` | Made in both modes; `expo-file-system` is `partial` in the coverage, so both lists include it. The spike's folder on disk has three files and no copies of the `expo-file-system` sources, while the spike's `on_load` stages `FileSystemDownload.swift`, `FileSystemFileHandle.swift` and `FileSystemModule.swift` as copies whenever `expo-file-system` is real (`EXPO_REWRITE`). The tool makes them too: in the parity comparison they are the only differences, and the other three entries are identical. The default mode leaves out the sources of the stubs (document picker, image picker, SQLite). |
