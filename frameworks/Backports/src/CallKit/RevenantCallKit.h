@@ -106,4 +106,8 @@ typedef NS_ENUM(NSInteger, RevenantCallEvent) {
 @end
 
 extern NSString *const revenant_call_screen_folder;
+extern const char *const revenant_call_incoming;
+extern const char *const revenant_call_ended;
+extern const char *const revenant_call_answered;
+extern const char *const revenant_call_declined;
 extern NSError *revenant_callkit_error(NSString *domain, NSInteger code);

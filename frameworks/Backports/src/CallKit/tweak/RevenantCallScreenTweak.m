@@ -1,12 +1,7 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
+#import "RevenantCallKit.h"
 #include <notify.h>
-
-static NSString *const revenant_call_screen_folder = @"/var/mobile/Library/Caches/org.revenant.callkit";
-static const char *const revenant_call_incoming = "org.revenant.callkit.incoming";
-static const char *const revenant_call_ended = "org.revenant.callkit.ended";
-static const char *const revenant_call_answered = "org.revenant.callkit.answered";
-static const char *const revenant_call_declined = "org.revenant.callkit.declined";
 
 static NSString *revenant_call_file(NSString *name)
 {
