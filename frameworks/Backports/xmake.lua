@@ -79,7 +79,6 @@ if is_plat("iphoneos") then
         set_default(false)
         add_rules("@addon/revenant/tweak")
         add_files(path.join(TWEAK, "RevenantCallScreenTweak.m"))
-        add_includedirs(path.join(SRC, "CallKit"))
         add_frameworks("UIKit", "Foundation", "QuartzCore", "CoreGraphics")
         set_values("tweak.filter", path.join(TWEAK, "springboard.plist"))
         set_values("revenant.control", path.join(TWEAK, "control"))
