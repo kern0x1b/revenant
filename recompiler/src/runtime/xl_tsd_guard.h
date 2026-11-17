@@ -5,8 +5,7 @@
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <unistd.h>
-
-#define XL_TSD_AUDITED_OFFSET 0x358u
+#include "../../include/xl_tsd_offset.h"
 
 static inline void xl_tsd_failed(const char *what)
 {

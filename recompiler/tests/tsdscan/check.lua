@@ -3,16 +3,17 @@ function main(out)
     local e
     e, out = corpus.setup("tsdscan", out)
     local here = os.scriptdir()
+    local audited = io.readfile(path.join(here, "..", "..", "include", "xl_tsd_offset.h")):match("XL_TSD_AUDITED_OFFSET%s+(0x%x+)")
     for _, name in ipairs({"good", "bad", "good.log", "bad.log", "good.json", "bad.json"}) do
         os.tryrm(path.join(out, name))
     end
-    os.execv("xcrun", {"clang", "-arch", "arm64", "-O2", "-w", "-DTSD_OFFSET=0x358", path.join(here, "main.c"), "-o", path.join(out, "good")})
+    os.execv("xcrun", {"clang", "-arch", "arm64", "-O2", "-w", "-DTSD_OFFSET=" .. audited, path.join(here, "main.c"), "-o", path.join(out, "good")})
     os.execv("xcrun", {"clang", "-arch", "arm64", "-O2", "-w", "-DTSD_OFFSET=0x40", path.join(here, "main.c"), "-o", path.join(out, "bad")})
 
     local ok, log = corpus.run(e.xlate, {"--base", "0x10000000", "--objc-manifest", path.join(out, "good.json"), path.join(out, "good")}, path.join(out, "good.log"))
     if not ok then
         io.write(log)
-        corpus.fail("xlate refused the one audited offset (0x358)")
+        corpus.fail("xlate refused the one audited offset (%s)", audited)
     end
     ok, log = corpus.run(e.xlate, {"--base", "0x10000000", "--objc-manifest", path.join(out, "bad.json"), path.join(out, "bad")}, path.join(out, "bad.log"))
     if ok then
