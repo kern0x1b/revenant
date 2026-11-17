@@ -68,7 +68,13 @@ open class XCTestCase: XCTest {
         }
     }
 
-    public func measure(_ block: () -> Void) { block() }
+    public func measure(_ block: () -> Void) {
+        let start = Date()
+        block()
+        let elapsed = String(format: "%.3f", Date().timeIntervalSince(start))
+        print("Measure '\(name)' (\(elapsed) seconds)")
+        fflush(stdout)
+    }
 }
 
 let _skipList: [String] = {
