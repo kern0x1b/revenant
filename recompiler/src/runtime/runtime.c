@@ -644,6 +644,44 @@ uint64_t xl_invoke_n(uint64_t address, const uint64_t *arguments, unsigned count
     return result;
 }
 
+uint64_t xl_invoke_registers(uint64_t address, const uint64_t *integers, unsigned integer_count, const uint64_t *floats, unsigned float_count, uint64_t *float_result)
+{
+    xl_ensure_ready();
+    State *state = xl_current_state();
+    xl_lifted function = xl_lookup(address);
+    if (!function)
+    {
+        char why[96];
+        snprintf(why, sizeof why, "callback into address 0x%llx without translated code", (unsigned long long)address);
+        xl_fault(state, why);
+    }
+    uint64_t saved_pc = XL_REG(state, PC), saved_lr = XL_REG(state, X30);
+    uint64_t saved_integer[8], saved_float[8];
+    for (unsigned i = 0; i < 8; i++) {
+        saved_integer[i] = *(uint64_t *)((char *)state + XL_OFFSET_X0 + (XL_OFFSET_X1 - XL_OFFSET_X0) * i);
+        saved_float[i] = *(uint64_t *)((char *)state + XL_OFFSET_V0 + 16 * i);
+    }
+    for (unsigned i = 0; i < integer_count && i < 8; i++)
+        *(uint64_t *)((char *)state + XL_OFFSET_X0 + (XL_OFFSET_X1 - XL_OFFSET_X0) * i) = integers[i];
+    for (unsigned i = 0; i < float_count && i < 8; i++) {
+        *(uint64_t *)((char *)state + XL_OFFSET_V0 + 16 * i) = floats[i];
+        *(uint64_t *)((char *)state + XL_OFFSET_V0 + 16 * i + 8) = 0;
+    }
+    XL_REG(state, PC) = address;
+    XL_REG(state, X30) = 0;
+    function(state);
+    uint64_t result = XL_REG(state, X0);
+    if (float_result)
+        *float_result = *(uint64_t *)((char *)state + XL_OFFSET_V0);
+    XL_REG(state, PC) = saved_pc;
+    XL_REG(state, X30) = saved_lr;
+    for (unsigned i = 0; i < 8; i++) {
+        *(uint64_t *)((char *)state + XL_OFFSET_X0 + (XL_OFFSET_X1 - XL_OFFSET_X0) * i) = saved_integer[i];
+        *(uint64_t *)((char *)state + XL_OFFSET_V0 + 16 * i) = saved_float[i];
+    }
+    return result;
+}
+
 #ifndef XL_LIBRARY
 static uint64_t *xl_guest_vector(char **vector)
 {

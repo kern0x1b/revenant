@@ -27,3 +27,8 @@
 @interface RCFHook : NSObject
 + (NSArray *)run;
 @end
+
+@interface RCFFloat : NSObject
++ (void)install;
++ (NSArray *)run;
+@end

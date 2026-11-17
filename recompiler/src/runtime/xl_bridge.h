@@ -66,6 +66,8 @@ _Noreturn void xl_unsupported(const char *message);
 _Noreturn void xl_narrowing_fault(const char *symbol, unsigned index, uint64_t value);
 uint64_t xl_invoke(uint64_t address, uint64_t argument);
 uint64_t xl_invoke_n(uint64_t address, const uint64_t *arguments, unsigned count);
+uint64_t xl_invoke_registers(uint64_t address, const uint64_t *integers, unsigned integer_count, const uint64_t *floats, unsigned float_count, uint64_t *float_result);
+uint64_t xl_invoke_typed(uint64_t address, const uint64_t *lead, unsigned lead_count, const char *kinds, unsigned count, const uintptr_t *words, char result_kind);
 uintptr_t xl_object_in(uint64_t guest, const char *symbol, unsigned index);
 uintptr_t xl_object_in_raw(uint64_t guest, const char *symbol, unsigned index);
 uintptr_t xl_object_in_owned(uint64_t guest, const char *symbol, unsigned index);

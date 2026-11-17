@@ -332,6 +332,21 @@ int main(int argc, char **argv)
             line(result);
         Class hooked = NSClassFromString(@"RCFHooked");
         report("find.hook", hooked != Nil && xl_find_class("RCFixture.Hooked") == (__bridge void *)hooked && NSClassFromString(@"RCFixture.Hooked") == Nil);
+        for (NSString *result in [NSClassFromString(@"RCFFloat") performSelector:@selector(run)])
+            line(result);
+        id floating = [[NSClassFromString(@"RCFFloat") alloc] init];
+        report("float.host.scale", ((float (*)(id, SEL, float, double))objc_msgSend)(floating, sel_registerName("scaleFloat:by:"), 1.5f, 4.0) == 6.0f &&
+                                   ((float (*)(id, SEL, float, double))objc_msgSend)(floating, sel_registerName("scaleFloat:by:"), -2.5f, 2.0) == -5.0f);
+        report("float.host.mix", ((double (*)(id, SEL, int, float, double))objc_msgSend)(floating, sel_registerName("mixInt:float:double:"), 3, 0.5f, 0.25) == 3.75);
+        report("float.host.integer.after", ((int (*)(id, SEL, float, int))objc_msgSend)(floating, sel_registerName("tagFloat:int:"), 2.0f, 7) == 11);
+        ((void (*)(id, SEL, float))objc_msgSend)(floating, sel_registerName("setLevel:"), 0.3f);
+        report("float.host.property", ((float (*)(id, SEL))objc_msgSend)(floating, sel_registerName("level")) == 0.3f);
+        ((void (*)(id, SEL, double))objc_msgSend)(floating, sel_registerName("setRatio:"), -1.0e-300);
+        report("double.host.property", ((double (*)(id, SEL))objc_msgSend)(floating, sel_registerName("ratio")) == -1.0e-300);
+        report("float.host.four", ((float (*)(id, SEL, float, float, float, float))objc_msgSend)(floating, sel_registerName("sumFloats:b:c:d:"), 1.0f, 2.0f, 4.0f, 8.0f) == 15.0f);
+        report("double.host.three", ((double (*)(id, SEL, double, double, double))objc_msgSend)(floating, sel_registerName("sumDoubles:b:c:"), 0.5, 0.25, 0.125) == 0.875);
+        report("float.host.object", ((id (*)(id, SEL, id, float))objc_msgSend)(floating, sel_registerName("objectAfter:float:"), floating, 1.0f) == floating &&
+                                    ((id (*)(id, SEL, id, float))objc_msgSend)(floating, sel_registerName("objectAfter:float:"), floating, -1.0f) == nil);
 #endif
 #ifdef RC_SWIFT_HOST
         const char *threadName = "RCFixture.Client";

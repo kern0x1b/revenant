@@ -727,19 +727,36 @@ static void xl_dynamic_send(State *state, id receiver, Method method, SEL select
     unsigned argc = method_getNumberOfArguments(method);
     uint32_t words[16] = {0};
     unsigned used = 2;
+    unsigned next_integer = 2, next_vector = 0;
     words[0] = (uint32_t)(uintptr_t)receiver;
     words[1] = (uint32_t)(uintptr_t)selector;
-    if (argc > 8) {
-        char detail[96];
-        snprintf(detail, sizeof detail, "%u arguments, encoding %s", argc, method_getTypeEncoding(method));
-        xl_dynamic_fault(state, receiver, selector, "stack-passed arguments", detail);
-    }
     for (unsigned i = 2; i < argc; i++) {
         char *type = method_copyArgumentType(method, i);
-        uint64_t value = *(uint64_t *)((char *)state + XL_OFFSET_X0 + i * 8);
         const char *t = type;
         while (*t == 'r' || *t == 'n' || *t == 'N' || *t == 'o' || *t == 'O' || *t == 'R' || *t == 'V')
             t++;
+        if (*t == 'f' || *t == 'd') {
+            unsigned need = *t == 'd' ? 2 : 1;
+            if (next_vector >= 8 || used + need > 12) {
+                char detail[96];
+                snprintf(detail, sizeof detail, "argument %u of %u, encoding %s", i, argc, method_getTypeEncoding(method));
+                free(type);
+                xl_dynamic_fault(state, receiver, selector, "stack-passed arguments", detail);
+            }
+            uint64_t bits = *(uint64_t *)((char *)state + XL_OFFSET_V0 + 16 * next_vector++);
+            words[used++] = (uint32_t)bits;
+            if (need == 2)
+                words[used++] = (uint32_t)(bits >> 32);
+            free(type);
+            continue;
+        }
+        if (next_integer >= 8 || used + ((*t == 'q' || *t == 'Q') ? 2 : 1) > 12) {
+            char detail[96];
+            snprintf(detail, sizeof detail, "argument %u of %u, encoding %s", i, argc, method_getTypeEncoding(method));
+            free(type);
+            xl_dynamic_fault(state, receiver, selector, "stack-passed arguments", detail);
+        }
+        uint64_t value = *(uint64_t *)((char *)state + XL_OFFSET_X0 + 8 * next_integer++);
         int wide = 0;
         uint32_t word = 0;
         switch (*t) {
@@ -780,8 +797,18 @@ static void xl_dynamic_send(State *state, id receiver, Method method, SEL select
     typedef uint64_t (*call64)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
                                uintptr_t, uintptr_t, uintptr_t, uintptr_t);
     uint64_t result = 0;
+    int floating = 0;
+    uint64_t vector = 0;
     switch (*r) {
     case 'v': ((call32)imp)(words[0], words[1], words[2], words[3], words[4], words[5], words[6], words[7], words[8], words[9], words[10], words[11]); break;
+    case 'f':
+        floating = 1;
+        vector = (uint32_t)((call32)imp)(words[0], words[1], words[2], words[3], words[4], words[5], words[6], words[7], words[8], words[9], words[10], words[11]);
+        break;
+    case 'd':
+        floating = 1;
+        vector = ((call64)imp)(words[0], words[1], words[2], words[3], words[4], words[5], words[6], words[7], words[8], words[9], words[10], words[11]);
+        break;
     case 'q': case 'Q':
         result = ((call64)imp)(words[0], words[1], words[2], words[3], words[4], words[5], words[6], words[7], words[8], words[9], words[10], words[11]);
         break;
@@ -807,6 +834,12 @@ static void xl_dynamic_send(State *state, id receiver, Method method, SEL select
     }
     }
     free(ret);
+    if (floating) {
+        xl_zero_result(state);
+        *(uint64_t *)((char *)state + XL_OFFSET_V0) = vector;
+        xl_return(state);
+        return;
+    }
     XL_REG(state, X0) = result;
     xl_return(state);
 }
@@ -1379,6 +1412,8 @@ struct xl_block_desc {
     const char *signature;
 };
 
+#define XL_BLOCK_KINDS 8
+
 struct xl_block_wrapper {
     void *isa;
     volatile int32_t flags;
@@ -1386,8 +1421,9 @@ struct xl_block_wrapper {
     void *invoke;
     struct xl_block_desc *descriptor;
     uint64_t guest;
-    char kinds[4];
+    char kinds[XL_BLOCK_KINDS];
     char result;
+    char count;
 };
 
 enum { XL_BLOCK_HAS_COPY_DISPOSE = 1 << 25, XL_BLOCK_HAS_SIGNATURE = 1 << 30, XL_BLOCK_NEEDS_FREE = 1 << 24 };
@@ -1411,6 +1447,8 @@ static char xl_type_token(const char **p, int host_side)
     char c = **p;
     switch (c) {
     case 'v': (*p)++; return 'V';
+    case 'f': (*p)++; return host_side ? 'X' : 'F';
+    case 'd': (*p)++; return host_side ? 'X' : 'D';
     case 'q': (*p)++; return host_side ? 'X' : 'S';
     case 'Q': (*p)++; return host_side ? 'X' : 'U';
     case 'c': case 'i': case 's': case 'l':
@@ -1442,16 +1480,19 @@ static int xl_block_simple_args(const char *sig, char *kinds, char *result, int 
         return -1;
     while (*p >= '0' && *p <= '9') p++;
     int count = 0;
+    int limit = host_side ? 4 : XL_BLOCK_KINDS;
+    int words = 0;
     while (*p) {
         char t = xl_type_token(&p, host_side);
         if (t == 'X' || t == 'V')
             return -1;
         while (*p >= '0' && *p <= '9') p++;
-        if (count < 4)
+        if (count < limit)
             kinds[count] = t;
         count++;
+        words += t == 'D' ? 2 : 1;
     }
-    return count > 4 ? -1 : count;
+    return count > limit || words > XL_BLOCK_KINDS ? -1 : count;
 }
 
 static uintptr_t xl_block_call(struct xl_block_wrapper *w, const uint64_t *args, unsigned n)
@@ -1469,6 +1510,43 @@ static uintptr_t xl_block_t1(void *b, uintptr_t a0) { uint64_t a[1] = {a0}; retu
 static uintptr_t xl_block_t2(void *b, uintptr_t a0, uintptr_t a1) { uint64_t a[2] = {a0, a1}; return xl_block_call(b, a, 2); }
 static uintptr_t xl_block_t3(void *b, uintptr_t a0, uintptr_t a1, uintptr_t a2) { uint64_t a[3] = {a0, a1, a2}; return xl_block_call(b, a, 3); }
 static uintptr_t xl_block_t4(void *b, uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3) { uint64_t a[4] = {a0, a1, a2, a3}; return xl_block_call(b, a, 4); }
+uint64_t xl_invoke_typed(uint64_t address, const uint64_t *lead, unsigned lead_count, const char *kinds, unsigned count, const uintptr_t *words, char result_kind)
+{
+    uint64_t integers[8], floats[8];
+    unsigned integer_count = 0, float_count = 0, word = 0;
+    for (; integer_count < lead_count && integer_count < 8; integer_count++)
+        integers[integer_count] = lead[integer_count];
+    for (unsigned i = 0; i < count; i++) {
+        char kind = kinds[i];
+        if (kind == 'F' || kind == 'D') {
+            if (float_count == 8)
+                xl_unsupported("a host call into the guest passes more than eight floating-point arguments");
+            floats[float_count++] = kind == 'F' ? (uint64_t)(uint32_t)words[word] : ((uint64_t)(uint32_t)words[word] | (uint64_t)(uint32_t)words[word + 1] << 32);
+            word += kind == 'D' ? 2 : 1;
+        } else {
+            if (integer_count == 8)
+                xl_unsupported("a host call into the guest passes more than eight integer arguments");
+            integers[integer_count++] = xl_kind_out(kind, words[word++]);
+        }
+    }
+    uint64_t vector = 0;
+    uint64_t result = xl_invoke_registers(address, integers, integer_count, floats, float_count, &vector);
+    if (result_kind == 'F')
+        return (uint32_t)vector;
+    return result_kind == 'D' ? vector : result;
+}
+
+static uint64_t xl_block_tf(void *b, uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3, uintptr_t a4, uintptr_t a5, uintptr_t a6, uintptr_t a7)
+{
+    struct xl_block_wrapper *w = b;
+    const uintptr_t words[8] = {a0, a1, a2, a3, a4, a5, a6, a7};
+    const uint64_t lead[1] = {w->guest};
+    uint64_t result = xl_invoke_typed(*(uint64_t *)(uintptr_t)(w->guest + 16), lead, 1, w->kinds, (unsigned)w->count, words, w->result);
+    if (w->result == 'F' || w->result == 'D')
+        return result;
+    return xl_kind_in(w->result, result, "guest block result");
+}
+
 static void xl_block_unsupported_invoke(void *b) { (void)b; xl_unsupported("host-invoked guest block with a signature the bridge cannot marshal"); }
 
 static const char *xl_guest_block_signature(uint64_t guest)
@@ -1559,7 +1637,12 @@ static struct xl_block_wrapper *xl_wrapper_for(uint64_t guest)
     w->descriptor = &xl_block_descriptor;
     w->guest = xl_invoke(XL_GUEST__Block_copy, guest);
     int args = xl_block_simple_args(xl_guest_block_signature(guest), w->kinds, &w->result, 0);
-    switch (args) {
+    w->count = (char)args;
+    int floating = w->result == 'F' || w->result == 'D';
+    for (int i = 0; i < args; i++)
+        floating |= w->kinds[i] == 'F' || w->kinds[i] == 'D';
+    switch (args >= 0 && (floating || args > 4) ? 5 : args) {
+    case 5: w->invoke = (void *)xl_block_tf; break;
     case 0: w->invoke = (void *)xl_block_t0; break;
     case 1: w->invoke = (void *)xl_block_t1; break;
     case 2: w->invoke = (void *)xl_block_t2; break;

@@ -190,9 +190,55 @@ block is released when the guest block is) whose invoke function is one generic 
 translation (`xl_hblock_generic_invoke` and `xl_hblock_generic_descriptor` in `guest.m`). When the guest calls the block,
 the runtime reads the host block's signature, converts each of up to four arguments by its kind (an object through
 `xl_object_in`, a pointer, an integer of one word: a `q`/`Q` in a host block is a real 64-bit value and is refused) and
-widens the result. A method with a `double`, `float` or structure parameter, a block result, or more than four
-arguments after `self` and `_cmd` still stops with a message that names its selector and encoding when the host calls it:
-`-executeWithAction:withTimeout:completion:` of the SDK has a `Double` and is one of them.
+widens the result. A method with a structure parameter, a block result, or more than four words of arguments after
+`self` and `_cmd` (a `double` is two words) still stops with a message that names its selector and encoding when the host
+calls it. A `float` or a `double` among the arguments, or as the result, is marshalled
+([floating-point values](#floating-point-arguments-and-results)): `-executeWithAction:withTimeout:completion:` of the SDK
+has a `Double` and a block, which is four words, and is covered. A host block that the guest calls with a `float` or a
+`double` is not: the block's signature is read with the kinds of one word and `f`/`d` stop the program with
+`the bridge cannot marshal`.
+
+### Floating-point arguments and results
+
+The arm64 guest passes a `float` or a `double` in `v0` to `v7`, counting them apart from the integer arguments in `x0` to
+`x7` (`-[Class m:(float)a n:(int)b]` has `a` in `s0` and `b` in `x2`). The armv7 iOS host passes both in the integer
+registers `r0` to `r3` and then on the stack, a `float` in one 4-byte word and a `double` in two (low word first), and
+returns a `float` in `r0` and a `double` in `r0` and `r1`. The armv7 iOS ABI does not align a 64-bit value to an even
+register (the AAPCS does): a `double` after a one-word argument starts in the very next register, with its low word in
+`r3` and its high word at `[sp]` when it begins there. Three places turn one convention into the other, and each of them
+refused or mangled a `float` or a `double` before:
+
+- `xl_dynamic_send`, a guest message to a host method without a generated bridge. The Protocol Buffers runtime of the
+  reCAPTCHA SDK adds the accessors of the fields of a message at run time (`+resolveInstanceMethod:` calls `class_addMethod`
+  with an IMP from `imp_implementationWithBlock` and the encoding `v@:f` or `d@:`), so `-[RCAVrpek_Vrpel setVrpm:]`
+  reached the dynamic send with the encoding `f` and stopped the SDK with `message without a bridge (argument type)`. The
+  send now takes each argument from the next integer register or the next vector register by its type, so `f` and `d`
+  read the low 32 or 64 bits of `v<n>`, the result `f` or `d` is written to `v0` (the rest of `v0` to `v3` and `x0`, `x1`
+  zeroed), and a method that does not fit in the registers (more than eight integers, eight vectors or twelve host words)
+  stops with `stack-passed arguments`.
+- The wrapper of a guest block that the host calls (`xl_block_tf`). The block that `imp_implementationWithBlock` was given
+  is a guest block; the host calls its wrapper with the host's words, and the wrapper now splits them by the kinds of the
+  block's signature (`f` one word, `d` two words, an object or pointer or one-word integer as before) into
+  `x1`.. and `v0`.. of the guest call, and returns `v0` for a `float` or `double` result. A block of up to eight
+  arguments is wrapped (it was four).
+- The IMPs for a guest method that the host calls (`xl_guest_method_imp`, and `xl_block_method_imp` for a method with a
+  block): the arguments `f` and `d` were read as one integer word and placed in `x`; they are now split the same way.
+
+`xl_invoke_typed` (in `objc_bridge.m`) is the one function that builds the guest registers from host words and kinds, and
+`xl_invoke_registers` (in `runtime.c`) saves and restores `x0`..`x7` and `v0`..`v7`, calls the guest function and reads
+`x0` and `v0`.
+
+The check `recompiler/tests/library` runs the shape on the phone: the fixture class `RCFFloat` adds methods with
+`class_addMethod` and a block (`f@:fd`, `d@:ifd`, `i@:fi`, `v@:f`, `f@:`, `v@:d`, `d@:`, `f@:ffff`, `d@:ddd`, `@@:@f`), the
+guest sends them (a dynamic send into a block wrapper into the guest block, `float.*` and `double.*` lines) and the host sends
+them as the armv7 compiler passes them (`float.host.*` lines, the guest block runs on the other side of the wrapper). A
+`float` after an `int`, a `double` that crosses `r3` and the stack, `1.0e300` and `-1.0e-300` (all of the high word),
+and `-2.5f` are among the values.
+
+What is not covered: a structure by value (`CGPoint`, `CGRect`, `NSRange`) as an argument or result of a message without a
+bridge (the encoding is refused, `argument type`), a `long double` (arm64 and armv7 both have it as a `double`, and the
+encoding `D` is refused), a vector type, a guest `q`/`Q` in a block that the host calls (taken as one host word, as the
+`NSInteger` of the SDK), and a `float` or a `double` parameter of a host block that the guest calls.
 
 ### The guest image (`recompiler/include/xl_guest_image.h`)
 
@@ -396,8 +442,9 @@ of the Foundation overlay or libswiftCore with few messages is the guest's own S
 The `xlate: no bridge for -[Class selector]` lines on stderr, with the receiver and the guest frames, belong to the same
 switch. They say that a guest message to a host object found no generated bridge, which is not a failure: the message
 is then sent through the host method's own type encoding (`xl_dynamic_send`), whose arguments and result may be
-objects, classes, selectors, pointers and integers of up to 64 bits, in at most eight arguments counting the receiver
-and the selector. A message whose method has a structure, a `float` or a `double` among them, or more arguments, stops
+objects, classes, selectors, pointers, `float`, `double` and integers of up to 64 bits, in at most eight integer
+arguments and eight vector arguments counting the receiver and the selector. A message whose method has a structure,
+a union or a vector among them, or more arguments, stops
 with `xlate: message without a bridge (argument type)` (or `return type`, `stack-passed arguments`) followed by the
 class, the selector and the encoding, with the switch on or off.
 

@@ -187,6 +187,10 @@ static char xl_word_kind(const char *type)
         return 'S';
     if (*type == 'Q')
         return 'U';
+    if (*type == 'f')
+        return 'F';
+    if (*type == 'd')
+        return 'D';
     return *type && strchr(":*^", *type) ? 'P' : 'I';
 }
 
@@ -209,7 +213,18 @@ static IMP xl_guest_method_imp(uint64_t guest, SEL selector, const char *types)
 {
     struct xl_word_kinds kinds = xl_word_kinds_of(types);
     int owned = kinds.result == 'O' && xl_selector_returns_owned(sel_getName(selector));
-    IMP imp = imp_implementationWithBlock(^uintptr_t(id self_, uintptr_t a, uintptr_t b, uintptr_t c, uintptr_t d) {
+    int floating = kinds.result == 'F' || kinds.result == 'D';
+    for (unsigned i = 0; i < 4; i++)
+        floating |= kinds.argument[i] == 'F' || kinds.argument[i] == 'D';
+    IMP imp = imp_implementationWithBlock(^uint64_t(id self_, uintptr_t a, uintptr_t b, uintptr_t c, uintptr_t d) {
+        if (floating) {
+            const uintptr_t words[8] = {a, b, c, d, 0, 0, 0, 0};
+            const uint64_t lead[2] = {xl_object_out((uintptr_t)self_), (uint64_t)(uintptr_t)selector};
+            uint64_t floated = xl_invoke_typed(guest, lead, 2, kinds.argument, 4, words, kinds.result);
+            if (kinds.result == 'F' || kinds.result == 'D')
+                return floated;
+            return owned ? (uint64_t)xl_object_in_owned(floated, "guest method result", 0) : (uint64_t)xl_kind_in(kinds.result, floated, "guest method result");
+        }
         uint64_t arguments[6] = {xl_object_out((uintptr_t)self_), (uint64_t)(uintptr_t)selector, xl_kind_out(kinds.argument[0], a),
                                  xl_kind_out(kinds.argument[1], b), xl_kind_out(kinds.argument[2], c), xl_kind_out(kinds.argument[3], d)};
         int traced = xl_watch_thunk_wanted(selector);
@@ -231,19 +246,21 @@ static const char *xl_skip_type(const char *type);
 
 static int xl_block_method_words(const char *types)
 {
-    unsigned count = 0;
+    unsigned count = 0, words = 0;
     for (const char *type = types; *type; count++) {
         const char *plain = type;
         while (*plain && strchr("rnNoORV", *plain))
             plain++;
         int block = plain[0] == '@' && plain[1] == '?';
-        if (!*plain || !strchr("v@#:*^cCsSiIlLBqQ", *plain) || (*plain == 'v' && count) || (block && count < 3))
+        if (!*plain || !strchr("v@#:*^cCsSiIlLBqQfd", *plain) || (*plain == 'v' && count) || (block && count < 3))
             return 0;
+        if (count >= 3)
+            words += *plain == 'd' ? 2 : 1;
         type = xl_skip_type(type);
         while (*type >= '0' && *type <= '9')
             type++;
     }
-    return count >= 3 && count <= 7;
+    return count >= 3 && count <= 7 && words <= 4;
 }
 
 static IMP xl_block_method_imp(uint64_t guest, SEL selector, const char *types)
@@ -251,14 +268,41 @@ static IMP xl_block_method_imp(uint64_t guest, SEL selector, const char *types)
     if (!xl_block_method_words(types)) {
         return imp_implementationWithBlock(^uintptr_t(id self_) {
             char why[256];
-            snprintf(why, sizeof why, "xlate: the guest method %s (function 0x%llx, type encoding %s) takes a block and has a type the bridge cannot marshal (self, _cmd and up to four arguments of objects, blocks, pointers and integers of at most one word, no block result)",
+            snprintf(why, sizeof why, "xlate: the guest method %s (function 0x%llx, type encoding %s) takes a block and has a type the bridge cannot marshal (self, _cmd and up to four words of arguments of objects, blocks, pointers, floats, doubles and integers of at most one word, no block result)",
                      sel_getName(selector), (unsigned long long)guest, types);
             xl_unsupported(why);
         });
     }
     struct xl_word_kinds kinds = xl_word_kinds_of(types);
     int owned = kinds.result == 'O' && xl_selector_returns_owned(sel_getName(selector));
-    IMP imp = imp_implementationWithBlock(^uintptr_t(id self_, uintptr_t a, uintptr_t b, uintptr_t c, uintptr_t d) {
+    int floating = kinds.result == 'F' || kinds.result == 'D';
+    for (unsigned i = 0; i < 4; i++)
+        floating |= kinds.argument[i] == 'F' || kinds.argument[i] == 'D';
+    IMP imp = imp_implementationWithBlock(^uint64_t(id self_, uintptr_t a, uintptr_t b, uintptr_t c, uintptr_t d) {
+        if (floating) {
+            uintptr_t words[8] = {a, b, c, d, 0, 0, 0, 0};
+            char typed[4];
+            uint64_t wrapped[4] = {0, 0, 0, 0};
+            unsigned word = 0;
+            for (unsigned i = 0; i < 4; i++) {
+                typed[i] = kinds.argument[i];
+                if (typed[i] == 'B') {
+                    wrapped[i] = xl_host_block_wrap((id)words[word], XL_GUEST_xl_hblock_generic_invoke, XL_GUEST_xl_hblock_generic_descriptor);
+                    words[word] = (uintptr_t)wrapped[i];
+                    typed[i] = 'I';
+                }
+                word += typed[i] == 'D' ? 2 : 1;
+            }
+            const uint64_t lead[2] = {xl_object_out((uintptr_t)self_), (uint64_t)(uintptr_t)selector};
+            uint64_t floated = xl_invoke_typed(guest, lead, 2, typed, 4, words, kinds.result);
+            for (unsigned i = 0; i < 4; i++) {
+                if (wrapped[i])
+                    xl_invoke(XL_GUEST__Block_release, wrapped[i]);
+            }
+            if (kinds.result == 'F' || kinds.result == 'D')
+                return floated;
+            return owned ? (uint64_t)xl_object_in_owned(floated, "guest method result", 0) : (uint64_t)xl_kind_in(kinds.result, floated, "guest method result");
+        }
         const uintptr_t host[4] = {a, b, c, d};
         uint64_t arguments[6] = {xl_object_out((uintptr_t)self_), (uint64_t)(uintptr_t)selector, 0, 0, 0, 0};
         uint64_t proxies[4] = {0, 0, 0, 0};

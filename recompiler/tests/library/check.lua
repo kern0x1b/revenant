@@ -141,6 +141,8 @@ end
 local EXPECTED = {"reserve", "load", "class", "create", "methods", "describe", "bundle", "bundle.path", "token", "category", "completion", "completion.thread"}
 local SWIFT_HOST_EXPECTED = {"host.bridge.before", "host.names", "names.disjoint", "host.bridge.after", "find.swift", "find.host", "block.generic"}
 local HOOK_EXPECTED = {"find.before", "hook.absent", "hook.old", "hook.guest", "hook.exact", "hook.unknown", "find.hook"}
+local FLOAT_EXPECTED = {"float.scale", "float.negative", "float.mix", "float.integer.after", "float.property", "double.property", "float.four", "double.three", "float.object",
+                        "float.host.scale", "float.host.mix", "float.host.integer.after", "float.host.property", "double.host.property", "float.host.four", "double.host.three", "float.host.object"}
 local FIND_EXPECTED = {"find.unloaded", "find.exact", "find.unknown", "find.thread"}
 
 local function build_objc(e, corpus, o, here)
@@ -254,7 +256,7 @@ function main(out, ...)
 
     local host_sources = {path.join(here, "host.m"), path.join(e.recompiler, "src", "loader", "xl_loader.c")}
     local host_flags = {"-O2", "-w", "-fobjc-arc", "-I", path.join(e.recompiler, "include"), "-framework", "Foundation", "-framework", "UIKit"}
-    local expected = table.join(EXPECTED, FIND_EXPECTED, HOOK_EXPECTED)
+    local expected = table.join(EXPECTED, FIND_EXPECTED, HOOK_EXPECTED, FLOAT_EXPECTED)
     local runtime
     local bridging = (os.getenv("XL_LIBRARY_HOST_BRIDGING") or "") ~= ""
     local host_runtime = os.getenv("XL_LIBRARY_HOST_RUNTIME")
