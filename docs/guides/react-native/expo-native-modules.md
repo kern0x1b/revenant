@@ -48,6 +48,7 @@ exercised on the phone, so their coverage rows are `real`, verified `build`.
 | Module | Removed or replaced | Why | What JS sees |
 | --- | --- | --- | --- |
 | expo-mail-composer | `UIAdaptivePresentationControllerDelegate`, the `presentationController` hook; the iOS 7 attachments are guarded; four names that collide inside `ExpoAppModules` are renamed | iOS 8, 13; attachments are an iOS 7 MessageUI API; the shared Swift module has one namespace | `isAvailableAsync` and `composeAsync` use `MFMailComposeViewController.canSendMail` and the compose sheet, both present on iOS 6; a request with attachments rejects with an exception that names iOS 7; interactive sheet dismissal is absent |
+| expo-sms | the unused `UniformTypeIdentifiers` import; the iOS 7 MMS attachments are guarded | the framework is iOS 14; attachments are an iOS 7 MessageUI API | `isAvailableAsync` and `sendSMSAsync` use `MFMessageComposeViewController.canSendText` and the compose sheet, both present on iOS 6; a request with attachments rejects with an exception that names iOS 7 |
 
 ## AVIF and SVG decision (2026-11-16)
 

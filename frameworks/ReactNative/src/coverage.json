@@ -756,9 +756,9 @@
    "group": "sdk",
    "version": "~57.0.2",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "MessageUI (MFMessageComposeViewController) is present in the iOS 6.1.3 cache. Not built."
+   "status": "real",
+   "verified": "build",
+   "note": "Recipe packages/e/expo-sms (npm 57.0.2, patch sms-ios6.patch) installs and its patch applies; compiled into the host alongside expo-mail-composer (links, not exercised on the phone). The patch drops the unused iOS 14 UniformTypeIdentifiers import and guards the iOS 7 MMS attachments, so a request with attachments rejects with an exception that names iOS 7. MFMessageComposeViewController.canSendText and the compose sheet are MessageUI APIs present on iOS 6."
   },
   {
    "id": "expo-speech",
