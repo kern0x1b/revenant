@@ -1,3 +1,4 @@
+#include "xl_diag.h"
 #include "xl_state.h"
 #include "xl_vm_map.h"
 
@@ -68,10 +69,8 @@ static uint32_t xl_threads_stack_live;
 
 int xl_stats_enabled(void)
 {
-    static int enabled = -1;
-    if (enabled < 0)
-        enabled = getenv("XL_STATS") != NULL || access("/private/var/revenant/xl-stats", F_OK) == 0;
-    return enabled;
+    static struct xl_diag_flag stats = {"xl-stats", 0};
+    return xl_diag_on(&stats);
 }
 
 static void xl_threads_report(const char *what, size_t stack, size_t host_stack)
@@ -288,25 +287,19 @@ State *xl_current_state(void)
     return state;
 }
 
-#define XL_LOG_DIR "/private/var/revenant/"
 #define XL_LOG_LIMIT (1 << 20)
 
 int xl_log_enabled(void)
 {
-    static int enabled = -1;
-    if (enabled < 0)
-        enabled = getenv("XL_LOG") != NULL || access(XL_LOG_DIR "xl-log", F_OK) == 0;
-    return enabled;
+    static struct xl_diag_flag logging = {"xl-log", 0};
+    return xl_diag_on(&logging);
 }
 
 int xl_log_open(const char *name)
 {
     if (!xl_log_enabled())
         return -1;
-    char file[128];
-    strlcpy(file, XL_LOG_DIR, sizeof file);
-    strlcat(file, name, sizeof file);
-    int fd = open(file, O_WRONLY | O_CREAT | O_APPEND, 0666);
+    int fd = xl_diag_open(name, O_APPEND);
     struct stat info;
     if (fd >= 0 && fstat(fd, &info) == 0 && info.st_size > XL_LOG_LIMIT)
         ftruncate(fd, 0);

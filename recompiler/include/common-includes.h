@@ -1,3 +1,6 @@
+#ifndef XL_COMMON_INCLUDES_H
+#define XL_COMMON_INCLUDES_H
+
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -92,3 +95,5 @@ extern const char *__progname;
 extern const struct dispatch_source_type_s _dispatch_source_type_vm;
 
 extern unsigned long xl_guest_image_low, xl_guest_image_high, xl_guest_arena_low, xl_guest_arena_high;
+
+#endif

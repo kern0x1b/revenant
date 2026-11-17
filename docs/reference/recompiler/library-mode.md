@@ -369,8 +369,16 @@ turns on the files that every process used to append to: `xlate-crash.log` (the 
 exception), `xlate-variant-miss.log` and `xlate-nobridge.log`.
 A file bigger than 1 MiB is emptied when the next process opens it, so none of them grows without bound. With
 the switch off the crash handler prints to stderr, which is where the test below reads it. The files that had a switch
-of their own (`xl-trace`, whose ARC lines are now events of the journal below, `xl-collect`, `xl-shadow-log`, `xl-trace-errno`, `xl-sysctl-trace` (a line of `xl-sysctl.log` for each of the first 50 `sysctl`/`sysctlbyname` calls and for every thousandth after them: the name, the class the bridge translates it as, the length before and after, the result and `errno`), `xl-memlog`, `xl-exp-guide-superview`,
-`xl-stubs.txt`, `XL_INIT_TRACE`) still need it and are not limited by `XL_LOG`. The library test crashes the host with the
+of their own (`xl-trace`, whose ARC lines are now events of the journal below, `xl-collect`, `xl-shadow-log`, `xl-trace-errno`, `xl-sysctl-trace` (a line of `xl-sysctl.log` for each of the first 50 `sysctl`/`sysctlbyname` calls and for every thousandth after them: the name, the class the bridge translates it as, the length before and after, the result and `errno`), `xl-init-trace`) still need it and are not limited by `XL_LOG`.
+
+Every one of these switches is read by one function, `xl_diag_on` of `src/runtime/xl_diag.h`, and every file the runtime
+writes under `/private/var/revenant` is opened by its `xl_diag_open`: a switch named `xl-<thing>` is on when the
+environment has `XL_<THING>` (the name in capitals, `-` as `_`) or the phone has the file
+`/private/var/revenant/xl-<thing>`; the answer is read once per process, with atomic loads and stores, so every thread
+sees the same one, and a file or a variable that appears later does not change a running process. No other path or
+variable switches the runtime's behaviour: the experiment hooks `xl-memlog`, `xl-exp-null-missing`,
+`xl-exp-guide-superview`, `xl-no-layout-super`, `xl-fault-ends-thread`, `xl-stubs.txt` and `xl-watch` that changed
+what the guest sees or watched memory words were removed. The library test crashes the host with the
 switch (the crash handler's file has the `xlate: signal 6` lines) and without it (the lines are on stderr and the file
 is not created).
 

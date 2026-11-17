@@ -1,3 +1,4 @@
+#include "xl_diag.h"
 #include "xl_guest_image.h"
 
 #include <dlfcn.h>
@@ -149,7 +150,8 @@ void xl_library_ensure(void)
 
 int xl_library_init(void)
 {
-    if (getenv("XL_CRASH") || access("/private/var/revenant/xl-crash", F_OK) == 0)
+    static struct xl_diag_flag crash = {"xl-crash", 0};
+    if (xl_diag_on(&crash))
         xl_install_diagnostics();
     if (xl_stats_enabled())
         xl_profile_start();

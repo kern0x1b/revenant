@@ -9,6 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "xl_diag.h"
 #include "xl_proxy.h"
 
 struct xl_journal_entry {
@@ -171,11 +172,12 @@ static void xl_journal_signal(int signal_number)
 
 static void xl_journal_setup(void)
 {
-    if (!getenv("XL_POOLCHECK") && access("/private/var/revenant/xl-poolcheck", F_OK) != 0) {
+    static struct xl_diag_flag poolcheck = {"xl-poolcheck", 0};
+    if (!xl_diag_on(&poolcheck)) {
         xl_journal_state = 2;
         return;
     }
-    xl_journal_fd = open("/private/var/revenant/xl-journal.log", O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    xl_journal_fd = xl_diag_open("xl-journal.log", O_TRUNC);
     struct sigaction action;
     memset(&action, 0, sizeof action);
     action.sa_handler = xl_journal_signal;

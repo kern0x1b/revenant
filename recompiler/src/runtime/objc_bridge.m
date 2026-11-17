@@ -7,10 +7,12 @@
 #include <Block.h>
 
 #include "xl_bridge.h"
+#include "xl_diag.h"
 #include "xl_host.h"
 #include "xl_dlsym.h"
 
 #include <pthread.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -101,27 +103,6 @@ static void xl_setup_application(void)
     NSSetUncaughtExceptionHandler(xl_uncaught);
     xl_load_rules();
     xl_wrap_layout_subviews();
-    FILE *stubs = fopen("/private/var/revenant/xl-stubs.txt", "r");
-    if (stubs) {
-        char line[256];
-        while (fgets(line, sizeof line, stubs)) {
-            char cls[128], sel[128];
-            char kind = line[0];
-            if ((kind != '+' && kind != '-' && kind != '=' && kind != '#') || sscanf(line + 1, "%127s %127s", cls, sel) != 2)
-                continue;
-            Class target = objc_getClass(cls);
-            if ((kind == '+' || kind == '#') && target)
-                target = object_getClass(target);
-            SEL selector = sel_registerName(sel);
-            if (!target || ((kind == '+' || kind == '-') && class_getInstanceMethod(target, selector)))
-                continue;
-            IMP nothing = imp_implementationWithBlock(^id(id self_) { return nil; });
-            class_replaceMethod(target, selector, nothing, "@@:");
-            int fd = open("/private/var/revenant/xl-hooks.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
-            if (fd >= 0) { dprintf(fd, "stub %c%s %s\n", kind, cls, sel); close(fd); }
-        }
-        fclose(stubs);
-    }
 }
 
 static void xl_setup(void)
@@ -180,8 +161,8 @@ void xl_register_application_classes(void)
 void xl_run_initializers(void)
 {
     xl_bridge_init();
-    int trace = getenv("XL_INIT_TRACE") ? open("/private/var/revenant/init-trace.log",
-                                               O_WRONLY | O_CREAT | O_TRUNC, 0666) : -1;
+    static struct xl_diag_flag init_trace = {"xl-init-trace", 0};
+    int trace = xl_diag_on(&init_trace) ? xl_diag_open("init-trace.log", O_TRUNC) : -1;
     for (uint32_t i = 0; i < xl_initializer_count; i++) {
         if (trace >= 0)
             dprintf(trace, "init %u/%u guest=0x%x\n", i, xl_initializer_count, xl_initializers[i]);
@@ -324,12 +305,24 @@ static uint32_t xl_nobridge_seen(Class lookup, SEL selector)
     return seen;
 }
 
+static void xl_collect_note(const char *format, ...) __attribute__((format(printf, 1, 2)));
+
+static void xl_collect_note(const char *format, ...)
+{
+    int descriptor = xl_diag_open("xlate-missing.log", O_APPEND);
+    if (descriptor < 0)
+        return;
+    va_list arguments;
+    va_start(arguments, format);
+    vdprintf(descriptor, format, arguments);
+    va_end(arguments);
+    close(descriptor);
+}
+
 static int xl_collect_enabled(void)
 {
-    static int enabled = -1;
-    if (enabled < 0)
-        enabled = getenv("XL_COLLECT") != NULL || access("/private/var/revenant/xl-collect", F_OK) == 0;
-    return enabled;
+    static struct xl_diag_flag collect = {"xl-collect", 0};
+    return xl_diag_on(&collect);
 }
 
 #define XL_STATS_SLOTS 256
@@ -589,8 +582,7 @@ static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp,
             }
         }
         if (xl_collect_enabled()) {
-            FILE *log = fopen("/private/var/revenant/xlate-missing.log", "a");
-            if (log) { fprintf(log, "-[%s %s]\n", class_getName(lookup), sel_getName(selector)); fclose(log); }
+            xl_collect_note("-[%s %s]\n", class_getName(lookup), sel_getName(selector));
             return 0;
         }
         return XL_NO_BRIDGE;
@@ -752,102 +744,15 @@ static void xl_dynamic_send(State *state, id receiver, Method method, SEL select
     xl_return(state);
 }
 
-#define XL_WATCH_FILE "/private/var/revenant/xl-watch"
-#define XL_WATCH_LIMIT 16
+static struct xl_diag_flag xl_trace_flag = {"xl-trace", 0};
+static struct xl_diag_flag xl_trace_rc_flag = {"xl-trace-rc", 0};
+static pthread_once_t xl_trace_once = PTHREAD_ONCE_INIT;
+static int xl_trace_fd = -1;
 
-static int xl_watch_ready;
-static char xl_watch_selector[96];
-static char xl_watch_thunk_selector[96];
-static unsigned xl_watch_offset;
-static int xl_watch_fd = -1;
-static uintptr_t xl_watched[XL_WATCH_LIMIT];
-static uint32_t xl_watched_word[XL_WATCH_LIMIT];
-static int xl_watched_count;
-
-void xl_watch_log(const char *format, ...) __attribute__((format(printf, 1, 2)));
-
-#define xl_watch_line xl_watch_log
-
-void xl_watch_log(const char *format, ...)
+static void xl_trace_open(void)
 {
-    char line[512];
-    va_list arguments;
-    va_start(arguments, format);
-    int n = vsnprintf(line, sizeof line, format, arguments);
-    va_end(arguments);
-    if (n < 0)
-        return;
-    if (n > (int)sizeof line - 2)
-        n = (int)sizeof line - 2;
-    line[n++] = '\n';
-    write(2, line, n);
-    if (xl_watch_fd >= 0)
-        write(xl_watch_fd, line, n);
-}
-
-static int xl_watch_enabled(void)
-{
-    if (xl_watch_ready)
-        return xl_watch_ready > 0;
-    xl_watch_ready = -1;
-    FILE *file = fopen(XL_WATCH_FILE, "r");
-    if (!file)
-        return 0;
-    char selector[sizeof xl_watch_selector], thunk[sizeof xl_watch_thunk_selector];
-    unsigned offset = 0;
-    thunk[0] = 0;
-    int read = fscanf(file, "%95s %u %95s", selector, &offset, thunk);
-    fclose(file);
-    if (read < 1)
-        return 0;
-    strlcpy(xl_watch_selector, selector, sizeof xl_watch_selector);
-    strlcpy(xl_watch_thunk_selector, read == 3 ? thunk : "", sizeof xl_watch_thunk_selector);
-    xl_watch_offset = read >= 2 ? offset : 16;
-    xl_watch_fd = open("/private/var/revenant/xlate-watch.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
-    xl_watch_ready = 1;
-    xl_watch_line("xl-watch: watching the word at +%u of every receiver of %s, and the calls of the host into the guest of %s", xl_watch_offset, xl_watch_selector,
-                  xl_watch_thunk_selector[0] ? xl_watch_thunk_selector : "(none)");
-    return 1;
-}
-
-int xl_watch_thunk_wanted(SEL selector)
-{
-    if (xl_watch_ready < 0 || !xl_watch_enabled() || !xl_watch_thunk_selector[0])
-        return 0;
-    const char *name = sel_getName(selector);
-    return name && !strcmp(name, xl_watch_thunk_selector);
-}
-
-static void xl_watch_note(State *state, id receiver, SEL selector, const char *kind)
-{
-    if (!xl_watch_enabled())
-        return;
-    const char *name = sel_getName(selector);
-    for (int i = 0; i < xl_watched_count; i++) {
-        uint32_t word = *(volatile uint32_t *)(xl_watched[i] + xl_watch_offset);
-        if (word != xl_watched_word[i]) {
-            xl_watch_line("xl-watch: the word at +%u of %p changed 0x%x -> 0x%x before %s %s on %p (%s), guest return address 0x%llx",
-                          xl_watch_offset, (void *)xl_watched[i], xl_watched_word[i], word, kind, name ? name : "?", (void *)receiver,
-                          receiver ? object_getClassName(receiver) : "nil", (unsigned long long)XL_REG(state, X30));
-            xl_watched_word[i] = word;
-        }
-    }
-    if (!receiver || !name || strcmp(name, xl_watch_selector))
-        return;
-    for (int i = 0; i < xl_watched_count; i++) {
-        if (xl_watched[i] == (uintptr_t)receiver)
-            return;
-    }
-    uint32_t *words = (uint32_t *)receiver;
-    xl_watch_line("xl-watch: %s %s on %p (%s), raw arguments x2=0x%llx x3=0x%llx x4=0x%llx x5=0x%llx, words %08x %08x %08x %08x %08x %08x, guest return address 0x%llx",
-                  kind, name, (void *)receiver, object_getClassName(receiver), (unsigned long long)XL_REG(state, X2), (unsigned long long)XL_REG(state, X3),
-                  (unsigned long long)XL_REG(state, X4), (unsigned long long)XL_REG(state, X5), words[0], words[1], words[2], words[3], words[4], words[5],
-                  (unsigned long long)XL_REG(state, X30));
-    if (xl_watched_count < XL_WATCH_LIMIT) {
-        xl_watched[xl_watched_count] = (uintptr_t)receiver;
-        xl_watched_word[xl_watched_count] = *(volatile uint32_t *)((uintptr_t)receiver + xl_watch_offset);
-        xl_watched_count++;
-    }
+    if (xl_diag_on(&xl_trace_flag))
+        xl_trace_fd = xl_diag_open("xlate-msgtrace.log", O_APPEND);
 }
 
 void xl_h_objc_msgSend(State *state)
@@ -868,36 +773,11 @@ void xl_h_objc_msgSend(State *state)
         xl_return(state);
         return;
     }
-    static int stats_on = -1;
-    if (stats_on < 0)
-        stats_on = xl_stats_enabled();
-    uint64_t stats_started = stats_on ? mach_absolute_time() : 0;
+    uint64_t stats_started = xl_stats_enabled() ? mach_absolute_time() : 0;
     id receiver = (id)xl_narrow_pointer(self, "objc_msgSend", 0);
     SEL selector = (SEL)(uintptr_t)XL_REG(state, X1);
-    if (xl_watch_ready >= 0)
-        xl_watch_note(state, receiver, selector, "message");
-    static int xl_trace_flags = -1;
-    static int xl_trace_fd = -1;
-    int trace_flags = __atomic_load_n(&xl_trace_flags, __ATOMIC_ACQUIRE);
-    if (trace_flags < 0) {
-        static pthread_mutex_t xl_trace_lock = PTHREAD_MUTEX_INITIALIZER;
-        pthread_mutex_lock(&xl_trace_lock);
-        trace_flags = __atomic_load_n(&xl_trace_flags, __ATOMIC_ACQUIRE);
-        if (trace_flags < 0) {
-            trace_flags = 0;
-            if (access("/private/var/revenant/xl-trace", F_OK) == 0) {
-                int fd = open("/private/var/revenant/xlate-msgtrace.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
-                if (fd >= 0) {
-                    xl_trace_fd = fd;
-                    trace_flags = 1;
-                    if (access("/private/var/revenant/xl-trace-rc", F_OK) == 0)
-                        trace_flags |= 2;
-                }
-            }
-            __atomic_store_n(&xl_trace_flags, trace_flags, __ATOMIC_RELEASE);
-        }
-        pthread_mutex_unlock(&xl_trace_lock);
-    }
+    pthread_once(&xl_trace_once, xl_trace_open);
+    int trace_flags = xl_trace_fd >= 0 ? 1 | (xl_diag_on(&xl_trace_rc_flag) ? 2 : 0) : 0;
     if (trace_flags & 1) {
         int xl_tfd = xl_trace_fd;
         if (xl_tfd >= 0) {
@@ -1036,8 +916,6 @@ void xl_h_objc_msgSendSuper2(State *state)
     id receiver = (id)xl_narrow_pointer(guest_receiver, "objc_msgSendSuper2", 1);
     Class current = xl_class_in(guest_super[1]);
     SEL selector = (SEL)(uintptr_t)XL_REG(state, X1);
-    if (xl_watch_ready >= 0)
-        xl_watch_note(state, receiver, selector, "super message");
     if (selector == @selector(dealloc))
         xl_swift_super_dealloc(receiver, current);
     uint64_t target = xl_route(state, class_getSuperclass(current), selector, receiver, current);
@@ -1057,9 +935,8 @@ void xl_h_objc_msgSendSuper2(State *state)
 void xl_h_xl_unsupported(State *state)
 {
     const char *message = (const char *)xl_narrow_pointer(XL_REG(state, X0), "xl_unsupported", 0);
-    if (access("/private/var/revenant/xl-collect", F_OK) == 0) {
-        FILE *log = fopen("/private/var/revenant/xlate-missing.log", "a");
-        if (log) { fprintf(log, "C %s\n", message); fclose(log); }
+    if (xl_collect_enabled()) {
+        xl_collect_note("C %s\n", message);
         xl_zero_result(state);
         xl_return(state);
         return;

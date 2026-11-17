@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 
 #include "xl_bridge.h"
+#include "xl_diag.h"
 
 State *xl_current_state(void);
 
@@ -110,17 +111,18 @@ void _dyld_register_func_for_add_image(void (*func)(const struct mach_header *mh
 #endif
 }
 
+static struct xl_diag_flag xl_errno_trace_flag = {"xl-trace-errno", 0};
+
 int xl_shim_openat(int dirfd, const char *path, int flags, int mode)
 {
-    static int trace = -1;
-    if (trace < 0)
-        trace = access("/private/var/revenant/xl-trace-errno", F_OK) == 0;
-    if (trace && (flags & O_CREAT)) {
-        int fd = open("/private/var/revenant/xl-errno.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+    if (xl_diag_on(&xl_errno_trace_flag) && (flags & O_CREAT)) {
+        int fd = xl_diag_open("xl-errno.log", O_APPEND);
         if (fd >= 0) { dprintf(fd, "openat O_CREAT dirfd=%d [%s] flags=0x%x mode=0%o\n", dirfd, path ? path : "(null)", flags, mode); close(fd); }
     }
-    if (!path)
-        return open(path, flags, mode);
+    if (!path) {
+        errno = EFAULT;
+        return -1;
+    }
     if (path[0] == '/' || dirfd == AT_FDCWD)
         return open(path, flags, mode);
     char dir[PATH_MAX];
@@ -155,14 +157,17 @@ static int xl_at_path(int dirfd, const char *path, char *out)
     return 0;
 }
 
+#define XL_AT_SYMLINK_NOFOLLOW 0x0020
+#define XL_AT_REMOVEDIR 0x0080
+
 #define XL_AT(fd, path, body) do { char full_[PATH_MAX]; if (xl_at_path((fd), (path), full_) == -1) return -1; return (body); } while (0)
 
 int xl_shim_mkdirat(int fd, const char *path, mode_t mode) { XL_AT(fd, path, mkdir(full_, mode)); }
-int xl_shim_unlinkat(int fd, const char *path, int flag) { XL_AT(fd, path, (flag & 0x0080 ) ? rmdir(full_) : unlink(full_)); }
-int xl_shim_fstatat(int fd, const char *path, struct stat *st, int flag) { XL_AT(fd, path, (flag & 0x0020 ) ? lstat(full_, st) : stat(full_, st)); }
+int xl_shim_unlinkat(int fd, const char *path, int flag) { XL_AT(fd, path, (flag & XL_AT_REMOVEDIR) ? rmdir(full_) : unlink(full_)); }
+int xl_shim_fstatat(int fd, const char *path, struct stat *st, int flag) { XL_AT(fd, path, (flag & XL_AT_SYMLINK_NOFOLLOW) ? lstat(full_, st) : stat(full_, st)); }
 ssize_t xl_shim_readlinkat(int fd, const char *path, char *buf, size_t size) { char full_[PATH_MAX]; if (xl_at_path(fd, path, full_) == -1) return -1; return readlink(full_, buf, size); }
-int xl_shim_fchmodat(int fd, const char *path, mode_t mode, int flag) { XL_AT(fd, path, (flag & 0x0020) ? lchmod(full_, mode) : chmod(full_, mode)); }
-int xl_shim_fchownat(int fd, const char *path, uid_t uid, gid_t gid, int flag) { XL_AT(fd, path, (flag & 0x0020) ? lchown(full_, uid, gid) : chown(full_, uid, gid)); }
+int xl_shim_fchmodat(int fd, const char *path, mode_t mode, int flag) { XL_AT(fd, path, (flag & XL_AT_SYMLINK_NOFOLLOW) ? lchmod(full_, mode) : chmod(full_, mode)); }
+int xl_shim_fchownat(int fd, const char *path, uid_t uid, gid_t gid, int flag) { XL_AT(fd, path, (flag & XL_AT_SYMLINK_NOFOLLOW) ? lchown(full_, uid, gid) : chown(full_, uid, gid)); }
 int xl_shim_faccessat(int fd, const char *path, int mode, int flag) { XL_AT(fd, path, access(full_, mode)); }
 
 int xl_shim_renameat(int ofd, const char *opath, int nfd, const char *npath)
@@ -229,7 +234,7 @@ void xl_manual_utimensat(void *pack)
             tv[i].tv_usec = (int)(gt[i].nsec / 1000);
         }
     }
-    p->r = (uint64_t)(int64_t)((p->flag & 0x0020) ? lutimes(full_, tv) : utimes(full_, tv));
+    p->r = (uint64_t)(int64_t)((p->flag & XL_AT_SYMLINK_NOFOLLOW) ? lutimes(full_, tv) : utimes(full_, tv));
 }
 
 struct xl_gdirent {
@@ -385,7 +390,7 @@ int xl_shim_sqlite3_bind_text64(struct sqlite3_stmt *stmt, int index, const char
             destructor((void *)data);
         return SQLITE_TOOBIG;
     }
-    if (encoding == SQLITE_UTF16 || encoding == 3  || encoding == 4 )
+    if (encoding == SQLITE_UTF16 || encoding == SQLITE_UTF16LE || encoding == SQLITE_UTF16BE)
         return sqlite3_bind_text16(stmt, index, data, (int)n, destructor);
     return sqlite3_bind_text(stmt, index, data, (int)n, destructor);
 }
@@ -398,10 +403,7 @@ void xl_errno_trace(const char *name, int64_t result, uint64_t first_argument, u
     if (result != -1)
         return;
     int saved = errno;
-    static int enabled = -1;
-    if (enabled < 0)
-        enabled = access("/private/var/revenant/xl-trace-errno", F_OK) == 0;
-    if (enabled) {
+    if (xl_diag_on(&xl_errno_trace_flag)) {
         static int devnull = -1;
         if (devnull < 0)
             devnull = open("/dev/null", O_WRONLY);
@@ -417,7 +419,7 @@ void xl_errno_trace(const char *name, int64_t result, uint64_t first_argument, u
                 text[k][n] = 0;
             }
         }
-        int fd = open("/private/var/revenant/xl-errno.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+        int fd = xl_diag_open("xl-errno.log", O_APPEND);
         if (fd >= 0) {
             dprintf(fd, "%s errno=%d a0=0x%llx [%s] a1=0x%llx [%s]\n", name, saved, (unsigned long long)first_argument, text[0],
                     (unsigned long long)second_argument, text[1]);
@@ -770,8 +772,14 @@ void xl_manual___cxa_atexit(void *pack)
     struct __attribute__((packed)) { uint64_t a0, a1, a2, r; } *p = pack;
     pthread_mutex_lock(&xl_cxa_lock);
     if (xl_cxa_count == xl_cxa_cap) {
-        xl_cxa_cap = xl_cxa_cap ? xl_cxa_cap * 2 : 128;
-        xl_cxa_list = realloc(xl_cxa_list, xl_cxa_cap * sizeof *xl_cxa_list);
+        unsigned grown = xl_cxa_cap ? xl_cxa_cap * 2 : 128;
+        struct xl_cxa_entry *list = realloc(xl_cxa_list, grown * sizeof *xl_cxa_list);
+        if (!list) {
+            pthread_mutex_unlock(&xl_cxa_lock);
+            xl_unsupported("__cxa_atexit: no memory for the destructor list");
+        }
+        xl_cxa_list = list;
+        xl_cxa_cap = grown;
     }
     xl_cxa_list[xl_cxa_count].func = p->a0;
     xl_cxa_list[xl_cxa_count].arg = p->a1;
