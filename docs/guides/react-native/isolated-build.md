@@ -55,7 +55,7 @@ find the package modules such as Combine.
 The build is made against the stubs of the Expo modules. A module you are porting is built as real by naming it:
 `--real expo-battery` for Expo packages (comma separated), `--pods react-native-pager-view:RNCViewPager` for community libraries
 (`package:codegenModule`). The community pods named in the application's manifest (`build/app-manifest/host.json`, made from
-`rn-spike/host.json`) are built as real without `--pods`; `--pods` replaces that list. The command prints the exit code, the log
+`manifest/host.json` of paseo-app) are built as real without `--pods`; `--pods` replaces that list. The command prints the exit code, the log
 path and the errors it holds. The log is `<folder>/build/isolated.log` unless `--log` names another file. The sources of a
 module come from its package in `packages/`, never from another worker's folder.
 
