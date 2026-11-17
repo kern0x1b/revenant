@@ -141,7 +141,18 @@ public func _runTest<T: XCTestCase>(_ type: T.Type, _ testName: String, _ body: 
 
 public func _finishTests() -> Int32 {
     print("Executed \(_xctStats.tests) tests, with \(_xctStats.failures) failures (\(_xctStats.failedTests) tests failed), \(_xctStats.skipped) skipped")
-    return _xctStats.failedTests == 0 ? 0 : 1
+    if _xctStats.tests == 0 {
+        print("no test executed: a run emptied by filter, resume or skip is not a pass")
+        return 1
+    }
+    if _xctStats.failedTests != 0 {
+        return 1
+    }
+    if _xctStats.skipped != 0 {
+        print("\(_xctStats.skipped) test(s) skipped: a run with skips is not a pass")
+        return 1
+    }
+    return 0
 }
 
 private func msg(_ m: () -> String) -> String { let s = m(); return s.isEmpty ? "" : " - \(s)" }
