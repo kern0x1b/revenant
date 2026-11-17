@@ -71,7 +71,12 @@ function main(folder, skipfile)
     local skipped = {}
     if skipfile then
         for line in io.readfile(skipfile):gmatch("[^\n]+") do
-            skipped[line:trim()] = true
+            local text = line:trim()
+            if text ~= "" and not text:startswith("#") then
+                local name, reason = text:match("^(%S+)%s+(.+)$")
+                assert(name and reason, "%s: skip entry %q needs a reason", skipfile, text)
+                skipped[name] = true
+            end
         end
     end
     local files = os.files(path.join(folder, "**Tests.swift"))
