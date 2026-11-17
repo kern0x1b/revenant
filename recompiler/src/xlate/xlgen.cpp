@@ -482,6 +482,7 @@ class Generator {
   std::vector<std::pair<std::string, uint64_t>> imp_map_;
   unsigned counter_ = 0;
   unsigned unsupported_ = 0;
+  unsigned weak_unbound_ = 0;
   std::map<std::string, QualType> guest_records_;
   std::map<std::string, QualType> host_records_;
   std::string guest_record_defs_;
@@ -1552,10 +1553,11 @@ std::string Generator::EmitBridge(const std::string &id, const Signature &signat
 void Generator::Fault(const std::string &symbol, const std::string &reason) {
   bool weak = weak_only_.count(symbol);
   Report(symbol + ": UNSUPPORTED: " + reason + (weak ? " (weak import, left unbound)" : ""));
-  ++unsupported_;
   if (weak) {
+    ++weak_unbound_;
     return;
   }
+  ++unsupported_;
   auto label = "xl_message_" + std::to_string(counter_++);
   std::string message = symbol.substr(1) + ": " + reason;
   guest_ += "__attribute__((used)) static const char " + label + "[] __asm(\"_" + label + "\") = \"" + message + "\";\n";
@@ -2893,7 +2895,7 @@ bool Generator::Write() {
     return false;
   }
   report << report_.str();
-  errs() << "xlgen: " << unsupported_ << " unsupported items, see " << ReportOut << "\n";
+  errs() << "xlgen: " << unsupported_ << " unsupported items, " << weak_unbound_ << " weak imports left unbound, see " << ReportOut << "\n";
   return true;
 }
 
