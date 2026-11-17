@@ -1,4 +1,5 @@
 #import <AVFAudio/AVSpeechSynthesis.h>
+#import "RevenantVoiceServices.h"
 #include <dlfcn.h>
 
 @protocol RevenantVoiceServicesListing <NSObject>
@@ -6,7 +7,7 @@
 + (NSArray *)availableVoicesForLanguageCode:(NSString *)languageCode;
 @end
 
-static NSString *const RevenantVoiceServicesPath = @"/System/Library/PrivateFrameworks/VoiceServices.framework/VoiceServices";
+NSString *const RevenantVoiceServicesPath = @"/System/Library/PrivateFrameworks/VoiceServices.framework/VoiceServices";
 
 static NSDictionary *RevenantHostIdentifiers(void)
 {
