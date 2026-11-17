@@ -567,9 +567,9 @@
    "group": "sdk",
    "version": "~57.0.2",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "MessageUI (MFMailComposeViewController) is present in the iOS 6.1.3 cache. Not built."
+   "status": "real",
+   "verified": "build",
+   "note": "Recipe packages/e/expo-mail-composer (npm 57.0.2, patch mail-composer-ios6.patch) installs and its patch applies; compiled into the host (links, not exercised on the phone). The patch drops the iOS 13 UIAdaptivePresentationControllerDelegate and the iOS 8 presentationController hook (no interactive sheet dismissal before iOS 13), guards the iOS 7 attachments so a request with attachments rejects with an exception that names iOS 7, and renames four symbols that collide inside ExpoAppModules. canSendMail, the mail clients, MFMailComposeViewController and UIApplication.canOpenURL are MessageUI and UIKit APIs present on iOS 6."
   },
   {
    "id": "expo-manifests",

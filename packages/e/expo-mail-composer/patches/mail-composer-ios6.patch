@@ -1,0 +1,102 @@
+diff -ru a/ios/MailComposerExceptions.swift b/ios/MailComposerExceptions.swift
+--- a/ios/MailComposerExceptions.swift	2026-11-17 18:37:26
++++ b/ios/MailComposerExceptions.swift	2026-11-17 19:48:05
+@@ -15,7 +15,7 @@
+   }
+ }
+ 
+-internal final class MissingViewControllerException: Exception {
++internal final class MailMissingViewControllerException: Exception {
+   override var reason: String {
+     "Unable to find the current view controller to present the compose view controller"
+   }
+@@ -33,14 +33,20 @@
+   }
+ }
+ 
+-internal final class FileSystemNotFoundException: Exception {
++internal final class MailFileSystemNotFoundException: Exception {
+   override var reason: String {
+     "FileSystem module not found, make sure 'expo-file-system' is linked correctly"
+   }
+ }
+ 
+-internal final class FileSystemReadPermissionException: GenericException<String> {
++internal final class MailFileSystemReadPermissionException: GenericException<String> {
+   override var reason: String {
+     "File '\(param)' is not readable"
++  }
++}
++
++internal final class AttachmentsUnavailableException: Exception {
++  override var reason: String {
++    "Email attachments need iOS 7; this iOS has none"
+   }
+ }
+diff -ru a/ios/MailComposingSession.swift b/ios/MailComposingSession.swift
+--- a/ios/MailComposingSession.swift	2026-11-17 18:37:26
++++ b/ios/MailComposingSession.swift	2026-11-17 19:48:32
+@@ -4,7 +4,7 @@
+ import MobileCoreServices
+ import ExpoModulesCore
+ 
+-internal final class MailComposingSession: NSObject, MFMailComposeViewControllerDelegate, UIAdaptivePresentationControllerDelegate {
++internal final class MailComposingSession: NSObject, MFMailComposeViewControllerDelegate {
+   typealias ComposingCallback = (Result<[String: String], Exception>) -> ()
+ 
+   let appContext: AppContext
+@@ -27,14 +27,17 @@
+     composeController.setMessageBody(options.body, isHTML: options.isHtml)
+ 
+     if let attachments = options.attachments {
++      guard #available(iOS 7, *) else {
++        throw AttachmentsUnavailableException()
++      }
+       guard let fileSystem = appContext.fileSystem else {
+-        throw FileSystemNotFoundException()
++        throw MailFileSystemNotFoundException()
+       }
+       for attachment in attachments {
+         guard fileSystem.permissions(forURI: attachment).contains(.read) else {
+-          throw FileSystemReadPermissionException(attachment.path)
++          throw MailFileSystemReadPermissionException(attachment.path)
+         }
+-        let mimeType = findMimeType(forAttachment: attachment)
++        let mimeType = mailComposerMimeType(forAttachment: attachment)
+         let fileData = try Data(contentsOf: attachment)
+         composeController.addAttachmentData(fileData, mimeType: mimeType, fileName: attachment.lastPathComponent)
+       }
+@@ -43,13 +46,10 @@
+ 
+   func presentViewController(_ callback: @escaping ComposingCallback) {
+     guard let currentViewController = appContext.utilities?.currentViewController() else {
+-      callback(.failure(MissingViewControllerException()))
++      callback(.failure(MailMissingViewControllerException()))
+       return
+     }
+     self.callback = callback
+-    if let presentationController = composeController.presentationController {
+-      presentationController.delegate = self
+-    }
+     currentViewController.present(composeController, animated: true)
+   }
+ 
+@@ -74,17 +74,9 @@
+       }
+     }
+   }
+-
+-  // MARK: - UIAdaptivePresentationControllerDelegate
+-  func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+-    guard let callback = self.callback else {
+-      return
+-    }
+-    callback(.success(["status": "cancelled"]))
+-  }
+ }
+ 
+-private func findMimeType(forAttachment attachment: URL) -> String {
++private func mailComposerMimeType(forAttachment attachment: URL) -> String {
+   if let identifier = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, attachment.pathExtension as CFString, nil)?.takeRetainedValue(),
+      let type = UTTypeCopyPreferredTagWithClass(identifier, kUTTagClassMIMEType)?.takeRetainedValue() {
+     return type as String

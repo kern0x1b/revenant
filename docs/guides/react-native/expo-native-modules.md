@@ -40,6 +40,15 @@ exercised, so the rows are `partial`, `phone`.
 | expo-blur | `UIVisualEffectView` | iOS 8 | a Core Image Gaussian blur of a snapshot of the view behind, with a white or black tint; it is taken when the view is added, resized or its intensity changes and does not follow later changes behind it |
 | expo-screen-orientation | trait collections, window scenes, `requestGeometryUpdate`, the safe-area notch test; the `RNSScreenWindowTraits` protocol is declared in Swift | iOS 8, 13, 16, 11 | the status-bar orientation and the size classes of the device idiom (iPhone: portrait regular/compact, landscape compact/compact); on the 4S `getOrientationAsync` answered unknown at start |
 
+## MessageUI and printing (block 4)
+
+These packages are recipes with iOS 6 patches; each installs, its patch applies, and the host compiles and links it. None has been
+exercised on the phone, so their coverage rows are `real`, verified `build`.
+
+| Module | Removed or replaced | Why | What JS sees |
+| --- | --- | --- | --- |
+| expo-mail-composer | `UIAdaptivePresentationControllerDelegate`, the `presentationController` hook; the iOS 7 attachments are guarded; four names that collide inside `ExpoAppModules` are renamed | iOS 8, 13; attachments are an iOS 7 MessageUI API; the shared Swift module has one namespace | `isAvailableAsync` and `composeAsync` use `MFMailComposeViewController.canSendMail` and the compose sheet, both present on iOS 6; a request with attachments rejects with an exception that names iOS 7; interactive sheet dismissal is absent |
+
 ## AVIF and SVG decision (2026-11-16)
 
 - SVG: not feasible. SDWebImageSVGCoder renders through CoreSVG, which iOS 6 does not have. A different renderer would be a new
