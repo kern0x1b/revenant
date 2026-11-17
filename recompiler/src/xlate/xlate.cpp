@@ -1933,7 +1933,11 @@ bool EmitGuestImage(Program &program, Module &module, const Overrides &overrides
         continue;
       }
       std::vector<uint8_t> bytes(segment.vmsize);
-      image->ReadBytes(image->host(segment.vmaddr), bytes.data(), bytes.size());
+      if (segment.vmsize && !image->ReadBytes(image->host(segment.vmaddr), bytes.data(), bytes.size())) {
+        errs() << "xlate: " << image->path() << ": segment " << segment.name << " cannot be read\n";
+        ok = false;
+        continue;
+      }
       for (auto &[vmaddr, piece] : SegmentPieces(program, module, *image, segment, overrides, ok)) {
         uint64_t offset = vmaddr - segment.vmaddr;
         for (auto field : piece.fields) {
@@ -2072,7 +2076,11 @@ bool EmitGuestData(Program &program, Module &module, std::vector<GuestSegment> &
       }
       std::string host_name = HostSegmentName(image_index, merge_data, segment);
       std::vector<uint8_t> bytes(segment.vmsize);
-      image->ReadBytes(image->host(segment.vmaddr), bytes.data(), bytes.size());
+      if (segment.vmsize && !image->ReadBytes(image->host(segment.vmaddr), bytes.data(), bytes.size())) {
+        errs() << "xlate: " << image->path() << ": segment " << segment.name << " cannot be read\n";
+        ok = false;
+        continue;
+      }
       auto pieces = SegmentPieces(program, module, *image, segment, overrides, ok);
       std::vector<Constant *> fields;
       std::vector<Type *> types;
