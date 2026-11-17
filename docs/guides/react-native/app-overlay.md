@@ -9,7 +9,7 @@ packaging/    the project's Info.plist, control-rnhost and brand files
 overlay/      files that replace the same path in the application's tree
 ```
 
-`overlay.lua apply` clones the application with APFS clones (`cp -cR`, so no copy of `node_modules` is made) and copies
+`overlay.lua update` brings the checkout to the newest upstream, and `overlay.lua apply` clones the application with APFS clones (`cp -cR`, so no copy of `node_modules` is made) and copies
 `overlay/` over the clone. The checkout is never written. A file in `overlay/` that the application does not have stops the
 command: the overlay is for another version.
 
@@ -21,12 +21,21 @@ command: the overlay is for another version.
 `<project>` holds the project's `xmake.lua`, which includes the host, and a `packaging/` copied from the overlay. Nothing in
 revenant names an application; `examples/paseo` is the first one.
 
-## The Paseo example
+## The Paseo example: always the latest upstream
 
-- Checkout: `$HOME/Git/projects/ios/paseo`, the open-source repository https://github.com/getpaseo/paseo at tag `v0.14.0`
-  (commit 8c6de842a3157530c26a7a94c78a3d647fb96ce9), cloned shallow, read only: nothing is committed or pushed there and its
-  push url is unset. The tag is the version of the daemon the spike ran against; React Native 0.86.3 and Expo 57 are the same in
-  v0.13.2 to v0.16.1. `npm ci` runs in a clone of the checkout, never in the checkout.
+- Checkout: `$HOME/Git/projects/ios/paseo`, the open-source repository https://github.com/getpaseo/paseo, shallow, read only:
+  nothing is committed or pushed there and its push url is unset. Every build of Paseo starts with
+
+  ```sh
+  ./xmakew l -P . frameworks/ReactNative/tools/overlay.lua update $HOME/Git/projects/ios/paseo https://github.com/getpaseo/paseo [--main]
+  ```
+
+  which fetches, checks out the newest release tag detached (`--main`: the head of the default branch) and prints the tag and
+  commit, which the build's report records. It runs once per build; no daemon or schedule keeps it fresh. First run: v0.16.1,
+  commit c09a3d81e772a747dd11bca43d860f3518f07c2d.
+- A newer upstream that breaks the overlay (a patched file is gone, React Native or Expo changed) is a finding: the overlay in
+  `examples/paseo/` is corrected, never the checkout. `apply` stops when an overlay file has no counterpart.
+- `npm ci` runs in a clone of the checkout, never in the checkout.
 - `overlay/node_modules/react-native-unistyles/lib/module/core/useProxifiedUnistyles/listener.native.js` coalesces the theme and
   runtime events of Unistyles per microtask, so a theme change costs one `setState` per subscriber instead of one per event.
 - `host.json` carries the bundle id `space.kern0x1b.paseo-ios6.rnhost` and the community pods the application needs.
