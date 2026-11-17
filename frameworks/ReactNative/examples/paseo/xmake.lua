@@ -19,7 +19,6 @@ if os.getenv("RN_DEPS_REPO") then
     if os.getenv("RN_BACKPORTS") then
         add_requires("revenant@backports", {alias = "backports", configs = {libraries = "FoundationBackports,CoreTextBackports,UIKitBackports,UserNotificationsBackports,CoreGraphicsBackports,GraphicsBackports,CoreFoundationBackports,SystemBackports,IOSurfaceBackports,WebKitBackports,MapKitBackports,CoreLocationBackports,SecurityBackports"}})
     end
-    -- folly comes from the revenant tree at REVENANT_PATH (point it at the rn-deps worktree until it lands)
     add_requires("revenant@folly 2024.11.18.00", {alias = "folly"})
     add_requires("revenant@socketrocket 0.7.1", {alias = "socketrocket"})
 end
@@ -32,12 +31,10 @@ set_allowedplats("iphoneos")
 set_allowedarchs("iphoneos|armv7")
 set_defaultplat("iphoneos")
 set_defaultarchs("iphoneos|armv7")
--- RN_ONLY: the RN host has no Swift; skip the Swift apps and the runtime they need
 if not os.getenv("RN_ONLY") or os.getenv("RN_EXPO") then
     add_requires("revenant@swift-runtime", {alias = "swift-runtime"})
 end
 add_requires("revenant@libcxx", {alias = "libcxx"})
--- backport packages the Swift probes of the expo libraries import
 if os.getenv("RN_DEPS_REPO") and (not os.getenv("RN_ONLY") or os.getenv("RN_EXPO")) then
     for _, name in ipairs({"cryptokit", "combine", "swiftui", "uniformtypeidentifiers"}) do
         add_requires("revenant@" .. name, {alias = name})
