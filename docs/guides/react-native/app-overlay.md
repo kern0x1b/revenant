@@ -4,6 +4,7 @@ The React Native host builds any Expo application. The application is a read-onl
 is an overlay folder in `frameworks/ReactNative/examples/<name>/`:
 
 ```
+xmake.lua     the project's root: it includes the host from the revenant checkout (`REVENANT_PATH`)
 host.json     the manifest: bundleId, pods, optionalComponents (the --manifest of inputs.lua)
 packaging/    the project's Info.plist, control-rnhost and brand files
 overlay/      files that replace the same path in the application's tree
@@ -18,7 +19,7 @@ command: the overlay is for another version.
 ./xmakew l -P . frameworks/ReactNative/tools/inputs.lua make <project> --manifest frameworks/ReactNative/examples/<name>/host.json
 ```
 
-`<project>` holds the project's `xmake.lua`, which includes the host, and a `packaging/` copied from the overlay. Nothing in
+`<project>` is a folder with `xmake.lua` and `packaging/` copied from the overlay folder and the `build/ref/app` link above. Nothing in
 revenant names an application; `examples/paseo` is the first one.
 
 ## The Paseo example: always the latest upstream
