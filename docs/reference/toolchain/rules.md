@@ -33,6 +33,7 @@ Files a tweak, daemon or app names with `add_installfiles` go into its package a
 | `revenant.strip` | strip arguments, default `-x`; applied after the checks |
 | `revenant.control` | the Debian `control` file of the package |
 | `revenant.maintainer-scripts` | the path of the package's maintainer scripts, copied into the package |
+| `revenant.restart` | process names the package restarts; the tool writes a postinst that kills them, beside any copied scripts |
 | `revenant.licenses` | files copied to `/usr/share/doc/<Package>/` |
 | `revenant.version` | the package version, when it is versioned apart from the project |
 | `revenant.waive.<check> "reason"` | waives one named check, with the reason it is safe |
