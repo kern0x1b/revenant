@@ -65,6 +65,14 @@ Check it with `REVENANT_PREBUILT=kern0x1b/revenant REVENANT_PREBUILT_ONLY=<name>
 prints `installed the prebuilt <key>`. The owner allows pre-releases of prebuilt packages without asking (2026-11-16). `ld64` 956.6
 is published this way (key e912c374, 0.8 MB; built from source it took about 2.5 minutes with cmake and ninja, from the release 18 s).
 
+The recompiler's library mode needs an arm64 runtime for `iphoneos` (`XL_SWIFTOBJC_LIBS`, see `docs/guides/recompiler/build-and-translate.md`):
+`revenant@swift-runtime` with `library_evolution = true` and the unpackaged `revenant@libcxx`. Both are published as pre-releases
+(2026-11-17, packed from main 77f70ac58): `prebuilt-swift-runtime-14437d78891c0cb1296ebd08a16dcda1` (10 MB) and
+`prebuilt-libcxx-b1b707cd98355ab2321b90340d496643` (1.5 MB). Built from source the two took about 14 minutes together on a busy host.
+`swift-crypto` and `network` are not wired for `prebuilt.pack`, so a cold cache builds them from source. The
+swift-runtime key moves with `frameworks/Backports/tools/lowered-members.txt`, a recipe input (`toolchain/modules/digest.lua`): a change
+to that file stops these releases from serving until a new one is published.
+
 The libcxx the Backports gate requires is the `packaged = true` one (`xmake.lua`, line 36), which is not wired, so it
 is built from source on every cold cache (about 10 minutes on 2026-11-16) although releases of the unpackaged one exist.
 
