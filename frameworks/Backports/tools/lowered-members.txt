@@ -9411,6 +9411,7 @@ global RevenantSwitchKnobSpring
 global RevenantSwitchSize
 global RevenantSwitchWellOffSpring
 global RevenantSwitchWellOnSpring
+global RevenantVoiceServicesPath
 global RevenantWebActionNavigationTypeKey
 global RevenantWebEngineErrorDomain
 global RevenantWebKitBridgeScheme
