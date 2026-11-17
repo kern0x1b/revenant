@@ -31,10 +31,14 @@ expo-secure-store is registered but the keychain refuses every write with errSec
 | expo-store-review | `SKStoreReviewController`, window scenes | iOS 10.3, 13 | `isAvailableAsync` is `false` and there is no native `requestReview`, so the JavaScript opens the store page by URL |
 | expo-brightness, expo-linear-gradient | nothing | `UIScreen` brightness and `CAGradientLayer` exist on iOS 6 | the modules as published |
 
-Not started because each needs a rewrite and a compiler to check it: expo-web-browser (`SFSafariViewController` is iOS 9 and
-`ASWebAuthenticationSession` iOS 12: opening a URL in Safari is possible, an authentication session is not), expo-blur
-(`UIVisualEffectView` is iOS 8; a blur on iOS 6 means rendering a snapshot through Core Image) and expo-screen-orientation (window
-scenes and `requestGeometryUpdate` are iOS 13 and 16; the view-controller orientation path is the analog).
+These three were rewritten and compiled into the host in the same build; the phone shows each registered, their calls are not
+exercised, so the rows are `partial`, `phone`.
+
+| Module | Removed or replaced | Why | What JS sees |
+| --- | --- | --- | --- |
+| expo-web-browser | `SFSafariViewController`, `ASWebAuthenticationSession`; `PresentationStyle` renamed `WebBrowserPresentationStyle` | iOS 9, iOS 12; name collision inside `ExpoAppModules` | `openBrowserAsync` opens the URL in Safari and resolves `{type: "opened"}`; the style options are accepted and ignored; `dismissBrowser` raises "no web browser to dismiss"; `openAuthSessionAsync` rejects naming iOS 12 |
+| expo-blur | `UIVisualEffectView` | iOS 8 | a Core Image Gaussian blur of a snapshot of the view behind, with a white or black tint; it is taken when the view is added, resized or its intensity changes and does not follow later changes behind it |
+| expo-screen-orientation | trait collections, window scenes, `requestGeometryUpdate`, the safe-area notch test; the `RNSScreenWindowTraits` protocol is declared in Swift | iOS 8, 13, 16, 11 | the status-bar orientation and the size classes of the device idiom (iPhone: portrait regular/compact, landscape compact/compact); on the 4S `getOrientationAsync` answered unknown at start |
 
 ## AVIF and SVG decision (2026-11-16)
 

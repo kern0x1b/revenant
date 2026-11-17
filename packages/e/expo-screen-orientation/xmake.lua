@@ -7,7 +7,7 @@ package("expo-screen-orientation")
 
     add_urls("https://registry.npmjs.org/expo-screen-orientation/-/expo-screen-orientation-$(version).tgz")
     add_versions("57.0.3", "b9fb4b3c430142550be41ad27206d31b3aa10708261079103d4678bb194baba7")
-    add_patches("57.0.3", path.join(os.scriptdir(), "patches", "screen-orientation-ios6.patch"), "4ad034eff4a0d93644110bf7d10ecb46a02416cf4c7350fe8ac0bd045e1c35c3")
+    add_patches("57.0.3", path.join(os.scriptdir(), "patches", "screen-orientation-ios6.patch"), "c7f5b056ce101ed982e78ee7c0baf08a952d4c5fcd900fcbf997f047a81ae87e")
 
     on_install(function (package)
         os.cp("*", package:installdir() .. "/")

@@ -47,10 +47,15 @@ var CHECKS = {
   },
   ExpoStoreReview: function (module) {
     return module.isAvailableAsync();
+  },
+  ExpoScreenOrientation: function (module) {
+    return Promise.all([module.getOrientationAsync(), module.getOrientationLockAsync()]).then(function (answers) {
+      return {orientation: answers[0], lock: answers[1]};
+    });
   }
 };
 
-var NAMES = ['FileSystem', 'ExpoDocumentPicker', 'ExpoImageManipulator', 'ExpoImage', 'ExpoCamera', 'ExpoSecureStore', 'ExpoNetwork', 'ExpoDevice', 'ExpoBrightness', 'ExpoLinearGradient', 'ExpoStoreReview'];
+var NAMES = ['FileSystem', 'ExpoDocumentPicker', 'ExpoImageManipulator', 'ExpoImage', 'ExpoCamera', 'ExpoSecureStore', 'ExpoNetwork', 'ExpoDevice', 'ExpoBrightness', 'ExpoLinearGradient', 'ExpoStoreReview', 'ExpoWebBrowser', 'ExpoBlur', 'ExpoScreenOrientation'];
 
 NAMES.forEach(function (name) {
   var found = present(name);

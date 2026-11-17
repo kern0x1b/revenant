@@ -7,7 +7,7 @@ package("expo-web-browser")
 
     add_urls("https://registry.npmjs.org/expo-web-browser/-/expo-web-browser-$(version).tgz")
     add_versions("57.0.3", "31ff16fe7840b18a755f0032ecf8e7c066eaf8dec4fa752f18073e517b89ecd7")
-    add_patches("57.0.3", path.join(os.scriptdir(), "patches", "web-browser-ios6.patch"), "041a2bb6a78bf95b023ecb5b9f49f35c69bbdc20f80c8de60434394c59d909c2")
+    add_patches("57.0.3", path.join(os.scriptdir(), "patches", "web-browser-ios6.patch"), "c0cf4d78d663eda50322d3d1d28298b8e349e435a6f69f33c64729a033efc917")
 
     on_install(function (package)
         os.cp("*", package:installdir() .. "/")
