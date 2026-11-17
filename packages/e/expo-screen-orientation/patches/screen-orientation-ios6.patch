@@ -131,7 +131,18 @@ diff -ru a/ios/ScreenOrientationUtilities.swift b/ios/ScreenOrientationUtilities
 diff -ru a/ios/ScreenOrientationViewController.swift b/ios/ScreenOrientationViewController.swift
 --- a/ios/ScreenOrientationViewController.swift
 +++ b/ios/ScreenOrientationViewController.swift
-@@ -8,25 +8,10 @@
+@@ -1,5 +1,10 @@
+ import ExpoModulesCore
+ 
++@objc private protocol ScreenOrientationRNSScreenWindowTraits {
++  @objc(shouldAskScreensForScreenOrientationInViewController:)
++  optional func shouldAskScreensForScreenOrientation(in viewController: UIViewController) -> Bool
++}
++
+ let defaultScreenOrientationMaskKey = "EXDefaultScreenOrientationMask"
+ let supportedOrientationsKey = "UISupportedInterfaceOrientations"
+ let ipadSupportedOrientationsKey = "UISupportedInterfaceOrientations~ipad"
+@@ -8,25 +13,10 @@
    let screenOrientationRegistry = ScreenOrientationRegistry.shared
    private var defaultOrientationMask: UIInterfaceOrientationMask
    private var previousInterfaceOrientation: UIInterfaceOrientation = .unknown
@@ -157,7 +168,7 @@ diff -ru a/ios/ScreenOrientationViewController.swift b/ios/ScreenOrientationView
    }
  
    convenience init(defaultScreenOrientationFromPlist: Void) {
-@@ -81,26 +66,14 @@
+@@ -81,26 +71,14 @@
      return !mask.isEmpty ? mask : defaultOrientationMask
    }
  
@@ -190,3 +201,12 @@ diff -ru a/ios/ScreenOrientationViewController.swift b/ios/ScreenOrientationView
    }
  
    /// Finds the VC whose subtree has a react-native-screens screen with orientation set.
+@@ -109,7 +87,7 @@
+   /// sits between this root VC and the RNSNavigationController, blocking the single-level
+   /// traversal that RNScreens' shouldAskScreensForScreenOrientation performs.
+   private func vcWithRNScreenOrientation() -> UIViewController? {
+-    guard let screenWindowTraitsClass = NSClassFromString("RNSScreenWindowTraits") else {
++    guard let screenWindowTraitsClass = NSClassFromString("RNSScreenWindowTraits") as AnyObject? else {
+       return nil
+     }
+     if screenWindowTraitsClass.shouldAskScreensForScreenOrientation?(in: self) ?? false {

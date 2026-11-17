@@ -157,15 +157,18 @@ diff -ru a/ios/WebBrowserOptions.swift b/ios/WebBrowserOptions.swift
  import ExpoModulesCore
  
  struct WebBrowserOptions: Record {
-@@ -20,7 +17,6 @@
+@@ -20,9 +17,8 @@
    @Field
    var controlsColor: UIColor?
  
 -  // Defaults to .overFullScreen to keep backwards compatibility
    @Field
-   var presentationStyle: PresentationStyle = .overFullScreen
+-  var presentationStyle: PresentationStyle = .overFullScreen
++  var presentationStyle: WebBrowserPresentationStyle = .overFullScreen
  }
-@@ -37,19 +33,6 @@
+ 
+ struct AuthSessionOptions: Record {
+@@ -37,22 +33,9 @@
    case done
    case close
    case cancel
@@ -184,7 +187,11 @@ diff -ru a/ios/WebBrowserOptions.swift b/ios/WebBrowserOptions.swift
 -#endif
  }
  
- internal enum PresentationStyle: String, Enumerable {
+-internal enum PresentationStyle: String, Enumerable {
++internal enum WebBrowserPresentationStyle: String, Enumerable {
+   case fullScreen
+   case pageSheet
+   case formSheet
 @@ -62,52 +45,4 @@
    case popover
    case none
