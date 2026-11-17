@@ -100,7 +100,8 @@ public func _runTest<T: XCTestCase>(_ type: T.Type, _ testName: String, _ body: 
         if full != r { return }
         _resumeFrom = nil
     }
-    if _skipList.contains(where: { full.contains($0) }) {
+    let className = String(describing: type)
+    if _skipList.contains(full) || _skipList.contains(className) {
         _xctStats.skipped += 1
         print("Test Case '\(full)' skipped (XCT_SKIP)")
         return
