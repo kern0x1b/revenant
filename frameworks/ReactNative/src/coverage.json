@@ -729,9 +729,9 @@
    "group": "sdk",
    "version": "~57.0.3",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "CoreMotion (CMMotionManager) is present in the iOS 6.1.3 cache. CMPedometer is absent (iOS 8); the CoreMotion backport supplies it. Not built."
+   "status": "real",
+   "verified": "build",
+   "note": "Recipe packages/e/expo-sensors (npm 57.0.3, no patch) installs and compiles unchanged into the host (links, not exercised on the phone). Accelerometer, gyroscope, magnetometer and device motion use CMMotionManager, present in the iOS 6.1.3 cache. CMPedometer and CMAltimeter (Pedometer, Barometer) are iOS 8 and come from the CoreMotion backport, linked as CoreMotionBackports; the link check passes."
   },
   {
    "id": "expo-server",
