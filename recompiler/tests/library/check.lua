@@ -74,7 +74,7 @@ local function map_phases(text)
         local phase, rest = line:match("^xl%-map (%S+) (.+)$")
         if phase then
             local entry = phases[phase]
-            if not entry then
+            if not entry or rest == "begin" then
                 entry = {regions = {}, holes = 0}
                 phases[phase] = entry
             end
@@ -192,6 +192,10 @@ function main(out, ...)
     local function o(file)
         return path.join(out, file)
     end
+
+    os.mkdir(o("loader"))
+    os.execv("cc", {"-O0", "-Wall", "-I", path.join(e.recompiler, "include"), "-o", o("loader/loader"), path.join(here, "loader.c")})
+    os.execv(o("loader/loader"), {o("loader")}, {timeout = 60000})
 
     local options, images = build(e, corpus, o, here)
     translate.translate(o("RCFixture.dylib"), o("includes.h"), o("xl"), images, options)
@@ -429,6 +433,33 @@ function main(out, ...)
         io.write(mapped)
         corpus.fail("the map after xl_load shows no readable guest segment, or the library's own image is not where it should be (reserve: %s, load: %s)",
                     tostring(names_library(found.reserve)), tostring(names_library(found.load)))
+    end
+    local lazy_expected = {"lazy.free"}
+    for _, name in ipairs(expected) do
+        if name ~= "reserve" then
+            table.insert(lazy_expected, name)
+        end
+    end
+    local lazy = launch(remote .. "/RCFixture.dylib " .. resident .. " --lazy=" .. range, "XL_LOADER_MAP=1 ")
+    verify(lazy, lazy_expected, "launch without a reservation")
+    local late = check_map(corpus, lazy, {"before-dlopen", "load"}, "a load without a reservation")
+    local _, late_guest = map_overlap(late.load, guest.low, guest.high)
+    if map_phases(lazy).reserve or #late_guest == 0 or not names_library(late.load) then
+        io.write(lazy)
+        corpus.fail("a host that never called xl_reserve printed the map of a reservation, or its xl_load did not take the guest range and load the library")
+    end
+    local released = launch(remote .. "/RCFixture.dylib " .. resident .. " --release=" .. range, "XL_LOADER_MAP=1 ")
+    verify(released, table.join({"release.held", "release.free"}, expected), "launch with a release between two reservations")
+    local given = check_map(corpus, released, {"before-reserve", "reserve", "release", "before-dlopen", "load"}, "a release between two reservations")
+    local given_room = false
+    for _, region in ipairs(given.release.regions) do
+        if region.protection == "---" and region.size >= host_size and (region.last <= guest.low or region.first >= guest.high) then
+            given_room = true
+        end
+    end
+    if map_overlap(given.release, guest.low, guest.high) ~= 0 or given_room then
+        io.write(released)
+        corpus.fail("the map after xl_release still shows a mapping inside the guest range 0x%x-0x%x or an inaccessible region of the host part's %d bytes", guest.low, guest.high, host_size)
     end
     local unreserved = launch(remote .. "/RCFixture.dylib " .. resident, "XL_LOADER_MAP=1 XL_LOADER_HOST_RESERVE=0 ")
     verify(unreserved, expected, "launch with XL_LOADER_HOST_RESERVE=0")
