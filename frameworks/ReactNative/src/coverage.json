@@ -315,9 +315,9 @@
    "group": "sdk",
    "version": "~57.0.2",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "CoreTelephony (CTCarrier) is present in the iOS 6.1.3 cache, and the CoreTelephony backport covers the radio-access API. Not built."
+   "status": "real",
+   "verified": "build",
+   "note": "Recipe packages/e/expo-cellular (npm 57.0.2, no patch) installs and compiles unchanged into the host (links, not exercised on the phone). The radio-access technology constants (CTRadioAccessTechnology*, iOS 7) and the per-service lookup come from the CoreTelephony backport, linked as CoreTelephonyBackports; the link check passes."
   },
   {
    "id": "expo-checkbox",

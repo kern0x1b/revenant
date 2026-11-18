@@ -163,7 +163,7 @@ function main()
     local base = os.iorunv("mktemp", {"-d"}):trim()
     local names = {"libFoundationBackports", "libCoreTextBackports", "libUIKitBackports", "libUserNotificationsBackports", "libCoreGraphicsBackports",
                    "libGraphicsBackports", "libCoreFoundationBackports", "libSystemBackports", "libIOSurfaceBackports", "libWebKitBackports", "libMapKitBackports",
-                   "libCoreLocationBackports", "libSecurityBackports", "libCoreMotionBackports", "libContactsBackports", "libLocalAuthenticationBackports", "libTLSBackports"}
+                   "libCoreLocationBackports", "libSecurityBackports", "libCoreMotionBackports", "libCoreTelephonyBackports", "libContactsBackports", "libLocalAuthenticationBackports", "libTLSBackports"}
     local partial = path.join(base, "partial")
     os.mkdir(partial)
     for _, name in ipairs(names) do
@@ -171,7 +171,7 @@ function main()
             io.writefile(path.join(partial, name .. ".dylib"), "")
         end
     end
-    expect("a folder's Backports libraries are read as they are", #host.backports_libraries(partial) == 15,
+    expect("a folder's Backports libraries are read as they are", #host.backports_libraries(partial) == 16,
         "got " .. #host.backports_libraries(partial))
 
     local otool = "\t/usr/lib/revenant/org.revenant.backports/libMapKitBackports.dylib (compatibility version 1.0.0, current version 1.0.0)\n"
@@ -199,7 +199,7 @@ function main()
     os.vrunv("touch", {"-t", "203001010000", newer})
     expect("a store generation is named by its key, not by the newest modification",
         host.backports_generation(store, key) == path.join(store, key, layout)
-            and #host.backports_libraries(host.backports_generation(store, key)) == 16,
+            and #host.backports_libraries(host.backports_generation(store, key)) == #names,
         "got " .. host.backports_generation(store, key))
     expect("the generation of another key is read on its own, with the libraries it carries",
         #host.backports_libraries(host.backports_generation(store, other)) == 1,

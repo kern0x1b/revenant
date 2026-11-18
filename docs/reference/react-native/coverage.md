@@ -6,11 +6,11 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 
 | Status | Meaning | Count |
 | --- | --- | --- |
-| real | built from the module's own sources, with no stub and no substitute | 49 |
+| real | built from the module's own sources, with no stub and no substitute | 50 |
 | partial | built and running, with a named part left out or rewritten | 28 |
 | js | no native code of its own, so it runs with the bundle | 12 |
 | stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 1 |
-| missing | native code that is not built yet | 26 |
+| missing | native code that is not built yet | 25 |
 | evaluate | not attempted; the note says what iOS 6 offers | 26 |
 | impossible | the system service does not exist before the iOS release the note names | 7 |
 | n/a | build, web or Android only: nothing to run on the phone | 11 |
@@ -95,7 +95,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-build-properties | ~57.0.22 | no | n/a | none | Build-time config plugin. |
 | expo-calendar | ~57.0.5 | yes | missing | none | EventKit (EKEventStore) is present in the iOS 6.1.3 cache. Not built. |
 | expo-camera | ~57.0.6 | yes | partial | phone | Built into the host from the npm 57.0.6 sources with ZXingObjC (packages/z/zxingobjc, Core, OneD and PDF417) for barcode scanning. camera-module.patch: the ZXing provider joins the host's one Swift module; VideoQuality and CameraType are renamed (expo-image-picker declares both); the system data scanner (VisionKit, iOS 16) throws CameraScannerUnavailableException from launchScanner, and isModernBarcodeScannerAvailable is false; a requested video codec is rejected with CameraRecordingException and getAvailableVideoCodecs is empty (per-codec output settings are iOS 10); the session-reset notification uses a block observer, not the async sequence of iOS 15. Linked into the host that started on the phone; not exercised yet. On the iPhone 4S (2026-11-16) the module is registered in the host with its exports; its calls were not exercised. |
-| expo-cellular | ~57.0.2 | yes | missing | none | CoreTelephony (CTCarrier) is present in the iOS 6.1.3 cache, and the CoreTelephony backport covers the radio-access API. Not built. |
+| expo-cellular | ~57.0.2 | yes | real | build | Recipe packages/e/expo-cellular (npm 57.0.2, no patch) installs and compiles unchanged into the host (links, not exercised on the phone). The radio-access technology constants (CTRadioAccessTechnology*, iOS 7) and the per-service lookup come from the CoreTelephony backport, linked as CoreTelephonyBackports; the link check passes. |
 | expo-checkbox | ~57.0.0 | no | js | none | Uses the core view; no native code. |
 | expo-clipboard | ~57.0.2 | yes | partial | build | Built from the package on the isolated host: the clipboard functions (strings, URLs, images, HTML, content types, change events) are real. Not built: ClipboardPasteButton, the iOS 16 view on UIPasteControl (iOS 6 has no UIPasteControl), and so isPasteButtonAvailable is false there, as the module already reports below iOS 16. Not exercised on the phone. |
 | expo-constants | ~57.0.22 | yes | real | phone | EXConstants.bundle and app.config are staged by the spike script, not by the build. |

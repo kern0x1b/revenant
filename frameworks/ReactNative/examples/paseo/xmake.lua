@@ -17,7 +17,7 @@ if os.getenv("RN_JSC_ENGINE") then
 end
 if os.getenv("RN_DEPS_REPO") then
     if os.getenv("RN_BACKPORTS") then
-        add_requires("revenant@backports", {alias = "backports", configs = {libraries = "FoundationBackports,CoreTextBackports,UIKitBackports,UserNotificationsBackports,CoreGraphicsBackports,GraphicsBackports,CoreFoundationBackports,SystemBackports,IOSurfaceBackports,WebKitBackports,MapKitBackports,CoreLocationBackports,SecurityBackports,CoreMotionBackports"}})
+        add_requires("revenant@backports", {alias = "backports", configs = {libraries = "FoundationBackports,CoreTextBackports,UIKitBackports,UserNotificationsBackports,CoreGraphicsBackports,GraphicsBackports,CoreFoundationBackports,SystemBackports,IOSurfaceBackports,WebKitBackports,MapKitBackports,CoreLocationBackports,SecurityBackports,CoreMotionBackports,CoreTelephonyBackports"}})
     end
     add_requires("revenant@folly 2024.11.18.00", {alias = "folly"})
     add_requires("revenant@socketrocket 0.7.1", {alias = "socketrocket"})
