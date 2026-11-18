@@ -1134,7 +1134,10 @@ its own process, next to a heap of its own size. `tests/library/check.lua` has t
 API is a string, because a Swift `String` that crosses an Objective-C signature goes through the Foundation overlay,
 which the guest does not have yet; the strings stay inside the library (`describedLength` builds one).
 
-The host part, which `recompiler_corpus/library` runs, translates the `objc` fixture with `XL_LIBRARY=1`, then checks
+The host part, which `recompiler_corpus/library` runs, first runs the loader on the Mac (`loader.c`: `xl_loader.c` over a
+model of a 4S process's address space, ten scenarios of reserving, releasing, loading without a reservation and of every
+failure, each of which must leave nothing held that the host did not ask to keep;
+[the scenarios](library-mode.md#the-check)). It then translates the `objc` fixture with `XL_LIBRARY=1` and checks
 the dylib statically:
 
 - the library has no `__X<n>` segment, has `__XGUEST` and `__LINKEDIT`, and the guest image header (`magic`, `version`, a
@@ -1157,7 +1160,9 @@ variant only), `completion` and `completion.thread` (a block called on another t
 finds `"RCFixture.Client"` and the host's `NSClassFromString` does not; [the contract](library-mode.md#the-class-of-a-name-xl_find_class-xl_library_class-objc_sethook_getclass)).
 Four negative controls run first: a held
 range, a guest image format the loader does not read, a registry that is not next to the library, and an init without a
-reservation. `XL_LIBRARY_LAUNCHES` repeats the launch, and `XL_LIBRARY_INSTALL_NAME=executable` names the library by
+reservation. Two more launches are a host that keeps no reservation: one never calls `xl_reserve` and loads after its heap
+grew (`lazy.free`, then every name but `reserve`), one reserves, calls `xl_release` and reserves again (`release.held`,
+`release.free`, then every name). `XL_LIBRARY_LAUNCHES` repeats the launch, and `XL_LIBRARY_INSTALL_NAME=executable` names the library by
 `@executable_path` and starts the host without `DYLD_FALLBACK_LIBRARY_PATH`. It prints
 `measure <step> resident=… virtual=… threads=…` after each step and the address map of the process (`map <step>
 <start>-<end> <protection>`). A watchdog `alarm` ends a hung host after 180 seconds.

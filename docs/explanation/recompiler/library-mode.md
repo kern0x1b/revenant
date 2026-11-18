@@ -32,10 +32,19 @@ A word of the guest that holds the address of something in the host (a class, a 
 bytes: it is an entry of a table of slots that dyld relocates with the rest of the dylib's data, and the loader writes
 it after the mapping.
 
-The range that must be fixed is small, so it can be put where no launch of the host app has anything: above the app's
-images and below the start of the random heap ([the map of the 4S](../../reference/recompiler/library-mode.md#the-address-space-of-a-host-on-the-4s),
+The range that must be fixed is small, so it can be put where the process arrives last: right under the main thread's
+stack. An address space fills from the bottom (every mapping takes the lowest hole that fits, and the heap goes up from its
+start), so that range is free at launch, at login and after minutes of use, for as long as the process has room for the
+library at all, and nothing has to be held in advance ([the map of the 4S](../../reference/recompiler/library-mode.md#the-address-space-of-a-host-on-the-4s),
+[the samples of a running app](../../reference/recompiler/library-mode.md#the-address-space-of-a-host-over-its-life),
 [the rule for `XL_BASE`](../../reference/recompiler/library-mode.md#choosing-xl_base)). What the host part needs is only a hole of its
-size, and the two free zones of the 4S (180 MB below the heap, 233 MB above it) together have about 410 MB of them.
+size, wherever it is.
+
+The placement before that was between the app's images and the random start of the heap. That range is free only at
+launch (in Telegram 13 it was taken within 16 s), so the app had to reserve it and the room for the host part from a
+constructor: 85 MB of the 493 MB the app starts with, held for the life of a process that never loads the library once its
+user is logged in, and more than the 58 MB the app had left at its worst moment. A reservation is the wrong tool for a library that
+may never be used; the right one is a range that does not need it.
 
 ## Loading
 
@@ -44,17 +53,22 @@ run time is placed at its preferred address if the range is free, and a dylib li
 hole that fits (dyld takes it with `vm_allocate` anywhere). The loader (`recompiler/src/loader/xl_loader.c`,
 `include/xl_loader.h`, and the format header `include/xl_guest_image.h`) is a `dlopen` loader, linked into the host app:
 
-1. `xl_reserve(path)` reads the guest image's header from the file, takes the guest range with `vm_allocate` at the fixed
-   address, protected `VM_PROT_NONE`, and takes room for the host part anywhere, also `VM_PROT_NONE`. An app calls it as
-   early as it can: the heap, other images and threads fill an address space from the bottom, and a range that is free at
-   launch is not free at login. If the guest range is held it fails with a message that names the holder (an image's
+1. `xl_load(path)`, called when the app first needs the library, reads the guest image's header from the file, takes the
+   guest range with `vm_allocate` at the fixed address, protected `VM_PROT_NONE`, and takes room for the host part
+   anywhere, also `VM_PROT_NONE`. If the guest range is held it fails with a message that names the holder (an image's
    path, `malloc`, `stack`, a memory tag), its range and its size.
-2. `xl_load(path)` gives the room for the host part back and calls `dlopen`: dyld takes the first hole that fits, which is
+2. It gives the room for the host part back and calls `dlopen`: dyld takes the first hole that fits, which is
    the one just given back. It then calls the library's `xl_library_init`, which checks the header again and that the guest
    range is still an untouched reservation, maps the segments, writes the slots, and loads the registry.
 3. Failures are statuses with a message (`xl_load_error`): a bad image or a format version the loader does not read, a
    busy range, a failed `dlopen`, a failed mapping. The host app decides what to do; nothing in the loader aborts it, and a
-   library that was not reserved refuses to map anything, so it cannot write over memory that is not its own.
+   library that was not reserved refuses to map anything, so it cannot write over memory that is not its own. A load
+   that fails before the library's initialization ran gives back what it took, so the process is as it was and the load
+   can be tried again.
+
+`xl_reserve(path)` does step 1 ahead of the load and keeps the two ranges, and `xl_release()` gives them back. They are
+for a library whose guest range is free only early in the process's life, and the price is the address space held
+while the library is not loaded; a library translated with its guest under the main stack does not need them.
 
 ### The registry
 

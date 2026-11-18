@@ -260,11 +260,15 @@ ordinary bytes at their own addresses, and the generated code refers to them by 
 
 ### Load order
 
-1. `xl_reserve` reads the header of the file (not the section in memory): refuses a wrong `magic` or `version`, takes
+1. The reservation reads the header of the file (not the section in memory): refuses a wrong `magic` or `version`, takes
    `[low, high)` with `vm_allocate` at the fixed address and `VM_PROT_NONE`, and takes the size of the host part
    (the sum of the dylib's own segments) anywhere with `VM_PROT_NONE`. If the guest range is held it fails with the
    region that holds it, its range, what it is (an image's path, `malloc`, `stack`, a memory tag) and its size.
    It also refuses a library whose registry file (`<name>-classes.dylib` in the same folder) is not there.
+   `xl_load` makes the reservation itself when it runs, so a host that only calls `xl_load` holds no address space of the
+   library until it uses it. `xl_reserve` makes it earlier and keeps it until `xl_load` or `xl_release`: 85 MB of address
+   space for the reCAPTCHA Enterprise SDK (drop35: 22.2 MB of guest, 62.9 MB of host part), held whether or not the library is ever loaded
+   ([when each is right](#choosing-xl_base)).
 2. `xl_load` gives the host reservation back and `dlopen`s the dylib: dyld takes the first hole that fits, which is the one just
    given back. It calls `xl_library_init`.
 3. `xl_library_init` checks the header again (`magic`, `version`, that every segment is inside `[low, high)`, that every slot
@@ -280,8 +284,9 @@ Pages of the guest that nothing touches stay clean file pages: they are not in t
 
 | Function | Does |
 |---|---|
-| `xl_reserve(path)` | reads the guest image's header from the file and takes the guest range and room for the host part, `VM_PROT_NONE` (the load order above) |
-| `xl_load(path)` | reserves if that was not done, gives the host room back, `dlopen`s, calls `xl_library_init`; the library owns the guest range from then on |
+| `xl_load(path)` | takes the guest range and room for the host part if the host did not reserve them, gives the host room back, `dlopen`s, calls `xl_library_init`; the library owns the guest range from then on. A load that fails before the library's initialization ran gives back what it took itself, so it holds nothing and can be tried again |
+| `xl_reserve(path)` | optional: reads the guest image's header from the file and takes the guest range and room for the host part, `VM_PROT_NONE`, and keeps them until `xl_load` or `xl_release` (the load order above). After a failed `dlopen` a host that reserved still holds both |
+| `xl_release()` | gives back the guest range and the host room that `xl_reserve` holds; the address space is as it was before `xl_reserve`, and `xl_reserve` or `xl_load` can take the ranges again later, if they are still free. Nothing happens when nothing is reserved or the library is loaded |
 | `xl_load_error()` | text of the last failure |
 | `void *xl_find_class(const char *name)` | the Objective-C class (a `Class`, as a pointer) that the loaded library answers to for `name`, or `NULL`: before `xl_load` succeeded, for a `NULL` name, for a name the library has no class of. Calls the library's export `xl_library_class` (found with `dlsym` on the handle of `xl_load`) |
 
@@ -289,7 +294,8 @@ Statuses: `XL_LOAD_OK`, `XL_LOAD_BAD_IMAGE` (not an armv7 dylib, no guest image,
 the version found; no registry next to the library), `XL_LOAD_RANGE_BUSY` (the guest range is held: the message names the holder; or the reservation is
 not an untouched inaccessible range when the library attaches; or no hole of the host's size), `XL_LOAD_DLOPEN_FAILED` (the library or its registry; the message has dyld's text),
 `XL_LOAD_MAP_FAILED` (`mmap` or `vm_protect` of the guest's segments failed). A status after the library's initialization has run is final: later
-calls return it, and the guest range is given back.
+calls return it, and the guest range is given back. A status before that (a busy range, no hole for the host part, a failed `dlopen`) is not: the
+next `xl_load` tries again, and between the two a host that did not call `xl_reserve` holds nothing.
 
 The library reports `XL_LIBRARY_OK`, `XL_LIBRARY_BAD_FORMAT`, `XL_LIBRARY_NOT_RESERVED` or `XL_LIBRARY_MAP_FAILED` from
 `xl_library_init` (`xl_guest_image.h`); the loader turns them into the statuses above. Called before `xl_load`
@@ -338,7 +344,7 @@ own in the guest (`RCFHook`) and the Swift variant uses the guest's real `libswi
 
 With `XL_LOADER_MAP` set in the environment to anything but `0`, the loader prints the process's virtual memory to
 `stderr` (the runtime's crash handler to the crash log or `stderr`, where its other lines go) in the phases
-`before-reserve` (before `xl_reserve` takes anything), `reserve` (after it), `load` (after `xl_load`; a failed call prints
+`before-reserve` (before `xl_reserve` takes anything), `reserve` (after it), `release` (after `xl_release`), `load` (after `xl_load`; a failed call prints
 `reserve-failed` or `load-failed`), and, once `xl_library_diagnostics` has installed the handlers, `crash` (a fatal
 signal) and `fault` (a guest fault). A host that does not call `xl_library_diagnostics` gets the same handlers from
 `xl_library_init` when the environment has `XL_CRASH` or the phone has the flag file `/private/var/revenant/xl-crash`:
@@ -422,8 +428,9 @@ and where the time goes when it is not in messages.
 build/recompiler/corpus/recaptcha-dropN/xl/RecaptchaEnterprise.symbols.txt STDERR.txt` takes every `samples at … (Image+0xOFFSET …)`
 line whose image name contains `RecaptchaEnterprise` (a third argument names another part), finds the greatest text symbol of
 the symbols file at or below the offset, and prints it with the distance into the function, the guest address a `_sub_<address>`
-symbol stands for and the guest image that address is in (`0x18000000` the SDK, `0x18200000` libswiftCore, `0x18800000` libc++,
-`0x18a00000` CoreFoundation, `0x18f00000` the Foundation overlay, `0x19600000` the libxl-guest stubs: the layout of the
+symbol stands for and the guest image that address is in (from the base of the drop, which is the lowest `_sub_` address
+of the symbols file rounded down to 1 MiB: `+0x0` the SDK, `+0x200000` libswiftCore, `+0x800000` libc++,
+`+0xa00000` CoreFoundation, `+0xf00000` the Foundation overlay, `+0x1600000` the libxl-guest stubs: the layout of the
 reCAPTCHA drops). Lines of a system image keep the name the process gave them. The report has one block per window of 5 s
 and then the functions with their samples added up over all windows. The offsets are exact only to the 64-byte bucket, so
 a function is named, not an instruction. `--self-test` runs it on a made-up profile. The symbols file is the one
@@ -587,7 +594,31 @@ library (`RCFClient`, `RCFToken`, and a category `RCFClient (RCFExtra)`; Objecti
 otherwise). The fixture is linked with `-no_objc_category_merging`: ld64 merges a category into its class when both are in
 one dylib, which leaves the category list empty and the check of the registry with nothing to prove.
 
-The host part of the check is the layout of the output (no `__X<n>` segment, `__LINKEDIT` and `__XGUEST` present, the header
+The host part of the check first runs the loader on the Mac (`loader.c`): `xl_loader.c` itself, compiled for the Mac with `vm_allocate`,
+`vm_deallocate`, `vm_protect`, `vm_region_recurse_64`, `dlopen` and `dlsym` replaced by a model of a 4S process (the address space below
+`0x30000000` with images up to `0x10000000`, a heap at `0x1c500000`, the main stack at `0x2fc02000`; an allocation anywhere takes the lowest
+hole that fits, as the phone's kernel does), and library files that the test writes (a 32-bit ARM header with a guest image header and its
+registry). A Mac process cannot allocate below 4 GB, which is why the kernel is a model; what the phone's kernel does is the device part.
+Ten scenarios, each in a process of its own:
+
+| Scenario | Proves |
+|---|---|
+| a reservation kept until the load | `xl_reserve` holds the guest range and the host room (85 MB: the 22.2 MB guest and the 62.9 MB host part of drop35), `xl_load` loads into them after the app grew by 300 MB, `xl_release` and a second reserve and load of the loaded library change nothing |
+| release and reserve again | `xl_release` leaves the address space exactly as it was before `xl_reserve`, twice; `xl_load` after it takes the range itself |
+| load without a reservation | a host that never reserved holds nothing while the app grows by 380 MB; the range under the main stack is still free then, and `xl_load` takes it and loads |
+| load without a reservation, guest range held | a guest at `0x18000000` after the same growth: `XL_LOAD_RANGE_BUSY`, the message names the holder, nothing is held and nothing mapped, and the next load succeeds once the range is free |
+| load without a reservation, no room for the host part | with 57 MB left: refused, and the guest range it took is given back |
+| load without a reservation, `dlopen` fails | `XL_LOAD_DLOPEN_FAILED` and nothing held; a library without `xl_library_init` is refused and nothing held; the next load succeeds |
+| a kept reservation, `dlopen` fails | a host that reserved keeps the guest range and the host room |
+| the library fails to attach | the status is final, the guest range is given back |
+| refusals take nothing | an unknown format version, a missing registry, a second library while one is reserved |
+| guest range only | `XL_LOADER_HOST_RESERVE=0` |
+
+The loader of before `xl_release` (with an empty `xl_release` added so that it links) fails four of the ten: release and reserve again, the load
+without a reservation whose `dlopen` fails (the guest range and the host room stayed held), the refusals (no second library after a release) and
+guest range only.
+
+The rest of the host part is the layout of the output (no `__X<n>` segment, `__LINKEDIT` and `__XGUEST` present, the header
 (`magic`, `version`, a range that is granule-aligned and not below `XL_BASE`), exports that are the three entry points
 (`_xl_library_class`, `_xl_library_diagnostics`, `_xl_library_init`) and the `_xl_objc_category_<n>` names and nothing else, a registry with only the `__objc_*` sections, no code and no exports). On the
 claimed phone the check copies the library and its registry into one folder, runs four negative controls, then grows the
@@ -606,7 +637,11 @@ After the launches the check runs the host with `XL_LOADER_MAP=1` and reads the 
 (at `before-dlopen` one of the host part's size, and the config line names that size);
 the guest range has no mapping before `xl_reserve`, is covered by `---` regions after it, together with one `---` region
 of the host part's size outside it, and has a readable segment after `xl_load`, which is also the first map that names
-the library's own image. Then the host aborts after `xl_library_diagnostics` (`--abort`): with the variable set the crash
+the library's own image. Two launches cover a host that does not keep a reservation, both with the map: `--lazy=LOW-HIGH` never calls
+`xl_reserve`, grows its heap, expects the guest range without a mapping (`lazy.free`) and loads (every name but `reserve`; the map has no
+`reserve` phase, and `load` shows the guest range and the library's image); `--release=LOW-HIGH` reserves, expects the whole guest range
+mapped (`release.held`), calls `xl_release`, expects it without a mapping (`release.free`; the `release` map has no mapping in the range and no
+`---` region of the host part's size), reserves again and goes on as the first launch does. Then the host aborts after `xl_library_diagnostics` (`--abort`): with the variable set the crash
 handler's output has the `crash` map and the guest range is readable in it; with it unset the handler prints its
 `xlate: signal 6` lines and no `xl-map` line, and so do the launches above.
 
@@ -724,10 +759,57 @@ guest's pointers are absolute: it is 9.1 MB for the Swift library (`0x10000000` 
 all the rest of the 162 MB, is linked at address 0 and dyld puts it in whatever hole is large enough (104 MiB of `__TEXT` in
 the Swift variant): there are about 410 MB of holes in the two free zones, and it does not matter which one is taken.
 
+### The address space of a host over its life
+
+Measured on the 4S (iOS 6.1.3) on 2026-11-18 by the Telegram session: Telegram 13 with an account logged in, so the reCAPTCHA
+SDK is never loaded, and with the reservation of drop35 made in a constructor (guest `0x18000000` to `0x1962c000`, 22.2 MB, and
+62.9 MB of room for the host part, 85 MB in all). A probe injected with `DYLD_INSERT_LIBRARIES` walked the regions about once a
+second: 102 samples over 119 s in launch A, 126 over 148 s in launch B.
+
+| Time | Free below `0x30000000` | The holes |
+|---|---|---|
+| the probe's constructor, before `xl_reserve` | 492.8 MB (A and B) | two: 245.6 MB from `0x0ff72000` and 244.6 MB from `0x20800000` (A); 221.3 MB from `0x0ffb2000` and 268.7 MB from `0x1f000000` (B) |
+| 5.0 s (A), 4.0 s (B), after `xl_reserve` | 403.2 MB, 402.2 MB | the room for the host part is the low end of the first zone, the guest range is in its middle |
+| 12.2 s (A), 10.3 s (B) | 296.8 MB, 297.7 MB | below the heap one hole is left, right above the guest range (`0x1962c000`, 94.8 MB in A and 70.8 MB in B) |
+| 14.7 s (A), 14.1 s (B) | 115.5 MB, 83.2 MB | one: from `0x28af6000` (A) and `0x2ab79000` (B) up to the main stack; nothing else of 1 MB |
+| the least, 21.3 s (A), 20.8 s (B), the chat list drawing | 58.5 MB, 60.1 MB | from `0x2c458000`, 56.3 MB (A); from `0x2c661000`, 54.3 MB (B) |
+| after 30 s, to the end | 77.3 to 78.8 MB (175 samples) | from `0x2b4a2000`, 72.0 MB (A); from `0x2bd00000`, 63.7 MB (B) |
+
+What the samples say:
+
+- The address space fills from the bottom. Every mapping that is not a malloc region takes the lowest hole that fits, and
+  the heap goes up from its start, so within 15 s nothing of 1 MB is free below `0x28000000`. A range in the first zone that
+  is not held by then is gone: without a reservation, `0x18000000` to `0x1962c000` was free until 10 s and held at 16 s in 3
+  of 3 launches (2026-11-13: a font mapping `0x14e63000` to `0x18ea9000` and small regions over 20 MB of it).
+- The last hole is the one under the main stack. Every one of the 228 samples has a hole that ends at the guard page of
+  the main thread's stack (`0x2fca2000` in A, `0x2fcac000` in B); from 14 s on it is the only one of any size, and its start
+  was never above `0x2c661000`. `0x2e000000` to `0x2f62c000` was inside it in every sample, with 25.6 MB between the start
+  of the hole and `0x2e000000` in the worst one. That is with the 85 MB of the reservation held all the time; a host that does not reserve has them
+  free as well, which puts the least free space of these launches at about 143 MB instead of 58.
+- A reservation that is never used is the largest single cost of the process: 85 MB of the 493 MB the app starts with,
+  and more than the 58 MB that are left at the worst moment.
+
 ### Choosing `XL_BASE`
 
-The guest range `[XL_BASE, XL_BASE + guest size)` has to be inside the part of the first free zone that no launch of the
-host app touches:
+The guest range `[XL_BASE, XL_BASE + guest size)` is the only part of the library at a fixed address, and where it is
+decides when it can still be taken.
+
+**Under the main stack**, for a library that is loaded when it is first used (a host that calls only `xl_load`):
+
+```
+XL_BASE + guest size  <=  0x2fc00000
+```
+
+`0x2fc00000` is `XL_GUEST_CEILING` (`xl_guest_image.h`): the main thread's stack is 1 MB below a random top of at most `0x2fe00000`, and
+its lowest page was never below `0x2fc02000`. The base is as high as the guest's size, and what it may grow by, allow.
+The reCAPTCHA SDK is translated with `XL_BASE=0x2e000000` (`recaptcha_build.lua`): its guest ends at `0x2f62c000`, 5.8 MB
+under the ceiling. `xlate` refuses a library whose guest range ends above the ceiling, because no process of the phone
+could ever take it. This is the range the process reaches last ([the samples above](#the-address-space-of-a-host-over-its-life)),
+so it is free at whatever moment the library is needed, for as long as the process has the address space for the library
+at all: the guest range and a hole of the host part's size. When it has not, `xl_load` answers `XL_LOAD_RANGE_BUSY` with
+the holder or with the size it found no hole for, holds nothing, and can be called again.
+
+**Between the images and the heap**, only for a host that reserves in a constructor and accepts the cost:
 
 ```
 frontier + 64 MiB  <=  XL_BASE  and  XL_BASE + guest size  <=  0x1c500000 - 16 MiB
@@ -735,12 +817,16 @@ frontier + 64 MiB  <=  XL_BASE  and  XL_BASE + guest size  <=  0x1c500000 - 16 M
 
 where `frontier` is the highest end of an image of the host app (the measured maximum for Telegram13 is `0x110bd000`, from
 20 launches; it moves by about 2 MB between launches, and a changed set of frameworks moves it more). For Telegram13 that
-is `[0x150bd000, 0x1b500000)`, 100 MB, and `XL_BASE=0x18000000` leaves 53 MiB for the guest above the base (the Swift
-library's guest is 9.1 MB) and 47 MiB below it. The default `0x10000000` is in the middle of Telegram13's images and is
-for a host that is not Telegram13. The rule is for the person who builds the drop; whatever the base, a host whose images
-or heap hold the range gets `XL_LOAD_RANGE_BUSY` from `xl_reserve` with the name of the holder, never a crash.
-The check (`recompiler/tests/library/host.m`) calls `xl_reserve` before it grows its heap, as an app does from a
-constructor.
+is `[0x150bd000, 0x1b500000)`, 100 MB, which is where the drops up to drop35 were (`XL_BASE=0x18000000`). Such a range is free
+only at launch, so `xl_reserve` has to run in a constructor, and from then on the guest range and the room for the host
+part are held whether the library is loaded or not. `xl_release` gives them back, but a later `xl_reserve` or `xl_load`
+finds the range taken.
+
+The default `0x10000000` is in the middle of Telegram13's images and is for a small host, such as the one of the check.
+The rule is for the person who builds the drop; whatever the base, a host whose images, heap or stack hold the range gets
+`XL_LOAD_RANGE_BUSY` with the name of the holder, never a crash.
+The check (`recompiler/tests/library/host.m`) runs both ways: with `xl_reserve` before it grows its heap, and with `xl_load`
+alone after it.
 
 ### A host that has its own Swift runtime
 
