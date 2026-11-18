@@ -9,6 +9,7 @@
 #define XL_GUEST_MAGIC 0x49474c58u
 #define XL_GUEST_VERSION 1u
 #define XL_GUEST_GRANULE 0x4000u
+#define XL_GUEST_CEILING 0x2fc00000u
 
 #define XL_GUEST_READ 1u
 #define XL_GUEST_WRITE 2u

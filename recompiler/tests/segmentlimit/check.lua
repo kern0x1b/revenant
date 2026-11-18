@@ -18,8 +18,8 @@ function main(out)
     end
     io.writefile(o("passthrough.txt"), "")
 
-    local function lift(name, count, library)
-        local argv = {"--base", "0x10000000", "--output", o(name .. ".bc"), "--layout", o(name .. ".layout"), "--passthrough", o("passthrough.txt"),
+    local function lift(name, count, library, base)
+        local argv = {"--base", base or "0x10000000", "--output", o(name .. ".bc"), "--layout", o(name .. ".layout"), "--passthrough", o("passthrough.txt"),
                       "--state-header", o(name .. ".h")}
         if library then
             table.insert(argv, "--library")
@@ -49,5 +49,14 @@ function main(out)
     if log:find(REFUSAL, 1, true) then
         corpus.fail("a library has no guest segments of its own, and seven images were refused:\n%s", log)
     end
-    print("ok: seven guest images are refused for an executable, six are not, and a library takes seven")
+    local CEILING = "ends above 0x2fc00000"
+    ok, log = lift("ceiling", 1, true, "0x2fbfc000")
+    if ok or not log:find(CEILING, 1, true) or not log:find("lower --base by at least 0x", 1, true) then
+        corpus.fail("a library whose guest image reaches the main stack's zone was translated, or the refusal does not say %q and by how much to lower the base:\n%s", CEILING, log)
+    end
+    ok, log = lift("under", 1, true, "0x2e000000")
+    if log:find(CEILING, 1, true) or not log:find("xlate: guest image 0x2e000000-0x", 1, true) then
+        corpus.fail("a library whose guest image is under the main stack was refused, or its guest image was not written:\n%s", log)
+    end
+    print("ok: seven guest images are refused for an executable, six are not, a library takes seven, and a library's guest image ends under the main stack or is refused")
 end

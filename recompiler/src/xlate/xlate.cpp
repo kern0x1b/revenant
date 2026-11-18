@@ -1979,6 +1979,12 @@ bool EmitGuestImage(Program &program, Module &module, const Overrides &overrides
       cursor += record.header.length;
     }
   }
+  if (header.high > XL_GUEST_CEILING) {
+    errs() << "xlate: the guest image 0x" << Hex(header.low) << "-0x" << Hex(header.high) << " ends above 0x" << Hex(XL_GUEST_CEILING)
+           << ", where the main thread's stack of a 32-bit process of iOS 6 may begin: no process could load the library; lower --base by at least 0x"
+           << Hex(AlignUp(header.high - XL_GUEST_CEILING, XL_GUEST_GRANULE)) << "\n";
+    return false;
+  }
   std::vector<uint8_t> blob(cursor);
   Store(blob, 0, header);
   for (size_t index = 0; index < records.size(); ++index) {
