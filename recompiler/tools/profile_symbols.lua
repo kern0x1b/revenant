@@ -1,18 +1,19 @@
 local DEFAULT_IMAGE = "RecaptchaEnterprise"
 
 local GUEST_IMAGES = {
-    {0x18000000, "the SDK"},
-    {0x18200000, "libswiftCore"},
-    {0x18800000, "libc++"},
-    {0x18a00000, "CoreFoundation"},
-    {0x18f00000, "Foundation overlay"},
-    {0x19600000, "libxl-guest stubs"},
+    {0x0000000, "the SDK"},
+    {0x0200000, "libswiftCore"},
+    {0x0800000, "libc++"},
+    {0x0a00000, "CoreFoundation"},
+    {0x0f00000, "Foundation overlay"},
+    {0x1600000, "libxl-guest stubs"},
 }
+local GUEST_IMAGE_ALIGNMENT = 0x100000
 
-local function guest_image(address)
+local function guest_image(address, base)
     local found = "?"
     for _, entry in ipairs(GUEST_IMAGES) do
-        if address >= entry[1] then
+        if address >= base + entry[1] then
             found = entry[2]
         end
     end
@@ -34,11 +35,16 @@ local function load_symbols(lines)
     end
     table.sort(order, function(a, b) return addresses[a] < addresses[b] end)
     local sorted_addresses, sorted_names = {}, {}
+    local lowest
     for index, original in ipairs(order) do
         sorted_addresses[index] = addresses[original]
         sorted_names[index] = names[original]
+        local guest = tonumber(names[original]:match("^_sub_(%x+)$") or "", 16)
+        if guest and (not lowest or guest < lowest) then
+            lowest = guest
+        end
     end
-    return {addresses = sorted_addresses, names = sorted_names}
+    return {addresses = sorted_addresses, names = sorted_names, base = lowest and lowest - lowest % GUEST_IMAGE_ALIGNMENT or 0}
 end
 
 local function resolve(symbols, offset)
@@ -64,7 +70,7 @@ local function describe(symbols, image, offset, symbol)
         return string.format("%s+0x%x", image, offset), image .. " (unresolved)"
     end
     local guest = name:match("^_sub_(%x+)")
-    local where = guest and string.format("guest 0x%s (%s)", guest, guest_image(tonumber(guest, 16))) or "host code of the library"
+    local where = guest and string.format("guest 0x%s (%s)", guest, guest_image(tonumber(guest, 16), symbols.base)) or "host code of the library"
     return string.format("%s+0x%x  %s", name, distance, where), name
 end
 
@@ -169,6 +175,10 @@ local function self_test()
     expect(windows[1].buckets[3].function_name == "libobjc.A.dylib objc_msgSend", "a system image is named, not resolved")
     expect(windows[2].buckets[1].function_name == "_xl_library_init", "a host symbol of the library resolves to its name")
     expect(report(windows):find("   220  _sub_18200200", 1, true), "the report adds the buckets of one function")
+    local moved = load_symbols(iterate({"00001000 t _sub_2e000100", "00001400 t _sub_2e800200", "00003000 t _sub_2f600010"}))
+    expect(moved.base == 0x2e000000 and describe(moved, DEFAULT_IMAGE, 0x1440, ""):find("guest 0x2e800200 (libc++)", 1, true) and
+           describe(moved, DEFAULT_IMAGE, 0x3000, ""):find("libxl-guest stubs", 1, true),
+           "the images are found from the base of the symbols file, whatever XL_BASE the drop was translated with")
     print("%s", report(windows))
     print("ok: profile_symbols self-test")
 end

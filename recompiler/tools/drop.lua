@@ -80,8 +80,8 @@ function main(name, ...)
     local sha, registry_sha = hash.sha256(path.join(destination, "RecaptchaEnterprise.dylib")), hash.sha256(path.join(destination, "RecaptchaEnterprise-classes.dylib"))
     io.writefile(path.join(destination, "runtime.txt"), string.format("runtime_key=%s\nruntime_recipe=%s\nlibswiftcore_sha256=%s\n", runtime.key, tostring(runtime.recipe), runtime.core_sha256))
     local entry = path.join(destination, "recaptcha-sdk.txt")
-    io.writefile(entry, string.format("dir=%s\nlibrary=RecaptchaEnterprise.dylib\nsha256=%s\nregistry_sha256=%s\nbase=0x18000000\ninstall=Frameworks/RecaptchaEnterprise.dylib\n",
-                                      destination, sha, registry_sha))
+    io.writefile(entry, string.format("dir=%s\nlibrary=RecaptchaEnterprise.dylib\nsha256=%s\nregistry_sha256=%s\nbase=0x%x\ninstall=Frameworks/RecaptchaEnterprise.dylib\n",
+                                      destination, sha, registry_sha, build.guest_base()))
     if verify and telegram and os.isfile(path.join(telegram, "tools", "recaptcha_sdk.lua")) then
         local sdk_module = import("recaptcha_sdk", {rootdir = path.join(telegram, "tools"), anonymous = true})
         sdk_module.verify(sdk_module.read(entry))
