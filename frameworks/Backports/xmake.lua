@@ -1194,6 +1194,9 @@ local function host_tests(folder, tests, library, frameworks, options)
             add_mflags("-fobjc-arc")
             add_mxxflags("-fobjc-arc")
             add_ldflags("-fobjc-arc")
+            if options.prefix then
+                add_mflags("-include " .. path.join(TESTS, options.prefix))
+            end
             add_cxxflags(table.unpack(options.cxxflags or {}))
             add_frameworks(table.unpack(frameworks or {"Foundation"}))
             add_syslinks(table.unpack(options.syslinks or {}))
@@ -1218,6 +1221,7 @@ end
 if not is_plat("iphoneos") then
     add_requires("revenant@ffmpeg", {alias = "ffmpeg"})
     host_tests("Foundation", FOUNDATION_TESTS, nil, {"Foundation"}, {syslinks = {"sqlite3"}})
+    host_tests("Foundation", {session_configuration = {"NSURLSessionConfiguration.m", "RevenantCookieStorage.m"}}, nil, {"Foundation"}, {prefix = "session_configuration_prefix.h"})
     host_tests("AVFoundation", {qr_decoder = {"RevenantQRCode.c", "RevenantQRECI.c"}, audio_preset = {"RevenantAudioUnitPreset.m"}}, nil, {"Foundation", "CoreImage", "CoreGraphics", "AudioToolbox"})
     host_tests("AVFoundation", {player_volume = {"AVPlayerVolume7.m"}, track_frame_duration = {"AVAssetTrackFrameDuration7.m"}}, nil, {"Foundation", "AVFoundation", "CoreMedia", "CoreVideo"})
     if is_arch("arm64", "x86_64") then

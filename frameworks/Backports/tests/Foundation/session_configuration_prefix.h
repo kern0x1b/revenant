@@ -1,0 +1,6 @@
+#ifndef SESSION_CONFIGURATION_PREFIX_H
+#define SESSION_CONFIGURATION_PREFIX_H
+
+#define NSURLSessionConfiguration RevNSURLSessionConfiguration
+
+#endif
