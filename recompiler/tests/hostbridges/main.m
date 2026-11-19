@@ -1158,13 +1158,35 @@ static void enumeration_checks(void)
     int visited = 0, raised = 0;
     @try {
         for (id item in mutated) {
-            if (!visited++)
+            if (visited++ == 20)
                 [mutated addObject:item];
         }
     } @catch (NSException *exception) {
         raised = [[exception name] isEqualToString:NSGenericException];
     }
-    printf("enumeration of a mutated array raised %d\n", raised);
+    printf("enumeration of an array of 100 changed at its 21st item raised %d, before its end %d\n", raised, visited < 100);
+    NSMutableSet *changed = [NSMutableSet setWithSet:set];
+    visited = raised = 0;
+    @try {
+        for (id item in changed) {
+            if (visited++ == 20)
+                [changed addObject:@"one more"];
+        }
+    } @catch (NSException *exception) {
+        raised = [[exception name] isEqualToString:NSGenericException];
+    }
+    printf("enumeration of a set of 100 changed at its 21st member raised %d, before its end %d\n", raised, visited < 100);
+    NSMutableDictionary *rekeyed = [NSMutableDictionary dictionaryWithDictionary:dictionary];
+    visited = raised = 0;
+    @try {
+        for (id key in rekeyed) {
+            if (visited++ == 20)
+                [rekeyed setObject:key forKey:@"one more"];
+        }
+    } @catch (NSException *exception) {
+        raised = [[exception name] isEqualToString:NSGenericException];
+    }
+    printf("enumeration of a dictionary of 100 changed at its 21st key raised %d, before its end %d\n", raised, visited < 100);
 }
 
 int main(int argc, char **argv)

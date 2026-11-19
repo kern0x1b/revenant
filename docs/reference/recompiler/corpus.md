@@ -465,9 +465,29 @@ The `enumeration` lines are `for … in` loops of the guest over host collection
 that, at its first item, runs 40 inner loops to their end or to a `break` and then 64 `malloc` blocks of the size of a
 list of 40 items, filled with `0xa5`, and still has its 40 items (`40 of 40 items intact`; with the 32 shared lists the
 bridge had before, the outer loop's list was freed by the thirty-third inner loop and the blocks landed on it); 41 loops
-nested in one another; an array, a set and a dictionary of 100, which come in batches of 16; an empty array; a guest
-collection that forwards the call to a host array of 100; and an array that is changed inside its loop, which raises
-`NSGenericException` as on the Mac.
+nested in one another; an array, a set and a dictionary of 100, which the guest gets 16 at a time (the array from one
+answer of the host, the other two from an answer for every 16); an empty array; a guest collection that forwards the
+call to a host array of 100; and an array, a set and a dictionary of 100 that are each changed at the twenty-first item
+of their loop, which must raise `NSGenericException` before the loop has seen 100 items. The array is the case that
+only the bridge's own comparison can raise: the host's array answers with all its items at once, so the host is not
+asked again before the hundredth item and no code of the host runs that could notice, and the comparison of the loop
+the compiler emits is the guest's here and reads the bridge's copy. The set and the dictionary are the case of a new
+answer, where the bridge writes a new copy and the guest's comparison raises. Each of the two was taken out once, on
+2026-11-19, and the translated program run with the Foundation of iOS 6.1.3 (10B329) in the emulator: without the
+bridge's comparison the array's line reads `raised 0, before its end 0` and the other two stay; with the guest's
+mutations pointer on a word that does not change, the set's and the dictionary's lines read `raised 0, before its end 0`
+and the array's stays. So the three lines fail when the mechanism they name is gone, and an array of iOS 6.1.3 does
+answer with more than the buffer holds.
+
+The translated program runs in the emulator without a phone, as the first process of a copy of the root filesystem
+(`cp -c -R` of `.cache/firmware/rootfs/iPhone4,1/6.1.3_10B329`, the program copied to `usr/local/bin`, then
+`emulator boot --rootfs COPY --device iPhone4,1 --binary /usr/local/bin/HostBridges --host-cache DIR --display headless --gles-backend software --time-scale 10 --ticks 4000000000`;
+8 seconds). Its lines without a `[` at the start are the program's: 171 of the 176 are those of `expected.txt`, and the
+five that differ are the two `getifaddrs lo0` lines and three `sysctl` lines (`kern.proc.pid`, `kern.proc.all` and the
+missing number), where the emulator's kernel answers a first process without a network otherwise than the phone's does;
+they were the phone's lines before the change of the `enumeration` lines, which touches neither. So this run stands in
+for the phone for every line but those, and not for `sysctl-unmapped` and `word-overflow`, which were not run there. The lines say `before its end 1` and not at which item, because the Mac raises at the
+twenty-second item and the bridge at the thirty-third ([why](../../explanation/recompiler/how-it-works.md)).
 
 `format locale nil`, `format locale posix` and `format locale unicode` call `-[NSString initWithFormat:locale:arguments:]`
 with a `va_list` the program builds. That selector is declared with `NS_FORMAT_FUNCTION(1,0)` and a `va_list` parameter, and

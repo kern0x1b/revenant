@@ -171,4 +171,6 @@ enumeration set of 100: 100 members, sum 4950
 enumeration dictionary of 100: 100 keys, 100 values match
 enumeration empty array 0
 enumeration of 100 through a collection that forwards: 100 in order of 100, asked more than once 1
-enumeration of a mutated array raised 1
+enumeration of an array of 100 changed at its 21st item raised 1, before its end 1
+enumeration of a set of 100 changed at its 21st member raised 1, before its end 1
+enumeration of a dictionary of 100 changed at its 21st key raised 1, before its end 1

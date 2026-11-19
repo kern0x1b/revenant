@@ -146,8 +146,18 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
   collection for a batch, and hands the batch over through the buffer the guest's loop passed (16 items at most a call),
   remembering in the guest's `state` word how many of the batch it has handed: the loop's own frame holds every byte
   of the enumeration, so any number of loops, nested or on any number of threads, are independent, and a loop that is
-  left early leaves nothing behind. A collection that changes under a loop is told the way the host tells it
-  (`objc_enumerationMutation`), from the host's mutations word. Before 2026-11-19 the converted items of a batch were
+  left early leaves nothing behind. A host collection may answer with more items than the buffer holds, in its own
+  storage: the arrays of Foundation give all of theirs at once (100 for a buffer of 16, mutable or not, on the 4S with
+  iOS 6.1.3 as on macOS 27; the sets and the dictionaries fill the buffer; a probe of 2026-11-19), so for an array the bridge is called once for every 16 items of one answer of the host,
+  and that is its usual path, not a rare one. A collection that changes under a loop raises as the host's loop does
+  (`objc_enumerationMutation`), but later: the loop the compiler emits compares the mutations word before every item,
+  and the guest's loop reads the copy of that word that the bridge wrote, which changes only when the bridge runs. The
+  bridge compares the host's word with the copy each time it hands on more of an answer, and writes a new copy with each
+  new answer, where the guest's own comparison then fails. So the exception comes when the guest asks for more, at most
+  15 items after the item at which the host's loop would have raised it, and a body that has released items of the
+  collection meets those of them that are left in its 16. Handing one item a call would raise at the same item as the
+  host and cost a call of the bridge for every item of every loop; before 2026-11-19 a change of an array was not
+  noticed at all, because the whole array was one answer. Before 2026-11-19 the converted items of a batch were
   in one of 32 lists shared by the process, given out in turn: the thirty-third loop that started while another was
   still running freed that one's list, and the first loop read its next item from freed memory. In the reCAPTCHA SDK
   that was `xlate: objc_msgSend argument 0 value 0x300002483d7b0 does not fit the host type` at guest `0x2e0d7e34`
