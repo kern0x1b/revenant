@@ -884,8 +884,11 @@ Three controls are the same file built with one part of the rule taken out, and 
 `-DCONTROL=1`, no lock (its writes are lookups, so that it stops at the counter and not in a damaged dictionary), at
 `FAIL shared.exclusion`; `-DCONTROL=2`, a thread that missed under the read side puts its value without looking again,
 at `FAIL shared.claim`; `-DCONTROL=3`, the lookups of one class each in a read section of their own, at `FAIL
-shared.atomic`. The check also reads the two runtime files: `swift_classes.m` may call no `CFDictionary` function itself,
-and `objc_bridge.m` may reach the variant cache only through the module. It runs under `MallocScribble` and
+shared.atomic`. The check also reads the runtime files: `swift_classes.m` may call no `CFDictionary` function itself,
+`objc_bridge.m` may reach the variant cache only through the module, neither may take the dictionary out of a table
+(the field `entries`), and `runtime.c` and `library.c`, where the crash handler lives, may not use the module at all: a
+handler that waited for a lock the interrupted thread holds would hang the process instead of reporting. The tables
+are `static` in files that are compiled one by one, so no other file and no generated code can name them. It runs under `MallocScribble` and
 `MallocGuardEdges` and takes under a second. What it cannot show is the cost of the lock on the phone; that is the
 table in the reference and the `xl-stats` window of a drop.
 

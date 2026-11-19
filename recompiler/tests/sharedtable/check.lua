@@ -41,11 +41,22 @@ function main(out)
     if direct then
         corpus.fail("swift_classes.m calls %s itself: every table of that file is shared between threads and goes through xl_shared_table.h", direct:sub(1, -2))
     end
+    local bridge = io.readfile(path.join(runtime, "objc_bridge.m"))
     local number = 0
-    for line in io.readfile(path.join(runtime, "objc_bridge.m")):gmatch("[^\n]*") do
+    for line in bridge:gmatch("[^\n]*") do
         number = number + 1
         if line:find("xl_variant_cache", 1, true) and not line:find("xl_shared_", 1, true) then
             corpus.fail("objc_bridge.m line %d reaches the variant cache without xl_shared_table.h: %s", number, line)
+        end
+    end
+    for name, source in pairs({["swift_classes.m"] = classes, ["objc_bridge.m"] = bridge}) do
+        if source:find("[.>]entries%f[^%w_]") then
+            corpus.fail("%s reads the dictionary out of a shared table (its field entries): only xl_shared_table.h may", name)
+        end
+    end
+    for _, name in ipairs({"runtime.c", "library.c"}) do
+        if io.readfile(path.join(runtime, name)):find("xl_shared_", 1, true) then
+            corpus.fail("%s uses xl_shared_table.h: the crash handler lives there and must not wait for a lock that the thread it interrupted may hold", name)
         end
     end
     print(text:match("ok: [^\n]*") .. "; the controls without the lock, without the second look and with split lookups each failed at their own line")
