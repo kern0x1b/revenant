@@ -377,6 +377,11 @@ The Swift surface is the runtime's `Symbols` overlay (`toolchain/src/swift-runti
 
 Not backed, because expo-symbols 57.0.3 does not call them: `removeSymbolEffectOfType:` (four variants), `setSymbolImage:withContentTransition:` (two variants), `NSSymbolEffectOptions optionsWithRepeatBehavior:` (iOS 18), the iOS 14 to 26 effects other than these (appear, disappear, wiggle, rotate, breathe, draw), and secure coding for the option and effect classes.
 
+- Added for the rendering configurations `SymbolView.swift` applies: the four factories in `src/UIKit/UIImageSymbolConfiguration.m` (`configurationPreferringMonochrome`, `configurationPreferringMulticolor`, `configurationWithHierarchicalColor:` and `configurationWithPaletteColors:`) and the layer policy in `src/UIKit/RevenantSymbolRendering.c`. Copy, apply, equality, hashing, secure coding and `UIImage+Symbols.m` carry the rendering choice to `revenant_symbol_bitmap`, so the existing glyph renderer honours it.
+- Monochrome draws the glyph black as a template image, so the image view's tint colour colours all of it. The drawn glyph set has no intrinsic per-layer colours, so `preferringMulticolor` uses a fixed six-colour palette instead: red 0.85/0.20/0.20, orange 0.95/0.55/0.10, yellow 0.85/0.75/0.10, green 0.15/0.65/0.25, blue 0.10/0.45/0.90 and purple 0.55/0.25/0.80, in that order.
+- Hierarchical draws each path the glyph script paints as one layer, all in the given colour: opacity 1.0 for the first path, 0.6 for the second, 0.4 for the third and 0.25 from the fourth on. A glyph script that paints one path is simply the given colour.
+- Palette gives path i the colour at index i modulo the number of colours, fully opaque. An empty palette falls back to monochrome. Hierarchical, palette and multicolor images are original-rendered so the baked colours show; monochrome and automatic stay template images.
+
 ## Expo modules: initializing a speech voice by identifier (expo-speech 57.0.3)
 
 Source: `expo-speech` 57.0.3, `ios/SpeechModule.swift`, which calls `AVSpeechSynthesisVoice(identifier:)` when JavaScript passes a voice identifier.

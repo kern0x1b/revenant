@@ -284,6 +284,7 @@ if is_plat("iphoneos") then
 end
 
 backports_tests("vimage_scale", {vimage_scale = "vimage_scale_test.lua"})
+backports_tests("symbol_rendering", {symbolrendering = "symbol_rendering_test.lua"})
 
 if is_plat("iphoneos") and not SELECTED then
     target("BackportsLayoutProbe")

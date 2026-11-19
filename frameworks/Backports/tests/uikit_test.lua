@@ -265,6 +265,18 @@ local AREAS = {
         },
     },
     {
+        name = "symbol rendering configurations expo-symbols uses for the drawn glyph set",
+        sources = {"UIImageSymbolConfiguration.m", "UIImageSymbolGlyphs.m", "UIImage+Symbols.m", "RevenantSymbolRendering.c"},
+        members = {
+            "+[UIImageSymbolConfiguration configurationPreferringMonochrome]",
+            "+[UIImageSymbolConfiguration configurationPreferringMulticolor]",
+            "+[UIImageSymbolConfiguration configurationWithHierarchicalColor:]",
+            "+[UIImageSymbolConfiguration configurationWithPaletteColors:]",
+            "-[UIImageSymbolConfiguration revenant_symbolRendering]",
+            "-[UIImageSymbolConfiguration revenant_symbolColors]",
+        },
+    },
+    {
         name = "user notifications: the notification center over local notifications",
         library = "UserNotifications",
         sources = {"UNUserNotificationCenter.m", "RevenantUserNotificationSupport.m", "UNNotificationTrigger.m"},

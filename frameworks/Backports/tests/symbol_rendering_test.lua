@@ -1,0 +1,15 @@
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
+local backports = path.absolute(path.join(os.scriptdir(), ".."))
+local source = path.join(backports, "src", "UIKit")
+local tests = path.join(backports, "tests", "symbol_rendering")
+
+function main()
+    local out = workspace.run("backports-tests", "SymbolRendering")
+    local object = path.join(out, "RevenantSymbolRendering.o")
+    os.vrunv("clang", {"-std=gnu11", "-Wall", "-Werror", "-I", source, "-c", path.join(source, "RevenantSymbolRendering.c"), "-o", object})
+    local exe = path.join(out, "render_test")
+    os.vrunv("clang", {"-std=gnu11", "-Wall", "-Werror", "-I", source, path.join(tests, "render_test.c"), object, "-o", exe})
+    local output = os.iorunv(exe):trim()
+    assert(output:find("symbol rendering tests passed", 1, true), "the rendering probe failed: " .. output)
+    print("symbol rendering tests passed")
+end

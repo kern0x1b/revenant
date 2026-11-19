@@ -8,8 +8,27 @@ static NSString *const RevenantPointSizeKey = @"UIPointSize";
 static NSString *const RevenantWeightKey = @"UISymbolWeight";
 static NSString *const RevenantScaleKey = @"UISymbolScale";
 static NSString *const RevenantTextStyleKey = @"UITextStyle";
+static NSString *const RevenantRenderingKey = @"UISymbolRendering";
+static NSString *const RevenantColorsKey = @"UISymbolRenderingColors";
 
 static const double RevenantDefaultPointSize = 17;
+
+static NSArray *RevenantMulticolorPalette(void)
+{
+    static NSArray *palette;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        palette = @[
+            [UIColor colorWithRed:0.85 green:0.20 blue:0.20 alpha:1],
+            [UIColor colorWithRed:0.95 green:0.55 blue:0.10 alpha:1],
+            [UIColor colorWithRed:0.85 green:0.75 blue:0.10 alpha:1],
+            [UIColor colorWithRed:0.15 green:0.65 blue:0.25 alpha:1],
+            [UIColor colorWithRed:0.10 green:0.45 blue:0.90 alpha:1],
+            [UIColor colorWithRed:0.55 green:0.25 blue:0.80 alpha:1],
+        ];
+    });
+    return palette;
+}
 
 static double revenant_text_style_size(NSString *style)
 {
@@ -83,6 +102,8 @@ static NSString *revenant_scale_name(NSInteger scale)
     NSInteger _weight;
     NSInteger _scale;
     NSString *_textStyle;
+    RevenantSymbolRendering _rendering;
+    NSArray<UIColor *> *_colors;
 }
 
 + (BOOL)supportsSecureCoding
@@ -153,6 +174,36 @@ static NSString *revenant_scale_name(NSInteger scale)
     return [self revenant_configurationWithPointSize:font.pointSize hasPointSize:YES weight:weight scale:scale textStyle:nil];
 }
 
++ (UIImageSymbolConfiguration *)revenant_configurationWithRendering:(RevenantSymbolRendering)rendering colors:(NSArray<UIColor *> *)colors
+{
+    UIImageSymbolConfiguration *configuration = [[self alloc] initRevenantWithPointSize:0 hasPointSize:NO weight:0 scale:0 textStyle:nil traitCollection:nil];
+    configuration->_rendering = rendering;
+    configuration->_colors = [colors copy];
+    return configuration;
+}
+
++ (UIImageSymbolConfiguration *)configurationPreferringMonochrome
+{
+    return [self revenant_configurationWithRendering:RevenantSymbolRenderingMonochrome colors:nil];
+}
+
++ (UIImageSymbolConfiguration *)configurationPreferringMulticolor
+{
+    return [self revenant_configurationWithRendering:RevenantSymbolRenderingMulticolor colors:RevenantMulticolorPalette()];
+}
+
++ (UIImageSymbolConfiguration *)configurationWithHierarchicalColor:(UIColor *)color
+{
+    return [self revenant_configurationWithRendering:RevenantSymbolRenderingHierarchical colors:@[color ?: [UIColor blackColor]]];
+}
+
++ (UIImageSymbolConfiguration *)configurationWithPaletteColors:(NSArray<UIColor *> *)colors
+{
+    if (!colors.count)
+        return [self revenant_configurationWithRendering:RevenantSymbolRenderingMonochrome colors:nil];
+    return [self revenant_configurationWithRendering:RevenantSymbolRenderingPalette colors:colors];
+}
+
 - (instancetype)initRevenantWithPointSize:(double)pointSize hasPointSize:(BOOL)hasPointSize weight:(NSInteger)weight scale:(NSInteger)scale
                                textStyle:(NSString *)textStyle traitCollection:(UITraitCollection *)traits
 {
@@ -162,6 +213,8 @@ static NSString *revenant_scale_name(NSInteger scale)
         _weight = weight;
         _scale = scale;
         _textStyle = textStyle;
+        _rendering = RevenantSymbolRenderingAutomatic;
+        _colors = nil;
     }
     return self;
 }
@@ -174,6 +227,16 @@ static NSString *revenant_scale_name(NSInteger scale)
         _weight = [coder decodeIntegerForKey:RevenantWeightKey];
         _scale = [coder decodeIntegerForKey:RevenantScaleKey];
         _textStyle = [coder decodeObjectOfClass:[NSString class] forKey:RevenantTextStyleKey];
+        _rendering = [coder decodeIntegerForKey:RevenantRenderingKey];
+        NSArray *encoded = [coder decodeObjectOfClasses:[NSSet setWithObjects:[NSArray class], [NSNumber class], nil] forKey:RevenantColorsKey];
+        NSMutableArray *colors = [NSMutableArray array];
+        for (NSArray *parts in encoded) {
+            if (parts.count < 4)
+                continue;
+            [colors addObject:[UIColor colorWithRed:[parts[0] doubleValue] green:[parts[1] doubleValue]
+                                              blue:[parts[2] doubleValue] alpha:[parts[3] doubleValue]]];
+        }
+        _colors = colors.count ? colors : nil;
     }
     return self;
 }
@@ -189,6 +252,28 @@ static NSString *revenant_scale_name(NSInteger scale)
         [coder encodeInteger:_scale forKey:RevenantScaleKey];
     if (_textStyle)
         [coder encodeObject:_textStyle forKey:RevenantTextStyleKey];
+    if (_rendering)
+        [coder encodeInteger:_rendering forKey:RevenantRenderingKey];
+    if (_colors) {
+        NSMutableArray *encoded = [NSMutableArray array];
+        for (UIColor *color in _colors) {
+            CGColorRef cg = color.CGColor;
+            size_t components = CGColorGetNumberOfComponents(cg);
+            const CGFloat *parts = CGColorGetComponents(cg);
+            CGFloat red = 0, green = 0, blue = 0, alpha = 1;
+            if (components >= 4) {
+                red = parts[0];
+                green = parts[1];
+                blue = parts[2];
+                alpha = parts[3];
+            } else if (components >= 2) {
+                red = green = blue = parts[0];
+                alpha = parts[1];
+            }
+            [encoded addObject:@[@(red), @(green), @(blue), @(alpha)]];
+        }
+        [coder encodeObject:encoded forKey:RevenantColorsKey];
+    }
 }
 
 - (id)copyWithZone:(NSZone *)zone
@@ -199,12 +284,15 @@ static NSString *revenant_scale_name(NSInteger scale)
     copy->_weight = _weight;
     copy->_scale = _scale;
     copy->_textStyle = _textStyle;
+    copy->_rendering = _rendering;
+    copy->_colors = _colors;
     return copy;
 }
 
 - (BOOL)revenant_isUnspecified
 {
-    return [super revenant_isUnspecified] && !_hasPointSize && !_weight && !_scale && !_textStyle;
+    return [super revenant_isUnspecified] && !_hasPointSize && !_weight && !_scale && !_textStyle &&
+           _rendering == RevenantSymbolRenderingAutomatic && !_colors;
 }
 
 - (void)revenant_applyFieldsOfConfiguration:(UIImageConfiguration *)other
@@ -225,6 +313,10 @@ static NSString *revenant_scale_name(NSInteger scale)
         _weight = symbols->_weight;
     if (symbols->_scale)
         _scale = symbols->_scale;
+    if (symbols->_rendering != RevenantSymbolRenderingAutomatic) {
+        _rendering = symbols->_rendering;
+        _colors = symbols->_colors;
+    }
 }
 
 - (instancetype)configurationByApplyingConfiguration:(UIImageConfiguration *)otherConfiguration
@@ -298,16 +390,17 @@ static NSString *revenant_scale_name(NSInteger scale)
         return [self revenant_isUnspecified];
     if (![otherConfiguration isKindOfClass:[UIImageSymbolConfiguration class]])
         return NO;
+    BOOL sameColors = _colors == otherConfiguration->_colors || [_colors isEqual:otherConfiguration->_colors];
     return _hasPointSize == otherConfiguration->_hasPointSize && _pointSize == otherConfiguration->_pointSize && _weight == otherConfiguration->_weight &&
            _scale == otherConfiguration->_scale && (_textStyle == otherConfiguration->_textStyle || [_textStyle isEqual:otherConfiguration->_textStyle]) &&
-           [self revenant_hasTraitsOfConfiguration:otherConfiguration];
+           _rendering == otherConfiguration->_rendering && sameColors && [self revenant_hasTraitsOfConfiguration:otherConfiguration];
 }
 
 - (NSUInteger)hash
 {
     double scaled = _hasPointSize ? _pointSize * 100 : 0;
     NSUInteger size = scaled > 0 && scaled < (double)NSUIntegerMax ? (NSUInteger)scaled : 0;
-    return size ^ (NSUInteger)_weight ^ (NSUInteger)_scale ^ _textStyle.hash ^ [super hash];
+    return size ^ (NSUInteger)_weight ^ (NSUInteger)_scale ^ (NSUInteger)_rendering ^ _textStyle.hash ^ _colors.hash ^ [super hash];
 }
 
 - (NSMutableArray<NSString *> *)revenant_fieldDescriptions
@@ -321,7 +414,21 @@ static NSString *revenant_scale_name(NSInteger scale)
         [fields addObject:[NSString stringWithFormat:@"weight=%@", revenant_weight_name(_weight)]];
     if (_scale)
         [fields addObject:[@"scale=" stringByAppendingString:revenant_scale_name(_scale)]];
+    if (_rendering)
+        [fields addObject:[NSString stringWithFormat:@"rendering=%ld", (long)_rendering]];
+    if (_colors)
+        [fields addObject:[NSString stringWithFormat:@"colors=%lu", (unsigned long)_colors.count]];
     return fields;
+}
+
+- (RevenantSymbolRendering)revenant_symbolRendering
+{
+    return _rendering;
+}
+
+- (NSArray<UIColor *> *)revenant_symbolColors
+{
+    return _colors;
 }
 
 @end
