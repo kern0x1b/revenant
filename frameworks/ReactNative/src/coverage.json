@@ -297,9 +297,9 @@
    "group": "sdk",
    "version": "~57.0.5",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "EventKit (EKEventStore) is present in the iOS 6.1.3 cache. Not built."
+   "status": "real",
+   "verified": "build",
+   "note": "Recipe packages/e/expo-calendar (npm 57.0.5, patch calendar-names-ios6.patch) installs and its patch applies; compiled into the host and linked (not exercised on the phone). The only change renames MissingCurrentViewControllerException to CalendarMissingCurrentViewControllerException, because expo-sharing declares the same class inside the shared ExpoAppModules Swift module. EventKit (EKEventStore, EKCalendar, EKEvent, EKRecurrenceRule) and the EventKitUI event and edit view controllers are present on iOS 6; the iOS 17 write-only permission branches are behind #available and are not taken there."
   },
   {
    "id": "expo-camera",

@@ -70,6 +70,14 @@ exercised on the phone, so their coverage rows are `real`, verified `build`.
 fails with "make the copy again" when a copy predates that. `src/expo/xmake.lua` writes each pod's module map and flags into
 `build/expo-core/implicit.rsp`.
 
+## Contacts and calendar (block 5)
+
+expo-calendar is a recipe with an iOS 6 patch (packages/e/expo-calendar/patches); it installs, its patch applies, and the host compiles and links it. It has not been exercised on the phone.
+
+| Module | Removed or replaced | Why | What JS sees |
+| --- | --- | --- | --- |
+| expo-calendar | nothing; `MissingCurrentViewControllerException` renamed `CalendarMissingCurrentViewControllerException` | the name collides with expo-sharing's inside the shared Swift module `ExpoAppModules` | the module as published: EventKit (`EKEventStore`, `EKEvent`, `EKCalendar`) and the EventKitUI event and edit view controllers are present on iOS 6; the iOS 17 write-only permission branches are behind `#available` and are not taken; built and linked, not exercised on the phone |
+
 ## How to check
 
 `./xmakew l -P . frameworks/ReactNative/tools/coverage.lua` regenerates `docs/reference/react-native/coverage.md`;
