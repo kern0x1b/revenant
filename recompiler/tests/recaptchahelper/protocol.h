@@ -1,5 +1,6 @@
 #pragma once
 #include <errno.h>
+#include <mach/mach_time.h>
 #include <poll.h>
 #include <stddef.h>
 #include <string.h>
@@ -189,8 +190,16 @@ static inline int rc_write_all(int fd, const char *bytes, size_t length)
     return 0;
 }
 
+static inline long long rc_clock_ms(void)
+{
+    mach_timebase_info_data_t base;
+    mach_timebase_info(&base);
+    return (long long)(mach_absolute_time() * base.numer / base.denom / 1000000);
+}
+
 static inline int rc_read_line(struct rc_reader *reader, int wait_ms, char **line, size_t *length)
 {
+    long long until = wait_ms >= 0 ? rc_clock_ms() + wait_ms : 0;
     if (reader->taken) {
         memmove(reader->bytes, reader->bytes + reader->taken, reader->have - reader->taken);
         reader->have -= reader->taken;
@@ -221,7 +230,8 @@ static inline int rc_read_line(struct rc_reader *reader, int wait_ms, char **lin
         scanned = reader->have;
         if (wait_ms >= 0) {
             struct pollfd waited = {reader->fd, POLLIN, 0};
-            int ready = poll(&waited, 1, wait_ms);
+            long long left = until - rc_clock_ms();
+            int ready = poll(&waited, 1, left > 0 ? (int)left : 0);
             if (ready < 0 && errno == EINTR)
                 continue;
             if (ready == 0)

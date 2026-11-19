@@ -10,7 +10,15 @@ local CONTROLS = {
     {name = "left-twice", number = 9, scenario = "quitclose", line = "a helper left twice", what = "two threads free to leave at once"},
     {name = "cookies-elsewhere", number = 10, scenario = "closed", line = "its line of leaving does not say cookies own=1", what = "the shared cookie store pointed at another store than the helper's own"},
     {name = "home-kept", number = 11, scenario = "closed", line = "the file the library wrote in its caches folder is not in the helper's own home", what = "the process's home left where it was given"},
-    {name = "cookies-reentrant", number = 12, scenario = "ready", line = "the answer pipe ended where the ready line was due", what = "the helper's cookie store made on first use, inside its own replacement"}
+    {name = "cookies-reentrant", number = 12, scenario = "ready", line = "the answer pipe ended where the ready line was due", what = "the helper's cookie store made on first use, inside its own replacement"},
+    {name = "long-not-counted", number = 13, scenario = "idle", line = "a line that was too long did not keep the helper alive", what = "a line that is too long not counted as a request for the idle time"}
+}
+
+local REFUSALS = {
+    {name = "stdout-refused", number = 14, failed = "STDOUT", what = "descriptor 1 cannot be pointed at the log"},
+    {name = "nosigpipe-refused", number = 15, failed = "NOSIGPIPE", what = "the answer pipe cannot be told not to raise SIGPIPE"},
+    {name = "reader-refused", number = 16, failed = "NO_READER", what = "the thread that reads the request pipe cannot be made"},
+    {name = "home-refused", number = 17, failed = "NO_HOME", what = "CFFIXED_USER_HOME cannot be set"}
 }
 
 function main(out, ...)
@@ -44,7 +52,7 @@ function main(out, ...)
     os.execv("cc", {"-O1", "-Wall", "-fobjc-arc", "-dynamiclib", "-framework", "Foundation", path.join(here, "standin.m"), "-o", o("standin.dylib")})
     os.execv("cc", {"-O1", "-Wall", path.join(here, "driver.c"), "-o", o("driver")})
     local code, text, state = drive(helper("rchelper"), "rchelper", nil)
-    if code ~= 0 or not text:find("\nok: 13 scenarios\n", 1, true) then
+    if code ~= 0 or not text:find("\nok: 14 scenarios\n", 1, true) then
         corpus.fail("the helper did not keep the protocol against the fixture library (exit %s):\n%s", tostring(code), text:sub(-2000))
     end
     local kept = os.iorunv("plutil", {"-p", path.join(state, "preferences.plist")})
@@ -64,6 +72,13 @@ function main(out, ...)
         end
     end
 
+    for _, refusal in ipairs(REFUSALS) do
+        local refusal_code, said = drive(helper("refusal-" .. refusal.name, refusal.number), refusal.name, refusal.name)
+        if refusal_code ~= 0 or not said:find("\nok: 1 scenarios\n", 1, true) then
+            corpus.fail("when %s the helper did not say failed %s before ready, and exit 3 (exit %s):\n%s", refusal.what, refusal.failed, tostring(refusal_code), said:sub(-2000))
+        end
+    end
+
     local runtime = corpus.swift_armv7()
     corpus.armv7(e, {"-O2", "-w", "-fobjc-arc", "-I", path.join(e.recompiler, "include"), "-I", here,
                      "-L", path.join(runtime, "lib", "swift", "iphoneos"), "-lswiftFoundation", "-lswiftCore", "-framework", "Foundation", "-Wl,-rpath,@executable_path",
@@ -75,6 +90,6 @@ function main(out, ...)
             corpus.fail("the armv7 helper imports %s: it starts no process of its own", symbol)
         end
     end
-    print("ok: the helper keeps the protocol in thirteen scenarios against the fixture library, the library's preferences, URL cache, cookies and caches folder land in the helper's own state, " ..
-          "twelve controls each fail at their own line, and the armv7 helper links with the loader")
+    print("ok: the helper keeps the protocol in fourteen scenarios against the fixture library, the library's preferences, URL cache, cookies and caches folder land in the helper's own state, " ..
+          "thirteen controls each fail at their own line, four refused system calls each end in their own failed line before ready, and the armv7 helper links with the loader")
 end

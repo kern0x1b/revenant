@@ -54,8 +54,10 @@ static void need(int holds, const char *format, ...)
     printf("\n");
     va_end(arguments);
     fflush(stdout);
-    if (running > 0)
+    if (running > 0) {
         kill(running, SIGKILL);
+        waitpid(running, NULL, 0);
+    }
     exit(1);
 }
 
@@ -668,6 +670,78 @@ static void scenario_idle(void)
     need(now() - late->at > 0.4, "the helper ended %.0f ms after its last answer, before its idle time of 600 ms", (now() - late->at) * 1000);
     status = finish(&helper, 2000);
     need(WIFEXITED(status) && WEXITSTATUS(status) == 0, "an idle helper ended with status 0x%x, not with exit 0", status);
+    static char raw[70002];
+    memset(raw, 'x', 70001);
+    raw[70001] = '\n';
+    begin(&helper, 600);
+    ready(&helper);
+    quiet(&helper, 400);
+    put(&helper, raw, sizeof raw);
+    struct line *rejected = one(&helper, 3000, "the rejection of a line that is too long");
+    is_rejected(rejected, "LINE_TOO_LONG");
+    kind = get(&helper, 450, &line, NULL);
+    need(kind == RC_WAIT, "a line that was too long did not keep the helper alive: its answer pipe ended %.0f ms after the rejection, and the idle time was 600 ms", (now() - rejected->at) * 1000);
+    kind = get(&helper, 3000, &line, NULL);
+    need(kind == RC_END, "the helper did not end after its idle time: its answer pipe was still open 3 s after the rejection of a long line");
+    need(now() - rejected->at > 0.4, "the helper ended %.0f ms after the rejection of a long line, before its idle time of 600 ms", (now() - rejected->at) * 1000);
+    status = finish(&helper, 2000);
+    need(WIFEXITED(status) && WEXITSTATUS(status) == 0, "an idle helper ended with status 0x%x, not with exit 0", status);
+}
+
+static void scenario_trickle(void)
+{
+    static struct rc_reader reader;
+    int fds[2];
+    need(pipe(fds) == 0, "pipe: %s", strerror(errno));
+    pid_t writer = fork();
+    need(writer >= 0, "fork: %s", strerror(errno));
+    if (writer == 0) {
+        close(fds[0]);
+        for (int i = 0; i < 40; i++) {
+            if (write(fds[1], "x", 1) != 1)
+                _exit(1);
+            usleep(50000);
+        }
+        _exit(0);
+    }
+    close(fds[1]);
+    memset(&reader, 0, sizeof reader);
+    reader.fd = fds[0];
+    char *raw = NULL;
+    size_t length = 0;
+    double began = now();
+    int kind = rc_read_line(&reader, 300, &raw, &length);
+    double took = (now() - began) * 1000;
+    kill(writer, SIGKILL);
+    waitpid(writer, NULL, 0);
+    close(fds[0]);
+    need(kind == RC_WAIT, "a read told to wait 300 ms for a line that never ends returned %d after %.0f ms, while a byte came every 50 ms", kind, took);
+    need(took >= 250 && took < 600, "a read told to wait 300 ms for a line returned after %.0f ms", took);
+}
+
+static void refusal(const char *name)
+{
+    refused((const char *[]){fixture_path, RC_VERSION, "--state", state_path, NULL}, name);
+}
+
+static void scenario_stdout_refused(void)
+{
+    refusal("STDOUT");
+}
+
+static void scenario_nosigpipe_refused(void)
+{
+    refusal("NOSIGPIPE");
+}
+
+static void scenario_reader_refused(void)
+{
+    refusal("NO_READER");
+}
+
+static void scenario_home_refused(void)
+{
+    refusal("NO_HOME");
 }
 
 static void scenario_noise(void)
@@ -691,9 +765,25 @@ int main(int argc, char **argv)
     static const struct {
         const char *name;
         void (*run)(void);
-    } scenarios[] = {{"ready", scenario_ready},     {"failed", scenario_failed}, {"token", scenario_token}, {"errors", scenario_errors},   {"unknown", scenario_unknown}, {"pending", scenario_pending},
-                     {"closed", scenario_closed},   {"killed", scenario_killed}, {"long", scenario_long},   {"garbage", scenario_garbage}, {"idle", scenario_idle},       {"noise", scenario_noise},
-                     {"quitclose", scenario_quitclose}};
+        int alone;
+    } scenarios[] = {{"ready", scenario_ready, 0},
+                     {"failed", scenario_failed, 0},
+                     {"token", scenario_token, 0},
+                     {"errors", scenario_errors, 0},
+                     {"unknown", scenario_unknown, 0},
+                     {"pending", scenario_pending, 0},
+                     {"closed", scenario_closed, 0},
+                     {"killed", scenario_killed, 0},
+                     {"long", scenario_long, 0},
+                     {"garbage", scenario_garbage, 0},
+                     {"idle", scenario_idle, 0},
+                     {"noise", scenario_noise, 0},
+                     {"quitclose", scenario_quitclose, 0},
+                     {"trickle", scenario_trickle, 0},
+                     {"stdout-refused", scenario_stdout_refused, 1},
+                     {"nosigpipe-refused", scenario_nosigpipe_refused, 1},
+                     {"reader-refused", scenario_reader_refused, 1},
+                     {"home-refused", scenario_home_refused, 1}};
     if (argc < 5) {
         fprintf(stderr, "usage: driver HELPER LIBRARY STATE LOG [SCENARIO]\n");
         return 2;
@@ -707,7 +797,7 @@ int main(int argc, char **argv)
         setenv("DYLD_INSERT_LIBRARIES", insert, 1);
     int ran = 0;
     for (size_t i = 0; i < sizeof scenarios / sizeof scenarios[0]; i++) {
-        if (argc > 5 && strcmp(argv[5], scenarios[i].name) != 0)
+        if (argc > 5 ? strcmp(argv[5], scenarios[i].name) != 0 : scenarios[i].alone)
             continue;
         scenario = scenarios[i].name;
         double began = now();

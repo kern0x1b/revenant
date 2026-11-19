@@ -65,7 +65,10 @@ reader takes any `%XX`, upper or lower case, and a `%` not followed by two such 
 | `LOAD_FAILED` | `xl_load` refused; the text is its status and message |
 | `NO_DEFAULTS` | `NSUserDefaults` has no `initWithSuiteName:` (the Foundation backport is not loaded) |
 | `NO_COOKIE_STORE` | there is no `NSURLSessionConfiguration`, so no cookie store of the helper's own can be made (the Foundation backport is not loaded) |
-| `NO_HOME` | the helper's home folder cannot be made; or after `CFFIXED_USER_HOME` was set the caches folder is not inside it; or the languages and locale the process reads from the global preferences are not what they were before the move. The text says the paths or the two values. The helper stops rather than let the library write into the app's container, or send another language than the app's |
+| `STDOUT` | descriptor 1 cannot be pointed at the log (`dup2`), or the answer pipe's own descriptor cannot be marked close-on-exec; the text says the error. Nothing the library prints may reach the answer pipe, so the helper stops before it loads the library |
+| `NOSIGPIPE` | `SIGPIPE` cannot be ignored, or `F_SETNOSIGPIPE` is refused on the answer pipe; the text says the error. Not measured on iOS 6: the Mac accepts the call on pipes, sockets, files and `/dev/null`, so a refusal there is the first thing the next phone run would show |
+| `NO_READER` | the thread that reads the request pipe cannot be made; the text says the error. The helper makes it before it writes `ready` (the thread waits until `ready` is written), so an app never sees `ready` from a helper that cannot hear it |
+| `NO_HOME` | the helper's home folder cannot be made; or `CFFIXED_USER_HOME` cannot be set; or after it was set the caches folder is not inside it; or the languages and locale the process reads from the global preferences are not what they were before the move. The text says the paths or the two values. The helper stops rather than let the library write into the app's container, or send another language than the app's |
 | `NO_CLASSES` | the library has not the two classes the helper calls |
 
 | `token … error` | Meaning |
@@ -120,17 +123,23 @@ Before each of the first two it writes its preferences out (`synchronize`).
 
 The helper sets `F_SETNOSIGPIPE` on its own end of the answer pipe as the app does on its end of the request pipe.
 Ignoring the signal is not enough there: with the runtime's diagnostics on, `SIGPIPE` has a handler of the runtime
-that ends in the default action.
+that ends in the default action. When the helper cannot ignore the signal or cannot set the flag, it says
+`failed NOSIGPIPE` and does not start; there is no fallback to the signal alone, because it is not known to be enough.
+
+Any line from the app keeps the helper alive for the idle time, a line that is too long (`LINE_TOO_LONG`) included,
+and so does the answer to a request.
 
 ## Descriptor 1, descriptor 2 and a crash
 
 The helper moves the answer pipe to a descriptor of its own before it loads the library, and points descriptor 1 at
 descriptor 2. So only protocol lines reach the app, and everything the library, the runtime or Foundation prints
 goes to the log file of descriptor 2: `printf` and `write(1, …)` of the SDK, the runtime's `xlate:` lines, `NSLog`,
-and the helper's own lines, which begin with `rchelper:`. At `ready` and at each exit of its own the helper writes
-one line there with the name of its state, the number of keys in its preferences, the size of its URL cache, the
-number of cookies in its own store and in the shared store its process was given (counts; no name or value), and the
-caches folder the library sees (`caches=`), which on a working run is inside the helper's home.
+and the helper's own lines, which begin with `rchelper:`. At `ready` and at each exit of its own (`quit`, the end of
+a pipe, the idle time) the helper writes one line there with the name of its state, the number of keys in its
+preferences, the size of its URL cache, the number of cookies in its own store and in the shared store its process was
+given (counts; no name or value), and the caches folder the library sees (`caches=`), which on a working run is inside
+the helper's home. A helper that stops with `failed` writes `rchelper: failed NAME: text` instead and no such line:
+it stops before it has a state to count, and the same two things are on the answer pipe.
 
 The log file is the app's: opened by the spawn so that `dyld`'s message about a missing library lands in it too,
 appended to, and trimmed by the app before a spawn when it has grown (256 KiB is plenty: a run writes a few lines).

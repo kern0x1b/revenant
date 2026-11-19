@@ -31,8 +31,16 @@
 #define COOKIES_ELSEWHERE 10
 #define HOME_KEPT 11
 #define COOKIES_REENTRANT 12
+#define LONG_NOT_COUNTED 13
+#define STDOUT_REFUSED 14
+#define NOSIGPIPE_REFUSED 15
+#define READER_REFUSED 16
+#define HOME_REFUSED 17
+
+#define REFUSED(control, code, call) ((CONTROL == (control)) ? (errno = (code), -1) : (call))
 
 static int answers = 1;
+static dispatch_semaphore_t begun;
 static NSString *state;
 static NSUserDefaults *domain;
 static NSURLCache *cache;
@@ -113,7 +121,8 @@ static void move_home(void)
         if (![[NSFileManager defaultManager] createDirectoryAtPath:[home stringByAppendingPathComponent:folder] withIntermediateDirectories:YES attributes:nil error:&error])
             fail(@"NO_HOME", [NSString stringWithFormat:@"the helper's home %@ cannot be made: %@", home, error.localizedDescription]);
     }
-    setenv("CFFIXED_USER_HOME", home.fileSystemRepresentation, 1);
+    if (REFUSED(HOME_REFUSED, ENOMEM, setenv("CFFIXED_USER_HOME", home.fileSystemRepresentation, 1)) != 0)
+        fail(@"NO_HOME", [NSString stringWithFormat:@"CFFIXED_USER_HOME cannot be set to %@: %s", home, strerror(errno)]);
     NSString *caches = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject;
     if (![caches hasPrefix:[home stringByAppendingString:@"/"]])
         fail(@"NO_HOME", [NSString stringWithFormat:@"after CFFIXED_USER_HOME was set to %@ the caches folder is %@, so what the library writes there would land outside the helper's state", home, caches]);
@@ -272,6 +281,14 @@ static void idle_arm(void)
         if (turn == idle_turn && !pending.count)
             leave(0, @"no request for the idle time");
     });
+}
+
+static void idle_touch(void)
+{
+    if (pending.count)
+        idle_turn++;
+    else
+        idle_arm();
 }
 
 static BOOL take(NSString *identifier, unsigned long serial)
@@ -457,15 +474,13 @@ static void request(NSData *bytes)
             }
         }
     }
-    if (pending.count)
-        idle_turn++;
-    else
-        idle_arm();
+    idle_touch();
 }
 
 static void *reader_main(void *unused)
 {
     static struct rc_reader reader;
+    dispatch_semaphore_wait(begun, DISPATCH_TIME_FOREVER);
     reader.fd = 0;
     for (;;) {
         @autoreleasepool {
@@ -480,6 +495,8 @@ static void *reader_main(void *unused)
             } else if (got == RC_LONG) {
                 dispatch_async(dispatch_get_main_queue(), ^{
                     say(@[@"rejected", @"LINE_TOO_LONG", [NSString stringWithFormat:@"%lu bytes, and a line has %d at most", (unsigned long)length, RC_LINE_MOST]], YES);
+                    if (CONTROL != LONG_NOT_COUNTED)
+                        idle_touch();
                 });
             } else {
                 if (CONTROL == END_IGNORED)
@@ -539,7 +556,8 @@ static NSString *load(const char *path)
 int main(int argc, char **argv)
 {
     @autoreleasepool {
-        signal(SIGPIPE, SIG_IGN);
+        if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
+            fail(@"NOSIGPIPE", [NSString stringWithFormat:@"SIGPIPE cannot be ignored: %s", strerror(errno)]);
         if (fcntl(2, F_GETFD) < 0) {
             int null = open("/dev/null", O_WRONLY);
             if (null >= 0 && null != 2) {
@@ -553,11 +571,13 @@ int main(int argc, char **argv)
                 note(@"descriptor 1 is not open: the helper has nowhere to answer");
                 return 4;
             }
-            fcntl(answers, F_SETFD, FD_CLOEXEC);
-            dup2(2, 1);
+            if (fcntl(answers, F_SETFD, FD_CLOEXEC) < 0)
+                fail(@"STDOUT", [NSString stringWithFormat:@"the answer descriptor cannot be closed on exec: %s", strerror(errno)]);
+            if (REFUSED(STDOUT_REFUSED, EBADF, dup2(2, 1)) < 0)
+                fail(@"STDOUT", [NSString stringWithFormat:@"descriptor 1 cannot be pointed at the log, so what the library prints would reach the answer pipe: %s", strerror(errno)]);
         }
-        if (CONTROL != PIPE_SIGNAL)
-            fcntl(answers, F_SETNOSIGPIPE, 1);
+        if (CONTROL != PIPE_SIGNAL && REFUSED(NOSIGPIPE_REFUSED, EBADF, fcntl(answers, F_SETNOSIGPIPE, 1)) < 0)
+            fail(@"NOSIGPIPE", [NSString stringWithFormat:@"the answer pipe cannot be told not to raise SIGPIPE: %s", strerror(errno)]);
         pending = [NSMutableDictionary dictionary];
         clients = [NSMutableDictionary dictionary];
         fetching = [NSMutableDictionary dictionary];
@@ -600,12 +620,16 @@ int main(int argc, char **argv)
         if (!recaptcha || !actions || !class_respondsToSelector(object_getClass(recaptcha), sel_registerName("fetchClientWithSiteKey:completion:")) ||
             !class_respondsToSelector(object_getClass(actions), sel_registerName("custom:")))
             fail(@"NO_CLASSES", @"the library has no RecaptchaEnterprise.Recaptcha with fetchClientWithSiteKey:completion: or no RecaptchaEnterprise.RecaptchaAction with custom:");
+        begun = dispatch_semaphore_create(0);
+        pthread_t reader = NULL;
+        int made = CONTROL == READER_REFUSED ? EAGAIN : pthread_create(&reader, NULL, reader_main, NULL);
+        if (made != 0)
+            fail(@"NO_READER", [NSString stringWithFormat:@"the thread that reads the request pipe cannot be made: %s", strerror(made)]);
+        pthread_detach(reader);
         say(@[@"ready", @RC_VERSION, uuid_of(argv[1]), [NSString stringWithFormat:@"%ld", took]], NO);
         look(@"ready");
         idle_arm();
-        pthread_t reader;
-        pthread_create(&reader, NULL, reader_main, NULL);
-        pthread_detach(reader);
+        dispatch_semaphore_signal(begun);
         CFRunLoopTimerRef keep = CFRunLoopTimerCreateWithHandler(NULL, CFAbsoluteTimeGetCurrent() + 3600, 3600, 0, 0, ^(CFRunLoopTimerRef timer) {
         });
         CFRunLoopAddTimer(CFRunLoopGetMain(), keep, kCFRunLoopCommonModes);

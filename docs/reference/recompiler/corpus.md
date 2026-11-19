@@ -1423,7 +1423,7 @@ configuration's `init` takes the shared stores and the method then replaces them
 helper it starts (`RCHELPER_INSERT`, which it turns into `DYLD_INSERT_LIBRARIES` for its children only), so that the
 Mac's own configuration, which never asks, behaves as the backport does.
 
-Thirteen scenarios, each with a helper of its own:
+Fourteen scenarios, each with a helper of its own (the last one has none):
 
 | Scenario | Requires |
 |---|---|
@@ -1437,9 +1437,10 @@ Thirteen scenarios, each with a helper of its own:
 | `killed` | `SIGKILL` with a request pending: the pipe ends, the status says the signal; `SIGKILL` while the helper is blocked writing three answers of 60000 bytes: every line read is whole and the piece without a newline is not a line; a helper started after it serves |
 | `long` | a request and an answer of 60 KiB; six of them written before anything is read; a line of exactly 65536 bytes is taken (its answer does not fit and says so); one byte more, and 300000 bytes, are rejected as `LINE_TOO_LONG` and the next request is served |
 | `garbage` | six wrong ids are rejected as `BAD_ID`; 28 requests with a valid id and a wrong rest (field count, empty fields, ten wrong times, wrong escapes, an escaped and a raw NUL, bytes that are not UTF-8, an overlong form, a surrogate) each get one `BAD_REQUEST`; four requests with escapes, spaces, control bytes and four-byte characters get the token of exactly those bytes |
-| `idle` | with `--idle-ms 600` the helper exits 0.4 to 3 s after `ready`; with a request pending it stays, answers `TIMEOUT`, then exits |
+| `idle` | with `--idle-ms 600` the helper exits 0.4 to 3 s after `ready`; with a request pending it stays, answers `TIMEOUT`, then exits; a line that is too long, sent 400 ms after `ready`, is rejected and keeps the helper alive past the 600 ms it had left, and the idle time then runs from the rejection |
 | `noise` | a token comes although the library prints on descriptor 1, and the file of descriptor 2 holds what it printed, the `NSLog` line and the helper's own two lines |
 | `quitclose` | twenty helpers are each sent `quit` and lose their request pipe in the same instant: each exits 0 and writes one line of leaving, not two (the thread that reads the pipe and the main thread both come to leave; on the phone the first helper did it twice) |
+| `trickle` | the reader of `protocol.h` (`rc_read_line`) that the app side uses, given a pipe on which a byte comes every 50 ms and no newline, and told to wait 300 ms, returns `RC_WAIT` after 250 to 600 ms: the time to wait is for the line, not for each byte |
 
 After the run the helper's state folder must hold the key the fixture stored with `standardUserDefaults` and the
 `Cache.db` of what it stored in the shared URL cache. On the build host the state is a folder (`--state` with a
@@ -1450,7 +1451,7 @@ the file `rcec/ovk`, which the fixture writes into the caches folder it finds wi
 as the SDK does, is in `home/Library/Caches` of the helper's state and that nothing was made in the home the helper
 was given.
 
-Twelve controls, each a build of the helper with one part taken away, run against the scenario that needs it, and
+Thirteen controls, each a build of the helper with one part taken away, run against the scenario that needs it, and
 each must fail at its own line: descriptor 1 left where the library prints (`noise`), no deadline of the helper's
 own (`errors`), an id that stays pending after its answer (`pending`), fields written without escapes (`errors`),
 the end of the request pipe ignored (`closed`), no idle exit (`idle`), a pending id taken a second time (`pending`),
@@ -1460,13 +1461,23 @@ one the helper counts (`closed`), the home left where it was given (`closed`: th
 folder the driver gave and not in the helper's), and the cookie store made on first use, inside the replacement of
 `sharedHTTPCookieStorage` (`ready`: with the stand-in, the helper's own request for the store calls the replacement
 that is being made. On iOS 6 that waited in `dispatch_once` for 270 s until `SIGALRM`; the Mac's libdispatch stops the
-process at the recursion instead, so the check sees the answer pipe end where the ready line was due). The cookie
+process at the recursion instead, so the check sees the answer pipe end where the ready line was due), and a line that
+is too long not counted as a request for the idle time (`idle`: the helper leaves 237 ms after the rejection, when
+the timer set at `ready` runs out, and not 600 ms after it). The cookie
 control sends the library's cookie to a second private store and not to the store of the user who runs the check,
 which is why it is not simply the replacement taken away; the home control gets its folder from the driver for the
 same reason, so that it never writes into the caches of the user who runs the check. There is no control for
 `synchronize` before the exit, because the build host writes preferences out without it, and none for
 the replacement of `standardUserDefaults`, because without it the fixture would write into the user's own
 preferences.
+
+Four refusals, each a build of the helper in which one system call is made to fail (`CONTROL` 14 to 17: the `dup2`
+that points descriptor 1 at the log, the `F_SETNOSIGPIPE` on the answer pipe, the `pthread_create` of the reader, the
+`setenv` of `CFFIXED_USER_HOME`), run against a scenario of their own that only they run (`stdout-refused`,
+`nosigpipe-refused`, `reader-refused`, `home-refused`). Each must end with one `failed` line (`STDOUT`, `NOSIGPIPE`,
+`NO_READER`, `NO_HOME`) as the first line, before any `ready`, and exit 3. The calls cannot be made to fail from
+outside on the build host (a descriptor that is open stays open, and the Mac accepts the flag on every descriptor), so
+the build makes them fail; the helper that does not check them goes on to `ready`, which is what the scenarios catch.
 
 Last the check builds the helper for armv7 with the loader, as it goes to the phone, and requires that it imports
 none of `posix_spawn`, `fork`, `system` and `popen`. That build has not run anywhere yet.
