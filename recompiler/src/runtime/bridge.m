@@ -2,9 +2,11 @@
 
 #include "xl_bridge.h"
 #include "xl_diag.h"
+#include "xl_guest_image.h"
 
 State *xl_current_state(void);
 
+#include <mach/mach.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -676,8 +678,7 @@ void xl_narrowing_fault(const char *symbol, unsigned index, uint64_t value)
     abort();
 }
 
-#define XL_WORD_SLOTS 262144u
-#define XL_WORD_STRIDE 16u
+#define XL_WORD_STRIDE XL_GUEST_WORD_STRIDE
 #define XL_WORD_OFFSET 4u
 
 uintptr_t xl_word_low;
@@ -687,19 +688,45 @@ static pthread_mutex_t xl_word_lock = PTHREAD_MUTEX_INITIALIZER;
 static uint64_t *xl_word_words;
 static uint32_t *xl_word_index;
 static volatile unsigned xl_word_used;
+static uint32_t xl_word_slots;
+
+static void xl_word_place(uintptr_t region, uint32_t slots)
+{
+    xl_word_words = (uint64_t *)(region + (uintptr_t)slots * XL_WORD_STRIDE);
+    xl_word_index = (uint32_t *)(xl_word_words + slots);
+    xl_word_slots = slots;
+    xl_word_low = region;
+    __sync_synchronize();
+    xl_word_span = (uintptr_t)slots * XL_WORD_STRIDE;
+}
+
+int xl_word_adopt(uintptr_t region, uint32_t slots)
+{
+    if (xl_word_span)
+        return 0;
+    if (vm_protect(mach_task_self(), region + (vm_address_t)slots * XL_WORD_STRIDE, (vm_size_t)slots * (XL_GUEST_WORD_BYTES - XL_WORD_STRIDE), FALSE,
+                   VM_PROT_READ | VM_PROT_WRITE) != KERN_SUCCESS)
+        return 0;
+    xl_word_place(region, slots);
+    return 1;
+}
+
+unsigned xl_word_count(unsigned *slots)
+{
+    *slots = xl_word_slots;
+    return xl_word_used;
+}
 
 static void xl_word_setup(void)
 {
-    void *region = mmap(NULL, (size_t)XL_WORD_SLOTS * XL_WORD_STRIDE, PROT_NONE, MAP_ANON | MAP_PRIVATE, -1, 0);
-    void *words = mmap(NULL, (size_t)XL_WORD_SLOTS * sizeof(uint64_t), PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
-    void *index = mmap(NULL, (size_t)XL_WORD_SLOTS * 2 * sizeof(uint32_t), PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
-    if (region == MAP_FAILED || words == MAP_FAILED || index == MAP_FAILED)
+    if (xl_word_span)
+        return;
+    size_t length = (size_t)XL_GUEST_WORD_SLOTS * XL_GUEST_WORD_BYTES;
+    void *region = mmap(NULL, length, PROT_NONE, MAP_ANON | MAP_PRIVATE, -1, 0);
+    if (region == MAP_FAILED || mprotect((char *)region + (size_t)XL_GUEST_WORD_SLOTS * XL_WORD_STRIDE,
+                                         length - (size_t)XL_GUEST_WORD_SLOTS * XL_WORD_STRIDE, PROT_READ | PROT_WRITE))
         xl_unsupported("the table of opaque 64-bit words cannot be mapped");
-    xl_word_words = words;
-    xl_word_index = index;
-    xl_word_low = (uintptr_t)region;
-    __sync_synchronize();
-    xl_word_span = (uintptr_t)XL_WORD_SLOTS * XL_WORD_STRIDE;
+    xl_word_place((uintptr_t)region, XL_GUEST_WORD_SLOTS);
 }
 
 void xl_word_init(void)
@@ -710,7 +737,7 @@ void xl_word_init(void)
 uintptr_t xl_word_slot(uint64_t word, const char *symbol, unsigned index)
 {
     pthread_once(&xl_word_once, xl_word_setup);
-    const uint32_t mask = XL_WORD_SLOTS * 2 - 1;
+    const uint32_t mask = xl_word_slots * 2 - 1;
     uint32_t at = (uint32_t)((word * 0x9E3779B97F4A7C15ull) >> 40) & mask;
     pthread_mutex_lock(&xl_word_lock);
     for (; xl_word_index[at]; at = (at + 1) & mask) {
@@ -721,12 +748,12 @@ uintptr_t xl_word_slot(uint64_t word, const char *symbol, unsigned index)
         }
     }
     unsigned next = xl_word_used;
-    if (next == XL_WORD_SLOTS) {
+    if (next == xl_word_slots) {
         pthread_mutex_unlock(&xl_word_lock);
         char buf[320];
         snprintf(buf, sizeof buf,
-                 "xlate: %s argument %u value 0x%llx needs a slot of the table of opaque 64-bit words, which holds %u distinct words and is full\n",
-                 symbol, index, word, XL_WORD_SLOTS);
+                 "xlate: %s argument %u value 0x%llx needs a slot of the table of opaque 64-bit words, which holds %u distinct words and is full; a library states the number with --word-slots when it is translated\n",
+                 symbol, index, word, xl_word_slots);
         fprintf(stderr, "%s", buf);
         xl_diag(buf);
         xl_report_guest_frame();

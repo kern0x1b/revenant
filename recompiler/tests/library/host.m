@@ -284,22 +284,42 @@ static void grow(size_t target_kilobytes)
     }
 }
 
+static void *abort_alone(void *unused)
+{
+    (void)unused;
+    abort();
+}
+
 int main(int argc, char **argv)
 {
     alarm(180);
     @autoreleasepool {
         if (argc < 2) {
-            fprintf(stderr, "usage: host LIBRARY [RESIDENT-MB [@LOW-HIGH | +LOW-HIGH | --expect=busy|image|registry|direct | --lazy=LOW-HIGH | --release=LOW-HIGH | --abort | PRELOADED-DYLIB]...]\n");
+            fprintf(stderr, "usage: host LIBRARY [RESIDENT-MB [@LOW-HIGH | +LOW-HIGH | --expect=busy|image|registry|direct | --lazy=LOW-HIGH | --release=LOW-HIGH | --abort | --abort-thread | --linger=SECONDS | --mark=ADDRESS | PRELOADED-DYLIB]...]\n");
             return 2;
         }
         const char *path = argv[1];
         size_t target = argc > 2 ? (size_t)atoi(argv[2]) : 85;
         const char *expect = NULL;
-        BOOL abort_at_end = NO, lazy = NO, release = NO;
+        BOOL abort_at_end = NO, abort_on_thread = NO, lazy = NO, release = NO;
+        unsigned linger = 0;
+        unsigned long mark = 0;
         unsigned long guest_low = 0, guest_high = 0;
         for (int index = 3; index < argc; index++) {
             if (strcmp(argv[index], "--abort") == 0) {
                 abort_at_end = YES;
+                continue;
+            }
+            if (strcmp(argv[index], "--abort-thread") == 0) {
+                abort_at_end = abort_on_thread = YES;
+                continue;
+            }
+            if (strncmp(argv[index], "--linger=", 9) == 0) {
+                linger = (unsigned)atoi(argv[index] + 9);
+                continue;
+            }
+            if (strncmp(argv[index], "--mark=", 7) == 0) {
+                mark = strtoul(argv[index] + 7, NULL, 16);
                 continue;
             }
             if (strncmp(argv[index], "--lazy=", 7) == 0 && range(argv[index] + 7, &guest_low, &guest_high)) {
@@ -449,6 +469,10 @@ int main(int argc, char **argv)
         report("host.bridge.after", hostBridges(NO) && hostNamesUnchanged());
 #endif
         regions("end", 0x1000, 0xfffff000);
+        if (mark)
+            *(volatile char *)mark = 1;
+        for (unsigned left = linger; left; left = sleep(left)) {
+        }
         if (abort_at_end) {
             void *handle = dlopen(path, RTLD_NOW | RTLD_NOLOAD);
             void (*diagnostics)(void) = handle ? (void (*)(void))dlsym(handle, "xl_library_diagnostics") : NULL;
@@ -456,6 +480,9 @@ int main(int argc, char **argv)
             if (diagnostics && !getenv("XL_HOST_SKIPS_DIAGNOSTICS"))
                 diagnostics();
             fflush(stdout);
+            pthread_t alone;
+            if (abort_on_thread && pthread_create(&alone, NULL, abort_alone, NULL) == 0)
+                pthread_join(alone, NULL);
             abort();
         }
         line(@"done");

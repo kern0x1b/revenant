@@ -990,67 +990,38 @@ struct xl_guest_enumeration {
     uint64_t extra[5];
 };
 
-#define XL_ITEMS_SLOTS 32
-
-static struct {
-    uint64_t state;
-    uint64_t *items;
-} xl_items_slots[XL_ITEMS_SLOTS];
-static unsigned xl_items_next;
-static pthread_mutex_t xl_items_lock = PTHREAD_MUTEX_INITIALIZER;
-
-static uint64_t *xl_items_buffer(uint64_t state, NSUInteger count)
-{
-    pthread_mutex_lock(&xl_items_lock);
-    unsigned slot = XL_ITEMS_SLOTS;
-    for (unsigned i = 0; i < XL_ITEMS_SLOTS; i++) {
-        if (xl_items_slots[i].state == state) {
-            slot = i;
-            break;
-        }
-    }
-    if (slot == XL_ITEMS_SLOTS) {
-        if (!count) {
-            pthread_mutex_unlock(&xl_items_lock);
-            return NULL;
-        }
-        slot = xl_items_next++ % XL_ITEMS_SLOTS;
-    }
-    free(xl_items_slots[slot].items);
-    xl_items_slots[slot].items = NULL;
-    xl_items_slots[slot].state = 0;
-    uint64_t *items = NULL;
-    if (count) {
-        items = malloc(count * sizeof(uint64_t));
-        if (!items) {
-            pthread_mutex_unlock(&xl_items_lock);
-            xl_unsupported("fast enumeration: no memory for the item list of a guest enumeration state");
-        }
-        xl_items_slots[slot].state = state;
-        xl_items_slots[slot].items = items;
-    }
-    pthread_mutex_unlock(&xl_items_lock);
-    return items;
-}
-
 void xl_manual_fast_enumeration(void *pack)
 {
+    static const char name[] = "countByEnumeratingWithState:objects:count:";
     struct xl_fast_enumeration_pack *p = pack;
-    struct xl_guest_enumeration *guest = (struct xl_guest_enumeration *)xl_narrow_pointer(p->state, "countByEnumeratingWithState:objects:count:", 0);
+    struct xl_guest_enumeration *guest = (struct xl_guest_enumeration *)xl_narrow_pointer(p->state, name, 0);
     NSFastEnumerationState *host = (NSFastEnumerationState *)&guest->extra[0];
-    id buffer[16];
+    id enumerated = (id)xl_object_in(p->self, name, 0);
+    uint32_t handed = (uint32_t)guest->state, batch = (uint32_t)(guest->state >> 32);
     NSUInteger length = p->length < 16 ? (NSUInteger)p->length : 16;
-    id enumerated = (id)xl_object_in(p->self, "countByEnumeratingWithState:objects:count:", 0);
-    NSUInteger count = [enumerated countByEnumeratingWithState:host objects:buffer count:length];
-    uint64_t *items = xl_items_buffer(p->state, count);
-    if (count) {
-        for (NSUInteger i = 0; i < count; i++)
-            items[i] = xl_object_out((uintptr_t)host->itemsPtr[i]);
-        guest->items = (uintptr_t)items;
-        guest->extra[4] = host->mutationsPtr ? *host->mutationsPtr : 0;
-        guest->mutations = (uintptr_t)&guest->extra[4];
-        guest->state = 1;
+    id buffer[16];
+    if (handed < batch) {
+        if (host->mutationsPtr && *host->mutationsPtr != (unsigned long)guest->extra[4])
+            objc_enumerationMutation(enumerated);
+    } else {
+        handed = 0;
+        batch = (uint32_t)[enumerated countByEnumeratingWithState:host objects:buffer count:length];
+        guest->extra[4] = batch && host->mutationsPtr ? *host->mutationsPtr : 0;
     }
+    if (!batch) {
+        guest->state = 0;
+        p->r = 0;
+        return;
+    }
+    if (!length)
+        xl_unsupported("fast enumeration: the host collection has items and the guest gave no buffer to hand them over in");
+    uint32_t count = batch - handed < length ? batch - handed : (uint32_t)length;
+    uint64_t *items = (uint64_t *)xl_narrow_pointer(p->buffer, name, 1);
+    for (uint32_t i = 0; i < count; i++)
+        items[i] = xl_object_out((uintptr_t)host->itemsPtr[handed + i]);
+    guest->items = p->buffer;
+    guest->mutations = (uintptr_t)&guest->extra[4];
+    guest->state = (uint64_t)batch << 32 | (handed + count);
     p->r = count;
 }
 

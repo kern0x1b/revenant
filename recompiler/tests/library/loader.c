@@ -233,6 +233,8 @@ static void expect(int passed, const char *format, ...)
         failures++;
 }
 
+static uint32_t model_budget_skew;
+
 static void write_library(const char *file, uintptr_t guest_low, uintptr_t guest_high, uint32_t version, int registry)
 {
     struct {
@@ -262,7 +264,9 @@ static void write_library(const char *file, uintptr_t guest_low, uintptr_t guest
     strcpy(commands.image.sectname, XL_GUEST_SECTION);
     commands.image.offset = 0x1000;
     commands.image.size = sizeof(struct xl_guest_header);
-    struct xl_guest_header guest = {XL_GUEST_MAGIC, version, (uint32_t)guest_low, (uint32_t)guest_high, 0};
+    uint32_t arena = XL_GUEST_GRANULE, slots = XL_GUEST_WORD_SLOTS_LEAST, aliases = XL_GUEST_GRANULE;
+    struct xl_guest_header guest = {XL_GUEST_MAGIC, version, (uint32_t)guest_low, (uint32_t)guest_high, 0,
+                                    (uint32_t)guest_high - arena - slots * XL_GUEST_WORD_BYTES - aliases - model_budget_skew, arena, slots, aliases};
     int fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (fd < 0 || pwrite(fd, &commands, sizeof commands, 0) != (ssize_t)sizeof commands ||
         pwrite(fd, &guest, sizeof guest, commands.image.offset) != (ssize_t)sizeof guest) {
@@ -454,6 +458,60 @@ static void scenario_attach(const char *folder)
     xl_release();
     expect(model_covered(model_guest_low, model_guest_high, 0) == 0 && !room_held(), "and nothing is held after it");
 }
+static void scenario_reservation_lost(const char *folder)
+{
+    const char *file = library(folder, "lost", BASE_UNDER_STACK, XL_GUEST_VERSION, 1);
+    expect(xl_reserve(file) == XL_LOAD_OK, "xl_reserve");
+    int touched = 0;
+    for (int index = 0; index < region_count; index++) {
+        if (regions[index].start == model_guest_low && regions[index].end == model_guest_high && regions[index].protection == VM_PROT_NONE) {
+            regions[index].protection = VM_PROT_READ | VM_PROT_WRITE;
+            touched = 1;
+        }
+    }
+    expect(touched, "the model made the reserved guest range accessible, as a mapping over it would");
+    xl_load_status status = xl_load(file);
+    expect(status == XL_LOAD_RESERVATION_LOST && strstr(xl_load_error(), "was not an untouched, inaccessible range"),
+           "a reservation that is not whole when the library attaches has a status of its own, not the one of a busy range: %s", xl_load_error());
+    expect(model_covered(model_guest_low, model_guest_high, 0) == 0 && !room_held(), "the guest range is given back");
+    expect(xl_load(file) == XL_LOAD_RESERVATION_LOST && xl_reserve(file) == XL_LOAD_RESERVATION_LOST && model_dlopen_calls == 1,
+           "the status is final: the next calls answer it and load nothing");
+}
+
+static void scenario_registry_failed(const char *folder)
+{
+    const char *file = library(folder, "registryfails", BASE_UNDER_STACK, XL_GUEST_VERSION, 1);
+    model_init_result = XL_LIBRARY_REGISTRY_FAILED;
+    xl_load_status status = xl_load(file);
+    expect(status == XL_LOAD_REGISTRY_FAILED && strstr(xl_load_error(), "dlopen of the registry of"),
+           "a registry that dyld refuses after the library attached has a status of its own, not the one of a dlopen that can be tried again: %s",
+           xl_load_error());
+    expect(model_covered(model_guest_low, model_guest_high, 0) == 0 && !room_held(), "the guest range is given back");
+    model_init_result = XL_LIBRARY_OK;
+    expect(xl_load(file) == XL_LOAD_REGISTRY_FAILED && model_dlopen_calls == 1, "the status is final");
+}
+static void scenario_attach_refused(const char *folder)
+{
+    const char *file = library(folder, "attachrefuses", BASE_UNDER_STACK, XL_GUEST_VERSION, 1);
+    model_init_result = XL_LIBRARY_BAD_FORMAT;
+    expect(xl_load(file) == XL_LOAD_ATTACH_REFUSED && strstr(xl_load_error(), "refused its guest image when it attached"),
+           "an image whose header the loader read and whose records the library refuses is not XL_LOAD_BAD_IMAGE, which follows the files: %s", xl_load_error());
+    expect(model_covered(model_guest_low, model_guest_high, 0) == 0 && !room_held(), "the guest range is given back");
+    model_init_result = XL_LIBRARY_OK;
+    expect(xl_load(file) == XL_LOAD_ATTACH_REFUSED && xl_reserve(file) == XL_LOAD_ATTACH_REFUSED && model_dlopen_calls == 1, "the status is final");
+}
+
+static void scenario_registry_gone(const char *folder)
+{
+    const char *file = library(folder, "registrygone", BASE_UNDER_STACK, XL_GUEST_VERSION, 1);
+    model_init_result = XL_LIBRARY_NO_REGISTRY;
+    expect(xl_load(file) == XL_LOAD_REGISTRY_FAILED && strstr(xl_load_error(), "was not next to the image when the library attached") &&
+           strstr(xl_load_error(), "it is the file registrygone-classes.dylib"),
+           "a registry that the library does not find when it attaches is not XL_LOAD_BAD_IMAGE, which follows the files: %s", xl_load_error());
+    expect(model_covered(model_guest_low, model_guest_high, 0) == 0 && !room_held(), "the guest range is given back");
+    model_init_result = XL_LIBRARY_OK;
+    expect(xl_load(file) == XL_LOAD_REGISTRY_FAILED && model_dlopen_calls == 1, "the status is final");
+}
 
 static void scenario_refusals(const char *folder)
 {
@@ -462,7 +520,14 @@ static void scenario_refusals(const char *folder)
     expect(xl_load(newer) == XL_LOAD_BAD_IMAGE && strstr(xl_load_error(), "format version"), "a format this loader does not read is refused: %s", xl_load_error());
     const char *alone = library(folder, "alone", BASE_UNDER_STACK, XL_GUEST_VERSION, 0);
     expect(xl_load(alone) == XL_LOAD_BAD_IMAGE && strstr(xl_load_error(), "registry"), "a library without its registry is refused: %s", xl_load_error());
-    expect(unchanged(), "neither refusal took any address space");
+    expect(strstr(xl_load_error(), "it is the file alone-classes.dylib next to it") != NULL, "and the message has the name of the file that is missing");
+    expect(xl_load(alone) == XL_LOAD_BAD_IMAGE && model_dlopen_calls == 0, "and again while the files are the same, before any dlopen");
+    model_budget_skew = XL_GUEST_GRANULE;
+    const char *skewed = library(folder, "skewed", BASE_UNDER_STACK, XL_GUEST_VERSION, 1);
+    model_budget_skew = 0;
+    expect(xl_load(skewed) == XL_LOAD_BAD_IMAGE && strstr(xl_load_error(), "do not end there"),
+           "a library whose images, arena, words and aliases do not end where its range ends is refused: %s", xl_load_error());
+    expect(unchanged(), "no refusal took any address space");
     const char *first = library(folder, "first", BASE_UNDER_STACK, XL_GUEST_VERSION, 1);
     const char *second = library(folder, "second", BASE_UNDER_STACK, XL_GUEST_VERSION, 1);
     expect(xl_reserve(first) == XL_LOAD_OK && xl_reserve(second) == XL_LOAD_BAD_IMAGE && strstr(xl_load_error(), "a process holds one translated library"),
@@ -471,6 +536,12 @@ static void scenario_refusals(const char *folder)
     expect(xl_reserve(second) == XL_LOAD_OK, "after xl_release another library can be reserved");
     xl_release();
     expect(unchanged(), "and released");
+    char companion[PATH_MAX];
+    xl_registry_path(alone, companion, sizeof companion);
+    int made = open(companion, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    close(made);
+    expect(made >= 0 && xl_load(alone) == XL_LOAD_OK && xl_find_class("RCFClient") == &model_class,
+           "XL_LOAD_BAD_IMAGE follows the files: with its registry put next to it the library that was refused loads");
 }
 
 static void scenario_guest_only(const char *folder)
@@ -497,6 +568,10 @@ static const struct {
     {"load without a reservation, dlopen fails", scenario_lazy_dlopen},
     {"a kept reservation, dlopen fails", scenario_kept_dlopen},
     {"the library fails to attach", scenario_attach},
+    {"the reservation is not whole when the library attaches", scenario_reservation_lost},
+    {"the registry fails to load after the attach", scenario_registry_failed},
+    {"the library refuses its image when it attaches", scenario_attach_refused},
+    {"the registry is gone when the library attaches", scenario_registry_gone},
     {"refusals take nothing", scenario_refusals},
     {"guest range only", scenario_guest_only},
 };

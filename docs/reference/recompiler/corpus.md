@@ -460,6 +460,35 @@ because of the aliases. Three controls on the 4S, each run with the program unch
 `format argument` has no control: the alias is a real copy with the same characters, so a `%@` that gets the alias formats
 the same text as one that gets the original, and nothing the program can observe tells the two apart.
 
+The `enumeration` lines are `for … in` loops of the guest over host collections, which
+`xl_manual_fast_enumeration` serves ([how](../../explanation/recompiler/how-it-works.md)): an outer loop over 40 strings
+that, at its first item, runs 40 inner loops to their end or to a `break` and then 64 `malloc` blocks of the size of a
+list of 40 items, filled with `0xa5`, and still has its 40 items (`40 of 40 items intact`; with the 32 shared lists the
+bridge had before, the outer loop's list was freed by the thirty-third inner loop and the blocks landed on it); 41 loops
+nested in one another; an array, a set and a dictionary of 100, which the guest gets 16 at a time (the array from one
+answer of the host, the other two from an answer for every 16); an empty array; a guest collection that forwards the
+call to a host array of 100; and an array, a set and a dictionary of 100 that are each changed at the twenty-first item
+of their loop, which must raise `NSGenericException` before the loop has seen 100 items. The array is the case that
+only the bridge's own comparison can raise: the host's array answers with all its items at once, so the host is not
+asked again before the hundredth item and no code of the host runs that could notice, and the comparison of the loop
+the compiler emits is the guest's here and reads the bridge's copy. The set and the dictionary are the case of a new
+answer, where the bridge writes a new copy and the guest's comparison raises. Each of the two was taken out once, on
+2026-11-19, and the translated program run with the Foundation of iOS 6.1.3 (10B329) in the emulator: without the
+bridge's comparison the array's line reads `raised 0, before its end 0` and the other two stay; with the guest's
+mutations pointer on a word that does not change, the set's and the dictionary's lines read `raised 0, before its end 0`
+and the array's stays. So the three lines fail when the mechanism they name is gone, and an array of iOS 6.1.3 does
+answer with more than the buffer holds.
+
+The translated program runs in the emulator without a phone, as the first process of a copy of the root filesystem
+(`cp -c -R` of `.cache/firmware/rootfs/iPhone4,1/6.1.3_10B329`, the program copied to `usr/local/bin`, then
+`emulator boot --rootfs COPY --device iPhone4,1 --binary /usr/local/bin/HostBridges --host-cache DIR --display headless --gles-backend software --time-scale 10 --ticks 4000000000`;
+8 seconds). Its lines without a `[` at the start are the program's: 171 of the 176 are those of `expected.txt`, and the
+five that differ are the two `getifaddrs lo0` lines and three `sysctl` lines (`kern.proc.pid`, `kern.proc.all` and the
+missing number), where the emulator's kernel answers a first process without a network otherwise than the phone's does;
+they were the phone's lines before the change of the `enumeration` lines, which touches neither. So this run stands in
+for the phone for every line but those, and not for `sysctl-unmapped` and `word-overflow`, which were not run there. The lines say `before its end 1` and not at which item, because the Mac raises at the
+twenty-second item and the bridge at the thirty-third ([why](../../explanation/recompiler/how-it-works.md)).
+
 `format locale nil`, `format locale posix` and `format locale unicode` call `-[NSString initWithFormat:locale:arguments:]`
 with a `va_list` the program builds. That selector is declared with `NS_FORMAT_FUNCTION(1,0)` and a `va_list` parameter, and
 until 2026-11-14 `xlgen` bridged the parameter as a plain pointer: the host read the guest's 8-byte argument words as 4-byte
@@ -607,8 +636,10 @@ Proves the page-protection scheme of `src/runtime/xl_tsd_guard.h` on the build h
 `TPIDRRO_EL0` workaround. mmap, mprotect and SIGSEGV are POSIX, so `main.c` is compiled for the host and run directly. There
 is no device, lift or translation.
 
-It also checks `xl_stack_first`, the size a thread first tries for its guest stack (twice its own stack, rounded up to 64 KiB,
-between 256 KiB and 4 MiB), for eight host stack sizes from 0 to the largest `size_t`.
+It also checks the guest stack of a thread: `xl_stack_length` (the thread's own stack rounded up to a page, and a guard
+page) for five sizes, `xl_stack_map` (the guard page faults and the first byte above it reads; a mapper that refuses above
+1 MB gives no smaller stack for 4 MB, a mapper that refuses everything gives none) and `xl_stack_used` (nothing for a
+stack nobody wrote to, then the depth of the lowest write after writes at five depths).
 
 It proves the arithmetic at this machine's page size, which `main.c` prints: 16384 on Apple Silicon. The 4 KiB device
 case rests on `xl_tsd_guard.h` reading the page size from `sysconf`. Each check in `main.c` forks with its own `alarm()`,
@@ -1135,7 +1166,7 @@ API is a string, because a Swift `String` that crosses an Objective-C signature 
 which the guest does not have yet; the strings stay inside the library (`describedLength` builds one).
 
 The host part, which `recompiler_corpus/library` runs, first runs the loader on the Mac (`loader.c`: `xl_loader.c` over a
-model of a 4S process's address space, ten scenarios of reserving, releasing, loading without a reservation and of every
+model of a 4S process's address space, fourteen scenarios of reserving, releasing, loading without a reservation and of every
 failure, each of which must leave nothing held that the host did not ask to keep;
 [the scenarios](library-mode.md#the-check)). It then translates the `objc` fixture with `XL_LIBRARY=1` and checks
 the dylib statically:
@@ -1208,7 +1239,8 @@ older recipe, because the scratch folder of libraries still pointed at it). `dro
 `libswiftNetwork` of the folder built against another runtime stops it too. After the translation it reads the `revenant_swift_runtime_<hash>`
 mark the guest `libswiftCore` leaves in the library and stops unless that is the only mark and the key of the runtime it was given. The drop gets
 a `runtime.txt` beside `recaptcha-sdk.txt` (`runtime_key`, `runtime_recipe`, `libswiftcore_sha256`; the reader of `recaptcha-sdk.txt` in
-telegram-build refuses a key it does not know, so those lines are not in it). The check `dropkey` builds a store of two fake installs and
+telegram-build refuses a key it does not know, so those lines are not in it) and a `source.txt` (`commit`, the commit of the checkout
+that translated it, and `uncommitted_changes`, `none` or `yes`: a drop is asked about long after the worktree that made it is gone). The check `dropkey` builds a store of two fake installs and
 runs every one of those refusals.
 
 The library link takes the runtime objects from the same loop that compiles them (`runtime_objects` in `tools/translate.lua`), and a
