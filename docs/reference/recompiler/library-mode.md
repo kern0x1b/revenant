@@ -720,6 +720,20 @@ Everything a launch on the phone printed is in `device.txt` of the output folder
 a line `== ` with its environment and arguments, and the crash log under its own: a check that fails at its sixth launch
 leaves the five before it, and a first run on a phone is read from that file, not from the last message.
 
+**What ran on the phone.** On 2026-11-19 the whole check passed on the 4S (iOS 6.1.3) three times, 26 seconds each: at
+the fixture's default base, and twice with `XL_BASE=0x2e000000`, where a drop's guest image lies. That was the first
+execution on a phone of the library's check that its reservation is one untouched inaccessible range, of the two
+window lines and of the messages of the refusals. At `0x2e000000` the map after `xl_load` shows the reservation as the
+header states it and nothing else in it: the images at `0x2e000000`-`0x2e018000`, the arena read-write up to
+`0x2e020000`, 4 MiB without access up to `0x2e420000` (the addresses the opaque words are handed out as) and 8 MiB
+read-write up to `0x2ec20000` (the words' values and the aliases), 12.125 MiB in all; the host part's 752 KiB were held
+at `0x000e5000` and dyld mapped the image exactly there; the main stack began at `0x2fc69000`. The guest stacks were
+1,024 KiB for the main thread (its own 1,020 KiB and the guard page) and 516 KiB for the second; the window read
+`guest stacks: 1 live, 1024 KiB mapped; the deepest live one has used 4 KiB of 1024 KiB` and
+`budget: metadata arena 20 of 32 KiB touched, opaque words 0 of 262144, aliases 0 of 0 KiB` (the 20 KiB are the host's
+mark; without it the arena read 0). The Objective-C fixture makes no opaque word and no alias, so those two numbers
+were seen at 0 only; what a real library uses of them is read from its own windows.
+
 **What of this ran without a phone.** On 2026-11-19 the launches were run in the emulator (iPhone4,1, the root filesystem
 of 6.1.3 10B329), the host started by a first process that sets its environment and arguments, the fixture translated
 with `XL_BASE=0x2e000000` (in the emulator the heap begins at `0x10000000`, the fixture's default base). The emulator's
@@ -735,7 +749,7 @@ guest state` and no guest register; `XL_STATS=1` prints a guest stack of 1,024 K
 the second; `--expect=registry` and `--expect=busy` are refused as they should be. What the emulator cannot show:
 anything that reads the list of regions (the reservation check itself, the holder named in a refusal, every `xl-map`
 line, the `lazy.free`, `release.held` and `release.free` questions), the window of the statistics (its kernel has no
-`mincore`: a process that calls it dies of signal 12, so the two lines above have not run anywhere yet), and where
+`mincore`: a process that calls it dies of signal 12, so the two lines above first ran on the phone), and where
 things lie on the phone (its address space is laid out otherwise, so nothing about room is learnt there).
 
 On the Mac the check also reads the header of the library it built: version 2, the images one after another with no
@@ -1044,7 +1058,10 @@ old sizes until a run of many `execute` calls says how they grow; with the numbe
 option of the translation, not a change of the runtime.
 
 For the reCAPTCHA Enterprise SDK: the sizes of drop36, measured in the region maps of the M4 acceptance, and what the
-same library takes with this layout, computed from those sizes and not yet measured on the phone:
+same library takes with this layout, computed from those sizes. The phone has confirmed the rules the sum is made
+by, on the fixture (the reservation is the header's range and nothing more, the room of the host part is the size of
+its image, a guest stack is the thread's own size and a page, 2026-11-19); the SDK's own terms (its host part, its
+images, its arena, the number of its threads) are not measured until the SDK is translated with this layout and run:
 
 | Part | drop36 | with the budget |
 |---|---|---|
