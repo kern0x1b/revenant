@@ -422,9 +422,53 @@ static void scenario_pending(void)
     quit(&helper);
 }
 
+static void forget(void)
+{
+    close(open(log_path, O_WRONLY | O_CREAT | O_TRUNC, 0600));
+}
+
+static const char *written(void)
+{
+    static char log[262144];
+    int fd = open(log_path, O_RDONLY);
+    ssize_t got = fd < 0 ? -1 : read(fd, log, sizeof log - 1);
+    need(got > 0, "the file of descriptor 2 is empty or cannot be read");
+    close(fd);
+    log[got] = '\0';
+    return log;
+}
+
+static int times(const char *text, const char *piece)
+{
+    int found = 0;
+    for (const char *at = strstr(text, piece); at; at = strstr(at + 1, piece))
+        found++;
+    return found;
+}
+
+static void scenario_quitclose(void)
+{
+    static struct helper helper;
+    enum { HELPERS = 20 };
+    forget();
+    for (int i = 0; i < HELPERS; i++) {
+        begin(&helper, 0);
+        ready(&helper);
+        put(&helper, RAW("quit\n"));
+        close(helper.to);
+        helper.to = -1;
+        ended(&helper, 2000, 0);
+    }
+    const char *log = written();
+    int left = times(log, "rchelper: quit: state=") + times(log, "rchelper: the app closed the request pipe: state=");
+    need(times(log, "rchelper: ready: state=") == HELPERS, "the file of descriptor 2 does not hold one ready line for each of %d helpers", (int)HELPERS);
+    need(left == HELPERS, "%d helpers that were sent quit and lost their request pipe at once wrote %d lines of leaving: a helper left twice", (int)HELPERS, left);
+}
+
 static void scenario_closed(void)
 {
     static struct helper helper;
+    forget();
     begin(&helper, 0);
     ready(&helper);
     ask(&helper, "s1", "store-key", "login", 5000);
@@ -434,6 +478,17 @@ static void scenario_closed(void)
     close(helper.to);
     helper.to = -1;
     ended(&helper, 1000, 0);
+    const char *left = strstr(written(), "rchelper: the app closed the request pipe: state=");
+    need(left != NULL, "a helper whose request pipe ended did not write its line of leaving to descriptor 2");
+    const char *own = strstr(left, " cookies own=1, ");
+    need(own != NULL && own < strchr(left, '\n'), "the cookie the library set is not in the cookie store of the helper's own: its line of leaving does not say cookies own=1");
+    const char *given = getenv("CFFIXED_USER_HOME");
+    need(given != NULL && given[0] == '/', "the driver was not given a home folder in CFFIXED_USER_HOME");
+    char file[2048];
+    snprintf(file, sizeof file, "%s/home/Library/Caches/rcec/ovk", state_path);
+    need(access(file, R_OK) == 0, "the file the library wrote in its caches folder is not in the helper's own home: there is no %s", file);
+    snprintf(file, sizeof file, "%s/Library/Caches/rcec", given);
+    need(access(file, F_OK) != 0, "the library wrote in %s, in the home the helper was given and outside its own state", file);
     begin(&helper, 0);
     ready(&helper);
     close(helper.from);
@@ -618,18 +673,14 @@ static void scenario_idle(void)
 static void scenario_noise(void)
 {
     static struct helper helper;
-    static char log[65536];
-    close(open(log_path, O_WRONLY | O_CREAT | O_TRUNC, 0600));
+    forget();
     begin(&helper, 0);
     ready(&helper);
     ask(&helper, "n1", "noisy-key", "login", 5000);
     is_ok(one(&helper, 3000, "the token of n1"), "n1", RAW("tok[noisy-key][login]"));
     quiet(&helper, 200);
     quit(&helper);
-    int fd = open(log_path, O_RDONLY);
-    ssize_t got = fd < 0 ? -1 : read(fd, log, sizeof log - 1);
-    need(got > 0, "the file of descriptor 2 is empty or cannot be read");
-    log[got] = '\0';
+    const char *log = written();
     const char *wanted[] = {"forged-load", "forged-execute", "ready\t1\tforged", "a line of the SDK on standard output", "a line on standard error from execute", "a line of NSLog", "rchelper: ready: state=", "rchelper: quit: state="};
     for (size_t i = 0; i < sizeof wanted / sizeof wanted[0]; i++)
         need(strstr(log, wanted[i]) != NULL, "the file of descriptor 2 does not hold what the library printed: no '%s' in it", shown(wanted[i], strlen(wanted[i])));
@@ -641,7 +692,8 @@ int main(int argc, char **argv)
         const char *name;
         void (*run)(void);
     } scenarios[] = {{"ready", scenario_ready},     {"failed", scenario_failed}, {"token", scenario_token}, {"errors", scenario_errors},   {"unknown", scenario_unknown}, {"pending", scenario_pending},
-                     {"closed", scenario_closed},   {"killed", scenario_killed}, {"long", scenario_long},   {"garbage", scenario_garbage}, {"idle", scenario_idle},       {"noise", scenario_noise}};
+                     {"closed", scenario_closed},   {"killed", scenario_killed}, {"long", scenario_long},   {"garbage", scenario_garbage}, {"idle", scenario_idle},       {"noise", scenario_noise},
+                     {"quitclose", scenario_quitclose}};
     if (argc < 5) {
         fprintf(stderr, "usage: driver HELPER LIBRARY STATE LOG [SCENARIO]\n");
         return 2;

@@ -116,6 +116,11 @@ __attribute__((objc_runtime_name("RecaptchaEnterprise.RecaptchaClient")))
             NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc] initWithURL:request.URL statusCode:200 HTTPVersion:@"HTTP/1.1" headerFields:@{@"Cache-Control": @"max-age=3600"}];
             NSData *body = [@"an answer the SDK wants kept" dataUsingEncoding:NSUTF8StringEncoding];
             [[NSURLCache sharedURLCache] storeCachedResponse:[[NSCachedURLResponse alloc] initWithResponse:response data:body] forRequest:request];
+            [[NSHTTPCookieStorage sharedHTTPCookieStorage] setCookie:[NSHTTPCookie cookieWithProperties:@{NSHTTPCookieName: @"fixture", NSHTTPCookieValue: @"1",
+                                                                                                         NSHTTPCookieDomain: @"fixture.invalid", NSHTTPCookiePath: @"/"}]];
+            NSString *folder = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:@"rcec"];
+            [[NSFileManager defaultManager] createDirectoryAtPath:folder withIntermediateDirectories:YES attributes:nil error:NULL];
+            [body writeToFile:[folder stringByAppendingPathComponent:@"ovk"] atomically:YES];
             completion(token, nil);
         });
     } else {

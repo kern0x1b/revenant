@@ -1419,7 +1419,7 @@ resets `SIGPIPE` to its default action as the runtime's handler does. `driver.c`
 helper with `posix_spawn`, two pipes, `POSIX_SPAWN_CLOEXEC_DEFAULT` and descriptor 2 on a file, and every line it
 reads must be a line of the protocol.
 
-Twelve scenarios, each with a helper of its own:
+Thirteen scenarios, each with a helper of its own:
 
 | Scenario | Requires |
 |---|---|
@@ -1429,24 +1429,37 @@ Twelve scenarios, each with a helper of its own:
 | `errors` | the SDK's error with its domain, code and text, tab, newline and percent sign in them included; a fetch that fails; neither token nor error; `TIMEOUT` 250 to 1500 ms after a request that allowed 300, for an execute and for a fetch that never answer, and a second request for the key whose fetch never answered |
 | `unknown` | eight lines that are not requests are each rejected as `UNKNOWN_LINE`, and the next request is served |
 | `pending` | a request is answered while an earlier one is pending; a second request with the pending id is rejected and the first still gets its `TIMEOUT`; an answer that comes after `TIMEOUT` and a second answer of the SDK are dropped; an answered id can be used again |
-| `closed` | the app closes its request end with a request pending: the answer pipe ends within a second, exit 0; the app closes its answer end: exit 0 and no signal |
+| `closed` | the app closes its request end with a request pending: the answer pipe ends within a second, exit 0, the helper's line of leaving counts in its own cookie store the cookie the library set in the shared one, and the file the library wrote in its caches folder is in the helper's home; the app closes its answer end: exit 0 and no signal |
 | `killed` | `SIGKILL` with a request pending: the pipe ends, the status says the signal; `SIGKILL` while the helper is blocked writing three answers of 60000 bytes: every line read is whole and the piece without a newline is not a line; a helper started after it serves |
 | `long` | a request and an answer of 60 KiB; six of them written before anything is read; a line of exactly 65536 bytes is taken (its answer does not fit and says so); one byte more, and 300000 bytes, are rejected as `LINE_TOO_LONG` and the next request is served |
 | `garbage` | six wrong ids are rejected as `BAD_ID`; 28 requests with a valid id and a wrong rest (field count, empty fields, ten wrong times, wrong escapes, an escaped and a raw NUL, bytes that are not UTF-8, an overlong form, a surrogate) each get one `BAD_REQUEST`; four requests with escapes, spaces, control bytes and four-byte characters get the token of exactly those bytes |
 | `idle` | with `--idle-ms 600` the helper exits 0.4 to 3 s after `ready`; with a request pending it stays, answers `TIMEOUT`, then exits |
 | `noise` | a token comes although the library prints on descriptor 1, and the file of descriptor 2 holds what it printed, the `NSLog` line and the helper's own two lines |
+| `quitclose` | twenty helpers are each sent `quit` and lose their request pipe in the same instant: each exits 0 and writes one line of leaving, not two (the thread that reads the pipe and the main thread both come to leave; on the phone the first helper did it twice) |
 
 After the run the helper's state folder must hold the key the fixture stored with `standardUserDefaults` and the
 `Cache.db` of what it stored in the shared URL cache. On the build host the state is a folder (`--state` with a
-path); on the phone it is a name. That difference is two functions of `helper.m` and is not proved here.
+path); on the phone it is a name. That difference is two functions of `helper.m` (the name of the preferences domain
+and the URL cache) and a third that places the helper's home, and none of the three is proved on the phone. The
+driver gives every helper a `CFFIXED_USER_HOME` of its own, an empty folder, and the `closed` scenario requires that
+the file `rcec/ovk`, which the fixture writes into the caches folder it finds with `NSSearchPathForDirectoriesInDomains`
+as the SDK does, is in `home/Library/Caches` of the helper's state and that nothing was made in the home the helper
+was given.
 
-Eight controls, each a build of the helper with one part taken away, run against the scenario that needs it, and
+Eleven controls, each a build of the helper with one part taken away, run against the scenario that needs it, and
 each must fail at its own line: descriptor 1 left where the library prints (`noise`), no deadline of the helper's
 own (`errors`), an id that stays pending after its answer (`pending`), fields written without escapes (`errors`),
 the end of the request pipe ignored (`closed`), no idle exit (`idle`), a pending id taken a second time (`pending`),
-and an answer pipe without `F_SETNOSIGPIPE` (`closed`: the helper dies of signal 13). There is no control for
-`synchronize` before the exit, because the build host writes preferences out without it, and none for the
-replacement of `standardUserDefaults`, because without it the fixture would write into the user's own preferences.
+an answer pipe without `F_SETNOSIGPIPE` (`closed`: the helper dies of signal 13), two threads free to leave at once
+(`quitclose`: 27 lines of leaving from 20 helpers), and the shared cookie store pointed at another store than the
+one the helper counts (`closed`), and the home left where it was given (`closed`: the library's file lands in the
+folder the driver gave and not in the helper's). The cookie control sends the library's cookie to a second private
+store and not to the store of the user who runs the check, which is why it is not simply the replacement taken away;
+the home control gets its folder from the driver for the same reason, so that it never writes into the caches of the
+user who runs the check. There is no
+control for `synchronize` before the exit, because the build host writes preferences out without it, and none for
+the replacement of `standardUserDefaults`, because without it the fixture would write into the user's own
+preferences.
 
 Last the check builds the helper for armv7 with the loader, as it goes to the phone, and requires that it imports
 none of `posix_spawn`, `fork`, `system` and `popen`. That build has not run anywhere yet.

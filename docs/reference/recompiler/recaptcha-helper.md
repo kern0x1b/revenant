@@ -6,8 +6,11 @@ is `recompiler/tests/recaptchahelper/helper.m`, and the check of that folder
 ([corpus](corpus.md), `recaptchahelper`) holds every rule here that names the helper. Its `driver.c` is an app side
 in C that keeps the rules below (`start`, `put`, `get`), to read beside this page.
 
-Proved on the build host against a fixture library. Not yet run on the phone with the real library; the last section
-says what that leaves open.
+Proved on the build host against a fixture library. It also ran on the phone (iPhone 4S, iOS 6.1.3) with the real
+library and a key the server refuses, in two parts on 2026-11-19: started from a shell, and started by Telegram's
+spawn probe. In both the helper answered `ready`, named the refused key's error as `EXECUTE_FAILED`, exited 0 when the
+request pipe closed, and survived being killed without the parent noticing. No run has returned a token. The last
+section says what is still open.
 
 ## Starting it
 
@@ -20,17 +23,18 @@ says what that leaves open.
   O_APPEND`);
 - the flag `POSIX_SPAWN_CLOEXEC_DEFAULT`, so that nothing else of the app is open in the helper;
 - the app's own environment. The helper needs the System and Foundation backports in its process as the app has
-  them: either it is linked against them as the app's executable is, or the environment names them in
-  `DYLD_INSERT_LIBRARIES`, which is what every measured run of `rcsdk` did. Which of the two the shipped helper uses
-  is the build's decision and is open.
+  them, and it gets them by being linked against them as the app's executable is: the build that compiles `helper.m`
+  and `protocol.h` links the Backports libraries into it, and the app's rules name no `DYLD_INSERT_LIBRARIES`. (The
+  measured runs of the kit on the phone inserted them, because the kit's helper was built outside that build.)
 
 After the call the app closes the two ends it gave away and sets `F_SETNOSIGPIPE` on its write end of the request
 pipe. Without it a write to a helper that has gone ends the app with `SIGPIPE` and no crash report (measured in
 Telegram's process).
 
-`--state` names the helper's preferences domain and its URL cache. Without it the name is the bundle identifier with
-`.recaptcha` added; a helper that has neither says `failed NO_IDENTITY`, because it would have no place of its own.
-The app passes it only when the helper does not lie at the top of the `.app`.
+`--state` names the helper's state: its home folder, with the preferences domain and the URL cache that lie in it
+(the table at the end). Without it the name is the bundle identifier with `.recaptcha` added; a helper that has
+neither says `failed NO_IDENTITY`, because it would have no place of its own. The app passes it only when the helper
+does not lie at the top of the `.app`.
 
 ## Lines
 
@@ -60,6 +64,8 @@ reader takes any `%XX`, upper or lower case, and a `%` not followed by two such 
 | `NO_IDENTITY` | no bundle identifier and no `--state` |
 | `LOAD_FAILED` | `xl_load` refused; the text is its status and message |
 | `NO_DEFAULTS` | `NSUserDefaults` has no `initWithSuiteName:` (the Foundation backport is not loaded) |
+| `NO_COOKIE_STORE` | there is no `NSURLSessionConfiguration`, so no cookie store of the helper's own can be made (the Foundation backport is not loaded) |
+| `NO_HOME` | the helper's home folder cannot be made; or after `CFFIXED_USER_HOME` was set the caches folder is not inside it; or the languages and locale the process reads from the global preferences are not what they were before the move. The text says the paths or the two values. The helper stops rather than let the library write into the app's container, or send another language than the app's |
 | `NO_CLASSES` | the library has not the two classes the helper calls |
 
 | `token … error` | Meaning |
@@ -122,8 +128,9 @@ The helper moves the answer pipe to a descriptor of its own before it loads the 
 descriptor 2. So only protocol lines reach the app, and everything the library, the runtime or Foundation prints
 goes to the log file of descriptor 2: `printf` and `write(1, …)` of the SDK, the runtime's `xlate:` lines, `NSLog`,
 and the helper's own lines, which begin with `rchelper:`. At `ready` and at each exit of its own the helper writes
-one line there with the name of its state, the number of keys in its preferences, the size of its URL cache and the
-number of cookies its process sees (how many, and how many for Google's hosts; no name or value).
+one line there with the name of its state, the number of keys in its preferences, the size of its URL cache, the
+number of cookies in its own store and in the shared store its process was given (counts; no name or value), and the
+caches folder the library sees (`caches=`), which on a working run is inside the helper's home.
 
 The log file is the app's: opened by the spawn so that `dyld`'s message about a missing library lands in it too,
 appended to, and trimmed by the app before a spawn when it has grown (256 KiB is plenty: a run writes a few lines).
@@ -137,16 +144,51 @@ a release.
 
 ## State
 
+All of it lies in one folder, the helper's home, so that removing the folder removes everything the helper and the
+library left. The first thing `main` does with the state is set `CFFIXED_USER_HOME` to that folder: on the phone
+`<app home>/Library/Caches/<state>`, on the build host `<state>/home`. The library finds its caches folder with
+`NSSearchPathForDirectoriesInDomains` (its `URL.cachesDirectory` calls it), a C function that no replacement of a
+class reaches, and that function reads the variable. The helper then asks for the caches folder and stops with
+`NO_HOME` when it is not inside the home.
+
 | What | Where | Why not the app's |
 |---|---|---|
-| preferences | the domain named by the state: `<bundle identifier>.recaptcha` | `standardUserDefaults` in the helper is replaced before the load, so the SDK's event queue and its pairs never enter the app's domain |
-| URL cache | a cache of the helper's own, named by the state, set as the shared one before the load | the default one would be the app's `Cache.db`, opened from a second process |
-| cookies | not redirected | nothing was seen of them; the helper's log line counts them so that a run shows it |
+| caches of the library | `Library/Caches/rcec/` of the helper's home: a file `ovk` of 564 bytes rewritten at every request, and a file for each site key the library has fetched a configuration for | on 2026-11-19 these were found in the `Library/Caches/rcec/` of the home the helper was given after a run of the helper, outside its state; the file for a site key was from 17 November, older than any run of the helper |
+| preferences | the domain named by the state, in `Library/Preferences/<state>.plist` of the home | `standardUserDefaults` in the helper is replaced before the load, so the SDK's event queue and its pairs never enter the app's domain |
+| URL cache | a cache of the helper's own, named by the state, in `Library/Caches/<program>/<state>` of the home, set as the shared one before the load | the default one would be the app's `Cache.db`, opened from a second process |
+| cookies | a store of the helper's own, in memory, returned for `sharedHTTPCookieStorage` before the load | the shared store the process was given held 211 cookies, 15 of them for Google's hosts: the SDK's requests would carry them and its responses would add to them |
+
+The move changes everything the process resolves from its home, not only the caches: `NSHomeDirectory`, the
+Documents, Library and Application Support folders, the preferences file of every domain, `Library/Cookies`. What the
+library or the runtime write there lands in the helper's home. What the SDK reads that lives only in the real home is
+the global preferences (`.GlobalPreferences.plist`): `AppleLanguages` and `AppleLocale`, which reach it through
+`NSLocale` and which it sends. The helper reads both keys before the move and after it and stops with `NO_HOME` when
+they differ, and on the phone its log line carries them (`regional=`). On the build host the move changes neither
+(measured: the global domain is served by `cfprefsd`, which ignores the variable), so there the guard only ever
+passes. The keychain is not under the home on iOS 6: `securityd` keeps it in `/var/Keychains` and a process reaches it
+by access group (from how iOS is built, not measured here). The temporary folder is not under it either (`TMPDIR`).
+
+The replacements of `standardUserDefaults`, of the URL cache and of the shared cookie store stay. Where a process
+reads and writes its own files under the home, the move alone would already keep the standard domain's file, the
+`Cache.db` and the cookie file out of the app's container. They stay because the build host, where the check runs,
+has daemons (`cfprefsd` is measured) that ignore the variable, so the check can prove the replacements and not the
+move for those three; and because iOS 6 honouring the variable is untested, where a replacement that turns out
+redundant costs nothing and a missing one writes into the app's own data.
+
+The cookie store is not kept between helpers: each helper starts with none. What the server sees of a repeated login
+is therefore what the SDK itself keeps in its preferences.
+
+On the phone before the home was moved, measured: the preferences file `<state>.plist` in `Library/Preferences` (5562
+bytes after one request with the refused key, 11345 bytes after the second part), and the URL cache as an SQLite file
+named by the state with its `-shm` and `-wal` files in `Library/Caches/<program>/`, no `Cache.db` among them. The
+same relative paths under the moved home are not measured.
 
 ## Not yet measured
 
-- The helper with the real library on the phone, alone and under Telegram.
-- Where iOS 6 puts a cache made with a name, and whether the Foundation backport is in the process before the
-  library asks for the preferences (the helper stops with a named line if it is not).
+- The helper with the real library on the phone under Telegram's own build, linked against the Backports as the app is.
+- Whether iOS 6 reads `CFFIXED_USER_HOME` from `main` onwards, and whether the languages and locale it reads survive
+  the move: the helper checks both and says `NO_HOME`, so a run shows it, and nothing else of the home move has run on
+  the phone. On the build host the caches part is proved, with a control; the languages part has no control, because
+  the build host never changes them.
 - The crash report of a child of Telegram, and the runtime's record under `XL_CRASH` in the helper.
 - Everything on the path that returns a token: no key that the server accepts has been used anywhere.

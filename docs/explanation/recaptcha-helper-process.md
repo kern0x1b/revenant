@@ -221,10 +221,12 @@ translated code sends that message to the host's class, so it gets the helper's 
 - a store of string pairs (`RCdku`): `setObject:forKey:` for each pair of a dictionary, and `stringForKey:`. Its key
   names are not literals in the code and were not traced.
 
-On the refused path nothing of it reaches a file: after the runs of measurement 1 there was no preferences file of
-`rcsdk` for `mobile`, and none for root from the runs on drop31. Either that path sets nothing, or what it sets is
-never written out by a program that ends without `synchronize`; which of the two is not known, and the path that
-returns a token may differ. The helper calls `synchronize` on its domain before it exits.
+After the runs of measurement 1 there was no preferences file of `rcsdk` for `mobile`, and none for root from the runs
+on drop31: a program that ends without `synchronize` writes nothing out. The helper calls `synchronize` on its domain
+before it exits, and then the file is there. **Measured** on the phone with the refused key: the domain has no key
+at `ready`, one at the exit (`RCA_client_events` with the SDK's version as suffix, an array), and the file
+`<state>.plist` was 5562 bytes after one request and 11345 after the second part of the run. So the refused path does
+keep an event queue, and it needs the `synchronize`. The path that returns a token may keep more.
 
 `valueForKey:` and `setValue:forKey:` are sent too (three and five places); their receivers were not traced. The
 suite object is a real `NSUserDefaults`, so it answers whatever the standard one does.
@@ -239,8 +241,35 @@ process never runs the SDK, so the helper's domain is the only place those keys 
 address of Google are in it). The folder is named after the bundle identifier, or after the program when there is
 none, so a helper at the top of the `.app` would open Telegram's own `Cache.db` from a second process. The helper
 does not: before `xl_load` it gives itself a cache of its own with `+[NSURLCache setSharedURLCache:]`, on a path
-beside its preferences domain. The cookie store is the third place of that kind and gets the same look with the
-first helper build (6 below): nothing was seen of it in these runs.
+beside its preferences domain. **Measured** on the phone: a cache made with a name is an SQLite file named by that
+name, with its `-shm` and `-wal` files, in `Library/Caches/<program>/`, and there is no `Cache.db` in it.
+
+**The cookie store.** The third place of that kind, and the phone showed it: the helper's process was given a shared
+cookie store with 211 cookies in it, 15 of them for Google's hosts. The Foundation backport's `NSURLSession` takes
+its cookies from the configuration's store, and the default configuration's store is the shared one
+(`NSURLSessionConfiguration.m`, `NSURLSession.m`), so the SDK's requests would carry those cookies and its responses
+would add to them. The helper therefore answers `sharedHTTPCookieStorage` with the store of an ephemeral
+configuration, in memory and its own; it is empty at each start. Whether the server's answer depends on cookies that
+the SDK itself set on an earlier request is not known, and that is the cost of the choice: a store kept on disk would
+be one more file in the helper's home.
+
+**The caches folder of the library.** A fourth place, found on the phone and not by reading: after a run there was a
+file `ovk` of 564 bytes in `Library/Caches/rcec/` of the home the helper was given, rewritten at every run, and beside
+it a file of 5396 bytes named by a short prefix and a site key, older than the helper. The library writes them itself:
+`rcec` is a string in it, and the Swift `URL.cachesDirectory` that it calls takes its path from the C function
+`NSSearchPathForDirectoriesInDomains`, which no replacement of an Objective-C method reaches. The helper moves its whole
+home before it loads anything: `CFFIXED_USER_HOME` is set to a folder of its state, and the preferences domain, the URL
+cache and `rcec` all lie under it. The helper asks for the caches folder afterwards and stops with `NO_HOME` if it is not
+inside, so that a Foundation that ignores the variable cannot make the library write into the app's container without
+saying so. On the build host this is proved with a fixture that writes as the SDK does; on iOS 6 it is not.
+
+The move has a price that the caches folder did not show. The home is also where a process finds the global
+preferences, and the SDK reads the preferred languages and the current locale (`NSLocale`) and sends them, so a helper
+whose home had no `.GlobalPreferences.plist` could report another language than the app and be judged on it. The
+helper reads `AppleLanguages` and `AppleLocale` before the move and after it and stops with `NO_HOME` if they differ.
+On the Mac they do not (the global domain is served by `cfprefsd`, which ignores the variable); on iOS 6 it is not
+known, and it is the first thing the next phone run settles. The keychain and the
+temporary folder are not under the home.
 
 ## Memory
 

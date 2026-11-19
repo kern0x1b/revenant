@@ -6,7 +6,10 @@ local CONTROLS = {
     {name = "end-ignored", number = 5, scenario = "closed", line = "the helper did not end: its answer pipe was still open", what = "the end of the request pipe ignored"},
     {name = "no-idle-exit", number = 6, scenario = "idle", line = "the helper did not end after its idle time", what = "no exit after the idle time"},
     {name = "duplicate-taken", number = 7, scenario = "pending", line = "the second request with a pending id was not rejected", what = "a pending id taken a second time"},
-    {name = "pipe-signal", number = 8, scenario = "closed", line = "a helper whose answer pipe was closed ended with status 0xd", what = "an answer pipe that may raise SIGPIPE"}
+    {name = "pipe-signal", number = 8, scenario = "closed", line = "a helper whose answer pipe was closed ended with status 0xd", what = "an answer pipe that may raise SIGPIPE"},
+    {name = "left-twice", number = 9, scenario = "quitclose", line = "a helper left twice", what = "two threads free to leave at once"},
+    {name = "cookies-elsewhere", number = 10, scenario = "closed", line = "its line of leaving does not say cookies own=1", what = "the shared cookie store pointed at another store than the helper's own"},
+    {name = "home-kept", number = 11, scenario = "closed", line = "the file the library wrote in its caches folder is not in the helper's own home", what = "the process's home left where it was given"}
 }
 
 function main(out, ...)
@@ -24,20 +27,22 @@ function main(out, ...)
         return o(name)
     end
     local function drive(program, name, scenario)
-        local state, log, said = o("state-" .. name), o("stderr-" .. name .. ".txt"), o("driver-" .. name .. ".txt")
+        local state, log, said, given = o("state-" .. name), o("stderr-" .. name .. ".txt"), o("driver-" .. name .. ".txt"), o("given-" .. name)
         os.tryrm(state)
         os.tryrm(log)
         os.tryrm(said)
+        os.tryrm(given)
         os.mkdir(state)
+        os.mkdir(given)
         local code = os.execv(o("driver"), table.join({program, o("fixture.dylib"), state, log}, scenario and {scenario} or {}),
-                              {stdout = said, stderr = said, try = true, timeout = 120000})
+                              {stdout = said, stderr = said, try = true, timeout = 120000, envs = {CFFIXED_USER_HOME = given}})
         return code, os.isfile(said) and io.readfile(said) or "", state
     end
 
     os.execv("cc", {"-O1", "-Wall", "-fobjc-arc", "-dynamiclib", "-framework", "Foundation", path.join(here, "fixture.m"), "-o", o("fixture.dylib")})
     os.execv("cc", {"-O1", "-Wall", path.join(here, "driver.c"), "-o", o("driver")})
     local code, text, state = drive(helper("rchelper"), "rchelper", nil)
-    if code ~= 0 or not text:find("\nok: 12 scenarios\n", 1, true) then
+    if code ~= 0 or not text:find("\nok: 13 scenarios\n", 1, true) then
         corpus.fail("the helper did not keep the protocol against the fixture library (exit %s):\n%s", tostring(code), text:sub(-2000))
     end
     local kept = os.iorunv("plutil", {"-p", path.join(state, "preferences.plist")})
@@ -68,6 +73,6 @@ function main(out, ...)
             corpus.fail("the armv7 helper imports %s: it starts no process of its own", symbol)
         end
     end
-    print("ok: the helper keeps the protocol in twelve scenarios against the fixture library, the library's preferences and URL cache land in the helper's own state, " ..
-          "eight controls each fail at their own line, and the armv7 helper links with the loader")
+    print("ok: the helper keeps the protocol in thirteen scenarios against the fixture library, the library's preferences, URL cache, cookies and caches folder land in the helper's own state, " ..
+          "eleven controls each fail at their own line, and the armv7 helper links with the loader")
 end

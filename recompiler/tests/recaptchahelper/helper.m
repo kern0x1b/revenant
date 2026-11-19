@@ -27,11 +27,16 @@
 #define NO_IDLE_EXIT 6
 #define DUPLICATE_TAKEN 7
 #define PIPE_SIGNAL 8
+#define LEFT_TWICE 9
+#define COOKIES_ELSEWHERE 10
+#define HOME_KEPT 11
 
 static int answers = 1;
 static NSString *state;
 static NSUserDefaults *domain;
 static NSURLCache *cache;
+static NSHTTPCookieStorage *jar;
+static unsigned long outside;
 static NSMutableDictionary *pending;
 static NSMutableDictionary *clients;
 static NSMutableDictionary *fetching;
@@ -40,6 +45,8 @@ static long idle_ms = 120000;
 static unsigned long idle_turn;
 static unsigned long serials;
 static char line_out[RC_LINE_MOST];
+
+__attribute__((noreturn)) static void fail(NSString *name, NSString *text);
 
 static double now(void)
 {
@@ -61,6 +68,56 @@ static NSString *preferences_name(void)
 #else
     return [state stringByAppendingPathComponent:@"preferences"];
 #endif
+}
+
+static NSString *own_home(void)
+{
+#if TARGET_OS_IPHONE
+    return [[NSHomeDirectory() stringByAppendingPathComponent:@"Library/Caches"] stringByAppendingPathComponent:state];
+#else
+    return [state stringByAppendingPathComponent:@"home"];
+#endif
+}
+
+static NSString *regional(void)
+{
+    NSString *(^read)(CFStringRef) = ^NSString *(CFStringRef key) {
+        CFPropertyListRef value = CFPreferencesCopyAppValue(key, kCFPreferencesCurrentApplication);
+        NSString *text = value ? [(__bridge id)value isKindOfClass:[NSArray class]] ? [(__bridge NSArray *)value componentsJoinedByString:@","] : [(__bridge id)value description] : @"none";
+        if (value)
+            CFRelease(value);
+        return text;
+    };
+    return [NSString stringWithFormat:@"%@ %@", read(CFSTR("AppleLanguages")), read(CFSTR("AppleLocale"))];
+}
+
+static NSString *regional_shown(void)
+{
+#if TARGET_OS_IPHONE
+    return regional();
+#else
+    return @"not shown on the build host";
+#endif
+}
+
+static void move_home(void)
+{
+    if (CONTROL == HOME_KEPT)
+        return;
+    NSString *home = own_home();
+    NSString *before = regional();
+    for (NSString *folder in @[@"Library/Caches", @"Library/Preferences"]) {
+        NSError *error = nil;
+        if (![[NSFileManager defaultManager] createDirectoryAtPath:[home stringByAppendingPathComponent:folder] withIntermediateDirectories:YES attributes:nil error:&error])
+            fail(@"NO_HOME", [NSString stringWithFormat:@"the helper's home %@ cannot be made: %@", home, error.localizedDescription]);
+    }
+    setenv("CFFIXED_USER_HOME", home.fileSystemRepresentation, 1);
+    NSString *caches = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject;
+    if (![caches hasPrefix:[home stringByAppendingString:@"/"]])
+        fail(@"NO_HOME", [NSString stringWithFormat:@"after CFFIXED_USER_HOME was set to %@ the caches folder is %@, so what the library writes there would land outside the helper's state", home, caches]);
+    NSString *after = regional();
+    if (![after isEqualToString:before])
+        fail(@"NO_HOME", [NSString stringWithFormat:@"moving the home to %@ changed the languages and the locale the process reads from the global preferences, which the SDK sends: before [%@], after [%@]", home, before, after]);
 }
 
 static NSURLCache *own_cache(void)
@@ -86,6 +143,25 @@ static NSUserDefaults *own_defaults(void)
     return domain;
 }
 
+static BOOL cookies_possible(void)
+{
+    return [NSClassFromString(@"NSURLSessionConfiguration") respondsToSelector:@selector(ephemeralSessionConfiguration)];
+}
+
+static NSHTTPCookieStorage *own_cookies(void)
+{
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        if (cookies_possible())
+            jar = [[NSClassFromString(@"NSURLSessionConfiguration") ephemeralSessionConfiguration] HTTPCookieStorage];
+    });
+    if (!jar) {
+        note(@"there is no NSURLSessionConfiguration to take a cookie store of the helper's own from, and the shared one is not the helper's: the process stops here");
+        abort();
+    }
+    return jar;
+}
+
 static void redirect(void)
 {
     Method standard = class_getClassMethod([NSUserDefaults class], @selector(standardUserDefaults));
@@ -94,34 +170,42 @@ static void redirect(void)
     }));
     cache = own_cache();
     [NSURLCache setSharedURLCache:cache];
+    Method shared = class_getClassMethod([NSHTTPCookieStorage class], @selector(sharedHTTPCookieStorage));
+#if TARGET_OS_IPHONE
+    NSHTTPCookieStorage *(*original)(id, SEL) = (NSHTTPCookieStorage *(*)(id, SEL))method_getImplementation(shared);
+    outside = (unsigned long)original([NSHTTPCookieStorage class], @selector(sharedHTTPCookieStorage)).cookies.count;
+#endif
+    method_setImplementation(shared, imp_implementationWithBlock(^id(id self) {
+        static NSHTTPCookieStorage *elsewhere;
+        static dispatch_once_t once;
+        if (CONTROL != COOKIES_ELSEWHERE)
+            return own_cookies();
+        dispatch_once(&once, ^{
+            elsewhere = [[NSClassFromString(@"NSURLSessionConfiguration") ephemeralSessionConfiguration] HTTPCookieStorage];
+        });
+        return elsewhere;
+    }));
 }
 
 static void look(NSString *when)
 {
-    static NSArray *ours;
-    if (!ours)
-        ours = @[@"google.com", @"gstatic.com", @"googleapis.com", @"recaptcha.net", @"withgoogle.com"];
-    NSArray *cookies = [NSHTTPCookieStorage sharedHTTPCookieStorage].cookies;
-    unsigned long google = 0;
-    for (NSHTTPCookie *cookie in cookies) {
-        for (NSString *host in ours) {
-            if ([cookie.domain hasSuffix:host]) {
-                google++;
-                break;
-            }
-        }
-    }
     CFArrayRef keys = CFPreferencesCopyKeyList((__bridge CFStringRef)preferences_name(), kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
     long kept = keys ? (long)CFArrayGetCount(keys) : 0;
     if (keys)
         CFRelease(keys);
     NSURLCache *shared = [NSURLCache sharedURLCache];
-    note([NSString stringWithFormat:@"%@: state=%@ preferences keys=%ld url cache own=%d disk=%lu memory=%lu cookies=%lu of them for Google's hosts=%lu", when, state, kept, shared == cache,
-                                     (unsigned long)shared.currentDiskUsage, (unsigned long)shared.currentMemoryUsage, (unsigned long)cookies.count, google]);
+    note([NSString stringWithFormat:@"%@: state=%@ preferences keys=%ld url cache own=%d disk=%lu memory=%lu cookies own=%lu, in the store the process was given=%lu caches=%@ regional=%@", when, state, kept,
+                                     shared == cache, (unsigned long)shared.currentDiskUsage, (unsigned long)shared.currentMemoryUsage, (unsigned long)jar.cookies.count, outside,
+                                     NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject, regional_shown()]);
 }
 
 __attribute__((noreturn)) static void leave(int code, NSString *why)
 {
+    static int leaving;
+    if (CONTROL != LEFT_TWICE && __atomic_exchange_n(&leaving, 1, __ATOMIC_SEQ_CST)) {
+        for (;;)
+            pause();
+    }
     look(why);
     [domain synchronize];
     _exit(code);
@@ -491,6 +575,7 @@ int main(int argc, char **argv)
         state = named ?: (bundle.length ? [bundle stringByAppendingString:@".recaptcha"] : nil);
         if (!state)
             fail(@"NO_IDENTITY", @"the program has no bundle identifier and no --state, so it has no name for its preferences and its cache");
+        move_home();
         redirect();
         double began = now();
         NSString *refused = load(argv[1]);
@@ -500,6 +585,9 @@ int main(int argc, char **argv)
         if (![NSUserDefaults instancesRespondToSelector:@selector(initWithSuiteName:)])
             fail(@"NO_DEFAULTS", @"NSUserDefaults has no initWithSuiteName:, so the helper cannot keep the SDK out of the app's preferences");
         own_defaults();
+        if (!cookies_possible())
+            fail(@"NO_COOKIE_STORE", @"there is no NSURLSessionConfiguration, so the helper cannot keep the SDK out of the cookie store its process was given");
+        own_cookies();
         if (!recaptcha || !actions || !class_respondsToSelector(object_getClass(recaptcha), sel_registerName("fetchClientWithSiteKey:completion:")) ||
             !class_respondsToSelector(object_getClass(actions), sel_registerName("custom:")))
             fail(@"NO_CLASSES", @"the library has no RecaptchaEnterprise.Recaptcha with fetchClientWithSiteKey:completion: or no RecaptchaEnterprise.RecaptchaAction with custom:");
