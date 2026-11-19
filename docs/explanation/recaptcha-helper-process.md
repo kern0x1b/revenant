@@ -35,10 +35,13 @@ exit 0; load 1.64 to 1.70 s; `fetchClient` answers with a client in 0.20 to 0.41
 0.76 s with `com.google.recaptcha 2 'Invalid Site Key.'`; resident 3.4 MB at start, 15.4 MB after the load, 24.4 MB
 at the most. `rcsdk` ran on no later drop (the Telegram session, 2026-11-19).
 
-**Measured in the app, on the same refused path** (`runs/m4-pass123/m4pts.out`, 2026-11-19, two runs): `fetchClient`
-3.93 and 3.72 s, `execute` 2.88 and 3.18 s, with the same answer. That is about ten times `rcsdk`'s times. The app's
-runs were on a drop before the routing fix (drop39), which removed a lock convoy between two threads; whether that is
-the whole difference is not traced.
+**Measured in the app, on the same refused path** (`runs/m4-pass124/xlstats-1/`, drop40, 2026-11-19, two launches):
+the load on demand and `fetchClient` together 1.89 and 1.62 s (the app's `fetched` time includes the load: the glue
+reports `load=not tried` when the fetch is called), and 20 `execute` calls 0.36 to 0.69 s. That is `rcsdk`'s load and
+fetch together (1.8 to 2.1 s) and its `execute`: the app is no slower than the separate process. Before the routing
+fix (pass123, `m4pts.out`) the same two steps took 3.93 and 3.72 s and 2.88 and 3.18 s, a lock convoy between two
+threads that drop39 removed ([library mode](../reference/recompiler/library-mode.md), "Two threads that send at
+once").
 
 **No run anywhere has returned a token.** Every `execute`, in `rcsdk` and in the app, was given a key the server
 refuses. The key Telegram uses is not in its sources: it arrives in the text of the server's error 403
@@ -86,8 +89,8 @@ when the SDK has not called back, so that a slow SDK is told from a dead helper.
 nothing but the spawn and the load can happen. A helper that the app starts when the login screen appears (a
 heuristic: the protocol gives no earlier sign, and the app knows neither the method nor the key until the 403) has
 loaded by the time the demand comes, and the 15 s are spent on `fetchClient` and `execute` alone: 0.5 to 1.2 s by
-`rcsdk`'s numbers, 6.8 and 6.9 s in the app's two runs, all on the refused path. A helper started by the demand adds
-the spawn and 1.7 s of load to that. A second token for the same key costs the `execute` alone, because the helper
+`rcsdk`'s numbers on the refused path. A helper started by the demand adds the spawn and 1.7 s of load to that (the
+app on drop40 does the three steps in 2.1 and 2.6 s). A second token for the same key costs the `execute` alone, because the helper
 keeps the client per key as the app does (`recaptchaClientsBySiteKey` in `AppDelegate.swift`). The helper exits on
 `quit`, when its descriptor 0 ends, or after 120 s without a request, so that it does not hold its memory through a
 session. Not measured: the spawn itself, and every time on the path that returns a token.

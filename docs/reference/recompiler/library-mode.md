@@ -1070,6 +1070,14 @@ class (the mutexes allowed that; no run is known to have hit it). A message take
 shadow method, the variant) where it took four or five mutexes, about 1.3 us alone and 2 us beside another sender, by
 the table above.
 
+On the phone the queue is gone (pass124, drop40, 2026-11-19, two launches of 165 s under `xl-stats`,
+`telegram-build/.agent-work/runs/m4-pass124/xlstats-1/`): a message costs 5.3 to 8.1 us of routing in every window but
+the first of each launch (16 and 19 us, the window of the load), and `__psynch_mutexdrop` is among the top samples
+of one window of the 56, with one sample. The load on demand and
+`fetchClient` together took 1.89 and 1.62 s and the 20 `execute` calls 0.36 to 0.69 s, near where they were before
+drop31; the process spent 2.4 and 1.9 s of processor time on the first, where pass123 spent 5.7 and 5.3 s on two
+cores for 3.9 and 3.7 s of waiting.
+
 The lock that fails stops the process with `xlate: the lock of the runtime's tables could not be taken to read|taken
 to write|given back (error N)`: going on would break the invariant silently.
 
@@ -1283,11 +1291,20 @@ without it. `H` other than 0 in a crash report says the crash is inside a pair s
 four threads) lose nothing, and a pair update alone costs 6.5 ns. On the 4S the device part of `llscpair` passed on
 2026-11-19 (two processors, 14 scenarios, nothing lost): a pair update alone costs 0.20 us, and two or four threads
 on one pair take 0.34 and 0.37 us of wall time an update between them, with no queue on the lock (the table is in
-[the corpus](corpus.md), `llscpair`). No drop with this lifter has run in the app yet. The crash of `rb-release21-1`
-(drop37, one launch in four: a `String` whose object word was two small integers, in a part of an async function
-that ran on a frame another part had finished with) is what a lost update of a task's status would give. That is a
-hypothesis: nothing reproduced the crash, and the count of failed pair stores in the windows of a run on the phone
-is the first evidence of how often two threads meet on a pair there.
+[the corpus](corpus.md), `llscpair`).
+
+In the app (pass124, drop40, 2026-11-19, two launches of 165 s with one `fetchClient` and ten `execute` calls each,
+`telegram-build/.agent-work/runs/m4-pass124/xlstats-1/windows-table.txt`) the line is in each of the 56 windows:
+15,455 and 15,661 pair stores a launch, 1,230 to 1,716 in a window of 5 s while the SDK works, none failed, one
+waited for its lock, once, none gave up the processor, and no lock was held at any report. So the lock costs nothing
+there, and in these two launches no store-pair met another thread's update: the lifter of before would have run them
+correctly too.
+
+That leaves the crash of `rb-release21-1` where it was. It (drop37, one launch in four: a `String` whose object word
+was two small integers, in a part of an async function that ran on a frame another part had finished with) is what a
+lost update of a task's status would give, and that is still a hypothesis: nothing reproduced the crash on purpose,
+and a window without one failed store neither supports it nor refutes it. What would: the scenario of that crash on
+drop40, as many launches as made it show on drop37, with the `F` of each.
 
 ## Dead-strip and lazy loading
 
