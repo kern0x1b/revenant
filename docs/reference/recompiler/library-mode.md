@@ -1065,7 +1065,22 @@ drop's numbers are stated from:
 `xlate: budget: metadata arena A of S KiB touched, opaque words N of M, aliases U of S KiB`. `A` is the end of the
 highest page of the arena that is in memory (`mincore`); when the kernel does not answer, the line says
 `metadata arena of S KiB not read (mincore: errno E)` and gives no number, so that an arena nobody could measure is
-never read as an arena nobody used. The two tables keep their
+never read as an arena nobody used.
+
+The crash report of `xl-crash` has the same two lines, right after its `xlate: signal` line and without `xl-stats`: a
+process that dies before its first window is over says what its address space held when it died. The first window on
+the SDK with this layout (pass122, 2026-11-19) is why: the app died of a defect of its own seven seconds after the
+library was attached, a five-second window of the statistics thread had not closed, and two launches gave no budget
+line at all. In the handler the lines are made by what a signal handler may do: the text is put together without
+`printf` (`xl_budget_lines.h`, the same builders the window uses, so the two cannot differ), nothing is allocated, and
+the list of the threads is read under `pthread_mutex_trylock`; when another thread holds the lock at that moment the
+line is `xlate: guest stacks: not read (the lock of the list of threads is held), the deepest ever D KiB` and the
+handler goes on. The three crash launches of the fixture's check (with and without `XL_LOG`, and on a thread that never
+ran translated code) require both lines with the header's arena and word count; the builders are compared with the
+`printf` text of the window in `tsdguard`, the not-read forms and a line cut short included. The held lock itself is
+not reached by any launch: nothing outside the runtime can hold it.
+
+The two tables keep their
 old sizes until a run of many `execute` calls says how they grow; with the numbers in the header, giving them less is an
 option of the translation, not a change of the runtime.
 

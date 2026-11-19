@@ -63,6 +63,7 @@ struct xl_thread {
 #define XL_THREAD_HEADER 32u
 _Static_assert(sizeof(struct xl_thread) <= XL_THREAD_HEADER, "the record of a thread has to fit in front of its state");
 #include "xl_tsd_guard.h"
+#include "xl_budget_lines.h"
 
 static uint32_t xl_threads_created;
 static uint32_t xl_threads_ended;
@@ -98,57 +99,58 @@ static size_t xl_thread_stack_used(const struct xl_thread *thread)
     return used;
 }
 
-static void xl_threads_stack_report(void)
+static int xl_threads_stack_count(int wait, struct xl_stacks_count *count)
 {
-    char line[160];
-    unsigned live = 0;
-    size_t mapped = 0, deepest = 0, deepest_of = 0;
-    pthread_mutex_lock(&xl_threads_lock);
-    for (struct xl_thread *thread = xl_threads_list; thread; thread = thread->next) {
-        size_t used = xl_thread_stack_used(thread);
-        live++;
-        mapped += thread->stack_size;
-        if (used >= deepest) {
-            deepest = used;
-            deepest_of = thread->stack_size;
+    count->live = 0;
+    count->mapped = count->deepest = count->deepest_of = 0;
+    int held = wait ? pthread_mutex_lock(&xl_threads_lock) == 0 : pthread_mutex_trylock(&xl_threads_lock) == 0;
+    if (held) {
+        for (struct xl_thread *thread = xl_threads_list; thread; thread = thread->next) {
+            size_t used = xl_thread_stack_used(thread);
+            count->live++;
+            count->mapped += thread->stack_size;
+            if (used >= count->deepest) {
+                count->deepest = used;
+                count->deepest_of = thread->stack_size;
+            }
         }
+        pthread_mutex_unlock(&xl_threads_lock);
     }
-    pthread_mutex_unlock(&xl_threads_lock);
-    int length = snprintf(line, sizeof line, "xlate: guest stacks: %u live, %lu KiB mapped; the deepest live one has used %lu KiB of %lu KiB, the deepest ever %lu KiB\n",
-                          live, (unsigned long)(mapped >> 10), (unsigned long)(deepest >> 10), (unsigned long)(deepest_of >> 10),
-                          (unsigned long)(__atomic_load_n(&xl_threads_stack_deepest, __ATOMIC_RELAXED) >> 10));
-    write(2, line, (size_t)length);
+    count->ever = __atomic_load_n(&xl_threads_stack_deepest, __ATOMIC_RELAXED);
+    return held;
+}
+
+static void xl_threads_stack_write(int fd, int wait)
+{
+    char line[200];
+    struct xl_stacks_count count;
+    int read = xl_threads_stack_count(wait, &count);
+    write(fd, line, xl_stacks_line(line, sizeof line, read, &count));
 }
 
 unsigned xl_word_count(unsigned *slots);
 unsigned long xl_alias_used(unsigned long *size);
 
-static void xl_budget_report(void)
+static void xl_budget_write(int fd)
 {
     char line[240];
-    unsigned slots = 0;
-    unsigned long aliases = 0, arena = 0;
-    int unread = 0;
-    unsigned words = xl_word_count(&slots);
-    unsigned long alias_used = xl_alias_used(&aliases);
+    struct xl_budget_count count = {0};
+    count.words = xl_word_count(&count.slots);
+    count.aliases = xl_alias_used(&count.aliases_size);
+    count.arena_size = xl_guest_arena_high - xl_guest_arena_low;
     size_t page = (size_t)sysconf(_SC_PAGESIZE);
     for (unsigned long at = xl_guest_arena_low; at < xl_guest_arena_high; at += sizeof line * page) {
-        unsigned long count = (xl_guest_arena_high - at) / page < sizeof line ? (xl_guest_arena_high - at) / page : sizeof line;
-        if (mincore((void *)at, count * page, line)) {
-            unread = errno ? errno : -1;
+        unsigned long pages = (xl_guest_arena_high - at) / page < sizeof line ? (xl_guest_arena_high - at) / page : sizeof line;
+        if (mincore((void *)at, pages * page, line)) {
+            count.unread = errno ? errno : -1;
             break;
         }
-        for (unsigned long i = 0; i < count; i++) {
+        for (unsigned long i = 0; i < pages; i++) {
             if (line[i] & MINCORE_INCORE)
-                arena = at + (i + 1) * page - xl_guest_arena_low;
+                count.arena = at + (i + 1) * page - xl_guest_arena_low;
         }
     }
-    int length = unread
-        ? snprintf(line, sizeof line, "xlate: budget: metadata arena of %lu KiB not read (mincore: errno %d), opaque words %u of %u, aliases %lu of %lu KiB (0 of 0 is not set up yet)\n",
-                   (xl_guest_arena_high - xl_guest_arena_low) >> 10, unread, words, slots, alias_used >> 10, aliases >> 10)
-        : snprintf(line, sizeof line, "xlate: budget: metadata arena %lu of %lu KiB touched, opaque words %u of %u, aliases %lu of %lu KiB (0 of 0 is not set up yet)\n",
-                   arena >> 10, (xl_guest_arena_high - xl_guest_arena_low) >> 10, words, slots, alias_used >> 10, aliases >> 10);
-    write(2, line, (size_t)length);
+    write(fd, line, xl_budget_line(line, sizeof line, &count));
 }
 
 #define XL_PROFILE_BUCKETS 1024
@@ -254,8 +256,8 @@ static void xl_profile_report(unsigned samples, uint32_t window_messages, uint32
         best->count = 0;
     }
     xl_stats_window_report();
-    xl_threads_stack_report();
-    xl_budget_report();
+    xl_threads_stack_write(2, 1);
+    xl_budget_write(2);
     memset(xl_profile_buckets, 0, sizeof xl_profile_buckets);
 }
 
@@ -500,6 +502,8 @@ static void xl_crash_handler(int signal, siginfo_t *info, void *context)
                         (unsigned long)thread->stack_size, (unsigned long)low, (unsigned long)(low + thread->stack_size));
         }
     }
+    xl_threads_stack_write(fd, 0);
+    xl_budget_write(fd);
     ucontext_t *uc = context;
     if (uc) {
         _STRUCT_ARM_THREAD_STATE *ss = &uc->uc_mcontext->__ss;
