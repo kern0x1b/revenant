@@ -12,7 +12,7 @@ class inventory (name, exporting image, members) and does not fall back to anoth
 without `dyld/6.1.3/classes_armv7.json` in the cache it stops and says so. It drops the class row from the skeleton when
 the device has the class and one of these holds: the exporting image is a public framework (`/System/Library/Frameworks`),
 whichever one the SDK puts the class in, or the exporting image is the private framework of the same name, or the device
-class implements at least one member that the SDK declares for it. No table of equivalent images is kept: Foundation
+class has the SDK's superclass and implements at least one member that the SDK declares for it. No table of equivalent images is kept: Foundation
 classes that CoreFoundation exports, UIKit classes that QuartzCore exports and the like are public images and need no
 entry, and the six `ImageCaptureCore` classes, which a private `ImageCapture` image exports, are the same classes because
 the device implements 12 of the 20 members that the SDK declares for `ICDevice`, 14 of 21 for `ICCameraItem`, 6 of 14 for
@@ -26,10 +26,17 @@ declared `init`, `initWithCoder:` or `delegate` does count. Eighteen class rows 
 private framework of another name, and it admits 16 of them: the six `ImageCaptureCore` classes (`ICCameraDevice` 12 of
 20 members, `ICCameraItem` 14 of 21, `ICDevice` 12 of 20, `ICDeviceBrowser` 6 of 14, `ICCameraFile` 2 of 31 (`fileSize`,
 `orientation`), `ICCameraFolder` 1 of 1 (`contents`)) and ten UIFoundation classes of UIKit (from `NSMutableParagraphStyle`
-3 of 22 to `NSLayoutManager` 75 of 87). For each admitted class the device superclass equals the SDK's, and no admitted
-class matches only on generic members; the thinnest are `ICCameraFolder`, whose superclass `ICCameraItem` matches 14 of
+3 of 22 to `NSLayoutManager` 75 of 87). The device superclass equals the SDK's for each admitted class, and the rule requires it (the SDK's superclass counts as `NSObject`
+when it is unavailable on iOS, as in the skeleton); no admitted class matches only on generic members; the thinnest are `ICCameraFolder`, whose superclass `ICCameraItem` matches 14 of
 21, and `ICCameraFile`. It refuses two: `SKOverlay` (0 of 5, superclass `SKLayer` against `NSObject`) and `CPListItem`
 (a `CorePDF` class, 0 of 23).
+
+The generator cannot tell a class that is missing from the inventory as a row from a class that is not on the device. The
+inventory is read from the release's shared cache and from the images in the cache folder's `outside_armv7` (six files on
+this machine); a class in an image that is in neither would be missing as a row and treated as absent, and nothing in the
+inventory says which of the two it is. What it can tell is a class that the inventory does have and the rule refuses: the
+generator prints one line for each (`device class refused, keeps its proxy: SKOverlay (StoreKit): stranger: SkankKit has the
+superclass SKLayer, the SDK's is NSObject`, and the same for `CPListItem`), so a stranger is never silent.
 
 Of 5,523 class rows that the SDK declares and iOS has, the rule agrees with the earlier image table on every row that
 the table accepted, and it additionally accepts rows that the table rejected (95; the ownership filter drops those rows for the frameworks that only name

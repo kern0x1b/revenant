@@ -352,7 +352,7 @@ end
 function class_on_device(state, row, framework_name)
     local info = device_class_inventory()[row.name]
     if not info then
-        return false
+        return false, "absent"
     end
     local image = info.image or ""
     local public = image:match("^/System/Library/Frameworks/([%w_]+)%.framework/")
@@ -360,16 +360,23 @@ function class_on_device(state, row, framework_name)
     if public or owner == framework_name then
         return true
     end
+    local super = row.signature ~= "" and row.signature or "NSObject"
+    if unavailable_classes_of(state)[super] then
+        super = "NSObject"
+    end
+    if info.superclass ~= super then
+        return false, "stranger: " .. (owner or image) .. " has the superclass " .. tostring(info.superclass) .. ", the SDK's is " .. super
+    end
     local members = sdk_members_of(state)[row.name]
     if members == nil then
-        return false
+        return false, "stranger: " .. (owner or image) .. " and the SDK declares no member to compare"
     end
     for key in pairs(members) do
         if device_declares(info, key) then
             return true
         end
     end
-    return false
+    return false, "stranger: " .. (owner or image) .. " implements none of the SDK's declared members"
 end
 
 function unavailable_count(state, framework)
@@ -425,13 +432,20 @@ function pending_of(state, only)
     local pending = {}
     for _, framework in ipairs(state.frameworks) do
         if only == nil or table.contains(only, framework.name) then
-            local rows, skipped = {}, {}
+            local rows, skipped, strangers = {}, {}, {}
             for _, row in ipairs(framework.rows) do
                 local owner = single_owned(row) and owners[row.kind .. "|" .. row.name]
                 if not single_owned(row) or (owner and owner.framework == framework.name) then
                     if exists_on_ios(row, unavailable) then
-                        if row.kind ~= "class" or not class_on_device(state, row, framework.name) then
+                        local on_device, why = false, nil
+                        if row.kind == "class" then
+                            on_device, why = class_on_device(state, row, framework.name)
+                        end
+                        if not on_device then
                             table.insert(rows, row)
+                            if why and why ~= "absent" then
+                                table.insert(strangers, row.name .. " (" .. framework.name .. "): " .. why)
+                            end
                         else
                             skipped[row.kind] = (skipped[row.kind] or 0) + 1
                         end
@@ -440,7 +454,7 @@ function pending_of(state, only)
                     end
                 end
             end
-            table.insert(pending, {name = framework.name, import = framework.import, rows = rows, skipped = skipped,
+            table.insert(pending, {name = framework.name, import = framework.import, rows = rows, skipped = skipped, strangers = strangers,
                 unavailable = unavailable, images = state.images})
         end
     end
@@ -630,6 +644,9 @@ function main(...)
         device, references_of_src(device))
     local skipped = 0
     for _, framework in ipairs(pending) do
+        for _, stranger in ipairs(framework.strangers) do
+            print("device class refused, keeps its proxy: " .. stranger)
+        end
         for _, count in pairs(framework.skipped) do
             skipped = skipped + count
         end
