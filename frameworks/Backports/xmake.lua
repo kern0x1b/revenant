@@ -15,6 +15,8 @@ local TESTS = path.absolute(path.join(os.scriptdir(), "tests"))
 local SKELETON = path.join(ROOT, "build", "generated", "backports", "skeleton")
 local INSTALL_FOLDER = "/usr/lib/revenant/org.revenant.backports"
 local SRC = path.absolute(path.join(os.scriptdir(), "src"))
+local STD_UNEXPORTED = path.join(os.getenv("REVENANT_CACHE") or path.join(ROOT, "build"), "std_namespace.unexp")
+local STD_UNEXPORTED_WRITTEN = false
 
 local SELECTED = os.getenv("REVENANT_BACKPORTS_LIBRARIES")
 SELECTED = SELECTED ~= "" and SELECTED or nil
@@ -118,6 +120,7 @@ if is_plat("iphoneos") then
                         "-Wl,-no_encryption", "-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__port_catlist", {force = true})
             on_load(function (target)
                 target:add("shflags", table.unpack(import("@addon.revenant.apple.backports_versions", {anonymous = true}).flags()))
+                target:add("shflags", "-Wl,-unexported_symbols_list," .. STD_UNEXPORTED, {force = true})
             end)
             after_build(function (target)
                 import("@addon.revenant.apple.backports_versions", {anonymous = true}).check(target:targetfile())
@@ -176,6 +179,14 @@ if is_plat("iphoneos") then
                     end
                 end)
             end
+            after_build(function (target)
+                for line in os.iorunv("nm", {"-gU", target:targetfile()}):gmatch("[^\n]+") do
+                    local name = line:match("(%S+)$") or ""
+                    if name:find("St3__1", 1, true) then
+                        raise("%s exports %s, a std::__1 symbol a Backports dylib must keep hidden", target:targetfile(), name)
+                    end
+                end
+            end)
             if library.name == "PhotosBackports" then
                 after_build(function (target)
                     local load = os.iorunv("otool", {"-l", target:targetfile()})
@@ -207,6 +218,10 @@ if is_plat("iphoneos") then
                 add_syslinks(name)
             end
             on_config(function (target)
+                if not STD_UNEXPORTED_WRITTEN then
+                    io.writefile(STD_UNEXPORTED, "*St3__1*\n")
+                    STD_UNEXPORTED_WRITTEN = true
+                end
                 if library.name == "SystemBackports" then
                     target:add("includedirs", path.join(target:pkg("apple-compat"):installdir(), "share", "apple-compat", "process-wide"))
                 end
