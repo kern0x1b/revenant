@@ -643,7 +643,11 @@ the library's own image. Two launches cover a host that does not keep a reservat
 mapped (`release.held`), calls `xl_release`, expects it without a mapping (`release.free`; the `release` map has no mapping in the range and no
 `---` region of the host part's size), reserves again and goes on as the first launch does. Then the host aborts after `xl_library_diagnostics` (`--abort`): with the variable set the crash
 handler's output has the `crash` map and the guest range is readable in it; with it unset the handler prints its
-`xlate: signal 6` lines and no `xl-map` line, and so do the launches above.
+`xlate: signal 6` lines and no `xl-map` line, and so do the launches above. With `--abort-thread` the abort is on a
+thread that never ran translated code: the handler says `xlate: this thread has not run translated code, so it has no
+guest state` and prints no guest registers; before 2026-11-19 it made a guest state for that thread to print them, and
+so mapped a guest stack inside the crash, which in a process without address space was a second failure on top of
+the first (`the guest stack of a thread could not be mapped` in the crash output of the M4 acceptance).
 
 | Name | Proves |
 |---|---|

@@ -477,9 +477,9 @@ function main(out, ...)
         corpus.fail("with XL_LOADER_HOST_RESERVE=0 the loader still holds room for the host part, lost the guest reservation, or the library did not load")
     end
     local crash_log = "/private/var/revenant/xlate-crash.log"
-    local function crash(extra, logged)
+    local function crash(extra, logged, where)
         device.run("rm -f " .. crash_log)
-        local text = launch(remote .. "/RCFixture.dylib " .. resident .. " --abort", (logged and "XL_LOG=1 " or "") .. extra)
+        local text = launch(remote .. "/RCFixture.dylib " .. resident .. " " .. (where or "--abort"), (logged and "XL_LOG=1 " or "") .. extra)
         return text .. "\n" .. (try { function ()
             return device.run("cat " .. crash_log .. " 2>/dev/null; true")
         end } or "")
@@ -514,6 +514,12 @@ function main(out, ...)
     if not by_switch:find("xlate: signal 6", 1, true) or not by_switch:find("xlate: guest pc=", 1, true) then
         io.write(by_switch)
         corpus.fail("with XL_CRASH and a host that never calls xl_library_diagnostics the crash handler did not run or printed no guest frame")
+    end
+    local foreign = crash("", false, "--abort-thread")
+    if not foreign:find("xlate: signal 6", 1, true) or not foreign:find("xlate: this thread has not run translated code", 1, true) or
+       foreign:find("xlate: guest pc=", 1, true) or foreign:find("the guest stack of a thread", 1, true) then
+        io.write(foreign)
+        corpus.fail("a crash on a thread that never ran translated code did not say so, or the crash handler made a guest state and a guest stack for it")
     end
     local without_switch = crash("XL_HOST_SKIPS_DIAGNOSTICS=1 ", false)
     if without_switch:find("xlate: signal 6", 1, true) then

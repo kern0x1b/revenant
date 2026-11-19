@@ -50,6 +50,7 @@ extern void xl_bridge_init(void);
 
 static pthread_key_t xl_state_key;
 static pthread_once_t xl_state_once = PTHREAD_ONCE_INIT;
+static int xl_state_key_made;
 static int xl_diagnostics_installed;
 static int xl_map_on;
 
@@ -253,7 +254,13 @@ static void xl_thread_state_failed(const char *what, size_t size)
 
 static void xl_state_key_create(void)
 {
-    pthread_key_create(&xl_state_key, xl_state_destroy);
+    if (pthread_key_create(&xl_state_key, xl_state_destroy) == 0)
+        __atomic_store_n(&xl_state_key_made, 1, __ATOMIC_RELEASE);
+}
+
+static State *xl_entered_state(void)
+{
+    return __atomic_load_n(&xl_state_key_made, __ATOMIC_ACQUIRE) ? pthread_getspecific(xl_state_key) : NULL;
 }
 
 State *xl_current_state(void)
@@ -332,7 +339,11 @@ void xl_fault(State *state, const char *reason)
 
 static void xl_walk_guest(int fd)
 {
-    State *state = xl_current_state();
+    State *state = xl_entered_state();
+    if (!state) {
+        dprintf(fd, "xlate: this thread has not run translated code, so it has no guest state\n");
+        return;
+    }
     dprintf(fd, "xlate: guest pc=0x%llx lr=0x%llx sp=0x%llx\n", XL_REG(state, PC), XL_REG(state, X30), XL_REG(state, SP));
     for (int i = 0; i < 8; i++)
         dprintf(fd, "xlate: guest x%d=0x%llx\n", i, *(uint64_t *)((char *)state + XL_OFFSET_X0 + (XL_OFFSET_X1 - XL_OFFSET_X0) * i));
@@ -389,7 +400,7 @@ static void xl_crash_handler(int signal, siginfo_t *info, void *context)
     int fd = xl_crash_fd();
     dprintf(fd, "xlate: signal %d at fault 0x%lx\n", signal, (unsigned long)(info ? info->si_addr : 0));
     if (info && (signal == SIGSEGV || signal == SIGBUS) && xl_diagnostics_installed) {
-        void *current = pthread_getspecific(xl_state_key);
+        void *current = xl_entered_state();
         if (current) {
             struct xl_thread *thread = (struct xl_thread *)((char *)current - XL_THREAD_HEADER);
             uintptr_t low = (uintptr_t)thread->stack, fault = (uintptr_t)info->si_addr;
