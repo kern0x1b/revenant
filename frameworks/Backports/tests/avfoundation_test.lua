@@ -30,8 +30,9 @@ local AREAS = {
     },
     {
         name = "resource loading, asset variants and buffering of expo-video",
-        sources = {"AVAssetResourceLoadingDataRequest7.m", "AVAssetVariant15.m", "AVPlayerItem+PreferredForwardBufferDuration10.m"},
+        sources = {"AVAssetResourceLoadingDataRequest7.m", "AVAssetResourceLoadingRequest+Data7.m", "AVAssetVariant15.m", "AVPlayerItem+PreferredForwardBufferDuration10.m"},
         members = {
+            "-[AVAssetResourceLoadingRequest dataRequest]", "-[AVAssetResourceLoadingRequest contentInformationRequest]",
             "-[AVAssetResourceLoadingDataRequest requestedOffset]", "-[AVAssetResourceLoadingDataRequest currentOffset]",
             "-[AVAssetResourceLoadingDataRequest requestedLength]", "-[AVAssetResourceLoadingDataRequest requestsAllDataToEndOfResource]",
             "-[AVAssetResourceLoadingDataRequest respondWithData:]",

@@ -401,7 +401,7 @@ Source: `expo-video` 57.0.5, `ios/Cache/CachableRequest.swift`, `ios/Utils/AVAss
 
 Added, with the iOS 6 behaviour stated:
 
-- `AVAssetResourceLoadingDataRequest` in `src/AVFoundation/AVAssetResourceLoadingDataRequest7.m`: the request range and the offset advanced by `respondWithData:`, with the data accumulated on the request. iOS 6's resource loader never hands out one of these, so the package's cache path sees no data request and stays out of the way.
+- `AVAssetResourceLoadingDataRequest` in `src/AVFoundation/AVAssetResourceLoadingDataRequest7.m`: the request range and the offset advanced by `respondWithData:`, with the data accumulated on the request. `AVAssetResourceLoadingRequest+Data7.m` supplies its `dataRequest` by parsing the request's Range header, and answers `contentInformationRequest` with nil, as iOS 6 has no content information request. The accumulated data stays in the backport: iOS 6 has no public way to hand it to the system resource loader.
 - `AVAssetVariant` and `AVAssetVariantVideoAttributes` in `src/AVFoundation/AVAssetVariant15.m`: the properties the track records read, with zero or nil defaults. The only use in expo-video sits behind `#available(iOS 26)`, so no instance is made on iOS 6.
 - `preferredForwardBufferDuration` on `AVPlayerItem`: an associated object that defaults to zero. The value is kept, but iOS 6 has no public way to set the player's forward buffer, so playback buffering is unchanged.
 - `canStartPictureInPictureAutomaticallyFromInline` on `AVPictureInPictureController` and `AVPlayerViewController`: an associated object that defaults to NO, replacing the `@dynamic` declarations that had no implementation. Automatic inline picture-in-picture is not available on iOS 6.
