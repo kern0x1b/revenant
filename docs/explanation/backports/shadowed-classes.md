@@ -6,6 +6,21 @@ Backports library links against gets the proxy. An app image that the SDK linked
 framework instead, so it gets the system class and not the proxy. `CASpringAnimation` is the case: QuartzCore on
 iOS 6.1.3 has a `CASpringAnimation` without `initialVelocity` or `settlingDuration`.
 
+A class that the device itself exports never gets a proxy, whatever the SDK's availability table says. The generator
+reads the release's measured Objective-C class inventory (name and exporting image) and drops the class row from the
+skeleton when the device has the class. Two images are equivalent for this rule where the SDK and the device split a
+framework: Foundation classes exported by CoreFoundation, UIKit classes by UIFoundation or QuartzCore, AVFAudio
+classes by AVFoundation or Foundation, CoreData classes by Foundation, and SceneKit classes by QuartzCore. A name that
+the device exports only from an unrelated private framework is a stranger, not the SDK class: `SKOverlay` in StoreKit
+is matched by a private SkankKit class and keeps its proxy.
+
+The reason is dynamic casts. Every object the system makes descends from the real class, so a Swift `as!` or an
+Objective-C `isKindOfClass:` against a proxy can never succeed; the trap names the proxy, as in
+`Could not cast value of type '__NSCFDictionary' to 'RevenantNSMutableDictionary'`. A proxy also hides the
+`kCFNull` singleton, so QuartzCore's pointer comparison misses and sends a `CAAction` message to a stand-in. Members
+that a later SDK added to an existing class live in a category on the real class instead. The generator's rule is
+checked by `cf_cast_test` and by `alias_adoption_test`, which asserts that the device classes have no proxy export.
+
 `frameworks/Backports/tools/shadowed-classes.txt` lists those classes, so a consumer knows which imports to move to
 the proxy.
 

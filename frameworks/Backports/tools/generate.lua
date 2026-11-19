@@ -1,4 +1,5 @@
 import("async.runjobs")
+import("core.base.json")
 
 local publics = import("public", {rootdir = os.scriptdir(), anonymous = true})
 local sdkfiles = import("sdk", {rootdir = os.scriptdir(), anonymous = true})
@@ -7,6 +8,16 @@ local skeleton = import("skeleton", {rootdir = os.scriptdir(), anonymous = true}
 local markers = import("markers", {rootdir = os.scriptdir(), anonymous = true})
 local libraries = import("library_list", {rootdir = os.scriptdir(), anonymous = true}).backports_libraries()
 local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
+local lowered = import("@addon.revenant.apple.lowered", {anonymous = true})
+
+local DEVICE_IMAGE_BRIDGES = {
+    CoreFoundation = {Foundation = true},
+    Foundation = {CoreFoundation = true},
+    UIKit = {UIFoundation = true, QuartzCore = true},
+    AVFAudio = {AVFoundation = true, Foundation = true},
+    CoreData = {Foundation = true},
+    SceneKit = {QuartzCore = true},
+}
 
 local SHARDS = 4
 local FIRST_IPHONE_OS = 2000
@@ -295,6 +306,40 @@ function available_rows(state, framework)
     return kept
 end
 
+local device_classes = nil
+
+local function device_class_inventory()
+    if device_classes == nil then
+        device_classes = {}
+        local file = path.join(dyld.root(), DEVICE_GLOBALS_RELEASE, "classes_armv7.json")
+        if not os.isfile(file) then
+            file = lowered.inventory_file()
+        end
+        if os.isfile(file) then
+            device_classes = json.decode(io.readfile(file)).classes or {}
+        end
+    end
+    return device_classes
+end
+
+function class_on_device(name, framework)
+    local info = device_class_inventory()[name]
+    if not info then
+        return false
+    end
+    local image = info.image or ""
+    local owner = image:match("/System/Library/Frameworks/([%w_]+)%.framework/")
+               or image:match("/System/Library/PrivateFrameworks/([%w_]+)%.framework/")
+    if not owner then
+        return false
+    end
+    if owner == framework then
+        return true
+    end
+    local bridge = DEVICE_IMAGE_BRIDGES[framework]
+    return bridge ~= nil and bridge[owner] == true
+end
+
 function unavailable_count(state, framework)
     local unavailable = unavailable_classes_of(state)
     local count = 0
@@ -353,7 +398,11 @@ function pending_of(state, only)
                 local owner = single_owned(row) and owners[row.kind .. "|" .. row.name]
                 if not single_owned(row) or (owner and owner.framework == framework.name) then
                     if exists_on_ios(row, unavailable) then
-                        table.insert(rows, row)
+                        if row.kind ~= "class" or not class_on_device(row.name, framework.name) then
+                            table.insert(rows, row)
+                        else
+                            skipped[row.kind] = (skipped[row.kind] or 0) + 1
+                        end
                     else
                         skipped[row.kind] = (skipped[row.kind] or 0) + 1
                     end

@@ -4,10 +4,6 @@
 #include <errno.h>
 #include <math.h>
 #include <stdlib.h>
-#import "../revenant_alias.h"
-
-REVENANT_ALIAS(NSJSONSerialization)
-
 NSData *revenant_sorted_keys_data(id object, NSUInteger options, NSError **error);
 
 static NSStringEncoding RevenantJSONDetectEncoding(NSData *data, NSUInteger *bomLength)
