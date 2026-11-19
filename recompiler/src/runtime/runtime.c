@@ -322,6 +322,14 @@ static void xl_thread_state_failed(const char *what, size_t size)
     abort();
 }
 
+static void xl_thread_stack_refused(size_t own)
+{
+    fprintf(stderr, "xlate: cannot set up a thread for translated code: the thread says its own stack is %lu bytes long, and no guest stack can be as long as that\n",
+            (unsigned long)own);
+    xl_threads_report("at the failure", 0, 0);
+    abort();
+}
+
 static void xl_state_key_create(void)
 {
     if (pthread_key_create(&xl_state_key, xl_state_destroy) == 0)
@@ -343,7 +351,9 @@ State *xl_current_state(void)
     if (posix_memalign((void **)&thread, 16, XL_THREAD_HEADER + XL_STATE_SIZE))
         xl_thread_state_failed("the allocation of the state", XL_THREAD_HEADER + XL_STATE_SIZE);
     memset(thread, 0, XL_THREAD_HEADER + XL_STATE_SIZE);
-    size_t size = xl_stack_length(pthread_get_stacksize_np(pthread_self()), (size_t)sysconf(_SC_PAGESIZE));
+    size_t own = pthread_get_stacksize_np(pthread_self()), size = 0;
+    if (!xl_stack_length(own, (size_t)sysconf(_SC_PAGESIZE), &size))
+        xl_thread_stack_refused(own);
     thread->stack = xl_stack_map(size, xl_map_anonymous, &thread->guard_size);
     if (thread->stack == MAP_FAILED)
         xl_thread_state_failed("the mapping of the guest stack with its guard page, as long as the thread's own stack,", size);

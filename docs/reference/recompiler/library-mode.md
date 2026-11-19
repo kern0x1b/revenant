@@ -540,9 +540,15 @@ measure whether one is there. The library test runs the host with the switch and
 ## The guest stack of a thread
 
 A thread that enters the guest maps its own guest stack, as long as the stack the thread itself has
-(`pthread_get_stacksize_np`, rounded up to a page) plus one page below it that is `PROT_NONE`: about 1 MiB for the
-main thread of an iOS 6 process (its own stack is a region of 1,020 KiB on the 4S), 512 KiB and a page for a thread with the default size (a libdispatch worker, an
-`NSThread`), and what a thread was created with when its creator set a size. The rule is `xl_stack_length` in
+(`pthread_get_stacksize_np`, rounded up to a page) plus one page below it that is `PROT_NONE`: 1 MiB in all for the
+main thread of an iOS 6 process, 512 KiB and a page for a thread with the default size (a libdispatch worker, an
+`NSThread`), and what a thread was created with when its creator set a size. The main thread is not a case of its own:
+the system reports its stack as it is. On the 4S with iOS 6.1.3 (a probe inside the Telegram app, three launches,
+2026-11-19) `pthread_get_stacksize_np` answers 1,044,480 bytes on the main thread, which is the region of 1,020 KiB
+that the main stack is in the region maps, 524,288 on a thread made with default attributes and in a block on a global
+Dispatch queue, and 2,097,152 on a thread made with `pthread_attr_setstacksize` of 2 MiB; the size is the stack without
+the system's own guard. A native probe as the first process of the emulator, with the same libsystem, prints the same
+two first numbers. The rule is `xl_stack_length` in
 `src/runtime/xl_tsd_guard.h`, and the reason for it is what the guest was built for: on a 64-bit phone the same thread
 would run the same guest frames on this very stack, together with the frames of the system frameworks, which here are on
 the host stack. So the guest never needs more guest stack than the thread has stack, and a size above that is address
@@ -551,17 +557,27 @@ other, and when a mapping failed it was tried again with half; in the M4 accepta
 thread's guest stack had used 16 KiB of its 8 MiB after `fetchClient` and `execute`, and a worker's 4 to 24 KiB of
 its 1 MiB (`m4p121reg-1` and `m4p121ctl-1`, the resident pages of each stack in the region maps).
 
-A mapping that fails is not replaced by a smaller one: the thread stops with
+A mapping that fails is not replaced by a smaller one: the process stops (`abort`) with
 `xlate: cannot set up a thread for translated code: the mapping of the guest stack with its guard page, as long as the thread's own stack, of N bytes failed, errno E`,
-the count of threads and the address map. A guest stack smaller than the thread's own would overflow where the program
+the count of threads and the address map. A thread that is already inside a call of the library has nowhere to return an
+error to, and no guest code can run on it without a stack. The same holds for a thread whose own stack the system reports
+as nothing, or as so long that the length with the guard is no size at all: `xl_stack_length` refuses both instead of
+rounding them, and the process stops with
+`xlate: cannot set up a thread for translated code: the thread says its own stack is N bytes long, and no guest stack can be as long as that`.
+`xl_stack_map` maps no stack without a whole page above its guard. A thread that its creator gave a long stack gets a guest
+stack as long: on a 64-bit phone it would have that stack too, and a process that has no room for it learns so when the
+thread first enters the guest. A guest stack smaller than the thread's own would overflow where the program
 was correct. The page below the stack is always inaccessible (a stack whose guard cannot be protected is not used), so a
 guest frame that goes below the stack faults instead of writing into the neighbouring mapping. A `SIGSEGV` or `SIGBUS`
 whose address is in that page prints, before the crash dump of `xl-crash`,
 `xlate: the guest stack of this thread overflowed: it holds N bytes (0x… to 0x…), as many as the thread's own stack, and the fault is in its guard page; …`,
 so a stack overflow is told from a bad pointer. The mapping and the guard are one function, `xl_stack_map`, and
 `xl_stack_used` reads how deep a stack has been written (the lowest page of it that is in memory, by `mincore`); the
-`tsdguard` check runs all three on the Mac: the lengths for five thread sizes, the guard, a mapper that refuses above a
-limit (no smaller stack comes back), a mapper that always refuses, and the depth after writes at five places.
+`tsdguard` check runs all three on the Mac: the lengths for five thread sizes, the sizes that are refused (none, the largest
+value of a size, and the first whose length with the guard does not fit) next to the longest that is not, the guard, the
+lengths `xl_stack_map` refuses (nothing above the guard, not whole pages) and the shortest stack it maps, a mapper that
+refuses above a limit (no smaller stack comes back), a mapper that always refuses, and the depth after writes at five
+places.
 
 The stack, the thread-specific page and the state of a thread are released together when the thread ends: they hang on a
 `pthread_key_t` whose destructor (`xl_state_destroy`) unmaps the stack, unmaps the page and frees the state, so a thread

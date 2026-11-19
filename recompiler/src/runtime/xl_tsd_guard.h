@@ -31,17 +31,24 @@ static inline void *xl_map_anonymous(size_t length)
     return mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
 }
 
-static inline size_t xl_stack_length(size_t thread_stack, size_t page)
+static inline int xl_stack_length(size_t thread_stack, size_t page, size_t *length)
 {
-    return (thread_stack + page - 1) / page * page + page;
+    if (!thread_stack || thread_stack > SIZE_MAX - 2 * page)
+        return 0;
+    *length = (thread_stack + page - 1) / page * page + page;
+    return 1;
 }
 
 static inline void *xl_stack_map(size_t length, void *(*mapper)(size_t), size_t *guard)
 {
+    size_t page = (size_t)sysconf(_SC_PAGESIZE);
+    if (length < 2 * page || length % page) {
+        errno = EINVAL;
+        return MAP_FAILED;
+    }
     void *stack = mapper(length);
     if (stack == MAP_FAILED)
         return MAP_FAILED;
-    size_t page = (size_t)sysconf(_SC_PAGESIZE);
     if (mprotect(stack, page, PROT_NONE)) {
         int error = errno;
         munmap(stack, length);

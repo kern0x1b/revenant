@@ -125,14 +125,30 @@ int main(void)
         {1, 2 * page},
     };
     for (size_t i = 0; i < sizeof(lengths) / sizeof(lengths[0]); i++) {
-        size_t got = xl_stack_length(lengths[i].thread, page);
-        if (got != lengths[i].want) {
+        size_t got = 0;
+        if (!xl_stack_length(lengths[i].thread, page, &got) || got != lengths[i].want) {
             fprintf(stderr, "FAIL: a thread whose own stack is %lu bytes maps %lu bytes for its guest stack and the guard page, wanted %lu\n",
                     (unsigned long)lengths[i].thread, (unsigned long)got, (unsigned long)lengths[i].want);
             fail = 1;
         }
     }
-    size_t length = xl_stack_length(512u << 10, page);
+    size_t refused[] = {0, SIZE_MAX, SIZE_MAX - page, SIZE_MAX - 2 * page + 1};
+    for (size_t i = 0; i < sizeof(refused) / sizeof(refused[0]); i++) {
+        size_t got = 7;
+        if (xl_stack_length(refused[i], page, &got) || got != 7) {
+            fprintf(stderr, "FAIL: a thread that says its own stack is %lu bytes got a guest stack length (%lu): no stack and a stack whose length with the guard does not fit a size must be refused, not rounded\n",
+                    (unsigned long)refused[i], (unsigned long)got);
+            fail = 1;
+        }
+    }
+    size_t largest = 0;
+    if (!xl_stack_length(SIZE_MAX - 2 * page, page, &largest) || largest != SIZE_MAX - page + 1) {
+        fprintf(stderr, "FAIL: the longest stack whose length with the guard still fits a size gives %lu, wanted %lu\n", (unsigned long)largest,
+                (unsigned long)(SIZE_MAX - page + 1));
+        fail = 1;
+    }
+    size_t length = 0;
+    xl_stack_length(512u << 10, page, &length);
     void *stack = xl_stack_map(length, xl_map_anonymous, &guard);
     if (stack == MAP_FAILED || guard != page) {
         fprintf(stderr, "FAIL: the guest stack of a thread with a 512 KiB stack was not mapped with a guard of one page (guard %lu)\n", (unsigned long)guard);
@@ -186,6 +202,27 @@ int main(void)
         fail = 1;
     } else {
         munmap(stack, 1u << 20);
+    }
+    size_t short_lengths[] = {0, page, page + 1, 3 * page - 1};
+    for (size_t i = 0; i < sizeof(short_lengths) / sizeof(short_lengths[0]); i++) {
+        stack = xl_stack_map(short_lengths[i], xl_map_anonymous, &guard);
+        if (stack != MAP_FAILED) {
+            fprintf(stderr, "FAIL: a guest stack of %lu bytes was mapped: a length that leaves no whole page above the guard, or is not whole pages, must be refused\n",
+                    (unsigned long)short_lengths[i]);
+            fail = 1;
+        }
+    }
+    stack = xl_stack_map(2 * page, xl_map_anonymous, &guard);
+    if (stack == MAP_FAILED || guard != page) {
+        fprintf(stderr, "FAIL: the shortest guest stack, one page and its guard, was not mapped\n");
+        fail = 1;
+    } else {
+        *((volatile char *)stack + 2 * page - 1) = 1;
+        if (try_read((uintptr_t)stack + page - 1) != 1 || try_read((uintptr_t)stack + page) != 0) {
+            fprintf(stderr, "FAIL: the shortest guest stack does not fault in its guard and read above it\n");
+            fail = 1;
+        }
+        munmap(stack, 2 * page);
     }
     stack = xl_stack_map(4u << 20, refusing_mapper, &guard);
     if (stack != MAP_FAILED) {
