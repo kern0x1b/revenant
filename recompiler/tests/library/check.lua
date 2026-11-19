@@ -147,11 +147,14 @@ local FLOAT_EXPECTED = {"float.scale", "float.negative", "float.mix", "float.int
 local FIND_EXPECTED = {"find.unloaded", "find.exact", "find.unknown", "find.thread"}
 
 local function build_objc(e, corpus, o, here)
+    corpus.ios(e, {"-fuse-ld=" .. e.ld, "-O2", "-w", "-fobjc-arc", "-dynamiclib", "-install_name", "@rpath/RCSecond.dylib", "-framework", "Foundation", "-I", here,
+                   path.join(here, "second.m"), "-o", o("RCSecond.dylib")})
     corpus.ios(e, {"-fuse-ld=" .. e.ld, "-Wl,-no_objc_category_merging", "-O2", "-w", "-fobjc-arc", "-dynamiclib", "-install_name", "@rpath/RCFixture.dylib", "-framework", "Foundation", "-I", here,
-                   path.join(here, "fixture.m"), "-o", o("RCFixture.dylib")})
-    io.writefile(o("includes.h"), string.format('#include "%s"\n#include "%s"\n', path.join(e.recompiler, "include", "uikit-includes.h"), path.join(here, "RCFixture.h")))
+                   path.join(here, "fixture.m"), o("RCSecond.dylib"), "-o", o("RCFixture.dylib")})
+    io.writefile(o("includes.h"), string.format('#include "%s"\n#include "%s"\n#include "%s"\n', path.join(e.recompiler, "include", "uikit-includes.h"), path.join(here, "RCFixture.h"),
+                                                path.join(here, "RCSecond.h")))
     local install = os.getenv("XL_LIBRARY_INSTALL_NAME") == "executable" and "@executable_path/RCFixture.dylib" or nil
-    return {XL_LIBRARY = "1", XL_INSTALL_NAME = install}, {}
+    return {XL_LIBRARY = "1", XL_INSTALL_NAME = install}, {o("RCSecond.dylib")}
 end
 
 local function build_swift(e, corpus, o, here)

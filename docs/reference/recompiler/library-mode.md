@@ -647,6 +647,18 @@ library (`RCFClient`, `RCFToken`, and a category `RCFClient (RCFExtra)`; Objecti
 otherwise). The fixture is linked with `-no_objc_category_merging`: ld64 merges a category into its class when both are in
 one dylib, which leaves the category list empty and the check of the registry with nothing to prove.
 
+The fixture is two guest images: `RCFixture.dylib` links a second one, `RCSecond.dylib` (`second.m`: a protocol with a
+method and a property, and a class that adopts it), and the category's value is 42 only when the class of the second
+image is made, conforms to its protocol and answers. A library of one image cannot show where the images after the
+first lie, and that is where a translation went wrong: `translate.lua` runs `xlate` twice, once for the manifest of the
+Objective-C metadata that `xlgen` writes the host side from and once for the lift, and only the lift was told
+`--library`. In library mode the images lie one after another on 16 KiB, otherwise on 1 MiB, so the host side named
+the protocols of every later image by addresses 1 MiB apart and the lifted data by the packed ones: the fixture of one
+image linked and ran, and the first translation of the reCAPTCHA SDK with the budget (drop37, 2026-11-19, fourteen
+images) stopped at the link with 62 undefined `_xl_objc_proto_<address>_…`. Both runs now get `--library`, each
+writes where it put every image (`<name>.manifest-images.txt`, `<name>.images.txt`), and `translate.lua` stops when the
+two differ, naming the image and both ranges, before anything is linked.
+
 The host part of the check first runs the loader on the Mac (`loader.c`): `xl_loader.c` itself, compiled for the Mac with `vm_allocate`,
 `vm_deallocate`, `vm_protect`, `vm_region_recurse_64`, `dlopen` and `dlsym` replaced by a model of a 4S process (the address space below
 `0x30000000` with images up to `0x10000000`, a heap at `0x1c500000`, the main stack at `0x2fc02000`; an allocation anywhere takes the lowest

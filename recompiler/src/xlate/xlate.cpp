@@ -2704,6 +2704,9 @@ int main(int argc, char **argv) {
     if (!ResolvedOut.empty() && !WriteResolved(program)) {
       return 1;
     }
+    if (!WriteImages(program)) {
+      return 1;
+    }
     std::error_code ec;
     raw_fd_ostream os(ObjCManifest, ec);
     if (ec) {
