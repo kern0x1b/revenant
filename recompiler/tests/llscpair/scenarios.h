@@ -5,15 +5,17 @@
 
 #include "workers.h"
 
-enum { ROUNDS = 200000, CELLS = 4, MOST = 4 };
+enum { ROUNDS = 200000, PARTS = 50, CELLS = 4, MOST = 4 };
 
 struct job {
     int worker;
-    uint64_t a, b, c, d, result;
+    uint64_t a, b, c, result;
 };
 
 static unsigned failures;
-static volatile int started;
+static volatile unsigned turn, waiting, inside;
+static volatile unsigned char shared[PARTS];
+static unsigned met;
 static unsigned long long elapsed;
 
 static unsigned long long microseconds(void)
@@ -23,35 +25,74 @@ static unsigned long long microseconds(void)
     return (unsigned long long)now.tv_sec * 1000000 + (unsigned long long)now.tv_usec;
 }
 
+static void until(volatile unsigned *counter, unsigned wanted)
+{
+    while (*counter < wanted) {
+    }
+}
+
+static uint64_t part(const struct job *job)
+{
+    uint64_t rounds = ROUNDS / PARTS;
+    switch (job->worker) {
+    case PAIR_SWAP:
+        return run(job->worker, job->a, job->b, job->c, rounds);
+    case PAIR_STORE:
+        return run(job->worker, job->a, job->b, rounds, 0);
+    default:
+        return run(job->worker, job->a, rounds, 0, 0);
+    }
+}
+
 static void *job_run(void *argument)
 {
     struct job *job = argument;
-    while (!started) {
+    for (unsigned at = 0; at < PARTS; at++) {
+        __sync_fetch_and_add(&waiting, 1);
+        until(&turn, at + 1);
+        if (__sync_add_and_fetch(&inside, 1) > 1)
+            shared[at] = 1;
+        job->result += part(job);
+        __sync_fetch_and_sub(&inside, 1);
     }
-    job->result = run(job->worker, job->a, job->b, job->c, job->d);
     return NULL;
 }
 
 static void together(struct job *jobs, unsigned count)
 {
     pthread_t threads[MOST];
-    started = 0;
+    turn = waiting = inside = 0;
+    for (unsigned at = 0; at < PARTS; at++)
+        shared[at] = 0;
     for (unsigned index = 0; index < count; index++)
         pthread_create(&threads[index], NULL, job_run, &jobs[index]);
     unsigned long long from = microseconds();
-    started = 1;
+    for (unsigned at = 0; at < PARTS; at++) {
+        until(&waiting, (at + 1) * count);
+        turn = at + 1;
+    }
     for (unsigned index = 0; index < count; index++)
         pthread_join(threads[index], NULL);
     elapsed = microseconds() - from;
+    met = 0;
+    for (unsigned at = 0; at < PARTS; at++)
+        met += shared[at];
 }
 
 static void verdict(const char *name, unsigned threads, unsigned long long wrong, unsigned long long all, const char *what)
 {
+    char side[96] = "";
+    if (threads > 1)
+        snprintf(side, sizeof side, ", two threads at work at once in %u of %u parts", met, (unsigned)PARTS);
     if (wrong) {
-        printf("FAIL %s with %u threads: %llu of %llu %s (%llu us)\n", name, threads, wrong, all, what, elapsed);
+        printf("FAIL %s with %u threads: %llu of %llu %s (%llu us%s)\n", name, threads, wrong, all, what, elapsed, side);
+        failures++;
+    } else if (threads > 1 && !met) {
+        printf("APART %s with %u threads: none of %llu %s, which proves nothing: in none of %u parts were two threads at work at once (%llu us)\n", name, threads, all, what,
+               (unsigned)PARTS, elapsed);
         failures++;
     } else {
-        printf("ok %s with %u threads: none of %llu %s (%llu us)\n", name, threads, all, what, elapsed);
+        printf("ok %s with %u threads: none of %llu %s (%llu us%s)\n", name, threads, all, what, elapsed, side);
     }
 }
 
@@ -61,7 +102,7 @@ static void counted(const char *name, int worker, unsigned threads)
     struct job jobs[MOST];
     cell = 0;
     for (unsigned index = 0; index < threads; index++)
-        jobs[index] = (struct job){worker, (uintptr_t)&cell, ROUNDS, 0, 0, 0};
+        jobs[index] = (struct job){worker, (uintptr_t)&cell, 0, 0, 0};
     together(jobs, threads);
     uint64_t all = (uint64_t)threads * ROUNDS, low = (uint64_t)cell, high = (uint64_t)(cell >> 64);
     uint64_t least = low < high ? low : high;
@@ -74,7 +115,7 @@ static void counted32(unsigned threads)
     struct job jobs[MOST];
     cell[0] = cell[1] = 0;
     for (unsigned index = 0; index < threads; index++)
-        jobs[index] = (struct job){PAIR32_ADD, (uintptr_t)cell, ROUNDS, 0, 0, 0};
+        jobs[index] = (struct job){PAIR32_ADD, (uintptr_t)cell, 0, 0, 0};
     together(jobs, threads);
     uint32_t all = threads * ROUNDS, least = cell[0] < cell[1] ? cell[0] : cell[1];
     verdict("pairs.add32", threads, cell[0] > all || cell[1] > all ? all : all - least, all, "updates lost");
@@ -94,7 +135,7 @@ static void swapped(unsigned threads)
         cells[index] = token(index + 1);
     for (unsigned index = 0; index < threads; index++) {
         mine[index] = token(CELLS + index + 1);
-        jobs[index] = (struct job){PAIR_SWAP, (uintptr_t)cells, CELLS - 1, (uintptr_t)&mine[index], ROUNDS, 0};
+        jobs[index] = (struct job){PAIR_SWAP, (uintptr_t)cells, CELLS - 1, (uintptr_t)&mine[index], 0};
     }
     together(jobs, threads);
     unsigned missing = 0;
@@ -116,9 +157,9 @@ static void torn(unsigned threads)
     cell = token(0);
     for (unsigned index = 0; index < threads; index++) {
         if (index % 2)
-            jobs[index] = (struct job){PAIR_TORN, (uintptr_t)&cell, ROUNDS, 0, 0, 0};
+            jobs[index] = (struct job){PAIR_TORN, (uintptr_t)&cell, 0, 0, 0};
         else
-            jobs[index] = (struct job){PAIR_STORE, (uintptr_t)&cell, index + 1, ROUNDS, 0, 0};
+            jobs[index] = (struct job){PAIR_STORE, (uintptr_t)&cell, index + 1, 0, 0};
     }
     together(jobs, threads);
     unsigned long long wrong = 0;
@@ -148,7 +189,7 @@ static uint64_t missing(uint64_t found, uint64_t wanted)
 static int overlapping(void)
 {
     static _Alignas(16) uint64_t words[4];
-    struct job jobs[2] = {{PAIR_ADD, (uintptr_t)&words[1], ROUNDS, 0, 0, 0}, {PAIR_ADD, (uintptr_t)&words[2], ROUNDS, 0, 0, 0}};
+    struct job jobs[2] = {{PAIR_ADD, (uintptr_t)&words[1], 0, 0, 0}, {PAIR_ADD, (uintptr_t)&words[2], 0, 0, 0}};
     together(jobs, 2);
     verdict("pairs.overlap", 2, missing(words[1], ROUNDS) + missing(words[2], 2 * ROUNDS) + missing(words[3], ROUNDS), 4 * ROUNDS,
             "updates lost by two pairs that share a word");
@@ -158,7 +199,7 @@ static int overlapping(void)
 static int overlapping32(void)
 {
     static _Alignas(16) uint32_t words[4];
-    struct job jobs[2] = {{PAIR32_ADD, (uintptr_t)&words[0], ROUNDS, 0, 0, 0}, {PAIR32_ADD, (uintptr_t)&words[1], ROUNDS, 0, 0, 0}};
+    struct job jobs[2] = {{PAIR32_ADD, (uintptr_t)&words[0], 0, 0, 0}, {PAIR32_ADD, (uintptr_t)&words[1], 0, 0, 0}};
     together(jobs, 2);
     verdict("pairs.overlap32", 2, missing(words[0], ROUNDS) + missing(words[1], 2 * ROUNDS) + missing(words[2], ROUNDS), 4 * ROUNDS,
             "updates lost by two 32-bit pairs that share a word");

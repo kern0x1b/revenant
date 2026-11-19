@@ -33,17 +33,40 @@ local function count(text, pattern)
     return found
 end
 
-local function verify(corpus, text, where, names)
-    text = "\n" .. text:gsub("\r", "")
-    for _, name in ipairs(names) do
-        if not text:find("\nok " .. name, 1, true) then
-            io.write(text)
-            corpus.fail("%s did not report ok for %s", where, name)
+local function said(text, name)
+    for line in text:gmatch("[^\r\n]+") do
+        local rest = line:match("^%a+ (.*)$")
+        if rest and rest:sub(1, #name + 1) == name .. ":" then
+            return line
         end
     end
+end
+
+local function verify(corpus, text, where, names, ended)
+    local wrong, apart = {}, {}
+    for _, name in ipairs(names) do
+        local line = said(text, name)
+        if not line then
+            table.insert(wrong, "no line for " .. name)
+        elseif line:find("^APART ") then
+            table.insert(apart, line)
+        elseif not line:find("^ok ") then
+            table.insert(wrong, line)
+        end
+    end
+    if #wrong > 0 then
+        io.write(text)
+        corpus.fail("%s, which ended with %s: %s", where, ended, table.concat(wrong, "; "))
+    end
+    if #apart > 0 then
+        io.write(text)
+        corpus.fail("%s proved nothing in %d scenarios, whose threads never worked at the same time (a processor too busy, not a lost update): %s", where, #apart,
+                    table.concat(apart, "; "))
+    end
+    text = "\n" .. text:gsub("\r", "")
     if text:find("\nFAIL ", 1, true) or not text:find("\ndone\n", 1, true) then
         io.write(text)
-        corpus.fail("%s reported a failure or did not run to its end", where)
+        corpus.fail("%s ended with %s and without its last line; the last it wrote is [%s]", where, ended, text:match("\n(FAIL [^\n]*)") or text:trim():match("[^\n]*$"))
     end
 end
 
@@ -66,15 +89,15 @@ function main(out, ...)
             os.tryrm(o(name))
         end
         os.execv("cc", {"-O2", "-march=armv8-a", "-w", source, "-o", o("llscpair-mac")})
-        local native = os.iorunv(o("llscpair-mac"), {})
-        verify(corpus, native, "the program on this Mac", LINES)
+        local _, native, left = corpus.run(o("llscpair-mac"), {}, o("native.txt"))
+        verify(corpus, native, "the program on this Mac", LINES, left)
         print("ok: on the processor of this Mac no update of a pair is lost and no pair is read torn (%d scenarios)", #LINES)
 
         corpus.ios(e, {"-march=armv8-a", "-O2", "-w", "-fno-stack-protector", "-D_FORTIFY_SOURCE=0", "-o", program, source})
         corpus.ios(e, {"-march=armv8-a", "-O2", "-w", "-DWORKERS_ALONE", "-o", binary, path.join(os.scriptdir(), "workers.c")})
-        local disassembly = functions(os.iorunv("xcrun", {"otool", "-tV", binary}))
+        local disassembly = functions(corpus.output("xcrun", {"otool", "-tV", binary}, o("otool-workers.txt")))
         local cases = {}
-        for line in os.iorunv("xcrun", {"nm", binary}):gmatch("[^\n]+") do
+        for line in corpus.output("xcrun", {"nm", binary}, o("nm-workers.txt")):gmatch("[^\n]+") do
             local address, symbol = line:match("^(%x+) [Tt] _([%w_]+)$")
             if symbol and table.contains(WORKERS, symbol) then
                 local case = {symbol = symbol, guest = format("%x", tonumber(address, 16) - 0x100000000 + 0x10000000), loads = 0, stores = 0, narrow = 0, single = 0, single_stores = 0}
@@ -132,26 +155,26 @@ function main(out, ...)
         os.execv(path.join(e.llvmbin, "clang"), {"-target", "arm64-apple-macos", "-Wno-override-module", "-O2", "-c", o("out-host.bc"), "-o", o("lifted-host.o")})
         local driver = {"-O2", "-w", "-I", out, path.join(os.scriptdir(), "lifted.c"), o("lifted-host.o")}
         os.execv("cc", table.join(driver, {path.join(runtime, "pair.c"), "-o", o("lifted")}))
-        local ran, result = corpus.run(o("lifted"), {}, o("lifted.txt"))
+        local _, result, finished = corpus.run(o("lifted"), {}, o("lifted.txt"))
+        verify(corpus, result, "the lifted functions on this Mac", table.join(LINES, MONITOR), finished)
         io.write(result)
-        if not ran then
-            corpus.fail("the lifted functions, run on this Mac by two and by four threads, lost updates of a pair or read a pair torn")
-        end
-        verify(corpus, result, "the lifted functions on this Mac", table.join(LINES, MONITOR))
         local stored, failed = result:match("xlate: pair stores: (%d+) stored and (%d+) failed since the start")
         if not stored or tonumber(stored) < 4000000 or tonumber(failed) == 0 then
             corpus.fail("the run does not report its pair stores, or reports none that failed: two threads never met on a pair, so it proved nothing")
         end
         print("ok: the lifted functions, run on this Mac by two and by four threads, lost no update of a pair and read no pair torn; %s pair stores stored and %s found the pair changed", stored, failed)
 
-        for control, wanted in ipairs({{"FAIL pairs.add with 2 threads", "FAIL pairs.cas with 4 threads"}, {"FAIL pairs.add with 4 threads"}}) do
+        for control, wanted in ipairs({{"pairs.add with 2 threads", "pairs.cas with 4 threads"}, {"pairs.add with 4 threads"}}) do
             local name = "lifted-control-" .. control
             os.execv("cc", table.join(driver, {"-DCONTROL=" .. control, path.join(os.scriptdir(), "control.c"), "-o", o(name)}))
-            local passed, text = corpus.run(o(name), {}, o(name .. ".txt"))
-            for _, line in ipairs(wanted) do
-                if passed or not text:find("\n" .. line, 1, true) then
+            local passed, text, left = corpus.run(o(name), {}, o(name .. ".txt"))
+            for _, scenario in ipairs(wanted) do
+                local line = said(text, scenario)
+                if passed or not line or not line:find("^FAIL ") then
                     io.write(text)
-                    corpus.fail("the control %d (%s) did not fail with %s", control, control == 1 and "a pair store that does not compare" or "a pair store that compares and stores without the lock", line)
+                    corpus.fail("the control %d (%s) lost nothing in %s: it ended with %s and wrote [%s]", control,
+                                control == 1 and "a pair store that does not compare" or "a pair store that compares and stores without the lock", scenario, left,
+                                line or "no line for it")
                 end
             end
         end
@@ -172,15 +195,18 @@ function main(out, ...)
         end
         os.execv("cc", table.join(driver, {"-DCONTROL=3", path.join(os.scriptdir(), "control.c"), "-o", o("lifted-control-3")}))
         local shared = ended(o("lifted-control-3"), "--overlap")
-        if not shared:find("FAIL pairs.overlap with 2 threads", 1, true) then
+        local overlap = said(shared, "pairs.overlap with 2 threads")
+        if not overlap or not overlap:find("^FAIL ") then
             io.write(shared)
-            corpus.fail("the control 3 (a lock for each 16 bytes and no look at the alignment) lost no update of the word two pairs share")
+            corpus.fail("the control 3 (a lock for each 16 bytes and no look at the alignment) lost no update of the word two pairs share: it wrote [%s]",
+                        overlap or shared:trim())
         end
         for _, program in ipairs({o("llscpair-mac"), o("lifted")}) do
             local narrow = ended(program, "--overlap32")
             if narrow:find("FAIL", 1, true) or not (narrow:find("ok pairs.overlap32", 1, true) or narrow:find("exit=138", 1, true)) then
                 io.write(narrow)
-                corpus.fail("two 32-bit pairs that share a word lost an update in %s: such a pair is one exclusive of 64 bits, which stores whole or faults", program)
+                corpus.fail("two 32-bit pairs that share a word did not keep every update in %s, where such a pair is one exclusive of 64 bits, which stores whole or faults: it wrote [%s]",
+                            program, said(narrow, "pairs.overlap32 with 2 threads") or narrow:trim())
             end
         end
         print("ok: two 64-bit pairs that share a word fault on this processor and stop the lifted run (%s); the control with a lock for each 16 bytes loses updates; two 32-bit pairs that share a word lose none",
@@ -224,22 +250,22 @@ function main(out, ...)
         local clang = path.join(e.llvmbin, "clang")
         os.execv(clang, {"-target", "armv7-apple-ios6.0", "-marm", "-isysroot", e.sdk, "-O2", "-w", "-c", o("out.bc"), "-o", o("lifted-armv7.o")})
         os.execv(clang, {"-target", "armv7-apple-ios6.0", "-isysroot", e.sdk, "-O2", "-I", runtime, "-c", path.join(runtime, "pair.c"), "-o", o("pair-armv7.o")})
-        local undefined = os.iorunv("xcrun", {"nm", "-u", o("lifted-armv7.o")})
+        local undefined = corpus.output("xcrun", {"nm", "-u", o("lifted-armv7.o")}, o("nm-lifted-armv7.txt"))
         if not undefined:find("_rellume_aarch64_stxp\n", 1, true) or undefined:find("atomic", 1, true) or undefined:find("sync_", 1, true) then
             io.write(undefined)
             corpus.fail("the lifted code compiled for armv7 needs a library call for an atomic, which iOS 6 does not have, or does not call the pair store")
         end
-        local called = os.iorunv("xcrun", {"nm", "-u", o("pair-armv7.o")}):trim():gsub("%s+", " ")
+        local called = corpus.output("xcrun", {"nm", "-u", o("pair-armv7.o")}, o("nm-pair-armv7.txt")):trim():gsub("%s+", " ")
         if called ~= "_abort _thread_switch _write" then
             print(called)
             corpus.fail("the pair store imports something else than thread_switch and the write and abort of its refusal: a library call for an atomic does not exist on iOS 6")
         end
-        local armv7 = os.iorunv("xcrun", {"otool", "-tV", o("pair-armv7.o")})
+        local armv7 = corpus.output("xcrun", {"otool", "-tV", o("pair-armv7.o")}, o("otool-pair-armv7.txt"))
         if not armv7:find("\tldrex\t", 1, true) or not armv7:find("\tstrex\t", 1, true) then
             corpus.fail("the pair store compiled for armv7 does not take its lock with ldrex and strex")
         end
         local starts, waits, refusals = {}, 0, 0
-        for line in os.iorunv("xcrun", {"nm", "-n", o("pair-armv7.o")}):gmatch("[^\n]+") do
+        for line in corpus.output("xcrun", {"nm", "-n", o("pair-armv7.o")}, o("nm-pair-sorted.txt")):gmatch("[^\n]+") do
             local address, symbol = line:match("^(%x+) [Tt] (_[%w_]+)$")
             if address then
                 table.insert(starts, {tonumber(address, 16), symbol})
@@ -254,7 +280,7 @@ function main(out, ...)
             end
             return found
         end
-        for line in os.iorunv("xcrun", {"otool", "-rv", o("pair-armv7.o")}):gmatch("[^\n]+") do
+        for line in corpus.output("xcrun", {"otool", "-rv", o("pair-armv7.o")}, o("otool-pair-relocations.txt")):gmatch("[^\n]+") do
             local address, extern, target = line:match("^(%x+) True%s+long%s+(%a+)%s+T_BR%d+%s+False%s+(.+)$")
             if address then
                 local caller = inside(tonumber(address, 16))
@@ -294,7 +320,7 @@ function main(out, ...)
     if not whole then
         corpus.fail("the run on the device did not reach its three parts")
     end
-    verify(corpus, whole, "the translated program", LINES)
+    verify(corpus, whole, "the translated program", LINES, whole:match("exit=%d+") or "no exit status")
     if not whole:find("exit=0", 1, true) then
         corpus.fail("the translated program did not exit with 0")
     end

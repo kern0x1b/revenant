@@ -83,7 +83,13 @@ local function corpus_runner(host_only)
             catch { function (raised) passed, errors = false, raised end }
         }
         if not passed then
-            opt.errors = tostring(errors)
+            local text = type(errors) == "table" and (errors.errors or errors.stderr or errors.stdout) or errors
+            text = tostring(text or ""):trim()
+            if #text == 0 then
+                text = "the check raised an error with no text: a program it ran for its output ended with a failure status and wrote nothing"
+            end
+            opt.errors = text
+            print("%s: %s", opt.name, text)
         end
         return passed
     end

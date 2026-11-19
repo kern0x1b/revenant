@@ -211,10 +211,26 @@ loop lost updates.
 `workers.c` holds the loops, with no library call so that they lift alone: add (`__atomic_fetch_add` of a 128-bit
 value, both halves counting), compare-and-swap, exchange, store and load, the 32-bit pair form written in assembly
 (clang does not emit it), and five small functions for the monitor. `scenarios.h` runs them on one, two and four
-threads that start together: two counters that must reach the number of updates in both halves, tokens exchanged
-between four cells and the threads that must all be there at the end with their two halves matching, and readers
-beside writers that must never see one half of another store. `main.c` calls the loops directly and is the program
-for the phone; `lifted.c` calls the lifted functions, each thread with a state of its own.
+threads: two counters that must reach the number of updates in both halves, tokens exchanged between four cells and
+the threads that must all be there at the end with their two halves matching, and readers beside writers that must
+never see one half of another store. `main.c` calls the loops directly and is the program for the phone; `lifted.c`
+calls the lifted functions, each thread with a state of its own.
+
+The threads of a scenario are made to meet. Its 200,000 rounds a thread are cut into 50 parts of 4,000, and no thread
+begins a part before every thread has ended the part before: each counts itself in at a gate and spins there, and
+the main thread opens the gate when all are counted. A thread that enters a part while another is in it marks the
+part, and the scenario's line says in how many of the 50 parts that was so (`two threads at work at once in 47 of 50
+parts`). A scenario with more than one thread whose threads met in no part proved nothing and says so with a line
+that begins with `APART`, which the check reports as that and not as a lost update. The gate spins and never gives
+the processor up: with `sched_yield` in it the threads fell into taking turns, and 5 of 1,500 scenario runs met in no
+part.
+
+Until 2026-11-19 the threads only started together, once, and ran their 200,000 rounds in under a millisecond. On a
+Mac busy with other builds (load 20 to 40 on 12 cores) one thread was often done before the other was given a
+processor, so a control that must lose updates lost none and the check failed: 7 of 30 runs of the check alone, six
+at the third control and one at the first; the third control alone lost nothing in 65 of 200 runs and the first in
+15 of 100. With the gate, under the same load: the third control lost updates in 500 of 500 runs, the first and the
+second in 150 of 150 each, and in 5,500 scenario runs the fewest parts in which threads met was 26 of 50.
 
 The host part proves, in this order:
 
@@ -250,14 +266,21 @@ The host part proves, in this order:
    that share a word (`--overlap32`, at 0 and at 4 bytes) must lose nothing or fault, in the native program and in
    the lifted one; on this Mac both run and lose nothing.
 
+A failure of the check names what failed: the scenario with its number of threads and the whole line the program
+wrote for it (how many updates of how many were lost, the time, the parts in which threads met), and how the program
+ended. `xmake test` shows a check's message only with `--output-on-failure` and ends every failed run with
+`error: <no error object>`, whatever failed; so the runner of this group also prints the message itself, after the
+name of the check, when the check fails.
+
 The device part runs the translated `main.c` on the phone and prints `hw.ncpu` first; each line carries the time of
 its scenario, so the run with one thread is the cost of a pair store there. Then it runs `--overlap`, which must stop
 with the runtime's line, and `--overlap32`, which must lose nothing or fault. Those two have not run on the phone
 yet.
 
 **What ran on the phone.** On 2026-11-19 the device part passed on the 4S (iOS 6.1.3, `hw.ncpu` 2), all 14 scenarios
-and exit 0. Times of a scenario over its number of updates, which is the wall time of all threads together and not
-the cost of one instruction:
+and exit 0. That was the program before the gate: the program with the gate has not run on the phone, and its times
+include the waits at the gate, so they are not the numbers below. Times of a scenario over its number of updates,
+which is the wall time of all threads together and not the cost of one instruction:
 
 | Loop | 1 thread | 2 threads | 4 threads |
 |---|---:|---:|---:|
