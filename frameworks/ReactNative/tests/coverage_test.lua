@@ -64,8 +64,13 @@ function main()
     expect_pass("the checked-in data", fixture("baseline"))
 
     local stubbed = fixture("verified-stub")
+    local stubbed_swift = path.join(stubbed, "frameworks/ReactNative/src/expo/StubModules.swift")
+    io.writefile(stubbed_swift, io.readfile(stubbed_swift) .. "\npublic final class StubFakeModule: Module {\n  public func definition() -> ModuleDefinition { Name(\"ExpoFake\") }\n}\n")
+    edit_file(stubbed, "frameworks/ReactNative/src/stubs.json", function (data)
+        table.insert(data.stubs, {name = "StubFakeModule", file = "src/expo/StubModules.swift", module = "ExpoFake", owner = "expo-fake", reason = "Name only."})
+    end)
     edit_file(stubbed, "frameworks/ReactNative/src/coverage.json", function (data)
-        row(data, "expo-sqlite").verified = "phone"
+        table.insert(data.rows, {id = "expo-fake", group = "sdk", version = "", native = true, status = "stub", verified = "phone", note = "A stub row that claims a phone check."})
     end)
     expect_fail("a stub row verified on the phone", stubbed, "a stub is not a check of the module")
 

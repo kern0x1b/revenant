@@ -140,10 +140,9 @@ end
 
 local defaults = expo_packages(context({}))
 check("the default Expo packages are the real and partial ones the application has", table.contains(defaults, "expo")
-    and table.contains(defaults, "expo-font") and table.contains(defaults, "expo-clipboard") and table.contains(defaults, "expo-splash-screen") and table.contains(defaults, "expo-audio") and table.contains(defaults, "expo-image") and #defaults == 6, table.concat(defaults, ","))
+    and table.contains(defaults, "expo-font") and table.contains(defaults, "expo-clipboard") and table.contains(defaults, "expo-splash-screen") and table.contains(defaults, "expo-audio") and table.contains(defaults, "expo-image") and table.contains(defaults, "expo-sqlite") and #defaults == 7, table.concat(defaults, ","))
 
-check("the default Expo packages leave out stubs, js-only packages and the core even when the application has them", not table.contains(defaults, "expo-sqlite")
-    and not table.contains(defaults, "expo-router") and not table.contains(defaults, "expo-modules-core"), table.concat(defaults, ","))
+check("the default Expo packages leave out js-only packages and the core even when the application has them", not table.contains(defaults, "expo-router") and not table.contains(defaults, "expo-modules-core"), table.concat(defaults, ","))
 
 local absent = fresh("expo-absent")
 os.mkdir(path.join(absent, "ref", "node_modules", "expo"))
@@ -155,8 +154,8 @@ local parity = expo_packages(context({real = "expo-audio,expo-image"}))
 check("--real replaces the default with the parity list on top of the base", table.contains(parity, "expo-audio") and table.contains(parity, "expo-image")
     and table.contains(parity, "expo-asset") and not table.contains(parity, "expo-camera"), table.concat(parity, ","))
 
-check("expo_real marks the packages that the mode builds as real", expo_real(context({}))["expo-font"] and not expo_real(context({}))["expo-sqlite"]
-    and expo_real(context({real = "expo-sqlite"}))["expo-sqlite"])
+check("expo_real marks the packages that the mode builds as real", expo_real(context({}))["expo-font"] and expo_real(context({}))["expo-sqlite"]
+    and not expo_real(context({}))["expo-router"] and expo_real(context({real = "expo-audio"}))["expo-audio"])
 
 local xmake_base = {}
 for name in (io.readfile(path.join(os.scriptdir(), "..", "src", "expo", "xmake.lua")):match("local EXPO_PARITY_BASE = (%b{})") or ""):gmatch('"([^"]+)"') do

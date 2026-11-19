@@ -783,9 +783,9 @@
    "group": "sdk",
    "version": "~57.0.4",
    "native": true,
-   "status": "stub",
-   "verified": "none",
-   "note": "Patched package for iOS 6 (packages/e/expo-sqlite, one patch): it removes SQLiteModuleLibSQL.swift, which imports the libsql module this build does not provide. The default build uses the vendored SQLite 3.50.3 amalgamation (vendor/sqlite3/sqlite3.c); the optional libSQL mode (expo.sqlite.useLibSQL) is not part of this. When expo-sqlite is real, expo-app-modules defines the SQLite macros in its bridging header and adds the amalgamation. An isolated RNHost copy links with expo-sqlite real (with expo-image-picker) on the current main digest and passes the packaging and import checks, but the default host still carries StubSQLiteModule, so the row stays stub with verified none until the default host takes the real module. On the iPhone 4S, in the isolated host copy, openDatabaseAsync, execAsync and getFirstAsync ran against the real module and returned the inserted sum; that run does not change this row, which describes the default host."
+   "status": "real",
+   "verified": "build",
+   "note": "Patched package for iOS 6 (packages/e/expo-sqlite, one patch): it removes SQLiteModuleLibSQL.swift, which imports the libsql module this build does not provide. The default build uses the vendored SQLite 3.50.3 amalgamation (vendor/sqlite3/sqlite3.c); the optional libSQL mode (expo.sqlite.useLibSQL) is not part of this. When expo-sqlite is real, expo-app-modules defines the SQLite macros in its bridging header and adds the amalgamation. The module is real in the default host: StubSQLiteModule is gone. Isolated RNHost builds with expo-sqlite real compile, link and pass the packaging and import checks, and on the iPhone 4S, in an isolated host copy, openDatabaseAsync, execAsync and getFirstAsync ran against the real module and returned the inserted sum. The default host itself has not been run on the phone since the stub was removed, so the row is build, not phone."
   },
   {
    "id": "expo-status-bar",

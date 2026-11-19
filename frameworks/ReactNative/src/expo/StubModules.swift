@@ -8,6 +8,3 @@ enum StubReport {
   }
 }
 
-public final class StubSQLiteModule: Module {
-  public func definition() -> ModuleDefinition { Name("ExpoSQLite") }
-}

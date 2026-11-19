@@ -1,11 +1,3 @@
 {
-  "stubs": [
-    {
-      "name": "StubSQLiteModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoSQLite",
-      "owner": "expo-sqlite",
-      "reason": "Name only."
-    }
-  ]
+  "stubs": []
 }

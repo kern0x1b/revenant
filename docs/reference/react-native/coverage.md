@@ -6,10 +6,10 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 
 | Status | Meaning | Count |
 | --- | --- | --- |
-| real | built from the module's own sources, with no stub and no substitute | 51 |
+| real | built from the module's own sources, with no stub and no substitute | 52 |
 | partial | built and running, with a named part left out or rewritten | 30 |
 | js | no native code of its own, so it runs with the bundle | 12 |
-| stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 1 |
+| stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 0 |
 | missing | native code that is not built yet | 23 |
 | evaluate | not attempted; the note says what iOS 6 offers | 25 |
 | impossible | the system service does not exist before the iOS release the note names | 7 |
@@ -147,7 +147,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-sms | ~57.0.2 | yes | real | build | Recipe packages/e/expo-sms (npm 57.0.2, patch sms-ios6.patch) installs and its patch applies; compiled into the host alongside expo-mail-composer (links, not exercised on the phone). The patch drops the unused iOS 14 UniformTypeIdentifiers import and guards the iOS 7 MMS attachments, so a request with attachments rejects with an exception that names iOS 7. MFMessageComposeViewController.canSendText and the compose sheet are MessageUI APIs present on iOS 6. |
 | expo-speech | ~57.0.3 | yes | missing | none | AVSpeechSynthesizer is iOS 7 and absent from the iOS 6.1.3 cache. The AVFoundation backport speaks through VoiceServices, whose VSSpeechSynthesizer is present in the cache. Not built. |
 | expo-splash-screen | ~57.0.10 | yes | real | build | Built from its recipe install on the isolated host, unpatched (packages/e/expo-splash-screen, 57.0.10; the patch that changed its React import was removed because upstream's internal import agrees with the module since 29b13755f). The host's react.modulemap lists RCTSurfaceHostingProxyRootView.h and RCTSurfaceHostingView.h. Not exercised on the phone. |
-| expo-sqlite | ~57.0.4 | yes | stub | none | Patched package for iOS 6 (packages/e/expo-sqlite, one patch): it removes SQLiteModuleLibSQL.swift, which imports the libsql module this build does not provide. The default build uses the vendored SQLite 3.50.3 amalgamation (vendor/sqlite3/sqlite3.c); the optional libSQL mode (expo.sqlite.useLibSQL) is not part of this. When expo-sqlite is real, expo-app-modules defines the SQLite macros in its bridging header and adds the amalgamation. An isolated RNHost copy links with expo-sqlite real (with expo-image-picker) on the current main digest and passes the packaging and import checks, but the default host still carries StubSQLiteModule, so the row stays stub with verified none until the default host takes the real module. On the iPhone 4S, in the isolated host copy, openDatabaseAsync, execAsync and getFirstAsync ran against the real module and returned the inserted sum; that run does not change this row, which describes the default host. |
+| expo-sqlite | ~57.0.4 | yes | real | build | Patched package for iOS 6 (packages/e/expo-sqlite, one patch): it removes SQLiteModuleLibSQL.swift, which imports the libsql module this build does not provide. The default build uses the vendored SQLite 3.50.3 amalgamation (vendor/sqlite3/sqlite3.c); the optional libSQL mode (expo.sqlite.useLibSQL) is not part of this. When expo-sqlite is real, expo-app-modules defines the SQLite macros in its bridging header and adds the amalgamation. The module is real in the default host: StubSQLiteModule is gone. Isolated RNHost builds with expo-sqlite real compile, link and pass the packaging and import checks, and on the iPhone 4S, in an isolated host copy, openDatabaseAsync, execAsync and getFirstAsync ran against the real module and returned the inserted sum. The default host itself has not been run on the phone since the stub was removed, so the row is build, not phone. |
 | expo-status-bar | ~57.0.1 | no | js | phone | Uses the core StatusBar. |
 | expo-store-review | ~57.0.3 | yes | real | phone | Recipe packages/e/expo-store-review (npm 57.0.3, patch store-review-ios6.patch) installs and its patch applies; compiled into the host (links, not yet exercised on the phone). SKStoreReviewController (iOS 10.3) and window scenes (iOS 13) are removed: isAvailableAsync answers false, there is no native requestReview, so the module's JavaScript opens the store page by URL. On the iPhone 4S (2026-11-16) isAvailableAsync returned false. |
 | expo-symbols | ~57.0.3 | yes | missing | none | Swift only (4 files); the symbol set is undecided: SF Symbols do not exist before iOS 13. Not compiled. |
@@ -199,4 +199,3 @@ What the build stands in with for a module it does not build. Each is listed in 
 
 | Stub | Module | File | Owner | Reason |
 | --- | --- | --- | --- | --- |
-| StubSQLiteModule | ExpoSQLite | src/expo/StubModules.swift | expo-sqlite | Name only. |

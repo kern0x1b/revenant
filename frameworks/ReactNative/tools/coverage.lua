@@ -161,6 +161,12 @@ local function stub_problems(data, registry, root)
             table.insert(problems, "stubs.json: " .. stub.name .. " is not in " .. stub.file)
         end
     end
+    for file in pairs(DECLARED) do
+        -- a file that declares stubs is read even when stubs.json lists none of them
+        if not texts[file] then
+            texts[file] = source(root, file)
+        end
+    end
     for file, text in pairs(texts) do
         local rule = DECLARED[file]
         if not rule then
