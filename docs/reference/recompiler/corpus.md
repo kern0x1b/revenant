@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, switchtail, tailcalls, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, llscpair, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, rebasetag, flagflow, hostbridges, checkapi, proxytable, sharedtable, statsthreads, systemclasses and dropkey; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, llscpair, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, rebasetag, flagflow, hostbridges, checkapi, proxytable, sharedtable, statsthreads, systemclasses, dropkey and sjljorder; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions`, `libexceptions`, `libcxxexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -1476,3 +1476,20 @@ It compiles `repro.ll` with the outliner, writes the assembly to `<out>/repro.s`
 and restored by at each call. It prints the compiler's version and either that the amounts still differ, or that they
 agree and the outliner can be tried again (the flags above, then the `hostbridges` and `libexceptions` checks on the
 phone). It is not in the corpus's test list, because both of its answers are a pass.
+
+### sjljorder
+
+Proves that the compiler gives the same object for the same bitcode, for the armv7 iOS 6 target whose exceptions are
+SjLj. LLVM's SjLj preparation put the phis of each landing pad into a pointer set and demoted them to the stack in the
+set's order, which is the order of their addresses once there are more than eight of them; the order is the order of the
+stack slots, so a function with such a landing pad came out with another frame, and another object, from run to run
+(see "The lift is deterministic" in [how it works](../../explanation/recompiler/how-it-works.md)). The llvm package
+carries `packages/l/llvm/patches/llvm-sjlj-demote-phis-in-block-order.patch`, which demotes them in block order.
+
+`recompiler/tests/sjljorder/check.lua` writes one function: two chains of two invokes each, every invoke after twelve
+opaque values, and one landing pad per chain whose twelve phis take those values from its two invokes. It compiles it
+once to optimized IR and requires that the phis are still there (otherwise it no longer reaches the pass), then compiles
+it six times for `armv7-apple-ios6.0` with `-O2 -mthumb`, the flags of the lifted code, and requires one object hash.
+On a compiler without the patch six compiles gave six different objects (2026-11-19, LLVM 23.1.3); the same function
+compiled with the order fixed by a stand-in gave one. The failure message names the patch. The check runs in
+`recompiler_corpus`, so a package that loses the patch stops it.
