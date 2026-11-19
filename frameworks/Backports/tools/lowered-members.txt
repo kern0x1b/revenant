@@ -215,6 +215,7 @@ class AVPlayerItemVideoOutput
 class AVPlayerLooper
 class AVPlayerMediaSelectionCriteria
 class AVPlayerViewController
+class AVRoutePickerView
 class AVSampleBufferAudioRenderer
 class AVSampleBufferRenderSynchronizer
 class AVSpeechSynthesisVoice
@@ -4009,6 +4010,7 @@ enum UIImageDynamicRangeConstrainedHigh
 enum UIImageDynamicRangeHigh
 enum UIImageDynamicRangeStandard
 enum UIImageDynamicRangeUnspecified
+enum UIImageRenderingModeAlwaysOriginal
 enum UIImageRenderingModeAlwaysTemplate
 enum UIImageRenderingModeAutomatic
 enum UIImageSymbolScaleLarge
@@ -6368,7 +6370,9 @@ function revenant_status_bar_overlap
 function revenant_swipe_class_is_backport
 function revenant_swipe_width
 function revenant_symbol_bitmap
+function revenant_symbol_color_index
 function revenant_symbol_known
+function revenant_symbol_layer_alpha
 function revenant_symbol_metrics
 function revenant_system_colour
 function revenant_tag_carries
@@ -13289,6 +13293,16 @@ member AVPlayerViewController -videoBounds
 member AVPlayerViewController -videoGravity
 member AVPlayerViewController -viewDidLayoutSubviews
 member AVPlayerViewController -viewWillAppear:
+member AVRoutePickerView -activeTintColor
+member AVRoutePickerView -dealloc
+member AVRoutePickerView -delegate
+member AVRoutePickerView -initWithFrame:
+member AVRoutePickerView -layoutSubviews
+member AVRoutePickerView -prioritizesVideoDevices
+member AVRoutePickerView -revenant_beginPresentation:
+member AVRoutePickerView -revenant_endPresentation:
+member AVRoutePickerView -revenant_routeButtonInView:expected:
+member AVRoutePickerView -setActiveTintColor:
 member AVSampleBufferAudioRenderer -audioTimePitchAlgorithm
 member AVSampleBufferAudioRenderer -dealloc
 member AVSampleBufferAudioRenderer -enqueueSampleBuffer:
@@ -13347,6 +13361,7 @@ member AVSpeechSynthesisVoice +voiceWithLanguage:
 member AVSpeechSynthesisVoice -encodeWithCoder:
 member AVSpeechSynthesisVoice -identifier
 member AVSpeechSynthesisVoice -initWithCoder:
+member AVSpeechSynthesisVoice -initWithIdentifier:
 member AVSpeechSynthesisVoice -language
 member AVSpeechSynthesisVoice -name
 member AVSpeechSynthesisVoice -quality
@@ -32769,8 +32784,12 @@ member UIImageReaderConfiguration -preferredThumbnailSize
 member UIImageReaderConfiguration -preparesImagesForDisplay
 member UIImageReaderConfiguration -setPreferredThumbnailSize:
 member UIImageReaderConfiguration -setPreparesImagesForDisplay:
+member UIImageSymbolConfiguration +configurationPreferringMonochrome
+member UIImageSymbolConfiguration +configurationPreferringMulticolor
 member UIImageSymbolConfiguration +configurationWithFont:
 member UIImageSymbolConfiguration +configurationWithFont:scale:
+member UIImageSymbolConfiguration +configurationWithHierarchicalColor:
+member UIImageSymbolConfiguration +configurationWithPaletteColors:
 member UIImageSymbolConfiguration +configurationWithPointSize:
 member UIImageSymbolConfiguration +configurationWithPointSize:weight:
 member UIImageSymbolConfiguration +configurationWithPointSize:weight:scale:
@@ -32779,6 +32798,7 @@ member UIImageSymbolConfiguration +configurationWithTextStyle:
 member UIImageSymbolConfiguration +configurationWithTextStyle:scale:
 member UIImageSymbolConfiguration +configurationWithWeight:
 member UIImageSymbolConfiguration +revenant_configurationWithPointSize:hasPointSize:weight:scale:textStyle:
+member UIImageSymbolConfiguration +revenant_configurationWithRendering:colors:
 member UIImageSymbolConfiguration +supportsSecureCoding
 member UIImageSymbolConfiguration +unspecifiedConfiguration
 member UIImageSymbolConfiguration -configurationByApplyingConfiguration:
@@ -32795,7 +32815,9 @@ member UIImageSymbolConfiguration -isEqualToConfiguration:
 member UIImageSymbolConfiguration -revenant_applyFieldsOfConfiguration:
 member UIImageSymbolConfiguration -revenant_fieldDescriptions
 member UIImageSymbolConfiguration -revenant_isUnspecified
+member UIImageSymbolConfiguration -revenant_symbolColors
 member UIImageSymbolConfiguration -revenant_symbolPointSize
+member UIImageSymbolConfiguration -revenant_symbolRendering
 member UIImageSymbolConfiguration -revenant_symbolScale
 member UIImageSymbolConfiguration -revenant_symbolWeight
 member UIImageView +load
@@ -36392,6 +36414,7 @@ protocol AVPictureInPictureControllerDelegate
 protocol AVPlaybackCoordinatorPlaybackControlDelegate
 protocol AVPlayerViewControllerDelegate
 protocol AVQueuedSampleBufferRendering
+protocol AVRoutePickerViewDelegate
 protocol AVVideoCompositionInstruction
 protocol AVVideoCompositionValidationHandling
 protocol AXChart
