@@ -851,7 +851,7 @@ else
                                   vfs = "lowered_vfs_test.lua", modules = "lowered_modules_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua", sec_access_control = "security_access_control_test.lua", sec_shared_web = "security_shared_web_test.lua", sec_items = "security_item_test.lua", sec_keys = "security_key_test.lua", la_passcode = "localauth_passcode_test.lua", air2es = "air2es_test.lua",
                                   webkitvalues = "webkit_values_test.lua", webkitmessage = "webkit_script_message_test.lua", webkittiling = "webkit_tiling_test.lua",
                                   webkitwindow = "webkit_window_test.lua", webkitdownload = "webkit_download_test.lua", webkithistoryplan = "webkit_history_plan_test.lua",
-                                  clock = "clock_uptime_test.lua", coretelephony = "coretelephony_test.lua", swiftflags = "swift_flags_test.lua", reparent = "reparent_test.lua"})
+                                  clock = "clock_uptime_test.lua", coretelephony = "coretelephony_test.lua", swiftflags = "swift_flags_test.lua", reparent = "reparent_test.lua", typing_oracle = "uitextview_typing_oracle_test.lua"})
 end
 
 option("backports_libs", {type = "string", default = "", showmenu = true,
@@ -940,6 +940,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         add_tests("alias_system_class")
         add_tests("cf_mutable_cast")
         add_tests("gesture_failure")
+        add_tests("uitextview_typing_attributes")
         add_tests("caspring_animation_cast")
         add_tests("caspring_animation_coding")
         add_tests("protocol_uimutabletraits")
