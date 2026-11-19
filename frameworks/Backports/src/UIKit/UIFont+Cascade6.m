@@ -4,11 +4,6 @@
 #import <malloc/malloc.h>
 #include "../revenant_font_cascade.h"
 
-// The CTFont a UICFFont holds sits at offset 0x30 of the object (GraphicsServices' GSFontGetCTFont reads it there).
-// That is a layout of iOS 6.1.3, read from the process and not declared anywhere, so the slot is written only for
-// an instance of exactly the class and sizes measured there (class UICFFont, class_getInstanceSize 4, so the object
-// is a UIFont whose storage GraphicsServices allocates itself, malloc_size 64); any other build leaves the font as
-// the system made it.
 static const size_t revenant_gs_font_core_text_offset = 0x30;
 static const size_t revenant_gs_font_instance_size = 4;
 static const size_t revenant_gs_font_allocation_size = 64;

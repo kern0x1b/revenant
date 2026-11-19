@@ -316,8 +316,6 @@ static void child(const char *variant)
             }
         }
         for (int mode = 0; mode < 3; mode++) {
-            // The UIFont pass runs twice over the same sizes: the first fills UIKit's own font cache, the second must
-            // grow nothing, so what the second pass leaves is what the backport leaves.
             for (int pass = 0; pass < (mode == 2 ? 2 : 1); pass++) {
                 const char *label = mode == 0 ? "stock" : mode == 1 ? "backport" : pass == 0 ? "uifont" : "uifont-again";
                 malloc_statistics_t before, after;
@@ -467,8 +465,6 @@ REVENANT_CASE(coretext_fallback_cascade)
         revenant_expect_true([NSString stringWithFormat:@"1000 fonts from %@ creators leave no more heap behind than the system's (%.0f bytes, %.0f blocks; system %.0f bytes)", mode, bytes, blocks, stockBytes],
                              (bytes <= stockBytes + 16384.0) != flip, [NSString stringWithFormat:@"%.0f bytes", bytes]);
     }
-    // UIKit keeps each UIFont of a new size (about 195 bytes each measured without the swap) and the UIFont holds the
-    // cascaded CTFont (about 350 bytes more each): 547344 bytes for the 1000 of the first pass.
     revenant_expect_true(@"1000 UIFonts of new sizes leave a bounded heap behind (the UIFonts UIKit keeps and the cascaded CTFont each holds)",
                          (value_of(results, @"leak.uifont-bytes") < 786432.0) != flip, results[@"leak.uifont-bytes"]);
     NSMutableArray *differences = [NSMutableArray array];
