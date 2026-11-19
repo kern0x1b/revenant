@@ -123,8 +123,9 @@ The class is the device's own `CASpringAnimation`, which iOS 6.1.3 has with `mas
 binds the device's class and finds the added members on it.
 
 `copyWithZone:`, `encodeWithCoder:` and `initWithCoder:` are replaced with `class_replaceMethod` on `CASpringAnimation`
-only, and only when the class itself implements the selector. The replacements call the implementation they found and
-add `allowsOverdamping`. `CABasicAnimation`, `CAKeyframeAnimation` and `CAAnimationGroup` keep their own methods; the
+only. When the class does not implement a selector itself, `class_replaceMethod` adds the override to
+`CASpringAnimation` and the implementation it found, the inherited `CAAnimation` one, becomes the previous one that the
+replacement calls; the superclass is not touched. The replacements call that implementation and add `allowsOverdamping`. `CABasicAnimation`, `CAKeyframeAnimation` and `CAAnimationGroup` keep their own methods; the
 runtime case `caspring_animation_coding` copies and archives each of them and a spring and measures that.
 
 The host build, which has no device class, compiles `RevenantCASpringAnimation` for the comparison test.
