@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdint.h>
 
 struct xl_stacks_count {
     unsigned live;
@@ -83,4 +84,29 @@ static inline size_t xl_budget_line(char *line, size_t size, const struct xl_bud
     at = xl_line_text(line, at, size, " of ");
     at = xl_line_number(line, at, size, count->aliases_size >> 10);
     return xl_line_text(line, at, size, " KiB (0 of 0 is not set up yet)\n");
+}
+
+struct xl_pair_count {
+    uint32_t stored, failed, waited, yielded, held;
+};
+
+static inline size_t xl_pair_line(char *line, size_t size, const struct xl_pair_count *all, const struct xl_pair_count *before)
+{
+    size_t at = xl_line_text(line, 0, size, "xlate: pair stores: ");
+    if (before) {
+        at = xl_line_number(line, at, size, (uint32_t)(all->stored - before->stored));
+        at = xl_line_text(line, at, size, " stored and ");
+        at = xl_line_number(line, at, size, (uint32_t)(all->failed - before->failed));
+        at = xl_line_text(line, at, size, " failed in this window, ");
+    }
+    at = xl_line_number(line, at, size, all->stored);
+    at = xl_line_text(line, at, size, " stored and ");
+    at = xl_line_number(line, at, size, all->failed);
+    at = xl_line_text(line, at, size, " failed since the start (a failed one found the pair changed after its load); ");
+    at = xl_line_number(line, at, size, all->waited);
+    at = xl_line_text(line, at, size, " waited for a lock and gave up the processor ");
+    at = xl_line_number(line, at, size, all->yielded);
+    at = xl_line_text(line, at, size, " times; ");
+    at = xl_line_number(line, at, size, all->held);
+    return xl_line_text(line, at, size, " of 64 locks held now\n");
 }

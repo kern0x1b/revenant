@@ -667,11 +667,12 @@ function translate(input, includes, out, images, opt)
     run(clang, table.join(host, {"-I", out, "-I", runtime, "-I", path.join(lab, "include")}, extra_cflags, {"-c", path.join(runtime, "runtime.c"), "-o", o("runtime.o")}))
     run(clang, table.join(host, extra_cflags, {"-c", path.join(runtime, "crypto.c"), "-o", o("crypto.o")}))
     run(clang, table.join(host, extra_cflags, {"-c", path.join(runtime, "half.c"), "-o", o("half.o")}))
+    run(clang, table.join(host, {"-I", runtime}, extra_cflags, {"-c", path.join(runtime, "pair.c"), "-o", o("pair.o")}))
     if library then
         run(clang, table.join(host, {"-I", out, "-I", runtime, "-I", path.join(lab, "include")}, extra_cflags, {"-c", path.join(runtime, "library.c"), "-o", o("library.o")}))
         writelines(o("exports.txt"), table.join({"_xl_library_init", "_xl_library_diagnostics", "_xl_library_class"}, readlines(o("registry-exports.txt"))))
     end
-    local runtime_objects = {o("runtime.o"), o("crypto.o"), o("half.o")}
+    local runtime_objects = {o("runtime.o"), o("crypto.o"), o("half.o"), o("pair.o")}
     for _, source in ipairs({path.join(runtime, "bridge.m"), path.join(runtime, "objc_bridge.m"), path.join(runtime, "swift_classes.m"),
                              path.join(runtime, "proxy.m"), path.join(runtime, "journal.m"), path.join(runtime, "alignment.m"), path.join(runtime, "objc_compat.m"), path.join(runtime, "sysctl_bridge.m"), o("host.m")}) do
         local object = o(path.basename(source) .. ".o")

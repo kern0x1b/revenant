@@ -535,6 +535,10 @@ function main(out, ...)
         io.write(counted)
         corpus.fail("a launch with XL_STATS=1 that stays for a window of the statistics has no line of the guest stacks, or one without a live stack of a thread's size")
     end
+    if not counted:find("\nxlate: pair stores: %d+ stored and %d+ failed in this window, %d+ stored and %d+ failed since the start [^\n]*; 0 of 64 locks held now\n") then
+        io.write(counted)
+        corpus.fail("a launch with XL_STATS=1 that stays for a window of the statistics has no line of the pair stores, or one with a lock held while nothing stores")
+    end
     if arena_touched and tonumber(arena_touched) ~= marked then
         io.write(counted)
         corpus.fail("the host wrote one byte at 0x%x, in the middle of an arena nothing else writes to, and the budget line counts %s KiB of the arena as touched, not %d: the line a drop's arena is sized from does not measure",
@@ -561,6 +565,10 @@ function main(out, ...)
         corpus.fail("the host that aborts did not reach the crash handler of the runtime")
     end
     local function crash_budget(text, what)
+        if not text:find("\nxlate: pair stores: %d+ stored and %d+ failed since the start [^\n]*; 0 of 64 locks held now\n") then
+            io.write(text)
+            corpus.fail("%s: the crash report has no line of the pair stores, or one with a lock held in a crash that is not inside a pair store", what)
+        end
         local live, mapped = text:match("\nxlate: guest stacks: (%d+) live, (%d+) KiB mapped; the deepest live one has used %d+ KiB of %d+ KiB, the deepest ever %d+ KiB\n")
         local size, slots = text:match("\nxlate: budget: metadata arena %d+ of (%d+) KiB touched, opaque words %d+ of (%d+), aliases %d+ of %d+ KiB")
         if not live or tonumber(live) < 1 or tonumber(mapped) < 512 or not size or tonumber(size) ~= guest.arena // 1024 or tonumber(slots) ~= guest.word_slots then

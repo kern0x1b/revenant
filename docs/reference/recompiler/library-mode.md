@@ -1142,6 +1142,10 @@ ran translated code) require both lines with the header's arena and word count; 
 `printf` text of the window in `tsdguard`, the not-read forms and a line cut short included. The held lock itself is
 not reached by any launch: nothing outside the runtime can hold it.
 
+A third line follows the two in both places, `xlate: pair stores: …` ("Pair exclusives" below). The window launch
+and the crash launches of the fixture's check require it with `0 of 64 locks held now`; the Objective-C fixture has
+no pair exclusive, so its counts are 0 there, and what moves them is `llscpair`.
+
 The sizes of the two tables are an option of the translation (`XL_WORD_SLOTS`, `XL_ALIAS_ARENA`), not a change of
 the runtime, and the rule a drop states them by is: 64 times the highest use that any window or crash line of the last
 acceptance run printed, the words rounded up to a power of two and never under the format's least (2,048), the aliases
@@ -1196,7 +1200,93 @@ Two things would take more off and are not built:
   file that is not a Mach-O in `Frameworks/`, which the app's signing and the drop's manifest have to carry. Giving the
   segment back after the attach instead (`vm_deallocate` of a range dyld still lists for the image) keeps two files, and
   leaves a hole inside an image that `dladdr` and a crash reporter would still name as the library.
-- **The lifted code nothing runs.** See the next section.
+- **The lifted code nothing runs.** See "Dead-strip and lazy loading".
+
+## Pair exclusives (`LDXP` and `STXP`)
+
+clang compiles a 16-byte atomic for arm64 to a loop of a load-pair and a store-pair: `ldxp`, change, `stxp`, again
+when the status is not 0. Its 128-bit atomic load is `ldxp`, `stxp` of the same two words, again; its atomic store is
+an `ldxp` into the zero register and an `stxp`. Until 2026-11-19 the lifter turned `LDXP` into a plain load and `STXP`
+into a plain store that answered 0, because a 128-bit `cmpxchg` has no armv7 lowering. Every such loop of two threads
+on one pair could lose an update.
+
+**Where the guest has them.** In the 14 images of a drop of the reCAPTCHA SDK only two have pair exclusives
+(`otool -tV` of each, every exclusive listed by function with the instruction that made its address):
+
+| Image | Load-pairs | Store-pairs | What they change |
+|---|---:|---:|---|
+| `libswift_Concurrency` | 109 | 157 | the status of a task (16 bytes at task+0x60) and of a default actor (16 bytes at actor+0x20), in 56 functions |
+| `libswiftCore` | 138 | 197 | the reference counts of a side table (16 bytes at entry+0x10), the pool of the metadata allocator and two caches of `findBridgeWitness` (three globals), in 53 functions |
+
+The SDK itself, `libc++`, `libc++abi` and the other overlays have single-word exclusives only (the SDK 87 pairs of
+them), and no image has `CASP` or an LSE atomic. Nothing else writes those 16-byte fields while they are shared: the
+single-word exclusives of the two runtimes are on other fields (a group's status and queue, a future's wait queue,
+an object's own count at object+8, `__SwiftValue`, `_stdlib_AtomicInt`), and the plain stores at the same offsets are
+the task group's ready queue under its own lock, async frames, and two objects that were allocated a few instructions
+earlier (a job, a side-table entry) and are not shared yet. That is what lets the pair forms have a lock of their
+own: had a single-word exclusive written one of those fields, it would have had to take the same lock. The method
+resolves an address by the last instruction that defined its register and by reading the rest; it is not a proof
+over all pointer arithmetic, and it says nothing of the host side, where no code is known to write these fields.
+
+**How they are lifted** (rellume patch 0014, `src/runtime/pair.c`).
+
+- `LDXP` loads both words atomically and records them and the address in the monitor of the thread
+  (`EXCL_ADDR`, `EXCL_VAL`, `EXCL_VAL2` at the end of the state). It records what memory held, also when a register
+  is the zero register. The address is recorded with its lowest bit set: an exclusive access is aligned, so the bit
+  is free, and a single-word `STXR` never matches the monitor of a load-pair, nor an `STXP` the monitor of an `LDXR`.
+  The load takes no lock: the architecture does not promise that a load-pair alone reads both words of one store,
+  only that the store-pair after it fails when they were not.
+- `STXP` calls `rellume_aarch64_stxp(address, armed, the two recorded words, the two new words)`. Not armed (no
+  load-pair before it, another address, the monitor cleared by `CLREX` or by an exclusive store) answers 1 and reads
+  nothing. Armed, it takes the lock of the address, compares both words in memory with the recorded ones, stores both
+  when they are the same and answers 0, answers 1 when they are not. The monitor is cleared either way.
+- The pair forms of 32-bit registers are 64 bits wide and lift as the 64-bit `LDXR` and `STXR` do, one atomic load
+  and one `cmpxchg`, with no lock. No image of the drop has them.
+
+Like the single-word forms this is a comparison of values: a store succeeds when the pair was changed and changed
+back in between, which a processor refuses. The loops compilers emit tolerate it.
+
+**The lock.** 64 locks in the library's own data, chosen by the address (`(address >> 4 ^ address >> 10) & 63`), each
+a word taken with `ldrex` and `strex`. A thread that finds its lock taken spins, and after 1,000 tries gives up the
+processor with `thread_switch` and a lowered priority for a millisecond, which is what the system's `OSSpinLock`
+does: on two cores a holder that was switched out is not waited for by burning the other core. It is not a
+`pthread_mutex`, because a contended one is handed over in the kernel on iOS 6 ("Two threads that send at once"), and
+it is not `OSSpinLock` itself, so that the report can say whether a lock is held.
+
+The rule of the lock is that nothing can keep it: the held section is two loads, a comparison, two stores and four
+counters, with no call (the check requires that `pair.c` calls nothing but `thread_switch`, which it calls while it
+waits and holds nothing). What can happen inside is a fault, when the guest's address cannot be read or written. Then
+the fault is taken with the lock held, the crash handler reports, and the process ends: the handler does not take
+the locks (it reads the counters and the lock words as they are, and says how many are held), and no path goes back
+to guest code: the runtime installs no guest signal handler (`signal` with a guest function answers
+`not installed`), the images of the drop import neither `sigaction` nor `signal`, `pthread_kill`, `pthread_cancel`,
+`pthread_exit` or `longjmp` (`nm -u` of each), and both handlers of the runtime (`xl-crash`, and the journal's under
+`xl-poolcheck`) end in the default action of the signal. A thread ends by returning from guest code, outside the
+section. The thread of `xl-stats` suspends threads to sample them and runs no guest code, so it never asks for one
+of these locks. A change that lets a fault return to guest code (a guest signal handler, a caught fault) has to
+release the lock on that path first. `llscpair --fault` is the check: a pair
+store into a page that cannot be written reaches a signal handler that prints the line below with
+`1 of 64 locks held now`.
+
+**The line.** Next to the two budget lines, in every window of `xl-stats` and in the crash report:
+
+`xlate: pair stores: S stored and F failed in this window, S stored and F failed since the start (a failed one found
+the pair changed after its load); W waited for a lock and gave up the processor Y times; H of 64 locks held now`
+
+(the crash report has no window part). `F` is the number that matters on the phone: a failed store is a store-pair
+whose pair another thread had changed since the load-pair, which is exactly the case in which the lifter of before
+wrote over the other thread's update. `W` counts stores that found their lock taken, `Y` the times such a store gave
+up the processor. The counters are 32 bits in the lock's own line of memory, changed under the lock, and read
+without it. `H` other than 0 in a crash report says the crash is inside a pair store.
+
+**What it costs and what ran.** On this Mac the lifted loops of `llscpair` (6.6 million pair stores on one, two and
+four threads) lose nothing, and a pair update alone costs 6.5 ns. On the phone nothing of this has run yet: the cost
+of a pair store there is expected near the 83 to 106 ns that `OSSpinLock` measured in "Two threads that send at once"
+plus the call, and the device part of `llscpair` prints it (the run with one thread). The crash of `rb-release21-1`
+(drop37, one launch in four: a `String` whose object word was two small integers, in a part of an async function
+that ran on a frame another part had finished with) is what a lost update of a task's status would give. That is a
+hypothesis: nothing reproduced the crash, and the count of failed pair stores in the windows of a run on the phone
+is the first evidence of how often two threads meet on a pair there.
 
 ## Dead-strip and lazy loading
 

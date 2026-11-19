@@ -153,6 +153,18 @@ static void xl_budget_write(int fd)
     write(fd, line, xl_budget_line(line, sizeof line, &count));
 }
 
+void xl_pair_read(struct xl_pair_count *count);
+
+static void xl_pair_write(int fd, struct xl_pair_count *before)
+{
+    char line[320];
+    struct xl_pair_count count;
+    xl_pair_read(&count);
+    write(fd, line, xl_pair_line(line, sizeof line, &count, before));
+    if (before)
+        *before = count;
+}
+
 #define XL_PROFILE_BUCKETS 1024
 #define XL_PROFILE_INTERVAL_US 20000u
 #define XL_PROFILE_WINDOW_US 5000000u
@@ -258,6 +270,8 @@ static void xl_profile_report(unsigned samples, uint32_t window_messages, uint32
     xl_stats_window_report();
     xl_threads_stack_write(2, 1);
     xl_budget_write(2);
+    static struct xl_pair_count before;
+    xl_pair_write(2, &before);
     memset(xl_profile_buckets, 0, sizeof xl_profile_buckets);
 }
 
@@ -504,6 +518,7 @@ static void xl_crash_handler(int signal, siginfo_t *info, void *context)
     }
     xl_threads_stack_write(fd, 0);
     xl_budget_write(fd);
+    xl_pair_write(fd, NULL);
     ucontext_t *uc = context;
     if (uc) {
         _STRUCT_ARM_THREAD_STATE *ss = &uc->uc_mcontext->__ss;

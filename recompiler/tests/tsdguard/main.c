@@ -104,6 +104,11 @@ static size_t build_budget(char *line, size_t size, const void *count)
     return xl_budget_line(line, size, count);
 }
 
+static size_t build_pairs(char *line, size_t size, const void *count)
+{
+    return xl_pair_line(line, size, count, NULL);
+}
+
 static void *limited_mapper(size_t length)
 {
     if (length > (1u << 20)) {
@@ -303,6 +308,24 @@ int main(void)
             snprintf(want, sizeof want, "xlate: budget: metadata arena %lu of %lu KiB touched, opaque words %u of %u, aliases %lu of %lu KiB (0 of 0 is not set up yet)\n",
                      budgets[i].arena >> 10, budgets[i].arena_size >> 10, budgets[i].words, budgets[i].slots, budgets[i].aliases >> 10, budgets[i].aliases_size >> 10);
         if (!same_line("the budget line", got, xl_budget_line(got, sizeof got, &budgets[i]), want) || !cut_line("the budget line", want, build_budget, &budgets[i]))
+            fail = 1;
+    }
+    struct xl_pair_count pairs[] = {
+        {0, 0, 0, 0, 0},
+        {123456, 17, 9, 2, 1},
+        {4294967295u, 4294967295u, 4294967295u, 4294967295u, 64},
+    };
+    for (size_t i = 0; i < sizeof(pairs) / sizeof(pairs[0]); i++) {
+        char want[320], got[320];
+        const struct xl_pair_count *all = &pairs[i], *before = &pairs[i ? i - 1 : 0];
+        snprintf(want, sizeof want, "xlate: pair stores: %u stored and %u failed since the start (a failed one found the pair changed after its load); "
+                 "%u waited for a lock and gave up the processor %u times; %u of 64 locks held now\n", all->stored, all->failed, all->waited, all->yielded, all->held);
+        if (!same_line("the line of the pair stores", got, xl_pair_line(got, sizeof got, all, NULL), want) || !cut_line("the line of the pair stores", want, build_pairs, all))
+            fail = 1;
+        snprintf(want, sizeof want, "xlate: pair stores: %u stored and %u failed in this window, %u stored and %u failed since the start (a failed one found the pair changed after its load); "
+                 "%u waited for a lock and gave up the processor %u times; %u of 64 locks held now\n", all->stored - before->stored, all->failed - before->failed,
+                 all->stored, all->failed, all->waited, all->yielded, all->held);
+        if (!same_line("the line of the pair stores of a window", got, xl_pair_line(got, sizeof got, all, before), want))
             fail = 1;
     }
     if (fail)

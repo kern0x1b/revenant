@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, switchtail, tailcalls, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, rebasetag, flagflow, hostbridges, checkapi, proxytable, sharedtable, statsthreads, systemclasses and dropkey; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, llscpair, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, rebasetag, flagflow, hostbridges, checkapi, proxytable, sharedtable, statsthreads, systemclasses and dropkey; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions`, `libexceptions`, `libcxxexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -23,6 +23,7 @@ A check that also has a device part is run by hand, with the output folder as it
 
 ```sh
 ./xmakew l -P . recompiler/tests/weakimport/check.lua <out>
+./xmakew l -P . recompiler/tests/llscpair/check.lua <out>
 ./xmakew l -P . recompiler/tests/classpair/check.lua <out>
 ./xmakew l -P . recompiler/tests/exceptions/check.lua <out>
 ./xmakew l -P . recompiler/tests/libexceptions/check.lua <out>
@@ -196,8 +197,51 @@ The check proves four things on the host:
 The monitor remembers the address and the value an exclusive load saw. `STXR` succeeds only when the address is the
 recorded one and the `cmpxchg` still finds the recorded value, so a thread that wrote in between makes it fail and
 the loop retry. A store that finds the same value written back by another thread succeeds, as it does in a user-mode
-emulator; the loops compilers emit are value-based and tolerate it. `LDXP` and `STXP` still lift as a plain load and
-store, because a 128-bit `cmpxchg` has no armv7 lowering.
+emulator; the loops compilers emit are value-based and tolerate it. The pair forms, `LDXP` and `STXP`, have their own
+check, `llscpair`.
+
+### llscpair (device part by hand)
+
+A control for the pair forms of the exclusive instructions, `LDXP`, `LDAXP`, `STXP` and `STLXP`: the loop clang emits for
+a 16-byte atomic on arm64. The Swift runtime keeps the status of a task, the status of a default actor and the
+reference counts of a side table in such atomics ([library mode](library-mode.md), "Pair exclusives"). Until
+2026-11-19 they were lifted as a plain load and a plain store that always answered success, so two threads in such a
+loop lost updates.
+
+`workers.c` holds the loops, with no library call so that they lift alone: add (`__atomic_fetch_add` of a 128-bit
+value, both halves counting), compare-and-swap, exchange, store and load, the 32-bit pair form written in assembly
+(clang does not emit it), and five small functions for the monitor. `scenarios.h` runs them on one, two and four
+threads that start together: two counters that must reach the number of updates in both halves, tokens exchanged
+between four cells and the threads that must all be there at the end with their two halves matching, and readers
+beside writers that must never see one half of another store. `main.c` calls the loops directly and is the program
+for the phone; `lifted.c` calls the lifted functions, each thread with a state of its own.
+
+The host part proves, in this order:
+
+1. The scenarios themselves: `main.c` built for this Mac passes, on hardware pairs.
+2. The arm64 binary carries a load-pair and a store-pair in every function, the 32-bit form among them, xlate leaves
+   no instruction unlifted and lifts every function.
+3. The lifted functions run on this Mac by one, two and four threads lose no update and read no torn pair. The lifted
+   code is laid out for armv7 and cuts a pointer to 32 bits, which no memory of a Mac process has, so the same binary
+   is lifted a second time with `--host-triple` and `--host-datalayout` of the Mac; the state header of the two lifts
+   must be the same file. The run ends with the runtime's own line of the pair stores, and the check wants at least
+   four million stored and at least one that failed: a run in which two threads never met on a pair proved nothing.
+   On the lifter as it was, this step lost 10,542 of 400,000 updates with two threads and 379,612 of 800,000 with
+   four, and a store-pair with no load before it answered success and wrote.
+4. The monitor: a store-pair with no load before it, at another address than its load, after a single-word exclusive
+   load, and the second of two after one load all answer 1 and store nothing; a single-word exclusive store after a
+   load-pair does the same.
+5. Two controls, the same lifted code linked with another pair store (`control.c`): one that stores without
+   comparing, and one that compares and stores without the lock. Both must lose updates.
+6. The fault: `lifted --fault` calls the pair store on a page that cannot be written. The signal handler must print
+   the line of the pair stores with `1 of 64 locks held now` (see "Pair exclusives" for why that is enough).
+7. The lifted IR: each load-pair is two atomic 64-bit loads, each store-pair one call of `rellume_aarch64_stxp`, the
+   32-bit pair one 64-bit `cmpxchg`, and the state header exports `EXCL_VAL2`.
+8. For armv7 the lifted object calls `rellume_aarch64_stxp` and no atomic library function (iOS 6 has none for 16
+   bytes), and `pair.c` calls nothing but `thread_switch` and takes its lock with `ldrex` and `strex`.
+
+The device part runs the translated `main.c` on the phone and prints `hw.ncpu` first; each line carries the time of
+its scenario, so the run with one thread is the cost of a pair store there. It has not run on a phone yet.
 
 ### crypto
 
@@ -653,6 +697,9 @@ It proves the arithmetic at this machine's page size, which `main.c` prints: 163
 case rests on `xl_tsd_guard.h` reading the page size from `sysconf`. Each check in `main.c` forks with its own `alarm()`,
 a bounded parent-side wait and a SIGKILL fallback, after a real hang on a device. The outer 60-second limit in
 `check.lua` is a second, independent belt: if it ever fires, `main.c`'s own bounding failed.
+
+The lines the crash handler writes without `printf` (`xl_budget_lines.h`: the guest stacks, the budget and the pair
+stores) are compared here with their `printf` text, a line cut short included.
 
 ### int128
 

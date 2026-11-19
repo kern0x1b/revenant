@@ -1,0 +1,155 @@
+#include <pthread.h>
+#include <stdio.h>
+#include <sys/time.h>
+
+#include "workers.h"
+
+enum { ROUNDS = 200000, CELLS = 4, MOST = 4 };
+
+struct job {
+    int worker;
+    uint64_t a, b, c, d, result;
+};
+
+static unsigned failures;
+static volatile int started;
+static unsigned long long elapsed;
+
+static unsigned long long microseconds(void)
+{
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    return (unsigned long long)now.tv_sec * 1000000 + (unsigned long long)now.tv_usec;
+}
+
+static void *job_run(void *argument)
+{
+    struct job *job = argument;
+    while (!started) {
+    }
+    job->result = run(job->worker, job->a, job->b, job->c, job->d);
+    return NULL;
+}
+
+static void together(struct job *jobs, unsigned count)
+{
+    pthread_t threads[MOST];
+    started = 0;
+    for (unsigned index = 0; index < count; index++)
+        pthread_create(&threads[index], NULL, job_run, &jobs[index]);
+    unsigned long long from = microseconds();
+    started = 1;
+    for (unsigned index = 0; index < count; index++)
+        pthread_join(threads[index], NULL);
+    elapsed = microseconds() - from;
+}
+
+static void verdict(const char *name, unsigned threads, unsigned long long wrong, unsigned long long all, const char *what)
+{
+    if (wrong) {
+        printf("FAIL %s with %u threads: %llu of %llu %s (%llu us)\n", name, threads, wrong, all, what, elapsed);
+        failures++;
+    } else {
+        printf("ok %s with %u threads: none of %llu %s (%llu us)\n", name, threads, all, what, elapsed);
+    }
+}
+
+static void counted(const char *name, int worker, unsigned threads)
+{
+    static _Alignas(16) u128 cell;
+    struct job jobs[MOST];
+    cell = 0;
+    for (unsigned index = 0; index < threads; index++)
+        jobs[index] = (struct job){worker, (uintptr_t)&cell, ROUNDS, 0, 0, 0};
+    together(jobs, threads);
+    uint64_t all = (uint64_t)threads * ROUNDS, low = (uint64_t)cell, high = (uint64_t)(cell >> 64);
+    uint64_t least = low < high ? low : high;
+    verdict(name, threads, low > all || high > all ? all : all - least, all, "updates lost");
+}
+
+static void counted32(unsigned threads)
+{
+    static _Alignas(8) uint32_t cell[2];
+    struct job jobs[MOST];
+    cell[0] = cell[1] = 0;
+    for (unsigned index = 0; index < threads; index++)
+        jobs[index] = (struct job){PAIR32_ADD, (uintptr_t)cell, ROUNDS, 0, 0, 0};
+    together(jobs, threads);
+    uint32_t all = threads * ROUNDS, least = cell[0] < cell[1] ? cell[0] : cell[1];
+    verdict("pairs.add32", threads, cell[0] > all || cell[1] > all ? all : all - least, all, "updates lost");
+}
+
+static u128 token(unsigned number)
+{
+    return ((u128)~(uint64_t)number << 64) | number;
+}
+
+static void swapped(unsigned threads)
+{
+    static _Alignas(16) u128 cells[CELLS], mine[MOST];
+    struct job jobs[MOST];
+    unsigned char seen[CELLS + MOST + 1] = {0};
+    for (unsigned index = 0; index < CELLS; index++)
+        cells[index] = token(index + 1);
+    for (unsigned index = 0; index < threads; index++) {
+        mine[index] = token(CELLS + index + 1);
+        jobs[index] = (struct job){PAIR_SWAP, (uintptr_t)cells, CELLS - 1, (uintptr_t)&mine[index], ROUNDS, 0};
+    }
+    together(jobs, threads);
+    unsigned missing = 0;
+    for (unsigned index = 0; index < CELLS + threads; index++) {
+        u128 held = index < CELLS ? cells[index] : mine[index - CELLS];
+        uint64_t number = (uint64_t)held;
+        if ((uint64_t)(held >> 64) == ~number && number >= 1 && number <= CELLS + threads)
+            seen[number] = 1;
+    }
+    for (unsigned number = 1; number <= CELLS + threads; number++)
+        missing += !seen[number];
+    verdict("pairs.swap", threads, missing, CELLS + threads, "tokens lost or torn");
+}
+
+static void torn(unsigned threads)
+{
+    static _Alignas(16) u128 cell;
+    struct job jobs[MOST];
+    cell = token(0);
+    for (unsigned index = 0; index < threads; index++) {
+        if (index % 2)
+            jobs[index] = (struct job){PAIR_TORN, (uintptr_t)&cell, ROUNDS, 0, 0, 0};
+        else
+            jobs[index] = (struct job){PAIR_STORE, (uintptr_t)&cell, index + 1, ROUNDS, 0, 0};
+    }
+    together(jobs, threads);
+    unsigned long long wrong = 0;
+    for (unsigned index = 1; index < threads; index += 2)
+        wrong += jobs[index].result;
+    verdict("pairs.torn", threads, wrong, (unsigned long long)(threads / 2) * ROUNDS, "pairs read with one half of another store");
+}
+
+static void bare(void)
+{
+    static _Alignas(16) u128 cell;
+    cell = token(7);
+    uint64_t status = run(PAIR_BARE, (uintptr_t)&cell, 0, 0, 0);
+    if (status != 1 || cell != token(7)) {
+        printf("FAIL pairs.bare: a pair store with no load before it answered %llu and %s the pair\n", (unsigned long long)status, cell != token(7) ? "changed" : "kept");
+        failures++;
+    } else {
+        printf("ok pairs.bare: a pair store with no load before it failed and stored nothing\n");
+    }
+}
+
+static void scenarios(void)
+{
+    bare();
+    counted("pairs.add", PAIR_ADD, 1);
+    counted("pairs.cas", PAIR_CAS, 1);
+    counted32(1);
+    for (unsigned threads = 2; threads <= MOST; threads += 2) {
+        counted("pairs.add", PAIR_ADD, threads);
+        counted("pairs.cas", PAIR_CAS, threads);
+        counted32(threads);
+        swapped(threads);
+        torn(threads);
+    }
+}
