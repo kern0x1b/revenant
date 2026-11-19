@@ -86,8 +86,11 @@ class AUParameterTree
 class AVAsset
 class AVAssetExportSession
 class AVAssetImageGenerator
+class AVAssetResourceLoadingDataRequest
 class AVAssetResourceRenewalRequest
 class AVAssetTrack
+class AVAssetVariant
+class AVAssetVariantVideoAttributes
 class AVAssetWriter
 class AVAssetWriterInput
 class AVAssetWriterInputPassDescription
@@ -11921,10 +11924,24 @@ member AVAssetExportSession -metadataItemFilter
 member AVAssetExportSession -setCanPerformMultiplePassesOverSourceMediaData:
 member AVAssetExportSession -setMetadataItemFilter:
 member AVAssetImageGenerator -generateCGImageAsynchronouslyForTime:completionHandler:
+member AVAssetResourceLoadingDataRequest -currentOffset
+member AVAssetResourceLoadingDataRequest -initWithRevenantRequestedOffset:length:toEnd:
+member AVAssetResourceLoadingDataRequest -requestedLength
+member AVAssetResourceLoadingDataRequest -requestedOffset
+member AVAssetResourceLoadingDataRequest -requestsAllDataToEndOfResource
+member AVAssetResourceLoadingDataRequest -respondWithData:
+member AVAssetResourceLoadingDataRequest -revenant_accumulatedData
 member AVAssetTrack -loadMetadataForFormat:completionHandler:
 member AVAssetTrack -loadSamplePresentationTimeForTrackTime:completionHandler:
 member AVAssetTrack -loadSegmentForTrackTime:completionHandler:
 member AVAssetTrack -minFrameDuration
+member AVAssetVariant -averageBitRate
+member AVAssetVariant -peakBitRate
+member AVAssetVariant -videoAttributes
+member AVAssetVariantVideoAttributes -codecTypes
+member AVAssetVariantVideoAttributes -nominalFrameRate
+member AVAssetVariantVideoAttributes -presentationSize
+member AVAssetVariantVideoAttributes -videoRange
 member AVAssetWriter -preferredOutputSegmentInterval
 member AVAssetWriter -setPreferredOutputSegmentInterval:
 member AVAssetWriterInput -canPerformMultiplePasses
@@ -13143,6 +13160,7 @@ member AVParameterEvent -setScope:
 member AVParameterEvent -setValue:
 member AVParameterEvent -value
 member AVPictureInPictureController +isPictureInPictureSupported
+member AVPictureInPictureController -canStartPictureInPictureAutomaticallyFromInline
 member AVPictureInPictureController -contentSource
 member AVPictureInPictureController -delegate
 member AVPictureInPictureController -initWithContentSource:
@@ -13152,6 +13170,7 @@ member AVPictureInPictureController -isPictureInPicturePossible
 member AVPictureInPictureController -isPictureInPictureSuspended
 member AVPictureInPictureController -playerLayer
 member AVPictureInPictureController -requiresLinearPlayback
+member AVPictureInPictureController -setCanStartPictureInPictureAutomaticallyFromInline:
 member AVPictureInPictureController -setContentSource:
 member AVPictureInPictureController -setDelegate:
 member AVPictureInPictureController -startPictureInPicture
@@ -13183,7 +13202,9 @@ member AVPlayerItem +playerItemWithAsset:automaticallyLoadedAssetKeys:
 member AVPlayerItem -automaticallyLoadedAssetKeys
 member AVPlayerItem -initWithAsset:automaticallyLoadedAssetKeys:
 member AVPlayerItem -nowPlayingInfo
+member AVPlayerItem -preferredForwardBufferDuration
 member AVPlayerItem -setNowPlayingInfo:
+member AVPlayerItem -setPreferredForwardBufferDuration:
 member AVPlayerItemVideoOutput -initWithOutputSettings:
 member AVPlayerLooper +playerLooperWithPlayer:templateItem:
 member AVPlayerLooper +playerLooperWithPlayer:templateItem:timeRange:
@@ -13221,6 +13242,7 @@ member AVPlayerMediaSelectionCriteria -revenant_setPrincipalMediaCharacteristics
 member AVPlayerViewController +keyPathsForValuesAffectingReadyForDisplay
 member AVPlayerViewController +keyPathsForValuesAffectingVideoBounds
 member AVPlayerViewController -allowsPictureInPicturePlayback
+member AVPlayerViewController -canStartPictureInPictureAutomaticallyFromInline
 member AVPlayerViewController -contentOverlayView
 member AVPlayerViewController -dealloc
 member AVPlayerViewController -delegate
@@ -13278,6 +13300,7 @@ member AVPlayerViewController -revenant_writeNowPlaying
 member AVPlayerViewController -selectSpeed:
 member AVPlayerViewController -selectedSpeed
 member AVPlayerViewController -setAllowsPictureInPicturePlayback:
+member AVPlayerViewController -setCanStartPictureInPictureAutomaticallyFromInline:
 member AVPlayerViewController -setDelegate:
 member AVPlayerViewController -setPixelBufferAttributes:
 member AVPlayerViewController -setPlayer:
