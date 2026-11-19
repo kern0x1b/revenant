@@ -1080,9 +1080,14 @@ ran translated code) require both lines with the header's arena and word count; 
 `printf` text of the window in `tsdguard`, the not-read forms and a line cut short included. The held lock itself is
 not reached by any launch: nothing outside the runtime can hold it.
 
-The two tables keep their
-old sizes until a run of many `execute` calls says how they grow; with the numbers in the header, giving them less is an
-option of the translation, not a change of the runtime.
+The sizes of the two tables are an option of the translation (`XL_WORD_SLOTS`, `XL_ALIAS_ARENA`), not a change of
+the runtime, and the rule a drop states them by is: 64 times the highest use that any window or crash line of the last
+acceptance run printed, the words rounded up to a power of two and never under the format's least (2,048), the aliases
+rounded up to 16 KiB with the printed kilobytes taken as one more than printed. The factor is large on purpose: an
+acceptance run goes down the paths it goes down (for the reCAPTCHA SDK so far a site key the server refuses), nothing
+measured says what another path takes, and the two lines of every window and every crash report say how much of the
+margin a run used, so the next drop is sized from a wider run and not from a guess. At the limit the runtime stops
+with the messages above, as before.
 
 For the reCAPTCHA Enterprise SDK: the sizes of drop36, measured in the region maps of the M4 acceptance, and what the
 same library takes with this layout. The library's own terms are measured on the Mac in drop37 (2026-11-19, the first
@@ -1090,25 +1095,34 @@ translation of the SDK with this layout, at `0x2e000000`): the host part is the 
 is the header of its guest image as `xlate` prints it (`0x2e000000-0x2f938000`). Both came out as they had been
 computed from drop36 before the translation (55.3 and 25.22 MiB). The phone has confirmed the rules the rest of the
 sum is made by, on the fixture (the reservation is the header's range and nothing more, the room of the host part is
-the size of its image, a guest stack is the thread's own size and a page, 2026-11-19). Two terms are still not
-measured on the SDK with this layout: how many of its threads enter the guest (18 is the count of drop36's
-acceptance) and how much of the arena, the words and the aliases it uses; the window lines of a run with `XL_STATS=1`
-say both.
+the size of its image, a guest stack is the thread's own size and a page, 2026-11-19). The first whole
+run of the statistics on the SDK with this layout (pass123 with drop37 on the 4S, 2026-11-19, two launches, `fetchClient`
+and ten `execute` each, 57 windows, `telegram-build/.agent-work/runs/m4-pass123/xlstats-1`) measured the rest, the same
+in every window of both launches: `metadata arena 0 of 1280 KiB touched, opaque words 4 of 262144, aliases 13 of 4096
+KiB`, at most 15 guest stacks live (8,248 KiB), the deepest use of one 24 KiB. The arena's 0 is the SDK and not the
+meter: the same meter counted the byte the fixture's host wrote on this phone (20 of 32 KiB), and the region maps of
+drop36 had shown the same by another way (`res=0K` of its 64 MiB); the metadata the guest's Swift runtime builds for
+this SDK fits the runtime's first pool. drop38 is drop37 with the two tables sized by the rule above from that run
+(2,048 words, 896 KiB of aliases), nothing else changed in its layout:
 
-| Part | drop36 | drop37, with the budget |
-|---|---|---|
-| host part | 62.95 MiB (41.5 lifted text, 8.7 data of which 8.0 `__bss`, 11.6 the bytes of the guest image, 1.2 link data) | 55.33 MiB (41.52 lifted text, 1.06 data, 11.59 the bytes of the guest image, 1.16 link data; the 7.6 MiB of the journal's tables are no longer `__bss`), a file of 54.94 MiB; the registry is 48 KiB more |
-| guest images | 22.17 MiB, of them 10.20 between the images | 11.97 MiB, nothing between the images |
-| metadata arena | 64 MiB, anywhere | 1.25 MiB, in the reservation |
-| opaque words, aliases | 8 MiB and 4 MiB, anywhere, at first use | 8 MiB and 4 MiB, in the reservation |
-| the reservation in all | none: three mappings at three moments | 25.22 MiB, taken or refused by `xl_load` |
-| main thread's guest stack | 16 MiB (8 after a failed mapping) | 1,024 KiB |
-| guest stack of each other thread | 1 MiB | 516 KiB |
-| in all, with 18 other threads in the guest | 195 MiB | 90.7 MiB, of them 80.6 not stacks |
+| Part | drop36 | drop37, with the budget | drop38, the tables sized from the run |
+|---|---|---|---|
+| host part | 62.95 MiB (41.5 lifted text, 8.7 data of which 8.0 `__bss`, 11.6 the bytes of the guest image, 1.2 link data) | 55.33 MiB (41.52 lifted text, 1.06 data, 11.59 the bytes of the guest image, 1.16 link data; the 7.6 MiB of the journal's tables are no longer `__bss`), a file of 54.94 MiB; the registry is 48 KiB more | 55.25 MiB (41.53, 1.06, 11.59, 1.06), a file of 54.87 MiB; the registry as before |
+| guest images | 22.17 MiB, of them 10.20 between the images | 11.97 MiB, nothing between the images | 11.97 MiB |
+| metadata arena | 64 MiB, anywhere | 1.25 MiB, in the reservation | 1.25 MiB (0 touched in the run) |
+| opaque words, aliases | 8 MiB and 4 MiB, anywhere, at first use | 8 MiB and 4 MiB, in the reservation (4 words and 13 KiB used in the run) | 64 KiB (2,048 words) and 896 KiB |
+| the reservation in all | none: three mappings at three moments | 25.22 MiB, taken or refused by `xl_load` | 14.16 MiB (`0x2e000000-0x2ee28000`) |
+| main thread's guest stack | 16 MiB (8 after a failed mapping) | 1,024 KiB | 1,024 KiB |
+| guest stack of each other thread | 1 MiB | 516 KiB | 516 KiB |
+| in all, with 18 other threads in the guest | 195 MiB | 90.7 MiB, of them 80.6 not stacks | 79.5 MiB, of them 69.5 not stacks |
+| in all, with the most stacks the run showed (15, 8,248 KiB) | | 88.7 MiB | 77.5 MiB |
 
 The Telegram app that the SDK is loaded into has, signed in and with its chat list drawn, 180 to 190 MiB free below
 `0x30000000` from its twentieth second on (`m4p121ctl-1`): 195 MiB did not fit, and the runtime found out one failed
-mapping at a time; 91 MiB fits, and the 81 MiB of it that are not stacks are taken by `xl_load` or refused by it.
+mapping at a time; 91 MiB fits, and the 81 MiB of it that are not stacks are taken by `xl_load` or refused by it. In
+the run on pass123 the virtual size of the process grew by 83.8 and 82.7 MiB between the call of `fetchClient` and its
+answer (the 80.6 MiB of drop37's host part and reservation, the rest the guest stacks of the threads that had entered
+the guest by then), no mapping failed and no launch died.
 
 Two things would take more off and are not built:
 
