@@ -89,7 +89,6 @@ expect("the copy's host no longer carries the libc++ the shared package installs
        and hosted:find('name ~= "libcxx"', 1, true) ~= nil, "the app.frameworks filter is missing from the copy")
 expect("the host rule is carried once", isolate.host_libcxx(hosted) == hosted, "a second pass changed the copy")
 
--- clone: a warm copy moved to another worktree with its own clone of the cache
 local base = path.join(os.tmpdir(), "rn-isolate-cloning")
 os.rm(base)
 local old_checkout, old_cache, old_folder = path.join(base, "old", "checkout"), path.join(base, "old", "checkout", ".cache-pp"), path.join(base, "old", "checkout", "iso-x")

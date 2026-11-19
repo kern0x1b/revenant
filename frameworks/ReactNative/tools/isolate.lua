@@ -350,8 +350,6 @@ local function checkout()
     return path.absolute(os.projectdir())
 end
 
--- the three absolute roots a copy's files name: the copy itself, the revenant checkout whose tools made it and the private cache
--- whose packages it links; copy and build write them so that clone knows what to rewrite
 function roots_file(folder)
     return path.join(folder, "build", "isolate-roots.txt")
 end
@@ -372,7 +370,6 @@ function read_roots(folder)
     return {folder = found[1], checkout = found[2], cache = found[3]}
 end
 
--- the old and new root pairs, the longest old root first, so that a root inside another one is replaced as itself
 function root_pairs(old, new)
     local pairs_ = {}
     for _, key in ipairs({"folder", "checkout", "cache"}) do
@@ -400,10 +397,6 @@ function retarget_link(target, mapped)
     end
 end
 
--- an APFS clone of the warm copy SRC in DST, for another worktree and its own clone of the cache: every file that names the old
--- roots is rewritten, every link under build/ (rn-headers, rn-src, probes) is retargeted, so that the clone neither probes the
--- packages again nor reaches into the copy it came from, and rebuilds only what the new module changes
--- an absolute path with its "." and ".." segments collapsed, as the files of the copy name it (path.absolute leaves ".." in an absolute path)
 function lexical_path(value)
     local parts = {}
     for segment in path.absolute(value):gmatch("[^/]+") do
@@ -466,7 +459,6 @@ function clone_project(src, dst, new_cache, old_cache, old_checkout, bundle_id)
             relinked = relinked + 1
         end
     end
-    -- a root that is still named means the clone would reach into the copy it came from or probe again: refuse instead of building it
     local left = try {
         function ()
             return os.iorunv("grep", table.join({"-rIlF", "--exclude-dir=ref"}, patterns, {dst}))
@@ -496,7 +488,6 @@ function probe_header(root)
         'includes("@addon/revenant/apple-ios")'}
 end
 
--- the xmake.lua of the probe project that installs one recipe and writes its install folder; ROOT is the revenant checkout
 function react_native_probe_text(root)
     return table.concat(table.join({'set_project("rnsrc")'}, probe_header(root), WHOLE_PROBE, {
         'add_requires("revenant@react-native 0.86.3", {alias = "react-native"})',
@@ -519,8 +510,6 @@ function recipe_probe_text(root, name, version)
         '    end)', ""}), "\n")
 end
 
--- the install folder that an earlier run of the same probe found, or nil: the probe's xmake.lua must be the same text, the folder
--- must still exist, and neither the recipe nor its patches may be newer than the answer
 function reusable_answer(probe, text, recipe)
     local script, installed = path.join(probe, "xmake.lua"), path.join(probe, "installdir.txt")
     if not (os.isfile(script) and os.isfile(installed) and io.readfile(script) == text) then
