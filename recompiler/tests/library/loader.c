@@ -233,6 +233,8 @@ static void expect(int passed, const char *format, ...)
         failures++;
 }
 
+static uint32_t model_budget_skew;
+
 static void write_library(const char *file, uintptr_t guest_low, uintptr_t guest_high, uint32_t version, int registry)
 {
     struct {
@@ -262,7 +264,9 @@ static void write_library(const char *file, uintptr_t guest_low, uintptr_t guest
     strcpy(commands.image.sectname, XL_GUEST_SECTION);
     commands.image.offset = 0x1000;
     commands.image.size = sizeof(struct xl_guest_header);
-    struct xl_guest_header guest = {XL_GUEST_MAGIC, version, (uint32_t)guest_low, (uint32_t)guest_high, 0};
+    uint32_t arena = XL_GUEST_GRANULE, slots = XL_GUEST_WORD_SLOTS_LEAST, aliases = XL_GUEST_GRANULE;
+    struct xl_guest_header guest = {XL_GUEST_MAGIC, version, (uint32_t)guest_low, (uint32_t)guest_high, 0,
+                                    (uint32_t)guest_high - arena - slots * XL_GUEST_WORD_BYTES - aliases - model_budget_skew, arena, slots, aliases};
     int fd = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (fd < 0 || pwrite(fd, &commands, sizeof commands, 0) != (ssize_t)sizeof commands ||
         pwrite(fd, &guest, sizeof guest, commands.image.offset) != (ssize_t)sizeof guest) {
@@ -462,7 +466,12 @@ static void scenario_refusals(const char *folder)
     expect(xl_load(newer) == XL_LOAD_BAD_IMAGE && strstr(xl_load_error(), "format version"), "a format this loader does not read is refused: %s", xl_load_error());
     const char *alone = library(folder, "alone", BASE_UNDER_STACK, XL_GUEST_VERSION, 0);
     expect(xl_load(alone) == XL_LOAD_BAD_IMAGE && strstr(xl_load_error(), "registry"), "a library without its registry is refused: %s", xl_load_error());
-    expect(unchanged(), "neither refusal took any address space");
+    model_budget_skew = XL_GUEST_GRANULE;
+    const char *skewed = library(folder, "skewed", BASE_UNDER_STACK, XL_GUEST_VERSION, 1);
+    model_budget_skew = 0;
+    expect(xl_load(skewed) == XL_LOAD_BAD_IMAGE && strstr(xl_load_error(), "do not end there"),
+           "a library whose images, arena, words and aliases do not end where its range ends is refused: %s", xl_load_error());
+    expect(unchanged(), "no refusal took any address space");
     const char *first = library(folder, "first", BASE_UNDER_STACK, XL_GUEST_VERSION, 1);
     const char *second = library(folder, "second", BASE_UNDER_STACK, XL_GUEST_VERSION, 1);
     expect(xl_reserve(first) == XL_LOAD_OK && xl_reserve(second) == XL_LOAD_BAD_IMAGE && strstr(xl_load_error(), "a process holds one translated library"),

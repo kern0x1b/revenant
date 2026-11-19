@@ -166,11 +166,12 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
   (`xl_guest_image_low`, `xl_guest_image_high`) nor in an arena the host reserved for the metadata the runtime builds
   (`xl_guest_arena_low`, `xl_guest_arena_high`), and reads `Data` only in them
   (`patches/a-class-outside-the-guest-images-is-not-class-metadata.patch`). The runtime defines the four words
-  (`runtime.c`), fills them when a library attaches (`library.c`, which reserves 64 MiB of address space with `vm_allocate`
-  for the arena; nothing is committed until a page is touched), and the generated bridge copies them into the guest like
+  (`runtime.c`), fills them when a library attaches (`library.c`: the arena is the part of the loader's reservation
+  right after the guest images, of the size the guest image's header states, so a process without room for it learns
+  that from `xl_load`; nothing is committed until a page is touched), and the generated bridge copies them into the guest like
   any host data the guest imports (`common-includes.h` and `uikit-includes.h` declare them, the runtime's link allows the
-  undefined symbols). Until they are set, in a program that is not a library, and when the arena could not be
-  reserved, the runtime reads `Data` as before and allocates as before. A class the Swift runtime builds at run time
+  undefined symbols). Until they are set, and in a program that is not a library, the runtime reads `Data` as before and
+  allocates as before. A class the Swift runtime builds at run time
   (`_ContiguousArrayStorage<T>`, a generic class of the program) lies in the arena, because the runtime's metadata
   allocator takes everything beyond its first 64 KiB (the pool in `libswiftCore`'s image), and every allocation too
   large for a pool page, from there instead of from the host's heap

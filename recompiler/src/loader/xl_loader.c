@@ -104,6 +104,10 @@ static xl_load_status xl_read_image(const char *path, struct xl_image *image)
     if (guest.low >= guest.high || guest.low % XL_GUEST_GRANULE || guest.high % XL_GUEST_GRANULE)
         return xl_fail(XL_LOAD_BAD_IMAGE, "the guest image of %s has the range 0x%x-0x%x, not a range of whole %u byte granules", path, guest.low, guest.high,
                        XL_GUEST_GRANULE);
+    if (!xl_guest_budget_fits(&guest))
+        return xl_fail(XL_LOAD_BAD_IMAGE,
+                       "the guest image of %s holds 0x%x-0x%x, and its images to 0x%x, 0x%x bytes of metadata arena, %u opaque words and 0x%x bytes of aliases do not end there",
+                       path, guest.low, guest.high, guest.images_high, guest.arena, guest.word_slots, guest.aliases);
     char registry[PATH_MAX];
     if (!xl_registry_path(path, registry, sizeof registry) || access(registry, R_OK) != 0)
         return xl_fail(XL_LOAD_BAD_IMAGE, "the registry of the Objective-C classes of %s is missing: it is the file %s%s next to it", path,

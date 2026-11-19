@@ -603,8 +603,16 @@ function translate(input, includes, out, images, opt)
     for _, part in ipairs(words(getenv("XL_XI_EXCEPT"))) do
         table.join2(xi_except, {"--xi-except", part})
     end
+    local budget = {}
+    for _, pair in ipairs({{"XL_METADATA_ARENA", "--metadata-arena"}, {"XL_WORD_SLOTS", "--word-slots"}, {"XL_ALIAS_ARENA", "--alias-arena"}}) do
+        local value = getenv(pair[1])
+        if library and value and value ~= "" then
+            table.insert(budget, pair[2])
+            table.insert(budget, value)
+        end
+    end
     local key = lift_key(e, input, extra, out, replaces, base .. (library and " library" or "") .. " " .. lifted_mode .. " " .. duplicates .. " xi=" .. xi ..
-                                                           " except=" .. table.concat(xi_except, ","))
+                                                           " except=" .. table.concat(xi_except, ",") .. " budget=" .. table.concat(budget, " "))
     local lifted_objs
     if os.isfile(o("lift.stamp")) and io.readfile(o("lift.stamp")) == key and os.isfile(o("lifted-objs.txt")) then
         print("lift inputs unchanged since the last run: reusing its lifted objects")
@@ -613,7 +621,7 @@ function translate(input, includes, out, images, opt)
         os.tryrm(o("lift.stamp"))
         os.tryrm(o("flag-flow.txt"))
         run(e.xlate, table.join({"--base", base, "--output", o("lifted.bc"), "--layout", o("layout.txt"), "--passthrough", o("passthrough.txt"),
-                                 "--state-header", o("xl_state.h"), "--dlsym-table", o("xl_dlsym.h"), "--flag-flow-summary", o("flag-flow.txt"), "--xi-out", o("xi.txt")}, library and {"--library"} or {},
+                                 "--state-header", o("xl_state.h"), "--dlsym-table", o("xl_dlsym.h"), "--flag-flow-summary", o("flag-flow.txt"), "--xi-out", o("xi.txt")}, library and {"--library", "--images-out", o(name .. ".images.txt")} or {}, budget,
                                 xi ~= "" and {"--xi-threshold", xi} or {}, xi_except, duplicates == "1" and {"--report-duplicates"} or {},
                                 replaces, {"--bridge", o("libxl-guest.dylib"), input}, extra,
                                 {o("libxl-guest.dylib")}))
@@ -647,7 +655,8 @@ function translate(input, includes, out, images, opt)
     for _, source in ipairs({path.join(runtime, "bridge.m"), path.join(runtime, "objc_bridge.m"), path.join(runtime, "swift_classes.m"),
                              path.join(runtime, "proxy.m"), path.join(runtime, "journal.m"), path.join(runtime, "alignment.m"), path.join(runtime, "objc_compat.m"), path.join(runtime, "sysctl_bridge.m"), o("host.m")}) do
         local object = o(path.basename(source) .. ".o")
-        run(clang, table.join(host, {"-fno-objc-arc", "-fblocks", "-I", out, "-I", runtime, "-iquote", incdir}, extra_cflags, {"-c", source, "-o", object}))
+        run(clang, table.join(host, {"-fno-objc-arc", "-fblocks", "-I", out, "-I", runtime, "-I", path.join(lab, "include"), "-iquote", incdir}, extra_cflags,
+                              {"-c", source, "-o", object}))
         print("renamed %d sections", macho.rename_sections(object, true))
         table.insert(runtime_objects, object)
     end

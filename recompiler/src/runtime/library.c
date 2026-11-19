@@ -22,9 +22,9 @@ extern int xl_stats_enabled(void);
 extern void xl_profile_start(void);
 extern uint32_t xl_guest_low, xl_guest_high;
 extern unsigned long xl_guest_image_low, xl_guest_image_high, xl_guest_arena_low, xl_guest_arena_high;
+extern int xl_word_adopt(uintptr_t region, uint32_t slots);
+extern int xl_alias_adopt(uintptr_t region, uint32_t size);
 _Noreturn void xl_unsupported(const char *message);
-
-#define XL_GUEST_ARENA_SIZE (64u << 20)
 
 enum { XL_LIBRARY_IDLE, XL_LIBRARY_ATTACHED, XL_LIBRARY_FAILED, XL_LIBRARY_READY };
 
@@ -54,21 +54,22 @@ static int xl_library_format(const struct xl_guest_header *header, unsigned long
 {
     if (size < sizeof *header || header->magic != XL_GUEST_MAGIC || header->version != XL_GUEST_VERSION)
         return 0;
-    if (header->low >= header->high || header->low % XL_GUEST_GRANULE || header->high % XL_GUEST_GRANULE)
+    if (header->low >= header->high || header->low % XL_GUEST_GRANULE || header->high % XL_GUEST_GRANULE || !xl_guest_budget_fits(header))
         return 0;
     if (header->segment_count > (size - sizeof *header) / sizeof(struct xl_guest_segment))
         return 0;
     const struct xl_guest_segment *segments = (const struct xl_guest_segment *)(header + 1);
     for (uint32_t index = 0; index < header->segment_count; index++) {
         const struct xl_guest_segment *segment = &segments[index];
-        if (segment->address < header->low || segment->size > header->high - segment->address || segment->address % XL_GUEST_GRANULE ||
+        if (segment->address < header->low || segment->address > header->images_high || segment->size > header->images_high - segment->address ||
+            segment->address % XL_GUEST_GRANULE ||
             segment->size % XL_GUEST_GRANULE || segment->offset % XL_GUEST_GRANULE || segment->length % XL_GUEST_GRANULE ||
             segment->length > segment->size || segment->offset > size || segment->length > size - segment->offset)
             return 0;
     }
     for (uint32_t index = 0; index < xl_guest_slot_count; index++) {
         uint32_t address = xl_guest_slots[index].address;
-        if (address < header->low || header->high - address < sizeof(uint32_t))
+        if (address < header->low || address > header->images_high || header->images_high - address < sizeof(uint32_t))
             return 0;
     }
     return 1;
@@ -103,15 +104,18 @@ static int xl_library_attach(void)
         return status;
     for (uint32_t index = 0; index < xl_guest_slot_count; index++)
         *(volatile uint32_t *)(uintptr_t)xl_guest_slots[index].address = xl_guest_slots[index].value;
+    vm_address_t arena = header->images_high;
+    vm_address_t words = arena + header->arena;
+    vm_address_t aliases = words + (vm_address_t)header->word_slots * XL_GUEST_WORD_BYTES;
+    if ((header->arena && vm_protect(mach_task_self(), arena, header->arena, FALSE, VM_PROT_READ | VM_PROT_WRITE) != KERN_SUCCESS) ||
+        !xl_word_adopt(words, header->word_slots) || !xl_alias_adopt(aliases, header->aliases))
+        return XL_LIBRARY_MAP_FAILED;
     xl_guest_low = header->low;
-    xl_guest_high = header->high;
-    vm_address_t arena = 0;
-    if (vm_allocate(mach_task_self(), &arena, XL_GUEST_ARENA_SIZE, VM_FLAGS_ANYWHERE) == KERN_SUCCESS) {
-        xl_guest_arena_low = arena;
-        xl_guest_arena_high = arena + XL_GUEST_ARENA_SIZE;
-        xl_guest_image_low = header->low;
-        xl_guest_image_high = header->high;
-    }
+    xl_guest_high = header->images_high;
+    xl_guest_arena_low = arena;
+    xl_guest_arena_high = arena + header->arena;
+    xl_guest_image_low = header->low;
+    xl_guest_image_high = header->images_high;
     for (uint32_t index = 0; index < header->segment_count; index++) {
         const struct xl_guest_segment *segment = &segments[index];
         if (segment->protection != (XL_GUEST_READ | XL_GUEST_WRITE) &&

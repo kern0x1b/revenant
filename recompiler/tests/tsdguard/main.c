@@ -115,20 +115,55 @@ int main(void)
 
     xl_tsd_free(pages);
 
-    size_t size = 0, guard = 0;
+    size_t guard = 0;
     size_t page = (size_t)sysconf(_SC_PAGESIZE);
-    void *stack = xl_stack_map(4u << 20, 256u << 10, limited_mapper, &size, &guard);
-    if (stack == MAP_FAILED || size != (1u << 20) || guard != page) {
-        fprintf(stderr, "FAIL: a mapper that refuses more than 1 MB gave size %lu and guard %lu for a first try of 4 MB, wanted 1 MB and one page\n",
-                (unsigned long)size, (unsigned long)guard);
+    struct { size_t thread, want; } lengths[] = {
+        {512u << 10, (512u << 10) + page},
+        {1u << 20, (1u << 20) + page},
+        {8u << 20, (8u << 20) + page},
+        {(300u << 10) + 1, ((300u << 10) / page + 1) * page + page},
+        {1, 2 * page},
+    };
+    for (size_t i = 0; i < sizeof(lengths) / sizeof(lengths[0]); i++) {
+        size_t got = xl_stack_length(lengths[i].thread, page);
+        if (got != lengths[i].want) {
+            fprintf(stderr, "FAIL: a thread whose own stack is %lu bytes maps %lu bytes for its guest stack and the guard page, wanted %lu\n",
+                    (unsigned long)lengths[i].thread, (unsigned long)got, (unsigned long)lengths[i].want);
+            fail = 1;
+        }
+    }
+    size_t length = xl_stack_length(512u << 10, page);
+    void *stack = xl_stack_map(length, xl_map_anonymous, &guard);
+    if (stack == MAP_FAILED || guard != page) {
+        fprintf(stderr, "FAIL: the guest stack of a thread with a 512 KiB stack was not mapped with a guard of one page (guard %lu)\n", (unsigned long)guard);
         fail = 1;
     } else {
         struct { uintptr_t offset; int want_fault; } stack_cases[] = {
             {0, 1},
             {page - 8, 1},
             {page, 0},
-            {size - 8, 0},
+            {length - 8, 0},
         };
+        size_t used = 1;
+        if (!xl_stack_used(stack, length, page, &used) || used != 0) {
+            fprintf(stderr, "FAIL: a guest stack that nothing wrote to counts %lu bytes as used\n", (unsigned long)used);
+            fail = 1;
+        }
+        struct { size_t depth, want; } marks[] = {
+            {8, page},
+            {5 * page - 8, 5 * page},
+            {3 * page, 5 * page},
+            {9 * page + 1, 10 * page},
+            {length - page, length - page},
+        };
+        for (size_t i = 0; i < sizeof(marks) / sizeof(marks[0]); i++) {
+            *((volatile char *)stack + length - marks[i].depth) = 1;
+            if (!xl_stack_used(stack, length, page, &used) || used != marks[i].want) {
+                fprintf(stderr, "FAIL: after a write %lu bytes below the top the guest stack counts %lu bytes as used, wanted %lu\n",
+                        (unsigned long)marks[i].depth, (unsigned long)used, (unsigned long)marks[i].want);
+                fail = 1;
+            }
+        }
         for (size_t i = 0; i < sizeof(stack_cases) / sizeof(stack_cases[0]); i++) {
             int r = try_read((uintptr_t)stack + stack_cases[i].offset);
             if ((r != 0 && r != 1) || (r == 1) != stack_cases[i].want_fault) {
@@ -137,27 +172,22 @@ int main(void)
                 fail = 1;
             }
         }
-        munmap(stack, size);
+        munmap(stack, length);
     }
-    struct { size_t host, want; } firsts[] = {
-        {512u << 10, 1u << 20},
-        {1u << 20, 2u << 20},
-        {2u << 20, 4u << 20},
-        {8u << 20, 4u << 20},
-        {(size_t)-1 / 4, 4u << 20},
-        {64u << 10, 256u << 10},
-        {0, 256u << 10},
-        {(300u << 10) + 1, (640u << 10)},
-    };
-    for (size_t i = 0; i < sizeof(firsts) / sizeof(firsts[0]); i++) {
-        size_t got = xl_stack_first(firsts[i].host, 256u << 10, 4u << 20);
-        if (got != firsts[i].want) {
-            fprintf(stderr, "FAIL: a thread with a host stack of %lu bytes first tries %lu bytes of guest stack, wanted %lu\n",
-                    (unsigned long)firsts[i].host, (unsigned long)got, (unsigned long)firsts[i].want);
-            fail = 1;
-        }
+    guard = 0;
+    stack = xl_stack_map(4u << 20, limited_mapper, &guard);
+    if (stack != MAP_FAILED) {
+        fprintf(stderr, "FAIL: a mapper that refuses more than 1 MB gave a stack for 4 MB: a refused size must not be replaced by a smaller one\n");
+        fail = 1;
     }
-    stack = xl_stack_map(4u << 20, 256u << 10, refusing_mapper, &size, &guard);
+    stack = xl_stack_map(1u << 20, limited_mapper, &guard);
+    if (stack == MAP_FAILED || guard != page) {
+        fprintf(stderr, "FAIL: a mapper that allows 1 MB gave no stack of 1 MB with a guard page\n");
+        fail = 1;
+    } else {
+        munmap(stack, 1u << 20);
+    }
+    stack = xl_stack_map(4u << 20, refusing_mapper, &guard);
     if (stack != MAP_FAILED) {
         fprintf(stderr, "FAIL: a mapper that refuses everything still gave a stack\n");
         fail = 1;

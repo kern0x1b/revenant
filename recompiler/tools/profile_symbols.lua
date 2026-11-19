@@ -10,14 +10,26 @@ local GUEST_IMAGES = {
 }
 local GUEST_IMAGE_ALIGNMENT = 0x100000
 
-local function guest_image(address, base)
+local function guest_image(address, symbols)
     local found = "?"
-    for _, entry in ipairs(GUEST_IMAGES) do
-        if address >= base + entry[1] then
+    for _, entry in ipairs(symbols.images or GUEST_IMAGES) do
+        if address >= (symbols.images and 0 or symbols.base) + entry[1] then
             found = entry[2]
         end
     end
     return found
+end
+
+local function load_images(lines)
+    local images = {}
+    for line in lines do
+        local low, name = line:match("^(%x+) %x+ (.+)$")
+        if low then
+            table.insert(images, {tonumber(low, 16), name})
+        end
+    end
+    table.sort(images, function(a, b) return a[1] < b[1] end)
+    return images
 end
 
 local function load_symbols(lines)
@@ -70,7 +82,7 @@ local function describe(symbols, image, offset, symbol)
         return string.format("%s+0x%x", image, offset), image .. " (unresolved)"
     end
     local guest = name:match("^_sub_(%x+)")
-    local where = guest and string.format("guest 0x%s (%s)", guest, guest_image(tonumber(guest, 16), symbols.base)) or "host code of the library"
+    local where = guest and string.format("guest 0x%s (%s)", guest, guest_image(tonumber(guest, 16), symbols)) or "host code of the library"
     return string.format("%s+0x%x  %s", name, distance, where), name
 end
 
@@ -179,6 +191,10 @@ local function self_test()
     expect(moved.base == 0x2e000000 and describe(moved, DEFAULT_IMAGE, 0x1440, ""):find("guest 0x2e800200 (libc++)", 1, true) and
            describe(moved, DEFAULT_IMAGE, 0x3000, ""):find("libxl-guest stubs", 1, true),
            "the images are found from the base of the symbols file, whatever XL_BASE the drop was translated with")
+    moved.images = load_images(iterate({"2e000000 2e160000 RecaptchaEnterprise", "2e160000 2e6c0000 libswiftCore.dylib", "2e6c0000 2e7a0000 libc++.1.dylib"}))
+    expect(describe(moved, DEFAULT_IMAGE, 0x1000, ""):find("guest 0x2e000100 (RecaptchaEnterprise)", 1, true) and
+           describe(moved, DEFAULT_IMAGE, 0x1440, ""):find("guest 0x2e800200 (libc++.1.dylib)", 1, true),
+           "with the images file of a drop the images are the ones the translator laid out, at their own addresses")
     print("%s", report(windows))
     print("ok: profile_symbols self-test")
 end
@@ -196,6 +212,10 @@ function main(...)
     local symbols = load_symbols(io.lines(symbols_file))
     if #symbols.addresses == 0 then
         raise("no text symbols in %s", symbols_file)
+    end
+    local images_file = symbols_file:gsub("%.symbols%.txt$", ".images.txt")
+    if images_file ~= symbols_file and os.isfile(images_file) then
+        symbols.images = load_images(io.lines(images_file))
     end
     local windows = read_profile(io.lines(stderr_file), symbols, image_pattern)
     if #windows == 0 then

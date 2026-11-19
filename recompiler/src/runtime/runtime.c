@@ -36,9 +36,6 @@ unsigned long xl_guest_image_low, xl_guest_image_high, xl_guest_arena_low, xl_gu
 xl_lifted xl_imp_lookup(uint64_t address);
 
 #define XL_REG(state, name) (*(uint64_t *)((char *)(state) + XL_OFFSET_##name))
-#define XL_GUEST_STACK_MAIN (16u << 20)
-#define XL_GUEST_STACK_THREAD (4u << 20)
-#define XL_GUEST_STACK_FLOOR (256u << 10)
 
 #ifdef XL_LIBRARY
 extern void xl_library_ensure(void);
@@ -59,14 +56,20 @@ struct xl_thread {
     void *tsd_pages;
     size_t stack_size;
     size_t guard_size;
+    struct xl_thread *next;
+    struct xl_thread **link;
 };
 
 #define XL_THREAD_HEADER 32u
+_Static_assert(sizeof(struct xl_thread) <= XL_THREAD_HEADER, "the record of a thread has to fit in front of its state");
 #include "xl_tsd_guard.h"
 
 static uint32_t xl_threads_created;
 static uint32_t xl_threads_ended;
 static uint32_t xl_threads_stack_live;
+static uint32_t xl_threads_stack_deepest;
+static struct xl_thread *xl_threads_list;
+static pthread_mutex_t xl_threads_lock = PTHREAD_MUTEX_INITIALIZER;
 
 int xl_stats_enabled(void)
 {
@@ -74,13 +77,72 @@ int xl_stats_enabled(void)
     return xl_diag_on(&stats);
 }
 
-static void xl_threads_report(const char *what, size_t stack, size_t host_stack)
+static void xl_threads_report(const char *what, size_t stack, size_t used)
 {
     uint32_t created = __atomic_load_n(&xl_threads_created, __ATOMIC_RELAXED);
     uint32_t ended = __atomic_load_n(&xl_threads_ended, __ATOMIC_RELAXED);
-    dprintf(2, "xlate: threads: %s (guest stack %lu KiB, host stack %lu KiB): %u live, %u created, %u ended, %lu KiB of guest stack live\n",
-            what, (unsigned long)(stack >> 10), (unsigned long)(host_stack >> 10), created - ended, created, ended,
-            (unsigned long)(__atomic_load_n(&xl_threads_stack_live, __ATOMIC_RELAXED) >> 10));
+    dprintf(2, "xlate: threads: %s (guest stack %lu KiB, %lu KiB of it used): %u live, %u created, %u ended, %lu KiB of guest stack live, %lu KiB the deepest use of one\n",
+            what, (unsigned long)(stack >> 10), (unsigned long)(used >> 10), created - ended, created, ended,
+            (unsigned long)(__atomic_load_n(&xl_threads_stack_live, __ATOMIC_RELAXED) >> 10),
+            (unsigned long)(__atomic_load_n(&xl_threads_stack_deepest, __ATOMIC_RELAXED) >> 10));
+}
+
+static size_t xl_thread_stack_used(const struct xl_thread *thread)
+{
+    size_t used = 0;
+    if (!xl_stack_used(thread->stack, thread->stack_size, thread->guard_size, &used))
+        return 0;
+    uint32_t deepest = __atomic_load_n(&xl_threads_stack_deepest, __ATOMIC_RELAXED);
+    while (used > deepest && !__atomic_compare_exchange_n(&xl_threads_stack_deepest, &deepest, (uint32_t)used, 1, __ATOMIC_RELAXED, __ATOMIC_RELAXED)) {
+    }
+    return used;
+}
+
+static void xl_threads_stack_report(void)
+{
+    char line[160];
+    unsigned live = 0;
+    size_t mapped = 0, deepest = 0, deepest_of = 0;
+    pthread_mutex_lock(&xl_threads_lock);
+    for (struct xl_thread *thread = xl_threads_list; thread; thread = thread->next) {
+        size_t used = xl_thread_stack_used(thread);
+        live++;
+        mapped += thread->stack_size;
+        if (used >= deepest) {
+            deepest = used;
+            deepest_of = thread->stack_size;
+        }
+    }
+    pthread_mutex_unlock(&xl_threads_lock);
+    int length = snprintf(line, sizeof line, "xlate: guest stacks: %u live, %lu KiB mapped; the deepest live one has used %lu KiB of %lu KiB, the deepest ever %lu KiB\n",
+                          live, (unsigned long)(mapped >> 10), (unsigned long)(deepest >> 10), (unsigned long)(deepest_of >> 10),
+                          (unsigned long)(__atomic_load_n(&xl_threads_stack_deepest, __ATOMIC_RELAXED) >> 10));
+    write(2, line, (size_t)length);
+}
+
+unsigned xl_word_count(unsigned *slots);
+unsigned long xl_alias_used(unsigned long *size);
+
+static void xl_budget_report(void)
+{
+    char line[240];
+    unsigned slots = 0;
+    unsigned long aliases = 0, arena = 0;
+    unsigned words = xl_word_count(&slots);
+    unsigned long alias_used = xl_alias_used(&aliases);
+    size_t page = (size_t)sysconf(_SC_PAGESIZE);
+    for (unsigned long at = xl_guest_arena_low; at < xl_guest_arena_high; at += sizeof line * page) {
+        unsigned long count = (xl_guest_arena_high - at) / page < sizeof line ? (xl_guest_arena_high - at) / page : sizeof line;
+        if (mincore((void *)at, count * page, line))
+            break;
+        for (unsigned long i = 0; i < count; i++) {
+            if (line[i] & MINCORE_INCORE)
+                arena = at + (i + 1) * page - xl_guest_arena_low;
+        }
+    }
+    int length = snprintf(line, sizeof line, "xlate: budget: metadata arena %lu of %lu KiB touched, opaque words %u of %u, aliases %lu of %lu KiB (0 of 0 is not set up yet)\n",
+                          arena >> 10, (xl_guest_arena_high - xl_guest_arena_low) >> 10, words, slots, alias_used >> 10, aliases >> 10);
+    write(2, line, (size_t)length);
 }
 
 #define XL_PROFILE_BUCKETS 1024
@@ -186,6 +248,8 @@ static void xl_profile_report(unsigned samples, uint32_t window_messages, uint32
         best->count = 0;
     }
     xl_stats_window_report();
+    xl_threads_stack_report();
+    xl_budget_report();
     memset(xl_profile_buckets, 0, sizeof xl_profile_buckets);
 }
 
@@ -234,13 +298,19 @@ static void xl_state_destroy(void *value)
 {
     struct xl_thread *thread = (struct xl_thread *)((char *)value - XL_THREAD_HEADER);
     size_t stack = thread->stack_size;
+    size_t used = xl_stats_enabled() ? xl_thread_stack_used(thread) : 0;
+    pthread_mutex_lock(&xl_threads_lock);
+    *thread->link = thread->next;
+    if (thread->next)
+        thread->next->link = thread->link;
+    pthread_mutex_unlock(&xl_threads_lock);
     munmap(thread->stack, thread->stack_size);
     xl_tsd_free(thread->tsd_pages);
     free(thread);
     __atomic_fetch_add(&xl_threads_ended, 1, __ATOMIC_RELAXED);
     __atomic_fetch_sub(&xl_threads_stack_live, (uint32_t)stack, __ATOMIC_RELAXED);
     if (xl_stats_enabled())
-        xl_threads_report("ended", stack, 0);
+        xl_threads_report("ended", stack, used);
 }
 
 static void xl_thread_state_failed(const char *what, size_t size)
@@ -273,17 +343,22 @@ State *xl_current_state(void)
     if (posix_memalign((void **)&thread, 16, XL_THREAD_HEADER + XL_STATE_SIZE))
         xl_thread_state_failed("the allocation of the state", XL_THREAD_HEADER + XL_STATE_SIZE);
     memset(thread, 0, XL_THREAD_HEADER + XL_STATE_SIZE);
-    size_t first = pthread_main_np() ? XL_GUEST_STACK_MAIN
-                                     : xl_stack_first(pthread_get_stacksize_np(pthread_self()), XL_GUEST_STACK_FLOOR, XL_GUEST_STACK_THREAD);
-    thread->stack = xl_stack_map(first, XL_GUEST_STACK_FLOOR, xl_map_anonymous, &thread->stack_size, &thread->guard_size);
+    size_t size = xl_stack_length(pthread_get_stacksize_np(pthread_self()), (size_t)sysconf(_SC_PAGESIZE));
+    thread->stack = xl_stack_map(size, xl_map_anonymous, &thread->guard_size);
     if (thread->stack == MAP_FAILED)
-        xl_thread_state_failed("the mapping of the guest stack", XL_GUEST_STACK_FLOOR);
-    size_t size = thread->stack_size;
+        xl_thread_state_failed("the mapping of the guest stack with its guard page, as long as the thread's own stack,", size);
+    thread->stack_size = size;
+    pthread_mutex_lock(&xl_threads_lock);
+    thread->next = xl_threads_list;
+    thread->link = &xl_threads_list;
+    if (thread->next)
+        thread->next->link = &thread->next;
+    xl_threads_list = thread;
+    pthread_mutex_unlock(&xl_threads_lock);
     __atomic_fetch_add(&xl_threads_created, 1, __ATOMIC_RELAXED);
     __atomic_fetch_add(&xl_threads_stack_live, (uint32_t)size, __ATOMIC_RELAXED);
-    if (size < first || xl_stats_enabled())
-        xl_threads_report(size < first ? "created with a halved stack" : "created", size,
-                          pthread_main_np() ? 0 : pthread_get_stacksize_np(pthread_self()));
+    if (xl_stats_enabled())
+        xl_threads_report("created", size, 0);
     thread->tsd_pages = xl_tsd_alloc();
     state = (State *)((char *)thread + XL_THREAD_HEADER);
     XL_REG(state, TPIDRRO_EL0) = xl_tsd_base(thread->tsd_pages);
@@ -405,7 +480,7 @@ static void xl_crash_handler(int signal, siginfo_t *info, void *context)
             struct xl_thread *thread = (struct xl_thread *)((char *)current - XL_THREAD_HEADER);
             uintptr_t low = (uintptr_t)thread->stack, fault = (uintptr_t)info->si_addr;
             if (thread->guard_size && fault >= low && fault < low + thread->guard_size)
-                dprintf(fd, "xlate: the guest stack of this thread overflowed: it holds %lu bytes (0x%lx to 0x%lx) and the fault is in its guard page; guest frames deeper than that need a larger XL_GUEST_STACK_THREAD (XL_GUEST_STACK_MAIN for the main thread) in runtime.c\n",
+                dprintf(fd, "xlate: the guest stack of this thread overflowed: it holds %lu bytes (0x%lx to 0x%lx), as many as the thread's own stack, and the fault is in its guard page; guest frames deeper than that need a thread with a larger stack\n",
                         (unsigned long)thread->stack_size, (unsigned long)low, (unsigned long)(low + thread->stack_size));
         }
     }

@@ -37,7 +37,8 @@ local function guest_header(file, list)
                 local data = io.readfile(file, {encoding = "binary"})
                 local at = section.offset + 1
                 return {offset = section.offset, size = section.size, magic = word(data, at), version = word(data, at + 4), low = word(data, at + 8),
-                        high = word(data, at + 12), count = word(data, at + 16), data = data}
+                        high = word(data, at + 12), count = word(data, at + 16), images_high = word(data, at + 20), arena = word(data, at + 24),
+                        word_slots = word(data, at + 28), aliases = word(data, at + 32), data = data}
             end
         end
     end
@@ -221,11 +222,42 @@ function main(out, ...)
     end
     local base = tonumber(os.getenv("XL_BASE") or "0x10000000")
     local guest = guest_header(library, list)
-    if not guest or guest.magic ~= 0x49474c58 or guest.version ~= 1 or guest.count == 0 then
-        corpus.fail("the section __XGUEST,__image does not start with a version 1 header with segments")
+    if not guest or guest.magic ~= 0x49474c58 or guest.version ~= 2 or guest.count == 0 then
+        corpus.fail("the section __XGUEST,__image does not start with a version 2 header with segments")
     end
     if guest.low % 0x4000 ~= 0 or guest.high % 0x4000 ~= 0 or guest.low < base or guest.low >= guest.high then
         corpus.fail("the guest image range 0x%x-0x%x is not whole 16 KiB granules from the base 0x%x up", guest.low, guest.high, base)
+    end
+    local writable, previous_end, mapped = 0, guest.low, 0
+    local records = {}
+    for index = 0, guest.count - 1 do
+        local at = guest.offset + 1 + 36 + index * 20
+        table.insert(records, {address = word(guest.data, at), size = word(guest.data, at + 4), protection = word(guest.data, at + 16)})
+    end
+    table.sort(records, function(a, b) return a.address < b.address end)
+    for _, record in ipairs(records) do
+        if record.protection % 4 >= 2 then
+            writable = writable + record.size
+        end
+        previous_end = math.max(previous_end, record.address + record.size)
+        mapped = mapped + record.size
+    end
+    if previous_end ~= guest.images_high then
+        corpus.fail("the header says the guest images end at 0x%x and the last segment ends at 0x%x", guest.images_high, previous_end)
+    end
+    if mapped ~= guest.images_high - guest.low then
+        corpus.fail("the guest images of a library lie one after another, and 0x%x bytes of 0x%x-0x%x belong to no segment", guest.images_high - guest.low - mapped,
+                    guest.low, guest.images_high)
+    end
+    if guest.arena ~= writable then
+        corpus.fail("the metadata arena of a library that states none is as large as the writable segments of its guest images (0x%x bytes), and the header says 0x%x",
+                    writable, guest.arena)
+    end
+    if guest.word_slots ~= 262144 or guest.aliases ~= 4 * 1048576 then
+        corpus.fail("a library that states neither has 262144 opaque words and 4 MiB of aliases, and the header says %d and 0x%x", guest.word_slots, guest.aliases)
+    end
+    if guest.high ~= guest.images_high + guest.arena + guest.word_slots * 32 + guest.aliases then
+        corpus.fail("the range the loader reserves ends at 0x%x, not where the images, the arena, the words and the aliases end", guest.high)
     end
     local symbols = {}
     local categories = 0
@@ -342,16 +374,16 @@ function main(out, ...)
     end
 
     local range = string.format("%x-%x", guest.low, guest.high)
-    local newer = o("RCFixtureV2.dylib")
-    local patched = guest.data:sub(1, guest.offset + 4) .. "\2\0\0\0" .. guest.data:sub(guest.offset + 9)
+    local newer = o("RCFixtureNewer.dylib")
+    local patched = guest.data:sub(1, guest.offset + 4) .. "\3\0\0\0" .. guest.data:sub(guest.offset + 9)
     io.writefile(newer, patched, {encoding = "binary"})
     os.runv("chmod", {"u+w", newer})
     corpus.sign(e, newer)
-    device.copy(newer, remote .. "/RCFixtureV2.dylib")
+    device.copy(newer, remote .. "/RCFixtureNewer.dylib")
 
     local controls = {
         {"a guest range another mapping holds", remote .. "/RCFixture.dylib 20 @" .. range .. " --expect=busy", {"occupy", "reserve.refused", "load.refused", "class.absent", "occupant.intact"}},
-        {"a library with a guest image format this loader does not read", remote .. "/RCFixtureV2.dylib 20 --expect=image", {"reserve.refused", "load.refused", "class.absent"}},
+        {"a library with a guest image format this loader does not read", remote .. "/RCFixtureNewer.dylib 20 --expect=image", {"reserve.refused", "load.refused", "class.absent"}},
         {"a library whose registry is not next to it", remote .. "/alone/RCFixture.dylib 20 --expect=registry", {"reserve.refused", "load.refused", "class.absent"}},
         {"an init without a reservation, over a mapping with data", remote .. "/RCFixture.dylib 20 +" .. range .. " --expect=direct", {"occupy", "dlopen", "init.refused", "init.final", "occupant.intact"}},
     }

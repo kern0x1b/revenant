@@ -13,6 +13,9 @@ What `XL_LIBRARY=1` builds, the loader API, and what was measured on the iPhone 
 | `XL_LIBRARY` | build a dylib instead of an executable | unset |
 | `XL_BASE` | address of the first guest segment: where the loader maps the guest image | `0x10000000` |
 | `XL_INSTALL_NAME` | install name of the output | `@rpath/<name>.dylib` |
+| `XL_METADATA_ARENA` | bytes of the arena for the metadata the guest's Swift runtime builds ([the budget](#the-address-space-budget-of-a-loaded-library)) | the writable segments of the guest images |
+| `XL_WORD_SLOTS` | how many distinct opaque 64-bit words the guest may hand to the host, a power of two, 32 bytes of address space each | 262144 |
+| `XL_ALIAS_ARENA` | bytes for the 8-aligned copies of host constants | 4 MiB |
 | `XL_SWIFT_HOST_ANCESTORS` | Swift classes with an Objective-C ancestor are host objects with a twin | unset |
 | `XL_REPLACES` | guest images that stand for system libraries | unset |
 | `XL_NAMESPACE` | prefix of the Objective-C class names of every guest image but the first (the runtime and the overlays); `none` leaves the names as they are | `XLG.` |
@@ -248,9 +251,19 @@ aligned; `xlate` refuses a segment that is not).
 
 | Part | Layout |
 |---|---|
-| header (at the start of the section) | `magic` `XLGI` (`0x49474c58`), `version` (1), `low`, `high` (the range of the guest, `high` is the end of the last segment), `segment_count` |
+| header (at the start of the section) | `magic` `XLGI` (`0x49474c58`), `version` (2), `low`, `high` (the range the loader reserves), `segment_count`, `images_high` (the end of the last segment), `arena` (bytes), `word_slots` (a count), `aliases` (bytes) |
 | `segment_count` records, right after the header | `address`, `size` (in the guest), `offset` (of its bytes from the start of the section), `length` (bytes in the file: the segment without its zero tail, up to the granule), `protection` (`1` read, `2` write; what the segment has when the library is ready) |
 | bytes | each segment's `length` bytes at its `offset`; a segment that is all zeros has `length` 0 |
+
+`[low, high)` is everything of a fixed size that the loaded library holds beside its own dylib, in this order: the guest
+images up to `images_high`; the arena of `arena` bytes that the guest's Swift runtime builds its metadata in; the table of
+opaque 64-bit words (`word_slots` slots of 32 bytes: 16 of an inaccessible address that stands for the word on the host's
+side, 8 of the word, 8 of the index); the `aliases` bytes of 8-aligned copies of host constants. `high` is exactly where
+the last ends (`xl_guest_budget_fits`), so the header is the statement of what the library takes, and
+[the budget](#the-address-space-budget-of-a-loaded-library) says where each number comes from. In a library `xlate` lays the
+guest images one after another at the granule, each where the segments of the one before end (an image's `__LINKEDIT` is
+read by `xlate` and is not part of the guest), so the images of a library have no hole between them; a program that is
+not a library keeps its images at megabytes, and has no header.
 
 The slots are not in the section. `xl_guest_slots` (`{address, value}` words, sorted by address) and `xl_guest_slot_count`
 are host data of the dylib, because the `value` of a slot is the address of a symbol (a class, an `xl_objc_ro_*` structure,
@@ -271,12 +284,15 @@ ordinary bytes at their own addresses, and the generated code refers to them by 
    ([when each is right](#choosing-xl_base)).
 2. `xl_load` gives the host reservation back and `dlopen`s the dylib: dyld takes the first hole that fits, which is the one just
    given back. It calls `xl_library_init`.
-3. `xl_library_init` checks the header again (`magic`, `version`, that every segment is inside `[low, high)`, that every slot
-   is inside it), checks that `[low, high)` is one untouched `VM_PROT_NONE` range (it writes nothing if it is not), then for
-   each segment: `mmap(address, length, READ|WRITE, MAP_FIXED|MAP_PRIVATE)` of the file at the segment's `offset`, and
-   `vm_protect` read-write for the zero tail. It writes every slot, applies the segment's `protection`, `dlopen`s the
-   registry (libobjc registers the guest's classes, protocols and categories), runs the guest's initializers (once, behind a
-   lock) and returns.
+3. `xl_library_init` checks the header again (`magic`, `version`, that every segment and every slot is inside
+   `[low, images_high)`, that the arena, the words and the aliases end at `high`), checks that `[low, high)` is one
+   untouched `VM_PROT_NONE` range (it writes nothing if it is not), then for each segment:
+   `mmap(address, length, READ|WRITE, MAP_FIXED|MAP_PRIVATE)` of the file at the segment's `offset`, and `vm_protect`
+   read-write for the zero tail. It writes every slot, makes the arena, the words with their index and the aliases
+   read-write where they lie (the 16 bytes of address of each word stay inaccessible), applies the segment's `protection`,
+   `dlopen`s the registry (libobjc registers the guest's classes, protocols and categories), runs the guest's initializers
+   (once, behind a lock) and returns. Nothing the runtime needs later of a fixed size is taken after this point, so a
+   process without room for the library learns it from the status of `xl_load`, before any guest code has run.
 
 Pages of the guest that nothing touches stay clean file pages: they are not in the resident set and the system can drop them.
 
@@ -297,8 +313,9 @@ not an untouched inaccessible range when the library attaches; or no hole of the
 calls return it, and the guest range is given back. A status before that (a busy range, no hole for the host part, a failed `dlopen`) is not: the
 next `xl_load` tries again, and between the two a host that did not call `xl_reserve` holds nothing.
 
-The library reports `XL_LIBRARY_OK`, `XL_LIBRARY_BAD_FORMAT`, `XL_LIBRARY_NOT_RESERVED` or `XL_LIBRARY_MAP_FAILED` from
-`xl_library_init` (`xl_guest_image.h`); the loader turns them into the statuses above. Called before `xl_load`
+The library reports `XL_LIBRARY_OK`, `XL_LIBRARY_BAD_FORMAT` (which includes an arena, a word table and aliases that do not
+end at `high`), `XL_LIBRARY_NOT_RESERVED` or `XL_LIBRARY_MAP_FAILED` (a segment, the arena, the words or the aliases
+could not be made accessible) from `xl_library_init` (`xl_guest_image.h`); the loader turns them into the statuses above. Called before `xl_load`
 by a host that never reserved, `xl_library_init` answers `XL_LIBRARY_NOT_RESERVED` and maps nothing, and any entry of the
 library aborts with "the guest image of the translated library is not attached".
 
@@ -401,8 +418,8 @@ prints the host registers and the guest frames and does not change the timing).
 
 `xl-stats` (the flag file `/private/var/revenant/xl-stats`, or `XL_STATS` in the environment; read once, so it has to exist
 before the process starts) measures what the bridge costs without a line per message. For every thread that starts or
-ends it prints `xlate: threads: created|ended (guest stack N KiB, host stack M KiB): L live, C created, E ended, S KiB of
-guest stack live`. Each message that the guest sends to a host object is timed from the entry of `xl_h_objc_msgSend` to the
+ends it prints `xlate: threads: created|ended (guest stack N KiB, U KiB of it used): L live, C created, E ended, S KiB of
+guest stack live, D KiB the deepest use of one` (the use is read when a thread ends and in each window below). Each message that the guest sends to a host object is timed from the entry of `xl_h_objc_msgSend` to the
 decision (the routing); a message sent dynamically is timed again across the host call, and after the 1,000th, the
 5,000th and every 10,000th dynamic message the process prints `xlate: messages: N in all, D of them dynamic; routing R us
 in all (A us each), host call H us in the dynamic ones (B us each)`, followed by the four dynamic messages (class and
@@ -428,10 +445,11 @@ and where the time goes when it is not in messages.
 build/recompiler/corpus/recaptcha-dropN/xl/RecaptchaEnterprise.symbols.txt STDERR.txt` takes every `samples at … (Image+0xOFFSET …)`
 line whose image name contains `RecaptchaEnterprise` (a third argument names another part), finds the greatest text symbol of
 the symbols file at or below the offset, and prints it with the distance into the function, the guest address a `_sub_<address>`
-symbol stands for and the guest image that address is in (from the base of the drop, which is the lowest `_sub_` address
-of the symbols file rounded down to 1 MiB: `+0x0` the SDK, `+0x200000` libswiftCore, `+0x800000` libc++,
-`+0xa00000` CoreFoundation, `+0xf00000` the Foundation overlay, `+0x1600000` the libxl-guest stubs: the layout of the
-reCAPTCHA drops). Lines of a system image keep the name the process gave them. The report has one block per window of 5 s
+symbol stands for and the guest image that address is in: from `<name>.images.txt` next to the symbols file, which
+`translate.lua` writes for a library (`xlate --images-out`: the low address, the end and the file name of each guest
+image), and for a drop that has no such file from the layout the reCAPTCHA drops had up to drop36 (a megabyte between
+images: `+0x0` the SDK, `+0x200000` libswiftCore, `+0x800000` libc++, `+0xa00000` CoreFoundation, `+0xf00000` the
+Foundation overlay, `+0x1600000` the libxl-guest stubs, from the lowest `_sub_` address rounded down to 1 MiB). Lines of a system image keep the name the process gave them. The report has one block per window of 5 s
 and then the functions with their samples added up over all windows. The offsets are exact only to the 64-byte bucket, so
 a function is named, not an instruction. `--self-test` runs it on a made-up profile. The symbols file is the one
 `translate.lua` writes before `strip -x`, of the same drop as the library that ran, because the symbol names carry the
@@ -486,7 +504,8 @@ whether an object is released twice or too early: `proxy-new`, `proxy-live` (a p
 and `proxy-free` (with the block's size), the `retain`, `release` and `autorelease` the guest sends through the bridge, `pool-push`,
 `pool-pop`, the entries of the pool that a `pool-pop` drains (`pool-entry`, read from the pages of the autorelease pool of iOS 6: a
 token whose page has not the pool's magic is `pool-pop-bad-token`), `alloc-object`, `create-instance` and `object-dispose`. The events go into a
-ring of 262,144 entries (about 7 MiB of zero pages that nothing touches while the switch is off). The ring is written to stderr and to
+ring of 262,144 entries (7.7 MiB with the records of the pools, mapped when the switch is found on and not at all while it is off;
+before this the ring was 8 MiB of the library's `__bss`, address space of every process that loaded the library). The ring is written to stderr and to
 `/private/var/revenant/xl-journal.log` when the process gets `SIGABRT`, `SIGSEGV` or `SIGBUS` (the handler runs once, then the signal
 takes its way as before): a header line with the thread and the counts, the last 3,000 events, and every event of the objects that the last
 `pool-pop` of the crashing thread drained, one line each: `xlate-journal: #SEQUENCE t=THREAD OP POINTER extra=… caller=… isa=… CLASS`, ended
@@ -512,34 +531,44 @@ measure whether one is there. The library test runs the host with the switch and
 
 ## The guest stack of a thread
 
-A thread that enters the guest maps its own stack: 16 MiB for the main thread (`XL_GUEST_STACK_MAIN`) and, for every other,
-twice the stack the thread itself has (`pthread_get_stacksize_np`: 512 KiB for a libdispatch worker, so 1 MiB), rounded up
-to 64 KiB, at least 256 KiB and at most 4 MiB (`XL_GUEST_STACK_THREAD`), in `src/runtime/runtime.c` and
-`xl_stack_first` in `xl_tsd_guard.h`. The host stack bounds the depth of a guest call chain first, because every lifted call
-is a host call, so twice it leaves a margin. Before this rule every worker took 4 MiB: in a 10-execute run of the Telegram
-app (38 threads, 1.05 GB virtual) three mappings failed with errno 12 and the last stack was 1 MiB anyway. The mapping is
-virtual and touched on use. When it fails
-the runtime says so on stderr (`xlate: the guest stack of a thread could not be mapped with N bytes (errno E), trying half`)
-and tries half the size, down to 256 KiB (`XL_GUEST_STACK_FLOOR`); below that the thread stops with a message that names
-the call. The lowest page of each stack is `PROT_NONE`, a guard page. A `SIGSEGV` or `SIGBUS` whose address is in that
-page prints, before the crash dump, `xlate: the guest stack of this thread overflowed: it holds N bytes (0x… to 0x…) and the
-fault is in its guard page; …`, so a stack overflow is told from a bad pointer. The mapping, the halving and the guard are one
-function, `xl_stack_map` in `src/runtime/xl_tsd_guard.h`, which the `tsdguard` check runs on the host with a mapper that
-fails above a limit and a mapper that always fails.
+A thread that enters the guest maps its own guest stack, as long as the stack the thread itself has
+(`pthread_get_stacksize_np`, rounded up to a page) plus one page below it that is `PROT_NONE`: about 1 MiB for the
+main thread of an iOS 6 process (its own stack is a region of 1,020 KiB on the 4S), 512 KiB and a page for a thread with the default size (a libdispatch worker, an
+`NSThread`), and what a thread was created with when its creator set a size. The rule is `xl_stack_length` in
+`src/runtime/xl_tsd_guard.h`, and the reason for it is what the guest was built for: on a 64-bit phone the same thread
+would run the same guest frames on this very stack, together with the frames of the system frameworks, which here are on
+the host stack. So the guest never needs more guest stack than the thread has stack, and a size above that is address
+space nothing can use. The sizes before this rule were 16 MiB for the main thread and twice the thread's own for every
+other, and when a mapping failed it was tried again with half; in the M4 acceptance of the Telegram app the main
+thread's guest stack had used 16 KiB of its 8 MiB after `fetchClient` and `execute`, and a worker's 4 to 24 KiB of
+its 1 MiB (`m4p121reg-1` and `m4p121ctl-1`, the resident pages of each stack in the region maps).
+
+A mapping that fails is not replaced by a smaller one: the thread stops with
+`xlate: cannot set up a thread for translated code: the mapping of the guest stack with its guard page, as long as the thread's own stack, of N bytes failed, errno E`,
+the count of threads and the address map. A guest stack smaller than the thread's own would overflow where the program
+was correct. The page below the stack is always inaccessible (a stack whose guard cannot be protected is not used), so a
+guest frame that goes below the stack faults instead of writing into the neighbouring mapping. A `SIGSEGV` or `SIGBUS`
+whose address is in that page prints, before the crash dump of `xl-crash`,
+`xlate: the guest stack of this thread overflowed: it holds N bytes (0x… to 0x…), as many as the thread's own stack, and the fault is in its guard page; …`,
+so a stack overflow is told from a bad pointer. The mapping and the guard are one function, `xl_stack_map`, and
+`xl_stack_used` reads how deep a stack has been written (the lowest page of it that is in memory, by `mincore`); the
+`tsdguard` check runs all three on the Mac: the lengths for five thread sizes, the guard, a mapper that refuses above a
+limit (no smaller stack comes back), a mapper that always refuses, and the depth after writes at five places.
 
 The stack, the thread-specific page and the state of a thread are released together when the thread ends: they hang on a
 `pthread_key_t` whose destructor (`xl_state_destroy`) unmaps the stack, unmaps the page and frees the state, so a thread
 that came and went (an `NSURLSession` or `WebThread` worker, a Dispatch worker that the system retires) leaves nothing
 behind. A guest call that runs on the thread after the destructor, from the destructor of another key, makes a new state
 that the next round of destructors (the system runs up to four) releases in turn. The runtime counts the threads it set up
-(`created`, `ended`, the guest stack of the live ones); the count is printed with every stack that had to be halved and with
-the failure of a thread's setup, and for every thread that starts or ends under the `xl-stats` flag (below), where
+(`created`, `ended`, the guest stack of the live ones); the count is printed with
+the failure of a thread's setup, and for every thread that starts or ends under the `xl-stats` flag (above), where
 `created - ended` is the number of live threads, to be compared with the thread count of the process: a difference that
 grows with each `execute` would be a leak.
 
-The reason for the sizes is the address space of a 32-bit process of iOS 6, about 768 MB below the shared cache, which the
-lifted library, the guest arena, the heap and the stacks of every worker share. The real SDK runs more than a dozen threads
-(a crash report of the 4S numbers 18), and each takes a stack, so the size of a worker's stack is paid that many times.
+The address space of a 32-bit process of iOS 6 is about 768 MB below the shared cache, which the lifted library, its
+reservation, the heap and the stacks of every thread share. The real SDK runs more than a dozen threads in the guest (14
+to 19 in the M4 acceptance), and each takes a guest stack beside its own, so the size of a worker's guest stack is paid
+that many times: [the budget](#the-address-space-budget-of-a-loaded-library) counts it.
 
 ## `sysctl` and `sysctlbyname`
 
@@ -611,7 +640,7 @@ Ten scenarios, each in a process of its own:
 | load without a reservation, `dlopen` fails | `XL_LOAD_DLOPEN_FAILED` and nothing held; a library without `xl_library_init` is refused and nothing held; the next load succeeds |
 | a kept reservation, `dlopen` fails | a host that reserved keeps the guest range and the host room |
 | the library fails to attach | the status is final, the guest range is given back |
-| refusals take nothing | an unknown format version, a missing registry, a second library while one is reserved |
+| refusals take nothing | an unknown format version, a missing registry, a header whose images, arena, words and aliases do not end at `high`, a second library while one is reserved |
 | guest range only | `XL_LOADER_HOST_RESERVE=0` |
 
 The loader of before `xl_release` (with an empty `xl_release` added so that it links) fails four of the ten: release and reserve again, the load
@@ -628,7 +657,7 @@ in every launch:
 | Control | Host argument | Proves |
 |---|---|---|
 | a range another mapping holds | `@LOW-HIGH` over the guest range, `--expect=busy` | `xl_reserve` refuses, the message names the holder, the occupant's pages are untouched (`occupant.intact`), the class is not registered |
-| a guest image format this loader does not read | a copy of the library whose `version` word is 2, `--expect=image` | `xl_reserve` refuses with the version found, nothing is registered |
+| a guest image format this loader does not read | a copy of the library whose `version` word is 3, `--expect=image` | `xl_reserve` refuses with the version found, nothing is registered |
 | a library whose registry is not next to it | the library alone in a folder, `--expect=registry` | `xl_reserve` refuses and names the missing file, no crash |
 | an init without a reservation, over a mapping with data | `+LOW-HIGH` (a read-write mapping with a sentinel), `--expect=direct` | `dlopen` of the library and the call of `xl_library_init` without `xl_reserve` is refused, and the occupant's data is intact |
 
@@ -648,6 +677,10 @@ thread that never ran translated code: the handler says `xlate: this thread has 
 guest state` and prints no guest registers; before 2026-11-19 it made a guest state for that thread to print them, and
 so mapped a guest stack inside the crash, which in a process without address space was a second failure on top of
 the first (`the guest stack of a thread could not be mapped` in the crash output of the M4 acceptance).
+
+On the Mac the check also reads the header of the library it built: version 2, the images one after another with no
+byte between them that belongs to no segment, an arena as large as the writable segments, 262,144 words, 4 MiB of
+aliases, and `high` where the four end.
 
 | Name | Proves |
 |---|---|
@@ -902,9 +935,95 @@ cost on the phone is a few seconds of one core in the background. If it ever has
 dictionary lookups and the lock of `xl_h_objc_msgSend` and `xl_route` (the variadic table, the guest imps, the shadow imps,
 the variant cache under `xl_variant_lock`), and the `getenv("XL_TRACK_DIAG")` that the function calls on every message.
 
+## The address-space budget of a loaded library
+
+What a process gives the library is stated in two places and nowhere else: the file (the dylib's own size, and
+`[low, high)` of the guest image's header) and the number of threads that enter the guest.
+
+| Part | Size | Where the number comes from | When it is taken, and what a failure is |
+|---|---|---|---|
+| the host part (the dylib: lifted code, bridges, data, the bytes of the guest image, link data) | the dylib's segments | the linker | `dlopen` in `xl_load`: `XL_LOAD_RANGE_BUSY` (no hole of that size) or `XL_LOAD_DLOPEN_FAILED` |
+| the guest images | `images_high - low` | `xlate`: the images' own segments, one after another at the 16 KiB granule | with `[low, high)`, at the start of `xl_load`: `XL_LOAD_RANGE_BUSY` with the holder |
+| the metadata arena | `arena` | `xlate --metadata-arena` (`XL_METADATA_ARENA`); when none is stated, as many bytes as the writable segments of the guest images (none for a library without writable data) | the same reservation |
+| the opaque 64-bit words | `word_slots` × 32 bytes | `xlate --word-slots` (`XL_WORD_SLOTS`); when none is stated, 262,144 | the same reservation |
+| the aliases | `aliases` | `xlate --alias-arena` (`XL_ALIAS_ARENA`); when none is stated, 4 MiB | the same reservation |
+| a guest stack for each thread in the guest | the thread's own stack and a page | `pthread_get_stacksize_np` ([the rule](#the-guest-stack-of-a-thread)) | when the thread first enters the guest: the thread stops with a message that names the size |
+| the thread-specific pages of each such thread | 2 pages | the audited offset (`xl_tsd_offset.h`) | the same moment |
+
+Before `xl_load` and after `xl_load` failed with a status that is not final, the library holds nothing (a host that calls
+`xl_reserve` holds `[low, high)` and the host part's size from that call on, by its own choice). A loaded library is not
+unloaded: its classes are registered with the Objective-C runtime and its threads run, so what it holds it holds until
+the process ends.
+
+Three of the numbers are not derived from the library, because nothing in the library bounds them, and each is a limit
+whose end is a message, not a corruption:
+
+- **The arena** holds the metadata the guest's Swift runtime builds beyond its first 64 KiB pool (generic types, witness
+  tables), which have to lie where the runtime tells a class of the guest from a class of the host by the address
+  ([why](../../explanation/recompiler/how-it-works.md)). It was 64 MiB taken anywhere when the library attached, with a
+  failure that nobody saw. The default is in proportion to the library (the runtime may build as much again as the
+  images carry of writable data: 1.25 MiB for the reCAPTCHA SDK); the measurement is that the SDK had not touched one
+  page of it after `fetchClient` and `execute` (`m4p121reg-1`, `m4p121ctl-1`: `res=0K` of the 64 MiB region). Its end is
+  the runtime's `the metadata arena of the guest (N bytes) is exhausted`.
+- **The words** are the 64-bit values that the guest hands to the host where the host has a pointer, each a slot for as
+  long as the process lives. 262,144 is the number the runtime had before the header carried it; the SDK had touched 16
+  KiB of the words (at most 2,048 of them) after `fetchClient` and `execute`. Its end is
+  `… needs a slot of the table of opaque 64-bit words, which holds N distinct words and is full`.
+- **The aliases** are the 8-aligned copies of the host's constant strings and protocols that the guest was handed. 4 MiB
+  is the number the runtime had; the SDK had touched 16 KiB. Its end is
+  `xlate: the arena of 8-aligned copies of host constants is full`.
+
+Under `xl-stats` every window prints what is in use, so that a drop's acceptance run is also the measurement the next
+drop's numbers are stated from:
+`xlate: guest stacks: L live, M KiB mapped; the deepest live one has used U KiB of S KiB, the deepest ever D KiB` and
+`xlate: budget: metadata arena A of S KiB touched, opaque words N of M, aliases U of S KiB`. The two tables keep their
+old sizes until a run of many `execute` calls says how they grow; with the numbers in the header, giving them less is an
+option of the translation, not a change of the runtime.
+
+For the reCAPTCHA Enterprise SDK: the sizes of drop36, measured in the region maps of the M4 acceptance, and what the
+same library takes with this layout, computed from those sizes and not yet measured on the phone:
+
+| Part | drop36 | with the budget |
+|---|---|---|
+| host part | 62.95 MiB (41.5 lifted text, 8.7 data of which 8.0 `__bss`, 11.6 the bytes of the guest image, 1.2 link data) | about 55.3 MiB (the 7.6 MiB of the journal's tables are no longer `__bss`) |
+| guest images | 22.17 MiB, of them 10.20 between the images | 11.97 MiB, nothing between the images |
+| metadata arena | 64 MiB, anywhere | 1.25 MiB, in the reservation |
+| opaque words, aliases | 8 MiB and 4 MiB, anywhere, at first use | 8 MiB and 4 MiB, in the reservation |
+| main thread's guest stack | 16 MiB (8 after a failed mapping) | about 1 MiB |
+| guest stack of each other thread | 1 MiB | 512 KiB and a page |
+| in all, with 18 other threads in the guest | 195 MiB | about 91 MiB |
+
+The Telegram app that the SDK is loaded into has, signed in and with its chat list drawn, 180 to 190 MiB free below
+`0x30000000` from its twentieth second on (`m4p121ctl-1`): 195 MiB did not fit, and the runtime found out one failed
+mapping at a time; 91 MiB fits, and the 81 MiB of it that are not stacks are taken by `xl_load` or refused by it.
+
+Two things would take more off and are not built:
+
+- **The bytes of the guest image stay mapped twice.** The dylib has them as its `__XGUEST` segment (11.6 MiB for the SDK),
+  and the loader maps the segments from the same file at their guest addresses; after the attach nothing reads the first
+  mapping. A third file for them (the dylib, its registry, the guest image) would make the host part 11.6 MiB smaller in
+  every process. For packaging it means one more file that has to lie next to the library and belong to the same
+  translation (the loader would have to refuse a pair that does not match, by a key of the translation in both), and a
+  file that is not a Mach-O in `Frameworks/`, which the app's signing and the drop's manifest have to carry. Giving the
+  segment back after the attach instead (`vm_deallocate` of a range dyld still lists for the image) keeps two files, and
+  leaves a hole inside an image that `dladdr` and a crash reporter would still name as the library.
+- **The lifted code nothing runs.** See the next section.
+
 ## Dead-strip and lazy loading
 
 Not built; only measured and analysed.
+
+- For the reCAPTCHA SDK the 41.5 MiB of lifted text is the code of 14 guest images, and the SDK's own image is 1.2 MiB of
+  their 10.7 MiB of read-only segments: about a ninth, so about 4.7 MiB of the lifted text is the SDK and about 37 MiB is
+  the Swift runtime and standard library (4.8 of the 10.7 MiB), CryptoKit (1.8), libc++ and libc++abi (1.0), the
+  Foundation overlay (1.1) and the other overlays. The 37 MiB is the most a strip could ever give, if the SDK used none
+  of them; what it uses of them nobody has measured, and the resident pages of the text (34.9 of 42.5 MiB after
+  `fetchClient`) do not measure it, because the kernel reads a file ahead of the fault.
+- `xlate` knows the direct calls and the function starts, and can follow absolute pointers in data through the rebase
+  information. It cannot know from them what the library reaches: see the third point. So it cannot divide the text into
+  reachable from the SDK's public entry points and the rest; a count of the functions a run enters (a bitmap that every
+  lifted function sets, in a build made for the measurement) would give the set one run used, which is a lower bound
+  on what must stay and not a proof for the rest.
 
 - `xlate` lifts every function in `LC_FUNCTION_STARTS`, so the 119 MB of the Swift variant is almost all the lifted
   `libswiftCore`.

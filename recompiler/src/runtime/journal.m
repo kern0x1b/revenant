@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <fcntl.h>
 #include <malloc/malloc.h>
 #include <mach/mach.h>
@@ -7,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 #include <unistd.h>
 
 #include "xl_diag.h"
@@ -42,10 +44,14 @@ struct xl_journal_pool_record {
 };
 #define XL_JOURNAL_NAMES 1024u
 
-static struct xl_journal_entry xl_journal[XL_JOURNAL_SIZE];
+struct xl_journal_tables {
+    struct xl_journal_entry ring[XL_JOURNAL_SIZE];
+    struct xl_journal_pool_record pools[XL_JOURNAL_POOL_SLOTS];
+    uint32_t set[XL_JOURNAL_SET];
+};
+
+static struct xl_journal_tables *xl_journal_tables;
 static struct xl_journal_name xl_journal_names[XL_JOURNAL_NAMES];
-static struct xl_journal_pool_record xl_journal_pools[XL_JOURNAL_POOL_SLOTS];
-static uint32_t xl_journal_set[XL_JOURNAL_SET];
 static volatile uint32_t xl_journal_count;
 static volatile int xl_journal_state;
 static pthread_once_t xl_journal_once = PTHREAD_ONCE_INIT;
@@ -96,11 +102,11 @@ static void xl_journal_set_add(uint32_t value)
 {
     uint32_t h = (value * 2654435761u) >> 17;
     for (unsigned n = 0; n < XL_JOURNAL_SET; n++, h = (h + 1) & (XL_JOURNAL_SET - 1)) {
-        if (!xl_journal_set[h]) {
-            xl_journal_set[h] = value;
+        if (!xl_journal_tables->set[h]) {
+            xl_journal_tables->set[h] = value;
             return;
         }
-        if (xl_journal_set[h] == value)
+        if (xl_journal_tables->set[h] == value)
             return;
     }
 }
@@ -109,9 +115,9 @@ static int xl_journal_set_has(uint32_t value)
 {
     uint32_t h = (value * 2654435761u) >> 17;
     for (unsigned n = 0; n < XL_JOURNAL_SET; n++, h = (h + 1) & (XL_JOURNAL_SET - 1)) {
-        if (!xl_journal_set[h])
+        if (!xl_journal_tables->set[h])
             return 0;
-        if (xl_journal_set[h] == value)
+        if (xl_journal_tables->set[h] == value)
             return 1;
     }
     return 0;
@@ -131,14 +137,16 @@ static void xl_journal_write(const char *line, int length)
 void xl_journal_dump(const char *why)
 {
     char line[256];
+    if (!xl_journal_tables)
+        return;
     uint32_t count = xl_journal_count;
     uint32_t first = count > XL_JOURNAL_SIZE ? count - XL_JOURNAL_SIZE : 0;
     uint32_t self = (uint32_t)(uintptr_t)pthread_self();
     const struct xl_journal_pool_record *pool = NULL;
     for (unsigned s = 0; s < XL_JOURNAL_POOL_SLOTS; s++)
-        if (xl_journal_pools[s].thread == self)
-            pool = &xl_journal_pools[s];
-    memset(xl_journal_set, 0, sizeof xl_journal_set);
+        if (xl_journal_tables->pools[s].thread == self)
+            pool = &xl_journal_tables->pools[s];
+    memset(xl_journal_tables->set, 0, sizeof xl_journal_tables->set);
     if (pool) {
         for (uint32_t k = 0; k < pool->count; k++)
             xl_journal_set_add(pool->entries[k]);
@@ -147,7 +155,7 @@ void xl_journal_dump(const char *why)
     xl_journal_write(line, snprintf(line, sizeof line, "xlate-journal: %s in thread %x: %u events, the ring holds %u; the last %u and every one of a pool entry follow\n", why, self, count, count - first, XL_JOURNAL_RECENT));
     unsigned lines = 0;
     for (uint32_t i = first; i < count; i++) {
-        const struct xl_journal_entry *e = &xl_journal[i % XL_JOURNAL_SIZE];
+        const struct xl_journal_entry *e = &xl_journal_tables->ring[i % XL_JOURNAL_SIZE];
         if (e->sequence != i || !e->op)
             continue;
         if (i + XL_JOURNAL_RECENT < count && !(pool && xl_journal_set_has(e->pointer)))
@@ -177,6 +185,14 @@ static void xl_journal_setup(void)
         xl_journal_state = 2;
         return;
     }
+    void *tables = mmap(NULL, sizeof(struct xl_journal_tables), PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+    if (tables == MAP_FAILED) {
+        dprintf(2, "xlate-journal: xl-poolcheck is on and the %lu bytes of the journal cannot be mapped (errno %d): nothing is recorded\n",
+                (unsigned long)sizeof(struct xl_journal_tables), errno);
+        xl_journal_state = 2;
+        return;
+    }
+    xl_journal_tables = tables;
     xl_journal_fd = xl_diag_open("xl-journal.log", O_TRUNC);
     struct sigaction action;
     memset(&action, 0, sizeof action);
@@ -201,7 +217,7 @@ void xl_journal_note3(const char *op, uintptr_t pointer, uintptr_t extra, uintpt
     if (xl_journal_state == 2 || !xl_journal_enabled())
         return;
     uint32_t index = __sync_fetch_and_add(&xl_journal_count, 1);
-    struct xl_journal_entry *e = &xl_journal[index % XL_JOURNAL_SIZE];
+    struct xl_journal_entry *e = &xl_journal_tables->ring[index % XL_JOURNAL_SIZE];
     uint32_t isa = 0;
     if (pointer >= 0x1000 && pointer < 0xFFFFF000u)
         xl_journal_read(pointer, &isa, 4);
@@ -223,16 +239,18 @@ void xl_journal_note(const char *op, uintptr_t pointer, uintptr_t extra)
 static struct xl_journal_pool_record *xl_journal_pool_record_of(uint32_t self)
 {
     for (unsigned s = 0; s < XL_JOURNAL_POOL_SLOTS; s++)
-        if (xl_journal_pools[s].thread == self)
-            return &xl_journal_pools[s];
+        if (xl_journal_tables->pools[s].thread == self)
+            return &xl_journal_tables->pools[s];
     for (unsigned s = 0; s < XL_JOURNAL_POOL_SLOTS; s++)
-        if (__sync_bool_compare_and_swap(&xl_journal_pools[s].thread, 0, self))
-            return &xl_journal_pools[s];
+        if (__sync_bool_compare_and_swap(&xl_journal_tables->pools[s].thread, 0, self))
+            return &xl_journal_tables->pools[s];
     return NULL;
 }
 
 void xl_journal_pool_pop(uintptr_t token)
 {
+    if (!xl_journal_enabled())
+        return;
     xl_journal_note("pool-pop", token, 0);
     struct xl_journal_pool_record *record = xl_journal_pool_record_of((uint32_t)(uintptr_t)pthread_self());
     if (record) {

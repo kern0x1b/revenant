@@ -31,29 +31,44 @@ static inline void *xl_map_anonymous(size_t length)
     return mmap(NULL, length, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
 }
 
-static inline size_t xl_stack_first(size_t host_stack, size_t floor, size_t cap)
+static inline size_t xl_stack_length(size_t thread_stack, size_t page)
 {
-    size_t twice = host_stack > cap ? cap : host_stack * 2;
-    twice = (twice + 0xffffu) & ~(size_t)0xffffu;
-    return twice < floor ? floor : twice > cap ? cap : twice;
+    return (thread_stack + page - 1) / page * page + page;
 }
 
-static inline void *xl_stack_map(size_t first, size_t floor, void *(*mapper)(size_t), size_t *size, size_t *guard)
+static inline void *xl_stack_map(size_t length, void *(*mapper)(size_t), size_t *guard)
 {
-    size_t length = first;
-    for (;;) {
-        void *stack = mapper(length);
-        if (stack != MAP_FAILED) {
-            size_t page = (size_t)sysconf(_SC_PAGESIZE);
-            *size = length;
-            *guard = mprotect(stack, page, PROT_NONE) == 0 ? page : 0;
-            return stack;
-        }
-        if (length <= floor)
-            return MAP_FAILED;
-        fprintf(stderr, "xlate: the guest stack of a thread could not be mapped with %lu bytes (errno %d), trying half\n", (unsigned long)length, errno);
-        length >>= 1;
+    void *stack = mapper(length);
+    if (stack == MAP_FAILED)
+        return MAP_FAILED;
+    size_t page = (size_t)sysconf(_SC_PAGESIZE);
+    if (mprotect(stack, page, PROT_NONE)) {
+        int error = errno;
+        munmap(stack, length);
+        errno = error;
+        return MAP_FAILED;
     }
+    *guard = page;
+    return stack;
+}
+
+static inline int xl_stack_used(void *stack, size_t length, size_t page, size_t *used)
+{
+    char seen[256];
+    size_t pages = length / page;
+    for (size_t first = 0; first < pages; first += sizeof seen) {
+        size_t count = pages - first < sizeof seen ? pages - first : sizeof seen;
+        if (mincore((char *)stack + first * page, count * page, seen))
+            return 0;
+        for (size_t i = 0; i < count; i++) {
+            if (seen[i] & MINCORE_INCORE) {
+                *used = length - (first + i) * page;
+                return 1;
+            }
+        }
+    }
+    *used = 0;
+    return 1;
 }
 
 static inline uintptr_t xl_tsd_base(void *pages)

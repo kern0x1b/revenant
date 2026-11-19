@@ -12,11 +12,11 @@
 #include <sys/mman.h>
 
 #include "xl_bridge.h"
+#include "xl_guest_image.h"
 #include "xl_host.h"
 
 enum {
     XL_CONSTANT_RANGES = 512,
-    XL_ALIAS_ARENA = 4 << 20,
     XL_ALIAS_BLOCK_OFFSET = 12,
     XL_ALIAS_OBJECT_OFFSET = 16,
     XL_CF_ALLOCATOR_PREFIX = 4,
@@ -40,6 +40,8 @@ static pthread_mutex_t xl_scan_lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_once_t xl_alias_once = PTHREAD_ONCE_INIT;
 static pthread_mutex_t xl_alias_lock = PTHREAD_MUTEX_INITIALIZER;
 static uintptr_t xl_alias_cursor;
+static uintptr_t xl_alias_given;
+static uintptr_t xl_alias_end;
 static uintptr_t xl_alias_first_block;
 static uintptr_t xl_alias_original;
 static CFAllocatorRef xl_alias_allocator;
@@ -52,8 +54,8 @@ static uintptr_t xl_alias_reserve(uintptr_t original, size_t size)
     uintptr_t slot = xl_alias_cursor;
     uintptr_t block = slot + XL_ALIAS_BLOCK_OFFSET;
     uintptr_t next = (block + size + 7) & ~(uintptr_t)7;
-    if (next > xl_alias_low + XL_ALIAS_ARENA)
-        xl_unsupported("xlate: the arena of 8-aligned copies of host constants is full");
+    if (next > xl_alias_end)
+        xl_unsupported("xlate: the arena of 8-aligned copies of host constants is full; a library states its size with --alias-arena when it is translated");
     xl_alias_cursor = next;
     ((uint32_t *)slot)[0] = (uint32_t)original;
     ((uint32_t *)slot)[1] = (uint32_t)(slot + XL_ALIAS_OBJECT_OFFSET) ^ XL_ALIAS_MAGIC;
@@ -113,11 +115,30 @@ static void xl_alias_scan_images(void)
     pthread_mutex_unlock(&xl_scan_lock);
 }
 
+int xl_alias_adopt(uintptr_t region, uint32_t size)
+{
+    if (xl_alias_end || vm_protect(mach_task_self(), region, size, FALSE, VM_PROT_READ | VM_PROT_WRITE) != KERN_SUCCESS)
+        return 0;
+    xl_alias_given = region;
+    xl_alias_end = region + size;
+    return 1;
+}
+
+unsigned long xl_alias_used(unsigned long *size)
+{
+    *size = xl_alias_span;
+    return xl_alias_span ? xl_alias_cursor - xl_alias_low : 0;
+}
+
 static void xl_alias_setup(void)
 {
-    void *arena = mmap(NULL, XL_ALIAS_ARENA, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
-    if (arena == MAP_FAILED)
-        xl_unsupported("xlate: cannot map the arena of 8-aligned copies of host constants");
+    void *arena = (void *)xl_alias_given;
+    if (!arena) {
+        arena = mmap(NULL, XL_GUEST_ALIASES, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+        if (arena == MAP_FAILED)
+            xl_unsupported("xlate: cannot map the arena of 8-aligned copies of host constants");
+        xl_alias_end = (uintptr_t)arena + XL_GUEST_ALIASES;
+    }
     xl_alias_cursor = (uintptr_t)arena;
     CFAllocatorContext context = {0, NULL, NULL, NULL, NULL, xl_alias_allocate, xl_alias_reallocate, xl_alias_deallocate, NULL};
     xl_alias_allocator = CFAllocatorCreate(NULL, &context);
@@ -127,7 +148,7 @@ static void xl_alias_setup(void)
     xl_alias_scan_images();
     __sync_synchronize();
     xl_alias_low = (uintptr_t)arena;
-    xl_alias_span = XL_ALIAS_ARENA;
+    xl_alias_span = xl_alias_end - (uintptr_t)arena;
 }
 
 static int xl_constant_in_ranges(uintptr_t pointer)
