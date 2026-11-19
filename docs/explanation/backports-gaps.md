@@ -389,6 +389,12 @@ Source: `expo-speech` 57.0.3, `ios/SpeechModule.swift`, which calls `AVSpeechSyn
 
 Added `-[AVSpeechSynthesisVoice initWithIdentifier:]` in `src/AVFoundation/AVSpeechSynthesisVoice7.m`. It looks the identifier up case-insensitively through `+voiceWithIdentifier:`, which reads the VoiceServices voice list the backport already uses for `speechVoices`; an unknown identifier returns nil. The new instance carries the resolved voice's language, identifier, name and quality, so a voice obtained this way speaks through the same VSSpeechSynthesizer path as one obtained by language. Because the identifier set is the one on the device, the identifiers are the measured ones of `RevenantHostIdentifiers()` or the `com.apple.voice.super-compact.<language>.<name>` fallback. Not exercised on a phone.
 
+## Expo modules: the route picker of expo-video 57.0.5
+
+Source: `expo-video` 57.0.5, `ios/VideoAirPlayButtonView.swift`, which creates an `AVRoutePickerView`, sets its delegate, `activeTintColor` and `prioritizesVideoDevices`, and listens for the two presentation events.
+
+Added `AVRoutePickerView` and `AVRoutePickerViewDelegate` in `src/AVKit/AVRoutePickerView.m`. The view is a `UIView` holding an `MPVolumeView` with the volume slider hidden and the route button shown; the button is found by its `routeButtonRectForBounds:` frame among the volume view's visible controls, and a touch on it calls `routePickerViewWillBeginPresentingRoutes:`. The end event follows `UIApplicationDidBecomeActiveNotification` or the popover dismissal notification, which is how a route sheet on this release goes away. `activeTintColor` sets the view's tint colour, and `prioritizesVideoDevices` is stored but has no effect, because MPVolumeView on iOS 6 has no way to sort video routes. `AVKitBackports` already links MediaPlayer, so no library list change was needed. Not exercised on a phone.
+
 ## SDWebImage 5.21.7 on iOS 6: Accelerate, CoreGraphics and the lock
 
 Source: SDWebImage 5.21.7 (`2de3a496`), `SDWebImage/Core`, 60 files. Each file was syntax-compiled for armv7 iOS 6.0 against the lowered overlay with `-Werror=unguarded-availability` and `-Werror=unguarded-availability-new`, and the errors were grouped by name.

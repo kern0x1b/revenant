@@ -277,6 +277,17 @@ local AREAS = {
         },
     },
     {
+        name = "route picker view of expo-video, built on the volume view's route button",
+        library = "AVKit",
+        sources = {"AVRoutePickerView.m"},
+        members = {
+            "@AVRoutePickerView",
+            "-[AVRoutePickerView setDelegate:]",
+            "-[AVRoutePickerView activeTintColor]", "-[AVRoutePickerView setActiveTintColor:]",
+            "-[AVRoutePickerView prioritizesVideoDevices]", "-[AVRoutePickerView setPrioritizesVideoDevices:]",
+        },
+    },
+    {
         name = "user notifications: the notification center over local notifications",
         library = "UserNotifications",
         sources = {"UNUserNotificationCenter.m", "RevenantUserNotificationSupport.m", "UNNotificationTrigger.m"},
