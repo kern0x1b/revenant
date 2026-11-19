@@ -794,7 +794,7 @@ function translate(input, includes, out, images, opt)
 
     if stock and #backport_libs > 0 then
         local shadowed = {}
-        local shadow_list = path.join(e.root, "frameworks", "Backports", "tools", "shadowed-classes.txt")
+        local shadow_list = getenv("XL_SHADOWED_CLASSES") or path.join(e.root, "frameworks", "Backports", "tools", "shadowed-classes.txt")
         if os.isfile(shadow_list) then
             for _, line in ipairs(readlines(shadow_list)) do
                 local class = line:match("^shadow (%S+) %S+ %S+$")

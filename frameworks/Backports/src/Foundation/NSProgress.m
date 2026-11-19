@@ -1,8 +1,5 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
-#import "../revenant_alias.h"
-
-REVENANT_ALIAS(NSProgress)
 
 @interface RevenantProgressFrame : NSObject
 @property (nonatomic, strong) NSProgress *progress;

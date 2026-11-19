@@ -3,6 +3,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#ifdef REVENANT_HOST_BUILD
 @interface RevenantCASpringAnimation : CABasicAnimation
 
 @property CGFloat mass;
@@ -18,5 +19,14 @@
 - (instancetype)initWithPerceptualDuration:(CFTimeInterval)perceptualDuration bounce:(CGFloat)bounce;
 
 @end
+#else
+@compatibility_alias RevenantCASpringAnimation CASpringAnimation;
+@interface CASpringAnimation (Revenant)
+- (instancetype)initWithPerceptualDuration:(CFTimeInterval)perceptualDuration bounce:(CGFloat)bounce;
+- (CFTimeInterval)settlingDuration;
+- (CFTimeInterval)perceptualDuration;
+- (CGFloat)bounce;
+@end
+#endif
 
 #endif
