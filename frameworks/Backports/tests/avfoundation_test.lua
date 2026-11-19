@@ -90,6 +90,11 @@ function main()
         end
     end
     assert(#missing == 0, "members not implemented by the compiled AVFoundation objects:\n" .. table.concat(missing, "\n"))
+    local undefined = os.iorunv("nm", {"-u", path.join(root, "AVFoundation", "src", "AVFoundation", "AVSampleBufferDisplayLayer8.m.o")})
+    for _, name in ipairs({"_CMTimebaseCreateWithMasterClock", "_CMTimebaseSetMasterTimebase", "_CMTimebaseAddTimerDispatchSource",
+        "_CMTimebaseSetTimerDispatchSourceNextFireTime", "_CMSampleBufferGetImageBuffer"}) do
+        assert(undefined:find(name, 1, true), "the display layer does not use " .. name .. ":\n" .. undefined)
+    end
     os.tryrm(root)
     print("avfoundation tests passed: " .. total .. " members implemented by " .. objects .. " objects in " .. #AREAS .. " areas")
 end
