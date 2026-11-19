@@ -706,6 +706,30 @@ guest state` and prints no guest registers; before 2026-11-19 it made a guest st
 so mapped a guest stack inside the crash, which in a process without address space was a second failure on top of
 the first (`the guest stack of a thread could not be mapped` in the crash output of the M4 acceptance).
 
+One launch is for the lines that a drop's sizes are measured from: with `XL_STATS=1` and `--linger=6` the host stays for
+six seconds after its calls, so that one window of the statistics (five seconds) closes while it lives. Its output must
+have `xlate: guest stacks: L live, M KiB mapped; …` with a live stack of at least a thread's size, and
+`xlate: budget: metadata arena A of S KiB touched, opaque words N of M, aliases U of S KiB` whose arena, word count and
+alias size are the header's (the aliases read `0 of 0` until their first use).
+
+**What of this ran without a phone.** On 2026-11-19 the launches were run in the emulator (iPhone4,1, the root filesystem
+of 6.1.3 10B329), the host started by a first process that sets its environment and arguments, the fixture translated
+with `XL_BASE=0x2e000000` (in the emulator the heap begins at `0x10000000`, the fixture's default base). The emulator's
+kernel has no `vm_region_recurse_64` (the call answers -303), so the library's check that its reservation is one
+untouched inaccessible range fails there and `xl_load` answers `XL_LOAD_RESERVATION_LOST` with its message; for these
+runs only, a build that skips that one check under an environment variable was used and then undone. With it: the
+first launch loads and prints `ok` for every name and `done` (the reservation, the attach that makes the arena, the
+words and the aliases accessible inside it, the registry, the guest's initializers, 40 names in all, a completion on a
+second thread); `--lazy` the same with `lazy.free` in place of `reserve` (an `ok` that says nothing there: the question
+reads the list of regions, and with no list nothing counts as mapped); `--abort` prints `xlate: signal 6`, the host
+frames and the guest registers; `--abort-thread` prints `xlate: this thread has not run translated code, so it has no
+guest state` and no guest register; `XL_STATS=1` prints a guest stack of 1,024 KiB for the main thread and 516 KiB for
+the second; `--expect=registry` and `--expect=busy` are refused as they should be. What the emulator cannot show:
+anything that reads the list of regions (the reservation check itself, the holder named in a refusal, every `xl-map`
+line, the `lazy.free`, `release.held` and `release.free` questions), the window of the statistics (its kernel has no
+`mincore`: a process that calls it dies of signal 12, so the two lines above have not run anywhere yet), and where
+things lie on the phone (its address space is laid out otherwise, so nothing about room is learnt there).
+
 On the Mac the check also reads the header of the library it built: version 2, the images one after another with no
 byte between them that belongs to no segment, an arena as large as the writable segments, 262,144 words, 4 MiB of
 aliases, and `high` where the four end.

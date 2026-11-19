@@ -505,7 +505,8 @@ static void scenario_registry_gone(const char *folder)
 {
     const char *file = library(folder, "registrygone", BASE_UNDER_STACK, XL_GUEST_VERSION, 1);
     model_init_result = XL_LIBRARY_NO_REGISTRY;
-    expect(xl_load(file) == XL_LOAD_REGISTRY_FAILED && strstr(xl_load_error(), "was not next to the image when the library attached"),
+    expect(xl_load(file) == XL_LOAD_REGISTRY_FAILED && strstr(xl_load_error(), "was not next to the image when the library attached") &&
+           strstr(xl_load_error(), "it is the file registrygone-classes.dylib"),
            "a registry that the library does not find when it attaches is not XL_LOAD_BAD_IMAGE, which follows the files: %s", xl_load_error());
     expect(model_covered(model_guest_low, model_guest_high, 0) == 0 && !room_held(), "the guest range is given back");
     model_init_result = XL_LIBRARY_OK;
@@ -519,6 +520,7 @@ static void scenario_refusals(const char *folder)
     expect(xl_load(newer) == XL_LOAD_BAD_IMAGE && strstr(xl_load_error(), "format version"), "a format this loader does not read is refused: %s", xl_load_error());
     const char *alone = library(folder, "alone", BASE_UNDER_STACK, XL_GUEST_VERSION, 0);
     expect(xl_load(alone) == XL_LOAD_BAD_IMAGE && strstr(xl_load_error(), "registry"), "a library without its registry is refused: %s", xl_load_error());
+    expect(strstr(xl_load_error(), "it is the file alone-classes.dylib next to it") != NULL, "and the message has the name of the file that is missing");
     expect(xl_load(alone) == XL_LOAD_BAD_IMAGE && model_dlopen_calls == 0, "and again while the files are the same, before any dlopen");
     model_budget_skew = XL_GUEST_GRANULE;
     const char *skewed = library(folder, "skewed", BASE_UNDER_STACK, XL_GUEST_VERSION, 1);

@@ -508,6 +508,22 @@ function main(out, ...)
         io.write(unreserved)
         corpus.fail("with XL_LOADER_HOST_RESERVE=0 the loader still holds room for the host part, lost the guest reservation, or the library did not load")
     end
+    local counted = launch(remote .. "/RCFixture.dylib " .. resident .. " --linger=6", "XL_STATS=1 ")
+    verify(counted, expected, "launch with XL_STATS=1")
+    local stacks_live, stacks_mapped = counted:match("\nxlate: guest stacks: (%d+) live, (%d+) KiB mapped; the deepest live one has used %d+ KiB of %d+ KiB, the deepest ever %d+ KiB\n")
+    local arena_touched, arena_size, words_used, words_slots, aliases_used, aliases_size =
+        counted:match("\nxlate: budget: metadata arena (%d+) of (%d+) KiB touched, opaque words (%d+) of (%d+), aliases (%d+) of (%d+) KiB")
+    if not stacks_live or tonumber(stacks_live) < 1 or tonumber(stacks_mapped) < 512 then
+        io.write(counted)
+        corpus.fail("a launch with XL_STATS=1 that stays for a window of the statistics has no line of the guest stacks, or one without a live stack of a thread's size")
+    end
+    if not arena_touched or tonumber(arena_size) ~= guest.arena // 1024 or tonumber(arena_touched) > tonumber(arena_size) or
+       tonumber(words_slots) ~= guest.word_slots or tonumber(words_used) > guest.word_slots or
+       (tonumber(aliases_size) ~= 0 and tonumber(aliases_size) ~= guest.aliases // 1024) or tonumber(aliases_used) > guest.aliases // 1024 then
+        io.write(counted)
+        corpus.fail("a launch with XL_STATS=1 has no budget line, or one whose arena (%d KiB), words (%d) and aliases (%d KiB, or 0 before their first use) are not the header's",
+                    guest.arena // 1024, guest.word_slots, guest.aliases // 1024)
+    end
     local crash_log = "/private/var/revenant/xlate-crash.log"
     local function crash(extra, logged, where)
         device.run("rm -f " .. crash_log)
