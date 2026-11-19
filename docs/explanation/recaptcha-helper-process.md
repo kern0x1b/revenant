@@ -90,10 +90,10 @@ nothing but the spawn and the load can happen. A helper that the app starts when
 heuristic: the protocol gives no earlier sign, and the app knows neither the method nor the key until the 403) has
 loaded by the time the demand comes, and the 15 s are spent on `fetchClient` and `execute` alone: 0.5 to 1.2 s by
 `rcsdk`'s numbers on the refused path. A helper started by the demand adds the spawn and 1.7 s of load to that (the
-app on drop40 does the three steps in 2.1 and 2.6 s). A second token for the same key costs the `execute` alone, because the helper
-keeps the client per key as the app does (`recaptchaClientsBySiteKey` in `AppDelegate.swift`). The helper exits on
-`quit`, when its descriptor 0 ends, or after 120 s without a request, so that it does not hold its memory through a
-session. Not measured: the spawn itself, and every time on the path that returns a token.
+app on drop40 does the three steps in 2.1 and 2.6 s). A second token for the same key costs the `execute` alone,
+because the helper keeps the client per key as the app does (`recaptchaClientsBySiteKey` in `AppDelegate.swift`).
+The helper exits on `quit`, when its descriptor 0 ends, or after 120 s without a request, so that it does not hold
+its memory through a session. Not measured: the spawn itself, and every time on the path that returns a token.
 
 ## Lifetime
 
