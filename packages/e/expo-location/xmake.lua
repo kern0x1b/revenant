@@ -1,0 +1,22 @@
+package("expo-location")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-location")
+    set_description("expo-location 57.0.21, the location services of the Expo SDK, from its npm tarball: the iOS module sources the host builds from, with the CoreLocation backport supplying what iOS 6 lacks")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-location/-/expo-location-$(version).tgz")
+    add_versions("57.0.21", "77cfa28b00e6122e468dc8ae7416d0a70eaeaa7b5c49d42cd350da4003cba10c")
+    add_patches("57.0.21", path.join(os.scriptdir(), "patches", "location-ios6.patch"), "078c144a0604a0cf7fd7997c452dd23939eec2dd65581fb953442fa6268a333a")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-location" and manifest.version == "57.0.21", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "ios", "LocationModule.swift")), "expo-location has no iOS module")
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-location has no expo-module.config.json")
+    end)

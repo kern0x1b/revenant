@@ -558,9 +558,9 @@
    "group": "sdk",
    "version": "~57.0.21",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "CoreLocation (CLLocationManager) is present in the iOS 6.1.3 cache. Not built."
+   "status": "partial",
+   "verified": "build",
+   "note": "Recipe packages/e/expo-location (npm 57.0.21, patch location-ios6.patch) installs and its patch applies; compiled into the host and linked (not exercised on the phone). The patch reads CLLocation.altitude where the module used ellipsoidalAltitude (iOS 15), in EXLocation.m and Geocoder.swift, so the altitude is the iOS 6 value, not the ellipsoidal one. CLLocationManager, CLGeocoder and CLCircularRegion are present on iOS 6; the iOS 8 authorization requests and the other later CoreLocation methods come from the CoreLocation backport, already linked by the host. Background location and geofencing tasks need expo-task-manager, which is not built, so they are not available; CLActivityTypeAirborne (iOS 12) is only an enum value. The status is partial because of that."
   },
   {
    "id": "expo-mail-composer",
