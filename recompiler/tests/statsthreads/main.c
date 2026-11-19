@@ -6,6 +6,7 @@
 #define CONTROL 0
 #endif
 #define ONE_COUNTER 1
+#define MISCOUNTED 2
 
 enum { WAVES = 20, THREADS = 4, MESSAGES = 200000, PAIRS = 64, LONG_THREADS = 2, LONG_MESSAGES = 64 };
 #define LONG_TICKS 0x30000000u
@@ -28,6 +29,12 @@ static void count(uintptr_t cls, uintptr_t sel, uint32_t ticks)
     (void)sel;
     one_counter_ticks += ticks;
     one_counter_messages++;
+#elif CONTROL == MISCOUNTED
+    static __thread unsigned mine;
+    if (++mine % 1000 == 0)
+        xl_stats_count(0x1000, 0x2000, ticks);
+    else
+        xl_stats_count(cls, sel, ticks);
 #else
     xl_stats_count(cls, sel, ticks);
 #endif
@@ -52,7 +59,7 @@ static void *long_sender(void *unused)
 }
 
 static volatile int reporting = 1;
-static unsigned long long window_messages, window_ticks, windows;
+static unsigned long long window_messages, window_ticks, windows, window_pair[PAIRS];
 
 static void close_window(void)
 {
@@ -67,6 +74,7 @@ static void close_window(void)
             fail("stats.window", "a window names a class and selector that no thread sent", slot->cls, slot->sel);
         window_messages += slot->count;
         window_ticks += slot->ticks;
+        window_pair[pair] += slot->count;
     }
     memset(xl_stats_window, 0, sizeof xl_stats_window);
     windows++;
@@ -125,6 +133,16 @@ int main(void)
         fail("stats.window", "the windows together do not hold the messages, give or take the one a thread was counting when a window closed", window_messages, sent);
     if (window_ticks > ticks || window_ticks + slack * 7 < ticks)
         fail("stats.window", "the windows together do not hold the routing time", window_ticks, ticks);
+    for (unsigned pair = 0; pair < PAIRS; pair++) {
+        unsigned long long to_pair = 0;
+        for (unsigned thread = 0; thread < THREADS; thread++) {
+            for (unsigned index = 0; index < MESSAGES; index++)
+                to_pair += (index * 7 + thread) % PAIRS == pair;
+        }
+        to_pair *= WAVES;
+        if (window_pair[pair] > to_pair)
+            fail("stats.window", "the windows give a class and selector more messages than were sent to it", window_pair[pair], to_pair);
+    }
 #endif
 
     pthread_t threads[LONG_THREADS];

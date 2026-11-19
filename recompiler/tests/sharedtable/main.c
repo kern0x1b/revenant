@@ -10,6 +10,7 @@
 #define UNLOCKED 1
 #define NO_SECOND_LOOK 2
 #define SPLIT_LOOKUP 3
+#define SPLIT_LOCKS 4
 
 enum { SENDERS = 4, REGISTRARS = 2, CLASSES = 2000, VARIANTS = 512, TWINS = 256, RACERS = 4, ROUNDS = 300 };
 
@@ -298,7 +299,7 @@ int main(void)
     host_twin = watched(&class_lock);
     twin_host = watched(&class_lock);
     pairs = watched(&class_lock);
-    pairs_back = watched(&class_lock);
+    pairs_back = watched(CONTROL == SPLIT_LOCKS ? &variant_lock : &class_lock);
     variants = watched(&variant_lock);
     claims = watched(&variant_lock);
     for (unsigned number = 1; number <= CLASSES; number++)

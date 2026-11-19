@@ -1063,7 +1063,8 @@ so a caller cannot reach one without the lock. `xl_shared_get` reads under the r
 the write side. A thread that did not find a key and wants to put it does not keep what it saw under the read side:
 `xl_shared_claim` takes the write side, looks again, and returns the value that is in the table, its own or the one
 another thread put first (`xl_shared_claim_pair` does the same for two tables that lead to each other, a host class and
-its twin). Several lookups that must agree are one read section: `xl_class_from_guest` asks for the shadow, the twin and
+its twin; it writes the second table under the lock of the first, so both must be behind one lock, and it stops the
+process with `xlate: the two tables of a pair are behind different locks` when they are not). Several lookups that must agree are one read section: `xl_class_from_guest` asks for the shadow, the twin and
 the class waiting to be built in one, because a class is moved from "waiting" to "built" in one write section, and a
 thread that asked in three separate sections could find it in neither and take the guest's class object for a host
 class (the mutexes allowed that; no run is known to have hit it). A message takes three read sections (the class, the
@@ -1082,7 +1083,16 @@ The lock that fails stops the process with `xlate: the lock of the runtime's tab
 to write|given back (error N)`: going on would break the invariant silently.
 
 `xl-stats` had the same fault of its own, one mutex for the counters of every message, so the flag would have shown
-`__psynch_mutexdrop` at the top after the tables were fixed. Its counters are per thread now (above). The table of
+`__psynch_mutexdrop` at the top after the tables were fixed. Its counters are per thread now (above), written with
+no lock on the path of a message and read by the thread that prints while their owners go on. What that reader gets
+is stated and checked. The totals are exact: a thread's two totals only grow, are read whole and are added by their
+difference. The table of classes and selectors of a window misses at most the one message each sending thread was
+counting when the window closed (it is in the totals and in no window), and it gives no class or selector a message
+of another: a thread clears its notes of a window before it publishes the window's number, with a full barrier
+between the two and one in the reader between the number and the notes, on a path taken once a window and not once a
+message; and the class and selector of a note are written once in a window, so the reader finds zeros or the right
+pair. An exact copy would take a sequence counter around every note, which on armv7, where the stores of one thread
+reach another core in any order, is two barriers a message; that price is not paid for a diagnostic. The table of
 dynamic messages keeps its mutex, and cannot start the same queue: a dynamic message is a host call of 55 to 80 us on
 average (30,000 of the 271,931 messages of that launch), so two threads ask for that lock once in 100 us or more each
 and hold it for one probe of a table, while the queue above needs threads that ask again within the 15 us a handover
@@ -1244,7 +1254,8 @@ over all pointer arithmetic, and it says nothing of the host side, where no code
   is free, and a single-word `STXR` never matches the monitor of a load-pair, nor an `STXP` the monitor of an `LDXR`.
   The load takes no lock: the architecture does not promise that a load-pair alone reads both words of one store,
   only that the store-pair after it fails when they were not.
-- `STXP` calls `rellume_aarch64_stxp(address, armed, the two recorded words, the two new words)`. Not armed (no
+- `STXP` calls `rellume_aarch64_stxp(address, armed, the two recorded words, the two new words)`. An address that
+  is not a multiple of 16 stops the process there, armed or not ("Two pairs that share a word" below). Not armed (no
   load-pair before it, another address, the monitor cleared by `CLREX` or by an exclusive store) answers 1 and reads
   nothing. Armed, it takes the lock of the address, compares both words in memory with the recorded ones, stores both
   when they are the same and answers 0, answers 1 when they are not. The monitor is cleared either way.
@@ -1261,9 +1272,30 @@ does: on two cores a holder that was switched out is not waited for by burning t
 `pthread_mutex`, because a contended one is handed over in the kernel on iOS 6 ("Two threads that send at once"), and
 it is not `OSSpinLock` itself, so that the report can say whether a lock is held.
 
+**Two pairs that share a word.** The lock is chosen by the 16 bytes a pair lies in. That is right only when two
+different pairs never share a word, and arm64 makes it so: a 64-bit load-pair or store-pair at an address that is not
+a multiple of 16 is an alignment fault, with the monitor armed or not. Measured on this Mac (an M4 Pro): `ldxp` of two
+64-bit registers at 4, 8 and 12 bytes past a multiple of 16 ends in `SIGBUS`, and so does an `stxp` there with no
+load before it. That processor has `FEAT_LSE2`, the loosest rule the architecture has (an exclusive access may not
+cross a line of 16 bytes); one without it wants every exclusive aligned to its size. The lifted code does not fault
+by itself, so the pair store refuses such an address before it looks at the monitor, with
+`xlate: a store-pair at 0x... is not aligned to 16 bytes: arm64 answers it with an alignment fault, so the process
+stops here` and `abort`. Without the refusal (the first version; a review found it on 2026-11-19) a pair at 8 bytes
+and one at 16 took different locks, both compared and both stored: 77,436 of 800,000 updates of the word they share
+were lost in `llscpair`. The load-pair is not checked: it changes nothing, and the store-pair of its loop stops the
+process. A pair at a multiple of 16 lies in one page, so a fault comes at the first read or the first write and no
+half of a pair is stored, and it lies in the 16 bytes of one lock.
+
+The 32-bit pair needs no rule of the runtime. It is one 64-bit exclusive of the host, which stores whole or faults:
+`ldrexd` and `strexd` of armv7 want an address that is a multiple of 8 (by the architecture; the device part of
+`llscpair` asks the phone, and has not run with this part yet), and on this Mac two 32-bit pairs at 0 and at 4 bytes
+run and lose no update. The translation is therefore an arm64 without `FEAT_LSE2`: an exclusive that is not aligned
+to its size stops the process where newer processors would run some of them.
+
 The rule of the lock is that nothing can keep it: the held section is two loads, a comparison, two stores and four
-counters, with no call (the check requires that `pair.c` calls nothing but `thread_switch`, which it calls while it
-waits and holds nothing). What can happen inside is a fault, when the guest's address cannot be read or written. Then
+counters, with no call. The check reads the calls of the armv7 object: the pair store calls `thread_switch`, while it
+waits and holds nothing, and its refusal, which does not return; `write` and `abort` are called by the refusal
+only. What can happen inside is a fault, when the guest's address cannot be read or written. Then
 the fault is taken with the lock held, the crash handler reports, and the process ends: the handler does not take
 the locks (it reads the counters and the lock words as they are, and says how many are held), and no path goes back
 to guest code: the runtime installs no guest signal handler (`signal` with a guest function answers
@@ -1273,8 +1305,8 @@ to guest code: the runtime installs no guest signal handler (`signal` with a gue
 section. The thread of `xl-stats` suspends threads to sample them and runs no guest code, so it never asks for one
 of these locks. A change that lets a fault return to guest code (a guest signal handler, a caught fault) has to
 release the lock on that path first. `llscpair --fault` is the check: a pair
-store into a page that cannot be written reaches a signal handler that prints the line below with
-`1 of 64 locks held now`.
+store into a page that cannot be written reaches a signal handler that finds both words as they were and prints the
+line below with `1 of 64 locks held now`.
 
 **The line.** Next to the two budget lines, in every window of `xl-stats` and in the crash report:
 

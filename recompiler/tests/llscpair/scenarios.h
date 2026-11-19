@@ -1,5 +1,6 @@
 #include <pthread.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/time.h>
 
 #include "workers.h"
@@ -137,6 +138,40 @@ static void bare(void)
     } else {
         printf("ok pairs.bare: a pair store with no load before it failed and stored nothing\n");
     }
+}
+
+static uint64_t missing(uint64_t found, uint64_t wanted)
+{
+    return found > wanted ? wanted : wanted - found;
+}
+
+static int overlapping(void)
+{
+    static _Alignas(16) uint64_t words[4];
+    struct job jobs[2] = {{PAIR_ADD, (uintptr_t)&words[1], ROUNDS, 0, 0, 0}, {PAIR_ADD, (uintptr_t)&words[2], ROUNDS, 0, 0, 0}};
+    together(jobs, 2);
+    verdict("pairs.overlap", 2, missing(words[1], ROUNDS) + missing(words[2], 2 * ROUNDS) + missing(words[3], ROUNDS), 4 * ROUNDS,
+            "updates lost by two pairs that share a word");
+    return failures != 0;
+}
+
+static int overlapping32(void)
+{
+    static _Alignas(16) uint32_t words[4];
+    struct job jobs[2] = {{PAIR32_ADD, (uintptr_t)&words[0], ROUNDS, 0, 0, 0}, {PAIR32_ADD, (uintptr_t)&words[1], ROUNDS, 0, 0, 0}};
+    together(jobs, 2);
+    verdict("pairs.overlap32", 2, missing(words[0], ROUNDS) + missing(words[1], 2 * ROUNDS) + missing(words[2], ROUNDS), 4 * ROUNDS,
+            "updates lost by two 32-bit pairs that share a word");
+    return failures != 0;
+}
+
+static int mode(int argc, char **argv)
+{
+    if (argc > 1 && !strcmp(argv[1], "--overlap"))
+        return overlapping();
+    if (argc > 1 && !strcmp(argv[1], "--overlap32"))
+        return overlapping32();
+    return -1;
 }
 
 static void scenarios(void)

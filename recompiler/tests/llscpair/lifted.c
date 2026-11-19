@@ -62,6 +62,8 @@ static void monitor(const char *name, void (*function)(void *), uint64_t wanted,
     }
 }
 
+static uint64_t *page;
+
 static void crashed(int signal)
 {
     char line[320];
@@ -69,12 +71,12 @@ static void crashed(int signal)
     (void)signal;
     xl_pair_read(&count);
     write(1, line, xl_pair_line(line, sizeof line, &count, NULL));
-    _exit(count.held == 1 ? 0 : 3);
+    _exit(count.held == 1 && page[0] == 5 && page[1] == 6 ? 0 : 3);
 }
 
 static int fault(void)
 {
-    uint64_t *page = mmap(NULL, 16384, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+    page = mmap(NULL, 16384, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
     page[0] = 5;
     page[1] = 6;
     mprotect(page, 16384, PROT_READ);
@@ -93,6 +95,9 @@ int main(int argc, char **argv)
     alarm(120);
     if (argc > 1 && !strcmp(argv[1], "--fault"))
         return fault();
+    int asked = mode(argc, argv);
+    if (asked >= 0)
+        return asked;
     scenarios();
     monitor("pairs.elsewhere", SUB_pair_elsewhere, 1, token(1), "a pair store at another address than its load failed and stored nothing");
     monitor("pairs.after-single", SUB_pair_after_single, 1, token(1), "a pair store after a single-word exclusive load failed and stored nothing");

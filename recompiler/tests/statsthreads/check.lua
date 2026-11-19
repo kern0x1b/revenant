@@ -1,6 +1,8 @@
 local CONTROLS = {
     {name = "one-counter", define = "-DCONTROL=1", line = "FAIL stats.total", what = "one set of counters for all threads and no lock"},
-    {name = "no-fold", define = "-DXL_STATS_FOLD_TICKS=0xffffffffu", line = "FAIL stats.wrap", what = "a thread that never adds its own time to the total"}
+    {name = "no-fold", define = "-DXL_STATS_FOLD_TICKS=0xffffffffu", line = "FAIL stats.wrap", what = "a thread that never adds its own time to the total"},
+    {name = "miscounted", define = "-DCONTROL=2", line = "the windows give a class and selector more messages than were sent to it",
+     what = "one message in a thousand counted for another class and selector"}
 }
 
 function main(out)
@@ -30,5 +32,5 @@ function main(out)
             corpus.fail("the control with %s failed, but not at %s:\n%s", control.what, control.line, said:sub(1, 2000))
         end
     end
-    print(text:match("ok: [^\n]*") .. "; the controls with one unlocked set of counters and without a thread's own fold each failed at their own line")
+    print(text:match("ok: [^\n]*") .. "; the controls with one unlocked set of counters, without a thread's own fold and with messages counted for another class each failed at their own line")
 end

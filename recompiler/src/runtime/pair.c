@@ -1,6 +1,8 @@
 #include <mach/mach.h>
 #include <mach/thread_switch.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include "xl_budget_lines.h"
 
@@ -15,11 +17,25 @@ struct xl_pair_lock {
 
 static struct xl_pair_lock xl_pair_locks[XL_PAIR_LOCKS] __attribute__((aligned(32)));
 
+__attribute__((noinline, noreturn)) static void xl_pair_unaligned(uintptr_t at)
+{
+    static const char digits[] = "0123456789abcdef";
+    char line[160];
+    size_t length = xl_line_text(line, 0, sizeof line, "xlate: a store-pair at 0x");
+    for (int shift = (int)(8 * sizeof at) - 4; shift >= 0 && length + 1 < sizeof line; shift -= 4)
+        line[length++] = digits[at >> shift & 15];
+    length = xl_line_text(line, length, sizeof line, " is not aligned to 16 bytes: arm64 answers it with an alignment fault, so the process stops here\n");
+    write(2, line, length);
+    abort();
+}
+
 uint32_t rellume_aarch64_stxp(volatile uint64_t *address, uint32_t armed, uint64_t seen_low, uint64_t seen_high, uint64_t low, uint64_t high)
 {
+    uintptr_t at = (uintptr_t)address;
+    if (at & 15)
+        xl_pair_unaligned(at);
     if (!armed)
         return 1;
-    uintptr_t at = (uintptr_t)address;
     struct xl_pair_lock *lock = &xl_pair_locks[(at >> 4 ^ at >> 10) & (XL_PAIR_LOCKS - 1)];
     uint32_t spins = 0, yields = 0;
     while (lock->held || __sync_lock_test_and_set(&lock->held, 1)) {

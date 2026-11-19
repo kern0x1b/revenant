@@ -22,6 +22,12 @@ static inline void xl_shared_failed(const char *what, int error)
     abort();
 }
 
+static inline void xl_shared_split(void)
+{
+    fprintf(stderr, "xlate: the two tables of a pair are behind different locks; the second would be written under the lock of the first only\n");
+    abort();
+}
+
 static inline void xl_shared_read_begin(struct xl_shared_lock *lock)
 {
     int error = pthread_rwlock_rdlock(&lock->lock);
@@ -94,6 +100,8 @@ static inline const void *xl_shared_claim(const struct xl_shared_table *table, c
 static inline const void *xl_shared_claim_pair(const struct xl_shared_table *table, const void *key, const void *value,
                                                const struct xl_shared_table *reverse)
 {
+    if (reverse->lock != table->lock)
+        xl_shared_split();
     xl_shared_write_begin(table->lock);
     const void *held = xl_shared_held_get(table, key);
     if (!held) {

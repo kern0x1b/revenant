@@ -87,7 +87,7 @@ static inline void xl_stats_window_close_locked(void)
 {
     uint32_t closed = __atomic_fetch_add(&xl_stats_window_number, 1, __ATOMIC_SEQ_CST);
     for (struct xl_stats_thread *thread = xl_stats_threads; thread; thread = thread->next) {
-        if (thread->window_of[closed & 1] == closed)
+        if (__atomic_load_n(&thread->window_of[closed & 1], __ATOMIC_SEQ_CST) == closed)
             xl_stats_window_merge_locked(thread->window[closed & 1]);
     }
 }
@@ -141,7 +141,7 @@ static inline void xl_stats_window_note(struct xl_stats_thread *mine, uintptr_t 
     struct xl_stats_note *notes = mine->window[number & 1];
     if (mine->window_of[number & 1] != number) {
         memset(notes, 0, sizeof mine->window[0]);
-        mine->window_of[number & 1] = number;
+        __atomic_store_n(&mine->window_of[number & 1], number, __ATOMIC_SEQ_CST);
     }
     unsigned start = xl_stats_window_start(cls, sel);
     for (unsigned probe = 0; probe < XL_STATS_WINDOW_SLOTS; probe++) {

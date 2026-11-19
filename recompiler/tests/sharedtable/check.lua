@@ -1,7 +1,8 @@
 local CONTROLS = {
     {define = "1", line = "FAIL shared.exclusion", what = "no lock around the tables"},
     {define = "2", line = "FAIL shared.claim", what = "no second look after the write side is taken"},
-    {define = "3", line = "FAIL shared.atomic", what = "the lookups of one class each in a read section of their own"}
+    {define = "3", line = "FAIL shared.atomic", what = "the lookups of one class each in a read section of their own"},
+    {define = "4", line = "xlate: the two tables of a pair are behind different locks", what = "the table that leads back behind another lock than its pair"}
 }
 
 function main(out)
@@ -59,5 +60,5 @@ function main(out)
             corpus.fail("%s uses xl_shared_table.h: the crash handler lives there and must not wait for a lock that the thread it interrupted may hold", name)
         end
     end
-    print(text:match("ok: [^\n]*") .. "; the controls without the lock, without the second look and with split lookups each failed at their own line")
+    print(text:match("ok: [^\n]*") .. "; the controls without the lock, without the second look, with split lookups and with a pair of tables behind two locks each failed at their own line")
 end

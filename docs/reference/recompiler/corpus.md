@@ -233,15 +233,27 @@ The host part proves, in this order:
    load-pair does the same.
 5. Two controls, the same lifted code linked with another pair store (`control.c`): one that stores without
    comparing, and one that compares and stores without the lock. Both must lose updates.
-6. The fault: `lifted --fault` calls the pair store on a page that cannot be written. The signal handler must print
-   the line of the pair stores with `1 of 64 locks held now` (see "Pair exclusives" for why that is enough).
+6. The fault: `lifted --fault` calls the pair store on a page that cannot be written. The signal handler must find
+   both words as they were and print the line of the pair stores with `1 of 64 locks held now` (see "Pair
+   exclusives" for why that is enough).
 7. The lifted IR: each load-pair is two atomic 64-bit loads, each store-pair one call of `rellume_aarch64_stxp`, the
    32-bit pair one 64-bit `cmpxchg`, and the state header exports `EXCL_VAL2`.
 8. For armv7 the lifted object calls `rellume_aarch64_stxp` and no atomic library function (iOS 6 has none for 16
-   bytes), and `pair.c` calls nothing but `thread_switch` and takes its lock with `ldrex` and `strex`.
+   bytes), and `pair.c` takes its lock with `ldrex` and `strex`, imports `thread_switch`, `write` and `abort` and
+   nothing else, and calls them where it may (read from the relocations of the object): the pair store calls
+   `thread_switch` once and its refusal once, and only the refusal calls `write` and `abort`.
+9. Two pairs that share a word (`--overlap`: two threads add to a pair at 8 bytes and to one at 16, 200,000 times
+   each). The program built for this Mac must die of `SIGBUS`: that is the processor's rule, asked again at every
+   run. The lifted run must stop at the first store with `xlate: a store-pair at 0x... is not aligned to 16 bytes`
+   and `SIGABRT`. A third control, the pair store with a lock for each 16 bytes and no look at the alignment (the
+   first version of `pair.c`), must lose updates of the shared word: it lost 77,436 of 800,000. Two 32-bit pairs
+   that share a word (`--overlap32`, at 0 and at 4 bytes) must lose nothing or fault, in the native program and in
+   the lifted one; on this Mac both run and lose nothing.
 
 The device part runs the translated `main.c` on the phone and prints `hw.ncpu` first; each line carries the time of
-its scenario, so the run with one thread is the cost of a pair store there.
+its scenario, so the run with one thread is the cost of a pair store there. Then it runs `--overlap`, which must stop
+with the runtime's line, and `--overlap32`, which must lose nothing or fault. Those two have not run on the phone
+yet.
 
 **What ran on the phone.** On 2026-11-19 the device part passed on the 4S (iOS 6.1.3, `hw.ncpu` 2), all 14 scenarios
 and exit 0. Times of a scenario over its number of updates, which is the wall time of all threads together and not
@@ -942,11 +954,12 @@ inside together at least once (a lock that shut readers out would pass everythin
 both built and waiting or neither, that every thread of a race was told the value that is in the table, and that the
 table that leads back holds no value of a thread that lost.
 
-Three controls are the same file built with one part of the rule taken out, and each must fail at its own line:
+Four controls are the same file built with one part of the rule taken out, and each must fail at its own line:
 `-DCONTROL=1`, no lock (its writes are lookups, so that it stops at the counter and not in a damaged dictionary), at
 `FAIL shared.exclusion`; `-DCONTROL=2`, a thread that missed under the read side puts its value without looking again,
 at `FAIL shared.claim`; `-DCONTROL=3`, the lookups of one class each in a read section of their own, at `FAIL
-shared.atomic`. The check also reads the runtime files: `swift_classes.m` may call no `CFDictionary` function itself,
+shared.atomic`; `-DCONTROL=4`, the table that leads back behind another lock than its pair, which the module itself
+must refuse at `xlate: the two tables of a pair are behind different locks`. The check also reads the runtime files: `swift_classes.m` may call no `CFDictionary` function itself,
 `objc_bridge.m` may reach the variant cache only through the module, neither may take the dictionary out of a table
 (the field `entries`), and `runtime.c` and `library.c`, where the crash handler lives, may not use the module at all: a
 handler that waited for a lock the interrupted thread holds would hang the process instead of reporting. The tables
@@ -961,14 +974,18 @@ without a lock, in a block of the sending thread, and the thread that prints add
 nothing is lost by that. Twenty waves of four threads send 200,000 messages each over 64 pairs of class and selector
 while another thread closes a window every 200 us, as the profile thread does every 5 s. It requires the total of
 messages and of routing time to be exact after the threads have ended (a thread that ends hands its counts over and
-leaves the list), every window to name only pairs that were sent, and the windows together to hold all messages but
-the one each thread was counting at the moment a window closed. Then two threads count 64 messages of 0x30000000
+leaves the list), every window to name only pairs that were sent, the windows together to hold all messages but
+the one each thread was counting at the moment a window closed, and no pair to have more messages in the windows than
+were sent to it (a reader that took one thread's stale notes, or a count for the wrong pair, would give one). Then two threads count 64 messages of 0x30000000
 ticks each, so the 32-bit counter of a thread passes its end twelve times with nobody printing, and the total must
 still be exact: a thread adds its own time to the total before a quarter of the counter is used.
 
-Two controls: `-DCONTROL=1` counts in one set of counters without a lock, which is what taking the mutex away and
+Three controls: `-DCONTROL=1` counts in one set of counters without a lock, which is what taking the mutex away and
 nothing else would be, and must fail at `FAIL stats.total`; `-DXL_STATS_FOLD_TICKS=0xffffffffu` never lets a thread add
-its own time, and must fail at `FAIL stats.wrap`. It runs under `MallocScribble` and `MallocGuardEdges`.
+its own time, and must fail at `FAIL stats.wrap`; `-DCONTROL=2` counts one message in a thousand for another pair, and
+must fail at the last requirement. There is no control for the barrier between a thread's clearing of its notes and
+the window's number: a run cannot be made to depend on the order in which one thread's stores reach another core, so
+that part rests on the memory model and not on a run. It runs under `MallocScribble` and `MallocGuardEdges`.
 
 ### proxytable
 

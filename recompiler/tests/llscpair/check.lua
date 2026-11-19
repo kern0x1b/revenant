@@ -62,7 +62,7 @@ function main(out, ...)
     local program, binary = o("llscpair"), o("llscpair-workers-arm64")
     if not options.device_only then
         for _, name in ipairs({"llscpair", "llscpair-workers-arm64", "llscpair-mac", "out.bc", "out.ll", "xlate.log", "coverage.log", "coverage.txt", "lifted-host.o",
-                               "lifted-armv7.o", "pair-armv7.o", "lifted", "lifted-control-1", "lifted-control-2", "out-host.bc"}) do
+                               "lifted-armv7.o", "pair-armv7.o", "lifted", "lifted-control-1", "lifted-control-2", "lifted-control-3", "out-host.bc"}) do
             os.tryrm(o(name))
         end
         os.execv("cc", {"-O2", "-march=armv8-a", "-w", source, "-o", o("llscpair-mac")})
@@ -157,6 +157,35 @@ function main(out, ...)
         end
         print("ok: the controls with a pair store that does not compare, and with one that compares and stores without the lock, lost updates")
 
+        local function ended(program, asked)
+            return os.iorunv("sh", {"-c", string.format("'%s' %s 2>&1; echo exit=$?", program, asked)})
+        end
+        local processor = ended(o("llscpair-mac"), "--overlap")
+        if not processor:find("exit=138", 1, true) or processor:find("pairs.overlap", 1, true) then
+            io.write(processor)
+            corpus.fail("the processor of this Mac did not answer a 64-bit pair at 8 mod 16 with an alignment fault: the rule the pair store enforces is not the processor's")
+        end
+        local stopped = ended(o("lifted"), "--overlap")
+        if not stopped:find("xlate: a store%-pair at 0x%x+ is not aligned to 16 bytes") or not stopped:find("exit=134", 1, true) or stopped:find("pairs.overlap", 1, true) then
+            io.write(stopped)
+            corpus.fail("two 64-bit pairs that share a word, which arm64 answers with an alignment fault, did not stop the lifted run at the first store")
+        end
+        os.execv("cc", table.join(driver, {"-DCONTROL=3", path.join(os.scriptdir(), "control.c"), "-o", o("lifted-control-3")}))
+        local shared = ended(o("lifted-control-3"), "--overlap")
+        if not shared:find("FAIL pairs.overlap with 2 threads", 1, true) then
+            io.write(shared)
+            corpus.fail("the control 3 (a lock for each 16 bytes and no look at the alignment) lost no update of the word two pairs share")
+        end
+        for _, program in ipairs({o("llscpair-mac"), o("lifted")}) do
+            local narrow = ended(program, "--overlap32")
+            if narrow:find("FAIL", 1, true) or not (narrow:find("ok pairs.overlap32", 1, true) or narrow:find("exit=138", 1, true)) then
+                io.write(narrow)
+                corpus.fail("two 32-bit pairs that share a word lost an update in %s: such a pair is one exclusive of 64 bits, which stores whole or faults", program)
+            end
+        end
+        print("ok: two 64-bit pairs that share a word fault on this processor and stop the lifted run (%s); the control with a lock for each 16 bytes loses updates; two 32-bit pairs that share a word lose none",
+              stopped:match("xlate: a store%-pair[^\n]*"))
+
         local held, report = corpus.run(o("lifted"), {"--fault"}, o("fault.txt"))
         if not held or not report:find("xlate: pair stores: 0 stored and 0 failed since the start", 1, true) or not report:find("; 1 of 64 locks held now\n", 1, true) then
             io.write(report)
@@ -200,14 +229,50 @@ function main(out, ...)
             io.write(undefined)
             corpus.fail("the lifted code compiled for armv7 needs a library call for an atomic, which iOS 6 does not have, or does not call the pair store")
         end
-        local called = os.iorunv("xcrun", {"nm", "-u", o("pair-armv7.o")}):trim()
-        if called ~= "_thread_switch" then
+        local called = os.iorunv("xcrun", {"nm", "-u", o("pair-armv7.o")}):trim():gsub("%s+", " ")
+        if called ~= "_abort _thread_switch _write" then
             print(called)
-            corpus.fail("the pair store calls something else than thread_switch, which it calls while it waits and holds nothing: a call inside the lock could keep it held, and a library call for an atomic does not exist on iOS 6")
+            corpus.fail("the pair store imports something else than thread_switch and the write and abort of its refusal: a library call for an atomic does not exist on iOS 6")
         end
         local armv7 = os.iorunv("xcrun", {"otool", "-tV", o("pair-armv7.o")})
         if not armv7:find("\tldrex\t", 1, true) or not armv7:find("\tstrex\t", 1, true) then
             corpus.fail("the pair store compiled for armv7 does not take its lock with ldrex and strex")
+        end
+        local starts, waits, refusals = {}, 0, 0
+        for line in os.iorunv("xcrun", {"nm", "-n", o("pair-armv7.o")}):gmatch("[^\n]+") do
+            local address, symbol = line:match("^(%x+) [Tt] (_[%w_]+)$")
+            if address then
+                table.insert(starts, {tonumber(address, 16), symbol})
+            end
+        end
+        local function inside(address)
+            local found
+            for _, start in ipairs(starts) do
+                if start[1] <= address then
+                    found = start[2]
+                end
+            end
+            return found
+        end
+        for line in os.iorunv("xcrun", {"otool", "-rv", o("pair-armv7.o")}):gmatch("[^\n]+") do
+            local address, extern, target = line:match("^(%x+) True%s+long%s+(%a+)%s+T_BR%d+%s+False%s+(.+)$")
+            if address then
+                local caller = inside(tonumber(address, 16))
+                local callee = extern == "True" and target or (armv7:match("\n" .. address .. "\t[%x ]+\tblx?\t(_[%w_]+)") or "?")
+                if caller == "_rellume_aarch64_stxp" and callee == "_thread_switch" then
+                    waits = waits + 1
+                elseif caller == "_rellume_aarch64_stxp" and callee == "_xl_pair_unaligned" then
+                    refusals = refusals + 1
+                elseif not (caller == "_xl_pair_unaligned" and (callee == "_write" or callee == "_abort" or callee == "_xl_line_text")) then
+                    print(line)
+                    corpus.fail("%s calls %s: the pair store may call thread_switch (while it waits and holds nothing) and its refusal (which does not return), and nothing else: a call inside the lock could keep it held",
+                                tostring(caller), callee)
+                end
+            end
+        end
+        if waits ~= 1 or refusals ~= 1 then
+            print(armv7)
+            corpus.fail("the pair store compiled for armv7 has %d calls of thread_switch and %d of its refusal where one of each is its whole shape", waits, refusals)
         end
         print("ok: for armv7 the lifted code calls the pair store, whose lock is an inline ldrex and strex, and nothing asks for an atomic library call")
         translate.translate(program, path.join(e.recompiler, "include", "common-includes.h"), o("xl"))
@@ -220,13 +285,25 @@ function main(out, ...)
     local remote = device.scratch .. "/xl-llscpair"
     device.copy(o("xl/llscpair"), remote)
     local output = try { function ()
-        return device.run(string.format("sysctl -n hw.ncpu; chmod +x %s && %s; echo exit=$?; rm -f %s", remote, remote, remote))
+        return device.run(string.format("sysctl -n hw.ncpu; chmod +x %s && %s; echo exit=$?; echo overlap; %s --overlap 2>&1; echo exit=$?; echo overlap32; %s --overlap32 2>&1; echo exit=$?; rm -f %s",
+                                        remote, remote, remote, remote, remote))
     end } or ""
     io.writefile(o("run.txt"), output)
     io.write(output)
-    verify(corpus, output, "the translated program", LINES)
-    if not output:find("exit=0", 1, true) then
+    local whole, wide, narrow = output:gsub("\r", ""):match("^(.-)\noverlap\n(.-)\noverlap32\n(.*)$")
+    if not whole then
+        corpus.fail("the run on the device did not reach its three parts")
+    end
+    verify(corpus, whole, "the translated program", LINES)
+    if not whole:find("exit=0", 1, true) then
         corpus.fail("the translated program did not exit with 0")
     end
+    if not wide:find("xlate: a store%-pair at 0x%x+ is not aligned to 16 bytes") or wide:find("pairs.overlap", 1, true) or wide:find("exit=0", 1, true) then
+        corpus.fail("two 64-bit pairs that share a word did not stop the translated program at the first store")
+    end
+    if narrow:find("FAIL", 1, true) or not (narrow:find("ok pairs.overlap32", 1, true) or not narrow:find("exit=0", 1, true)) then
+        corpus.fail("two 32-bit pairs that share a word lost an update on the device: such a pair is one exclusive of 64 bits, which stores whole or faults")
+    end
+    print("ok: on the device two 64-bit pairs that share a word stop the program, and two 32-bit ones %s", narrow:find("ok pairs.overlap32", 1, true) and "lose no update" or "fault")
     print("ok: the translated program, on the %s processors of the device, lost no update of a pair and read no pair torn (%d scenarios)", output:match("^(%d+)") or "?", #LINES)
 end

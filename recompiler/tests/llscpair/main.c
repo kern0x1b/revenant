@@ -21,9 +21,12 @@ static uint64_t run(int worker, uint64_t a, uint64_t b, uint64_t c, uint64_t d)
     }
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
     setvbuf(stdout, NULL, _IONBF, 0);
+    int asked = mode(argc, argv);
+    if (asked >= 0)
+        return asked;
     scenarios();
     printf("done\n");
     return failures != 0;
