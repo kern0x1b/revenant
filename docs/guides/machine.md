@@ -194,6 +194,9 @@ build:
   device group `glslang` was the one missing from the main `.cache`). The configure of a warm clone ends in under a minute
   (28 seconds measured on 2026-11-16) and prints no `installing` or `downloading` line; the first such line means the
   source was not warm, and the build is stopped there and the source changed, not waited for.
+- `<source>/dyld/6.1.3/classes_armv7.json` exists. The Backports generator decides from that file which SDK classes get a
+  proxy and stops without it; a clone that has only `dyld/6.0` once produced a skeleton from the wrong release's inventory
+  (a `MapKit` proxy that the 6.1.3 device does not need).
 - For the device runtime tests, `<source>/firmware/rootfs/iPhone4,1/6.1.3_10B329` exists. A clone without it runs every
   `backports_runtime` case as failed (measured 2026-11-19, all cases of the group), because the emulator has no root file
   system to boot. A missing one is cloned from a cache that has it with `cp -c -R -p` (an APFS clone, no second copy on

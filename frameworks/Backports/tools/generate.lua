@@ -8,16 +8,6 @@ local skeleton = import("skeleton", {rootdir = os.scriptdir(), anonymous = true}
 local markers = import("markers", {rootdir = os.scriptdir(), anonymous = true})
 local libraries = import("library_list", {rootdir = os.scriptdir(), anonymous = true}).backports_libraries()
 local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
-local lowered = import("@addon.revenant.apple.lowered", {anonymous = true})
-
-local DEVICE_IMAGE_BRIDGES = {
-    CoreFoundation = {Foundation = true},
-    Foundation = {CoreFoundation = true},
-    UIKit = {UIFoundation = true, QuartzCore = true},
-    AVFAudio = {AVFoundation = true, Foundation = true},
-    CoreData = {Foundation = true},
-    SceneKit = {QuartzCore = true},
-}
 
 local SHARDS = 4
 local FIRST_IPHONE_OS = 2000
@@ -308,36 +298,78 @@ end
 
 local device_classes = nil
 
+function device_class_inventory_file()
+    return path.join(dyld.root(), DEVICE_GLOBALS_RELEASE, "classes_armv7.json")
+end
+
 local function device_class_inventory()
     if device_classes == nil then
-        device_classes = {}
-        local file = path.join(dyld.root(), DEVICE_GLOBALS_RELEASE, "classes_armv7.json")
+        local file = device_class_inventory_file()
         if not os.isfile(file) then
-            file = lowered.inventory_file()
+            raise("the iOS %s class inventory %s is missing: the generator decides which SDK classes get a proxy from exactly that release's inventory and does not fall back to another one; clone a cache that holds it (docs/guides/machine.md, \"Which cache to clone\")", DEVICE_GLOBALS_RELEASE, file)
         end
-        if os.isfile(file) then
-            device_classes = json.decode(io.readfile(file)).classes or {}
-        end
+        device_classes = json.decode(io.readfile(file)).classes or {}
     end
     return device_classes
 end
 
-function class_on_device(name, framework)
-    local info = device_class_inventory()[name]
+local function sdk_members_of(state)
+    if state.sdk_members == nil then
+        local unavailable = unavailable_classes_of(state)
+        local members = {}
+        for _, framework in ipairs(state.frameworks) do
+            for _, row in ipairs(framework.rows) do
+                if exists_on_ios(row, unavailable) then
+                    local key
+                    if row.kind == "instance method" or row.kind == "class method" then
+                        key = row.kind .. "|" .. row.name
+                    elseif row.kind == "property" then
+                        local getter = string.match(row.flags or "", "getter:(%S+)") or row.name
+                        key = (has_flag(row, "class") and "class method" or "instance method") .. "|" .. getter
+                    end
+                    if key then
+                        members[row.container] = members[row.container] or {}
+                        members[row.container][key] = true
+                    end
+                end
+            end
+        end
+        state.sdk_members = members
+    end
+    return state.sdk_members
+end
+
+local function device_declares(info, key)
+    local kind, name = key:match("^(.-)|(.*)$")
+    for _, selector in ipairs((kind == "class method" and info.class or info.instance) or {}) do
+        if selector == name then
+            return true
+        end
+    end
+    return false
+end
+
+function class_on_device(state, row, framework_name)
+    local info = device_class_inventory()[row.name]
     if not info then
         return false
     end
     local image = info.image or ""
-    local owner = image:match("/System/Library/Frameworks/([%w_]+)%.framework/")
-               or image:match("/System/Library/PrivateFrameworks/([%w_]+)%.framework/")
-    if not owner then
-        return false
-    end
-    if owner == framework then
+    local public = image:match("^/System/Library/Frameworks/([%w_]+)%.framework/")
+    local owner = public or image:match("^/System/Library/PrivateFrameworks/([%w_]+)%.framework/")
+    if public or owner == framework_name then
         return true
     end
-    local bridge = DEVICE_IMAGE_BRIDGES[framework]
-    return bridge ~= nil and bridge[owner] == true
+    local members = sdk_members_of(state)[row.name]
+    if members == nil then
+        return false
+    end
+    for key in pairs(members) do
+        if device_declares(info, key) then
+            return true
+        end
+    end
+    return false
 end
 
 function unavailable_count(state, framework)
@@ -398,7 +430,7 @@ function pending_of(state, only)
                 local owner = single_owned(row) and owners[row.kind .. "|" .. row.name]
                 if not single_owned(row) or (owner and owner.framework == framework.name) then
                     if exists_on_ios(row, unavailable) then
-                        if row.kind ~= "class" or not class_on_device(row.name, framework.name) then
+                        if row.kind ~= "class" or not class_on_device(state, row, framework.name) then
                             table.insert(rows, row)
                         else
                             skipped[row.kind] = (skipped[row.kind] or 0) + 1

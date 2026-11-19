@@ -6,13 +6,25 @@ Backports library links against gets the proxy. An app image that the SDK linked
 framework instead, so it gets the system class and not the proxy. `CASpringAnimation` is the case: QuartzCore on
 iOS 6.1.3 has a `CASpringAnimation` without `initialVelocity` or `settlingDuration`.
 
-A class that the device itself exports never gets a proxy, whatever the SDK's availability table says. The generator
-reads the release's measured Objective-C class inventory (name and exporting image) and drops the class row from the
-skeleton when the device has the class. Two images are equivalent for this rule where the SDK and the device split a
-framework: Foundation classes exported by CoreFoundation, UIKit classes by UIFoundation or QuartzCore, AVFAudio
-classes by AVFoundation or Foundation, CoreData classes by Foundation, and SceneKit classes by QuartzCore. A name that
-the device exports only from an unrelated private framework is a stranger, not the SDK class: `SKOverlay` in StoreKit
-is matched by a private SkankKit class and keeps its proxy.
+A class that the device itself exports never gets a proxy, whatever the SDK's availability table says, except a
+stranger: a private class that only shares the name. The generator reads the iOS 6.1.3 release's measured Objective-C
+class inventory (name, exporting image, members) and does not fall back to another release's file or to an empty one:
+without `dyld/6.1.3/classes_armv7.json` in the cache it stops and says so. It drops the class row from the skeleton when
+the device has the class and one of these holds: the exporting image is a public framework (`/System/Library/Frameworks`),
+whichever one the SDK puts the class in, or the exporting image is the private framework of the same name, or the device
+class implements at least one member that the SDK declares for it. No table of equivalent images is kept: Foundation
+classes that CoreFoundation exports, UIKit classes that QuartzCore exports and the like are public images and need no
+entry, and the six `ImageCaptureCore` classes, which a private `ImageCapture` image exports, are the same classes because
+the device implements 12 of the 20 members that the SDK declares for `ICDevice`, 14 of 21 for `ICCameraItem`, 6 of 14 for
+`ICDeviceBrowser` and the like (measured). `SKOverlay` in StoreKit is the one stranger left: SkankKit's class of that name
+has the superclass `SKLayer` and none of the 5 members of the SDK's, so it keeps its proxy; `cf_cast_test` names it as the
+only class of the skeleton that the device also exports.
+
+Of 5,523 class rows that the SDK declares and iOS has, the rule agrees with the earlier image table on every row that
+the table accepted, and it additionally accepts rows that the table rejected (95; the ownership filter drops those rows for the frameworks that only name
+the class; each one was not inspected). The generated skeleton drops the six `ImageCaptureCore` proxies, which no shipped
+library compiled, because no Backports library carries `ImageCaptureCore`; an app that links that framework on 6.1.3 binds
+no Backports export for it either way.
 
 The reason is dynamic casts. Every object the system makes descends from the real class, so a Swift `as!` or an
 Objective-C `isKindOfClass:` against a proxy can never succeed; the trap names the proxy, as in
