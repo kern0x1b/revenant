@@ -612,6 +612,14 @@ too big. Then `compile_lifted` of `translate.lua` compiles it with its own piece
 smaller than 16 MB, and every function defined once across them. The objects are compiled with `-O0` to keep the check
 at about a minute; the limit is on the size of an object, and `-O0` code is bigger than `-O2` code.
 
+Its last step splits two small modules at once in one xmake process (`pair.lua`, started as a child with a limit of 120 s
+and killed at it) and requires both to return with their three objects. The pieces of a split are compiled by xmake's
+`runjobs`, and the scheduler under it keeps the coroutines and the one waiter of a run under the run's name: two runs of
+one name that overlap share them, and the one that began to wait first is never woken, with all its jobs done and no
+process left. That is what `xmake test "recompiler_corpus/*"` did whenever two checks split a module in the same run
+(objectsplit always does, libcxxexceptions when its lift is not reused): the whole run sat idle until it was killed,
+and the same checks passed one by one. A split now runs under a name with its output folder in it.
+
 ### tsdscan
 
 A control for xlate's build-time TSD offset scan (`src/xlate/tsd_scan.cpp`). xlate refuses to lift an image that reads
