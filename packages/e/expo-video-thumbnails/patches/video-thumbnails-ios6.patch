@@ -1,0 +1,58 @@
+diff -ru a/ios/VideoThumbnailsExceptions.swift b/ios/VideoThumbnailsExceptions.swift
+--- a/ios/VideoThumbnailsExceptions.swift	2026-11-19 02:16:45
++++ b/ios/VideoThumbnailsExceptions.swift	2026-11-19 02:16:45
+@@ -1,18 +1,18 @@
+ import ExpoModulesCore
+ 
+-internal final class FileSystemReadPermissionException: GenericException<String> {
++internal final class VideoThumbnailsReadPermissionException: GenericException<String> {
+   override var reason: String {
+     "File '\(param)' is not readable"
+   }
+ }
+ 
+-internal final class ImageWriteFailedException: GenericException<String> {
++internal final class VideoThumbnailsWriteFailedException: GenericException<String> {
+   override var reason: String {
+     "Writing image data to the file has failed: \(param)"
+   }
+ }
+ 
+-internal final class CorruptedImageDataException: Exception {
++internal final class VideoThumbnailsCorruptedDataException: Exception {
+   override var reason: String {
+     "Cannot create image data for saving of the thumbnail of the given video"
+   }
+diff -ru a/ios/VideoThumbnailsModule.swift b/ios/VideoThumbnailsModule.swift
+--- a/ios/VideoThumbnailsModule.swift	2026-11-19 02:16:45
++++ b/ios/VideoThumbnailsModule.swift	2026-11-19 02:16:45
+@@ -13,7 +13,7 @@
+   internal func getVideoThumbnail(sourceFilename: URL, options: VideoThumbnailsOptions) throws -> [String: Any] {
+     if sourceFilename.isFileURL {
+       guard FileSystemUtilities.isReadableFile(appContext, sourceFilename) else {
+-        throw FileSystemReadPermissionException(sourceFilename.absoluteString)
++        throw VideoThumbnailsReadPermissionException(sourceFilename.absoluteString)
+       }
+     }
+ 
+@@ -53,17 +53,17 @@
+     FileSystemUtilities.ensureDirExists(at: directory)
+ 
+     guard let data = image.jpegData(compressionQuality: CGFloat(quality)) else {
+-      throw CorruptedImageDataException()
++      throw VideoThumbnailsCorruptedDataException()
+     }
+ 
+     guard let fileUrl else {
+-      throw ImageWriteFailedException("Unrecognized url \(String(describing: fileUrl?.path))")
++      throw VideoThumbnailsWriteFailedException("Unrecognized url \(String(describing: fileUrl?.path))")
+     }
+ 
+     do {
+       try data.write(to: fileUrl, options: .atomic)
+     } catch let error {
+-      throw ImageWriteFailedException(error.localizedDescription)
++      throw VideoThumbnailsWriteFailedException(error.localizedDescription)
+     }
+ 
+     return fileUrl

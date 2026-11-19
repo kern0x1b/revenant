@@ -855,9 +855,9 @@
    "group": "sdk",
    "version": "~57.0.2",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Not built; package packages/e/expo-video-thumbnails (57.0.2, unpatched). It uses AVAssetImageGenerator.copyCGImage, AVURLAsset and UIImage jpegData, all iOS 4, so no patch is expected; the build is what decides."
+   "status": "real",
+   "verified": "build",
+   "note": "Recipe packages/e/expo-video-thumbnails (npm 57.0.2, patch video-thumbnails-ios6.patch) installs and its patch applies; compiled into the host and linked (not exercised on the phone). The only change renames the three exception classes that collide with expo-image-manipulator's inside the shared ExpoAppModules Swift module. AVAssetImageGenerator.copyCGImage, AVURLAsset and UIImage jpegData are iOS 4 APIs; the HTTP-headers asset option is passed as a plain string key; whether iOS 6 honours it for http sources was not checked."
   },
   {
    "id": "expo-video",

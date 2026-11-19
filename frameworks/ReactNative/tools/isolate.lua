@@ -376,8 +376,9 @@ function install_recipe(folder, cache, name, version)
     local probe = path.join(folder, "build", "pkg-probe-" .. name)
     os.mkdir(probe)
     local installed = path.join(probe, "installdir.txt")
-    os.tryrm(installed)
-    io.writefile(path.join(probe, "xmake.lua"), table.concat(table.join({
+    local script = path.join(probe, "xmake.lua")
+    local before = os.isfile(script) and io.readfile(script) or nil
+    local text = table.concat(table.join({
         'set_project("pkgprobe")',
         'set_xmakever("3.1.2")',
         'add_rules("mode.release")',
@@ -391,7 +392,21 @@ function install_recipe(folder, cache, name, version)
         string.format('    add_packages("%s")', name),
         '    on_config(function (target)',
         string.format('        io.writefile(path.join(os.projectdir(), "installdir.txt"), target:pkg("%s"):installdir())', name),
-        '    end)', ""}), "\n"))
+        '    end)', ""}), "\n")
+    if before == text and os.isfile(installed) then
+        -- the same probe answered before: reuse its install folder while it exists and the recipe and its patches are older than the answer
+        local previous = io.readfile(installed):trim()
+        local recipe = path.join(checkout(), "packages", name:sub(1, 1), name)
+        local stamp, newest_recipe = os.mtime(installed), 0
+        for _, file in ipairs(os.files(path.join(recipe, "**"))) do
+            newest_recipe = math.max(newest_recipe, os.mtime(file))
+        end
+        if os.isdir(previous) and newest_recipe < stamp then
+            return previous
+        end
+    end
+    os.tryrm(installed)
+    io.writefile(script, text)
     os.vrunv(path.join(checkout(), "xmakew"), {"f", "-P", probe, "-p", "iphoneos", "-a", "armv7", "-y"}, {envs = {REVENANT_CACHE = cache}})
     if not os.isfile(installed) then
         raise("%s %s is not installed from its recipe", name, version)

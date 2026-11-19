@@ -1,12 +1,13 @@
 package("expo-video-thumbnails")
     set_kind("library", {headeronly = true})
     set_homepage("https://github.com/expo/expo/tree/main/packages/expo-video-thumbnails")
-    set_description("expo-video-thumbnails 57.0.2, the Expo SDK frame grabber of a video, from its npm tarball: the iOS module sources the host builds from, unpatched so far")
+    set_description("expo-video-thumbnails 57.0.2, the Expo SDK frame grabber of a video, from its npm tarball: the iOS module sources the host builds from, with the three exception classes that collide with expo-image-manipulator's inside the shared Swift module renamed")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://registry.npmjs.org/expo-video-thumbnails/-/expo-video-thumbnails-$(version).tgz")
     add_versions("57.0.2", "10523ecf075a1ed6605c85c8cf8cc29f5de819ae4d91c647d73416229d398caa")
+    add_patches("57.0.2", path.join(os.scriptdir(), "patches", "video-thumbnails-ios6.patch"), "fd0ed951aa8b95438fd72085475e308497577c20116ce6639497f75253a55cae")
 
     on_install(function (package)
         os.cp("*", package:installdir() .. "/")
