@@ -88,3 +88,48 @@ local hosted = isolate.host_libcxx(APPLICATION)
 expect("the copy's host no longer carries the libc++ the shared package installs", hosted:find('target("RNHost")', 1, true) ~= nil
        and hosted:find('name ~= "libcxx"', 1, true) ~= nil, "the app.frameworks filter is missing from the copy")
 expect("the host rule is carried once", isolate.host_libcxx(hosted) == hosted, "a second pass changed the copy")
+
+-- clone: a warm copy moved to another worktree with its own clone of the cache
+local base = path.join(os.tmpdir(), "rn-isolate-cloning")
+os.rm(base)
+local old_checkout, old_cache, old_folder = path.join(base, "old", "checkout"), path.join(base, "old", "checkout", ".cache-pp"), path.join(base, "old", "checkout", "iso-x")
+local new_cache, new_folder = path.join(base, "new", ".cache-pp"), path.join(base, "new", "iso-y")
+os.mkdir(path.join(old_cache, "pkg", "x"))
+os.mkdir(path.join(old_cache, "pkg", "rn", "src", "React"))
+io.writefile(path.join(old_cache, "pkg", "rn", "src", "React", "a.h"), "// a header\n")
+os.mkdir(path.join(old_folder, "build", "pkg-probe-x"))
+os.mkdir(path.join(old_folder, "build", "rn-headers", "React"))
+os.mkdir(path.join(base, "app"))
+io.writefile(path.join(old_folder, "build", "pkg-probe-x", "xmake.lua"), isolate.recipe_probe_text(old_checkout, "x", "1"))
+io.writefile(path.join(old_folder, "build", "pkg-probe-x", "installdir.txt"), path.join(old_cache, "pkg", "x") .. "\n")
+io.writefile(path.join(old_folder, "build", "isolate-roots.txt"), table.concat({old_folder, old_checkout, old_cache}, "\n") .. "\n")
+io.writefile(path.join(old_folder, "xmake.lua"), 'set_project("example-host")\n-- built in ' .. old_folder .. " from " .. old_checkout .. "\n")
+os.vrunv("ln", {"-sfn", path.join(old_cache, "pkg", "rn", "src"), path.join(old_folder, "build", "rn-src")})
+os.vrunv("ln", {"-sfn", path.join(old_folder, "build", "rn-src", "React", "a.h"), path.join(old_folder, "build", "rn-headers", "React", "a.h")})
+os.vrunv("ln", {"-sfn", path.join(base, "app"), path.join(old_folder, "build", "ref")})
+os.mkdir(path.directory(new_cache))
+os.vrunv("cp", {"-cR", old_cache, new_cache})
+
+local cloned = isolate.clone_project(old_folder, new_folder, new_cache)
+local function naming(root)
+    local found = try { function () return os.iorunv("grep", {"-rIlF", "--exclude-dir=ref", root, new_folder}) end, catch { function () return "" end } }
+    return found or ""
+end
+expect("a clone names none of the old roots in its text files", naming(old_folder) == "" and naming(old_checkout) == "" and naming(old_cache) == "",
+       "the clone still names the old copy, checkout or cache: " .. naming(old_checkout) .. naming(old_folder))
+local rn_src = os.iorunv("readlink", {path.join(new_folder, "build", "rn-src")}):trim()
+local header = os.iorunv("readlink", {path.join(new_folder, "build", "rn-headers", "React", "a.h")}):trim()
+expect("the rn-src link of a clone points into its own cache and the rn-headers links into its own rn-src", rn_src == path.join(new_cache, "pkg", "rn", "src")
+       and header == path.join(new_folder, "build", "rn-src", "React", "a.h") and io.readfile(path.join(new_folder, "build", "rn-headers", "React", "a.h")) == "// a header\n",
+       "rn-src is " .. rn_src .. " and the header link is " .. header)
+local here = path.absolute(os.projectdir())
+local answer = isolate.reusable_answer(path.join(new_folder, "build", "pkg-probe-x"), isolate.recipe_probe_text(here, "x", "1"), path.join(base, "no-recipe"))
+expect("a clone's probes answer from their recorded install folders without installing again", answer == path.join(new_cache, "pkg", "x"),
+       "the probe answered " .. tostring(answer))
+expect("a clone leaves the copy it came from as it was", io.readfile(path.join(old_folder, "build", "pkg-probe-x", "xmake.lua")):find(old_checkout, 1, true) ~= nil
+       and os.iorunv("readlink", {path.join(old_folder, "build", "rn-src")}):trim() == path.join(old_cache, "pkg", "rn", "src"), "the old copy was changed")
+expect("a clone records its own roots", isolate.read_roots(new_folder).folder == new_folder and isolate.read_roots(new_folder).cache == new_cache
+       and isolate.read_roots(new_folder).checkout == here, "the roots file of the clone is wrong")
+expect("a clone refuses an existing folder", refusal(function () isolate.clone_project(old_folder, new_folder, new_cache) end) ~= nil, "an existing folder was overwritten")
+expect("a clone counts what it rewrote", cloned.rewritten >= 3 and cloned.relinked == 2, cloned.rewritten .. " files, " .. cloned.relinked .. " links")
+os.rm(base)
