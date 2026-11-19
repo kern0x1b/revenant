@@ -350,10 +350,18 @@ function main(out, ...)
     if os.getenv("XL_LIBRARY_INSTALL_NAME") == "executable" and variant == "objc" then
         environment = "XL_LIBRARY_NO_FALLBACK=1"
     end
+    local record = o("device.txt")
+    io.writefile(record, "")
+    local function recorded(title, text)
+        local file = io.open(record, "a")
+        file:write("== " .. title .. "\n" .. text .. (text:sub(-1) == "\n" and "" or "\n"))
+        file:close()
+        return text
+    end
     local function launch(arguments, extra)
-        return try { function ()
+        return recorded((extra or "") .. "xl-library-host " .. arguments, try { function ()
             return device.run("chmod +x " .. remote .. "/xl-library-host && cd " .. remote .. " && " .. (extra or "") .. environment .. " ./xl-library-host " .. arguments .. " 2>&1; echo exit=$?")
-        end } or ""
+        end } or "")
     end
     local function verify(output, names, what)
         local text = "\n" .. output:gsub("\r", "")
@@ -528,7 +536,7 @@ function main(out, ...)
     local function crash(extra, logged, where)
         device.run("rm -f " .. crash_log)
         local text = launch(remote .. "/RCFixture.dylib " .. resident .. " " .. (where or "--abort"), (logged and "XL_LOG=1 " or "") .. extra)
-        return text .. "\n" .. (try { function ()
+        return text .. "\n" .. recorded(crash_log .. " after it", try { function ()
             return device.run("cat " .. crash_log .. " 2>/dev/null; true")
         end } or "")
     end

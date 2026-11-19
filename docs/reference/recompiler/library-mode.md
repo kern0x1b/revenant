@@ -712,6 +712,10 @@ have `xlate: guest stacks: L live, M KiB mapped; …` with a live stack of at le
 `xlate: budget: metadata arena A of S KiB touched, opaque words N of M, aliases U of S KiB` whose arena, word count and
 alias size are the header's (the aliases read `0 of 0` until their first use).
 
+Everything a launch on the phone printed is in `device.txt` of the output folder as soon as the launch ends, each under
+a line `== ` with its environment and arguments, and the crash log under its own: a check that fails at its sixth launch
+leaves the five before it, and a first run on a phone is read from that file, not from the last message.
+
 **What of this ran without a phone.** On 2026-11-19 the launches were run in the emulator (iPhone4,1, the root filesystem
 of 6.1.3 10B329), the host started by a first process that sets its environment and arguments, the fixture translated
 with `XL_BASE=0x2e000000` (in the emulator the heap begins at `0x10000000`, the fixture's default base). The emulator's
