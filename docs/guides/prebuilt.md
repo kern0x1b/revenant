@@ -5,9 +5,16 @@ key from its release. Releases exist for `llvm`, `swift`, `ld64`, `libcxx` and `
 
 ## What it is for
 
-LLVM and Swift take hours to build from source, and every machine and every change to their recipes builds
-them again. A prebuilt archive is built once for a key, on a GitHub runner, and attached to a release named
-by that key. A machine whose recipe gives the same key downloads the archive instead of building.
+LLVM and Swift are slow to build from source, and every machine and every change to their recipes would build
+them again. Measured for LLVM (the `libraries` configuration, clang for ARM and AArch64, 12 cores): ninja took 8.9
+minutes on 2026-11-02 and 9.0 on 2026-11-03 with nothing else running (125 CPU-minutes), and the same build on a Mac
+that other builds share takes a multiple of that (the load average was 30 to 40 on 2026-11-19). A prebuilt archive is
+built once for a key, on this Mac (there is no CI: `prebuilt.yml` was removed on 2026-11-03 with the other workflows),
+and attached by hand to a release named by that key (see Releases). A machine whose recipe gives the same key
+downloads the archive instead of building. A kept build tree does not make a rebuild incremental across a change of the
+host's compiler: the kept tree of 2026-11-02 was built with Apple clang 21.0.0.21000334 (the tree of 2026-11-03 records
+the same), and with the host's 21.0.0.21000401 ninja planned 2709 steps for it after one patched file, and its
+precompiled headers were refused (`built from a different branch`).
 
 ## The key
 
@@ -50,7 +57,7 @@ early return would skip them. Doing that changes the recipe, and so the key, onc
 The `shared` config of `swift-runtime` and the `packaged` config of `libcxx` are not wired: they stage packages that
 an early return would skip, so those builds come from source. The Backports targets are not packages, so they are not affected.
 
-A recipe is archived only when it calls `prebuilt.pack`, so a job that builds one has nothing to release unless
+A recipe is archived only when it calls `prebuilt.pack`, so a build of one has nothing to publish unless
 its recipe is wired.
 
 ## Releases
