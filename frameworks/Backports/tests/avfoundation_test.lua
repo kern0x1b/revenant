@@ -31,6 +31,28 @@ local AREAS = {
             "-[RevenantAVPlayerLooper loopingPlayerItems]", "-[RevenantAVPlayerLooper disableLooping]",
         },
     },
+    {
+        name = "time and rendering of a queued sample buffer display layer",
+        sources = {"AVSampleBufferDisplayLayer8.m"},
+        members = {
+            "-[AVSampleBufferDisplayLayer timebase]", "-[AVSampleBufferDisplayLayer controlTimebase]",
+            "-[AVSampleBufferDisplayLayer setControlTimebase:]", "-[AVSampleBufferDisplayLayer videoGravity]",
+            "-[AVSampleBufferDisplayLayer setVideoGravity:]", "-[AVSampleBufferDisplayLayer isReadyForDisplay]",
+            "-[AVSampleBufferDisplayLayer status]", "-[AVSampleBufferDisplayLayer error]",
+            "-[AVSampleBufferDisplayLayer enqueueSampleBuffer:]", "-[AVSampleBufferDisplayLayer flush]",
+            "-[AVSampleBufferDisplayLayer flushAndRemoveImage]",
+            "-[AVSampleBufferDisplayLayer requiresFlushToResumeDecoding]",
+            "-[AVSampleBufferDisplayLayer isReadyForMoreMediaData]",
+            "-[AVSampleBufferDisplayLayer requestMediaDataWhenReadyOnQueue:usingBlock:]",
+            "-[AVSampleBufferDisplayLayer stopRequestingMediaData]",
+            "-[AVSampleBufferDisplayLayer hasSufficientMediaDataForReliablePlaybackStart]",
+            "-[AVSampleBufferDisplayLayer preventsCapture]", "-[AVSampleBufferDisplayLayer setPreventsCapture:]",
+            "-[AVSampleBufferDisplayLayer preventsDisplaySleepDuringVideoPlayback]",
+            "-[AVSampleBufferDisplayLayer setPreventsDisplaySleepDuringVideoPlayback:]",
+            "-[AVSampleBufferDisplayLayer outputObscuredDueToInsufficientExternalProtection]",
+            "-[AVSampleBufferDisplayLayer sampleBufferRenderer]",
+        },
+    },
 }
 
 local function key_of(member)
