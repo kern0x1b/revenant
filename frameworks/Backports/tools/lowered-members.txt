@@ -2113,6 +2113,7 @@ class RevenantTextLocation
 class RevenantTextReplacement
 class RevenantTextStack
 class RevenantTextViewSelectable7
+class RevenantTextViewTypingAttributes6
 class RevenantTileCache
 class RevenantTimerBlockTarget
 class RevenantTokenState
@@ -29448,6 +29449,7 @@ member RevenantTextStack -revenant_pushToView
 member RevenantTextStack -textStorage:didProcessEditing:range:changeInLength:
 member RevenantTextStack -textStorageDidProcessEditing:
 member RevenantTextViewSelectable7 +load
+member RevenantTextViewTypingAttributes6 +load
 member RevenantTileCache +revenant_shared
 member RevenantTileCache -init
 member RevenantTileCache -revenant_dataForKey:
