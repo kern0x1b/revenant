@@ -213,8 +213,9 @@ same relative paths under the moved home are not measured.
 
 - The helper with the real library on the phone under Telegram's own build ran once (pass125b, above). Not yet run
   there: a second request on the same helper, the helper's exit on idle, the pause after a `failed`, and a key the
-  server accepts. The helper's own virtual size on the phone has not been measured (the app's virtual size grew by 1.4
-  MB and 3.0 MB across the `execute` in the two windows: 882700K to 884108K and 880044K to 882996K).
+  server accepts. The helper's own virtual size on the phone was measured with a refused key (about 402 MB idle, 409 MB at
+  the peak, 21 MB resident; the table in [the design](../../explanation/recaptcha-helper-process.md), section Memory), not with a key the
+  server accepts.
 - The home move on the phone: in pass125b the helper's line named `caches=/var/mobile/Library/Caches/
   ph.telegra.Telegraph.recaptcha/Library/Caches` and `own store: separate from the shared store`, and `NO_HOME` did not
   appear, so iOS 6.1.3 honoured `CFFIXED_USER_HOME` for the caches folder and the languages and locale it reads

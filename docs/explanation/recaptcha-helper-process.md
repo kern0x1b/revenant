@@ -306,6 +306,30 @@ of range and what it touches) and every failure of loading late; whether the app
 panel is a question about the app, measured by the Telegram session, and the panel case of this measurement cannot
 pass before that one does.
 
+**Measured, the helper itself** (pass125b of Telegram's build on the iPhone 4S, iOS 6.1.3, 2026-11-19; two windows, the
+helper of the drop43 sources with a memory probe inserted into it, a key the server refuses; the Telegram session's
+record, `scratch-login/memprobe/memprobe-helper-HH1.out` and `-HH2.out`, one sample about every 1.35 s):
+
+| Moment | Virtual size | Resident | Threads |
+|---|---|---|---|
+| the helper's constructor | 288100 K (110 regions, mostly the shared cache) | | |
+| while `xl_load` runs, 0.6 s before `ready` | 398848 K in both | 11224 K and 11208 K | 8 |
+| 0.7 s after `ready`, before the answer | 401580 K and 405252 K | 17552 K and 19028 K | 9 and 12 |
+| 0.5 s after the answer (the peak) | 409132 K and 408088 K | 21524 K and 21476 K | 16 and 15 |
+| idle, from 8.5 s on | 402868 K, then 402344 K | 21312 K, then 21296 K | 10 |
+
+The library adds about 110 MB of virtual size to the helper (288 to 399), an `execute` adds 3 to 10 MB at its peak and
+the size returns to about 402 MB after the answer and stays there; resident is 21 MB, and the malloc zones grew from
+20.8 to 21.1 MB with 1.2 to 2.2 MB in use and no failures. Below `0x30000000` the helper has 760476 K free at the start,
+about 650 MB after `xl_load` and about 646 MB when idle, the largest hole 360 to 395 MB: the helper is far from the limit
+of its address space, which is the question the budget asks. The helper starts when the first request comes: `ready`
+2.03 and 2.06 s after the spawn (`xl_load` 1577 and 1671 ms), the answer `EXECUTE_FAILED ... Invalid Site Key.` 3.80
+and 3.68 s after the request. The app's virtual size in the same windows: 880872 K before the request and 882020 K after
+the answer in the first, 879064 K and 881968 K in the second, resident 120584 to 120748 K and 119848 to 121676 K, so the
+helper costs the app 1 to 3 MB (the pipes and the reader thread) and the library lives in another address space. Not
+measured: a helper with a key the server accepts, which goes further down the SDK's path than the refusal does, and
+the helper after a second request.
+
 ## Signing and install
 
 **Measured**: a program signed with `ldid -S` and the entitlements file of Telegram's executable runs as `mobile` from
