@@ -490,6 +490,27 @@ static void scenario_registry_failed(const char *folder)
     model_init_result = XL_LIBRARY_OK;
     expect(xl_load(file) == XL_LOAD_REGISTRY_FAILED && model_dlopen_calls == 1, "the status is final");
 }
+static void scenario_attach_refused(const char *folder)
+{
+    const char *file = library(folder, "attachrefuses", BASE_UNDER_STACK, XL_GUEST_VERSION, 1);
+    model_init_result = XL_LIBRARY_BAD_FORMAT;
+    expect(xl_load(file) == XL_LOAD_ATTACH_REFUSED && strstr(xl_load_error(), "refused its guest image when it attached"),
+           "an image whose header the loader read and whose records the library refuses is not XL_LOAD_BAD_IMAGE, which follows the files: %s", xl_load_error());
+    expect(model_covered(model_guest_low, model_guest_high, 0) == 0 && !room_held(), "the guest range is given back");
+    model_init_result = XL_LIBRARY_OK;
+    expect(xl_load(file) == XL_LOAD_ATTACH_REFUSED && xl_reserve(file) == XL_LOAD_ATTACH_REFUSED && model_dlopen_calls == 1, "the status is final");
+}
+
+static void scenario_registry_gone(const char *folder)
+{
+    const char *file = library(folder, "registrygone", BASE_UNDER_STACK, XL_GUEST_VERSION, 1);
+    model_init_result = XL_LIBRARY_NO_REGISTRY;
+    expect(xl_load(file) == XL_LOAD_REGISTRY_FAILED && strstr(xl_load_error(), "was not next to the image when the library attached"),
+           "a registry that the library does not find when it attaches is not XL_LOAD_BAD_IMAGE, which follows the files: %s", xl_load_error());
+    expect(model_covered(model_guest_low, model_guest_high, 0) == 0 && !room_held(), "the guest range is given back");
+    model_init_result = XL_LIBRARY_OK;
+    expect(xl_load(file) == XL_LOAD_REGISTRY_FAILED && model_dlopen_calls == 1, "the status is final");
+}
 
 static void scenario_refusals(const char *folder)
 {
@@ -498,6 +519,7 @@ static void scenario_refusals(const char *folder)
     expect(xl_load(newer) == XL_LOAD_BAD_IMAGE && strstr(xl_load_error(), "format version"), "a format this loader does not read is refused: %s", xl_load_error());
     const char *alone = library(folder, "alone", BASE_UNDER_STACK, XL_GUEST_VERSION, 0);
     expect(xl_load(alone) == XL_LOAD_BAD_IMAGE && strstr(xl_load_error(), "registry"), "a library without its registry is refused: %s", xl_load_error());
+    expect(xl_load(alone) == XL_LOAD_BAD_IMAGE && model_dlopen_calls == 0, "and again while the files are the same, before any dlopen");
     model_budget_skew = XL_GUEST_GRANULE;
     const char *skewed = library(folder, "skewed", BASE_UNDER_STACK, XL_GUEST_VERSION, 1);
     model_budget_skew = 0;
@@ -512,6 +534,12 @@ static void scenario_refusals(const char *folder)
     expect(xl_reserve(second) == XL_LOAD_OK, "after xl_release another library can be reserved");
     xl_release();
     expect(unchanged(), "and released");
+    char companion[PATH_MAX];
+    xl_registry_path(alone, companion, sizeof companion);
+    int made = open(companion, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    close(made);
+    expect(made >= 0 && xl_load(alone) == XL_LOAD_OK && xl_find_class("RCFClient") == &model_class,
+           "XL_LOAD_BAD_IMAGE follows the files: with its registry put next to it the library that was refused loads");
 }
 
 static void scenario_guest_only(const char *folder)
@@ -540,6 +568,8 @@ static const struct {
     {"the library fails to attach", scenario_attach},
     {"the reservation is not whole when the library attaches", scenario_reservation_lost},
     {"the registry fails to load after the attach", scenario_registry_failed},
+    {"the library refuses its image when it attaches", scenario_attach_refused},
+    {"the registry is gone when the library attaches", scenario_registry_gone},
     {"refusals take nothing", scenario_refusals},
     {"guest range only", scenario_guest_only},
 };
