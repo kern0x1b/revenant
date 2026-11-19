@@ -940,6 +940,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         add_tests("alias_system_class")
         add_tests("cf_mutable_cast")
         add_tests("gesture_failure")
+        add_tests("uitextview_typing_attributes")
         add_tests("caspring_animation_cast")
         add_tests("caspring_animation_coding")
         add_tests("protocol_uimutabletraits")
