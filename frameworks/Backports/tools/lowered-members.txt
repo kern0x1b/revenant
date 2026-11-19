@@ -87,6 +87,7 @@ class AVAsset
 class AVAssetExportSession
 class AVAssetImageGenerator
 class AVAssetResourceLoadingDataRequest
+class AVAssetResourceLoadingRequest
 class AVAssetResourceRenewalRequest
 class AVAssetTrack
 class AVAssetVariant
@@ -11931,6 +11932,8 @@ member AVAssetResourceLoadingDataRequest -requestedOffset
 member AVAssetResourceLoadingDataRequest -requestsAllDataToEndOfResource
 member AVAssetResourceLoadingDataRequest -respondWithData:
 member AVAssetResourceLoadingDataRequest -revenant_accumulatedData
+member AVAssetResourceLoadingRequest -contentInformationRequest
+member AVAssetResourceLoadingRequest -dataRequest
 member AVAssetTrack -loadMetadataForFormat:completionHandler:
 member AVAssetTrack -loadSamplePresentationTimeForTrackTime:completionHandler:
 member AVAssetTrack -loadSegmentForTrackTime:completionHandler:
