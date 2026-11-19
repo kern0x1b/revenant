@@ -200,9 +200,16 @@ What could not be measured is the case this route exists for, Telegram alive wit
 helper beside it. On pass124 Telegram does not survive the panel: in three windows of three it died within seconds
 of it (`mmap` failing with `ENOMEM`, then an allocation that failed, a fault or a trap). In two of them `rcsdk` had
 not been started; in the third Telegram died a second after `rcsdk` started, which neither shows nor excludes that
-a second process took memory from it. pass124 still carries the in-process path, and the glue reports the library's
-ranges reserved in the app's address space before any load (`reserve=0`), which is the coexistence the first section
-says cannot work. The measurement needs an app without that path, so it waits for the first helper build.
+a second process took memory from it. pass124 still carries the in-process path, but before a load it holds nothing
+of the library's: the glue's `reserve=0` is the status of finding the library's file and no reservation (the
+constructor of `recaptcha_native.c` reserves nothing, `xl_load` takes the range when it is called), and the map of
+pass124 with a chat open and no library loaded (`runs/m4-pass124/addrmap/memprobe-C1.out`, the mark `A2`) has no
+region in `0x2e000000` to `0x2ee28000`: the range lies in a free block of 50 MiB that begins at `0x2caba000`, the
+largest one below `0x30000000`, which is where the heap's next arenas go when the rest is used. So a library loaded
+late finds its range taken by the app, and one loaded early takes 14 MiB of the block the panel needs. **Not known**:
+whether the app had loaded the library in the three windows where it died, so whether those deaths are the two
+together or the app's own. The panel case is repeated with the first helper build, on an app without the in-process
+path.
 
 ## Signing and install
 
