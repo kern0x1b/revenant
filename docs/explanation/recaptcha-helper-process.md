@@ -106,9 +106,9 @@ when the SDK has not called back, so that a slow SDK is told from a dead helper.
 **One helper per login, serving several tokens.** The key reaches the app only in the server's demand, so before it
 nothing but the spawn and the load can happen. A helper that the app starts when the login screen appears (a
 heuristic: the protocol gives no earlier sign, and the app knows neither the method nor the key until the 403) has
-loaded by the time the demand comes, and the 15 s are spent on `fetchClient` and `execute` alone: 0.5 to 1.2 s by
-`rcsdk`'s numbers on the refused path. A helper started by the demand adds the spawn and 1.7 s of load to that (the
-app on drop40 does the three steps in 2.1 and 2.6 s). A second token for the same key costs the `execute` alone,
+loaded by the time the demand comes, and the 15 s are spent on `fetchClient` and `execute` alone. A helper started
+by the demand adds the spawn and the load to that; the numbers of both are in "One login" below (the app on drop40
+does load, fetch and execute in 2.1 and 2.6 s). A second token for the same key costs the `execute` alone,
 because the helper keeps the client per key as the app does (`recaptchaClientsBySiteKey` in `AppDelegate.swift`).
 The helper exits on `quit`, when its descriptor 0 ends, or after 120 s without a request, so that it does not hold
 its memory through a session.
@@ -118,6 +118,55 @@ the program's libraries; that second is paid before `main` and no design of the 
 load then took 4.1 s, against 0.8 to 2.3 s from a shell, because Telegram itself was 15 s into its launch and held
 both cores; `fetchClient` and `execute` took 1.08 and 0.39 s. A helper started while the app is busy is that slow,
 which is one more reason to start it before the demand. Not measured: every time on the path that returns a token.
+
+## One login, from the 403 to the retried request
+
+What Telegram does (`submodules/MtProtoKit/Sources/MTRequestMessageService.m`, line 1018, and
+`submodules/TelegramCore/Sources/Network/Network.swift`, line 683): the server answers a request with 403
+`RECAPTCHA_CHECK_<method>__<siteKey>`; the request is kept, the app is asked for a token with that method and key,
+and when a string comes the request is sent again with it. The wait is `filter { $0 != nil } |> take(1) |>
+timeout(15.0, …, alternate: .single("RECAPTCHA_TIMEOUT"))`: a `nil` from the app is dropped, so a failure answered
+with `nil` costs the user the rest of the 15 s. Each request that meets the 403 asks on its own, so two may be
+pending at once; they are two `token` lines with two ids, and the helper makes one fetch for the key.
+
+A helper that has said `ready` has nothing to do before the 403: there is no step of the protocol without a key. The
+one `token` line does the fetch for a key it has not seen and then the execute; a second line for the same key does
+the execute alone.
+
+The clock is the app's and starts at the 403: it answers its caller by 13 s, 2 s inside Telegram's 15. The
+milliseconds it writes into the request are what is left of 12 s at the moment of writing, so that the helper's
+`TIMEOUT` reaches the app a second before the app's own deadline and a slow SDK is told from a dead helper.
+
+Every number is **measured** on the 4S with a key the server refuses, the low end from a shell with the phone idle
+(drop40, measurement 1, and drop31), the high end as a child of a Telegram 15 s into its launch (measurement 4):
+
+| Step | Cold: the helper is started by the 403 | Warm: the helper said `ready` before |
+|---|---|---|
+| `posix_spawn` returns | 0.006 s | |
+| to the helper's first instruction (dyld) | 0.92 s, one measurement | |
+| load, to `ready` | 1.1 to 4.1 s | |
+| `ready` at | 2.0 to 5.0 s | before the 403 |
+| the request is written | at `ready`, with 10.0 to 7.0 s allowed | at 0, with 12.0 s allowed |
+| fetch for the key | 0.2 to 1.1 s | 0.2 to 1.1 s |
+| execute | 0.3 to 0.8 s | 0.3 to 0.8 s |
+| the answer at | 2.5 to 6.9 s; the run of measurement 4 was 6.5 s | 0.5 to 1.9 s |
+| left of the 13 s | 6.1 to 10.5 s | 11.1 to 12.5 s |
+
+So both fit, on this path. What the table cannot say is the path that returns a token: it has at least the same
+steps, and any request to Google that the refused path does not make comes on top, on the phone's network. Cold has
+6 s for that at its slowest, warm 11 s. That is the reason to start the helper at the login screen and not a reason
+to refuse the cold start, which stays as what happens when the warm helper is not there.
+
+When the warm helper is not there. It exits after its idle time, and a person can look at the login screen longer
+than 120 s. Two rules cover it without a guess. The app starts the login helper with a longer idle time
+(`--idle-ms 600000`: `rcsdk` holds 12.6 MB resident after the load, measured, and the app has no chats open yet).
+And whenever the 403 finds no helper, or one that has not said `ready`, the request waits for `ready` and the cold
+column applies: the app never needs to know which case it is in, it writes the request when `ready` has come and
+puts what is left of 12 s into it.
+
+What ends the wait early: `failed` in place of `ready`, the end of the answer pipe, a `token … error`. In each the
+app answers its caller at once, with a string and not `nil`, for the reason in the first paragraph; which string
+Telegram's own code should see for a failure is the app's decision.
 
 ## Lifetime
 

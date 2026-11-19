@@ -84,7 +84,10 @@ what it quotes is escaped.
    that piece is not an answer.
 2. Own the deadline. Telegram gives a token 15 s; the app answers its caller at 13 s whatever the helper does, and
    puts a smaller number in the request so that the helper's `TIMEOUT` arrives first when the SDK is slow. A helper
-   that has answered nothing by the app's own deadline is killed.
+   that has answered nothing by the app's own deadline is killed. The steps of one login with their measured times,
+   cold and with a helper started at the login screen, are in [the design](../../explanation/recaptcha-helper-process.md),
+   "One login, from the 403 to the retried request"; it also says why a failure must reach Telegram's code as a
+   string and not as `nil`.
 3. Read the answer pipe on its own, never between two writes: the helper reads requests while it is writing answers,
    so the app's writes do not wait for its reads, but an app that stops reading stops the helper's answers.
 4. When the answer pipe ends, `waitpid` and decide by the status:
