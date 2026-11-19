@@ -1,7 +1,10 @@
 # The reCAPTCHA SDK in a helper process: design
 
-A design, written before any code. It replaces the plan of loading the translated SDK into Telegram's own process
-([library mode](../reference/recompiler/library-mode.md)). Every statement is marked **Measured** (with where),
+The design of the helper, written before its code. It replaces the plan of loading the translated SDK into
+Telegram's own process ([library mode](../reference/recompiler/library-mode.md)). The helper now exists
+(`recompiler/tests/recaptchahelper`) and is proved on the build host against a fixture library; the rules an app
+keeps towards it are [the contract](../reference/recompiler/recaptcha-helper.md), which is the page to read for
+the protocol as built. Every statement is marked **Measured** (with where),
 **Reasoned** or **Not known**; the last section orders the measurements that decide the open ones.
 
 ## Why
@@ -65,8 +68,9 @@ purpose), and everything on the path that returns a token.
 ## Protocol
 
 The app starts the helper with `posix_spawn` and file actions: the read end of one pipe becomes the helper's
-descriptor 0, the write end of a second its descriptor 1, descriptor 2 goes to the runtime's log file or
-`/dev/null`, and `POSIX_SPAWN_CLOEXEC_DEFAULT` closes everything else, so that none of Telegram's sockets and
+descriptor 0, the write end of a second its descriptor 1, descriptor 2 is opened on a log file of the app's
+(decided with the code: not `/dev/null`, the last lines of a helper that died are the only account of why), and
+`POSIX_SPAWN_CLOEXEC_DEFAULT` closes everything else, so that none of Telegram's sockets and
 database files reaches the helper. **Measured** (4 below): iOS 6.1.3 takes the flag, the call returns in 6.2 ms, and
 the child's descriptors at the start of `main` are 0, 1 and 2 as pipes and a fourth, a pipe at 3, that the same
 program has when a shell starts it: one of its own libraries opens it, and nothing of Telegram's is there (the
@@ -76,19 +80,21 @@ an empty one is not tried).
 
 The app sets `F_SETNOSIGPIPE` on its write end. **Measured** in Telegram's process: `SIGPIPE` has its default action
 there, a write into a pipe whose reader has gone ends Telegram with signal 13 and leaves no crash report, and with
-the flag the same write answers `EPIPE` and the app lives. So the flag is required, not prudent; the helper ignores
-`SIGPIPE` for the same reason.
+the flag the same write answers `EPIPE` and the app lives. So the flag is required, not prudent; the helper sets it
+on its own end of the answer pipe, because ignoring the signal does not hold once the runtime's diagnostics have
+given it a handler (found with the check: a helper whose library reset the signal died of it).
 
 A message is one line of UTF-8, fields separated by a tab, ended by a newline; a tab, a newline or a percent sign
 inside a field is percent-escaped; a line is at most 64 KiB (a token is a few KiB of ASCII).
 
 | Direction | Line | Meaning |
 |---|---|---|
-| helper to app | `ready` version, sha256 of the library, milliseconds of the load | sent once; the app sends nothing before it |
+| helper to app | `ready` version, UUID of the library, milliseconds of the load | sent once; the app sends nothing before it. The UUID is the file's `LC_UUID`: a sha256 would read 57.6 MB at every start |
 | helper to app | `failed` name, text | sent once in place of `ready`; the helper then exits |
 | app to helper | `token` id, site key, action, milliseconds allowed | several may be pending; the helper answers each id once |
 | helper to app | `token` id, `ok`, the token | |
 | helper to app | `token` id, `error`, name, domain, code, text | names: `FETCH_FAILED`, `EXECUTE_FAILED`, `TIMEOUT`, `BAD_REQUEST`; domain, code and text are the SDK's `NSError` |
+| helper to app | `rejected` name, text | a line the helper could not tie to an id: `UNKNOWN_LINE`, `BAD_ID`, `DUPLICATE_ID`, `LINE_TOO_LONG` |
 | app to helper | `quit` | the helper exits 0 |
 
 **Timeouts.** Telegram waits 15 s for a token and then reports `RECAPTCHA_TIMEOUT`

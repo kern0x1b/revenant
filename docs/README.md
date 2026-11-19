@@ -280,6 +280,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Research](explanation/recompiler/research.md) | the research behind it |
 | [Corpus and benchmark](reference/recompiler/corpus.md) | what each check proves |
 | [Extra inhabitants of a pointer](reference/recompiler/extra-inhabitants.md) | the 4 GB rule of arm64 Swift against 32-bit host pointers: the contract (get, store, count), the idiom the lift rewrites, an inventory of every guest image, the limit of 4096, what the phone measured |
+| [The reCAPTCHA helper: the app side's contract](reference/recompiler/recaptcha-helper.md) | how an app starts the helper process of the translated reCAPTCHA SDK and talks to it: the spawn, the lines of the protocol with their names, what the app side must do on each end of the pipe, where the helper's output and a crash go, its state |
 | [Runtime helpers of the lifted code](reference/recompiler/lifted-helpers.md) | the C helpers that the AES, SHA-1, SHA-256, PMULL and half-precision FCVT instructions are lifted to: symbols, prototypes, the buffer contract, what is left unlifted and why |
 
 ## Agent skills

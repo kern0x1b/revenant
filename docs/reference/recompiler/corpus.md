@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, switchtail, tailcalls, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, llscpair, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, rebasetag, flagflow, hostbridges, checkapi, proxytable, sharedtable, statsthreads, systemclasses and dropkey; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, llscpair, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, rebasetag, flagflow, hostbridges, checkapi, proxytable, sharedtable, statsthreads, systemclasses, dropkey and recaptchahelper; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions`, `libexceptions`, `libcxxexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -1404,6 +1404,49 @@ The library link takes the runtime objects from the same loop that compiles them
 link that fails on an undefined `_xl_*` symbol is not retried with `-U`: those symbols are the runtime's own, nothing in the application
 defines them, and a lazy binding would stop the program at its first call. `drop.lua` also reads `nm -u` of the library before it
 writes the drop and stops on any `_xl_*` import (drop20 shipped five `_xl_journal_*` imports because `journal.o` was not in the link).
+
+### recaptchahelper
+
+Proves the helper process of the reCAPTCHA SDK ([its contract](recaptcha-helper.md)) on the build host. `helper.m` is
+the program; built with `-DRCHELPER_NATIVE` it loads the library with `dlopen` in place of `xl_load` and is otherwise
+the same code. `fixture.m` is a native library with the three classes the helper calls, whose answer depends on the
+site key (a token that repeats key and action, an error, no answer at all, an answer after 600 ms, two answers, a
+token of a given size), and which prints forged protocol lines on descriptor 1 when it is loaded and when asked, and
+resets `SIGPIPE` to its default action as the runtime's handler does. `driver.c` is the app side: it starts the
+helper with `posix_spawn`, two pipes, `POSIX_SPAWN_CLOEXEC_DEFAULT` and descriptor 2 on a file, and every line it
+reads must be a line of the protocol.
+
+Twelve scenarios, each with a helper of its own:
+
+| Scenario | Requires |
+|---|---|
+| `ready` | the first line is `ready` with the version, the library's UUID and the load's milliseconds; `quit` ends the helper with exit 0 |
+| `failed` | a missing library, another version, a library without the classes, no state, no arguments, an unknown option and a wrong idle time each give one `failed` line with its name, then exit 3 |
+| `token` | a token for `login`, `signup` and a custom action; two requests for a new key share one fetch and both are answered |
+| `errors` | the SDK's error with its domain, code and text, tab, newline and percent sign in them included; a fetch that fails; neither token nor error; `TIMEOUT` 250 to 1500 ms after a request that allowed 300, for an execute and for a fetch that never answer, and a second request for the key whose fetch never answered |
+| `unknown` | eight lines that are not requests are each rejected as `UNKNOWN_LINE`, and the next request is served |
+| `pending` | a request is answered while an earlier one is pending; a second request with the pending id is rejected and the first still gets its `TIMEOUT`; an answer that comes after `TIMEOUT` and a second answer of the SDK are dropped; an answered id can be used again |
+| `closed` | the app closes its request end with a request pending: the answer pipe ends within a second, exit 0; the app closes its answer end: exit 0 and no signal |
+| `killed` | `SIGKILL` with a request pending: the pipe ends, the status says the signal; `SIGKILL` while the helper is blocked writing three answers of 60000 bytes: every line read is whole and the piece without a newline is not a line; a helper started after it serves |
+| `long` | a request and an answer of 60 KiB; six of them written before anything is read; a line of exactly 65536 bytes is taken (its answer does not fit and says so); one byte more, and 300000 bytes, are rejected as `LINE_TOO_LONG` and the next request is served |
+| `garbage` | six wrong ids are rejected as `BAD_ID`; 28 requests with a valid id and a wrong rest (field count, empty fields, ten wrong times, wrong escapes, an escaped and a raw NUL, bytes that are not UTF-8, an overlong form, a surrogate) each get one `BAD_REQUEST`; four requests with escapes, spaces, control bytes and four-byte characters get the token of exactly those bytes |
+| `idle` | with `--idle-ms 600` the helper exits 0.4 to 3 s after `ready`; with a request pending it stays, answers `TIMEOUT`, then exits |
+| `noise` | a token comes although the library prints on descriptor 1, and the file of descriptor 2 holds what it printed, the `NSLog` line and the helper's own two lines |
+
+After the run the helper's state folder must hold the key the fixture stored with `standardUserDefaults` and the
+`Cache.db` of what it stored in the shared URL cache. On the build host the state is a folder (`--state` with a
+path); on the phone it is a name. That difference is two functions of `helper.m` and is not proved here.
+
+Eight controls, each a build of the helper with one part taken away, run against the scenario that needs it, and
+each must fail at its own line: descriptor 1 left where the library prints (`noise`), no deadline of the helper's
+own (`errors`), an id that stays pending after its answer (`pending`), fields written without escapes (`errors`),
+the end of the request pipe ignored (`closed`), no idle exit (`idle`), a pending id taken a second time (`pending`),
+and an answer pipe without `F_SETNOSIGPIPE` (`closed`: the helper dies of signal 13). There is no control for
+`synchronize` before the exit, because the build host writes preferences out without it, and none for the
+replacement of `standardUserDefaults`, because without it the fixture would write into the user's own preferences.
+
+Last the check builds the helper for armv7 with the loader, as it goes to the phone, and requires that it imports
+none of `posix_spawn`, `fork`, `system` and `popen`. That build has not run anywhere yet.
 
 ### cxxinit and refrepro
 
