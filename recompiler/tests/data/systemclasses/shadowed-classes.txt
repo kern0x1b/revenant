@@ -1,0 +1,1 @@
+shadow CASpringAnimation RevenantCASpringAnimation _OBJC_CLASS_$_CASpringAnimation
