@@ -1239,7 +1239,8 @@ older recipe, because the scratch folder of libraries still pointed at it). `dro
 `libswiftNetwork` of the folder built against another runtime stops it too. After the translation it reads the `revenant_swift_runtime_<hash>`
 mark the guest `libswiftCore` leaves in the library and stops unless that is the only mark and the key of the runtime it was given. The drop gets
 a `runtime.txt` beside `recaptcha-sdk.txt` (`runtime_key`, `runtime_recipe`, `libswiftcore_sha256`; the reader of `recaptcha-sdk.txt` in
-telegram-build refuses a key it does not know, so those lines are not in it). The check `dropkey` builds a store of two fake installs and
+telegram-build refuses a key it does not know, so those lines are not in it) and a `source.txt` (`commit`, the commit of the checkout
+that translated it, and `uncommitted_changes`, `none` or `yes`: a drop is asked about long after the worktree that made it is gone). The check `dropkey` builds a store of two fake installs and
 runs every one of those refusals.
 
 The library link takes the runtime objects from the same loop that compiles them (`runtime_objects` in `tools/translate.lua`), and a

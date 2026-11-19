@@ -79,6 +79,10 @@ function main(name, ...)
     end
     local sha, registry_sha = hash.sha256(path.join(destination, "RecaptchaEnterprise.dylib")), hash.sha256(path.join(destination, "RecaptchaEnterprise-classes.dylib"))
     io.writefile(path.join(destination, "runtime.txt"), string.format("runtime_key=%s\nruntime_recipe=%s\nlibswiftcore_sha256=%s\n", runtime.key, tostring(runtime.recipe), runtime.core_sha256))
+    local checkout = path.absolute(path.join(scripts, "..", ".."))
+    local commit = os.iorunv("git", {"-C", checkout, "rev-parse", "HEAD"}):trim()
+    local changed = os.iorunv("git", {"-C", checkout, "status", "--porcelain", "--untracked-files=no"}):trim()
+    io.writefile(path.join(destination, "source.txt"), string.format("commit=%s\nuncommitted_changes=%s\n", commit, changed == "" and "none" or "yes"))
     local entry = path.join(destination, "recaptcha-sdk.txt")
     io.writefile(entry, string.format("dir=%s\nlibrary=RecaptchaEnterprise.dylib\nsha256=%s\nregistry_sha256=%s\nbase=0x%x\ninstall=Frameworks/RecaptchaEnterprise.dylib\n",
                                       destination, sha, registry_sha, build.guest_base()))
