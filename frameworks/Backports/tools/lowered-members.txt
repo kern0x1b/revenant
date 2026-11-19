@@ -260,6 +260,7 @@ class CABackdropLayer
 class CADisplayLink
 class CALayer
 class CAMetalLayer
+class CASpringAnimation
 class CHHapticDynamicParameter
 class CHHapticEngine
 class CHHapticEvent
@@ -13657,6 +13658,16 @@ member CAMetalLayer -setPixelFormat:
 member CAMetalLayer -setPresentsWithTransaction:
 member CAMetalLayer -setWantsExtendedDynamicRangeContent:
 member CAMetalLayer -wantsExtendedDynamicRangeContent
+member CASpringAnimation +supportsSecureCoding
+member CASpringAnimation -allowsOverdamping
+member CASpringAnimation -bounce
+member CASpringAnimation -initWithPerceptualDuration:bounce:
+member CASpringAnimation -initialVelocity
+member CASpringAnimation -perceptualDuration
+member CASpringAnimation -revenant_parameters
+member CASpringAnimation -setAllowsOverdamping:
+member CASpringAnimation -setInitialVelocity:
+member CASpringAnimation -settlingDuration
 member CHHapticDynamicParameter -initWithParameterID:value:relativeTime:
 member CHHapticDynamicParameter -parameterID
 member CHHapticDynamicParameter -relativeTime
@@ -26881,12 +26892,6 @@ member RevenantBridgedContext -init
 member RevenantBridgedContext -options
 member RevenantBridgedContext -outputs
 member RevenantButtonTint +load
-member RevenantCASpringAnimation +alloc
-member RevenantCASpringAnimation +allocWithZone:
-member RevenantCASpringAnimation +class
-member RevenantCASpringAnimation +instancesRespondToSelector:
-member RevenantCASpringAnimation +isSubclassOfClass:
-member RevenantCASpringAnimation +superclass
 member RevenantCASpringAnimation +supportsSecureCoding
 member RevenantCASpringAnimation -allowsOverdamping
 member RevenantCASpringAnimation -bounce
@@ -26901,10 +26906,8 @@ member RevenantCASpringAnimation -initialVelocity
 member RevenantCASpringAnimation -mass
 member RevenantCASpringAnimation -perceptualDuration
 member RevenantCASpringAnimation -revenant_parameters
-member RevenantCASpringAnimation -runActionForKey:object:arguments:
 member RevenantCASpringAnimation -settlingDuration
 member RevenantCASpringAnimation -stiffness
-member RevenantCASpringAnimation -superclass
 member RevenantCHHapticPatternPlayer -cancelAndReturnError:
 member RevenantCHHapticPatternPlayer -initWithEngine:pattern:
 member RevenantCHHapticPatternPlayer -isMuted
@@ -36397,7 +36400,6 @@ protocol AVVideoCompositionValidationHandling
 protocol AXChart
 protocol AXDataAxisDescriptor
 protocol AXMathExpressionProvider
-protocol CAAction
 protocol CAAnimationDelegate
 protocol CALayerDelegate
 protocol CAMediaTiming
@@ -36784,7 +36786,6 @@ protocol_member AVQueuedSampleBufferRendering -stopRequestingMediaData
 protocol_member AVQueuedSampleBufferRendering -timebase
 protocol_member AXDataAxisDescriptor -attributedTitle
 protocol_member AXDataAxisDescriptor -title
-protocol_member CAAction -runActionForKey:object:arguments:
 protocol_member CAAnimationDelegate -animationDidStart:
 protocol_member CAAnimationDelegate -animationDidStop:finished:
 protocol_member CAMetalDrawable -layer
