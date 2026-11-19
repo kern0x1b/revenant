@@ -241,7 +241,22 @@ The host part proves, in this order:
    bytes), and `pair.c` calls nothing but `thread_switch` and takes its lock with `ldrex` and `strex`.
 
 The device part runs the translated `main.c` on the phone and prints `hw.ncpu` first; each line carries the time of
-its scenario, so the run with one thread is the cost of a pair store there. It has not run on a phone yet.
+its scenario, so the run with one thread is the cost of a pair store there.
+
+**What ran on the phone.** On 2026-11-19 the device part passed on the 4S (iOS 6.1.3, `hw.ncpu` 2), all 14 scenarios
+and exit 0. Times of a scenario over its number of updates, which is the wall time of all threads together and not
+the cost of one instruction:
+
+| Loop | 1 thread | 2 threads | 4 threads |
+|---|---:|---:|---:|
+| add (one load-pair and one store-pair an update) | 0.20 us | 0.34 us | 0.37 us |
+| compare-and-swap (a 128-bit load, then the swap: two store-pairs an update) | 0.39 us | 0.73 us | 0.76 us |
+| add of the 32-bit pair (one 64-bit exclusive, no lock) | 0.05 us | 0.06 us | 0.07 us |
+
+So a pair store costs about 0.2 us on the phone, and two or four threads that do nothing else than change one pair
+still finish 2.7 to 2.9 million updates a second between them: the lock does not turn into the queue a mutex makes
+there (14.6 us a pair of calls with two threads, [library mode](library-mode.md), "Two threads that send at once").
+The translated program prints no window of `xl-stats`, so this run has no count of failed stores.
 
 ### crypto
 

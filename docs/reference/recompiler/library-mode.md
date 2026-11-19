@@ -1280,9 +1280,10 @@ up the processor. The counters are 32 bits in the lock's own line of memory, cha
 without it. `H` other than 0 in a crash report says the crash is inside a pair store.
 
 **What it costs and what ran.** On this Mac the lifted loops of `llscpair` (6.6 million pair stores on one, two and
-four threads) lose nothing, and a pair update alone costs 6.5 ns. On the phone nothing of this has run yet: the cost
-of a pair store there is expected near the 83 to 106 ns that `OSSpinLock` measured in "Two threads that send at once"
-plus the call, and the device part of `llscpair` prints it (the run with one thread). The crash of `rb-release21-1`
+four threads) lose nothing, and a pair update alone costs 6.5 ns. On the 4S the device part of `llscpair` passed on
+2026-11-19 (two processors, 14 scenarios, nothing lost): a pair update alone costs 0.20 us, and two or four threads
+on one pair take 0.34 and 0.37 us of wall time an update between them, with no queue on the lock (the table is in
+[the corpus](corpus.md), `llscpair`). No drop with this lifter has run in the app yet. The crash of `rb-release21-1`
 (drop37, one launch in four: a `String` whose object word was two small integers, in a part of an async function
 that ran on a frame another part had finished with) is what a lost update of a task's status would give. That is a
 hypothesis: nothing reproduced the crash, and the count of failed pair stores in the windows of a run on the phone
