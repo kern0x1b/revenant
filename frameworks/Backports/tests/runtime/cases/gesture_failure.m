@@ -30,6 +30,30 @@
 @implementation RevenantGesturePlainDelegate
 @end
 
+@interface RevenantGestureNativeDelegate : NSObject <UIGestureRecognizerDelegate>
+@end
+
+@implementation RevenantGestureNativeDelegate
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRequireFailureOfGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+{
+    return YES;
+}
+- (BOOL)_gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRequireFailureOfGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+{
+    return NO;
+}
+@end
+
+@interface RevenantGestureOverridingRecognizer : UIPanGestureRecognizer
+@end
+
+@implementation RevenantGestureOverridingRecognizer
+- (void)setDelegate:(id<UIGestureRecognizerDelegate>)delegate
+{
+    [super setDelegate:delegate];
+}
+@end
+
 @interface RevenantGestureFailureRecognizer : UIGestureRecognizer
 @end
 
@@ -99,6 +123,23 @@ REVENANT_CASE(gesture_failure)
     revenant_expect_true(@"the private names answer what the public methods answer",
                          (forwardRequire && forwardFail) != (BOOL)negative,
                          [NSString stringWithFormat:@"require %d, be-required %d", forwardRequire, forwardFail]);
+
+    RevenantGestureOverridingRecognizer *overriding = [[RevenantGestureOverridingRecognizer alloc] initWithTarget:nil action:NULL];
+    RevenantGestureRequireDelegate *overridingDelegate = [[RevenantGestureRequireDelegate alloc] init];
+    [overriding setDelegate:overridingDelegate];
+    unsigned int overridingFlags = revenant_gesture_flags(overriding);
+    revenant_expect_true(@"a recognizer subclass that overrides setDelegate: and calls super gets the capability bit",
+                         ((overridingFlags & RevenantGestureRequireBit) != 0) != (BOOL)negative,
+                         [NSString stringWithFormat:@"flags %#x", overridingFlags]);
+
+    UIPanGestureRecognizer *native = [[UIPanGestureRecognizer alloc] initWithTarget:nil action:NULL];
+    RevenantGestureNativeDelegate *nativeDelegate = [[RevenantGestureNativeDelegate alloc] init];
+    [native setDelegate:nativeDelegate];
+    unsigned int nativeFlags = revenant_gesture_flags(native);
+    BOOL nativeAnswer = send2(nativeDelegate, require, native, bare);
+    revenant_expect_true(@"a delegate that already implements the private name keeps its own answer",
+                         ((nativeFlags & RevenantGestureRequireBit) != 0 && !nativeAnswer) != (BOOL)negative,
+                         [NSString stringWithFormat:@"flags %#x, private answer %d", nativeFlags, nativeAnswer]);
 
     RevenantGestureFailureRecognizer *recognizer = [[RevenantGestureFailureRecognizer alloc] init];
     BOOL hookAnswer = ((BOOL (*)(id, SEL, id))objc_msgSend)(recognizer, hook, bare);
