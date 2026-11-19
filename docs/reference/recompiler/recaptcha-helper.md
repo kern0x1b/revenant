@@ -156,7 +156,7 @@ class reaches, and that function reads the variable. The helper then asks for th
 | caches of the library | `Library/Caches/rcec/` of the helper's home: a file `ovk` of 564 bytes rewritten at every request, and a file for each site key the library has fetched a configuration for | on 2026-11-19 these were found in the `Library/Caches/rcec/` of the home the helper was given after a run of the helper, outside its state; the file for a site key was from 17 November, older than any run of the helper |
 | preferences | the domain named by the state, in `Library/Preferences/<state>.plist` of the home | `standardUserDefaults` in the helper is replaced before the load, so the SDK's event queue and its pairs never enter the app's domain |
 | URL cache | a cache of the helper's own, named by the state, in `Library/Caches/<program>/<state>` of the home, set as the shared one before the load | the default one would be the app's `Cache.db`, opened from a second process |
-| cookies | a store of the helper's own, in memory, returned for `sharedHTTPCookieStorage` before the load | the shared store the process was given held 211 cookies, 15 of them for Google's hosts: the SDK's requests would carry them and its responses would add to them |
+| cookies | a store of the helper's own, in memory, made before the replacement of `sharedHTTPCookieStorage` is installed and returned by it from then on | the shared store the process was given held 211 cookies, 15 of them for Google's hosts: the SDK's requests would carry them and its responses would add to them |
 
 The move changes everything the process resolves from its home, not only the caches: `NSHomeDirectory`, the
 Documents, Library and Application Support folders, the preferences file of every domain, `Library/Cookies`. What the
@@ -174,6 +174,11 @@ reads and writes its own files under the home, the move alone would already keep
 has daemons (`cfprefsd` is measured) that ignore the variable, so the check can prove the replacements and not the
 move for those three; and because iOS 6 honouring the variable is untested, where a replacement that turns out
 redundant costs nothing and a missing one writes into the app's own data.
+
+The order matters: the store is the one of an ephemeral `NSURLSessionConfiguration`, and the Foundation backport's
+configuration asks `+sharedHTTPCookieStorage` while it is made. A helper that made the store on first use, inside its
+own replacement, waited forever in `dispatch_once` on the phone (kit 2, 2026-11-19: no `ready`, `SIGALRM` after 270 s).
+The log line says `own store: separate from the shared store` or `the shared store`, compared on the phone only.
 
 The cookie store is not kept between helpers: each helper starts with none. What the server sees of a repeated login
 is therefore what the SDK itself keeps in its preferences.

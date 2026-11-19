@@ -9,7 +9,8 @@ local CONTROLS = {
     {name = "pipe-signal", number = 8, scenario = "closed", line = "a helper whose answer pipe was closed ended with status 0xd", what = "an answer pipe that may raise SIGPIPE"},
     {name = "left-twice", number = 9, scenario = "quitclose", line = "a helper left twice", what = "two threads free to leave at once"},
     {name = "cookies-elsewhere", number = 10, scenario = "closed", line = "its line of leaving does not say cookies own=1", what = "the shared cookie store pointed at another store than the helper's own"},
-    {name = "home-kept", number = 11, scenario = "closed", line = "the file the library wrote in its caches folder is not in the helper's own home", what = "the process's home left where it was given"}
+    {name = "home-kept", number = 11, scenario = "closed", line = "the file the library wrote in its caches folder is not in the helper's own home", what = "the process's home left where it was given"},
+    {name = "cookies-reentrant", number = 12, scenario = "ready", line = "the answer pipe ended where the ready line was due", what = "the helper's cookie store made on first use, inside its own replacement"}
 }
 
 function main(out, ...)
@@ -35,11 +36,12 @@ function main(out, ...)
         os.mkdir(state)
         os.mkdir(given)
         local code = os.execv(o("driver"), table.join({program, o("fixture.dylib"), state, log}, scenario and {scenario} or {}),
-                              {stdout = said, stderr = said, try = true, timeout = 120000, envs = {CFFIXED_USER_HOME = given}})
+                              {stdout = said, stderr = said, try = true, timeout = 120000, envs = {CFFIXED_USER_HOME = given, RCHELPER_INSERT = o("standin.dylib")}})
         return code, os.isfile(said) and io.readfile(said) or "", state
     end
 
     os.execv("cc", {"-O1", "-Wall", "-fobjc-arc", "-dynamiclib", "-framework", "Foundation", path.join(here, "fixture.m"), "-o", o("fixture.dylib")})
+    os.execv("cc", {"-O1", "-Wall", "-fobjc-arc", "-dynamiclib", "-framework", "Foundation", path.join(here, "standin.m"), "-o", o("standin.dylib")})
     os.execv("cc", {"-O1", "-Wall", path.join(here, "driver.c"), "-o", o("driver")})
     local code, text, state = drive(helper("rchelper"), "rchelper", nil)
     if code ~= 0 or not text:find("\nok: 13 scenarios\n", 1, true) then
@@ -74,5 +76,5 @@ function main(out, ...)
         end
     end
     print("ok: the helper keeps the protocol in thirteen scenarios against the fixture library, the library's preferences, URL cache, cookies and caches folder land in the helper's own state, " ..
-          "eleven controls each fail at their own line, and the armv7 helper links with the loader")
+          "twelve controls each fail at their own line, and the armv7 helper links with the loader")
 end

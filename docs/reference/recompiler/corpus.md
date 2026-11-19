@@ -1417,7 +1417,11 @@ site key (a token that repeats key and action, an error, no answer at all, an an
 token of a given size), and which prints forged protocol lines on descriptor 1 when it is loaded and when asked, and
 resets `SIGPIPE` to its default action as the runtime's handler does. `driver.c` is the app side: it starts the
 helper with `posix_spawn`, two pipes, `POSIX_SPAWN_CLOEXEC_DEFAULT` and descriptor 2 on a file, and every line it
-reads must be a line of the protocol.
+reads must be a line of the protocol. `standin.m` is a native library that stands for one thing the Foundation backport
+does on iOS 6: its `+ephemeralSessionConfiguration` asks `+sharedHTTPCookieStorage` before it returns, because the
+configuration's `init` takes the shared stores and the method then replaces them. The driver inserts it into every
+helper it starts (`RCHELPER_INSERT`, which it turns into `DYLD_INSERT_LIBRARIES` for its children only), so that the
+Mac's own configuration, which never asks, behaves as the backport does.
 
 Thirteen scenarios, each with a helper of its own:
 
@@ -1446,18 +1450,21 @@ the file `rcec/ovk`, which the fixture writes into the caches folder it finds wi
 as the SDK does, is in `home/Library/Caches` of the helper's state and that nothing was made in the home the helper
 was given.
 
-Eleven controls, each a build of the helper with one part taken away, run against the scenario that needs it, and
+Twelve controls, each a build of the helper with one part taken away, run against the scenario that needs it, and
 each must fail at its own line: descriptor 1 left where the library prints (`noise`), no deadline of the helper's
 own (`errors`), an id that stays pending after its answer (`pending`), fields written without escapes (`errors`),
 the end of the request pipe ignored (`closed`), no idle exit (`idle`), a pending id taken a second time (`pending`),
 an answer pipe without `F_SETNOSIGPIPE` (`closed`: the helper dies of signal 13), two threads free to leave at once
 (`quitclose`: 27 lines of leaving from 20 helpers), and the shared cookie store pointed at another store than the
-one the helper counts (`closed`), and the home left where it was given (`closed`: the library's file lands in the
-folder the driver gave and not in the helper's). The cookie control sends the library's cookie to a second private
-store and not to the store of the user who runs the check, which is why it is not simply the replacement taken away;
-the home control gets its folder from the driver for the same reason, so that it never writes into the caches of the
-user who runs the check. There is no
-control for `synchronize` before the exit, because the build host writes preferences out without it, and none for
+one the helper counts (`closed`), the home left where it was given (`closed`: the library's file lands in the
+folder the driver gave and not in the helper's), and the cookie store made on first use, inside the replacement of
+`sharedHTTPCookieStorage` (`ready`: with the stand-in, the helper's own request for the store calls the replacement
+that is being made. On iOS 6 that waited in `dispatch_once` for 270 s until `SIGALRM`; the Mac's libdispatch stops the
+process at the recursion instead, so the check sees the answer pipe end where the ready line was due). The cookie
+control sends the library's cookie to a second private store and not to the store of the user who runs the check,
+which is why it is not simply the replacement taken away; the home control gets its folder from the driver for the
+same reason, so that it never writes into the caches of the user who runs the check. There is no control for
+`synchronize` before the exit, because the build host writes preferences out without it, and none for
 the replacement of `standardUserDefaults`, because without it the fixture would write into the user's own
 preferences.
 

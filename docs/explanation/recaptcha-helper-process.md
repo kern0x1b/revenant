@@ -249,7 +249,11 @@ cookie store with 211 cookies in it, 15 of them for Google's hosts. The Foundati
 its cookies from the configuration's store, and the default configuration's store is the shared one
 (`NSURLSessionConfiguration.m`, `NSURLSession.m`), so the SDK's requests would carry those cookies and its responses
 would add to them. The helper therefore answers `sharedHTTPCookieStorage` with the store of an ephemeral
-configuration, in memory and its own; it is empty at each start. Whether the server's answer depends on cookies that
+configuration, in memory and its own; it is empty at each start. The store has to exist before the replacement is
+installed: the backport's `NSURLSessionConfiguration` `init` asks for the shared stores, and its ephemeral constructor
+then overwrites them (`NSURLSessionConfiguration.m`, `RevenantCookieStorage.m`), so a helper that made the store on
+first use re-entered its own `dispatch_once` and hung on the phone. By that reading the ephemeral store is private, and
+the log line compares it with the shared one on the phone. Whether the server's answer depends on cookies that
 the SDK itself set on an earlier request is not known, and that is the cost of the choice: a store kept on disk would
 be one more file in the helper's home.
 

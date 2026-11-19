@@ -702,6 +702,9 @@ int main(int argc, char **argv)
     fixture_path = argv[2];
     state_path = argv[3];
     log_path = argv[4];
+    const char *insert = getenv("RCHELPER_INSERT");
+    if (insert)
+        setenv("DYLD_INSERT_LIBRARIES", insert, 1);
     int ran = 0;
     for (size_t i = 0; i < sizeof scenarios / sizeof scenarios[0]; i++) {
         if (argc > 5 && strcmp(argv[5], scenarios[i].name) != 0)

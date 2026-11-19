@@ -30,12 +30,14 @@
 #define LEFT_TWICE 9
 #define COOKIES_ELSEWHERE 10
 #define HOME_KEPT 11
+#define COOKIES_REENTRANT 12
 
 static int answers = 1;
 static NSString *state;
 static NSUserDefaults *domain;
 static NSURLCache *cache;
-static NSHTTPCookieStorage *jar;
+static NSHTTPCookieStorage *jar, *elsewhere;
+static NSString *identity = @"not compared on the build host";
 static unsigned long outside;
 static NSMutableDictionary *pending;
 static NSMutableDictionary *clients;
@@ -148,13 +150,19 @@ static BOOL cookies_possible(void)
     return [NSClassFromString(@"NSURLSessionConfiguration") respondsToSelector:@selector(ephemeralSessionConfiguration)];
 }
 
+static NSHTTPCookieStorage *private_cookies(void)
+{
+    return cookies_possible() ? [[NSClassFromString(@"NSURLSessionConfiguration") ephemeralSessionConfiguration] HTTPCookieStorage] : nil;
+}
+
 static NSHTTPCookieStorage *own_cookies(void)
 {
-    static dispatch_once_t once;
-    dispatch_once(&once, ^{
-        if (cookies_possible())
-            jar = [[NSClassFromString(@"NSURLSessionConfiguration") ephemeralSessionConfiguration] HTTPCookieStorage];
-    });
+    if (CONTROL == COOKIES_REENTRANT) {
+        static dispatch_once_t once;
+        dispatch_once(&once, ^{
+            jar = private_cookies();
+        });
+    }
     if (!jar) {
         note(@"there is no NSURLSessionConfiguration to take a cookie store of the helper's own from, and the shared one is not the helper's: the process stops here");
         abort();
@@ -173,17 +181,18 @@ static void redirect(void)
     Method shared = class_getClassMethod([NSHTTPCookieStorage class], @selector(sharedHTTPCookieStorage));
 #if TARGET_OS_IPHONE
     NSHTTPCookieStorage *(*original)(id, SEL) = (NSHTTPCookieStorage *(*)(id, SEL))method_getImplementation(shared);
-    outside = (unsigned long)original([NSHTTPCookieStorage class], @selector(sharedHTTPCookieStorage)).cookies.count;
+    NSHTTPCookieStorage *given = original([NSHTTPCookieStorage class], @selector(sharedHTTPCookieStorage));
+    outside = (unsigned long)given.cookies.count;
+#endif
+    if (CONTROL != COOKIES_REENTRANT)
+        jar = private_cookies();
+    if (CONTROL == COOKIES_ELSEWHERE)
+        elsewhere = private_cookies();
+#if TARGET_OS_IPHONE
+    identity = jar == given ? @"the shared store" : @"separate from the shared store";
 #endif
     method_setImplementation(shared, imp_implementationWithBlock(^id(id self) {
-        static NSHTTPCookieStorage *elsewhere;
-        static dispatch_once_t once;
-        if (CONTROL != COOKIES_ELSEWHERE)
-            return own_cookies();
-        dispatch_once(&once, ^{
-            elsewhere = [[NSClassFromString(@"NSURLSessionConfiguration") ephemeralSessionConfiguration] HTTPCookieStorage];
-        });
-        return elsewhere;
+        return CONTROL == COOKIES_ELSEWHERE ? elsewhere : own_cookies();
     }));
 }
 
@@ -194,8 +203,8 @@ static void look(NSString *when)
     if (keys)
         CFRelease(keys);
     NSURLCache *shared = [NSURLCache sharedURLCache];
-    note([NSString stringWithFormat:@"%@: state=%@ preferences keys=%ld url cache own=%d disk=%lu memory=%lu cookies own=%lu, in the store the process was given=%lu caches=%@ regional=%@", when, state, kept,
-                                     shared == cache, (unsigned long)shared.currentDiskUsage, (unsigned long)shared.currentMemoryUsage, (unsigned long)jar.cookies.count, outside,
+    note([NSString stringWithFormat:@"%@: state=%@ preferences keys=%ld url cache own=%d disk=%lu memory=%lu cookies own=%lu, in the store the process was given=%lu, own store: %@ caches=%@ regional=%@", when, state, kept,
+                                     shared == cache, (unsigned long)shared.currentDiskUsage, (unsigned long)shared.currentMemoryUsage, (unsigned long)jar.cookies.count, outside, identity,
                                      NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject, regional_shown()]);
 }
 
