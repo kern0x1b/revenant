@@ -710,7 +710,11 @@ One launch is for the lines that a drop's sizes are measured from: with `XL_STAT
 six seconds after its calls, so that one window of the statistics (five seconds) closes while it lives. Its output must
 have `xlate: guest stacks: L live, M KiB mapped; …` with a live stack of at least a thread's size, and
 `xlate: budget: metadata arena A of S KiB touched, opaque words N of M, aliases U of S KiB` whose arena, word count and
-alias size are the header's (the aliases read `0 of 0` until their first use).
+alias size are the header's (the aliases read `0 of 0` until their first use). The Objective-C fixture writes nothing
+to its arena, and a meter that reads 0 where nothing was written proves nothing, so the host takes `--mark=ADDRESS`
+and writes one byte in the middle of the arena after its calls: the last budget line of the launch must count exactly
+the pages up to that byte (20 KiB of the fixture's 32). The word counter has its control in `hostbridges`
+(`word-overflow` fills the table to its last slot on the phone).
 
 Everything a launch on the phone printed is in `device.txt` of the output folder as soon as the launch ends, each under
 a line `== ` with its environment and arguments, and the crash log under its own: a check that fails at its sixth launch
@@ -1032,7 +1036,10 @@ whose end is a message, not a corruption:
 Under `xl-stats` every window prints what is in use, so that a drop's acceptance run is also the measurement the next
 drop's numbers are stated from:
 `xlate: guest stacks: L live, M KiB mapped; the deepest live one has used U KiB of S KiB, the deepest ever D KiB` and
-`xlate: budget: metadata arena A of S KiB touched, opaque words N of M, aliases U of S KiB`. The two tables keep their
+`xlate: budget: metadata arena A of S KiB touched, opaque words N of M, aliases U of S KiB`. `A` is the end of the
+highest page of the arena that is in memory (`mincore`); when the kernel does not answer, the line says
+`metadata arena of S KiB not read (mincore: errno E)` and gives no number, so that an arena nobody could measure is
+never read as an arena nobody used. The two tables keep their
 old sizes until a run of many `execute` calls says how they grow; with the numbers in the header, giving them less is an
 option of the translation, not a change of the runtime.
 

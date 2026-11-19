@@ -295,7 +295,7 @@ int main(int argc, char **argv)
     alarm(180);
     @autoreleasepool {
         if (argc < 2) {
-            fprintf(stderr, "usage: host LIBRARY [RESIDENT-MB [@LOW-HIGH | +LOW-HIGH | --expect=busy|image|registry|direct | --lazy=LOW-HIGH | --release=LOW-HIGH | --abort | --abort-thread | --linger=SECONDS | PRELOADED-DYLIB]...]\n");
+            fprintf(stderr, "usage: host LIBRARY [RESIDENT-MB [@LOW-HIGH | +LOW-HIGH | --expect=busy|image|registry|direct | --lazy=LOW-HIGH | --release=LOW-HIGH | --abort | --abort-thread | --linger=SECONDS | --mark=ADDRESS | PRELOADED-DYLIB]...]\n");
             return 2;
         }
         const char *path = argv[1];
@@ -303,6 +303,7 @@ int main(int argc, char **argv)
         const char *expect = NULL;
         BOOL abort_at_end = NO, abort_on_thread = NO, lazy = NO, release = NO;
         unsigned linger = 0;
+        unsigned long mark = 0;
         unsigned long guest_low = 0, guest_high = 0;
         for (int index = 3; index < argc; index++) {
             if (strcmp(argv[index], "--abort") == 0) {
@@ -315,6 +316,10 @@ int main(int argc, char **argv)
             }
             if (strncmp(argv[index], "--linger=", 9) == 0) {
                 linger = (unsigned)atoi(argv[index] + 9);
+                continue;
+            }
+            if (strncmp(argv[index], "--mark=", 7) == 0) {
+                mark = strtoul(argv[index] + 7, NULL, 16);
                 continue;
             }
             if (strncmp(argv[index], "--lazy=", 7) == 0 && range(argv[index] + 7, &guest_low, &guest_high)) {
@@ -464,6 +469,8 @@ int main(int argc, char **argv)
         report("host.bridge.after", hostBridges(NO) && hostNamesUnchanged());
 #endif
         regions("end", 0x1000, 0xfffff000);
+        if (mark)
+            *(volatile char *)mark = 1;
         for (unsigned left = linger; left; left = sleep(left)) {
         }
         if (abort_at_end) {

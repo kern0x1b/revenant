@@ -516,14 +516,26 @@ function main(out, ...)
         io.write(unreserved)
         corpus.fail("with XL_LOADER_HOST_RESERVE=0 the loader still holds room for the host part, lost the guest reservation, or the library did not load")
     end
-    local counted = launch(remote .. "/RCFixture.dylib " .. resident .. " --linger=6", "XL_STATS=1 ")
+    local mark = guest.images_high + guest.arena // 2
+    local marked = guest.arena > 0 and (guest.arena // 2 // 4096 + 1) * 4096 // 1024 or 0
+    local counted = launch(remote .. "/RCFixture.dylib " .. resident .. " --linger=6" .. (guest.arena > 0 and string.format(" --mark=%x", mark) or ""), "XL_STATS=1 ")
     verify(counted, expected, "launch with XL_STATS=1")
-    local stacks_live, stacks_mapped = counted:match("\nxlate: guest stacks: (%d+) live, (%d+) KiB mapped; the deepest live one has used %d+ KiB of %d+ KiB, the deepest ever %d+ KiB\n")
-    local arena_touched, arena_size, words_used, words_slots, aliases_used, aliases_size =
-        counted:match("\nxlate: budget: metadata arena (%d+) of (%d+) KiB touched, opaque words (%d+) of (%d+), aliases (%d+) of (%d+) KiB")
+    local stacks_live, stacks_mapped, arena_touched, arena_size, words_used, words_slots, aliases_used, aliases_size
+    for live, mapped in counted:gmatch("\nxlate: guest stacks: (%d+) live, (%d+) KiB mapped; the deepest live one has used %d+ KiB of %d+ KiB, the deepest ever %d+ KiB") do
+        stacks_live, stacks_mapped = live, mapped
+    end
+    for touched, size, used, slots, alias_used, alias_size in
+        counted:gmatch("\nxlate: budget: metadata arena (%d+) of (%d+) KiB touched, opaque words (%d+) of (%d+), aliases (%d+) of (%d+) KiB") do
+        arena_touched, arena_size, words_used, words_slots, aliases_used, aliases_size = touched, size, used, slots, alias_used, alias_size
+    end
     if not stacks_live or tonumber(stacks_live) < 1 or tonumber(stacks_mapped) < 512 then
         io.write(counted)
         corpus.fail("a launch with XL_STATS=1 that stays for a window of the statistics has no line of the guest stacks, or one without a live stack of a thread's size")
+    end
+    if arena_touched and tonumber(arena_touched) ~= marked then
+        io.write(counted)
+        corpus.fail("the host wrote one byte at 0x%x, in the middle of an arena nothing else writes to, and the budget line counts %s KiB of the arena as touched, not %d: the line a drop's arena is sized from does not measure",
+                    mark, arena_touched, marked)
     end
     if not arena_touched or tonumber(arena_size) ~= guest.arena // 1024 or tonumber(arena_touched) > tonumber(arena_size) or
        tonumber(words_slots) ~= guest.word_slots or tonumber(words_used) > guest.word_slots or

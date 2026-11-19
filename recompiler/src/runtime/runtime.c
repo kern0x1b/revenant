@@ -128,20 +128,26 @@ static void xl_budget_report(void)
     char line[240];
     unsigned slots = 0;
     unsigned long aliases = 0, arena = 0;
+    int unread = 0;
     unsigned words = xl_word_count(&slots);
     unsigned long alias_used = xl_alias_used(&aliases);
     size_t page = (size_t)sysconf(_SC_PAGESIZE);
     for (unsigned long at = xl_guest_arena_low; at < xl_guest_arena_high; at += sizeof line * page) {
         unsigned long count = (xl_guest_arena_high - at) / page < sizeof line ? (xl_guest_arena_high - at) / page : sizeof line;
-        if (mincore((void *)at, count * page, line))
+        if (mincore((void *)at, count * page, line)) {
+            unread = errno ? errno : -1;
             break;
+        }
         for (unsigned long i = 0; i < count; i++) {
             if (line[i] & MINCORE_INCORE)
                 arena = at + (i + 1) * page - xl_guest_arena_low;
         }
     }
-    int length = snprintf(line, sizeof line, "xlate: budget: metadata arena %lu of %lu KiB touched, opaque words %u of %u, aliases %lu of %lu KiB (0 of 0 is not set up yet)\n",
-                          arena >> 10, (xl_guest_arena_high - xl_guest_arena_low) >> 10, words, slots, alias_used >> 10, aliases >> 10);
+    int length = unread
+        ? snprintf(line, sizeof line, "xlate: budget: metadata arena of %lu KiB not read (mincore: errno %d), opaque words %u of %u, aliases %lu of %lu KiB (0 of 0 is not set up yet)\n",
+                   (xl_guest_arena_high - xl_guest_arena_low) >> 10, unread, words, slots, alias_used >> 10, aliases >> 10)
+        : snprintf(line, sizeof line, "xlate: budget: metadata arena %lu of %lu KiB touched, opaque words %u of %u, aliases %lu of %lu KiB (0 of 0 is not set up yet)\n",
+                   arena >> 10, (xl_guest_arena_high - xl_guest_arena_low) >> 10, words, slots, alias_used >> 10, aliases >> 10);
     write(2, line, (size_t)length);
 }
 
