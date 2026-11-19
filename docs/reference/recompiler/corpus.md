@@ -1384,8 +1384,11 @@ conformance, see `stepDlsymGuest` above) and the double free of drop16 both repr
 
 `./xmakew l -P . recompiler/tools/drop.lua NAME [--out DIR] [--no-verify]` builds a drop in one command and stops at the first step that
 fails: it builds `xlate` and `xlgen`, translates the SDK with the same recipe as the check, copies the library, its registry,
-the loader files and the reports to `telegram-build/.agent-work/recaptcha-real/NAME` (or DIR), writes `recaptcha-sdk.txt` with the
-two sha256 and, when `telegram-build/tools/recaptcha_sdk.lua` is there, verifies the drop with it. It prints the path and both
+the loader files and the reports to `telegram-build/.agent-work/recaptcha-real/NAME` (or DIR), and with them the two sources of
+the helper process, `helper.m` and `protocol.h` of `tests/recaptchahelper`, which the app's build compiles with its own flags as it
+compiles the loader; `helper.txt` beside them has `protocol_version` and the sha256 of each (`helper_m_sha256`,
+`protocol_h_sha256`), so that the app's build can show that what it compiled is what the drop carried. It writes
+`recaptcha-sdk.txt` with the two sha256 of the library and, when `telegram-build/tools/recaptcha_sdk.lua` is there, verifies the drop with it. It prints the path and both
 digests. It needs `XL_SWIFTOBJC_LIBS` and `BACKPORTS_DIR` in the environment (and `REVENANT_CACHE` in a worktree); the second translation of an
 unchanged lift reuses the lifted objects (`lift.stamp`).
 
