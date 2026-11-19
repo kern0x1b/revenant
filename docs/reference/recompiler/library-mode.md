@@ -307,11 +307,18 @@ Pages of the guest that nothing touches stay clean file pages: they are not in t
 | `void *xl_find_class(const char *name)` | the Objective-C class (a `Class`, as a pointer) that the loaded library answers to for `name`, or `NULL`: before `xl_load` succeeded, for a `NULL` name, for a name the library has no class of. Calls the library's export `xl_library_class` (found with `dlsym` on the handle of `xl_load`) |
 
 Statuses: `XL_LOAD_OK`, `XL_LOAD_BAD_IMAGE` (not an armv7 dylib, no guest image, a `magic` or `version` that is not read: the message says which, and
-the version found; no registry next to the library), `XL_LOAD_RANGE_BUSY` (the guest range is held: the message names the holder; or the reservation is
-not an untouched inaccessible range when the library attaches; or no hole of the host's size), `XL_LOAD_DLOPEN_FAILED` (the library or its registry; the message has dyld's text),
-`XL_LOAD_MAP_FAILED` (`mmap` or `vm_protect` of the guest's segments failed). A status after the library's initialization has run is final: later
-calls return it, and the guest range is given back. A status before that (a busy range, no hole for the host part, a failed `dlopen`) is not: the
-next `xl_load` tries again, and between the two a host that did not call `xl_reserve` holds nothing.
+the version found; no registry next to the library), `XL_LOAD_RANGE_BUSY` (the guest range is held: the message names the holder; or no hole of the host's size), `XL_LOAD_DLOPEN_FAILED` (the library; the message has dyld's text),
+`XL_LOAD_MAP_FAILED` (`mmap` or `vm_protect` of the guest's segments, the arena, the words or the aliases failed), `XL_LOAD_RESERVATION_LOST` (the reservation
+was not an untouched inaccessible range when the library attached) and `XL_LOAD_REGISTRY_FAILED` (dyld refused the registry after the library attached; the
+message has dyld's text).
+
+A status says by itself whether another call can help, so a host never has to find out by trying:
+
+| Status | Another `xl_load` | Why |
+|---|---|---|
+| `XL_LOAD_RANGE_BUSY`, `XL_LOAD_DLOPEN_FAILED` | can succeed | they come before the library's initialization has run: the loader gave back what it took itself, a host that did not call `xl_reserve` holds nothing, and the next call starts again; it succeeds once the range is free and a hole of the host part's size exists |
+| `XL_LOAD_BAD_IMAGE` | answers the same for the same files | the file, its format or its registry is wrong, whenever it is found out |
+| `XL_LOAD_MAP_FAILED`, `XL_LOAD_RESERVATION_LOST`, `XL_LOAD_REGISTRY_FAILED` | answers the same until the process ends | they come after the library's initialization has run, which happens once in a process: the loader remembers the status, gives the guest range back and loads nothing again |
 
 The library reports `XL_LIBRARY_OK`, `XL_LIBRARY_BAD_FORMAT` (which includes an arena, a word table and aliases that do not
 end at `high`), `XL_LIBRARY_NOT_RESERVED` or `XL_LIBRARY_MAP_FAILED` (a segment, the arena, the words or the aliases
@@ -628,7 +635,7 @@ The host part of the check first runs the loader on the Mac (`loader.c`): `xl_lo
 `0x30000000` with images up to `0x10000000`, a heap at `0x1c500000`, the main stack at `0x2fc02000`; an allocation anywhere takes the lowest
 hole that fits, as the phone's kernel does), and library files that the test writes (a 32-bit ARM header with a guest image header and its
 registry). A Mac process cannot allocate below 4 GB, which is why the kernel is a model; what the phone's kernel does is the device part.
-Ten scenarios, each in a process of its own:
+Twelve scenarios, each in a process of its own:
 
 | Scenario | Proves |
 |---|---|
@@ -640,10 +647,12 @@ Ten scenarios, each in a process of its own:
 | load without a reservation, `dlopen` fails | `XL_LOAD_DLOPEN_FAILED` and nothing held; a library without `xl_library_init` is refused and nothing held; the next load succeeds |
 | a kept reservation, `dlopen` fails | a host that reserved keeps the guest range and the host room |
 | the library fails to attach | the status is final, the guest range is given back |
+| the reservation is not whole when the library attaches | a host reserved and the range became accessible before the load: `XL_LOAD_RESERVATION_LOST`, not `XL_LOAD_RANGE_BUSY`; the guest range is given back, and the next `xl_load` and `xl_reserve` answer the same and load nothing |
+| the registry fails to load after the attach | `XL_LOAD_REGISTRY_FAILED`, not `XL_LOAD_DLOPEN_FAILED`; the guest range is given back and the status is final |
 | refusals take nothing | an unknown format version, a missing registry, a header whose images, arena, words and aliases do not end at `high`, a second library while one is reserved |
 | guest range only | `XL_LOADER_HOST_RESERVE=0` |
 
-The loader of before `xl_release` (with an empty `xl_release` added so that it links) fails four of the ten: release and reserve again, the load
+The loader of before `xl_release` (with an empty `xl_release` added so that it links) fails four of the ten there were then (the two of the attach statuses came later): release and reserve again, the load
 without a reservation whose `dlopen` fails (the guest range and the host room stayed held), the refusals (no second library after a release) and
 guest range only.
 

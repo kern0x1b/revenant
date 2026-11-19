@@ -258,13 +258,13 @@ static xl_load_status xl_attach_failed(int failure)
     case XL_LIBRARY_BAD_FORMAT:
         return xl_fail(XL_LOAD_BAD_IMAGE, "the guest image of %s is not in the format this library reads", xl_loader_path);
     case XL_LIBRARY_NOT_RESERVED:
-        return xl_fail(XL_LOAD_RANGE_BUSY, "the reservation of the guest image of %s was not an untouched, inaccessible range when the library attached it",
+        return xl_fail(XL_LOAD_RESERVATION_LOST, "the reservation of the guest image of %s was not an untouched, inaccessible range when the library attached it",
                        xl_loader_path);
     case XL_LIBRARY_NO_REGISTRY:
         return xl_fail(XL_LOAD_BAD_IMAGE, "the registry of the Objective-C classes of %s is missing: it is the file %s%s next to it", xl_loader_path,
                        strrchr(xl_loader_path, '/') ? strrchr(xl_loader_path, '/') + 1 : xl_loader_path, XL_REGISTRY_SUFFIX);
     case XL_LIBRARY_REGISTRY_FAILED:
-        return xl_fail(XL_LOAD_DLOPEN_FAILED, "dlopen of the registry of %s: %s", xl_loader_path, dlerror());
+        return xl_fail(XL_LOAD_REGISTRY_FAILED, "dlopen of the registry of %s: %s", xl_loader_path, dlerror());
     default:
         return xl_fail(XL_LOAD_MAP_FAILED, "mapping the guest image of %s failed", xl_loader_path);
     }

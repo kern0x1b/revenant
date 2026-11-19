@@ -1146,7 +1146,7 @@ API is a string, because a Swift `String` that crosses an Objective-C signature 
 which the guest does not have yet; the strings stay inside the library (`describedLength` builds one).
 
 The host part, which `recompiler_corpus/library` runs, first runs the loader on the Mac (`loader.c`: `xl_loader.c` over a
-model of a 4S process's address space, ten scenarios of reserving, releasing, loading without a reservation and of every
+model of a 4S process's address space, twelve scenarios of reserving, releasing, loading without a reservation and of every
 failure, each of which must leave nothing held that the host did not ask to keep;
 [the scenarios](library-mode.md#the-check)). It then translates the `objc` fixture with `XL_LIBRARY=1` and checks
 the dylib statically:

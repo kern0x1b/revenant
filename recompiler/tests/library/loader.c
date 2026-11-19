@@ -458,6 +458,38 @@ static void scenario_attach(const char *folder)
     xl_release();
     expect(model_covered(model_guest_low, model_guest_high, 0) == 0 && !room_held(), "and nothing is held after it");
 }
+static void scenario_reservation_lost(const char *folder)
+{
+    const char *file = library(folder, "lost", BASE_UNDER_STACK, XL_GUEST_VERSION, 1);
+    expect(xl_reserve(file) == XL_LOAD_OK, "xl_reserve");
+    int touched = 0;
+    for (int index = 0; index < region_count; index++) {
+        if (regions[index].start == model_guest_low && regions[index].end == model_guest_high && regions[index].protection == VM_PROT_NONE) {
+            regions[index].protection = VM_PROT_READ | VM_PROT_WRITE;
+            touched = 1;
+        }
+    }
+    expect(touched, "the model made the reserved guest range accessible, as a mapping over it would");
+    xl_load_status status = xl_load(file);
+    expect(status == XL_LOAD_RESERVATION_LOST && strstr(xl_load_error(), "was not an untouched, inaccessible range"),
+           "a reservation that is not whole when the library attaches has a status of its own, not the one of a busy range: %s", xl_load_error());
+    expect(model_covered(model_guest_low, model_guest_high, 0) == 0 && !room_held(), "the guest range is given back");
+    expect(xl_load(file) == XL_LOAD_RESERVATION_LOST && xl_reserve(file) == XL_LOAD_RESERVATION_LOST && model_dlopen_calls == 1,
+           "the status is final: the next calls answer it and load nothing");
+}
+
+static void scenario_registry_failed(const char *folder)
+{
+    const char *file = library(folder, "registryfails", BASE_UNDER_STACK, XL_GUEST_VERSION, 1);
+    model_init_result = XL_LIBRARY_REGISTRY_FAILED;
+    xl_load_status status = xl_load(file);
+    expect(status == XL_LOAD_REGISTRY_FAILED && strstr(xl_load_error(), "dlopen of the registry of"),
+           "a registry that dyld refuses after the library attached has a status of its own, not the one of a dlopen that can be tried again: %s",
+           xl_load_error());
+    expect(model_covered(model_guest_low, model_guest_high, 0) == 0 && !room_held(), "the guest range is given back");
+    model_init_result = XL_LIBRARY_OK;
+    expect(xl_load(file) == XL_LOAD_REGISTRY_FAILED && model_dlopen_calls == 1, "the status is final");
+}
 
 static void scenario_refusals(const char *folder)
 {
@@ -506,6 +538,8 @@ static const struct {
     {"load without a reservation, dlopen fails", scenario_lazy_dlopen},
     {"a kept reservation, dlopen fails", scenario_kept_dlopen},
     {"the library fails to attach", scenario_attach},
+    {"the reservation is not whole when the library attaches", scenario_reservation_lost},
+    {"the registry fails to load after the attach", scenario_registry_failed},
     {"refusals take nothing", scenario_refusals},
     {"guest range only", scenario_guest_only},
 };
