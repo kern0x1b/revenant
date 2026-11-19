@@ -647,6 +647,18 @@ library (`RCFClient`, `RCFToken`, and a category `RCFClient (RCFExtra)`; Objecti
 otherwise). The fixture is linked with `-no_objc_category_merging`: ld64 merges a category into its class when both are in
 one dylib, which leaves the category list empty and the check of the registry with nothing to prove.
 
+The fixture is two guest images: `RCFixture.dylib` links a second one, `RCSecond.dylib` (`second.m`: a protocol with a
+method and a property, and a class that adopts it), and the category's value is 42 only when the class of the second
+image is made, conforms to its protocol and answers. A library of one image cannot show where the images after the
+first lie, and that is where a translation went wrong: `translate.lua` runs `xlate` twice, once for the manifest of the
+Objective-C metadata that `xlgen` writes the host side from and once for the lift, and only the lift was told
+`--library`. In library mode the images lie one after another on 16 KiB, otherwise on 1 MiB, so the host side named
+the protocols of every later image by addresses 1 MiB apart and the lifted data by the packed ones: the fixture of one
+image linked and ran, and the first translation of the reCAPTCHA SDK with the budget (drop37, 2026-11-19, fourteen
+images) stopped at the link with 62 undefined `_xl_objc_proto_<address>_…`. Both runs now get `--library`, each
+writes where it put every image (`<name>.manifest-images.txt`, `<name>.images.txt`), and `translate.lua` stops when the
+two differ, naming the image and both ranges, before anything is linked.
+
 The host part of the check first runs the loader on the Mac (`loader.c`): `xl_loader.c` itself, compiled for the Mac with `vm_allocate`,
 `vm_deallocate`, `vm_protect`, `vm_region_recurse_64`, `dlopen` and `dlsym` replaced by a model of a 4S process (the address space below
 `0x30000000` with images up to `0x10000000`, a heap at `0x1c500000`, the main stack at `0x2fc02000`; an allocation anywhere takes the lowest
@@ -1058,20 +1070,26 @@ old sizes until a run of many `execute` calls says how they grow; with the numbe
 option of the translation, not a change of the runtime.
 
 For the reCAPTCHA Enterprise SDK: the sizes of drop36, measured in the region maps of the M4 acceptance, and what the
-same library takes with this layout, computed from those sizes. The phone has confirmed the rules the sum is made
-by, on the fixture (the reservation is the header's range and nothing more, the room of the host part is the size of
-its image, a guest stack is the thread's own size and a page, 2026-11-19); the SDK's own terms (its host part, its
-images, its arena, the number of its threads) are not measured until the SDK is translated with this layout and run:
+same library takes with this layout. The library's own terms are measured on the Mac in drop37 (2026-11-19, the first
+translation of the SDK with this layout, at `0x2e000000`): the host part is the segments of the dylib, the reservation
+is the header of its guest image as `xlate` prints it (`0x2e000000-0x2f938000`). Both came out as they had been
+computed from drop36 before the translation (55.3 and 25.22 MiB). The phone has confirmed the rules the rest of the
+sum is made by, on the fixture (the reservation is the header's range and nothing more, the room of the host part is
+the size of its image, a guest stack is the thread's own size and a page, 2026-11-19). Two terms are still not
+measured on the SDK with this layout: how many of its threads enter the guest (18 is the count of drop36's
+acceptance) and how much of the arena, the words and the aliases it uses; the window lines of a run with `XL_STATS=1`
+say both.
 
-| Part | drop36 | with the budget |
+| Part | drop36 | drop37, with the budget |
 |---|---|---|
-| host part | 62.95 MiB (41.5 lifted text, 8.7 data of which 8.0 `__bss`, 11.6 the bytes of the guest image, 1.2 link data) | about 55.3 MiB (the 7.6 MiB of the journal's tables are no longer `__bss`) |
+| host part | 62.95 MiB (41.5 lifted text, 8.7 data of which 8.0 `__bss`, 11.6 the bytes of the guest image, 1.2 link data) | 55.33 MiB (41.52 lifted text, 1.06 data, 11.59 the bytes of the guest image, 1.16 link data; the 7.6 MiB of the journal's tables are no longer `__bss`), a file of 54.94 MiB; the registry is 48 KiB more |
 | guest images | 22.17 MiB, of them 10.20 between the images | 11.97 MiB, nothing between the images |
 | metadata arena | 64 MiB, anywhere | 1.25 MiB, in the reservation |
 | opaque words, aliases | 8 MiB and 4 MiB, anywhere, at first use | 8 MiB and 4 MiB, in the reservation |
-| main thread's guest stack | 16 MiB (8 after a failed mapping) | about 1 MiB |
-| guest stack of each other thread | 1 MiB | 512 KiB and a page |
-| in all, with 18 other threads in the guest | 195 MiB | about 91 MiB |
+| the reservation in all | none: three mappings at three moments | 25.22 MiB, taken or refused by `xl_load` |
+| main thread's guest stack | 16 MiB (8 after a failed mapping) | 1,024 KiB |
+| guest stack of each other thread | 1 MiB | 516 KiB |
+| in all, with 18 other threads in the guest | 195 MiB | 90.7 MiB, of them 80.6 not stacks |
 
 The Telegram app that the SDK is loaded into has, signed in and with its chat list drawn, 180 to 190 MiB free below
 `0x30000000` from its twentieth second on (`m4p121ctl-1`): 195 MiB did not fit, and the runtime found out one failed

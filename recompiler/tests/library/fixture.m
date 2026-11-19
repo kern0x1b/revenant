@@ -2,6 +2,7 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 #import "RCFixture.h"
+#import "RCSecond.h"
 #include <dispatch/dispatch.h>
 
 static NSInteger RCFCreated;
@@ -70,7 +71,10 @@ static NSInteger RCFCreated;
 @implementation RCFClient (RCFExtra)
 - (NSInteger)categoryValue
 {
-    return [self seed] + 35;
+    RCSThing *thing = [RCSThing new];
+    if (![thing conformsToProtocol:@protocol(RCSNamed)] || ![[thing rcsName] isEqualToString:@"second"])
+        return -1;
+    return [self seed] + 28 + [thing rcsValue];
 }
 @end
 

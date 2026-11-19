@@ -478,7 +478,8 @@ function translate(input, includes, out, images, opt)
             table.join2(replaces, {"--namespace-prefix", namespace})
         end
     end
-    run(e.xlate, table.join({"--base", base}, replaces, {"--objc-manifest", o("manifest.json"), "--resolved-out", o("guest-resolved.txt"), input}, extra))
+    run(e.xlate, table.join({"--base", base}, library and {"--library", "--images-out", o(name .. ".manifest-images.txt")} or {}, replaces,
+                            {"--objc-manifest", o("manifest.json"), "--resolved-out", o("guest-resolved.txt"), input}, extra))
 
     local support_undefined = {}
     for _, line in ipairs(lines(iorun("nm", table.join({"-u"}, support)))) do
@@ -628,6 +629,25 @@ function translate(input, includes, out, images, opt)
         lifted_objs = compile_lifted(e, out, env.lifted_flags(lifted_mode, host))
         io.writefile(o("lifted-objs.txt"), table.concat(lifted_objs, " ") .. "\n")
         io.writefile(o("lift.stamp"), key)
+    end
+    if library then
+        local described = io.readfile(o(name .. ".manifest-images.txt"))
+        local described_rows, lifted_rows = {}, {}
+        for low, high, file in described:gmatch("(%x+) (%x+) ([^\n]+)") do
+            described_rows[file] = low .. " " .. high
+        end
+        for low, high, file in io.readfile(o(name .. ".images.txt")):gmatch("(%x+) (%x+) ([^\n]+)") do
+            lifted_rows[file] = low .. " " .. high
+            if described_rows[file] and described_rows[file] ~= lifted_rows[file] then
+                raise("the guest image %s lies at %s in the lifted code and at %s in the manifest of its Objective-C metadata: the two runs of xlate laid the images out by different rules, and every address the generator wrote for that image is wrong",
+                      file, lifted_rows[file], described_rows[file])
+            end
+        end
+        for file in pairs(described_rows) do
+            if not lifted_rows[file] then
+                raise("the guest image %s is in the manifest of the Objective-C metadata and not in the lifted code", file)
+            end
+        end
     end
     local rewritten = {}
     for _, line in ipairs(os.isfile(o("xi.txt")) and readlines(o("xi.txt")) or {}) do
