@@ -9,8 +9,13 @@ in C that keeps the rules below (`start`, `put`, `get`), to read beside this pag
 Proved on the build host against a fixture library. It also ran on the phone (iPhone 4S, iOS 6.1.3) with the real
 library and a key the server refuses, in two parts on 2026-11-19: started from a shell, and started by Telegram's
 spawn probe. In both the helper answered `ready`, named the refused key's error as `EXECUTE_FAILED`, exited 0 when the
-request pipe closed, and survived being killed without the parent noticing. No run has returned a token. The last
-section says what is still open.
+request pipe closed, and survived being killed without the parent noticing. A third time, on 2026-11-19 (pass125b of
+Telegram's build, two windows), the helper of this page was spawned by the app: `F_SETNOSIGPIPE` on the answer pipe was
+accepted and none of `failed STDOUT`, `NOSIGPIPE`, `NO_HOME` or `NO_READER` appeared; `ready` came 1.734 and 1.715 s
+after the spawn (the library's load 1445 and 1418 ms), and the answer to an `execute` with a key the server refuses,
+`EXECUTE_FAILED com.google.recaptcha 2: Invalid Site Key.`, came 3.33 and 3.03 s after the spawn, so the helper, the
+library, Google and the SDK's error reached the app whole. (Those times and the lines are the Telegram session's
+record of its own run.) No run has returned a token. The last section says what is still open.
 
 ## Starting it
 
@@ -26,6 +31,13 @@ section says what is still open.
   them, and it gets them by being linked against them as the app's executable is: the build that compiles `helper.m`
   and `protocol.h` links the Backports libraries into it, and the app's rules name no `DYLD_INSERT_LIBRARIES`. (The
   measured runs of the kit on the phone inserted them, because the kit's helper was built outside that build.)
+
+A helper that lies at the root of the `.app`, as the main executable does, must be linked with `-Wl,-rpath,
+@executable_path/Frameworks`, the `LC_RPATH` the main executable has: the phone's dyld resolves `@rpath` only through
+the `LC_RPATH` of the image that loads the library, not through the app's. Measured in pass125b: the first window's
+helper, linked with `-rpath @executable_path`, died after 0.39 s with signal 5 and `dyld: Library not loaded:
+@rpath/libswiftFoundation.dylib, Referenced from …/RecaptchaHelper`. The check of `recompiler/tests/recaptchahelper`
+links the helper for the build host and does not see this.
 
 After the call the app closes the two ends it gave away and sets `F_SETNOSIGPIPE` on its write end of the request
 pipe. Without it a write to a helper that has gone ends the app with `SIGPIPE` and no crash report (measured in
@@ -66,7 +78,7 @@ reader takes any `%XX`, upper or lower case, and a `%` not followed by two such 
 | `NO_DEFAULTS` | `NSUserDefaults` has no `initWithSuiteName:` (the Foundation backport is not loaded) |
 | `NO_COOKIE_STORE` | there is no `NSURLSessionConfiguration`, so no cookie store of the helper's own can be made (the Foundation backport is not loaded) |
 | `STDOUT` | descriptor 1 cannot be pointed at the log (`dup2`), or the answer pipe's own descriptor cannot be marked close-on-exec; the text says the error. Nothing the library prints may reach the answer pipe, so the helper stops before it loads the library |
-| `NOSIGPIPE` | `SIGPIPE` cannot be ignored, or `F_SETNOSIGPIPE` is refused on the answer pipe; the text says the error. Not measured on iOS 6: the Mac accepts the call on pipes, sockets, files and `/dev/null`, so a refusal there is the first thing the next phone run would show |
+| `NOSIGPIPE` | `SIGPIPE` cannot be ignored, or `F_SETNOSIGPIPE` is refused on the answer pipe; the text says the error. iOS 6.1.3 accepted the call on the answer pipe (iPhone 4S, 2026-11-19), and the Mac accepts it on pipes, sockets, files and `/dev/null`; the refusal has not been seen anywhere |
 | `NO_READER` | the thread that reads the request pipe cannot be made; the text says the error. The helper makes it before it writes `ready` (the thread waits until `ready` is written), so an app never sees `ready` from a helper that cannot hear it |
 | `NO_HOME` | the helper's home folder cannot be made; or `CFFIXED_USER_HOME` cannot be set; or after it was set the caches folder is not inside it; or the languages and locale the process reads from the global preferences are not what they were before the move. The text says the paths or the two values. The helper stops rather than let the library write into the app's container, or send another language than the app's |
 | `NO_CLASSES` | the library has not the two classes the helper calls |
@@ -199,10 +211,15 @@ same relative paths under the moved home are not measured.
 
 ## Not yet measured
 
-- The helper with the real library on the phone under Telegram's own build, linked against the Backports as the app is.
-- Whether iOS 6 reads `CFFIXED_USER_HOME` from `main` onwards, and whether the languages and locale it reads survive
-  the move: the helper checks both and says `NO_HOME`, so a run shows it, and nothing else of the home move has run on
-  the phone. On the build host the caches part is proved, with a control; the languages part has no control, because
-  the build host never changes them.
+- The helper with the real library on the phone under Telegram's own build ran once (pass125b, above). Not yet run
+  there: a second request on the same helper, the helper's exit on idle, the pause after a `failed`, and a key the
+  server accepts. The helper's own virtual size on the phone has not been measured (the app's virtual size grew by 1.4
+  MB and 3.0 MB across the `execute` in the two windows: 882700K to 884108K and 880044K to 882996K).
+- The home move on the phone: in pass125b the helper's line named `caches=/var/mobile/Library/Caches/
+  ph.telegra.Telegraph.recaptcha/Library/Caches` and `own store: separate from the shared store`, and `NO_HOME` did not
+  appear, so iOS 6.1.3 honoured `CFFIXED_USER_HOME` for the caches folder and the languages and locale it reads
+  survived the move (the helper checks both before `ready`). The files under the moved home (the preferences and the
+  URL cache above) have not been looked at. On the build host the caches part is proved, with a control; the languages
+  part has no control, because the build host never changes them.
 - The crash report of a child of Telegram, and the runtime's record under `XL_CRASH` in the helper.
 - Everything on the path that returns a token: no key that the server accepts has been used anywhere.
