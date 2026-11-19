@@ -33,7 +33,8 @@ revenant names an application; `examples/paseo` is the first one.
 
   which fetches, checks out the newest release tag detached (`--main`: the head of the default branch) and prints the tag and
   commit, which the build's report records. It runs once per build; no daemon or schedule keeps it fresh. First run: v0.16.1,
-  commit c09a3d81e772a747dd11bca43d860f3518f07c2d.
+  commit c09a3d81e772a747dd11bca43d860f3518f07c2d; latest built: v0.16.2, commit 2ee30f4164af42ba209236ab3a31bf9532592fc3 (the overlay
+  applies unchanged, the isolated host builds, every pod of the manifest matches its recipe version).
 - A newer upstream that breaks the overlay (a patched file is gone, React Native or Expo changed) is a finding: the overlay in
   `examples/paseo/` is corrected, never the checkout. `apply` stops when an overlay file has no counterpart.
 - `npm ci` runs in a clone of the checkout, never in the checkout.
