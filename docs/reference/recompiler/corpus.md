@@ -460,6 +460,15 @@ because of the aliases. Three controls on the 4S, each run with the program unch
 `format argument` has no control: the alias is a real copy with the same characters, so a `%@` that gets the alias formats
 the same text as one that gets the original, and nothing the program can observe tells the two apart.
 
+The `enumeration` lines are `for … in` loops of the guest over host collections, which
+`xl_manual_fast_enumeration` serves ([how](../../explanation/recompiler/how-it-works.md)): an outer loop over 40 strings
+that, at its first item, runs 40 inner loops to their end or to a `break` and then 64 `malloc` blocks of the size of a
+list of 40 items, filled with `0xa5`, and still has its 40 items (`40 of 40 items intact`; with the 32 shared lists the
+bridge had before, the outer loop's list was freed by the thirty-third inner loop and the blocks landed on it); 41 loops
+nested in one another; an array, a set and a dictionary of 100, which come in batches of 16; an empty array; a guest
+collection that forwards the call to a host array of 100; and an array that is changed inside its loop, which raises
+`NSGenericException` as on the Mac.
+
 `format locale nil`, `format locale posix` and `format locale unicode` call `-[NSString initWithFormat:locale:arguments:]`
 with a `va_list` the program builds. That selector is declared with `NS_FORMAT_FUNCTION(1,0)` and a `va_list` parameter, and
 until 2026-11-14 `xlgen` bridged the parameter as a plain pointer: the host read the guest's 8-byte argument words as 4-byte

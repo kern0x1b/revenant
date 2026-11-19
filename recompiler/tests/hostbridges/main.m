@@ -1036,6 +1036,137 @@ static void word_overflow_checks(void)
     printf("the table of words did not overflow, last 0x%llx\n", (unsigned long long)word_last);
 }
 
+enum { ENUMERATION_OUTER = 40, ENUMERATION_INNER = 40, ENUMERATION_CHURN = 64, ENUMERATION_DEPTH = 40 };
+
+__attribute__((noinline)) static int enumeration_inner(NSArray *numbers, int stop)
+{
+    int seen = 0;
+    for (NSNumber *number in numbers) {
+        seen += [number intValue];
+        if (stop && seen > stop)
+            break;
+    }
+    return seen;
+}
+
+__attribute__((noinline)) static int enumeration_descend(NSArray *numbers, int depth)
+{
+    int seen = 0;
+    for (NSNumber *number in numbers) {
+        if (depth && [number intValue] == 0)
+            seen += enumeration_descend(numbers, depth - 1);
+        seen += [number intValue];
+    }
+    return seen;
+}
+
+@interface EnumerationForwarder : NSObject <NSFastEnumeration> {
+    NSArray *_inner;
+    int _calls;
+}
+- (id)initWithInner:(NSArray *)inner;
+- (int)calls;
+@end
+
+@implementation EnumerationForwarder
+- (id)initWithInner:(NSArray *)inner
+{
+    if ((self = [super init]))
+        _inner = [inner retain];
+    return self;
+}
+- (void)dealloc
+{
+    [_inner release];
+    [super dealloc];
+}
+- (int)calls
+{
+    return _calls;
+}
+- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id *)buffer count:(NSUInteger)length
+{
+    _calls++;
+    return [_inner countByEnumeratingWithState:state objects:buffer count:length];
+}
+@end
+
+static void enumeration_checks(void)
+{
+    NSMutableArray *outer = [NSMutableArray array];
+    for (int i = 0; i < ENUMERATION_OUTER; i++)
+        [outer addObject:[NSString stringWithFormat:@"outer %d", i]];
+    NSMutableArray *numbers = [NSMutableArray array];
+    for (int i = 0; i < 24; i++)
+        [numbers addObject:[NSNumber numberWithInt:i]];
+    void *churn[ENUMERATION_CHURN];
+    int index = 0, intact = 0, sums = 0;
+    for (NSString *item in outer) {
+        if (index == 0) {
+            for (int round = 0; round < ENUMERATION_INNER; round++)
+                sums += enumeration_inner(numbers, round % 2 ? 100 : 0);
+            for (int i = 0; i < ENUMERATION_CHURN; i++) {
+                churn[i] = malloc(ENUMERATION_OUTER * sizeof(void *));
+                memset(churn[i], 0xa5, ENUMERATION_OUTER * sizeof(void *));
+            }
+        }
+        intact += item == [outer objectAtIndex:index] && [item isEqualToString:[NSString stringWithFormat:@"outer %d", index]];
+        index++;
+    }
+    for (int i = 0; i < ENUMERATION_CHURN; i++)
+        free(churn[i]);
+    printf("enumeration outer loop across %d inner loops: %d of %d items intact, inner sum %d\n", ENUMERATION_INNER, intact, index, sums);
+    printf("enumeration %d loops deep: sum %d\n", ENUMERATION_DEPTH + 1, enumeration_descend(numbers, ENUMERATION_DEPTH));
+
+    NSMutableArray *hundred = [NSMutableArray array];
+    NSMutableSet *set = [NSMutableSet set];
+    NSMutableDictionary *dictionary = [NSMutableDictionary dictionary];
+    for (int i = 0; i < 100; i++) {
+        NSNumber *number = [NSNumber numberWithInt:i];
+        [hundred addObject:number];
+        [set addObject:number];
+        [dictionary setObject:[NSNumber numberWithInt:i * 2] forKey:number];
+    }
+    int position = 0, ordered = 0;
+    for (NSNumber *number in hundred)
+        ordered += [number intValue] == position++;
+    printf("enumeration array of 100 in order %d of %d\n", ordered, position);
+    int members = 0, total = 0;
+    for (NSNumber *number in set) {
+        members++;
+        total += [number intValue];
+    }
+    printf("enumeration set of 100: %d members, sum %d\n", members, total);
+    int keys = 0, values = 0;
+    for (NSNumber *key in dictionary) {
+        keys++;
+        values += [[dictionary objectForKey:key] intValue] == [key intValue] * 2;
+    }
+    printf("enumeration dictionary of 100: %d keys, %d values match\n", keys, values);
+    int empty = 0;
+    for (id item in [NSArray array])
+        empty++;
+    printf("enumeration empty array %d\n", empty);
+    EnumerationForwarder *forwarder = [[EnumerationForwarder alloc] initWithInner:hundred];
+    int forwarded = 0, forwarded_ordered = 0;
+    for (NSNumber *number in forwarder)
+        forwarded_ordered += [number intValue] == forwarded++;
+    printf("enumeration of 100 through a collection that forwards: %d in order of %d, asked more than once %d\n", forwarded_ordered, forwarded, [forwarder calls] > 1);
+    [forwarder release];
+
+    NSMutableArray *mutated = [NSMutableArray arrayWithArray:hundred];
+    int visited = 0, raised = 0;
+    @try {
+        for (id item in mutated) {
+            if (!visited++)
+                [mutated addObject:item];
+        }
+    } @catch (NSException *exception) {
+        raised = [[exception name] isEqualToString:NSGenericException];
+    }
+    printf("enumeration of a mutated array raised %d\n", raised);
+}
+
 int main(int argc, char **argv)
 {
     if (argc > 1 && !strcmp(argv[1], "word-overflow")) {
@@ -1069,6 +1200,7 @@ int main(int argc, char **argv)
         callback_checks();
         key_checks();
         word_checks();
+        enumeration_checks();
     }
     return 0;
 }

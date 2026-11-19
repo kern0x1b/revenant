@@ -140,6 +140,24 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
   the block bridge), an `id *` buffer whose length is another argument (`count`, or the `length` of an `NSRange`), a
   record such as `NSFastEnumerationState`. A method with a block and no typed IMP stops with a message when it is called.
 
+- **A `for … in` of the guest over a host collection keeps everything in the guest's own loop.** The guest's
+  `NSFastEnumerationState` is 64 bytes and its items are 64-bit words; the host's is 32 bytes and its items are 32-bit.
+  `xl_manual_fast_enumeration` keeps the host's state in four of the five `extra` words of the guest's, asks the host
+  collection for a batch, and hands the batch over through the buffer the guest's loop passed (16 items at most a call),
+  remembering in the guest's `state` word how many of the batch it has handed: the loop's own frame holds every byte
+  of the enumeration, so any number of loops, nested or on any number of threads, are independent, and a loop that is
+  left early leaves nothing behind. A collection that changes under a loop is told the way the host tells it
+  (`objc_enumerationMutation`), from the host's mutations word. Before 2026-11-19 the converted items of a batch were
+  in one of 32 lists shared by the process, given out in turn: the thirty-third loop that started while another was
+  still running freed that one's list, and the first loop read its next item from freed memory. In the reCAPTCHA SDK
+  that was `xlate: objc_msgSend argument 0 value 0x300002483d7b0 does not fit the host type` at guest `0x2e0d7e34`
+  (the receiver was two 32-bit words of whatever `malloc` had put there since), in 2 of 3 launches of the M4
+  acceptance after the answer had arrived. One case is not served, and never was: a host caller that enumerates a
+  guest collection which forwards the call to a host collection. The typed IMP gives the guest a 64-byte copy of the
+  host's state for the one call and narrows it back word by word, and the host collection's state that the bridge
+  keeps in the `extra` words does not fit that way, so the call stops with `… does not fit the host type` and names
+  `xl_g_NSFastEnumerationState`.
+
 - **The guest runtime tells a host class from its own by the address.** A class of the host's libobjc is a 20-byte
   `objc_class` (isa, superclass, cache, vtable, bits), so the word that Swift's `ClassMetadata` keeps its `Data` in
   (offset 32) is whatever follows the class in the host's memory, and `ClassMetadata::isTypeMetadata()` read it. For a
