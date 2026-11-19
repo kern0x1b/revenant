@@ -70,6 +70,14 @@ exercised on the phone, so their coverage rows are `real`, verified `build`.
 fails with "make the copy again" when a copy predates that. `src/expo/xmake.lua` writes each pod's module map and flags into
 `build/expo-core/implicit.rsp`.
 
+## Speech, symbols and video (Hy4)
+
+These modules are built into the isolated host from their npm tarballs; none has been exercised on the phone.
+
+| Module | Removed or replaced | Why | What JS sees |
+| --- | --- | --- | --- |
+| expo-speech | nothing; the speech classes and the voice-by-identifier initializer come from the AVFoundation backport | AVSpeechSynthesizer and its voice API are iOS 7, absent from the iOS 6 cache; the backport speaks through VoiceServices' VSSpeechSynthesizer | the module as published: speak, getVoices, stop, pause, resume and isSpeaking run on the backport; build-verified, not exercised on the phone |
+
 ## How to check
 
 `./xmakew l -P . frameworks/ReactNative/tools/coverage.lua` regenerates `docs/reference/react-native/coverage.md`;
