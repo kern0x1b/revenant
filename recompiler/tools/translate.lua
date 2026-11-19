@@ -381,7 +381,7 @@ local function split_compile(e, out, lifted, host, bytes, limit)
         table.insert(objects, piece .. ".o")
     end
     local count = tonumber(os.getenv("XL_COMPILE_JOBS") or "") or 4
-    runjobs("compile", function (index)
+    runjobs("compile " .. path.absolute(out), function (index)
         local job = jobs[index]
         if job.piece then
             local log = job.bitcode .. ".log"
@@ -400,10 +400,10 @@ local function split_compile(e, out, lifted, host, bytes, limit)
     return objects
 end
 
-function compile_lifted(e, out, host)
+function compile_lifted(e, out, host, limit)
     local lifted = path.join(out, "lifted.bc")
     local bytes = os.filesize(lifted)
-    local limit = tonumber(os.getenv("XL_OBJECT_BYTES") or "") or OBJECT_BYTES
+    limit = limit or tonumber(os.getenv("XL_OBJECT_BYTES") or "") or OBJECT_BYTES
     if bytes > limit then
         return split_compile(e, out, lifted, host, bytes, limit)
     end
