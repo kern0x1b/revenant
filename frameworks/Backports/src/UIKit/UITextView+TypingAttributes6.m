@@ -7,8 +7,7 @@ static IMP RevenantNativeSetTypingAttributes;
 
 static BOOL revenant_has_selection(UITextView *view)
 {
-    NSRange range = [view selectedRange];
-    return range.location != NSNotFound && NSMaxRange(range) <= view.text.length;
+    return [view selectedRange].location != NSNotFound;
 }
 
 static NSDictionary *revenant_typing_attributes(UITextView *self, SEL selector)
@@ -52,6 +51,8 @@ static void revenant_set_typing_attributes(UITextView *self, SEL selector, NSDic
 
 + (void)load
 {
+    if (NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_7_0)
+        return;
     Method getter = class_getInstanceMethod([UITextView class], @selector(typingAttributes));
     Method setter = class_getInstanceMethod([UITextView class], @selector(setTypingAttributes:));
     if (!getter || !setter)
