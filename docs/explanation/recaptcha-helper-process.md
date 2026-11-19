@@ -70,8 +70,9 @@ descriptor 0, the write end of a second its descriptor 1, descriptor 2 goes to t
 database files reaches the helper. **Measured** (4 below): iOS 6.1.3 takes the flag, the call returns in 6.2 ms, and
 the child's descriptors at the start of `main` are 0, 1 and 2 as pipes and a fourth, a pipe at 3, that the same
 program has when a shell starts it: one of its own libraries opens it, and nothing of Telegram's is there (the
-app's new pipes were its descriptors 44 to 47). The arguments are the path of the library and the protocol version; the environment is the app's own with
-the `XL_*` switches (the measurement passed Telegram's environment; an empty one is not tried).
+app's new pipes were its descriptors 44 to 47). The arguments are the path of the library and the protocol
+version; the environment is the app's own with the `XL_*` switches (the measurement passed Telegram's environment;
+an empty one is not tried).
 
 The app sets `F_SETNOSIGPIPE` on its write end. **Measured** in Telegram's process: `SIGPIPE` has its default action
 there, a write into a pipe whose reader has gone ends Telegram with signal 13 and leaves no crash report, and with
@@ -253,8 +254,8 @@ coordinator, 2026-11-19); what to copy, the commands, what a pass looks like and
    fixes the numbers.
 6. Preferences, caches and keychain, with the first helper build: Telegram's preferences file, its `Cache.db` and
    its cookie file are the same before and after a request (the helper's are its own), and the keychain calls of the
-   SDK answer for a program signed with `ldid`. Nothing here ends the route: a keychain that refuses is answered by the SDK's own error path, to be
-   read then.
+   SDK answer for a program signed with `ldid`. Nothing here ends the route: a keychain that refuses is answered by
+   the SDK's own error path, to be read then.
 7. Times, with the first helper build: five requests from a helper started by the request and five from one that had
    loaded before it. The route stands if both are under 13 s with room, which the refused path's numbers say.
 
