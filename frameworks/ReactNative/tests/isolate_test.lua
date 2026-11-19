@@ -110,7 +110,8 @@ os.vrunv("ln", {"-sfn", path.join(base, "app"), path.join(old_folder, "build", "
 os.mkdir(path.directory(new_cache))
 os.vrunv("cp", {"-cR", old_cache, new_cache})
 
-local cloned = isolate.clone_project(old_folder, new_folder, new_cache)
+local cloned = isolate.clone_project(path.join(base, "old", "..", "old", "checkout", "iso-x"), new_folder, path.join(base, "new", "x", "..", ".cache-pp"),
+    path.join(old_cache, "..", ".cache-pp"), path.join(base, "old", "x", "..", "checkout"))
 local function naming(root)
     local found = try { function () return os.iorunv("grep", {"-rIlF", "--exclude-dir=ref", root, new_folder}) end, catch { function () return "" end } }
     return found or ""

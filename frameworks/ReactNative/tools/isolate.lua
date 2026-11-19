@@ -403,8 +403,21 @@ end
 -- an APFS clone of the warm copy SRC in DST, for another worktree and its own clone of the cache: every file that names the old
 -- roots is rewritten, every link under build/ (rn-headers, rn-src, probes) is retargeted, so that the clone neither probes the
 -- packages again nor reaches into the copy it came from, and rebuilds only what the new module changes
+-- an absolute path with its "." and ".." segments collapsed, as the files of the copy name it (path.absolute leaves ".." in an absolute path)
+function lexical_path(value)
+    local parts = {}
+    for segment in path.absolute(value):gmatch("[^/]+") do
+        if segment == ".." then
+            table.remove(parts)
+        elseif segment ~= "." then
+            table.insert(parts, segment)
+        end
+    end
+    return "/" .. table.concat(parts, "/")
+end
+
 function clone_project(src, dst, new_cache, old_cache, old_checkout, bundle_id)
-    src, dst = path.absolute(src), path.absolute(dst)
+    src, dst = lexical_path(src), lexical_path(dst)
     if not folder_is_valid(dst) then
         raise("%s contains test or Example, which the pod source filter of the host build skips", dst)
     end
@@ -413,12 +426,12 @@ function clone_project(src, dst, new_cache, old_cache, old_checkout, bundle_id)
     end
     local old = read_roots(src) or {folder = src}
     old.folder = src
-    old.cache = old_cache and path.absolute(old_cache) or old.cache
-    old.checkout = old_checkout and path.absolute(old_checkout) or old.checkout
+    old.cache = old_cache and lexical_path(old_cache) or old.cache
+    old.checkout = old_checkout and lexical_path(old_checkout) or old.checkout
     if not (old.cache and old.checkout) then
         raise("%s has no build/isolate-roots.txt: pass --src-cache and --src-checkout", src)
     end
-    local new = {folder = dst, checkout = checkout(), cache = path.absolute(new_cache)}
+    local new = {folder = dst, checkout = checkout(), cache = lexical_path(new_cache)}
     local mapped = root_pairs(old, new)
     os.mkdir(path.directory(dst))
     os.vrunv("cp", {"-cR", src, dst})
@@ -452,6 +465,21 @@ function clone_project(src, dst, new_cache, old_cache, old_checkout, bundle_id)
             os.vrunv("ln", {"-sfn", retargeted, link})
             relinked = relinked + 1
         end
+    end
+    -- a root that is still named means the clone would reach into the copy it came from or probe again: refuse instead of building it
+    local left = try {
+        function ()
+            return os.iorunv("grep", table.join({"-rIlF", "--exclude-dir=ref"}, patterns, {dst}))
+        end,
+        catch {
+            function ()
+                return ""
+            end
+        }
+    }
+    local first = lines(left or "")[1]
+    if first then
+        raise("the clone %s still names a root of the copy it came from, for example in %s", dst, first)
     end
     write_roots(dst, new.cache)
     local id = bundle_id and write_bundle_id(dst, bundle_id) or nil
