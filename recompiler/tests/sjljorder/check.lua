@@ -37,6 +37,17 @@ local function module_text()
     return table.concat(lines, "\n") .. "\n"
 end
 
+local function phis_by_block(ir)
+    local counts, block = {}, nil
+    for line in ir:gmatch("[^\n]+") do
+        block = line:match("^([%w%._]+):") or block
+        if block and line:find("= phi i64", 1, true) then
+            counts[block] = (counts[block] or 0) + 1
+        end
+    end
+    return counts
+end
+
 function main(out)
     local corpus = import("corpus", {rootdir = path.join(os.scriptdir(), "..", "..", "tools"), anonymous = true})
     local e
@@ -47,18 +58,26 @@ function main(out)
     local flags = {"-target", "armv7-apple-ios6.0", "-isysroot", e.sdk, "-O2", "-w", "-mthumb"}
 
     local optimized = path.join(out, "pads.opt.ll")
-    os.execv(clang, table.join(flags, {"-x", "ir", "-S", "-emit-llvm", source, "-o", optimized}))
-    local ir = io.readfile(optimized)
-    local _, phis = ir:gsub("= phi i64", "")
-    if not ir:find("landingpad", 1, true) or phis < 2 * PHIS then
-        corpus.fail("the optimizer left %d PHIs in the landing pads of the check's function, fewer than the %d it needs: the check no longer exercises the demotion of the PHIs of a landing pad", phis, 2 * PHIS)
+    os.tryrm(optimized)
+    corpus.output(clang, table.join(flags, {"-x", "ir", "-S", "-emit-llvm", source, "-o", optimized}), path.join(out, "pads.opt.log"))
+    local ir = os.isfile(optimized) and io.readfile(optimized) or ""
+    local counts = phis_by_block(ir)
+    for _, chain in ipairs(CHAINS) do
+        local phis = counts[chain.pad] or 0
+        if not ir:find("landingpad", 1, true) or phis < PHIS then
+            corpus.fail("the optimizer left %d PHIs in the landing pad %s of the check's function, fewer than the %d it needs: the check no longer exercises the demotion of the PHIs of a landing pad",
+                        phis, chain.pad, PHIS)
+        end
     end
 
     local seen, order = {}, {}
     for run = 1, RUNS do
         local object = path.join(out, string.format("pads-%d.o", run))
         os.tryrm(object)
-        os.execv(clang, table.join(flags, {"-x", "ir", "-c", source, "-o", object}))
+        corpus.output(clang, table.join(flags, {"-x", "ir", "-c", source, "-o", object}), path.join(out, string.format("pads-%d.log", run)))
+        if not os.isfile(object) then
+            corpus.fail("the compile %d of the check's function wrote no object %s", run, object)
+        end
         local digest = hash.sha256(object)
         if not seen[digest] then
             seen[digest] = 0

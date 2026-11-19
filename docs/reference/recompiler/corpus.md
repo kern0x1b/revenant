@@ -1488,8 +1488,10 @@ carries `packages/l/llvm/patches/llvm-sjlj-demote-phis-in-block-order.patch`, wh
 
 `recompiler/tests/sjljorder/check.lua` writes one function: two chains of two invokes each, every invoke after twelve
 opaque values, and one landing pad per chain whose twelve phis take those values from its two invokes. It compiles it
-once to optimized IR and requires that the phis are still there (otherwise it no longer reaches the pass), then compiles
-it six times for `armv7-apple-ios6.0` with `-O2 -mthumb`, the flags of the lifted code, and requires one object hash.
+once to optimized IR and requires that each landing pad still has its twelve phis (counted in the pad's own block, not in
+the module; otherwise the check no longer reaches the pass), then compiles it six times for `armv7-apple-ios6.0` with
+`-O2 -mthumb`, the flags of the lifted code, and requires one object hash. A compile that ends with a failure status
+fails the check with the compiler's output, and a compile that writes no object does too.
 On a compiler without the patch six compiles gave six different objects (2026-11-19, LLVM 23.1.3); the same function
 compiled with the order fixed by a stand-in gave one. The failure message names the patch. The check runs in
 `recompiler_corpus`, so a package that loses the patch stops it.
