@@ -13,23 +13,6 @@ static NSString *const RevenantColorsKey = @"UISymbolRenderingColors";
 
 static const double RevenantDefaultPointSize = 17;
 
-static NSArray *RevenantMulticolorPalette(void)
-{
-    static NSArray *palette;
-    static dispatch_once_t once;
-    dispatch_once(&once, ^{
-        palette = @[
-            [UIColor colorWithRed:0.85 green:0.20 blue:0.20 alpha:1],
-            [UIColor colorWithRed:0.95 green:0.55 blue:0.10 alpha:1],
-            [UIColor colorWithRed:0.85 green:0.75 blue:0.10 alpha:1],
-            [UIColor colorWithRed:0.15 green:0.65 blue:0.25 alpha:1],
-            [UIColor colorWithRed:0.10 green:0.45 blue:0.90 alpha:1],
-            [UIColor colorWithRed:0.55 green:0.25 blue:0.80 alpha:1],
-        ];
-    });
-    return palette;
-}
-
 static double revenant_text_style_size(NSString *style)
 {
     static NSDictionary *sizes;
@@ -189,7 +172,7 @@ static NSString *revenant_scale_name(NSInteger scale)
 
 + (UIImageSymbolConfiguration *)configurationPreferringMulticolor
 {
-    return [self revenant_configurationWithRendering:RevenantSymbolRenderingMulticolor colors:RevenantMulticolorPalette()];
+    return [self revenant_configurationWithRendering:RevenantSymbolRenderingMulticolor colors:nil];
 }
 
 + (UIImageSymbolConfiguration *)configurationWithHierarchicalColor:(UIColor *)color

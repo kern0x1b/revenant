@@ -18,8 +18,8 @@ double revenant_symbol_layer_alpha(RevenantSymbolRendering rendering, int layer)
     if (layer <= 0)
         return 1.0;
     if (layer == 1)
-        return 0.6;
+        return 153.0 / 255.0;
     if (layer == 2)
-        return 0.4;
-    return 0.25;
+        return 76.0 / 255.0;
+    return 45.0 / 255.0;
 }

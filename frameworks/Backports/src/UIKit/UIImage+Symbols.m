@@ -41,7 +41,8 @@ static UIImage *revenant_symbol_image(NSString *name, UIImageSymbolConfiguration
     if (!drawn || !revenant_symbol_metrics(name, pointSize, weight, scale, &size, &insets, &baseline))
         return nil;
     UIImage *image = [drawn imageWithAlignmentRectInsets:insets];
-    UIImageRenderingMode mode = (rendering == RevenantSymbolRenderingMonochrome || rendering == RevenantSymbolRenderingAutomatic || !colors.count)
+    UIImageRenderingMode mode = (rendering == RevenantSymbolRenderingMonochrome || rendering == RevenantSymbolRenderingMulticolor ||
+                                  rendering == RevenantSymbolRenderingAutomatic || !colors.count)
         ? UIImageRenderingModeAlwaysTemplate : UIImageRenderingModeAlwaysOriginal;
     image = [image imageWithRenderingMode:mode];
     objc_setAssociatedObject(image, &revenant_symbol_name_key, name, OBJC_ASSOCIATION_COPY_NONATOMIC);
