@@ -14,14 +14,8 @@
 }
 @end
 
-REVENANT_CASE(quartzcore_nsnull_action)
+static NSString *revenant_run_null_actions(id null)
 {
-    id null = [[NSNull alloc] init];
-    BOOL singleton = null == (id)kCFNull && null == [NSNull null];
-    revenant_expect_true(@"an NSNull made by alloc and init is the null singleton", singleton != (BOOL)negative,
-                         [NSString stringWithFormat:@"class %@, object %p, kCFNull %p", [null class], null, kCFNull]);
-
-    NSString *raised = nil;
     @try {
         NSDictionary *actions = @{@"onOrderIn": null, @"onOrderOut": null, @"position": null, @"bounds": null,
                                   @"opacity": null, @"sublayers": null, @"hidden": null, @"contents": null};
@@ -45,8 +39,20 @@ REVENANT_CASE(quartzcore_nsnull_action)
         [view removeFromSuperview];
         [CATransaction flush];
     } @catch (NSException *exception) {
-        raised = [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason];
+        return [NSString stringWithFormat:@"%@: %@", exception.name, exception.reason];
     }
-    revenant_expect_true(@"an NSNull action ends the search without a message to it", (raised == nil) != (BOOL)negative,
+    return nil;
+}
+
+REVENANT_CASE(quartzcore_nsnull_action)
+{
+    Class bound = revenant_backport_class("Foundation", "NSNull");
+    id made = [[bound alloc] init];
+    BOOL singleton = made == (id)kCFNull && made == [NSNull null];
+    revenant_expect_true(@"an NSNull made by alloc and init is the null singleton", singleton != (BOOL)negative,
+                         [NSString stringWithFormat:@"class %@, object %p, kCFNull %p", [made class], (__bridge void *)made, kCFNull]);
+
+    NSString *raised = revenant_run_null_actions(made);
+    revenant_expect_true(@"the null singleton as an action ends the search without a message to it", (raised == nil) != (BOOL)negative,
                          raised ?: @"no exception");
 }
