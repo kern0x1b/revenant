@@ -377,6 +377,12 @@ The Swift surface is the runtime's `Symbols` overlay (`toolchain/src/swift-runti
 
 Not backed, because expo-symbols 57.0.3 does not call them: `removeSymbolEffectOfType:` (four variants), `setSymbolImage:withContentTransition:` (two variants), `NSSymbolEffectOptions optionsWithRepeatBehavior:` (iOS 18), the iOS 14 to 26 effects other than these (appear, disappear, wiggle, rotate, breathe, draw), and secure coding for the option and effect classes.
 
+## Expo modules: initializing a speech voice by identifier (expo-speech 57.0.3)
+
+Source: `expo-speech` 57.0.3, `ios/SpeechModule.swift`, which calls `AVSpeechSynthesisVoice(identifier:)` when JavaScript passes a voice identifier.
+
+Added `-[AVSpeechSynthesisVoice initWithIdentifier:]` in `src/AVFoundation/AVSpeechSynthesisVoice7.m`. It looks the identifier up case-insensitively through `+voiceWithIdentifier:`, which reads the VoiceServices voice list the backport already uses for `speechVoices`; an unknown identifier returns nil. The new instance carries the resolved voice's language, identifier, name and quality, so a voice obtained this way speaks through the same VSSpeechSynthesizer path as one obtained by language. Because the identifier set is the one on the device, the identifiers are the measured ones of `RevenantHostIdentifiers()` or the `com.apple.voice.super-compact.<language>.<name>` fallback. Not exercised on a phone.
+
 ## SDWebImage 5.21.7 on iOS 6: Accelerate, CoreGraphics and the lock
 
 Source: SDWebImage 5.21.7 (`2de3a496`), `SDWebImage/Core`, 60 files. Each file was syntax-compiled for armv7 iOS 6.0 against the lowered overlay with `-Werror=unguarded-availability` and `-Werror=unguarded-availability-new`, and the errors were grouped by name.

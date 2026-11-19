@@ -22,6 +22,13 @@ local AREAS = {
         },
     },
     {
+        name = "initialization of a speech voice by its identifier, as expo-speech does",
+        sources = {"AVSpeechSynthesisVoice7.m"},
+        members = {
+            "-[AVSpeechSynthesisVoice initWithIdentifier:]",
+        },
+    },
+    {
         name = "looping of a template item through a queue player",
         sources = {"AVPlayerLooper10.m"},
         members = {
