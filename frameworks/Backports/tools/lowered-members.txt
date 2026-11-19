@@ -25199,6 +25199,7 @@ member NSURLSessionConfiguration -discretionary
 member NSURLSessionConfiguration -enablesEarlyData
 member NSURLSessionConfiguration -identifier
 member NSURLSessionConfiguration -init
+member NSURLSessionConfiguration -initWithRevenantSharedStores:
 member NSURLSessionConfiguration -multipathServiceType
 member NSURLSessionConfiguration -mutableCopyWithZone:
 member NSURLSessionConfiguration -networkServiceType
