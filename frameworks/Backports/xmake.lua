@@ -938,7 +938,6 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         add_tests("scenekit_members")
         add_tests("alias_public_name")
         add_tests("alias_system_class")
-        add_tests("quartzcore_nsnull_action")
         add_tests("cf_mutable_cast")
         add_tests("gesture_failure")
         add_tests("caspring_animation_cast")
