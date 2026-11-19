@@ -206,10 +206,17 @@ constructor of `recaptcha_native.c` reserves nothing, `xl_load` takes the range 
 pass124 with a chat open and no library loaded (`runs/m4-pass124/addrmap/memprobe-C1.out`, the mark `A2`) has no
 region in `0x2e000000` to `0x2ee28000`: the range lies in a free block of 50 MiB that begins at `0x2caba000`, the
 largest one below `0x30000000`, which is where the heap's next arenas go when the rest is used. So a library loaded
-late finds its range taken by the app, and one loaded early takes 14 MiB of the block the panel needs. **Not known**:
-whether the app had loaded the library in the three windows where it died, so whether those deaths are the two
-together or the app's own. The panel case is repeated with the first helper build, on an app without the in-process
-path.
+late finds its range taken by the app, and one loaded early takes 14 MiB of the block the panel needs.
+
+**Measured** (the same files): in the three windows where it died the app had not loaded the library. Its syslog has
+no `recaptcha: xl_load` line in any of them (`rcsmem/syslog-Q1.txt`, `rcsmem2/syslog-Q2.txt`,
+`rcsmem3/syslog-Q3-mid.txt`), and the map of the second (`rcsmem2/memprobe-Q2.out`) shows the library's range empty
+at the start, two regions of 184 KiB in it with a chat open, and the app's own heap in it at the last mark, with
+30 MiB free below `0x30000000`. So pass124 dies of the panel with nothing of the library in its address space: that
+is the app's own shortage, and the helper does not cure it. What the helper removes is the library's share (14 MiB
+of range and what it touches) and every failure of loading late; whether the app without the library survives the
+panel is a question about the app, measured by the Telegram session, and the panel case of this measurement cannot
+pass before that one does.
 
 ## Signing and install
 
@@ -250,7 +257,8 @@ coordinator, 2026-11-19); what to copy, the commands, what a pass looks like and
    open. **Ends the route** if Telegram or the helper is killed for memory there, twice in a row. The size on the
    path that returns a token stays unknown until 2. **Half done**: the sizes are measured and `rcsdk` was never
    killed, beside a Telegram with a chat open and beside one dying of its own address space; the panel case cannot
-   be made on pass124 ("Memory") and is repeated with the first helper build.
+   be made while the app dies of the panel with no library in it, as pass124 does ("Memory"); it is repeated when
+   an app survives the panel.
 4. `posix_spawn` of `rcsdk` from Telegram's process with the two pipes and `POSIX_SPAWN_CLOEXEC_DEFAULT` (the probe
    that started `/bin/true`): it loads and answers, and its descriptors are 0, 1 and 2 only. **Ends the route** if a
    child of the app cannot load the library (a limit inherited from the app). **Passed**: the twelve lines on the
