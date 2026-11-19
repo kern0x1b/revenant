@@ -560,6 +560,16 @@ function main(out, ...)
         io.write(crashed)
         corpus.fail("the host that aborts did not reach the crash handler of the runtime")
     end
+    local function crash_budget(text, what)
+        local live, mapped = text:match("\nxlate: guest stacks: (%d+) live, (%d+) KiB mapped; the deepest live one has used %d+ KiB of %d+ KiB, the deepest ever %d+ KiB\n")
+        local size, slots = text:match("\nxlate: budget: metadata arena %d+ of (%d+) KiB touched, opaque words %d+ of (%d+), aliases %d+ of %d+ KiB")
+        if not live or tonumber(live) < 1 or tonumber(mapped) < 512 or not size or tonumber(size) ~= guest.arena // 1024 or tonumber(slots) ~= guest.word_slots then
+            io.write(text)
+            corpus.fail("%s: the crash report has no line of the guest stacks with a live stack of a thread's size, or no budget line with the header's arena (%d KiB) and words (%d). " ..
+                        "A launch that dies before its first window of the statistics then says nothing of what its address space held", what, guest.arena // 1024, guest.word_slots)
+        end
+    end
+    crash_budget(crashed, "a crash with XL_LOG=1")
     local crash_found = check_map(corpus, crashed, {"crash"}, "a crash with XL_LOADER_MAP=1")
     local _, crash_guest = map_overlap(crash_found.crash, guest.low, guest.high)
     local crash_readable = false
@@ -581,6 +591,7 @@ function main(out, ...)
         io.write(unlogged)
         corpus.fail("without XL_LOG the crash handler did not print to stderr, or it wrote %s on the phone (%s)", crash_log, written:trim())
     end
+    crash_budget(unlogged, "a crash without XL_LOG")
     local by_switch = crash("XL_CRASH=1 XL_HOST_SKIPS_DIAGNOSTICS=1 ", false)
     if not by_switch:find("xlate: signal 6", 1, true) or not by_switch:find("xlate: guest pc=", 1, true) then
         io.write(by_switch)
@@ -592,6 +603,7 @@ function main(out, ...)
         io.write(foreign)
         corpus.fail("a crash on a thread that never ran translated code did not say so, or the crash handler made a guest state and a guest stack for it")
     end
+    crash_budget(foreign, "a crash on a thread that never ran translated code")
     local without_switch = crash("XL_HOST_SKIPS_DIAGNOSTICS=1 ", false)
     if without_switch:find("xlate: signal 6", 1, true) then
         io.write(without_switch)

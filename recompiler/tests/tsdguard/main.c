@@ -1,8 +1,11 @@
 #include "../../src/runtime/xl_tsd_guard.h"
+#include "../../src/runtime/xl_budget_lines.h"
 
+#include <limits.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -61,6 +64,44 @@ static const char *Describe(int r)
         case 3: return "parent's wait timed out, child killed";
         default: return "unclassifiable wait status";
     }
+}
+
+static int same_line(const char *what, const char *got, size_t length, const char *want)
+{
+    if (length == strlen(want) && strcmp(got, want) == 0)
+        return 1;
+    fprintf(stderr, "FAIL: %s is built as\n%sand the statistics printed it as\n%s", what, got, want);
+    return 0;
+}
+
+static int cut_line(const char *what, const char *whole, size_t (*build)(char *, size_t, const void *), const void *count)
+{
+    size_t sizes[] = {0, 1, 2, 17, 60, strlen(whole), strlen(whole) + 1};
+    for (size_t i = 0; i < sizeof(sizes) / sizeof(sizes[0]); i++) {
+        char room[400];
+        memset(room, '#', sizeof room);
+        size_t size = sizes[i];
+        size_t length = build(room, size, count);
+        size_t kept = size ? size - 1 : 0;
+        if (kept > strlen(whole))
+            kept = strlen(whole);
+        if (length != kept || memcmp(room, whole, kept) != 0 || (size && room[kept] != 0) || room[size] != '#') {
+            fprintf(stderr, "FAIL: %s built into %lu bytes is not the first %lu bytes of the line and a zero, or it wrote past them\n", what,
+                    (unsigned long)size, (unsigned long)kept);
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static size_t build_stacks(char *line, size_t size, const void *count)
+{
+    return xl_stacks_line(line, size, 1, count);
+}
+
+static size_t build_budget(char *line, size_t size, const void *count)
+{
+    return xl_budget_line(line, size, count);
 }
 
 static void *limited_mapper(size_t length)
@@ -228,6 +269,41 @@ int main(void)
     if (stack != MAP_FAILED) {
         fprintf(stderr, "FAIL: a mapper that refuses everything still gave a stack\n");
         fail = 1;
+    }
+    struct xl_stacks_count stacks[] = {
+        {0, 0, 0, 0, 0},
+        {1, 1024ul << 10, 4ul << 10, 1024ul << 10, 4ul << 10},
+        {14, 7732ul << 10, 12ul << 10, 516ul << 10, 12ul << 10},
+        {UINT_MAX, ULONG_MAX, ULONG_MAX, ULONG_MAX, ULONG_MAX},
+    };
+    for (size_t i = 0; i < sizeof(stacks) / sizeof(stacks[0]); i++) {
+        char want[256], got[256];
+        snprintf(want, sizeof want, "xlate: guest stacks: %u live, %lu KiB mapped; the deepest live one has used %lu KiB of %lu KiB, the deepest ever %lu KiB\n",
+                 stacks[i].live, stacks[i].mapped >> 10, stacks[i].deepest >> 10, stacks[i].deepest_of >> 10, stacks[i].ever >> 10);
+        if (!same_line("the line of the guest stacks", got, xl_stacks_line(got, sizeof got, 1, &stacks[i]), want) ||
+            !cut_line("the line of the guest stacks", want, build_stacks, &stacks[i]))
+            fail = 1;
+        snprintf(want, sizeof want, "xlate: guest stacks: not read (the lock of the list of threads is held), the deepest ever %lu KiB\n", stacks[i].ever >> 10);
+        if (!same_line("the line of guest stacks that could not be counted", got, xl_stacks_line(got, sizeof got, 0, &stacks[i]), want))
+            fail = 1;
+    }
+    struct xl_budget_count budgets[] = {
+        {0, 20ul << 10, 32ul << 10, 0, 262144, 0, 0},
+        {0, 1280ul << 10, 1280ul << 10, 262144, 262144, 4096ul << 10, 4096ul << 10},
+        {12, 0, 1280ul << 10, 7, 262144, 1ul << 10, 4096ul << 10},
+        {-1, 0, 48ul << 10, 0, 16, 0, 0},
+        {INT_MIN, ULONG_MAX, ULONG_MAX, UINT_MAX, UINT_MAX, ULONG_MAX, ULONG_MAX},
+    };
+    for (size_t i = 0; i < sizeof(budgets) / sizeof(budgets[0]); i++) {
+        char want[320], got[320];
+        if (budgets[i].unread)
+            snprintf(want, sizeof want, "xlate: budget: metadata arena of %lu KiB not read (mincore: errno %d), opaque words %u of %u, aliases %lu of %lu KiB (0 of 0 is not set up yet)\n",
+                     budgets[i].arena_size >> 10, budgets[i].unread, budgets[i].words, budgets[i].slots, budgets[i].aliases >> 10, budgets[i].aliases_size >> 10);
+        else
+            snprintf(want, sizeof want, "xlate: budget: metadata arena %lu of %lu KiB touched, opaque words %u of %u, aliases %lu of %lu KiB (0 of 0 is not set up yet)\n",
+                     budgets[i].arena >> 10, budgets[i].arena_size >> 10, budgets[i].words, budgets[i].slots, budgets[i].aliases >> 10, budgets[i].aliases_size >> 10);
+        if (!same_line("the budget line", got, xl_budget_line(got, sizeof got, &budgets[i]), want) || !cut_line("the budget line", want, build_budget, &budgets[i]))
+            fail = 1;
     }
     if (fail)
         return 1;
