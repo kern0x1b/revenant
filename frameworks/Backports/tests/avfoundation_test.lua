@@ -29,6 +29,19 @@ local AREAS = {
         },
     },
     {
+        name = "resource loading, asset variants and buffering of expo-video",
+        sources = {"AVAssetResourceLoadingDataRequest7.m", "AVAssetVariant15.m", "AVPlayerItem+PreferredForwardBufferDuration10.m"},
+        members = {
+            "-[AVAssetResourceLoadingDataRequest requestedOffset]", "-[AVAssetResourceLoadingDataRequest currentOffset]",
+            "-[AVAssetResourceLoadingDataRequest requestedLength]", "-[AVAssetResourceLoadingDataRequest requestsAllDataToEndOfResource]",
+            "-[AVAssetResourceLoadingDataRequest respondWithData:]",
+            "-[AVAssetVariant peakBitRate]", "-[AVAssetVariant averageBitRate]", "-[AVAssetVariant videoAttributes]",
+            "-[AVAssetVariantVideoAttributes presentationSize]", "-[AVAssetVariantVideoAttributes codecTypes]",
+            "-[AVAssetVariantVideoAttributes nominalFrameRate]", "-[AVAssetVariantVideoAttributes videoRange]",
+            "-[AVPlayerItem preferredForwardBufferDuration]", "-[AVPlayerItem setPreferredForwardBufferDuration:]",
+        },
+    },
+    {
         name = "looping of a template item through a queue player",
         sources = {"AVPlayerLooper10.m"},
         members = {

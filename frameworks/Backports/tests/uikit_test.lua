@@ -288,6 +288,17 @@ local AREAS = {
         },
     },
     {
+        name = "automatic inline picture-in-picture of expo-video",
+        library = "AVKit",
+        sources = {"AVKit+AutomaticInline14.m"},
+        members = {
+            "-[AVPictureInPictureController canStartPictureInPictureAutomaticallyFromInline]",
+            "-[AVPictureInPictureController setCanStartPictureInPictureAutomaticallyFromInline:]",
+            "-[AVPlayerViewController canStartPictureInPictureAutomaticallyFromInline]",
+            "-[AVPlayerViewController setCanStartPictureInPictureAutomaticallyFromInline:]",
+        },
+    },
+    {
         name = "user notifications: the notification center over local notifications",
         library = "UserNotifications",
         sources = {"UNUserNotificationCenter.m", "RevenantUserNotificationSupport.m", "UNNotificationTrigger.m"},

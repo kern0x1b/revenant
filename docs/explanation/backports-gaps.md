@@ -395,6 +395,19 @@ Source: `expo-video` 57.0.5, `ios/VideoAirPlayButtonView.swift`, which creates a
 
 Added `AVRoutePickerView` and `AVRoutePickerViewDelegate` in `src/AVKit/AVRoutePickerView.m`. The view is a `UIView` holding an `MPVolumeView` with the volume slider hidden and the route button shown; the button is found by its `routeButtonRectForBounds:` frame among the volume view's visible controls, and a touch on it calls `routePickerViewWillBeginPresentingRoutes:`. The end event follows `UIApplicationDidBecomeActiveNotification` or the popover dismissal notification, which is how a route sheet on this release goes away. `activeTintColor` sets the view's tint colour, and `prioritizesVideoDevices` is stored but has no effect, because MPVolumeView on iOS 6 has no way to sort video routes. `AVKitBackports` already links MediaPlayer, so no library list change was needed. Not exercised on a phone.
 
+## Expo modules: resource loading, variants and buffering (expo-video 57.0.5)
+
+Source: `expo-video` 57.0.5, `ios/Cache/CachableRequest.swift`, `ios/Utils/AVAssetVariant+VideoTracks.swift`, `ios/VideoPlayer.swift` and `ios/VideoView.swift`.
+
+Added, with the iOS 6 behaviour stated:
+
+- `AVAssetResourceLoadingDataRequest` in `src/AVFoundation/AVAssetResourceLoadingDataRequest7.m`: the request range and the offset advanced by `respondWithData:`, with the data accumulated on the request. iOS 6's resource loader never hands out one of these, so the package's cache path sees no data request and stays out of the way.
+- `AVAssetVariant` and `AVAssetVariantVideoAttributes` in `src/AVFoundation/AVAssetVariant15.m`: the properties the track records read, with zero or nil defaults. The only use in expo-video sits behind `#available(iOS 26)`, so no instance is made on iOS 6.
+- `preferredForwardBufferDuration` on `AVPlayerItem`: an associated object that defaults to zero. The value is kept, but iOS 6 has no public way to set the player's forward buffer, so playback buffering is unchanged.
+- `canStartPictureInPictureAutomaticallyFromInline` on `AVPictureInPictureController` and `AVPlayerViewController`: an associated object that defaults to NO, replacing the `@dynamic` declarations that had no implementation. Automatic inline picture-in-picture is not available on iOS 6.
+
+None of these paths was exercised on a phone.
+
 ## SDWebImage 5.21.7 on iOS 6: Accelerate, CoreGraphics and the lock
 
 Source: SDWebImage 5.21.7 (`2de3a496`), `SDWebImage/Core`, 60 files. Each file was syntax-compiled for armv7 iOS 6.0 against the lowered overlay with `-Werror=unguarded-availability` and `-Werror=unguarded-availability-new`, and the errors were grouped by name.
