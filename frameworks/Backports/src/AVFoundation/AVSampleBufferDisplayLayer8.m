@@ -11,6 +11,7 @@
 @public
     CMSampleBufferRef sample;
     CMTime presentation;
+    BOOL display;
 }
 @end
 
@@ -39,14 +40,20 @@
     dispatch_queue_t _workQueue;
     dispatch_source_t _displaySource;
     NSMutableArray *_pending;
+    NSUInteger _generation;
     dispatch_queue_t _requestQueue;
     void (^_requestBlock)(void);
+    BOOL _requestActive;
 }
-- (instancetype)initRevenantLayer;
+- (BOOL)revenant_setupFromLayer:(id)layer;
 - (void)revenant_presentDueFrames;
 - (void)revenant_armDisplayTimer;
-- (void)revenant_showBuffer:(RevenantAVDisplayBuffer *)buffer;
+- (void)revenant_prepareBuffer:(RevenantAVDisplayBuffer *)buffer generation:(NSUInteger)generation;
+- (void)revenant_invokeRequestIfNeeded;
+- (void)revenant_failWithDescription:(NSString *)description;
 @end
+
+static const NSUInteger revenant_pending_limit = 3;
 
 static NSString *revenant_contents_gravity(id gravity)
 {
@@ -55,6 +62,15 @@ static NSString *revenant_contents_gravity(id gravity)
     if ([gravity isEqualToString:AVLayerVideoGravityResize])
         return kCAGravityResize;
     return kCAGravityResizeAspect;
+}
+
+static BOOL revenant_attachment(CMSampleBufferRef sample, CFStringRef key)
+{
+    CFArrayRef attachments = CMSampleBufferGetSampleAttachmentsArray(sample, false);
+    if (!attachments || CFArrayGetCount(attachments) == 0)
+        return NO;
+    CFDictionaryRef values = CFArrayGetValueAtIndex(attachments, 0);
+    return CFDictionaryGetValue(values, key) == kCFBooleanTrue;
 }
 
 static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *context)
@@ -67,10 +83,10 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *conte
     CGBitmapInfo info = 0;
     BOOL direct = NO;
     if (format == kCVPixelFormatType_32BGRA) {
-        info = (CGBitmapInfo)(kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst);
+        info = (CGBitmapInfo)(kCGBitmapByteOrder32Little | kCGImageAlphaNoneSkipFirst);
         direct = YES;
     } else if (format == kCVPixelFormatType_32ARGB) {
-        info = (CGBitmapInfo)(kCGBitmapByteOrder32Big | kCGImageAlphaPremultipliedFirst);
+        info = (CGBitmapInfo)(kCGBitmapByteOrder32Big | kCGImageAlphaNoneSkipFirst);
         direct = YES;
     }
     if (direct && CVPixelBufferLockBaseAddress(image, kCVPixelBufferLock_ReadOnly) == kCVReturnSuccess) {
@@ -96,12 +112,10 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *conte
 
 @implementation AVSampleBufferDisplayLayer
 
-- (instancetype)initRevenantLayer
+- (BOOL)revenant_setupFromLayer:(id)layer
 {
-    if (!(self = [super init]))
-        return nil;
     if (CMTimebaseCreateWithMasterClock(kCFAllocatorDefault, CMClockGetHostTimeClock(), &_timebase) != noErr)
-        return nil;
+        return NO;
     _videoGravity = [AVLayerVideoGravityResizeAspect copy];
     _status = AVQueuedSampleBufferRenderingStatusUnknown;
     _context = [CIContext contextWithOptions:nil];
@@ -109,45 +123,56 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *conte
     _workQueue = dispatch_queue_create("revenant.samplebuffer.display", DISPATCH_QUEUE_SERIAL);
     _displaySource = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, _workQueue);
     dispatch_resume(_displaySource);
+    __weak AVSampleBufferDisplayLayer *weakSelf = self;
     dispatch_source_set_event_handler(_displaySource, ^{
-        [self revenant_presentDueFrames];
+        AVSampleBufferDisplayLayer *owner = weakSelf;
+        if (owner)
+            [owner revenant_presentDueFrames];
     });
     CMTimebaseAddTimerDispatchSource(_timebase, _displaySource);
-    return self;
+    if ([layer isKindOfClass:[AVSampleBufferDisplayLayer class]]) {
+        AVSampleBufferDisplayLayer *source = layer;
+        id gravity = [source->_videoGravity copy];
+        if (gravity)
+            _videoGravity = gravity;
+        _preventsCapture = source->_preventsCapture;
+        _preventsDisplaySleep = source->_preventsDisplaySleep;
+        if (source->_controlTimebase) {
+            _controlTimebase = (CMTimebaseRef)CFRetain(source->_controlTimebase);
+            CMTimebaseSetMasterTimebase(_timebase, _controlTimebase);
+        }
+    }
+    return YES;
 }
 
 - (instancetype)init
 {
-    return [self initRevenantLayer];
+    if (!(self = [super init]))
+        return nil;
+    if (![self revenant_setupFromLayer:nil])
+        return nil;
+    return self;
 }
 
 - (instancetype)initWithLayer:(id)layer
 {
     if (!(self = [super initWithLayer:layer]))
         return nil;
-    if (CMTimebaseCreateWithMasterClock(kCFAllocatorDefault, CMClockGetHostTimeClock(), &_timebase) != noErr)
+    if (![self revenant_setupFromLayer:layer])
         return nil;
-    _videoGravity = [AVLayerVideoGravityResizeAspect copy];
-    _status = AVQueuedSampleBufferRenderingStatusUnknown;
-    _context = [CIContext contextWithOptions:nil];
-    _pending = [[NSMutableArray alloc] init];
-    _workQueue = dispatch_queue_create("revenant.samplebuffer.display", DISPATCH_QUEUE_SERIAL);
-    _displaySource = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, _workQueue);
-    dispatch_resume(_displaySource);
-    dispatch_source_set_event_handler(_displaySource, ^{
-        [self revenant_presentDueFrames];
-    });
-    CMTimebaseAddTimerDispatchSource(_timebase, _displaySource);
     return self;
 }
 
 - (void)dealloc
 {
+    _requestBlock = nil;
+    _requestQueue = NULL;
     if (_timebase) {
         if (_displaySource) {
             CMTimebaseSetTimerDispatchSourceNextFireTime(_timebase, _displaySource, kCMTimeInvalid, 0);
             CMTimebaseRemoveTimerDispatchSource(_timebase, _displaySource);
             dispatch_source_cancel(_displaySource);
+            dispatch_source_set_event_handler(_displaySource, NULL);
         }
         CFRelease(_timebase);
     }
@@ -200,8 +225,11 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *conte
 
 - (void)revenant_presentDueFrames
 {
+    NSMutableArray *expired = [[NSMutableArray alloc] init];
     NSMutableArray *due = [[NSMutableArray alloc] init];
+    NSUInteger generation = 0;
     @synchronized (self) {
+        generation = _generation;
         if (_pending.count == 0 || _status == AVQueuedSampleBufferRenderingStatusFailed) {
             CMTimebaseSetTimerDispatchSourceNextFireTime(_timebase, _displaySource, kCMTimeInvalid, 0);
             return;
@@ -210,32 +238,90 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *conte
         for (RevenantAVDisplayBuffer *buffer in _pending) {
             if (CMTIME_IS_NUMERIC(buffer->presentation) && CMTimeCompare(buffer->presentation, now) > 0)
                 continue;
-            [due addObject:buffer];
+            [expired addObject:buffer];
+            if (buffer->display)
+                [due addObject:buffer];
         }
-        [_pending removeObjectsInArray:due];
+        [_pending removeObjectsInArray:expired];
     }
-    if (due.count) {
-        RevenantAVDisplayBuffer *latest = [due lastObject];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self revenant_showBuffer:latest];
-        });
+    RevenantAVDisplayBuffer *latest = nil;
+    for (RevenantAVDisplayBuffer *buffer in due) {
+        if (!latest || (CMTIME_IS_NUMERIC(buffer->presentation) && CMTimeCompare(buffer->presentation, latest->presentation) > 0))
+            latest = buffer;
+    }
+    if (latest) {
+        [self revenant_prepareBuffer:latest generation:generation];
+        [self revenant_invokeRequestIfNeeded];
     }
     [self revenant_armDisplayTimer];
 }
 
-- (void)revenant_showBuffer:(RevenantAVDisplayBuffer *)buffer
+- (void)revenant_invokeRequestIfNeeded
 {
-    CGImageRef frame = revenant_copy_image(buffer->sample, _context);
-    if (!frame)
-        return;
-    [CATransaction begin];
-    [CATransaction setDisableActions:YES];
-    self.contents = (__bridge id)frame;
-    [CATransaction commit];
-    CGImageRelease(frame);
+    void (^block)(void) = nil;
+    dispatch_queue_t queue = NULL;
     @synchronized (self) {
-        _readyForDisplay = YES;
+        if (!_requestBlock || _requestActive || _pending.count >= revenant_pending_limit)
+            return;
+        if (_status == AVQueuedSampleBufferRenderingStatusFailed)
+            return;
+        _requestActive = YES;
+        block = _requestBlock;
+        queue = _requestQueue;
     }
+    dispatch_async(queue ?: dispatch_get_main_queue(), ^{
+        void (^pending)(void);
+        @synchronized (self) {
+            pending = _requestBlock;
+        }
+        if (pending)
+            pending();
+        @synchronized (self) {
+            _requestActive = NO;
+        }
+    });
+}
+
+- (void)revenant_prepareBuffer:(RevenantAVDisplayBuffer *)buffer generation:(NSUInteger)generation
+{
+    @synchronized (self) {
+        if (generation != _generation || _status == AVQueuedSampleBufferRenderingStatusFailed)
+            return;
+    }
+    CGImageRef frame = revenant_copy_image(buffer->sample, _context);
+    if (!frame) {
+        [self revenant_failWithDescription:@"AVSampleBufferDisplayLayer could not create an image from a sample buffer"];
+        return;
+    }
+    dispatch_async(dispatch_get_main_queue(), ^{
+        @synchronized (self) {
+            if (generation != _generation) {
+                CGImageRelease(frame);
+                return;
+            }
+        }
+        [CATransaction begin];
+        [CATransaction setDisableActions:YES];
+        self.contents = (__bridge id)frame;
+        [CATransaction commit];
+        CGImageRelease(frame);
+        [self willChangeValueForKey:@"readyForDisplay"];
+        @synchronized (self) {
+            _readyForDisplay = YES;
+        }
+        [self didChangeValueForKey:@"readyForDisplay"];
+    });
+}
+
+- (void)revenant_failWithDescription:(NSString *)description
+{
+    [self willChangeValueForKey:@"status"];
+    @synchronized (self) {
+        _status = AVQueuedSampleBufferRenderingStatusFailed;
+        _error = [NSError errorWithDomain:AVFoundationErrorDomain code:AVErrorUnknown
+                                 userInfo:@{NSLocalizedDescriptionKey: description}];
+    }
+    [self didChangeValueForKey:@"status"];
 }
 
 #pragma mark - the layer
@@ -308,7 +394,9 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *conte
 
 - (BOOL)isReadyForMoreMediaData
 {
-    return YES;
+    @synchronized (self) {
+        return _pending.count < revenant_pending_limit && _status != AVQueuedSampleBufferRenderingStatusFailed;
+    }
 }
 
 - (BOOL)hasSufficientMediaDataForReliablePlaybackStart
@@ -321,45 +409,51 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *conte
     if (!sampleBuffer)
         [NSException raise:NSInvalidArgumentException
                     format:@"-[AVSampleBufferDisplayLayer enqueueSampleBuffer:] was given no sample buffer"];
-    BOOL immediate = NO;
-    CFArrayRef attachments = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, false);
-    if (attachments && CFArrayGetCount(attachments) > 0) {
-        CFDictionaryRef values = CFArrayGetValueAtIndex(attachments, 0);
-        immediate = CFDictionaryGetValue(values, kCMSampleAttachmentKey_DisplayImmediately) == kCFBooleanTrue;
-    }
+    BOOL immediate = revenant_attachment(sampleBuffer, kCMSampleAttachmentKey_DisplayImmediately);
+    BOOL display = !revenant_attachment(sampleBuffer, kCMSampleAttachmentKey_DoNotDisplay);
     RevenantAVDisplayBuffer *buffer = [[RevenantAVDisplayBuffer alloc] init];
     buffer->sample = (CMSampleBufferRef)CFRetain(sampleBuffer);
     buffer->presentation = CMSampleBufferGetOutputPresentationTimeStamp(sampleBuffer);
-    void (^request)(void) = nil;
+    buffer->display = display;
+    NSUInteger generation = 0;
+    [self willChangeValueForKey:@"status"];
     @synchronized (self) {
-        if (_status == AVQueuedSampleBufferRenderingStatusFailed)
+        if (_status == AVQueuedSampleBufferRenderingStatusFailed) {
+            [self didChangeValueForKey:@"status"];
             return;
+        }
         if (_status == AVQueuedSampleBufferRenderingStatusUnknown)
             _status = AVQueuedSampleBufferRenderingStatusRendering;
-        request = _requestBlock;
-        _requestBlock = nil;
+        generation = _generation;
         if (!immediate)
             [_pending addObject:buffer];
     }
-    if (immediate)
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self revenant_showBuffer:buffer];
-        });
-    else
+    [self didChangeValueForKey:@"status"];
+    if (immediate) {
+        if (display)
+            dispatch_async(_workQueue, ^{
+                [self revenant_prepareBuffer:buffer generation:generation];
+            });
+    } else {
         [self revenant_armDisplayTimer];
-    if (request)
-        dispatch_async(_requestQueue ?: dispatch_get_main_queue(), request);
+    }
 }
 
 - (void)flush
 {
+    [self willChangeValueForKey:@"status"];
+    [self willChangeValueForKey:@"readyForDisplay"];
     @synchronized (self) {
         [_pending removeAllObjects];
         _error = nil;
         _readyForDisplay = NO;
         _status = AVQueuedSampleBufferRenderingStatusUnknown;
+        _generation++;
     }
+    [self didChangeValueForKey:@"readyForDisplay"];
+    [self didChangeValueForKey:@"status"];
     CMTimebaseSetTimerDispatchSourceNextFireTime(_timebase, _displaySource, kCMTimeInvalid, 0);
+    [self revenant_invokeRequestIfNeeded];
 }
 
 - (void)flushAndRemoveImage
@@ -382,15 +476,7 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *conte
         _requestQueue = queue;
         _requestBlock = [block copy];
     }
-    dispatch_async(queue ?: dispatch_get_main_queue(), ^{
-        void (^pending)(void);
-        @synchronized (self) {
-            pending = _requestBlock;
-            _requestBlock = nil;
-        }
-        if (pending)
-            pending();
-    });
+    [self revenant_invokeRequestIfNeeded];
 }
 
 - (void)stopRequestingMediaData
