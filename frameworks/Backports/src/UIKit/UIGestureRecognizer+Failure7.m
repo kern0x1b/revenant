@@ -19,6 +19,11 @@ static BOOL revenant_required_to_fail_by(id self, SEL _cmd, UIGestureRecognizer 
     return NO;
 }
 
+static BOOL revenant_recognizer_requires_failure(UIGestureRecognizer *self, SEL _cmd, UIGestureRecognizer *other)
+{
+    return [self shouldRequireFailureOfGestureRecognizer:other];
+}
+
 static void revenant_prepare_delegate(id delegate)
 {
     if (!delegate)
@@ -49,6 +54,10 @@ static void revenant_prepare_delegate(id delegate)
         revenant_prepare_delegate(delegate);
         original(recognizer, setter, delegate);
     }), method_getTypeEncoding(method));
+    Method hook = class_getInstanceMethod([UIGestureRecognizer class], sel_registerName("_shouldRequireFailureOfGestureRecognizer:"));
+    if (hook)
+        class_replaceMethod([UIGestureRecognizer class], sel_registerName("_shouldRequireFailureOfGestureRecognizer:"),
+                            (IMP)revenant_recognizer_requires_failure, method_getTypeEncoding(hook));
 }
 @end
 
@@ -60,9 +69,5 @@ static void revenant_prepare_delegate(id delegate)
 - (BOOL)shouldBeRequiredToFailByGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
     return NO;
-}
-- (BOOL)_shouldRequireFailureOfGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
-{
-    return [self shouldRequireFailureOfGestureRecognizer:otherGestureRecognizer];
 }
 @end

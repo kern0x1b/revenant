@@ -1,26 +1,33 @@
 #import "../app/revenant_check.h"
 #import <UIKit/UIKit.h>
+#import <dlfcn.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
 
-@interface RevenantGestureFailureDelegate : NSObject <UIGestureRecognizerDelegate>
+@interface RevenantGestureRequireDelegate : NSObject <UIGestureRecognizerDelegate>
 @end
 
-@implementation RevenantGestureFailureDelegate
+@implementation RevenantGestureRequireDelegate
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRequireFailureOfGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
     return YES;
 }
+@end
+
+@interface RevenantGestureFailByDelegate : NSObject <UIGestureRecognizerDelegate>
+@end
+
+@implementation RevenantGestureFailByDelegate
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldBeRequiredToFailByGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
     return YES;
 }
 @end
 
-@interface RevenantGestureFailurePlainDelegate : NSObject <UIGestureRecognizerDelegate>
+@interface RevenantGesturePlainDelegate : NSObject <UIGestureRecognizerDelegate>
 @end
 
-@implementation RevenantGestureFailurePlainDelegate
+@implementation RevenantGesturePlainDelegate
 @end
 
 @interface RevenantGestureFailureRecognizer : UIGestureRecognizer
@@ -33,64 +40,69 @@
 }
 @end
 
+static const unsigned int RevenantGestureRequireBit = 0x20;
+static const unsigned int RevenantGestureFailByBit = 0x40;
+
+static unsigned int revenant_gesture_flags(UIGestureRecognizer *recognizer)
+{
+    Ivar flags = class_getInstanceVariable([UIGestureRecognizer class], "_gestureFlags");
+    if (!flags)
+        return 0xffff;
+    return *(uint16_t *)((char *)(__bridge void *)recognizer + ivar_getOffset(flags));
+}
+
+static NSString *revenant_image_of(id object, SEL selector)
+{
+    Method method = class_getInstanceMethod(object_getClass(object), selector);
+    Dl_info info;
+    if (!method || !dladdr((void *)method_getImplementation(method), &info) || !info.dli_fname)
+        return @"none";
+    return [NSString stringWithUTF8String:info.dli_fname].lastPathComponent;
+}
+
 REVENANT_CASE(gesture_failure)
 {
     SEL require = sel_registerName("_gestureRecognizer:shouldRequireFailureOfGestureRecognizer:");
     SEL fail = sel_registerName("_gestureRecognizer:shouldBeRequiredToFailByGestureRecognizer:");
-    SEL query = sel_registerName("_queryFailureRequirements");
-    SEL depends = sel_registerName("_requiresGestureRecognizerToFail:");
     SEL hook = sel_registerName("_shouldRequireFailureOfGestureRecognizer:");
     BOOL (*send2)(id, SEL, id, id) = (BOOL (*)(id, SEL, id, id))objc_msgSend;
-    void (*send0)(id, SEL) = (void (*)(id, SEL))objc_msgSend;
 
-    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
-    UIPanGestureRecognizer *first = [[UIPanGestureRecognizer alloc] initWithTarget:nil action:NULL];
-    UIPanGestureRecognizer *second = [[UIPanGestureRecognizer alloc] initWithTarget:nil action:NULL];
-    [view addGestureRecognizer:first];
-    [view addGestureRecognizer:second];
-    RevenantGestureFailureDelegate *delegate = [[RevenantGestureFailureDelegate alloc] init];
-    [first setDelegate:delegate];
+    UIPanGestureRecognizer *bare = [[UIPanGestureRecognizer alloc] initWithTarget:nil action:NULL];
+    unsigned int base = revenant_gesture_flags(bare) & (RevenantGestureRequireBit | RevenantGestureFailByBit);
 
-    BOOL resolves = [delegate respondsToSelector:require] && [delegate respondsToSelector:fail];
-    revenant_expect_true(@"the private failure names resolve when the delegate is set",
-                         resolves != (BOOL)negative, @"class_addMethod at setDelegate:");
+    UIPanGestureRecognizer *requiring = [[UIPanGestureRecognizer alloc] initWithTarget:nil action:NULL];
+    RevenantGestureRequireDelegate *requireDelegate = [[RevenantGestureRequireDelegate alloc] init];
+    [requiring setDelegate:requireDelegate];
+    unsigned int requireFlags = revenant_gesture_flags(requiring);
+    revenant_expect_true(@"UIKit caches the require capability of a delegate that has only the public method",
+                         ((requireFlags & RevenantGestureRequireBit) != 0 && (requireFlags & RevenantGestureFailByBit) == 0 && base == 0) != (BOOL)negative,
+                         [NSString stringWithFormat:@"flags %#x, bare %#x", requireFlags, base]);
 
-    ((void (*)(id, SEL))objc_msgSend)(first, query);
-    BOOL waits = ((BOOL (*)(id, SEL, id))objc_msgSend)(first, depends, second);
-    revenant_expect_true(@"the other pan must wait for the pan whose delegate required it",
-                         waits != (BOOL)negative, @"");
+    UIPanGestureRecognizer *failedBy = [[UIPanGestureRecognizer alloc] initWithTarget:nil action:NULL];
+    RevenantGestureFailByDelegate *failByDelegate = [[RevenantGestureFailByDelegate alloc] init];
+    [failedBy setDelegate:failByDelegate];
+    unsigned int failFlags = revenant_gesture_flags(failedBy);
+    revenant_expect_true(@"UIKit caches the be-required capability of a delegate that has only the public method",
+                         ((failFlags & RevenantGestureFailByBit) != 0 && (failFlags & RevenantGestureRequireBit) == 0) != (BOOL)negative,
+                         [NSString stringWithFormat:@"flags %#x", failFlags]);
 
-    BOOL forward = NO;
-    if ([delegate respondsToSelector:require])
-        forward = send2(delegate, require, first, second);
-    revenant_expect_true(@"the private shouldRequireFailureOf forwards to the iOS 7 public method",
-                         forward != (BOOL)negative, @"the delegate answers YES");
+    UIPanGestureRecognizer *plain = [[UIPanGestureRecognizer alloc] initWithTarget:nil action:NULL];
+    RevenantGesturePlainDelegate *plainDelegate = [[RevenantGesturePlainDelegate alloc] init];
+    [plain setDelegate:plainDelegate];
+    unsigned int plainFlags = revenant_gesture_flags(plain) & (RevenantGestureRequireBit | RevenantGestureFailByBit);
+    revenant_expect_true(@"a delegate without the public methods leaves UIKit's capability bits clear",
+                         (plainFlags == 0 && ![plainDelegate respondsToSelector:require] && ![plainDelegate respondsToSelector:fail]) != (BOOL)negative,
+                         [NSString stringWithFormat:@"flags %#x", plainFlags]);
 
-    BOOL reverse = NO;
-    if ([delegate respondsToSelector:fail])
-        reverse = send2(delegate, fail, first, second);
-    revenant_expect_true(@"the private shouldBeRequiredToFailBy forwards to the iOS 7 public method",
-                         reverse != (BOOL)negative, @"the delegate answers YES");
-
-    UIView *plainView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
-    UIPanGestureRecognizer *plainFirst = [[UIPanGestureRecognizer alloc] initWithTarget:nil action:NULL];
-    UIPanGestureRecognizer *plainSecond = [[UIPanGestureRecognizer alloc] initWithTarget:nil action:NULL];
-    [plainView addGestureRecognizer:plainFirst];
-    [plainView addGestureRecognizer:plainSecond];
-    RevenantGestureFailurePlainDelegate *plain = [[RevenantGestureFailurePlainDelegate alloc] init];
-    [plainFirst setDelegate:plain];
-
-    BOOL stock = ![plain respondsToSelector:require] && ![plain respondsToSelector:fail];
-    revenant_expect_true(@"a delegate without the public methods keeps the stock private names",
-                         stock != (BOOL)negative, @"");
-
-    send0(plainFirst, query);
-    BOOL stockWaits = ((BOOL (*)(id, SEL, id))objc_msgSend)(plainFirst, depends, plainSecond);
-    revenant_expect_true(@"a delegate without the public methods leaves the pans independent",
-                         stockWaits == (BOOL)negative, @"");
+    BOOL forwardRequire = [requireDelegate respondsToSelector:require] && send2(requireDelegate, require, requiring, bare);
+    BOOL forwardFail = [failByDelegate respondsToSelector:fail] && send2(failByDelegate, fail, failedBy, bare);
+    revenant_expect_true(@"the private names answer what the public methods answer",
+                         (forwardRequire && forwardFail) != (BOOL)negative,
+                         [NSString stringWithFormat:@"require %d, be-required %d", forwardRequire, forwardFail]);
 
     RevenantGestureFailureRecognizer *recognizer = [[RevenantGestureFailureRecognizer alloc] init];
-    BOOL hookAnswer = ((BOOL (*)(id, SEL, id))objc_msgSend)(recognizer, hook, first);
+    BOOL hookAnswer = ((BOOL (*)(id, SEL, id))objc_msgSend)(recognizer, hook, bare);
     revenant_expect_true(@"a subclass's public hook reaches UIKit's private hook",
-                         hookAnswer != (BOOL)negative, @"");
+                         hookAnswer != (BOOL)negative,
+                         [NSString stringWithFormat:@"answer %d, hook implemented in %@", hookAnswer, revenant_image_of(recognizer, hook)]);
 }
