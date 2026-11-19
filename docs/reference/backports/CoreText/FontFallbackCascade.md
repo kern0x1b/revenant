@@ -56,10 +56,33 @@ on iOS 6 is not a `CTFont`: `+systemFontOfSize:` answers a `UICFFont` that holds
 `0x30` of the object, so a function that takes a `CTFontRef` cannot be given a `UIFont`. At `+load` it replaces
 `+fontWithName:size:`, `+systemFontOfSize:`, `+boldSystemFontOfSize:`, `+italicSystemFontOfSize:` and `-fontWithSize:`
 (the weight creator and the others of the backports are built on them): each calls the original and swaps the held
-`CTFont` for the cascaded one, only when the slot still holds the font that `-ctFontRef` returned. A `UIFont` that is
-laid out through `CTTypesetterCreateWithAttributedString` therefore does not walk either.
+`CTFont` for the cascaded one, only when the object has the layout measured below and the slot still holds the font that
+`-ctFontRef` returned. A `UIFont` that is laid out through `CTTypesetterCreateWithAttributedString` therefore does not
+walk either.
 
 Both files share `frameworks/Backports/src/revenant_font_cascade.h`.
+
+## Limits
+
+- **The `UIFont` swap writes into an object the SDK does not describe.** The `CTFont` of a `UICFFont` is a pointer at
+  offset `0x30`; no header, no declared ivar and no accessor sets it (`-ctFontRef` and `-CTFont` only read it).
+  Measured on iOS 6.1.3 in the emulator, which runs the firmware's own UIKit and GraphicsServices: the class is exactly
+  `UICFFont`, `class_getInstanceSize` is 4 (the `isa` only: GraphicsServices allocates the storage itself), `malloc_size`
+  of the object is 64, and the pointer at `0x30` equals what `-ctFontRef` returns. `UIFont+Cascade6.m` writes the slot
+  only when all of that holds (exact class, both sizes, and the slot equal to `-ctFontRef`); for any other class or
+  size it leaves the font as the system made it, which walks as before. The case checks the same facts from the
+  process, and with a guard that did not match, a measuring run saw all five UIFont variants walk (168.7 MiB), so the
+  guard fails safe. It has not been read on the phone: the Telegram session's run on the phone's firmware is the check.
+- **What removes it.** A CoreText-level seam that does not need the slot: a shadow of `CTTypesetterCreateWithAttributedString`
+  and the framesetter and line creators that gives a cascaded copy to the font runs of the attributed string, which
+  needs the UIFont values to be converted to `CTFont` first and changes what a reader of the run attributes finds. It
+  was left out because of that. It is recorded in `coordination/crutches.md`.
+- **No cache of results.** The default list is cached per PostScript name (one entry per font name, measured 80 bytes
+  of heap for 1000 `CTFontCreateWithName` calls of new sizes, against 0 for the system's creator) and nothing keeps the
+  fonts that were made. An earlier version kept every source font and its copy in a dictionary; it was removed
+  because it held two fonts per creation for the life of the process. For `UIFont` the 1000 fonts of new sizes grew the
+  heap by 547344 bytes (UIKit keeps each `UIFont`, 194688 bytes measured without the swap, and each now holds the larger
+  cascaded `CTFont`), and a second pass over the same sizes grew it by 32 bytes.
 
 ## What is not done
 

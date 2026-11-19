@@ -2,6 +2,7 @@
 #import <UIKit/UIKit.h>
 #import <CoreText/CoreText.h>
 #import <objc/message.h>
+#import <malloc/malloc.h>
 #import <mach/mach.h>
 #import <mach-o/dyld.h>
 #import <spawn.h>
@@ -82,6 +83,11 @@ static SystemCreateWithName system_create_with_name(void)
     return (SystemCreateWithName)dlsym(coreText, "CTFontCreateWithName");
 }
 
+static CTFontRef ct_of(UIFont *font)
+{
+    return ((CTFontRef (*)(id, SEL))objc_msgSend)(font, @selector(ctFontRef));
+}
+
 static void result(const char *variant, const char *key, NSString *value)
 {
     printf("RESULT %s %s=%s\n", variant, key, [value UTF8String]);
@@ -97,12 +103,8 @@ static void run_uncovered(const char *variant, CTFontRef font, const char *which
     result(variant, "run", last);
 }
 
-static void compare_fonts(const char *variant, const char *name)
+static NSString *compare_pair(CTFontRef stock, CTFontRef backport)
 {
-    CFStringRef fontName = CFStringCreateWithCString(kCFAllocatorDefault, name, kCFStringEncodingUTF8);
-    CTFontRef stock = system_create_with_name()(fontName, 17.0, NULL);
-    CTFontRef backport = CTFontCreateWithName(fontName, 17.0, NULL);
-    CFRelease(fontName);
     CGAffineTransform stockMatrix = CTFontGetMatrix(stock), backportMatrix = CTFontGetMatrix(backport);
     CFStringRef stockName = CTFontCopyPostScriptName(stock), backportName = CTFontCopyPostScriptName(backport);
     BOOL same = CFEqual(stockName, backportName) && CTFontGetSize(stock) == CTFontGetSize(backport)
@@ -118,10 +120,20 @@ static void compare_fonts(const char *variant, const char *name)
         if (![a isEqualToString:b])
             [different appendFormat:@"[%u: %@ vs %@]", index, a, b];
     }
-    NSString *key = [NSString stringWithFormat:@"%s-%s", variant, name];
-    result("identical", [key UTF8String], [NSString stringWithFormat:@"%d%@", same && different.length == 0, same ? different : @" metrics differ"]);
+    NSString *verdict = [NSString stringWithFormat:@"%d%@", same && different.length == 0, same ? different : @" metrics differ"];
     CFRelease(stockName);
     CFRelease(backportName);
+    return verdict;
+}
+
+static void compare_fonts(const char *variant, const char *name)
+{
+    CFStringRef fontName = CFStringCreateWithCString(kCFAllocatorDefault, name, kCFStringEncodingUTF8);
+    CTFontRef stock = system_create_with_name()(fontName, 17.0, NULL);
+    CTFontRef backport = CTFontCreateWithName(fontName, 17.0, NULL);
+    CFRelease(fontName);
+    NSString *key = [NSString stringWithFormat:@"%s-%s", variant, name];
+    result("identical", [key UTF8String], compare_pair(stock, backport));
     CFRelease(stock);
     CFRelease(backport);
 }
@@ -137,7 +149,7 @@ static void prepare_uikit(void)
 
 static void child(const char *variant)
 {
-    if (!strncmp(variant, "uifont", 6) || !strcmp(variant, "identical") || !strcmp(variant, "inspect"))
+    if (!strncmp(variant, "uifont", 6) || !strcmp(variant, "identical") || !strcmp(variant, "inspect") || !strcmp(variant, "leak"))
         prepare_uikit();
     if (!strcmp(variant, "uifont")) {
         UIFont *font = [UIFont systemFontOfSize:17.0];
@@ -149,7 +161,7 @@ static void child(const char *variant)
         result(variant, "cascade", [NSString stringWithFormat:@"%ld", list ? (long)CFArrayGetCount((CFArrayRef)list) : -1L]);
         CFStringRef lastName = list && CFArrayGetCount((CFArrayRef)list) > 0 ? (CFStringRef)CTFontDescriptorCopyAttribute((CTFontDescriptorRef)CFArrayGetValueAtIndex((CFArrayRef)list, CFArrayGetCount((CFArrayRef)list) - 1), kCTFontNameAttribute) : NULL;
         result(variant, "cascade-last", lastName ? (__bridge NSString *)lastName : @"none");
-        run_uncovered(variant, (__bridge CTFontRef)font, "emoji");
+        run_uncovered(variant, ct_of(font), "emoji");
     } else if (!strcmp(variant, "inspect")) {
         UIFont *font = [UIFont systemFontOfSize:17.0];
         for (Class cls = [font class]; cls; cls = class_getSuperclass(cls)) {
@@ -186,6 +198,11 @@ static void child(const char *variant)
                     CFRelease(description);
             }
         }
+        {
+            Class cls = object_getClass(font);
+            void *held = *(void **)((char *)(__bridge void *)font + 0x30);
+            result(variant, "layout", [NSString stringWithFormat:@"class=%s instance-size=%zu malloc-size=%zu slot30-is-ctFontRef=%d", class_getName(cls), class_getInstanceSize(cls), malloc_size((__bridge void *)font), held == (void *)ct_of(font)]);
+        }
         Ivar ivar = class_getInstanceVariable([font class], "_font");
         if (ivar) {
             void *raw = (__bridge void *)object_getIvar(font, ivar);
@@ -193,16 +210,16 @@ static void child(const char *variant)
         }
     } else if (!strcmp(variant, "uifont-named")) {
         UIFont *font = [UIFont fontWithName:@"HelveticaNeue" size:17.0];
-        run_uncovered(variant, (__bridge CTFontRef)font, "rare");
+        run_uncovered(variant, ct_of(font), "rare");
     } else if (!strcmp(variant, "uifont-bold")) {
         UIFont *font = [UIFont boldSystemFontOfSize:17.0];
-        run_uncovered(variant, (__bridge CTFontRef)font, "math");
+        run_uncovered(variant, ct_of(font), "math");
     } else if (!strcmp(variant, "uifont-resize")) {
         UIFont *font = [[UIFont systemFontOfSize:12.0] fontWithSize:17.0];
-        run_uncovered(variant, (__bridge CTFontRef)font, "emoji");
+        run_uncovered(variant, ct_of(font), "emoji");
     } else if (!strcmp(variant, "uifont-weight")) {
         UIFont *font = [UIFont systemFontOfSize:17.0 weight:UIFontWeightLight];
-        run_uncovered(variant, (__bridge CTFontRef)font, "rare");
+        run_uncovered(variant, ct_of(font), "rare");
     } else if (!strcmp(variant, "ctname")) {
         Dl_info where;
         memset(&where, 0, sizeof where);
@@ -276,12 +293,51 @@ static void child(const char *variant)
         NSArray *labels = @[@"system", @"bold", @"italic", @"named"];
         for (NSUInteger index = 0; index < fonts.count; index++) {
             UIFont *font = fonts[index];
-            result("identical", [[NSString stringWithFormat:@"uifont-%@", labels[index]] UTF8String],
-                   [NSString stringWithFormat:@"name=%@ family=%@ size=%.1f ascender=%.3f descender=%.3f lineHeight=%.3f same=%d", font.fontName, font.familyName, font.pointSize, font.ascender, font.descender, font.lineHeight, [font isEqual:[UIFont fontWithName:font.fontName size:font.pointSize]]]);
+            CFStringRef fontName = (__bridge CFStringRef)font.fontName;
+            CTFontRef stock = system_create_with_name()(fontName, font.pointSize, NULL);
+            result("identical", [[NSString stringWithFormat:@"uifont-%@", labels[index]] UTF8String], compare_pair(stock, ct_of(font)));
+            result("identical", [[NSString stringWithFormat:@"uifont-%@-facts", labels[index]] UTF8String],
+                   [NSString stringWithFormat:@"name=%@ size=%.1f", font.fontName, font.pointSize]);
+            CFRelease(stock);
         }
         result("identical", "uifont-same-instance", [NSString stringWithFormat:@"%d", [UIFont systemFontOfSize:17.0] == [UIFont systemFontOfSize:17.0]]);
         result("identical", "uifont-attributed", [NSString stringWithFormat:@"%d", [[[NSAttributedString alloc] initWithString:@"Hi" attributes:@{NSFontAttributeName: systemFont}] attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] == systemFont]);
-        result("identical", "uifont-below", [NSString stringWithFormat:@"%.1f", mapped_below_mib()]);
+    } else if (!strcmp(variant, "leak")) {
+        CTFontRef (*systemCreate)(CFStringRef, CGFloat, const CGAffineTransform *) = system_create_with_name();
+        CTFontRef stockOne = systemCreate(CFSTR("HelveticaNeue"), 17.0, NULL);
+        CTFontRef backportOne = CTFontCreateWithName(CFSTR("HelveticaNeue"), 17.0, NULL);
+        result(variant, "retain-stock", [NSString stringWithFormat:@"%ld", (long)CFGetRetainCount(stockOne)]);
+        result(variant, "retain-backport", [NSString stringWithFormat:@"%ld", (long)CFGetRetainCount(backportOne)]);
+        CFRelease(stockOne);
+        CFRelease(backportOne);
+        for (int round = 0; round < 2; round++) {
+            for (int index = 0; index < 50; index++) {
+                CFRelease(round ? CTFontCreateWithName(CFSTR("HelveticaNeue"), 5.0 + index * 0.01, NULL) : systemCreate(CFSTR("HelveticaNeue"), 5.0 + index * 0.01, NULL));
+            }
+        }
+        for (int mode = 0; mode < 3; mode++) {
+            // The UIFont pass runs twice over the same sizes: the first fills UIKit's own font cache, the second must
+            // grow nothing, so what the second pass leaves is what the backport leaves.
+            for (int pass = 0; pass < (mode == 2 ? 2 : 1); pass++) {
+                const char *label = mode == 0 ? "stock" : mode == 1 ? "backport" : pass == 0 ? "uifont" : "uifont-again";
+                malloc_statistics_t before, after;
+                malloc_zone_statistics(NULL, &before);
+                for (int index = 0; index < 1000; index++) {
+                    @autoreleasepool {
+                        double size = 20.0 + index * 0.01 + mode * 100.0;
+                        if (mode == 0)
+                            CFRelease(systemCreate(CFSTR("HelveticaNeue"), size, NULL));
+                        else if (mode == 1)
+                            CFRelease(CTFontCreateWithName(CFSTR("HelveticaNeue"), size, NULL));
+                        else
+                            (void)[UIFont fontWithName:@"HelveticaNeue" size:size];
+                    }
+                }
+                malloc_zone_statistics(NULL, &after);
+                result(variant, [[NSString stringWithFormat:@"%s-blocks", label] UTF8String], [NSString stringWithFormat:@"%ld", (long)after.blocks_in_use - (long)before.blocks_in_use]);
+                result(variant, [[NSString stringWithFormat:@"%s-bytes", label] UTF8String], [NSString stringWithFormat:@"%ld", (long)after.size_in_use - (long)before.size_in_use]);
+            }
+        }
     }
 }
 
@@ -299,7 +355,7 @@ static NSMutableDictionary *results_of_children(void)
     char executable[1024];
     uint32_t size = sizeof executable;
     _NSGetExecutablePath(executable, &size);
-    const char *variants[] = {"uifont", "uifont-named", "uifont-bold", "uifont-resize", "uifont-weight", "ctname", "ctdescriptor", "ctcopy", "ctattributes", "system", "kept", "inspect", "identical", NULL};
+    const char *variants[] = {"uifont", "uifont-named", "uifont-bold", "uifont-resize", "uifont-weight", "ctname", "ctdescriptor", "ctcopy", "ctattributes", "system", "kept", "inspect", "identical", "leak", NULL};
     for (int index = 0; variants[index]; index++) {
         char flag[160];
         snprintf(flag, sizeof flag, "FONTCASCADE_VARIANT=%s", variants[index]);
@@ -382,6 +438,39 @@ REVENANT_CASE(coretext_fallback_cascade)
     revenant_expect_true(@"a font that already ends in LastResort is not extended again",
                          [results[@"kept.again"] isEqualToString:@"2"] != flip, results[@"kept.again"]);
     revenant_expect_true(@"a copy at another size has that size", [results[@"ctattributes.size"] isEqualToString:@"21.0"] != flip, results[@"ctattributes.size"]);
+    revenant_expect_true(@"the system font is a UICFFont and not a CTFont (the layout the UIKit swap relies on)",
+                         ([results[@"uifont.class"] isEqualToString:@"UICFFont"] && [results[@"uifont.cftype"] isEqualToString:@"0"]) != flip,
+                         [NSString stringWithFormat:@"%@ cftype %@", results[@"uifont.class"], results[@"uifont.cftype"]]);
+    revenant_expect_true(@"the UICFFont holds the CTFont that -ctFontRef returns at offset 0x30 (class and size read from the process)",
+                         [results[@"inspect.layout"] isEqualToString:@"class=UICFFont instance-size=4 malloc-size=64 slot30-is-ctFontRef=1"] != flip, results[@"inspect.layout"]);
+    NSDictionary *expected = @{@"system": @"name=.HelveticaNeueUI size=17.0", @"bold": @"name=.HelveticaNeueUI-Bold size=17.0",
+                               @"italic": @"name=.HelveticaNeueUI-Italic size=17.0", @"named": @"name=HelveticaNeue size=17.0"};
+    for (NSString *label in expected) {
+        NSString *facts = results[[NSString stringWithFormat:@"identical.uifont-%@-facts", label]];
+        revenant_expect_true([NSString stringWithFormat:@"the %@ UIFont has the name and size the system's creator gives", label],
+                             [facts isEqualToString:expected[label]] != flip, facts);
+        NSString *same = results[[NSString stringWithFormat:@"identical.uifont-%@", label]];
+        revenant_expect_true([NSString stringWithFormat:@"the CTFont inside the %@ UIFont equals the system's font made by the same name and size: name, size, matrix, metrics and the runs for Latin, CJK, Arabic, Thai, Indic and emoji", label],
+                             [same isEqualToString:@"1"] != flip, same);
+    }
+    revenant_expect_true(@"a UIFont creator still returns the same instance for the same arguments",
+                         [results[@"identical.uifont-same-instance"] isEqualToString:@"1"] != flip, results[@"identical.uifont-same-instance"]);
+    revenant_expect_true(@"a UIFont put in an attributed string is the object read back",
+                         [results[@"identical.uifont-attributed"] isEqualToString:@"1"] != flip, results[@"identical.uifont-attributed"]);
+    revenant_expect_true(@"a font from the backport creator is held once, as the system's is",
+                         [results[@"leak.retain-backport"] isEqualToString:results[@"leak.retain-stock"]] != flip,
+                         [NSString stringWithFormat:@"backport %@, system %@", results[@"leak.retain-backport"], results[@"leak.retain-stock"]]);
+    double stockBytes = value_of(results, @"leak.stock-bytes");
+    for (NSString *mode in @[@"backport", @"uifont-again"]) {
+        double bytes = value_of(results, [NSString stringWithFormat:@"leak.%@-bytes", mode]);
+        double blocks = value_of(results, [NSString stringWithFormat:@"leak.%@-blocks", mode]);
+        revenant_expect_true([NSString stringWithFormat:@"1000 fonts from %@ creators leave no more heap behind than the system's (%.0f bytes, %.0f blocks; system %.0f bytes)", mode, bytes, blocks, stockBytes],
+                             (bytes <= stockBytes + 16384.0) != flip, [NSString stringWithFormat:@"%.0f bytes", bytes]);
+    }
+    // UIKit keeps each UIFont of a new size (about 195 bytes each measured without the swap) and the UIFont holds the
+    // cascaded CTFont (about 350 bytes more each): 547344 bytes for the 1000 of the first pass.
+    revenant_expect_true(@"1000 UIFonts of new sizes leave a bounded heap behind (the UIFonts UIKit keeps and the cascaded CTFont each holds)",
+                         (value_of(results, @"leak.uifont-bytes") < 786432.0) != flip, results[@"leak.uifont-bytes"]);
     NSMutableArray *differences = [NSMutableArray array];
     for (NSString *key in results) {
         if ([key hasPrefix:@"identical.created-"] && ![results[key] isEqualToString:@"1"])

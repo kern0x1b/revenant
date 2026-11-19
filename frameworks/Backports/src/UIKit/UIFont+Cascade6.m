@@ -1,9 +1,17 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 #import <objc/message.h>
+#import <malloc/malloc.h>
 #include "../revenant_font_cascade.h"
 
+// The CTFont a UICFFont holds sits at offset 0x30 of the object (GraphicsServices' GSFontGetCTFont reads it there).
+// That is a layout of iOS 6.1.3, read from the process and not declared anywhere, so the slot is written only for
+// an instance of exactly the class and sizes measured there (class UICFFont, class_getInstanceSize 4, so the object
+// is a UIFont whose storage GraphicsServices allocates itself, malloc_size 64); any other build leaves the font as
+// the system made it.
 static const size_t revenant_gs_font_core_text_offset = 0x30;
+static const size_t revenant_gs_font_instance_size = 4;
+static const size_t revenant_gs_font_allocation_size = 64;
 
 static CTFontRef revenant_core_text_font_of(UIFont *font)
 {
@@ -13,9 +21,21 @@ static CTFontRef revenant_core_text_font_of(UIFont *font)
     return ((CTFontRef (*)(id, SEL))objc_msgSend)(font, selector);
 }
 
+static BOOL revenant_slot_is_known_layout(UIFont *font)
+{
+    Class cls = object_getClass(font);
+    static Class measured;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        measured = objc_getClass("UICFFont");
+    });
+    return measured != Nil && cls == measured && class_getInstanceSize(cls) == revenant_gs_font_instance_size
+        && malloc_size((__bridge const void *)font) == revenant_gs_font_allocation_size;
+}
+
 static UIFont *revenant_cascaded_font(UIFont *font)
 {
-    if (font == nil)
+    if (font == nil || !revenant_slot_is_known_layout(font))
         return font;
     static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
     CTFontRef current = revenant_core_text_font_of(font);

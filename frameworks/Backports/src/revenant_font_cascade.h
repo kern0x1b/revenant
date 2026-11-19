@@ -13,7 +13,6 @@ static pthread_mutex_t revenant_cascade_lock = PTHREAD_MUTEX_INITIALIZER;
 static pthread_once_t revenant_cascade_once = PTHREAD_ONCE_INIT;
 static RevenantCopyWithAttributesFunction revenant_cascade_system_copy = NULL;
 static CFMutableDictionaryRef revenant_cascade_carriers = NULL;
-static CFMutableDictionaryRef revenant_cascade_results = NULL;
 
 static void revenant_cascade_resolve(void)
 {
@@ -21,7 +20,6 @@ static void revenant_cascade_resolve(void)
     if (coreText)
         revenant_cascade_system_copy = (RevenantCopyWithAttributesFunction)dlsym(coreText, "CTFontCreateCopyWithAttributes");
     revenant_cascade_carriers = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-    revenant_cascade_results = CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
 }
 
 static BOOL revenant_cascade_applies(void)
@@ -105,14 +103,6 @@ static CTFontRef revenant_cascade_font(CTFontRef font)
     if (revenant_cascade_system_copy == NULL)
         return (CTFontRef)CFRetain(font);
 
-    pthread_mutex_lock(&revenant_cascade_lock);
-    CTFontRef known = (CTFontRef)CFDictionaryGetValue(revenant_cascade_results, font);
-    if (known)
-        CFRetain(known);
-    pthread_mutex_unlock(&revenant_cascade_lock);
-    if (known)
-        return known;
-
     CTFontDescriptorRef carrier = NULL;
     CFTypeRef current = CTFontCopyAttribute(font, kCTFontCascadeListAttribute);
     if (current && CFGetTypeID(current) == CFArrayGetTypeID()) {
@@ -138,9 +128,6 @@ static CTFontRef revenant_cascade_font(CTFontRef font)
     if (made == NULL)
         return (CTFontRef)CFRetain(font);
 
-    pthread_mutex_lock(&revenant_cascade_lock);
-    CFDictionarySetValue(revenant_cascade_results, font, made);
-    pthread_mutex_unlock(&revenant_cascade_lock);
     return made;
 }
 
