@@ -1337,7 +1337,8 @@ the shape of an app that has its own armv7 Swift runtime (`hostswift.swift` runs
 `NSDictionary` of the host's libswiftFoundation before the library is loaded), and runs it on the claimed phone: `xl_reserve`, `xl_load`, `xl_find_class` of `RecaptchaEnterprise.Recaptcha` and `RecaptchaAction`,
 `fetchClientWithSiteKey:completion:` with an empty key and no network (the answer is an error, not a crash), with `--execute`
 `executeWithAction:completion:`, `--rounds` times, then three seconds for the pools of the guest threads. It prints a line for
-each step with the resident size. It fails when a step is missing, when the fetch does not answer in `--seconds`, or when the
+each step with the resident size. The `identity` line names the user, the parent process, the main bundle with its identifier and the
+descriptors open at the start, for the runs that start it from an app's folder or from another process. It fails when a step is missing, when the fetch does not answer in `--seconds`, or when the
 process does not end with exit 0. A run takes 16 s on the 4S; the drop17 stop (`dlsym` answered with the host's `CFError: Error`
 conformance, see `stepDlsymGuest` above) and the double free of drop16 both reproduced in it.
 

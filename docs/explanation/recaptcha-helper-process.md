@@ -33,13 +33,23 @@ space holds the program and its libraries and nothing else, so the fixed range i
 scratch folder, with a 40-character key the server refuses): 60 of 60
 exit 0; load 1.64 to 1.70 s; `fetchClient` answers with a client in 0.20 to 0.41 s; `execute` answers in 0.28 to
 0.76 s with `com.google.recaptcha 2 'Invalid Site Key.'`; resident 3.4 MB at start, 15.4 MB after the load, 24.4 MB
-at the most. I found records of `rcsdk` for drop31 only; what the runs on drop32 to drop35 add is the Telegram
-session's to say.
+at the most. `rcsdk` ran on no later drop (the Telegram session, 2026-11-19).
 
-**Not proved by `rcsdk`**, each a measurement below: a token for a key the server accepts (in the app that path
-takes 3.7 to 3.9 s for the fetch and 2.9 to 3.2 s for the execute, the Telegram session's numbers; whether it goes
-through the `WKWebView` backport, `UIDevice` or the keychain in a process without `UIApplication` is not known);
-running as `mobile` from inside the `.app`; the bundle identifier the SDK then reads; being started by the app.
+**Measured in the app, on the same refused path** (`runs/m4-pass123/m4pts.out`, 2026-11-19, two runs): `fetchClient`
+3.93 and 3.72 s, `execute` 2.88 and 3.18 s, with the same answer. That is about ten times `rcsdk`'s times. The app's
+runs were on a drop before the routing fix (drop39), which removed a lock convoy between two threads; whether that is
+the whole difference is not traced.
+
+**No run anywhere has returned a token.** Every `execute`, in `rcsdk` and in the app, was given a key the server
+refuses. The key Telegram uses is not in its sources: it arrives in the text of the server's error 403
+`RECAPTCHA_CHECK_<method>__<siteKey>` to a sign-in request (`submodules/MtProtoKit/Sources/MTRequestMessageService.m`,
+line 1018), and a search of the sources for a 40-character key constant finds none. A sign-in request is an account
+action, which the owner forbade. So whether the path to a token goes through the `WKWebView` backport, `UIDevice` or
+the keychain, and whether those answer in a process without `UIApplication`, is **not known** and cannot be measured
+until the owner gives a key (2 below).
+
+**Not proved by `rcsdk`** either, each a measurement below: running as `mobile` from inside the `.app`; the bundle
+identifier the SDK then reads; being started by the app.
 
 ## Protocol
 
@@ -51,7 +61,8 @@ database files reaches the helper (the SDK's `spawn.h` has the flag and marks it
 there, the helper closes every descriptor above 2 before it loads anything). The arguments are the path of the
 library and the protocol version; the environment is empty but for the `XL_*` switches. The app sets
 `F_SETNOSIGPIPE` on its write end, so that a request written to a helper that has died answers `EPIPE` and does not
-end Telegram with `SIGPIPE`; the helper ignores `SIGPIPE` for the same reason.
+end Telegram with `SIGPIPE` (Telegram's sources ignore the signal nowhere and set `SO_NOSIGPIPE` on their sockets
+only: the Telegram session's reading); the helper ignores `SIGPIPE` for the same reason.
 
 A message is one line of UTF-8, fields separated by a tab, ended by a newline; a tab, a newline or a percent sign
 inside a field is percent-escaped; a line is at most 64 KiB (a token is a few KiB of ASCII).
@@ -71,12 +82,15 @@ the deadline: it answers its caller at 13 s with a named error whatever the help
 answered a request by then is killed. The helper has the same number in the request and answers `TIMEOUT` itself
 when the SDK has not called back, so that a slow SDK is told from a dead helper.
 
-**One helper per login, serving several tokens.** By the numbers above a helper started for one token needs the
-spawn, 1.7 s of load, 3.7 to 3.9 s of fetch and 2.9 to 3.2 s of execute, 8.3 to 8.8 s and more than half of the 15 s
-gone before anything can go wrong. A helper that the app starts when the login screen appears has loaded and fetched
-by the time the server asks, and a token then costs the execute alone, about 3 s; the second token of the same login
-costs the same 3 s, not another 8.5 s. It exits on `quit`, when its descriptor 0 ends, or after 120 s without a
-request, so that it does not hold its memory through a session. The spawn itself is not measured.
+**One helper per login, serving several tokens.** The key reaches the app only in the server's demand, so before it
+nothing but the spawn and the load can happen. A helper that the app starts when the login screen appears (a
+heuristic: the protocol gives no earlier sign, and the app knows neither the method nor the key until the 403) has
+loaded by the time the demand comes, and the 15 s are spent on `fetchClient` and `execute` alone: 0.5 to 1.2 s by
+`rcsdk`'s numbers, 6.8 and 6.9 s in the app's two runs, all on the refused path. A helper started by the demand adds
+the spawn and 1.7 s of load to that. A second token for the same key costs the `execute` alone, because the helper
+keeps the client per key as the app does (`recaptchaClientsBySiteKey` in `AppDelegate.swift`). The helper exits on
+`quit`, when its descriptor 0 ends, or after 120 s without a request, so that it does not hold its memory through a
+session. Not measured: the spawn itself, and every time on the path that returns a token.
 
 ## Lifetime
 
@@ -99,9 +113,9 @@ request, so that it does not hold its memory through a session. The spawn itself
 **Reasoned.** The executable lies at the top of `Telegram.app`, next to `Info.plist`, so `NSBundle.mainBundle` is
 Telegram's bundle and the SDK reads Telegram's bundle identifier, version and `infoDictionary`; in a subfolder the
 main bundle would be that folder and the identifier nil, which the server answers with `Invalid Package Name.` (a
-string of the SDK). Its code signature is `ldid -S` with Telegram's entitlements (`application-identifier`,
-`keychain-access-groups`), so that `SecItemAdd` and `SecItemCopyMatching` of the SDK land in a group the helper may
-use.
+string of the SDK). Its code signature is `ldid -S` with the entitlements file of Telegram's own executable (the
+signed pass keeps it; it has `application-identifier` and no `keychain-access-groups`), so that `SecItemAdd` and
+`SecItemCopyMatching` of the SDK ask with the same identity as in the app.
 
 What the SDK asks the system for ([the study](recaptcha-sdk-on-ios6.md), section 4), and what is known for a process
 without `UIApplication`:
@@ -109,10 +123,36 @@ without `UIApplication`:
 | Asked | Known |
 |---|---|
 | `NSURLSession` (the backport), reachability | **Measured**: the 60 runs of `rcsdk` got their answer from the network path |
-| `NSUserDefaults standardUserDefaults` (`setObject:forKey:`, `removeObjectForKey:`, `dictionaryRepresentation`) | **Not known**, and a risk: with Telegram's bundle identifier the helper writes the same preferences file as the app, from a second process |
+| `NSUserDefaults standardUserDefaults` | closed by design: the helper answers it with a domain of its own (below) |
 | Keychain (`SecItemAdd`, `SecItemCopyMatching`, `SecItemDelete`, this-device-only) | **Not known** for a program signed with `ldid` |
 | `DCAppAttestService` | **Measured** in the app: the backport answers unsupported; the same code in the helper |
 | `UIDevice` (`identifierForVendor`, `model`), `WKWebView` and its script messages | **Not known**: in the module, not on the static path; whether a token needs them, and whether they answer outside an application, decides the route (2 below) |
+
+**Preferences.** With Telegram's bundle identifier, `standardUserDefaults` in the helper would be Telegram's own
+domain, written from a second process. The helper does not use it. Before `xl_load` it replaces
+`+[NSUserDefaults standardUserDefaults]` in its own process with a method that answers
+`[[NSUserDefaults alloc] initWithSuiteName:]` of a domain of its own, the bundle identifier with `.recaptcha` added.
+The Foundation backport gives that initializer on iOS 6, a subclass over `CFPreferences` with the suite as the
+application (`frameworks/Backports/src/Foundation/NSUserDefaults+SuiteName.m`). The SDK asks the class for
+`standardUserDefaults` in one place and passes the object on (`RCfni.rcfnp`, 0x2c0b8 in the arm64 SDK), and the
+translated code sends that message to the host's class, so it gets the helper's object.
+
+**Measured in the SDK's disassembly**, what it keeps there:
+
+- a queue of client events: an array of strings under the key `RCA_client_events` plus a suffix
+  (`stringArrayForKey:`, `setObject:forKey:`), and at start `dictionaryRepresentation`, used once, to find every
+  other key with that prefix and `removeObjectForKey:` it;
+- a store of string pairs (`RCdku`): `setObject:forKey:` for each pair of a dictionary, and `stringForKey:`. Its key
+  names are not literals in the code and were not traced; the preferences file `rcsdk` leaves on the phone names
+  them (asked for with measurement 1).
+
+`valueForKey:` and `setValue:forKey:` are sent too (three and five places); their receivers were not traced. The
+suite object is a real `NSUserDefaults`, so it answers whatever the standard one does.
+
+What the server sees does not depend on the domain's name: the package name comes from `NSBundle` (`mainBundle`,
+`bundleIdentifier`), not from the preferences. It may depend on the content being kept from one helper to the next
+(the queue, the pairs), so the domain is a file that persists, not a dictionary in memory. On this route Telegram's
+process never runs the SDK, so the helper's domain is the only place those keys ever are.
 
 ## Memory
 
@@ -138,17 +178,24 @@ spawn itself fails) where the glue returned its sticky load status.
 
 ## Measurements, cheapest first
 
-Each is one run on the phone; 1 to 3 need no new code, only the existing `rcsdk` and a drop.
+Each is one run on the phone; 1, 3 and 4 need no new code, only `rcsdk` and a drop. They run first, on drop40 (the
+coordinator, 2026-11-19); what to copy, the commands, what a pass looks like and what each line means are in
+`telegram-build/.agent-work/recaptcha-real/drop40-rcsdk-kit/README.txt`, beside the two signed builds of `rcsdk`.
 
-1. `rcsdk` copied into `Telegram.app` and run as `mobile` from there, with the refused key. Shows: a program of ours
-   signed with `ldid` runs there, `xl_load` succeeds in an empty address space as `mobile`. **Ends the route** if it
-   is killed at start under every signature we can make, or cannot load.
-2. The same with Telegram's site key (a request to Google, which the owner allows from this phone; no account
-   action). Shows: a token, or the error, for a process that is not an application. **Ends the route** if the path
-   to a token needs what only an application has (the web view, the vendor identifier) and neither answers here.
-   This is the largest unknown and costs one run, so it comes before everything that needs code.
-3. The resident lines of run 2 (`fetched`, `executed`), and the same run while Telegram is frontmost with the panel
-   open. **Ends the route** if Telegram or the helper is killed for memory there, twice in a row.
+1. `rcsdk` in a subfolder of `Telegram.app`, run as `mobile` from there, with the refused key. Shows: a program of
+   ours signed with `ldid` runs there (with Telegram's entitlements, and with none), `xl_load` succeeds in an empty
+   address space as `mobile`. **Ends the route** if it is killed at start under every signature we can make, or
+   cannot load. A subfolder, not the top of the `.app`: there `rcsdk` has no bundle identifier and writes nothing
+   into Telegram's preferences, which no measurement may do; the identifier at the top waits for the helper build,
+   which has the domain of its own.
+2. The same with Telegram's site key (a request to Google, which the owner allows from this phone). Shows: a token,
+   or the error, for a process that is not an application. **Ends the route** if the path to a token needs what only
+   an application has (the web view, the vendor identifier) and neither answers here. This is the largest unknown.
+   It cannot run: nobody here has a key the server accepts, and the only source is an account action (above). It
+   waits for the owner's word.
+3. The resident lines of run 1 (`fetched`, `executed`), and the same run while Telegram is frontmost with the panel
+   open. **Ends the route** if Telegram or the helper is killed for memory there, twice in a row. The size on the
+   path that returns a token stays unknown until 2.
 4. `posix_spawn` of `rcsdk` from Telegram's process with the two pipes and `POSIX_SPAWN_CLOEXEC_DEFAULT` (the probe
    that started `/bin/true`): it loads and answers, and its descriptors are 0, 1 and 2 only. **Ends the route** if a
    child of the app cannot load the library (a limit inherited from the app).
@@ -156,11 +203,12 @@ Each is one run on the phone; 1 to 3 need no new code, only the existing `rcsdk`
    gone within a second; the app sent to the background during a request, the answer there on return; a helper
    stopped with `SIGSTOP`, the app's deadline fires at 13 s and no process is left. Nothing here ends the route; it
    fixes the numbers.
-6. Preferences and keychain: Telegram's preferences file and keychain items before and after a token from the
-   helper. **Ends the route** only if the helper's writes damage the app's own settings and cannot be pointed
-   elsewhere (the helper is our program: its `standardUserDefaults` can be given another domain).
-7. Times: five tokens from a cold start and five from a helper that has loaded and fetched. The route stands if the
-   second kind is under 15 s with room, which the app's numbers say (about 3 s).
+6. Preferences and keychain, with the first helper build: Telegram's preferences file is the same before and after a
+   request (the helper's keys are in its own domain), and the keychain calls of the SDK answer for a program signed
+   with `ldid`. Nothing here ends the route: a keychain that refuses is answered by the SDK's own error path, to be
+   read then.
+7. Times, with the first helper build: five requests from a helper started by the request and five from one that had
+   loaded before it. The route stands if both are under 13 s with room, which the refused path's numbers say.
 
 Not ours to measure: whether Telegram's server accepts the token. Only a sign-up answers that, and that is the
 owner's action.
