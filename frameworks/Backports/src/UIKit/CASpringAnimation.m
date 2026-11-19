@@ -266,19 +266,23 @@ static void revenant_add_animation(CALayer *self, SEL selector, CAAnimation *ani
     ((void (*)(id, SEL, CAAnimation *, NSString *))revenant_original_add_animation)(self, selector, keyframes ?: animation, key);
 }
 
+static IMP revenant_spring_override(Class cls, SEL selector, IMP replacement)
+{
+    Method inherited = class_getInstanceMethod(cls, selector);
+    if (!inherited)
+        return NULL;
+    IMP previous = method_getImplementation(inherited);
+    class_replaceMethod(cls, selector, replacement, method_getTypeEncoding(inherited));
+    return previous;
+}
+
 __attribute__((constructor)) static void revenant_spring_install(void)
 {
     Class system = objc_getClass("CASpringAnimation");
-    if (system) {
-        Method method = class_getInstanceMethod(system, @selector(copyWithZone:));
-        if (method && !revenant_original_copy)
-            revenant_original_copy = method_setImplementation(method, (IMP)revenant_spring_copy);
-        method = class_getInstanceMethod(system, @selector(encodeWithCoder:));
-        if (method && !revenant_original_encode)
-            revenant_original_encode = method_setImplementation(method, (IMP)revenant_spring_encode);
-        method = class_getInstanceMethod(system, @selector(initWithCoder:));
-        if (method && !revenant_original_decode)
-            revenant_original_decode = method_setImplementation(method, (IMP)revenant_spring_decode);
+    if (system && !revenant_original_copy) {
+        revenant_original_copy = revenant_spring_override(system, @selector(copyWithZone:), (IMP)revenant_spring_copy);
+        revenant_original_encode = revenant_spring_override(system, @selector(encodeWithCoder:), (IMP)revenant_spring_encode);
+        revenant_original_decode = revenant_spring_override(system, @selector(initWithCoder:), (IMP)revenant_spring_decode);
     }
     Method method = class_getInstanceMethod([CALayer class], @selector(addAnimation:forKey:));
     if (method && !revenant_original_add_animation)
