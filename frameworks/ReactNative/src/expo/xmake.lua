@@ -145,6 +145,8 @@ end
 local EXPO_SKIP_FILES = {}
 local EXPO_SKIP_MODULES = {}
 local function expo_skip(f)
+    -- the podspecs exclude 'Tests/': those sources import ExpoModulesTestCore, which the host does not carry
+    if f:find("/ios/Tests/", 1, true) then return true end
     for _, name in ipairs(EXPO_SKIP_FILES) do
         if f:find(name, 1, true) then return true end
     end
