@@ -20,6 +20,17 @@ the device implements 12 of the 20 members that the SDK declares for `ICDevice`,
 has the superclass `SKLayer` and none of the 5 members of the SDK's, so it keeps its proxy; `cf_cast_test` names it as the
 only class of the skeleton that the device also exports.
 
+What the third clause counts: only members the SDK declares with the class itself as the container (instance and class
+methods and property getters); `NSObject`'s and protocol members sit under other containers and are not counted, and a
+declared `init`, `initWithCoder:` or `delegate` does count. Eighteen class rows reach the clause, because their image is a
+private framework of another name, and it admits 16 of them: the six `ImageCaptureCore` classes (`ICCameraDevice` 12 of
+20 members, `ICCameraItem` 14 of 21, `ICDevice` 12 of 20, `ICDeviceBrowser` 6 of 14, `ICCameraFile` 2 of 31 (`fileSize`,
+`orientation`), `ICCameraFolder` 1 of 1 (`contents`)) and ten UIFoundation classes of UIKit (from `NSMutableParagraphStyle`
+3 of 22 to `NSLayoutManager` 75 of 87). For each admitted class the device superclass equals the SDK's, and no admitted
+class matches only on generic members; the thinnest are `ICCameraFolder`, whose superclass `ICCameraItem` matches 14 of
+21, and `ICCameraFile`. It refuses two: `SKOverlay` (0 of 5, superclass `SKLayer` against `NSObject`) and `CPListItem`
+(a `CorePDF` class, 0 of 23).
+
 Of 5,523 class rows that the SDK declares and iOS has, the rule agrees with the earlier image table on every row that
 the table accepted, and it additionally accepts rows that the table rejected (95; the ownership filter drops those rows for the frameworks that only name
 the class; each one was not inspected). The generated skeleton drops the six `ImageCaptureCore` proxies, which no shipped
