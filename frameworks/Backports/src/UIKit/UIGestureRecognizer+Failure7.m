@@ -3,76 +3,66 @@
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
 
-static void revenant_collect_descendants(UIView *view, NSMutableArray *found)
+static BOOL revenant_should_require_failure(id self, SEL _cmd, UIGestureRecognizer *recognizer, UIGestureRecognizer *other)
 {
-    for (UIView *subview in view.subviews) {
-        [found addObjectsFromArray:subview.gestureRecognizers];
-        revenant_collect_descendants(subview, found);
-    }
+    id<UIGestureRecognizerDelegate> delegate = (id<UIGestureRecognizerDelegate>)self;
+    if ([delegate respondsToSelector:@selector(gestureRecognizer:shouldRequireFailureOfGestureRecognizer:)])
+        return [delegate gestureRecognizer:recognizer shouldRequireFailureOfGestureRecognizer:other];
+    return NO;
 }
 
-static BOOL revenant_requires_failure(UIGestureRecognizer *recognizer, UIGestureRecognizer *other)
+static BOOL revenant_required_to_fail_by(id self, SEL _cmd, UIGestureRecognizer *recognizer, UIGestureRecognizer *other)
 {
-    id delegate = recognizer.delegate;
-    if ([delegate respondsToSelector:@selector(gestureRecognizer:shouldRequireFailureOfGestureRecognizer:)] && [delegate gestureRecognizer:recognizer shouldRequireFailureOfGestureRecognizer:other])
-        return YES;
-    return [recognizer shouldRequireFailureOfGestureRecognizer:other];
+    id<UIGestureRecognizerDelegate> delegate = (id<UIGestureRecognizerDelegate>)self;
+    if ([delegate respondsToSelector:@selector(gestureRecognizer:shouldBeRequiredToFailByGestureRecognizer:)])
+        return [delegate gestureRecognizer:recognizer shouldBeRequiredToFailByGestureRecognizer:other];
+    return NO;
 }
 
-static BOOL revenant_required_to_fail_by(UIGestureRecognizer *recognizer, UIGestureRecognizer *other)
+static void revenant_prepare_delegate(id delegate)
 {
-    id delegate = recognizer.delegate;
-    if ([delegate respondsToSelector:@selector(gestureRecognizer:shouldBeRequiredToFailByGestureRecognizer:)] && [delegate gestureRecognizer:recognizer shouldBeRequiredToFailByGestureRecognizer:other])
-        return YES;
-    return [recognizer shouldBeRequiredToFailByGestureRecognizer:other];
-}
-
-static void revenant_arbitrate(UIView *view, UIGestureRecognizer *recognizer)
-{
-    NSMutableArray *others = [NSMutableArray array];
-    for (UIView *ancestor = view; ancestor; ancestor = ancestor.superview)
-        [others addObjectsFromArray:ancestor.gestureRecognizers];
-    revenant_collect_descendants(view, others);
-    for (UIGestureRecognizer *other in others) {
-        if (other == recognizer)
-            continue;
-        if (revenant_requires_failure(recognizer, other) || revenant_required_to_fail_by(other, recognizer))
-            [recognizer requireGestureRecognizerToFail:other];
-        if (revenant_requires_failure(other, recognizer) || revenant_required_to_fail_by(recognizer, other))
-            [other requireGestureRecognizerToFail:recognizer];
-    }
+    if (!delegate)
+        return;
+    Class cls = object_getClass(delegate);
+    SEL require = @selector(_gestureRecognizer:shouldRequireFailureOfGestureRecognizer:);
+    SEL fail = @selector(_gestureRecognizer:shouldBeRequiredToFailByGestureRecognizer:);
+    if (!class_getInstanceMethod(cls, require) &&
+        [delegate respondsToSelector:@selector(gestureRecognizer:shouldRequireFailureOfGestureRecognizer:)])
+        class_addMethod(cls, require, (IMP)revenant_should_require_failure, "c16@0:4@8@12");
+    if (!class_getInstanceMethod(cls, fail) &&
+        [delegate respondsToSelector:@selector(gestureRecognizer:shouldBeRequiredToFailByGestureRecognizer:)])
+        class_addMethod(cls, fail, (IMP)revenant_required_to_fail_by, "c16@0:4@8@12");
 }
 
 @interface RevenantGestureFailure7 : NSObject
 @end
 
 @implementation RevenantGestureFailure7
-
 + (void)load
 {
     if ([UIGestureRecognizer instancesRespondToSelector:@selector(shouldRequireFailureOfGestureRecognizer:)])
         return;
-    SEL add = @selector(addGestureRecognizer:);
-    Method method = class_getInstanceMethod([UIView class], add);
+    SEL setter = @selector(setDelegate:);
+    Method method = class_getInstanceMethod([UIGestureRecognizer class], setter);
     void (*original)(id, SEL, id) = (void (*)(id, SEL, id))method_getImplementation(method);
-    class_replaceMethod([UIView class], add, imp_implementationWithBlock(^(UIView *view, UIGestureRecognizer *recognizer) {
-        original(view, add, recognizer);
-        revenant_arbitrate(view, recognizer);
+    class_replaceMethod([UIGestureRecognizer class], setter, imp_implementationWithBlock(^(UIGestureRecognizer *recognizer, id delegate) {
+        revenant_prepare_delegate(delegate);
+        original(recognizer, setter, delegate);
     }), method_getTypeEncoding(method));
 }
-
 @end
 
 @implementation UIGestureRecognizer (RevenantFailure7)
-
 - (BOOL)shouldRequireFailureOfGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
     return NO;
 }
-
 - (BOOL)shouldBeRequiredToFailByGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
     return NO;
 }
-
+- (BOOL)_shouldRequireFailureOfGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+{
+    return [self shouldRequireFailureOfGestureRecognizer:otherGestureRecognizer];
+}
 @end

@@ -940,6 +940,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         add_tests("alias_system_class")
         add_tests("quartzcore_nsnull_action")
         add_tests("cf_mutable_cast")
+        add_tests("gesture_failure")
         add_tests("protocol_uimutabletraits")
         add_tests("trait_style_default")
         add_tests("protocol_ck_key_value_setting")
