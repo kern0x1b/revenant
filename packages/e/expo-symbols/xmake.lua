@@ -1,0 +1,21 @@
+package("expo-symbols")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-symbols")
+    set_description("expo-symbols 57.0.3, the SF Symbols of the Expo SDK, from its npm tarball: the iOS module sources the host builds from, unpatched so far")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-symbols/-/expo-symbols-$(version).tgz")
+    add_versions("57.0.3", "f0938a6c8761bacf740a11645aa6793affed2cee666b52c4a52f1b34d82ac955")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-symbols" and manifest.version == "57.0.3", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "ios", "SymbolModule.swift")), "expo-symbols has no iOS module")
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-symbols has no expo-module.config.json")
+    end)

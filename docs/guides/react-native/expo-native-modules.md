@@ -77,6 +77,7 @@ These modules are built into the isolated host from their npm tarballs; none has
 | Module | Removed or replaced | Why | What JS sees |
 | --- | --- | --- | --- |
 | expo-speech | nothing; the speech classes and the voice-by-identifier initializer come from the AVFoundation backport | AVSpeechSynthesizer and its voice API are iOS 7, absent from the iOS 6 cache; the backport speaks through VoiceServices' VSSpeechSynthesizer | the module as published: speak, getVoices, stop, pause, resume and isSpeaking run on the backport; build-verified, not exercised on the phone |
+| expo-symbols | nothing; `UIImage(systemName:)` and the four configuration factories come from the Backports' UIKit glyph renderer | SF Symbols are iOS 13; the backport draws about 80 glyphs and implements the factories over them | monochrome renders as a tinted template; multicolor has no effect for a glyph set with no colour layers and stays monochrome; hierarchical uses the label-opacity steps of UIColorDynamic.m as an approximation; palette cycles the given colours per painted path; built and linked, not shown on the phone |
 
 ## How to check
 

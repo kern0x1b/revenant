@@ -810,9 +810,9 @@
    "group": "sdk",
    "version": "~57.0.3",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Swift only (4 files); the symbol set is undecided: SF Symbols do not exist before iOS 13. Not compiled."
+   "status": "partial",
+   "verified": "build",
+   "note": "Recipe packages/e/expo-symbols (npm 57.0.3, no patch) installs and compiles unchanged into the isolated RNHost and links (status 0, 391 s); the view was not shown on a phone. UIImage(systemName:) and the iOS 14/16 configuration factories come from the Backports' UIKit glyph renderer (about 80 drawn glyphs): monochrome is a tinted template, multicolor has no effect for this glyph set and stays monochrome as Apple documents for symbols without colour layers, hierarchical applies this checkout's label-opacity steps as an approximation because Apple publishes no numbers, and palette cycles the given colours per painted path. Built and linked; glyph appearance not exercised."
   },
   {
    "id": "expo-system-ui",
