@@ -11,8 +11,8 @@ curve.
 
 | File | Contents |
 | --- | --- |
-| `frameworks/Backports/src/UIKit/CASpringAnimation.m` | the class, its runtime name, the layer handoff and the symbol alias |
-| `frameworks/Backports/src/UIKit/RevenantCASpringAnimation.h` | the class interface shared with the host test |
+| `frameworks/Backports/src/UIKit/CASpringAnimation.m` | the category on the system class, the layer handoff, and the host build's comparison class |
+| `frameworks/Backports/src/UIKit/RevenantCASpringAnimation.h` | the interface of the host build's comparison class |
 | `frameworks/Backports/src/UIKit/RevenantSpringSolver.h`, `.m` | position, settling and perceptual-parameter maths |
 | `frameworks/Backports/src/UIKit/RevenantSpringKeyframes.h`, `.m` | value interpolation and the keyframe builder shared with `UIView` |
 | `frameworks/Backports/tests/QuartzCore/spring_animation_test.m` | the host comparison against the system class |
@@ -114,23 +114,20 @@ Two consequences for an application that inspects the animation: `-[CALayer anim
 animation, not the spring, and a delegate's `animationDidStop:finished:` receives the keyframe animation. The
 application's own `CASpringAnimation` object is unchanged, and copying or archiving it preserves the spring parameters.
 
-## The class name
+## The class
 
-The compiled class is `RevenantCASpringAnimation`. The binary also defines `_OBJC_CLASS_$_CASpringAnimation` as an alias
-of it, without a `__port_alias` section, so a wrapper that links the backport finds the class by ordinal.
+The class is the device's own `CASpringAnimation`, which iOS 6.1.3 has with `mass`, `stiffness`, `damping` and
+`velocity`. The backport adds a category to it (`CASpringAnimation (Revenant)`): `initialVelocity` over `velocity`,
+`allowsOverdamping` in associated storage, the computed durations and the perceptual initializer. The binary defines no
+`_OBJC_CLASS_$_CASpringAnimation` and `shadowed-classes.txt` has no entry for it, so an application that names the class
+binds the device's class and finds the added members on it.
 
-At load time the constructor asks `objc_getClass("CASpringAnimation")`. If the system has no such class, it registers a
-runtime subclass of the compiled class under that name. On iOS 9 and later it registers nothing and the proxy's
-`+class`, `+alloc`, `+allocWithZone:`, `+superclass`, `-superclass`, `+isSubclassOfClass:` and
-`+instancesRespondToSelector:` hand the call to the system class. The runtime therefore never holds two classes with the
-name `CASpringAnimation`.
+`copyWithZone:`, `encodeWithCoder:` and `initWithCoder:` are replaced with `class_replaceMethod` on `CASpringAnimation`
+only, and only when the class itself implements the selector. The replacements call the implementation they found and
+add `allowsOverdamping`. `CABasicAnimation`, `CAKeyframeAnimation` and `CAAnimationGroup` keep their own methods; the
+runtime case `caspring_animation_coding` copies and archives each of them and a spring and measures that.
 
-On iOS 9 and later the system class is used as it is. Its iOS 17 perceptual API appears there with iOS 17; the backport
-does not add methods to it. The iOS 6 class carries the full surface.
-
-On iOS 6, `+class` on the alias returns the runtime subclass, so `NSStringFromClass` and `[object class]` say
-`CASpringAnimation`. The runtime class inherits the compiled class's ivars and methods, so `copy` and `NSCoding` work
-without a second implementation.
+The host build, which has no device class, compiles `RevenantCASpringAnimation` for the comparison test.
 
 ## Limits
 

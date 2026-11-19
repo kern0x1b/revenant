@@ -897,7 +897,8 @@ that a Backports library exports under the same symbol ([library mode](library-m
 - `addEntriesFromDictionary`, `removeAllObjects`, `setDictionary`: the three mutators that `NSMutableDictionary` implements
   and `NSDictionary` does not work on an `SCDict`.
 - `absent`, `shadowed`, `dispatch`: the guest still gets a class of its name for `NSURLQueryItem`, which the cache lacks, for
-  `CASpringAnimation`, which `shadowed-classes.txt` lists, and for `OS_dispatch_queue`, which the cache has but its `libSystem`
+  `CASpringAnimation`, which the check's own `data/systemclasses/shadowed-classes.txt` lists (the translator reads it through
+  `XL_SHADOWED_CLASSES`; the Backports' list is empty), and for `OS_dispatch_queue`, which the cache has but its `libSystem`
   does not export as a symbol.
 - `wide`: the guest sends host class `SCHostWide` four messages through a cast `objc_msgSend`, whose parameters are
   `int, long long`, `long long, long long`, `int, int, int, long long` (the last on the stack) and `unsigned char,
@@ -916,7 +917,8 @@ that a Backports library exports under the same symbol ([library mode](library-m
   zero-extends every `q` reports `FAIL blocks` on the 4S (`-5` arrives as `4294967291`).
 
 The host part needs no Backports build. It compiles two stand-in libraries for the armv7 target, `libFoundationBackports`
-from the sources of `NSMutableDictionaryAlias.m` (the proxy `RevenantNSMutableDictionary` and the alias symbols) and a
+from the sources of the check's own `alias.m` (`REVENANT_ALIAS_OF(NSMutableDictionary, NSDictionary)`, which makes the proxy
+`RevenantNSMutableDictionary` and the alias symbols that the Backports no longer carry) and a
 class `NSURLQueryItem`, `libUIKitBackports` with `REVENANT_ALIAS(CASpringAnimation)` and `libSystemBackports` with
 `REVENANT_ALIAS(OS_dispatch_queue)`, under the install names of the
 real ones. It translates the fixture with `BACKPORTS_DIR` naming them, and requires of the library:

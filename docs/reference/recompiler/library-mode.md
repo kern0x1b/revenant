@@ -60,7 +60,7 @@ a Backports library is rebound to the system library the SDK links it from, unle
 |---|---|
 | the class is not in `classes_armv7.json` of the iOS 6.0 cache (the deployment floor, `e.dyld`) | the system has no such class; the proxy registers one (`+load`) |
 | `XL_PROXY_CLASSES=1` | the negative control |
-| the class is in `frameworks/Backports/tools/shadowed-classes.txt` (`CASpringAnimation`) | the system class lacks members the proxy has, and the proxy is the one that has them |
+| the class is in `frameworks/Backports/tools/shadowed-classes.txt` (empty at present; `XL_SHADOWED_CLASSES` names another list) | the system class lacks members the proxy has, and the proxy is the one that has them |
 | a Backports library exports `___revenant_override_OBJC_CLASS_$_X` | the same marker `revenant.rebind` reads: the library says it replaces the system symbol |
 | the iOS 6.0 cache does not export the symbol from the library the SDK links it from (`OS_dispatch_queue`, `OS_dispatch_source` from `libSystem.B.dylib`) | the class exists, but a strong bind to a library that does not export it fails when dyld loads the image; the import check of the translation names it |
 | the SDK links no system library for the symbol | nothing to rebind to |
