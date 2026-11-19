@@ -444,8 +444,11 @@ class and selector that the guest sent most often in the window, dynamic or not,
 selector names itself). The offset in the library
 resolves against `build/recompiler/corpus/recaptcha-dropN/xl/RecaptchaEnterprise.symbols.txt` (the lifted function is
 the greatest symbol at or below the address, `_sub_<guest address>`), so the window of a CPU spike shows whether the
-time is in the guest code, in the bridge or in the system. It costs two `mach_absolute_time` calls and one lock per
-message and a few system calls per sample while it is on, and nothing while it is off. It exists to answer what a log
+time is in the guest code, in the bridge or in the system. It costs two `mach_absolute_time` calls per message and a
+few system calls per sample while it is on, and nothing while it is off. It takes no lock for a message with a bridge:
+each thread counts in a block of its own (33 KiB, made at its first message under the flag and freed when the thread
+ends), and the thread that prints adds the blocks up; only a dynamic message, which costs a host call anyway, takes the
+lock of the table of dynamic messages (see "Two threads that send at once" below for why that matters). It exists to answer what a log
 cannot, because `XL_LOG` slows the loop it measures: how long one message of a guest loop takes, which message it is,
 and where the time goes when it is not in messages.
 
@@ -1018,8 +1021,67 @@ that returns an integer: no string is converted, so a cache of bridged strings h
 skipped the routing of this one selector would save at most the routing share of the burst, about a third of 5 s, once per
 run. The measurements do not justify it: it adds a second route to a bridge that has one, the burst ends by itself, and the
 cost on the phone is a few seconds of one core in the background. If it ever has to be cut, the places are the five
-dictionary lookups and the lock of `xl_h_objc_msgSend` and `xl_route` (the variadic table, the guest imps, the shadow imps,
-the variant cache under `xl_variant_lock`), and the `getenv("XL_TRACK_DIAG")` that the function calls on every message.
+dictionary lookups of `xl_h_objc_msgSend` and `xl_route` (the variadic table, the guest imps, the shadow imps, the
+variant cache), their three read sections (below), and the `getenv("XL_TRACK_DIAG")` that the function calls on every
+message.
+
+### Two threads that send at once
+
+The tables the route reads are written while the program runs: a class of the guest gets its shadow at its first use, a
+method its function, a host method its variant. They are `CFDictionary` objects, which two threads may read together and
+no thread may read or change while another changes them. That is the invariant, and drop31 is what breaking it looks
+like: two threads in `xl_bridge_for` put a variant into the cache at once and the process died of a double free inside
+`CFDictionarySetValue`. From drop31 to drop38 the invariant was kept by two mutexes (`xl_table_lock` for the tables of
+classes, `xl_variant_lock` for the variant cache), taken four or five times by every message, and once more under
+`xl-stats`.
+
+A mutex of iOS 6 that a second thread waits for is handed over in the kernel, and the thread that gives it back cannot
+take it again before the waiting one has run. Two threads that send messages therefore run one at a time, with a switch
+for every lock. The first whole `xl-stats` run of the SDK in Telegram shows it (pass123, drop37, 2026-11-19): 2,235 of
+the 3,816 samples of one launch and 1,598 of 2,804 of the other are in `__psynch_mutexdrop`; the routing of the 476,635
+messages of the first launch took 33.8 s of thread time; in the windows of an `execute` a message costs 96 to 348 us of
+routing with 55 to 77 % of the samples in `__psynch_mutexdrop`, and in two windows where one thread sends alone (126,782
+and 144,041 messages) it costs 7 to 8 us with no sample there. The threads were not waiting for a core: 1.35 threads were
+running on average in those windows, on two cores. `fetchClient` took 3.9 s and an `execute` 2.2 to 5.1 s, against 1.3 to
+1.6 s and 0.4 to 0.9 s before drop31.
+
+What a lock costs there was measured before one was chosen, by a native program on the 4S (iOS 6.1.3, two cores, nothing
+else running; each number is one second of threads that only take one lock and give it back):
+
+| Lock | 1 thread | 2 threads | 4 threads |
+|---|---|---|---|
+| `pthread_mutex` | 359 ns a pair | 14,628 ns, 68,398 forced switches for 68,432 pairs | 16,606 ns, 60,262 switches for 60,265 pairs |
+| `pthread_rwlock`, read side | 416 ns | 656 ns on each thread (3.05 million pairs a second in all), 82 switches | 3.16 million pairs a second in all, 540 switches |
+| the same with a writer every 1 ms | 438 ns | 2.92 million a second in all, 572 writes | 3.36 million, 381 writes |
+| `OSSpinLock` | 83 ns | 9.5 million a second in all | 9.4 million |
+| none | 9 ns | 226 million a second | 228 million |
+
+So the read side of a read-write lock stays in user space on that system, with one reader or several and with a writer
+coming and going, and the mutex is 40 times dearer as soon as two threads want it. The tables are behind read-write
+locks now (`src/runtime/xl_shared_table.h`): a table is a `struct xl_shared_table`, which no `CFDictionary` call accepts,
+so a caller cannot reach one without the lock. `xl_shared_get` reads under the read side and `xl_shared_set` writes under
+the write side. A thread that did not find a key and wants to put it does not keep what it saw under the read side:
+`xl_shared_claim` takes the write side, looks again, and returns the value that is in the table, its own or the one
+another thread put first (`xl_shared_claim_pair` does the same for two tables that lead to each other, a host class and
+its twin). Several lookups that must agree are one read section: `xl_class_from_guest` asks for the shadow, the twin and
+the class waiting to be built in one, because a class is moved from "waiting" to "built" in one write section, and a
+thread that asked in three separate sections could find it in neither and take the guest's class object for a host
+class (the mutexes allowed that; no run is known to have hit it). A message takes three read sections (the class, the
+shadow method, the variant) where it took four or five mutexes, about 1.3 us alone and 2 us beside another sender, by
+the table above.
+
+The lock that fails stops the process with `xlate: the lock of the runtime's tables could not be taken to read|taken
+to write|given back (error N)`: going on would break the invariant silently.
+
+`xl-stats` had the same fault of its own, one mutex for the counters of every message, so the flag would have shown
+`__psynch_mutexdrop` at the top after the tables were fixed. Its counters are per thread now (above). The table of
+dynamic messages keeps its mutex, and cannot start the same queue: a dynamic message is a host call of 55 to 80 us on
+average (30,000 of the 271,931 messages of that launch), so two threads ask for that lock once in 100 us or more each
+and hold it for one probe of a table, while the queue above needs threads that ask again within the 15 us a handover
+takes.
+
+The `sharedtable` check ([the corpus](corpus.md)) runs the module on the Mac with senders and registrars racing, and
+fails without each part of the rule; `statsthreads` does the same for the counters of `xl-stats`.
 
 ## The address-space budget of a loaded library
 

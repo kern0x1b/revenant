@@ -9,6 +9,8 @@
 #include "xl_bridge.h"
 #include "xl_diag.h"
 #include "xl_host.h"
+#include "xl_shared_table.h"
+#include "xl_stats_threads.h"
 #include "xl_dlsym.h"
 
 #include <pthread.h>
@@ -38,8 +40,8 @@ extern void xl_fault(State *state, const char *reason);
 
 static CFMutableDictionaryRef xl_selector_table;
 static CFMutableDictionaryRef xl_selector_variant_table;
-static CFMutableDictionaryRef xl_variant_cache;
-static pthread_mutex_t xl_variant_lock = PTHREAD_MUTEX_INITIALIZER;
+static struct xl_shared_lock xl_variant_lock = XL_SHARED_LOCK_INITIALIZER;
+static struct xl_shared_table xl_variant_cache;
 static CFMutableDictionaryRef xl_guest_imps;
 static CFMutableDictionaryRef xl_variadic_table;
 static pthread_once_t xl_setup_once = PTHREAD_ONCE_INIT;
@@ -118,7 +120,9 @@ static void xl_setup(void)
     for (const struct xl_imp_entry *entry = xl_imp_map; entry->imp; entry++)
         CFDictionarySetValue(xl_guest_imps, entry->imp, (void *)(uintptr_t)entry->guest);
     xl_selector_variant_table = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
-    xl_variant_cache = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+    xl_shared_write_begin(&xl_variant_lock);
+    xl_variant_cache = xl_shared_table_make(&xl_variant_lock, NULL);
+    xl_shared_end(&xl_variant_lock);
     for (const struct xl_selector_variant *v = xl_selector_variants; v->selector; v++) {
         SEL sel = sel_registerName(v->selector);
         CFMutableDictionaryRef by_enc = (CFMutableDictionaryRef)CFDictionaryGetValue(xl_selector_variant_table, sel);
@@ -331,18 +335,10 @@ static int xl_collect_enabled(void)
 #define XL_STATS_SECOND 5000u
 #define XL_STATS_TOP 4
 
-struct xl_stats_slot {
-    uintptr_t cls;
-    uintptr_t sel;
-    uint32_t count;
-    uint64_t ticks;
-};
+#define XL_STATS_WINDOW_TOP 8
 
 static struct xl_stats_slot xl_stats_slots[XL_STATS_SLOTS];
-static pthread_mutex_t xl_stats_lock = PTHREAD_MUTEX_INITIALIZER;
-static uint32_t xl_stats_messages;
 static uint32_t xl_stats_dynamic;
-static uint64_t xl_stats_routing_ticks;
 static uint64_t xl_stats_call_ticks;
 
 uint64_t xl_stats_microseconds(uint64_t ticks)
@@ -358,6 +354,7 @@ uint64_t xl_stats_microseconds(uint64_t ticks)
 void xl_stats_snapshot(uint32_t *messages, uint32_t *dynamic, uint64_t *routing_ticks, uint64_t *call_ticks)
 {
     pthread_mutex_lock(&xl_stats_lock);
+    xl_stats_fold_locked();
     *messages = xl_stats_messages;
     *dynamic = xl_stats_dynamic;
     *routing_ticks = xl_stats_routing_ticks;
@@ -365,31 +362,10 @@ void xl_stats_snapshot(uint32_t *messages, uint32_t *dynamic, uint64_t *routing_
     pthread_mutex_unlock(&xl_stats_lock);
 }
 
-#define XL_STATS_WINDOW_SLOTS 1024
-#define XL_STATS_WINDOW_TOP 8
-
-static struct xl_stats_slot xl_stats_window[XL_STATS_WINDOW_SLOTS];
-
-static void xl_stats_window_note_locked(Class lookup, SEL selector, uint64_t ticks)
-{
-    unsigned start = (unsigned)((((uintptr_t)selector >> 2) ^ ((uintptr_t)lookup >> 4)) * 2654435761u) % XL_STATS_WINDOW_SLOTS;
-    for (unsigned probe = 0; probe < XL_STATS_WINDOW_SLOTS; probe++) {
-        struct xl_stats_slot *slot = &xl_stats_window[(start + probe) % XL_STATS_WINDOW_SLOTS];
-        if (!slot->count) {
-            slot->cls = (uintptr_t)lookup;
-            slot->sel = (uintptr_t)selector;
-        }
-        if (slot->cls == (uintptr_t)lookup && slot->sel == (uintptr_t)selector) {
-            slot->count++;
-            slot->ticks += ticks;
-            return;
-        }
-    }
-}
-
 void xl_stats_window_report(void)
 {
     pthread_mutex_lock(&xl_stats_lock);
+    xl_stats_window_close_locked();
     const struct xl_stats_slot *top[XL_STATS_WINDOW_TOP] = {0};
     for (unsigned i = 0; i < XL_STATS_WINDOW_SLOTS; i++) {
         const struct xl_stats_slot *slot = &xl_stats_window[i];
@@ -414,12 +390,7 @@ void xl_stats_window_report(void)
 
 static void xl_stats_message(uint64_t started, Class lookup, SEL selector)
 {
-    uint64_t ticks = mach_absolute_time() - started;
-    pthread_mutex_lock(&xl_stats_lock);
-    xl_stats_messages++;
-    xl_stats_routing_ticks += ticks;
-    xl_stats_window_note_locked(lookup, selector, ticks);
-    pthread_mutex_unlock(&xl_stats_lock);
+    xl_stats_count((uintptr_t)lookup, (uintptr_t)selector, (uint32_t)(mach_absolute_time() - started));
 }
 
 static void xl_stats_report_locked(void)
@@ -438,6 +409,7 @@ static void xl_stats_report_locked(void)
             }
         }
     }
+    xl_stats_fold_locked();
     dprintf(2, "xlate: messages: %u in all, %u of them dynamic; routing %llu us in all (%llu us each), host call %llu us in the dynamic ones (%llu us each)\n",
             xl_stats_messages, xl_stats_dynamic, (unsigned long long)xl_stats_us(xl_stats_routing_ticks),
             (unsigned long long)xl_stats_us(xl_stats_routing_ticks) / (xl_stats_messages ? xl_stats_messages : 1),
@@ -451,12 +423,14 @@ static void xl_stats_report_locked(void)
 
 static void xl_stats_dynamic_send(uint64_t routing, uint64_t call, Class lookup, SEL selector)
 {
+    struct xl_stats_thread *mine = xl_stats_mine();
+    if (mine)
+        xl_stats_window_note(mine, (uintptr_t)lookup, (uintptr_t)selector, (uint32_t)(routing + call));
     pthread_mutex_lock(&xl_stats_lock);
     xl_stats_messages++;
     xl_stats_dynamic++;
     xl_stats_routing_ticks += routing;
     xl_stats_call_ticks += call;
-    xl_stats_window_note_locked(lookup, selector, routing + call);
     unsigned start = (unsigned)((((uintptr_t)selector >> 2) ^ ((uintptr_t)lookup >> 4)) * 2654435761u) % XL_STATS_SLOTS;
     for (unsigned probe = 0; probe < XL_STATS_SLOTS; probe++) {
         struct xl_stats_slot *slot = &xl_stats_slots[(start + probe) % XL_STATS_SLOTS];
@@ -513,9 +487,7 @@ static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp,
 {
     uintptr_t guest;
     if (imp) {
-        pthread_mutex_lock(&xl_variant_lock);
-        uintptr_t cached = (uintptr_t)CFDictionaryGetValue(xl_variant_cache, imp);
-        pthread_mutex_unlock(&xl_variant_lock);
+        uintptr_t cached = (uintptr_t)xl_shared_get(&xl_variant_cache, imp);
         if (cached)
             return cached;
     }
@@ -543,11 +515,8 @@ static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp,
             uintptr_t variant = (uintptr_t)CFDictionaryGetValue(by_enc, key);
             CFRelease(key);
             if (variant) {
-                if (imp) {
-                    pthread_mutex_lock(&xl_variant_lock);
-                    CFDictionarySetValue(xl_variant_cache, imp, (void *)variant);
-                    pthread_mutex_unlock(&xl_variant_lock);
-                }
+                if (imp)
+                    variant = (uintptr_t)xl_shared_claim(&xl_variant_cache, imp, (void *)variant);
                 return variant;
             }
             int miss_fd = xl_log_open("xlate-variant-miss.log");

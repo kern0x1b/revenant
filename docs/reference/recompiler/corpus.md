@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, switchtail, tailcalls, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, rebasetag, flagflow, hostbridges, checkapi, proxytable, systemclasses and dropkey; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, rebasetag, flagflow, hostbridges, checkapi, proxytable, sharedtable, statsthreads, systemclasses and dropkey; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions`, `libexceptions`, `libcxxexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -863,6 +863,47 @@ It needs the arm64 runtime, so `XL_SWIFTOBJC_LIBS` names the folder with `libswi
 `libc++abi.1.dylib`. The fixture is compiled like swiftconformance's, for iOS 12.0 with the legacy type info: that
 target marks a Swift class with bit 0 of the class data, the bit the guest's libswiftCore tests. A class compiled for
 iOS 12.2 or later (bit 1) is accepted too, because the runtime rewrites that bit when it sets the class up.
+
+### sharedtable
+
+Proves the rule of `src/runtime/xl_shared_table.h` on the build host: the tables that message routing reads and class
+registration writes are read by several threads together and by none while one changes them
+([why](library-mode.md), "Two threads that send at once"). `main.c` includes the header as the runtime does and gives its
+tables a hash function of the test's own, which `CFDictionary` calls inside every lookup and every change, so the test
+stands inside the lock: it counts the threads that are reading and changing, sleeps there to let the others arrive, and
+stops at the first reader beside a writer or second writer. Four threads send (each message looks a class up in one read
+section, then its method, a variant it puts into the cache if it is missing, and the twin of a host class it makes if it
+is missing) while two threads register 2,000 classes, each moved from "waiting to be built" to "built" in one write
+section; the senders ask mostly for the classes that are being registered at that moment. Then four threads race 300
+times to put one key, alone and as a pair of tables. It requires that no reader met a writer, that two readers were
+inside together at least once (a lock that shut readers out would pass everything else), that a class was never seen
+both built and waiting or neither, that every thread of a race was told the value that is in the table, and that the
+table that leads back holds no value of a thread that lost.
+
+Three controls are the same file built with one part of the rule taken out, and each must fail at its own line:
+`-DCONTROL=1`, no lock (its writes are lookups, so that it stops at the counter and not in a damaged dictionary), at
+`FAIL shared.exclusion`; `-DCONTROL=2`, a thread that missed under the read side puts its value without looking again,
+at `FAIL shared.claim`; `-DCONTROL=3`, the lookups of one class each in a read section of their own, at `FAIL
+shared.atomic`. The check also reads the two runtime files: `swift_classes.m` may call no `CFDictionary` function itself,
+and `objc_bridge.m` may reach the variant cache only through the module. It runs under `MallocScribble` and
+`MallocGuardEdges` and takes under a second. What it cannot show is the cost of the lock on the phone; that is the
+table in the reference and the `xl-stats` window of a drop.
+
+### statsthreads
+
+Proves the counters of `xl-stats` (`src/runtime/xl_stats_threads.h`) on the build host. A message with a bridge is counted
+without a lock, in a block of the sending thread, and the thread that prints adds the blocks up; the check is that
+nothing is lost by that. Twenty waves of four threads send 200,000 messages each over 64 pairs of class and selector
+while another thread closes a window every 200 us, as the profile thread does every 5 s. It requires the total of
+messages and of routing time to be exact after the threads have ended (a thread that ends hands its counts over and
+leaves the list), every window to name only pairs that were sent, and the windows together to hold all messages but
+the one each thread was counting at the moment a window closed. Then two threads count 64 messages of 0x30000000
+ticks each, so the 32-bit counter of a thread passes its end twelve times with nobody printing, and the total must
+still be exact: a thread adds its own time to the total before a quarter of the counter is used.
+
+Two controls: `-DCONTROL=1` counts in one set of counters without a lock, which is what taking the mutex away and
+nothing else would be, and must fail at `FAIL stats.total`; `-DXL_STATS_FOLD_TICKS=0xffffffffu` never lets a thread add
+its own time, and must fail at `FAIL stats.wrap`. It runs under `MallocScribble` and `MallocGuardEdges`.
 
 ### proxytable
 
