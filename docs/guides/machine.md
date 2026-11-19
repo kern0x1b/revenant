@@ -176,6 +176,31 @@ The boot folder keeps only what that run wrote (an `xmake/` folder and a `.scrat
 afterwards. Run the `rm` even when the clone fails: a leftover folder is git-ignored (`/.cache-boot/`), so it stays out of commits,
 but it still takes space.
 
+### Which cache to clone
+
+The tool clones the main checkout's `.cache` unless `--from <cache>` names another one. A clone is only as warm as its
+source: on 2026-11-19 the main `.cache` was behind the packages the stack needs (the device configure started a cold
+`glslang` install and failed), and a clone of it would have repeated that. `--from` takes any cache that holds the
+packages the task builds, and a sibling worktree's private cache is the usual choice:
+
+```
+./xmakew l -P . tools/private_cache.lua <worktree>/.cache-private --from <other worktree>/.cache-pp
+```
+
+The tool does not know what a task needs, so the worker checks the source before the clone, and the clone before the first
+build:
+
+- `<source>/xmake-global/.xmake/packages/` holds an installed folder for each package the configure names (for the Backports
+  device group `glslang` was the one missing from the main `.cache`). The configure of a warm clone ends in under a minute
+  (28 seconds measured on 2026-11-16) and prints no `installing` or `downloading` line; the first such line means the
+  source was not warm, and the build is stopped there and the source changed, not waited for.
+- For the device runtime tests, `<source>/firmware/rootfs/iPhone4,1/6.1.3_10B329` exists. A clone without it runs every
+  `backports_runtime` case as failed (measured 2026-11-19, all cases of the group), because the emulator has no root file
+  system to boot. A missing one is cloned from a cache that has it with `cp -c -R -p` (an APFS clone, no second copy on
+  disk), before the first run.
+- `df -h /System/Volumes/Data` after the clone: a clone costs little until it is written to, and the floor of the disk rule
+  holds.
+
 The clone takes the whole of `.cache` except five folders that hold this machine's state: `budget` (the token pool, which a private run takes its tokens from and does not copy), `devices` (which run holds which
 device), `emulator-slots` (the locks that bound how many emulators run at once), `scratch` (the scratch of the tasks running
 in the shared cache) and `sizes` (the measured sizes of the cache's paths, keyed by source path, which would be wrong for the
