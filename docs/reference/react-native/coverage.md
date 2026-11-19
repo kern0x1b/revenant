@@ -7,10 +7,10 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 | Status | Meaning | Count |
 | --- | --- | --- |
 | real | built from the module's own sources, with no stub and no substitute | 53 |
-| partial | built and running, with a named part left out or rewritten | 30 |
+| partial | built and running, with a named part left out or rewritten | 31 |
 | js | no native code of its own, so it runs with the bundle | 12 |
 | stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 0 |
-| missing | native code that is not built yet | 22 |
+| missing | native code that is not built yet | 21 |
 | evaluate | not attempted; the note says what iOS 6 offers | 25 |
 | impossible | the system service does not exist before the iOS release the note names | 7 |
 | n/a | build, web or Android only: nothing to run on the phone | 11 |
@@ -99,7 +99,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-checkbox | ~57.0.0 | no | js | none | Uses the core view; no native code. |
 | expo-clipboard | ~57.0.2 | yes | partial | build | Built from the package on the isolated host: the clipboard functions (strings, URLs, images, HTML, content types, change events) are real. Not built: ClipboardPasteButton, the iOS 16 view on UIPasteControl (iOS 6 has no UIPasteControl), and so isPasteButtonAvailable is false there, as the module already reports below iOS 16. Not exercised on the phone. |
 | expo-constants | ~57.0.22 | yes | real | phone | EXConstants.bundle and app.config are staged by the spike script, not by the build. |
-| expo-contacts | ~57.0.8 | yes | missing | none | Contacts.framework (iOS 9) is absent from the iOS 6.1.3 cache; AddressBook is present and is the analog, and the Contacts backport exists. Not built. |
+| expo-contacts | ~57.0.8 | yes | partial | none | Recipe packages/e/expo-contacts (npm 57.0.8, patch contacts-names-ios6.patch) installs and its patch applies, but the host build is not green: the ContactsUI classes CNContactViewController and CNContactPickerViewController (iOS 9) are not backported, so the form and picker sources cannot compile unchanged. The Contacts backport supplies CNContactStore, CNContact and the AddressBook mapping; the later CNLabel* constants are supplied as exported values by frameworks/Backports/src/Contacts/ContactsLabels13.m, so every consumer gets them. The patch renames Image to ContactImageRecord and three exceptions that collide with expo-file-system inside the shared ExpoAppModules Swift module. What remains is a ContactsUI backport over ABPersonViewController, ABNewPersonViewController and ABPeoplePickerNavigationController, tracked as a separate task; until it lands presentFormAsync, presentContactPickerAsync and the next form functions are not built. Not exercised on the phone. |
 | expo-crypto | ~57.0.4 | yes | real | build | Compiled; not exercised. |
 | expo-dev-client | ~57.0.20 | yes | impossible | none | A development tool; one file of iOS code, no meaning in a release host. |
 | expo-device | ~57.0.2 | yes | real | phone | Recipe packages/e/expo-device (npm 57.0.2, patch device-ios6.patch) installs and its patch applies; compiled into the host (links, not yet exercised on the phone). The patch removes the Mac Catalyst and iOS-app-on-Mac checks (iOS 13, 14) and adds the model names of the devices iOS 6 runs on (iPhone 3GS to 5, iPod touch 4 and 5, iPad 2 to 4, iPad mini). On the iPhone 4S (2026-11-16) modelName is iPhone 4S, osVersion 6.1.3 and totalMemory 529 MB. |

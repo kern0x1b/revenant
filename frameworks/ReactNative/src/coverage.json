@@ -351,9 +351,9 @@
    "group": "sdk",
    "version": "~57.0.8",
    "native": true,
-   "status": "missing",
+   "status": "partial",
    "verified": "none",
-   "note": "Contacts.framework (iOS 9) is absent from the iOS 6.1.3 cache; AddressBook is present and is the analog, and the Contacts backport exists. Not built."
+   "note": "Recipe packages/e/expo-contacts (npm 57.0.8, patch contacts-names-ios6.patch) installs and its patch applies, but the host build is not green: the ContactsUI classes CNContactViewController and CNContactPickerViewController (iOS 9) are not backported, so the form and picker sources cannot compile unchanged. The Contacts backport supplies CNContactStore, CNContact and the AddressBook mapping; the later CNLabel* constants are supplied as exported values by frameworks/Backports/src/Contacts/ContactsLabels13.m, so every consumer gets them. The patch renames Image to ContactImageRecord and three exceptions that collide with expo-file-system inside the shared ExpoAppModules Swift module. What remains is a ContactsUI backport over ABPersonViewController, ABNewPersonViewController and ABPeoplePickerNavigationController, tracked as a separate task; until it lands presentFormAsync, presentContactPickerAsync and the next form functions are not built. Not exercised on the phone."
   },
   {
    "id": "expo-crypto",
