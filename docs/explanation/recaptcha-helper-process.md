@@ -51,21 +51,32 @@ action, which the owner forbade. So whether the path to a token goes through the
 the keychain, and whether those answer in a process without `UIApplication`, is **not known** and cannot be measured
 until the owner gives a key (2 below).
 
-**Not proved by `rcsdk`** either, each a measurement below: running as `mobile` from inside the `.app`; the bundle
-identifier the SDK then reads; being started by the app.
+**Measured as `mobile`, from inside the `.app` and started by the app** (the Telegram session, 2026-11-19, drop40,
+pass124, `telegram-build/.agent-work/runs/rcsdk-pass124/`; measurements 1, 3 and 4 below): `rcsdk` signed with `ldid`
+and Telegram's entitlements ran from a subfolder of the installed `.app` as `mobile`, eight runs of eight with the
+twelve step lines and exit 0, from a shell and from `posix_spawn` inside Telegram's process. From the shell with
+Telegram not running: load 1.12 s, `fetchClient` 0.45 s, `execute` 0.63 s, the same answer; resident 3.3 MB at start,
+12.6 MB after the load, 21.5 MB at the most. So drop40 in a process of its own is where drop31 was, and where the app
+is.
+
+**Not proved yet**: the bundle identifier the SDK reads at the top of the `.app` (the runs were in a subfolder, on
+purpose), and everything on the path that returns a token.
 
 ## Protocol
 
-**Reasoned.** The app starts the helper with `posix_spawn` and file actions: the read end of one pipe becomes the
-helper's descriptor 0, the write end of a second its descriptor 1, descriptor 2 goes to the runtime's log file or
+The app starts the helper with `posix_spawn` and file actions: the read end of one pipe becomes the helper's
+descriptor 0, the write end of a second its descriptor 1, descriptor 2 goes to the runtime's log file or
 `/dev/null`, and `POSIX_SPAWN_CLOEXEC_DEFAULT` closes everything else, so that none of Telegram's sockets and
-database files reaches the helper (the SDK's `spawn.h` has the flag and marks its companion
-`posix_spawn_file_actions_addinherit_np` as available from iOS 4.3; on the phone it is measurement 4; if it fails
-there, the helper closes every descriptor above 2 before it loads anything). The arguments are the path of the
-library and the protocol version; the environment is empty but for the `XL_*` switches. The app sets
-`F_SETNOSIGPIPE` on its write end, so that a request written to a helper that has died answers `EPIPE` and does not
-end Telegram with `SIGPIPE` (Telegram's sources ignore the signal nowhere and set `SO_NOSIGPIPE` on their sockets
-only: the Telegram session's reading); the helper ignores `SIGPIPE` for the same reason.
+database files reaches the helper. **Measured** (4 below): iOS 6.1.3 takes the flag, the call returns in 6.2 ms, and
+the child's descriptors at the start of `main` are 0, 1 and 2 as pipes and a fourth, a pipe at 3, that the same
+program has when a shell starts it: one of its own libraries opens it, and nothing of Telegram's is there (the
+app's new pipes were its descriptors 44 to 47). The arguments are the path of the library and the protocol version; the environment is the app's own with
+the `XL_*` switches (the measurement passed Telegram's environment; an empty one is not tried).
+
+The app sets `F_SETNOSIGPIPE` on its write end. **Measured** in Telegram's process: `SIGPIPE` has its default action
+there, a write into a pipe whose reader has gone ends Telegram with signal 13 and leaves no crash report, and with
+the flag the same write answers `EPIPE` and the app lives. So the flag is required, not prudent; the helper ignores
+`SIGPIPE` for the same reason.
 
 A message is one line of UTF-8, fields separated by a tab, ended by a newline; a tab, a newline or a percent sign
 inside a field is percent-escaped; a line is at most 64 KiB (a token is a few KiB of ASCII).
@@ -93,7 +104,13 @@ loaded by the time the demand comes, and the 15 s are spent on `fetchClient` and
 app on drop40 does the three steps in 2.1 and 2.6 s). A second token for the same key costs the `execute` alone,
 because the helper keeps the client per key as the app does (`recaptchaClientsBySiteKey` in `AppDelegate.swift`).
 The helper exits on `quit`, when its descriptor 0 ends, or after 120 s without a request, so that it does not hold
-its memory through a session. Not measured: the spawn itself, and every time on the path that returns a token.
+its memory through a session.
+
+**Measured** (4 below), the spawn: 6.2 ms for the call and 0.92 s until the child's first line, which is dyld and
+the program's libraries; that second is paid before `main` and no design of the helper removes it. In that run the
+load then took 4.1 s, against 0.8 to 2.3 s from a shell, because Telegram itself was 15 s into its launch and held
+both cores; `fetchClient` and `execute` took 1.08 and 0.39 s. A helper started while the app is busy is that slow,
+which is one more reason to start it before the demand. Not measured: every time on the path that returns a token.
 
 ## Lifetime
 
@@ -146,8 +163,12 @@ translated code sends that message to the host's class, so it gets the helper's 
   (`stringArrayForKey:`, `setObject:forKey:`), and at start `dictionaryRepresentation`, used once, to find every
   other key with that prefix and `removeObjectForKey:` it;
 - a store of string pairs (`RCdku`): `setObject:forKey:` for each pair of a dictionary, and `stringForKey:`. Its key
-  names are not literals in the code and were not traced; the preferences file `rcsdk` leaves on the phone names
-  them (asked for with measurement 1).
+  names are not literals in the code and were not traced.
+
+On the refused path nothing of it reaches a file: after the runs of measurement 1 there was no preferences file of
+`rcsdk` for `mobile`, and none for root from the runs on drop31. Either that path sets nothing, or what it sets is
+never written out by a program that ends without `synchronize`; which of the two is not known, and the path that
+returns a token may differ. The helper calls `synchronize` on its domain before it exits.
 
 `valueForKey:` and `setValue:forKey:` are sent too (three and five places); their receivers were not traced. The
 suite object is a real `NSUserDefaults`, so it answers whatever the standard one does.
@@ -157,17 +178,37 @@ What the server sees does not depend on the domain's name: the package name come
 (the queue, the pairs), so the domain is a file that persists, not a dictionary in memory. On this route Telegram's
 process never runs the SDK, so the helper's domain is the only place those keys ever are.
 
+**The URL cache.** The same question, found by measurement 1 and not by reading: the run left
+`Library/Caches/rcsdk-entitled/` with a `Cache.db` of `NSURLCache` (the answers of `www.gstatic.com` and a report
+address of Google are in it). The folder is named after the bundle identifier, or after the program when there is
+none, so a helper at the top of the `.app` would open Telegram's own `Cache.db` from a second process. The helper
+does not: before `xl_load` it gives itself a cache of its own with `+[NSURLCache setSharedURLCache:]`, on a path
+beside its preferences domain. The cookie store is the third place of that kind and gets the same look with the
+first helper build (6 below): nothing was seen of it in these runs.
+
 ## Memory
 
-**Measured**: the helper's resident size on the refused-key path is 24.4 MB (above). **Not known**: its size on the
-path that returns a token, and what jetsam does with a child of an application when Telegram itself is at 230 MB
-resident on a 512 MB phone. The library's 57.6 MB file is mapped, not read: the resident figure is what counts.
+**Measured** (3 below): the resident size of `rcsdk` on the refused path is 21.5 MB at the most on drop40 (24.4 MB
+on drop31). It ran six times in the windows of that measurement, once beside a Telegram with a chat open that was
+already getting memory warnings, once while the panel was being built, four times after Telegram had died, and every
+run passed: no line of jetsam or memorystatus is in the syslog of any of them, and `rcsdk` was never killed. **Not
+known**: its size on the path that returns a token. The library's 57.6 MB file is mapped, not read: the resident
+figure is what counts.
+
+What could not be measured is the case this route exists for, Telegram alive with the media panel open and the
+helper beside it. On pass124 Telegram does not survive the panel: in three windows of three it died within seconds
+of it (`mmap` failing with `ENOMEM`, then an allocation that failed, a fault or a trap). In two of them `rcsdk` had
+not been started; in the third Telegram died a second after `rcsdk` started, which neither shows nor excludes that
+a second process took memory from it. pass124 still carries the in-process path, and the glue reports the library's
+ranges reserved in the app's address space before any load (`reserve=0`), which is the coexistence the first section
+says cannot work. The measurement needs an app without that path, so it waits for the first helper build.
 
 ## Signing and install
 
-**Measured**: programs signed with `ldid -S` run on this phone as root from the scratch folder (every device check of
-the corpus). **Not known**: the same as `mobile` from the app's folder. The helper and the two library files are
-added to the `.app` by the Telegram session's install step; the app's own executable no longer links the loader.
+**Measured**: a program signed with `ldid -S` and the entitlements file of Telegram's executable runs as `mobile` from
+inside the installed `.app`, from a shell and as a child of the app (1 and 4 below); the plain signature was not
+needed and so not tried there. The helper and the two library files are added to the `.app` by the Telegram
+session's install step; the app's own executable no longer links the loader.
 
 ## What the in-process path keeps
 
@@ -190,7 +231,8 @@ coordinator, 2026-11-19); what to copy, the commands, what a pass looks like and
    address space as `mobile`. **Ends the route** if it is killed at start under every signature we can make, or
    cannot load. A subfolder, not the top of the `.app`: there `rcsdk` has no bundle identifier and writes nothing
    into Telegram's preferences, which no measurement may do; the identifier at the top waits for the helper build,
-   which has the domain of its own.
+   which has the domain of its own. **Passed** (2026-11-19): the build with Telegram's entitlements, at the first
+   try; Telegram's preferences file the same before and after.
 2. The same with Telegram's site key (a request to Google, which the owner allows from this phone). Shows: a token,
    or the error, for a process that is not an application. **Ends the route** if the path to a token needs what only
    an application has (the web view, the vendor identifier) and neither answers here. This is the largest unknown.
@@ -198,17 +240,20 @@ coordinator, 2026-11-19); what to copy, the commands, what a pass looks like and
    waits for the owner's word.
 3. The resident lines of run 1 (`fetched`, `executed`), and the same run while Telegram is frontmost with the panel
    open. **Ends the route** if Telegram or the helper is killed for memory there, twice in a row. The size on the
-   path that returns a token stays unknown until 2.
+   path that returns a token stays unknown until 2. **Half done**: the sizes are measured and `rcsdk` was never
+   killed, beside a Telegram with a chat open and beside one dying of its own address space; the panel case cannot
+   be made on pass124 ("Memory") and is repeated with the first helper build.
 4. `posix_spawn` of `rcsdk` from Telegram's process with the two pipes and `POSIX_SPAWN_CLOEXEC_DEFAULT` (the probe
    that started `/bin/true`): it loads and answers, and its descriptors are 0, 1 and 2 only. **Ends the route** if a
-   child of the app cannot load the library (a limit inherited from the app).
+   child of the app cannot load the library (a limit inherited from the app). **Passed**: the twelve lines on the
+   answer pipe, end-of-file, exit 0, the parent Telegram's pid, nothing inherited ("Protocol").
 5. Lifetime, with the first helper build: the app killed (by signal, and by the user) during a request, the helper
    gone within a second; the app sent to the background during a request, the answer there on return; a helper
    stopped with `SIGSTOP`, the app's deadline fires at 13 s and no process is left. Nothing here ends the route; it
    fixes the numbers.
-6. Preferences and keychain, with the first helper build: Telegram's preferences file is the same before and after a
-   request (the helper's keys are in its own domain), and the keychain calls of the SDK answer for a program signed
-   with `ldid`. Nothing here ends the route: a keychain that refuses is answered by the SDK's own error path, to be
+6. Preferences, caches and keychain, with the first helper build: Telegram's preferences file, its `Cache.db` and
+   its cookie file are the same before and after a request (the helper's are its own), and the keychain calls of the
+   SDK answer for a program signed with `ldid`. Nothing here ends the route: a keychain that refuses is answered by the SDK's own error path, to be
    read then.
 7. Times, with the first helper build: five requests from a helper started by the request and five from one that had
    loaded before it. The route stands if both are under 13 s with room, which the refused path's numbers say.
