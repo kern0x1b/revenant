@@ -15,6 +15,7 @@ local VMSTAT = "/usr/bin/vm_stat"
 local DF = "/bin/df"
 local PS = "/bin/ps"
 local LOAD_WINDOW_MS = 60000
+local AGING_S = 600
 
 local CLASSES = {
     critical = {rank = 1, nice = 0},
@@ -32,6 +33,10 @@ end
 
 local function slot_path(folder, index)
     return path.join(folder, string.format("slot-%02d.lock", index))
+end
+
+local function aged_path(folder, name)
+    return path.join(folder, "queue", "aged-" .. name)
 end
 
 local function parse_loadavg(text)
@@ -52,23 +57,16 @@ local function parse_vmstat(text)
 end
 
 local previous
-local grants = {}
 
-local function remember_grant(count)
-    local now = os.mclock()
-    for index = #grants, 1, -1 do
-        if now - grants[index].at > LOAD_WINDOW_MS then
-            table.remove(grants, index)
-        end
-    end
-    table.insert(grants, {at = now, count = count})
-end
-
-local function recent_grants()
-    local now, total = os.mclock(), 0
-    for _, entry in ipairs(grants) do
-        if now - entry.at <= LOAD_WINDOW_MS then
-            total = total + entry.count
+local function read_grants(folder)
+    local now, window = os.time(), LOAD_WINDOW_MS / 1000
+    local total = 0
+    for _, file in ipairs(os.files(path.join(folder, "slot-*.lock"))) do
+        for at, count in (io.readfile(file) or ""):gmatch("g (%d+) (%d+)") do
+            local age = now - tonumber(at)
+            if age >= 0 and age < window then
+                total = total + tonumber(count) * math.max(0, 1 - age / window)
+            end
         end
     end
     return total
@@ -78,7 +76,8 @@ local function sample()
     local loadavg = parse_loadavg(os.iorunv(SYSCTL, {"-n", "vm.loadavg"}))
     local pressure = parse_pressure(os.iorunv(SYSCTL, {"-n", "kern.memorystatus_vm_pressure_level"}))
     local vm = parse_vmstat(os.iorunv(VMSTAT, {}))
-    local reading = {loadavg = loadavg, load = loadavg + recent_grants(), pressure = pressure, vm = vm, previous = previous}
+    local reading = {loadavg = loadavg, load = math.max(loadavg, read_grants(pool_folder())),
+                     pressure = pressure, vm = vm, previous = previous}
     previous = vm
     return reading
 end
@@ -87,31 +86,20 @@ local function own_runnable(pids)
     if #pids == 0 then
         return 0
     end
-    local out = try { function () return os.iorunv(PS, {"-ax", "-o", "pid=,ppid=,state="}) end } or ""
-    local kids, states = {}, {}
-    for line in out:gmatch("[^\n]+") do
-        local pid, ppid, state = line:match("(%d+)%s+(%d+)%s+(%a)")
-        if pid then
-            pid, ppid = tonumber(pid), tonumber(ppid)
-            states[pid] = state
-            kids[ppid] = kids[ppid] or {}
-            table.insert(kids[ppid], pid)
-        end
+    local pgids = {}
+    local out = try { function () return os.iorunv(PS, {"-o", "pgid=", "-p", table.concat(pids, ",")}) end } or ""
+    for value in out:gmatch("%d+") do
+        table.insert(pgids, value)
     end
-    local seen, total = {}, 0
-    local function walk(pid)
-        if not seen[pid] then
-            seen[pid] = true
-            if states[pid] == "R" then
-                total = total + 1
-            end
-            for _, child in ipairs(kids[pid] or {}) do
-                walk(child)
-            end
-        end
+    if #pgids == 0 then
+        return #pids
     end
-    for _, pid in ipairs(pids) do
-        walk(pid)
+    local states = try { function () return os.iorunv(PS, {"-o", "stat=", "-g", table.concat(pgids, ",")}) end } or ""
+    local total = 0
+    for state in states:gmatch("%S+") do
+        if state:sub(1, 1) == "R" then
+            total = total + 1
+        end
     end
     return total
 end
@@ -185,8 +173,11 @@ local function enqueue(folder, rank, minimum)
     return {name = name, file = file, lock = lock}
 end
 
-local function leave(ticket)
+local function leave(ticket, folder)
     os.tryrm(ticket.file)
+    if folder then
+        os.tryrm(aged_path(folder, ticket.name))
+    end
     ticket.lock:unlock()
     ticket.lock:close()
 end
@@ -208,6 +199,14 @@ local function holder_alive(file)
 end
 
 local function ahead_of(folder, name, available)
+    for _, file in ipairs(os.files(path.join(folder, "queue", "aged-*.ticket"))) do
+        if path.filename(file):sub(5) ~= name then
+            local need = tonumber(io.readfile(file)) or 1
+            if need <= available then
+                return true
+            end
+        end
+    end
     for _, file in ipairs(os.files(path.join(folder, "queue", "*.ticket"))) do
         if path.filename(file) < name and holder_alive(file) then
             local need = tonumber(io.readfile(file)) or 1
@@ -225,6 +224,7 @@ local function snapshot_slots(folder, cores)
         local file = slot_path(folder, index)
         local lock = io.openlock(file)
         if lock and lock:trylock() then
+            io.writefile(file, tostring(os.getpid()) .. "\n")
             table.insert(free, {lock = lock, file = file})
         else
             held = held + 1
@@ -244,11 +244,24 @@ local function release_locks(entries)
     end
 end
 
+local function publish_slot(entry, count)
+    local lines = {}
+    for line in (io.readfile(entry.file) or ""):gmatch("[^\n]+") do
+        if not line:match("^g ") then
+            table.insert(lines, line)
+        end
+    end
+    table.insert(lines, string.format("g %d %d", os.time(), count))
+    io.writefile(entry.file, table.concat(lines, "\n") .. "\n")
+end
+
 local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms)
     reading_fn = reading_fn or sample
     poll_ms = poll_ms or POLL_MS
     local ticket = enqueue(folder, CLASSES[class].rank, minimum)
-    local announced
+    local started = os.mclock()
+    local aging = (tonumber(os.getenv("REVENANT_BUDGET_AGING_S")) or AGING_S) * 1000
+    local announced, marked
     while true do
         local cores = os.cpuinfo("ncpu")
         local reading = reading_fn()
@@ -261,13 +274,16 @@ local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms)
             local grant = table.slice(free, 1, count)
             release_locks(table.slice(free, count + 1))
             for _, entry in ipairs(grant) do
-                io.writefile(entry.file, tostring(os.getpid()))
+                publish_slot(entry, count)
             end
-            remember_grant(count)
-            leave(ticket)
+            leave(ticket, folder)
             return grant
         end
         release_locks(free)
+        if not marked and os.mclock() - started > aging then
+            io.writefile(aged_path(folder, ticket.name), tostring(minimum))
+            marked = true
+        end
         if not announced then
             print("budget: waiting for %d token(s), %s class", minimum, class)
             announced = true
@@ -444,10 +460,6 @@ local function test_suite()
     local raw_vm = os.iorunv(VMSTAT, {})
     local raw_free = tonumber(raw_vm:match("Pages free:%s+(%d+)"))
     check("sample reads the machine's free pages", math.abs(live.vm.free - raw_free) < 100000, true)
-    remember_grant(3)
-    local after_grant = sample()
-    check("recent grants are load until the average catches up", after_grant.load - after_grant.loadavg >= 2.9, true)
-
     check("a request gets what the room holds", grantable(6, 3, 5, 1, 6), 3)
     check("a request below its minimum gets nothing", grantable(6, 3, 5, 4, 6), 0)
     check("a grant stops at the free slots", grantable(10, 0, 2, 1, 6), 2)
@@ -487,6 +499,32 @@ local function test_suite()
     check("and does block one when there is room for it", ahead_of(pool, "2-0000000000002-00000002.ticket", 6), true)
     leave(large)
     check("a ticket behind the request does not block", ahead_of(pool, "1-0000000000000-00000000.ticket", 1), false)
+
+    local aged = path.join(queue, "aged-2-0000000000003-00000003.ticket")
+    io.writefile(aged, "3")
+    check("an aged request blocks the backfill that would starve it", ahead_of(pool, "2-0000000000004-00000004.ticket", 3), true)
+    check("but not when the room is below its minimum", ahead_of(pool, "2-0000000000004-00000004.ticket", 2), false)
+    os.tryrm(aged)
+
+    local stamp_pool = path.join(base, "stamppool")
+    os.mkdir(stamp_pool)
+    local stamp_log = path.join(base, "stamp.log")
+    local granter = process.openv(os.programfile(), {"l", "-P", path.directory(os.scriptdir()),
+        path.join(os.scriptdir(), "budget.lua"), "run", "--class", "normal", "--jobs", "1", "--min", "1", "--", "/bin/sleep", "30"},
+        {outpath = stamp_log, errpath = stamp_log, envs = {"REVENANT_BUDGET_POOL=" .. stamp_pool}})
+    local stamp_deadline = os.mclock() + 30000
+    while held_slots(stamp_pool) < 1 and os.mclock() < stamp_deadline do
+        os.sleep(500)
+    end
+    check("a second process sees the grant made by the first", read_grants(stamp_pool) >= 0.9, true)
+    check("the grant stamps the shared slot under the lock", (io.readfile(slot_path(stamp_pool, 1)) or ""):match("g %d+ %d+") ~= nil, true)
+    granter:kill()
+    os.tryrm(slot_path(stamp_pool, 1))
+    local slot = slot_path(stamp_pool, 1)
+    io.writefile(slot, string.format("12345\ng %d 4\n", os.time() - 30))
+    check("a grant's load decays across the window", math.abs(read_grants(stamp_pool) - 2) < 0.2, true)
+    io.writefile(slot, string.format("12345\ng %d 4\n", os.time() - 70))
+    check("a grant older than the window adds no load", read_grants(stamp_pool), 0)
 
     local env_script = path.join(base, "env.lua")
     io.writefile(env_script, "print(os.getenv('XMAKE_MAX_JOBS'))\n")
