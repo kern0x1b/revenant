@@ -92,6 +92,25 @@ REVENANT_CASE(avfoundation_display_layer)
                              (layer.contents != nil && layer.isReadyForDisplay) != (BOOL)negative, @"the immediate frame was not drawn");
     }
 
+    @autoreleasepool {
+        AVSampleBufferDisplayLayer *scrubbed = [[AVSampleBufferDisplayLayer alloc] init];
+        CMTimebaseRef control = NULL;
+        CMTimebaseCreateWithMasterClock(kCFAllocatorDefault, CMClockGetHostTimeClock(), &control);
+        scrubbed.controlTimebase = control;
+        CMSampleBufferRef frame = revenant_sample(CMTimeMake(2, 1), NO, YES);
+        [scrubbed enqueueSampleBuffer:frame];
+        CFRelease(frame);
+        revenant_spin();
+        revenant_expect_true(@"a frame at 2 s is not drawn while the control timebase is at 0",
+                             (scrubbed.contents == nil) != (BOOL)negative, @"the frame was drawn early");
+        CMTimebaseSetTime(control, CMTimeMake(2, 1));
+        revenant_spin();
+        revenant_expect_true(@"a jump of a paused control timebase to the frame's time draws it",
+                             (scrubbed.contents != nil) != (BOOL)negative, @"the frame was not drawn");
+        scrubbed.controlTimebase = NULL;
+        CFRelease(control);
+    }
+
     __weak AVSampleBufferDisplayLayer *weakLayer = nil;
     @autoreleasepool {
         AVSampleBufferDisplayLayer *temporary = [[AVSampleBufferDisplayLayer alloc] init];

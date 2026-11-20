@@ -5,6 +5,7 @@
 #import <CoreMedia/CoreMedia.h>
 #import <CoreVideo/CoreVideo.h>
 #import <QuartzCore/QuartzCore.h>
+#import <dlfcn.h>
 
 @interface RevenantAVDisplayBuffer : NSObject
 {
@@ -25,9 +26,42 @@
 
 @end
 
+typedef const void *RevenantNotificationCenter;
+typedef void (*RevenantNotificationCallback)(RevenantNotificationCenter, const void *, CFStringRef, const void *, CFTypeRef);
+typedef RevenantNotificationCenter (*RevenantGetCenterFunction)(void);
+typedef OSStatus (*RevenantAddListenerFunction)(RevenantNotificationCenter, const void *, RevenantNotificationCallback, CFStringRef, const void *, UInt32);
+typedef OSStatus (*RevenantRemoveListenerFunction)(RevenantNotificationCenter, const void *, RevenantNotificationCallback, CFStringRef, const void *);
+
+static RevenantGetCenterFunction revenant_get_center;
+static RevenantAddListenerFunction revenant_add_listener;
+static RevenantRemoveListenerFunction revenant_remove_listener;
+
+static void revenant_resolve_notifications(void)
+{
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        revenant_get_center = (RevenantGetCenterFunction)dlsym(RTLD_DEFAULT, "CMNotificationCenterGetDefaultLocalCenter");
+        revenant_add_listener = (RevenantAddListenerFunction)dlsym(RTLD_DEFAULT, "CMNotificationCenterAddListener");
+        revenant_remove_listener = (RevenantRemoveListenerFunction)dlsym(RTLD_DEFAULT, "CMNotificationCenterRemoveListener");
+    });
+}
+
+@class AVSampleBufferDisplayLayer;
+
+@interface RevenantTimeJumpBox : NSObject
+{
+@public
+    __weak AVSampleBufferDisplayLayer *layer;
+}
+@end
+
+@implementation RevenantTimeJumpBox
+@end
+
 @interface AVSampleBufferDisplayLayer ()
 {
 @private
+    RevenantTimeJumpBox *_jumpBox;
     CMTimebaseRef _timebase;
     CMTimebaseRef _controlTimebase;
     id _videoGravity;
@@ -47,6 +81,9 @@
 }
 - (BOOL)revenant_setupFromLayer:(id)layer;
 - (void)revenant_presentDueFrames;
+- (void)revenant_timeJumped;
+- (void)revenant_watchJumpsOf:(CMTimebaseRef)timebase;
+- (void)revenant_unwatchJumpsOf:(CMTimebaseRef)timebase;
 - (void)revenant_armDisplayTimer;
 - (void)revenant_prepareBuffer:(RevenantAVDisplayBuffer *)buffer generation:(NSUInteger)generation;
 - (void)revenant_invokeRequestIfNeeded;
@@ -111,12 +148,46 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *(^con
     return frame;
 }
 
+static void revenant_time_jumped(RevenantNotificationCenter center, const void *observer, CFStringRef name, const void *object, CFTypeRef payload)
+{
+    RevenantTimeJumpBox *box = (__bridge RevenantTimeJumpBox *)observer;
+    AVSampleBufferDisplayLayer *layer = box->layer;
+    if (layer)
+        [layer revenant_timeJumped];
+}
+
 @implementation AVSampleBufferDisplayLayer
+
+- (void)revenant_watchJumpsOf:(CMTimebaseRef)timebase
+{
+    revenant_resolve_notifications();
+    if (!timebase || !_jumpBox || !revenant_get_center || !revenant_add_listener)
+        return;
+    revenant_add_listener(revenant_get_center(), (__bridge const void *)_jumpBox, revenant_time_jumped, kCMTimebaseNotification_TimeJumped, timebase, 0);
+}
+
+- (void)revenant_unwatchJumpsOf:(CMTimebaseRef)timebase
+{
+    revenant_resolve_notifications();
+    if (!timebase || !_jumpBox || !revenant_get_center || !revenant_remove_listener)
+        return;
+    revenant_remove_listener(revenant_get_center(), (__bridge const void *)_jumpBox, revenant_time_jumped, kCMTimebaseNotification_TimeJumped, timebase);
+}
+
+- (void)revenant_timeJumped
+{
+    dispatch_async(_workQueue, ^{
+        [self revenant_presentDueFrames];
+    });
+}
 
 - (BOOL)revenant_setupFromLayer:(id)layer
 {
     if (CMTimebaseCreateWithMasterClock(kCFAllocatorDefault, CMClockGetHostTimeClock(), &_timebase) != noErr)
         return NO;
+    _jumpBox = [[RevenantTimeJumpBox alloc] init];
+    _jumpBox->layer = self;
+    [self revenant_watchJumpsOf:_timebase];
     _videoGravity = [AVLayerVideoGravityResizeAspect copy];
     _status = AVQueuedSampleBufferRenderingStatusUnknown;
     _pending = [[NSMutableArray alloc] init];
@@ -140,6 +211,8 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *(^con
         if (source->_controlTimebase) {
             _controlTimebase = (CMTimebaseRef)CFRetain(source->_controlTimebase);
             CMTimebaseSetMasterTimebase(_timebase, _controlTimebase);
+            CMTimebaseSetRate(_timebase, 1.0);
+            [self revenant_watchJumpsOf:_controlTimebase];
         }
     }
     return YES;
@@ -167,12 +240,13 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *(^con
 {
     _requestBlock = nil;
     _requestQueue = NULL;
+    [self revenant_unwatchJumpsOf:_timebase];
+    [self revenant_unwatchJumpsOf:_controlTimebase];
     if (_timebase) {
         if (_displaySource) {
             CMTimebaseSetTimerDispatchSourceNextFireTime(_timebase, _displaySource, kCMTimeInvalid, 0);
             CMTimebaseRemoveTimerDispatchSource(_timebase, _displaySource);
             dispatch_source_cancel(_displaySource);
-            dispatch_source_set_event_handler(_displaySource, NULL);
         }
         CFRelease(_timebase);
     }
@@ -197,13 +271,19 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *(^con
     @synchronized (self) {
         if (controlTimebase == _controlTimebase)
             return;
-        if (_controlTimebase)
+        if (_controlTimebase) {
+            [self revenant_unwatchJumpsOf:_controlTimebase];
             CFRelease(_controlTimebase);
+        }
         _controlTimebase = controlTimebase ? (CMTimebaseRef)CFRetain(controlTimebase) : NULL;
-        if (_controlTimebase)
+        if (_controlTimebase) {
             CMTimebaseSetMasterTimebase(_timebase, _controlTimebase);
-        else
+            CMTimebaseSetRate(_timebase, 1.0);
+            [self revenant_watchJumpsOf:_controlTimebase];
+        } else {
             CMTimebaseSetMasterClock(_timebase, CMClockGetHostTimeClock());
+            CMTimebaseSetRate(_timebase, 0.0);
+        }
     }
     [self revenant_armDisplayTimer];
 }
