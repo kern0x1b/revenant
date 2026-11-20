@@ -391,14 +391,42 @@ static void RNHostMemoryMapMilestone(UIView *root, NSUInteger views)
     }
 }
 
-- (NSUInteger)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window
+static NSUInteger RNHostOrientationMask(NSArray *names)
 {
-    for (id<UIApplicationDelegate> subscriber in RNHostExpoSubscribers()) {
-        if ([subscriber respondsToSelector:@selector(application:supportedInterfaceOrientationsForWindow:)]) {
-            return [subscriber application:application supportedInterfaceOrientationsForWindow:window];
+    NSDictionary *bits = @{@"UIInterfaceOrientationPortrait": @(UIInterfaceOrientationMaskPortrait),
+                           @"UIInterfaceOrientationLandscapeLeft": @(UIInterfaceOrientationMaskLandscapeLeft),
+                           @"UIInterfaceOrientationLandscapeRight": @(UIInterfaceOrientationMaskLandscapeRight),
+                           @"UIInterfaceOrientationPortraitUpsideDown": @(UIInterfaceOrientationMaskPortraitUpsideDown)};
+    NSUInteger mask = 0;
+    for (id name in names) {
+        mask |= [bits[name] unsignedIntegerValue];
+    }
+    return mask;
+}
+
+static NSUInteger RNHostInfoPlistOrientations(void)
+{
+    NSDictionary *info = [[NSBundle mainBundle] infoDictionary];
+    if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+        NSUInteger pad = RNHostOrientationMask(info[@"UISupportedInterfaceOrientations~ipad"]);
+        if (pad != 0) {
+            return pad;
         }
     }
-    return UIInterfaceOrientationMaskAllButUpsideDown;
+    return RNHostOrientationMask(info[@"UISupportedInterfaceOrientations"]);
+}
+
+- (NSUInteger)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window
+{
+    BOOL answered = NO;
+    NSUInteger mask = UIInterfaceOrientationMaskAll;
+    for (id<UIApplicationDelegate> subscriber in RNHostExpoSubscribers()) {
+        if ([subscriber respondsToSelector:@selector(application:supportedInterfaceOrientationsForWindow:)]) {
+            answered = YES;
+            mask &= [subscriber application:application supportedInterfaceOrientationsForWindow:window];
+        }
+    }
+    return answered ? mask : RNHostInfoPlistOrientations();
 }
 
 #pragma clang diagnostic pop
