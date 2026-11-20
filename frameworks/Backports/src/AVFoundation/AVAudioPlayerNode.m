@@ -1,5 +1,6 @@
 #import "RevenantAVAudioEngine.h"
 #import "RevenantAVAudioBuffer.h"
+#import <AVFoundation/AVAudioSession.h>
 
 OSStatus RevenantPlayerRenderCallback(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, const AudioTimeStamp *inTimeStamp,
                                     UInt32 inBusNumber, UInt32 inNumberFrames, AudioBufferList *ioData)
@@ -66,6 +67,26 @@ OSStatus RevenantPlayerRenderCallback(void *inRefCon, AudioUnitRenderActionFlags
     }
     if (![self revenant_impl]->attached)
         [self revenant_setFormat:buffer.format];
+}
+
+- (void)scheduleBuffer:(AVAudioPCMBuffer *)buffer atTime:(AVAudioTime *)when options:(NSUInteger)options completionCallbackType:(AVAudioPlayerNodeCompletionCallbackType)callbackType completionHandler:(AVAudioPlayerNodeCompletionHandler)completionHandler
+{
+    if (completionHandler == nil) {
+        [self scheduleBuffer:buffer atTime:when options:options completionHandler:nil];
+        return;
+    }
+    AVAudioPlayerNodeCompletionHandler kept = [completionHandler copy];
+    [self scheduleBuffer:buffer atTime:when options:options completionHandler:^{
+        if (callbackType == AVAudioPlayerNodeCompletionDataPlayedBack) {
+            // The buffer has left the render callback; it is heard after the output latency of the session.
+            NSTimeInterval latency = [AVAudioSession sharedInstance].outputLatency;
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(latency * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                kept(callbackType);
+            });
+        } else {
+            kept(callbackType);
+        }
+    }];
 }
 
 - (void)play

@@ -748,6 +748,18 @@ if is_plat("iphoneos") and not SELECTED then
         add_syslinks("objc")
     target_end()
 
+    target("AudioVoiceProcessingProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/daemon")
+        add_deps("AVFoundationBackports")
+        add_files("tests/device_probe/audio_voice_processing_main.m")
+        add_includedirs("tests/Foundation")
+        add_mflags("-fobjc-arc", "-Wno-unguarded-availability-new", "-Wno-unguarded-availability")
+        add_frameworks("Foundation", "AVFoundation", "AudioToolbox")
+        add_syslinks("objc")
+    target_end()
+
     target("PDFViewProbe")
         set_kind("binary")
         set_default(false)

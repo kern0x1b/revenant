@@ -1,4 +1,6 @@
 #import "RevenantAVAudioEngine.h"
+#import "RevenantAVAudioTap.h"
+#import <AVFoundation/AVAudioSession.h>
 
 @implementation RevenantScheduledBuffer
 @synthesize buffer = _buffer;
@@ -12,6 +14,10 @@
     AVAudioFormat *_revenant_format;
     NSMutableArray<RevenantScheduledBuffer *> *_revenant_queue;
     AVAudioNodeTapBlock _revenant_tapBlock;
+    RevenantTapPump *_revenant_pump;
+    // Pumps whose tap was removed or replaced. The audio thread may still be inside one, so they live until the node does.
+    NSMutableArray<RevenantTapPump *> *_revenant_retired;
+    BOOL _revenant_notifyInstalled;
 }
 
 - (instancetype)init
@@ -95,17 +101,56 @@
     return nil;
 }
 
+- (RevenantTapPump *)revenant_pump
+{
+    return _revenant_pump;
+}
+
+- (void)revenant_retirePump
+{
+    if (_revenant_pump == nil)
+        return;
+    [_revenant_pump stop];
+    if (_revenant_notifyInstalled && _revenant->audioUnit) {
+        AudioUnitRemoveRenderNotify(_revenant->audioUnit, RevenantTapRenderNotify, (__bridge void *)_revenant_pump);
+        _revenant_notifyInstalled = NO;
+    }
+    if (_revenant_retired == nil)
+        _revenant_retired = [NSMutableArray array];
+    [_revenant_retired addObject:_revenant_pump];
+    _revenant_pump = nil;
+}
+
 - (void)installTapOnBus:(AVAudioNodeBus)bus bufferSize:(AVAudioFrameCount)bufferSize format:(AVAudioFormat *)format block:(AVAudioNodeTapBlock)tapBlock
 {
     _revenant_tapBlock = [tapBlock copy];
     _revenant->tapBufferSize = bufferSize;
     if (format)
         _revenant_format = format;
+    if ([self isKindOfClass:[AVAudioInputNode class]])
+        [(AVAudioInputNode *)self revenant_inputState]->pump = NULL;
+    [self revenant_retirePump];
+    AVAudioFormat *tapFormat = format ?: _revenant_format ?: [self outputFormatForBus:bus];
+    if (tapFormat == nil || tapBlock == nil)
+        return;
+    _revenant_pump = [[RevenantTapPump alloc] initWithFormat:tapFormat bufferSize:bufferSize block:tapBlock];
+    // A node with an audio unit of its own (the mixer) is tapped on the unit's output; the input node's samples come from
+    // the microphone callback of the engine, which it sets up in prepare.
+    if (![self isKindOfClass:[AVAudioInputNode class]] && _revenant->audioUnit) {
+        AudioUnitAddRenderNotify(_revenant->audioUnit, RevenantTapRenderNotify, (__bridge void *)_revenant_pump);
+        _revenant_notifyInstalled = YES;
+    }
+    if ([self isKindOfClass:[AVAudioInputNode class]])
+        [(AVAudioInputNode *)self revenant_inputState]->pump = (__bridge void *)_revenant_pump;
+    [_revenant_engine revenant_inputChanged];
 }
 
 - (void)removeTapOnBus:(AVAudioNodeBus)bus
 {
     _revenant_tapBlock = nil;
+    if ([self isKindOfClass:[AVAudioInputNode class]])
+        [(AVAudioInputNode *)self revenant_inputState]->pump = NULL;
+    [self revenant_retirePump];
 }
 
 @end
@@ -119,5 +164,100 @@
 @implementation AVAudioOutputNode
 @end
 
-@implementation AVAudioInputNode
+@implementation AVAudioInputNode {
+    RevenantInputState *_revenant_state;
+    BOOL _revenant_voiceProcessing;
+    BOOL _revenant_bypassed;
+    BOOL _revenant_agc;
+    BOOL _revenant_muted;
+}
+
+- (instancetype)init
+{
+    if ((self = [super init])) {
+        _revenant_state = calloc(1, sizeof(RevenantInputState));
+        _revenant_state->scratchFrames = 4096;
+        _revenant_state->scratch = calloc(_revenant_state->scratchFrames, sizeof(int16_t));
+        // As on iOS 13 and later, automatic gain control is on once voice processing is.
+        _revenant_agc = YES;
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    _revenant_state->pump = NULL;
+    free(_revenant_state->scratch);
+    free(_revenant_state);
+}
+
+- (RevenantInputState *)revenant_inputState
+{
+    return _revenant_state;
+}
+
+- (AVAudioFormat *)outputFormatForBus:(AVAudioNodeBus)bus
+{
+    AVAudioFormat *set = [super outputFormatForBus:bus];
+    if (set)
+        return set;
+    double rate = [AVAudioSession sharedInstance].sampleRate;
+    return [[AVAudioFormat alloc] initWithCommonFormat:AVAudioPCMFormatFloat32 sampleRate:rate > 0 ? rate : 44100 channels:1 interleaved:NO];
+}
+
+- (AVAudioFormat *)inputFormatForBus:(AVAudioNodeBus)bus
+{
+    return [self outputFormatForBus:bus];
+}
+
+- (BOOL)setVoiceProcessingEnabled:(BOOL)enabled error:(NSError **)outError
+{
+    if (enabled == _revenant_voiceProcessing)
+        return YES;
+    AVAudioEngine *engine = self.engine;
+    if (engine != nil && ![engine revenant_setVoiceProcessingEnabled:enabled error:outError])
+        return NO;
+    _revenant_voiceProcessing = enabled;
+    [engine revenant_inputChanged];
+    return YES;
+}
+
+- (BOOL)isVoiceProcessingEnabled
+{
+    return _revenant_voiceProcessing;
+}
+
+- (BOOL)isVoiceProcessingBypassed
+{
+    return _revenant_bypassed;
+}
+
+- (void)setVoiceProcessingBypassed:(BOOL)bypassed
+{
+    _revenant_bypassed = bypassed;
+    [self.engine revenant_applyVoiceProcessing];
+}
+
+- (BOOL)isVoiceProcessingAGCEnabled
+{
+    return _revenant_agc;
+}
+
+- (void)setVoiceProcessingAGCEnabled:(BOOL)enabled
+{
+    _revenant_agc = enabled;
+    [self.engine revenant_applyVoiceProcessing];
+}
+
+- (BOOL)isVoiceProcessingInputMuted
+{
+    return _revenant_muted;
+}
+
+- (void)setVoiceProcessingInputMuted:(BOOL)muted
+{
+    _revenant_muted = muted;
+    _revenant_state->muted = muted ? 1 : 0;
+}
+
 @end
