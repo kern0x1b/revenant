@@ -1,6 +1,6 @@
 local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/module_build.lua FOLDER CACHE EXTRA_MODULES
   Builds the isolated host FOLDER (made by isolate.lua copy) with the 25 base real modules plus EXTRA_MODULES (comma separated
-  Expo packages whose recipes are in packages/), under one budget claim for the whole build, so that the per-package probes
+  Expo packages whose recipes are in packages/; expo-task-manager brings unimodules-app-loader, the pod it links), under one budget claim for the whole build, so that the per-package probes
   and the nested configures do not each wait in the budget queue. It prints the budget state and elapsed seconds to stderr.
   The log of the build is FOLDER-build.log. Run it with run_in_background and a timeout of at most 1200000 (20 minutes).]]
 
@@ -17,6 +17,9 @@ function run(folder, cache, extra, execute)
         say("budget " .. (status:match(key .. "[^\n]*") or key .. "?"))
     end
     local real = BASE .. (extra and extra ~= "" and ("," .. extra) or "")
+    if real:find("expo-task-manager", 1, true) and not real:find("unimodules-app-loader", 1, true) then
+        real = real .. ",unimodules-app-loader"
+    end
     local envs = {
         REVENANT_CACHE = path.absolute(cache),
         REVENANT_PATH = root,
