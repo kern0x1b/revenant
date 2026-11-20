@@ -2,6 +2,7 @@ local ROOT = path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
 local TOOLS = path.join(ROOT, "frameworks", "ReactNative", "tools")
 
 local isolate = import("isolate", {rootdir = TOOLS, anonymous = true})
+local patch_wire = import("patch_wire", {rootdir = TOOLS, anonymous = true})
 local module_build = import("module_build", {rootdir = TOOLS, anonymous = true})
 
 local function expect(name, condition, detail)
@@ -146,3 +147,9 @@ local failed, command = build_status(3)
 expect("module_build returns the status of a failed build", failed == 3, "the status was " .. tostring(failed))
 expect("module_build returns 0 for a build that passed", build_status(0) == 0, "a passed build was reported as failed")
 expect("module_build builds the base modules and the extra ones", command:find("expo-print,expo-x", 1, true) ~= nil, command)
+local recipe = '    add_versions("1.0", "aa")\n    add_patches("1.0", path.join(os.scriptdir(), "patches", "x-ios6.patch"), "11")\n'
+local once = patch_wire.register(recipe, "1.0", "x-ios6.patch", "22")
+local twice = patch_wire.register(once, "1.0", "x-ios6.patch", "33")
+local _, count = twice:gsub("add_patches", "")
+expect("patch_wire replaces the registration of a patch whose name has a dash and does not add a second one", count == 1 and twice:find('"33"', 1, true) ~= nil and twice:find('"11"', 1, true) == nil,
+       twice)

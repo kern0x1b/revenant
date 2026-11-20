@@ -12,11 +12,14 @@ function main(recipe, version, source, name)
     local target = path.join(folder, "patches", name)
     os.mkdir(path.directory(target))
     os.cp(source, target)
-    local sha = hash.sha256(target)
     local file = path.join(folder, "xmake.lua")
-    local text = io.readfile(file)
+    io.writefile(file, register(io.readfile(file), version, name, hash.sha256(target)))
+    print(recipe, name, hash.sha256(target))
+end
+
+function register(text, version, name, sha)
     local line = string.format('    add_patches("%s", path.join(os.scriptdir(), "patches", "%s"), "%s")\n', version, name, sha)
-    local escaped_version, escaped_name = version:gsub("%.", "%%."), name:gsub("%.", "%%.")
+    local escaped_version, escaped_name = version:gsub("%W", "%%%0"), name:gsub("%W", "%%%0")
     local pattern = '    add_patches%("' .. escaped_version .. '", path%.join%(os%.scriptdir%(%), "patches", "' .. escaped_name .. '"%), "[0-9a-f]+"%)\n'
     if text:find(pattern) then
         text = text:gsub(pattern, function () return line end)
@@ -25,6 +28,5 @@ function main(recipe, version, source, name)
         assert(last, "no add_versions line for " .. version)
         text = text:sub(1, last) .. line .. text:sub(last + 1)
     end
-    io.writefile(file, text)
-    print(recipe, name, sha)
+    return text
 end
