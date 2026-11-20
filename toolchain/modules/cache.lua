@@ -6,6 +6,11 @@ local DEFAULT_GIGABYTES = 50
 local DEFAULT_GROWTH = 2 * GIGABYTE
 local ROOT_VARIABLE = "REVENANT_CACHE"
 local LIMIT_VARIABLE = "REVENANT_CACHE_GB"
+local STORE_VARIABLE = "REVENANT_STORE"
+local STORE_LIMIT_VARIABLE = "REVENANT_STORE_GB"
+local DEFAULT_STORE_GIGABYTES = 80
+local STORE_STAMP = ".cap-checked"
+local STORE_CHECK_SECONDS = 600
 local ARCHITECTURE = "armv7"
 local RELEASES = {"6.1.3", "6.0"}
 local BUILD_OUTPUTS = {".xmake", "build"}
@@ -36,16 +41,65 @@ function root()
     return path.join(checkout(), ".cache")
 end
 
-function limit()
-    local text = os.getenv(LIMIT_VARIABLE)
+function store()
+    local named = os.getenv(STORE_VARIABLE)
+    if named and named ~= "" then
+        if not path.is_absolute(named) then
+            raise("%s is %q, which is not an absolute path", STORE_VARIABLE, named)
+        end
+        return path.normalize(named)
+    end
+    local home = os.getenv("HOME")
+    if not home or home == "" then
+        raise("HOME is unset, so the shared store has no default place: set %s", STORE_VARIABLE)
+    end
+    return path.join(home, ".revenant", "store")
+end
+
+local function gigabytes_of(variable, default)
+    local text = os.getenv(variable)
     if not text or text == "" then
-        return DEFAULT_GIGABYTES * GIGABYTE
+        return default * GIGABYTE
     end
     local gigabytes = tonumber(text)
     if not gigabytes or gigabytes <= 0 then
-        raise("%s is %q, which is not a positive number of gigabytes", LIMIT_VARIABLE, text)
+        raise("%s is %q, which is not a positive number of gigabytes", variable, text)
     end
     return math.floor(gigabytes * GIGABYTE)
+end
+
+function limit()
+    return gigabytes_of(LIMIT_VARIABLE, DEFAULT_GIGABYTES)
+end
+
+function store_limit()
+    return gigabytes_of(STORE_LIMIT_VARIABLE, DEFAULT_STORE_GIGABYTES)
+end
+
+function store_stamp()
+    return STORE_STAMP
+end
+
+function pins(base)
+    local pinned = {}
+    for _, file in ipairs(os.files(path.join(base, "roots", "*.txt"))) do
+        for line in io.readfile(file):gmatch("[^\n]+") do
+            local named = line:match("^%s*([^#%s][^%s]*)")
+            if named then
+                pinned[path.join(base, "xmake-global", ".xmake", "packages", named)] = true
+            end
+        end
+    end
+    return pinned
+end
+
+local function pinned_by(members, fixed)
+    for _, member in ipairs(members) do
+        if fixed[member] then
+            return true
+        end
+    end
+    return false
 end
 
 function human(bytes)
@@ -233,9 +287,20 @@ local function modcache_entries(base, found)
     end
 end
 
-function entries(base)
+local function own_children(base)
     local found = {}
     for _, folder in ipairs(children(base)) do
+        local name = path.filename(folder)
+        if not (os.islink(folder) and (name == "xmake" or name == "xmake-global")) then
+            table.insert(found, folder)
+        end
+    end
+    return found
+end
+
+function entries(base)
+    local found = {}
+    for _, folder in ipairs(own_children(base)) do
         local name = path.filename(folder)
         if name == "scratch" then
             for _, task in ipairs(children(folder)) do
@@ -260,6 +325,10 @@ function entries(base)
         else
             table.insert(found, entry(base, folder, "kept"))
         end
+    end
+    local fixed = pins(base)
+    for _, listed in ipairs(found) do
+        listed.pinned = pinned_by(listed.members, fixed)
     end
     return found
 end
@@ -368,7 +437,7 @@ function reserve(bytes, what, opt)
     local candidates, freeable = {}, 0
     for _, listed in ipairs(all) do
         listed.bytes = entry_bytes(listed)
-        if ORDER[listed.class] and not held_by(listed.members, paths) then
+        if ORDER[listed.class] and not listed.pinned and not held_by(listed.members, paths) then
             table.insert(candidates, listed)
             freeable = freeable + listed.bytes
         end
@@ -452,7 +521,15 @@ function guard(from, opt)
     local worktree = real(from)
     local builds = opt.builds or build_outputs(worktree)
     local expected = growth(worktree, {root = opt.root, builds = builds})
-    return reserve(expected, "the build in " .. worktree, {root = opt.root, limit = opt.limit, builds = builds})
+    local result = reserve(expected, "the build in " .. worktree, {root = opt.root, limit = opt.limit, builds = builds})
+    local shared = opt.store or store()
+    local stamp = path.join(shared, STORE_STAMP)
+    if not os.isfile(stamp) or os.time() - os.mtime(stamp) >= (opt.store_interval or STORE_CHECK_SECONDS) then
+        local trimmed = reserve(0, "keeping the shared store within its cap", {root = shared, limit = opt.store_limit or store_limit(), builds = {}})
+        result.evicted = table.join(result.evicted, trimmed.evicted)
+        io.writefile(stamp, tostring(os.time()))
+    end
+    return result
 end
 
 local function drop(members, removed, dry, paths)
@@ -471,7 +548,7 @@ function prune_generations(base, opt)
     local paths = retention.open_paths()
     local byname = {}
     for _, listed in ipairs(entries(base)) do
-        if listed.class == "generation" and not held_by(listed.members, paths) then
+        if listed.class == "generation" and not listed.pinned and not held_by(listed.members, paths) then
             byname[listed.published] = byname[listed.published] or {}
             table.insert(byname[listed.published], listed)
         end

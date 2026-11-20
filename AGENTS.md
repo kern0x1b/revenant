@@ -67,18 +67,19 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
 - Skills live in `.agents/skills/` at the top of revenant (`.claude/skills` links there); a member keeps none of its
   own. xmake's own skills come from the `xmake-skills` plugin pinned in `.claude/settings.json`, and are not copied into `.agents/`. The `xmake-*` skills of `agent-skills/` are derived from those upstream skills and rewritten for the toolchain: `agent-skills/THIRD-PARTY.md` maps each one to its upstream skills and to the commit they were taken from.
   `agent-skills/` is the plugin `agent-skills` of the revenant marketplace (`.claude-plugin/marketplace.json`).
-- xmake at the top is always `./xmakew`, the pinned and patched xmake of `packages/x/xmake` (built into
-  `.cache/xmake/` on first use): `./xmakew f -p iphoneos -a armv7`, `./xmakew build <target>`. It takes
-  the revenant addon from `toolchain/` of the checkout; stock xmake would fetch and install the toolchain globally instead.
-  Its package store is `.cache/xmake-global` (`XMAKE_GLOBALDIR`). Everything a build can make again is under
-  `.cache`, and `./xmakew l tools/clean.lua [--packages | --all]` gives it back. The whole of `.cache` is capped at
-  50 GB (`REVENANT_CACHE_GB`): a write that would pass it evicts old entries first, and `./xmakew l tools/cache.lua status`
-  shows what is there. It is in `docs/guides/machine.md`.
-  A linked worktree has no cache of its own, and `./xmakew` refuses to run there without `REVENANT_CACHE`: it would otherwise use
-  the main checkout's `.cache`, which every worker shares. Make the private cache with `./xmakew l -P . tools/private_cache.lua <worktree>/.cache-private` (never an empty folder: a linked
-  worktree's `./xmakew` refuses a `REVENANT_CACHE` without the `.private-cache` marker, and a cold cache costs about an hour)
-  (`docs/guides/machine.md`, "A private cache"), set `REVENANT_CACHE` to the folder it prints for each run, echo it first,
-  and never point it at the main checkout's `.cache`. Remove it with `tools/private_cache.lua --remove` when the worktree is done.
+- xmake at the top is always `./xmakew`, the pinned and patched xmake of `packages/x/xmake` (built once per machine into
+  `<store>/xmake/<key>`, the store being `REVENANT_STORE`, default `~/.revenant/store`): `./xmakew f -p iphoneos -a armv7`,
+  `./xmakew build <target>`. It takes the revenant addon from `toolchain/` of the checkout; stock xmake would fetch and
+  install the toolchain globally instead. There is one package store per machine, `<store>/xmake-global`
+  (`XMAKE_GLOBALDIR`), at a fixed path, and every worktree reads it through links in its cache; a worktree makes no copy of
+  it and no private cache. Everything a build can make again is under `.cache` and the store, and
+  `./xmakew l tools/clean.lua [--packages | --all]` gives it back. `.cache` is capped at 50 GB (`REVENANT_CACHE_GB`) and
+  the store at 80 GB (`REVENANT_STORE_GB`), apart from what a roots file (`<store>/roots/*.txt`) pins: a write that would
+  pass a cap evicts old entries first, and `./xmakew l tools/cache.lua status` shows what is there. It is in
+  `docs/guides/machine.md`.
+  A linked worktree takes `<worktree>/.cache` for its cache (`REVENANT_CACHE` names another folder; an empty one is fine, it
+  needs no marker). A cache from before the store, with a package store of its own, is refused with the command that
+  seeds the store from it (`tools/private_cache.lua <store> --from <cache>`, once, while the store does not exist).
 - Tests: `./xmakew test -P .` is the one test entry point. It runs every test a host with the prebuilt packages can
   run (`REVENANT_PREBUILT=kern0x1b/revenant`, `REVENANT_PREBUILT_ONLY=llvm,swift,ld64`), in parallel, and each component's tests are
   targets named for it, so `./xmakew test -P . 'toolchain_*/*'` or `'repository/*'` runs one component. A test that

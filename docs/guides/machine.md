@@ -2,19 +2,30 @@
 
 How a build uses this machine's disk, what the cache holds and how it is capped, and how to give space back.
 
-## One folder, one cap
+## Two folders, two caps
 
-Everything revenant writes outside its sources goes under one folder, `.cache` in the main checkout. Every worktree of
-the checkout uses that folder: `toolchain/modules/cache.lua` finds the checkout from any worktree with
-`git rev-parse --git-common-dir`, and git ignores `.cache` (`.gitignore`). `REVENANT_CACHE` names another folder for all
-of it, and `./xmakew` exports the folder it uses, so each tool and test it runs reads the same one.
+Everything revenant writes outside its sources goes into two folders.
 
-The folder is capped at 50 GB, and the cap counts the build outputs as well: each `build/` and `.xmake/` that git ignores,
+The **store** holds the packages: the pinned and patched xmake binaries and the package store (`XMAKE_GLOBALDIR`, with the
+installs, the sources and the build folders of every package). It is one folder for the whole machine, `~/.revenant/store`
+(`REVENANT_STORE` names another, as an absolute path), and every checkout and worktree reads and writes it, so a package
+key is built once per machine and the absolute paths in an install never move (the section "The shared store" below).
+
+The **cache** holds the rest: the shared caches of the firmware, the lowered caches, the emulator images, the token pool,
+the scratch of each task. It is `.cache` in the main checkout and `.cache` in a linked worktree (git ignores both,
+`.gitignore`); `REVENANT_CACHE` names another folder. `toolchain/modules/cache.lua` finds the checkout from any worktree
+with `git rev-parse --git-common-dir`. `./xmakew` exports both folders it uses, so each tool and test it runs reads the
+same ones, and it links `xmake` and `xmake-global` of the cache to the store, so a tool that reads
+`<cache>/xmake-global/.xmake/packages` reads the store's.
+
+The cache is capped at 50 GB, and the cap counts the build outputs as well: each `build/` and `.xmake/` that git ignores,
 in the main checkout, in every worktree, and in every framework of each. `REVENANT_CACHE_GB` sets the cap in decimal
-gigabytes. The size is counted with `du`, which counts an APFS clone at its full size although the clone takes no room;
-the count can be above what the disk holds, so a write can be refused that would fit.
+gigabytes. The store is capped at 80 GB (`REVENANT_STORE_GB`) and counts nothing else. The size is counted with `du`,
+which counts an APFS clone at its full size although the clone takes no room; the count can be above what the disk holds,
+so a write can be refused that would fit.
 
-Each folder falls in one of these classes. Only the package, generation, source, scratch and build classes can be evicted, and only to make room for a write:
+Each folder falls in one of these classes. The rows that begin `xmake/` or `xmake-global/` are folders of the store, the
+others of the cache. Only the package, generation, source, scratch and build classes can be evicted, and only to make room for a write:
 
 | Folder | What it is | Class |
 | --- | --- | --- |
@@ -23,7 +34,8 @@ Each folder falls in one of these classes. Only the package, generation, source,
 | `xmake-global/.xmake/packages` | the package store: a package's folder, its link `<hash>`, and its install generations `<hash>.g<token>` | package, generation |
 | `xmake-global/.xmake/cache/packages/<yymm>/<letter>/<package>` | the package sources and build folders, one folder per package | source |
 | the rest of `xmake-global/.xmake/cache` | xmake's other caches | scratch |
-| the rest of `xmake-global/.xmake` | the repositories and xmake's state, through `XMAKE_GLOBALDIR`, which `xmakew` sets to `.cache/xmake-global` | kept |
+| the rest of `xmake-global/.xmake` | the repositories and xmake's state, through `XMAKE_GLOBALDIR`, which `xmakew` sets to the store's `xmake-global` | kept |
+| `roots/*.txt` of the store | the installs that other tools build against and that must stay (below) | kept |
 | `scratch/<task>` | the scratch of one task, written by the task and deleted when it ends | scratch |
 | `dyld/<release>` | the shared caches and libraries of each iOS release, taken out of decrypted firmware; 6.1.3 and 6.0 are kept, other releases are scratch | kept or scratch |
 | `firmware/rootfs/<device>/<release>_<build>` | root file systems; 6.1.3 and 6.0 are kept, other releases are scratch | kept or scratch |
@@ -65,7 +77,16 @@ If the write still does not fit once nothing more can go, it fails before anythi
 write, the cap, and the five biggest entries.
 
 The package store keeps at most one previous generation of each package, and the firmware keeps only 6.1.3 and 6.0, and
-only armv7 within them. The daily sweep and `tools/cache.lua prune` remove what is beyond that.
+only armv7 within them. The daily sweep and `tools/cache.lua prune` remove what is beyond that, in the store and in the
+cache.
+
+The store has its own cap and the same order of eviction, and it never evicts what a roots file names. A tool that builds
+against particular installs (the Bazel build of Telegram links the ones in its `bazel/store-pins.txt`) gives the store a
+file `roots/<name>.txt`, one install per line, the path under `xmake-global/.xmake/packages` (`s/swift-runtime/6.4.0/<hash>.g<token>`
+for one generation, `s/swift-runtime/6.4.0/<hash>` for a package and its current generation), blank lines and `#` comments
+allowed. A listed generation, or a package, is pinned: neither eviction nor `prune` removes it, and `status` marks it
+`(pinned)`. A symbolic link `roots/<name>.txt` to the tool's own file keeps the list in the tool's repository. If a write
+could be made to fit only by evicting a pinned install, it fails and removes nothing of it.
 
 ## A build and an emulator run
 
@@ -73,7 +94,9 @@ Before a build starts (`./xmakew f -P .`, `build`, `rebuild`, `test`, `install`,
 `tools/cache.lua guard`. It reserves the room the build is expected to add: the size its worktree's build outputs had
 after the last build, less what is there now, and 2 GB before the first build. A build that cannot get that room
 does not start. After the build, `tools/cache.lua record` stores the worktree's build-output size for the next guard. A
-build that grows beyond its reservation is caught at its next start.
+build that grows beyond its reservation is caught at its next start. The guard also keeps the store within its cap, at
+most once in ten minutes (the stamp `.cap-checked` in the store), because counting the store with `du` takes as long as
+the store has files.
 
 An emulator run clones the golden root file system, which reserves the full size of the image first, so a run whose
 clone would pass the cap does not start. Its TMPDIR is `tmp` inside its run folder. When the run ends, pass or fail,
@@ -86,9 +109,9 @@ fails raises.
     ./xmakew l -P . tools/cache.lua status
     ./xmakew l -P . tools/cache.lua prune [--dry-run]
 
-`status` prints the folder, the cap, what is used, and each entry with its size, class, last use, and `(in use)` when a
-process has files open in it. `prune` removes the package generations beyond the one previous, and the firmware the
-configured releases do not need.
+`status` prints the cache and then the store: the folder, the cap, what is used, and each entry with its size, class, last
+use, `(in use)` when a process has files open in it, and `(pinned)` when a roots file names it. `prune` removes the package
+generations beyond the one previous, and the firmware the configured releases do not need.
 
 ## One clean
 
@@ -98,11 +121,13 @@ configured releases do not need.
 
 | Level | Removes | Keeps |
 | --- | --- | --- |
-| default | each worktree's ignored `.xmake` and `build`, every tool cache and scratch folder, the package sources and build folders of the store, xmake's leftover build folders and logs | the package store, the xmake binaries, the kept folders |
-| `--packages` | the same and the package store | the xmake binaries, the kept folders |
-| `--all` | everything under `.cache`, the kept folders included; the xmake binaries are built again on the next `./xmakew` | nothing |
+| default | each worktree's ignored `.xmake` and `build`, every tool cache and scratch folder of the cache | the store, the kept folders |
+| `--packages` | the same | the store, the kept folders |
+| `--all` | everything under the cache, the kept folders included, and its links to the store | the store |
 
-Only ignored and untracked build folders are removed: `git check-ignore` decides.
+Only ignored and untracked build folders are removed: `git check-ignore` decides. The store is shared by every checkout
+of the machine, and a build in another worktree may be using a source or build folder in it, so `clean` never removes
+from it; `tools/cache.lua prune` and the cap remove from it, and never what a process has open or a roots file names.
 
 ## Scratch: kept while it is used, removed when it is not
 
@@ -141,90 +166,80 @@ clone (`emulator.clone` is `cp -c -R`), and the files the emulator copies into i
 firmware's root filesystem is copied once per release out of its disk image, with `ditto`, and no clone can be made
 from there; each emulator image after that is a clone of it.
 
-## A private cache
+## The shared store
 
-**A new cache is made with `tools/private_cache.lua`, never as an empty folder.** An empty `REVENANT_CACHE` starts a cold build of every
-package: on 2026-11-16 a prepush in a hand-made cache took 63 minutes (46 of them packages, `tessdata` 12, `libcxx` 10) where the clone of
-the main `.cache` takes under a minute and the same configure 28 seconds. In a linked worktree `./xmakew` refuses a `REVENANT_CACHE` that has
-no `.private-cache` marker, except a folder named `.cache-boot` (the tool's own first run), and says how to make one. A warm
-cache that predates the rule gets the marker by hand (`echo adopted > <cache>/.private-cache`); `--remove` then deletes it like any other.
+**There is one package store per machine, and a worktree needs no clone of it.** Until 2026-11-20 each worktree had a
+cache of its own with a store inside, made by cloning another one with `tools/private_cache.lua`: 75 stores on one machine,
+the same keys built two to four times (libcxx three times in a morning), 16 million files that every create and delete
+passed through the file-system event daemon, and a cold build of every package, 63 minutes on 2026-11-16, when a cache was
+made by hand. The store is one folder at a fixed path, so an install's absolute paths (a CMake cache, a manifest, a
+pkg-config file) are the same for every worktree and never need to be rewritten.
 
-A worker that builds from its own worktree must not write into the main checkout's `.cache`, and a CMake cache that names
-the shared folder would send a later build back into it. `tools/private_cache.lua` makes a private cache for a worktree: an
-APFS clone of the main checkout's `.cache`, in which every absolute link into the source and every absolute path in a
-`CMakeCache.txt` is rewritten to name the clone.
+`./xmakew` takes the store from `REVENANT_STORE` (an absolute path) or `~/.revenant/store`, builds the pinned xmake into
+`<store>/xmake/<key>` once for the machine, runs it with `XMAKE_GLOBALDIR=<store>/xmake-global`, and links `xmake` and
+`xmake-global` of the cache to those. A linked worktree takes `<worktree>/.cache` for its cache when `REVENANT_CACHE` is
+unset, and any folder `REVENANT_CACHE` names, empty or not, with no marker. What it holds is small: the token pool, the
+scratch of its tasks, the lowered caches, and (when a task needs them) `dyld` and `firmware`.
 
-```
-./xmakew l -P . tools/private_cache.lua <worktree>/.cache-private
-```
+Two builds of one package key never run at once, because the install is locked by its folder (`<installdir>.lock`); two
+different keys of one package, built at once by two processes, each patch and build in their own copy of the sources
+(`checkout.keyed`, [ADR 0018](../explanation/decisions/0018-source-folder-per-build.md)).
 
-It prints the value to give `REVENANT_CACHE` for each run, which is the folder it just made:
-
-```
-REVENANT_CACHE=<worktree>/.cache-private ./xmakew f -P . -p iphoneos -a armv7 --component=Backports -y
-```
-
-A linked worktree's `./xmakew` refuses to run without `REVENANT_CACHE`, so the tool's own first run needs a throwaway folder
-that is removed once the private cache exists:
+**A cache from before the store is refused**, because a real `xmake-global` in it would be read by the tools that read it
+beside the store's, and it is not the store's. `xmakew` stops and names two ways out: remove the folder (the installs come
+again from the prebuilt releases or are built once), or make that cache the store while the store does not exist yet,
+which keeps its installs and the generation names a roots file pins:
 
 ```
-REVENANT_CACHE=<worktree>/.cache-boot ./xmakew l -P . tools/private_cache.lua <worktree>/.cache-private
-rm -rf -- <worktree>/.cache-boot
+REVENANT_CACHE=<an empty folder> ./xmakew l -P . tools/private_cache.lua ~/.revenant/store --from <the old cache>
 ```
 
-The boot folder keeps only what that run wrote (an `xmake/` folder and a `.scratch-swept` marker), and nothing reads it
-afterwards. Run the `rm` even when the clone fails: a leftover folder is git-ignored (`/.cache-boot/`), so it stays out of commits,
-but it still takes space.
+The tool clones the cache with APFS clones and rewrites every absolute link, every `CMakeCache.txt` and the text state under
+`xmake-global/.xmake/cache` to name the store, then writes its `.private-cache` marker. It refuses a destination that exists
+and is not empty, inside the source or holding it, or on another volume. A clone is only as warm as its source: choose the
+cache that holds the packages the pins and the tasks need, and read `status` of the store before using it. Its older
+`xmake/<key>` binaries come with it, and the key of this `xmakew` is built beside them on first use.
 
-### Which cache to clone
+### What a new cache lacks
 
-The tool clones the main checkout's `.cache` unless `--from <cache>` names another one. A clone is only as warm as its
-source: on 2026-11-19 the main `.cache` was behind the packages the stack needs (the device configure started a cold
-`glslang` install and failed), and a clone of it would have repeated that. `--from` takes any cache that holds the
-packages the task builds, and a sibling worktree's private cache is the usual choice:
+A new cache has no `dyld` and no `firmware`; a task that reads them fetches them (the iOS 6.0 shared cache, the firmware
+catalogue), or the worker clones them from a cache that has them with `cp -c -R -p` (an APFS clone) before the first run:
 
-```
-./xmakew l -P . tools/private_cache.lua <worktree>/.cache-private --from <other worktree>/.cache-pp
-```
-
-The tool does not know what a task needs, so the worker checks the source before the clone, and the clone before the first
-build:
-
-- `<source>/xmake-global/.xmake/packages/` holds an installed folder for each package the configure names (for the Backports
-  device group `glslang` was the one missing from the main `.cache`). The configure of a warm clone ends in under a minute
-  (28 seconds measured on 2026-11-16) and prints no `installing` or `downloading` line; the first such line means the
-  source was not warm, and the build is stopped there and the source changed, not waited for.
 - `<source>/dyld/6.1.3/classes_armv7.json` exists. The Backports generator decides from that file which SDK classes get a
-  proxy and stops without it; a clone that has only `dyld/6.0` once produced a skeleton from the wrong release's inventory
+  proxy and stops without it; a cache that has only `dyld/6.0` once produced a skeleton from the wrong release's inventory
   (a `MapKit` proxy that the 6.1.3 device does not need).
-- For the device runtime tests, `<source>/firmware/rootfs/iPhone4,1/6.1.3_10B329` exists. A clone without it runs every
+- For the device runtime tests, `<source>/firmware/rootfs/iPhone4,1/6.1.3_10B329` exists. A cache without it runs every
   `backports_runtime` case as failed (measured 2026-11-19, all cases of the group), because the emulator has no root file
   system to boot. A missing one is cloned from a cache that has it with `cp -c -R -p` (an APFS clone, no second copy on
   disk), before the first run.
-- `df -h /System/Volumes/Data` after the clone: a clone costs little until it is written to, and the floor of the disk rule
+- `df -h /System/Volumes/Data` after a clone: a clone costs little until it is written to, and the floor of the disk rule
   holds.
 
-The clone takes the whole of `.cache` except five folders that hold this machine's state: `budget` (the token pool, which a private run takes its tokens from and does not copy), `devices` (which run holds which
-device), `emulator-slots` (the locks that bound how many emulators run at once), `scratch` (the scratch of the tasks running
-in the shared cache) and `sizes` (the measured sizes of the cache's paths, keyed by source path, which would be wrong for the
-clone). A private run therefore claims no device and no emulator slot of the shared cache.
+`tools/private_cache.lua` is now the way to seed the store once, and nothing a worktree does at its start. It takes the whole of
+the source cache except five folders that hold the state of the machine and of the tasks that were running in the source:
+`budget` (the token pool), `devices` (which run holds which device), `emulator-slots` (the locks that bound how many
+emulators run at once), `scratch` (the scratch of the tasks running there) and `sizes` (the measured sizes of the source's
+paths, which would be wrong for the clone). The new store therefore claims no device and no emulator slot of the source.
 
 An absolute link into the source is pointed into the clone; a relative link, or a link to a path outside the cache, is kept.
-A link into one of the four left-out folders stays dangling in the clone, and the tool reports those apart from the links
+A link into one of the five left-out folders stays dangling in the clone, and the tool reports those apart from the links
 that were already dangling in the source. A `CMakeCache.txt` has every source path replaced with the clone's path. Other
-files that name the source are copied unchanged, since the tool does not look for them.
+files that name the source are copied unchanged, since the tool does not look for them. After the rewrite it checks that no
+link and no CMake cache still names the source; if one does, it removes the clone and fails.
 
-The tool refuses a destination inside the source or holding it, a destination that exists and is not empty, and a
-destination on another volume, where a copy would take the full size of the cache. After the rewrite it checks that no link
-and no CMake cache still names the source; if one does, it removes the clone and fails.
+The tool refuses a destination that exists and is not empty, one inside the source or holding it, and one on another volume,
+where a copy would take the full size of the source. The destination is the store, so the roots file of a project that pins
+generations by name (Telegram's `bazel/store-pins.txt`, linked into `<store>/roots/`) keeps naming installs
+that exist in it.
 
 ```
-./xmakew l -P . tools/private_cache.lua --remove <worktree>/.cache-private
+./xmakew l -P . tools/private_cache.lua --remove <folder>
 ```
 
 removes a folder only when it holds the `.private-cache` marker that the tool wrote, and never the folder that holds the
-checkout. Apple's directories are copied read-only, so removal makes the clone's directories writable before it deletes them,
-and it does not follow links.
+checkout. Never run it on the store while a roots file names its installs: `tools/cache.lua` drops a part no root names when
+the cap is reached, and nothing else deletes from the store. Apple's directories are copied read-only, so removal makes the
+directories writable before it deletes them, and it does not follow links.
 
 ## Build each package once
 

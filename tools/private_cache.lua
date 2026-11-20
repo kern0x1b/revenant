@@ -358,34 +358,6 @@ local function test_suite()
     check(os.isfile(path.join(install, "lib", "libx.dylib")), "removing a clone that links into the source leaves the source's library in place")
     check(os.isdir(source), "removing a clone leaves the source in place")
 
-    local repo = path.join(base, "repo")
-    local linked = path.join(base, "linked")
-    os.mkdir(repo)
-    local function git(folder, args)
-        return os.iorunv("git", table.join({"-C", folder, "-c", "user.name=t", "-c", "user.email=t@localhost", "-c", "commit.gpgsign=false"}, args))
-    end
-    git(repo, {"init", "-q"})
-    git(repo, {"commit", "-q", "--allow-empty", "-m", "one"})
-    git(repo, {"worktree", "add", "-q", linked})
-    os.cp(path.join(os.projectdir(), "xmakew"), path.join(linked, "xmakew"))
-    os.cp(path.join(os.projectdir(), "xmakew"), path.join(repo, "xmakew"))
-    local function wrapper(folder, cache_folder)
-        local output = try { function () return os.iorunv("sh", {"-c", "cd \"$1\" && REVENANT_CACHE=\"$2\" ./xmakew 2>&1; true", "sh", folder, cache_folder}) end } or ""
-        return output
-    end
-    local hand_made = path.join(base, "hand-made")
-    os.mkdir(hand_made)
-    check(wrapper(linked, hand_made):find("is not a private cache", 1, true) ~= nil, "a linked worktree refuses a cache without the marker")
-    check(wrapper(linked, hand_made):find("private_cache.lua", 1, true) ~= nil, "and says how to make one")
-    local marked = path.join(base, "marked")
-    os.mkdir(marked)
-    io.writefile(path.join(marked, MARKER), "source x\n")
-    check(wrapper(linked, marked):find("is not a private cache", 1, true) == nil, "a linked worktree takes a cache with the marker")
-    local boot = path.join(base, ".cache-boot")
-    os.mkdir(boot)
-    check(wrapper(linked, boot):find("is not a private cache", 1, true) == nil, "a linked worktree takes the boot folder the tool's first run needs")
-    check(wrapper(repo, hand_made):find("is not a private cache", 1, true) == nil, "the main checkout takes any cache")
-
     remove_tree(base)
     print("private cache: %d tests passed", count)
 end

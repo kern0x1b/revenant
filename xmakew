@@ -17,19 +17,8 @@ fi
 gitdir=$(git -C "$root" rev-parse --path-format=absolute --git-dir 2>/dev/null || true)
 if [ -n "${REVENANT_CACHE:-}" ]; then
     cache=$REVENANT_CACHE
-    if [ -n "$common" ] && [ "$gitdir" != "$common" ]; then
-        case $cache in
-            /*) absolute=$cache ;;
-            *) absolute=$(pwd)/$cache ;;
-        esac
-        if [ ! -f "$absolute/.private-cache" ] && [ "$(basename "$absolute")" != ".cache-boot" ]; then
-            echo "xmakew: $absolute is not a private cache (it has no .private-cache marker): an empty or hand-made folder starts a cold build of every package (63 minutes on 2026-11-16). Make the cache by cloning the main checkout's: REVENANT_CACHE=$root/.cache-boot ./xmakew l -P . tools/private_cache.lua $root/.cache-private, then rm -rf $root/.cache-boot and set REVENANT_CACHE=$root/.cache-private (docs/guides/machine.md, 'A private cache')" >&2
-            exit 1
-        fi
-    fi
 elif [ -n "$common" ] && [ "$gitdir" != "$common" ]; then
-    echo "xmakew: $root is a linked worktree, and its cache must not fall back to the main checkout's $checkout/.cache: set REVENANT_CACHE to a directory of this worktree" >&2
-    exit 1
+    cache=$root/.cache
 else
     cache=$checkout/.cache
 fi
@@ -39,7 +28,24 @@ case $cache in
 esac
 REVENANT_CACHE=$cache
 export REVENANT_CACHE
-GIT_CEILING_DIRECTORIES=$cache${GIT_CEILING_DIRECTORIES:+:$GIT_CEILING_DIRECTORIES}
+store=${REVENANT_STORE:-}
+if [ -z "$store" ]; then
+    if [ -z "${HOME:-}" ]; then
+        echo "xmakew: HOME is unset, so the shared store has no default place: set REVENANT_STORE to an absolute path" >&2
+        exit 1
+    fi
+    store=$HOME/.revenant/store
+fi
+case $store in
+    /*) ;;
+    *)
+        echo "xmakew: REVENANT_STORE is $store, which is not an absolute path" >&2
+        exit 1
+        ;;
+esac
+REVENANT_STORE=$store
+export REVENANT_STORE
+GIT_CEILING_DIRECTORIES=$cache:$store${GIT_CEILING_DIRECTORIES:+:$GIT_CEILING_DIRECTORIES}
 export GIT_CEILING_DIRECTORIES
 
 url=$(sed -n 's/^ *add_urls("\([^"]*\)").*/\1/p' "$recipe")
@@ -85,8 +91,20 @@ fi
 
 key=$( (printf '%s\n%s\n' "$commit" "$patches"; cat "$root/xmakew") | sha256 | cut -c1-16)
 digest=$(patchset "$package/patches" "$commit" "$patches")
-xmakes=$cache/xmake
+xmakes=$store/xmake
 prefix=$xmakes/$key
+
+for part in xmake xmake-global; do
+    mkdir -p "$store/$part" "$cache"
+    if [ -L "$cache/$part" ]; then
+        [ "$(readlink "$cache/$part")" = "$store/$part" ] || ln -sfn "$store/$part" "$cache/$part"
+    elif [ -e "$cache/$part" ]; then
+        echo "xmakew: $cache/$part is a package store of its own, made before the shared store $store, and nothing reads it any more: remove $cache/$part, or keep its installs by making the cache the shared store once, while $store does not exist: REVENANT_CACHE=<an empty folder> $root/xmakew l -P $root tools/private_cache.lua $store --from $cache (docs/guides/machine.md, 'The shared store')" >&2
+        exit 1
+    else
+        ln -sfn "$store/$part" "$cache/$part"
+    fi
+done
 
 if [ ! -x "$prefix/bin/xmake" ]; then
     work=$xmakes/$key.build.$$
@@ -136,7 +154,7 @@ if [ ! -x "$prefix/bin/xmake" ]; then
     trap - EXIT INT TERM
 fi
 
-XMAKE_GLOBALDIR=$cache/xmake-global
+XMAKE_GLOBALDIR=$store/xmake-global
 export XMAKE_GLOBALDIR
 
 scratch_stamp=$cache/.scratch-swept

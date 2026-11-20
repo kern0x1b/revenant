@@ -363,10 +363,10 @@ local function preflight(requested)
     local common = path.directory(git("rev-parse", "--path-format=absolute", "--git-common-dir"))
     local shared = path.join(common, ".cache")
     if not cache() then
-        raise("REVENANT_CACHE is not set: run through ./xmakew with the private cache of this worktree (tools/private_cache.lua)")
+        raise("REVENANT_CACHE is not set: run through ./xmakew, which gives a linked worktree a cache of its own")
     end
     if path.normalize(cache()) == path.normalize(shared) and path.normalize(ROOT) ~= path.normalize(common) then
-        raise("this worktree must not use the main checkout's cache %s: make a private one with tools/private_cache.lua", shared)
+        raise("this worktree must not use the main checkout's cache %s: leave REVENANT_CACHE unset, which gives it a cache of its own, or name a folder of this worktree", shared)
     end
     local dirty = #lines(git("status", "--porcelain"))
     print("ci_local: commit %s %s", git("rev-parse", "--short=12", "HEAD"), git("log", "-1", "--format=%s"))
