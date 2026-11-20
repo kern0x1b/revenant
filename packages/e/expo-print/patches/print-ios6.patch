@@ -99,13 +99,14 @@ diff -ru a/ios/ExpoPrintToFile.swift b/ios/ExpoPrintToFile.swift
 diff -ru a/ios/ExpoPrintWithPrinter.swift b/ios/ExpoPrintWithPrinter.swift
 --- a/ios/ExpoPrintWithPrinter.swift	2026-11-17 18:37:26
 +++ b/ios/ExpoPrintWithPrinter.swift	2026-11-17 20:48:25
-@@ -1,11 +1,57 @@
+@@ -1,11 +1,62 @@
  import ExpoModulesCore
  
 +private final class PrintDataConnection: NSObject, NSURLConnectionDataDelegate {
 +  private var completion: ((Data?) -> Void)?
 +  private var connection: NSURLConnection?
 +  private var received = NSMutableData()
++  private var succeeded = false
 +  private var keepAlive: PrintDataConnection?
 +
 +  static func fetch(_ request: URLRequest, completion: @escaping (Data?) -> Void) -> PrintDataConnection {
@@ -125,6 +126,10 @@ diff -ru a/ios/ExpoPrintWithPrinter.swift b/ios/ExpoPrintWithPrinter.swift
 +    super.init()
 +  }
 +
++  func connection(_ connection: NSURLConnection, didReceive response: URLResponse) {
++    succeeded = (response as? HTTPURLResponse)?.statusCode == 200
++  }
++
 +  func connection(_ connection: NSURLConnection, didReceive data: Data) {
 +    received.append(data)
 +  }
@@ -134,7 +139,7 @@ diff -ru a/ios/ExpoPrintWithPrinter.swift b/ios/ExpoPrintWithPrinter.swift
 +  }
 +
 +  func connectionDidFinishLoading(_ connection: NSURLConnection) {
-+    finish(received as Data)
++    finish(succeeded ? received as Data : nil)
 +  }
 +
 +  private func finish(_ data: Data?) {
@@ -159,7 +164,7 @@ diff -ru a/ios/ExpoPrintWithPrinter.swift b/ios/ExpoPrintWithPrinter.swift
  
    init(delegate: ExpoPrintModuleDelegate) {
      self.delegate = delegate
-@@ -17,13 +63,12 @@
+@@ -17,13 +68,12 @@
          if let self = self, let printingData = data {
            self.printWithData(printingData: printingData, options: options, promise: promise)
          } else {
@@ -174,7 +179,7 @@ diff -ru a/ios/ExpoPrintWithPrinter.swift b/ios/ExpoPrintWithPrinter.swift
      guard let htmlString = options.markupFormatterIOS ?? options.html else {
        promise.reject(NoPrintDataException())
        return
-@@ -96,13 +141,10 @@
+@@ -96,13 +146,10 @@
      }
  
      if !printerUrl.isEmpty {
@@ -192,7 +197,7 @@ diff -ru a/ios/ExpoPrintWithPrinter.swift b/ios/ExpoPrintWithPrinter.swift
        let printer = self.cachedPrinters[printerUrl] ?? UIPrinter(url: candidateUrl)
        self.cachedPrinters[printerUrl] = printer
  
-@@ -121,21 +163,24 @@
+@@ -121,21 +168,24 @@
    }
  
    private func makePrintInteractionController(options: PrintOptions) -> UIPrintInteractionController {
@@ -221,7 +226,7 @@ diff -ru a/ios/ExpoPrintWithPrinter.swift b/ios/ExpoPrintWithPrinter.swift
  
      return printInteractionController
    }
-@@ -145,31 +190,16 @@
+@@ -145,31 +195,16 @@
        completion(nil)
        return
      }

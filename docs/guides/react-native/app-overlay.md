@@ -10,7 +10,7 @@ packaging/    the project's Info.plist, control-rnhost and brand files
 overlay/      files that replace the same path in the application's tree
 ```
 
-`overlay.lua update` brings the checkout to the newest upstream, and `overlay.lua apply` clones the application with APFS clones (`cp -cR`, so no copy of `node_modules` is made) and copies
+`overlay.lua update` brings the checkout to the newest upstream (the operator runs it before a build; no build step does), and `overlay.lua apply` clones the application with APFS clones (`cp -cR`, so no copy of `node_modules` is made) and copies
 `overlay/` over the clone. The checkout is never written. A file in `overlay/` that the application does not have stops the
 command: the overlay is for another version.
 
@@ -24,15 +24,15 @@ revenant names an application; `examples/paseo` is the first one.
 
 ## The Paseo example: always the latest upstream
 
-- Checkout: `$HOME/Git/projects/ios/paseo`, the open-source repository https://github.com/getpaseo/paseo, shallow, read only:
-  nothing is committed or pushed there and its push url is unset. Every build of Paseo starts with
+- Checkout: `<checkout>`, a folder outside revenant that holds the open-source repository https://github.com/getpaseo/paseo, shallow, read only:
+  nothing is committed or pushed there and its push url is unset. Before each build of Paseo the operator runs
 
   ```sh
-  ./xmakew l -P . frameworks/ReactNative/tools/overlay.lua update $HOME/Git/projects/ios/paseo https://github.com/getpaseo/paseo [--main]
+  ./xmakew l -P . frameworks/ReactNative/tools/overlay.lua update <checkout> https://github.com/getpaseo/paseo [--main]
   ```
 
   which fetches, checks out the newest release tag detached (`--main`: the head of the default branch) and prints the tag and
-  commit, which the build's report records. It runs once per build; no daemon or schedule keeps it fresh. First run: v0.16.1,
+  commit, which the build's report records. No build step calls it and no daemon or schedule keeps the checkout fresh: it is the operator's first command of a build. First run: v0.16.1,
   commit c09a3d81e772a747dd11bca43d860f3518f07c2d; latest built: v0.16.2, commit 2ee30f4164af42ba209236ab3a31bf9532592fc3 (the overlay
   applies unchanged, the isolated host builds, every pod of the manifest matches its recipe version).
 - A newer upstream that breaks the overlay (a patched file is gone, React Native or Expo changed) is a finding: the overlay in

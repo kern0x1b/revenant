@@ -7,6 +7,8 @@ package("expo-print")
 
     add_urls("https://registry.npmjs.org/expo-print/-/expo-print-$(version).tgz")
     add_versions("57.0.2", "51bf0ef20cfe171e8296f237d93cd0824e7cf132f712f3555cf2c20c439e0f5d")
+    add_patches("57.0.2", path.join(os.scriptdir(), "patches", "print-ios6.patch"), "b04b733a4c6087af2114cb2c44f235d9c25a4c56a6e3b46c6777c702e93fae54")
+    add_patches("57.0.2", path.join(os.scriptdir(), "patches", "print-ios6.patch"), "0e0a0c9d2b16a83d85b67fc60c252f40e993c64734d32ef9877220b56272d770")
     add_patches("57.0.2", path.join(os.scriptdir(), "patches", "print-ios6.patch"), "ffe933b353ea22aad836b78be7bd6646c327b038e25a9714a6fb0a8bc8192df9")
 
     on_install(function (package)

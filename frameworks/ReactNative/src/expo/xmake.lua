@@ -144,8 +144,10 @@ end
 
 local EXPO_SKIP_FILES = {}
 local EXPO_SKIP_MODULES = {}
-local function expo_skip(f)
-    if f:find("/ios/Tests/", 1, true) then return true end
+local EXPO_SKIP_DIRS = {["expo-task-manager"] = "ios/Tests/"}
+local function expo_skip(f, package)
+    local dir = EXPO_SKIP_DIRS[package]
+    if dir and path.relative(f, expo_dir(package)):startswith(dir) then return true end
     for _, name in ipairs(EXPO_SKIP_FILES) do
         if f:find(name, 1, true) then return true end
     end
@@ -375,7 +377,7 @@ target("expo-app-modules")
         for _, package in ipairs(expo) do
             for _, f in ipairs(os.files(path.join(expo_dir(package), "ios", EXPO_ONLY[package] or "", "**.swift"))) do
                 local name = path.filename(f)
-                if expo_skip(f) or LOCAL_COPIES[package] == name then
+                if expo_skip(f, package) or LOCAL_COPIES[package] == name then
                 elseif EXPO_REWRITE[name] and EXPO_REWRITE[name].package == package then
                     seen[name] = true
                     table.insert(duplicates, {f, path.join(staged, package .. "-" .. name), EXPO_REWRITE[name].replace})
