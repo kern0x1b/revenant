@@ -22,9 +22,11 @@ a store could not be moved or shared between two places. A store that never move
 - The xmake of a key is built under a lock on `<store>/xmake/<key>.lock` (`flock` or `lockf`), re-checked under the lock, so
   launchers that ask at once wait for one build and use it; the build works in a folder of its own and is moved into place
   once, and it leaves its log only when it fails. The wait is bounded: the launcher says every 30 seconds who holds the lock
-  (the builder writes its process and start to `<store>/xmake/<key>.holder`) and for how long, and stops with an error after
-  1800 seconds (`REVENANT_XMAKE_BUILD_WAIT`, `REVENANT_XMAKE_BUILD_POLL`), because a build that hangs under a lock with no
-  limit blocks every launcher of its key and says nothing.
+  (the builder writes its process, its start and the start time of that process to `<store>/xmake/<key>.holder` by a temp file
+  and a rename, so a reader never sees half a record, and a process number that another process has taken is told from the
+  builder by that start time) and for how long, and stops with an error after
+  1800 seconds (`REVENANT_XMAKE_BUILD_WAIT`, `REVENANT_XMAKE_BUILD_POLL`, both at least 1), because a build that hangs under a lock
+  with no limit blocks every launcher of its key and says nothing.
 - `./xmakew` links `xmake` and `xmake-global` of the cache to those folders and runs xmake with
   `XMAKE_GLOBALDIR=<store>/xmake-global`. A worktree's cache holds only what is the worktree's own: the token pool, the
   scratch of its tasks, `dyld` and `firmware` when a task needs them. A relative `REVENANT_STORE` is refused.
