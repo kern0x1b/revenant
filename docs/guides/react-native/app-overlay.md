@@ -1,0 +1,45 @@
+# An application and its overlay
+
+The React Native host builds any Expo application. The application is a read-only checkout; what revenant changes for it
+is an overlay folder in `frameworks/ReactNative/examples/<name>/`:
+
+```
+xmake.lua     the project's root: it includes the host from the revenant checkout (`REVENANT_PATH`)
+host.json     the manifest: bundleId, pods, optionalComponents (the --manifest of inputs.lua)
+packaging/    the project's Info.plist, control-rnhost and brand files
+overlay/      files that replace the same path in the application's tree
+```
+
+`overlay.lua update` brings the checkout to the newest upstream (the operator runs it before a build; no build step does), and `overlay.lua apply` clones the application with APFS clones (`cp -cR`, so no copy of `node_modules` is made) and copies
+`overlay/` over the clone. The checkout is never written. A file in `overlay/` that the application does not have stops the
+command: the overlay is for another version.
+
+```sh
+./xmakew l -P . frameworks/ReactNative/tools/overlay.lua apply <checkout> frameworks/ReactNative/examples/<name> <project>/build/ref/app
+./xmakew l -P . frameworks/ReactNative/tools/inputs.lua make <project> --manifest frameworks/ReactNative/examples/<name>/host.json
+```
+
+`<project>` is a folder with `xmake.lua` and `packaging/` copied from the overlay folder and the `build/ref/app` link above. Nothing in
+revenant names an application; `examples/paseo` is the first one.
+
+## The Paseo example: always the latest upstream
+
+- Checkout: `<checkout>`, a folder outside revenant that holds the open-source repository https://github.com/getpaseo/paseo, shallow, read only:
+  nothing is committed or pushed there and its push url is unset. Before each build of Paseo the operator runs
+
+  ```sh
+  ./xmakew l -P . frameworks/ReactNative/tools/overlay.lua update <checkout> https://github.com/getpaseo/paseo [--main]
+  ```
+
+  which fetches, checks out the newest release tag detached (`--main`: the head of the default branch) and prints the tag and
+  commit, which the build's report records. No build step calls it and no daemon or schedule keeps the checkout fresh: it is the operator's first command of a build. First run: v0.16.1,
+  commit c09a3d81e772a747dd11bca43d860f3518f07c2d; latest built: v0.16.2, commit 2ee30f4164af42ba209236ab3a31bf9532592fc3 (the overlay
+  applies unchanged, the isolated host builds, every pod of the manifest matches its recipe version).
+- A newer upstream that breaks the overlay (a patched file is gone, React Native or Expo changed) is a finding: the overlay in
+  `examples/paseo/` is corrected, never the checkout. `apply` stops when an overlay file has no counterpart.
+- `npm ci` runs in a clone of the checkout, never in the checkout.
+- `overlay/node_modules/react-native-unistyles/lib/module/core/useProxifiedUnistyles/listener.native.js` coalesces the theme and
+  runtime events of Unistyles per microtask, so a theme change costs one `setState` per subscriber instead of one per event.
+- `host.json` carries the bundle id `space.kern0x1b.paseo-ios6.rnhost` and the community pods the application needs.
+- The Paseo-specific native modules (`@getpaseo/expo-two-way-audio`, `PaseoHardwareKeyboard`) are not in the host's scope: the
+  host has no stub for them, and an application that needs them gets the loud missing-module error.

@@ -1,0 +1,21 @@
+package("expo-speech")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-speech")
+    set_description("expo-speech 57.0.3, the text-to-speech of the Expo SDK, from its npm tarball: the iOS module sources the host builds from, unpatched so far")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-speech/-/expo-speech-$(version).tgz")
+    add_versions("57.0.3", "a6e85003d8a60219036cd1d340abc2c58c5e311a0c5a6f8592dde39201c611e5")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-speech" and manifest.version == "57.0.3", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "ios", "SpeechModule.swift")), "expo-speech has no iOS module")
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-speech has no expo-module.config.json")
+    end)

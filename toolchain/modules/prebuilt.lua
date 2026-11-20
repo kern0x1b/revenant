@@ -143,6 +143,11 @@ function pack(package)
     if not outdir or outdir == "" then
         return
     end
+    local reads = import("apple.runtime_reads", {anonymous = true})
+    if reads.recording() then
+        raise("%s: %s is set, which switches off the check of the Swift overlay lookups, so this install must not be packed or released: build it again without it",
+              package:name(), reads.record_variable())
+    end
     os.mkdir(outdir)
     local pinned = (try { function () return os.iorunv("grep", {"-rlF", package:installdir(), package:installdir()}) end } or "") ..
                    os.iorunv("find", {package:installdir(), "-type", "l", "-lname", package:installdir() .. "*"})

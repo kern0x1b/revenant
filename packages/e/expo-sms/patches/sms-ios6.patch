@@ -1,0 +1,39 @@
+diff -ru a/ios/ExpoSMSModule.swift b/ios/ExpoSMSModule.swift
+--- a/ios/ExpoSMSModule.swift	2026-11-17 18:37:26
++++ b/ios/ExpoSMSModule.swift	2026-11-17 18:44:40
+@@ -2,7 +2,6 @@
+ import MessageUI
+ import CoreServices
+ import MobileCoreServices
+-import UniformTypeIdentifiers
+ 
+ struct ExpoSMSContext {
+   let promise: Promise
+@@ -42,6 +41,11 @@
+     messageComposeViewController.recipients = addresses
+     messageComposeViewController.body = message
+ 
++    if !options.attachments.isEmpty {
++      guard #available(iOS 7, *) else {
++        throw SMSAttachmentsUnavailableException()
++      }
++    }
+     for attachment in options.attachments {
+       let utiRef = UTTypeCreatePreferredIdentifierForTag(
+         kUTTagClassMIMEType, attachment.mimeType as CFString, nil)
+diff -ru a/ios/SMSExceptions.swift b/ios/SMSExceptions.swift
+--- a/ios/SMSExceptions.swift	2026-11-17 18:37:26
++++ b/ios/SMSExceptions.swift	2026-11-17 18:44:15
+@@ -30,6 +30,12 @@
+   }
+ }
+ 
++internal final class SMSAttachmentsUnavailableException: Exception {
++  override var reason: String {
++    "SMS attachments need iOS 7; this iOS has none"
++  }
++}
++
+ internal final class SMSUriException: GenericException<String> {
+   override var reason: String {
+     "Invalid file uri: \(param)"

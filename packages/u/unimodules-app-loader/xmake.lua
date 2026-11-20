@@ -1,0 +1,20 @@
+package("unimodules-app-loader")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/unimodules-app-loader")
+    set_description("unimodules-app-loader 57.0.2, the app loader interfaces of the Expo SDK (pod UMAppLoader) that expo-task-manager imports, from its npm tarball")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/unimodules-app-loader/-/unimodules-app-loader-$(version).tgz")
+    add_versions("57.0.2", "b1b6105a2b877d5540e27550213540d1f76fc3f01cd30ece98e13a14e8c485df")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "unimodules-app-loader" and manifest.version == "57.0.2", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "ios", "UMAppLoader", "UMAppLoaderProvider.h")), "unimodules-app-loader has no UMAppLoaderProvider.h")
+    end)

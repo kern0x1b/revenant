@@ -1,0 +1,163 @@
+name addingPercentEncoding
+name appTransportSecurityRequiresSecureConnection
+name applyingTransform
+name backgroundSessionInUseByAnotherProcess
+name backgroundSessionRequiresSharedContainer
+name backgroundSessionWasDisconnected
+name backgroundTaskCancelledReason
+name canLoadObject
+name coderReadCorrupt
+name coderReadCorruptError
+name coderValueNotFound
+name coderValueNotFoundError
+name decodeDecodable
+name decodeTopLevelDecodable
+name decodeTopLevelObject
+name downloadTaskResumeData
+name encodeEncodable
+name fileProtection
+name fileType
+name init base64Encoded:Data
+name init base64Encoded:String
+name init fileURLWithFileSystemRepresentation:UnsafePointer
+name init fileURLWithPath:String
+name init resolvingAliasFileAt:URL
+name isCoderError
+name isUbiquitousFileError
+name isUserActivityError
+name loadObject
+name localizedCapitalized
+name localizedLowercase
+name localizedStandardContains
+name localizedStandardRange
+name localizedUppercase
+name networkUnavailableReason
+name persistentTrackID
+name presentationTimeStamp
+name propertyListWriteInvalid
+name propertyListWriteInvalidError
+name registerObject
+name removingPercentEncoding
+name scope AVCapturePhotoOutput availablePhotoPixelFormatTypes
+name scope AVCapturePhotoOutput availableRawPhotoPixelFormatTypes
+name scope AVCapturePhotoOutput supportedFlashModes
+name scope AVCapturePhotoSettings availablePreviewPhotoPixelFormatTypes
+name scope AVMetadataMachineReadableCodeObject corners
+name scope Calendar compare
+name scope Calendar component
+name scope Calendar date
+name scope Calendar dateComponents
+name scope Calendar dateIntervalOfWeekend
+name scope Calendar enumerateDates
+name scope Calendar isDate
+name scope Calendar isDateInToday
+name scope Calendar isDateInTomorrow
+name scope Calendar isDateInWeekend
+name scope Calendar isDateInYesterday
+name scope Calendar nextDate
+name scope Calendar nextWeekend
+name scope Calendar startOfDay
+name scope Data base64EncodedData
+name scope Data base64EncodedString
+name scope DateComponents isValidDate
+name scope DateComponents setValue
+name scope DateComponents value
+name scope MeasurementFormatter string
+name scope Progress estimatedTimeRemaining
+name scope Progress fileCompletedCount
+name scope Progress fileTotalCount
+name scope Progress performAsCurrent
+name scope Progress throughput
+name scope Timer publish
+name scope URL checkPromisedItemIsReachable
+name scope URL dataRepresentation
+name scope URL hasDirectoryPath
+name scope URL promisedItemResourceValues
+name scope URL removeAllCachedResourceValues
+name scope URL removeCachedResourceValue
+name scope URL setTemporaryResourceValue
+name scope URL startAccessingSecurityScopedResource
+name scope URL stopAccessingSecurityScopedResource
+name scope URL withUnsafeFileSystemRepresentation
+name scope URLComponents percentEncodedQueryItems
+name scope URLComponents queryItems
+name scope URLComponents rangeOfFragment
+name scope URLComponents rangeOfHost
+name scope URLComponents rangeOfPassword
+name scope URLComponents rangeOfPath
+name scope URLComponents rangeOfPort
+name scope URLComponents rangeOfQuery
+name scope URLComponents rangeOfScheme
+name scope URLComponents rangeOfUser
+name scope URLComponents string
+name scope URLRequest allowsConstrainedNetworkAccess
+name scope URLRequest allowsExpensiveNetworkAccess
+name scope URLSession dataTaskPublisher
+name scope URLSessionTaskTransactionMetrics localPort
+name scope URLSessionTaskTransactionMetrics negotiatedTLSCipherSuite
+name scope URLSessionTaskTransactionMetrics negotiatedTLSProtocolVersion
+name scope URLSessionTaskTransactionMetrics remotePort
+name scope UndoManager registerUndo
+name scoped AVCapturePhotoOutput
+name scoped AVCapturePhotoSettings
+name scoped AVError
+name scoped AVMetadataMachineReadableCodeObject
+name scoped Calendar
+name scoped CocoaError
+name scoped Data
+name scoped DateComponents
+name scoped MeasurementFormatter
+name scoped NSCoder
+name scoped NSItemProvider
+name scoped NSKeyedArchiver
+name scoped NSKeyedUnarchiver
+name scoped Progress
+name scoped StringProtocol
+name scoped Timer
+name scoped URL
+name scoped URLComponents
+name scoped URLError
+name scoped URLRequest
+name scoped URLResourceValues
+name scoped URLSession
+name scoped URLSessionTaskTransactionMetrics
+name scoped UndoManager
+name type BackgroundTaskCancelledReason
+name type Calendar
+name type DateInterval
+name type Measurement
+name type MeasurementFormatter
+name type NSItemProvider
+name type NSObject
+name type NetworkUnavailableReason
+name type Notification
+name type NotificationCenter
+name type PersonNameComponents
+name type Progress
+name type Timer
+name type URLComponents
+name type URLQueryItem
+name type URLSession
+name type URLSessionTaskTransactionMetrics
+name ubiquitousFileNotUploadedDueToQuota
+name ubiquitousFileNotUploadedDueToQuotaError
+name ubiquitousFileUbiquityServerNotAvailable
+name ubiquitousFileUnavailable
+name ubiquitousFileUnavailableError
+name ubiquitousItemContainerDisplayName
+name ubiquitousItemDownloadingError
+name ubiquitousSharedItemMostRecentEditorNameComponents
+name unarchiveTopLevelObjectWithData
+name unarchivedObject
+name userActivityConnectionUnavailable
+name userActivityConnectionUnavailableError
+name userActivityHandoffFailed
+name userActivityHandoffFailedError
+name userActivityHandoffUserInfoTooLarge
+name userActivityHandoffUserInfoTooLargeError
+name userActivityRemoteApplicationTimedOut
+name userActivityRemoteApplicationTimedOutError
+type CombineObservableObject
+type CombinePublished
+type NSDataBase64DecodingOptions
+type NSDataBase64EncodingOptions

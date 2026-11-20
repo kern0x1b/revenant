@@ -22,6 +22,35 @@ local AREAS = {
         },
     },
     {
+        name = "initialization of a speech voice by its identifier, as expo-speech does",
+        sources = {"AVSpeechSynthesisVoice7.m"},
+        members = {
+            "-[AVSpeechSynthesisVoice initWithIdentifier:]",
+        },
+    },
+    {
+        name = "resource loading, asset variants and buffering of expo-video",
+        sources = {"AVAssetResourceLoadingDataRequest7.m", "AVAssetResourceLoadingRequest+Data7.m", "RevenantRangeHeader.c", "AVAssetVariant15.m", "AVPlayerItem+PreferredForwardBufferDuration10.m", "AVPlayerItem+CurrentMediaSelection5.m",
+                   "AVPlayerItem+ConfiguredTimeOffset13.m", "AVMediaSelectionOption+DisplayName7.m", "AVMediaSelectionGroup+DefaultOption8.m", "AVPlayer+MediaSelectionCriteria7.m", "AVPlayer+AudiovisualBackgroundPlaybackPolicy15.m"},
+        members = {
+            "-[AVAssetResourceLoadingRequest dataRequest]", "-[AVAssetResourceLoadingRequest contentInformationRequest]",
+            "-[AVAssetResourceLoadingRequest response]", "-[AVAssetResourceLoadingRequest setResponse:]",
+            "-[AVAssetResourceLoadingRequest finishLoading]",
+            "-[AVPlayerItem currentMediaSelection]",
+            "-[AVPlayerItem configuredTimeOffsetFromLive]", "-[AVPlayerItem setConfiguredTimeOffsetFromLive:]",
+            "-[AVMediaSelectionOption displayName]", "-[AVMediaSelectionGroup defaultOption]",
+            "-[AVPlayer setMediaSelectionCriteria:forMediaCharacteristic:]",
+            "-[AVPlayer audiovisualBackgroundPlaybackPolicy]", "-[AVPlayer setAudiovisualBackgroundPlaybackPolicy:]",
+            "-[AVAssetResourceLoadingDataRequest requestedOffset]", "-[AVAssetResourceLoadingDataRequest currentOffset]",
+            "-[AVAssetResourceLoadingDataRequest requestedLength]", "-[AVAssetResourceLoadingDataRequest requestsAllDataToEndOfResource]",
+            "-[AVAssetResourceLoadingDataRequest respondWithData:]",
+            "-[AVAssetVariant peakBitRate]", "-[AVAssetVariant averageBitRate]", "-[AVAssetVariant videoAttributes]",
+            "-[AVAssetVariantVideoAttributes presentationSize]", "-[AVAssetVariantVideoAttributes codecTypes]",
+            "-[AVAssetVariantVideoAttributes nominalFrameRate]", "-[AVAssetVariantVideoAttributes videoRange]",
+            "-[AVPlayerItem preferredForwardBufferDuration]", "-[AVPlayerItem setPreferredForwardBufferDuration:]",
+        },
+    },
+    {
         name = "looping of a template item through a queue player",
         sources = {"AVPlayerLooper10.m"},
         members = {

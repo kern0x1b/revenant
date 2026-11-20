@@ -4,6 +4,7 @@ rule("app")
     on_load(function (target)
         target:set("kind", "binary")
         target:add("packages", "ldid", "firmware-tools")
+        target:add("ldflags", "-Wl,-headerpad_max_install_names", {force = true})
     end)
 
     before_link(function (target)

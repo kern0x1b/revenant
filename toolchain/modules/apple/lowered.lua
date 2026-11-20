@@ -154,7 +154,7 @@ local MEMBERS = {
             directory = {"System", "Library", "Frameworks", "Foundation.framework", "Headers"},
             file = "NSURL.h",
             find = "NSURLUbiquitousItemDownloadingStatusKey      API_AVAILABLE(...);",
-            replace = "NSURLUbiquitousItemDownloadingStatusKey     ;",
+            replace = "NSURLUbiquitousItemDownloadingStatusKey;",
         },
     },
     {
@@ -641,6 +641,66 @@ local MEMBERS = {
 
 local MODULE_DIR = os.scriptdir()
 
+local DEVICE_EXPORT_FILES = {"device-globals.txt", "device-unlisted.txt"}
+
+local function device_export_file(file)
+    return path.absolute(path.join(MODULE_DIR, "..", "..", "..", "frameworks", "Backports", "tools", file))
+end
+
+local function device_exports_text()
+    local texts = {}
+    for _, file in ipairs(DEVICE_EXPORT_FILES) do
+        table.insert(texts, io.readfile(device_export_file(file)))
+    end
+    return table.concat(texts, "\0")
+end
+
+local DEVICE_EXPORTS
+
+local function device_exports()
+    if not DEVICE_EXPORTS then
+        DEVICE_EXPORTS = {}
+        for _, file in ipairs(DEVICE_EXPORT_FILES) do
+            for line in io.lines(device_export_file(file)) do
+                if line ~= "" and line:sub(1, 1) ~= "#" then
+                    local symbol = line:match("^([^\t]+)")
+                    if symbol then
+                        DEVICE_EXPORTS[symbol] = true
+                    end
+                end
+            end
+        end
+    end
+    return DEVICE_EXPORTS
+end
+
+local function weakify(replacement, lowering, member)
+    if type(lowering.file) ~= "string" or type(member) ~= "string" or not member:match("^[%a_][%w_]*$") then
+        return replacement
+    end
+    if device_exports()[member] or not replacement:match(member .. "%s*;%s*$") then
+        return replacement
+    end
+    if replacement:find("weak_import", 1, true) or replacement:find("__asm", 1, true) then
+        return replacement
+    end
+    return (replacement:gsub(";%s*$", " __attribute__((weak_import));"))
+end
+
+function weak_absence()
+    local exports, found = device_exports(), {}
+    for _, entry in ipairs(MEMBERS) do
+        local header, member = entry.header, entry.member
+        if header and type(member) == "string" and member:match("^[%a_][%w_]*$") and not exports[member]
+           and type(header.find) == "string" and (header.find:find("API_AVAILABLE", 1, true) or header.find:find("API_DEPRECATED", 1, true))
+           and type(header.replace) == "string" and header.replace:match(member .. "%s*;%s*$")
+           and not header.replace:find("weak_import", 1, true) and not header.replace:find("__asm", 1, true) then
+            table.insert(found, member)
+        end
+    end
+    return found
+end
+
 local BOUNDARIES = {";", "*/", "}", "@end"}
 local WINDOW = 8192
 
@@ -673,7 +733,7 @@ local function replaced(text, lowering, where, member)
             break
         end
         table.insert(parts, text:sub(position, start - 1))
-        table.insert(parts, lowering.replace)
+        table.insert(parts, weakify(lowering.replace, lowering, member))
         position = stop + 1
     until not lowering.every
     if #parts == 0 then
@@ -2635,7 +2695,11 @@ function device_members_of(sdk, inventory)
 end
 
 local function input_digest(sdk, text)
-    return hash.strhash128(table.concat({sdk, digest_of(MODULE_DIR, generator_files()), text}, "\0"))
+    return hash.strhash128(table.concat({sdk, digest_of(MODULE_DIR, generator_files()), device_exports_text(), text}, "\0"))
+end
+
+function lowering_key(identity)
+    return input_digest(identity, io.readfile(members_file()) .. io.readfile(device_members_file()))
 end
 
 THIRD_PARTY_MODULES = {
@@ -2714,13 +2778,13 @@ function third_party_modules(text)
     return modules
 end
 
-local function built_into(sdk, folder, digest, set, mapped, modules, target)
+local function built_into(sdk, folder, digest, set, mapped, modules, target, reads)
     os.mkdir(folder)
     local stamp = path.join(folder, "input.digest")
     local vfs = path.join(folder, "vfs.yaml")
     local marked = digest .. "\n" .. folder
     if not (os.isfile(vfs) and os.isfile(stamp) and io.readfile(stamp) == marked) then
-        vfs = build_overlay(sdk, folder, set or read_all_members(), mapped, modules or {}, target)
+        vfs = build_overlay(sdk, folder, set or read_all_members(), mapped, modules or {}, target, reads)
         io.writefile(stamp, marked)
     end
     return vfs
@@ -2741,15 +2805,16 @@ local function linked(out, shared)
     os.ln(shared, out)
 end
 
-function overlay(sdk, out, set, subtrees, modules, target)
+function overlay(sdk, out, set, subtrees, modules, target, reads)
     local text = set and serialize(set) or (io.readfile(members_file()) .. io.readfile(device_members_file()))
     local mapped = subtrees or VFS_SUBTREES
     local placed = module_digest(modules or {})
-    local key = table.concat({sdk, out, hash.strhash128(text), table.concat(table.orderkeys(mapped), ","), placed, target or ""}, "|")
+    local closed = reads and hash.strhash128(table.concat(table.orderkeys(reads), "\n")) or ""
+    local key = table.concat({sdk, out, hash.strhash128(text), table.concat(table.orderkeys(mapped), ","), placed, target or "", closed}, "|")
     if built[key] then
         return built[key]
     end
-    local digest = input_digest(sdk, text .. table.concat(table.orderkeys(mapped), ",") .. placed .. (target or ""))
+    local digest = input_digest(sdk, text .. table.concat(table.orderkeys(mapped), ",") .. placed .. (target or "") .. closed)
     local shared = shared_folder(digest)
     os.mkdir(path.directory(shared))
     local lock = io.openlock(path.join(path.directory(shared), "overlay.lock"))
@@ -2759,9 +2824,9 @@ function overlay(sdk, out, set, subtrees, modules, target)
     lock:lock()
     local vfs
     if os.isdir(out) and not os.islink(out) then
-        vfs = built_into(sdk, out, digest, set, mapped, modules, target)
+        vfs = built_into(sdk, out, digest, set, mapped, modules, target, reads)
     else
-        built_into(sdk, shared, digest, set, mapped, modules, target)
+        built_into(sdk, shared, digest, set, mapped, modules, target, reads)
         linked(out, shared)
         vfs = path.join(out, "vfs.yaml")
     end
@@ -2961,7 +3026,7 @@ function nested_headers_of_changed(changed)
     return found
 end
 
-function build_overlay(sdk, out, set, subtrees, modules, target)
+function lowered_texts(sdk, set, subtrees, only)
     set.markers = set.markers or region_markers(sdk)
     local changed = member_headers(sdk)
     local simd = path.join(sdk, "usr", "include", "simd", "math.h")
@@ -2979,14 +3044,7 @@ function build_overlay(sdk, out, set, subtrees, modules, target)
         "",
     }, "\n") .. io.readfile(simd)
     for _, file in ipairs(framework_headers(sdk)) do
-        local text = changed[file] or io.readfile(file)
-        local lowered = lowering_of(text, set)
-        if lowered ~= text then
-            changed[file] = lowered
-        end
-    end
-    for _, name in ipairs(table.orderkeys(subtrees or VFS_SUBTREES)) do
-        for _, file in ipairs(os.files(path.join(sdk, "usr", "include", name, "**.h"))) do
+        if not only or only[file] then
             local text = changed[file] or io.readfile(file)
             local lowered = lowering_of(text, set)
             if lowered ~= text then
@@ -2994,9 +3052,20 @@ function build_overlay(sdk, out, set, subtrees, modules, target)
             end
         end
     end
+    for _, name in ipairs(table.orderkeys(subtrees or VFS_SUBTREES)) do
+        for _, file in ipairs(os.files(path.join(sdk, "usr", "include", name, "**.h"))) do
+            if not only or only[file] then
+                local text = changed[file] or io.readfile(file)
+                local lowered = lowering_of(text, set)
+                if lowered ~= text then
+                    changed[file] = lowered
+                end
+            end
+        end
+    end
     for name in pairs(LOWERED_FILES) do
         local file = path.join(sdk, "usr", "include", name)
-        if name:match("%.h$") and os.isfile(file) then
+        if name:match("%.h$") and os.isfile(file) and (not only or only[file]) then
             local text = changed[file] or io.readfile(file)
             local lowered = lowering_of(text, set)
             if lowered ~= text then
@@ -3011,6 +3080,24 @@ function build_overlay(sdk, out, set, subtrees, modules, target)
     local uikit_notes = path.join(sdk, "System", "Library", "Frameworks", "UIKit.framework", "Headers", "UIKit.apinotes")
     if os.isfile(uikit_notes) then
         changed[uikit_notes] = lowered_trait_apinotes(io.readfile(uikit_notes), set)
+    end
+    return changed
+end
+
+function closed_to(sdk, changed, reads)
+    for file, text in pairs(changed) do
+        local relative = path.relative(file, sdk)
+        if file:endswith(".h") and not reads[relative] and text ~= io.readfile(file) then
+            changed[file] = string.format("#error \"the Swift runtime reads %s, which toolchain/src/swift-runtime/reads/lowered-reads.txt does not list: add it there and run toolchain/tools/recipe_digests.lua\"\n", relative)
+        end
+    end
+    return changed
+end
+
+function build_overlay(sdk, out, set, subtrees, modules, target, reads)
+    local changed = lowered_texts(sdk, set, subtrees)
+    if reads then
+        closed_to(sdk, changed, reads)
     end
     for _, file in ipairs(nested_headers_of_changed(changed)) do
         changed[file] = changed[file] or io.readfile(file)
@@ -3152,12 +3239,21 @@ local function type_opened(line)
            line:match("^enum%s+([%a_][%w_]*)")
 end
 
+local lookup_hook = nil
+
+local function peek(values, kind, key)
+    if lookup_hook ~= nil and key ~= nil then
+        lookup_hook(kind .. " " .. tostring(key))
+    end
+    return values[key]
+end
+
 local function implemented_scope(scope, names)
-    return scope ~= nil and names["type " .. scope] == true
+    return scope ~= nil and peek(names, "name", "type " .. scope) == true
 end
 
 local function names_unlowered_type(line, names)
-    return line:find("%f[%w_]DateInterval%f[^%w_]") ~= nil and not names["type DateInterval"]
+    return line:find("%f[%w_]DateInterval%f[^%w_]") ~= nil and not peek(names, "name", "type DateInterval")
 end
 
 local function lowered_by(line, names, types, scope)
@@ -3166,24 +3262,24 @@ local function lowered_by(line, names, types, scope)
         if names_unlowered_type(line, names) then
             return false
         end
-        if scope and names["scoped " .. scope] then
-            return names["scope " .. scope .. " " .. name] or false
+        if scope and peek(names, "name", "scoped " .. scope) then
+            return peek(names, "name", "scope " .. scope .. " " .. name) or false
         end
-        return names[name]
+        return peek(names, "name", name)
     end
     local label, rest = line:match("public%s+init%??%(%s*([%a_][%w_]*)%s+[%a_][%w_]*%s*:%s*(.*)$")
     if label then
         local kind = rest:match("^__shared%s+([%a_][%w_]*)") or rest:match("^([%a_][%w_]*)") or ""
-        return names["init " .. label .. ":" .. kind]
+        return peek(names, "name", "init " .. label .. ":" .. kind)
     end
     local target = line:match("public%s+typealias%s+[%a_][%w_]*%s*=%s*([%a_][%w_%.]*)")
     if target then
-        return types[(target:gsub("%.", ""))]
+        return peek(types, "type", (target:gsub("%.", "")))
     end
     local declared = line:match("^%s*public%s+struct%s+([%a_][%w_]*)") or line:match("^%s*public%s+class%s+([%a_][%w_]*)") or
                      line:match("^%s*public%s+enum%s+([%a_][%w_]*)")
     if declared then
-        return names["type " .. declared] or false
+        return peek(names, "name", "type " .. declared) or false
     end
     if line:match("^%s*public%s+static%s+func%s+[=<>!+%-*/&|^%%~]") then
         return implemented_scope(scope, names)
@@ -3199,7 +3295,7 @@ end
 
 local function operator_extension(lines, at, names)
     local name = lines[at]:match("^extension%s+([%a_][%w_]*)%s*{")
-    if not name or not names["type " .. name] then
+    if not name or not peek(names, "name", "type " .. name) then
         return false
     end
     for index = at + 1, #lines do
@@ -3215,7 +3311,7 @@ end
 
 local function implemented_extension(lines, at, names, types)
     local name = lines[at]:match("^extension%s+([%a_][%w_]*)%s*{")
-    if not name or not names["type " .. name] then
+    if not name or not peek(names, "name", "type " .. name) then
         return false
     end
     local members = 0
@@ -3285,7 +3381,7 @@ function lower_swift_text(text, names, types, keep)
     return table.concat(buffer)
 end
 
-function swift_overlays(root, set)
+function swift_overlays(root, set, on_lookup)
     for _, entry in ipairs(MEMBERS) do
         local lowering = entry.overlay
         if lowering then
@@ -3293,12 +3389,13 @@ function swift_overlays(root, set)
             io.writefile(file, replaced(io.readfile(file), lowering, "the Swift overlay " .. file, entry.member))
         end
     end
-    lower_swift_overlay_folder(root, "Foundation", set)
+    lower_swift_overlay_folder(root, "Foundation", set, on_lookup)
 end
 
-function lower_swift_overlay_folder(root, folder, set)
+function lower_swift_overlay_folder(root, folder, set, on_lookup)
     set = set or read_all_members()
     local names, types = swift_names(set), set.types or {}
+    lookup_hook = on_lookup
     for _, file in ipairs(os.files(path.join(root, "stdlib", "public", "Darwin", folder, "*.swift"))) do
         local text = io.readfile(file)
         local lowered = lower_swift_text(text, names, types, guarded_lines(file))
@@ -3306,4 +3403,5 @@ function lower_swift_overlay_folder(root, folder, set)
             io.writefile(file, lowered)
         end
     end
+    lookup_hook = nil
 end

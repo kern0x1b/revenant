@@ -1,0 +1,15 @@
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
+local backports = path.absolute(path.join(os.scriptdir(), ".."))
+local source = path.join(backports, "src", "AVFoundation")
+local tests = path.join(backports, "tests", "resource_range")
+
+function main()
+    local out = workspace.run("backports-tests", "ResourceRange")
+    local object = path.join(out, "RevenantRangeHeader.o")
+    os.vrunv("clang", {"-std=gnu11", "-Wall", "-Werror", "-I", source, "-c", path.join(source, "RevenantRangeHeader.c"), "-o", object})
+    local exe = path.join(out, "range_test")
+    os.vrunv("clang", {"-std=gnu11", "-Wall", "-Werror", "-I", source, path.join(tests, "range_test.c"), object, "-o", exe})
+    local output = os.iorunv(exe):trim()
+    assert(output:find("resource range tests passed", 1, true), "the range probe failed: " .. output)
+    print("resource range tests passed")
+end

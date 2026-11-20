@@ -100,6 +100,11 @@
 
 + (PHFetchResult<PHAsset *> *)fetchAssetsWithMediaType:(PHAssetMediaType)mediaType options:(PHFetchOptions *)options
 {
+    if (mediaType == PHAssetMediaTypeAudio) {
+        return [self revenant_result:^{
+            return (NSArray *)@[];
+        } options:options];
+    }
     ALAssetsFilter *filter = mediaType == PHAssetMediaTypeImage ? [ALAssetsFilter allPhotos] : mediaType == PHAssetMediaTypeVideo ? [ALAssetsFilter allVideos] : nil;
     PHAssetSourceType sourceTypes = options.includeAssetSourceTypes;
     return [self revenant_result:^{
