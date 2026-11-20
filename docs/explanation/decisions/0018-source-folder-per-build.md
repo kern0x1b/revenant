@@ -33,6 +33,10 @@ for llvm. The sources are the same for both builds; only what a build does to th
 
 A package that only reads its sources (tessdata, libsql) keeps working in the shared folder.
 
+Two processes that install the same build hash never meet in the copy: xmake takes `<installdir>.lock` before it downloads
+and holds it through the install, so the second process waits, finds the package installed and installs nothing. `keyed`
+resets the copy at every call, which is safe only because of that lock; the test below records it.
+
 ## Consequences
 
 - Two builds of one package run at once on one store and each compiles the sources it patched.
@@ -44,4 +48,8 @@ A package that only reads its sources (tessdata, libsql) keeps working in the sh
 `toolchain_light/source_lock_test`: two processes install two builds of one package, the second downloading while the
 first is patching. In the shared folder (the control) one of them compiles the unpatched source; with `keyed` both
 compile the patched one. `toolchain_light/checkout_test` holds the copies: separate folders, a patch in one reaching
-no other, a reset that keeps an ignored build directory, a copy made again when the pinned sources change.
+no other, a reset that keeps an ignored build directory, a copy made again when the pinned sources change. The same file runs two
+processes that install one build hash, in the shared folder and with `keyed`: the second one's download must come after the
+first one's install has finished (a marker written by each), and the first one must still see its patched source after the
+second has been given time to reach the lock; a run of two different hashes, whose second download comes during the first's
+install, shows that the marker can tell.
