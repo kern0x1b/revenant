@@ -153,9 +153,14 @@ local twice = patch_wire.register(once, "1.0", "x-ios6.patch", "33")
 local _, count = twice:gsub("add_patches", "")
 expect("patch_wire replaces the registration of a patch whose name has a dash and does not add a second one", count == 1 and twice:find('"33"', 1, true) ~= nil and twice:find('"11"', 1, true) == nil,
        twice)
-local manager_args
-module_build.run("folder", "cache", "expo-task-manager", function (_, args)
-    manager_args = table.concat(args, " ")
-    return 0
-end)
-expect("module_build adds unimodules-app-loader for expo-task-manager", manager_args:find("expo-task-manager,unimodules-app-loader", 1, true) ~= nil, manager_args)
+local fixture = path.join(os.tmpdir(), "rn-closure-fixture")
+os.tryrm(fixture)
+os.mkdir(path.join(fixture, "frameworks", "ReactNative", "src"))
+io.writefile(path.join(fixture, "frameworks", "ReactNative", "src", "coverage.json"), '{"rows": [{"id": "expo-a"}, {"id": "pod-b"}, {"id": "pod-c"}]}')
+for name, deps in pairs({["expo-a"] = 'add_deps("pod-b", "swift-runtime")', ["pod-b"] = 'add_deps("pod-c")', ["pod-c"] = 'add_deps("pod-b")'}) do
+    os.mkdir(path.join(fixture, "packages", name:sub(1, 1), name))
+    io.writefile(path.join(fixture, "packages", name:sub(1, 1), name, "xmake.lua"), 'package("' .. name .. '")\n    ' .. deps .. '\n')
+end
+local closed = module_build.closure(fixture, {"expo-a"})
+expect("module_build closes a package list over the add_deps of the recipes that are coverage rows, once each", table.concat(closed, ",") == "expo-a,pod-b,pod-c", table.concat(closed, ","))
+os.tryrm(fixture)

@@ -144,10 +144,8 @@ end
 
 local EXPO_SKIP_FILES = {}
 local EXPO_SKIP_MODULES = {}
-local EXPO_SKIP_DIRS = {["expo-task-manager"] = "ios/Tests/", ["unimodules-app-loader"] = "ios/Tests/"}
 local function expo_skip(f, package)
-    local dir = EXPO_SKIP_DIRS[package]
-    if dir and path.relative(f, expo_dir(package)):startswith(dir) then return true end
+    if path.relative(f, expo_dir(package)):startswith("ios/Tests/") then return true end
     for _, name in ipairs(EXPO_SKIP_FILES) do
         if f:find(name, 1, true) then return true end
     end
