@@ -82,6 +82,41 @@ diff -ru a/ios/Enums/ContentType.swift b/ios/Enums/ContentType.swift
    case auto
    case progressive
    case hls
+diff -ru a/ios/OrientationAVPlayerViewController.swift b/ios/OrientationAVPlayerViewController.swift
+--- a/ios/OrientationAVPlayerViewController.swift	2026-11-20 00:45:49
++++ b/ios/OrientationAVPlayerViewController.swift	2026-11-20 02:01:45
+@@ -164,6 +164,7 @@
+ 
+   // MARK: - AVPlayerViewControllerDelegate
+   // TODO: Forward more methods to the forward delegate as needed
++  @available(iOS 12.0, *)
+   func playerViewController(
+     _ playerViewController: AVPlayerViewController,
+     willBeginFullScreenPresentationWithAnimationCoordinator coordinator: any UIViewControllerTransitionCoordinator
+@@ -183,6 +184,7 @@
+     }
+   }
+ 
++  @available(iOS 12.0, *)
+   func playerViewController(
+     _ playerViewController: AVPlayerViewController,
+     willEndFullScreenPresentationWithAnimationCoordinator coordinator: any UIViewControllerTransitionCoordinator
+@@ -196,6 +198,7 @@
+   }
+   #endif
+ 
++  @available(iOS 9.0, *)
+   func playerViewControllerDidStartPictureInPicture(_ playerViewController: AVPlayerViewController) {
+     isInPictureInPicture = true
+     wasInFullscreenWhenPiPStarted = isFullscreen
+@@ -203,6 +206,7 @@
+     forwardDelegate?.playerViewControllerDidStartPictureInPicture?(playerViewController)
+   }
+ 
++  @available(iOS 9.0, *)
+   func playerViewControllerDidStopPictureInPicture(_ playerViewController: AVPlayerViewController) {
+     isInPictureInPicture = false
+     pipWasAutoEntered = false
 diff -ru a/ios/Records/Tracks.swift b/ios/Records/Tracks.swift
 --- a/ios/Records/Tracks.swift	2026-11-20 00:45:49
 +++ b/ios/Records/Tracks.swift	2026-11-20 01:35:24

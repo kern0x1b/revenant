@@ -7,7 +7,7 @@ package("expo-video")
 
     add_urls("https://registry.npmjs.org/expo-video/-/expo-video-$(version).tgz")
     add_versions("57.0.5", "db9b60d195dacc6ce5a9df44ad69bbf941c7493a4b63339bf1222b8a97a6613d")
-    add_patches("57.0.5", path.join(os.scriptdir(), "patches", "video-ios6.patch"), "6c1cfd58ad5605d1c79c8df100cfa8e0bc34e821498f998cc2e23b10b0807234")
+    add_patches("57.0.5", path.join(os.scriptdir(), "patches", "video-ios6.patch"), "c04aabd2bab3bd956466324e70e9181fb2cfda695fa067a9ec7ea821d09ec7a6")
 
     on_install(function (package)
         os.cp("*", package:installdir() .. "/")
