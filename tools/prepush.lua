@@ -69,6 +69,17 @@ local function gate_commands(tree)
     }
 end
 
+local function gate_preflight()
+    return {"true"}
+end
+
+local function gate_remove(tree)
+    if os.isdir(tree) then
+        os.execv("chmod", {"-R", "u+w", tree}, {try = true})
+        os.tryrm(tree)
+    end
+end
+
 local function failure_lines(text)
     local report = import("ci.log", {rootdir = os.scriptdir()}).report(text)
     local lines = {}
@@ -107,9 +118,13 @@ local function backports_build()
     local folder = gate_folder()
     local tree = gate_tree(folder)
     local logfile = path.join(folder, "prepush.log")
-    os.mkdir(tree)
+    os.mkdir(folder)
     local output = io.open(logfile, "w")
-    local ok = os.execv("rsync", gate_sync_arguments(tree), {try = true, stdout = output, stderr = output}) == 0
+    local ok = budgeted(gate_preflight(), {output = output})
+    if ok then
+        os.mkdir(tree)
+        ok = os.execv("rsync", gate_sync_arguments(tree), {try = true, stdout = output, stderr = output}) == 0
+    end
     if ok then
         for _, command in ipairs(gate_commands(tree)) do
             if not budgeted(command, {jobs = GATE_JOBS, curdir = tree, envs = gate_environment(), output = output}) then
@@ -122,6 +137,7 @@ local function backports_build()
     if not ok then
         explain_failure(logfile)
     end
+    gate_remove(tree)
     return ok
 end
 
@@ -354,6 +370,15 @@ local function test_suite()
     check("the gate copies from the checkout's folder to its tree", table.concat(sync, " ", #sync - 1), root .. "/ /g/tree/")
     check("the gate leaves out git, the configuration, the build and the caches", table.concat(sync, " "):find("--exclude=/.git --exclude=/.xmake --exclude=/build --exclude=/.cache ", 1, true) ~= nil, true)
     check("the gate leaves out a private cache of any name that starts with .cache-, so a worktree's own cache is not copied into the tree", table.concat(sync, " "):find("--exclude=/.cache-* ", 1, true) ~= nil, true)
+    check("the gate asks the budget before it creates its tree", gate_preflight()[1], "true")
+    local doomed = path.join(os.tmpdir(), "prepush-gate-remove", "tree")
+    os.tryrm(path.directory(doomed))
+    os.mkdir(path.join(doomed, "locked"))
+    io.writefile(path.join(doomed, "locked", "f"), "x")
+    os.execv("chmod", {"-R", "a-w", doomed})
+    gate_remove(doomed)
+    check("the gate removes its tree when it is done, read-only files included", os.isdir(doomed), false)
+    os.tryrm(path.directory(doomed))
     local commands = gate_commands("/g/tree")
     check("the gate configures the armv7 device build of the Backports component in its own tree",
           table.concat(commands[1], " ", 2), "f -P /g/tree -p iphoneos -a armv7 --component=Backports -y")
