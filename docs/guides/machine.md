@@ -191,10 +191,10 @@ again from the prebuilt releases or are built once), or make that cache the stor
 which keeps its installs and the generation names a roots file pins:
 
 ```
-REVENANT_CACHE=<an empty folder> ./xmakew l -P . tools/private_cache.lua ~/.revenant/store --from <the old cache>
+REVENANT_CACHE=<an empty folder> ./xmakew l -P . tools/private_cache.lua ~/.revenant/store --from <the old cache> --only xmake,xmake-global
 ```
 
-The tool clones the cache with APFS clones and rewrites every absolute link, every `CMakeCache.txt` and the text state under
+The tool clones the two folders `--only` names with APFS clones (without `--only` it clones the whole cache) and rewrites every absolute link, every `CMakeCache.txt` and the text state under
 `xmake-global/.xmake/cache` to name the store, then writes its `.private-cache` marker. It refuses a destination that exists
 and is not empty, inside the source or holding it, or on another volume. A clone is only as warm as its source: choose the
 cache that holds the packages the pins and the tasks need, and read `status` of the store before using it. Its older
@@ -215,8 +215,8 @@ catalogue), or the worker clones them from a cache that has them with `cp -c -R 
 - `df -h /System/Volumes/Data` after a clone: a clone costs little until it is written to, and the floor of the disk rule
   holds.
 
-`tools/private_cache.lua` is now the way to seed the store once, and nothing a worktree does at its start. It takes the whole of
-the source cache except five folders that hold the state of the machine and of the tasks that were running in the source:
+`tools/private_cache.lua` is now the way to seed the store once, and nothing a worktree does at its start. Without `--only` it
+takes the whole of the source cache except five folders that hold the state of the machine and of the tasks that were running in the source:
 `budget` (the token pool), `devices` (which run holds which device), `emulator-slots` (the locks that bound how many
 emulators run at once), `scratch` (the scratch of the tasks running there) and `sizes` (the measured sizes of the source's
 paths, which would be wrong for the clone). The new store therefore claims no device and no emulator slot of the source.

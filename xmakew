@@ -99,7 +99,7 @@ for part in xmake xmake-global; do
     if [ -L "$cache/$part" ]; then
         [ "$(readlink "$cache/$part")" = "$store/$part" ] || ln -sfn "$store/$part" "$cache/$part"
     elif [ -e "$cache/$part" ]; then
-        echo "xmakew: $cache/$part is a package store of its own, made before the shared store $store, and nothing reads it any more: remove $cache/$part, or keep its installs by making the cache the shared store once, while $store does not exist: REVENANT_CACHE=<an empty folder> $root/xmakew l -P $root tools/private_cache.lua $store --from $cache (docs/guides/machine.md, 'The shared store')" >&2
+        echo "xmakew: $cache/$part is a package store of its own, made before the shared store $store, and nothing reads it any more: remove $cache/$part, or keep its installs by making the cache the shared store once, while $store does not exist: REVENANT_CACHE=<an empty folder> $root/xmakew l -P $root tools/private_cache.lua $store --from $cache --only xmake,xmake-global (docs/guides/machine.md, 'The shared store')" >&2
         exit 1
     else
         ln -sfn "$store/$part" "$cache/$part"

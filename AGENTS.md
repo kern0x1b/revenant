@@ -79,7 +79,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   `docs/guides/machine.md`.
   A linked worktree takes `<worktree>/.cache` for its cache (`REVENANT_CACHE` names another folder; an empty one is fine, it
   needs no marker). A cache from before the store, with a package store of its own, is refused with the command that
-  seeds the store from it (`tools/private_cache.lua <store> --from <cache>`, once, while the store does not exist).
+  seeds the store from it (`tools/private_cache.lua <store> --from <cache> --only xmake,xmake-global`, once, while the store does not exist).
 - Tests: `./xmakew test -P .` is the one test entry point. It runs every test a host with the prebuilt packages can
   run (`REVENANT_PREBUILT=kern0x1b/revenant`, `REVENANT_PREBUILT_ONLY=llvm,swift,ld64`), in parallel, and each component's tests are
   targets named for it, so `./xmakew test -P . 'toolchain_*/*'` or `'repository/*'` runs one component. A test that
