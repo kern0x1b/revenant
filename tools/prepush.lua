@@ -29,7 +29,7 @@ end
 
 local GATE_JOBS = 6
 local GATE_LINES = 30
-local GATE_EXCLUDES = {"/.git", "/.xmake", "/build", "/.cache", "/.cache-private", "/.cache-boot", "/.claude/worktrees"}
+local GATE_EXCLUDES = {"/.git", "/.xmake", "/build", "/.cache", "/.cache-private", "/.cache-boot", "/.cache-*", "/.claude/worktrees"}
 
 local function budgeted(command, opt)
     opt = opt or {}
@@ -353,6 +353,7 @@ local function test_suite()
     check("the gate copies the checkout into its own tree and deletes what the checkout dropped", table.concat(sync, " ", 1, 2), "-a --delete")
     check("the gate copies from the checkout's folder to its tree", table.concat(sync, " ", #sync - 1), root .. "/ /g/tree/")
     check("the gate leaves out git, the configuration, the build and the caches", table.concat(sync, " "):find("--exclude=/.git --exclude=/.xmake --exclude=/build --exclude=/.cache ", 1, true) ~= nil, true)
+    check("the gate leaves out a private cache of any name that starts with .cache-, so a worktree's own cache is not copied into the tree", table.concat(sync, " "):find("--exclude=/.cache-* ", 1, true) ~= nil, true)
     local commands = gate_commands("/g/tree")
     check("the gate configures the armv7 device build of the Backports component in its own tree",
           table.concat(commands[1], " ", 2), "f -P /g/tree -p iphoneos -a armv7 --component=Backports -y")
