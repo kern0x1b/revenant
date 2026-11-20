@@ -3,7 +3,7 @@ import("core.base.json")
 local ast = import("ast", {rootdir = os.scriptdir(), anonymous = true})
 local sdkfiles = import("sdk", {rootdir = os.scriptdir(), anonymous = true})
 
-local CLANG = "/usr/bin/clang"
+local CLANG = sdkfiles.clang()
 
 local SWIFT_KINDS = {Func = true, Constructor = true, Accessor = true, Var = true, Struct = true, Class = true, Enum = true,
                      Protocol = true, TypeAlias = true, EnumElement = true, Subscript = true, AssociatedType = true}
@@ -203,6 +203,16 @@ function objc_facts(sdk, name, version)
     return state.rows
 end
 
+function extract(sdk, version, cache, logs, name)
+    local rows = objc_facts(sdk, name, version)
+    if sdkfiles.has_swift_module(sdk, name) then
+        for _, row in ipairs(swift_facts(sdk, name, version, logs)) do
+            table.insert(rows, row)
+        end
+    end
+    sdkfiles.write_rows(path.join(cache, name .. ".tsv"), name, rows)
+end
+
 function constant_intros(sdk)
     local file = path.join(sdkfiles.cache_folder(sdk), "constant_intros.tsv")
     if os.isfile(file) then
@@ -216,7 +226,7 @@ function constant_intros(sdk)
     end
     local intros = {}
     local function note(name, intro, kind)
-        if name and (intros[name] == nil or intros[name].intro == nil) then
+        if name and string.find(name, "^[%a_][%w_]*$") and (intros[name] == nil or intros[name].intro == nil) then
             intros[name] = {intro = intro, kind = kind}
         end
     end

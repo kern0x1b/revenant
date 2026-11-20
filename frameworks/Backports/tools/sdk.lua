@@ -82,16 +82,107 @@ function has_swift_module(sdk, name)
     return os.isdir(path.join(frameworks_dir(sdk), name .. ".framework", "Modules", name .. ".swiftmodule"))
 end
 
-local GENERATOR = {"ast.lua", "facts.lua", "generate.lua", "markers.lua", "skeleton.lua", "sdk.lua"}
+local FACTS = {"ast.lua", "facts.lua", "public.lua", "sdk.lua"}
 
-function generator_digest()
-    local digests = {}
-    for _, name in ipairs(GENERATOR) do
-        local file = path.join(os.scriptdir(), name)
-        table.insert(digests, name .. "=" .. hash.sha256(file))
+local FACTS_EXTERNAL = {["core.base.json"] = true, ["@addon.revenant.workspace"] = true, ["@addon.revenant.retention"] = true}
+
+function facts_files()
+    return table.clone(FACTS)
+end
+
+local LOADERS = {"dofile", "loadfile", "loadstring", "load", "require", "includes"}
+
+local function without_strings(text)
+    local out, at, size = {}, 1, #text
+    while at <= size do
+        local char = string.sub(text, at, at)
+        if char == '"' or char == "'" then
+            local cursor = at + 1
+            while cursor <= size do
+                local following = string.sub(text, cursor, cursor)
+                if following == "\\" then
+                    cursor = cursor + 2
+                elseif following == char then
+                    break
+                else
+                    cursor = cursor + 1
+                end
+            end
+            table.insert(out, char .. char)
+            at = cursor + 1
+        else
+            table.insert(out, char)
+            at = at + 1
+        end
     end
-    table.sort(digests)
-    return string.sub(hash.strhash128(table.concat(digests, ";")), 1, 16)
+    return table.concat(out)
+end
+
+function facts_import_problems(folder)
+    folder = folder or os.scriptdir()
+    local inside = {}
+    for _, name in ipairs(FACTS) do
+        inside[name] = true
+    end
+    local problems = {}
+    for _, name in ipairs(FACTS) do
+        local text = io.readfile(path.join(folder, name))
+        local code = without_strings(text)
+        for following in string.gmatch(code, "%f[%w_]import%f[^%w_]%s*(.?)") do
+            if following ~= "(" then
+                table.insert(problems, name .. " uses import without calling it with parentheses (an alias, or a call with a string argument), which the key cannot follow")
+            end
+        end
+        for _, loader in ipairs(LOADERS) do
+            for start in string.gmatch(code, "()%f[%w_]" .. loader .. "%f[^%w_]") do
+                local before = string.sub(code, start - 1, start - 1)
+                if before ~= "." and before ~= ":" then
+                    table.insert(problems, name .. " uses " .. loader .. ", which loads code the key does not cover")
+                end
+            end
+        end
+        for call in string.gmatch(text, "%f[%w_]import%s*%b()") do
+            local module = string.match(call, '^import%s*%(%s*"([^"]+)"')
+            if module == nil then
+                table.insert(problems, name .. ": " .. string.gsub(call, "%s+", " ") .. " does not name its module by a literal")
+            elseif not FACTS_EXTERNAL[module] and (string.find(module, "[%.@/]") or not inside[module .. ".lua"]) then
+                table.insert(problems, name .. " imports " .. module .. ", which is not one of " .. table.concat(FACTS, ", ") .. " and not an allowed external module")
+            end
+        end
+    end
+    return problems
+end
+
+local facts_digest_memo = nil
+
+function facts_digest()
+    if facts_digest_memo == nil then
+        local problems = facts_import_problems()
+        assert(#problems == 0, "the facts cache key does not cover what the facts read:\n" .. table.concat(problems, "\n"))
+        local digests = {}
+        for _, name in ipairs(FACTS) do
+            table.insert(digests, name .. "=" .. hash.sha256(path.join(os.scriptdir(), name)))
+        end
+        table.sort(digests)
+        facts_digest_memo = string.sub(hash.strhash128(table.concat(digests, ";")), 1, 16)
+    end
+    return facts_digest_memo
+end
+
+local identity_memo = {}
+
+function sdk_identity(sdk)
+    local real = retention().real_path(sdk)
+    if identity_memo[real] == nil then
+        local lines = {}
+        for _, file in ipairs(os.files(path.join(real, "**"))) do
+            local content = os.islink(file) and ("link " .. os.readlink(file)) or hash.sha256(file)
+            table.insert(lines, path.relative(file, real) .. "=" .. content)
+        end
+        table.sort(lines)
+        identity_memo[real] = string.sub(hash.strhash128(table.concat(lines, "\n")), 1, 32)
+    end
+    return identity_memo[real]
 end
 
 function build_root()
@@ -106,19 +197,49 @@ function digester()
     return tool("swift-api-digester")
 end
 
-function tool_identity(name)
-    local file = tool(name)
-    return {file, tostring(os.mtime(file)), tostring(os.filesize(file))}
+function clang()
+    return "/usr/bin/clang"
+end
+
+local clang_memo = nil
+
+function clang_identity()
+    if clang_memo == nil then
+        local lines = {}
+        for line in string.gmatch(os.iorunv(clang(), {"--version"}), "[^\n]+") do
+            if not string.find(line, "^InstalledDir:") then
+                table.insert(lines, line)
+            end
+        end
+        clang_memo = {table.concat(lines, "\n")}
+    end
+    return clang_memo
+end
+
+local digester_memo = nil
+
+function digester_identity()
+    if digester_memo == nil then
+        local file = digester()
+        digester_memo = {tostring(os.filesize(file)), hash.sha256(file)}
+    end
+    return digester_memo
 end
 
 function model_cache(sdk)
-    local identity = table.join({retention().real_path(sdk), sdk_version(sdk)}, tool_identity("swift-api-digester"))
+    local identity = table.join({retention().real_path(sdk), sdk_version(sdk)}, digester_identity())
     return path.join(workspace().home(), "modcache", string.sub(hash.strhash128(table.concat(identity, "\n")), 1, 16))
 end
 
+local key_memo = {}
+
 function cache_key(sdk)
-    local identity = table.join({retention().real_path(sdk), sdk_version(sdk), generator_digest()}, tool_identity("clang"))
-    return sdk_version(sdk) .. "-" .. string.sub(hash.strhash128(table.concat(identity, "\n")), 1, 16)
+    local real = retention().real_path(sdk)
+    if key_memo[real] == nil then
+        local identity = table.join({sdk_identity(sdk), sdk_version(sdk), facts_digest()}, clang_identity(), digester_identity())
+        key_memo[real] = sdk_version(sdk) .. "-" .. string.sub(hash.strhash128(table.concat(identity, "\n")), 1, 16)
+    end
+    return key_memo[real]
 end
 
 function shared_root()
