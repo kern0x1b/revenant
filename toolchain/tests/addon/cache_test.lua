@@ -397,6 +397,45 @@ function failures(arguments)
         table.insert(found, "a write that would need a pinned install fails and removes nothing of it: " .. tostring(blocked))
     end
 
+    local overlays = path.join(folder, "overlay-store")
+    local stale = folder_of(path.join(overlays, "lowered", "aaaa"), 2 * MEGABYTE, OLDEST)
+    local fresh = folder_of(path.join(overlays, "lowered", "bbbb"), 2 * MEGABYTE, RECENT)
+    local stale_lock = file_of(path.join(overlays, "lowered", "aaaa.lock"), 0)
+    local unpinned = package_of(overlays, "sss")
+    folder_of(unpinned, 2 * MEGABYTE, OLD)
+    local overlay_rows = {}
+    for _, row in ipairs(cache.status(overlays, {builds = {}})) do
+        overlay_rows[row.name] = row.class
+    end
+    if overlay_rows["lowered/aaaa"] ~= "scratch" or overlay_rows["lowered/bbbb"] ~= "scratch" or overlay_rows["lowered/aaaa.lock"] then
+        table.insert(found, "each overlay folder under the store's lowered/ is an entry that can be evicted, and its lock file is a member of it, not an entry: " .. tostring(overlay_rows["lowered/aaaa"]) .. ", " .. tostring(overlay_rows["lowered/aaaa.lock"]))
+    end
+    local made_room
+    local not_made = fixtures.refusal(function ()
+        made_room = cache.reserve(3.5 * MEGABYTE, "a write into the shared store", {root = overlays, limit = 6 * MEGABYTE, builds = {}})
+    end)
+    if not_made or classes(made_room) ~= "scratch,scratch" or exists(stale) or exists(fresh) or not exists(unpinned) or exists(stale_lock) then
+        table.insert(found, "an eviction from the store takes the overlays, oldest first, with their locks, before any installed package: " .. tostring(not_made or classes(made_room)))
+    end
+
+    stale = folder_of(path.join(overlays, "lowered", "aaaa"), 2 * MEGABYTE, OLDEST)
+    fresh = folder_of(path.join(overlays, "lowered", "bbbb"), 2 * MEGABYTE, OLD)
+    stale_lock = file_of(path.join(overlays, "lowered", "aaaa.lock"), 0)
+    local building = io.openlock(stale_lock)
+    if not building or not building:trylock() then
+        table.insert(found, "the test could not take the lock of an overlay that is being built")
+    else
+        local kept_building
+        local failed = fixtures.refusal(function ()
+            kept_building = cache.reserve(3.5 * MEGABYTE, "a write into the shared store", {root = overlays, limit = 6 * MEGABYTE, builds = {}})
+        end)
+        building:unlock()
+        building:close()
+        if failed or classes(kept_building) ~= "scratch,package" or not exists(stale) or exists(fresh) or exists(unpinned) then
+            table.insert(found, "an eviction from the store leaves the overlay whose lock another process holds, and takes the next entries: " .. tostring(failed or classes(kept_building)))
+        end
+    end
+
     local home = path.join(folder, "linking-cache")
     os.mkdir(home)
     file_of(path.join(home, "dyld", "6.0", "dyld_shared_cache_armv7"), MEGABYTE)

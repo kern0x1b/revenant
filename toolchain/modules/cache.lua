@@ -315,6 +315,14 @@ local function modcache_entries(base, found)
     end
 end
 
+local function lowered_entries(base, found)
+    for _, folder in ipairs(children(path.join(base, "lowered"))) do
+        if not folder:endswith(".lock") then
+            table.insert(found, entry(base, folder, "scratch"))
+        end
+    end
+end
+
 local function own_children(base)
     local found = {}
     for _, folder in ipairs(children(base)) do
@@ -336,6 +344,8 @@ function entries(base)
             end
         elseif name == "modcache" then
             modcache_entries(base, found)
+        elseif name == "lowered" then
+            lowered_entries(base, found)
         elseif name == "device-baselines" then
             for _, device in ipairs(children(folder)) do
                 table.insert(found, entry(base, device, "kept"))

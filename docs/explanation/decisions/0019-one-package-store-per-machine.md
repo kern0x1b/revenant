@@ -27,8 +27,14 @@ a store could not be moved or shared between two places. A store that never move
   limit blocks every launcher of its key and says nothing.
 - `./xmakew` links `xmake` and `xmake-global` of the cache to those folders and runs xmake with
   `XMAKE_GLOBALDIR=<store>/xmake-global`. A worktree's cache holds only what is the worktree's own: the token pool, the
-  scratch of its tasks, the lowered caches, `dyld` and `firmware` when a task needs them. A relative `REVENANT_STORE` is
-  refused.
+  scratch of its tasks, `dyld` and `firmware` when a task needs them. A relative `REVENANT_STORE` is refused.
+- The lowered SDK overlays are in the store too (`<store>/lowered/<digest>`, `lowered.shared_overlay_folder`), not in the
+  cache of a checkout. An overlay's `vfs.yaml` names its files by absolute path and the packages that were built against it
+  link to the folder, so an overlay in a cache per checkout was one overlay per checkout and a link that no other
+  checkout's packages could share. Each overlay is locked by `lowered/<digest>.lock` while it is built, which makes the
+  lock a member of its entry, so the store's trim evicts it like scratch (before any installed package) and leaves one
+  that is being built. An installed package does not read its overlay again; a missing one is built again by the next
+  call that asks for that digest.
 - A cache from before the store, with a package store of its own, is refused before `./xmakew` makes anything (no store, no
   link), and it prints the command that makes the cache the store once, run with an xmake binary of that cache because
   the seeding refuses a store that has anything in it (`<cache>/xmake/<key>/bin/xmake l -P . tools/private_cache.lua <store>
