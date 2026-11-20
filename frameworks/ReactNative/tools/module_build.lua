@@ -6,11 +6,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/module_build
 
 local BASE = "expo-image-picker,expo-sqlite,expo-notifications,expo-haptics,expo-sharing,expo-audio,expo-clipboard,expo-font,expo-file-system,expo-document-picker,expo-image-manipulator,expo-image,expo-camera,expo-secure-store,expo-network,expo-device,expo-brightness,expo-linear-gradient,expo-store-review,expo-web-browser,expo-blur,expo-screen-orientation,expo-mail-composer,expo-sms,expo-print"
 
-function main(folder, cache, extra)
-    if not folder or not cache then
-        print(USAGE)
-        os.exit(1)
-    end
+function run(folder, cache, extra, execute)
     local root = os.curdir()
     local started = os.time()
     local function say(text)
@@ -29,9 +25,21 @@ function main(folder, cache, extra)
         RN_HERMES = "1",
     }
     say("build start")
-    local ok = os.execv("./xmakew", {"l", "-P", ".", "tools/budget.lua", "run", "--class", "normal", "--jobs", "4", "--min", "1", "--",
+    local status = execute("./xmakew", {"l", "-P", ".", "tools/budget.lua", "run", "--class", "normal", "--jobs", "4", "--min", "1", "--",
         "./xmakew", "l", "-P", ".", "frameworks/ReactNative/tools/isolate.lua", "build", path.absolute(folder),
         "--cache", path.absolute(cache), "--target", "RNHost", "--real", real, "--log", path.absolute(folder) .. "-build.log"},
         {envs = envs, try = true})
-    say("build end, status " .. tostring(ok))
+    say("build end, status " .. tostring(status))
+    return status
+end
+
+function main(folder, cache, extra)
+    if not folder or not cache then
+        print(USAGE)
+        os.exit(1)
+    end
+    local status = run(folder, cache, extra, os.execv)
+    if status ~= 0 then
+        os.exit(status)
+    end
 end

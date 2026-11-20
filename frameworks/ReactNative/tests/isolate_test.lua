@@ -2,6 +2,7 @@ local ROOT = path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
 local TOOLS = path.join(ROOT, "frameworks", "ReactNative", "tools")
 
 local isolate = import("isolate", {rootdir = TOOLS, anonymous = true})
+local module_build = import("module_build", {rootdir = TOOLS, anonymous = true})
 
 local function expect(name, condition, detail)
     if not condition then
@@ -133,3 +134,15 @@ expect("a clone records its own roots", isolate.read_roots(new_folder).folder ==
 expect("a clone refuses an existing folder", refusal(function () isolate.clone_project(old_folder, new_folder, new_cache) end) ~= nil, "an existing folder was overwritten")
 expect("a clone counts what it rewrote", cloned.rewritten >= 3 and cloned.relinked == 2, cloned.rewritten .. " files, " .. cloned.relinked .. " links")
 os.rm(base)
+local function build_status(code)
+    local ran
+    local status = module_build.run("folder", "cache", "expo-x", function (_, args)
+        ran = table.concat(args, " ")
+        return code
+    end)
+    return status, ran
+end
+local failed, command = build_status(3)
+expect("module_build returns the status of a failed build", failed == 3, "the status was " .. tostring(failed))
+expect("module_build returns 0 for a build that passed", build_status(0) == 0, "a passed build was reported as failed")
+expect("module_build builds the base modules and the extra ones", command:find("expo-print,expo-x", 1, true) ~= nil, command)
