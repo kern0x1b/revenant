@@ -73,7 +73,7 @@ static BOOL revenant_attachment(CMSampleBufferRef sample, CFStringRef key)
     return CFDictionaryGetValue(values, key) == kCFBooleanTrue;
 }
 
-static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *context)
+static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *(^context)(void))
 {
     CVPixelBufferRef image = CMSampleBufferGetImageBuffer(sample);
     if (!image)
@@ -105,7 +105,8 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *conte
     }
     if (!frame && context) {
         CIImage *ci = [CIImage imageWithCVPixelBuffer:image];
-        frame = ci ? [context createCGImage:ci fromRect:ci.extent] : NULL;
+        CIContext *shared = ci ? context() : nil;
+        frame = shared ? [shared createCGImage:ci fromRect:ci.extent] : NULL;
     }
     return frame;
 }
@@ -118,7 +119,6 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *conte
         return NO;
     _videoGravity = [AVLayerVideoGravityResizeAspect copy];
     _status = AVQueuedSampleBufferRenderingStatusUnknown;
-    _context = [CIContext contextWithOptions:nil];
     _pending = [[NSMutableArray alloc] init];
     _workQueue = dispatch_queue_create("revenant.samplebuffer.display", DISPATCH_QUEUE_SERIAL);
     _displaySource = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, _workQueue);
@@ -288,7 +288,13 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *conte
         if (generation != _generation || _status == AVQueuedSampleBufferRenderingStatusFailed)
             return;
     }
-    CGImageRef frame = revenant_copy_image(buffer->sample, _context);
+    CGImageRef frame = revenant_copy_image(buffer->sample, ^CIContext *{
+        @synchronized (self) {
+            if (!_context)
+                _context = [CIContext contextWithOptions:nil];
+            return _context;
+        }
+    });
     if (!frame) {
         [self revenant_failWithDescription:@"AVSampleBufferDisplayLayer could not create an image from a sample buffer"];
         return;
