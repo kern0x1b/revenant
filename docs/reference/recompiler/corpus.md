@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, switchtail, tailcalls, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, rebasetag, flagflow, hostbridges, checkapi, proxytable, systemclasses and dropkey; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, llscpair, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, rebasetag, flagflow, hostbridges, checkapi, proxytable, sharedtable, statsthreads, systemclasses, dropkey and recaptchahelper; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions`, `libexceptions`, `libcxxexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -23,6 +23,7 @@ A check that also has a device part is run by hand, with the output folder as it
 
 ```sh
 ./xmakew l -P . recompiler/tests/weakimport/check.lua <out>
+./xmakew l -P . recompiler/tests/llscpair/check.lua <out>
 ./xmakew l -P . recompiler/tests/classpair/check.lua <out>
 ./xmakew l -P . recompiler/tests/exceptions/check.lua <out>
 ./xmakew l -P . recompiler/tests/libexceptions/check.lua <out>
@@ -196,8 +197,101 @@ The check proves four things on the host:
 The monitor remembers the address and the value an exclusive load saw. `STXR` succeeds only when the address is the
 recorded one and the `cmpxchg` still finds the recorded value, so a thread that wrote in between makes it fail and
 the loop retry. A store that finds the same value written back by another thread succeeds, as it does in a user-mode
-emulator; the loops compilers emit are value-based and tolerate it. `LDXP` and `STXP` still lift as a plain load and
-store, because a 128-bit `cmpxchg` has no armv7 lowering.
+emulator; the loops compilers emit are value-based and tolerate it. The pair forms, `LDXP` and `STXP`, have their own
+check, `llscpair`.
+
+### llscpair (device part by hand)
+
+A control for the pair forms of the exclusive instructions, `LDXP`, `LDAXP`, `STXP` and `STLXP`: the loop clang emits for
+a 16-byte atomic on arm64. The Swift runtime keeps the status of a task, the status of a default actor and the
+reference counts of a side table in such atomics ([library mode](library-mode.md), "Pair exclusives"). Until
+2026-11-19 they were lifted as a plain load and a plain store that always answered success, so two threads in such a
+loop lost updates.
+
+`workers.c` holds the loops, with no library call so that they lift alone: add (`__atomic_fetch_add` of a 128-bit
+value, both halves counting), compare-and-swap, exchange, store and load, the 32-bit pair form written in assembly
+(clang does not emit it), and five small functions for the monitor. `scenarios.h` runs them on one, two and four
+threads: two counters that must reach the number of updates in both halves, tokens exchanged between four cells and
+the threads that must all be there at the end with their two halves matching, and readers beside writers that must
+never see one half of another store. `main.c` calls the loops directly and is the program for the phone; `lifted.c`
+calls the lifted functions, each thread with a state of its own.
+
+The threads of a scenario are made to meet. Its 200,000 rounds a thread are cut into 50 parts of 4,000, and no thread
+begins a part before every thread has ended the part before: each counts itself in at a gate and spins there, and
+the main thread opens the gate when all are counted. A thread that enters a part while another is in it marks the
+part, and the scenario's line says in how many of the 50 parts that was so (`two threads at work at once in 47 of 50
+parts`). A scenario with more than one thread whose threads met in no part proved nothing and says so with a line
+that begins with `APART`, which the check reports as that and not as a lost update. The gate spins and never gives
+the processor up: with `sched_yield` in it the threads fell into taking turns, and 5 of 1,500 scenario runs met in no
+part.
+
+Until 2026-11-19 the threads only started together, once, and ran their 200,000 rounds in under a millisecond. On a
+Mac busy with other builds (load 20 to 40 on 12 cores) one thread was often done before the other was given a
+processor, so a control that must lose updates lost none and the check failed: 7 of 30 runs of the check alone, six
+at the third control and one at the first; the third control alone lost nothing in 65 of 200 runs and the first in
+15 of 100. With the gate, under the same load: the third control lost updates in 500 of 500 runs, the first and the
+second in 150 of 150 each, and in 5,500 scenario runs the fewest parts in which threads met was 26 of 50.
+
+The host part proves, in this order:
+
+1. The scenarios themselves: `main.c` built for this Mac passes, on hardware pairs.
+2. The arm64 binary carries a load-pair and a store-pair in every function, the 32-bit form among them, xlate leaves
+   no instruction unlifted and lifts every function.
+3. The lifted functions run on this Mac by one, two and four threads lose no update and read no torn pair. The lifted
+   code is laid out for armv7 and cuts a pointer to 32 bits, which no memory of a Mac process has, so the same binary
+   is lifted a second time with `--host-triple` and `--host-datalayout` of the Mac; the state header of the two lifts
+   must be the same file. The run ends with the runtime's own line of the pair stores, and the check wants at least
+   four million stored and at least one that failed: a run in which two threads never met on a pair proved nothing.
+   On the lifter as it was, this step lost 10,542 of 400,000 updates with two threads and 379,612 of 800,000 with
+   four, and a store-pair with no load before it answered success and wrote.
+4. The monitor: a store-pair with no load before it, at another address than its load, after a single-word exclusive
+   load, and the second of two after one load all answer 1 and store nothing; a single-word exclusive store after a
+   load-pair does the same.
+5. Two controls, the same lifted code linked with another pair store (`control.c`): one that stores without
+   comparing, and one that compares and stores without the lock. Both must lose updates.
+6. The fault: `lifted --fault` calls the pair store on a page that cannot be written. The signal handler must find
+   both words as they were and print the line of the pair stores with `1 of 64 locks held now` (see "Pair
+   exclusives" for why that is enough).
+7. The lifted IR: each load-pair is two atomic 64-bit loads, each store-pair one call of `rellume_aarch64_stxp`, the
+   32-bit pair one 64-bit `cmpxchg`, and the state header exports `EXCL_VAL2`.
+8. For armv7 the lifted object calls `rellume_aarch64_stxp` and no atomic library function (iOS 6 has none for 16
+   bytes), and `pair.c` takes its lock with `ldrex` and `strex`, imports `thread_switch`, `write` and `abort` and
+   nothing else, and calls them where it may (read from the relocations of the object): the pair store calls
+   `thread_switch` once and its refusal once, and only the refusal calls `write` and `abort`.
+9. Two pairs that share a word (`--overlap`: two threads add to a pair at 8 bytes and to one at 16, 200,000 times
+   each). The program built for this Mac must die of `SIGBUS`: that is the processor's rule, asked again at every
+   run. The lifted run must stop at the first store with `xlate: a store-pair at 0x... is not aligned to 16 bytes`
+   and `SIGABRT`. A third control, the pair store with a lock for each 16 bytes and no look at the alignment (the
+   first version of `pair.c`), must lose updates of the shared word: it lost 77,436 of 800,000. Two 32-bit pairs
+   that share a word (`--overlap32`, at 0 and at 4 bytes) must lose nothing or fault, in the native program and in
+   the lifted one; on this Mac both run and lose nothing.
+
+A failure of the check names what failed: the scenario with its number of threads and the whole line the program
+wrote for it (how many updates of how many were lost, the time, the parts in which threads met), and how the program
+ended. `xmake test` shows a check's message only with `--output-on-failure` and ends every failed run with
+`error: <no error object>`, whatever failed; so the runner of this group also prints the message itself, after the
+name of the check, when the check fails.
+
+The device part runs the translated `main.c` on the phone and prints `hw.ncpu` first; each line carries the time of
+its scenario, so the run with one thread is the cost of a pair store there. Then it runs `--overlap`, which must stop
+with the runtime's line, and `--overlap32`, which must lose nothing or fault. Those two have not run on the phone
+yet.
+
+**What ran on the phone.** On 2026-11-19 the device part passed on the 4S (iOS 6.1.3, `hw.ncpu` 2), all 14 scenarios
+and exit 0. That was the program before the gate: the program with the gate has not run on the phone, and its times
+include the waits at the gate, so they are not the numbers below. Times of a scenario over its number of updates,
+which is the wall time of all threads together and not the cost of one instruction:
+
+| Loop | 1 thread | 2 threads | 4 threads |
+|---|---:|---:|---:|
+| add (one load-pair and one store-pair an update) | 0.20 us | 0.34 us | 0.37 us |
+| compare-and-swap (a 128-bit load, then the swap: two store-pairs an update) | 0.39 us | 0.73 us | 0.76 us |
+| add of the 32-bit pair (one 64-bit exclusive, no lock) | 0.05 us | 0.06 us | 0.07 us |
+
+So a pair store costs about 0.2 us on the phone, and two or four threads that do nothing else than change one pair
+still finish 2.7 to 2.9 million updates a second between them: the lock does not turn into the queue a mutex makes
+there (14.6 us a pair of calls with two threads, [library mode](library-mode.md), "Two threads that send at once").
+The translated program prints no window of `xl-stats`, so this run has no count of failed stores.
 
 ### crypto
 
@@ -460,6 +554,35 @@ because of the aliases. Three controls on the 4S, each run with the program unch
 `format argument` has no control: the alias is a real copy with the same characters, so a `%@` that gets the alias formats
 the same text as one that gets the original, and nothing the program can observe tells the two apart.
 
+The `enumeration` lines are `for … in` loops of the guest over host collections, which
+`xl_manual_fast_enumeration` serves ([how](../../explanation/recompiler/how-it-works.md)): an outer loop over 40 strings
+that, at its first item, runs 40 inner loops to their end or to a `break` and then 64 `malloc` blocks of the size of a
+list of 40 items, filled with `0xa5`, and still has its 40 items (`40 of 40 items intact`; with the 32 shared lists the
+bridge had before, the outer loop's list was freed by the thirty-third inner loop and the blocks landed on it); 41 loops
+nested in one another; an array, a set and a dictionary of 100, which the guest gets 16 at a time (the array from one
+answer of the host, the other two from an answer for every 16); an empty array; a guest collection that forwards the
+call to a host array of 100; and an array, a set and a dictionary of 100 that are each changed at the twenty-first item
+of their loop, which must raise `NSGenericException` before the loop has seen 100 items. The array is the case that
+only the bridge's own comparison can raise: the host's array answers with all its items at once, so the host is not
+asked again before the hundredth item and no code of the host runs that could notice, and the comparison of the loop
+the compiler emits is the guest's here and reads the bridge's copy. The set and the dictionary are the case of a new
+answer, where the bridge writes a new copy and the guest's comparison raises. Each of the two was taken out once, on
+2026-11-19, and the translated program run with the Foundation of iOS 6.1.3 (10B329) in the emulator: without the
+bridge's comparison the array's line reads `raised 0, before its end 0` and the other two stay; with the guest's
+mutations pointer on a word that does not change, the set's and the dictionary's lines read `raised 0, before its end 0`
+and the array's stays. So the three lines fail when the mechanism they name is gone, and an array of iOS 6.1.3 does
+answer with more than the buffer holds.
+
+The translated program runs in the emulator without a phone, as the first process of a copy of the root filesystem
+(`cp -c -R` of `.cache/firmware/rootfs/iPhone4,1/6.1.3_10B329`, the program copied to `usr/local/bin`, then
+`emulator boot --rootfs COPY --device iPhone4,1 --binary /usr/local/bin/HostBridges --host-cache DIR --display headless --gles-backend software --time-scale 10 --ticks 4000000000`;
+8 seconds). Its lines without a `[` at the start are the program's: 171 of the 176 are those of `expected.txt`, and the
+five that differ are the two `getifaddrs lo0` lines and three `sysctl` lines (`kern.proc.pid`, `kern.proc.all` and the
+missing number), where the emulator's kernel answers a first process without a network otherwise than the phone's does;
+they were the phone's lines before the change of the `enumeration` lines, which touches neither. So this run stands in
+for the phone for every line but those, and not for `sysctl-unmapped` and `word-overflow`, which were not run there. The lines say `before its end 1` and not at which item, because the Mac raises at the
+twenty-second item and the bridge at the thirty-third ([why](../../explanation/recompiler/how-it-works.md)).
+
 `format locale nil`, `format locale posix` and `format locale unicode` call `-[NSString initWithFormat:locale:arguments:]`
 with a `va_list` the program builds. That selector is declared with `NS_FORMAT_FUNCTION(1,0)` and a `va_list` parameter, and
 until 2026-11-14 `xlgen` bridged the parameter as a plain pointer: the host read the guest's 8-byte argument words as 4-byte
@@ -583,6 +706,14 @@ too big. Then `compile_lifted` of `translate.lua` compiles it with its own piece
 smaller than 16 MB, and every function defined once across them. The objects are compiled with `-O0` to keep the check
 at about a minute; the limit is on the size of an object, and `-O0` code is bigger than `-O2` code.
 
+Its last step splits two small modules at once in one xmake process (`pair.lua`, started as a child with a limit of 120 s
+and killed at it) and requires both to return with their three objects. The pieces of a split are compiled by xmake's
+`runjobs`, and the scheduler under it keeps the coroutines and the one waiter of a run under the run's name: two runs of
+one name that overlap share them, and the one that began to wait first is never woken, with all its jobs done and no
+process left. That is what `xmake test "recompiler_corpus/*"` did whenever two checks split a module in the same run
+(objectsplit always does, libcxxexceptions when its lift is not reused): the whole run sat idle until it was killed,
+and the same checks passed one by one. A split now runs under a name with its output folder in it.
+
 ### tsdscan
 
 A control for xlate's build-time TSD offset scan (`src/xlate/tsd_scan.cpp`). xlate refuses to lift an image that reads
@@ -607,13 +738,18 @@ Proves the page-protection scheme of `src/runtime/xl_tsd_guard.h` on the build h
 `TPIDRRO_EL0` workaround. mmap, mprotect and SIGSEGV are POSIX, so `main.c` is compiled for the host and run directly. There
 is no device, lift or translation.
 
-It also checks `xl_stack_first`, the size a thread first tries for its guest stack (twice its own stack, rounded up to 64 KiB,
-between 256 KiB and 4 MiB), for eight host stack sizes from 0 to the largest `size_t`.
+It also checks the guest stack of a thread: `xl_stack_length` (the thread's own stack rounded up to a page, and a guard
+page) for five sizes, `xl_stack_map` (the guard page faults and the first byte above it reads; a mapper that refuses above
+1 MB gives no smaller stack for 4 MB, a mapper that refuses everything gives none) and `xl_stack_used` (nothing for a
+stack nobody wrote to, then the depth of the lowest write after writes at five depths).
 
 It proves the arithmetic at this machine's page size, which `main.c` prints: 16384 on Apple Silicon. The 4 KiB device
 case rests on `xl_tsd_guard.h` reading the page size from `sysconf`. Each check in `main.c` forks with its own `alarm()`,
 a bounded parent-side wait and a SIGKILL fallback, after a real hang on a device. The outer 60-second limit in
 `check.lua` is a second, independent belt: if it ever fires, `main.c`'s own bounding failed.
+
+The lines the crash handler writes without `printf` (`xl_budget_lines.h`: the guest stacks, the budget and the pair
+stores) are compared here with their `printf` text, a line cut short included.
 
 ### int128
 
@@ -825,6 +961,55 @@ It needs the arm64 runtime, so `XL_SWIFTOBJC_LIBS` names the folder with `libswi
 target marks a Swift class with bit 0 of the class data, the bit the guest's libswiftCore tests. A class compiled for
 iOS 12.2 or later (bit 1) is accepted too, because the runtime rewrites that bit when it sets the class up.
 
+### sharedtable
+
+Proves the rule of `src/runtime/xl_shared_table.h` on the build host: the tables that message routing reads and class
+registration writes are read by several threads together and by none while one changes them
+([why](library-mode.md), "Two threads that send at once"). `main.c` includes the header as the runtime does and gives its
+tables a hash function of the test's own, which `CFDictionary` calls inside every lookup and every change, so the test
+stands inside the lock: it counts the threads that are reading and changing, sleeps there to let the others arrive, and
+stops at the first reader beside a writer or second writer. Four threads send (each message looks a class up in one read
+section, then its method, a variant it puts into the cache if it is missing, and the twin of a host class it makes if it
+is missing) while two threads register 2,000 classes, each moved from "waiting to be built" to "built" in one write
+section; the senders ask mostly for the classes that are being registered at that moment. Then four threads race 300
+times to put one key, alone and as a pair of tables. It requires that no reader met a writer, that two readers were
+inside together at least once (a lock that shut readers out would pass everything else), that a class was never seen
+both built and waiting or neither, that every thread of a race was told the value that is in the table, and that the
+table that leads back holds no value of a thread that lost.
+
+Four controls are the same file built with one part of the rule taken out, and each must fail at its own line:
+`-DCONTROL=1`, no lock (its writes are lookups, so that it stops at the counter and not in a damaged dictionary), at
+`FAIL shared.exclusion`; `-DCONTROL=2`, a thread that missed under the read side puts its value without looking again,
+at `FAIL shared.claim`; `-DCONTROL=3`, the lookups of one class each in a read section of their own, at `FAIL
+shared.atomic`; `-DCONTROL=4`, the table that leads back behind another lock than its pair, which the module itself
+must refuse at `xlate: the two tables of a pair are behind different locks`. The check also reads the runtime files: `swift_classes.m` may call no `CFDictionary` function itself,
+`objc_bridge.m` may reach the variant cache only through the module, neither may take the dictionary out of a table
+(the field `entries`), and `runtime.c` and `library.c`, where the crash handler lives, may not use the module at all: a
+handler that waited for a lock the interrupted thread holds would hang the process instead of reporting. The tables
+are `static` in files that are compiled one by one, so no other file and no generated code can name them. It runs under `MallocScribble` and
+`MallocGuardEdges` and takes under a second. What it cannot show is the cost of the lock on the phone; that is the
+table in the reference and the `xl-stats` window of a drop.
+
+### statsthreads
+
+Proves the counters of `xl-stats` (`src/runtime/xl_stats_threads.h`) on the build host. A message with a bridge is counted
+without a lock, in a block of the sending thread, and the thread that prints adds the blocks up; the check is that
+nothing is lost by that. Twenty waves of four threads send 200,000 messages each over 64 pairs of class and selector
+while another thread closes a window every 200 us, as the profile thread does every 5 s. It requires the total of
+messages and of routing time to be exact after the threads have ended (a thread that ends hands its counts over and
+leaves the list), every window to name only pairs that were sent, the windows together to hold all messages but
+the one each thread was counting at the moment a window closed, and no pair to have more messages in the windows than
+were sent to it (a reader that took one thread's stale notes, or a count for the wrong pair, would give one). Then two threads count 64 messages of 0x30000000
+ticks each, so the 32-bit counter of a thread passes its end twelve times with nobody printing, and the total must
+still be exact: a thread adds its own time to the total before a quarter of the counter is used.
+
+Three controls: `-DCONTROL=1` counts in one set of counters without a lock, which is what taking the mutex away and
+nothing else would be, and must fail at `FAIL stats.total`; `-DXL_STATS_FOLD_TICKS=0xffffffffu` never lets a thread add
+its own time, and must fail at `FAIL stats.wrap`; `-DCONTROL=2` counts one message in a thousand for another pair, and
+must fail at the last requirement. There is no control for the barrier between a thread's clearing of its notes and
+the window's number: a run cannot be made to depend on the order in which one thread's stores reach another core, so
+that part rests on the memory model and not on a run. It runs under `MallocScribble` and `MallocGuardEdges`.
+
 ### proxytable
 
 A control for the proxies of guest objects ([how it works](../../explanation/recompiler/how-it-works.md)), run on the Mac:
@@ -866,7 +1051,8 @@ that a Backports library exports under the same symbol ([library mode](library-m
 - `addEntriesFromDictionary`, `removeAllObjects`, `setDictionary`: the three mutators that `NSMutableDictionary` implements
   and `NSDictionary` does not work on an `SCDict`.
 - `absent`, `shadowed`, `dispatch`: the guest still gets a class of its name for `NSURLQueryItem`, which the cache lacks, for
-  `CASpringAnimation`, which `shadowed-classes.txt` lists, and for `OS_dispatch_queue`, which the cache has but its `libSystem`
+  `CASpringAnimation`, which the check's own `data/systemclasses/shadowed-classes.txt` lists (the translator reads it through
+  `XL_SHADOWED_CLASSES`; the Backports' list is empty), and for `OS_dispatch_queue`, which the cache has but its `libSystem`
   does not export as a symbol.
 - `wide`: the guest sends host class `SCHostWide` four messages through a cast `objc_msgSend`, whose parameters are
   `int, long long`, `long long, long long`, `int, int, int, long long` (the last on the stack) and `unsigned char,
@@ -885,7 +1071,8 @@ that a Backports library exports under the same symbol ([library mode](library-m
   zero-extends every `q` reports `FAIL blocks` on the 4S (`-5` arrives as `4294967291`).
 
 The host part needs no Backports build. It compiles two stand-in libraries for the armv7 target, `libFoundationBackports`
-from the sources of `NSMutableDictionaryAlias.m` (the proxy `RevenantNSMutableDictionary` and the alias symbols) and a
+from the sources of the check's own `alias.m` (`REVENANT_ALIAS_OF(NSMutableDictionary, NSDictionary)`, which makes the proxy
+`RevenantNSMutableDictionary` and the alias symbols that the Backports no longer carry) and a
 class `NSURLQueryItem`, `libUIKitBackports` with `REVENANT_ALIAS(CASpringAnimation)` and `libSystemBackports` with
 `REVENANT_ALIAS(OS_dispatch_queue)`, under the install names of the
 real ones. It translates the fixture with `BACKPORTS_DIR` naming them, and requires of the library:
@@ -1134,7 +1321,10 @@ its own process, next to a heap of its own size. `tests/library/check.lua` has t
 API is a string, because a Swift `String` that crosses an Objective-C signature goes through the Foundation overlay,
 which the guest does not have yet; the strings stay inside the library (`describedLength` builds one).
 
-The host part, which `recompiler_corpus/library` runs, translates the `objc` fixture with `XL_LIBRARY=1`, then checks
+The host part, which `recompiler_corpus/library` runs, first runs the loader on the Mac (`loader.c`: `xl_loader.c` over a
+model of a 4S process's address space, fourteen scenarios of reserving, releasing, loading without a reservation and of every
+failure, each of which must leave nothing held that the host did not ask to keep;
+[the scenarios](library-mode.md#the-check)). It then translates the `objc` fixture with `XL_LIBRARY=1` and checks
 the dylib statically:
 
 - the library has no `__X<n>` segment, has `__XGUEST` and `__LINKEDIT`, and the guest image header (`magic`, `version`, a
@@ -1157,7 +1347,9 @@ variant only), `completion` and `completion.thread` (a block called on another t
 finds `"RCFixture.Client"` and the host's `NSClassFromString` does not; [the contract](library-mode.md#the-class-of-a-name-xl_find_class-xl_library_class-objc_sethook_getclass)).
 Four negative controls run first: a held
 range, a guest image format the loader does not read, a registry that is not next to the library, and an init without a
-reservation. `XL_LIBRARY_LAUNCHES` repeats the launch, and `XL_LIBRARY_INSTALL_NAME=executable` names the library by
+reservation. Two more launches are a host that keeps no reservation: one never calls `xl_reserve` and loads after its heap
+grew (`lazy.free`, then every name but `reserve`), one reserves, calls `xl_release` and reserves again (`release.held`,
+`release.free`, then every name). `XL_LIBRARY_LAUNCHES` repeats the launch, and `XL_LIBRARY_INSTALL_NAME=executable` names the library by
 `@executable_path` and starts the host without `DYLD_FALLBACK_LIBRARY_PATH`. It prints
 `measure <step> resident=… virtual=… threads=…` after each step and the address map of the process (`map <step>
 <start>-<end> <protection>`). A watchdog `alarm` ends a hung host after 180 seconds.
@@ -1185,14 +1377,18 @@ the shape of an app that has its own armv7 Swift runtime (`hostswift.swift` runs
 `NSDictionary` of the host's libswiftFoundation before the library is loaded), and runs it on the claimed phone: `xl_reserve`, `xl_load`, `xl_find_class` of `RecaptchaEnterprise.Recaptcha` and `RecaptchaAction`,
 `fetchClientWithSiteKey:completion:` with an empty key and no network (the answer is an error, not a crash), with `--execute`
 `executeWithAction:completion:`, `--rounds` times, then three seconds for the pools of the guest threads. It prints a line for
-each step with the resident size. It fails when a step is missing, when the fetch does not answer in `--seconds`, or when the
+each step with the resident size. The `identity` line names the user, the parent process, the main bundle with its identifier and the
+descriptors open at the start, for the runs that start it from an app's folder or from another process. It fails when a step is missing, when the fetch does not answer in `--seconds`, or when the
 process does not end with exit 0. A run takes 16 s on the 4S; the drop17 stop (`dlsym` answered with the host's `CFError: Error`
 conformance, see `stepDlsymGuest` above) and the double free of drop16 both reproduced in it.
 
 `./xmakew l -P . recompiler/tools/drop.lua NAME [--out DIR] [--no-verify]` builds a drop in one command and stops at the first step that
 fails: it builds `xlate` and `xlgen`, translates the SDK with the same recipe as the check, copies the library, its registry,
-the loader files and the reports to `telegram-build/.agent-work/recaptcha-real/NAME` (or DIR), writes `recaptcha-sdk.txt` with the
-two sha256 and, when `telegram-build/tools/recaptcha_sdk.lua` is there, verifies the drop with it. It prints the path and both
+the loader files and the reports to `telegram-build/.agent-work/recaptcha-real/NAME` (or DIR), and with them the two sources of
+the helper process, `helper.m` and `protocol.h` of `tests/recaptchahelper`, which the app's build compiles with its own flags as it
+compiles the loader; `helper.txt` beside them has `protocol_version` and the sha256 of each (`helper_m_sha256`,
+`protocol_h_sha256`), so that the app's build can show that what it compiled is what the drop carried. It writes
+`recaptcha-sdk.txt` with the two sha256 of the library and, when `telegram-build/tools/recaptcha_sdk.lua` is there, verifies the drop with it. It prints the path and both
 digests. It needs `XL_SWIFTOBJC_LIBS` and `BACKPORTS_DIR` in the environment (and `REVENANT_CACHE` in a worktree); the second translation of an
 unchanged lift reuses the lifted objects (`lift.stamp`).
 
@@ -1203,13 +1399,88 @@ older recipe, because the scratch folder of libraries still pointed at it). `dro
 `libswiftNetwork` of the folder built against another runtime stops it too. After the translation it reads the `revenant_swift_runtime_<hash>`
 mark the guest `libswiftCore` leaves in the library and stops unless that is the only mark and the key of the runtime it was given. The drop gets
 a `runtime.txt` beside `recaptcha-sdk.txt` (`runtime_key`, `runtime_recipe`, `libswiftcore_sha256`; the reader of `recaptcha-sdk.txt` in
-telegram-build refuses a key it does not know, so those lines are not in it). The check `dropkey` builds a store of two fake installs and
+telegram-build refuses a key it does not know, so those lines are not in it) and a `source.txt` (`commit`, the commit of the checkout
+that translated it, and `uncommitted_changes`, `none` or `yes`: a drop is asked about long after the worktree that made it is gone). The check `dropkey` builds a store of two fake installs and
 runs every one of those refusals.
 
 The library link takes the runtime objects from the same loop that compiles them (`runtime_objects` in `tools/translate.lua`), and a
 link that fails on an undefined `_xl_*` symbol is not retried with `-U`: those symbols are the runtime's own, nothing in the application
 defines them, and a lazy binding would stop the program at its first call. `drop.lua` also reads `nm -u` of the library before it
 writes the drop and stops on any `_xl_*` import (drop20 shipped five `_xl_journal_*` imports because `journal.o` was not in the link).
+
+### recaptchahelper
+
+Proves the helper process of the reCAPTCHA SDK ([its contract](recaptcha-helper.md)) on the build host. `helper.m` is
+the program; built with `-DRCHELPER_NATIVE` it loads the library with `dlopen` in place of `xl_load` and is otherwise
+the same code. `fixture.m` is a native library with the three classes the helper calls, whose answer depends on the
+site key (a token that repeats key and action, an error, no answer at all, an answer after 600 ms, two answers, a
+token of a given size), and which prints forged protocol lines on descriptor 1 when it is loaded and when asked, and
+resets `SIGPIPE` to its default action as the runtime's handler does. `driver.c` is the app side: it starts the
+helper with `posix_spawn`, two pipes, `POSIX_SPAWN_CLOEXEC_DEFAULT` and descriptor 2 on a file, and every line it
+reads must be a line of the protocol. `standin.m` is a native library that stands for one thing the Foundation backport
+does on iOS 6: its `+ephemeralSessionConfiguration` asks `+sharedHTTPCookieStorage` before it returns, because the
+configuration's `init` takes the shared stores and the method then replaces them. The driver inserts it into every
+helper it starts (`RCHELPER_INSERT`, which it turns into `DYLD_INSERT_LIBRARIES` for its children only), so that the
+Mac's own configuration, which never asks, behaves as the backport does.
+
+Fourteen scenarios, each with a helper of its own (the last one has none):
+
+| Scenario | Requires |
+|---|---|
+| `ready` | the first line is `ready` with the version, the library's UUID and the load's milliseconds; `quit` ends the helper with exit 0 |
+| `failed` | a missing library, another version, a library without the classes, no state, no arguments, an unknown option and a wrong idle time each give one `failed` line with its name, then exit 3 |
+| `token` | a token for `login`, `signup` and a custom action; two requests for a new key share one fetch and both are answered |
+| `errors` | the SDK's error with its domain, code and text, tab, newline and percent sign in them included; a fetch that fails; neither token nor error; `TIMEOUT` 250 to 1500 ms after a request that allowed 300, for an execute and for a fetch that never answer, and a second request for the key whose fetch never answered |
+| `unknown` | eight lines that are not requests are each rejected as `UNKNOWN_LINE`, and the next request is served |
+| `pending` | a request is answered while an earlier one is pending; a second request with the pending id is rejected and the first still gets its `TIMEOUT`; an answer that comes after `TIMEOUT` and a second answer of the SDK are dropped; an answered id can be used again |
+| `closed` | the app closes its request end with a request pending: the answer pipe ends within a second, exit 0, the helper's line of leaving counts in its own cookie store the cookie the library set in the shared one, and the file the library wrote in its caches folder is in the helper's home; the app closes its answer end: exit 0 and no signal |
+| `killed` | `SIGKILL` with a request pending: the pipe ends, the status says the signal; `SIGKILL` while the helper is blocked writing three answers of 60000 bytes: every line read is whole and the piece without a newline is not a line; a helper started after it serves |
+| `long` | a request and an answer of 60 KiB; six of them written before anything is read; a line of exactly 65536 bytes is taken (its answer does not fit and says so); one byte more, and 300000 bytes, are rejected as `LINE_TOO_LONG` and the next request is served |
+| `garbage` | six wrong ids are rejected as `BAD_ID`; 28 requests with a valid id and a wrong rest (field count, empty fields, ten wrong times, wrong escapes, an escaped and a raw NUL, bytes that are not UTF-8, an overlong form, a surrogate) each get one `BAD_REQUEST`; four requests with escapes, spaces, control bytes and four-byte characters get the token of exactly those bytes |
+| `idle` | with `--idle-ms 600` the helper exits 0.4 to 3 s after `ready`; with a request pending it stays, answers `TIMEOUT`, then exits; a line that is too long, sent 400 ms after `ready`, is rejected and keeps the helper alive past the 600 ms it had left, and the idle time then runs from the rejection |
+| `noise` | a token comes although the library prints on descriptor 1, and the file of descriptor 2 holds what it printed, the `NSLog` line and the helper's own two lines |
+| `quitclose` | twenty helpers are each sent `quit` and lose their request pipe in the same instant: each exits 0 and writes one line of leaving, not two (the thread that reads the pipe and the main thread both come to leave; on the phone the first helper did it twice) |
+| `trickle` | the reader of `protocol.h` (`rc_read_line`) that the app side uses, given a pipe on which a byte comes every 50 ms and no newline, and told to wait 300 ms, returns `RC_WAIT` after 250 to 600 ms: the time to wait is for the line, not for each byte |
+
+After the run the helper's state folder must hold the key the fixture stored with `standardUserDefaults` and the
+`Cache.db` of what it stored in the shared URL cache. On the build host the state is a folder (`--state` with a
+path); on the phone it is a name. That difference is two functions of `helper.m` (the name of the preferences domain
+and the URL cache) and a third that places the helper's home, and none of the three is proved on the phone. The
+driver gives every helper a `CFFIXED_USER_HOME` of its own, an empty folder, and the `closed` scenario requires that
+the file `rcec/ovk`, which the fixture writes into the caches folder it finds with `NSSearchPathForDirectoriesInDomains`
+as the SDK does, is in `home/Library/Caches` of the helper's state and that nothing was made in the home the helper
+was given.
+
+Thirteen controls, each a build of the helper with one part taken away, run against the scenario that needs it, and
+each must fail at its own line: descriptor 1 left where the library prints (`noise`), no deadline of the helper's
+own (`errors`), an id that stays pending after its answer (`pending`), fields written without escapes (`errors`),
+the end of the request pipe ignored (`closed`), no idle exit (`idle`), a pending id taken a second time (`pending`),
+an answer pipe without `F_SETNOSIGPIPE` (`closed`: the helper dies of signal 13), two threads free to leave at once
+(`quitclose`: 27 lines of leaving from 20 helpers), and the shared cookie store pointed at another store than the
+one the helper counts (`closed`), the home left where it was given (`closed`: the library's file lands in the
+folder the driver gave and not in the helper's), and the cookie store made on first use, inside the replacement of
+`sharedHTTPCookieStorage` (`ready`: with the stand-in, the helper's own request for the store calls the replacement
+that is being made. On iOS 6 that waited in `dispatch_once` for 270 s until `SIGALRM`; the Mac's libdispatch stops the
+process at the recursion instead, so the check sees the answer pipe end where the ready line was due), and a line that
+is too long not counted as a request for the idle time (`idle`: the helper leaves 237 ms after the rejection, when
+the timer set at `ready` runs out, and not 600 ms after it). The cookie
+control sends the library's cookie to a second private store and not to the store of the user who runs the check,
+which is why it is not simply the replacement taken away; the home control gets its folder from the driver for the
+same reason, so that it never writes into the caches of the user who runs the check. There is no control for
+`synchronize` before the exit, because the build host writes preferences out without it, and none for
+the replacement of `standardUserDefaults`, because without it the fixture would write into the user's own
+preferences.
+
+Four refusals, each a build of the helper in which one system call is made to fail (`CONTROL` 14 to 17: the `dup2`
+that points descriptor 1 at the log, the `F_SETNOSIGPIPE` on the answer pipe, the `pthread_create` of the reader, the
+`setenv` of `CFFIXED_USER_HOME`), run against a scenario of their own that only they run (`stdout-refused`,
+`nosigpipe-refused`, `reader-refused`, `home-refused`). Each must end with one `failed` line (`STDOUT`, `NOSIGPIPE`,
+`NO_READER`, `NO_HOME`) as the first line, before any `ready`, and exit 3. The calls cannot be made to fail from
+outside on the build host (a descriptor that is open stays open, and the Mac accepts the flag on every descriptor), so
+the build makes them fail; the helper that does not check them goes on to `ready`, which is what the scenarios catch.
+
+Last the check builds the helper for armv7 with the loader, as it goes to the phone, and requires that it imports
+none of `posix_spawn`, `fork`, `system` and `popen`. That build has not run anywhere yet.
 
 ### cxxinit and refrepro
 

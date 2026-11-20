@@ -65,10 +65,6 @@ local function without(remove, list)
     return result
 end
 
-local function difference(list, remove)
-    return without(remove, list)
-end
-
 local function iorun(program, argv)
     return os.iorunv(program, argv)
 end
@@ -385,7 +381,7 @@ local function split_compile(e, out, lifted, host, bytes, limit)
         table.insert(objects, piece .. ".o")
     end
     local count = tonumber(os.getenv("XL_COMPILE_JOBS") or "") or 4
-    runjobs("compile", function (index)
+    runjobs("compile " .. path.absolute(out), function (index)
         local job = jobs[index]
         if job.piece then
             local log = job.bitcode .. ".log"
@@ -404,10 +400,10 @@ local function split_compile(e, out, lifted, host, bytes, limit)
     return objects
 end
 
-function compile_lifted(e, out, host)
+function compile_lifted(e, out, host, limit)
     local lifted = path.join(out, "lifted.bc")
     local bytes = os.filesize(lifted)
-    local limit = tonumber(os.getenv("XL_OBJECT_BYTES") or "") or OBJECT_BYTES
+    limit = limit or tonumber(os.getenv("XL_OBJECT_BYTES") or "") or OBJECT_BYTES
     if bytes > limit then
         return split_compile(e, out, lifted, host, bytes, limit)
     end
@@ -482,7 +478,8 @@ function translate(input, includes, out, images, opt)
             table.join2(replaces, {"--namespace-prefix", namespace})
         end
     end
-    run(e.xlate, table.join({"--base", base}, replaces, {"--objc-manifest", o("manifest.json"), "--resolved-out", o("guest-resolved.txt"), input}, extra))
+    run(e.xlate, table.join({"--base", base}, library and {"--library", "--images-out", o(name .. ".manifest-images.txt")} or {}, replaces,
+                            {"--objc-manifest", o("manifest.json"), "--resolved-out", o("guest-resolved.txt"), input}, extra))
 
     local support_undefined = {}
     for _, line in ipairs(lines(iorun("nm", table.join({"-u"}, support)))) do
@@ -607,8 +604,16 @@ function translate(input, includes, out, images, opt)
     for _, part in ipairs(words(getenv("XL_XI_EXCEPT"))) do
         table.join2(xi_except, {"--xi-except", part})
     end
+    local budget = {}
+    for _, pair in ipairs({{"XL_METADATA_ARENA", "--metadata-arena"}, {"XL_WORD_SLOTS", "--word-slots"}, {"XL_ALIAS_ARENA", "--alias-arena"}}) do
+        local value = getenv(pair[1])
+        if library and value and value ~= "" then
+            table.insert(budget, pair[2])
+            table.insert(budget, value)
+        end
+    end
     local key = lift_key(e, input, extra, out, replaces, base .. (library and " library" or "") .. " " .. lifted_mode .. " " .. duplicates .. " xi=" .. xi ..
-                                                           " except=" .. table.concat(xi_except, ","))
+                                                           " except=" .. table.concat(xi_except, ",") .. " budget=" .. table.concat(budget, " "))
     local lifted_objs
     if os.isfile(o("lift.stamp")) and io.readfile(o("lift.stamp")) == key and os.isfile(o("lifted-objs.txt")) then
         print("lift inputs unchanged since the last run: reusing its lifted objects")
@@ -617,13 +622,32 @@ function translate(input, includes, out, images, opt)
         os.tryrm(o("lift.stamp"))
         os.tryrm(o("flag-flow.txt"))
         run(e.xlate, table.join({"--base", base, "--output", o("lifted.bc"), "--layout", o("layout.txt"), "--passthrough", o("passthrough.txt"),
-                                 "--state-header", o("xl_state.h"), "--dlsym-table", o("xl_dlsym.h"), "--flag-flow-summary", o("flag-flow.txt"), "--xi-out", o("xi.txt")}, library and {"--library"} or {},
+                                 "--state-header", o("xl_state.h"), "--dlsym-table", o("xl_dlsym.h"), "--flag-flow-summary", o("flag-flow.txt"), "--xi-out", o("xi.txt")}, library and {"--library", "--images-out", o(name .. ".images.txt")} or {}, budget,
                                 xi ~= "" and {"--xi-threshold", xi} or {}, xi_except, duplicates == "1" and {"--report-duplicates"} or {},
                                 replaces, {"--bridge", o("libxl-guest.dylib"), input}, extra,
                                 {o("libxl-guest.dylib")}))
         lifted_objs = compile_lifted(e, out, env.lifted_flags(lifted_mode, host))
         io.writefile(o("lifted-objs.txt"), table.concat(lifted_objs, " ") .. "\n")
         io.writefile(o("lift.stamp"), key)
+    end
+    if library then
+        local described = io.readfile(o(name .. ".manifest-images.txt"))
+        local described_rows, lifted_rows = {}, {}
+        for low, high, file in described:gmatch("(%x+) (%x+) ([^\n]+)") do
+            described_rows[file] = low .. " " .. high
+        end
+        for low, high, file in io.readfile(o(name .. ".images.txt")):gmatch("(%x+) (%x+) ([^\n]+)") do
+            lifted_rows[file] = low .. " " .. high
+            if described_rows[file] and described_rows[file] ~= lifted_rows[file] then
+                raise("the guest image %s lies at %s in the lifted code and at %s in the manifest of its Objective-C metadata: the two runs of xlate laid the images out by different rules, and every address the generator wrote for that image is wrong",
+                      file, lifted_rows[file], described_rows[file])
+            end
+        end
+        for file in pairs(described_rows) do
+            if not lifted_rows[file] then
+                raise("the guest image %s is in the manifest of the Objective-C metadata and not in the lifted code", file)
+            end
+        end
     end
     local rewritten = {}
     for _, line in ipairs(os.isfile(o("xi.txt")) and readlines(o("xi.txt")) or {}) do
@@ -643,15 +667,17 @@ function translate(input, includes, out, images, opt)
     run(clang, table.join(host, {"-I", out, "-I", runtime, "-I", path.join(lab, "include")}, extra_cflags, {"-c", path.join(runtime, "runtime.c"), "-o", o("runtime.o")}))
     run(clang, table.join(host, extra_cflags, {"-c", path.join(runtime, "crypto.c"), "-o", o("crypto.o")}))
     run(clang, table.join(host, extra_cflags, {"-c", path.join(runtime, "half.c"), "-o", o("half.o")}))
+    run(clang, table.join(host, {"-I", runtime}, extra_cflags, {"-c", path.join(runtime, "pair.c"), "-o", o("pair.o")}))
     if library then
         run(clang, table.join(host, {"-I", out, "-I", runtime, "-I", path.join(lab, "include")}, extra_cflags, {"-c", path.join(runtime, "library.c"), "-o", o("library.o")}))
         writelines(o("exports.txt"), table.join({"_xl_library_init", "_xl_library_diagnostics", "_xl_library_class"}, readlines(o("registry-exports.txt"))))
     end
-    local runtime_objects = {o("runtime.o"), o("crypto.o"), o("half.o")}
+    local runtime_objects = {o("runtime.o"), o("crypto.o"), o("half.o"), o("pair.o")}
     for _, source in ipairs({path.join(runtime, "bridge.m"), path.join(runtime, "objc_bridge.m"), path.join(runtime, "swift_classes.m"),
                              path.join(runtime, "proxy.m"), path.join(runtime, "journal.m"), path.join(runtime, "alignment.m"), path.join(runtime, "objc_compat.m"), path.join(runtime, "sysctl_bridge.m"), o("host.m")}) do
         local object = o(path.basename(source) .. ".o")
-        run(clang, table.join(host, {"-fno-objc-arc", "-fblocks", "-I", out, "-I", runtime, "-iquote", incdir}, extra_cflags, {"-c", source, "-o", object}))
+        run(clang, table.join(host, {"-fno-objc-arc", "-fblocks", "-I", out, "-I", runtime, "-I", path.join(lab, "include"), "-iquote", incdir}, extra_cflags,
+                              {"-c", source, "-o", object}))
         print("renamed %d sections", macho.rename_sections(object, true))
         table.insert(runtime_objects, object)
     end
@@ -726,7 +752,7 @@ function translate(input, includes, out, images, opt)
         table.join2(covered, classes_of(resolved))
         covered = unique(covered)
         writelines(o("covered-pre.txt"), covered)
-        for _, class in ipairs(difference(wanted, covered)) do
+        for _, class in ipairs(without(covered, wanted)) do
             table.insert(undef_flags, "-Wl,-U,_OBJC_CLASS_$_" .. class)
         end
     end
@@ -769,7 +795,7 @@ function translate(input, includes, out, images, opt)
 
     if stock and #backport_libs > 0 then
         local shadowed = {}
-        local shadow_list = path.join(e.root, "frameworks", "Backports", "tools", "shadowed-classes.txt")
+        local shadow_list = getenv("XL_SHADOWED_CLASSES") or path.join(e.root, "frameworks", "Backports", "tools", "shadowed-classes.txt")
         if os.isfile(shadow_list) then
             for _, line in ipairs(readlines(shadow_list)) do
                 local class = line:match("^shadow (%S+) %S+ %S+$")

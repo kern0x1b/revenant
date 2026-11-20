@@ -6,6 +6,7 @@ build/
 /.claude/worktrees/
 !/agent-skills/skills/build/
 !/frameworks/ReactNative/tests/data/**/build/
+!/frameworks/ReactNative/examples/*/overlay/node_modules/
 xcuserdata/
 DerivedData/
 *.log

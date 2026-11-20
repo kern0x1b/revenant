@@ -1,7 +1,9 @@
 set_project("paseo-ios6")
 set_version("0.1.0")
-local home = os.getenv("HOME")
-local revenant = os.getenv("REVENANT_PATH") or (home .. "/Git/projects/ios/revenant")
+local revenant = os.getenv("REVENANT_PATH")
+if not revenant or revenant == "" then
+    raise("REVENANT_PATH must name the revenant checkout this project builds with")
+end
 add_repositories("revenant " .. revenant)
 if os.getenv("RN_WEBKIT") then
     add_requires("webkit-engine", {alias = "webkit-engine-prefixed", configs = {variant = "prefixed", carried = "jsc"}})

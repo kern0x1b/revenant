@@ -162,7 +162,6 @@ local function stub_problems(data, registry, root)
         end
     end
     for file in pairs(DECLARED) do
-        -- a file that declares stubs is read even when stubs.json lists none of them
         if not texts[file] then
             texts[file] = source(root, file)
         end

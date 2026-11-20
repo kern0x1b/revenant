@@ -31,6 +31,7 @@ static uintptr_t xl_guest_low;
 static uintptr_t xl_guest_high;
 static uintptr_t xl_host_low;
 static void *xl_loaded_handle;
+static int xl_reservation_kept;
 static xl_load_status xl_loader_final;
 
 static xl_load_status xl_fail(xl_load_status status, const char *format, ...)
@@ -45,6 +46,12 @@ static xl_load_status xl_fail(xl_load_status status, const char *format, ...)
 static uintptr_t xl_round_up(uintptr_t value, uintptr_t granule)
 {
     return (value + granule - 1) & ~(granule - 1);
+}
+
+static const char *xl_leaf(const char *path)
+{
+    const char *slash = strrchr(path, '/');
+    return slash ? slash + 1 : path;
 }
 
 static xl_load_status xl_read_image(const char *path, struct xl_image *image)
@@ -103,10 +110,15 @@ static xl_load_status xl_read_image(const char *path, struct xl_image *image)
     if (guest.low >= guest.high || guest.low % XL_GUEST_GRANULE || guest.high % XL_GUEST_GRANULE)
         return xl_fail(XL_LOAD_BAD_IMAGE, "the guest image of %s has the range 0x%x-0x%x, not a range of whole %u byte granules", path, guest.low, guest.high,
                        XL_GUEST_GRANULE);
+    if (!xl_guest_budget_fits(&guest))
+        return xl_fail(XL_LOAD_BAD_IMAGE,
+                       "the guest image of %s holds 0x%x-0x%x, and its images to 0x%x, 0x%x bytes of metadata arena, %u opaque words and 0x%x bytes of aliases do not end there",
+                       path, guest.low, guest.high, guest.images_high, guest.arena, guest.word_slots, guest.aliases);
     char registry[PATH_MAX];
-    if (!xl_registry_path(path, registry, sizeof registry) || access(registry, R_OK) != 0)
-        return xl_fail(XL_LOAD_BAD_IMAGE, "the registry of the Objective-C classes of %s is missing: it is the file %s%s next to it", path,
-                       strrchr(path, '/') ? strrchr(path, '/') + 1 : path, XL_REGISTRY_SUFFIX);
+    if (!xl_registry_path(path, registry, sizeof registry))
+        return xl_fail(XL_LOAD_BAD_IMAGE, "the path %s is too long for the name of the registry next to it, which ends in %s", path, XL_REGISTRY_SUFFIX);
+    if (access(registry, R_OK) != 0)
+        return xl_fail(XL_LOAD_BAD_IMAGE, "the registry of the Objective-C classes of %s is missing: it is the file %s next to it", path, xl_leaf(registry));
     image->guest_low = guest.low;
     image->guest_high = guest.high;
     image->host_size = xl_round_up(last - first, vm_page_size);
@@ -224,6 +236,8 @@ xl_load_status xl_reserve(const char *path)
     if (!xl_guest_high && !xl_host_low && !xl_loaded_handle)
         xl_map_phase("before-reserve", XL_LOAD_OK);
     xl_load_status status = xl_loader_final != XL_LOAD_OK ? xl_loader_final : xl_loaded_handle ? XL_LOAD_OK : xl_reserve_locked(path);
+    if (status == XL_LOAD_OK && !xl_loaded_handle)
+        xl_reservation_kept = 1;
     xl_map_phase("reserve", status);
     if (xl_vm_map_enabled() && xl_reserved_image.host_size)
         dprintf(STDERR_FILENO, "xl-map reserve config host_reserve=%d host_size=0x%lx host_low=0x%lx guest_low=0x%lx guest_high=0x%lx\n",
@@ -233,20 +247,34 @@ xl_load_status xl_reserve(const char *path)
     return status;
 }
 
+void xl_release(void)
+{
+    pthread_mutex_lock(&xl_loader_lock);
+    xl_release_guest();
+    xl_release_host();
+    xl_reservation_kept = 0;
+    xl_map_phase("release", XL_LOAD_OK);
+    pthread_mutex_unlock(&xl_loader_lock);
+}
+
 static xl_load_status xl_attach_failed(int failure)
 {
     xl_release_guest();
+    xl_reservation_kept = 0;
     switch (failure) {
     case XL_LIBRARY_BAD_FORMAT:
-        return xl_fail(XL_LOAD_BAD_IMAGE, "the guest image of %s is not in the format this library reads", xl_loader_path);
-    case XL_LIBRARY_NOT_RESERVED:
-        return xl_fail(XL_LOAD_RANGE_BUSY, "the reservation of the guest image of %s was not an untouched, inaccessible range when the library attached it",
+        return xl_fail(XL_LOAD_ATTACH_REFUSED, "the library %s refused its guest image when it attached: the header, a segment or a slot is not what it reads",
                        xl_loader_path);
-    case XL_LIBRARY_NO_REGISTRY:
-        return xl_fail(XL_LOAD_BAD_IMAGE, "the registry of the Objective-C classes of %s is missing: it is the file %s%s next to it", xl_loader_path,
-                       strrchr(xl_loader_path, '/') ? strrchr(xl_loader_path, '/') + 1 : xl_loader_path, XL_REGISTRY_SUFFIX);
+    case XL_LIBRARY_NOT_RESERVED:
+        return xl_fail(XL_LOAD_RESERVATION_LOST, "the reservation of the guest image of %s was not an untouched, inaccessible range when the library attached it",
+                       xl_loader_path);
+    case XL_LIBRARY_NO_REGISTRY: {
+        char registry[PATH_MAX];
+        return xl_fail(XL_LOAD_REGISTRY_FAILED, "the registry of the Objective-C classes of %s was not next to the image when the library attached: it is the file %s",
+                       xl_loader_path, xl_registry_path(xl_loader_path, registry, sizeof registry) ? xl_leaf(registry) : XL_REGISTRY_SUFFIX);
+    }
     case XL_LIBRARY_REGISTRY_FAILED:
-        return xl_fail(XL_LOAD_DLOPEN_FAILED, "dlopen of the registry of %s: %s", xl_loader_path, dlerror());
+        return xl_fail(XL_LOAD_REGISTRY_FAILED, "dlopen of the registry of %s: %s", xl_loader_path, dlerror());
     default:
         return xl_fail(XL_LOAD_MAP_FAILED, "mapping the guest image of %s failed", xl_loader_path);
     }
@@ -265,16 +293,23 @@ static xl_load_status xl_load_locked(const char *path)
     xl_map_phase("before-dlopen", XL_LOAD_OK);
     void *handle = dlopen(xl_loader_path, RTLD_NOW | RTLD_LOCAL);
     if (!handle) {
-        xl_reserve_host(&xl_reserved_image, xl_loader_path);
+        if (xl_reservation_kept)
+            xl_reserve_host(&xl_reserved_image, xl_loader_path);
+        else
+            xl_release_guest();
         return xl_fail(XL_LOAD_DLOPEN_FAILED, "dlopen: %s", dlerror());
     }
     int (*initialize)(void) = (int (*)(void))dlsym(handle, "xl_library_init");
-    if (!initialize)
+    if (!initialize) {
+        if (!xl_reservation_kept)
+            xl_release_guest();
         return xl_fail(XL_LOAD_BAD_IMAGE, "%s has no xl_library_init", xl_loader_path);
+    }
     int failure = initialize();
     if (failure != XL_LIBRARY_OK)
         return xl_loader_final = xl_attach_failed(failure);
     xl_guest_low = xl_guest_high = 0;
+    xl_reservation_kept = 0;
     xl_loaded_handle = handle;
     return XL_LOAD_OK;
 }

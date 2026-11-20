@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <sys/time.h>
 #include <unistd.h>
 
@@ -35,6 +36,20 @@ static NSString *failure(id error)
     if (!error)
         return @"error=nil";
     return [NSString stringWithFormat:@"error=%@ %ld '%@'", [error domain], (long)[error code], [error localizedDescription]];
+}
+
+static NSString *descriptors(void)
+{
+    NSMutableString *text = [NSMutableString string];
+    int most = getdtablesize();
+    for (int fd = 0; fd < most && fd < 1024; fd++) {
+        struct stat info;
+        if (fstat(fd, &info) != 0)
+            continue;
+        const char *kind = S_ISFIFO(info.st_mode) ? "pipe" : S_ISCHR(info.st_mode) ? "device" : S_ISREG(info.st_mode) ? "file" : S_ISSOCK(info.st_mode) ? "socket" : S_ISDIR(info.st_mode) ? "folder" : "other";
+        [text appendFormat:@"%s%d:%s", text.length ? " " : "", fd, kind];
+    }
+    return text;
 }
 
 static Class find(const char *name)
@@ -69,8 +84,11 @@ int main(int argc, char **argv)
     }
     alarm((unsigned)(seconds * 2 * rounds) + 30);
     started = now();
+    NSString *open = descriptors();
     const char *path = argv[1];
     step("start", [NSString stringWithFormat:@"key length %lu execute=%d rounds=%d", (unsigned long)key.length, execute, rounds]);
+    step("identity", [NSString stringWithFormat:@"uid=%d euid=%d parent=%d bundle=%@ id=%@ descriptors=%@", (int)getuid(), (int)geteuid(), (int)getppid(),
+                                                  [NSBundle mainBundle].bundlePath, [NSBundle mainBundle].bundleIdentifier, open]);
     step("host swift", [NSString stringWithFormat:@"%ld", rcsdk_host_swift(7)]);
     xl_load_status reserved = xl_reserve(path);
     step("reserve", [NSString stringWithFormat:@"status=%d %s", reserved, reserved ? xl_load_error() : ""]);

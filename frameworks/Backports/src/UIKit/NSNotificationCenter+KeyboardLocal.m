@@ -11,6 +11,8 @@ static NSDictionary *revenant_local_info(NSDictionary *info)
     if (!info || info[UIKeyboardIsLocalUserInfoKey])
         return info;
     NSMutableDictionary *merged = [info mutableCopy];
+    if (!merged)
+        return info;
     merged[UIKeyboardIsLocalUserInfoKey] = @YES;
     return merged;
 }
@@ -35,9 +37,13 @@ static NSDictionary *revenant_local_info(NSDictionary *info)
     void (*wholeOriginal)(id, SEL, NSNotification *) = (void (*)(id, SEL, NSNotification *))method_getImplementation(wholeMethod);
     class_replaceMethod(center, whole, imp_implementationWithBlock(^(NSNotificationCenter *self, NSNotification *notification) {
         NSString *name = notification.name;
-        if (revenant_is_keyboard_notification(name) && notification.userInfo && !notification.userInfo[UIKeyboardIsLocalUserInfoKey])
-            notification = [NSNotification notificationWithName:name object:notification.object userInfo:revenant_local_info(notification.userInfo)];
-        wholeOriginal(self, whole, notification);
+        NSNotification *posted = notification;
+        if (revenant_is_keyboard_notification(name) && notification.userInfo && !notification.userInfo[UIKeyboardIsLocalUserInfoKey]) {
+            NSNotification *local = [NSNotification notificationWithName:name object:notification.object userInfo:revenant_local_info(notification.userInfo)];
+            if (local)
+                posted = local;
+        }
+        wholeOriginal(self, whole, posted);
     }), method_getTypeEncoding(wholeMethod));
 }
 

@@ -1,9 +1,12 @@
 #import <Foundation/Foundation.h>
 
 #include "xl_bridge.h"
+#include "xl_diag.h"
+#include "xl_guest_image.h"
 
 State *xl_current_state(void);
 
+#include <mach/mach.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -110,17 +113,18 @@ void _dyld_register_func_for_add_image(void (*func)(const struct mach_header *mh
 #endif
 }
 
+static struct xl_diag_flag xl_errno_trace_flag = {"xl-trace-errno", 0};
+
 int xl_shim_openat(int dirfd, const char *path, int flags, int mode)
 {
-    static int trace = -1;
-    if (trace < 0)
-        trace = access("/private/var/revenant/xl-trace-errno", F_OK) == 0;
-    if (trace && (flags & O_CREAT)) {
-        int fd = open("/private/var/revenant/xl-errno.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+    if (xl_diag_on(&xl_errno_trace_flag) && (flags & O_CREAT)) {
+        int fd = xl_diag_open("xl-errno.log", O_APPEND);
         if (fd >= 0) { dprintf(fd, "openat O_CREAT dirfd=%d [%s] flags=0x%x mode=0%o\n", dirfd, path ? path : "(null)", flags, mode); close(fd); }
     }
-    if (!path)
-        return open(path, flags, mode);
+    if (!path) {
+        errno = EFAULT;
+        return -1;
+    }
     if (path[0] == '/' || dirfd == AT_FDCWD)
         return open(path, flags, mode);
     char dir[PATH_MAX];
@@ -155,14 +159,17 @@ static int xl_at_path(int dirfd, const char *path, char *out)
     return 0;
 }
 
+#define XL_AT_SYMLINK_NOFOLLOW 0x0020
+#define XL_AT_REMOVEDIR 0x0080
+
 #define XL_AT(fd, path, body) do { char full_[PATH_MAX]; if (xl_at_path((fd), (path), full_) == -1) return -1; return (body); } while (0)
 
 int xl_shim_mkdirat(int fd, const char *path, mode_t mode) { XL_AT(fd, path, mkdir(full_, mode)); }
-int xl_shim_unlinkat(int fd, const char *path, int flag) { XL_AT(fd, path, (flag & 0x0080 ) ? rmdir(full_) : unlink(full_)); }
-int xl_shim_fstatat(int fd, const char *path, struct stat *st, int flag) { XL_AT(fd, path, (flag & 0x0020 ) ? lstat(full_, st) : stat(full_, st)); }
+int xl_shim_unlinkat(int fd, const char *path, int flag) { XL_AT(fd, path, (flag & XL_AT_REMOVEDIR) ? rmdir(full_) : unlink(full_)); }
+int xl_shim_fstatat(int fd, const char *path, struct stat *st, int flag) { XL_AT(fd, path, (flag & XL_AT_SYMLINK_NOFOLLOW) ? lstat(full_, st) : stat(full_, st)); }
 ssize_t xl_shim_readlinkat(int fd, const char *path, char *buf, size_t size) { char full_[PATH_MAX]; if (xl_at_path(fd, path, full_) == -1) return -1; return readlink(full_, buf, size); }
-int xl_shim_fchmodat(int fd, const char *path, mode_t mode, int flag) { XL_AT(fd, path, (flag & 0x0020) ? lchmod(full_, mode) : chmod(full_, mode)); }
-int xl_shim_fchownat(int fd, const char *path, uid_t uid, gid_t gid, int flag) { XL_AT(fd, path, (flag & 0x0020) ? lchown(full_, uid, gid) : chown(full_, uid, gid)); }
+int xl_shim_fchmodat(int fd, const char *path, mode_t mode, int flag) { XL_AT(fd, path, (flag & XL_AT_SYMLINK_NOFOLLOW) ? lchmod(full_, mode) : chmod(full_, mode)); }
+int xl_shim_fchownat(int fd, const char *path, uid_t uid, gid_t gid, int flag) { XL_AT(fd, path, (flag & XL_AT_SYMLINK_NOFOLLOW) ? lchown(full_, uid, gid) : chown(full_, uid, gid)); }
 int xl_shim_faccessat(int fd, const char *path, int mode, int flag) { XL_AT(fd, path, access(full_, mode)); }
 
 int xl_shim_renameat(int ofd, const char *opath, int nfd, const char *npath)
@@ -229,7 +236,7 @@ void xl_manual_utimensat(void *pack)
             tv[i].tv_usec = (int)(gt[i].nsec / 1000);
         }
     }
-    p->r = (uint64_t)(int64_t)((p->flag & 0x0020) ? lutimes(full_, tv) : utimes(full_, tv));
+    p->r = (uint64_t)(int64_t)((p->flag & XL_AT_SYMLINK_NOFOLLOW) ? lutimes(full_, tv) : utimes(full_, tv));
 }
 
 struct xl_gdirent {
@@ -385,7 +392,7 @@ int xl_shim_sqlite3_bind_text64(struct sqlite3_stmt *stmt, int index, const char
             destructor((void *)data);
         return SQLITE_TOOBIG;
     }
-    if (encoding == SQLITE_UTF16 || encoding == 3  || encoding == 4 )
+    if (encoding == SQLITE_UTF16 || encoding == SQLITE_UTF16LE || encoding == SQLITE_UTF16BE)
         return sqlite3_bind_text16(stmt, index, data, (int)n, destructor);
     return sqlite3_bind_text(stmt, index, data, (int)n, destructor);
 }
@@ -398,10 +405,7 @@ void xl_errno_trace(const char *name, int64_t result, uint64_t first_argument, u
     if (result != -1)
         return;
     int saved = errno;
-    static int enabled = -1;
-    if (enabled < 0)
-        enabled = access("/private/var/revenant/xl-trace-errno", F_OK) == 0;
-    if (enabled) {
+    if (xl_diag_on(&xl_errno_trace_flag)) {
         static int devnull = -1;
         if (devnull < 0)
             devnull = open("/dev/null", O_WRONLY);
@@ -417,7 +421,7 @@ void xl_errno_trace(const char *name, int64_t result, uint64_t first_argument, u
                 text[k][n] = 0;
             }
         }
-        int fd = open("/private/var/revenant/xl-errno.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+        int fd = xl_diag_open("xl-errno.log", O_APPEND);
         if (fd >= 0) {
             dprintf(fd, "%s errno=%d a0=0x%llx [%s] a1=0x%llx [%s]\n", name, saved, (unsigned long long)first_argument, text[0],
                     (unsigned long long)second_argument, text[1]);
@@ -674,8 +678,7 @@ void xl_narrowing_fault(const char *symbol, unsigned index, uint64_t value)
     abort();
 }
 
-#define XL_WORD_SLOTS 262144u
-#define XL_WORD_STRIDE 16u
+#define XL_WORD_STRIDE XL_GUEST_WORD_STRIDE
 #define XL_WORD_OFFSET 4u
 
 uintptr_t xl_word_low;
@@ -685,19 +688,45 @@ static pthread_mutex_t xl_word_lock = PTHREAD_MUTEX_INITIALIZER;
 static uint64_t *xl_word_words;
 static uint32_t *xl_word_index;
 static volatile unsigned xl_word_used;
+static uint32_t xl_word_slots;
+
+static void xl_word_place(uintptr_t region, uint32_t slots)
+{
+    xl_word_words = (uint64_t *)(region + (uintptr_t)slots * XL_WORD_STRIDE);
+    xl_word_index = (uint32_t *)(xl_word_words + slots);
+    xl_word_slots = slots;
+    xl_word_low = region;
+    __sync_synchronize();
+    xl_word_span = (uintptr_t)slots * XL_WORD_STRIDE;
+}
+
+int xl_word_adopt(uintptr_t region, uint32_t slots)
+{
+    if (xl_word_span)
+        return 0;
+    if (vm_protect(mach_task_self(), region + (vm_address_t)slots * XL_WORD_STRIDE, (vm_size_t)slots * (XL_GUEST_WORD_BYTES - XL_WORD_STRIDE), FALSE,
+                   VM_PROT_READ | VM_PROT_WRITE) != KERN_SUCCESS)
+        return 0;
+    xl_word_place(region, slots);
+    return 1;
+}
+
+unsigned xl_word_count(unsigned *slots)
+{
+    *slots = xl_word_slots;
+    return xl_word_used;
+}
 
 static void xl_word_setup(void)
 {
-    void *region = mmap(NULL, (size_t)XL_WORD_SLOTS * XL_WORD_STRIDE, PROT_NONE, MAP_ANON | MAP_PRIVATE, -1, 0);
-    void *words = mmap(NULL, (size_t)XL_WORD_SLOTS * sizeof(uint64_t), PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
-    void *index = mmap(NULL, (size_t)XL_WORD_SLOTS * 2 * sizeof(uint32_t), PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
-    if (region == MAP_FAILED || words == MAP_FAILED || index == MAP_FAILED)
+    if (xl_word_span)
+        return;
+    size_t length = (size_t)XL_GUEST_WORD_SLOTS * XL_GUEST_WORD_BYTES;
+    void *region = mmap(NULL, length, PROT_NONE, MAP_ANON | MAP_PRIVATE, -1, 0);
+    if (region == MAP_FAILED || mprotect((char *)region + (size_t)XL_GUEST_WORD_SLOTS * XL_WORD_STRIDE,
+                                         length - (size_t)XL_GUEST_WORD_SLOTS * XL_WORD_STRIDE, PROT_READ | PROT_WRITE))
         xl_unsupported("the table of opaque 64-bit words cannot be mapped");
-    xl_word_words = words;
-    xl_word_index = index;
-    xl_word_low = (uintptr_t)region;
-    __sync_synchronize();
-    xl_word_span = (uintptr_t)XL_WORD_SLOTS * XL_WORD_STRIDE;
+    xl_word_place((uintptr_t)region, XL_GUEST_WORD_SLOTS);
 }
 
 void xl_word_init(void)
@@ -708,7 +737,7 @@ void xl_word_init(void)
 uintptr_t xl_word_slot(uint64_t word, const char *symbol, unsigned index)
 {
     pthread_once(&xl_word_once, xl_word_setup);
-    const uint32_t mask = XL_WORD_SLOTS * 2 - 1;
+    const uint32_t mask = xl_word_slots * 2 - 1;
     uint32_t at = (uint32_t)((word * 0x9E3779B97F4A7C15ull) >> 40) & mask;
     pthread_mutex_lock(&xl_word_lock);
     for (; xl_word_index[at]; at = (at + 1) & mask) {
@@ -719,12 +748,12 @@ uintptr_t xl_word_slot(uint64_t word, const char *symbol, unsigned index)
         }
     }
     unsigned next = xl_word_used;
-    if (next == XL_WORD_SLOTS) {
+    if (next == xl_word_slots) {
         pthread_mutex_unlock(&xl_word_lock);
         char buf[320];
         snprintf(buf, sizeof buf,
-                 "xlate: %s argument %u value 0x%llx needs a slot of the table of opaque 64-bit words, which holds %u distinct words and is full\n",
-                 symbol, index, word, XL_WORD_SLOTS);
+                 "xlate: %s argument %u value 0x%llx needs a slot of the table of opaque 64-bit words, which holds %u distinct words and is full; a library states the number with --word-slots when it is translated\n",
+                 symbol, index, word, xl_word_slots);
         fprintf(stderr, "%s", buf);
         xl_diag(buf);
         xl_report_guest_frame();
@@ -770,8 +799,14 @@ void xl_manual___cxa_atexit(void *pack)
     struct __attribute__((packed)) { uint64_t a0, a1, a2, r; } *p = pack;
     pthread_mutex_lock(&xl_cxa_lock);
     if (xl_cxa_count == xl_cxa_cap) {
-        xl_cxa_cap = xl_cxa_cap ? xl_cxa_cap * 2 : 128;
-        xl_cxa_list = realloc(xl_cxa_list, xl_cxa_cap * sizeof *xl_cxa_list);
+        unsigned grown = xl_cxa_cap ? xl_cxa_cap * 2 : 128;
+        struct xl_cxa_entry *list = realloc(xl_cxa_list, grown * sizeof *xl_cxa_list);
+        if (!list) {
+            pthread_mutex_unlock(&xl_cxa_lock);
+            xl_unsupported("__cxa_atexit: no memory for the destructor list");
+        }
+        xl_cxa_list = list;
+        xl_cxa_cap = grown;
     }
     xl_cxa_list[xl_cxa_count].func = p->a0;
     xl_cxa_list[xl_cxa_count].arg = p->a1;

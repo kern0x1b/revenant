@@ -1,5 +1,8 @@
-URLSessionTests
-DispatchQueueSchedulerTests.testScheduleActionOnceNow
-DispatchQueueSchedulerTests.testStrideFromDispatchTimeInterval
-DispatchQueueSchedulerTests.testStrideFromNumericValue
-RecordTests.testRecordDecode
+# The closed list of OpenCombine tests CombineTests does not run, and why. One line per entry:
+# the class name or Type.test identifier, whitespace, the reason. The reasons are measured in
+# docs/reference/combine/test-results.md. An entry with no reason is refused by tools/discover.lua.
+URLSessionTests the test classes subclass URLSession, an iOS 7 class; 16 tests
+DispatchQueueSchedulerTests.testScheduleActionOnceNow uses DispatchQueue.async(qos:), an iOS 8 QoS API
+DispatchQueueSchedulerTests.testStrideFromDispatchTimeInterval Stride.magnitude is Int and traps on 32-bit armv7 with an Int64 nanosecond count
+DispatchQueueSchedulerTests.testStrideFromNumericValue Stride.magnitude is Int and traps on 32-bit armv7 with an Int64 nanosecond count
+RecordTests.testRecordDecode traps in the Foundation overlay bridging a dictionary during JSON decode, not in Combine

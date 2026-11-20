@@ -1,3 +1,4 @@
+#include "xl_diag.h"
 #include "xl_state.h"
 #include "xl_vm_map.h"
 
@@ -35,9 +36,6 @@ unsigned long xl_guest_image_low, xl_guest_image_high, xl_guest_arena_low, xl_gu
 xl_lifted xl_imp_lookup(uint64_t address);
 
 #define XL_REG(state, name) (*(uint64_t *)((char *)(state) + XL_OFFSET_##name))
-#define XL_GUEST_STACK_MAIN (16u << 20)
-#define XL_GUEST_STACK_THREAD (4u << 20)
-#define XL_GUEST_STACK_FLOOR (256u << 10)
 
 #ifdef XL_LIBRARY
 extern void xl_library_ensure(void);
@@ -49,6 +47,7 @@ extern void xl_bridge_init(void);
 
 static pthread_key_t xl_state_key;
 static pthread_once_t xl_state_once = PTHREAD_ONCE_INIT;
+static int xl_state_key_made;
 static int xl_diagnostics_installed;
 static int xl_map_on;
 
@@ -57,30 +56,113 @@ struct xl_thread {
     void *tsd_pages;
     size_t stack_size;
     size_t guard_size;
+    struct xl_thread *next;
+    struct xl_thread **link;
 };
 
 #define XL_THREAD_HEADER 32u
+_Static_assert(sizeof(struct xl_thread) <= XL_THREAD_HEADER, "the record of a thread has to fit in front of its state");
 #include "xl_tsd_guard.h"
+#include "xl_budget_lines.h"
 
 static uint32_t xl_threads_created;
 static uint32_t xl_threads_ended;
 static uint32_t xl_threads_stack_live;
+static uint32_t xl_threads_stack_deepest;
+static struct xl_thread *xl_threads_list;
+static pthread_mutex_t xl_threads_lock = PTHREAD_MUTEX_INITIALIZER;
 
 int xl_stats_enabled(void)
 {
-    static int enabled = -1;
-    if (enabled < 0)
-        enabled = getenv("XL_STATS") != NULL || access("/private/var/revenant/xl-stats", F_OK) == 0;
-    return enabled;
+    static struct xl_diag_flag stats = {"xl-stats", 0};
+    return xl_diag_on(&stats);
 }
 
-static void xl_threads_report(const char *what, size_t stack, size_t host_stack)
+static void xl_threads_report(const char *what, size_t stack, size_t used)
 {
     uint32_t created = __atomic_load_n(&xl_threads_created, __ATOMIC_RELAXED);
     uint32_t ended = __atomic_load_n(&xl_threads_ended, __ATOMIC_RELAXED);
-    dprintf(2, "xlate: threads: %s (guest stack %lu KiB, host stack %lu KiB): %u live, %u created, %u ended, %lu KiB of guest stack live\n",
-            what, (unsigned long)(stack >> 10), (unsigned long)(host_stack >> 10), created - ended, created, ended,
-            (unsigned long)(__atomic_load_n(&xl_threads_stack_live, __ATOMIC_RELAXED) >> 10));
+    dprintf(2, "xlate: threads: %s (guest stack %lu KiB, %lu KiB of it used): %u live, %u created, %u ended, %lu KiB of guest stack live, %lu KiB the deepest use of one\n",
+            what, (unsigned long)(stack >> 10), (unsigned long)(used >> 10), created - ended, created, ended,
+            (unsigned long)(__atomic_load_n(&xl_threads_stack_live, __ATOMIC_RELAXED) >> 10),
+            (unsigned long)(__atomic_load_n(&xl_threads_stack_deepest, __ATOMIC_RELAXED) >> 10));
+}
+
+static size_t xl_thread_stack_used(const struct xl_thread *thread)
+{
+    size_t used = 0;
+    if (!xl_stack_used(thread->stack, thread->stack_size, thread->guard_size, &used))
+        return 0;
+    uint32_t deepest = __atomic_load_n(&xl_threads_stack_deepest, __ATOMIC_RELAXED);
+    while (used > deepest && !__atomic_compare_exchange_n(&xl_threads_stack_deepest, &deepest, (uint32_t)used, 1, __ATOMIC_RELAXED, __ATOMIC_RELAXED)) {
+    }
+    return used;
+}
+
+static int xl_threads_stack_count(int wait, struct xl_stacks_count *count)
+{
+    count->live = 0;
+    count->mapped = count->deepest = count->deepest_of = 0;
+    int held = wait ? pthread_mutex_lock(&xl_threads_lock) == 0 : pthread_mutex_trylock(&xl_threads_lock) == 0;
+    if (held) {
+        for (struct xl_thread *thread = xl_threads_list; thread; thread = thread->next) {
+            size_t used = xl_thread_stack_used(thread);
+            count->live++;
+            count->mapped += thread->stack_size;
+            if (used >= count->deepest) {
+                count->deepest = used;
+                count->deepest_of = thread->stack_size;
+            }
+        }
+        pthread_mutex_unlock(&xl_threads_lock);
+    }
+    count->ever = __atomic_load_n(&xl_threads_stack_deepest, __ATOMIC_RELAXED);
+    return held;
+}
+
+static void xl_threads_stack_write(int fd, int wait)
+{
+    char line[200];
+    struct xl_stacks_count count;
+    int read = xl_threads_stack_count(wait, &count);
+    write(fd, line, xl_stacks_line(line, sizeof line, read, &count));
+}
+
+unsigned xl_word_count(unsigned *slots);
+unsigned long xl_alias_used(unsigned long *size);
+
+static void xl_budget_write(int fd)
+{
+    char line[240];
+    struct xl_budget_count count = {0};
+    count.words = xl_word_count(&count.slots);
+    count.aliases = xl_alias_used(&count.aliases_size);
+    count.arena_size = xl_guest_arena_high - xl_guest_arena_low;
+    size_t page = (size_t)sysconf(_SC_PAGESIZE);
+    for (unsigned long at = xl_guest_arena_low; at < xl_guest_arena_high; at += sizeof line * page) {
+        unsigned long pages = (xl_guest_arena_high - at) / page < sizeof line ? (xl_guest_arena_high - at) / page : sizeof line;
+        if (mincore((void *)at, pages * page, line)) {
+            count.unread = errno ? errno : -1;
+            break;
+        }
+        for (unsigned long i = 0; i < pages; i++) {
+            if (line[i] & MINCORE_INCORE)
+                count.arena = at + (i + 1) * page - xl_guest_arena_low;
+        }
+    }
+    write(fd, line, xl_budget_line(line, sizeof line, &count));
+}
+
+void xl_pair_read(struct xl_pair_count *count);
+
+static void xl_pair_write(int fd, struct xl_pair_count *before)
+{
+    char line[320];
+    struct xl_pair_count count;
+    xl_pair_read(&count);
+    write(fd, line, xl_pair_line(line, sizeof line, &count, before));
+    if (before)
+        *before = count;
 }
 
 #define XL_PROFILE_BUCKETS 1024
@@ -186,6 +268,10 @@ static void xl_profile_report(unsigned samples, uint32_t window_messages, uint32
         best->count = 0;
     }
     xl_stats_window_report();
+    xl_threads_stack_write(2, 1);
+    xl_budget_write(2);
+    static struct xl_pair_count before;
+    xl_pair_write(2, &before);
     memset(xl_profile_buckets, 0, sizeof xl_profile_buckets);
 }
 
@@ -234,13 +320,19 @@ static void xl_state_destroy(void *value)
 {
     struct xl_thread *thread = (struct xl_thread *)((char *)value - XL_THREAD_HEADER);
     size_t stack = thread->stack_size;
+    size_t used = xl_stats_enabled() ? xl_thread_stack_used(thread) : 0;
+    pthread_mutex_lock(&xl_threads_lock);
+    *thread->link = thread->next;
+    if (thread->next)
+        thread->next->link = thread->link;
+    pthread_mutex_unlock(&xl_threads_lock);
     munmap(thread->stack, thread->stack_size);
     xl_tsd_free(thread->tsd_pages);
     free(thread);
     __atomic_fetch_add(&xl_threads_ended, 1, __ATOMIC_RELAXED);
     __atomic_fetch_sub(&xl_threads_stack_live, (uint32_t)stack, __ATOMIC_RELAXED);
     if (xl_stats_enabled())
-        xl_threads_report("ended", stack, 0);
+        xl_threads_report("ended", stack, used);
 }
 
 static void xl_thread_state_failed(const char *what, size_t size)
@@ -252,9 +344,23 @@ static void xl_thread_state_failed(const char *what, size_t size)
     abort();
 }
 
+static void xl_thread_stack_refused(size_t own)
+{
+    fprintf(stderr, "xlate: cannot set up a thread for translated code: the thread says its own stack is %lu bytes long, and no guest stack can be as long as that\n",
+            (unsigned long)own);
+    xl_threads_report("at the failure", 0, 0);
+    abort();
+}
+
 static void xl_state_key_create(void)
 {
-    pthread_key_create(&xl_state_key, xl_state_destroy);
+    if (pthread_key_create(&xl_state_key, xl_state_destroy) == 0)
+        __atomic_store_n(&xl_state_key_made, 1, __ATOMIC_RELEASE);
+}
+
+static State *xl_entered_state(void)
+{
+    return __atomic_load_n(&xl_state_key_made, __ATOMIC_ACQUIRE) ? pthread_getspecific(xl_state_key) : NULL;
 }
 
 State *xl_current_state(void)
@@ -267,17 +373,24 @@ State *xl_current_state(void)
     if (posix_memalign((void **)&thread, 16, XL_THREAD_HEADER + XL_STATE_SIZE))
         xl_thread_state_failed("the allocation of the state", XL_THREAD_HEADER + XL_STATE_SIZE);
     memset(thread, 0, XL_THREAD_HEADER + XL_STATE_SIZE);
-    size_t first = pthread_main_np() ? XL_GUEST_STACK_MAIN
-                                     : xl_stack_first(pthread_get_stacksize_np(pthread_self()), XL_GUEST_STACK_FLOOR, XL_GUEST_STACK_THREAD);
-    thread->stack = xl_stack_map(first, XL_GUEST_STACK_FLOOR, xl_map_anonymous, &thread->stack_size, &thread->guard_size);
+    size_t own = pthread_get_stacksize_np(pthread_self()), size = 0;
+    if (!xl_stack_length(own, (size_t)sysconf(_SC_PAGESIZE), &size))
+        xl_thread_stack_refused(own);
+    thread->stack = xl_stack_map(size, xl_map_anonymous, &thread->guard_size);
     if (thread->stack == MAP_FAILED)
-        xl_thread_state_failed("the mapping of the guest stack", XL_GUEST_STACK_FLOOR);
-    size_t size = thread->stack_size;
+        xl_thread_state_failed("the mapping of the guest stack with its guard page, as long as the thread's own stack,", size);
+    thread->stack_size = size;
+    pthread_mutex_lock(&xl_threads_lock);
+    thread->next = xl_threads_list;
+    thread->link = &xl_threads_list;
+    if (thread->next)
+        thread->next->link = &thread->next;
+    xl_threads_list = thread;
+    pthread_mutex_unlock(&xl_threads_lock);
     __atomic_fetch_add(&xl_threads_created, 1, __ATOMIC_RELAXED);
     __atomic_fetch_add(&xl_threads_stack_live, (uint32_t)size, __ATOMIC_RELAXED);
-    if (size < first || xl_stats_enabled())
-        xl_threads_report(size < first ? "created with a halved stack" : "created", size,
-                          pthread_main_np() ? 0 : pthread_get_stacksize_np(pthread_self()));
+    if (xl_stats_enabled())
+        xl_threads_report("created", size, 0);
     thread->tsd_pages = xl_tsd_alloc();
     state = (State *)((char *)thread + XL_THREAD_HEADER);
     XL_REG(state, TPIDRRO_EL0) = xl_tsd_base(thread->tsd_pages);
@@ -288,25 +401,19 @@ State *xl_current_state(void)
     return state;
 }
 
-#define XL_LOG_DIR "/private/var/revenant/"
 #define XL_LOG_LIMIT (1 << 20)
 
 int xl_log_enabled(void)
 {
-    static int enabled = -1;
-    if (enabled < 0)
-        enabled = getenv("XL_LOG") != NULL || access(XL_LOG_DIR "xl-log", F_OK) == 0;
-    return enabled;
+    static struct xl_diag_flag logging = {"xl-log", 0};
+    return xl_diag_on(&logging);
 }
 
 int xl_log_open(const char *name)
 {
     if (!xl_log_enabled())
         return -1;
-    char file[128];
-    strlcpy(file, XL_LOG_DIR, sizeof file);
-    strlcat(file, name, sizeof file);
-    int fd = open(file, O_WRONLY | O_CREAT | O_APPEND, 0666);
+    int fd = xl_diag_open(name, O_APPEND);
     struct stat info;
     if (fd >= 0 && fstat(fd, &info) == 0 && info.st_size > XL_LOG_LIMIT)
         ftruncate(fd, 0);
@@ -334,20 +441,16 @@ void xl_fault(State *state, const char *reason)
         close(log_fd);
     }
     xl_dump(state);
-    if (!pthread_main_np() && access("/private/var/revenant/xl-fault-ends-thread", F_OK) == 0) {
-        int fd = xl_log_open("xlate-crash.log");
-        if (fd >= 0) {
-            dprintf(fd, "xlate: worker thread ended by the fault above (xl-fault-ends-thread)\n");
-            close(fd);
-        }
-        pthread_exit(NULL);
-    }
     abort();
 }
 
 static void xl_walk_guest(int fd)
 {
-    State *state = xl_current_state();
+    State *state = xl_entered_state();
+    if (!state) {
+        dprintf(fd, "xlate: this thread has not run translated code, so it has no guest state\n");
+        return;
+    }
     dprintf(fd, "xlate: guest pc=0x%llx lr=0x%llx sp=0x%llx\n", XL_REG(state, PC), XL_REG(state, X30), XL_REG(state, SP));
     for (int i = 0; i < 8; i++)
         dprintf(fd, "xlate: guest x%d=0x%llx\n", i, *(uint64_t *)((char *)state + XL_OFFSET_X0 + (XL_OFFSET_X1 - XL_OFFSET_X0) * i));
@@ -404,15 +507,18 @@ static void xl_crash_handler(int signal, siginfo_t *info, void *context)
     int fd = xl_crash_fd();
     dprintf(fd, "xlate: signal %d at fault 0x%lx\n", signal, (unsigned long)(info ? info->si_addr : 0));
     if (info && (signal == SIGSEGV || signal == SIGBUS) && xl_diagnostics_installed) {
-        void *current = pthread_getspecific(xl_state_key);
+        void *current = xl_entered_state();
         if (current) {
             struct xl_thread *thread = (struct xl_thread *)((char *)current - XL_THREAD_HEADER);
             uintptr_t low = (uintptr_t)thread->stack, fault = (uintptr_t)info->si_addr;
             if (thread->guard_size && fault >= low && fault < low + thread->guard_size)
-                dprintf(fd, "xlate: the guest stack of this thread overflowed: it holds %lu bytes (0x%lx to 0x%lx) and the fault is in its guard page; guest frames deeper than that need a larger XL_GUEST_STACK_THREAD (XL_GUEST_STACK_MAIN for the main thread) in runtime.c\n",
+                dprintf(fd, "xlate: the guest stack of this thread overflowed: it holds %lu bytes (0x%lx to 0x%lx), as many as the thread's own stack, and the fault is in its guard page; guest frames deeper than that need a thread with a larger stack\n",
                         (unsigned long)thread->stack_size, (unsigned long)low, (unsigned long)(low + thread->stack_size));
         }
     }
+    xl_threads_stack_write(fd, 0);
+    xl_budget_write(fd);
+    xl_pair_write(fd, NULL);
     ucontext_t *uc = context;
     if (uc) {
         _STRUCT_ARM_THREAD_STATE *ss = &uc->uc_mcontext->__ss;
@@ -641,6 +747,44 @@ uint64_t xl_invoke_n(uint64_t address, const uint64_t *arguments, unsigned count
     XL_REG(state, X30) = saved_lr;
     for (unsigned i = 0; i < 8; i++)
         *(uint64_t *)((char *)state + XL_OFFSET_X0 + (XL_OFFSET_X1 - XL_OFFSET_X0) * i) = saved_arg[i];
+    return result;
+}
+
+uint64_t xl_invoke_registers(uint64_t address, const uint64_t *integers, unsigned integer_count, const uint64_t *floats, unsigned float_count, uint64_t *float_result)
+{
+    xl_ensure_ready();
+    State *state = xl_current_state();
+    xl_lifted function = xl_lookup(address);
+    if (!function)
+    {
+        char why[96];
+        snprintf(why, sizeof why, "callback into address 0x%llx without translated code", (unsigned long long)address);
+        xl_fault(state, why);
+    }
+    uint64_t saved_pc = XL_REG(state, PC), saved_lr = XL_REG(state, X30);
+    uint64_t saved_integer[8], saved_float[8];
+    for (unsigned i = 0; i < 8; i++) {
+        saved_integer[i] = *(uint64_t *)((char *)state + XL_OFFSET_X0 + (XL_OFFSET_X1 - XL_OFFSET_X0) * i);
+        saved_float[i] = *(uint64_t *)((char *)state + XL_OFFSET_V0 + 16 * i);
+    }
+    for (unsigned i = 0; i < integer_count && i < 8; i++)
+        *(uint64_t *)((char *)state + XL_OFFSET_X0 + (XL_OFFSET_X1 - XL_OFFSET_X0) * i) = integers[i];
+    for (unsigned i = 0; i < float_count && i < 8; i++) {
+        *(uint64_t *)((char *)state + XL_OFFSET_V0 + 16 * i) = floats[i];
+        *(uint64_t *)((char *)state + XL_OFFSET_V0 + 16 * i + 8) = 0;
+    }
+    XL_REG(state, PC) = address;
+    XL_REG(state, X30) = 0;
+    function(state);
+    uint64_t result = XL_REG(state, X0);
+    if (float_result)
+        *float_result = *(uint64_t *)((char *)state + XL_OFFSET_V0);
+    XL_REG(state, PC) = saved_pc;
+    XL_REG(state, X30) = saved_lr;
+    for (unsigned i = 0; i < 8; i++) {
+        *(uint64_t *)((char *)state + XL_OFFSET_X0 + (XL_OFFSET_X1 - XL_OFFSET_X0) * i) = saved_integer[i];
+        *(uint64_t *)((char *)state + XL_OFFSET_V0 + 16 * i) = saved_float[i];
+    }
     return result;
 }
 

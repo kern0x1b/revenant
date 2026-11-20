@@ -56,7 +56,7 @@ Consequences to respect:
 | --- | --- |
 | `xmake.lua` | `CombineXCTest` and `CombineTests`, upstream's tests as a daemon, with the module from the package `revenant@combine` and its tree; `CombineGenerated`, the gyb check; `CombineHelpersTests` and `CombineHelpers`, the helper's checks and the autolink check (configure with `--component=Combine` for these alone). The module and its C++ helper are built by the package, not by this component |
 | `tests/XCTest.swift` | the XCTest API shim the tests compile against (`XCT_SKIP`, `XCT_FILTER`, `xct-skip.txt`, `xct-resume.txt` at run time) |
-| `tests/data/skip.txt` | the tests left out of the iOS 6 run, one `Class` or `Class.test` per line (see `docs/reference/combine/test-results.md`) |
+| `tests/data/skip.txt` | the tests left out of the iOS 6 run, one `Class` or `Class.test` per line followed by its reason, an entry without a reason is refused (see `docs/reference/combine/test-results.md`) |
 | `tests/control` | the Debian control of the test daemon |
 | `tests/helpers/main.swift` | the checks of the C helper's locks and identifier counter and of a Combine pipeline, one source for the host and the device (see `docs/guides/combine/build-and-test.md`) |
 | `tools/discover.lua` | finds upstream's tests and writes the `main.swift` that runs them |

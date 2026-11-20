@@ -4,11 +4,13 @@ local root = path.absolute(path.join(backports, "..", ".."))
 local REQUIRED = {
     {framework = "Foundation", class = "NSURLComponents", protocols = {"NSCopying"}},
     {framework = "Foundation", class = "NSURLQueryItem", protocols = {"NSSecureCoding", "NSCopying"}},
-    {framework = "Foundation", class = "NSUUID", protocols = {"NSCopying", "NSSecureCoding"}},
 }
 
-local EXPORTS = {
+local DEVICE_CLASSES = {
     {framework = "Foundation", symbol = "_OBJC_CLASS_$_NSMutableDictionary"},
+    {framework = "Foundation", symbol = "_OBJC_CLASS_$_NSNull"},
+    {framework = "Foundation", symbol = "_OBJC_CLASS_$_NSMutableSet"},
+    {framework = "UIKit", symbol = "_OBJC_CLASS_$_UIDevice"},
 }
 
 local function exported(library, symbol)
@@ -85,12 +87,14 @@ function main()
         end
     end
     assert(#errors == 0, table.concat(errors, "\n"))
-    for _, required in ipairs(EXPORTS) do
+
+    for _, required in ipairs(DEVICE_CLASSES) do
         local library = path.join(folder, "lib" .. required.framework .. "Backports.dylib")
         assert(os.isfile(library), library .. " is not built: build the Backports component first")
-        assert(not exported(library, "_OBJC_CLASS_$_RevenantNoSuchExport"), "the export check must refuse a symbol that the library does not export")
-        assert(exported(library, required.symbol), path.filename(library) .. " no longer exports " .. required.symbol ..
-               ": a library translated against an earlier build binds it strongly and stops at load with 'Symbol not found'")
+        assert(not exported(library, required.symbol), path.filename(library) .. " still exports " .. required.symbol
+               .. ": the device already exports this class, so a Backports proxy makes a Swift or Objective-C dynamic cast to it trap "
+               .. "(the __NSCFDictionary -> RevenantNSMutableDictionary crash). The class symbol must resolve to the system image; "
+               .. "members a later SDK added live in a category on the real class.")
     end
-    print("alias adoption: %d classes carry the protocols their source lists", #entries)
+    print("alias adoption: %d classes carry the protocols their source lists; %d device classes have no proxy export", #entries, #DEVICE_CLASSES)
 end

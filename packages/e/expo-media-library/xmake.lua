@@ -1,0 +1,22 @@
+package("expo-media-library")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-media-library")
+    set_description("expo-media-library 57.0.5, the photo and video library module of the Expo SDK, from its npm tarball: the iOS module sources the host builds from, with the Photos API that iOS 6 lacks supplied by the Photos backport")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-media-library/-/expo-media-library-$(version).tgz")
+    add_versions("57.0.5", "a5f582e26c2c39b66bc5d48eb9740f5e33c9344277b6a165e0533f3b6b7b2fa6")
+    add_patches("57.0.5", path.join(os.scriptdir(), "patches", "media-library-names-ios6.patch"), "28d8272104a84bdcd0974504eae523fd5a711953b840d9aba191c718a97eaaea")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-media-library" and manifest.version == "57.0.5", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "ios", "MediaLibraryModule.swift")), "expo-media-library has no iOS module")
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-media-library has no expo-module.config.json")
+    end)

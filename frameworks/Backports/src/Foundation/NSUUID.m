@@ -1,11 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
 #include <uuid/uuid.h>
-#import "../revenant_alias.h"
-
-REVENANT_ALIAS(NSUUID)
-
-REVENANT_ALIAS_ADOPTS(NSUUID, NSCopying, NSSecureCoding)
 
 static char RevenantUUIDBytesKey;
 

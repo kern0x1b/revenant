@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 
 #include "xl_bridge.h"
+#include "xl_diag.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -405,10 +406,8 @@ static void xl_sysctl_name(const int *mib, unsigned count, char *text, size_t si
 
 static int xl_sysctl_trace_enabled(void)
 {
-    static int enabled = -1;
-    if (enabled < 0)
-        enabled = access("/private/var/revenant/xl-sysctl-trace", F_OK) == 0;
-    return enabled;
+    static struct xl_diag_flag trace = {"xl-sysctl-trace", 0};
+    return xl_diag_on(&trace);
 }
 
 static void xl_sysctl_trace(const int *mib, unsigned count, int kind, const char *by_name, int has_old, uint64_t length_in, uint64_t length_out,
@@ -428,7 +427,7 @@ static void xl_sysctl_trace(const int *mib, unsigned count, int kind, const char
     int n = snprintf(line, sizeof line, "#%lld thread %p kind %d %s old %s in %llu out %llu new %s %llu -> %d errno %d\n", (long long)number,
                      (void *)pthread_self(), kind, name, has_old ? "buffer" : "null", (unsigned long long)length_in, (unsigned long long)length_out,
                      has_new ? "set" : "none", (unsigned long long)new_length, result, result ? error : 0);
-    int fd = open("/private/var/revenant/xl-sysctl.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
+    int fd = xl_diag_open("xl-sysctl.log", O_APPEND);
     if (fd >= 0) {
         if (n > 0)
             (void)write(fd, line, (size_t)n);

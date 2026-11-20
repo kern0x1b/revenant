@@ -7,10 +7,14 @@
 #include <Block.h>
 
 #include "xl_bridge.h"
+#include "xl_diag.h"
 #include "xl_host.h"
+#include "xl_shared_table.h"
+#include "xl_stats_threads.h"
 #include "xl_dlsym.h"
 
 #include <pthread.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -36,8 +40,8 @@ extern void xl_fault(State *state, const char *reason);
 
 static CFMutableDictionaryRef xl_selector_table;
 static CFMutableDictionaryRef xl_selector_variant_table;
-static CFMutableDictionaryRef xl_variant_cache;
-static pthread_mutex_t xl_variant_lock = PTHREAD_MUTEX_INITIALIZER;
+static struct xl_shared_lock xl_variant_lock = XL_SHARED_LOCK_INITIALIZER;
+static struct xl_shared_table xl_variant_cache;
 static CFMutableDictionaryRef xl_guest_imps;
 static CFMutableDictionaryRef xl_variadic_table;
 static pthread_once_t xl_setup_once = PTHREAD_ONCE_INIT;
@@ -61,68 +65,8 @@ static void xl_uncaught(NSException *exception)
 
 static void xl_fix_layouts(void);
 
-@interface XLNullObject : NSObject
-@end
-@implementation XLNullObject
-- (NSMethodSignature *)methodSignatureForSelector:(SEL)sel
-{
-    const char *n = sel_getName(sel);
-    char enc[80] = "@@:";
-    for (; *n && strlen(enc) < 70; n++)
-        if (*n == ':')
-            strcat(enc, "@");
-    return [NSMethodSignature signatureWithObjCTypes:enc];
-}
-- (void)forwardInvocation:(NSInvocation *)invocation
-{
-    id nothing = nil;
-    if ([[invocation methodSignature] methodReturnLength] == sizeof(id))
-        [invocation setReturnValue:&nothing];
-}
-@end
-
-static id xl_null_missing(id self_, SEL forwarding_sel, SEL missing)
-{
-    static NSMutableSet *seen;
-    static XLNullObject *null_object;
-    static dispatch_once_t once;
-    dispatch_once(&once, ^{ seen = [[NSMutableSet alloc] init]; null_object = [[XLNullObject alloc] init]; });
-    if (missing == @selector(forwardInvocation:) || missing == @selector(methodSignatureForSelector:) ||
-        missing == @selector(_isDeallocating) || missing == @selector(_tryRetain))
-        return nil;
-    NSString *key = [NSString stringWithFormat:@"%s%s %s", class_isMetaClass(object_getClass(self_)) ? "+" : "-",
-                     object_getClassName(self_), sel_getName(missing)];
-    @synchronized (seen) {
-        if (![seen containsObject:key]) {
-            [seen addObject:key];
-            int fd = xl_log_open("xl-missing.log");
-            if (fd >= 0) { dprintf(fd, "%s\n", [key UTF8String]); close(fd); }
-        }
-    }
-    return null_object;
-}
-
-static void *xl_memlog_thread(void *arg)
-{
-    (void)arg;
-    int fd = open("/private/var/revenant/xl-mem.log", O_WRONLY | O_CREAT | O_TRUNC, 0666);
-    if (fd < 0)
-        return NULL;
-    for (unsigned tick = 0;; tick++) {
-        struct task_basic_info info;
-        mach_msg_type_number_t count = TASK_BASIC_INFO_COUNT;
-        if (task_info(mach_task_self(), TASK_BASIC_INFO, (task_info_t)&info, &count) == KERN_SUCCESS)
-            dprintf(fd, "t=%u.%u resident=%lu KB virtual=%lu MB\n", tick / 10, tick % 10, (unsigned long)(info.resident_size / 1024),
-                    (unsigned long)(info.virtual_size / (1024 * 1024)));
-        usleep(100000);
-    }
-    return NULL;
-}
-
 static void xl_wrap_layout_subviews(void)
 {
-    if (access("/private/var/revenant/xl-no-layout-super", F_OK) == 0)
-        return;
     const char *main_image = _dyld_get_image_name(0);
     Class view_class = [UIView class];
     unsigned count = 0;
@@ -161,59 +105,6 @@ static void xl_setup_application(void)
     NSSetUncaughtExceptionHandler(xl_uncaught);
     xl_load_rules();
     xl_wrap_layout_subviews();
-    if (access("/private/var/revenant/xl-memlog", F_OK) == 0) {
-        pthread_t thread;
-        pthread_create(&thread, NULL, xl_memlog_thread, NULL);
-    }
-    if (access("/private/var/revenant/xl-exp-null-missing", F_OK) == 0) {
-        IMP imp = imp_implementationWithBlock(^id(id self_, SEL missing) { return xl_null_missing(self_, 0, missing); });
-        class_replaceMethod([NSObject class], @selector(forwardingTargetForSelector:), imp, "@@::");
-        class_replaceMethod(object_getClass([NSObject class]), @selector(forwardingTargetForSelector:), imp, "@@::");
-    }
-    FILE *stubs = fopen("/private/var/revenant/xl-stubs.txt", "r");
-    if (stubs) {
-        char line[256];
-        while (fgets(line, sizeof line, stubs)) {
-            char cls[128], sel[128];
-            char kind = line[0];
-            if ((kind != '+' && kind != '-' && kind != '=' && kind != '#') || sscanf(line + 1, "%127s %127s", cls, sel) != 2)
-                continue;
-            Class target = objc_getClass(cls);
-            if ((kind == '+' || kind == '#') && target)
-                target = object_getClass(target);
-            SEL selector = sel_registerName(sel);
-            if (!target || ((kind == '+' || kind == '-') && class_getInstanceMethod(target, selector)))
-                continue;
-            IMP nothing = imp_implementationWithBlock(^id(id self_) { return nil; });
-            class_replaceMethod(target, selector, nothing, "@@:");
-            int fd = open("/private/var/revenant/xl-hooks.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
-            if (fd >= 0) { dprintf(fd, "stub %c%s %s\n", kind, cls, sel); close(fd); }
-        }
-        fclose(stubs);
-    }
-    if (access("/private/var/revenant/xl-exp-guide-superview", F_OK) == 0) {
-        Class guide = NSClassFromString(@"UILayoutGuide");
-        if (guide && !class_getInstanceMethod(guide, @selector(superview))) {
-            IMP imp = imp_implementationWithBlock(^id(id self_) { return [self_ performSelector:@selector(owningView)]; });
-            class_addMethod(guide, @selector(superview), imp, "@@:");
-        }
-        if (guide) {
-            IMP no = imp_implementationWithBlock(^BOOL(id self_) { return NO; });
-            class_addMethod(guide, NSSelectorFromString(@"_supportsContentDimensionVariables"), no, "c@:");
-        }
-        if (guide) {
-            IMP fwd = imp_implementationWithBlock(^id(id self_, SEL sel) {
-                id owner = [self_ performSelector:@selector(owningView)];
-                if (owner && [owner respondsToSelector:sel]) {
-                    int fd = open("/private/var/revenant/xl-exp.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
-                    if (fd >= 0) { dprintf(fd, "UILayoutGuide forwarded -%s to owningView\n", sel_getName(sel)); close(fd); }
-                    return owner;
-                }
-                return nil;
-            });
-            class_replaceMethod(guide, @selector(forwardingTargetForSelector:), fwd, "@@::");
-        }
-    }
 }
 
 static void xl_setup(void)
@@ -229,7 +120,9 @@ static void xl_setup(void)
     for (const struct xl_imp_entry *entry = xl_imp_map; entry->imp; entry++)
         CFDictionarySetValue(xl_guest_imps, entry->imp, (void *)(uintptr_t)entry->guest);
     xl_selector_variant_table = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
-    xl_variant_cache = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+    xl_shared_write_begin(&xl_variant_lock);
+    xl_variant_cache = xl_shared_table_make(&xl_variant_lock, NULL);
+    xl_shared_end(&xl_variant_lock);
     for (const struct xl_selector_variant *v = xl_selector_variants; v->selector; v++) {
         SEL sel = sel_registerName(v->selector);
         CFMutableDictionaryRef by_enc = (CFMutableDictionaryRef)CFDictionaryGetValue(xl_selector_variant_table, sel);
@@ -272,8 +165,8 @@ void xl_register_application_classes(void)
 void xl_run_initializers(void)
 {
     xl_bridge_init();
-    int trace = getenv("XL_INIT_TRACE") ? open("/private/var/revenant/init-trace.log",
-                                               O_WRONLY | O_CREAT | O_TRUNC, 0666) : -1;
+    static struct xl_diag_flag init_trace = {"xl-init-trace", 0};
+    int trace = xl_diag_on(&init_trace) ? xl_diag_open("init-trace.log", O_TRUNC) : -1;
     for (uint32_t i = 0; i < xl_initializer_count; i++) {
         if (trace >= 0)
             dprintf(trace, "init %u/%u guest=0x%x\n", i, xl_initializer_count, xl_initializers[i]);
@@ -416,12 +309,24 @@ static uint32_t xl_nobridge_seen(Class lookup, SEL selector)
     return seen;
 }
 
+static void xl_collect_note(const char *format, ...) __attribute__((format(printf, 1, 2)));
+
+static void xl_collect_note(const char *format, ...)
+{
+    int descriptor = xl_diag_open("xlate-missing.log", O_APPEND);
+    if (descriptor < 0)
+        return;
+    va_list arguments;
+    va_start(arguments, format);
+    vdprintf(descriptor, format, arguments);
+    va_end(arguments);
+    close(descriptor);
+}
+
 static int xl_collect_enabled(void)
 {
-    static int enabled = -1;
-    if (enabled < 0)
-        enabled = getenv("XL_COLLECT") != NULL || access("/private/var/revenant/xl-collect", F_OK) == 0;
-    return enabled;
+    static struct xl_diag_flag collect = {"xl-collect", 0};
+    return xl_diag_on(&collect);
 }
 
 #define XL_STATS_SLOTS 256
@@ -430,18 +335,10 @@ static int xl_collect_enabled(void)
 #define XL_STATS_SECOND 5000u
 #define XL_STATS_TOP 4
 
-struct xl_stats_slot {
-    uintptr_t cls;
-    uintptr_t sel;
-    uint32_t count;
-    uint64_t ticks;
-};
+#define XL_STATS_WINDOW_TOP 8
 
 static struct xl_stats_slot xl_stats_slots[XL_STATS_SLOTS];
-static pthread_mutex_t xl_stats_lock = PTHREAD_MUTEX_INITIALIZER;
-static uint32_t xl_stats_messages;
 static uint32_t xl_stats_dynamic;
-static uint64_t xl_stats_routing_ticks;
 static uint64_t xl_stats_call_ticks;
 
 uint64_t xl_stats_microseconds(uint64_t ticks)
@@ -457,6 +354,7 @@ uint64_t xl_stats_microseconds(uint64_t ticks)
 void xl_stats_snapshot(uint32_t *messages, uint32_t *dynamic, uint64_t *routing_ticks, uint64_t *call_ticks)
 {
     pthread_mutex_lock(&xl_stats_lock);
+    xl_stats_fold_locked();
     *messages = xl_stats_messages;
     *dynamic = xl_stats_dynamic;
     *routing_ticks = xl_stats_routing_ticks;
@@ -464,31 +362,10 @@ void xl_stats_snapshot(uint32_t *messages, uint32_t *dynamic, uint64_t *routing_
     pthread_mutex_unlock(&xl_stats_lock);
 }
 
-#define XL_STATS_WINDOW_SLOTS 1024
-#define XL_STATS_WINDOW_TOP 8
-
-static struct xl_stats_slot xl_stats_window[XL_STATS_WINDOW_SLOTS];
-
-static void xl_stats_window_note_locked(Class lookup, SEL selector, uint64_t ticks)
-{
-    unsigned start = (unsigned)((((uintptr_t)selector >> 2) ^ ((uintptr_t)lookup >> 4)) * 2654435761u) % XL_STATS_WINDOW_SLOTS;
-    for (unsigned probe = 0; probe < XL_STATS_WINDOW_SLOTS; probe++) {
-        struct xl_stats_slot *slot = &xl_stats_window[(start + probe) % XL_STATS_WINDOW_SLOTS];
-        if (!slot->count) {
-            slot->cls = (uintptr_t)lookup;
-            slot->sel = (uintptr_t)selector;
-        }
-        if (slot->cls == (uintptr_t)lookup && slot->sel == (uintptr_t)selector) {
-            slot->count++;
-            slot->ticks += ticks;
-            return;
-        }
-    }
-}
-
 void xl_stats_window_report(void)
 {
     pthread_mutex_lock(&xl_stats_lock);
+    xl_stats_window_close_locked();
     const struct xl_stats_slot *top[XL_STATS_WINDOW_TOP] = {0};
     for (unsigned i = 0; i < XL_STATS_WINDOW_SLOTS; i++) {
         const struct xl_stats_slot *slot = &xl_stats_window[i];
@@ -513,12 +390,7 @@ void xl_stats_window_report(void)
 
 static void xl_stats_message(uint64_t started, Class lookup, SEL selector)
 {
-    uint64_t ticks = mach_absolute_time() - started;
-    pthread_mutex_lock(&xl_stats_lock);
-    xl_stats_messages++;
-    xl_stats_routing_ticks += ticks;
-    xl_stats_window_note_locked(lookup, selector, ticks);
-    pthread_mutex_unlock(&xl_stats_lock);
+    xl_stats_count((uintptr_t)lookup, (uintptr_t)selector, (uint32_t)(mach_absolute_time() - started));
 }
 
 static void xl_stats_report_locked(void)
@@ -537,6 +409,7 @@ static void xl_stats_report_locked(void)
             }
         }
     }
+    xl_stats_fold_locked();
     dprintf(2, "xlate: messages: %u in all, %u of them dynamic; routing %llu us in all (%llu us each), host call %llu us in the dynamic ones (%llu us each)\n",
             xl_stats_messages, xl_stats_dynamic, (unsigned long long)xl_stats_us(xl_stats_routing_ticks),
             (unsigned long long)xl_stats_us(xl_stats_routing_ticks) / (xl_stats_messages ? xl_stats_messages : 1),
@@ -550,12 +423,14 @@ static void xl_stats_report_locked(void)
 
 static void xl_stats_dynamic_send(uint64_t routing, uint64_t call, Class lookup, SEL selector)
 {
+    struct xl_stats_thread *mine = xl_stats_mine();
+    if (mine)
+        xl_stats_window_note(mine, (uintptr_t)lookup, (uintptr_t)selector, (uint32_t)(routing + call));
     pthread_mutex_lock(&xl_stats_lock);
     xl_stats_messages++;
     xl_stats_dynamic++;
     xl_stats_routing_ticks += routing;
     xl_stats_call_ticks += call;
-    xl_stats_window_note_locked(lookup, selector, routing + call);
     unsigned start = (unsigned)((((uintptr_t)selector >> 2) ^ ((uintptr_t)lookup >> 4)) * 2654435761u) % XL_STATS_SLOTS;
     for (unsigned probe = 0; probe < XL_STATS_SLOTS; probe++) {
         struct xl_stats_slot *slot = &xl_stats_slots[(start + probe) % XL_STATS_SLOTS];
@@ -612,9 +487,7 @@ static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp,
 {
     uintptr_t guest;
     if (imp) {
-        pthread_mutex_lock(&xl_variant_lock);
-        uintptr_t cached = (uintptr_t)CFDictionaryGetValue(xl_variant_cache, imp);
-        pthread_mutex_unlock(&xl_variant_lock);
+        uintptr_t cached = (uintptr_t)xl_shared_get(&xl_variant_cache, imp);
         if (cached)
             return cached;
     }
@@ -642,11 +515,8 @@ static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp,
             uintptr_t variant = (uintptr_t)CFDictionaryGetValue(by_enc, key);
             CFRelease(key);
             if (variant) {
-                if (imp) {
-                    pthread_mutex_lock(&xl_variant_lock);
-                    CFDictionarySetValue(xl_variant_cache, imp, (void *)variant);
-                    pthread_mutex_unlock(&xl_variant_lock);
-                }
+                if (imp)
+                    variant = (uintptr_t)xl_shared_claim(&xl_variant_cache, imp, (void *)variant);
                 return variant;
             }
             int miss_fd = xl_log_open("xlate-variant-miss.log");
@@ -681,8 +551,7 @@ static uint64_t xl_bridge_for(State *state, Class lookup, SEL selector, IMP imp,
             }
         }
         if (xl_collect_enabled()) {
-            FILE *log = fopen("/private/var/revenant/xlate-missing.log", "a");
-            if (log) { fprintf(log, "-[%s %s]\n", class_getName(lookup), sel_getName(selector)); fclose(log); }
+            xl_collect_note("-[%s %s]\n", class_getName(lookup), sel_getName(selector));
             return 0;
         }
         return XL_NO_BRIDGE;
@@ -727,19 +596,36 @@ static void xl_dynamic_send(State *state, id receiver, Method method, SEL select
     unsigned argc = method_getNumberOfArguments(method);
     uint32_t words[16] = {0};
     unsigned used = 2;
+    unsigned next_integer = 2, next_vector = 0;
     words[0] = (uint32_t)(uintptr_t)receiver;
     words[1] = (uint32_t)(uintptr_t)selector;
-    if (argc > 8) {
-        char detail[96];
-        snprintf(detail, sizeof detail, "%u arguments, encoding %s", argc, method_getTypeEncoding(method));
-        xl_dynamic_fault(state, receiver, selector, "stack-passed arguments", detail);
-    }
     for (unsigned i = 2; i < argc; i++) {
         char *type = method_copyArgumentType(method, i);
-        uint64_t value = *(uint64_t *)((char *)state + XL_OFFSET_X0 + i * 8);
         const char *t = type;
         while (*t == 'r' || *t == 'n' || *t == 'N' || *t == 'o' || *t == 'O' || *t == 'R' || *t == 'V')
             t++;
+        if (*t == 'f' || *t == 'd') {
+            unsigned need = *t == 'd' ? 2 : 1;
+            if (next_vector >= 8 || used + need > 12) {
+                char detail[96];
+                snprintf(detail, sizeof detail, "argument %u of %u, encoding %s", i, argc, method_getTypeEncoding(method));
+                free(type);
+                xl_dynamic_fault(state, receiver, selector, "stack-passed arguments", detail);
+            }
+            uint64_t bits = *(uint64_t *)((char *)state + XL_OFFSET_V0 + 16 * next_vector++);
+            words[used++] = (uint32_t)bits;
+            if (need == 2)
+                words[used++] = (uint32_t)(bits >> 32);
+            free(type);
+            continue;
+        }
+        if (next_integer >= 8 || used + ((*t == 'q' || *t == 'Q') ? 2 : 1) > 12) {
+            char detail[96];
+            snprintf(detail, sizeof detail, "argument %u of %u, encoding %s", i, argc, method_getTypeEncoding(method));
+            free(type);
+            xl_dynamic_fault(state, receiver, selector, "stack-passed arguments", detail);
+        }
+        uint64_t value = *(uint64_t *)((char *)state + XL_OFFSET_X0 + 8 * next_integer++);
         int wide = 0;
         uint32_t word = 0;
         switch (*t) {
@@ -780,8 +666,18 @@ static void xl_dynamic_send(State *state, id receiver, Method method, SEL select
     typedef uint64_t (*call64)(uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t, uintptr_t,
                                uintptr_t, uintptr_t, uintptr_t, uintptr_t);
     uint64_t result = 0;
+    int floating = 0;
+    uint64_t vector = 0;
     switch (*r) {
     case 'v': ((call32)imp)(words[0], words[1], words[2], words[3], words[4], words[5], words[6], words[7], words[8], words[9], words[10], words[11]); break;
+    case 'f':
+        floating = 1;
+        vector = (uint32_t)((call32)imp)(words[0], words[1], words[2], words[3], words[4], words[5], words[6], words[7], words[8], words[9], words[10], words[11]);
+        break;
+    case 'd':
+        floating = 1;
+        vector = ((call64)imp)(words[0], words[1], words[2], words[3], words[4], words[5], words[6], words[7], words[8], words[9], words[10], words[11]);
+        break;
     case 'q': case 'Q':
         result = ((call64)imp)(words[0], words[1], words[2], words[3], words[4], words[5], words[6], words[7], words[8], words[9], words[10], words[11]);
         break;
@@ -807,106 +703,25 @@ static void xl_dynamic_send(State *state, id receiver, Method method, SEL select
     }
     }
     free(ret);
+    if (floating) {
+        xl_zero_result(state);
+        *(uint64_t *)((char *)state + XL_OFFSET_V0) = vector;
+        xl_return(state);
+        return;
+    }
     XL_REG(state, X0) = result;
     xl_return(state);
 }
 
-#define XL_WATCH_FILE "/private/var/revenant/xl-watch"
-#define XL_WATCH_LIMIT 16
+static struct xl_diag_flag xl_trace_flag = {"xl-trace", 0};
+static struct xl_diag_flag xl_trace_rc_flag = {"xl-trace-rc", 0};
+static pthread_once_t xl_trace_once = PTHREAD_ONCE_INIT;
+static int xl_trace_fd = -1;
 
-static int xl_watch_ready;
-static char xl_watch_selector[96];
-static char xl_watch_thunk_selector[96];
-static unsigned xl_watch_offset;
-static int xl_watch_fd = -1;
-static uintptr_t xl_watched[XL_WATCH_LIMIT];
-static uint32_t xl_watched_word[XL_WATCH_LIMIT];
-static int xl_watched_count;
-
-void xl_watch_log(const char *format, ...) __attribute__((format(printf, 1, 2)));
-
-#define xl_watch_line xl_watch_log
-
-void xl_watch_log(const char *format, ...)
+static void xl_trace_open(void)
 {
-    char line[512];
-    va_list arguments;
-    va_start(arguments, format);
-    int n = vsnprintf(line, sizeof line, format, arguments);
-    va_end(arguments);
-    if (n < 0)
-        return;
-    if (n > (int)sizeof line - 2)
-        n = (int)sizeof line - 2;
-    line[n++] = '\n';
-    write(2, line, n);
-    if (xl_watch_fd >= 0)
-        write(xl_watch_fd, line, n);
-}
-
-static int xl_watch_enabled(void)
-{
-    if (xl_watch_ready)
-        return xl_watch_ready > 0;
-    xl_watch_ready = -1;
-    FILE *file = fopen(XL_WATCH_FILE, "r");
-    if (!file)
-        return 0;
-    char selector[sizeof xl_watch_selector], thunk[sizeof xl_watch_thunk_selector];
-    unsigned offset = 0;
-    thunk[0] = 0;
-    int read = fscanf(file, "%95s %u %95s", selector, &offset, thunk);
-    fclose(file);
-    if (read < 1)
-        return 0;
-    strlcpy(xl_watch_selector, selector, sizeof xl_watch_selector);
-    strlcpy(xl_watch_thunk_selector, read == 3 ? thunk : "", sizeof xl_watch_thunk_selector);
-    xl_watch_offset = read >= 2 ? offset : 16;
-    xl_watch_fd = open("/private/var/revenant/xlate-watch.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
-    xl_watch_ready = 1;
-    xl_watch_line("xl-watch: watching the word at +%u of every receiver of %s, and the calls of the host into the guest of %s", xl_watch_offset, xl_watch_selector,
-                  xl_watch_thunk_selector[0] ? xl_watch_thunk_selector : "(none)");
-    return 1;
-}
-
-int xl_watch_thunk_wanted(SEL selector)
-{
-    if (xl_watch_ready < 0 || !xl_watch_enabled() || !xl_watch_thunk_selector[0])
-        return 0;
-    const char *name = sel_getName(selector);
-    return name && !strcmp(name, xl_watch_thunk_selector);
-}
-
-static void xl_watch_note(State *state, id receiver, SEL selector, const char *kind)
-{
-    if (!xl_watch_enabled())
-        return;
-    const char *name = sel_getName(selector);
-    for (int i = 0; i < xl_watched_count; i++) {
-        uint32_t word = *(volatile uint32_t *)(xl_watched[i] + xl_watch_offset);
-        if (word != xl_watched_word[i]) {
-            xl_watch_line("xl-watch: the word at +%u of %p changed 0x%x -> 0x%x before %s %s on %p (%s), guest return address 0x%llx",
-                          xl_watch_offset, (void *)xl_watched[i], xl_watched_word[i], word, kind, name ? name : "?", (void *)receiver,
-                          receiver ? object_getClassName(receiver) : "nil", (unsigned long long)XL_REG(state, X30));
-            xl_watched_word[i] = word;
-        }
-    }
-    if (!receiver || !name || strcmp(name, xl_watch_selector))
-        return;
-    for (int i = 0; i < xl_watched_count; i++) {
-        if (xl_watched[i] == (uintptr_t)receiver)
-            return;
-    }
-    uint32_t *words = (uint32_t *)receiver;
-    xl_watch_line("xl-watch: %s %s on %p (%s), raw arguments x2=0x%llx x3=0x%llx x4=0x%llx x5=0x%llx, words %08x %08x %08x %08x %08x %08x, guest return address 0x%llx",
-                  kind, name, (void *)receiver, object_getClassName(receiver), (unsigned long long)XL_REG(state, X2), (unsigned long long)XL_REG(state, X3),
-                  (unsigned long long)XL_REG(state, X4), (unsigned long long)XL_REG(state, X5), words[0], words[1], words[2], words[3], words[4], words[5],
-                  (unsigned long long)XL_REG(state, X30));
-    if (xl_watched_count < XL_WATCH_LIMIT) {
-        xl_watched[xl_watched_count] = (uintptr_t)receiver;
-        xl_watched_word[xl_watched_count] = *(volatile uint32_t *)((uintptr_t)receiver + xl_watch_offset);
-        xl_watched_count++;
-    }
+    if (xl_diag_on(&xl_trace_flag))
+        xl_trace_fd = xl_diag_open("xlate-msgtrace.log", O_APPEND);
 }
 
 void xl_h_objc_msgSend(State *state)
@@ -927,36 +742,11 @@ void xl_h_objc_msgSend(State *state)
         xl_return(state);
         return;
     }
-    static int stats_on = -1;
-    if (stats_on < 0)
-        stats_on = xl_stats_enabled();
-    uint64_t stats_started = stats_on ? mach_absolute_time() : 0;
+    uint64_t stats_started = xl_stats_enabled() ? mach_absolute_time() : 0;
     id receiver = (id)xl_narrow_pointer(self, "objc_msgSend", 0);
     SEL selector = (SEL)(uintptr_t)XL_REG(state, X1);
-    if (xl_watch_ready >= 0)
-        xl_watch_note(state, receiver, selector, "message");
-    static int xl_trace_flags = -1;
-    static int xl_trace_fd = -1;
-    int trace_flags = __atomic_load_n(&xl_trace_flags, __ATOMIC_ACQUIRE);
-    if (trace_flags < 0) {
-        static pthread_mutex_t xl_trace_lock = PTHREAD_MUTEX_INITIALIZER;
-        pthread_mutex_lock(&xl_trace_lock);
-        trace_flags = __atomic_load_n(&xl_trace_flags, __ATOMIC_ACQUIRE);
-        if (trace_flags < 0) {
-            trace_flags = 0;
-            if (access("/private/var/revenant/xl-trace", F_OK) == 0) {
-                int fd = open("/private/var/revenant/xlate-msgtrace.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
-                if (fd >= 0) {
-                    xl_trace_fd = fd;
-                    trace_flags = 1;
-                    if (access("/private/var/revenant/xl-trace-rc", F_OK) == 0)
-                        trace_flags |= 2;
-                }
-            }
-            __atomic_store_n(&xl_trace_flags, trace_flags, __ATOMIC_RELEASE);
-        }
-        pthread_mutex_unlock(&xl_trace_lock);
-    }
+    pthread_once(&xl_trace_once, xl_trace_open);
+    int trace_flags = xl_trace_fd >= 0 ? 1 | (xl_diag_on(&xl_trace_rc_flag) ? 2 : 0) : 0;
     if (trace_flags & 1) {
         int xl_tfd = xl_trace_fd;
         if (xl_tfd >= 0) {
@@ -1042,15 +832,6 @@ void xl_h_objc_msgSend(State *state)
             }
         }
     }
-    if (getenv("XL_TRACK_DIAG")) {
-        const char *sn = sel_getName(selector);
-        if (sn && (!strcmp(sn, "trackAction:") || !strcmp(sn, "defaultTracker") || !strcmp(sn, "sharedInstance"))) {
-            uint32_t classref = *(uint32_t *)(uintptr_t)0x1010ee60u;
-            fprintf(stderr, "xlate: DIAG %s self=%p isa=0x%x class=%s classref[0x1010ee60]=0x%x\n",
-                    sn, (void *)receiver, receiver ? *(uint32_t *)receiver : 0,
-                    class_getName(object_getClass(receiver)), classref);
-        }
-    }
     struct xl_arguments arguments;
     xl_arguments_save(state, &arguments);
     Class receiver_class = xl_class_of(receiver);
@@ -1104,8 +885,6 @@ void xl_h_objc_msgSendSuper2(State *state)
     id receiver = (id)xl_narrow_pointer(guest_receiver, "objc_msgSendSuper2", 1);
     Class current = xl_class_in(guest_super[1]);
     SEL selector = (SEL)(uintptr_t)XL_REG(state, X1);
-    if (xl_watch_ready >= 0)
-        xl_watch_note(state, receiver, selector, "super message");
     if (selector == @selector(dealloc))
         xl_swift_super_dealloc(receiver, current);
     uint64_t target = xl_route(state, class_getSuperclass(current), selector, receiver, current);
@@ -1125,9 +904,8 @@ void xl_h_objc_msgSendSuper2(State *state)
 void xl_h_xl_unsupported(State *state)
 {
     const char *message = (const char *)xl_narrow_pointer(XL_REG(state, X0), "xl_unsupported", 0);
-    if (access("/private/var/revenant/xl-collect", F_OK) == 0) {
-        FILE *log = fopen("/private/var/revenant/xlate-missing.log", "a");
-        if (log) { fprintf(log, "C %s\n", message); fclose(log); }
+    if (xl_collect_enabled()) {
+        xl_collect_note("C %s\n", message);
         xl_zero_result(state);
         xl_return(state);
         return;
@@ -1183,22 +961,36 @@ struct xl_guest_enumeration {
 
 void xl_manual_fast_enumeration(void *pack)
 {
+    static const char name[] = "countByEnumeratingWithState:objects:count:";
     struct xl_fast_enumeration_pack *p = pack;
-    struct xl_guest_enumeration *guest = (struct xl_guest_enumeration *)xl_narrow_pointer(p->state, "countByEnumeratingWithState:objects:count:", 0);
+    struct xl_guest_enumeration *guest = (struct xl_guest_enumeration *)xl_narrow_pointer(p->state, name, 0);
     NSFastEnumerationState *host = (NSFastEnumerationState *)&guest->extra[0];
-    id buffer[16];
+    id enumerated = (id)xl_object_in(p->self, name, 0);
+    uint32_t handed = (uint32_t)guest->state, batch = (uint32_t)(guest->state >> 32);
     NSUInteger length = p->length < 16 ? (NSUInteger)p->length : 16;
-    id enumerated = (id)xl_object_in(p->self, "countByEnumeratingWithState:objects:count:", 0);
-    NSUInteger count = [enumerated countByEnumeratingWithState:host objects:buffer count:length];
-    if (count) {
-        uint64_t *items = [[NSMutableData dataWithLength:count * sizeof(uint64_t)] mutableBytes];
-        for (NSUInteger i = 0; i < count; i++)
-            items[i] = xl_object_out((uintptr_t)host->itemsPtr[i]);
-        guest->items = (uintptr_t)items;
-        guest->extra[4] = host->mutationsPtr ? *host->mutationsPtr : 0;
-        guest->mutations = (uintptr_t)&guest->extra[4];
-        guest->state = 1;
+    id buffer[16];
+    if (handed < batch) {
+        if (host->mutationsPtr && *host->mutationsPtr != (unsigned long)guest->extra[4])
+            objc_enumerationMutation(enumerated);
+    } else {
+        handed = 0;
+        batch = (uint32_t)[enumerated countByEnumeratingWithState:host objects:buffer count:length];
+        guest->extra[4] = batch && host->mutationsPtr ? *host->mutationsPtr : 0;
     }
+    if (!batch) {
+        guest->state = 0;
+        p->r = 0;
+        return;
+    }
+    if (!length)
+        xl_unsupported("fast enumeration: the host collection has items and the guest gave no buffer to hand them over in");
+    uint32_t count = batch - handed < length ? batch - handed : (uint32_t)length;
+    uint64_t *items = (uint64_t *)xl_narrow_pointer(p->buffer, name, 1);
+    for (uint32_t i = 0; i < count; i++)
+        items[i] = xl_object_out((uintptr_t)host->itemsPtr[handed + i]);
+    guest->items = p->buffer;
+    guest->mutations = (uintptr_t)&guest->extra[4];
+    guest->state = (uint64_t)batch << 32 | (handed + count);
     p->r = count;
 }
 
@@ -1379,6 +1171,8 @@ struct xl_block_desc {
     const char *signature;
 };
 
+#define XL_BLOCK_KINDS 8
+
 struct xl_block_wrapper {
     void *isa;
     volatile int32_t flags;
@@ -1386,8 +1180,9 @@ struct xl_block_wrapper {
     void *invoke;
     struct xl_block_desc *descriptor;
     uint64_t guest;
-    char kinds[4];
+    char kinds[XL_BLOCK_KINDS];
     char result;
+    char count;
 };
 
 enum { XL_BLOCK_HAS_COPY_DISPOSE = 1 << 25, XL_BLOCK_HAS_SIGNATURE = 1 << 30, XL_BLOCK_NEEDS_FREE = 1 << 24 };
@@ -1411,6 +1206,8 @@ static char xl_type_token(const char **p, int host_side)
     char c = **p;
     switch (c) {
     case 'v': (*p)++; return 'V';
+    case 'f': (*p)++; return host_side ? 'X' : 'F';
+    case 'd': (*p)++; return host_side ? 'X' : 'D';
     case 'q': (*p)++; return host_side ? 'X' : 'S';
     case 'Q': (*p)++; return host_side ? 'X' : 'U';
     case 'c': case 'i': case 's': case 'l':
@@ -1442,16 +1239,19 @@ static int xl_block_simple_args(const char *sig, char *kinds, char *result, int 
         return -1;
     while (*p >= '0' && *p <= '9') p++;
     int count = 0;
+    int limit = host_side ? 4 : XL_BLOCK_KINDS;
+    int words = 0;
     while (*p) {
         char t = xl_type_token(&p, host_side);
         if (t == 'X' || t == 'V')
             return -1;
         while (*p >= '0' && *p <= '9') p++;
-        if (count < 4)
+        if (count < limit)
             kinds[count] = t;
         count++;
+        words += t == 'D' ? 2 : 1;
     }
-    return count > 4 ? -1 : count;
+    return count > limit || words > XL_BLOCK_KINDS ? -1 : count;
 }
 
 static uintptr_t xl_block_call(struct xl_block_wrapper *w, const uint64_t *args, unsigned n)
@@ -1469,6 +1269,43 @@ static uintptr_t xl_block_t1(void *b, uintptr_t a0) { uint64_t a[1] = {a0}; retu
 static uintptr_t xl_block_t2(void *b, uintptr_t a0, uintptr_t a1) { uint64_t a[2] = {a0, a1}; return xl_block_call(b, a, 2); }
 static uintptr_t xl_block_t3(void *b, uintptr_t a0, uintptr_t a1, uintptr_t a2) { uint64_t a[3] = {a0, a1, a2}; return xl_block_call(b, a, 3); }
 static uintptr_t xl_block_t4(void *b, uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3) { uint64_t a[4] = {a0, a1, a2, a3}; return xl_block_call(b, a, 4); }
+uint64_t xl_invoke_typed(uint64_t address, const uint64_t *lead, unsigned lead_count, const char *kinds, unsigned count, const uintptr_t *words, char result_kind)
+{
+    uint64_t integers[8], floats[8];
+    unsigned integer_count = 0, float_count = 0, word = 0;
+    for (; integer_count < lead_count && integer_count < 8; integer_count++)
+        integers[integer_count] = lead[integer_count];
+    for (unsigned i = 0; i < count; i++) {
+        char kind = kinds[i];
+        if (kind == 'F' || kind == 'D') {
+            if (float_count == 8)
+                xl_unsupported("a host call into the guest passes more than eight floating-point arguments");
+            floats[float_count++] = kind == 'F' ? (uint64_t)(uint32_t)words[word] : ((uint64_t)(uint32_t)words[word] | (uint64_t)(uint32_t)words[word + 1] << 32);
+            word += kind == 'D' ? 2 : 1;
+        } else {
+            if (integer_count == 8)
+                xl_unsupported("a host call into the guest passes more than eight integer arguments");
+            integers[integer_count++] = xl_kind_out(kind, words[word++]);
+        }
+    }
+    uint64_t vector = 0;
+    uint64_t result = xl_invoke_registers(address, integers, integer_count, floats, float_count, &vector);
+    if (result_kind == 'F')
+        return (uint32_t)vector;
+    return result_kind == 'D' ? vector : result;
+}
+
+static uint64_t xl_block_tf(void *b, uintptr_t a0, uintptr_t a1, uintptr_t a2, uintptr_t a3, uintptr_t a4, uintptr_t a5, uintptr_t a6, uintptr_t a7)
+{
+    struct xl_block_wrapper *w = b;
+    const uintptr_t words[8] = {a0, a1, a2, a3, a4, a5, a6, a7};
+    const uint64_t lead[1] = {w->guest};
+    uint64_t result = xl_invoke_typed(*(uint64_t *)(uintptr_t)(w->guest + 16), lead, 1, w->kinds, (unsigned)w->count, words, w->result);
+    if (w->result == 'F' || w->result == 'D')
+        return result;
+    return xl_kind_in(w->result, result, "guest block result");
+}
+
 static void xl_block_unsupported_invoke(void *b) { (void)b; xl_unsupported("host-invoked guest block with a signature the bridge cannot marshal"); }
 
 static const char *xl_guest_block_signature(uint64_t guest)
@@ -1559,7 +1396,12 @@ static struct xl_block_wrapper *xl_wrapper_for(uint64_t guest)
     w->descriptor = &xl_block_descriptor;
     w->guest = xl_invoke(XL_GUEST__Block_copy, guest);
     int args = xl_block_simple_args(xl_guest_block_signature(guest), w->kinds, &w->result, 0);
-    switch (args) {
+    w->count = (char)args;
+    int floating = w->result == 'F' || w->result == 'D';
+    for (int i = 0; i < args; i++)
+        floating |= w->kinds[i] == 'F' || w->kinds[i] == 'D';
+    switch (args >= 0 && (floating || args > 4) ? 5 : args) {
+    case 5: w->invoke = (void *)xl_block_tf; break;
     case 0: w->invoke = (void *)xl_block_t0; break;
     case 1: w->invoke = (void *)xl_block_t1; break;
     case 2: w->invoke = (void *)xl_block_t2; break;

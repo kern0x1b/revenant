@@ -52,6 +52,7 @@ static cl::opt<std::string> ResolvedOut("resolved-out", cl::desc("With --objc-ma
 static cl::opt<std::string> Output("output", cl::desc("Output bitcode"));
 static cl::opt<std::string> IROutput("ir", cl::desc("Optional textual IR output"));
 static cl::opt<std::string> LayoutOutput("layout", cl::desc("Linker arguments placing guest segments"));
+static cl::opt<std::string> ImagesOut("images-out", cl::desc("Write where every guest image lies, one line each: low, end, file name"));
 static cl::opt<bool> Library("library", cl::desc("The output is a dylib whose guest segments are one image in a section (__XGUEST,__image) that the loader maps at their addresses, "
                                                  "with a table of the slots that hold host addresses, instead of segments the linker places there"));
 static cl::opt<std::string> StateHeader("state-header", cl::desc("C header with guest register offsets and guest export addresses"));
@@ -64,6 +65,13 @@ static cl::opt<std::string> FlagFlowSummary("flag-flow-summary", cl::desc("Where
 static cl::opt<std::string> HostTriple("host-triple", cl::init("armv7-apple-ios6.0.0"));
 static cl::opt<std::string> HostLayout("host-datalayout", cl::init("e-m:o-p:32:32-Fi8-f64:32:64-v64:32:64-v128:32:128-a:0:32-n32-S32"));
 static cl::opt<uint64_t> Base("base", cl::init(0x10000000));
+static cl::opt<uint64_t> MetadataArena("metadata-arena", cl::init(0),
+                                       cl::desc("With --library: the bytes of address space, after the guest images, for the metadata the guest's Swift runtime builds; "
+                                                "0 is as many as the writable segments of the guest images have"));
+static cl::opt<uint64_t> WordSlots("word-slots", cl::init(XL_GUEST_WORD_SLOTS),
+                                   cl::desc("With --library: how many distinct opaque 64-bit words the guest may hand to the host, a power of two"));
+static cl::opt<uint64_t> AliasArena("alias-arena", cl::init(XL_GUEST_ALIASES),
+                                    cl::desc("With --library: the bytes for the 8-aligned copies of host constants that the guest is handed"));
 static cl::opt<bool> Optimize("optimize", cl::init(true));
 static cl::opt<bool> ReportDuplicates("report-duplicates", cl::init(false),
                                       cl::desc("Report how many guest instructions the lift decoded in all and how many different ones: the rest is code that "
@@ -388,12 +396,29 @@ std::vector<bool> HostAncestorImages(const Program &program) {
   return result;
 }
 
+bool WriteImages(const Program &program) {
+  if (ImagesOut.empty()) {
+    return true;
+  }
+  std::error_code ec;
+  raw_fd_ostream os(ImagesOut, ec);
+  if (ec) {
+    errs() << "xlate: " << ImagesOut << ": " << ec.message() << "\n";
+    return false;
+  }
+  for (auto &image : program.images) {
+    os << format_hex_no_prefix(image->host(image->preferred_base()), 8) << " " << format_hex_no_prefix(image->host(image->image_end()), 8) << " "
+       << sys::path::filename(image->path()) << "\n";
+  }
+  return true;
+}
+
 bool LayoutAndResolve(Program &program, bool strict) {
   uint64_t cursor = Base;
   for (auto &image : program.images) {
     auto base = image->preferred_base();
     image->set_slide(cursor - base);
-    cursor = AlignUp(image->host(image->image_end()), 0x100000);
+    cursor = AlignUp(image->host(image->image_end()), Library ? XL_GUEST_GRANULE : 0x100000);
   }
   for (auto &image : program.images) {
     std::string error;
@@ -1933,7 +1958,11 @@ bool EmitGuestImage(Program &program, Module &module, const Overrides &overrides
         continue;
       }
       std::vector<uint8_t> bytes(segment.vmsize);
-      image->ReadBytes(image->host(segment.vmaddr), bytes.data(), bytes.size());
+      if (segment.vmsize && !image->ReadBytes(image->host(segment.vmaddr), bytes.data(), bytes.size())) {
+        errs() << "xlate: " << image->path() << ": segment " << segment.name << " cannot be read\n";
+        ok = false;
+        continue;
+      }
       for (auto &[vmaddr, piece] : SegmentPieces(program, module, *image, segment, overrides, ok)) {
         uint64_t offset = vmaddr - segment.vmaddr;
         for (auto field : piece.fields) {
@@ -1965,16 +1994,46 @@ bool EmitGuestImage(Program &program, Module &module, const Overrides &overrides
   if (!ok) {
     return false;
   }
-  xl_guest_header header = {XL_GUEST_MAGIC, XL_GUEST_VERSION, UINT32_MAX, 0, static_cast<uint32_t>(records.size())};
+  xl_guest_header header = {XL_GUEST_MAGIC, XL_GUEST_VERSION, UINT32_MAX, 0, static_cast<uint32_t>(records.size()), 0, 0, 0, 0};
   uint64_t cursor = AlignUp(sizeof header + records.size() * sizeof(xl_guest_segment), XL_GUEST_GRANULE);
+  uint64_t writable = 0, mapped = 0;
   for (auto &record : records) {
     header.low = std::min(header.low, record.header.address);
-    header.high = std::max(header.high, record.header.address + record.header.size);
+    header.images_high = std::max(header.images_high, record.header.address + record.header.size);
+    mapped += record.header.size;
+    if (record.header.protection & XL_GUEST_WRITE) {
+      writable += record.header.size;
+    }
     if (record.header.length) {
       record.header.offset = cursor;
       cursor += record.header.length;
     }
   }
+  uint64_t arena = AlignUp(MetadataArena ? MetadataArena : writable, XL_GUEST_GRANULE);
+  uint64_t aliases = AlignUp(AliasArena, XL_GUEST_GRANULE);
+  uint64_t end = header.images_high + arena + WordSlots * XL_GUEST_WORD_BYTES + aliases;
+  if (end > XL_GUEST_CEILING) {
+    errs() << "xlate: the range 0x" << Hex(header.low) << "-0x" << Hex(end) << " that the library holds (its guest images to 0x" << Hex(header.images_high)
+           << ", 0x" << Hex(arena) << " bytes of metadata arena, " << WordSlots << " opaque words, 0x" << Hex(aliases) << " bytes of aliases) ends above 0x"
+           << Hex(XL_GUEST_CEILING)
+           << ", where the main thread's stack of a 32-bit process of iOS 6 may begin: no process could load the library; lower --base by at least 0x"
+           << Hex(AlignUp(end - XL_GUEST_CEILING, XL_GUEST_GRANULE)) << "\n";
+    return false;
+  }
+  header.high = static_cast<uint32_t>(end);
+  header.arena = static_cast<uint32_t>(arena);
+  header.word_slots = static_cast<uint32_t>(WordSlots);
+  header.aliases = static_cast<uint32_t>(aliases);
+  if (!xl_guest_budget_fits(&header)) {
+    errs() << "xlate: the library cannot be given 0x" << Hex(arena) << " bytes of metadata arena (--metadata-arena), " << WordSlots
+           << " opaque words (--word-slots, a power of two, at least " << XL_GUEST_WORD_SLOTS_LEAST << ") and 0x" << Hex(aliases)
+           << " bytes of aliases (--alias-arena, more than 0)\n";
+    return false;
+  }
+  outs() << "xlate: the library holds 0x" << Hex(header.low) << "-0x" << Hex(header.high) << " when it is loaded: 0x" << Hex(header.images_high - header.low)
+         << " bytes of guest images (0x" << Hex(writable) << " of them writable, 0x" << Hex(header.images_high - header.low - mapped)
+         << " between the segments), 0x" << Hex(arena) << " of metadata arena, 0x"
+         << Hex(WordSlots * XL_GUEST_WORD_BYTES) << " for " << WordSlots << " opaque words, 0x" << Hex(aliases) << " of aliases\n";
   std::vector<uint8_t> blob(cursor);
   Store(blob, 0, header);
   for (size_t index = 0; index < records.size(); ++index) {
@@ -2072,7 +2131,11 @@ bool EmitGuestData(Program &program, Module &module, std::vector<GuestSegment> &
       }
       std::string host_name = HostSegmentName(image_index, merge_data, segment);
       std::vector<uint8_t> bytes(segment.vmsize);
-      image->ReadBytes(image->host(segment.vmaddr), bytes.data(), bytes.size());
+      if (segment.vmsize && !image->ReadBytes(image->host(segment.vmaddr), bytes.data(), bytes.size())) {
+        errs() << "xlate: " << image->path() << ": segment " << segment.name << " cannot be read\n";
+        ok = false;
+        continue;
+      }
       auto pieces = SegmentPieces(program, module, *image, segment, overrides, ok);
       std::vector<Constant *> fields;
       std::vector<Type *> types;
@@ -2533,8 +2596,10 @@ int Coverage(Program &program) {
       }
       for (uint64_t offset = 0; offset + 4 <= section.size; offset += 4) {
         uint64_t address = image->host(section.addr + offset);
-        uint8_t bytes[4];
-        image->ReadBytes(address, bytes, 4);
+        uint8_t bytes[4] = {};
+        if (!image->ReadBytes(address, bytes, 4)) {
+          continue;
+        }
         uint32_t word = bytes[0] | bytes[1] << 8 | bytes[2] << 16 | (uint32_t)bytes[3] << 24;
         auto func = ll_func_new(wrap(&module), config);
         bool decoded = ll_func_decode_instr(func, address, ReadCode, &program) == 0;
@@ -2639,6 +2704,9 @@ int main(int argc, char **argv) {
     if (!ResolvedOut.empty() && !WriteResolved(program)) {
       return 1;
     }
+    if (!WriteImages(program)) {
+      return 1;
+    }
     std::error_code ec;
     raw_fd_ostream os(ObjCManifest, ec);
     if (ec) {
@@ -2651,7 +2719,8 @@ int main(int argc, char **argv) {
     xlate::WriteManifest(os, images, objc, NamespacePrefix);
     return 0;
   }
-  if (Output.empty() || (!Library && !CheckExecutableSegmentLimit(program)) || !LoadPassthrough(program) || !LayoutAndResolve(program, true)) {
+  if (Output.empty() || (!Library && !CheckExecutableSegmentLimit(program)) || !LoadPassthrough(program) || !LayoutAndResolve(program, true) ||
+      !WriteImages(program)) {
     return 1;
   }
   if (!CheckFlagFlow(program)) {

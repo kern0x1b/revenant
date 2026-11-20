@@ -76,6 +76,10 @@ function main()
     end
     local root = os.projectdir()
     local llvm = installdir("llvm")
+    local resources = os.dirs(path.join(llvm, "lib", "clang", "*"))
+    if #resources ~= 1 then
+        raise("the llvm package holds %d clang resource directories under %s, not one", #resources, path.join(llvm, "lib", "clang"))
+    end
     local sdks = os.dirs(path.join(installdir("iphoneos-sdk"), "Developer.app", "Contents", "Developer", "Platforms", "iPhoneOS.platform", "Developer", "SDKs", "iPhoneOS*.sdk"))
     if #sdks ~= 1 then
         raise("the iphoneos-sdk package holds %d SDKs, not one", #sdks)
@@ -89,7 +93,7 @@ function main()
         llvm = llvm,
         farmdec = installdir("farmdec"),
         llvmbin = path.join(llvm, "bin"),
-        resourcedir = path.join(llvm, "lib", "clang", "23"),
+        resourcedir = resources[1],
         sdk = sdks[1],
         ld = path.join(installdir("ld64"), "bin", "ld"),
         ldid = path.join(installdir("ldid"), "bin", "ldid"),

@@ -1,8 +1,10 @@
 # Guest memory under parallel execution
 
-Status: implemented on `work/emulator-memory`. The design is from 2026-10-25; the code is in `dd3c1da0c`, and the CI
-runs below are on head `d318d1f5b`. The calibration is in `docs/reference/emulator/performance.md`, section "Why guest
-memory accesses leave the inline page table". The CI numbers are in "CI numbers" below.
+Status: implemented on main. The design is from 2026-10-25. The calibration is in
+`docs/reference/emulator/performance.md`, section "Why guest memory accesses leave the inline page table". The runs
+below were recorded while the work was on `work/emulator-memory` (code in `dd3c1da0c`, runs on head `d318d1f5b`); they
+are a historical record, not current verification. Verification is local (`./xmakew test -P .`, then the emulator
+session skill), as the workspace contract requires.
 
 ## Problem
 
@@ -91,9 +93,10 @@ on a code read), and `runtime/emulator_session.cpp` (the reclaim before each bat
    The 69,152 exclusive callbacks in the `counted2` idle window (14.0 M callbacks, two cores) show that
    load-exclusive is not rare.
 
-## CI numbers
+## CI numbers (branch record, superseded)
 
-Only CI runs are cited here. The boot, the copy-on-write test and the check run are on head `d318d1f5b`.
+These are the recorded runs from the development branch, kept as history; no new CI run is claimed here. The boot, the
+copy-on-write test and the check run were on head `d318d1f5b`.
 
 - Boot, run `40228044518`, `emulator.yml` job `boot`: two guest cores, `--time-scale 10`, bounded by
   `--ticks 4000000000`, with `--perf-summary`. The perf summary records the spawn of
@@ -119,6 +122,9 @@ Only CI runs are cited here. The boot, the copy-on-write test and the check run 
 - Measure, run `40232948349`: cancelled before it reported. No branch-against-main numbers exist.
 
 ## Verification
+
+The run ids below are the historical branch record, not current evidence; local verification follows the workspace
+contract (`./xmakew test -P .`, then the emulator session skill).
 
 - `monitor_counter` (exact count from two threads), `connect_writable_dispatch` and the libdispatch connect probe
   (`bd31c5b51`, the refcount trap). The CI probe is pending, see "CI numbers".

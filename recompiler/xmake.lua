@@ -73,18 +73,26 @@ for _, app in ipairs({{"recompiler_cxxinit", "tests/cxxinit/build.lua"}, {"recom
         set_values("recompiler.script", script)
 end
 
-local function corpus(target, opt)
-    local name = path.filename(opt.name)
-    local check = import("check", {rootdir = path.join(target:scriptdir(), "tests", name), anonymous = true})
-    local passed, errors = true, nil
-    try {
-        function () check(path.join(target:autogendir(), "tests", name), {host_only = true}) end,
-        catch { function (raised) passed, errors = false, raised end }
-    }
-    if not passed then
-        opt.errors = tostring(errors)
+local function corpus_runner(host_only)
+    return function (target, opt)
+        local name = path.filename(opt.name)
+        local check = import("check", {rootdir = path.join(target:scriptdir(), "tests", name), anonymous = true})
+        local passed, errors = true, nil
+        try {
+            function () check(path.join(target:autogendir(), "tests", name), {host_only = host_only}) end,
+            catch { function (raised) passed, errors = false, raised end }
+        }
+        if not passed then
+            local text = type(errors) == "table" and (errors.errors or errors.stderr or errors.stdout) or errors
+            text = tostring(text or ""):trim()
+            if #text == 0 then
+                text = "the check raised an error with no text: a program it ran for its output ended with a failure status and wrote nothing"
+            end
+            opt.errors = text
+            print("%s: %s", opt.name, text)
+        end
+        return passed
     end
-    return passed
 end
 
 target("recompiler_corpus")
@@ -92,8 +100,8 @@ target("recompiler_corpus")
     set_default(false)
     add_deps("xlate", "xlgen")
     add_packages("blocksruntime", "iphoneos-sdk", "ld64", "ldid")
-    add_tests("jumptable", "switchtail", "tailcalls", "tsdscan", "tsdguard", "int128", "weakimport", "lse", "llsc", "crypto", "library", "exceptions", "libexceptions", "libcxxexceptions", "objectsplit", "segmentlimit", "absolutes", "rebasetag", "flagflow", "hostbridges", "checkapi", "devicegate", "proxytable", "systemclasses", "dropkey")
-    on_test(corpus)
+    add_tests("jumptable", "switchtail", "tailcalls", "tsdscan", "tsdguard", "int128", "weakimport", "lse", "llsc", "llscpair", "crypto", "library", "exceptions", "libexceptions", "libcxxexceptions", "objectsplit", "segmentlimit", "absolutes", "rebasetag", "flagflow", "hostbridges", "checkapi", "devicegate", "proxytable", "sharedtable", "statsthreads", "systemclasses", "dropkey", "recaptchahelper")
+    on_test(corpus_runner(true))
 target_end()
 
 if get_config("tests") == "device" then
@@ -104,6 +112,6 @@ if get_config("tests") == "device" then
         add_deps("xlate", "xlgen")
         add_packages("blocksruntime", "iphoneos-sdk", "ld64", "ldid")
         add_tests("classpair", "ordinal", "exceptions", "libexceptions", "libcxxexceptions", "hostbridges")
-        on_test(corpus)
+        on_test(corpus_runner(false))
     target_end()
 end

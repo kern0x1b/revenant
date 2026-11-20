@@ -1,4 +1,5 @@
 local LOADER_FILES = {"src/loader/xl_loader.c", "include/xl_loader.h", "include/xl_guest_image.h", "include/xl_vm_map.h"}
+local HELPER_FILES = {"tests/recaptchahelper/helper.m", "tests/recaptchahelper/protocol.h"}
 local PRODUCT_FILES = {"proxy-classes.txt", "report.txt", "system-classes.txt"}
 
 function main(name, ...)
@@ -77,11 +78,29 @@ function main(name, ...)
             os.cp(source, path.join(destination, path.filename(relative)))
         end
     end
+    local helper = {}
+    for _, relative in ipairs(HELPER_FILES) do
+        local source, leaf = path.join(e.recompiler, relative), path.filename(relative)
+        if not os.isfile(source) then
+            raise("the helper's source %s is missing", source)
+        end
+        os.cp(source, path.join(destination, leaf))
+        table.insert(helper, string.format("%s_sha256=%s", (leaf:gsub("%.", "_")), hash.sha256(path.join(destination, leaf))))
+    end
+    local protocol = io.readfile(path.join(destination, "protocol.h")):match('#define RC_VERSION "(%d+)"')
+    if not protocol then
+        raise("protocol.h does not define RC_VERSION as a number in quotes")
+    end
+    io.writefile(path.join(destination, "helper.txt"), string.format("protocol_version=%s\n%s\n", protocol, table.concat(helper, "\n")))
     local sha, registry_sha = hash.sha256(path.join(destination, "RecaptchaEnterprise.dylib")), hash.sha256(path.join(destination, "RecaptchaEnterprise-classes.dylib"))
     io.writefile(path.join(destination, "runtime.txt"), string.format("runtime_key=%s\nruntime_recipe=%s\nlibswiftcore_sha256=%s\n", runtime.key, tostring(runtime.recipe), runtime.core_sha256))
+    local checkout = path.absolute(path.join(scripts, "..", ".."))
+    local commit = os.iorunv("git", {"-C", checkout, "rev-parse", "HEAD"}):trim()
+    local changed = os.iorunv("git", {"-C", checkout, "status", "--porcelain", "--untracked-files=no"}):trim()
+    io.writefile(path.join(destination, "source.txt"), string.format("commit=%s\nuncommitted_changes=%s\n", commit, changed == "" and "none" or "yes"))
     local entry = path.join(destination, "recaptcha-sdk.txt")
-    io.writefile(entry, string.format("dir=%s\nlibrary=RecaptchaEnterprise.dylib\nsha256=%s\nregistry_sha256=%s\nbase=0x18000000\ninstall=Frameworks/RecaptchaEnterprise.dylib\n",
-                                      destination, sha, registry_sha))
+    io.writefile(entry, string.format("dir=%s\nlibrary=RecaptchaEnterprise.dylib\nsha256=%s\nregistry_sha256=%s\nbase=0x%x\ninstall=Frameworks/RecaptchaEnterprise.dylib\n",
+                                      destination, sha, registry_sha, build.guest_base()))
     if verify and telegram and os.isfile(path.join(telegram, "tools", "recaptcha_sdk.lua")) then
         local sdk_module = import("recaptcha_sdk", {rootdir = path.join(telegram, "tools"), anonymous = true})
         sdk_module.verify(sdk_module.read(entry))

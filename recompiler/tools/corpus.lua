@@ -72,11 +72,21 @@ end
 
 function run(program, argv, log)
     local errors = log .. ".stderr"
-    local status = os.execv(program, argv, {stdout = log, stderr = errors, try = true})
+    local status, reason = os.execv(program, argv, {stdout = log, stderr = errors, try = true})
     local text = (os.isfile(log) and io.readfile(log) or "") .. (os.isfile(errors) and io.readfile(errors) or "")
     io.writefile(log, text)
     os.tryrm(errors)
-    return status == 0, text
+    local ended = status == nil and "no start (" .. tostring(reason) .. ")" or status == -1 and "a signal" or "the exit status " .. tostring(status)
+    return status == 0, text, ended
+end
+
+function output(program, argv, log)
+    local ok, text, ended = run(program, argv, log)
+    if not ok then
+        io.write(text)
+        fail("%s %s ended with %s after writing %d bytes (kept in %s)", program, table.concat(argv, " "), ended, #text, log)
+    end
+    return text
 end
 
 function options(...)

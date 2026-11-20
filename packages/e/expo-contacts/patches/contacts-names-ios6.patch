@@ -1,0 +1,122 @@
+diff -ru a/ios/ContactsExceptions.swift b/ios/ContactsExceptions.swift
+--- a/ios/ContactsExceptions.swift	2026-11-19 23:56:20
++++ b/ios/ContactsExceptions.swift	2026-11-19 23:56:20
+@@ -30,7 +30,7 @@
+   }
+ }
+ 
+-internal final class FilePermissionException: GenericException<String?> {
++internal final class ContactsFilePermissionException: GenericException<String?> {
+   override var reason: String {
+     "File '\(String(describing: param))' isn't readable."
+   }
+@@ -90,7 +90,7 @@
+   }
+ }
+ 
+-internal final class MissingCurrentViewControllerException: Exception {
++internal final class ContactsMissingCurrentViewControllerException: Exception {
+   override var reason: String {
+     "Cannot determine currently presented view controller"
+   }
+@@ -102,7 +102,7 @@
+   }
+ }
+ 
+-internal final class MissingViewControllerException: Exception {
++internal final class ContactsMissingViewControllerException: Exception {
+   override var reason: String {
+     "Could not find the current ViewController"
+   }
+diff -ru a/ios/ContactsModule.swift b/ios/ContactsModule.swift
+--- a/ios/ContactsModule.swift	2026-11-19 23:56:20
++++ b/ios/ContactsModule.swift	2026-11-19 23:56:20
+@@ -160,7 +160,7 @@
+         parent.present(navController, animated: options.preventAnimation != true)
+       } else {
+         contactManipulationPromise = nil
+-        promise.reject(MissingViewControllerException())
++        promise.reject(ContactsMissingViewControllerException())
+       }
+     }.runOnQueue(.main)
+ 
+@@ -365,7 +365,7 @@
+         return promise.reject(AccessPickerUnavailableException())
+       }
+       guard let currentViewController = appContext?.utilities?.currentViewController() else {
+-        return promise.reject(MissingCurrentViewControllerException())
++        return promise.reject(ContactsMissingCurrentViewControllerException())
+       }
+       ContactAccessPicker.present(inViewController: currentViewController, promise: promise)
+     }
+@@ -568,7 +568,7 @@
+ 
+   private func imageData(forPath uri: String?) throws -> Data? {
+     guard let uri, let url = URL(string: uri) else {
+-      throw FilePermissionException(uri)
++      throw ContactsFilePermissionException(uri)
+     }
+ 
+     guard url.isFileURL else {
+diff -ru a/ios/ContactsRecords.swift b/ios/ContactsRecords.swift
+--- a/ios/ContactsRecords.swift	2026-11-19 23:56:20
++++ b/ios/ContactsRecords.swift	2026-11-19 23:56:20
+@@ -43,8 +43,8 @@
+   @Field var department: String?
+   @Field var note: String?
+   @Field var imageAvailable: Bool?
+-  @Field var image: Image?
+-  @Field var rawImage: Image?
++  @Field var image: ContactImageRecord?
++  @Field var rawImage: ContactImageRecord?
+   @Field var birthday: ContactDate?
+   @Field var dates: [ContactDate]?
+   @Field var relationships: [Relationship]?
+@@ -125,7 +125,7 @@
+   @Field var format: String?
+ }
+ 
+-struct Image: Record {
++struct ContactImageRecord: Record {
+   @Field var uri: String?
+   @Field var width: Int?
+   @Field var height: Int?
+diff -ru a/ios/next/form/FormDelegate.swift b/ios/next/form/FormDelegate.swift
+--- a/ios/next/form/FormDelegate.swift	2026-11-19 23:56:20
++++ b/ios/next/form/FormDelegate.swift	2026-11-19 23:56:20
+@@ -55,7 +55,7 @@
+       parent.present(navController, animated: options?.preventAnimation != true)
+     } else {
+       contactManipulationPromise = nil
+-      throw MissingViewControllerException()
++      throw ContactsMissingViewControllerException()
+     }
+   }
+ 
+@@ -82,7 +82,7 @@
+       parent.present(navController, animated: options?.preventAnimation != true)
+     } else {
+       contactManipulationPromise = nil
+-      throw MissingViewControllerException()
++      throw ContactsMissingViewControllerException()
+     }
+   }
+ 
+@@ -96,7 +96,7 @@
+     pickerController.delegate = pickerDelegate
+ 
+     guard let currentController = appContext?.utilities?.currentViewController() else {
+-      throw MissingViewControllerException()
++      throw ContactsMissingViewControllerException()
+     }
+     currentController.present(pickerController, animated: true)
+ 
+@@ -152,7 +152,7 @@
+       throw AccessPickerUnavailableException()
+     }
+     guard let currentViewController = appContext?.utilities?.currentViewController() else {
+-      throw MissingCurrentViewControllerException()
++      throw ContactsMissingCurrentViewControllerException()
+     }
+     ContactAccessPickerNext.present(
+       inViewController: currentViewController,

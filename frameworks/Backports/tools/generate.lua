@@ -1,4 +1,5 @@
 import("async.runjobs")
+import("core.base.json")
 
 local publics = import("public", {rootdir = os.scriptdir(), anonymous = true})
 local sdkfiles = import("sdk", {rootdir = os.scriptdir(), anonymous = true})
@@ -7,6 +8,7 @@ local skeleton = import("skeleton", {rootdir = os.scriptdir(), anonymous = true}
 local markers = import("markers", {rootdir = os.scriptdir(), anonymous = true})
 local libraries = import("library_list", {rootdir = os.scriptdir(), anonymous = true}).backports_libraries()
 local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
+local timing = import("@addon.revenant.apple.timing", {anonymous = true})
 
 local SHARDS = 4
 local FIRST_IPHONE_OS = 2000
@@ -22,16 +24,6 @@ local DEVICE_GLOBALS_HEADER = {
     "# frameworks/Backports/tests/device_globals_test.lua checks this file against the cache where the cache is present.",
 }
 
-local function extract(sdk, version, cache, logs, name)
-    local rows = facts.objc_facts(sdk, name, version)
-    if sdkfiles.has_swift_module(sdk, name) then
-        for _, row in ipairs(facts.swift_facts(sdk, name, version, logs)) do
-            table.insert(rows, row)
-        end
-    end
-    sdkfiles.write_rows(path.join(cache, name .. ".tsv"), name, rows)
-end
-
 local function failure_file(logs, name)
     return path.join(logs, name .. ".failed")
 end
@@ -43,7 +35,7 @@ local function worker(args)
         try
         {
             function ()
-                extract(sdk, version, cache, logs, name)
+                facts.extract(sdk, version, cache, logs, name)
             end,
             catch
             {
@@ -121,7 +113,9 @@ local function ready(sdk, version, logs, names)
     os.vrunv("touch", {cache})
     if #missing > 0 then
         os.mkdir(logs)
-        extract_all(sdk, version, cache, logs, missing)
+        timing.run("generate: facts extraction of " .. #missing .. " of " .. #names .. " frameworks (cache " .. path.filename(cache) .. ")", function ()
+            extract_all(sdk, version, cache, logs, missing)
+        end)
     end
     return cache
 end
@@ -230,13 +224,21 @@ function prepare(only)
         end
         names = chosen
     end
-    local cache = ready(sdk, version, logs, names)
+    local cache = timing.run("generate: facts cache check (and extraction if missing)", function ()
+        return ready(sdk, version, logs, names)
+    end)
+    local frameworks = timing.run("generate: read the facts of " .. #names .. " frameworks", function ()
+        return frameworks_of(cache, names, sdk)
+    end)
+    local images = timing.run("generate: install names of the SDK's images", function ()
+        return publics.install_names(sdk)
+    end)
     return {
         sdk = sdk,
         version = version,
         logs = logs,
-        frameworks = frameworks_of(cache, names, sdk),
-        images = publics.install_names(sdk),
+        frameworks = frameworks,
+        images = images,
     }
 end
 
@@ -295,6 +297,89 @@ function available_rows(state, framework)
     return kept
 end
 
+local device_classes = nil
+
+function device_class_inventory_file()
+    return path.join(dyld.root(), DEVICE_GLOBALS_RELEASE, "classes_armv7.json")
+end
+
+local function device_class_inventory()
+    if device_classes == nil then
+        local file = device_class_inventory_file()
+        if not os.isfile(file) then
+            raise("the iOS %s class inventory %s is missing: the generator decides which SDK classes get a proxy from exactly that release's inventory and does not fall back to another one; clone a cache that holds it (docs/guides/machine.md, \"Which cache to clone\")", DEVICE_GLOBALS_RELEASE, file)
+        end
+        device_classes = json.decode(io.readfile(file)).classes or {}
+    end
+    return device_classes
+end
+
+local function sdk_members_of(state)
+    if state.sdk_members == nil then
+        local unavailable = unavailable_classes_of(state)
+        local members = {}
+        for _, framework in ipairs(state.frameworks) do
+            for _, row in ipairs(framework.rows) do
+                if exists_on_ios(row, unavailable) then
+                    local key
+                    if row.kind == "instance method" or row.kind == "class method" then
+                        key = row.kind .. "|" .. row.name
+                    elseif row.kind == "property" then
+                        local getter = string.match(row.flags or "", "getter:(%S+)") or row.name
+                        key = (has_flag(row, "class") and "class method" or "instance method") .. "|" .. getter
+                    end
+                    if key then
+                        members[row.container] = members[row.container] or {}
+                        members[row.container][key] = true
+                    end
+                end
+            end
+        end
+        state.sdk_members = members
+    end
+    return state.sdk_members
+end
+
+local function device_declares(info, key)
+    local kind, name = key:match("^(.-)|(.*)$")
+    for _, selector in ipairs((kind == "class method" and info.class or info.instance) or {}) do
+        if selector == name then
+            return true
+        end
+    end
+    return false
+end
+
+function class_on_device(state, row, framework_name)
+    local info = device_class_inventory()[row.name]
+    if not info then
+        return false, "absent"
+    end
+    local image = info.image or ""
+    local public = image:match("^/System/Library/Frameworks/([%w_]+)%.framework/")
+    local owner = public or image:match("^/System/Library/PrivateFrameworks/([%w_]+)%.framework/")
+    if public or owner == framework_name then
+        return true
+    end
+    local super = row.signature ~= "" and row.signature or "NSObject"
+    if unavailable_classes_of(state)[super] then
+        super = "NSObject"
+    end
+    if info.superclass ~= super then
+        return false, "stranger: " .. (owner or image) .. " has the superclass " .. tostring(info.superclass) .. ", the SDK's is " .. super
+    end
+    local members = sdk_members_of(state)[row.name]
+    if members == nil then
+        return false, "stranger: " .. (owner or image) .. " and the SDK declares no member to compare"
+    end
+    for key in pairs(members) do
+        if device_declares(info, key) then
+            return true
+        end
+    end
+    return false, "stranger: " .. (owner or image) .. " implements none of the SDK's declared members"
+end
+
 function unavailable_count(state, framework)
     local unavailable = unavailable_classes_of(state)
     local count = 0
@@ -348,18 +433,29 @@ function pending_of(state, only)
     local pending = {}
     for _, framework in ipairs(state.frameworks) do
         if only == nil or table.contains(only, framework.name) then
-            local rows, skipped = {}, {}
+            local rows, skipped, strangers = {}, {}, {}
             for _, row in ipairs(framework.rows) do
                 local owner = single_owned(row) and owners[row.kind .. "|" .. row.name]
                 if not single_owned(row) or (owner and owner.framework == framework.name) then
                     if exists_on_ios(row, unavailable) then
-                        table.insert(rows, row)
+                        local on_device, why = false, nil
+                        if row.kind == "class" then
+                            on_device, why = class_on_device(state, row, framework.name)
+                        end
+                        if not on_device then
+                            table.insert(rows, row)
+                            if why and why ~= "absent" then
+                                table.insert(strangers, row.name .. " (" .. framework.name .. "): " .. why)
+                            end
+                        else
+                            skipped[row.kind] = (skipped[row.kind] or 0) + 1
+                        end
                     else
                         skipped[row.kind] = (skipped[row.kind] or 0) + 1
                     end
                 end
             end
-            table.insert(pending, {name = framework.name, import = framework.import, rows = rows, skipped = skipped,
+            table.insert(pending, {name = framework.name, import = framework.import, rows = rows, skipped = skipped, strangers = strangers,
                 unavailable = unavailable, images = state.images})
         end
     end
@@ -524,7 +620,7 @@ function main(...)
     if args[1] == "facts" then
         return worker(args)
     end
-    local state = everything()
+    local state = timing.run("generate: state (facts cache, rows, images)", everything)
     if args[1] == "device-globals" then
         local owner, definitions = markers_of_src()
         local set, unlisted = device_globals_of(state, owner, definitions)
@@ -541,14 +637,25 @@ function main(...)
         print(string.format("device-globals: %d globals the cache exports from an SDK framework that the SDK lists nowhere, under %s", others, device_unlisted_file()))
         return
     end
-    local pending = pending_of(state)
+    local pending = timing.run("generate: pending rows (device image, owners)", function ()
+        return pending_of(state)
+    end)
     os.tryrm(path.join(sdkfiles.build_root(), "skeleton"))
-    local owners, definitions = markers_of_src()
-    local device = read_device_globals()
-    local totals = skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented_names(), state.images, owners, definitions,
-        device, references_of_src(device))
+    local owners, definitions, device, implemented, references
+    timing.run("generate: src scan (markers, device globals, implemented names, references)", function ()
+        owners, definitions = markers_of_src()
+        device = read_device_globals()
+        implemented = implemented_names()
+        references = references_of_src(device)
+    end)
+    local totals = timing.run("generate: skeleton.write", function ()
+        return skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented, state.images, owners, definitions, device, references)
+    end)
     local skipped = 0
     for _, framework in ipairs(pending) do
+        for _, stranger in ipairs(framework.strangers) do
+            print("device class refused, keeps its proxy: " .. stranger)
+        end
         for _, count in pairs(framework.skipped) do
             skipped = skipped + count
         end
