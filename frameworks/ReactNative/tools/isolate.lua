@@ -432,15 +432,15 @@ function clone_project(src, dst, new_cache, old_cache, old_checkout, bundle_id)
     local new = {folder = dst, checkout = checkout(), cache = lexical_path(new_cache)}
     local mapped = root_pairs(old, new)
     os.mkdir(path.directory(dst))
-    os.vrunv("cp", {"-cR", src, dst})
     local patterns = {}
     for _, pair in ipairs(mapped) do
         table.join2(patterns, {"-e", pair[1]})
     end
-    local rewritten = 0
+    -- The files that name a root are found in the source, once, before the copy; the copy is one clone of the tree and
+    -- only those files are opened in it, so the clone is neither walked nor searched.
     local named = try {
         function ()
-            return os.iorunv("grep", table.join({"-rIlF", "--exclude-dir=ref"}, patterns, {dst}))
+            return os.iorunv("grep", table.join({"-rIlF", "--exclude-dir=ref"}, patterns, {src}))
         end,
         catch {
             function ()
@@ -448,7 +448,12 @@ function clone_project(src, dst, new_cache, old_cache, old_checkout, bundle_id)
             end
         }
     }
-    for _, file in ipairs(lines(named)) do
+    os.vrunv("cp", {"-cR", src, dst})
+    local rewritten = 0
+    local touched = {}
+    for _, source_file in ipairs(lines(named)) do
+        local file = path.join(dst, path.relative(source_file, src))
+        table.insert(touched, file)
         local text = io.readfile(file)
         local changed = rewrite_roots(text, mapped)
         if changed ~= text then
@@ -457,16 +462,16 @@ function clone_project(src, dst, new_cache, old_cache, old_checkout, bundle_id)
         end
     end
     local relinked = 0
-    for _, link in ipairs(lines(os.iorunv("find", {path.join(dst, "build"), "-type", "l", "-not", "-path", path.join(dst, "build", "ref")}))) do
+    for _, link in ipairs(lines(os.iorunv("find", {path.join(dst, "build"), "-path", path.join(dst, "build", "ref"), "-prune", "-o", "-type", "l", "-print"}))) do
         local retargeted = retarget_link(os.iorunv("readlink", {link}):trim(), mapped)
         if retargeted then
             os.vrunv("ln", {"-sfn", retargeted, link})
             relinked = relinked + 1
         end
     end
-    local left = try {
+    local left = #touched == 0 and "" or try {
         function ()
-            return os.iorunv("grep", table.join({"-rIlF", "--exclude-dir=ref"}, patterns, {dst}))
+            return os.iorunv("grep", table.join({"-IlF"}, patterns, touched))
         end,
         catch {
             function ()
