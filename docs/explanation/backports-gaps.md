@@ -408,6 +408,8 @@ Added, with the iOS 6 behaviour stated:
 - `setMediaSelectionCriteria:forMediaCharacteristic:` on `AVPlayer` sorts the group's options with the iOS 5 `mediaSelectionOptionsFromArray:filteredAndSortedAccordingToPreferredLanguages:` when the criteria carry preferred languages, then selects an option with the iOS 5 `selectMediaOption:inMediaSelectionGroup:`. The selection is real, not a stored copy.
 - `configuredTimeOffsetFromLive` on `AVPlayerItem` is stored only: iOS 6 has no live-edge offset to configure, so setting it changes no playback behaviour.
 
+- `showsTimecodes` on `AVPlayerViewController` and `audiovisualBackgroundPlaybackPolicy` on `AVPlayer` are stored only. iOS 6 has neither a timecode overlay nor a background playback policy, so accepting and returning the value changes no playback behaviour; this is not claimed as working rendering or policy.
+
 - `preferredForwardBufferDuration` on `AVPlayerItem`: an associated object that defaults to zero. The value is kept, but iOS 6 has no public way to set the player's forward buffer, so playback buffering is unchanged.
 - `canStartPictureInPictureAutomaticallyFromInline` on `AVPictureInPictureController` and `AVPlayerViewController`: an associated object that defaults to NO, replacing the `@dynamic` declarations that had no implementation. Automatic inline picture-in-picture is not available on iOS 6.
 

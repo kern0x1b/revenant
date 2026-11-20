@@ -290,8 +290,9 @@ local AREAS = {
     {
         name = "automatic inline picture-in-picture of expo-video",
         library = "AVKit",
-        sources = {"AVKit+AutomaticInline14.m"},
+        sources = {"AVKit+AutomaticInline14.m", "AVPlayerViewController+ShowsTimecodes13.m"},
         members = {
+            "-[AVPlayerViewController showsTimecodes]", "-[AVPlayerViewController setShowsTimecodes:]",
             "-[AVPictureInPictureController canStartPictureInPictureAutomaticallyFromInline]",
             "-[AVPictureInPictureController setCanStartPictureInPictureAutomaticallyFromInline:]",
             "-[AVPlayerViewController canStartPictureInPictureAutomaticallyFromInline]",

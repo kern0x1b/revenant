@@ -13195,11 +13195,13 @@ member AVPlaybackSpeed -initWithRate:localizedName:
 member AVPlaybackSpeed -localizedName
 member AVPlaybackSpeed -localizedNumericName
 member AVPlaybackSpeed -rate
+member AVPlayer -audiovisualBackgroundPlaybackPolicy
 member AVPlayer -automaticallyWaitsToMinimizeStalling
 member AVPlayer -defaultRate
 member AVPlayer -isMuted
 member AVPlayer -playImmediatelyAtRate:
 member AVPlayer -preventsDisplaySleepDuringVideoPlayback
+member AVPlayer -setAudiovisualBackgroundPlaybackPolicy:
 member AVPlayer -setAutomaticallyWaitsToMinimizeStalling:
 member AVPlayer -setDefaultRate:
 member AVPlayer -setMediaSelectionCriteria:forMediaCharacteristic:
@@ -13321,10 +13323,12 @@ member AVPlayerViewController -setPixelBufferAttributes:
 member AVPlayerViewController -setPlayer:
 member AVPlayerViewController -setRequiresLinearPlayback:
 member AVPlayerViewController -setShowsPlaybackControls:
+member AVPlayerViewController -setShowsTimecodes:
 member AVPlayerViewController -setSpeeds:
 member AVPlayerViewController -setUpdatesNowPlayingInfoCenter:
 member AVPlayerViewController -setVideoGravity:
 member AVPlayerViewController -showsPlaybackControls
+member AVPlayerViewController -showsTimecodes
 member AVPlayerViewController -speeds
 member AVPlayerViewController -updatesNowPlayingInfoCenter
 member AVPlayerViewController -videoBounds
@@ -37683,6 +37687,7 @@ type AVDepthDataAccuracy
 type AVDepthDataQuality
 type AVExternalContentProtectionStatus
 type AVMetadataObjectType
+type AVPlayerAudiovisualBackgroundPlaybackPolicy
 type AVPlayerInterstitialEventAssetListResponseStatus
 type AVPlayerInterstitialEventCue
 type AVPlayerInterstitialEventSkippableEventState
