@@ -864,9 +864,9 @@
    "group": "sdk",
    "version": "~57.0.5",
    "native": true,
-   "status": "partial",
+   "status": "evaluate",
    "verified": "none",
-   "note": "Recipe packages/e/expo-video (npm 57.0.5) and patch video-ios6.patch are committed. The patch renames the ContentType and MediaInfo types that collide with expo-clipboard and expo-image-picker inside ExpoAppModules, and replaces the iOS 15 Swift async load calls with the iOS 4 properties they read. The port is in progress: isolated builds still fail on about 20 post-iOS-6 APIs whose Backports implementations and lowering metadata are being added in batches. Nothing here is verified as built or running on the phone."
+   "note": "Recipe packages/e/expo-video (npm 57.0.5) and patch video-ios6.patch are committed, but the module is not built: isolated builds still fail on about 20 post-iOS-6 APIs whose Backports implementations are being added in batches. The patch renames the ContentType and MediaInfo types that collide with expo-clipboard and expo-image-picker inside ExpoAppModules and replaces the iOS 15 async load calls with iOS 4 property access. Nothing is verified as built or running, so the row stays evaluate until a build passes."
   },
   {
    "id": "expo-web-browser",

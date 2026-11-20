@@ -72,11 +72,11 @@ fails with "make the copy again" when a copy predates that. `src/expo/xmake.lua`
 
 ## Speech, symbols and video (Hy4)
 
-These modules are built into the isolated host from their npm tarballs; none has been exercised on the phone.
+These modules are built into the isolated host from their npm tarballs; none has been exercised on the phone. A row is `real` when the platform supplies the real engine behind the API (speech goes through VoiceServices); it is `partial` when the platform can only approximate the result (symbols draws a fixed glyph set). Neither classification means the calls were exercised: every row here is `build` only, integrated and linked, not run on the phone.
 
 | Module | Removed or replaced | Why | What JS sees |
 | --- | --- | --- | --- |
-| expo-speech | nothing; the speech classes and the voice-by-identifier initializer come from the AVFoundation backport | AVSpeechSynthesizer and its voice API are iOS 7, absent from the iOS 6 cache; the backport speaks through VoiceServices' VSSpeechSynthesizer | the module as published: speak, getVoices, stop, pause, resume and isSpeaking run on the backport; build-verified, not exercised on the phone |
+| expo-speech | nothing; the speech classes and the voice-by-identifier initializer come from the AVFoundation backport | AVSpeechSynthesizer and its voice API are iOS 7, absent from the iOS 6 cache; the backport speaks through VoiceServices' VSSpeechSynthesizer | the module as published: speak, getVoices, stop, pause, resume and isSpeaking are integrated and linked, not run on the phone |
 | expo-symbols | nothing; `UIImage(systemName:)` and the four configuration factories come from the Backports' UIKit glyph renderer | SF Symbols are iOS 13; the backport draws about 80 glyphs and implements the factories over them | monochrome renders as a tinted template; multicolor has no effect for a glyph set with no colour layers and stays monochrome; hierarchical uses the label-opacity steps of UIColorDynamic.m as an approximation; palette cycles the given colours per painted path; built and linked, not shown on the phone |
 | expo-video | `ContentType` and `MediaInfo` renamed with the module's prefix; iOS 15 async `load` calls replaced by the iOS 4 properties they read; the iOS 26 variant path falls back to the legacy HLS parser | the two type names collide inside the one Swift module ExpoAppModules; the async load API is iOS 15 | not verified: the port is in progress, with the remaining post-iOS-6 APIs being added to the Backports in batches |
 
