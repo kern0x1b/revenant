@@ -573,6 +573,41 @@ function link_react_native(folder, installdir)
     return found
 end
 
+function config_key(folder, env, tree)
+    local names = table.keys(env)
+    table.sort(names)
+    local parts = {}
+    for _, name in ipairs(names) do
+        table.insert(parts, name .. "=" .. tostring(env[name]))
+    end
+    table.insert(parts, io.readfile(path.join(folder, "xmake.lua")))
+    table.insert(parts, tree)
+    return hash.strhash128(table.concat(parts, "\0"))
+end
+
+local CONFIG_EXTENSIONS = {lua = true, json = true, toml = true, txt = true, cmake = true, sh = true, plist = true, patch = true, yaml = true}
+
+function checkout_state(root)
+    local listed = lines(os.iorunv("git", {"-C", root, "ls-files", "-co", "--exclude-standard", "--", "toolchain", "packages", "frameworks"}))
+    local inputs = {}
+    for _, file in ipairs(listed) do
+        local extension = file:match("%.([%w]+)$")
+        if extension and CONFIG_EXTENSIONS[extension:lower()] and os.isfile(path.join(root, file)) then
+            table.insert(inputs, file)
+        end
+    end
+    local listing = path.join(os.tmpdir(), "config-inputs-" .. hash.strhash128(root))
+    io.writefile(listing, table.concat(inputs, "\n") .. "\n")
+    local contents = os.iorunv("sh", {"-c", "cd \"$1\" && git hash-object --stdin-paths < \"$2\"", "sh", root, listing})
+    os.rm(listing)
+    return hash.strhash128(table.concat(listed, "\n")) .. "\0" .. hash.strhash128(contents)
+end
+
+function configured_before(folder, key)
+    local file = path.join(folder, "build", "config-key")
+    return os.isfile(file) and io.readfile(file):trim() == key and os.isdir(path.join(folder, ".xmake"))
+end
+
 function command_status(arguments, options)
     local ok = try {
         function ()
@@ -684,7 +719,17 @@ function build(folder, cache, options)
     install_react_native(folder, path.absolute(cache))
     os.cd(folder)
     local xmakew = path.join(checkout(), "xmakew")
-    local configured = command_status({"-c", "\"$1\" f -c -y -p iphoneos -a armv7 -P \"$2\" > \"$3\" 2>&1", "sh", xmakew, folder, log}, {envs = env})
+    local key = config_key(folder, env, checkout_state(checkout()))
+    local configured = 0
+    if configured_before(folder, key) then
+        io.writefile(log, "configuration unchanged (key " .. key:sub(1, 12) .. "), not configured again\n")
+    else
+        os.rm(path.join(folder, "build", "config-key"))
+        configured = command_status({"-c", "\"$1\" f -c -y -p iphoneos -a armv7 -P \"$2\" > \"$3\" 2>&1", "sh", xmakew, folder, log}, {envs = env})
+        if configured == 0 then
+            io.writefile(path.join(folder, "build", "config-key"), key .. "\n")
+        end
+    end
     local built = configured
     if configured == 0 and not options.configure_only then
         built = command_status({"-c", "\"$1\" build -P \"$2\" -j \"$5\" -y -v \"$3\" >> \"$4\" 2>&1", "sh", xmakew, folder, options.target or "RNHost", log, options.jobs or "4"}, {envs = env})
