@@ -70,9 +70,6 @@ REVENANT_CASE(backport_impl_shadowed)
     printf("shadow fact: app SecItemDelete status %d\n", (int)deleteStatus);
     if (control)
         CFRelease(control);
-    // The system answers errSecParam (-50) to any item with an access control, so a call that
-    // reaches the backport's emulation answers something else. The emulator's keychain is locked
-    // (a plain add answers -25308 there); where it works the item must also be stored and read.
     revenant_expect_true(@"SecItemAdd does not refuse an item that carries a SecAccessControl as a bad parameter",
                          (appStatus != errSecParam) != flip, [NSString stringWithFormat:@"status %d", (int)appStatus]);
     if (plainAdd == errSecSuccess) {
