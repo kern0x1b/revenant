@@ -27,8 +27,12 @@ local function cache()
     return import("@addon.revenant.cache", {anonymous = true})
 end
 
+local function checkout_dir()
+    return try { function () return cache().checkout() end } or os.projectdir()
+end
+
 local function pool_folder()
-    return os.getenv("REVENANT_BUDGET_POOL") or path.join(cache().checkout(), ".cache", "budget")
+    return os.getenv("REVENANT_BUDGET_POOL") or path.join(checkout_dir(), ".cache", "budget")
 end
 
 local function slot_path(folder, index)
@@ -86,20 +90,31 @@ local function own_runnable(pids)
     if #pids == 0 then
         return 0
     end
-    local pgids = {}
-    local out = try { function () return os.iorunv(PS, {"-o", "pgid=", "-p", table.concat(pids, ",")}) end } or ""
-    for value in out:gmatch("%d+") do
-        table.insert(pgids, value)
-    end
-    if #pgids == 0 then
-        return #pids
-    end
-    local states = try { function () return os.iorunv(PS, {"-o", "stat=", "-g", table.concat(pgids, ",")}) end } or ""
-    local total = 0
-    for state in states:gmatch("%S+") do
-        if state:sub(1, 1) == "R" then
-            total = total + 1
+    local out = try { function () return os.iorunv(PS, {"-ax", "-o", "pid=,ppid=,state="}) end } or ""
+    local kids, states = {}, {}
+    for line in out:gmatch("[^\n]+") do
+        local pid, ppid, state = line:match("(%d+)%s+(%d+)%s+(%a)")
+        if pid then
+            pid, ppid = tonumber(pid), tonumber(ppid)
+            states[pid] = state
+            kids[ppid] = kids[ppid] or {}
+            table.insert(kids[ppid], pid)
         end
+    end
+    local seen, total = {}, 0
+    local function walk(pid)
+        if not seen[pid] then
+            seen[pid] = true
+            if states[pid] == "R" then
+                total = total + 1
+            end
+            for _, child in ipairs(kids[pid] or {}) do
+                walk(child)
+            end
+        end
+    end
+    for _, pid in ipairs(pids) do
+        walk(pid)
     end
     return total
 end
@@ -150,7 +165,7 @@ local function tokens_wanted(opt, cores)
 end
 
 local function free_disk_gb()
-    local out = os.iorunv(DF, {"-Pk", cache().checkout()})
+    local out = os.iorunv(DF, {"-Pk", checkout_dir()})
     local fields = {}
     for field in out:match("[^\n]*\n([^\n]+)"):gmatch("%S+") do
         table.insert(fields, field)
@@ -194,13 +209,26 @@ local function holder_alive(file)
     lock:close()
     if free then
         os.tryrm(file)
+        os.tryrm(path.join(path.directory(file), "aged-" .. path.filename(file)))
     end
     return not free
 end
 
+local function write_pid(file, pid)
+    local lines = {}
+    for line in (io.readfile(file) or ""):gmatch("[^\n]+") do
+        if not line:match("^%d+$") then
+            table.insert(lines, line)
+        end
+    end
+    table.insert(lines, 1, tostring(pid))
+    io.writefile(file, table.concat(lines, "\n") .. "\n")
+end
+
 local function ahead_of(folder, name, available)
     for _, file in ipairs(os.files(path.join(folder, "queue", "aged-*.ticket"))) do
-        if path.filename(file):sub(5) ~= name then
+        local other = path.filename(file):sub(6)
+        if other < name and holder_alive(path.join(folder, "queue", other)) then
             local need = tonumber(io.readfile(file)) or 1
             if need <= available then
                 return true
@@ -224,7 +252,7 @@ local function snapshot_slots(folder, cores)
         local file = slot_path(folder, index)
         local lock = io.openlock(file)
         if lock and lock:trylock() then
-            io.writefile(file, tostring(os.getpid()) .. "\n")
+            write_pid(file, os.getpid())
             table.insert(free, {lock = lock, file = file})
         else
             held = held + 1
@@ -274,7 +302,7 @@ local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms)
             local grant = table.slice(free, 1, count)
             release_locks(table.slice(free, count + 1))
             for _, entry in ipairs(grant) do
-                publish_slot(entry, count)
+                publish_slot(entry, 1)
             end
             leave(ticket, folder)
             return grant
@@ -500,11 +528,17 @@ local function test_suite()
     leave(large)
     check("a ticket behind the request does not block", ahead_of(pool, "1-0000000000000-00000000.ticket", 1), false)
 
-    local aged = path.join(queue, "aged-2-0000000000003-00000003.ticket")
-    io.writefile(aged, "3")
-    check("an aged request blocks the backfill that would starve it", ahead_of(pool, "2-0000000000004-00000004.ticket", 3), true)
-    check("but not when the room is below its minimum", ahead_of(pool, "2-0000000000004-00000004.ticket", 2), false)
-    os.tryrm(aged)
+    local name_a, name_b = "2-0000000000003-00000003.ticket", "2-0000000000004-00000004.ticket"
+    local aged_a, aged_b = ticket_at(name_a, 4), ticket_at(name_b, 4)
+    io.writefile(aged_path(pool, name_a), "4")
+    io.writefile(aged_path(pool, name_b), "4")
+    check("an earlier aged ticket blocks a later one", ahead_of(pool, name_b, 4), true)
+    check("a later aged ticket does not block the earlier one", ahead_of(pool, name_a, 4), false)
+    aged_a.lock:unlock()
+    aged_a.lock:close()
+    check("a dead aged holder stops blocking", ahead_of(pool, name_b, 4), false)
+    check("and its aged marker is removed with the dead ticket", os.isfile(aged_path(pool, name_a)), false)
+    leave(aged_b)
 
     local stamp_pool = path.join(base, "stamppool")
     os.mkdir(stamp_pool)
@@ -554,6 +588,20 @@ local function test_suite()
     check("a request that does not fit waits and is granted when it does", #granted, 1)
     check("and the re-check happens without a fixed patience wait", calls >= 3 and elapsed < 10000, true)
     release_locks(granted)
+
+    local multi_pool = path.join(base, "multi")
+    local multi = acquire(multi_pool, "normal", 4, 4, function () return test_reading(0, 1, 11000) end, 1)
+    check("a four-token request gets four slots", #multi, 4)
+    local stamped = read_grants(multi_pool)
+    check("four granted slots count as four tokens, not sixteen", stamped >= 3.9 and stamped <= 4.001, true)
+    release_locks(multi)
+
+    local keep_pool = path.join(base, "keep")
+    os.mkdir(keep_pool)
+    io.writefile(slot_path(keep_pool, 1), string.format("111\ng %d 2\n", os.time()))
+    local free_keep = snapshot_slots(keep_pool, os.cpuinfo("ncpu"))
+    release_locks(free_keep)
+    check("sampling a free slot keeps its grant stamp", read_grants(keep_pool) >= 1.9, true)
 
     local short_calls = 0
     local short_error

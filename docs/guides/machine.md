@@ -382,11 +382,12 @@ one pool, kept in `.cache/budget` of the main checkout whatever `REVENANT_CACHE`
 
 - Size. The pool holds at most the cores less two. Room is recomputed on every poll, never from a sample taken once at
   admission or from a patience timeout. CPU headroom uses the largest of three measurements: the one-minute runnable load
-  (`sysctl vm.loadavg`); the runnable threads of the pool's own holders, read from `ps` state `R` over each holder's process
-  group, so a command's children count even if the holder exits; and the tokens granted in the last minute, stamped into
-  the pool's slot files under the slot lock when a grant is published and read by every later request. A stamp contributes
-  its tokens times the share of the minute still left, and is never added on top of a load average that already reflects
-  it — the largest of the three wins. Tokens are not assumed to be runnable threads: a holder blocked on I/O contributes
+  (`sysctl vm.loadavg`); the runnable threads of the pool's own holders, read from `ps` state `R` over the descendant tree
+  of each holder pid, so a command's children count and a caller's unrelated process group is never included; and the
+  tokens granted in the last minute, stamped one per slot into the pool's slot files under the slot lock when a grant is
+  published and read by every later request. A stamp contributes one token times the share of the minute still left, so
+  an N-token grant counts as N, never N squared, and is never added on top of a load average that already reflects it —
+  the largest of the three wins. Tokens are not assumed to be runnable threads: a holder blocked on I/O contributes
   nothing, and a holder whose build spawns many compilers contributes all of them. Memory headroom comes from
   pressure, not from idle pages: the pressure level (`kern.memorystatus_vm_pressure_level`), the growth in compressor pages
   and the pageouts per second between successive `vm_stat` samples. Inactive pages are never counted as free. At normal
@@ -402,8 +403,9 @@ one pool, kept in `.cache/budget` of the main checkout whatever `REVENANT_CACHE`
   build, test, configure, install, run, package and deb uses) and `background`. Within a class the first to wait goes first.
   A small request backfills past an earlier one whose minimum does not fit the current headroom, so a large request that
   cannot be granted does not hold up the queue behind it. A request that has waited ten minutes (`REVENANT_BUDGET_AGING_S`)
-  marks itself aged in the queue; from then on it also blocks any backfill whose minimum it could have used, so a stream
-  of small requests cannot starve it. A request whose process died is removed from the queue.
+  marks itself aged in the queue; from then on it also blocks any *later* backfill whose minimum it could have used, so a
+  stream of small requests cannot starve it without two aged requests blocking each other. The marker is removed with a
+  dead ticket, so a crashed request cannot block the queue forever. A request whose process died is removed from the queue.
 - Nice. `critical` keeps its priority, `normal` runs under `nice -n 5`, `background` under `taskpolicy -b` and `nice -n 15`.
 - Release. A token is a lock on a slot file, and the kernel releases it when its process ends, `kill -9` included. The command
   is started with the descriptors of the slot files closed, since a child that kept one would keep the token after its parent died.
