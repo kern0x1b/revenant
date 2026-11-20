@@ -351,7 +351,7 @@
    "group": "sdk",
    "version": "~57.0.8",
    "native": true,
-   "status": "partial",
+   "status": "evaluate",
    "verified": "none",
    "note": "Recipe packages/e/expo-contacts (npm 57.0.8, patch contacts-names-ios6.patch) installs and its patch applies, but the host build is not green: the ContactsUI classes CNContactViewController and CNContactPickerViewController (iOS 9) are not backported, so the form and picker sources cannot compile unchanged. The Contacts backport supplies CNContactStore, CNContact and the AddressBook mapping; the later CNLabel* constants are supplied as exported values by frameworks/Backports/src/Contacts/ContactsLabels13.m, so every consumer gets them. The patch renames Image to ContactImageRecord and three exceptions that collide with expo-file-system inside the shared ExpoAppModules Swift module. What remains is a ContactsUI backport over ABPersonViewController, ABNewPersonViewController and ABPeoplePickerNavigationController, tracked as a separate task; until it lands presentFormAsync, presentContactPickerAsync and the next form functions are not built. Not exercised on the phone."
   },
@@ -605,7 +605,7 @@
    "native": true,
    "status": "partial",
    "verified": "build",
-   "note": "Recipe packages/e/expo-media-library (npm 57.0.5, patch media-library-names-ios6.patch) installs and its patch applies; compiled into the host and linked (not exercised on the phone). The patch renames AssetInfo, MediaType, PermissionsModuleNotFoundException and the three permission requester classes with an ExpoML prefix, because expo-image-picker declares the same names inside the shared ExpoAppModules Swift module. The Photos backport supplies the Photos API over AssetsLibrary: fetchMoments returns the ALAssetsGroupEvent collections and the later PHAssetMediaTypeAudio constant is exported with its SDK value of 3; the host links the backported swiftPhotos runtime so the Photos change-details extensions resolve. Audio assets and all phone behaviour are not verified."
+   "note": "Recipe packages/e/expo-media-library (npm 57.0.5, patch media-library-names-ios6.patch) installs and its patch applies; compiled into the host and linked (not exercised on the phone). The patch renames AssetInfo, MediaType, PermissionsModuleNotFoundException and the three permission requester classes with an ExpoML prefix, because expo-image-picker declares the same names inside the shared ExpoAppModules Swift module. The Photos backport supplies the Photos API over AssetsLibrary: moments are not available on iOS 6; getMomentsAsync returns the synced event albums. The later PHAssetMediaTypeAudio constant is exported with its SDK value of 3; the host links the backported swiftPhotos runtime so the Photos change-details extensions resolve. Audio assets and all phone behaviour are not verified."
   },
   {
    "id": "expo-mesh-gradient",

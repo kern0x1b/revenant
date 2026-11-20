@@ -206,5 +206,5 @@ NSString * const BACKPORT_IMPL(CNLabelContactRelationYoungerSister) = @"_$!<Youn
 NSString * const BACKPORT_IMPL(CNLabelContactRelationYoungerSisterInLaw) = @"_$!<YoungerSisterInLaw>!$_";
 NSString * const BACKPORT_IMPL(CNLabelContactRelationYoungestBrother) = @"_$!<YoungestBrother>!$_";
 NSString * const BACKPORT_IMPL(CNLabelContactRelationYoungestSister) = @"_$!<YoungestSister>!$_";
-NSString * const BACKPORT_IMPL(CNLabelPhoneNumberAppleWatch) = @"_$!<AppleWatch>!$_";
+NSString * const BACKPORT_IMPL(CNLabelPhoneNumberAppleWatch) = @"Apple Watch";
 NSString * const BACKPORT_IMPL(CNLabelSchool) = @"_$!<School>!$_";

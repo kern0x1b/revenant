@@ -90,7 +90,7 @@ expo-media-library is a recipe with an iOS 6 patch (packages/e/expo-media-librar
 
 | Module | Removed or replaced | Why | What JS sees |
 | --- | --- | --- | --- |
-| expo-media-library | nothing removed; `AssetInfo`, `MediaType`, `PermissionsModuleNotFoundException` and the three permission requester classes renamed with an `ExpoML` prefix | their names collide with expo-image-picker's inside the shared Swift module `ExpoAppModules` | the module as published against the Photos backport over AssetsLibrary: `getMomentsAsync` returns the AssetsLibrary Event collections, the audio media-type constant has its SDK value, and the Photos change-details extensions resolve through the backported `swiftPhotos` runtime; audio assets and all phone behaviour are not verified |
+| expo-media-library | nothing removed; `AssetInfo`, `MediaType`, `PermissionsModuleNotFoundException` and the three permission requester classes renamed with an `ExpoML` prefix | their names collide with expo-image-picker's inside the shared Swift module `ExpoAppModules` | the module as published against the Photos backport over AssetsLibrary: moments are not available on iOS 6; `getMomentsAsync` returns the synced event albums. The audio media-type constant has its SDK value, and the Photos change-details extensions resolve through the backported `swiftPhotos` runtime; audio assets and all phone behaviour are not verified |
 
 ## How to check
 
