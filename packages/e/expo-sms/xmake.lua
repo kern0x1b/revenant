@@ -1,0 +1,21 @@
+package("expo-sms")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-sms")
+    set_description("expo-sms 57.0.2, the SMS compose sheet of the Expo SDK, from its npm tarball: the iOS sources guard the iOS 7 attachments and drop the iOS 14 UniformTypeIdentifiers import, so that they run on iOS 6 with MessageUI")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-sms/-/expo-sms-$(version).tgz")
+    add_versions("57.0.2", "c54b08603b684d17ceb4ef2cbd3f5beeca42e98c18434d740f83f7ce7cd58bf3")
+    add_patches("57.0.2", path.join(os.scriptdir(), "patches", "sms-ios6.patch"), "bff54851857e6ca7165478acdac65beb10738ae1991b8453920b716a3a092a44")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-sms" and manifest.version == "57.0.2", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-sms has no expo-module.config.json")
+    end)

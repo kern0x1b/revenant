@@ -16,7 +16,7 @@ table records, file by file, whether the two sets agree and which one the spike 
 | `native-libs-ios6-32bit.patch` (webview and reanimated hunks) | `packages/r/react-native-webview/patches/ios6-32bit.patch`, `packages/r/react-native-reanimated/patches/ios6-32bit.patch` | Same hunks, split per package. |
 | `worklets-jsc.patch` | `packages/r/react-native-worklets/patches/worklets-jsc.patch` | Same hunks; path prefix only. |
 | `expo-fabric-view-swift-base.patch` | `packages/e/expo-modules-core/patches/expo-fabric-view-swift-base.patch` | Same hunks; path prefix only. |
-| `expo-viewmodulewrapper-ios6.patch` | `packages/e/expo-modules-core/patches/expo-viewmodulewrapper-ios6.patch` | Package newer: adds an `NSLog` error line and blank lines. The spike's `build/ref/paseo/node_modules/expo-modules-core/ios/Fabric/ExpoFabricViewObjC.mm` contains the `NSLog`, so the spike builds the package version. |
+| `expo-viewmodulewrapper-ios6.patch` | `packages/e/expo-modules-core/patches/expo-viewmodulewrapper-ios6.patch` | Package newer: adds an `NSLog` error line and blank lines. The spike's `build/ref/app/node_modules/expo-modules-core/ios/Fabric/ExpoFabricViewObjC.mm` contains the `NSLog`, so the spike builds the package version. |
 
 The spike's own `patches/` directory was therefore stale, and it is removed. The spike builds from `build/rn-src` and `build/ref`, which
 already carry the package set. Every sha256 in the recipes matches its file in `packages/`. No spike patch is missing

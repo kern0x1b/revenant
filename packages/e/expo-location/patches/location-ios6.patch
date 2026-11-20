@@ -1,0 +1,24 @@
+diff -ru a/ios/EXLocation.m b/ios/EXLocation.m
+--- a/ios/EXLocation.m	2026-11-19 02:28:10
++++ b/ios/EXLocation.m	2026-11-19 02:28:10
+@@ -12,7 +12,7 @@
+     @"coords": @{
+         @"latitude": @(location.coordinate.latitude),
+         @"longitude": @(location.coordinate.longitude),
+-        @"altitude": @(location.ellipsoidalAltitude),
++        @"altitude": @(location.altitude),
+         @"accuracy": @(location.horizontalAccuracy),
+         @"altitudeAccuracy": @(location.verticalAccuracy),
+         @"heading": @(location.course),
+diff -ru a/ios/Geocoder.swift b/ios/Geocoder.swift
+--- a/ios/Geocoder.swift	2026-11-19 02:28:10
++++ b/ios/Geocoder.swift	2026-11-19 02:28:10
+@@ -14,7 +14,7 @@
+         return [
+           "latitude": location?.coordinate.latitude,
+           "longitude": location?.coordinate.longitude,
+-          "altitude": location?.ellipsoidalAltitude,
++          "altitude": location?.altitude,
+           "accuracy": location?.horizontalAccuracy
+         ]
+       }

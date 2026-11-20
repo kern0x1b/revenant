@@ -1,0 +1,22 @@
+package("expo-contacts")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-contacts")
+    set_description("expo-contacts 57.0.8, the contacts module of the Expo SDK, from its npm tarball: the iOS module sources the host builds from, with the Contacts API of iOS 9 supplied by the Contacts backport")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-contacts/-/expo-contacts-$(version).tgz")
+    add_versions("57.0.8", "4ec0d9b8d53a0530c97031b30aab5a6abdb68933d18878363f53796defa174c5")
+    add_patches("57.0.8", path.join(os.scriptdir(), "patches", "contacts-names-ios6.patch"), "508c159c15b122f7713d252ad6e7755e1c6c049d81780289f68df4bd2041ee74")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-contacts" and manifest.version == "57.0.8", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "ios", "ContactsModule.swift")), "expo-contacts has no iOS module")
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-contacts has no expo-module.config.json")
+    end)

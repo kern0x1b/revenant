@@ -35,6 +35,12 @@ local function is_loc(token)
         or string.find(token, "^/") ~= nil)
 end
 
+local function plain_pseudo_files(body)
+    body = string.gsub(body, "<built%-in>", "built-in")
+    body = string.gsub(body, "<scratch space>", "scratch_space")
+    return (string.gsub(body, "<command line>", "command_line"))
+end
+
 local function node_of(body, state)
     local node = {children = {}, file = first_path(body) or state}
     node.kind = string.match(body, "^(%S+)")
@@ -48,7 +54,7 @@ local function node_of(body, state)
     for word in string.gmatch(node.tail, "%a+") do
         node.flags[word] = true
     end
-    local normal = string.gsub(string.gsub(body, "<<([^<>]*)>:", "<%1:"), "<<([^<>]*)>>", "<%1>")
+    local normal = string.gsub(string.gsub(plain_pseudo_files(body), "<<([^<>]*)>:", "<%1:"), "<<([^<>]*)>>", "<%1>")
     local pre = string.match(normal, "^[^'\"]*")
     local range_start, range_end = string.find(pre, "<[^<>]*>")
     node.invalid = string.find(pre, "invalid sloc", 1, true) ~= nil

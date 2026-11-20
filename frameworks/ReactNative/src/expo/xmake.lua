@@ -55,7 +55,7 @@ local function expo_dir(package)
     if PKG_DIRS[package] then
         return PKG_DIRS[package]
     end
-    local ref = path.join(os.projectdir(), "build", "ref", "paseo")
+    local ref = path.join(os.projectdir(), "build", "ref", "app")
     for _, base in ipairs({path.join(ref, "packages", "app", "node_modules"), path.join(ref, "node_modules")}) do
         if os.isdir(path.join(base, package)) then
             return path.join(base, package)
@@ -144,7 +144,8 @@ end
 
 local EXPO_SKIP_FILES = {}
 local EXPO_SKIP_MODULES = {}
-local function expo_skip(f)
+local function expo_skip(f, package)
+    if path.relative(f, expo_dir(package)):startswith("ios/Tests/") then return true end
     for _, name in ipairs(EXPO_SKIP_FILES) do
         if f:find(name, 1, true) then return true end
     end
@@ -186,7 +187,7 @@ target("expo-jsi-probe")
     end
     local rn = react_native()
     local rc = path.join(rn, "ReactCommon")
-    local pkg = path.join(os.projectdir(), "build", "ref", "paseo", "node_modules", "expo-modules-jsi", "apple")
+    local pkg = path.join(os.projectdir(), "build", "ref", "app", "node_modules", "expo-modules-jsi", "apple")
     local src = path.join(pkg, "Sources")
     local modmap = path.join(os.projectdir(), "build", "expo-jsi", "module.modulemap")
     add_files(path.join(src, "ExpoModulesJSI", "**.swift"))
@@ -235,7 +236,7 @@ target("expo-core-probe")
     add_packages("swift-runtime", "libcxx", "combine", "cryptokit", "swiftui")
     add_packages("folly")
     local proj = os.projectdir()
-    local nm = path.join(proj, "build", "ref", "paseo", "node_modules")
+    local nm = path.join(proj, "build", "ref", "app", "node_modules")
     local core = path.join(expo_dir("expo-modules-core"), "ios")
     add_files(path.join(core, "**.swift"))
     remove_files(path.join(core, "WorkletsTests", "**.swift"))
@@ -269,7 +270,7 @@ target("expo-core-objc")
     add_packages("libcxx")
     add_packages("folly", "socketrocket")
     local proj = os.projectdir()
-    local nm = path.join(proj, "build", "ref", "paseo", "node_modules")
+    local nm = path.join(proj, "build", "ref", "app", "node_modules")
     local core = path.join(expo_dir("expo-modules-core"), "ios")
     local ecore = path.join(proj, "build", "expo-core")
     local rn = react_native()
@@ -359,7 +360,7 @@ target("expo-app-modules")
         end
     end
     local proj = os.projectdir()
-    local nm = path.join(proj, "build", "ref", "paseo", "node_modules")
+    local nm = path.join(proj, "build", "ref", "app", "node_modules")
     local ecore = path.join(proj, "build", "expo-core")
     local staged = path.join(proj, "build", "expo-src")
     add_files(path.join(SOURCES, "expo", "GlassView.swift"))
@@ -374,7 +375,7 @@ target("expo-app-modules")
         for _, package in ipairs(expo) do
             for _, f in ipairs(os.files(path.join(expo_dir(package), "ios", EXPO_ONLY[package] or "", "**.swift"))) do
                 local name = path.filename(f)
-                if expo_skip(f) or LOCAL_COPIES[package] == name then
+                if expo_skip(f, package) or LOCAL_COPIES[package] == name then
                 elseif EXPO_REWRITE[name] and EXPO_REWRITE[name].package == package then
                     seen[name] = true
                     table.insert(duplicates, {f, path.join(staged, package .. "-" .. name), EXPO_REWRITE[name].replace})
@@ -492,7 +493,7 @@ target("nitro-objc")
     add_packages("libcxx")
     add_packages("folly", "socketrocket")
     local proj = os.projectdir()
-    local nm = path.join(proj, "build", "ref", "paseo", "node_modules")
+    local nm = path.join(proj, "build", "ref", "app", "node_modules")
     local nroot = path.join(nm, "react-native-nitro-modules")
     local rn = react_native()
     local rc = path.join(rn, "ReactCommon")
@@ -531,7 +532,7 @@ target("nitro-probe")
     add_packages("swift-runtime", "libcxx", "combine", "cryptokit", "swiftui")
     add_packages("folly")
     local proj = os.projectdir()
-    local nm = path.join(proj, "build", "ref", "paseo", "node_modules")
+    local nm = path.join(proj, "build", "ref", "app", "node_modules")
     local core = path.join(nm, "react-native-nitro-modules", "ios")
     add_files(path.join(core, "**.swift"))
     local ncpp = path.join(nm, "react-native-nitro-modules", "cpp")
@@ -574,7 +575,7 @@ target("unistyles-objc")
         end
     end)
     local proj = os.projectdir()
-    local nm = path.join(proj, "build", "ref", "paseo", "node_modules")
+    local nm = path.join(proj, "build", "ref", "app", "node_modules")
     local uroot = path.join(nm, "react-native-unistyles")
     local ugen = path.join(uroot, "nitrogen", "generated")
     local nroot = path.join(nm, "react-native-nitro-modules")
@@ -615,7 +616,7 @@ target("unistyles-probe")
     add_packages("swift-runtime", "libcxx", "combine", "cryptokit", "swiftui")
     add_packages("folly")
     local proj = os.projectdir()
-    local nm = path.join(proj, "build", "ref", "paseo", "node_modules")
+    local nm = path.join(proj, "build", "ref", "app", "node_modules")
     local core = path.join(nm, "react-native-unistyles", "ios")
     add_files(path.join(core, "**.swift"), path.join(nm, "react-native-unistyles", "nitrogen", "generated", "ios", "swift", "**.swift"))
     local ncpp = path.join(nm, "react-native-nitro-modules", "cpp")

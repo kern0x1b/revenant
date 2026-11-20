@@ -1,25 +1,3 @@
 {
-  "stubs": [
-    {
-      "name": "StubTwoWayAudioModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoTwoWayAudio",
-      "owner": "@getpaseo/expo-two-way-audio",
-      "reason": "Name only; the module belongs to the Paseo package @getpaseo/expo-two-way-audio, which is not built."
-    },
-    {
-      "name": "StubHardwareKeyboardModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "PaseoHardwareKeyboard",
-      "owner": "PaseoHardwareKeyboard",
-      "reason": "Name only; a module of the spike app that no package provides and the paseo app does not use."
-    },
-    {
-      "name": "StubSQLiteModule",
-      "file": "src/expo/StubModules.swift",
-      "module": "ExpoSQLite",
-      "owner": "expo-sqlite",
-      "reason": "Name only."
-    }
-  ]
+  "stubs": []
 }

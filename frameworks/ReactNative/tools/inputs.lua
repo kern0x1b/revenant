@@ -2,7 +2,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/inputs.lua m
        ./xmakew l -P . frameworks/ReactNative/tools/inputs.lua compare <reference build> <built build> [--only name,...]
   make     writes the hand-made inputs of the React Native host into <project>/build, from the packages of this checkout and
            the application's node_modules: codegen (the application's codegen), rn-codegen (its component specs), rn-src (the
-           react-native package with all its patches). <project> is the folder of the host; it holds ref/paseo, the application,
+           react-native package with all its patches). <project> is the folder of the host; it holds ref/app, the application,
            or a link to it. The inputs are: codegen, rn-codegen, rn-headers, lib-headers, expo-core, expo-jsi, expo-pods, expo-src,
            nitro, unistyles, keyboard, screens, app-assets, app-components. --only makes the named ones. app-components takes the optionalComponents of the application's host.json (--manifest FILE, default <project>/host.json) and needs codegen. The Expo inputs take the packages that
            coverage.json marks real or partial and that the application's node_modules has; --real replaces them with the parity list of the spike (RN_EXPO_REAL).
@@ -184,7 +184,7 @@ end
 
 function context(options)
     local build = path.absolute(options.build or path.join(options.project, "build"))
-    local ref = path.absolute(options.app or path.join(build, "ref", "paseo"))
+    local ref = path.absolute(options.app or path.join(build, "ref", "app"))
     local packages = install_packages()
     return {
         build = build,
@@ -277,10 +277,8 @@ function make_expo_jsi(ctx)
         "-Xcc", "-fmodule-map-file=" .. path.join(out, "cxx.modulemap"), "-Xcc", "-Xclang", "-Xcc", "-femulated-tls"})
     os.mkdir(path.join(out, "include"))
     os.ln(path.join(sources, "ExpoModulesJSI-Cxx", "include", "Public"), path.join(out, "include", "ExpoModulesJSI"))
-    local libcxx = installed("libcxx", path.join("include", "c++", "v1"))
     local swift = installed("swift", path.join("include"))
-    write_lines(path.join(out, "libcxx.rsp"), {"-Xcc", "-isystem", "-Xcc", path.join(libcxx, "include", "c++", "v1"),
-        "-Xcc", "-I" .. path.join(swift, "include"), "-Xcc", "-fapinotes-modules", "-Xcc", "-iapinotes-modules", "-Xcc", path.join(ctx.nm, "expo-modules-jsi", "apple", "APINotes")})
+    write_lines(path.join(out, "jsi.rsp"), {"-Xcc", "-I" .. path.join(swift, "include"), "-Xcc", "-fapinotes-modules", "-Xcc", "-iapinotes-modules", "-Xcc", path.join(ctx.nm, "expo-modules-jsi", "apple", "APINotes")})
 end
 
 function write_lines(file, lines)
@@ -514,7 +512,7 @@ function make_unistyles(ctx)
         "-I" .. path.join(ctx.build, "rn-headers"), "-fmodule-map-file=" .. expo_jsi_map(ctx), "-fmodule-map-file=" .. path.join(out, "module.modulemap")}, includes))
     local header = path.join(out, "swift-header", "Unistyles-Swift.h")
     local nitro = path.join(ctx.build, "nitro")
-    local libcxx = "@" .. path.join(ctx.build, "expo-jsi", "libcxx.rsp")
+    local libcxx = "@" .. path.join(ctx.build, "expo-jsi", "jsi.rsp")
     local swift_sources = os.files(path.join(root, "ios", "**.swift"))
     for _, file in ipairs(os.files(path.join(ugen, "swift", "**.swift"))) do
         table.insert(swift_sources, file)
@@ -877,13 +875,18 @@ function make_expo_core(ctx)
         "  public override func getReactDelegateHandlers() -> [ExpoReactDelegateHandlerTupleType] {", "    return []", "  }", "",
         "  public override func getAppCodeSignEntitlements() -> AppCodeSignEntitlements {", '    return AppCodeSignEntitlements.from(json: "{}")', "  }", "}"}
     write_lines(path.join(out, "ExpoModulesProvider.swift"), provider)
-    local core = path.join(nm, "expo-modules-core", "ios")
+    local core_package = ctx.packages["expo-modules-core"]
+    local core_version = json.decode(io.readfile(path.join(nm, "expo-modules-core", "package.json"))).version
+    if core_version ~= PACKAGE_VERSIONS["expo-modules-core"] then
+        raise("the application has expo-modules-core %s; the patched package of this checkout is %s", core_version, PACKAGE_VERSIONS["expo-modules-core"])
+    end
+    local core = path.join(core_package, "ios")
     local rn = rn_root(ctx)
     local rc = path.join(rn, "ReactCommon")
     local jsi = path.join(nm, "expo-modules-jsi", "apple", "Sources", "ExpoModulesJSI-Cxx", "include")
     local includes = {path.join(out, "include"), core, rc, path.join(rc, "jsi"), path.join(rc, "runtimeexecutor"), path.join(rc, "callinvoker"), jsi, path.join(jsi, "Public")}
     write_lines(path.join(out, "flags.rsp"), cxx_response(ctx, {"-fmodule-map-file=" .. expo_jsi_map(ctx), "-fmodule-map-file=" .. path.join(out, "module.modulemap"), "-fmodule-map-file=" .. path.join(out, "react.modulemap")}, includes))
-    make_expo_core_headers(ctx, out, core, path.join(nm, "expo-modules-core", "common", "cpp"))
+    make_expo_core_headers(ctx, out, core, path.join(core_package, "common", "cpp"))
     local header = path.join(out, "swift-header", "ExpoModulesCore", "ExpoModulesCore-Swift.h")
     local sources = {}
     for _, file in ipairs(os.files(path.join(core, "**.swift"))) do
@@ -908,7 +911,7 @@ function make_expo_core(ctx)
         table.insert(jsi_flags, "-Xcc")
         table.insert(jsi_flags, "-I" .. dir)
     end
-    table.insert(jsi_flags, "@" .. path.join(jsi_out, "libcxx.rsp"))
+    table.insert(jsi_flags, "@" .. path.join(jsi_out, "jsi.rsp"))
     swift_header({
         name = "expo-core",
         build = "ExpoModulesCore",
@@ -927,7 +930,7 @@ function make_expo_core(ctx)
                 deps = {"ExpoModulesJSI"},
                 packages = SWIFT_PACKAGES,
                 sources = sources,
-                flags = {"-swift-version", "6", "@" .. path.join(jsi_out, "features.rsp"), "@" .. path.join(jsi_out, "libcxx.rsp"), "@" .. path.join(out, "flags.rsp"),
+                flags = {"-swift-version", "6", "@" .. path.join(jsi_out, "features.rsp"), "@" .. path.join(jsi_out, "jsi.rsp"), "@" .. path.join(out, "flags.rsp"),
                     "-import-underlying-module", "-emit-objc-header", "-emit-objc-header-path", header}
             }
         }

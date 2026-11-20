@@ -64,8 +64,13 @@ function main()
     expect_pass("the checked-in data", fixture("baseline"))
 
     local stubbed = fixture("verified-stub")
+    local stubbed_swift = path.join(stubbed, "frameworks/ReactNative/src/expo/StubModules.swift")
+    io.writefile(stubbed_swift, io.readfile(stubbed_swift) .. "\npublic final class StubFakeModule: Module {\n  public func definition() -> ModuleDefinition { Name(\"ExpoFake\") }\n}\n")
+    edit_file(stubbed, "frameworks/ReactNative/src/stubs.json", function (data)
+        table.insert(data.stubs, {name = "StubFakeModule", file = "src/expo/StubModules.swift", module = "ExpoFake", owner = "expo-fake", reason = "Name only."})
+    end)
     edit_file(stubbed, "frameworks/ReactNative/src/coverage.json", function (data)
-        row(data, "PaseoHardwareKeyboard").verified = "phone"
+        table.insert(data.rows, {id = "expo-fake", group = "sdk", version = "", native = true, status = "stub", verified = "phone", note = "A stub row that claims a phone check."})
     end)
     expect_fail("a stub row verified on the phone", stubbed, "a stub is not a check of the module")
 
@@ -76,16 +81,9 @@ function main()
     expect_fail("a real row with a local copy of its file", substitute, "replaces its file with a local copy")
 
     local unlisted = fixture("unlisted-class")
-    edit_file(unlisted, "frameworks/ReactNative/src/stubs.json", function (data)
-        local kept = {}
-        for _, stub in ipairs(data.stubs) do
-            if stub.name ~= "StubSQLiteModule" then
-                table.insert(kept, stub)
-            end
-        end
-        data.stubs = kept
-    end)
-    expect_fail("a stub class missing from stubs.json", unlisted, "declares StubSQLiteModule, which stubs.json does not list")
+    local swift = path.join(unlisted, "frameworks/ReactNative/src/expo/StubModules.swift")
+    io.writefile(swift, io.readfile(swift) .. "\npublic final class StubExtraModule: Module {\n  public func definition() -> ModuleDefinition { Name(\"Extra\") }\n}\n")
+    expect_fail("a stub class missing from stubs.json", unlisted, "declares StubExtraModule, which stubs.json does not list")
 
     local orphan = fixture("stub-without-entry")
     edit_file(orphan, "frameworks/ReactNative/src/coverage.json", function (data)
