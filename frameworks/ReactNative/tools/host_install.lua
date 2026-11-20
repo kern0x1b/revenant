@@ -4,7 +4,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua launch --bundle-id ID [--dyld FOLDER]
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stop --bundle-id ID
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua diagnostics --bundle-id ID [--output DIR]
-       ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua window --archive FILE --bundle-id ID --output DIR [--debs FILE,...] [--packages FILE] [--probe FILE] [--expect NAME,...] [--restore-bundle FILE]
+       ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua window --archive FILE --bundle-id ID --output DIR [--debs FILE,...] [--packages FILE] [--provided NAME] [--dyld FOLDER] [--probe FILE] [--expect NAME,...] [--restore-bundle FILE]
   stage  makes DIR/<app name>.app and DIR/host.tgz from a built host: it adds the manifest folder (EXConstants.bundle from app_config.lua),
           the backports libraries in DIR of --backports (with --key, the generation of that store which the key names; no other
           generation is picked), refusing a built host that loads a library DIR lacks and naming each one, retargets the library references from /usr/lib/revenant/org.revenant.backports
@@ -891,7 +891,7 @@ function window(options)
     local log_file = run_folder(id) .. "/rnhost.log"
     device.run(settings, "touch " .. app .. "/rnhost.log.on; rm -f " .. log_file)
     stop({["bundle-id"] = id})
-    launch({["bundle-id"] = id})
+    launch({["bundle-id"] = id, dyld = options.dyld})
     step("launched " .. id .. ", waiting " .. PROBE_WAIT_SECONDS .. " s")
     os.sleep(PROBE_WAIT_SECONDS * 1000)
     local expected = {}
