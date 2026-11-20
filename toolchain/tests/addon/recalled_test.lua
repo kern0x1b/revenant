@@ -2,16 +2,7 @@ import("fixtures")
 
 local LINE = "recalled light suites memo (ran 297 s in w at 0123456789, 3 min ago)"
 local KEY = "a1b2c3"
-
-local function counted(key)
-    local calls = {n = 0}
-    calls.fn = function (root)
-        calls.n = calls.n + 1
-        calls.root = root
-        return key
-    end
-    return calls
-end
+local OTHER_KEY = "ffffff"
 
 function failures(opt)
     local recalled = import("recalled", {rootdir = opt.modules, anonymous = true})
@@ -23,81 +14,107 @@ function failures(opt)
             failures = failures + 1
         end
     end
-    local function run(label)
+    local function folder_of(label)
         local folder = path.join(home, label)
         os.mkdir(folder)
         return folder
     end
+    local memo = folder_of("memo")
+    local function remember(key, verdict)
+        os.mkdir(path.join(memo, "light-suites"))
+        io.writefile(path.join(memo, "light-suites", key), "verdict " .. (verdict or "ok") .. "\nseconds 297\nworktree w\nhead 0123456789\nat 1\n")
+    end
+    local function forget(key)
+        os.tryrm(path.join(memo, "light-suites", key))
+    end
+    local function lstart(pid)
+        local text = try { function () return os.iorunv("ps", {"-o", "lstart=", "-p", tostring(pid)}) end } or ""
+        return (text:gsub("%s+", " "):gsub("^ ", ""):gsub(" $", ""))
+    end
+    local function forged(folder, nonce, key, tree, pid, began)
+        local file = path.join(folder, "light-suites.verdict")
+        io.writefile(file, table.concat({nonce, key, tree, tostring(pid), began, LINE}, "\n") .. "\n")
+        return nonce .. "@" .. file
+    end
+    local me = os.getpid()
+    local mine = lstart(me)
+    local function real(folder)
+        return os.iorunv("sh", {"-c", "cd \"$1\" && pwd -P", "sh", folder}):trim()
+    end
 
-    local folder = run("valid")
-    local value = recalled.issue(folder, KEY, "/the/root", LINE)
-    local current = counted(KEY)
-    check("a value that names its file carries a nonce and the path", value:match("^%x+@" .. folder:gsub("%p", "%%%0")) ~= nil, true)
-    check("the value is not the line", value:find(LINE, 1, true), nil)
-    check("a valid verdict is read", recalled.read(value, current.fn), LINE)
-    check("the key is asked of the root the verdict names", current.root, "/the/root")
-    check("the key is computed once for a first read", current.n, 1)
-    local again = counted(KEY)
-    check("a second read of the same verdict is the same line", recalled.read(value, again.fn), LINE)
-    check("a second read does not compute the key again", again.n, 0)
+    local tree = folder_of("tree")
+    local folder = folder_of("valid")
+    remember(KEY)
+    local value = recalled.issue(folder, KEY, tree, LINE)
+    check("a value that names its file carries a nonce and the path", (value or ""):find("^%x+@" .. folder:gsub("%p", "%%%0") .. "/") ~= nil, true)
+    check("the value is not the line", (value or ""):find(LINE, 1, true), nil)
+    check("a verdict the memo holds, for this checkout, from a live run, is read", recalled.read(value, tree, memo), LINE)
+    check("it is read again by the next suite", recalled.read(value, tree, memo), LINE)
+    check("reading writes nothing beside the verdict file", #os.files(path.join(folder, "*")), 1)
 
-    local forged = counted(KEY)
-    check("a forged value is no verdict", recalled.read("anything", forged.fn), nil)
-    check("a forged value does not ask for the key", forged.n, 0)
-    check("a recall line in the variable is no verdict", recalled.read(LINE, forged.fn), nil)
-    check("an empty value is no verdict", recalled.read("", forged.fn), nil)
-    check("no value is no verdict", recalled.read(nil, forged.fn), nil)
+    local link = path.join(home, "tree-link")
+    os.ln(tree, link)
+    check("the checkout is told by where it really is", recalled.read(value, link, memo), LINE)
+    check("another checkout is no verdict", recalled.read(value, folder_of("elsewhere"), memo), nil)
+    check("no checkout is no verdict", recalled.read(value, nil, memo), nil)
 
+    check("a forged value is no verdict", recalled.read("anything", tree, memo), nil)
+    check("a recall line in the variable is no verdict", recalled.read(LINE, tree, memo), nil)
+    check("an empty value is no verdict", recalled.read("", tree, memo), nil)
+    check("no value is no verdict", recalled.read(nil, tree, memo), nil)
     local file = value:match("^%x+@(.+)$")
-    local wrong = ("0"):rep(32) .. "@" .. file
-    check("a value with another nonce is no verdict", recalled.read(wrong, forged.fn), nil)
-    check("a value that names a missing file is no verdict", recalled.read(value:match("^%x+") .. "@" .. path.join(home, "none"), forged.fn), nil)
-    check("a made-up value never computed a key", forged.n, 0)
+    check("a value with another nonce is no verdict", recalled.read(("0"):rep(32) .. "@" .. file, tree, memo), nil)
+    check("a value that names a missing file is no verdict", recalled.read(value:match("^%x+") .. "@" .. path.join(home, "none"), tree, memo), nil)
 
-    local other = run("other")
-    local second = recalled.issue(other, KEY, "/the/root", LINE)
+    local second = recalled.issue(folder_of("other"), KEY, tree, LINE)
     check("two runs have two nonces", value:match("^%x+") ~= second:match("^%x+"), true)
-    check("the nonce of one run does not open the file of another", recalled.read(value:match("^%x+") .. "@" .. second:match("^%x+@(.+)$"), forged.fn), nil)
+    check("the nonce of one run does not open the file of another", recalled.read(value:match("^%x+") .. "@" .. second:match("^%x+@(.+)$"), tree, memo), nil)
 
-    local moved = run("moved")
-    local stale = recalled.issue(moved, KEY, "/the/root", LINE)
-    local changed = counted("ffffff")
-    check("a key that is no longer the current one is no verdict", recalled.read(stale, changed.fn), nil)
-    check("the key was asked once for it", changed.n, 1)
-    local after = counted(KEY)
-    check("a refused verdict leaves no marker that a later read would trust", recalled.read(stale, after.fn), LINE)
-    check("and the later read computes the key itself", after.n, 1)
+    local invented = forged(folder_of("invented"), "0123456789abcdef", "deadbeef", real(tree), me, mine)
+    check("a file that is consistent in itself but whose key the memo does not hold is no verdict", recalled.read(invented, tree, memo), nil)
+    local failed_key = "badbad"
+    remember(failed_key, "FAIL")
+    local failed = forged(folder_of("failed"), "0123456789abcdef", failed_key, real(tree), me, mine)
+    check("a key the memo holds as anything but ok is no verdict", recalled.read(failed, tree, memo), nil)
+    local honest = forged(folder_of("honest"), "0123456789abcdef", KEY, real(tree), me, mine)
+    check("the same file with a key the memo holds is read", recalled.read(honest, tree, memo), LINE)
 
-    local raising = run("raising")
-    local raised = recalled.issue(raising, KEY, "/the/root", LINE)
-    check("a key that cannot be computed is no verdict", recalled.read(raised, function () raise("no git here") end), nil)
+    local refused = recalled.issue(folder_of("refused"), OTHER_KEY, tree, LINE)
+    check("a key the memo does not hold is refused", recalled.read(refused, tree, memo), nil)
+    remember(OTHER_KEY)
+    check("a refused verdict is asked again, and the memo's answer is the answer", recalled.read(refused, tree, memo), LINE)
+    forget(OTHER_KEY)
+    check("a verdict the memo no longer holds is refused again", recalled.read(refused, tree, memo), nil)
 
-    local marked = run("marked")
-    local value_marked = recalled.issue(marked, KEY, "/the/root", LINE)
-    recalled.read(value_marked, counted(KEY).fn)
-    local marker = path.join(marked, "light-suites.verdict.verified")
-    io.writefile(marker, "someone else\nffffff")
-    local forged_marker = counted("ffffff")
-    check("a marker that does not hold this nonce and key is not trusted", recalled.read(value_marked, forged_marker.fn), nil)
-    check("the key is computed when the marker is not its own", forged_marker.n, 1)
+    local finished = os.iorunv("sh", {"-c", "echo $$"}):trim()
+    check("the process that made the file is gone", lstart(finished), "")
+    check("a run that has ended is no verdict", recalled.read(forged(folder_of("dead"), "0123456789abcdef", KEY, real(tree), finished, mine), tree, memo), nil)
+    check("a process number that another process has taken is no verdict", recalled.read(forged(folder_of("reused"), "0123456789abcdef", KEY, real(tree), me, "Mon Jan 1 00:00:00 2001"), tree, memo), nil)
 
-    local tampered = run("tampered")
-    local value_tampered = recalled.issue(tampered, KEY, "/the/root", LINE)
-    local tampered_file = value_tampered:match("^%x+@(.+)$")
-    io.writefile(tampered_file, (io.readfile(tampered_file):gsub(KEY, "ffffff")))
-    local honest = counted(KEY)
-    check("a file edited after it was written does not match the key", recalled.read(value_tampered, honest.fn), nil)
+    local tampered = recalled.issue(folder_of("tampered"), KEY, tree, LINE)
+    local tampered_file = tampered:match("^%x+@(.+)$")
+    io.writefile(tampered_file, (io.readfile(tampered_file):gsub(KEY, OTHER_KEY)))
+    check("a file edited after it was written does not match the memo", recalled.read(tampered, tree, memo), nil)
+    local short = forged(folder_of("short"), "0123456789abcdef", KEY, real(tree), me, mine)
+    local short_file = short:match("^%x+@(.+)$")
+    io.writefile(short_file, "0123456789abcdef\n" .. KEY .. "\n")
+    check("a file that stops short is no verdict", recalled.read(short, tree, memo), nil)
 
-    local cleared = run("cleared")
-    local value_cleared = recalled.issue(cleared, KEY, "/the/root", LINE)
-    recalled.read(value_cleared, counted(KEY).fn)
-    recalled.clear(value_cleared)
-    check("clearing removes the file", os.isfile(value_cleared:match("^%x+@(.+)$")), false)
-    check("clearing removes the marker", os.isfile(value_cleared:match("^%x+@(.+)$") .. ".verified"), false)
-    check("a cleared verdict is no verdict", recalled.read(value_cleared, counted(KEY).fn), nil)
-    recalled.clear(value_cleared)
+    local cleared = recalled.issue(folder_of("cleared"), KEY, tree, LINE)
+    recalled.clear(cleared)
+    check("clearing removes the file", os.isfile(cleared:match("^%x+@(.+)$")), false)
+    check("a cleared verdict is no verdict", recalled.read(cleared, tree, memo), nil)
+    recalled.clear(cleared)
     recalled.clear("anything")
     recalled.clear(nil)
+    local kept = recalled.issue(folder_of("kept"), KEY, tree, LINE)
+    recalled.clear(("0"):rep(32) .. "@" .. kept:match("^%x+@(.+)$"))
+    check("a value with another nonce clears nothing", os.isfile(kept:match("^%x+@(.+)$")), true)
+
+    check("the memo holds an ok verdict of a check by its name", recalled.holds(memo, "light suites", KEY), true)
+    check("the memo does not hold a verdict it has none of", recalled.holds(memo, "light suites", "000000"), false)
+    check("the memo does not hold another check's verdict as this one's", recalled.holds(memo, "comments", KEY), false)
+    check("the memo does not hold a verdict that is not ok", recalled.holds(memo, "light suites", failed_key), false)
 
     local line, key = recalled.parse("\27[0mnoise\n" .. LINE .. "\nkey " .. KEY .. "\n")
     check("the line is taken from prepush's output", line, LINE)

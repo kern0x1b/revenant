@@ -48,7 +48,7 @@ local function suites(name, list, packages, group)
         end
         on_test(function (target, opt)
             local suite = path.filename(opt.name)
-            local recalled = name == "toolchain_light" and import("recalled", {rootdir = path.join(toolchain, "modules"), anonymous = true}).read(os.getenv("REVENANT_LIGHT_SUITES_VERDICT"))
+            local recalled = name == "toolchain_light" and import("recalled", {rootdir = path.join(toolchain, "modules"), anonymous = true}).read(os.getenv("REVENANT_LIGHT_SUITES_VERDICT"), path.directory(toolchain))
             if recalled then
                 cprint("${green}%s: %s", suite, recalled)
                 return true

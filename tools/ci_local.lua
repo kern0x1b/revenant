@@ -214,11 +214,29 @@ local function light_recall()
     end }
 end
 
-local function light_handoff(output, folder)
+local function light_handoff(output, folder, tree)
     local line, key = recalled.parse(output)
     if line then
-        return recalled.issue(folder, key, ROOT, line), line
+        local value = recalled.issue(folder, key, tree, line)
+        if value then
+            return value, line
+        end
     end
+end
+
+local light_verdict
+
+local function hand_off_light(dir, tree)
+    local value, line = light_handoff(light_recall(), dir, tree)
+    light_verdict = value
+    os.setenv("REVENANT_LIGHT_SUITES_VERDICT", value or "")
+    print("ci_local: %s", line and (line .. "; the tests of the checks job take the light suites from it") or "prepush holds no verdict of the light suites for this tree; the checks job runs them")
+end
+
+local function end_light()
+    recalled.clear(light_verdict)
+    light_verdict = nil
+    os.setenv("REVENANT_LIGHT_SUITES_VERDICT", "")
 end
 
 local function minutes(ms)
@@ -468,21 +486,28 @@ local function test()
     check("the quick job runs prepush after its fresh configuration", JOBS.quick.steps[2].argv[5], "tools/prepush.lua")
     local handoff_folder = os.iorunv("mktemp", {"-d"}):trim()
     local recall_text = "\27[0mnoise\nrecalled light suites memo (ran 297 s in w at 0123456789, 3 min ago)\nkey 0a1b2c\n"
-    local verdict, line = light_handoff(recall_text, handoff_folder)
+    local tree = path.join(handoff_folder, "tree")
+    local memo = path.join(handoff_folder, "memo")
+    os.mkdir(tree)
+    os.mkdir(path.join(memo, "light-suites"))
+    io.writefile(path.join(memo, "light-suites", "0a1b2c"), "verdict ok\n")
+    local verdict, line = light_handoff(recall_text, handoff_folder, tree)
     check("the verdict of the light suites is read from prepush's line", line, "recalled light suites memo (ran 297 s in w at 0123456789, 3 min ago)")
     check("the hand-off is a nonce and a file in the run's folder, not the line", (verdict or ""):find("^%x+@" .. handoff_folder:gsub("%p", "%%%0") .. "/") ~= nil, true)
-    check("the hand-off is read back by the tests while the key holds", recalled.read(verdict, function () return "0a1b2c" end), line)
-    check("a value that ci_local did not issue is no verdict, whatever the file holds", recalled.read("recalled light suites memo (ran 1 s in w at h, 1 s ago)", function () return "0a1b2c" end), nil)
-    check("a made-up value is no verdict", recalled.read("anything", function () return "0a1b2c" end), nil)
+    check("the hand-off is read back by the tests of the tree it was made for while the memo holds the key", recalled.read(verdict, tree, memo), line)
+    check("the tests of another tree do not take it", recalled.read(verdict, handoff_folder, memo), nil)
+    check("a memo that does not hold the key does not give it", recalled.read(verdict, tree, path.join(handoff_folder, "no-memo")), nil)
+    check("a value that ci_local did not issue is no verdict, whatever the file holds", recalled.read("recalled light suites memo (ran 1 s in w at h, 1 s ago)", tree, memo), nil)
+    check("a made-up value is no verdict", recalled.read("anything", tree, memo), nil)
     recalled.clear(verdict)
-    check("the hand-off is gone when the run ends", recalled.read(verdict, function () return "0a1b2c" end), nil)
-    check("another check's recall is not the light suites'", (light_handoff("recalled comments memo (ran 1 s in w at h, 1 s ago)\nkey 0a1b2c\n", handoff_folder)), nil)
-    check("a recall without its key is no verdict", (light_handoff("recalled light suites memo (ran 1 s in w at h, 1 s ago)\n", handoff_folder)), nil)
-    check("no recall is no verdict", (light_handoff(nil, handoff_folder)), nil)
-    check("nothing was written for a recall that is no verdict", #os.files(path.join(handoff_folder, "*")), 0)
+    check("the hand-off is gone when the run ends", recalled.read(verdict, tree, memo), nil)
+    check("another check's recall is not the light suites'", (light_handoff("recalled comments memo (ran 1 s in w at h, 1 s ago)\nkey 0a1b2c\n", handoff_folder, tree)), nil)
+    check("a recall without its key is no verdict", (light_handoff("recalled light suites memo (ran 1 s in w at h, 1 s ago)\n", handoff_folder, tree)), nil)
+    check("no recall is no verdict", (light_handoff(nil, handoff_folder, tree)), nil)
+    check("nothing was written for a recall that is no verdict", #os.files(path.join(handoff_folder, "*.verdict")), 0)
     os.tryrm(handoff_folder)
     local light_target = io.readfile(path.join(ROOT, "toolchain", "tests", "xmake.lua"))
-    check("the light target takes its verdict from the recalled module and from no other variable", light_target:find('read(os.getenv("REVENANT_LIGHT_SUITES_VERDICT"))', 1, true) ~= nil, true)
+    check("the light target takes its verdict from the recalled module, for its own checkout, and from no other variable", light_target:find('read(os.getenv("REVENANT_LIGHT_SUITES_VERDICT"), path.directory(toolchain))', 1, true) ~= nil, true)
     check("the light target does not trust a bare variable", light_target:find("REVENANT_LIGHT_SUITES_RECALLED", 1, true), nil)
     local selected = select_jobs({})
     for _, name in ipairs(ALL) do
@@ -572,6 +597,9 @@ local function schedule(names, dir, limit_kb)
         else
             clones[name] = path.join(dir, "tree-" .. name)
             os.execv("/bin/sh", {"-c", CLONE, "ci-local", clones[name], ROOT})
+            if name == "checks" then
+                hand_off_light(dir, clones[name])
+            end
         end
     end
     while #pending > 0 or #running > 0 do
@@ -635,6 +663,7 @@ local function schedule(names, dir, limit_kb)
         end
         running = still
     end
+    end_light()
     return done, peak_total
 end
 
@@ -642,7 +671,13 @@ local function run_serial(selected, dir, limit_kb)
     local by_name, quick_failed = {}, false
     for _, name in ipairs(ORDER) do
         if selected[name] and not (name ~= "quick" and quick_failed) then
+            if name == "checks" then
+                hand_off_light(dir, ROOT)
+            end
             by_name[name] = run_job(name, dir, limit_kb)
+            if name == "checks" then
+                end_light()
+            end
             if name == "quick" and not by_name[name].ok then
                 quick_failed = true
             end
@@ -745,9 +780,7 @@ function main(...)
     local dir = path.join(root, os.date("%Y%m%d-%H%M%S"))
     os.execv("mkdir", {"-p", dir})
     prune_runs(root)
-    local verdict, line = light_handoff(light_recall(), dir)
-    os.setenv("REVENANT_LIGHT_SUITES_VERDICT", verdict or "")
-    print("ci_local: %s", line and (line .. "; the tests of the checks job take the light suites from it when the key still holds") or "prepush holds no verdict of the light suites for this tree; the checks job runs them")
+    os.setenv("REVENANT_LIGHT_SUITES_VERDICT", "")
     local began = os.mclock()
     local by_name, peak_total
     if serial then
@@ -756,7 +789,7 @@ function main(...)
         by_name, peak_total = run_parallel(selected, dir, limit_kb)
     end
     local failed = report(by_name, selected, dir, began, peak_total)
-    recalled.clear(verdict)
+    end_light()
     print("ci_local: load after %s", load())
     if failed then
         os.exit(1)
