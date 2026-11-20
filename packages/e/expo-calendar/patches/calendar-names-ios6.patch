@@ -1,0 +1,41 @@
+diff -ru a/ios/Next/CalendarNextExceptions.swift b/ios/Next/CalendarNextExceptions.swift
+--- a/ios/Next/CalendarNextExceptions.swift	1985-10-26 09:15:00
++++ b/ios/Next/CalendarNextExceptions.swift	2026-11-20 00:13:24
+@@ -1,6 +1,6 @@
+ import ExpoModulesCore
+ 
+-final internal class MissingCurrentViewControllerException: Exception {
++final internal class CalendarMissingCurrentViewControllerException: Exception {
+   override var reason: String {
+     "Cannot find the current view controller to present"
+   }
+diff -ru a/ios/Next/CalendarNextModule.swift b/ios/Next/CalendarNextModule.swift
+--- a/ios/Next/CalendarNextModule.swift	1985-10-26 09:15:00
++++ b/ios/Next/CalendarNextModule.swift	2026-11-20 00:13:24
+@@ -69,7 +69,7 @@
+     AsyncFunction("presentPicker") { (promise: Promise) in
+       // No access guard here on purpose. The system picker itself shows a message when permissions aren't granted.
+       guard let currentVc = appContext?.utilities?.currentViewController() else {
+-        throw MissingCurrentViewControllerException()
++        throw CalendarMissingCurrentViewControllerException()
+       }
+ 
+       let calendarChooser = EKCalendarChooser(
+@@ -486,7 +486,7 @@
+         }
+ 
+         guard let currentVc = appContext?.utilities?.currentViewController() else {
+-          throw MissingCurrentViewControllerException()
++          throw CalendarMissingCurrentViewControllerException()
+         }
+ 
+         let controller = EKEventViewController()
+@@ -659,7 +659,7 @@
+ 
+   private func presentEventEditViewController(event: EKEvent, promise: Promise) throws {
+     guard let currentVc = appContext?.utilities?.currentViewController() else {
+-      throw MissingCurrentViewControllerException()
++      throw CalendarMissingCurrentViewControllerException()
+     }
+ 
+     let controller = EditEventViewController(

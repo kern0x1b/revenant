@@ -1,6 +1,6 @@
 local inputs = os.getenv("RN_INPUTS") or path.join(os.projectdir(), "build")
 local probes = path.join(os.scriptdir(), "probes")
-local reactcommon = path.join((os.getenv("RN_SRC") or path.join(inputs, "ref", "paseo", "node_modules", "react-native")), "ReactCommon")
+local reactcommon = path.join((os.getenv("RN_SRC") or path.join(inputs, "ref", "app", "node_modules", "react-native")), "ReactCommon")
 
 target("rn-jsc-host")
     set_kind("binary")
@@ -37,7 +37,7 @@ target("rn-ios-probe")
     add_rules("@addon/revenant/apple-ios")
     set_default(false)
     add_packages("libcxx")
-    local rn = (os.getenv("RN_SRC") or path.join(inputs, "ref", "paseo", "node_modules", "react-native"))
+    local rn = (os.getenv("RN_SRC") or path.join(inputs, "ref", "app", "node_modules", "react-native"))
     if os.getenv("RN_DEPS_REPO") then
         add_packages("folly", "socketrocket")
     end
@@ -79,8 +79,8 @@ target("rn-lib-probe")
     if os.getenv("RN_DEPS_REPO") then
         add_packages("folly", "socketrocket")
     end
-    local nm = path.join(inputs, "ref", "paseo", "node_modules")
-    local rn = (os.getenv("RN_SRC") or path.join(inputs, "ref", "paseo", "node_modules", "react-native"))
+    local nm = path.join(inputs, "ref", "app", "node_modules")
+    local rn = (os.getenv("RN_SRC") or path.join(inputs, "ref", "app", "node_modules", "react-native"))
     local rc = path.join(rn, "ReactCommon")
     local appnm = path.join(nm, "..", "packages", "app", "node_modules")
     local libname = os.getenv("RN_LIB") or "react-native-screens"
@@ -169,7 +169,7 @@ target("rn-cxx-probe")
     if os.getenv("RN_DEPS_REPO") then
         add_packages("folly")
     end
-    local rn = (os.getenv("RN_SRC") or path.join(inputs, "ref", "paseo", "node_modules", "react-native"))
+    local rn = (os.getenv("RN_SRC") or path.join(inputs, "ref", "app", "node_modules", "react-native"))
     local rc = path.join(rn, "ReactCommon")
     local slice = os.getenv("RN_CXX_SLICE") or "cxxreact"
     for _, f in ipairs(os.files(path.join(rc, slice, "**.cpp"))) do

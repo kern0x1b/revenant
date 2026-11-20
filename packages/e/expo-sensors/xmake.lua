@@ -1,0 +1,21 @@
+package("expo-sensors")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-sensors")
+    set_description("expo-sensors 57.0.3, the motion sensors of the Expo SDK, from its npm tarball: the iOS module sources the host builds from, with the iOS 8 motion services supplied by the CoreMotion backport")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-sensors/-/expo-sensors-$(version).tgz")
+    add_versions("57.0.3", "f667fe617bb800506a807f6585b6068c061cc339a552e220b3b1005a024555a9")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-sensors" and manifest.version == "57.0.3", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "ios", "AccelerometerModule.swift")), "expo-sensors has no iOS module")
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-sensors has no expo-module.config.json")
+    end)

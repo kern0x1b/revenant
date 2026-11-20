@@ -391,6 +391,44 @@ static void RNHostMemoryMapMilestone(UIView *root, NSUInteger views)
     }
 }
 
+static NSUInteger RNHostOrientationMask(NSArray *names)
+{
+    NSDictionary *bits = @{@"UIInterfaceOrientationPortrait": @(UIInterfaceOrientationMaskPortrait),
+                           @"UIInterfaceOrientationLandscapeLeft": @(UIInterfaceOrientationMaskLandscapeLeft),
+                           @"UIInterfaceOrientationLandscapeRight": @(UIInterfaceOrientationMaskLandscapeRight),
+                           @"UIInterfaceOrientationPortraitUpsideDown": @(UIInterfaceOrientationMaskPortraitUpsideDown)};
+    NSUInteger mask = 0;
+    for (id name in names) {
+        mask |= [bits[name] unsignedIntegerValue];
+    }
+    return mask;
+}
+
+static NSUInteger RNHostInfoPlistOrientations(void)
+{
+    NSDictionary *info = [[NSBundle mainBundle] infoDictionary];
+    if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+        NSUInteger pad = RNHostOrientationMask(info[@"UISupportedInterfaceOrientations~ipad"]);
+        if (pad != 0) {
+            return pad;
+        }
+    }
+    return RNHostOrientationMask(info[@"UISupportedInterfaceOrientations"]);
+}
+
+- (NSUInteger)application:(UIApplication *)application supportedInterfaceOrientationsForWindow:(UIWindow *)window
+{
+    BOOL answered = NO;
+    NSUInteger mask = UIInterfaceOrientationMaskAll;
+    for (id<UIApplicationDelegate> subscriber in RNHostExpoSubscribers()) {
+        if ([subscriber respondsToSelector:@selector(application:supportedInterfaceOrientationsForWindow:)]) {
+            answered = YES;
+            mask &= [subscriber application:application supportedInterfaceOrientationsForWindow:window];
+        }
+    }
+    return answered ? mask : RNHostInfoPlistOrientations();
+}
+
 #pragma clang diagnostic pop
 #endif
 
@@ -422,6 +460,13 @@ static void RNHostMemoryMapMilestone(UIView *root, NSUInteger views)
 #endif
     [self.window makeKeyAndVisible];
     [_factory startReactNativeWithModuleName:module inWindow:self.window];
+#ifdef RN_EXPO
+    for (id<UIApplicationDelegate> subscriber in RNHostExpoSubscribers()) {
+        if ([subscriber respondsToSelector:@selector(application:didFinishLaunchingWithOptions:)]) {
+            [subscriber application:application didFinishLaunchingWithOptions:launchOptions];
+        }
+    }
+#endif
     NSLog(@"rn-host: react started, rss %.1f MB", [RNHostRuntime residentMegabytes]);
     return YES;
 }

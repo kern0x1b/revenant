@@ -1,0 +1,21 @@
+package("expo-cellular")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-cellular")
+    set_description("expo-cellular 57.0.2, the cellular generation of the Expo SDK, from its npm tarball: the iOS module sources the host builds from, with the radio-access API supplied by the CoreTelephony backport")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-cellular/-/expo-cellular-$(version).tgz")
+    add_versions("57.0.2", "5ce2c52a0e0f33625cd6b619760cbe0bd1b477d8374a695363ebf79fc8eb6843")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-cellular" and manifest.version == "57.0.2", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "ios", "CellularModule.swift")), "expo-cellular has no iOS module")
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-cellular has no expo-module.config.json")
+    end)

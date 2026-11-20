@@ -38,7 +38,24 @@ exercised, so the rows are `partial`, `phone`.
 | --- | --- | --- | --- |
 | expo-web-browser | `SFSafariViewController`, `ASWebAuthenticationSession`; `PresentationStyle` renamed `WebBrowserPresentationStyle` | iOS 9, iOS 12; name collision inside `ExpoAppModules` | `openBrowserAsync` opens the URL in Safari and resolves `{type: "opened"}`; the style options are accepted and ignored; `dismissBrowser` raises "no web browser to dismiss"; `openAuthSessionAsync` rejects naming iOS 12 |
 | expo-blur | `UIVisualEffectView` | iOS 8 | a Core Image Gaussian blur of a snapshot of the view behind, with a white or black tint; it is taken when the view is added, resized or its intensity changes and does not follow later changes behind it |
-| expo-screen-orientation | trait collections, window scenes, `requestGeometryUpdate`, the safe-area notch test; the `RNSScreenWindowTraits` protocol is declared in Swift | iOS 8, 13, 16, 11 | the status-bar orientation and the size classes of the device idiom (iPhone: portrait regular/compact, landscape compact/compact); on the 4S `getOrientationAsync` answered unknown at start |
+| expo-screen-orientation | trait collections, window scenes, `requestGeometryUpdate`, the safe-area notch test; the `RNSScreenWindowTraits` protocol is declared in Swift | iOS 8, 13, 16, 11 | the status-bar orientation and the size classes of the device idiom (iPhone: portrait regular/compact, landscape compact/compact); on the 4S `getOrientationAsync` answered unknown at start; the host's orientation mask is the intersection of every subscriber's answer and, with no subscriber answering, the Info.plist orientations, as `ExpoAppDelegateSubscriberManager.swift` (expo-modules-core 57.0.23, line 464) does |
+
+## MessageUI and printing (block 4)
+
+These packages are recipes; each installs, and the host compiles and links it. expo-mail-composer, expo-sms, expo-print and expo-video-thumbnails carry
+iOS 6 patches that apply; expo-sensors, expo-cellular and expo-task-manager build unpatched, and expo-location carries a patch. None has been exercised on the phone:
+expo-mail-composer, expo-sms, expo-print, expo-sensors, expo-cellular and expo-video-thumbnails are `real`, verified `build`; expo-location and expo-task-manager are `partial`, verified `build`.
+
+| Module | Removed or replaced | Why | What JS sees |
+| --- | --- | --- | --- |
+| expo-mail-composer | `UIAdaptivePresentationControllerDelegate`, the `presentationController` hook; the iOS 7 attachments are guarded; four names that collide inside `ExpoAppModules` are renamed | iOS 8, 13; attachments are an iOS 7 MessageUI API; the shared Swift module has one namespace | `isAvailableAsync` and `composeAsync` use `MFMailComposeViewController.canSendMail` and the compose sheet, both present on iOS 6; a request with attachments rejects with an exception that names iOS 7; interactive sheet dismissal is absent |
+| expo-sms | the unused `UniformTypeIdentifiers` import; the iOS 7 MMS attachments are guarded | the framework is iOS 14; attachments are an iOS 7 MessageUI API | `isAvailableAsync` and `sendSMSAsync` use `MFMessageComposeViewController.canSendText` and the compose sheet, both present on iOS 6; a request with attachments rejects with an exception that names iOS 7 |
+| expo-print | `WKWebView` and `WebKit`; `URLSession`; the iOS 7 and 8 printer options; the iOS 7 `NSData` base64 method; one colliding exception name | WKWebView and URLSession are iOS 8 and 7 and WebKit is not linked in the Hermes host; specific-printer printing and printer selection are iOS 8 | HTML is rendered to PDF by `UIMarkupTextPrintFormatter` and drawn through `UIPrintPageRenderer` (iOS 4.2); http URIs are fetched with `NSURLConnection` and, as upstream, a response that is not HTTP 200 gives no data; `print` shows `UIPrintInteractionController` on iOS 6; `selectPrinter` and a `printerUrl` reject with an exception that names iOS 8; `base64` uses a small encoder on iOS 6 |
+| expo-sensors | nothing; `CMPedometer` and `CMAltimeter` come from the CoreMotion backport (`CoreMotionBackports`, linked by the host) | both classes are iOS 8 | the module as published: accelerometer, gyroscope, magnetometer and device motion use `CMMotionManager` (iOS 4); Pedometer and Barometer call the backport classes; built and linked, not exercised on the phone |
+| expo-cellular | nothing; the `CTRadioAccessTechnology*` constants and the per-service radio lookup come from the CoreTelephony backport (`CoreTelephonyBackports`, linked by the host) | the constants are iOS 7, the per-service property iOS 12 | the module as published: `getCellularGenerationAsync` maps the radio technology to 2G, 3G or 4G as upstream; built and linked, not exercised on the phone |
+| expo-location | `CLLocation.ellipsoidalAltitude` replaced by `altitude` (EXLocation.m, Geocoder.swift) | `ellipsoidalAltitude` is iOS 15 | the services as published on `CLLocationManager` and `CLGeocoder`, with the later CoreLocation calls from the CoreLocation backport; the altitude is the iOS 6 `altitude`; background location and geofencing run through expo-task-manager (built, not exercised); built and linked, not exercised on the phone |
+| expo-task-manager | nothing; the package's `Tests/` folder is left out of the host build, and the `UMAppLoader` pod it imports comes from the `unimodules-app-loader` recipe | the tests import `ExpoModulesTestCore`, which the host does not carry | the module as published; background fetch (iOS 7) and BGTask are absent on iOS 6, so a fetch task is never woken by the system and tasks run in the foreground or the `beginBackgroundTaskWithExpirationHandler` window; built and linked, not exercised on the phone |
+| expo-video-thumbnails | three exception classes renamed (`VideoThumbnails…`) | their names collide with expo-image-manipulator's inside the shared Swift module | `getThumbnail` grabs a frame with `AVAssetImageGenerator` and saves a JPEG, all iOS 4 APIs; built and linked, not exercised on the phone |
 
 ## AVIF and SVG decision (2026-11-16)
 
@@ -53,6 +70,28 @@ exercised, so the rows are `partial`, `phone`.
 `isolate.lua` adds the `add_requires` lines only for the modules in `RN_EXPO_REAL` that use them (`POD_REQUIRES`); `isolate.lua build`
 fails with "make the copy again" when a copy predates that. `src/expo/xmake.lua` writes each pod's module map and flags into
 `build/expo-core/implicit.rsp`.
+
+## Contacts and calendar (block 5)
+
+expo-calendar is a recipe with an iOS 6 patch (packages/e/expo-calendar/patches); it installs, its patch applies, and the host compiles and links it. It has not been exercised on the phone.
+
+| Module | Removed or replaced | Why | What JS sees |
+| --- | --- | --- | --- |
+| expo-calendar | nothing; `MissingCurrentViewControllerException` renamed `CalendarMissingCurrentViewControllerException` | the name collides with expo-sharing's inside the shared Swift module `ExpoAppModules` | the module as published: EventKit (`EKEventStore`, `EKEvent`, `EKCalendar`) and the EventKitUI event and edit view controllers are present on iOS 6; the iOS 17 write-only permission branches are behind `#available` and are not taken; built and linked, not exercised on the phone |
+
+expo-contacts is a recipe with one name patch (packages/e/expo-contacts/patches) and the later `CNLabel*` constants in the Contacts backport. Its host build is not green, so its coverage row is evaluate and its calls are not verified.
+
+| Module | Removed or replaced | Why | What JS sees |
+| --- | --- | --- | --- |
+| expo-contacts | `Image` renamed `ContactImageRecord`; three exceptions colliding with expo-file-system renamed; the ContactsUI form and picker sources are not built, pending a separate backport task | the first two are name collisions inside `ExpoAppModules`; `CNContactViewController` and `CNContactPickerViewController` are iOS 9 and have no backport yet, and the task forbids a throwing shim | contact data operations through the Contacts backport are compiled but not verified; `presentFormAsync`, `presentContactPickerAsync` and the next form functions are absent until a ContactsUI backport over `ABPersonViewController`, `ABNewPersonViewController` and `ABPeoplePickerNavigationController` lands |
+
+## Media library (block 5)
+
+expo-media-library is a recipe with an iOS 6 patch (packages/e/expo-media-library/patches); it installs, its patch applies, and the host compiles and links it. It has not been exercised on the phone.
+
+| Module | Removed or replaced | Why | What JS sees |
+| --- | --- | --- | --- |
+| expo-media-library | nothing removed; `AssetInfo`, `MediaType`, `PermissionsModuleNotFoundException` and the three permission requester classes renamed with an `ExpoML` prefix | their names collide with expo-image-picker's inside the shared Swift module `ExpoAppModules` | the module as published against the Photos backport over AssetsLibrary: moments are not available on iOS 6; `getMomentsAsync` returns the synced event albums. The audio media-type constant has its SDK value, and the Photos change-details extensions resolve through the backported `swiftPhotos` runtime; audio assets and all phone behaviour are not verified |
 
 ## How to check
 

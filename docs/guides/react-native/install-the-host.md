@@ -80,7 +80,7 @@ the `launchctl` entry `UIKitApplication:<id>[...]` and kills that one process. I
 (`./xmakew device -P . --minutes=20 claim`), then
 
 ```
-./xmakew l -P . frameworks/ReactNative/tools/host_install.lua window --archive host.tgz --bundle-id space.kern0x1b.paseo-ios6.rnhost \
+./xmakew l -P . frameworks/ReactNative/tools/host_install.lua window --archive host.tgz --bundle-id <bundleId> \
   --packages host-packages.json --debs DEBS/org.revenant.swift-runtime-KEY_..._iphoneos-arm.deb,... \
   --probe probe.hbc --expect FileSystem,ExpoCamera,ExpoImage,ExpoSecureStore --restore-bundle bundle.hbc --output build/window
 ```

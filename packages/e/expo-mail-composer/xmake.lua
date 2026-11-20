@@ -1,0 +1,21 @@
+package("expo-mail-composer")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-mail-composer")
+    set_description("expo-mail-composer 57.0.2, the mail compose sheet of the Expo SDK, from its npm tarball: the iOS sources drop the iOS 13 adaptive-presentation delegate and guard the iOS 7 attachments, so that they run on iOS 6 with MessageUI")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-mail-composer/-/expo-mail-composer-$(version).tgz")
+    add_versions("57.0.2", "0df16fef159e086276584aa005bf68269171b0dcf639417d05f0ebfb5a8dd448")
+    add_patches("57.0.2", path.join(os.scriptdir(), "patches", "mail-composer-ios6.patch"), "225fa3f145a9db8c9ea3d49b6564bc1fd6aaba5e4e55596e20ea42f73a5fc326")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-mail-composer" and manifest.version == "57.0.2", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-mail-composer has no expo-module.config.json")
+    end)
