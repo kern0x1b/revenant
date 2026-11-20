@@ -142,6 +142,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [GLSL ES 3.00 to 1.00 translator](reference/react-native/glsl-translator.md) | the glslang and SPIRV-Cross prototype on three.js's ES 3.00 programs: what translates on the host, the armv7 build, and what is still unmeasured |
 | [OpenGL ES 3 on iOS 6](reference/backports/opengles-es3.md) | the ES3 entry points on the ES2 driver: what is forwarded, emulated and refused, and why no ES3 EAGL context yet |
 | [AVFoundation: QR codes on iOS 6](reference/backports/AVFoundation/README.md) | the metadata output's QR path, what the iOS 6.0 cache shows, and what is still to measure on a device |
+| [AVSampleBufferDisplayLayer: the pixel formats it draws](reference/backports/AVFoundation/SampleBufferDisplayLayerFormats.md) | the formats the display layer draws on iOS 6, the CPU conversion of 420v and 420f, the YCbCrMatrix values it accepts (601, 709, absent means 709 as VTPixelTransferSession measures) and refuses, and what the case checks |
 | [Photos on iOS 6](reference/backports/Photos/README.md) | the AssetsLibrary-backed PhotoKit surface, cache bound, and unsupported operations |
 | [MediaPlayer on iOS 6: the remote command center](reference/backports/MediaPlayer/README.md) | which remote control events reach which command, what iOS 6 never sends, and what the iPhone 4S probe measured |
 | [StoreKit on iOS 6: manage subscriptions](reference/backports/StoreKit/README.md) | the overlay over the SDK's module, why the call opens the Settings pane, and what was not measured |
