@@ -82,6 +82,13 @@ local function modules(text)
             end
         end
     end
+    -- The application's own Expo modules (the host.json "modules" of the application, RN_APP_MODULES): packages of its
+    -- workspace or node_modules that are not part of the Expo SDK, built from the application's sources.
+    for _, package in ipairs(string.split(os.getenv("RN_APP_MODULES") or "", ",", {plain = true})) do
+        if package ~= "" then
+            table.insert(candidates, package)
+        end
+    end
     local expo, real = {}, {}
     for _, package in ipairs(candidates) do
         if not real[package] and os.isdir(expo_dir(package)) then
@@ -378,9 +385,9 @@ target("expo-app-modules")
                 if expo_skip(f, package) or LOCAL_COPIES[package] == name then
                 elseif EXPO_REWRITE[name] and EXPO_REWRITE[name].package == package then
                     seen[name] = true
-                    table.insert(duplicates, {f, path.join(staged, package .. "-" .. name), EXPO_REWRITE[name].replace})
+                    table.insert(duplicates, {f, path.join(staged, package:gsub("[^%w%-]", "_") .. "-" .. name), EXPO_REWRITE[name].replace})
                 elseif seen[name] then
-                    table.insert(duplicates, {f, path.join(staged, package .. "-" .. name)})
+                    table.insert(duplicates, {f, path.join(staged, package:gsub("[^%w%-]", "_") .. "-" .. name)})
                 else
                     seen[name] = true
                     target:add("files", f)

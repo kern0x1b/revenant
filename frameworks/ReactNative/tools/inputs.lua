@@ -305,16 +305,24 @@ function covered_packages(ctx)
 end
 
 function expo_packages(ctx)
+    local packages
     if ctx.options.real then
-        local packages = table.clone(EXPO_PARITY_BASE)
+        packages = table.clone(EXPO_PARITY_BASE)
         for _, package in ipairs(string.split(ctx.options.real, ",", {plain = true})) do
             if package ~= "" then
                 table.insert(packages, package)
             end
         end
-        return packages
+    else
+        packages = covered_packages(ctx)
     end
-    return covered_packages(ctx)
+    for _, package in ipairs(app_modules(ctx.options)) do
+        if not installed_in_application(ctx, package) then
+            raise("the app manifest names the module %s, which is not in the application's node_modules", package)
+        end
+        table.insert(packages, package)
+    end
+    return packages
 end
 
 function expo_dir(ctx, package)
@@ -1035,6 +1043,22 @@ function app_optional_components(options)
     for _, name in ipairs(names) do
         if type(name) ~= "string" or name == "" or name:find('[",]') then
             raise("optionalComponents of the app manifest takes component names, not %s", tostring(name))
+        end
+    end
+    return names
+end
+
+-- The application's own Expo modules: packages of its workspace or node_modules, not of the Expo SDK, that carry an
+-- expo-module.config.json and are built into the host from the application's sources.
+function app_modules(options)
+    -- An application with no host.json has no modules of its own; a named manifest that is missing is still an error.
+    if not options.manifest and not (options.project and os.isfile(path.join(options.project, "host.json"))) then
+        return {}
+    end
+    local names = app_manifest(options).modules or {}
+    for _, name in ipairs(names) do
+        if type(name) ~= "string" or name == "" or name:find('[",\\\\ ]') or name:find("%.%.", 1) then
+            raise("modules of the app manifest takes package names, not %s", tostring(name))
         end
     end
     return names

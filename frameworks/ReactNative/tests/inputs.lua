@@ -5,6 +5,7 @@ local byte_less = tool.byte_less
 local xml_text, splash_options = tool.xml_text, tool.splash_options
 local expo_packages, expo_real, expo_subscribers = tool.expo_packages, tool.expo_real, tool.expo_subscribers
 local expo_classes, stub_entries, component_provider, app_optional_components = tool.expo_classes, tool.stub_entries, tool.component_provider, tool.app_optional_components
+local app_modules = tool.app_modules
 local make_app_manifest = tool.make_app_manifest
 
 local DATA = path.join(os.scriptdir(), "data")
@@ -228,6 +229,21 @@ io.writefile(path.join(manifest_app, "host.json"), '{"optionalComponents": ["RNC
 check("the app manifest gives the optional components", same_list(app_optional_components({project = manifest_app}), {"RNCWebView", "RNSVGPath"}))
 check("a project without host.json is an error, not an empty manifest", fails(function () app_optional_components({project = fresh("no-manifest")}) end))
 check("a named manifest that does not exist is an error", fails(function () app_optional_components({project = manifest_app, manifest = path.join(manifest_app, "missing.json")}) end))
+local modules_app = fresh("app-modules")
+io.writefile(path.join(modules_app, "host.json"), '{"modules": ["@scope/some-module", "plain-module"]}')
+check("the app manifest gives the application's own Expo modules", same_list(app_modules({project = modules_app}), {"@scope/some-module", "plain-module"}))
+check("an application without host.json has no modules of its own", same_list(app_modules({project = fresh("no-modules")}), {}))
+check("a manifest without modules gives none", same_list(app_modules({project = manifest_app}), {}))
+check("a named manifest that does not exist is an error for the modules too", fails(function () app_modules({project = modules_app, manifest = path.join(modules_app, "missing.json")}) end))
+local bad_modules = fresh("bad-modules")
+io.writefile(path.join(bad_modules, "host.json"), '{"modules": ["a,b"]}')
+check("a module name with a comma is refused", fails(function () app_modules({project = bad_modules}) end))
+local ctx_modules = {options = {}, app = path.join(modules_app, "app"), ref = path.join(modules_app, "ref")}
+ctx_modules.options.project = modules_app
+check("a module the application does not have is an error", fails(function () expo_packages(ctx_modules) end))
+os.mkdir(path.join(modules_app, "app", "node_modules", "@scope", "some-module"))
+os.mkdir(path.join(modules_app, "app", "node_modules", "plain-module"))
+check("the application's modules join the built packages", (function () local names = expo_packages(ctx_modules); return names[#names - 1] == "@scope/some-module" and names[#names] == "plain-module" end)())
 local named_manifest = fresh("named-manifest")
 io.writefile(path.join(named_manifest, "elsewhere.json"), '{"optionalComponents": ["RNSVGPath"]}')
 check("the named manifest is read instead of the project's host.json", same_list(app_optional_components({project = fresh("no-manifest-2"), manifest = path.join(named_manifest, "elsewhere.json")}), {"RNSVGPath"}))

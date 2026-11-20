@@ -275,6 +275,11 @@ function build_environment(options)
     if options.pkgdirs and options.pkgdirs ~= "" then
         env.RN_PKG_DIRS = options.pkgdirs
     end
+    -- The application's own Expo modules (the "modules" of its host.json) are built from its sources, with no recipe.
+    local modules = options.folder and read_app_manifest(options.folder).modules
+    if modules and #modules > 0 then
+        env.RN_APP_MODULES = table.concat(modules, ",")
+    end
     return env
 end
 
