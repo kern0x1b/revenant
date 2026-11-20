@@ -412,6 +412,13 @@ local function provenance(record)
     return string.format("ran %s s in %s at %s, %s", record.seconds, record.worktree, (record.head or ""):sub(1, 9), age_of(record.at))
 end
 
+local function recall_line(store, step, key)
+    local record = recalled(store, step, key)
+    if record then
+        return string.format("recalled %s memo (%s)", step.name, provenance(record))
+    end
+end
+
 local function batch(steps, keep_going)
     local results = {}
     for _, step in ipairs(steps) do
@@ -650,6 +657,9 @@ local function test_cache()
     check("a step that passed ran once", runs.a + runs.c + runs.d + runs.e, 4)
     check("a failing step is not remembered", recalled(store, steps[2], key(steps[2])), nil)
     check("a passing step is remembered with where it ran", recalled(store, steps[1], key(steps[1])).worktree, "w")
+    check("a recall says where the verdict came from", (recall_line(store, steps[1], key(steps[1])) or ""):find("^recalled a memo %(ran %d+ s in w at h, ") ~= nil, true)
+    check("a step that failed has no recall", recall_line(store, steps[2], key(steps[2])), nil)
+    check("a recall asks for the inputs it is given", recall_line(store, steps[1], "0000"), nil)
     pass()
     check("a passing step is not run again on unchanged inputs", runs.a, 1)
     check("a spawned step is not run again on unchanged inputs", runs.c, 1)
@@ -674,7 +684,7 @@ local function test_cache()
 end
 
 local function parse_arguments(arguments)
-    local parsed = {keep_going = false, list = false, only = nil, fresh = false, inline = nil, results = nil}
+    local parsed = {keep_going = false, list = false, only = nil, fresh = false, inline = nil, results = nil, recall = nil}
     local function names(argument, value)
         assert(value, argument .. " needs a comma-separated list of check names; --list prints them")
         local found = {}
@@ -698,12 +708,16 @@ local function parse_arguments(arguments)
         elseif argument == "--inline" then
             index = index + 1
             parsed.inline = names(argument, arguments[index])
+        elseif argument == "--recall" then
+            index = index + 1
+            parsed.recall = arguments[index]
+            assert(parsed.recall, "--recall needs the name of one check; --list prints them")
         elseif argument == "--results" then
             index = index + 1
             parsed.results = arguments[index]
             assert(parsed.results, "--results needs the file the verdicts are written to")
         else
-            raise("unknown argument %s; the arguments are test, --list, --only <check,...>, --keep-going and --fresh", argument)
+            raise("unknown argument %s; the arguments are test, --list, --only <check,...>, --recall <check>, --keep-going and --fresh", argument)
         end
         index = index + 1
     end
@@ -751,6 +765,8 @@ local function test_arguments()
     check("--results without a value is an error", raises({"--results"}), true)
     check("--only splits on commas and keeps the spaces of a name", table.concat(parse_arguments({"--only", "layout,light suites"}).only, "|"), "layout|light suites")
     check("--only without a value is an error", raises({"--only"}), true)
+    check("--recall names one check", parse_arguments({"--recall", "light suites"}).recall, "light suites")
+    check("--recall without a value is an error", raises({"--recall"}), true)
     check("an unknown argument is an error", raises({"--fast"}), true)
 
     local steps = {{name = "a"}, {name = "b"}, {name = "c"}}
@@ -819,6 +835,15 @@ function main(command, ...)
         for _, step in ipairs(STEPS) do
             print("%s%s", step.name, step.heavy and " (heavy)" or "")
         end
+        return
+    end
+    if parsed.recall then
+        local step = select_steps(STEPS, {parsed.recall})[1]
+        local line = recall_line(path.join(cache().store(), "memo"), step, key_of(inputs(root), step))
+        if not line then
+            raise("no verdict of %s is remembered for these inputs", step.name)
+        end
+        print("%s", line)
         return
     end
     if parsed.inline then
