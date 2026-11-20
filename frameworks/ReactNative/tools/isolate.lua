@@ -1,6 +1,6 @@
 local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua copy <project> <folder> --cache <private cache> [--bundle-id org.revenant.rnhost.<name>]
        ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua clone <warm copy> <folder> --cache <own clone of the private cache> [--src-cache <its cache>] [--src-checkout <its checkout>] [--bundle-id org.revenant.rnhost.<name>]
-       ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua build <folder> --cache <private cache> [--target RNHost] [--real a,b] [--pods pkg:module,...] [--jobs N] [--log file] [--configure-only 1]
+       ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua build <folder> --cache <private cache> [--target RNHost] [--real a,b] [--pods pkg:module,...] [--jobs N] [--log file] [--configure-only 1] [--deb DIR]
   copy   makes a private copy of the host project in <folder>: the hand-made inputs of its build/ with every absolute path rewritten to
          the folder, build/ref linked read only, and the react-native package with all its patches installed into the private cache
          and linked as build/rn-src. The path of <folder> must not contain "test" or "Example". The copy's app gets its own bundle id,
@@ -682,6 +682,9 @@ function build(folder, cache, options)
     if configured == 0 and not options.configure_only then
         built = command_status({"-c", "\"$1\" build -P \"$2\" -j \"$5\" -y -v \"$3\" >> \"$4\" 2>&1", "sh", xmakew, folder, options.target or "RNHost", log, options.jobs or "4"}, {envs = env})
     end
+    if built == 0 and options.deb then
+        built = command_status({"-c", "\"$1\" deb -P \"$2\" -y -o \"$3\" \"$5\" >> \"$4\" 2>&1", "sh", xmakew, folder, path.absolute(options.deb), log, options.target or "RNHost"}, {envs = env})
+    end
     return built or 1, log
 end
 
@@ -709,7 +712,7 @@ function main(...)
         local result = clone_project(positional[1], positional[2], options.cache, options["src-cache"], options["src-checkout"], options["bundle-id"])
         print(string.format("cloned %s to %s: %d files rewritten, %d links retargeted", positional[1], positional[2], result.rewritten, result.relinked))
     elseif command == "build" and #positional == 1 and options.cache then
-        local code, log = build(positional[1], options.cache, {target = options.target, real = options.real, pods = options.pods, log = options.log, engine = options.engine, swiftui = options.swiftui, backports = options.backports, shared = options.shared, jobs = options.jobs, configure_only = options["configure-only"]})
+        local code, log = build(positional[1], options.cache, {target = options.target, real = options.real, pods = options.pods, log = options.log, deb = options.deb, engine = options.engine, swiftui = options.swiftui, backports = options.backports, shared = options.shared, jobs = options.jobs, configure_only = options["configure-only"]})
         print(string.format("exit %d, log %s", code, log))
         local errors = try {
             function ()

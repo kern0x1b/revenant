@@ -312,6 +312,20 @@ function main()
         local todo = host.delta_plan(wanted, {a = "1", b = "1", c = ""})
         expect("the delta installs only the packages whose version differs or is absent", #todo == 2 and todo[1].name == "b" and todo[2].name == "c", #todo .. " packages")
         expect("the delta of an unchanged phone is empty", #host.delta_plan(wanted, {a = "1", b = "2", c = "3"}) == 0, "not empty")
+        local ordered = host.install_order({{name = "cryptokit"}, {name = "swift-crypto"}, {name = "runtime"}, {name = "other"}},
+            {cryptokit = host.deb_depends("swift-crypto (= 1), runtime"), ["swift-crypto"] = host.deb_depends("runtime (= 1)")})
+        local position = {}
+        for index, package in ipairs(ordered) do
+            position[package.name] = index
+        end
+        expect("packages install after the packages they depend on, each once", #ordered == 4 and position.runtime < position["swift-crypto"]
+            and position["swift-crypto"] < position.cryptokit and position.other ~= nil, table.concat(table.imap(ordered, function (_, package) return package.name end), ","))
+        expect("a dependency circle is refused naming a package", (refusal(function () host.install_order({{name = "a"}, {name = "b"}}, {a = {"b"}, b = {"a"}}) end) or ""):find("circle", 1, true) ~= nil, "no refusal")
+        local empty = path.join(os.tmpdir(), "rn-held-empty")
+        os.tryrm(empty)
+        os.mkdir(empty)
+        expect("a Backports folder with no libraries is refused naming the folder", (refusal(function () host.held_libraries(empty) end) or ""):find(empty, 1, true) ~= nil, "no refusal")
+        os.tryrm(empty)
         expect("an archive with the recorded sha is not copied again", host.archive_unchanged("abc", "abc\n") == true, "copied")
         expect("an archive with another sha is copied", host.archive_unchanged("abc", "abd\n") == false and host.archive_unchanged("abc", "") == false and host.archive_unchanged("abc", nil) == false, "not copied")
         local log = "x rn-host: heartbeat\n"
