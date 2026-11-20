@@ -897,7 +897,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         else
             add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports", "IOSurfaceBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "PhotosBackports", "CloudKitBackports", "CoreTextBackports")
         end
-        add_frameworks("Foundation", "UIKit", "CoreGraphics", "CoreText", "QuartzCore", "OpenAL", "AudioToolbox", "AssetsLibrary")
+        add_frameworks("Foundation", "UIKit", "CoreGraphics", "CoreText", "QuartzCore", "OpenAL", "AudioToolbox", "AssetsLibrary", "CoreMedia")
         add_syslinks("objc")
     target_end()
 
@@ -962,6 +962,10 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         add_tests("uitextview_typing_attributes")
         add_tests("coretext_fallback_probe")
         add_tests("coretext_fallback_cascade")
+        add_tests("avfoundation_display_layer")
+        add_tests("avfoundation_timebase_probe")
+        add_tests("avfoundation_display_layer_formats")
+        add_tests("avfoundation_synchronizer_observers")
         add_tests("caspring_animation_cast")
         add_tests("caspring_animation_coding")
         add_tests("protocol_uimutabletraits")
