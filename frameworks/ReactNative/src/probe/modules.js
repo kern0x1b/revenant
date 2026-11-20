@@ -53,7 +53,7 @@ var CHECKS = {
     function query(source) {
       var statement = new module.NativeStatement();
       return database.prepareAsync(statement, source).then(function () {
-        return statement.runAsync(database);
+        return statement.runAsync(database, {}, {}, true);
       }).then(function (result) {
         return statement.finalizeAsync(database).then(function () { return result.firstRowValues; });
       });
