@@ -352,7 +352,6 @@
     CMTimebaseRemoveTimerDispatchSource(self->owner.timebase, self->source);
 
     dispatch_source_cancel(self->source);
-    dispatch_source_set_event_handler(self->source, NULL);
     self->source = NULL;
     self->owner = nil;
     self->periodic = nil;
