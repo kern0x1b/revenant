@@ -60,6 +60,28 @@ local AREAS = {
             "-[RevenantAVPlayerLooper loopingPlayerItems]", "-[RevenantAVPlayerLooper disableLooping]",
         },
     },
+    {
+        name = "time and rendering of a queued sample buffer display layer",
+        sources = {"AVSampleBufferDisplayLayer8.m"},
+        members = {
+            "-[AVSampleBufferDisplayLayer timebase]", "-[AVSampleBufferDisplayLayer controlTimebase]",
+            "-[AVSampleBufferDisplayLayer setControlTimebase:]", "-[AVSampleBufferDisplayLayer videoGravity]",
+            "-[AVSampleBufferDisplayLayer setVideoGravity:]", "-[AVSampleBufferDisplayLayer isReadyForDisplay]",
+            "-[AVSampleBufferDisplayLayer status]", "-[AVSampleBufferDisplayLayer error]",
+            "-[AVSampleBufferDisplayLayer enqueueSampleBuffer:]", "-[AVSampleBufferDisplayLayer flush]",
+            "-[AVSampleBufferDisplayLayer flushAndRemoveImage]",
+            "-[AVSampleBufferDisplayLayer requiresFlushToResumeDecoding]",
+            "-[AVSampleBufferDisplayLayer isReadyForMoreMediaData]",
+            "-[AVSampleBufferDisplayLayer requestMediaDataWhenReadyOnQueue:usingBlock:]",
+            "-[AVSampleBufferDisplayLayer stopRequestingMediaData]",
+            "-[AVSampleBufferDisplayLayer hasSufficientMediaDataForReliablePlaybackStart]",
+            "-[AVSampleBufferDisplayLayer preventsCapture]", "-[AVSampleBufferDisplayLayer setPreventsCapture:]",
+            "-[AVSampleBufferDisplayLayer preventsDisplaySleepDuringVideoPlayback]",
+            "-[AVSampleBufferDisplayLayer setPreventsDisplaySleepDuringVideoPlayback:]",
+            "-[AVSampleBufferDisplayLayer outputObscuredDueToInsufficientExternalProtection]",
+            "-[AVSampleBufferDisplayLayer sampleBufferRenderer]",
+        },
+    },
 }
 
 local function key_of(member)
@@ -97,6 +119,11 @@ function main()
         end
     end
     assert(#missing == 0, "members not implemented by the compiled AVFoundation objects:\n" .. table.concat(missing, "\n"))
+    local undefined = os.iorunv("nm", {"-u", path.join(root, "AVFoundation", "src", "AVFoundation", "AVSampleBufferDisplayLayer8.m.o")})
+    for _, name in ipairs({"_CMTimebaseCreateWithMasterClock", "_CMTimebaseSetMasterTimebase", "_CMTimebaseAddTimerDispatchSource",
+        "_CMTimebaseSetTimerDispatchSourceNextFireTime", "_CMSampleBufferGetImageBuffer"}) do
+        assert(undefined:find(name, 1, true), "the display layer does not use " .. name .. ":\n" .. undefined)
+    end
     os.tryrm(root)
     print("avfoundation tests passed: " .. total .. " members implemented by " .. objects .. " objects in " .. #AREAS .. " areas")
 end
