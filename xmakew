@@ -94,17 +94,60 @@ digest=$(patchset "$package/patches" "$commit" "$patches")
 xmakes=$store/xmake
 prefix=$xmakes/$key
 
+holder=$xmakes/$key.holder
+
+holder_of() {
+    pid=""
+    started=""
+    if [ -r "$holder" ]; then
+        read -r pid started < "$holder" || true
+    fi
+    if [ -z "$pid" ] || [ -z "$started" ]; then
+        echo "whose holder recorded no process (it has only just started, or it is an older xmakew)"
+    elif kill -0 "$pid" 2>/dev/null; then
+        echo "which process $pid has held for $(( $(date +%s) - started )) s (its log is $xmakes/$key.log)"
+    else
+        echo "which process $pid held for $(( $(date +%s) - started )) s and which has ended, while a process it started still holds the lock (its log is $xmakes/$key.log)"
+    fi
+}
+
 exclusively() {
     lockfile=$1
     shift
+    limit=${REVENANT_XMAKE_BUILD_WAIT:-1800}
+    poll=${REVENANT_XMAKE_BUILD_POLL:-30}
+    case $limit$poll in
+        *[!0-9]*|"")
+            echo "xmakew: REVENANT_XMAKE_BUILD_WAIT is $limit and REVENANT_XMAKE_BUILD_POLL is $poll; both are whole numbers of seconds" >&2
+            return 1 ;;
+    esac
+    [ "$poll" -ge 1 ] || poll=1
     if command -v flock >/dev/null 2>&1; then
-        flock "$lockfile" "$@"
+        locker=flock
     elif command -v lockf >/dev/null 2>&1; then
-        lockf -k "$lockfile" "$@"
+        locker=lockf
     else
         echo "xmakew: neither flock nor lockf is installed, so two builds of the xmake could not be kept apart" >&2
         return 1
     fi
+    waited=0
+    while :; do
+        status=0
+        if [ "$locker" = flock ]; then
+            flock -E 75 -w "$poll" "$lockfile" "$@" || status=$?
+        else
+            lockf -s -k -t "$poll" "$lockfile" "$@" || status=$?
+        fi
+        if [ "$status" -ne 75 ]; then
+            return "$status"
+        fi
+        waited=$((waited + poll))
+        echo "xmakew: waited $waited s for the build of xmake $key, $(holder_of)" >&2
+        if [ "$waited" -ge "$limit" ]; then
+            echo "xmakew: gave up on the build of xmake $key after $waited s: if it has hung, stop the process above (and any make or compiler it started) and run this again; REVENANT_XMAKE_BUILD_WAIT sets how many seconds to wait (1800 by default)" >&2
+            return 1
+        fi
+    done
 }
 
 build_xmake() {
@@ -114,7 +157,8 @@ build_xmake() {
     work=$xmakes/$key.build.$$
     log=$xmakes/$key.log
     mkdir -p "$work/src"
-    trap 'rm -rf "$work"' EXIT INT TERM
+    printf '%s %s\n' "$$" "$(date +%s)" > "$holder"
+    trap 'rm -rf "$work" "$holder"' EXIT INT TERM
     echo "xmakew: building xmake $commit with its patches into $prefix, log in $log" >&2
     {
         git -C "$work/src" init -q
@@ -155,7 +199,7 @@ build_xmake() {
     ) >> "$log" 2>&1
     rm -rf "$prefix"
     mv "$work/install" "$prefix"
-    rm -rf "$work" "$log"
+    rm -rf "$work" "$log" "$holder"
     trap - EXIT INT TERM
 }
 

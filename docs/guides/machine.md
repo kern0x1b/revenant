@@ -183,7 +183,10 @@ pkg-config file) are the same for every worktree and never need to be rewritten.
 `./xmakew` takes the store from `REVENANT_STORE` (an absolute path) or `~/.revenant/store`, builds the pinned xmake into
 `<store>/xmake/<key>` once for the machine (under a lock on `<store>/xmake/<key>.lock`, so launchers that ask at once wait for
 one build and use it), runs it with `XMAKE_GLOBALDIR=<store>/xmake-global`, and links `xmake` and
-`xmake-global` of the cache to those. A linked worktree takes `<worktree>/.cache` for its cache when `REVENANT_CACHE` is
+`xmake-global` of the cache to those. A launcher that waits for another's build says so every 30 seconds (`REVENANT_XMAKE_BUILD_POLL`),
+naming the process that holds the lock (the builder records it in `<store>/xmake/<key>.holder`), how long it has held it and
+where its log is, and stops with an error after 1800 seconds (`REVENANT_XMAKE_BUILD_WAIT`), so a hung build does not block
+every launcher of that key without a word; stop the process it names and its children (`make`, the compiler) and run it again. A linked worktree takes `<worktree>/.cache` for its cache when `REVENANT_CACHE` is
 unset, and any folder `REVENANT_CACHE` names, empty or not, with no marker. What it holds is small: the token pool, the
 scratch of its tasks, the lowered caches, and (when a task needs them) `dyld` and `firmware`.
 
