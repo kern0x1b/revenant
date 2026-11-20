@@ -328,12 +328,14 @@ package("swift-runtime")
         do
             local arm64 = package:is_arch("arm64")
             local overlays = path.absolute("overlays")
+            local runtime_reads = import("@addon.revenant.apple.runtime_reads", {anonymous = true})
+            local lookup_check = runtime_reads.lookup_check()
             local overlay_patches = os.files(path.join(package:scriptdir(), "patches", "overlays", "*.patch"))
             table.sort(overlay_patches)
             for _, patch in ipairs(overlay_patches) do
                 os.vrunv("patch", {"-p1", "-i", patch}, {curdir = overlays})
             end
-            import("@addon.revenant.apple.lowered", {anonymous = true}).swift_overlays(overlays)
+            import("@addon.revenant.apple.lowered", {anonymous = true}).swift_overlays(overlays, nil, lookup_check.note)
 
             local installed_shims = path.join(install, "shims")
             local shim_modules = path.join(installed_shims, "module.modulemap")
@@ -359,7 +361,7 @@ package("swift-runtime")
                 for _, patch in ipairs(uikit_patches) do
                     os.vrunv("patch", {"-p1", "-i", patch}, {curdir = uikit})
                 end
-                import("@addon.revenant.apple.lowered", {anonymous = true}).lower_swift_overlay_folder(uikit, "AVFoundation")
+                import("@addon.revenant.apple.lowered", {anonymous = true}).lower_swift_overlay_folder(uikit, "AVFoundation", nil, lookup_check.note)
                 os.vcp(path.join(uikit, "stdlib", "public", "SwiftShims", "UIKitOverlayShims.h"), installed_shims .. "/")
                 if not io.readfile(shim_modules):find("_SwiftUIKitOverlayShims", 1, true) then
                     io.writefile(shim_modules, io.readfile(shim_modules) ..
@@ -432,7 +434,8 @@ package("swift-runtime")
             build_overlay("CoreFoundation", overlay_sources_of("CoreFoundation", {"CoreFoundation.swift"}),
                           {"-lswiftDarwin", "-framework", "CoreFoundation"})
             local lowered = import("@addon.revenant.apple.lowered", {anonymous = true})
-            local lowered_headers = lowered.overlay(toolchain:config("sdkdir"), path.absolute("lowered"), nil, {}, nil, triple)
+            local lowered_headers = lowered.overlay(toolchain:config("sdkdir"), path.absolute("lowered"), nil, {}, nil, triple, runtime_reads.allowed_headers())
+            lookup_check.finish()
             local flat = import("@addon.revenant.apple.flat_classes", {anonymous = true})
             local flat_flags = flat.link_flags(flat.stub_directory(toolchain:config("sdkdir"), path.join(generated, "flat-stubs")))
             local lowered_include = lowered.include_directory(path.absolute("lowered"))

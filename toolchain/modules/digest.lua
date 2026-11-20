@@ -62,12 +62,13 @@ local RECIPES = {
      inputs = {"packages/s/swift-runtime/xmake.lua", "toolchain/modules/apple/shared_runtime.lua",
                "toolchain/modules/apple/compat.lua", "toolchain/modules/apple/dyld.lua", "toolchain/modules/apple/flat_classes.lua",
                "toolchain/modules/apple/lowered.lua", "toolchain/modules/apple/runtime_guards.lua", "toolchain/modules/apple/swift_interface.lua",
-               "frameworks/Backports/tools/lowered-members.txt", "frameworks/Backports/tools/device-members.txt",
+               "toolchain/modules/apple/runtime_reads.lua",
                "toolchain/src/swift-runtime/**",
                "toolchain/modules/gyb/bigint.lua", "toolchain/modules/gyb/compiler.lua", "toolchain/modules/gyb/lexer.lua", "toolchain/modules/gyb/main.lua",
                "toolchain/modules/gyb/parser.lua", "toolchain/modules/gyb/random.lua", "toolchain/modules/gyb/runtime.lua", "toolchain/modules/gyb/template.lua",
                "packages/s/swift-runtime/patches/**.patch", "packages/s/swift/xmake.lua", "packages/s/swift/patches/**.patch",
-               "toolchain/src/apple-compat/src/*.c", "toolchain/src/apple-compat/src/*.h", "toolchain/src/apple-compat/include/revenant/*.h"}},
+               "toolchain/src/apple-compat/src/*.c", "toolchain/src/apple-compat/src/*.h", "toolchain/src/apple-compat/include/revenant/*.h"},
+     computed = "runtime_reads"},
     {folder = "packages/l/libcxx", variable = "libcxx_sources_digest",
      inputs = {"packages/l/libcxx/xmake.lua", "packages/l/libcxx/patches/*.patch", "toolchain/modules/apple/shared_runtime.lua",
                "toolchain/src/apple-compat/src/*.c", "toolchain/src/apple-compat/src/*.h", "toolchain/src/apple-compat/include/revenant/*.h"}},
@@ -155,7 +156,19 @@ function recipes()
     return RECIPES
 end
 
-function sources(root, inputs)
+local function computed_text(name)
+    if name == "runtime_reads" then
+        local reads = import("@addon.revenant.apple.runtime_reads", {anonymous = true})
+        return reads.digest(import("@addon.revenant.workspace", {anonymous = true}).sdk())
+    end
+    raise("%s is not a computed digest input", name)
+end
+
+function recipe_digest(root, recipe)
+    return sources(root, recipe.inputs, recipe.computed and computed_text(recipe.computed) or nil)
+end
+
+function sources(root, inputs, computed)
     local digests = {}
     for _, input in ipairs(inputs) do
         local files = {path.join(root, input)}
@@ -169,8 +182,11 @@ function sources(root, inputs)
                 text = stripped(text)
             end
             local name = input:find("*", 1, true) and path.relative(file, root) or input
-            table.insert(digests, name .. "=" .. hash.strhash128(text))
+            table.insert(digests, name .. "=" .. hash.strhash128(#text > 0 and text or "\0empty"))
         end
+    end
+    if computed then
+        table.insert(digests, "computed=" .. computed)
     end
     return hash.strhash128(table.concat(digests, ";"))
 end
