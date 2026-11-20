@@ -25,8 +25,10 @@ RevenantRangeStatus revenant_range_header_parse(const char *value, long long tot
     *offset = 0;
     *length = 0;
     *to_end = 0;
-    if (!value)
-        return REVENANT_RANGE_INVALID;
+    if (!value) {
+        *to_end = 1;
+        return REVENANT_RANGE_OK;
+    }
     const char *p = value;
     if (p[0] != 'b' || p[1] != 'y' || p[2] != 't' || p[3] != 'e' || p[4] != 's' || p[5] != '=')
         return REVENANT_RANGE_INVALID;
@@ -59,6 +61,8 @@ RevenantRangeStatus revenant_range_header_parse(const char *value, long long tot
     if (total >= 0 && last >= total)
         last = total - 1;
     if (last < first)
+        return REVENANT_RANGE_INVALID;
+    if (last - first >= LLONG_MAX)
         return REVENANT_RANGE_INVALID;
     *offset = first;
     *length = last - first + 1;

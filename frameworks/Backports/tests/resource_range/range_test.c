@@ -1,4 +1,5 @@
 #include "RevenantRangeHeader.h"
+#include <limits.h>
 #include <stdio.h>
 
 static int failures = 0;
@@ -18,7 +19,7 @@ static void expect(const char *name, const char *value, long long total,
 
 int main(void)
 {
-    expect("missing", NULL, REVENANT_RANGE_TOTAL_UNKNOWN, REVENANT_RANGE_INVALID, 0, 0, 0);
+    expect("absent range is full content", NULL, REVENANT_RANGE_TOTAL_UNKNOWN, REVENANT_RANGE_OK, 0, 0, 1);
     expect("empty", "", REVENANT_RANGE_TOTAL_UNKNOWN, REVENANT_RANGE_INVALID, 0, 0, 0);
     expect("junk", "bytes=garbage", REVENANT_RANGE_TOTAL_UNKNOWN, REVENANT_RANGE_INVALID, 0, 0, 0);
     expect("letters", "bytes=abc-def", REVENANT_RANGE_TOTAL_UNKNOWN, REVENANT_RANGE_INVALID, 0, 0, 0);
@@ -29,6 +30,10 @@ int main(void)
     expect("whitespace", "bytes= 0-1", REVENANT_RANGE_TOTAL_UNKNOWN, REVENANT_RANGE_INVALID, 0, 0, 0);
     expect("two dashes", "bytes=1-2-3", REVENANT_RANGE_TOTAL_UNKNOWN, REVENANT_RANGE_INVALID, 0, 0, 0);
     expect("overflow", "bytes=999999999999999999999-", REVENANT_RANGE_TOTAL_UNKNOWN, REVENANT_RANGE_INVALID, 0, 0, 0);
+    expect("length overflows long long", "bytes=0-9223372036854775807", REVENANT_RANGE_TOTAL_UNKNOWN, REVENANT_RANGE_INVALID, 0, 0, 0);
+    expect("length at long long max", "bytes=1-9223372036854775807", REVENANT_RANGE_TOTAL_UNKNOWN, REVENANT_RANGE_OK, 1, LLONG_MAX, 0);
+    expect("multiple ranges", "bytes=0-99,200-299", REVENANT_RANGE_TOTAL_UNKNOWN, REVENANT_RANGE_INVALID, 0, 0, 0);
+    expect("multiple open ranges", "bytes=0-,200-", REVENANT_RANGE_TOTAL_UNKNOWN, REVENANT_RANGE_INVALID, 0, 0, 0);
 
     expect("closed range", "bytes=0-499", REVENANT_RANGE_TOTAL_UNKNOWN, REVENANT_RANGE_OK, 0, 500, 0);
     expect("middle range", "bytes=100-199", REVENANT_RANGE_TOTAL_UNKNOWN, REVENANT_RANGE_OK, 100, 100, 0);
