@@ -1,3 +1,6 @@
+#ifndef XL_SWIFTDEMO_INCLUDES_H
+#define XL_SWIFTDEMO_INCLUDES_H
+
 #include "common-includes.h"
 #include <math.h>
 #include <execinfo.h>
@@ -9,3 +12,5 @@
 #include <os/log.h>
 #include <os/signpost.h>
 #include <objc/message.h>
+
+#endif

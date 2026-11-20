@@ -59,6 +59,31 @@ function failures(opt)
             table.insert(found, "data.tar.gz must carry " .. expected .. ": " .. data_listing)
         end
     end
+    local restarted = debian.write({control = control, version = "1.2.3", root = root,
+                                    restart = {"MobileSafari", "Preferences"},
+                                    outputdir = path.join(folder, "restarted")})
+    local restarted_parts = members(restarted)
+    io.writefile(path.join(folder, "restarted.tar.gz"), restarted_parts["control.tar.gz"], {encoding = "binary"})
+    local restarted_extracted = path.join(folder, "restarted-extracted")
+    os.mkdir(restarted_extracted)
+    os.runv("tar", {"-xzf", path.join(folder, "restarted.tar.gz"), "-C", restarted_extracted})
+    local postinst = io.readfile(path.join(restarted_extracted, "postinst"))
+    for _, line in ipairs({"killall MobileSafari 2>/dev/null || true", "killall Preferences 2>/dev/null || true", "exit 0"}) do
+        if not postinst:find(line, 1, true) then
+            table.insert(found, "a restart package carries a postinst that kills the named processes: " .. tostring(postinst))
+        end
+    end
+    local scripts = path.join(folder, "scripts")
+    os.mkdir(scripts)
+    io.writefile(path.join(scripts, "postinst"), "#!/bin/sh\n")
+    local refused = fixtures.refusal(function ()
+        debian.write({control = control, version = "1.2.3", root = root, scripts = scripts,
+                      restart = {"MobileSafari"}, outputdir = folder})
+    end)
+    if not refused or not refused:find("both the maintainer scripts", 1, true) then
+        table.insert(found, "a generated postinst must not overwrite one supplied by the package")
+    end
+
     local extracted = path.join(folder, "extracted")
     os.mkdir(extracted)
     io.writefile(path.join(folder, "control.tar.gz"), parts["control.tar.gz"], {encoding = "binary"})

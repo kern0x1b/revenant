@@ -15,6 +15,8 @@ local TESTS = path.absolute(path.join(os.scriptdir(), "tests"))
 local SKELETON = path.join(ROOT, "build", "generated", "backports", "skeleton")
 local INSTALL_FOLDER = "/usr/lib/revenant/org.revenant.backports"
 local SRC = path.absolute(path.join(os.scriptdir(), "src"))
+local STD_UNEXPORTED = path.join(os.getenv("REVENANT_CACHE") or path.join(ROOT, "build"), "std_namespace.unexp")
+local STD_UNEXPORTED_WRITTEN = false
 
 local SELECTED = os.getenv("REVENANT_BACKPORTS_LIBRARIES")
 SELECTED = SELECTED ~= "" and SELECTED or nil
@@ -118,6 +120,7 @@ if is_plat("iphoneos") then
                         "-Wl,-no_encryption", "-Wl,-rename_section,__DATA,__objc_catlist,__DATA,__port_catlist", {force = true})
             on_load(function (target)
                 target:add("shflags", table.unpack(import("@addon.revenant.apple.backports_versions", {anonymous = true}).flags()))
+                target:add("shflags", "-Wl,-unexported_symbols_list," .. STD_UNEXPORTED, {force = true})
             end)
             after_build(function (target)
                 import("@addon.revenant.apple.backports_versions", {anonymous = true}).check(target:targetfile())
@@ -176,6 +179,14 @@ if is_plat("iphoneos") then
                     end
                 end)
             end
+            after_build(function (target)
+                for line in os.iorunv("nm", {"-gU", target:targetfile()}):gmatch("[^\n]+") do
+                    local name = line:match("(%S+)$") or ""
+                    if name:find("St3__1", 1, true) then
+                        raise("%s exports %s, a std::__1 symbol a Backports dylib must keep hidden", target:targetfile(), name)
+                    end
+                end
+            end)
             if library.name == "PhotosBackports" then
                 after_build(function (target)
                     local load = os.iorunv("otool", {"-l", target:targetfile()})
@@ -207,6 +218,10 @@ if is_plat("iphoneos") then
                 add_syslinks(name)
             end
             on_config(function (target)
+                if not STD_UNEXPORTED_WRITTEN then
+                    io.writefile(STD_UNEXPORTED, "*St3__1*\n")
+                    STD_UNEXPORTED_WRITTEN = true
+                end
                 if library.name == "SystemBackports" then
                     target:add("includedirs", path.join(target:pkg("apple-compat"):installdir(), "share", "apple-compat", "process-wide"))
                 end
@@ -847,11 +862,11 @@ else
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua", naturallanguageoverlay = "natural_language_overlay_test.lua", usernotifications = "user_notifications_test.lua",
                                   network = "network_test.lua", networkpath = "network_path_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", securetransport = "security_ssl_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua", facts_error = "facts_error_test.lua",
                                   device = "device_members_test.lua", compression = "compression_roundtrip_test.lua",
-                                  presentation = "presentation_intent_test.lua", localelanguage = "locale_language_test.lua", attributedstringmarkdown = "attributed_string_markdown_test.lua", markdownparser = "markdown_parser_oracle_test.lua", dateformatstyle = "date_format_style_test.lua", urlpercentencoded = "url_percent_encoded_test.lua",pastematching = "paste_matching_test.lua", documentpickerrules = "document_picker_rules_test.lua",exports = "lowered_exports_test.lua", constants = "constants_test.lua", loadglobals = "load_globals_test.lua", deviceglobals = "device_globals_test.lua", devicereads = "device_reads_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
+                                  presentation = "presentation_intent_test.lua", localelanguage = "locale_language_test.lua", attributedstringmarkdown = "attributed_string_markdown_test.lua", markdownparser = "markdown_parser_oracle_test.lua", dateformatstyle = "date_format_style_test.lua", urlpercentencoded = "url_percent_encoded_test.lua",pastematching = "paste_matching_test.lua", documentpickerrules = "document_picker_rules_test.lua",exports = "lowered_exports_test.lua", staleobjects = "stale_objects_test.lua", constants = "constants_test.lua", loadglobals = "load_globals_test.lua", deviceglobals = "device_globals_test.lua", devicereads = "device_reads_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
                                   vfs = "lowered_vfs_test.lua", modules = "lowered_modules_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua", sec_access_control = "security_access_control_test.lua", sec_shared_web = "security_shared_web_test.lua", sec_items = "security_item_test.lua", sec_keys = "security_key_test.lua", la_passcode = "localauth_passcode_test.lua", air2es = "air2es_test.lua",
                                   webkitvalues = "webkit_values_test.lua", webkitmessage = "webkit_script_message_test.lua", webkittiling = "webkit_tiling_test.lua",
                                   webkitwindow = "webkit_window_test.lua", webkitdownload = "webkit_download_test.lua", webkithistoryplan = "webkit_history_plan_test.lua",
-                                  clock = "clock_uptime_test.lua", coretelephony = "coretelephony_test.lua", swiftflags = "swift_flags_test.lua", reparent = "reparent_test.lua"})
+                                  clock = "clock_uptime_test.lua", coretelephony = "coretelephony_test.lua", swiftflags = "swift_flags_test.lua", reparent = "reparent_test.lua", typing_oracle = "uitextview_typing_oracle_test.lua"})
 end
 
 option("backports_libs", {type = "string", default = "", showmenu = true,
@@ -859,7 +874,7 @@ option("backports_libs", {type = "string", default = "", showmenu = true,
 
 local RUNTIME = path.absolute(path.join(os.scriptdir(), "tests", "runtime"))
 local RUNTIME_LIBS = get_config("backports_libs")
-local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports", "PhotosBackports", "CloudKitBackports"}
+local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports", "PhotosBackports", "CloudKitBackports", "CoreTextBackports"}
 
 if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
     add_requires("revenant@emulator-guest", {alias = "emulator-guest"})
@@ -876,9 +891,9 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
             add_linkdirs(RUNTIME_LIBS)
             add_links(table.unpack(RUNTIME_LINKS))
         else
-            add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports", "IOSurfaceBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "PhotosBackports", "CloudKitBackports")
+            add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports", "IOSurfaceBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "PhotosBackports", "CloudKitBackports", "CoreTextBackports")
         end
-        add_frameworks("Foundation", "UIKit", "CoreGraphics", "QuartzCore", "OpenAL", "AudioToolbox", "AssetsLibrary")
+        add_frameworks("Foundation", "UIKit", "CoreGraphics", "CoreText", "QuartzCore", "OpenAL", "AudioToolbox", "AssetsLibrary")
         add_syslinks("objc")
     target_end()
 
@@ -938,6 +953,13 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         add_tests("scenekit_members")
         add_tests("alias_public_name")
         add_tests("alias_system_class")
+        add_tests("cf_mutable_cast")
+        add_tests("gesture_failure")
+        add_tests("uitextview_typing_attributes")
+        add_tests("coretext_fallback_probe")
+        add_tests("coretext_fallback_cascade")
+        add_tests("caspring_animation_cast")
+        add_tests("caspring_animation_coding")
         add_tests("protocol_uimutabletraits")
         add_tests("trait_style_default")
         add_tests("protocol_ck_key_value_setting")
@@ -1189,6 +1211,9 @@ local function host_tests(folder, tests, library, frameworks, options)
             add_mflags("-fobjc-arc")
             add_mxxflags("-fobjc-arc")
             add_ldflags("-fobjc-arc")
+            if options.prefix then
+                add_mflags("-include " .. path.join(TESTS, options.prefix))
+            end
             add_cxxflags(table.unpack(options.cxxflags or {}))
             add_frameworks(table.unpack(frameworks or {"Foundation"}))
             add_syslinks(table.unpack(options.syslinks or {}))
@@ -1213,6 +1238,7 @@ end
 if not is_plat("iphoneos") then
     add_requires("revenant@ffmpeg", {alias = "ffmpeg"})
     host_tests("Foundation", FOUNDATION_TESTS, nil, {"Foundation"}, {syslinks = {"sqlite3"}})
+    host_tests("Foundation", {session_configuration = {"NSURLSessionConfiguration.m", "RevenantCookieStorage.m"}}, nil, {"Foundation"}, {prefix = "session_configuration_prefix.h"})
     host_tests("AVFoundation", {qr_decoder = {"RevenantQRCode.c", "RevenantQRECI.c"}, audio_preset = {"RevenantAudioUnitPreset.m"}}, nil, {"Foundation", "CoreImage", "CoreGraphics", "AudioToolbox"})
     host_tests("AVFoundation", {player_volume = {"AVPlayerVolume7.m"}, track_frame_duration = {"AVAssetTrackFrameDuration7.m"}}, nil, {"Foundation", "AVFoundation", "CoreMedia", "CoreVideo"})
     if is_arch("arm64", "x86_64") then

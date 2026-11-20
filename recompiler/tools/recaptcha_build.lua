@@ -18,8 +18,14 @@ local RUNTIME_LIBRARIES = {"libswiftCore", "libc++.1", "libc++abi.1", "libswiftC
                             "libswift_Concurrency", "libswiftFoundation", "libswiftCoreGraphics", "libswiftNetwork", "libswiftCryptoKit"}
 local OVERLAYS = {"Core", "CoreFoundation", "Darwin", "Dispatch", "ObjectiveC", "_Concurrency", "Foundation", "CoreGraphics", "Network"}
 
+local GUEST_BASE = 0x2e000000
+
 function sdk_sha256()
     return SDK_SHA256
+end
+
+function guest_base()
+    return GUEST_BASE
 end
 
 function telegram_build()
@@ -144,7 +150,7 @@ function translate_sdk(e, out, sdk, libs, extra)
         table.insert(replaces, "/usr/lib/swift/libswift" .. overlay .. ".dylib=" .. path.join(libs, "libswift" .. overlay .. ".dylib"))
     end
     table.insert(replaces, "/System/Library/Frameworks/CryptoKit.framework/CryptoKit=" .. path.join(libs, "libswiftCryptoKit.dylib"))
-    local options = {XL_LIBRARY = "1", XL_BASE = "0x18000000", XL_INSTALL_NAME = "@executable_path/Frameworks/RecaptchaEnterprise.dylib",
+    local options = {XL_LIBRARY = "1", XL_BASE = string.format("0x%x", GUEST_BASE), XL_INSTALL_NAME = "@executable_path/Frameworks/RecaptchaEnterprise.dylib",
                      XL_REPLACES = table.concat(replaces, " "), XL_SWIFT_HOST_ANCESTORS = "1"}
     for key, value in pairs(extra or {}) do
         options[key] = value

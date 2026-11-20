@@ -1,0 +1,140 @@
+From 376f2530096bf866820340e521abf91c58c43f32 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Thu, 19 Nov 2026 12:06:57 +0100
+Subject: [PATCH] Lift the AArch64 exclusive pair loads and stores through the
+ monitor
+
+LDXP and STXP were still a plain load and a plain store, with STXP
+always reporting success, because a 128-bit cmpxchg has no armv7
+lowering. Two threads in a load-pair, change, store-pair loop then lost
+updates: the Swift runtime keeps the status of a task, the status of an
+actor and the reference counts of a side table in 16-byte atomics that
+are changed by nothing else.
+
+The monitor gets a third exported slot for the second word.
+
+- LDXP and LDAXP of 64-bit registers load both words atomically (acquire
+  for the acquire form), record them and the address in the monitor, and
+  write them to the two registers. What is recorded is what memory held,
+  also when a register is the zero register: the compiler's 128-bit
+  atomic store is a load-pair into nothing followed by a store-pair.
+- STXP and STLXP of 64-bit registers call rellume_aarch64_stxp(address,
+  armed, the two recorded words, the two new words), which the program
+  that links the lifted code provides. It stores both words only when the
+  pair still holds the recorded words, the two steps under a lock of its
+  own, and returns the status: 0 when it stored, 1 otherwise. The monitor
+  is cleared either way.
+- The address of a 64-bit pair is recorded with its lowest bit set. An
+  exclusive access is aligned, so that bit is free, and with it a
+  single-word exclusive store never matches the monitor of a pair load,
+  nor a pair store the monitor of a single-word load.
+- The pair forms of 32-bit registers are 64 bits wide, which armv7 has
+  an exclusive pair for: they lift as the 64-bit LDXR and STXR do, one
+  atomic load and one cmpxchg.
+
+As with the single-word forms, a store succeeds when the pair was written
+and restored to the loaded words in between.
+---
+ data/rellume/cpustruct-aarch64.json |  3 +-
+ src/a64/main.cc                     | 64 ++++++++++++++++++++++++++---
+ 2 files changed, 61 insertions(+), 6 deletions(-)
+
+diff --git a/data/rellume/cpustruct-aarch64.json b/data/rellume/cpustruct-aarch64.json
+index f98329c..2e1b8a3 100644
+--- a/data/rellume/cpustruct-aarch64.json
++++ b/data/rellume/cpustruct-aarch64.json
+@@ -74,5 +74,6 @@
+     {"name": "v31", "size": 16, "reg": ["VEC(31)", "V2I64"], "export": true},
+ 
+     {"name": "excl_addr", "size": 8, "reg": ["INVALID", "I64"], "export": true},
+-    {"name": "excl_val", "size": 8, "reg": ["INVALID", "I64"], "export": true}
++    {"name": "excl_val", "size": 8, "reg": ["INVALID", "I64"], "export": true},
++    {"name": "excl_val2", "size": 8, "reg": ["INVALID", "I64"], "export": true}
+ ]
+diff --git a/src/a64/main.cc b/src/a64/main.cc
+index b0ee70b..d404006 100644
+--- a/src/a64/main.cc
++++ b/src/a64/main.cc
+@@ -37,6 +37,7 @@
+ #include <llvm/IR/DerivedTypes.h>
+ #include <llvm/IR/IRBuilder.h>
+ #include <llvm/IR/Instruction.h>
++#include <llvm/IR/Module.h>
+ #include <llvm/IR/Value.h>
+ #include <llvm/Transforms/Utils/Cloning.h>
+ 
+@@ -766,13 +767,66 @@ bool Lifter::Lift(const Instr& inst) {
+     case farmdec::A64_CLREX:
+         irb.CreateStore(irb.getInt64(0), fi.sptr[SptrIdx::aarch64::EXCL_ADDR]);
+         break;
+-    case farmdec::A64_LDXP:
+-        LiftLoadStore(a64, w32);
++    case farmdec::A64_LDXP: {
++        bool narrow = (fad_get_mem_extend(a64.flags) & 3) == farmdec::SZ_W;
++        bool acq = a64.ldst_order.load != farmdec::MO_NONE;
++        auto order = acq ? llvm::AtomicOrdering::Acquire : llvm::AtomicOrdering::Monotonic;
++        auto i64 = irb.getInt64Ty();
++        auto ptr = Addr(i64, a64.rn);
++        auto addr = irb.CreatePtrToInt(ptr, i64);
++        auto low = irb.CreateAlignedLoad(i64, ptr, llvm::Align(8));
++        low->setOrdering(order);
++        irb.CreateStore(low, fi.sptr[SptrIdx::aarch64::EXCL_VAL]);
++        if (narrow) {
++            irb.CreateStore(addr, fi.sptr[SptrIdx::aarch64::EXCL_ADDR]);
++            SetGp(a64.rt, /*w32=*/true, irb.CreateTrunc(low, irb.getInt32Ty()));
++            SetGp(a64.rt2, /*w32=*/true, irb.CreateTrunc(irb.CreateLShr(low, 32), irb.getInt32Ty()));
++            break;
++        }
++        auto high = irb.CreateAlignedLoad(i64, irb.CreateConstGEP1_64(i64, ptr, 1), llvm::Align(8));
++        high->setOrdering(order);
++        irb.CreateStore(high, fi.sptr[SptrIdx::aarch64::EXCL_VAL2]);
++        irb.CreateStore(irb.CreateOr(addr, irb.getInt64(1)), fi.sptr[SptrIdx::aarch64::EXCL_ADDR]);
++        SetGp(a64.rt, /*w32=*/false, low);
++        SetGp(a64.rt2, /*w32=*/false, high);
+         break;
+-    case farmdec::A64_STXP:
+-        LiftLoadStore(a64, w32);
+-        SetGp(a64.ldst_order.rs, w32, getIntN(bits, 0));
++    }
++    case farmdec::A64_STXP: {
++        bool narrow = (fad_get_mem_extend(a64.flags) & 3) == farmdec::SZ_W;
++        bool rel = a64.ldst_order.store != farmdec::MO_NONE;
++        auto i64 = irb.getInt64Ty();
++        auto ptr = Addr(i64, a64.rn);
++        auto addr = irb.CreatePtrToInt(ptr, i64);
++        auto monitor_addr = irb.CreateLoad(i64, fi.sptr[SptrIdx::aarch64::EXCL_ADDR]);
++        auto monitor_val = irb.CreateLoad(i64, fi.sptr[SptrIdx::aarch64::EXCL_VAL]);
++        llvm::Value* failed;
++        if (narrow) {
++            auto armed = irb.CreateICmpEQ(addr, monitor_addr);
++            auto value = irb.CreateOr(irb.CreateZExt(GetGp(a64.rt, /*w32=*/true), i64),
++                                      irb.CreateShl(irb.CreateZExt(GetGp(a64.rt2, /*w32=*/true), i64), 32));
++            auto desired = irb.CreateSelect(armed, value, monitor_val);
++            auto success = rel ? llvm::AtomicOrdering::Release : llvm::AtomicOrdering::Monotonic;
++            auto pair = irb.CreateAtomicCmpXchg(ptr, monitor_val, desired, llvm::MaybeAlign(8), success, llvm::AtomicOrdering::Monotonic);
++            auto stored = irb.CreateAnd(armed, irb.CreateExtractValue(pair, 1));
++            failed = irb.CreateZExt(irb.CreateNot(stored), irb.getInt32Ty());
++        } else {
++            auto armed = irb.CreateICmpEQ(irb.CreateOr(addr, irb.getInt64(1)), monitor_addr);
++            auto monitor_high = irb.CreateLoad(i64, fi.sptr[SptrIdx::aarch64::EXCL_VAL2]);
++            llvm::AttrBuilder attrs(irb.getContext());
++            attrs.addAttribute(llvm::Attribute::NoUnwind);
++            attrs.addAttribute(llvm::Attribute::WillReturn);
++            attrs.addAttribute(llvm::Attribute::NoFree);
++            auto i32 = irb.getInt32Ty();
++            auto callee = GetModule()->getOrInsertFunction(
++                "rellume_aarch64_stxp", llvm::FunctionType::get(i32, {irb.getPtrTy(), i32, i64, i64, i64, i64}, /*isVarArg=*/false),
++                llvm::AttributeList::get(irb.getContext(), llvm::AttributeList::FunctionIndex, attrs));
++            failed = irb.CreateCall(callee, {ptr, irb.CreateZExt(armed, i32), monitor_val, monitor_high,
++                                             GetGp(a64.rt, /*w32=*/false), GetGp(a64.rt2, /*w32=*/false)});
++        }
++        irb.CreateStore(irb.getInt64(0), fi.sptr[SptrIdx::aarch64::EXCL_ADDR]);
++        SetGp(a64.ldst_order.rs, /*w32=*/true, failed);
+         break;
++    }
+     case farmdec::A64_LDP:
+     case farmdec::A64_STP:
+     case farmdec::A64_LDR:
+-- 
+2.54.0 (Apple Git-157)
+

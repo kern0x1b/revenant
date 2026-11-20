@@ -948,8 +948,9 @@ function rebind(file, moves, libraries)
     end
     local cmds_end = header_end - (signature and signature.size or 0) + added_bytes
     if cmds_end > first then
-        raise("%s has no room in its header for %d bytes of load command: its load commands end at %#x and its first section begins at %#x; relink it with -headerpad to make room",
-              file, added_bytes, header_end, first)
+        local room = first - (header_end - (signature and signature.size or 0))
+        raise("%s has no room in its header: rebinding needs %d bytes of new load command, but only %d bytes fit between the end of its load commands at %#x and its first section at %#x; relink it with -Wl,-headerpad_max_install_names",
+              file, added_bytes, room, header_end, first)
     end
     if cmds_end > header_end and data:sub(header_end + 1, cmds_end):find("[^%z]") then
         raise("the bytes of %s between its load commands and its first section are not padding, so a load command cannot go there", file)

@@ -1,10 +1,10 @@
 #include "objc_abi.h"
+#include "xl_diag.h"
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
 #import <objc/runtime.h>
 #include <Block.h>
 #include <dlfcn.h>
-#include <libkern/OSAtomic.h>
 #include <pthread.h>
 #include <fcntl.h>
 #include <stdarg.h>
@@ -14,6 +14,7 @@
 
 #include "xl_bridge.h"
 #include "xl_host.h"
+#include "xl_shared_table.h"
 
 struct xl_guest_class {
     uint64_t isa;
@@ -69,39 +70,41 @@ static int xl_namespaced_class(uintptr_t guest, const char *name)
 }
 
 static volatile int xl_shadows_active;
-static OSSpinLock xl_table_lock = OS_SPINLOCK_INIT;
-static CFMutableDictionaryRef xl_guest_to_host;
-static CFMutableDictionaryRef xl_host_to_guest;
-static CFMutableDictionaryRef xl_unbuilt_static;
-static CFMutableDictionaryRef xl_shadow_imps;
-static CFMutableDictionaryRef xl_guest_imp_cache;
-static CFMutableDictionaryRef xl_host_twin;
-static CFMutableDictionaryRef xl_twin_host;
-static CFMutableDictionaryRef xl_twin_published;
-static CFMutableDictionaryRef xl_tail_of_shadow;
-static CFMutableDictionaryRef xl_destructors;
-static CFMutableDictionaryRef xl_static_class_set;
+static struct xl_shared_lock xl_table_lock = XL_SHARED_LOCK_INITIALIZER;
+static struct xl_shared_table xl_guest_to_host;
+static struct xl_shared_table xl_host_to_guest;
+static struct xl_shared_table xl_unbuilt_static;
+static struct xl_shared_table xl_shadow_imps;
+static struct xl_shared_table xl_guest_imp_cache;
+static struct xl_shared_table xl_host_twin;
+static struct xl_shared_table xl_twin_host;
+static struct xl_shared_table xl_twin_published;
+static struct xl_shared_table xl_tail_of_shadow;
+static struct xl_shared_table xl_destructors;
+static struct xl_shared_table xl_static_class_set;
 static SEL xl_cxx_destruct_selector;
 static pthread_mutex_t xl_build_lock;
 static pthread_once_t xl_shadow_once = PTHREAD_ONCE_INIT;
 static uint64_t xl_lazy_namer;
 
-static int xl_shadow_logging = -1;
+static struct xl_diag_flag xl_shadow_logging = {"xl-shadow-log", 0};
 
 int xl_shadow_log_enabled(void)
 {
-    if (xl_shadow_logging < 0)
-        xl_shadow_logging = access("/private/var/revenant/xl-shadow-log", F_OK) == 0;
-    return xl_shadow_logging;
+    return xl_diag_on(&xl_shadow_logging);
 }
 
 void xl_shadow_note(const char *format, ...)
 {
     if (!xl_shadow_log_enabled())
         return;
-    FILE *log = fopen("/private/var/revenant/xlate-shadow.log", "a");
-    if (!log)
+    int descriptor = xl_diag_open("xlate-shadow.log", O_APPEND);
+    FILE *log = descriptor >= 0 ? fdopen(descriptor, "a") : NULL;
+    if (!log) {
+        if (descriptor >= 0)
+            close(descriptor);
         return;
+    }
     va_list arguments;
     va_start(arguments, format);
     vfprintf(log, format, arguments);
@@ -116,21 +119,23 @@ static void xl_shadow_setup(void)
     pthread_mutexattr_init(&attribute);
     pthread_mutexattr_settype(&attribute, PTHREAD_MUTEX_RECURSIVE);
     pthread_mutex_init(&xl_build_lock, &attribute);
-    xl_guest_to_host = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
-    xl_host_to_guest = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
-    xl_unbuilt_static = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
-    xl_shadow_imps = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
-    xl_host_twin = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
-    xl_twin_host = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
-    xl_twin_published = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
-    xl_tail_of_shadow = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
-    xl_destructors = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+    xl_shared_write_begin(&xl_table_lock);
+    xl_guest_to_host = xl_shared_table_make(&xl_table_lock, NULL);
+    xl_host_to_guest = xl_shared_table_make(&xl_table_lock, NULL);
+    xl_unbuilt_static = xl_shared_table_make(&xl_table_lock, NULL);
+    xl_shadow_imps = xl_shared_table_make(&xl_table_lock, NULL);
+    xl_guest_imp_cache = xl_shared_table_make(&xl_table_lock, &kCFTypeDictionaryKeyCallBacks);
+    xl_host_twin = xl_shared_table_make(&xl_table_lock, NULL);
+    xl_twin_host = xl_shared_table_make(&xl_table_lock, NULL);
+    xl_twin_published = xl_shared_table_make(&xl_table_lock, NULL);
+    xl_tail_of_shadow = xl_shared_table_make(&xl_table_lock, NULL);
+    xl_destructors = xl_shared_table_make(&xl_table_lock, NULL);
     xl_cxx_destruct_selector = sel_registerName(".cxx_destruct");
-    xl_static_class_set = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
+    xl_static_class_set = xl_shared_table_make(&xl_table_lock, NULL);
     for (const uint32_t *object = xl_swift_static_classes; *object; object++)
-        CFDictionarySetValue(xl_static_class_set, (const void *)(uintptr_t)*object, (const void *)(uintptr_t)*object);
+        xl_shared_held_set(&xl_static_class_set, (const void *)(uintptr_t)*object, (const void *)(uintptr_t)*object);
     for (const uint32_t *object = xl_swift_listed_classes; *object; object++)
-        CFDictionarySetValue(xl_static_class_set, (const void *)(uintptr_t)*object, (const void *)(uintptr_t)*object);
+        xl_shared_held_set(&xl_static_class_set, (const void *)(uintptr_t)*object, (const void *)(uintptr_t)*object);
     for (const uint32_t *object = xl_swift_static_classes; *object; object++) {
         struct xl_guest_class *c = (struct xl_guest_class *)(uintptr_t)*object;
         const struct xl_guest_ro *ro = (const struct xl_guest_ro *)(uintptr_t)(c->bits & ~7ull);
@@ -138,12 +143,13 @@ static void xl_shadow_setup(void)
             continue;
         if ((c->bits & 3) == 2)
             c->bits = (c->bits & ~3ull) | 1;
-        CFDictionarySetValue(xl_unbuilt_static, (const void *)(uintptr_t)*object, (const void *)(uintptr_t)*object);
+        xl_shared_held_set(&xl_unbuilt_static, (const void *)(uintptr_t)*object, (const void *)(uintptr_t)*object);
         if (c->isa)
-            CFDictionarySetValue(xl_unbuilt_static, (const void *)(uintptr_t)c->isa, (const void *)(uintptr_t)*object);
+            xl_shared_held_set(&xl_unbuilt_static, (const void *)(uintptr_t)c->isa, (const void *)(uintptr_t)*object);
     }
     if (xl_swift_static_classes[0])
         xl_shadows_active = 1;
+    xl_shared_end(&xl_table_lock);
 }
 
 void xl_shadow_init(void)
@@ -151,19 +157,14 @@ void xl_shadow_init(void)
     pthread_once(&xl_shadow_once, xl_shadow_setup);
 }
 
-static const void *xl_table_get(CFMutableDictionaryRef table, uintptr_t key)
+static const void *xl_table_get(const struct xl_shared_table *table, uintptr_t key)
 {
-    OSSpinLockLock(&xl_table_lock);
-    const void *value = CFDictionaryGetValue(table, (const void *)key);
-    OSSpinLockUnlock(&xl_table_lock);
-    return value;
+    return xl_shared_get(table, (const void *)key);
 }
 
-static void xl_table_set(CFMutableDictionaryRef table, uintptr_t key, const void *value)
+static void xl_table_set(const struct xl_shared_table *table, uintptr_t key, const void *value)
 {
-    OSSpinLockLock(&xl_table_lock);
-    CFDictionarySetValue(table, (const void *)key, value);
-    OSSpinLockUnlock(&xl_table_lock);
+    xl_shared_set(table, (const void *)key, value);
 }
 
 struct xl_word_kinds {
@@ -187,6 +188,10 @@ static char xl_word_kind(const char *type)
         return 'S';
     if (*type == 'Q')
         return 'U';
+    if (*type == 'f')
+        return 'F';
+    if (*type == 'd')
+        return 'D';
     return *type && strchr(":*^", *type) ? 'P' : 'I';
 }
 
@@ -209,21 +214,24 @@ static IMP xl_guest_method_imp(uint64_t guest, SEL selector, const char *types)
 {
     struct xl_word_kinds kinds = xl_word_kinds_of(types);
     int owned = kinds.result == 'O' && xl_selector_returns_owned(sel_getName(selector));
-    IMP imp = imp_implementationWithBlock(^uintptr_t(id self_, uintptr_t a, uintptr_t b, uintptr_t c, uintptr_t d) {
+    int floating = kinds.result == 'F' || kinds.result == 'D';
+    for (unsigned i = 0; i < 4; i++)
+        floating |= kinds.argument[i] == 'F' || kinds.argument[i] == 'D';
+    IMP imp = imp_implementationWithBlock(^uint64_t(id self_, uintptr_t a, uintptr_t b, uintptr_t c, uintptr_t d) {
+        if (floating) {
+            const uintptr_t words[8] = {a, b, c, d, 0, 0, 0, 0};
+            const uint64_t lead[2] = {xl_object_out((uintptr_t)self_), (uint64_t)(uintptr_t)selector};
+            uint64_t floated = xl_invoke_typed(guest, lead, 2, kinds.argument, 4, words, kinds.result);
+            if (kinds.result == 'F' || kinds.result == 'D')
+                return floated;
+            return owned ? (uint64_t)xl_object_in_owned(floated, "guest method result", 0) : (uint64_t)xl_kind_in(kinds.result, floated, "guest method result");
+        }
         uint64_t arguments[6] = {xl_object_out((uintptr_t)self_), (uint64_t)(uintptr_t)selector, xl_kind_out(kinds.argument[0], a),
                                  xl_kind_out(kinds.argument[1], b), xl_kind_out(kinds.argument[2], c), xl_kind_out(kinds.argument[3], d)};
-        int traced = xl_watch_thunk_wanted(selector);
-        if (traced)
-            xl_watch_log("xl-watch: the host calls the guest %s on %p (%s) with 0x%lx 0x%lx 0x%lx 0x%lx, the guest receives x2=0x%llx x3=0x%llx x4=0x%llx x5=0x%llx", sel_getName(selector),
-                         (void *)self_, self_ ? object_getClassName(self_) : "nil", (unsigned long)a, (unsigned long)b, (unsigned long)c, (unsigned long)d,
-                         (unsigned long long)arguments[2], (unsigned long long)arguments[3], (unsigned long long)arguments[4], (unsigned long long)arguments[5]);
         uint64_t result = xl_invoke_n(guest, arguments, 6);
-        uintptr_t converted = owned ? (uintptr_t)xl_object_in_owned(result, "guest method result", 0) : (uintptr_t)xl_kind_in(kinds.result, result, "guest method result");
-        if (traced)
-            xl_watch_log("xl-watch: the guest %s on %p returned 0x%llx, the host gets 0x%lx", sel_getName(selector), (void *)self_, (unsigned long long)result, (unsigned long)converted);
-        return converted;
+        return owned ? (uintptr_t)xl_object_in_owned(result, "guest method result", 0) : (uintptr_t)xl_kind_in(kinds.result, result, "guest method result");
     });
-    xl_table_set(xl_shadow_imps, (uintptr_t)imp, (const void *)(uintptr_t)guest);
+    xl_table_set(&xl_shadow_imps, (uintptr_t)imp, (const void *)(uintptr_t)guest);
     return imp;
 }
 
@@ -231,19 +239,21 @@ static const char *xl_skip_type(const char *type);
 
 static int xl_block_method_words(const char *types)
 {
-    unsigned count = 0;
+    unsigned count = 0, words = 0;
     for (const char *type = types; *type; count++) {
         const char *plain = type;
         while (*plain && strchr("rnNoORV", *plain))
             plain++;
         int block = plain[0] == '@' && plain[1] == '?';
-        if (!*plain || !strchr("v@#:*^cCsSiIlLBqQ", *plain) || (*plain == 'v' && count) || (block && count < 3))
+        if (!*plain || !strchr("v@#:*^cCsSiIlLBqQfd", *plain) || (*plain == 'v' && count) || (block && count < 3))
             return 0;
+        if (count >= 3)
+            words += *plain == 'd' ? 2 : 1;
         type = xl_skip_type(type);
         while (*type >= '0' && *type <= '9')
             type++;
     }
-    return count >= 3 && count <= 7;
+    return count >= 3 && count <= 7 && words <= 4;
 }
 
 static IMP xl_block_method_imp(uint64_t guest, SEL selector, const char *types)
@@ -251,14 +261,41 @@ static IMP xl_block_method_imp(uint64_t guest, SEL selector, const char *types)
     if (!xl_block_method_words(types)) {
         return imp_implementationWithBlock(^uintptr_t(id self_) {
             char why[256];
-            snprintf(why, sizeof why, "xlate: the guest method %s (function 0x%llx, type encoding %s) takes a block and has a type the bridge cannot marshal (self, _cmd and up to four arguments of objects, blocks, pointers and integers of at most one word, no block result)",
+            snprintf(why, sizeof why, "xlate: the guest method %s (function 0x%llx, type encoding %s) takes a block and has a type the bridge cannot marshal (self, _cmd and up to four words of arguments of objects, blocks, pointers, floats, doubles and integers of at most one word, no block result)",
                      sel_getName(selector), (unsigned long long)guest, types);
             xl_unsupported(why);
         });
     }
     struct xl_word_kinds kinds = xl_word_kinds_of(types);
     int owned = kinds.result == 'O' && xl_selector_returns_owned(sel_getName(selector));
-    IMP imp = imp_implementationWithBlock(^uintptr_t(id self_, uintptr_t a, uintptr_t b, uintptr_t c, uintptr_t d) {
+    int floating = kinds.result == 'F' || kinds.result == 'D';
+    for (unsigned i = 0; i < 4; i++)
+        floating |= kinds.argument[i] == 'F' || kinds.argument[i] == 'D';
+    IMP imp = imp_implementationWithBlock(^uint64_t(id self_, uintptr_t a, uintptr_t b, uintptr_t c, uintptr_t d) {
+        if (floating) {
+            uintptr_t words[8] = {a, b, c, d, 0, 0, 0, 0};
+            char typed[4];
+            uint64_t wrapped[4] = {0, 0, 0, 0};
+            unsigned word = 0;
+            for (unsigned i = 0; i < 4; i++) {
+                typed[i] = kinds.argument[i];
+                if (typed[i] == 'B') {
+                    wrapped[i] = xl_host_block_wrap((id)words[word], XL_GUEST_xl_hblock_generic_invoke, XL_GUEST_xl_hblock_generic_descriptor);
+                    words[word] = (uintptr_t)wrapped[i];
+                    typed[i] = 'I';
+                }
+                word += typed[i] == 'D' ? 2 : 1;
+            }
+            const uint64_t lead[2] = {xl_object_out((uintptr_t)self_), (uint64_t)(uintptr_t)selector};
+            uint64_t floated = xl_invoke_typed(guest, lead, 2, typed, 4, words, kinds.result);
+            for (unsigned i = 0; i < 4; i++) {
+                if (wrapped[i])
+                    xl_invoke(XL_GUEST__Block_release, wrapped[i]);
+            }
+            if (kinds.result == 'F' || kinds.result == 'D')
+                return floated;
+            return owned ? (uint64_t)xl_object_in_owned(floated, "guest method result", 0) : (uint64_t)xl_kind_in(kinds.result, floated, "guest method result");
+        }
         const uintptr_t host[4] = {a, b, c, d};
         uint64_t arguments[6] = {xl_object_out((uintptr_t)self_), (uint64_t)(uintptr_t)selector, 0, 0, 0, 0};
         uint64_t proxies[4] = {0, 0, 0, 0};
@@ -277,7 +314,7 @@ static IMP xl_block_method_imp(uint64_t guest, SEL selector, const char *types)
         }
         return owned ? xl_object_in_owned(result, "guest method result", 0) : xl_kind_in(kinds.result, result, "guest method result");
     });
-    xl_table_set(xl_shadow_imps, (uintptr_t)imp, (const void *)(uintptr_t)guest);
+    xl_table_set(&xl_shadow_imps, (uintptr_t)imp, (const void *)(uintptr_t)guest);
     return imp;
 }
 
@@ -341,31 +378,24 @@ IMP xl_host_imp_for_guest(uint64_t guest, SEL selector, const char *types)
         xl_unsupported(why);
     }
     CFNumberRef key = CFNumberCreate(NULL, kCFNumberSInt64Type, &(int64_t){(int64_t)((guest << 32) | (uint32_t)(uintptr_t)selector)});
-    OSSpinLockLock(&xl_table_lock);
-    if (!xl_guest_imp_cache)
-        xl_guest_imp_cache = CFDictionaryCreateMutable(NULL, 0, &kCFTypeDictionaryKeyCallBacks, NULL);
-    IMP imp = (IMP)CFDictionaryGetValue(xl_guest_imp_cache, key);
-    OSSpinLockUnlock(&xl_table_lock);
-    if (!imp) {
-        imp = xl_guest_method_imp(guest, selector, types);
-        OSSpinLockLock(&xl_table_lock);
-        CFDictionarySetValue(xl_guest_imp_cache, key, imp);
-        OSSpinLockUnlock(&xl_table_lock);
-    }
+    xl_shadow_init();
+    IMP imp = (IMP)xl_shared_get(&xl_guest_imp_cache, key);
+    if (!imp)
+        imp = (IMP)xl_shared_claim(&xl_guest_imp_cache, key, xl_guest_method_imp(guest, selector, types));
     CFRelease(key);
     return imp;
 }
 
 uint32_t xl_guest_function_of(IMP imp)
 {
-    return imp ? (uint32_t)(uintptr_t)xl_table_get(xl_shadow_imps, (uintptr_t)imp) : 0;
+    return imp ? (uint32_t)(uintptr_t)xl_table_get(&xl_shadow_imps, (uintptr_t)imp) : 0;
 }
 
 uint32_t xl_shadow_imp(IMP imp)
 {
     if (!xl_shadows_active || !imp)
         return 0;
-    return (uint32_t)(uintptr_t)xl_table_get(xl_shadow_imps, (uintptr_t)imp);
+    return (uint32_t)(uintptr_t)xl_table_get(&xl_shadow_imps, (uintptr_t)imp);
 }
 
 static const struct xl_swift_method *xl_typed_method(uint64_t guest)
@@ -407,9 +437,9 @@ static int xl_add_guest_methods(Class target, uint64_t list, const char *class_n
             continue;
         }
         if (typed)
-            xl_table_set(xl_shadow_imps, (uintptr_t)host_imp, (const void *)(uintptr_t)imp);
+            xl_table_set(&xl_shadow_imps, (uintptr_t)host_imp, (const void *)(uintptr_t)imp);
         if (selector == xl_cxx_destruct_selector)
-            xl_table_set(xl_destructors, (uintptr_t)target, (const void *)(uintptr_t)imp);
+            xl_table_set(&xl_destructors, (uintptr_t)target, (const void *)(uintptr_t)imp);
         if (selector == @selector(dealloc))
             adds_dealloc = 1;
     }
@@ -444,38 +474,30 @@ static uint64_t xl_twin_of(Class host)
 {
     if (!host)
         return 0;
-    uintptr_t twin = (uintptr_t)xl_table_get(xl_host_twin, (uintptr_t)host);
+    uintptr_t twin = (uintptr_t)xl_table_get(&xl_host_twin, (uintptr_t)host);
     if (twin)
         return twin;
     struct xl_guest_class *made = calloc(1, 64);
     made->superclass = xl_twin_of(class_getSuperclass(host));
-    OSSpinLockLock(&xl_table_lock);
-    twin = (uintptr_t)CFDictionaryGetValue(xl_host_twin, (const void *)host);
-    if (twin) {
-        OSSpinLockUnlock(&xl_table_lock);
+    twin = (uintptr_t)xl_shared_claim_pair(&xl_host_twin, (const void *)host, made, &xl_twin_host);
+    if (twin != (uintptr_t)made)
         free(made);
-        return twin;
-    }
-    twin = (uintptr_t)made;
-    CFDictionarySetValue(xl_host_twin, (const void *)host, (const void *)twin);
-    CFDictionarySetValue(xl_twin_host, (const void *)twin, (const void *)host);
-    OSSpinLockUnlock(&xl_table_lock);
     return twin;
 }
 
 static void xl_publish_twins(Class host)
 {
     for (Class c = host; c; c = class_getSuperclass(c)) {
-        const void *twin = xl_table_get(xl_host_twin, (uintptr_t)c);
+        const void *twin = xl_table_get(&xl_host_twin, (uintptr_t)c);
         if (twin)
-            xl_table_set(xl_twin_published, (uintptr_t)c, twin);
+            xl_table_set(&xl_twin_published, (uintptr_t)c, twin);
     }
 }
 
 static int xl_has_host_ancestor(Class cls)
 {
     for (Class c = cls; c; c = class_getSuperclass(c))
-        if (xl_table_get(xl_host_twin, (uintptr_t)c))
+        if (xl_table_get(&xl_host_twin, (uintptr_t)c))
             return 1;
     return 0;
 }
@@ -494,7 +516,7 @@ static uint32_t xl_swift_extent(const struct xl_guest_class *c)
 
 static void xl_sync_tail(const struct xl_guest_class *c, Class shadow)
 {
-    uint32_t extent = (uint32_t)(uintptr_t)xl_table_get(xl_tail_of_shadow, (uintptr_t)shadow);
+    uint32_t extent = (uint32_t)(uintptr_t)xl_table_get(&xl_tail_of_shadow, (uintptr_t)shadow);
     if (!extent)
         return;
     uint32_t now = xl_swift_extent(c);
@@ -505,22 +527,22 @@ static void xl_sync_tail(const struct xl_guest_class *c, Class shadow)
 
 void xl_swift_sync_class(Class cls)
 {
-    if (!xl_shadows_active || !cls || !xl_tail_of_shadow)
+    if (!xl_shadows_active || !cls)
         return;
-    uintptr_t guest = (uintptr_t)xl_table_get(xl_host_to_guest, (uintptr_t)cls);
-    if (guest && xl_table_get(xl_tail_of_shadow, (uintptr_t)cls))
+    uintptr_t guest = (uintptr_t)xl_table_get(&xl_host_to_guest, (uintptr_t)cls);
+    if (guest && xl_table_get(&xl_tail_of_shadow, (uintptr_t)cls))
         xl_sync_tail((const struct xl_guest_class *)guest, cls);
 }
 
 static int xl_is_shadow(Class cls)
 {
-    return cls && xl_table_get(xl_host_to_guest, (uintptr_t)cls);
+    return cls && xl_table_get(&xl_host_to_guest, (uintptr_t)cls);
 }
 
 static void xl_destroy_ivars(id object)
 {
     for (Class cls = object_getClass(object); xl_is_shadow(cls); cls = class_getSuperclass(cls)) {
-        uintptr_t guest = (uintptr_t)xl_table_get(xl_destructors, (uintptr_t)cls);
+        uintptr_t guest = (uintptr_t)xl_table_get(&xl_destructors, (uintptr_t)cls);
         if (guest) {
             uint64_t arguments[2] = {(uint64_t)(uintptr_t)object, (uint64_t)(uintptr_t)xl_cxx_destruct_selector};
             xl_invoke_n(guest, arguments, 2);
@@ -530,7 +552,7 @@ static void xl_destroy_ivars(id object)
 
 void xl_swift_super_dealloc(id object, Class current)
 {
-    if (!xl_shadows_active || !xl_table_get(xl_tail_of_shadow, (uintptr_t)current))
+    if (!xl_shadows_active || !xl_table_get(&xl_tail_of_shadow, (uintptr_t)current))
         return;
     if (xl_is_shadow(class_getSuperclass(current)))
         return;
@@ -620,7 +642,7 @@ static void xl_reconcile_swift_super(struct xl_guest_class *c, struct xl_guest_r
 static Class xl_build_shadow(uintptr_t guest)
 {
     pthread_mutex_lock(&xl_build_lock);
-    Class shadow = (Class)xl_table_get(xl_guest_to_host, guest);
+    Class shadow = (Class)xl_table_get(&xl_guest_to_host, guest);
     if (shadow) {
         pthread_mutex_unlock(&xl_build_lock);
         return shadow;
@@ -659,7 +681,7 @@ static Class xl_build_shadow(uintptr_t guest)
         ((id(*)(id, SEL))objc_msgSend)((id)host_super, sel_registerName("class"));
     int direct_host_super = host_super && c->superclass == (uint64_t)(uintptr_t)host_super;
     if ((c->bits & 3) && xl_swift_host_layout((uintptr_t)host_super))
-        xl_reconcile_swift_super((struct xl_guest_class *)c, (struct xl_guest_ro *)ro, (uintptr_t)host_super, name, !xl_table_get(xl_unbuilt_static, guest));
+        xl_reconcile_swift_super((struct xl_guest_class *)c, (struct xl_guest_ro *)ro, (uintptr_t)host_super, name, !xl_table_get(&xl_unbuilt_static, guest));
     if (direct_host_super)
         xl_twin_of(host_super);
     uint32_t extent = host_super && xl_has_host_ancestor(host_super) ? xl_swift_extent(c) : 0;
@@ -696,19 +718,19 @@ static Class xl_build_shadow(uintptr_t guest)
                        (unsigned long long)ro->base_protocols, (unsigned long long)ro->ivars, (unsigned long long)ro->base_properties);
     objc_registerClassPair(shadow);
 
-    OSSpinLockLock(&xl_table_lock);
-    CFDictionarySetValue(xl_guest_to_host, (const void *)guest, shadow);
-    CFDictionarySetValue(xl_host_to_guest, shadow, (const void *)guest);
-    CFDictionaryRemoveValue(xl_unbuilt_static, (const void *)guest);
+    xl_shared_write_begin(&xl_table_lock);
+    xl_shared_held_set(&xl_guest_to_host, (const void *)guest, shadow);
+    xl_shared_held_set(&xl_host_to_guest, shadow, (const void *)guest);
+    xl_shared_held_remove(&xl_unbuilt_static, (const void *)guest);
     if (meta) {
-        CFDictionarySetValue(xl_guest_to_host, (const void *)(uintptr_t)c->isa, shadow_meta);
-        CFDictionarySetValue(xl_host_to_guest, shadow_meta, (const void *)(uintptr_t)c->isa);
-        CFDictionaryRemoveValue(xl_unbuilt_static, (const void *)(uintptr_t)c->isa);
+        xl_shared_held_set(&xl_guest_to_host, (const void *)(uintptr_t)c->isa, shadow_meta);
+        xl_shared_held_set(&xl_host_to_guest, shadow_meta, (const void *)(uintptr_t)c->isa);
+        xl_shared_held_remove(&xl_unbuilt_static, (const void *)(uintptr_t)c->isa);
     }
     xl_shadows_active = 1;
-    OSSpinLockUnlock(&xl_table_lock);
+    xl_shared_end(&xl_table_lock);
     if (extent) {
-        xl_table_set(xl_tail_of_shadow, (uintptr_t)shadow, (const void *)(uintptr_t)extent);
+        xl_table_set(&xl_tail_of_shadow, (uintptr_t)shadow, (const void *)(uintptr_t)extent);
         xl_sync_tail(c, shadow);
         xl_publish_twins(host_super);
         if (direct_host_super && !xl_class_in_image((uintptr_t)host_super))
@@ -728,16 +750,18 @@ static Class xl_class_from_guest(uint64_t guest)
 {
     if (!xl_shadows_active)
         return (Class)(uintptr_t)guest;
-    Class shadow = (Class)xl_table_get(xl_guest_to_host, (uintptr_t)guest);
-    if (shadow)
-        return shadow;
-    Class twinned = (Class)xl_table_get(xl_twin_host, (uintptr_t)guest);
-    if (twinned)
-        return twinned;
-    uintptr_t owner = (uintptr_t)xl_table_get(xl_unbuilt_static, (uintptr_t)guest);
+    const void *key = (const void *)(uintptr_t)guest;
+    xl_shared_read_begin(&xl_table_lock);
+    Class known = (Class)xl_shared_held_get(&xl_guest_to_host, key);
+    if (!known)
+        known = (Class)xl_shared_held_get(&xl_twin_host, key);
+    uintptr_t owner = known ? 0 : (uintptr_t)xl_shared_held_get(&xl_unbuilt_static, key);
+    xl_shared_end(&xl_table_lock);
+    if (known)
+        return known;
     if (!owner)
         return (Class)(uintptr_t)guest;
-    shadow = xl_build_shadow(owner);
+    Class shadow = xl_build_shadow(owner);
     return owner == guest ? shadow : object_getClass(shadow);
 }
 
@@ -765,10 +789,12 @@ uint64_t xl_class_out(uintptr_t host)
 {
     if (!xl_shadows_active)
         return host;
-    uintptr_t guest = (uintptr_t)xl_table_get(xl_host_to_guest, host);
+    xl_shared_read_begin(&xl_table_lock);
+    uintptr_t guest = (uintptr_t)xl_shared_held_get(&xl_host_to_guest, (const void *)host);
+    uintptr_t twin = guest ? 0 : (uintptr_t)xl_shared_held_get(&xl_twin_published, (const void *)host);
+    xl_shared_end(&xl_table_lock);
     if (guest)
         return guest;
-    uintptr_t twin = (uintptr_t)xl_table_get(xl_twin_published, host);
     if (twin && xl_class_in_image(host))
         return host;
     return twin ? twin : host;
@@ -787,11 +813,11 @@ int xl_guest_send(id object, SEL selector, uint64_t *result)
 {
     if (!xl_shadows_active || !object)
         return 0;
-    if (xl_table_get(xl_guest_to_host, (uintptr_t)object)) {
+    if (xl_table_get(&xl_guest_to_host, (uintptr_t)object)) {
         *result = (uint64_t)(uintptr_t)object;
         return 1;
     }
-    Class shadow = (Class)xl_table_get(xl_guest_to_host, *(const uintptr_t *)(uintptr_t)object);
+    Class shadow = (Class)xl_table_get(&xl_guest_to_host, *(const uintptr_t *)(uintptr_t)object);
     if (!shadow)
         return 0;
     uint32_t guest = xl_guest_imp_address(class_getMethodImplementation(shadow, selector));
@@ -806,16 +832,15 @@ int xl_guest_send(id object, SEL selector, uint64_t *result)
     return 1;
 }
 
-static uintptr_t xl_register_class(uintptr_t guest, const char *call)
+static uintptr_t xl_register_class(uintptr_t guest)
 {
     if (!guest)
         return 0;
-    (void)call;
     Class shadow = xl_build_shadow(guest);
-    if (xl_table_get(xl_tail_of_shadow, (uintptr_t)shadow))
+    if (xl_table_get(&xl_tail_of_shadow, (uintptr_t)shadow))
         xl_sync_tail((const struct xl_guest_class *)guest, shadow);
 #ifdef XL_GUEST_swift_retain
-    if (!xl_table_get(xl_static_class_set, guest))
+    if (!xl_table_get(&xl_static_class_set, guest))
         xl_proxy_note_class(guest);
 #endif
     return (uintptr_t)shadow;
@@ -823,7 +848,7 @@ static uintptr_t xl_register_class(uintptr_t guest, const char *call)
 
 Class xl_proxy_shadow_of(uintptr_t guest_class)
 {
-    return (Class)xl_table_get(xl_guest_to_host, guest_class);
+    return (Class)xl_table_get(&xl_guest_to_host, guest_class);
 }
 
 #ifdef XL_GUEST_swift_retain
@@ -867,7 +892,7 @@ void xl_manual_objc_readClassPair(void *pack)
 {
     struct xl_pair_pack *p = pack;
     xl_shadow_init();
-    xl_register_class(xl_narrow_pointer(p->a0, "objc_readClassPair", 0), "objc_readClassPair");
+    xl_register_class(xl_narrow_pointer(p->a0, "objc_readClassPair", 0));
     p->r = p->a0;
 }
 
@@ -882,9 +907,9 @@ void xl_manual__objc_realizeClassFromSwift(void *pack)
         snprintf(why, sizeof why, "Swift requested that class %p be ignored, but libobjc does not support that", (void *)previously);
         xl_unsupported(why);
     }
-    Class shadow = (Class)xl_register_class(cls, "_objc_realizeClassFromSwift");
+    Class shadow = (Class)xl_register_class(cls);
     if (previously && previously != cls)
-        xl_table_set(xl_guest_to_host, previously, shadow);
+        xl_table_set(&xl_guest_to_host, previously, shadow);
     p->r = p->a0;
 }
 

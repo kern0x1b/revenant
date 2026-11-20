@@ -45,15 +45,31 @@ function defined_protocols()
     return names
 end
 
+local function source_of(object, checkout)
+    local relative = object:match("/%.objs/[^/]+/[^/]+/[^/]+/[^/]+/(.+)$")
+    if relative == nil then
+        return nil
+    end
+    local parts = {}
+    for part in relative:sub(1, -3):gmatch("[^/]+") do
+        table.insert(parts, part == "__" and ".." or part)
+    end
+    return path.join(checkout, table.concat(parts, "/"))
+end
+
 function from_objects(root)
     local keys = {}
     root = root or path.join(sdkfiles.root(), "build", ".objs")
+    local checkout = path.absolute(path.directory(path.directory(root)))
     local objects, frameworks = {}, {}
     for _, object in ipairs(os.files(path.join(root, "**.o"))) do
         local framework = string.match(object, "/src/([^/]+)/[^/]+%.o$")
         if framework then
-            table.insert(objects, object)
-            frameworks[object] = framework
+            local source = source_of(object, checkout)
+            if source == nil or os.isfile(source) then
+                table.insert(objects, object)
+                frameworks[object] = framework
+            end
         end
     end
     assert(#objects > 0, "no objects of a src/<Framework> folder under " .. root)

@@ -90,9 +90,6 @@ WebKit (`src/WebKit`, Objective-C, not a Swift wrapper): the `WK*` classes and p
 
 The large members still open, with a design note for each, are in `docs/explanation/backports-open-members.md`.
 
-These framework targets fail before building on iOS 6 while Telegram's demanded API is missing:
-
-
 `WidgetKit` and `WidgetCenter` are provided by the Swift overlay. `PassKitBackports` provides `PKPaymentNetworkAmex`, `PKPaymentNetworkDiscover`, `PKPaymentNetworkMasterCard` and `PKPaymentNetworkVisa`.
 
 ## Compile-only declarations

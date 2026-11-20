@@ -155,7 +155,7 @@ static NSURLCredentialStorage *revenant_ephemeral_credential_storage(void)
 
 + (NSURLSessionConfiguration *)ephemeralSessionConfiguration
 {
-    NSURLSessionConfiguration *configuration = [[self alloc] init];
+    NSURLSessionConfiguration *configuration = [[self alloc] initWithRevenantSharedStores:NO];
     configuration->_HTTPCookieStorage = revenant_ephemeral_cookie_storage();
     configuration->_URLCredentialStorage = revenant_ephemeral_credential_storage();
     configuration->_URLCache = [[NSURLCache alloc] initWithMemoryCapacity:512000 diskCapacity:0 diskPath:nil];
@@ -173,6 +173,11 @@ static NSURLCredentialStorage *revenant_ephemeral_credential_storage(void)
 
 - (instancetype)init
 {
+    return [self initWithRevenantSharedStores:YES];
+}
+
+- (instancetype)initWithRevenantSharedStores:(BOOL)sharing
+{
     if ((self = [super init])) {
         _requestCachePolicy = NSURLRequestUseProtocolCachePolicy;
         _timeoutIntervalForRequest = 60;
@@ -188,9 +193,11 @@ static NSURLCredentialStorage *revenant_ephemeral_credential_storage(void)
 #else
         _HTTPMaximumConnectionsPerHost = 6;
 #endif
-        _HTTPCookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
-        _URLCredentialStorage = [NSURLCredentialStorage sharedCredentialStorage];
-        _URLCache = [NSURLCache sharedURLCache];
+        if (sharing) {
+            _HTTPCookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+            _URLCredentialStorage = [NSURLCredentialStorage sharedCredentialStorage];
+            _URLCache = [NSURLCache sharedURLCache];
+        }
         _protocolClasses = @[];
     }
     return self;
@@ -203,7 +210,7 @@ static NSURLCredentialStorage *revenant_ephemeral_credential_storage(void)
 
 - (id)copyWithZone:(NSZone *)zone
 {
-    NSURLSessionConfiguration *copy = [[[self class] alloc] init];
+    NSURLSessionConfiguration *copy = [[[self class] alloc] initWithRevenantSharedStores:NO];
     copy->_identifier = self.identifier;
     copy->_requestCachePolicy = self.requestCachePolicy;
     copy->_timeoutIntervalForRequest = self.timeoutIntervalForRequest;

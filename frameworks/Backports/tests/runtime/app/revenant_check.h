@@ -1,9 +1,22 @@
 #import <Foundation/Foundation.h>
 #import <objc/runtime.h>
+#include <dlfcn.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 typedef void (*revenant_case_function)(int negative);
+
+static inline Class revenant_backport_class(const char *library, const char *name)
+{
+    char path[256];
+    snprintf(path, sizeof path, "/usr/lib/revenant/org.revenant.backports/lib%sBackports.dylib", library);
+    void *handle = dlopen(path, RTLD_LAZY | RTLD_NOLOAD);
+    char symbol[128];
+    snprintf(symbol, sizeof symbol, "OBJC_CLASS_$_%s", name);
+    void *found = handle ? dlsym(handle, symbol) : NULL;
+    return found ? (__bridge Class)found : objc_getClass(name);
+}
 
 static inline NSUInteger revenant_registered_count(const char *name)
 {

@@ -1,9 +1,7 @@
 #import <UIKit/UIKit.h>
-#import "../revenant_alias.h"
+#import <objc/runtime.h>
 
 #pragma clang diagnostic ignored "-Wobjc-protocol-method-implementation"
-
-REVENANT_ALIAS(NSTextTab)
 
 static const char RevenantTabAlignmentKey;
 static const char RevenantTabLocationKey;

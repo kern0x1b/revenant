@@ -1,4 +1,5 @@
 import("async.runjobs")
+import("core.base.json")
 
 local publics = import("public", {rootdir = os.scriptdir(), anonymous = true})
 local sdkfiles = import("sdk", {rootdir = os.scriptdir(), anonymous = true})
@@ -295,6 +296,89 @@ function available_rows(state, framework)
     return kept
 end
 
+local device_classes = nil
+
+function device_class_inventory_file()
+    return path.join(dyld.root(), DEVICE_GLOBALS_RELEASE, "classes_armv7.json")
+end
+
+local function device_class_inventory()
+    if device_classes == nil then
+        local file = device_class_inventory_file()
+        if not os.isfile(file) then
+            raise("the iOS %s class inventory %s is missing: the generator decides which SDK classes get a proxy from exactly that release's inventory and does not fall back to another one; clone a cache that holds it (docs/guides/machine.md, \"Which cache to clone\")", DEVICE_GLOBALS_RELEASE, file)
+        end
+        device_classes = json.decode(io.readfile(file)).classes or {}
+    end
+    return device_classes
+end
+
+local function sdk_members_of(state)
+    if state.sdk_members == nil then
+        local unavailable = unavailable_classes_of(state)
+        local members = {}
+        for _, framework in ipairs(state.frameworks) do
+            for _, row in ipairs(framework.rows) do
+                if exists_on_ios(row, unavailable) then
+                    local key
+                    if row.kind == "instance method" or row.kind == "class method" then
+                        key = row.kind .. "|" .. row.name
+                    elseif row.kind == "property" then
+                        local getter = string.match(row.flags or "", "getter:(%S+)") or row.name
+                        key = (has_flag(row, "class") and "class method" or "instance method") .. "|" .. getter
+                    end
+                    if key then
+                        members[row.container] = members[row.container] or {}
+                        members[row.container][key] = true
+                    end
+                end
+            end
+        end
+        state.sdk_members = members
+    end
+    return state.sdk_members
+end
+
+local function device_declares(info, key)
+    local kind, name = key:match("^(.-)|(.*)$")
+    for _, selector in ipairs((kind == "class method" and info.class or info.instance) or {}) do
+        if selector == name then
+            return true
+        end
+    end
+    return false
+end
+
+function class_on_device(state, row, framework_name)
+    local info = device_class_inventory()[row.name]
+    if not info then
+        return false, "absent"
+    end
+    local image = info.image or ""
+    local public = image:match("^/System/Library/Frameworks/([%w_]+)%.framework/")
+    local owner = public or image:match("^/System/Library/PrivateFrameworks/([%w_]+)%.framework/")
+    if public or owner == framework_name then
+        return true
+    end
+    local super = row.signature ~= "" and row.signature or "NSObject"
+    if unavailable_classes_of(state)[super] then
+        super = "NSObject"
+    end
+    if info.superclass ~= super then
+        return false, "stranger: " .. (owner or image) .. " has the superclass " .. tostring(info.superclass) .. ", the SDK's is " .. super
+    end
+    local members = sdk_members_of(state)[row.name]
+    if members == nil then
+        return false, "stranger: " .. (owner or image) .. " and the SDK declares no member to compare"
+    end
+    for key in pairs(members) do
+        if device_declares(info, key) then
+            return true
+        end
+    end
+    return false, "stranger: " .. (owner or image) .. " implements none of the SDK's declared members"
+end
+
 function unavailable_count(state, framework)
     local unavailable = unavailable_classes_of(state)
     local count = 0
@@ -348,18 +432,29 @@ function pending_of(state, only)
     local pending = {}
     for _, framework in ipairs(state.frameworks) do
         if only == nil or table.contains(only, framework.name) then
-            local rows, skipped = {}, {}
+            local rows, skipped, strangers = {}, {}, {}
             for _, row in ipairs(framework.rows) do
                 local owner = single_owned(row) and owners[row.kind .. "|" .. row.name]
                 if not single_owned(row) or (owner and owner.framework == framework.name) then
                     if exists_on_ios(row, unavailable) then
-                        table.insert(rows, row)
+                        local on_device, why = false, nil
+                        if row.kind == "class" then
+                            on_device, why = class_on_device(state, row, framework.name)
+                        end
+                        if not on_device then
+                            table.insert(rows, row)
+                            if why and why ~= "absent" then
+                                table.insert(strangers, row.name .. " (" .. framework.name .. "): " .. why)
+                            end
+                        else
+                            skipped[row.kind] = (skipped[row.kind] or 0) + 1
+                        end
                     else
                         skipped[row.kind] = (skipped[row.kind] or 0) + 1
                     end
                 end
             end
-            table.insert(pending, {name = framework.name, import = framework.import, rows = rows, skipped = skipped,
+            table.insert(pending, {name = framework.name, import = framework.import, rows = rows, skipped = skipped, strangers = strangers,
                 unavailable = unavailable, images = state.images})
         end
     end
@@ -549,6 +644,9 @@ function main(...)
         device, references_of_src(device))
     local skipped = 0
     for _, framework in ipairs(pending) do
+        for _, stranger in ipairs(framework.strangers) do
+            print("device class refused, keeps its proxy: " .. stranger)
+        end
         for _, count in pairs(framework.skipped) do
             skipped = skipped + count
         end
