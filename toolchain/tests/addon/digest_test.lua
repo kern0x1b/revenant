@@ -43,7 +43,7 @@ end
     local root = path.join(opt.modules, "..", "..")
     for _, recipe in ipairs(digest.recipes()) do
         local written = io.readfile(path.join(root, recipe.folder, "port", "digest.lua"))
-        local expected = digest.digest_file(recipe, digest.sources(root, recipe.inputs))
+        local expected = digest.digest_file(recipe, digest.recipe_digest(root, recipe))
         if written ~= expected then
             table.insert(found, string.format("%s/digest.lua is not what the sources give; run ./xmakew l toolchain/tools/recipe_digests.lua", recipe.folder))
         end
