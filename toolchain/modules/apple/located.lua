@@ -12,7 +12,7 @@ local function explanation(name, version, used)
                          name, version, used)
 end
 
-function tools(toolchain, required, strict)
+local function resolve(toolchain, required, strict)
     local found, absent = {}, {}
     for _, name in ipairs({"ld64", "llvm"}) do
         local package = required[name]
@@ -30,4 +30,12 @@ function tools(toolchain, required, strict)
         end
     end
     return found, absent
+end
+
+function check_tools(toolchain, required)
+    return resolve(toolchain, required, false)
+end
+
+function load_tools(toolchain, required)
+    return resolve(toolchain, required, true)
 end

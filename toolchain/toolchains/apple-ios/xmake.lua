@@ -16,14 +16,14 @@ toolchain("apple-ios")
     set_toolset("scar", "ar")
     set_toolset("strip", "strip")
 
-    local function parts(toolchain, project, apple_sdk, located, strict)
+    local function parts(toolchain, project, apple_sdk, tools_of)
         local required = project.required_packages() or {}
         local found = {}
         local sdk = required["iphoneos-sdk"]
         if sdk and toolchain:config("sdk") then
             found.sdk = apple_sdk.folder(sdk:installdir(), toolchain:config("sdk"))
         end
-        local tools, absent = located.tools(toolchain, required, strict)
+        local tools, absent = tools_of(toolchain, required)
         found.linker = tools.ld64
         found.clang = tools.llvm
         found.absent = absent
@@ -31,7 +31,7 @@ toolchain("apple-ios")
     end
 
     on_check(function (toolchain)
-        local found = parts(toolchain, import("core.project.project"), import("@self.apple.sdk"), import("@self.apple.located"), false)
+        local found = parts(toolchain, import("core.project.project"), import("@self.apple.sdk"), import("@self.apple.located").check_tools)
         if not toolchain:config("minimum") or not (found.clang or found.absent.llvm) then
             return false
         end
@@ -40,7 +40,7 @@ toolchain("apple-ios")
 
     on_load(function (toolchain)
         import("core.base.semver")
-        local found = parts(toolchain, import("core.project.project"), import("@self.apple.sdk"), import("@self.apple.located"), true)
+        local found = parts(toolchain, import("core.project.project"), import("@self.apple.sdk"), import("@self.apple.located").load_tools)
         local declared = toolchain:config("minimum")
         if not declared or not found.clang then
             raise("toolchain(apple-ios) needs the SDK and llvm packages and apple_minimum; includes(\"@addon/revenant/apple-ios\") provides them")
