@@ -16,35 +16,31 @@ toolchain("apple-ios")
     set_toolset("scar", "ar")
     set_toolset("strip", "strip")
 
-    local function parts(toolchain, project, apple_sdk)
+    local function parts(toolchain, project, apple_sdk, located, strict)
         local required = project.required_packages() or {}
         local found = {}
         local sdk = required["iphoneos-sdk"]
         if sdk and toolchain:config("sdk") then
             found.sdk = apple_sdk.folder(sdk:installdir(), toolchain:config("sdk"))
         end
-        local ld64 = required["ld64"]
-        if ld64 and toolchain:config("ld64") then
-            found.linker = path.join(ld64:installdir(), "bin", "ld")
-        end
-        local llvm = required["llvm"]
-        if llvm and toolchain:config("llvm") then
-            found.clang = path.join(llvm:installdir(), "bin", "clang")
-        end
+        local tools, absent = located.tools(toolchain, required, strict)
+        found.linker = tools.ld64
+        found.clang = tools.llvm
+        found.absent = absent
         return found
     end
 
     on_check(function (toolchain)
-        local found = parts(toolchain, import("core.project.project"), import("@self.apple.sdk"))
-        if not toolchain:config("minimum") or not found.clang then
+        local found = parts(toolchain, import("core.project.project"), import("@self.apple.sdk"), import("@self.apple.located"), false)
+        if not toolchain:config("minimum") or not (found.clang or found.absent.llvm) then
             return false
         end
-        return not toolchain:is_arch("armv6", "armv7", "armv7s") or found.linker ~= nil
+        return not toolchain:is_arch("armv6", "armv7", "armv7s") or found.linker ~= nil or found.absent.ld64 ~= nil
     end)
 
     on_load(function (toolchain)
         import("core.base.semver")
-        local found = parts(toolchain, import("core.project.project"), import("@self.apple.sdk"))
+        local found = parts(toolchain, import("core.project.project"), import("@self.apple.sdk"), import("@self.apple.located"), true)
         local declared = toolchain:config("minimum")
         if not declared or not found.clang then
             raise("toolchain(apple-ios) needs the SDK and llvm packages and apple_minimum; includes(\"@addon/revenant/apple-ios\") provides them")
