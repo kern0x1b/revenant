@@ -476,11 +476,14 @@ the files the key covers and no others), so the host configuration of the checko
 `XMAKE_CONFIGDIR` would not do: the configure starts nested xmake processes that inherit it and wait on the project lock the
 configure holds. The check takes the prebuilt `llvm`, `swift` and `ld64` of `REVENANT_PREBUILT` and `REVENANT_PREBUILT_ONLY` when the
 environment names them (`kern0x1b/revenant` and `llvm,swift,ld64` otherwise), and fails rather than building them from source. It reads
-the package store, the iOS 6.0 shared cache and the lowered cache of `REVENANT_CACHE`, which are caches and not part of its key. On
+the iOS 6.0 shared cache and the lowered cache of `REVENANT_CACHE`, which are caches and not part of its key (the installs it builds against are). On
 a failure it prints the compiler's errors and the path of the whole log, `build/backports-gate/prepush.log`. The first run builds
 all libraries (about six minutes on a 12-core Mac), a later one only what changed, and a run on an unchanged tree is remembered like the
 others. `./xmakew l -P . tools/ci_local.lua backports` runs the same build from a fresh configuration and goes on to the Backports
-tests, the probe app and the exports check.
+tests, the probe app and the exports check. `ci_local` asks the memo once, before it clones the tree, whether prepush holds the verdict of
+the light suites for it (`prepush.lua --recall "light suites"`): when it does, the `checks` job's `xmake test` takes those suites from it,
+prints the line that says where the verdict came from and runs the rest; when it does not, the job runs them. The variable that carries the
+verdict, `REVENANT_LIGHT_SUITES_RECALLED`, is set by `ci_local` alone and is emptied when the memo holds none.
 
 Order and flags. The cheap checks run first and the heavy ones (`lowered members`, `lowered exports`, `light suites`,
 `backports build`) last, and the run stops at the first check that fails, so a two-second `layout` failure does not wait

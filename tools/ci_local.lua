@@ -206,6 +206,18 @@ local function applies(step)
     return true
 end
 
+local function recalled_line(output)
+    return (output or ""):gsub("\27%[[%d;]*m", ""):match("recalled light suites memo [^\n]*")
+end
+
+local function light_verdict()
+    local output = try { function ()
+        return os.iorunv(os.programfile(), {"l", "-P", ROOT, path.join(ROOT, "tools", "prepush.lua"), "--recall", "light suites"},
+                         {envs = {REVENANT_PREBUILT = PREBUILT, REVENANT_PREBUILT_ONLY = JOBS.checks.prebuilt}})
+    end }
+    return recalled_line(output)
+end
+
 local function minutes(ms)
     return string.format("%.1f min", ms / 60000)
 end
@@ -451,6 +463,10 @@ local function test()
         end
     end
     check("the quick job runs prepush after its fresh configuration", JOBS.quick.steps[2].argv[5], "tools/prepush.lua")
+    check("the verdict of the light suites is read from prepush's line", recalled_line("\27[0mnoise\nrecalled light suites memo (ran 297 s in w at 0123456789, 3 min ago)\n"), "recalled light suites memo (ran 297 s in w at 0123456789, 3 min ago)")
+    check("another check's recall is not the light suites'", recalled_line("recalled comments memo (ran 1 s in w at h, 1 s ago)\n"), nil)
+    check("no recall is no verdict", recalled_line(nil), nil)
+    check("the light target takes a recalled verdict only when ci_local passes it", io.readfile(path.join(ROOT, "toolchain", "tests", "xmake.lua")):find('os.getenv("REVENANT_LIGHT_SUITES_RECALLED")', 1, true) ~= nil, true)
     local selected = select_jobs({})
     for _, name in ipairs(ALL) do
         check("no job argument selects " .. name, selected[name], true)
@@ -712,6 +728,9 @@ function main(...)
     local dir = path.join(root, os.date("%Y%m%d-%H%M%S"))
     os.execv("mkdir", {"-p", dir})
     prune_runs(root)
+    local recalled = light_verdict()
+    os.setenv("REVENANT_LIGHT_SUITES_RECALLED", recalled or "")
+    print("ci_local: %s", recalled and (recalled .. "; the tests of the checks job take the light suites from it") or "prepush holds no verdict of the light suites for this tree; the checks job runs them")
     local began = os.mclock()
     local by_name, peak_total
     if serial then
