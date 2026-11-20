@@ -73,6 +73,9 @@ within each group, and stopping as soon as the write fits:
 
 An evicted entry takes its lock files with it, and each folder of the package store that it leaves empty, so that nothing
 is left for xmake to take for an install. An entry with a file open in some process is never evicted, and if `lsof` cannot list the open files nothing is evicted.
+The list of open files is a snapshot, so eviction also takes the entry's lock files (`<installdir>.lock`, `<sourcedir>.lock`) for
+the moment of removal: an entry whose lock another process holds, an install or a source folder in use, is skipped and the
+next candidate goes instead.
 If the write still does not fit once nothing more can go, it fails before anything is removed. The message names the
 write, the cap, and the five biggest entries.
 
@@ -96,7 +99,9 @@ after the last build, less what is there now, and 2 GB before the first build. A
 does not start. After the build, `tools/cache.lua record` stores the worktree's build-output size for the next guard. A
 build that grows beyond its reservation is caught at its next start. The guard also keeps the store within its cap, at
 most once in ten minutes (the stamp `.cap-checked` in the store), because counting the store with `du` takes as long as
-the store has files.
+the store has files, and in one process at a time (`<store>/.trim.lock`: a process that finds it held leaves the trim to the
+holder). A store that cannot be brought under `REVENANT_STORE_GB`, because what is left is pinned or in use, is reported
+and the build goes on; only the room for the worktree's own build can stop it.
 
 An emulator run clones the golden root file system, which reserves the full size of the image first, so a run whose
 clone would pass the cap does not start. Its TMPDIR is `tmp` inside its run folder. When the run ends, pass or fail,
@@ -176,7 +181,8 @@ made by hand. The store is one folder at a fixed path, so an install's absolute 
 pkg-config file) are the same for every worktree and never need to be rewritten.
 
 `./xmakew` takes the store from `REVENANT_STORE` (an absolute path) or `~/.revenant/store`, builds the pinned xmake into
-`<store>/xmake/<key>` once for the machine, runs it with `XMAKE_GLOBALDIR=<store>/xmake-global`, and links `xmake` and
+`<store>/xmake/<key>` once for the machine (under a lock on `<store>/xmake/<key>.lock`, so launchers that ask at once wait for
+one build and use it), runs it with `XMAKE_GLOBALDIR=<store>/xmake-global`, and links `xmake` and
 `xmake-global` of the cache to those. A linked worktree takes `<worktree>/.cache` for its cache when `REVENANT_CACHE` is
 unset, and any folder `REVENANT_CACHE` names, empty or not, with no marker. What it holds is small: the token pool, the
 scratch of its tasks, the lowered caches, and (when a task needs them) `dyld` and `firmware`.
@@ -186,13 +192,18 @@ different keys of one package, built at once by two processes, each patch and bu
 (`checkout.keyed`, [ADR 0018](../explanation/decisions/0018-source-folder-per-build.md)).
 
 **A cache from before the store is refused**, because a real `xmake-global` in it would be read by the tools that read it
-beside the store's, and it is not the store's. `xmakew` stops and names two ways out: remove the folder (the installs come
-again from the prebuilt releases or are built once), or make that cache the store while the store does not exist yet,
-which keeps its installs and the generation names a roots file pins:
+beside the store's, and it is not the store's. `xmakew` stops before it makes anything (no store, no link) and names two ways
+out: remove `xmake` and `xmake-global` of that cache (the installs come again from the prebuilt releases or are built once),
+or make that cache the store while the store does not exist yet, which keeps its installs and the generation names a roots
+file pins. The second is run with an xmake binary of the old cache, because `./xmakew` would build one into the store and
+the seeding refuses a store that has anything in it; `xmakew` prints the whole command on a line that starts with
+`xmakew: seed:`:
 
 ```
-REVENANT_CACHE=<an empty folder> ./xmakew l -P . tools/private_cache.lua ~/.revenant/store --from <the old cache> --only xmake,xmake-global
+cd <checkout> && <old cache>/xmake/<key>/bin/xmake l -P . tools/private_cache.lua ~/.revenant/store --from <old cache> --only xmake,xmake-global
 ```
+
+After it, remove `xmake` and `xmake-global` of the old cache; the next `./xmakew` links the cache to the store.
 
 The tool clones the two folders `--only` names with APFS clones (without `--only` it clones the whole cache) and rewrites every absolute link, every `CMakeCache.txt` and the text state under
 `xmake-global/.xmake/cache` to name the store, then writes its `.private-cache` marker. It refuses a destination that exists

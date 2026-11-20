@@ -1,5 +1,6 @@
 import("retention")
 import("generations")
+import("exclusive")
 
 local GIGABYTE = 1000 * 1000 * 1000
 local DEFAULT_GIGABYTES = 50
@@ -10,6 +11,7 @@ local STORE_VARIABLE = "REVENANT_STORE"
 local STORE_LIMIT_VARIABLE = "REVENANT_STORE_GB"
 local DEFAULT_STORE_GIGABYTES = 80
 local STORE_STAMP = ".cap-checked"
+local STORE_TRIM_LOCK = ".trim.lock"
 local STORE_CHECK_SECONDS = 600
 local ARCHITECTURE = "armv7"
 local RELEASES = {"6.1.3", "6.0"}
@@ -169,6 +171,32 @@ local function remove(members)
         end
         prune_empty(member)
     end
+end
+
+local function unlock_members(held)
+    for _, lock in ipairs(held) do
+        lock:unlock()
+        lock:close()
+    end
+end
+
+local function lock_members(members)
+    local held = {}
+    for _, member in ipairs(members) do
+        if member:endswith(".lock") and os.isfile(member) then
+            local lock = io.openlock(member)
+            if lock and lock:trylock() then
+                table.insert(held, lock)
+            else
+                if lock then
+                    lock:close()
+                end
+                unlock_members(held)
+                return nil
+            end
+        end
+    end
+    return held
 end
 
 local function with_locks(members)
@@ -432,7 +460,9 @@ function reserve(bytes, what, opt)
     if used + bytes <= cap then
         return {evicted = {}, used = used, limit = cap}
     end
-    local paths = retention.open_paths()
+    local paths = (opt.open_paths or retention.open_paths)()
+    local variable = opt.variable or LIMIT_VARIABLE
+    local label = opt.label or "cache"
     local all = table.join(entries(base), build_entries(builds))
     local candidates, freeable = {}, 0
     for _, listed in ipairs(all) do
@@ -448,8 +478,8 @@ function reserve(bytes, what, opt)
         for index = 1, math.min(5, #all) do
             table.insert(lines, string.format("  %10s  %-10s %s", human(all[index].bytes), all[index].class, all[index].name))
         end
-        raise("cache: %s needs %s, which would take the cache at %s and the build outputs of its worktrees past its %s cap (%s); no entry that is not in use can be evicted to make room, so nothing was removed. Biggest entries:\n%s",
-              what, human(bytes), base, human(cap), LIMIT_VARIABLE, table.concat(lines, "\n"))
+        raise("cache: %s needs %s, which would take the %s at %s and the build outputs of its worktrees past its %s cap (%s); no entry that is not in use can be evicted to make room, so nothing was removed. Biggest entries:\n%s",
+              what, human(bytes), label, base, human(cap), variable, table.concat(lines, "\n"))
     end
     for _, listed in ipairs(candidates) do
         listed.used = last_used(listed.touched or listed.folder)
@@ -465,9 +495,17 @@ function reserve(bytes, what, opt)
         if used + bytes <= cap then
             break
         end
-        remove(listed.members)
-        used = used - listed.bytes
-        table.insert(evicted, listed)
+        local held = lock_members(listed.members)
+        if held then
+            remove(listed.members)
+            unlock_members(held)
+            used = used - listed.bytes
+            table.insert(evicted, listed)
+        end
+    end
+    if used + bytes > cap then
+        raise("cache: %s needs %s, which would take the %s at %s past its %s cap (%s); the entries that can go were evicted and the rest is being installed or built by another process",
+              what, human(bytes), label, base, human(cap), variable)
     end
     return {evicted = evicted, used = used, limit = cap}
 end
@@ -524,10 +562,30 @@ function guard(from, opt)
     local result = reserve(expected, "the build in " .. worktree, {root = opt.root, limit = opt.limit, builds = builds})
     local shared = opt.store or store()
     local stamp = path.join(shared, STORE_STAMP)
-    if not os.isfile(stamp) or os.time() - os.mtime(stamp) >= (opt.store_interval or STORE_CHECK_SECONDS) then
-        local trimmed = reserve(0, "keeping the shared store within its cap", {root = shared, limit = opt.store_limit or store_limit(), builds = {}})
-        result.evicted = table.join(result.evicted, trimmed.evicted)
-        io.writefile(stamp, tostring(os.time()))
+    local interval = opt.store_interval or STORE_CHECK_SECONDS
+    local function due()
+        return not os.isfile(stamp) or os.time() - os.mtime(stamp) >= interval
+    end
+    if due() then
+        exclusive.attempt(path.join(shared, STORE_TRIM_LOCK), function ()
+            if not due() then
+                return
+            end
+            try {
+                function ()
+                    local trimmed = reserve(0, "keeping the shared store within its cap",
+                                            {root = shared, limit = opt.store_limit or store_limit(), builds = {}, variable = STORE_LIMIT_VARIABLE, label = "shared store"})
+                    result.evicted = table.join(result.evicted, trimmed.evicted)
+                end,
+                catch {
+                    function (errors)
+                        result.store_error = tostring(errors)
+                        print("%s", result.store_error)
+                    end
+                }
+            }
+            io.writefile(stamp, tostring(os.time()))
+        end)
     end
     return result
 end
@@ -537,7 +595,12 @@ local function drop(members, removed, dry, paths)
         return
     end
     if not dry then
+        local held = lock_members(members)
+        if not held then
+            return
+        end
         remove(members)
+        unlock_members(held)
     end
     table.insert(removed, members[1])
 end

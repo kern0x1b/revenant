@@ -19,18 +19,27 @@ a store could not be moved or shared between two places. A store that never move
 - There is one store per machine, a folder at a fixed absolute path: `REVENANT_STORE`, default `~/.revenant/store`.
   It holds the pinned xmake (`<store>/xmake/<key>`, one build per machine) and the package store
   (`<store>/xmake-global`, `XMAKE_GLOBALDIR`).
+- The xmake of a key is built under a lock on `<store>/xmake/<key>.lock` (`flock` or `lockf`), re-checked under the lock, so
+  launchers that ask at once wait for one build and use it; the build works in a folder of its own and is moved into place
+  once, and it leaves its log only when it fails.
 - `./xmakew` links `xmake` and `xmake-global` of the cache to those folders and runs xmake with
   `XMAKE_GLOBALDIR=<store>/xmake-global`. A worktree's cache holds only what is the worktree's own: the token pool, the
   scratch of its tasks, the lowered caches, `dyld` and `firmware` when a task needs them. A relative `REVENANT_STORE` is
   refused.
-- A cache from before the store, with a package store of its own, is refused with the command that makes it the store once
-  (`tools/private_cache.lua <store> --from <cache> --only xmake,xmake-global`, only while the store does not exist). A real `xmake-global` beside
-  the store's would be read by the tools that read it, and it is not the store's.
+- A cache from before the store, with a package store of its own, is refused before `./xmakew` makes anything (no store, no
+  link), and it prints the command that makes the cache the store once, run with an xmake binary of that cache because
+  the seeding refuses a store that has anything in it (`<cache>/xmake/<key>/bin/xmake l -P . tools/private_cache.lua <store>
+  --from <cache> --only xmake,xmake-global`, only while the store does not exist). A real `xmake-global` beside the store's
+  would be read by the tools that read it, and it is not the store's.
 - The store is bounded and rooted. `tools/cache.lua` drops what no root names when the store passes
   `REVENANT_STORE_GB` (80 GB); a root is a file `<store>/roots/*.txt` of `<letter>/<package>/<version>/<key>[.g<token>]`
-  lines, the format of Telegram's `bazel/store-pins.txt`. The check is throttled (`.cap-checked`, 600 s). `.cache` keeps
-  its own cap (`REVENANT_CACHE_GB`, 50 GB), which does not count the linked store parts.
-- Two builds of one package key never run at once (the install is locked per folder, `<installdir>.lock`), and two keys
+  lines, the format of Telegram's `bazel/store-pins.txt`. The check is throttled (`.cap-checked`, 600 s) and runs in one
+  process at a time (`<store>/.trim.lock`; a process that finds it held leaves the trim to the holder). A store that cannot
+  be brought under its cap is reported by the build that found it and does not stop that build. An entry whose lock
+  (`<installdir>.lock`, `<sourcedir>.lock`) another process holds is not evicted, whatever the list of open files said when
+  it was taken. `.cache` keeps its own cap (`REVENANT_CACHE_GB`, 50 GB), which does not count the linked store parts.
+- Two installs of one package key never run at once (the install, download included, is locked per folder, `<installdir>.lock`),
+  and two keys
   of one package build in their own copies of the sources ([ADR 0018](0018-source-folder-per-build.md)), so one store
   serves any number of processes.
 

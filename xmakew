@@ -94,19 +94,23 @@ digest=$(patchset "$package/patches" "$commit" "$patches")
 xmakes=$store/xmake
 prefix=$xmakes/$key
 
-for part in xmake xmake-global; do
-    mkdir -p "$store/$part" "$cache"
-    if [ -L "$cache/$part" ]; then
-        [ "$(readlink "$cache/$part")" = "$store/$part" ] || ln -sfn "$store/$part" "$cache/$part"
-    elif [ -e "$cache/$part" ]; then
-        echo "xmakew: $cache/$part is a package store of its own, made before the shared store $store, and nothing reads it any more: remove $cache/$part, or keep its installs by making the cache the shared store once, while $store does not exist: REVENANT_CACHE=<an empty folder> $root/xmakew l -P $root tools/private_cache.lua $store --from $cache --only xmake,xmake-global (docs/guides/machine.md, 'The shared store')" >&2
-        exit 1
+exclusively() {
+    lockfile=$1
+    shift
+    if command -v flock >/dev/null 2>&1; then
+        flock "$lockfile" "$@"
+    elif command -v lockf >/dev/null 2>&1; then
+        lockf -k "$lockfile" "$@"
     else
-        ln -sfn "$store/$part" "$cache/$part"
+        echo "xmakew: neither flock nor lockf is installed, so two builds of the xmake could not be kept apart" >&2
+        return 1
     fi
-done
+}
 
-if [ ! -x "$prefix/bin/xmake" ]; then
+build_xmake() {
+    if [ -x "$prefix/bin/xmake" ]; then
+        return 0
+    fi
     work=$xmakes/$key.build.$$
     log=$xmakes/$key.log
     mkdir -p "$work/src"
@@ -149,9 +153,47 @@ if [ ! -x "$prefix/bin/xmake" ]; then
         fi
         cc -O2 -DLUA_COMPAT_5_1 -DLUA_COMPAT_5_2 -DLUA_COMPAT_5_3 -D$system -o "$work/install/bin/lua" "$work"/lua/*.c $libs
     ) >> "$log" 2>&1
-    [ -e "$prefix" ] || mv "$work/install" "$prefix"
+    rm -rf "$prefix"
+    mv "$work/install" "$prefix"
     rm -rf "$work" "$log"
     trap - EXIT INT TERM
+}
+
+if [ "${1:-}" = --build-xmake ]; then
+    build_xmake
+    exit 0
+fi
+
+for part in xmake xmake-global; do
+    if [ ! -L "$cache/$part" ] && [ -e "$cache/$part" ]; then
+        seeder=""
+        for candidate in "$cache"/xmake/*/bin/xmake "$store"/xmake/*/bin/xmake; do
+            if [ -x "$candidate" ]; then
+                seeder=$candidate
+                break
+            fi
+        done
+        echo "xmakew: $cache/$part is a package store of its own, made before the shared store $store, and nothing reads it any more: remove $cache/xmake and $cache/xmake-global (the installs come again from the prebuilt releases or are built once), or keep the installs by making the cache the shared store, once, while $store does not exist (docs/guides/machine.md, 'The shared store')" >&2
+        if [ -n "$seeder" ]; then
+            echo "xmakew: seed: cd '$root' && '$seeder' l -P . tools/private_cache.lua '$store' --from '$cache' --only xmake,xmake-global" >&2
+        else
+            echo "xmakew: $cache/xmake holds no xmake to run the seeding with, so remove the folders" >&2
+        fi
+        exit 1
+    fi
+done
+
+for part in xmake xmake-global; do
+    mkdir -p "$store/$part" "$cache"
+    if [ -L "$cache/$part" ]; then
+        [ "$(readlink "$cache/$part")" = "$store/$part" ] || ln -sfn "$store/$part" "$cache/$part"
+    else
+        ln -sfn "$store/$part" "$cache/$part"
+    fi
+done
+
+if [ ! -x "$prefix/bin/xmake" ]; then
+    exclusively "$xmakes/$key.lock" "$root/xmakew" --build-xmake
 fi
 
 XMAKE_GLOBALDIR=$store/xmake-global

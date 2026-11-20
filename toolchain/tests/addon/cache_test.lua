@@ -430,6 +430,60 @@ function failures(arguments)
         table.insert(found, "guard looks at the shared store again when the interval has passed")
     end
 
+    local capped = path.join(folder, "capped-store")
+    folder_of(package_of(capped, "aaa"), 6 * MEGABYTE, OLD)
+    file_of(path.join(capped, "roots", "all.txt"), 10)
+    io.writefile(path.join(capped, "roots", "all.txt"), "t/aaa/1.0/aaa\n")
+    local unbound
+    local stopped = fixtures.refusal(function ()
+        unbound = cache.guard(guarded, {root = home, limit = CAP, builds = {}, store = capped, store_limit = 3 * MEGABYTE, store_interval = 0})
+    end)
+    if stopped then
+        table.insert(found, "a store that nothing in it can be evicted from does not stop the build of a worktree that has room: " .. stopped)
+    elseif not unbound.store_error or not unbound.store_error:find("REVENANT_STORE_GB", 1, true) or unbound.store_error:find("REVENANT_CACHE_GB", 1, true) then
+        table.insert(found, "the store's own cap is the one the report names: " .. tostring(unbound.store_error))
+    end
+    if not exists(package_of(capped, "aaa")) then
+        table.insert(found, "the pinned install stays when the store cannot be brought under its cap")
+    end
+
+    local leased = path.join(folder, "leased-store")
+    for _, name in ipairs({"bbb", "ccc", "ddd"}) do
+        folder_of(package_of(leased, name), 3 * MEGABYTE, name == "ccc" and OLDER or OLD)
+    end
+    local installing = io.openlock(file_of(package_of(leased, "ccc") .. ".lock", 1))
+    installing:lock()
+    local stale_snapshot = function () return {} end
+    cache.reserve(3.5 * MEGABYTE, "a write while ccc is being installed", {root = leased, limit = 8 * MEGABYTE, builds = {}, open_paths = stale_snapshot})
+    if not exists(package_of(leased, "ccc")) then
+        table.insert(found, "an install that holds its lock is not evicted, even when the list of open files was taken before it took the lock")
+    end
+    if exists(package_of(leased, "bbb")) or exists(package_of(leased, "ddd")) then
+        table.insert(found, "the entries nobody holds are evicted instead of the one that is held")
+    end
+    installing:unlock()
+    installing:close()
+    folder_of(package_of(leased, "eee"), 3 * MEGABYTE, OLD)
+    cache.reserve(3.5 * MEGABYTE, "a write after ccc was installed", {root = leased, limit = 8 * MEGABYTE, builds = {}, open_paths = stale_snapshot})
+    if exists(package_of(leased, "ccc")) then
+        table.insert(found, "an install whose lock is free is evicted again")
+    end
+
+    local trimming = path.join(folder, "trimming-store")
+    folder_of(package_of(trimming, "fff"), 6 * MEGABYTE, OLD)
+    local other = io.openlock(file_of(path.join(trimming, ".trim.lock"), 1))
+    other:lock()
+    local skipped = cache.guard(guarded, {root = home, limit = CAP, builds = {}, store = trimming, store_limit = 3 * MEGABYTE, store_interval = 0})
+    if #skipped.evicted > 0 or not exists(package_of(trimming, "fff")) or exists(path.join(trimming, cache.store_stamp())) then
+        table.insert(found, "a process that finds another trimming the store leaves the trim to it and does not record one")
+    end
+    other:unlock()
+    other:close()
+    local trimmed_here = cache.guard(guarded, {root = home, limit = CAP, builds = {}, store = trimming, store_limit = 3 * MEGABYTE, store_interval = 0})
+    if #trimmed_here.evicted == 0 or exists(package_of(trimming, "fff")) then
+        table.insert(found, "the trim runs once the other process has finished")
+    end
+
     os.tryrm(folder)
     return found
 end
