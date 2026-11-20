@@ -4,6 +4,7 @@
 
 static char revenant_data_request_key;
 static char revenant_response_key;
+static NSString *const RevenantRangeErrorDomain = @"RevenantRangeErrorDomain";
 
 @interface AVAssetResourceLoadingDataRequest (RevenantInit)
 - (instancetype)initWithRevenantRequestedOffset:(long long)offset length:(NSInteger)length toEnd:(BOOL)toEnd;
@@ -18,15 +19,24 @@ static char revenant_response_key;
 
 - (AVAssetResourceLoadingDataRequest *)dataRequest
 {
-    AVAssetResourceLoadingDataRequest *data = objc_getAssociatedObject(self, &revenant_data_request_key);
-    if (data)
+    @synchronized (self) {
+        AVAssetResourceLoadingDataRequest *data = objc_getAssociatedObject(self, &revenant_data_request_key);
+        if (data)
+            return data;
+        long long offset = 0, length = 0;
+        int toEnd = 0;
+        RevenantRangeStatus status = revenant_range_header_parse(
+            [[self.request valueForHTTPHeaderField:@"Range"] UTF8String], REVENANT_RANGE_TOTAL_UNKNOWN,
+            &offset, &length, &toEnd);
+        if (status != REVENANT_RANGE_OK) {
+            NSDictionary *info = @{NSLocalizedDescriptionKey: @"The Range header cannot be served on iOS 6"};
+            [self finishLoadingWithError:[NSError errorWithDomain:RevenantRangeErrorDomain code:status userInfo:info]];
+            return nil;
+        }
+        data = [[AVAssetResourceLoadingDataRequest alloc] initWithRevenantRequestedOffset:offset length:(NSInteger)length toEnd:(BOOL)toEnd];
+        objc_setAssociatedObject(self, &revenant_data_request_key, data, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         return data;
-    long long offset = 0, length = 0;
-    int toEnd = 1;
-    revenant_range_header_parse([[self.request valueForHTTPHeaderField:@"Range"] UTF8String], &offset, &length, &toEnd);
-    data = [[AVAssetResourceLoadingDataRequest alloc] initWithRevenantRequestedOffset:offset length:(NSInteger)length toEnd:(BOOL)toEnd];
-    objc_setAssociatedObject(self, &revenant_data_request_key, data, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    return data;
+    }
 }
 
 - (AVAssetResourceLoadingContentInformationRequest *)contentInformationRequest
@@ -47,6 +57,8 @@ static char revenant_response_key;
 - (void)finishLoading
 {
     AVAssetResourceLoadingDataRequest *data = [self dataRequest];
+    if (!data)
+        return;
     [self finishLoadingWithResponse:[self response] data:[data revenant_accumulatedData] redirect:nil];
 }
 
