@@ -65,6 +65,32 @@ var CHECKS = {
         return query('SELECT sqlite_version()').then(function (version) { return {sum: sum, version: version}; });
       });
   },
+  ExpoTwoWayAudio: function (module) {
+    // The application's own module (the host.json "modules" of an application): its engine, the microphone on a
+    // VoiceProcessingIO unit, starts, reports its recording state and delivers microphone chunks and levels.
+    var counts = {micChunks: 0, micBytes: 0, inputLevels: 0, outputLevels: 0, recordingChanges: []};
+    module.addListener('onMicrophoneData', function (event) {
+      counts.micChunks += 1;
+      counts.micBytes += event && event.data && event.data.byteLength || 0;
+    });
+    module.addListener('onInputVolumeLevelData', function () { counts.inputLevels += 1; });
+    module.addListener('onOutputVolumeLevelData', function () { counts.outputLevels += 1; });
+    module.addListener('onRecordingChange', function (event) { counts.recordingChanges.push(event && event.data); });
+    var answers = {};
+    return module.initialize().then(function (initialized) {
+      answers.initialized = initialized;
+      answers.recording = module.toggleRecording(true);
+      return new Promise(function (resolve) { setTimeout(resolve, 3000); });
+    }).then(function () {
+      answers.stillRecording = module.isRecording();
+      answers.playing = module.isPlaying();
+      module.toggleRecording(false);
+      answers.recordingAfterStop = module.isRecording();
+      module.tearDown();
+      answers.counts = counts;
+      return answers;
+    });
+  },
   ExpoScreenOrientation: function (module) {
     return Promise.all([module.getOrientationAsync(), module.getOrientationLockAsync()]).then(function (answers) {
       var result = {orientation: answers[0], lock: answers[1]};
@@ -88,7 +114,7 @@ var CHECKS = {
   }
 };
 
-var NAMES = ['FileSystem', 'ExpoDocumentPicker', 'ExpoImageManipulator', 'ExpoImage', 'ExpoCamera', 'ExpoSecureStore', 'ExpoNetwork', 'ExpoDevice', 'ExpoBrightness', 'ExpoLinearGradient', 'ExpoStoreReview', 'ExpoWebBrowser', 'ExpoBlur', 'ExpoScreenOrientation', 'ExpoSQLite'];
+var NAMES = ['FileSystem', 'ExpoDocumentPicker', 'ExpoImageManipulator', 'ExpoImage', 'ExpoCamera', 'ExpoSecureStore', 'ExpoNetwork', 'ExpoDevice', 'ExpoBrightness', 'ExpoLinearGradient', 'ExpoStoreReview', 'ExpoWebBrowser', 'ExpoBlur', 'ExpoScreenOrientation', 'ExpoSQLite', 'ExpoTwoWayAudio'];
 
 NAMES.forEach(function (name) {
   var found = present(name);
