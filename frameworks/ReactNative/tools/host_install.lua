@@ -176,6 +176,17 @@ function framework_retargets(otool_text, imports_text, exports, library_names, p
     return arguments, notes
 end
 
+function held_libraries(root)
+    local held = {}
+    for _, library in ipairs(os.files(path.join(root, "*Backports.dylib"))) do
+        table.insert(held, path.basename(library))
+    end
+    if #held == 0 then
+        raise("the Backports folder %s holds no libraries: name the shared-packages folder of the build the host links (a store generation whose files were evicted has none), or the frameworks iOS 6 lacks stay unbound and the host crashes at start", root)
+    end
+    return held
+end
+
 function duplicate_install_names(otool_text)
     local count, duplicates = {}, {}
     for line in otool_text:gmatch("[^\n]+") do
@@ -497,10 +508,7 @@ local function stage_shared(options)
         os.vrunv("plutil", {"-replace", "CFBundleExecutable", "-string", executable, path.join(target, "Info.plist")})
     end
     local staged = path.join(target, executable)
-    local held = {}
-    for _, library in ipairs(os.files(path.join(backports_root, "*Backports.dylib"))) do
-        table.insert(held, path.basename(library))
-    end
+    local held = held_libraries(backports_root)
     local exports = {}
     for _, name in ipairs(held) do
         exports[name] = os.iorunv("nm", {"-gU", "-arch", "armv7", path.join(backports_root, name .. ".dylib")})
@@ -811,6 +819,51 @@ function deb_package(file)
     return {name = name, version = version, file = file}
 end
 
+function install_order(packages, depends)
+    local names = {}
+    for _, package in ipairs(packages) do
+        names[package.name] = true
+    end
+    local ordered, placed, remaining = {}, {}, {}
+    for _, package in ipairs(packages) do
+        table.insert(remaining, package)
+    end
+    while #remaining > 0 do
+        local next_remaining, progressed = {}, false
+        for _, package in ipairs(remaining) do
+            local ready = true
+            for _, dependency in ipairs(depends[package.name] or {}) do
+                if names[dependency] and not placed[dependency] and dependency ~= package.name then
+                    ready = false
+                end
+            end
+            if ready then
+                table.insert(ordered, package)
+                placed[package.name] = true
+                progressed = true
+            else
+                table.insert(next_remaining, package)
+            end
+        end
+        if not progressed then
+            raise("the packages to install depend on each other in a circle: %s", next_remaining[1].name)
+        end
+        remaining = next_remaining
+    end
+    return ordered
+end
+
+function deb_depends(text)
+    local names = {}
+    for entry in (text or ""):gmatch("[^,]+") do
+        local name = entry:match("^%s*([%w%.%-_+]+)")
+        if name then
+            table.insert(names, name)
+        end
+    end
+    return names
+end
+
 function delta_plan(wanted, installed)
     local todo = {}
     for _, package in ipairs(wanted) do
@@ -862,6 +915,11 @@ function window(options)
             table.insert(wanted, deb_package(file))
         end
     end
+    local depends = {}
+    for _, package in ipairs(wanted) do
+        depends[package.name] = deb_depends(os.iorunv("dpkg-deb", {"-f", package.file, "Depends"}))
+    end
+    wanted = install_order(wanted, depends)
     for _, package in ipairs(wanted) do
         installed[package.name] = device.run(settings, "dpkg-query -W -f='${Version}' " .. package.name .. " 2>/dev/null ; true", {capture = true}):trim()
     end
