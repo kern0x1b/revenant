@@ -19,6 +19,11 @@ package("racefix")
         local markers = os.getenv("RACE_MARKERS")
         local variant = package:config("variant")
         local other = variant == "a" and "b" or "a"
+        local held = 0
+        while variant == "b" and not os.isfile(path.join(markers, "a.seen")) and held < 90000 do
+            os.sleep(100)
+            held = held + 100
+        end
         os.vrunv("git", {"apply", path.join(package:scriptdir(), "patches", "fix.patch")})
         io.writefile(path.join(markers, variant .. ".patched"), "patched")
         local waited = 0
