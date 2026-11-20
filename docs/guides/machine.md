@@ -251,11 +251,15 @@ SDK-relative path a line), and the digest hashes the lowered text of exactly tho
 the runtime's overlay by an `#error` that names it, so a read the list lacks fails the build and cannot go unkeyed. The
 Swift overlays (`Foundation`, `AVFoundation`) are lowered from the pinned swift sources by looking names up in the member
 set: `toolchain/src/swift-runtime/reads/swift-overlay-reads.txt` lists every lookup the lowering makes (`name <key>` or `type <key>`),
-the digest hashes the answers to exactly those, and a lookup outside the list fails the build. After a change that
+the digest hashes the answers to exactly those, and a lookup outside the list fails the build. A build of the armv7
+runtime also fails when a listed lookup was never made (the arm64 build skips `AVFoundation`, so it does not check), so
+the list cannot keep a lookup the lowering has dropped. After a change that
 adds a read, run the runtime build once with `REVENANT_RUNTIME_READS_RECORD=<folder>` to record the lookups, copy
 `swift-overlay-reads.txt` from the folder into `toolchain/src/swift-runtime/reads/`, add the header the `#error` named to `lowered-reads.txt`, and
 run `toolchain/tools/recipe_digests.lua`, which needs the SDK package and takes about a minute the first time for a changed member set
-(the lowered text of the listed headers is cached under `runtime-reads/` in the cache home).
+(the lowered text of the listed headers is cached under `runtime-reads/` in the cache home, keyed by the SDK's content and
+not by its path). The recording switches the lookup check off, so `prebuilt.pack` refuses to pack an install made with
+`REVENANT_RUNTIME_READS_RECORD` set: build it again without the variable before releasing.
 
 A change to documentation rebuilds nothing. `./xmakew l -P . tools/keys.lua [package ...]` prints each package's
 version and the key its prebuilt archive is released under, `prebuilt-<package>-<key>`. The key is computed by

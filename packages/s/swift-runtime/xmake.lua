@@ -380,6 +380,7 @@ package("swift-runtime")
                     end
                 end
             end
+            lookup_check.finish(not arm64)
             local function overlay_sources_of(name, files)
                 local found = {}
                 for _, file in ipairs(files) do
@@ -435,7 +436,6 @@ package("swift-runtime")
                           {"-lswiftDarwin", "-framework", "CoreFoundation"})
             local lowered = import("@addon.revenant.apple.lowered", {anonymous = true})
             local lowered_headers = lowered.overlay(toolchain:config("sdkdir"), path.absolute("lowered"), nil, {}, nil, triple, runtime_reads.allowed_headers())
-            lookup_check.finish()
             local flat = import("@addon.revenant.apple.flat_classes", {anonymous = true})
             local flat_flags = flat.link_flags(flat.stub_directory(toolchain:config("sdkdir"), path.join(generated, "flat-stubs")))
             local lowered_include = lowered.include_directory(path.absolute("lowered"))

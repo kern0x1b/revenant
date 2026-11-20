@@ -138,6 +138,56 @@ function failures(opt)
     local without = reads.swift_digest({classes = {}}, keys)
     check(reads.swift_digest({classes = {NSFixture = {["-fixtureCall"] = true}}}, keys) ~= without, "a member the lowering looked up does not move the Swift digest")
     check(reads.swift_digest({classes = {NSFixture = {["-otherCall"] = true}}}, keys) == without, "a member the lowering never looked up moves the Swift digest")
+
+    local pair = {"name firstCall", "name secondCall"}
+    local partial = reads.lookup_check(pair)
+    partial.note("name firstCall")
+    local stale = raises(function ()
+        partial.finish(true)
+    end)
+    check(stale ~= nil and stale:find("name secondCall", 1, true) and stale:find("never made", 1, true),
+          "a listed lookup that a complete build never made is not reported: " .. tostring(stale))
+    check(raises(function ()
+        partial.finish(false)
+    end) == nil, "an incomplete build (arm64 skips AVFoundation) reports a listed lookup it never made")
+    local whole = reads.lookup_check(pair)
+    whole.note("name firstCall")
+    whole.note("name secondCall")
+    check(raises(function ()
+        whole.finish(true)
+    end) == nil, "a complete build that made every listed lookup is reported")
+
+    local variable = reads.record_variable()
+    local before = {record = os.getenv(variable), out = os.getenv("REVENANT_PREBUILT_OUT")}
+    local recorded = path.join(root, "recorded")
+    local release = path.join(root, "release")
+    os.setenv(variable, recorded)
+    os.setenv("REVENANT_PREBUILT_OUT", release)
+    local recorder = reads.lookup_check(pair)
+    recorder.note("name secondCall")
+    recorder.note("name unlistedCall")
+    check(raises(function ()
+        recorder.finish(true)
+    end) == nil, "a recording run reports a listed lookup it never made")
+    local written = path.join(recorded, "swift-overlay-reads.txt")
+    check(os.isfile(written) and io.readfile(written) == "name secondCall\nname unlistedCall\n", "the recording does not hold the sorted lookups the run made")
+    local prebuilt = import("prebuilt", {rootdir = opt.modules, anonymous = true})
+    local refused = raises(function ()
+        prebuilt.pack({name = function () return "swift-runtime" end})
+    end)
+    check(refused ~= nil and refused:find(variable, 1, true) and refused:find("must not be packed", 1, true),
+          "a build that records the lookups can pack a prebuilt archive: " .. tostring(refused))
+    check(not os.isdir(release), "the refused pack created the release folder")
+    os.setenv(variable, before.record or "")
+    os.setenv("REVENANT_PREBUILT_OUT", before.out or "")
+
+    local sdks = {a = path.join(root, "sdk-a"), b = path.join(root, "sdk-b"), c = path.join(root, "sdk-c")}
+    for name, folder in pairs(sdks) do
+        os.mkdir(path.join(folder, "usr", "include"))
+        io.writefile(path.join(folder, "usr", "include", "a.h"), name == "c" and "int b;\n" or "int a;\n")
+    end
+    check(reads.lowered_key(sdks.a) == reads.lowered_key(sdks.b), "the same SDK content under two paths gets two lowered-digest cache keys")
+    check(reads.lowered_key(sdks.a) ~= reads.lowered_key(sdks.c), "an SDK header that differs does not move the lowered-digest cache key")
     os.tryrm(root)
     return found
 end

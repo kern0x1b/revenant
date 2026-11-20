@@ -641,14 +641,27 @@ local MEMBERS = {
 
 local MODULE_DIR = os.scriptdir()
 
+local DEVICE_EXPORT_FILES = {"device-globals.txt", "device-unlisted.txt"}
+
+local function device_export_file(file)
+    return path.absolute(path.join(MODULE_DIR, "..", "..", "..", "frameworks", "Backports", "tools", file))
+end
+
+local function device_exports_text()
+    local texts = {}
+    for _, file in ipairs(DEVICE_EXPORT_FILES) do
+        table.insert(texts, io.readfile(device_export_file(file)))
+    end
+    return table.concat(texts, "\0")
+end
+
 local DEVICE_EXPORTS
 
 local function device_exports()
     if not DEVICE_EXPORTS then
         DEVICE_EXPORTS = {}
-        for _, file in ipairs({"device-globals.txt", "device-unlisted.txt"}) do
-            local path_to = path.absolute(path.join(MODULE_DIR, "..", "..", "..", "frameworks", "Backports", "tools", file))
-            for line in io.lines(path_to) do
+        for _, file in ipairs(DEVICE_EXPORT_FILES) do
+            for line in io.lines(device_export_file(file)) do
                 if line ~= "" and line:sub(1, 1) ~= "#" then
                     local symbol = line:match("^([^\t]+)")
                     if symbol then
@@ -2682,11 +2695,11 @@ function device_members_of(sdk, inventory)
 end
 
 local function input_digest(sdk, text)
-    return hash.strhash128(table.concat({sdk, digest_of(MODULE_DIR, generator_files()), text}, "\0"))
+    return hash.strhash128(table.concat({sdk, digest_of(MODULE_DIR, generator_files()), device_exports_text(), text}, "\0"))
 end
 
-function lowering_key(sdk)
-    return input_digest(sdk, io.readfile(members_file()) .. io.readfile(device_members_file()))
+function lowering_key(identity)
+    return input_digest(identity, io.readfile(members_file()) .. io.readfile(device_members_file()))
 end
 
 THIRD_PARTY_MODULES = {

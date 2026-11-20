@@ -3,6 +3,16 @@ local byteorder = import("byteorder", {rootdir = path.join(os.scriptdir(), "..")
 
 local FOLDER = path.join(os.scriptdir(), "..", "..", "src", "swift-runtime", "reads")
 local RECORD = "REVENANT_RUNTIME_READS_RECORD"
+local BACKPORTS_TOOLS = path.join(os.scriptdir(), "..", "..", "..", "frameworks", "Backports", "tools")
+
+function record_variable()
+    return RECORD
+end
+
+function recording()
+    local folder = os.getenv(RECORD)
+    return folder ~= nil and folder ~= ""
+end
 
 function headers_file()
     return path.join(FOLDER, "lowered-reads.txt")
@@ -40,9 +50,14 @@ function lookups()
     return lines_of(lookups_file())
 end
 
-local function cached(sdk, action)
+function lowered_key(sdk)
+    local identity = import("sdk", {rootdir = BACKPORTS_TOOLS, anonymous = true}).sdk_identity(sdk)
     local own = hash.strhash128(io.readfile(path.join(os.scriptdir(), "runtime_reads.lua")))
-    local key = hash.strhash128(lowered.lowering_key(sdk) .. "\0" .. own .. "\0" .. table.concat(headers(), "\n") .. "\n")
+    return hash.strhash128(lowered.lowering_key(identity) .. "\0" .. own .. "\0" .. table.concat(headers(), "\n") .. "\n")
+end
+
+local function cached(sdk, action)
+    local key = lowered_key(sdk)
     local file = path.join(import("@addon.revenant.cache", {anonymous = true}).root(), "runtime-reads", key)
     if os.isfile(file) then
         return io.readfile(file)
@@ -96,28 +111,42 @@ function digest(sdk)
 end
 
 function lookup_check(keys)
+    local listed = keys or lookups()
     local allowed = {}
-    for _, key in ipairs(keys or lookups()) do
+    for _, key in ipairs(listed) do
         allowed[key] = true
     end
-    local record = os.getenv(RECORD)
+    local record = recording() and os.getenv(RECORD) or nil
     local seen = {}
     local check = {}
     function check.note(key)
         if not seen[key] then
             seen[key] = true
-            if not allowed[key] and not (record and record ~= "") then
+            if not allowed[key] and not record then
                 raise("the Swift overlay lowering looks up %s, which %s does not list: run the runtime build once with %s=<folder>, copy swift-overlay-reads.txt from it and regenerate the digests (toolchain/tools/recipe_digests.lua)", key, lookups_file(), RECORD)
             end
         end
     end
-    function check.finish()
-        if record and record ~= "" then
-            local keys = table.orderkeys(seen)
-            byteorder.sort(keys)
+    function check.finish(complete)
+        if record then
+            local recorded = table.orderkeys(seen)
+            byteorder.sort(recorded)
             os.mkdir(record)
-            io.writefile(path.join(record, "swift-overlay-reads.txt"), table.concat(keys, "\n") .. "\n")
-            print("recorded %d Swift overlay lookups in %s", #keys, path.join(record, "swift-overlay-reads.txt"))
+            io.writefile(path.join(record, "swift-overlay-reads.txt"), table.concat(recorded, "\n") .. "\n")
+            print("recorded %d Swift overlay lookups in %s; an install made with %s set must not be released", #recorded, path.join(record, "swift-overlay-reads.txt"), RECORD)
+            return
+        end
+        if complete then
+            local unused = {}
+            for _, key in ipairs(listed) do
+                if not seen[key] then
+                    table.insert(unused, key)
+                end
+            end
+            if #unused > 0 then
+                raise("%s lists %d lookups this build never made (the first is %s), so the digest hashes answers that nothing reads: record the lookups again with %s=<folder>, copy swift-overlay-reads.txt from it and regenerate the digests (toolchain/tools/recipe_digests.lua)",
+                      lookups_file(), #unused, unused[1], RECORD)
+            end
         end
     end
     return check
