@@ -84,6 +84,14 @@ expo-contacts is a recipe with one name patch (packages/e/expo-contacts/patches)
 | --- | --- | --- | --- |
 | expo-contacts | `Image` renamed `ContactImageRecord`; three exceptions colliding with expo-file-system renamed; the ContactsUI form and picker sources are not built, pending a separate backport task | the first two are name collisions inside `ExpoAppModules`; `CNContactViewController` and `CNContactPickerViewController` are iOS 9 and have no backport yet, and the task forbids a throwing shim | contact data operations through the Contacts backport are compiled but not verified; `presentFormAsync`, `presentContactPickerAsync` and the next form functions are absent until a ContactsUI backport over `ABPersonViewController`, `ABNewPersonViewController` and `ABPeoplePickerNavigationController` lands |
 
+## Media library (block 5)
+
+expo-media-library is a recipe with an iOS 6 patch (packages/e/expo-media-library/patches); it installs, its patch applies, and the host compiles and links it. It has not been exercised on the phone.
+
+| Module | Removed or replaced | Why | What JS sees |
+| --- | --- | --- | --- |
+| expo-media-library | nothing removed; `AssetInfo`, `MediaType`, `PermissionsModuleNotFoundException` and the three permission requester classes renamed with an `ExpoML` prefix | their names collide with expo-image-picker's inside the shared Swift module `ExpoAppModules` | the module as published against the Photos backport over AssetsLibrary: `getMomentsAsync` returns the AssetsLibrary Event collections, the audio media-type constant has its SDK value, and the Photos change-details extensions resolve through the backported `swiftPhotos` runtime; audio assets and all phone behaviour are not verified |
+
 ## How to check
 
 `./xmakew l -P . frameworks/ReactNative/tools/coverage.lua` regenerates `docs/reference/react-native/coverage.md`;

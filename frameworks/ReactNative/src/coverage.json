@@ -603,9 +603,9 @@
    "group": "sdk",
    "version": "~57.0.5",
    "native": true,
-   "status": "missing",
-   "verified": "none",
-   "note": "Photos is absent from the iOS 6.1.3 cache; AssetsLibrary (ALAssetsLibrary) is present and is the analog. Not built."
+   "status": "partial",
+   "verified": "build",
+   "note": "Recipe packages/e/expo-media-library (npm 57.0.5, patch media-library-names-ios6.patch) installs and its patch applies; compiled into the host and linked (not exercised on the phone). The patch renames AssetInfo, MediaType, PermissionsModuleNotFoundException and the three permission requester classes with an ExpoML prefix, because expo-image-picker declares the same names inside the shared ExpoAppModules Swift module. The Photos backport supplies the Photos API over AssetsLibrary: fetchMoments returns the ALAssetsGroupEvent collections and the later PHAssetMediaTypeAudio constant is exported with its SDK value of 3; the host links the backported swiftPhotos runtime so the Photos change-details extensions resolve. Audio assets and all phone behaviour are not verified."
   },
   {
    "id": "expo-mesh-gradient",

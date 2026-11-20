@@ -142,6 +142,10 @@ target("RNHost")
             target:add("ldflags", "-Wl,-weak_framework,Photos", {force = true})
             target:add("ldflags", "-Wl,-weak_framework,PhotosUI", {force = true})
         end
+        if ("," .. expo_real .. ","):find(",expo-media-library,", 1, true) then
+            target:add("ldflags", "-Wl,-weak_framework,Photos", {force = true})
+            target:add("links", "swiftPhotos", {force = true})
+        end
         local file = path.join(os.projectdir(), "build", "app-manifest", "host.json")
         local text = os.isfile(file) and io.readfile(file) or ""
         local function key(name)

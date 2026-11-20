@@ -1,0 +1,203 @@
+diff -ru a/ios/MediaLibraryExceptions.swift b/ios/MediaLibraryExceptions.swift
+--- a/ios/MediaLibraryExceptions.swift	1985-10-26 09:15:00
++++ b/ios/MediaLibraryExceptions.swift	2026-11-20 00:13:24
+@@ -110,7 +110,7 @@
+   }
+ }
+ 
+-internal final class PermissionsModuleNotFoundException: Exception {
++internal final class ExpoMLPermissionsModuleNotFoundException: Exception {
+   override var reason: String {
+     "Permissions module not found. Are you sure that Expo modules are properly linked?"
+   }
+diff -ru a/ios/MediaLibraryModule.swift b/ios/MediaLibraryModule.swift
+--- a/ios/MediaLibraryModule.swift	1985-10-26 09:15:00
++++ b/ios/MediaLibraryModule.swift	2026-11-20 00:13:24
+@@ -41,8 +41,8 @@
+ 
+     OnCreate {
+       appContext?.permissions?.register([
+-        MediaLibraryPermissionRequester(),
+-        MediaLibraryWriteOnlyPermissionRequester()
++        ExpoMLPermissionRequester(),
++        ExpoMLWriteOnlyPermissionRequester()
+       ])
+     }
+ 
+@@ -528,7 +528,7 @@
+ 
+   private func runIfAllPermissionsWereGranted(reject: @escaping EXPromiseRejectBlock, block: @escaping () -> Void) {
+     appContext?.permissions?.getPermissionUsingRequesterClass(
+-      MediaLibraryPermissionRequester.self,
++      ExpoMLPermissionRequester.self,
+       resolve: { result in
+         if let permissions = result as? [String: Any] {
+           if permissions["status"] as? String != "granted" {
+diff -ru a/ios/MediaLibraryRecords.swift b/ios/MediaLibraryRecords.swift
+--- a/ios/MediaLibraryRecords.swift	1985-10-26 09:15:00
++++ b/ios/MediaLibraryRecords.swift	2026-11-20 00:13:24
+@@ -1,7 +1,7 @@
+ import ExpoModulesCore
+ import Photos
+ 
+-enum MediaType: String, Enumerable {
++enum ExpoMLMediaType: String, Enumerable {
+   case audio
+   case photo
+   case video
+@@ -9,7 +9,7 @@
+   case unknown
+ 
+   init(fromPHAssetMediaType mediaType: PHAssetMediaType) {
+-    let result: MediaType = switch mediaType {
++    let result: ExpoMLMediaType = switch mediaType {
+     case .audio: .audio
+     case .image: .photo
+     case .video: .video
+@@ -95,7 +95,7 @@
+   @Field var after: String?
+   @Field var album: String?
+   @Field var sortBy: [String] = []
+-  @Field var mediaType: [MediaType]
++  @Field var mediaType: [ExpoMLMediaType]
+   @Field var mediaSubtypes: [MediaSubtype]
+   @Field var createdAfter: Double?
+   @Field var createdBefore: Double?
+diff -ru a/ios/MediaLibraryUtilities.swift b/ios/MediaLibraryUtilities.swift
+--- a/ios/MediaLibraryUtilities.swift	1985-10-26 09:15:00
++++ b/ios/MediaLibraryUtilities.swift	2026-11-20 00:13:24
+@@ -38,7 +38,7 @@
+     "id": asset.localIdentifier,
+     "filename": fileName,
+     "uri": assetUriForLocalId(localId: asset.localIdentifier),
+-    "mediaType": MediaType(fromPHAssetMediaType: asset.mediaType).rawValue,
++    "mediaType": ExpoMLMediaType(fromPHAssetMediaType: asset.mediaType).rawValue,
+     "mediaSubtypes": MediaSubtype.stringify(asset.mediaSubtypes),
+     "width": asset.pixelWidth,
+     "height": asset.pixelHeight,
+@@ -519,9 +519,9 @@
+ 
+ func requesterClass(_ writeOnly: Bool) -> EXPermissionsRequester.Type {
+   if writeOnly {
+-    return MediaLibraryWriteOnlyPermissionRequester.self
++    return ExpoMLWriteOnlyPermissionRequester.self
+   }
+-  return MediaLibraryPermissionRequester.self
++  return ExpoMLPermissionRequester.self
+ }
+ 
+ func readSizeFrom(url: URL) -> CGSize? {
+diff -ru a/ios/Requesters.swift b/ios/Requesters.swift
+--- a/ios/Requesters.swift	1985-10-26 09:15:00
++++ b/ios/Requesters.swift	2026-11-20 00:13:24
+@@ -1,13 +1,13 @@
+ import ExpoModulesCore
+ import Photos
+ 
+-public class MediaLibraryPermissionRequester: DefaultMediaLibraryPermissionRequester, EXPermissionsRequester {
++public class ExpoMLPermissionRequester: ExpoMLDefaultPermissionRequester, EXPermissionsRequester {
+   public static func permissionType() -> String {
+     return "mediaLibrary"
+   }
+ }
+ 
+-public class MediaLibraryWriteOnlyPermissionRequester: DefaultMediaLibraryPermissionRequester, EXPermissionsRequester {
++public class ExpoMLWriteOnlyPermissionRequester: ExpoMLDefaultPermissionRequester, EXPermissionsRequester {
+   public static func permissionType() -> String {
+     return "mediaLibraryWriteOnly"
+   }
+@@ -17,9 +17,9 @@
+   }
+ }
+ 
+-public class DefaultMediaLibraryPermissionRequester: NSObject {}
++public class ExpoMLDefaultPermissionRequester: NSObject {}
+ 
+-extension DefaultMediaLibraryPermissionRequester {
++extension ExpoMLDefaultPermissionRequester {
+   @objc
+   public func requestPermissions(resolver resolve: @escaping EXPromiseResolveBlock, rejecter reject: EXPromiseRejectBlock) {
+     let authorizationHandler = { (_: PHAuthorizationStatus) in
+diff -ru a/ios/next/MediaLibraryNextPermissionDelegate.swift b/ios/next/MediaLibraryNextPermissionDelegate.swift
+--- a/ios/next/MediaLibraryNextPermissionDelegate.swift	1985-10-26 09:15:00
++++ b/ios/next/MediaLibraryNextPermissionDelegate.swift	2026-11-20 00:13:24
+@@ -9,8 +9,8 @@
+ 
+   func registerPermissionRequesters() {
+     appContext?.permissions?.register([
+-      MediaLibraryPermissionRequester(),
+-      MediaLibraryWriteOnlyPermissionRequester()
++      ExpoMLPermissionRequester(),
++      ExpoMLWriteOnlyPermissionRequester()
+     ])
+   }
+ 
+@@ -33,19 +33,19 @@
+   }
+ 
+   func checkIfReadWritePermissionGranted() async throws {
+-    let permissions = try await getPermissions(using: MediaLibraryPermissionRequester.self)
++    let permissions = try await getPermissions(using: ExpoMLPermissionRequester.self)
+     guard hasGrantedPermission(permissions) else {
+       throw FailedToGrantPermissions()
+     }
+   }
+ 
+   func checkIfWritePermissionGranted() async throws {
+-    let writeOnlyPermissions = try await getPermissions(using: MediaLibraryWriteOnlyPermissionRequester.self)
++    let writeOnlyPermissions = try await getPermissions(using: ExpoMLWriteOnlyPermissionRequester.self)
+     if hasGrantedPermission(writeOnlyPermissions) {
+       return
+     }
+ 
+-    let readWritePermissions = try await getPermissions(using: MediaLibraryPermissionRequester.self)
++    let readWritePermissions = try await getPermissions(using: ExpoMLPermissionRequester.self)
+     guard hasWritePermission(
+       writeOnlyPermissions: writeOnlyPermissions,
+       readWritePermissions: readWritePermissions
+@@ -55,7 +55,7 @@
+   }
+ 
+   func checkIfFullAccessGranted() async throws {
+-    let permissions = try await getPermissions(using: MediaLibraryPermissionRequester.self)
++    let permissions = try await getPermissions(using: ExpoMLPermissionRequester.self)
+     guard hasFullAccess(permissions) else {
+       throw FailedToGrantPermissions()
+     }
+diff -ru a/ios/next/objects/asset/Asset.swift b/ios/next/objects/asset/Asset.swift
+--- a/ios/next/objects/asset/Asset.swift	1985-10-26 09:15:00
++++ b/ios/next/objects/asset/Asset.swift	2026-11-20 00:13:24
+@@ -139,7 +139,7 @@
+     return try await assetMapper.mapUri(phAsset)
+   }
+ 
+-  func getInfo() async throws -> AssetInfo {
++  func getInfo() async throws -> ExpoMLAssetInfo {
+     let phAsset = try await requirePHAsset()
+     return try await assetMapper.toDto(phAsset)
+   }
+diff -ru a/ios/next/objects/asset/AssetInfo.swift b/ios/next/objects/asset/AssetInfo.swift
+--- a/ios/next/objects/asset/AssetInfo.swift	1985-10-26 09:15:00
++++ b/ios/next/objects/asset/AssetInfo.swift	2026-11-20 00:13:24
+@@ -1,6 +1,6 @@
+ import ExpoModulesCore
+ 
+-struct AssetInfo: Record {
++struct ExpoMLAssetInfo: Record {
+   @Field var id: String
+   @Field var creationTime: Int?
+   @Field var duration: Int?
+diff -ru a/ios/next/objects/asset/AssetMapper.swift b/ios/next/objects/asset/AssetMapper.swift
+--- a/ios/next/objects/asset/AssetMapper.swift	1985-10-26 09:15:00
++++ b/ios/next/objects/asset/AssetMapper.swift	2026-11-20 00:13:24
+@@ -2,8 +2,8 @@
+ import Photos
+ 
+ class AssetMapper {
+-  func toDto(_ phAsset: PHAsset) async throws -> AssetInfo {
+-    return AssetInfo(
++  func toDto(_ phAsset: PHAsset) async throws -> ExpoMLAssetInfo {
++    return ExpoMLAssetInfo(
+       id: "ph://\(phAsset.localIdentifier)",
+       creationTime: mapCreationTime(phAsset.creationDate),
+       duration: mapDuration(phAsset.duration),
