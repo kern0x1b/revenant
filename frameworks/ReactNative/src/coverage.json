@@ -864,9 +864,9 @@
    "group": "sdk",
    "version": "~57.0.5",
    "native": true,
-   "status": "evaluate",
-   "verified": "none",
-   "note": "Recipe packages/e/expo-video (npm 57.0.5) and patch video-ios6.patch are committed, but the module is not built: isolated builds still fail on about 20 post-iOS-6 APIs whose Backports implementations are being added in batches. The patch renames the ContentType and MediaInfo types that collide with expo-clipboard and expo-image-picker inside ExpoAppModules and replaces the iOS 15 async load calls with iOS 4 property access. Nothing is verified as built or running, so the row stays evaluate until a build passes."
+   "status": "partial",
+   "verified": "build",
+   "note": "Recipe packages/e/expo-video (npm 57.0.5, patch video-ios6.patch) compiles into the isolated RNHost and links (status 0, 878 s; every non-weak import of the 57 armv7 binaries resolves). The patch renames ContentType and MediaInfo so they no longer collide with expo-clipboard and expo-image-picker in ExpoAppModules, replaces the iOS 15 async load API with the iOS 4 properties, uses the legacy HLS thumbnail generator, and gives the fullscreen and picture-in-picture delegate callbacks their real availability, so nothing calls them on iOS 6. Backports supply the iOS 6 loading-request completion through finishLoadingWithResponse:data:redirect:, media selection from the iOS 5 group selectors, AVRoutePickerView over MPVolumeView's route button, and AVPlayerItem buffering; AVKitBackports is now carried by the host. configuredTimeOffsetFromLive, audiovisualBackgroundPlaybackPolicy and showsTimecodes are stored with no effect, and the route picker's end event is not delivered on iPhone. Not exercised on the phone."
   },
   {
    "id": "expo-web-browser",
