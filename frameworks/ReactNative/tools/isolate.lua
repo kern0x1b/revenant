@@ -573,12 +573,40 @@ function link_react_native(folder, installdir)
     return found
 end
 
-function config_key(folder, env, tree)
-    local names = table.keys(env)
+local AMBIENT_NAMES = {"DEVELOPER_DIR", "SDKROOT", "TOOLCHAINS", "MACOSX_DEPLOYMENT_TARGET", "IPHONEOS_DEPLOYMENT_TARGET", "CC", "CXX", "LD", "AR", "CFLAGS", "CXXFLAGS", "CPPFLAGS", "LDFLAGS", "OBJCFLAGS", "PATH"}
+
+function ambient_environment()
+    local seen = {}
+    local names = {}
+    for _, name in ipairs(AMBIENT_NAMES) do
+        seen[name] = true
+        table.insert(names, name)
+    end
+    for name, _ in pairs(os.getenvs()) do
+        if name:find("^XMAKE_") and not seen[name] then
+            table.insert(names, name)
+        end
+    end
+    table.sort(names)
+    local ambient = {}
+    for _, name in ipairs(names) do
+        ambient[name] = os.getenv(name)
+    end
+    return ambient
+end
+
+function config_key(folder, env, tree, ambient)
+    local explicit = table.clone(env)
+    for name, value in pairs(ambient or ambient_environment()) do
+        if explicit[name] == nil then
+            explicit[name] = value
+        end
+    end
+    local names = table.keys(explicit)
     table.sort(names)
     local parts = {}
     for _, name in ipairs(names) do
-        table.insert(parts, name .. "=" .. tostring(env[name]))
+        table.insert(parts, name .. "=" .. tostring(explicit[name]))
     end
     table.insert(parts, io.readfile(path.join(folder, "xmake.lua")))
     table.insert(parts, tree)

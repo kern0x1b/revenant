@@ -203,3 +203,32 @@ expect("editing a build file changes the checkout's configuration state", edited
 io.writefile(path.join(tree, "frameworks", "X", "b.swift"), "let b = 1\n")
 expect("adding a source file changes the checkout's configuration state", isolate.checkout_state(tree) ~= edited, "a new file kept the state")
 os.tryrm(tree)
+
+local ambient_dir = path.join(os.tmpdir(), "rn-config-ambient")
+os.tryrm(ambient_dir)
+os.mkdir(ambient_dir)
+io.writefile(path.join(ambient_dir, "xmake.lua"), "set_project('a')\n")
+local aenv = {A = "1"}
+local base_key = isolate.config_key(ambient_dir, aenv, "tree", {DEVELOPER_DIR = "/Xcode-1"})
+expect("a configuration key changes with an inherited variable", base_key ~= isolate.config_key(ambient_dir, aenv, "tree", {DEVELOPER_DIR = "/Xcode-2"}), "another DEVELOPER_DIR kept the key")
+expect("a configuration key is the same for the same inherited variables", base_key == isolate.config_key(ambient_dir, aenv, "tree", {DEVELOPER_DIR = "/Xcode-1"}), "the same inherited variables changed the key")
+expect("an explicit variable wins over the inherited one in the key", isolate.config_key(ambient_dir, {DEVELOPER_DIR = "/x"}, "tree", {DEVELOPER_DIR = "/Xcode-1"}) == isolate.config_key(ambient_dir, {DEVELOPER_DIR = "/x"}, "tree", {DEVELOPER_DIR = "/Xcode-2"}), "an inherited value reached the key past an explicit one")
+local saved = os.getenv("DEVELOPER_DIR")
+os.setenv("DEVELOPER_DIR", "/Xcode-A")
+local first = isolate.config_key(ambient_dir, aenv, "tree")
+os.setenv("DEVELOPER_DIR", "/Xcode-B")
+local second = isolate.config_key(ambient_dir, aenv, "tree")
+os.setenv("DEVELOPER_DIR", saved or "")
+expect("changing DEVELOPER_DIR changes the key a build computes, so xmake f -c runs", first ~= second, "the key ignored DEVELOPER_DIR")
+os.setenv("XMAKE_RN_PROBE", "1")
+local with_switch = isolate.ambient_environment().XMAKE_RN_PROBE
+os.setenv("XMAKE_RN_PROBE", "")
+expect("an XMAKE_ variable is part of the inherited environment of the key", with_switch == "1", "XMAKE_RN_PROBE was not read")
+os.tryrm(ambient_dir)
+
+local libraries = import("backports_libraries", {rootdir = TOOLS, anonymous = true})
+local own = 'add_requires("revenant@backports", {alias = "backports", configs = {libraries = "FoundationBackports,UIKitBackports,MyOwnBackports"}})\n'
+expect("the libraries of an application's backports requirement are read from its xmake.lua", table.concat(libraries.declared(own), ",") == "FoundationBackports,UIKitBackports,MyOwnBackports", "the list was not read")
+expect("an application with another set keeps its own list and is checked against what the host links", table.concat(libraries.missing(libraries.declared(own), {"FoundationBackports", "MyOwnBackports"}), ",") == "", "an own library was reported missing")
+expect("a library the host links and the application lacks is named", table.concat(libraries.missing(libraries.declared(own)), ","):find("CoreTextBackports", 1, true) ~= nil, "a missing host library was not named")
+expect("an xmake.lua with no list is not read as one", libraries.declared('add_requires("revenant@backports")\n') == nil, "a requirement without libraries gave a list")

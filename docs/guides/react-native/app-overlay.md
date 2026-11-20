@@ -48,3 +48,9 @@ revenant names an application; `examples/paseo` is the first one.
   VoiceProcessingIO unit, crutch C12), not a change to the module.
 - `PaseoHardwareKeyboard` is not in the host's scope: the host has no stub for it, and an application that needs it gets the loud
   missing-module error.
+
+## The application names its Backports libraries
+
+The libraries of the `revenant@backports` requirement are the application's: its own `xmake.lua` lists them (`configs = {libraries = "..."}`), and the host takes that list as it stands, with none of its own and no override. A module that needs another framework on the phone (for example the audio engine of `@getpaseo/expo-two-way-audio`) adds that library to the application's list only. The host's `on_load` checks the list against the libraries the host itself links (`tools/backports_libraries.lua`, `HOST_REQUIRED`) and refuses a build whose list lacks one, naming it; an `xmake.lua` that gives no list is refused too.
+
+The Expo provider reads the `apple` block of a package's `expo-module.config.json` and, when there is none, the `ios` block, as Expo's own `getAppleConfig` does (`apple` wins when both are present). It does not read the `platforms` array: a package the application lists is one the application means to build for iOS, and a module whose `platforms` omit iOS has no Apple block to read.

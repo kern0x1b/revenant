@@ -252,13 +252,14 @@ for _, package in ipairs(expo_packages(ctx_modules)) do
     os.mkdir(dir)
     local config = package == "@scope/some-module"
         and '{"platforms": ["ios", "android"], "ios": {"modules": ["SomeModule"], "appDelegateSubscribers": ["SomeSubscriber"]}, "android": {"modules": ["expo.modules.Some"], "appDelegateSubscribers": ["AndroidOnly"]}}'
-        or (package == "plain-module" and '{"apple": {"modules": ["PlainModule"]}}' or '{"apple": {"modules": []}}')
+        or (package == "plain-module" and '{"apple": {"modules": ["PlainModule"]}, "ios": {"modules": ["LegacyModule"]}}' or '{"apple": {"modules": []}}')
     io.writefile(path.join(dir, "expo-module.config.json"), config)
 end
 local ios_classes = table.concat(expo_classes(ctx_modules), "|")
 check("a module under the ios key is in the provider", ios_classes:find("(module: SomeModule.self, name: nil)", 1, true) ~= nil, ios_classes)
 check("a module under the apple key still is", ios_classes:find("(module: PlainModule.self, name: nil)", 1, true) ~= nil, ios_classes)
 check("the android modules are not", ios_classes:find("expo.modules.Some", 1, true) == nil, ios_classes)
+check("a package with both keys registers the apple key and not the ios one", ios_classes:find("LegacyModule", 1, true) == nil, ios_classes)
 local ios_subscribers = table.concat(expo_subscribers(ctx_modules), "|")
 check("the app delegate subscribers of the ios key are listed, those of android are not", ios_subscribers:find("SomeSubscriber.self", 1, true) ~= nil
     and ios_subscribers:find("AndroidOnly", 1, true) == nil, ios_subscribers)
