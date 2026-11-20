@@ -15,7 +15,7 @@ if os.getenv("RN_EXPO") then
     add_requires("revenant@swift-crypto", {alias = "swift-crypto"})
 end
 
-local BACKPORTS_LIBRARIES = "FoundationBackports,CoreTextBackports,UIKitBackports,UserNotificationsBackports,CoreGraphicsBackports,GraphicsBackports,CoreFoundationBackports,SystemBackports,IOSurfaceBackports,WebKitBackports,MapKitBackports,CoreLocationBackports,SecurityBackports,CoreMotionBackports,CoreTelephonyBackports,AVKitBackports"
+local BACKPORTS_LIBRARIES = "FoundationBackports,CoreTextBackports,UIKitBackports,UserNotificationsBackports,CoreGraphicsBackports,GraphicsBackports,CoreFoundationBackports,SystemBackports,IOSurfaceBackports,WebKitBackports,MapKitBackports,CoreLocationBackports,SecurityBackports,CoreMotionBackports,CoreTelephonyBackports,AVKitBackports,AccelerateBackports,CoreMediaBackports,AVFoundationBackports"
 local RETARGETED_BY_STAGE = {UserNotificationsBackports = true, ContactsBackports = true, LocalAuthenticationBackports = true}
 
 if os.getenv("RN_LINK_ALL") and os.getenv("RN_BACKPORTS") then

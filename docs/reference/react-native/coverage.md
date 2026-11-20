@@ -7,14 +7,14 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 | Status | Meaning | Count |
 | --- | --- | --- |
 | real | built from the module's own sources, with no stub and no substitute | 54 |
-| partial | built and running, with a named part left out or rewritten | 33 |
+| partial | built and running, with a named part left out or rewritten | 34 |
 | js | no native code of its own, so it runs with the bundle | 12 |
 | stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 0 |
 | missing | native code that is not built yet | 18 |
 | evaluate | not attempted; the note says what iOS 6 offers | 25 |
 | impossible | the system service does not exist before the iOS release the note names | 7 |
 | n/a | build, web or Android only: nothing to run on the phone | 11 |
-| total | | 160 |
+| total | | 161 |
 
 Checked: phone: seen working on the phone; build: compiles and links; not exercised; none: not checked.
 
@@ -139,7 +139,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-live-photo | ~57.0.2 | yes | impossible | none | Live Photos exist from iOS 9.1, and Photos is absent from the iOS 6.1.3 cache. The Photos backport makes no Live Photo, and a Live Photo request fails with PHPhotosErrorRequestNotSupportedForAsset. |
 | expo-router | ~57.0.28 | yes | js | phone | The router runs in the app; its small iOS part is not built. |
 | expo-screen-capture | ~57.0.4 | yes | partial | none | Detection is backed: the SpringBoard hook of the Backports (src/SpringBoard/RevenantScreenshot.m, on SBScreenShotter saveScreenshot:) posts UIApplicationUserDidTakeScreenshotNotification to the frontmost app, which the module can listen to. Prevention is not: iOS 6 has no API that blocks a capture, so preventScreenCaptureAsync has no effect. Not built. |
-| expo-screen-orientation | ~57.0.3 | yes | partial | phone | Recipe packages/e/expo-screen-orientation (npm 57.0.3, patch screen-orientation-ios6.patch), built into the host. Trait collections, window scenes, requestGeometryUpdate and the notch test are replaced by the status-bar orientation and the size classes of the device idiom. On the iPhone 4S (2026-11-17) getOrientationAsync returned 0 (unknown) and getOrientationLockAsync 1, so the initial orientation is not yet set at start; a lock and a rotation were not exercised. |
+| expo-screen-orientation | ~57.0.3 | yes | partial | phone | Recipe packages/e/expo-screen-orientation (npm 57.0.3, patch screen-orientation-ios6.patch), built into the host. Trait collections, window scenes, requestGeometryUpdate and the notch test are replaced by the status-bar orientation and the size classes of the device idiom. On the iPhone 4S (2026-11-17) getOrientationAsync returned 0 (unknown) and getOrientationLockAsync 1, so the initial orientation is not yet set at start; a lock and a rotation were not exercised. The intersection with the Info.plist orientations was checked on the iPad 2 (2026-11-20): portrait holds. A rotation into landscape was not checked, because that needs a host with landscape in its plist. |
 | expo-secure-store | ~57.0.4 | yes | partial | phone | Recipe packages/e/expo-secure-store (npm 57.0.4, patch secure-store-ios6.patch) installs and its patch applies; the module is compiled into the host (links, not yet exercised on the phone). The patch removes LocalAuthentication, SecAccessControl and the passcode-bound class (iOS 8): canUseBiometricAuthentication answers false, requireAuthentication true and WHEN_PASSCODE_SET_THIS_DEVICE_ONLY reject with an exception that names iOS 8; the other keychain classes use SecItem as before. On the iPhone 4S (2026-11-17) the module is registered, but setValueWithKeyAsync fails in the whenUnlocked, afterFirstUnlock and always classes with errSecInteractionNotAllowed (-25308), also with application-identifier and keychain-access-groups in the signature. It is the device, not the module: the Backports Security probe gets -25308 from every keychain call on the iPad 2 as well (docs/reference/backports/Security/README.md), with the phone unlocked, without a passcode and without keybagd. The module raises the KeyChainException to JavaScript. |
 | expo-sensors | ~57.0.3 | yes | real | build | Recipe packages/e/expo-sensors (npm 57.0.3, no patch) installs and compiles unchanged into the host (links, not exercised on the phone). Accelerometer, gyroscope, magnetometer and device motion use CMMotionManager, present in the iOS 6.1.3 cache. CMPedometer and CMAltimeter (Pedometer, Barometer) are iOS 8 and come from the CoreMotion backport, linked as CoreMotionBackports; the link check passes. |
 | expo-server | ~57.0.3 | no | n/a | none | Server runtime, not on the device. |
@@ -192,6 +192,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | Module | Version | Native | Status | Checked | Note |
 | --- | --- | --- | --- | --- | --- |
 | react-native-paste-input | 2.0.1 | yes | partial | build | Package packages/r/react-native-paste-input (npm 2.0.1) with patch 0001 (@import UIKit and Accelerate as #import). Compiles for armv7 iOS 6 with the real flags (library probe, build ok), so the ImageEffects category is in. The earlier phone check predates it and is not repeated; the iOS 11 UITextSmartDashesType use is a warning, not an error. |
+| @getpaseo/expo-two-way-audio | 0.16.2 | yes | partial | phone | The Paseo application's own Expo module (a workspace package, not on npm), named in the host.json "modules" and built as it is, from the application's sources. Its Swift needs AVAudioEngine, which iOS 6 lacks: AVFoundationBackports (AVAudioEngine over an AUGraph, a live input node on a VoiceProcessingIO unit with setVoiceProcessingEnabled, bypass, AGC and input muting, mixer and input taps, scheduleBuffer completion callback types) supplies it, so the module compiles unchanged except that MicrophonePermissionRequester.swift's microphoneKey is renamed because expo-camera declares the same name. On the iPad 2 (2026-11-20) initialize returned true, toggleRecording(true) started a recording, in three seconds 23 microphone chunks (4096 bytes each) and 23 input and 23 output level events arrived, onRecordingChange fired once, and toggleRecording(false) stopped it. What the microphone recorded and what the speaker played were not checked: the chunks were counted, not listened to. playPCMData, restart, dictation mode and interruptions were not exercised. |
 
 ## Stubs
 
