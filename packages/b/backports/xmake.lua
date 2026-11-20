@@ -24,6 +24,7 @@ package("backports")
         local macho = import("@addon.revenant.apple.macho", {anonymous = true})
         local backports = import("@addon.revenant.apple.backports_package", {anonymous = true})
         local runtime = import("@addon.revenant.apple.shared_runtime", {anonymous = true})
+        local timing = import("@addon.revenant.apple.timing", {anonymous = true})
         local lib = package:installdir("lib")
         local requested = package:config("libraries"):split("%s*,%s*")
         local wanted = {}
@@ -33,7 +34,9 @@ package("backports")
         local targets, missing = requested, {}
         os.setenv("REVENANT_BACKPORTS_LIBRARIES", table.concat(requested, ","))
         repeat
-            wrapper.install(package, {root = root, includes = {path.join(root, "frameworks", "Backports")}, targets = targets})
+            timing.run("backports package: wrapper.install of " .. #targets .. " libraries", function ()
+                wrapper.install(package, {root = root, includes = {path.join(root, "frameworks", "Backports")}, targets = targets})
+            end)
             missing = {}
             for _, file in ipairs(os.files(path.join(lib, "*.dylib"))) do
                 for _, reference in ipairs(macho.images(macho.read(file))[1].libraries) do
@@ -55,11 +58,13 @@ package("backports")
         for _, file in ipairs(libraries) do
             table.insert(found, {leaf = path.filename(file), file = file})
         end
-        runtime.stage({packages = {{name = NAME, version = backports.release(found, {}), title = "Revenant Backports",
-                                    description = "The Backports libraries of one build of revenant's frameworks/Backports",
-                                    depends = {}, libraries = libraries}},
-                       root = path.join(package:installdir("share"), "root"),
-                       metadata = path.join(package:installdir("share"), "shared-packages"), strip = {"-x"}})
+        timing.run("backports package: runtime.stage of " .. #libraries .. " dylibs", function ()
+            runtime.stage({packages = {{name = NAME, version = backports.release(found, {}), title = "Revenant Backports",
+                                        description = "The Backports libraries of one build of revenant's frameworks/Backports",
+                                        depends = {}, libraries = libraries}},
+                           root = path.join(package:installdir("share"), "root"),
+                           metadata = path.join(package:installdir("share"), "shared-packages"), strip = {"-x"}})
+        end)
         for _, library in ipairs(libraries) do
             os.rm(library)
         end

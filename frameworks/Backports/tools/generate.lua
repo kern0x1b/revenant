@@ -8,6 +8,7 @@ local skeleton = import("skeleton", {rootdir = os.scriptdir(), anonymous = true}
 local markers = import("markers", {rootdir = os.scriptdir(), anonymous = true})
 local libraries = import("library_list", {rootdir = os.scriptdir(), anonymous = true}).backports_libraries()
 local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
+local timing = import("@addon.revenant.apple.timing", {anonymous = true})
 
 local SHARDS = 4
 local FIRST_IPHONE_OS = 2000
@@ -112,7 +113,9 @@ local function ready(sdk, version, logs, names)
     os.vrunv("touch", {cache})
     if #missing > 0 then
         os.mkdir(logs)
-        extract_all(sdk, version, cache, logs, missing)
+        timing.run("generate: facts extraction of " .. #missing .. " of " .. #names .. " frameworks (cache " .. path.filename(cache) .. ")", function ()
+            extract_all(sdk, version, cache, logs, missing)
+        end)
     end
     return cache
 end
@@ -221,13 +224,21 @@ function prepare(only)
         end
         names = chosen
     end
-    local cache = ready(sdk, version, logs, names)
+    local cache = timing.run("generate: facts cache check (and extraction if missing)", function ()
+        return ready(sdk, version, logs, names)
+    end)
+    local frameworks = timing.run("generate: read the facts of " .. #names .. " frameworks", function ()
+        return frameworks_of(cache, names, sdk)
+    end)
+    local images = timing.run("generate: install names of the SDK's images", function ()
+        return publics.install_names(sdk)
+    end)
     return {
         sdk = sdk,
         version = version,
         logs = logs,
-        frameworks = frameworks_of(cache, names, sdk),
-        images = publics.install_names(sdk),
+        frameworks = frameworks,
+        images = images,
     }
 end
 
@@ -609,7 +620,7 @@ function main(...)
     if args[1] == "facts" then
         return worker(args)
     end
-    local state = everything()
+    local state = timing.run("generate: state (facts cache, rows, images)", everything)
     if args[1] == "device-globals" then
         local owner, definitions = markers_of_src()
         local set, unlisted = device_globals_of(state, owner, definitions)
@@ -626,12 +637,20 @@ function main(...)
         print(string.format("device-globals: %d globals the cache exports from an SDK framework that the SDK lists nowhere, under %s", others, device_unlisted_file()))
         return
     end
-    local pending = pending_of(state)
+    local pending = timing.run("generate: pending rows (device image, owners)", function ()
+        return pending_of(state)
+    end)
     os.tryrm(path.join(sdkfiles.build_root(), "skeleton"))
-    local owners, definitions = markers_of_src()
-    local device = read_device_globals()
-    local totals = skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented_names(), state.images, owners, definitions,
-        device, references_of_src(device))
+    local owners, definitions, device, implemented, references
+    timing.run("generate: src scan (markers, device globals, implemented names, references)", function ()
+        owners, definitions = markers_of_src()
+        device = read_device_globals()
+        implemented = implemented_names()
+        references = references_of_src(device)
+    end)
+    local totals = timing.run("generate: skeleton.write", function ()
+        return skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented, state.images, owners, definitions, device, references)
+    end)
     local skipped = 0
     for _, framework in ipairs(pending) do
         for _, stranger in ipairs(framework.strangers) do

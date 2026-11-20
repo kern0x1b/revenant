@@ -226,7 +226,9 @@ if is_plat("iphoneos") then
                     target:add("includedirs", path.join(target:pkg("apple-compat"):installdir(), "share", "apple-compat", "process-wide"))
                 end
                 if not skeleton_generated then
+                    local started = os.mclock()
                     os.execv(os.programfile(), {"l", "-P", ROOT, path.join(TOOLS, "generate.lua")})
+                    print(string.format("timing: skeleton generation (generate.lua process): %.1f s", (os.mclock() - started) / 1000))
                     skeleton_generated = true
                 end
                 local files = {}
