@@ -1164,6 +1164,8 @@ local QUARTZCORE_TESTS = {
 local CORETEXT_TESTS = {
     open_type_feature = {"CTFontOpenTypeFeatureKeys8.m"},
     font_descriptors = {"RevenantFontDescriptors.m"},
+    deleted_glyphs = {},
+    emoji_clusters = {},
 }
 
 local SCENEKIT_TESTS = {

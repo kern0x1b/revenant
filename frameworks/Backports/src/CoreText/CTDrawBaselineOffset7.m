@@ -259,19 +259,8 @@ static void revenant_draw_frame_lines(CTFrameRef drawn, CTFrameRef attributed, C
     free(origins);
 }
 
-void BACKPORT_IMPL(CTRunDraw)(CTRunRef run, CGContextRef context, CFRange range)
-{
-    revenant_draw_run(run, revenant_needs_model() ? revenant_run_offset(run) : 0, context, range);
-}
-
-void BACKPORT_IMPL(CTLineDraw)(CTLineRef line, CGContextRef context)
-{
-    if (!revenant_needs_model() || !revenant_line_has_offset(line)) {
-        system_line_draw(line, context);
-        return;
-    }
-    revenant_draw_line_runs(line, line, context);
-}
+// CTRunDraw and CTLineDraw are not here: CTDeletedGlyphs6.m defines them, in front of the system's. A BACKPORT_IMPL of the same name would make the
+// generated forwarder of the symbol a strong definition of its own (a fallback exists), and the library would define `_CTRunDraw` twice.
 
 void BACKPORT_IMPL(CTFrameDraw)(CTFrameRef frame, CGContextRef context)
 {
