@@ -8,6 +8,7 @@ static char revenant_data_accumulation_key;
     long long _currentOffset;
     NSInteger _requestedLength;
     BOOL _requestsAllDataToEndOfResource;
+    NSLock *_lock;
 }
 
 - (instancetype)initWithRevenantRequestedOffset:(long long)offset length:(NSInteger)length toEnd:(BOOL)toEnd
@@ -17,6 +18,7 @@ static char revenant_data_accumulation_key;
         _currentOffset = offset;
         _requestedLength = length;
         _requestsAllDataToEndOfResource = toEnd;
+        _lock = [[NSLock alloc] init];
     }
     return self;
 }
@@ -28,7 +30,10 @@ static char revenant_data_accumulation_key;
 
 - (long long)currentOffset
 {
-    return _currentOffset;
+    [_lock lock];
+    long long offset = _currentOffset;
+    [_lock unlock];
+    return offset;
 }
 
 - (NSInteger)requestedLength
@@ -43,6 +48,7 @@ static char revenant_data_accumulation_key;
 
 - (void)respondWithData:(NSData *)data
 {
+    [_lock lock];
     NSMutableData *accumulated = objc_getAssociatedObject(self, &revenant_data_accumulation_key);
     if (!accumulated) {
         accumulated = [NSMutableData data];
@@ -50,11 +56,15 @@ static char revenant_data_accumulation_key;
     }
     [accumulated appendData:data];
     _currentOffset += data.length;
+    [_lock unlock];
 }
 
 - (NSData *)revenant_accumulatedData
 {
-    return objc_getAssociatedObject(self, &revenant_data_accumulation_key);
+    [_lock lock];
+    NSData *data = [objc_getAssociatedObject(self, &revenant_data_accumulation_key) copy];
+    [_lock unlock];
+    return data;
 }
 
 @end

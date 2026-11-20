@@ -1,10 +1,17 @@
 #import <AVFoundation/AVFoundation.h>
 #import <objc/runtime.h>
+#import "RevenantRangeHeader.h"
 
 static char revenant_data_request_key;
+static char revenant_response_key;
 
 @interface AVAssetResourceLoadingDataRequest (RevenantInit)
 - (instancetype)initWithRevenantRequestedOffset:(long long)offset length:(NSInteger)length toEnd:(BOOL)toEnd;
+- (NSData *)revenant_accumulatedData;
+@end
+
+@interface AVAssetResourceLoadingRequest (RevenantIOS6)
+- (void)finishLoadingWithResponse:(NSURLResponse *)response data:(NSData *)data redirect:(NSURLRequest *)redirect;
 @end
 
 @implementation AVAssetResourceLoadingRequest (RevenantData7)
@@ -14,20 +21,10 @@ static char revenant_data_request_key;
     AVAssetResourceLoadingDataRequest *data = objc_getAssociatedObject(self, &revenant_data_request_key);
     if (data)
         return data;
-    NSString *range = [self.request valueForHTTPHeaderField:@"Range"];
-    long long offset = 0;
-    NSInteger length = 0;
-    BOOL toEnd = YES;
-    NSString *value = [range hasPrefix:@"bytes="] ? [range substringFromIndex:6] : range;
-    NSArray *parts = [value componentsSeparatedByString:@"-"];
-    if (parts.count == 2) {
-        offset = [parts[0] longLongValue];
-        if ([parts[1] length]) {
-            length = [parts[1] integerValue] - (NSInteger)offset + 1;
-            toEnd = NO;
-        }
-    }
-    data = [[AVAssetResourceLoadingDataRequest alloc] initWithRevenantRequestedOffset:offset length:length toEnd:toEnd];
+    long long offset = 0, length = 0;
+    int toEnd = 1;
+    revenant_range_header_parse([[self.request valueForHTTPHeaderField:@"Range"] UTF8String], &offset, &length, &toEnd);
+    data = [[AVAssetResourceLoadingDataRequest alloc] initWithRevenantRequestedOffset:offset length:(NSInteger)length toEnd:(BOOL)toEnd];
     objc_setAssociatedObject(self, &revenant_data_request_key, data, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     return data;
 }
@@ -35,6 +32,22 @@ static char revenant_data_request_key;
 - (AVAssetResourceLoadingContentInformationRequest *)contentInformationRequest
 {
     return nil;
+}
+
+- (NSURLResponse *)response
+{
+    return objc_getAssociatedObject(self, &revenant_response_key);
+}
+
+- (void)setResponse:(NSURLResponse *)response
+{
+    objc_setAssociatedObject(self, &revenant_response_key, response, OBJC_ASSOCIATION_COPY_NONATOMIC);
+}
+
+- (void)finishLoading
+{
+    AVAssetResourceLoadingDataRequest *data = [self dataRequest];
+    [self finishLoadingWithResponse:[self response] data:[data revenant_accumulatedData] redirect:nil];
 }
 
 @end

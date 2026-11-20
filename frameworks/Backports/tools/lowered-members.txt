@@ -6320,6 +6320,7 @@ function revenant_qr_install_default_converter
 function revenant_qr_result_free
 function revenant_qr_set_converter
 function revenant_quality_of_service
+function revenant_range_header_parse
 function revenant_read_trait_value
 function revenant_reciprocal_converter
 function revenant_reciprocal_converter_class
@@ -11934,6 +11935,9 @@ member AVAssetResourceLoadingDataRequest -respondWithData:
 member AVAssetResourceLoadingDataRequest -revenant_accumulatedData
 member AVAssetResourceLoadingRequest -contentInformationRequest
 member AVAssetResourceLoadingRequest -dataRequest
+member AVAssetResourceLoadingRequest -finishLoading
+member AVAssetResourceLoadingRequest -response
+member AVAssetResourceLoadingRequest -setResponse:
 member AVAssetTrack -loadMetadataForFormat:completionHandler:
 member AVAssetTrack -loadSamplePresentationTimeForTrackTime:completionHandler:
 member AVAssetTrack -loadSegmentForTrackTime:completionHandler:
@@ -13203,6 +13207,7 @@ member AVPlayer -timeControlStatus
 member AVPlayer -volume
 member AVPlayerItem +playerItemWithAsset:automaticallyLoadedAssetKeys:
 member AVPlayerItem -automaticallyLoadedAssetKeys
+member AVPlayerItem -currentMediaSelection
 member AVPlayerItem -initWithAsset:automaticallyLoadedAssetKeys:
 member AVPlayerItem -nowPlayingInfo
 member AVPlayerItem -preferredForwardBufferDuration

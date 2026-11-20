@@ -84,7 +84,7 @@ diff -ru a/ios/Enums/ContentType.swift b/ios/Enums/ContentType.swift
    case hls
 diff -ru a/ios/Records/Tracks.swift b/ios/Records/Tracks.swift
 --- a/ios/Records/Tracks.swift	2026-11-20 00:45:49
-+++ b/ios/Records/Tracks.swift	2026-11-20 00:56:57
++++ b/ios/Records/Tracks.swift	2026-11-20 01:11:13
 @@ -85,19 +85,21 @@
    static func from(assetTrack: AVAssetTrack) async -> VideoTrack {
      var averageBitrate: Int?
@@ -93,7 +93,7 @@ diff -ru a/ios/Records/Tracks.swift b/ios/Records/Tracks.swift
 +    let supported = assetTrack.isPlayable
      let mediaFormat = try? await assetTrack.mediaFormat
 -    let frameRate = try? await assetTrack.load(.nominalFrameRate)
-+    let frameRate: Double? = assetTrack.nominalFrameRate
++    let frameRate: Float? = assetTrack.nominalFrameRate
      let safeFrameRate = (frameRate?.isFinite == true) ? frameRate : nil
  
 -    if let bitrateFloat = try? await assetTrack.load(.estimatedDataRate), bitrateFloat.isFinite {
@@ -122,9 +122,27 @@ diff -ru a/ios/Records/VideoSource.swift b/ios/Records/VideoSource.swift
 +  var contentType: VideoContentType = .auto
  }
  // swiftlint:enable redundant_optional_initialization
+diff -ru a/ios/Thumbnails/VideoThumbnailGenerator.swift b/ios/Thumbnails/VideoThumbnailGenerator.swift
+--- a/ios/Thumbnails/VideoThumbnailGenerator.swift	2026-11-20 00:45:49
++++ b/ios/Thumbnails/VideoThumbnailGenerator.swift	2026-11-20 01:11:13
+@@ -25,14 +25,6 @@
+  Generates an array of thumbnails using the given image generator. It uses two different ways to generate the images, based on the platform version.
+  */
+ private func generateThumbnails(generator: AVAssetImageGenerator, times: [CMTime]) async throws -> [VideoThumbnail] {
+-  if #available(iOS 16, tvOS 16, *) {
+-    return try await generator
+-      .images(for: times)
+-      .reduce(into: [VideoThumbnail]()) { thumbnails, result in
+-        let thumbnail = try VideoThumbnail(result.image, requestedTime: result.requestedTime, actualTime: result.actualTime)
+-        thumbnails.append(thumbnail)
+-      }
+-  }
+   return try await VideoThumbnailLegacyGenerator(generator: generator, times: times)
+     .reduce(into: [VideoThumbnail]()) { thumbnails, thumbnail in
+       thumbnails.append(thumbnail)
 diff -ru a/ios/Utils/AvAssetTrack+VideoTracks.swift b/ios/Utils/AvAssetTrack+VideoTracks.swift
 --- a/ios/Utils/AvAssetTrack+VideoTracks.swift	2026-11-20 00:45:49
-+++ b/ios/Utils/AvAssetTrack+VideoTracks.swift	2026-11-20 00:56:57
++++ b/ios/Utils/AvAssetTrack+VideoTracks.swift	2026-11-20 01:11:13
 @@ -4,7 +4,7 @@
    var mediaFormat: String {
      get async throws {
@@ -145,15 +163,17 @@ diff -ru a/ios/Utils/AvAssetTrack+VideoTracks.swift b/ios/Utils/AvAssetTrack+Vid
  
        for formatDesc in formatDescriptions {
          guard let transferFunction = CMFormatDescriptionGetExtension(
-@@ -48,7 +46,7 @@
+@@ -48,8 +46,8 @@
    // Decently reliable way to extract peak bitrate from MP4 containers
    // Unlike for average bitrate, we can't get this information from AVKit API
    func getPeakBitrate() async -> Int? {
 -    guard let videoDescriptions = try? await self.load(.formatDescriptions),
+-      let videoDescription = (videoDescriptions.first { $0.mediaType == .video }),
 +    guard let videoDescriptions = self.formatDescriptions as? [CMFormatDescription],
-       let videoDescription = (videoDescriptions.first { $0.mediaType == .video }),
++      let videoDescription = (videoDescriptions.first { CMFormatDescriptionGetMediaType($0) == kCMMediaType_Video }),
        let extensions = getBitrateParentExtension(from: videoDescription),
        // If the container publishes the peak bitrate at all, it should be declared in this box
+       let btrtData = extensions["btrt"] as? Data, btrtData.count >= 12
 diff -ru a/ios/VideoAsset.swift b/ios/VideoAsset.swift
 --- a/ios/VideoAsset.swift	2026-11-20 00:45:49
 +++ b/ios/VideoAsset.swift	2026-11-20 00:46:00
