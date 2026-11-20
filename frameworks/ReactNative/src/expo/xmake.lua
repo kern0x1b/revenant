@@ -163,6 +163,9 @@ local EXPO_REWRITE = {
     ["FileSystemModule.swift"] = {package = "expo-file-system", replace = GATE14},
     ["FileSystemDownload.swift"] = {package = "expo-file-system", replace = GATE14},
     ["FileSystemFileHandle.swift"] = {package = "expo-file-system", replace = GATE14},
+    -- A top-level `let microphoneKey` that expo-camera's CameraPermissionsRequester.swift also declares: the two modules
+    -- share the Swift module ExpoAppModules, so the application module's constant takes the module's prefix (a name only).
+    ["MicrophonePermissionRequester.swift"] = {package = "@getpaseo/expo-two-way-audio", replace = {{"let microphoneKey", "let twoWayAudioMicrophoneKey"}}},
 }
 local LOCAL_COPIES = {
     ["expo-glass-effect"] = "GlassView.swift",

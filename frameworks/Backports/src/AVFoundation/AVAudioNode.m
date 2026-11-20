@@ -86,6 +86,7 @@
     return _revenant_format;
 }
 
+
 - (AVAudioFormat *)outputFormatForBus:(AVAudioNodeBus)bus
 {
     return _revenant_format;
@@ -155,7 +156,27 @@
 
 @end
 
-@implementation AVAudioIONode
+@implementation AVAudioIONode {
+    BOOL _revenant_voiceProcessing;
+}
+
+- (BOOL)setVoiceProcessingEnabled:(BOOL)enabled error:(NSError **)outError
+{
+    if (enabled == _revenant_voiceProcessing)
+        return YES;
+    AVAudioEngine *engine = self.engine;
+    if (engine != nil && ![engine revenant_setVoiceProcessingEnabled:enabled error:outError])
+        return NO;
+    _revenant_voiceProcessing = enabled;
+    [engine revenant_inputChanged];
+    return YES;
+}
+
+- (BOOL)isVoiceProcessingEnabled
+{
+    return _revenant_voiceProcessing;
+}
+
 @end
 
 @implementation AVAudioMixerNode
@@ -166,7 +187,6 @@
 
 @implementation AVAudioInputNode {
     RevenantInputState *_revenant_state;
-    BOOL _revenant_voiceProcessing;
     BOOL _revenant_bypassed;
     BOOL _revenant_agc;
     BOOL _revenant_muted;
@@ -208,23 +228,6 @@
 - (AVAudioFormat *)inputFormatForBus:(AVAudioNodeBus)bus
 {
     return [self outputFormatForBus:bus];
-}
-
-- (BOOL)setVoiceProcessingEnabled:(BOOL)enabled error:(NSError **)outError
-{
-    if (enabled == _revenant_voiceProcessing)
-        return YES;
-    AVAudioEngine *engine = self.engine;
-    if (engine != nil && ![engine revenant_setVoiceProcessingEnabled:enabled error:outError])
-        return NO;
-    _revenant_voiceProcessing = enabled;
-    [engine revenant_inputChanged];
-    return YES;
-}
-
-- (BOOL)isVoiceProcessingEnabled
-{
-    return _revenant_voiceProcessing;
 }
 
 - (BOOL)isVoiceProcessingBypassed

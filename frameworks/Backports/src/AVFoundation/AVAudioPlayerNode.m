@@ -89,6 +89,11 @@ OSStatus RevenantPlayerRenderCallback(void *inRefCon, AudioUnitRenderActionFlags
     }];
 }
 
+- (void)scheduleBuffer:(AVAudioPCMBuffer *)buffer completionCallbackType:(AVAudioPlayerNodeCompletionCallbackType)callbackType completionHandler:(AVAudioPlayerNodeCompletionHandler)completionHandler
+{
+    [self scheduleBuffer:buffer atTime:nil options:0 completionCallbackType:callbackType completionHandler:completionHandler];
+}
+
 - (void)play
 {
     [self revenant_impl]->playing = YES;
