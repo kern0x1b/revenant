@@ -23,16 +23,6 @@ local DEVICE_GLOBALS_HEADER = {
     "# frameworks/Backports/tests/device_globals_test.lua checks this file against the cache where the cache is present.",
 }
 
-local function extract(sdk, version, cache, logs, name)
-    local rows = facts.objc_facts(sdk, name, version)
-    if sdkfiles.has_swift_module(sdk, name) then
-        for _, row in ipairs(facts.swift_facts(sdk, name, version, logs)) do
-            table.insert(rows, row)
-        end
-    end
-    sdkfiles.write_rows(path.join(cache, name .. ".tsv"), name, rows)
-end
-
 local function failure_file(logs, name)
     return path.join(logs, name .. ".failed")
 end
@@ -44,7 +34,7 @@ local function worker(args)
         try
         {
             function ()
-                extract(sdk, version, cache, logs, name)
+                facts.extract(sdk, version, cache, logs, name)
             end,
             catch
             {
