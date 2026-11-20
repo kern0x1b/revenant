@@ -282,7 +282,9 @@ The first covers revenant's xmake patches. Each patch in `packages/x/xmake/patch
 can change what a build produces, with `Changes-build-output: yes` or `no`; `xmakew` takes the xmake
 commit and the patches that say `yes` and writes the digest to `share/xmake/revenant-patch-set` beside the binary,
 and patch `0020` folds it into every variant of the hash. A patch marked `yes` moves every package's key once, so an
-unmarked patch moves none. A binary without the file refuses to compute a build hash. No patch is marked now: the
+unmarked patch moves none. A binary without the file refuses to compute a build hash. One patch is marked: `0025`, which sorts the strings of a
+build hash by byte instead of by the locale's collation ([decision 0017](../explanation/decisions/0017-build-hash-sorts-by-byte.md));
+it moved every key once. The others are not marked: the
 addon patches `0001` to `0003` and `0005` to `0007` change which addon version a build loads, which the second term
 keys, and `0015` publishes an install under its generation path, which is the store's design and the same for every
 build with a key; the others change locks, job counts, warnings, process waits, manifest checks, exports, fetches, the

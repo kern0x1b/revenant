@@ -106,10 +106,9 @@ the `libraries` build stays.
 Each change below moves a prebuilt key, so each waits for the next planned rebuild of llvm, swift or swift-runtime,
 when the releases are rebuilt anyway. Until then the key stays as the release has it.
 
-- **A byte-order sort in the buildhash.** xmake sorts a package's configuration strings with `table.sort`, which
-  compares with the locale's collation. `xmakew` pins `LC_COLLATE` to `en_US.UTF-8` so that every machine hashes as the
-  released keys did. The change is to sort those strings byte by byte, which removes the pin. The orders differ for
-  some names, so the keys move, and the pin is removed in the same commit as the rebuild.
+- **The byte-order sort in the buildhash is done** (xmake patch 0025, [decision 0017](../explanation/decisions/0017-build-hash-sorts-by-byte.md)):
+  every key moved with it, `xmakew` no longer pins `LC_COLLATE`, and the releases of llvm, swift, ld64, libcxx and
+  swift-runtime of the earlier keys do not serve any more.
 - **The llvm package has no libLTO.** Neither llvm configuration installs `libLTO.dylib`: the default installs clang
   alone, and the `libraries` configuration's distribution components do not list LTO. A link with `-flto=thin` then
   fails, because the linker cannot load the library for the bitcode objects it reads, so every LTO link fails. The
