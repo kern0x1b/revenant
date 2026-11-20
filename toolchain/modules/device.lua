@@ -45,9 +45,26 @@ local function read_env_file(file)
     return values
 end
 
+local function main_checkout(root)
+    local common = try { function () return os.iorunv("git", {"-C", root, "rev-parse", "--path-format=absolute", "--git-common-dir"}) end }
+    common = common and common:trim() or ""
+    if common == "" or path.filename(common) ~= ".git" then
+        return nil
+    end
+    return path.directory(common)
+end
+
 local function env_file(root, name)
     local chosen = name or os.getenv(CHOSEN)
-    return path.join(root, chosen and ("device." .. chosen .. ".env") or "device.env")
+    local filename = chosen and ("device." .. chosen .. ".env") or "device.env"
+    local file = path.join(root, filename)
+    if not os.isfile(file) then
+        local main = main_checkout(root)
+        if main and main ~= path.absolute(root) and os.isfile(path.join(main, filename)) then
+            return path.join(main, filename)
+        end
+    end
+    return file
 end
 
 function bind(root, name)
