@@ -172,6 +172,8 @@ class AVContentKeySpecifier
 class AVDateRangeMetadataGroup
 class AVDepthData
 class AVMediaSelection
+class AVMediaSelectionGroup
+class AVMediaSelectionOption
 class AVMetadataBodyObject
 class AVMetadataCatBodyObject
 class AVMetadataDogBodyObject
@@ -12888,6 +12890,8 @@ member AVMediaSelection -revenant_selected
 member AVMediaSelection -revenant_setSelected:
 member AVMediaSelection -selectedMediaOptionInMediaSelectionGroup:
 member AVMediaSelection -selectedMediaOptions
+member AVMediaSelectionGroup -defaultOption
+member AVMediaSelectionOption -displayName
 member AVMetadataBodyObject -bodyID
 member AVMetadataBodyObject -copyWithZone:
 member AVMetadataBodyObject -faceID
@@ -13198,6 +13202,7 @@ member AVPlayer -playImmediatelyAtRate:
 member AVPlayer -preventsDisplaySleepDuringVideoPlayback
 member AVPlayer -setAutomaticallyWaitsToMinimizeStalling:
 member AVPlayer -setDefaultRate:
+member AVPlayer -setMediaSelectionCriteria:forMediaCharacteristic:
 member AVPlayer -setMuted:
 member AVPlayer -setPreventsDisplaySleepDuringVideoPlayback:
 member AVPlayer -setSourceClock:
@@ -13207,10 +13212,12 @@ member AVPlayer -timeControlStatus
 member AVPlayer -volume
 member AVPlayerItem +playerItemWithAsset:automaticallyLoadedAssetKeys:
 member AVPlayerItem -automaticallyLoadedAssetKeys
+member AVPlayerItem -configuredTimeOffsetFromLive
 member AVPlayerItem -currentMediaSelection
 member AVPlayerItem -initWithAsset:automaticallyLoadedAssetKeys:
 member AVPlayerItem -nowPlayingInfo
 member AVPlayerItem -preferredForwardBufferDuration
+member AVPlayerItem -setConfiguredTimeOffsetFromLive:
 member AVPlayerItem -setNowPlayingInfo:
 member AVPlayerItem -setPreferredForwardBufferDuration:
 member AVPlayerItemVideoOutput -initWithOutputSettings:

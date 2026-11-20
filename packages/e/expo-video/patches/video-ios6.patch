@@ -84,7 +84,7 @@ diff -ru a/ios/Enums/ContentType.swift b/ios/Enums/ContentType.swift
    case hls
 diff -ru a/ios/Records/Tracks.swift b/ios/Records/Tracks.swift
 --- a/ios/Records/Tracks.swift	2026-11-20 00:45:49
-+++ b/ios/Records/Tracks.swift	2026-11-20 01:11:13
++++ b/ios/Records/Tracks.swift	2026-11-20 01:35:24
 @@ -85,19 +85,21 @@
    static func from(assetTrack: AVAssetTrack) async -> VideoTrack {
      var averageBitrate: Int?
@@ -111,6 +111,40 @@ diff -ru a/ios/Records/Tracks.swift b/ios/Records/Tracks.swift
        size = VideoSize.from(cgSize)
      }
  
+@@ -116,32 +118,7 @@
+ 
+   @available(iOS 26, tvOS 26, *)
+   static func from(assetVariant: AVAssetVariant, isPlayable: Bool, mainUrl: URL) -> VideoTrack? {
+-    guard let videoAttributes = assetVariant.videoAttributes else {
+-      return nil
+-    }
+-
+-    let trackUrl = assetVariant.url
+-    let id = extractHlsTrackId(trackUrl: trackUrl, mainUrl: mainUrl)
+-    let videoSize = videoAttributes.videoSize
+-    let mimeType = videoAttributes.getFormattedCodecString()
+-    let frameRate = videoAttributes.nominalFrameRate.flatMap(Float.init)
+-    let peakBitrate = assetVariant.peakBitRate.flatMap { $0.isFinite ? Int($0) : nil }
+-    let averageBitrate = assetVariant.averageBitRate.flatMap { $0.isFinite ? Int($0) : nil }
+-    let safeFrameRate = (frameRate?.isFinite == true) ? frameRate : nil
+-    let videoRange = VideoRange.from(videoRange: assetVariant.videoAttributes?.videoRange ?? .sdr)
+-
+-    return VideoTrack(
+-      id: id,
+-      url: trackUrl,
+-      size: videoSize,
+-      mimeType: mimeType,
+-      bitrate: peakBitrate ?? averageBitrate,
+-      peakBitrate: peakBitrate,
+-      averageBitrate: averageBitrate,
+-      isSupported: isPlayable,
+-      frameRate: safeFrameRate,
+-      videoRange: videoRange
+-    )
++    return nil
+   }
+ 
+   static func from(hlsHeaderLine: String, idLine: String, mainUrl: URL) -> VideoTrack? {
 diff -ru a/ios/Records/VideoSource.swift b/ios/Records/VideoSource.swift
 --- a/ios/Records/VideoSource.swift	2026-11-20 00:45:49
 +++ b/ios/Records/VideoSource.swift	2026-11-20 00:46:00
@@ -140,6 +174,31 @@ diff -ru a/ios/Thumbnails/VideoThumbnailGenerator.swift b/ios/Thumbnails/VideoTh
    return try await VideoThumbnailLegacyGenerator(generator: generator, times: times)
      .reduce(into: [VideoThumbnail]()) { thumbnails, thumbnail in
        thumbnails.append(thumbnail)
+diff -ru a/ios/Utils/AVAssetVariant+VideoTracks.swift b/ios/Utils/AVAssetVariant+VideoTracks.swift
+--- a/ios/Utils/AVAssetVariant+VideoTracks.swift	2026-11-20 00:45:49
++++ b/ios/Utils/AVAssetVariant+VideoTracks.swift	2026-11-20 01:35:15
+@@ -2,19 +2,10 @@
+ 
+ extension AVAssetVariant.VideoAttributes {
+   var videoSize: VideoSize? {
+-    guard presentationSize.width.isFinite, presentationSize.height.isFinite else {
+-      return nil
+-    }
+-    return VideoSize(width: Int(presentationSize.width), height: Int(presentationSize.height))
++    return nil
+   }
+ 
+   func getFormattedCodecString() -> String {
+-    guard let codecType = self.codecTypes.first else {
+-      return "video/unknown"
+-    }
+-
+-    let fourCC = CMVideoCodecType(codecType).toCorrectedString()
+-
+-    return "video/\(fourCC)"
++    return "video/unknown"
+   }
+ }
 diff -ru a/ios/Utils/AvAssetTrack+VideoTracks.swift b/ios/Utils/AvAssetTrack+VideoTracks.swift
 --- a/ios/Utils/AvAssetTrack+VideoTracks.swift	2026-11-20 00:45:49
 +++ b/ios/Utils/AvAssetTrack+VideoTracks.swift	2026-11-20 01:11:13

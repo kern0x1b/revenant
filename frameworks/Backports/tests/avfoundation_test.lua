@@ -30,12 +30,16 @@ local AREAS = {
     },
     {
         name = "resource loading, asset variants and buffering of expo-video",
-        sources = {"AVAssetResourceLoadingDataRequest7.m", "AVAssetResourceLoadingRequest+Data7.m", "RevenantRangeHeader.c", "AVAssetVariant15.m", "AVPlayerItem+PreferredForwardBufferDuration10.m", "AVPlayerItem+CurrentMediaSelection5.m"},
+        sources = {"AVAssetResourceLoadingDataRequest7.m", "AVAssetResourceLoadingRequest+Data7.m", "RevenantRangeHeader.c", "AVAssetVariant15.m", "AVPlayerItem+PreferredForwardBufferDuration10.m", "AVPlayerItem+CurrentMediaSelection5.m",
+                   "AVPlayerItem+ConfiguredTimeOffset13.m", "AVMediaSelectionOption+DisplayName7.m", "AVMediaSelectionGroup+DefaultOption8.m", "AVPlayer+MediaSelectionCriteria7.m"},
         members = {
             "-[AVAssetResourceLoadingRequest dataRequest]", "-[AVAssetResourceLoadingRequest contentInformationRequest]",
             "-[AVAssetResourceLoadingRequest response]", "-[AVAssetResourceLoadingRequest setResponse:]",
             "-[AVAssetResourceLoadingRequest finishLoading]",
             "-[AVPlayerItem currentMediaSelection]",
+            "-[AVPlayerItem configuredTimeOffsetFromLive]", "-[AVPlayerItem setConfiguredTimeOffsetFromLive:]",
+            "-[AVMediaSelectionOption displayName]", "-[AVMediaSelectionGroup defaultOption]",
+            "-[AVPlayer setMediaSelectionCriteria:forMediaCharacteristic:]",
             "-[AVAssetResourceLoadingDataRequest requestedOffset]", "-[AVAssetResourceLoadingDataRequest currentOffset]",
             "-[AVAssetResourceLoadingDataRequest requestedLength]", "-[AVAssetResourceLoadingDataRequest requestsAllDataToEndOfResource]",
             "-[AVAssetResourceLoadingDataRequest respondWithData:]",
