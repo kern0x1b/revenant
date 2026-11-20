@@ -86,8 +86,12 @@ class AUParameterTree
 class AVAsset
 class AVAssetExportSession
 class AVAssetImageGenerator
+class AVAssetResourceLoadingDataRequest
+class AVAssetResourceLoadingRequest
 class AVAssetResourceRenewalRequest
 class AVAssetTrack
+class AVAssetVariant
+class AVAssetVariantVideoAttributes
 class AVAssetWriter
 class AVAssetWriterInput
 class AVAssetWriterInputPassDescription
@@ -168,6 +172,8 @@ class AVContentKeySpecifier
 class AVDateRangeMetadataGroup
 class AVDepthData
 class AVMediaSelection
+class AVMediaSelectionGroup
+class AVMediaSelectionOption
 class AVMetadataBodyObject
 class AVMetadataCatBodyObject
 class AVMetadataDogBodyObject
@@ -215,6 +221,7 @@ class AVPlayerItemVideoOutput
 class AVPlayerLooper
 class AVPlayerMediaSelectionCriteria
 class AVPlayerViewController
+class AVRoutePickerView
 class AVSampleBufferAudioRenderer
 class AVSampleBufferRenderSynchronizer
 class AVSpeechSynthesisVoice
@@ -4014,6 +4021,7 @@ enum UIImageDynamicRangeConstrainedHigh
 enum UIImageDynamicRangeHigh
 enum UIImageDynamicRangeStandard
 enum UIImageDynamicRangeUnspecified
+enum UIImageRenderingModeAlwaysOriginal
 enum UIImageRenderingModeAlwaysTemplate
 enum UIImageRenderingModeAutomatic
 enum UIImageSymbolScaleLarge
@@ -6326,6 +6334,7 @@ function revenant_qr_install_default_converter
 function revenant_qr_result_free
 function revenant_qr_set_converter
 function revenant_quality_of_service
+function revenant_range_header_parse
 function revenant_read_trait_value
 function revenant_reciprocal_converter
 function revenant_reciprocal_converter_class
@@ -6380,7 +6389,9 @@ function revenant_status_bar_overlap
 function revenant_swipe_class_is_backport
 function revenant_swipe_width
 function revenant_symbol_bitmap
+function revenant_symbol_color_index
 function revenant_symbol_known
+function revenant_symbol_layer_alpha
 function revenant_symbol_metrics
 function revenant_system_colour
 function revenant_tag_carries
@@ -12136,10 +12147,30 @@ member AVAssetExportSession -metadataItemFilter
 member AVAssetExportSession -setCanPerformMultiplePassesOverSourceMediaData:
 member AVAssetExportSession -setMetadataItemFilter:
 member AVAssetImageGenerator -generateCGImageAsynchronouslyForTime:completionHandler:
+member AVAssetResourceLoadingDataRequest -currentOffset
+member AVAssetResourceLoadingDataRequest -initWithRevenantRequestedOffset:length:toEnd:
+member AVAssetResourceLoadingDataRequest -requestedLength
+member AVAssetResourceLoadingDataRequest -requestedOffset
+member AVAssetResourceLoadingDataRequest -requestsAllDataToEndOfResource
+member AVAssetResourceLoadingDataRequest -respondWithData:
+member AVAssetResourceLoadingDataRequest -revenant_accumulatedData
+member AVAssetResourceLoadingRequest -contentInformationRequest
+member AVAssetResourceLoadingRequest -dataRequest
+member AVAssetResourceLoadingRequest -finishLoading
+member AVAssetResourceLoadingRequest -response
+member AVAssetResourceLoadingRequest -revenant_claimCompletion
+member AVAssetResourceLoadingRequest -setResponse:
 member AVAssetTrack -loadMetadataForFormat:completionHandler:
 member AVAssetTrack -loadSamplePresentationTimeForTrackTime:completionHandler:
 member AVAssetTrack -loadSegmentForTrackTime:completionHandler:
 member AVAssetTrack -minFrameDuration
+member AVAssetVariant -averageBitRate
+member AVAssetVariant -peakBitRate
+member AVAssetVariant -videoAttributes
+member AVAssetVariantVideoAttributes -codecTypes
+member AVAssetVariantVideoAttributes -nominalFrameRate
+member AVAssetVariantVideoAttributes -presentationSize
+member AVAssetVariantVideoAttributes -videoRange
 member AVAssetWriter -preferredOutputSegmentInterval
 member AVAssetWriter -setPreferredOutputSegmentInterval:
 member AVAssetWriterInput -canPerformMultiplePasses
@@ -13079,6 +13110,8 @@ member AVMediaSelection -revenant_selected
 member AVMediaSelection -revenant_setSelected:
 member AVMediaSelection -selectedMediaOptionInMediaSelectionGroup:
 member AVMediaSelection -selectedMediaOptions
+member AVMediaSelectionGroup -defaultOption
+member AVMediaSelectionOption -displayName
 member AVMetadataBodyObject -bodyID
 member AVMetadataBodyObject -copyWithZone:
 member AVMetadataBodyObject -faceID
@@ -13358,6 +13391,7 @@ member AVParameterEvent -setScope:
 member AVParameterEvent -setValue:
 member AVParameterEvent -value
 member AVPictureInPictureController +isPictureInPictureSupported
+member AVPictureInPictureController -canStartPictureInPictureAutomaticallyFromInline
 member AVPictureInPictureController -contentSource
 member AVPictureInPictureController -delegate
 member AVPictureInPictureController -initWithContentSource:
@@ -13367,6 +13401,7 @@ member AVPictureInPictureController -isPictureInPicturePossible
 member AVPictureInPictureController -isPictureInPictureSuspended
 member AVPictureInPictureController -playerLayer
 member AVPictureInPictureController -requiresLinearPlayback
+member AVPictureInPictureController -setCanStartPictureInPictureAutomaticallyFromInline:
 member AVPictureInPictureController -setContentSource:
 member AVPictureInPictureController -setDelegate:
 member AVPictureInPictureController -startPictureInPicture
@@ -13380,13 +13415,16 @@ member AVPlaybackSpeed -initWithRate:localizedName:
 member AVPlaybackSpeed -localizedName
 member AVPlaybackSpeed -localizedNumericName
 member AVPlaybackSpeed -rate
+member AVPlayer -audiovisualBackgroundPlaybackPolicy
 member AVPlayer -automaticallyWaitsToMinimizeStalling
 member AVPlayer -defaultRate
 member AVPlayer -isMuted
 member AVPlayer -playImmediatelyAtRate:
 member AVPlayer -preventsDisplaySleepDuringVideoPlayback
+member AVPlayer -setAudiovisualBackgroundPlaybackPolicy:
 member AVPlayer -setAutomaticallyWaitsToMinimizeStalling:
 member AVPlayer -setDefaultRate:
+member AVPlayer -setMediaSelectionCriteria:forMediaCharacteristic:
 member AVPlayer -setMuted:
 member AVPlayer -setPreventsDisplaySleepDuringVideoPlayback:
 member AVPlayer -setSourceClock:
@@ -13396,9 +13434,14 @@ member AVPlayer -timeControlStatus
 member AVPlayer -volume
 member AVPlayerItem +playerItemWithAsset:automaticallyLoadedAssetKeys:
 member AVPlayerItem -automaticallyLoadedAssetKeys
+member AVPlayerItem -configuredTimeOffsetFromLive
+member AVPlayerItem -currentMediaSelection
 member AVPlayerItem -initWithAsset:automaticallyLoadedAssetKeys:
 member AVPlayerItem -nowPlayingInfo
+member AVPlayerItem -preferredForwardBufferDuration
+member AVPlayerItem -setConfiguredTimeOffsetFromLive:
 member AVPlayerItem -setNowPlayingInfo:
+member AVPlayerItem -setPreferredForwardBufferDuration:
 member AVPlayerItemVideoOutput -initWithOutputSettings:
 member AVPlayerLooper +playerLooperWithPlayer:templateItem:
 member AVPlayerLooper +playerLooperWithPlayer:templateItem:timeRange:
@@ -13436,6 +13479,7 @@ member AVPlayerMediaSelectionCriteria -revenant_setPrincipalMediaCharacteristics
 member AVPlayerViewController +keyPathsForValuesAffectingReadyForDisplay
 member AVPlayerViewController +keyPathsForValuesAffectingVideoBounds
 member AVPlayerViewController -allowsPictureInPicturePlayback
+member AVPlayerViewController -canStartPictureInPictureAutomaticallyFromInline
 member AVPlayerViewController -contentOverlayView
 member AVPlayerViewController -dealloc
 member AVPlayerViewController -delegate
@@ -13493,21 +13537,34 @@ member AVPlayerViewController -revenant_writeNowPlaying
 member AVPlayerViewController -selectSpeed:
 member AVPlayerViewController -selectedSpeed
 member AVPlayerViewController -setAllowsPictureInPicturePlayback:
+member AVPlayerViewController -setCanStartPictureInPictureAutomaticallyFromInline:
 member AVPlayerViewController -setDelegate:
 member AVPlayerViewController -setPixelBufferAttributes:
 member AVPlayerViewController -setPlayer:
 member AVPlayerViewController -setRequiresLinearPlayback:
 member AVPlayerViewController -setShowsPlaybackControls:
+member AVPlayerViewController -setShowsTimecodes:
 member AVPlayerViewController -setSpeeds:
 member AVPlayerViewController -setUpdatesNowPlayingInfoCenter:
 member AVPlayerViewController -setVideoGravity:
 member AVPlayerViewController -showsPlaybackControls
+member AVPlayerViewController -showsTimecodes
 member AVPlayerViewController -speeds
 member AVPlayerViewController -updatesNowPlayingInfoCenter
 member AVPlayerViewController -videoBounds
 member AVPlayerViewController -videoGravity
 member AVPlayerViewController -viewDidLayoutSubviews
 member AVPlayerViewController -viewWillAppear:
+member AVRoutePickerView -activeTintColor
+member AVRoutePickerView -dealloc
+member AVRoutePickerView -delegate
+member AVRoutePickerView -initWithFrame:
+member AVRoutePickerView -layoutSubviews
+member AVRoutePickerView -prioritizesVideoDevices
+member AVRoutePickerView -revenant_beginPresentation:
+member AVRoutePickerView -revenant_endPresentation:
+member AVRoutePickerView -revenant_routeButtonInView:expected:
+member AVRoutePickerView -setActiveTintColor:
 member AVSampleBufferAudioRenderer -audioTimePitchAlgorithm
 member AVSampleBufferAudioRenderer -dealloc
 member AVSampleBufferAudioRenderer -enqueueSampleBuffer:
@@ -13566,6 +13623,7 @@ member AVSpeechSynthesisVoice +voiceWithLanguage:
 member AVSpeechSynthesisVoice -encodeWithCoder:
 member AVSpeechSynthesisVoice -identifier
 member AVSpeechSynthesisVoice -initWithCoder:
+member AVSpeechSynthesisVoice -initWithIdentifier:
 member AVSpeechSynthesisVoice -language
 member AVSpeechSynthesisVoice -name
 member AVSpeechSynthesisVoice -quality
@@ -32994,8 +33052,12 @@ member UIImageReaderConfiguration -preferredThumbnailSize
 member UIImageReaderConfiguration -preparesImagesForDisplay
 member UIImageReaderConfiguration -setPreferredThumbnailSize:
 member UIImageReaderConfiguration -setPreparesImagesForDisplay:
+member UIImageSymbolConfiguration +configurationPreferringMonochrome
+member UIImageSymbolConfiguration +configurationPreferringMulticolor
 member UIImageSymbolConfiguration +configurationWithFont:
 member UIImageSymbolConfiguration +configurationWithFont:scale:
+member UIImageSymbolConfiguration +configurationWithHierarchicalColor:
+member UIImageSymbolConfiguration +configurationWithPaletteColors:
 member UIImageSymbolConfiguration +configurationWithPointSize:
 member UIImageSymbolConfiguration +configurationWithPointSize:weight:
 member UIImageSymbolConfiguration +configurationWithPointSize:weight:scale:
@@ -33004,6 +33066,7 @@ member UIImageSymbolConfiguration +configurationWithTextStyle:
 member UIImageSymbolConfiguration +configurationWithTextStyle:scale:
 member UIImageSymbolConfiguration +configurationWithWeight:
 member UIImageSymbolConfiguration +revenant_configurationWithPointSize:hasPointSize:weight:scale:textStyle:
+member UIImageSymbolConfiguration +revenant_configurationWithRendering:colors:
 member UIImageSymbolConfiguration +supportsSecureCoding
 member UIImageSymbolConfiguration +unspecifiedConfiguration
 member UIImageSymbolConfiguration -configurationByApplyingConfiguration:
@@ -33020,7 +33083,9 @@ member UIImageSymbolConfiguration -isEqualToConfiguration:
 member UIImageSymbolConfiguration -revenant_applyFieldsOfConfiguration:
 member UIImageSymbolConfiguration -revenant_fieldDescriptions
 member UIImageSymbolConfiguration -revenant_isUnspecified
+member UIImageSymbolConfiguration -revenant_symbolColors
 member UIImageSymbolConfiguration -revenant_symbolPointSize
+member UIImageSymbolConfiguration -revenant_symbolRendering
 member UIImageSymbolConfiguration -revenant_symbolScale
 member UIImageSymbolConfiguration -revenant_symbolWeight
 member UIImageView +load
@@ -36617,6 +36682,7 @@ protocol AVPictureInPictureControllerDelegate
 protocol AVPlaybackCoordinatorPlaybackControlDelegate
 protocol AVPlayerViewControllerDelegate
 protocol AVQueuedSampleBufferRendering
+protocol AVRoutePickerViewDelegate
 protocol AVVideoCompositionInstruction
 protocol AVVideoCompositionValidationHandling
 protocol AXChart
@@ -37845,6 +37911,7 @@ type AVDepthDataAccuracy
 type AVDepthDataQuality
 type AVExternalContentProtectionStatus
 type AVMetadataObjectType
+type AVPlayerAudiovisualBackgroundPlaybackPolicy
 type AVPlayerInterstitialEventAssetListResponseStatus
 type AVPlayerInterstitialEventCue
 type AVPlayerInterstitialEventSkippableEventState

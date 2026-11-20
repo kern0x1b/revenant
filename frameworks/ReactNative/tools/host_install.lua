@@ -4,7 +4,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua launch --bundle-id ID [--dyld FOLDER]
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua stop --bundle-id ID
        ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua diagnostics --bundle-id ID [--output DIR]
-       ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua window --archive FILE --bundle-id ID --output DIR [--debs FILE,...] [--packages FILE] [--probe FILE] [--expect NAME,...] [--restore-bundle FILE]
+       ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua window --archive FILE --bundle-id ID --output DIR [--debs FILE,...] [--packages FILE] [--provided NAME] [--dyld FOLDER] [--probe FILE] [--expect NAME,...] [--restore-bundle FILE]
   stage  makes DIR/<app name>.app and DIR/host.tgz from a built host: it adds the manifest folder (EXConstants.bundle from app_config.lua),
           the backports libraries in DIR of --backports (with --key, the generation of that store which the key names; no other
           generation is picked), refusing a built host that loads a library DIR lacks and naming each one, retargets the library references from /usr/lib/revenant/org.revenant.backports
@@ -38,7 +38,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
 
 LIBRARIES = {"libFoundationBackports", "libCoreTextBackports", "libUIKitBackports", "libUserNotificationsBackports", "libCoreGraphicsBackports",
              "libGraphicsBackports", "libCoreFoundationBackports", "libSystemBackports", "libIOSurfaceBackports", "libWebKitBackports", "libMapKitBackports",
-             "libCoreLocationBackports", "libSecurityBackports", "libCoreMotionBackports", "libCoreTelephonyBackports", "libContactsBackports", "libLocalAuthenticationBackports", "libTLSBackports"}
+             "libCoreLocationBackports", "libSecurityBackports", "libCoreMotionBackports", "libCoreTelephonyBackports", "libAVKitBackports", "libContactsBackports", "libLocalAuthenticationBackports", "libTLSBackports"}
 
 local BACKPORTS_SUBDIR = path.join("share", "root", "usr", "lib", "revenant", "org.revenant.backports")
 
@@ -174,6 +174,17 @@ function framework_retargets(otool_text, imports_text, exports, library_names, p
         end
     end
     return arguments, notes
+end
+
+function held_libraries(root)
+    local held = {}
+    for _, library in ipairs(os.files(path.join(root, "*Backports.dylib"))) do
+        table.insert(held, path.basename(library))
+    end
+    if #held == 0 then
+        raise("the Backports folder %s holds no libraries: name the shared-packages folder of the build the host links (a store generation whose files were evicted has none), or the frameworks iOS 6 lacks stay unbound and the host crashes at start", root)
+    end
+    return held
 end
 
 function duplicate_install_names(otool_text)
@@ -497,10 +508,7 @@ local function stage_shared(options)
         os.vrunv("plutil", {"-replace", "CFBundleExecutable", "-string", executable, path.join(target, "Info.plist")})
     end
     local staged = path.join(target, executable)
-    local held = {}
-    for _, library in ipairs(os.files(path.join(backports_root, "*Backports.dylib"))) do
-        table.insert(held, path.basename(library))
-    end
+    local held = held_libraries(backports_root)
     local exports = {}
     for _, name in ipairs(held) do
         exports[name] = os.iorunv("nm", {"-gU", "-arch", "armv7", path.join(backports_root, name .. ".dylib")})
@@ -811,6 +819,51 @@ function deb_package(file)
     return {name = name, version = version, file = file}
 end
 
+function install_order(packages, depends)
+    local names = {}
+    for _, package in ipairs(packages) do
+        names[package.name] = true
+    end
+    local ordered, placed, remaining = {}, {}, {}
+    for _, package in ipairs(packages) do
+        table.insert(remaining, package)
+    end
+    while #remaining > 0 do
+        local next_remaining, progressed = {}, false
+        for _, package in ipairs(remaining) do
+            local ready = true
+            for _, dependency in ipairs(depends[package.name] or {}) do
+                if names[dependency] and not placed[dependency] and dependency ~= package.name then
+                    ready = false
+                end
+            end
+            if ready then
+                table.insert(ordered, package)
+                placed[package.name] = true
+                progressed = true
+            else
+                table.insert(next_remaining, package)
+            end
+        end
+        if not progressed then
+            raise("the packages to install depend on each other in a circle: %s", next_remaining[1].name)
+        end
+        remaining = next_remaining
+    end
+    return ordered
+end
+
+function deb_depends(text)
+    local names = {}
+    for entry in (text or ""):gmatch("[^,]+") do
+        local name = entry:match("^%s*([%w%.%-_+]+)")
+        if name then
+            table.insert(names, name)
+        end
+    end
+    return names
+end
+
 function delta_plan(wanted, installed)
     local todo = {}
     for _, package in ipairs(wanted) do
@@ -862,6 +915,11 @@ function window(options)
             table.insert(wanted, deb_package(file))
         end
     end
+    local depends = {}
+    for _, package in ipairs(wanted) do
+        depends[package.name] = deb_depends(os.iorunv("dpkg-deb", {"-f", package.file, "Depends"}))
+    end
+    wanted = install_order(wanted, depends)
     for _, package in ipairs(wanted) do
         installed[package.name] = device.run(settings, "dpkg-query -W -f='${Version}' " .. package.name .. " 2>/dev/null ; true", {capture = true}):trim()
     end
@@ -891,7 +949,7 @@ function window(options)
     local log_file = run_folder(id) .. "/rnhost.log"
     device.run(settings, "touch " .. app .. "/rnhost.log.on; rm -f " .. log_file)
     stop({["bundle-id"] = id})
-    launch({["bundle-id"] = id})
+    launch({["bundle-id"] = id, dyld = options.dyld})
     step("launched " .. id .. ", waiting " .. PROBE_WAIT_SECONDS .. " s")
     os.sleep(PROBE_WAIT_SECONDS * 1000)
     local expected = {}

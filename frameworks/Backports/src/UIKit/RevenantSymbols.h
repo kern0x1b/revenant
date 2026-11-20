@@ -1,5 +1,6 @@
 #import <UIKit/UIKit.h>
 #import "RevenantMenus.h"
+#import "RevenantSymbolRendering.h"
 
 NSString *revenant_trait_summary(UITraitCollection *traits);
 
@@ -17,8 +18,11 @@ NSString *revenant_trait_summary(UITraitCollection *traits);
 - (double)revenant_symbolPointSize;
 - (NSInteger)revenant_symbolWeight;
 - (NSInteger)revenant_symbolScale;
+- (RevenantSymbolRendering)revenant_symbolRendering;
+- (NSArray<UIColor *> *)revenant_symbolColors;
 @end
 
 BOOL revenant_symbol_known(NSString *name);
 BOOL revenant_symbol_metrics(NSString *name, double pointSize, NSInteger weight, NSInteger scale, CGSize *size, UIEdgeInsets *insets, CGFloat *baseline);
-UIImage *revenant_symbol_bitmap(NSString *name, double pointSize, NSInteger weight, NSInteger scale, CGFloat displayScale);
+UIImage *revenant_symbol_bitmap(NSString *name, double pointSize, NSInteger weight, NSInteger scale, CGFloat displayScale,
+                                RevenantSymbolRendering rendering, NSArray<UIColor *> *colors);

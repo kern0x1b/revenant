@@ -265,6 +265,41 @@ local AREAS = {
         },
     },
     {
+        name = "symbol rendering configurations expo-symbols uses for the drawn glyph set",
+        sources = {"UIImageSymbolConfiguration.m", "UIImageSymbolGlyphs.m", "UIImage+Symbols.m", "RevenantSymbolRendering.c"},
+        members = {
+            "+[UIImageSymbolConfiguration configurationPreferringMonochrome]",
+            "+[UIImageSymbolConfiguration configurationPreferringMulticolor]",
+            "+[UIImageSymbolConfiguration configurationWithHierarchicalColor:]",
+            "+[UIImageSymbolConfiguration configurationWithPaletteColors:]",
+            "-[UIImageSymbolConfiguration revenant_symbolRendering]",
+            "-[UIImageSymbolConfiguration revenant_symbolColors]",
+        },
+    },
+    {
+        name = "route picker view of expo-video, built on the volume view's route button",
+        library = "AVKit",
+        sources = {"AVRoutePickerView.m"},
+        members = {
+            "@AVRoutePickerView",
+            "-[AVRoutePickerView setDelegate:]",
+            "-[AVRoutePickerView activeTintColor]", "-[AVRoutePickerView setActiveTintColor:]",
+            "-[AVRoutePickerView prioritizesVideoDevices]", "-[AVRoutePickerView setPrioritizesVideoDevices:]",
+        },
+    },
+    {
+        name = "automatic inline picture-in-picture of expo-video",
+        library = "AVKit",
+        sources = {"AVKit+AutomaticInline14.m", "AVPlayerViewController+ShowsTimecodes13.m"},
+        members = {
+            "-[AVPlayerViewController showsTimecodes]", "-[AVPlayerViewController setShowsTimecodes:]",
+            "-[AVPictureInPictureController canStartPictureInPictureAutomaticallyFromInline]",
+            "-[AVPictureInPictureController setCanStartPictureInPictureAutomaticallyFromInline:]",
+            "-[AVPlayerViewController canStartPictureInPictureAutomaticallyFromInline]",
+            "-[AVPlayerViewController setCanStartPictureInPictureAutomaticallyFromInline:]",
+        },
+    },
+    {
         name = "user notifications: the notification center over local notifications",
         library = "UserNotifications",
         sources = {"UNUserNotificationCenter.m", "RevenantUserNotificationSupport.m", "UNNotificationTrigger.m"},
