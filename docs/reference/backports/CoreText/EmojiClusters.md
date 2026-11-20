@@ -76,14 +76,15 @@ On the 4S, iOS 6.1.3, FNV hash of 200x40 bitmaps:
 
 | text | system | cascade only | backports | backports / cascade only |
 | --- | --- | --- | --- | --- |
-| plain, line made and drawn | 159.9 | 161.7 | 167.6 | 1.036 |
-| plain, line made | 109.6 | 109.6 | 111.8 | 1.020 |
-| a family and a heart with VS16, made and drawn | 2937.1 | 2977.3 | 1318.3 | 0.443 |
-| a family and a heart with VS16, made | 587.4 | 629.3 | 362.5 | 0.576 |
-| a heart with VS16, made and drawn | 1410.5 | 1439.9 | 755.0 | 0.524 |
+| plain, line made and drawn | 162.4 | 164.1 | 171.0 | 1.042 |
+| plain, line made | 109.2 | 109.6 | 114.7 | 1.047 |
+| a family and a heart with VS16, made and drawn | 2953.5 | 2990.1 | 1330.5 | 0.445 |
+| a family and a heart with VS16, made | 589.6 | 629.4 | 363.7 | 0.578 |
+| a heart with VS16, made and drawn | 1423.5 | 1440.6 | 755.2 | 0.524 |
 
-Plain text pays 2 us per line made (the scan of the UTF-16) and 6 us per line made and drawn (that, and for every run drawn the
-lookup of its baseline offset and the scan of its glyphs, `DeletedGlyphs.md`); text with a cluster is cheaper than before because
+Plain text pays 5.5 us per line made (the scan of the UTF-16 for a cluster, about 2 us, and the scan of the attributed string for a
+baseline offset until one was seen, `DeletedGlyphs.md`) and 8.6 us per line made and drawn (that, and for every run drawn the
+scan of its glyphs); text with a cluster is cheaper than before because
 its runs are fewer and the deleted glyph is not logged.
 
 ## Not covered

@@ -73,6 +73,36 @@ static NSAttributedString *underlined(NSAttributedString *text)
     return result;
 }
 
+static double underline_centre(NSData *under, NSData *plain)
+{
+    const unsigned char *a = (const unsigned char *)[under bytes];
+    const unsigned char *b = (const unsigned char *)[plain bytes];
+    double weight = 0, sum = 0;
+    for (size_t row = 0; row < height; row++) {
+        for (size_t x = 0; x < width; x++) {
+            size_t index = (row * width + x) * 4;
+            double each = fabs((double)a[index + 3] - (double)b[index + 3]);
+            weight += each;
+            sum += each * (double)row;
+        }
+    }
+    return weight > 0 ? sum / weight : -1;
+}
+
+static int underline_ink(NSData *under, NSData *plain, size_t from, size_t to)
+{
+    const unsigned char *a = (const unsigned char *)[under bytes];
+    const unsigned char *b = (const unsigned char *)[plain bytes];
+    int count = 0;
+    for (size_t row = 0; row < height; row++) {
+        for (size_t x = from; x < to; x++) {
+            size_t index = (row * width + x) * 4;
+            count += a[index + 3] != b[index + 3];
+        }
+    }
+    return count;
+}
+
 static CTLineRef line_of(NSAttributedString *text)
 {
     return CTLineCreateWithAttributedString((__bridge CFAttributedStringRef)text);
@@ -289,13 +319,44 @@ int main(void)
         printf("CT-ORACLE line-equal=%d run-equal=%d frame-equal=%d negative-differs=%d flipped-lowered=%d flipped-model-raises=%d flipped-appkit-unmoved=%d\n",
                lineEqual, runEqual, frameEqual, negativeDiffers, flippedLowered, flippedModelRaises, flippedAppKitUnmoved);
         NSAttributedString *plainUnder = underlined(plain);
-        NSAttributedString *lowered = styled(@"Hxg", NSMakeRange(0, 3), -4);
-        BOOL underlineDrawn = ![system_line(plainUnder, native.line, NO) isEqualToData:system_line(plain, native.line, NO)];
-        BOOL underlineEqual = [system_line(plainUnder, native.line, NO) isEqualToData:model_line(plainUnder, plainUnder, NO)]
-            && [system_line(underlined(lowered), native.line, NO) isEqualToData:model_line(plainUnder, underlined(lowered), NO)];
-        printf("CT-UNDERLINE underline-drawn=%d underline-equal=%d\n", underlineDrawn, underlineEqual);
+        BOOL underlineDrawn = ![system_line(plainUnder, native.line, NO) isEqualToData:system_line(plain, native.line, NO)]
+            && ![model_line(plainUnder, plainUnder, NO) isEqualToData:model_line(plain, plain, NO)];
+        double nativeBase = underline_centre(system_line(plainUnder, native.line, NO), system_line(plain, native.line, NO));
+        double modelBase = underline_centre(model_line(plainUnder, plainUnder, NO), model_line(plain, plain, NO));
+        BOOL loweredEqual = YES, raisedWithin = YES;
+        double offsets[5] = {-8, -4, -2, 2, 6};
+        for (int index = 0; index < 5; index++) {
+            NSAttributedString *moved = styled(@"Hxg", NSMakeRange(0, 3), offsets[index]);
+            double nativeShift = underline_centre(system_line(underlined(moved), native.line, NO), system_line(moved, native.line, NO)) - nativeBase;
+            double modelShift = underline_centre(model_line(plainUnder, underlined(moved), NO), model_line(plain, moved, NO)) - modelBase;
+            printf("CT-UNDERLINE offset %+.0f: native shift %+.2f rows, backport shift %+.2f rows\n", offsets[index], nativeShift, modelShift);
+            if (offsets[index] < 0)
+                loweredEqual = loweredEqual && fabs(nativeShift - modelShift) < 0.01;
+            else
+                raisedWithin = raisedWithin && fabs(nativeShift - modelShift) <= 1.0;
+        }
+        NSMutableAttributedString *mixed = [styled(@"Hxg", NSMakeRange(0, 3), 0) mutableCopy];
+        [mixed addAttribute:NSBaselineOffsetAttributeName value:@(-4) range:NSMakeRange(0, 1)];
+        [mixed addAttribute:NSBaselineOffsetAttributeName value:@(-8) range:NSMakeRange(2, 1)];
+        NSAttributedString *mixedUnder = underlined(mixed);
+        NSData *mixedDrawn = model_line(plainUnder, mixedUnder, NO);
+        NSData *mixedBare = model_line(plain, mixed, NO);
+        CTLineRef mixedLine = line_of(mixed);
+        CFArrayRef mixedRuns = CTLineGetGlyphRuns(mixedLine);
+        BOOL mixedKept = CFArrayGetCount(mixedRuns) == 3;
+        BOOL mixedBlank = mixedKept;
+        for (CFIndex index = 0; index < CFArrayGetCount(mixedRuns); index++) {
+            CTRunRef run = (CTRunRef)CFArrayGetValueAtIndex(mixedRuns, index);
+            CGPoint start;
+            CTRunGetPositions(run, CFRangeMake(0, 1), &start);
+            double runWidth = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), NULL, NULL, NULL);
+            mixedKept = mixedKept && underline_ink(mixedDrawn, mixedBare, (size_t)(20 + start.x + 1), (size_t)(20 + start.x + runWidth - 1)) > 0;
+            mixedBlank = mixedBlank && underline_ink(mixedBare, mixedBare, (size_t)(20 + start.x + 1), (size_t)(20 + start.x + runWidth - 1)) == 0;
+        }
+        CFRelease(mixedLine);
+        printf("CT-UNDERLINE underline-drawn=%d lowered-equal=%d raised-within=%d mixed-kept=%d mixed-without-underline-empty=%d\n", underlineDrawn, loweredEqual, raisedWithin, mixedKept, mixedBlank);
         BOOL oracle = lineEqual && runEqual && frameEqual && negativeDiffers && flippedLowered && flippedModelRaises && flippedAppKitUnmoved
-            && underlineDrawn && underlineEqual;
+            && underlineDrawn && loweredEqual && raisedWithin && mixedKept && mixedBlank;
 
         BOOL layoutEqual = YES;
         layoutEqual = layout_check("one-raised", styled(@"Hxg", NSMakeRange(0, 3), 0), styled(@"Hxg", NSMakeRange(0, 3), 6), native) && layoutEqual;

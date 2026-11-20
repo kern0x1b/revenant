@@ -1,7 +1,9 @@
 #include "revenant_emoji_clusters.h"
+#include "revenant_baseline_offset_seen.h"
 #import <CoreText/CoreText.h>
 #import <Foundation/Foundation.h>
 #import <dlfcn.h>
+#import <objc/message.h>
 #import <pthread.h>
 
 static void *revenant_emoji_core_text(void)
@@ -122,19 +124,15 @@ static void revenant_cluster_list_add(CFRange cluster, void *context)
     list->ranges[list->count++] = cluster;
 }
 
-@protocol RevenantPointSized <NSObject>
-- (CGFloat)pointSize;
-@end
-
 static CGFloat revenant_attribute_font_size(CFTypeRef font)
 {
     if (font == NULL)
         return 12.0;
     if (CFGetTypeID(font) == CTFontGetTypeID())
         return CTFontGetSize((CTFontRef)font);
-    id<RevenantPointSized> object = (__bridge id<RevenantPointSized>)font;
+    id object = (__bridge id)font;
     if ([object respondsToSelector:@selector(pointSize)])
-        return [object pointSize];
+        return ((CGFloat (*)(id, SEL))objc_msgSend)(object, @selector(pointSize));
     return 12.0;
 }
 
@@ -202,6 +200,7 @@ static CFAttributedStringRef revenant_emoji_clustered(CFAttributedStringRef attr
 
 CTTypesetterRef CTTypesetterCreateWithAttributedString(CFAttributedStringRef string)
 {
+    revenant_note_baseline_offset(string);
     static __typeof__(&CTTypesetterCreateWithAttributedString) system;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
@@ -216,6 +215,7 @@ CTTypesetterRef CTTypesetterCreateWithAttributedString(CFAttributedStringRef str
 
 CTTypesetterRef CTTypesetterCreateWithAttributedStringAndOptions(CFAttributedStringRef string, CFDictionaryRef options)
 {
+    revenant_note_baseline_offset(string);
     static __typeof__(&CTTypesetterCreateWithAttributedStringAndOptions) system;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
@@ -230,6 +230,7 @@ CTTypesetterRef CTTypesetterCreateWithAttributedStringAndOptions(CFAttributedStr
 
 CTLineRef CTLineCreateWithAttributedString(CFAttributedStringRef string)
 {
+    revenant_note_baseline_offset(string);
     static __typeof__(&CTLineCreateWithAttributedString) system;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
@@ -244,6 +245,7 @@ CTLineRef CTLineCreateWithAttributedString(CFAttributedStringRef string)
 
 CTFramesetterRef CTFramesetterCreateWithAttributedString(CFAttributedStringRef string)
 {
+    revenant_note_baseline_offset(string);
     static __typeof__(&CTFramesetterCreateWithAttributedString) system;
     static dispatch_once_t once;
     dispatch_once(&once, ^{

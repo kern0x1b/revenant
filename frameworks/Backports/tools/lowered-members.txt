@@ -36907,7 +36907,6 @@ protocol RevenantMetalResident
 protocol RevenantMetalTextureName
 protocol RevenantOverlayView
 protocol RevenantPhotosChange
-protocol RevenantPointSized
 protocol RevenantPolicyListener
 protocol RevenantRootLayerHandler
 protocol RevenantSCNAnimatable
