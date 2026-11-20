@@ -78,7 +78,7 @@ expo-calendar is a recipe with an iOS 6 patch (packages/e/expo-calendar/patches)
 | --- | --- | --- | --- |
 | expo-calendar | nothing; `MissingCurrentViewControllerException` renamed `CalendarMissingCurrentViewControllerException` | the name collides with expo-sharing's inside the shared Swift module `ExpoAppModules` | the module as published: EventKit (`EKEventStore`, `EKEvent`, `EKCalendar`) and the EventKitUI event and edit view controllers are present on iOS 6; the iOS 17 write-only permission branches are behind `#available` and are not taken; built and linked, not exercised on the phone |
 
-expo-contacts is a recipe with one name patch (packages/e/expo-contacts/patches) and the later `CNLabel*` constants in the Contacts backport. Its host build is not green, so its coverage row is partial and its calls are not verified.
+expo-contacts is a recipe with one name patch (packages/e/expo-contacts/patches) and the later `CNLabel*` constants in the Contacts backport. Its host build is not green, so its coverage row is evaluate and its calls are not verified.
 
 | Module | Removed or replaced | Why | What JS sees |
 | --- | --- | --- | --- |
