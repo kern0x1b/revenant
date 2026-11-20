@@ -205,7 +205,7 @@ local TOOLS = {"toolchain/modules/", "toolchain/addon.lua", "xmake.lua"}
 local UNBUILT = {"docs/**", "**/*.md", ".agents/**", "agent-skills/**"}
 local PREBUILT_ENV = {"REVENANT_PREBUILT", "REVENANT_PREBUILT_ONLY"}
 local ALWAYS = {"tools/prepush.lua", "tools/budget.lua"}
-local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true}
+local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true, REVENANT_LIGHT_SUITES_VERDICT = true}
 local STORE_PACKAGES = {"llvm", "swift", "swift-bootstrap", "swift-runtime", "libcxx", "apple-compat", "iphoneos-sdk", "ld64", "ldid"}
 local TOOL_NAMES = {"git", "rsync", "cmake", "ninja", "xcrun", "clang", "cc", "make", "sh"}
 
@@ -330,7 +330,9 @@ end
 local function resolved_tools()
     local lines = {}
     for _, name in ipairs(TOOL_NAMES) do
-        table.insert(lines, name .. "=" .. (try { function () return os.iorunv("sh", {"-c", "command -v " .. name}):trim() end } or "none"))
+        local found = try { function () return os.iorunv("sh", {"-c", "command -v " .. name}):trim() end } or "none"
+        local version = try { function () return os.iorunv("sh", {"-c", name .. " --version 2>&1 | head -n 1"}):trim() end } or ""
+        table.insert(lines, name .. "=" .. found .. " " .. version)
     end
     return table.concat(lines, "\n")
 end
@@ -516,6 +518,13 @@ local function recall_line(store, step, key)
     local record = recalled(store, step, key)
     if record then
         return string.format("recalled %s memo (%s)", step.name, provenance(record))
+    end
+end
+
+local function recall_report(store, step, key)
+    local line = recall_line(store, step, key)
+    if line then
+        return line .. "\nkey " .. key
     end
 end
 
@@ -726,6 +735,11 @@ local function test_cache()
     check("the cache folder of a worktree and the budget's own variables change no key", key(narrow), base_keys.narrow)
     os.setenv("REVENANT_CACHE", saved_cache or "")
     os.setenv("REVENANT_BUDGET_HELD", saved_held or "")
+    local saved_verdict = os.getenv("REVENANT_LIGHT_SUITES_VERDICT")
+    os.setenv("REVENANT_LIGHT_SUITES_VERDICT", "0123456789abcdef@/a/run/light-suites.verdict")
+    check("the hand-off of a verdict from ci_local to its tests is not an input of the verdict", key(narrow), base_keys.narrow)
+    os.setenv("REVENANT_LIGHT_SUITES_VERDICT", saved_verdict or "")
+    check("a tool is keyed by its version and not only by where it resolves", resolved_tools():find("git=%S*git git version") ~= nil, true)
     local saved_global = os.getenv("XMAKE_GLOBALDIR")
     os.setenv("XMAKE_GLOBALDIR", "/another/store")
     check("the package store xmake reads changes every key", key(narrow) ~= base_keys.narrow, true)
@@ -819,6 +833,9 @@ local function test_cache()
     check("a recall says where the verdict came from", (recall_line(store, steps[1], key(steps[1])) or ""):find("^recalled a memo %(ran %d+ s in w at h, ") ~= nil, true)
     check("a step that failed has no recall", recall_line(store, steps[2], key(steps[2])), nil)
     check("a recall asks for the inputs it is given", recall_line(store, steps[1], "0000"), nil)
+    local report = recall_report(store, steps[1], key(steps[1])) or ""
+    check("a recall report is the line and then the key it was found under", report:find("^recalled a memo %(.-%)\nkey " .. key(steps[1]) .. "$") ~= nil, true)
+    check("a step that failed has no recall report", recall_report(store, steps[2], key(steps[2])), nil)
     pass()
     check("a passing step is not run again on unchanged inputs", runs.a, 1)
     check("a spawned step is not run again on unchanged inputs", runs.c, 1)
@@ -1025,11 +1042,11 @@ function main(command, ...)
     end
     if parsed.recall then
         local step = select_steps(STEPS, {parsed.recall})[1]
-        local line = recall_line(path.join(cache().store(), "memo"), step, key_of(inputs(root), step))
-        if not line then
+        local report = recall_report(path.join(cache().store(), "memo"), step, key_of(inputs(root), step))
+        if not report then
             raise("no verdict of %s is remembered for these inputs", step.name)
         end
-        print("%s", line)
+        print("%s", report)
         return
     end
     if parsed.inline then

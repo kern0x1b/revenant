@@ -427,8 +427,8 @@ A command run straight with `xmake`, and not through `./xmakew` or a budget run,
 ## Checks that remember their result
 
 `./xmakew l -P . tools/prepush.lua` remembers each check that passed, in the shared store (`<store>/memo/<check>/<key>`, the 40
-newest of each check), under the key of what the check reads. A doubt is an input: a rerun costs seconds, a verdict
-that no longer holds costs a push. The key is
+newest of each check), under the key of what the check reads. Where it is in doubt whether something is an input it goes into the
+key, because a rerun costs seconds and a verdict that no longer holds costs a push; what stays out is listed after the key. The key is
 
 - the check's name and version, the xmake that runs it, the host, and the code that runs the checks: `tools/prepush.lua` and
   `tools/budget.lua` are read by every check, so a change to how a check is run runs it again;
@@ -440,10 +440,18 @@ that no longer holds costs a push. The key is
 - for `comments`, the content of the local `.git/info/attributes` and of the global attributes file, which `git check-attr` reads
   to classify a file;
 - for `recipe digests`, `lowered members`, `lowered exports`, `light suites` and `backports build`, which run against what is
-  installed: the Xcode and SDK probes, where `git`, `rsync`, `cmake`, `ninja`, `xcrun`, `clang`, `cc`, `make` and `sh` resolve,
-  every install of `llvm`, `swift`, `swift-bootstrap`, `swift-runtime`, `libcxx`, `apple-compat`, `iphoneos-sdk`, `ld64` and
+  installed: the Xcode and SDK probes, where `git`, `rsync`, `cmake`, `ninja`, `xcrun`, `clang`, `cc`, `make` and `sh` resolve and the
+  first line of what each prints for `--version`, every install of `llvm`, `swift`, `swift-bootstrap`, `swift-runtime`, `libcxx`, `apple-compat`, `iphoneos-sdk`, `ld64` and
   `ldid` in the store with the digest of its `manifest.txt`, and the content key of the iPhoneOS SDK (every file of it, with
-  the Xcode tools, about 6 s once per run). An install replaced in place with the same name and manifest is not seen.
+  the Xcode tools, about 6 s once per run).
+
+What a key does not see, and the remembered `ok` can therefore outlive a change that a fresh run would report: an install replaced in
+place with the same name and manifest, and a tool replaced in place with the same version line; the host's own frameworks and tools
+that a check calls without naming them in a key (`assets_extract_test` reads the host's CoreUI and runs `plutil` and `assetutil`,
+`emulator_source_test` runs `locale -a`); the wall clock (`credentials` reads `os.time()` against a fixture that expires in 2100, so it
+cannot change its answer before then); the external `find` that `copied_text` and `credentials` run; a file git ignores inside a
+folder a check reads (`agent-skills/tests/data/`: an ignored fixture that changes does not run those two again); the network. A
+change of the host's macOS or of any of those is the case for `--fresh`, which runs every check and records the verdicts.
 
 The commit, the folder and the rest of the environment are not part of a key, so a rebase, an amend, another worktree or another
 shell with the same files takes the verdict from the store, and a file a check does not read does not run it again. A check that
@@ -481,9 +489,15 @@ a failure it prints the compiler's errors and the path of the whole log, `build/
 all libraries (about six minutes on a 12-core Mac), a later one only what changed, and a run on an unchanged tree is remembered like the
 others. `./xmakew l -P . tools/ci_local.lua backports` runs the same build from a fresh configuration and goes on to the Backports
 tests, the probe app and the exports check. `ci_local` asks the memo once, before it clones the tree, whether prepush holds the verdict of
-the light suites for it (`prepush.lua --recall "light suites"`): when it does, the `checks` job's `xmake test` takes those suites from it,
-prints the line that says where the verdict came from and runs the rest; when it does not, the job runs them. The variable that carries the
-verdict, `REVENANT_LIGHT_SUITES_RECALLED`, is set by `ci_local` alone and is emptied when the memo holds none.
+the light suites for it (`prepush.lua --recall "light suites"`, which prints the line and `key <hash>`): when it does, it writes the
+line, the key and the checkout's path to `light-suites.verdict` in the folder of its run, under a nonce made for that run, and
+exports `REVENANT_LIGHT_SUITES_VERDICT=<nonce>@<that file>`; the `checks` job's `xmake test` takes the light suites from the file
+when the nonce in the variable is the one in the file and the key is still the one the memo holds for the checkout now (the first of
+the suites asks once and leaves a marker that holds the nonce and the key, so the other fifty-odd do not ask again), prints the line
+that says where the verdict came from and runs the rest; a value that is not a nonce and a file of a run (a string typed into the
+variable, a leftover of another shell, a file of another run) is no verdict and the suites run. When the memo holds none, the variable
+is empty and the job runs them. `ci_local` deletes the file at the end of its run (not when it is first read, because every suite
+reads it). The tool `toolchain/modules/recalled.lua` holds the writing and the reading, and `toolchain_light/recalled_test` its cases.
 
 Order and flags. The cheap checks run first and the heavy ones (`lowered members`, `lowered exports`, `light suites`,
 `backports build`) last, and the run stops at the first check that fails, so a two-second `layout` failure does not wait

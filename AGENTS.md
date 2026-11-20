@@ -104,7 +104,8 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   digests, lowered members, lowered exports, negative-test shape) and the build of every Backports library for armv7 with
   the project's flags (`backports build`, in a configuration and a build folder of its own, so the checkout's host
   configuration stays). A check that passed is remembered in the shared store by the content of what it reads (its files, the
-  code of prepush, the `REVENANT_*` environment, and for the checks that run against installs the installs and the SDK), so a
+  code of prepush, the `REVENANT_*` environment, and for the checks that run against installs the installs and the SDK; what a
+  key does not see is listed in `docs/guides/machine.md`, and `--fresh` runs everything), so a
   second prepush on the same inputs, from any worktree, runs nothing and prints where each verdict came from; a check that
   left no verdict fails. The host checks take about 15 seconds with the caches warm; the Backports build takes about six
   minutes the first time and builds only what changed after that. It must print

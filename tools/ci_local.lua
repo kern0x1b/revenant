@@ -1,4 +1,5 @@
 local ROOT = path.absolute(path.directory(os.scriptdir()))
+local recalled = import("@addon.revenant.recalled", {anonymous = true})
 local GIB = 1024 * 1024 * 1024
 local MIN_FREE = 100 * GIB
 local MEMORY_GB = 14
@@ -206,16 +207,18 @@ local function applies(step)
     return true
 end
 
-local function recalled_line(output)
-    return (output or ""):gsub("\27%[[%d;]*m", ""):match("recalled light suites memo [^\n]*")
-end
-
-local function light_verdict()
-    local output = try { function ()
+local function light_recall()
+    return try { function ()
         return os.iorunv(os.programfile(), {"l", "-P", ROOT, path.join(ROOT, "tools", "prepush.lua"), "--recall", "light suites"},
                          {envs = {REVENANT_PREBUILT = PREBUILT, REVENANT_PREBUILT_ONLY = JOBS.checks.prebuilt}})
     end }
-    return recalled_line(output)
+end
+
+local function light_handoff(output, folder)
+    local line, key = recalled.parse(output)
+    if line then
+        return recalled.issue(folder, key, ROOT, line), line
+    end
 end
 
 local function minutes(ms)
@@ -463,10 +466,24 @@ local function test()
         end
     end
     check("the quick job runs prepush after its fresh configuration", JOBS.quick.steps[2].argv[5], "tools/prepush.lua")
-    check("the verdict of the light suites is read from prepush's line", recalled_line("\27[0mnoise\nrecalled light suites memo (ran 297 s in w at 0123456789, 3 min ago)\n"), "recalled light suites memo (ran 297 s in w at 0123456789, 3 min ago)")
-    check("another check's recall is not the light suites'", recalled_line("recalled comments memo (ran 1 s in w at h, 1 s ago)\n"), nil)
-    check("no recall is no verdict", recalled_line(nil), nil)
-    check("the light target takes a recalled verdict only when ci_local passes it", io.readfile(path.join(ROOT, "toolchain", "tests", "xmake.lua")):find('os.getenv("REVENANT_LIGHT_SUITES_RECALLED")', 1, true) ~= nil, true)
+    local handoff_folder = os.iorunv("mktemp", {"-d"}):trim()
+    local recall_text = "\27[0mnoise\nrecalled light suites memo (ran 297 s in w at 0123456789, 3 min ago)\nkey 0a1b2c\n"
+    local verdict, line = light_handoff(recall_text, handoff_folder)
+    check("the verdict of the light suites is read from prepush's line", line, "recalled light suites memo (ran 297 s in w at 0123456789, 3 min ago)")
+    check("the hand-off is a nonce and a file in the run's folder, not the line", (verdict or ""):find("^%x+@" .. handoff_folder:gsub("%p", "%%%0") .. "/") ~= nil, true)
+    check("the hand-off is read back by the tests while the key holds", recalled.read(verdict, function () return "0a1b2c" end), line)
+    check("a value that ci_local did not issue is no verdict, whatever the file holds", recalled.read("recalled light suites memo (ran 1 s in w at h, 1 s ago)", function () return "0a1b2c" end), nil)
+    check("a made-up value is no verdict", recalled.read("anything", function () return "0a1b2c" end), nil)
+    recalled.clear(verdict)
+    check("the hand-off is gone when the run ends", recalled.read(verdict, function () return "0a1b2c" end), nil)
+    check("another check's recall is not the light suites'", (light_handoff("recalled comments memo (ran 1 s in w at h, 1 s ago)\nkey 0a1b2c\n", handoff_folder)), nil)
+    check("a recall without its key is no verdict", (light_handoff("recalled light suites memo (ran 1 s in w at h, 1 s ago)\n", handoff_folder)), nil)
+    check("no recall is no verdict", (light_handoff(nil, handoff_folder)), nil)
+    check("nothing was written for a recall that is no verdict", #os.files(path.join(handoff_folder, "*")), 0)
+    os.tryrm(handoff_folder)
+    local light_target = io.readfile(path.join(ROOT, "toolchain", "tests", "xmake.lua"))
+    check("the light target takes its verdict from the recalled module and from no other variable", light_target:find('read(os.getenv("REVENANT_LIGHT_SUITES_VERDICT"))', 1, true) ~= nil, true)
+    check("the light target does not trust a bare variable", light_target:find("REVENANT_LIGHT_SUITES_RECALLED", 1, true), nil)
     local selected = select_jobs({})
     for _, name in ipairs(ALL) do
         check("no job argument selects " .. name, selected[name], true)
@@ -728,9 +745,9 @@ function main(...)
     local dir = path.join(root, os.date("%Y%m%d-%H%M%S"))
     os.execv("mkdir", {"-p", dir})
     prune_runs(root)
-    local recalled = light_verdict()
-    os.setenv("REVENANT_LIGHT_SUITES_RECALLED", recalled or "")
-    print("ci_local: %s", recalled and (recalled .. "; the tests of the checks job take the light suites from it") or "prepush holds no verdict of the light suites for this tree; the checks job runs them")
+    local verdict, line = light_handoff(light_recall(), dir)
+    os.setenv("REVENANT_LIGHT_SUITES_VERDICT", verdict or "")
+    print("ci_local: %s", line and (line .. "; the tests of the checks job take the light suites from it when the key still holds") or "prepush holds no verdict of the light suites for this tree; the checks job runs them")
     local began = os.mclock()
     local by_name, peak_total
     if serial then
@@ -739,6 +756,7 @@ function main(...)
         by_name, peak_total = run_parallel(selected, dir, limit_kb)
     end
     local failed = report(by_name, selected, dir, began, peak_total)
+    recalled.clear(verdict)
     print("ci_local: load after %s", load())
     if failed then
         os.exit(1)
