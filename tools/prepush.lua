@@ -8,6 +8,8 @@ local function cache()
     return import("@addon.revenant.cache", {anonymous = true})
 end
 
+local byteorder = import("@addon.revenant.byteorder", {anonymous = true})
+
 local function digest(text)
     return hash.sha256(bytes(text))
 end
@@ -49,10 +51,21 @@ local function gate_environment()
     }
 end
 
-local function gate_sync_arguments(tree)
+local function gate_ignored(folder)
+    local lines = {}
+    for entry in git(folder, {"ls-files", "--others", "--ignored", "--exclude-standard", "--directory", "-z"}):gmatch("[^\0]+") do
+        table.insert(lines, "/" .. entry:gsub("([%*%?%[\\])", "\\%1"))
+    end
+    return table.concat(lines, "\n") .. "\n"
+end
+
+local function gate_sync_arguments(tree, ignored)
     local args = {"-a", "--delete"}
     for _, pattern in ipairs(GATE_EXCLUDES) do
         table.insert(args, "--exclude=" .. pattern)
+    end
+    if ignored then
+        table.insert(args, "--exclude-from=" .. ignored)
     end
     table.insert(args, root .. "/")
     table.insert(args, tree .. "/")
@@ -106,7 +119,9 @@ local function backports_build()
     local logfile = path.join(folder, "prepush.log")
     os.mkdir(tree)
     local output = io.open(logfile, "w")
-    local ok = os.execv("rsync", gate_sync_arguments(tree), {try = true, stdout = output, stderr = output}) == 0
+    local ignored = path.join(folder, "ignored.txt")
+    io.writefile(ignored, gate_ignored(root))
+    local ok = os.execv("rsync", gate_sync_arguments(tree, ignored), {try = true, stdout = output, stderr = output}) == 0
     if ok then
         for _, command in ipairs(gate_commands(tree)) do
             if not budgeted(command, {jobs = GATE_JOBS, curdir = tree, envs = gate_environment(), output = output}) then
@@ -184,11 +199,15 @@ local function negative_shape()
     return #errors == 0
 end
 
-local MEMO_VERSION = "prepush memo 2"
+local MEMO_VERSION = "prepush memo 3"
 local MEMO_KEEP = 40
 local TOOLS = {"toolchain/modules/", "toolchain/addon.lua", "xmake.lua"}
 local UNBUILT = {"docs/**", "**/*.md", ".agents/**", "agent-skills/**"}
 local PREBUILT_ENV = {"REVENANT_PREBUILT", "REVENANT_PREBUILT_ONLY"}
+local ALWAYS = {"tools/prepush.lua", "tools/budget.lua"}
+local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true}
+local STORE_PACKAGES = {"llvm", "swift", "swift-bootstrap", "swift-runtime", "libcxx", "apple-compat", "iphoneos-sdk", "ld64", "ldid"}
+local TOOL_NAMES = {"git", "rsync", "cmake", "ninja", "xcrun", "clang", "cc", "make", "sh"}
 
 local function call(script, ...)
     local arguments = table.pack(...)
@@ -241,6 +260,88 @@ local function toolchain_facts()
         facts_text = table.concat(facts, "\n")
     end
     return facts_text
+end
+
+local function sorted(lines)
+    byteorder.sort(lines)
+    return lines
+end
+
+local function ambient_environment()
+    local lines = {}
+    for name, value in pairs(os.getenvs()) do
+        if (name:find("^REVENANT_") or name == "XMAKE_GLOBALDIR") and not AMBIENT_SKIPS[name] and value ~= "" then
+            table.insert(lines, name .. "=" .. value)
+        end
+    end
+    return table.concat(sorted(lines), "\n")
+end
+
+local function attributes_facts(folder)
+    local locations = {path.join(folder, (git(folder, {"rev-parse", "--git-path", "info/attributes"}):trim()))}
+    local configured = try { function () return git(folder, {"config", "--get", "core.attributesFile"}):trim() end }
+    if configured and configured ~= "" then
+        table.insert(locations, (configured:gsub("^~/", (os.getenv("HOME") or "") .. "/")))
+    else
+        table.insert(locations, path.join(os.getenv("XDG_CONFIG_HOME") or path.join(os.getenv("HOME") or "", ".config"), "git", "attributes"))
+    end
+    local lines = {}
+    for index, file in ipairs(locations) do
+        table.insert(lines, (index == 1 and "local " or "global ") .. (os.isfile(file) and hash.sha256(file) or "none"))
+    end
+    return table.concat(lines, "\n")
+end
+
+local function packages_folder()
+    return path.join(cache().store(), "xmake-global", ".xmake", "packages")
+end
+
+local function store_installs()
+    local lines = {}
+    local packages = packages_folder()
+    for _, name in ipairs(STORE_PACKAGES) do
+        for _, install in ipairs(os.filedirs(path.join(packages, name:sub(1, 1), name, "*", "*"))) do
+            local line = path.relative(install, packages)
+            if os.islink(install) then
+                line = line .. " -> " .. path.filename(os.readlink(install))
+            end
+            local manifest = path.join(install, "manifest.txt")
+            table.insert(lines, line .. " " .. (os.isfile(manifest) and hash.sha256(manifest) or "no manifest"))
+        end
+    end
+    return table.concat(sorted(lines), "\n")
+end
+
+local function sdk_content()
+    local sdk = import("sdk", {rootdir = path.join(root, "frameworks", "Backports", "tools"), anonymous = true})
+    local pattern = path.join(packages_folder(), "i", "iphoneos-sdk", "*", "*", "Developer.app", "Contents", "Developer", "Platforms",
+                              "iPhoneOS.platform", "Developer", "SDKs", "iPhoneOS*.sdk")
+    local seen, lines = {}, {}
+    for _, folder in ipairs(os.dirs(pattern)) do
+        local real = os.iorunv("sh", {"-c", "cd \"$1\" && pwd -P", "sh", folder}):trim()
+        if not seen[real] then
+            seen[real] = true
+            table.insert(lines, try { function () return sdk.cache_key(real) end } or "unreadable")
+        end
+    end
+    return table.concat(sorted(lines), "\n")
+end
+
+local function resolved_tools()
+    local lines = {}
+    for _, name in ipairs(TOOL_NAMES) do
+        table.insert(lines, name .. "=" .. (try { function () return os.iorunv("sh", {"-c", "command -v " .. name}):trim() end } or "none"))
+    end
+    return table.concat(lines, "\n")
+end
+
+local installed_text
+
+local function installed_facts()
+    if not installed_text then
+        installed_text = table.concat({toolchain_facts(), resolved_tools(), store_installs(), sdk_content()}, "\n--\n")
+    end
+    return installed_text
 end
 
 local function dirty_entries(folder)
@@ -327,12 +428,11 @@ local function selected(files, step)
     local reads = reads_of(step)
     local lines = {}
     for file, value in pairs(files) do
-        if matches(file, reads) and not matches(file, step.skips or {}) then
+        if (matches(file, reads) and not matches(file, step.skips or {})) or matches(file, ALWAYS) then
             table.insert(lines, file .. " " .. value)
         end
     end
-    table.sort(lines)
-    return lines
+    return sorted(lines)
 end
 
 local function environment_of(step)
@@ -353,7 +453,7 @@ end
 
 local function key_of(input, step)
     local facts = step.facts and step.facts() or ""
-    return digest(table.concat({MEMO_VERSION, step.name, step.version or "1", input.tool, input.host, environment_of(step), facts,
+    return digest(table.concat({MEMO_VERSION, step.name, step.version or "1", input.tool, input.host, ambient_environment(), environment_of(step), facts,
                                 table.concat(selected(input.files, step), "\n")}, "\n"))
 end
 
@@ -473,7 +573,10 @@ local function run_steps(steps, opt)
             local result = verdicts[step.name]
             if result and result.ok then
                 record_of(step, result.seconds)
-            elseif result then
+            else
+                if not result then
+                    print("FAIL %s: the process that runs the checks left no verdict for it", step.name)
+                end
                 table.insert(failed, step.name)
                 stopped = not opt.keep_going
             end
@@ -495,7 +598,7 @@ local function run_steps(steps, opt)
 end
 
 local STEPS = {
-    {name = "comments", inline = function () return call("tools/comments.lua", "check") end},
+    {name = "comments", facts = function () return attributes_facts(root) end, inline = function () return call("tools/comments.lua", "check") end},
     {name = "comments test", reads = {"tools/comments.lua", "tools/comments/"}, inline = function () return call("tools/comments.lua", "test") end},
     {name = "private cache test", reads = table.join({"tools/private_cache.lua"}, TOOLS), inline = function () return call("tools/private_cache.lua", "test") end},
     {name = "layout", env = {"LC_COLLATE"}, inline = function () return call("tools/layout.lua") end},
@@ -503,16 +606,16 @@ local STEPS = {
     {name = "open_gaps", inline = function () return call("tools/open_gaps.lua") end},
     {name = "credentials", reads = {"agent-skills/tests/"}, inline = function () return call("agent-skills/tests/credentials.lua", "test") end},
     {name = "copied_text", reads = {"agent-skills/tests/"}, inline = function () return call("agent-skills/tests/copied_text.lua", "test") end},
-    {name = "recipe digests", reads = digest_reads, facts = toolchain_facts, inline = function () return digests_stable(call) end},
+    {name = "recipe digests", reads = digest_reads, facts = installed_facts, inline = function () return digests_stable(call) end},
     {name = "negative shape", reads = {"frameworks/Backports/xmake.lua", "frameworks/Backports/tests/", "emulator/"}, inline = negative_shape},
     {name = "ci errors test", reads = table.join({"tools/ci_errors.lua", "tools/ci/"}, TOOLS), inline = function () return call("tools/ci_errors.lua", "test") end},
     {name = "ci replay test", reads = table.join({"tools/ci_swiftc_replay.lua", "tools/ci/"}, TOOLS), inline = function () return call("tools/ci_swiftc_replay.lua", "test") end},
     {name = "host install test", run = function () return lua("frameworks/ReactNative/tests/host_install_test.lua") end},
     {name = "isolate test", run = function () return lua("frameworks/ReactNative/tests/isolate_test.lua") end},
-    {name = "lowered members", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = toolchain_facts, run = function () return lua("frameworks/Backports/tests/lowered_members_test.lua") end},
-    {name = "lowered exports", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = toolchain_facts, run = function () return lua("frameworks/Backports/tests/lowered_exports_test.lua") end},
-    {name = "light suites", heavy = true, env = PREBUILT_ENV, facts = toolchain_facts, run = function () return lua("toolchain/tests/light_suites.lua") end},
-    {name = "backports build", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = toolchain_facts, run = backports_build},
+    {name = "lowered members", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_members_test.lua") end},
+    {name = "lowered exports", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_exports_test.lua") end},
+    {name = "light suites", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("toolchain/tests/light_suites.lua") end},
+    {name = "backports build", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = backports_build},
 }
 
 local function test_suite()
@@ -539,6 +642,9 @@ local function test_suite()
     check("the gate copies the checkout into its own tree and deletes what the checkout dropped", table.concat(sync, " ", 1, 2), "-a --delete")
     check("the gate copies from the checkout's folder to its tree", table.concat(sync, " ", #sync - 1), root .. "/ /g/tree/")
     check("the gate leaves out git, the configuration, the build and the caches", table.concat(sync, " "):find("--exclude=/.git --exclude=/.xmake --exclude=/build --exclude=/.cache ", 1, true) ~= nil, true)
+    local ignoring = gate_sync_arguments("/g/tree", "/g/ignored.txt")
+    check("the gate leaves out what git ignores, so that it builds what the key covers", table.concat(ignoring, " "):find("--exclude-from=/g/ignored.txt", 1, true) ~= nil, true)
+    check("the gate's source and tree stay last", table.concat(ignoring, " ", #ignoring - 1), root .. "/ /g/tree/")
     local commands = gate_commands("/g/tree")
     check("the gate configures the armv7 device build of the Backports component in its own tree",
           table.concat(commands[1], " ", 2), "f -P /g/tree -p iphoneos -a armv7 --component=Backports -y")
@@ -577,7 +683,10 @@ local function test_cache()
     local repo = path.join(base, "repo")
     local store = path.join(base, "store")
     os.mkdir(path.join(repo, "docs"))
+    os.mkdir(path.join(repo, "tools"))
     git(repo, {"init", "-q"})
+    io.writefile(path.join(repo, "tools", "prepush.lua"), "one\n")
+    io.writefile(path.join(repo, "tools", "budget.lua"), "one\n")
     io.writefile(path.join(repo, "a.txt"), "one\n")
     io.writefile(path.join(repo, "docs", "d.md"), "doc\n")
     io.writefile(path.join(repo, "b.txt"), "other\n")
@@ -596,6 +705,31 @@ local function test_cache()
     check("the same inputs give the same key", key(everything), base_keys.everything)
     check("the step's name is part of the key", key({name = "other"}) ~= base_keys.everything, true)
     check("the step's version is part of the key", key({name = "everything", version = "2"}) ~= base_keys.everything, true)
+
+    io.writefile(path.join(repo, "tools", "prepush.lua"), "two\n")
+    check("the code of prepush is part of the key of a step that reads one file", key(narrow) ~= base_keys.narrow, true)
+    check("the code of prepush is part of the key of a step that skips documents", key(code) ~= base_keys.code, true)
+    io.writefile(path.join(repo, "tools", "prepush.lua"), "one\n")
+    io.writefile(path.join(repo, "tools", "budget.lua"), "two\n")
+    check("the code of the budget is part of every key", key(narrow) ~= base_keys.narrow, true)
+    io.writefile(path.join(repo, "tools", "budget.lua"), "one\n")
+    check("restoring the code restores the keys", key(narrow), base_keys.narrow)
+
+    local saved_catalogue = os.getenv("REVENANT_TEST_ASSET_CATALOGUE")
+    os.setenv("REVENANT_TEST_ASSET_CATALOGUE", "elsewhere")
+    check("a REVENANT_ variable that nothing declares changes every key", key(narrow) ~= base_keys.narrow, true)
+    os.setenv("REVENANT_TEST_ASSET_CATALOGUE", saved_catalogue or "")
+    check("a REVENANT_ variable that is emptied is as good as unset", key(narrow), base_keys.narrow)
+    local saved_cache, saved_held = os.getenv("REVENANT_CACHE"), os.getenv("REVENANT_BUDGET_HELD")
+    os.setenv("REVENANT_CACHE", "/another/worktree/.cache")
+    os.setenv("REVENANT_BUDGET_HELD", "1")
+    check("the cache folder of a worktree and the budget's own variables change no key", key(narrow), base_keys.narrow)
+    os.setenv("REVENANT_CACHE", saved_cache or "")
+    os.setenv("REVENANT_BUDGET_HELD", saved_held or "")
+    local saved_global = os.getenv("XMAKE_GLOBALDIR")
+    os.setenv("XMAKE_GLOBALDIR", "/another/store")
+    check("the package store xmake reads changes every key", key(narrow) ~= base_keys.narrow, true)
+    os.setenv("XMAKE_GLOBALDIR", saved_global or "")
 
     io.writefile(path.join(repo, "docs", "d.md"), "changed\n")
     check("a changed document changes the key of a step that reads everything", key(everything) ~= base_keys.everything, true)
@@ -633,6 +767,31 @@ local function test_cache()
     local copy = path.join(base, "copy")
     os.cp(repo, copy)
     check("another folder with the same content has the same key", key(everything, copy), base_keys.everything)
+
+    local fixture_store = path.join(base, "fixture-store")
+    local packages = path.join(fixture_store, "xmake-global", ".xmake", "packages")
+    local install = path.join(packages, "l", "llvm", "1.0", "abc")
+    os.mkdir(install)
+    io.writefile(path.join(install, "manifest.txt"), "one\n")
+    local function installs()
+        local saved = os.getenv("REVENANT_STORE")
+        os.setenv("REVENANT_STORE", fixture_store)
+        local text = store_installs()
+        os.setenv("REVENANT_STORE", saved or "")
+        return text
+    end
+    local installed = installs()
+    check("an install of a package the checks run against is listed with its manifest", installed:find("l/llvm/1.0/abc ", 1, true) ~= nil, true)
+    io.writefile(path.join(install, "manifest.txt"), "two\n")
+    check("an install that is made again under the same name changes the digest", installs() ~= installed, true)
+    os.mkdir(path.join(packages, "o", "other", "1.0", "x"))
+    check("a package the checks do not run against changes nothing", installs():find("other", 1, true), nil)
+
+    local attributes = attributes_facts(repo)
+    io.writefile(path.join(repo, ".git", "info", "attributes"), "*.m comments=upstream\n")
+    check("a local attribute file changes what the comments check is keyed on", attributes_facts(repo) ~= attributes, true)
+    os.rm(path.join(repo, ".git", "info", "attributes"))
+    check("removing the local attribute file restores it", attributes_facts(repo), attributes)
 
     local runs = {a = 0, b = 0, c = 0, d = 0, e = 0}
     local batches = 0
@@ -675,6 +834,33 @@ local function test_cache()
     check("a changed file runs the steps that read it", runs.d, 3)
     check("a changed file runs the steps that read everything", runs.a, 3)
     check("a changed file leaves the steps that read other files", runs.e, 2)
+
+    local silent = {{name = "p", inline = function () return true end}, {name = "q", inline = function () return true end}}
+    local lost_store = path.join(base, "lost-store")
+    local function by_name(step) return step.name end
+    local lost = run_steps(silent, {keep_going = true, store = lost_store, key = by_name, batch = function () return {} end})
+    check("checks that run in one process and leave no verdict are failures", table.concat(lost, ","), "p,q")
+    check("a check that left no verdict is not remembered", recalled(lost_store, silent[1], "p"), nil)
+    local partial = run_steps(silent, {keep_going = true, store = lost_store, key = by_name, batch = function () return {{name = "p", ok = true, seconds = 0}} end})
+    check("a check missing from the verdicts fails and the one present passes", table.concat(partial, ","), "q")
+    local stopped = run_steps(silent, {keep_going = false, store = path.join(base, "stop-store"), key = by_name, batch = function () return {} end})
+    check("a lost verdict stops the run like a failure", table.concat(stopped, ","), "p")
+
+    local gate
+    for _, step in ipairs(STEPS) do
+        if step.name == "backports build" then
+            gate = step
+        end
+    end
+    check("the Backports gate skips no file, since its tree is a copy of the checkout", #(gate.skips or {}), 0)
+
+    io.writefile(path.join(repo, ".gitignore"), "scratch/\n*.o\n")
+    io.writefile(path.join(repo, "junk.o"), "x\n")
+    os.mkdir(path.join(repo, "scratch"))
+    io.writefile(path.join(repo, "scratch", "x"), "x\n")
+    local ignored = gate_ignored(repo)
+    check("what git ignores is listed for the gate, anchored at the root", ignored:find("/junk.o", 1, true) ~= nil and ignored:find("/scratch/", 1, true) ~= nil, true)
+    check("what git tracks is not listed", ignored:find("a.txt", 1, true), nil)
 
     local record = {seconds = "12", worktree = "w", head = "0123456789abcdef", at = os.time() - 120}
     check("a verdict names where and when it was made", provenance(record), "ran 12 s in w at 012345678, 2 min ago")

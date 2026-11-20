@@ -427,13 +427,28 @@ A command run straight with `xmake`, and not through `./xmakew` or a budget run,
 ## Checks that remember their result
 
 `./xmakew l -P . tools/prepush.lua` remembers each check that passed, in the shared store (`<store>/memo/<check>/<key>`, the 40
-newest of each check), under the key of what the check reads: its name and version, the xmake that runs it, the host, the
-values of the environment variables it names (`LC_COLLATE` for `layout`, the two prebuilt variables for the Backports checks),
-the Xcode and SDK facts for the checks that read the SDK, and the content of every tracked file and every untracked file git
-does not ignore that it reads (its blob id, or its content when it differs from the index). The commit, the folder and the
-rest of the environment are not part of a key, so a rebase, an amend, another worktree or another shell with the same files
-takes the verdict from the store, and a file a check does not read does not run it again. A check that failed is never
-remembered. A run prints where each verdict came from, `ok layout memo (ran 3 s in xl-source-lock at 4825472b6, 12 min ago)`
+newest of each check), under the key of what the check reads. A doubt is an input: a rerun costs seconds, a verdict
+that no longer holds costs a push. The key is
+
+- the check's name and version, the xmake that runs it, the host, and the code that runs the checks: `tools/prepush.lua` and
+  `tools/budget.lua` are read by every check, so a change to how a check is run runs it again;
+- every `REVENANT_*` variable that is set and not empty, and `XMAKE_GLOBALDIR`, for every check, and the variables a check
+  names (`LC_COLLATE` for `layout`). Not part of a key: `REVENANT_CACHE`, which is the folder of one worktree, and the budget's
+  own `REVENANT_BUDGET_*` variables, which say when a command may start, not what it finds;
+- the content of every tracked file and every untracked file git does not ignore that the check reads (its blob id, or its
+  content when it differs from the index);
+- for `comments`, the content of the local `.git/info/attributes` and of the global attributes file, which `git check-attr` reads
+  to classify a file;
+- for `recipe digests`, `lowered members`, `lowered exports`, `light suites` and `backports build`, which run against what is
+  installed: the Xcode and SDK probes, where `git`, `rsync`, `cmake`, `ninja`, `xcrun`, `clang`, `cc`, `make` and `sh` resolve,
+  every install of `llvm`, `swift`, `swift-bootstrap`, `swift-runtime`, `libcxx`, `apple-compat`, `iphoneos-sdk`, `ld64` and
+  `ldid` in the store with the digest of its `manifest.txt`, and the content key of the iPhoneOS SDK (every file of it, with
+  the Xcode tools, about 6 s once per run). An install replaced in place with the same name and manifest is not seen.
+
+The commit, the folder and the rest of the environment are not part of a key, so a rebase, an amend, another worktree or another
+shell with the same files takes the verdict from the store, and a file a check does not read does not run it again. A check that
+failed is never remembered, and one that left no verdict (the process that runs the in-process checks was refused by the budget or
+died) fails. A run prints where each verdict came from, `ok layout memo (ran 3 s in xl-source-lock at 4825472b6, 12 min ago)`
 when it was remembered and `ok layout 3s` when it ran; `--fresh` runs every check regardless and records the verdicts.
 
 What a check reads is declared on the check in `tools/prepush.lua` (`reads`, a list of files, directories ending in `/`, and globs with
@@ -441,10 +456,10 @@ What a check reads is declared on the check in `tools/prepush.lua` (`reads`, a l
 so an undeclared check is slower, never stale. The narrow ones: `comments test` (`tools/comments.lua`, `tools/comments/`), the
 tests of `tools/private_cache.lua`, `tools/ci_errors.lua` and `tools/ci_swiftc_replay.lua` (the tool, its folder and the addon
 modules), `credentials` and `copied_text` (`agent-skills/tests/`), `negative shape` (the Backports tests and `emulator/`),
-`recipe digests` (the inputs the recipes list in `toolchain/modules/digest.lua`, the digest files and the addon modules), and the
-checks that build or measure (`lowered members`, `lowered exports`, `backports build`), which skip `docs/`, Markdown files,
-`.agents/` and `agent-skills/`. A check that starts to read a file outside its declaration, or an ignored file, must say so there; an
-ignored file is not part of a key.
+`recipe digests` (the inputs the recipes list in `toolchain/modules/digest.lua`, the digest files and the addon modules), and
+`lowered members` and `lowered exports`, which skip `docs/`, Markdown files, `.agents/` and `agent-skills/`. `backports build` skips
+nothing, because the copy it builds in holds every file. A check that starts to read a file outside its declaration, or an ignored
+file, must say so there; an ignored file is not part of a key.
 
 The checks that run inside xmake (`comments`, `layout`, `docs_commands`, `recipe digests` and the rest of the cheap ones) and
 whose verdict is not remembered run together in one xmake process behind one admission of the budget: before, each took its
@@ -455,7 +470,8 @@ build or need their own process (`host install test`, `isolate test`, the heavy 
 of the package, so a source the `backports` package cannot compile (a `-Werror` of `frameworks/Backports/xmake.lua`, a missing
 header, a link error) stops the push and not the build of an application that requires the package. The check works in a copy of
 the checkout, `build/backports-gate/tree`, which `rsync -a --delete` brings up to date from the checkout on every run (git, `.xmake`,
-`build`, the caches and `.claude/worktrees` stay out), so the host configuration of the checkout stays what it was and
+`build`, the caches, `.claude/worktrees` and every file git ignores, `build/backports-gate/ignored.txt`, stay out, so that the tree holds
+the files the key covers and no others), so the host configuration of the checkout stays what it was and
 `./xmakew test -P .` still runs. The copy keeps its own `.xmake` and `build`, so a later run compiles only what changed. A shared
 `XMAKE_CONFIGDIR` would not do: the configure starts nested xmake processes that inherit it and wait on the project lock the
 configure holds. The check takes the prebuilt `llvm`, `swift` and `ld64` of `REVENANT_PREBUILT` and `REVENANT_PREBUILT_ONLY` when the
