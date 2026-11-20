@@ -33,7 +33,7 @@ static FrameOriginsFunction system_frame_origins = NULL;
 static SuggestSizeFunction system_suggest_size = NULL;
 static LineBoundsWithOptionsFunction system_line_bounds_with_options = NULL;
 static LineCreateFunction system_line_create = NULL;
-static volatile BOOL revenant_offset_seen = NO;
+static BOOL revenant_offset_seen = NO;
 
 __attribute__((constructor)) static void revenant_resolve_system_text_layout(void)
 {
@@ -98,12 +98,16 @@ static BOOL revenant_system_honours_baseline_offset(void)
 
 static BOOL revenant_needs_model(void)
 {
+#ifdef REVENANT_ASSUME_OFFSET_IGNORED
+    return YES;
+#else
     return !revenant_system_honours_baseline_offset();
+#endif
 }
 
 static BOOL revenant_may_offset(void)
 {
-    return revenant_offset_seen && revenant_needs_model();
+    return __atomic_load_n(&revenant_offset_seen, __ATOMIC_ACQUIRE) && revenant_needs_model();
 }
 
 static BOOL revenant_leaves_deleted_glyphs(void)
@@ -127,7 +131,7 @@ static CGFloat revenant_run_offset(CTRunRef run)
 
 __attribute__((visibility("hidden"))) void revenant_note_baseline_offset(CFAttributedStringRef string)
 {
-    if (revenant_offset_seen || string == NULL || !revenant_needs_model())
+    if (__atomic_load_n(&revenant_offset_seen, __ATOMIC_RELAXED) || string == NULL || !revenant_needs_model())
         return;
     CFIndex length = CFAttributedStringGetLength(string);
     CFRange whole = CFRangeMake(0, length);
@@ -136,7 +140,7 @@ __attribute__((visibility("hidden"))) void revenant_note_baseline_offset(CFAttri
         CFTypeRef value = CFAttributedStringGetAttributeAndLongestEffectiveRange(string, index, (__bridge CFStringRef)revenant_baseline_offset_name, whole, &range);
         double offset = 0;
         if (value && CFGetTypeID(value) == CFNumberGetTypeID() && CFNumberGetValue((CFNumberRef)value, kCFNumberDoubleType, &offset) && offset != 0) {
-            revenant_offset_seen = YES;
+            __atomic_store_n(&revenant_offset_seen, YES, __ATOMIC_RELEASE);
             return;
         }
         index = range.location + (range.length > 0 ? range.length : 1);

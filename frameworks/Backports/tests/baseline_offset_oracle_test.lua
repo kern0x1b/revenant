@@ -4,6 +4,7 @@ local SOURCE = path.join(BACKPORTS, "src", "UIKit", "NSAttributedString+Baseline
 local ORACLE = path.join(TESTS, "baseline_offset", "oracle.m")
 local CORETEXT = path.join(BACKPORTS, "src", "CoreText", "CTDrawBaselineOffset7.m")
 local CORETEXT_ORACLE = path.join(TESTS, "baseline_offset", "coretext_oracle.m")
+local CORETEXT_THREADS = path.join(TESTS, "baseline_offset", "coretext_threads.m")
 local workspace = import("@addon.revenant.workspace", {anonymous = true})
 
 local function clang()
@@ -32,6 +33,13 @@ function main()
         "the CoreText backport's layout model does not match the host's CoreText:\n" .. drawn)
     assert(drawn:find("CT-BOUNDS all-equal=1", 1, true),
         "the CoreText backport's bounds do not match the host's CoreText for the options Telegram passes:\n" .. drawn)
+    local threads = path.join(work, "coretext_threads")
+    os.vrunv(clang(), {"-DREVENANT_ASSUME_OFFSET_IGNORED", "-isysroot", sdk, "-fobjc-arc", "-w", "-I", path.join(BACKPORTS, "src", "CoreText"),
+                       "-framework", "Foundation", "-framework", "CoreText", "-framework", "CoreGraphics", "-o", threads, CORETEXT, CORETEXT_THREADS})
+    local crossed = os.iorunv(threads, {})
+    io.write(crossed)
+    assert(crossed:find("CT-THREAD before-seen-passes-through=1 made-elsewhere-takes-model=1 model-everywhere-after=1", 1, true),
+        "a line made with a baseline offset on one thread is not drawn by the model on another:\n" .. crossed)
     os.tryrm(work)
     print("BASELINE_OFFSET_ORACLE_TEST passed")
 end

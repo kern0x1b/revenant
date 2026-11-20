@@ -333,7 +333,7 @@ int main(void)
             if (offsets[index] < 0)
                 loweredEqual = loweredEqual && fabs(nativeShift - modelShift) < 0.01;
             else
-                raisedWithin = raisedWithin && fabs(nativeShift - modelShift) <= 1.0;
+                raisedWithin = raisedWithin && fabs(nativeShift - modelShift) <= 0.1;
         }
         NSMutableAttributedString *mixed = [styled(@"Hxg", NSMakeRange(0, 3), 0) mutableCopy];
         [mixed addAttribute:NSBaselineOffsetAttributeName value:@(-4) range:NSMakeRange(0, 1)];
