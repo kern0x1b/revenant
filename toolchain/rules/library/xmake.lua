@@ -3,6 +3,7 @@ rule("library")
 
     on_load(function (target)
         target:set("kind", "shared")
+        target:add("shflags", "-Wl,-headerpad_max_install_names", {force = true})
     end)
 
     after_link(function (target)
