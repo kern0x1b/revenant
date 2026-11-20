@@ -22,3 +22,4 @@ A decision that changes gets a new record that supersedes the old one; the old o
 | [0014](0014-performance-is-a-requirement.md) | Speed and memory on the A5 are part of correctness; claims are measurements | not enforced (a benchmark group is the check it needs) |
 | [0015](0015-urlcomponents-follows-the-sdk-it-is-linked-against.md) | NSURLComponents parses as macOS does: the lenient grammar the 26.2-linked apps get | `frameworks/Backports/tests/url_components_oracle_test.lua` (run by hand; not in a group yet) |
 | [0016](0016-swift-overlays-self-contained.md) | A Swift overlay is self-contained over the backport's own layers on every release; no Swift symbol is forwarded to the system or to a renamed copy | not enforced |
+| [0018](0018-source-folder-per-build.md) | A build of a package patches and builds in its own APFS copy of the pinned sources, not in the folder two builds share | `toolchain_light/source_lock_test`, `toolchain_light/checkout_test` |

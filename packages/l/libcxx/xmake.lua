@@ -48,6 +48,7 @@ package("libcxx")
         if not package:config("packaged") and import("@addon.revenant.prebuilt", {anonymous = true}).install(package) then
             return
         end
+        os.cd(import("@addon.revenant.checkout", {anonymous = true}).keyed(os.curdir(), package:buildhash()))
         local cmake = import("@addon.revenant.apple.cmake", {anonymous = true})
         local macho = import("@addon.revenant.apple.macho", {anonymous = true})
         for _, patch in ipairs({"utimensat-told-no.patch", "reexport-when-dyld-can.patch", "one-emulated-tls-runtime.patch", "one-atomic-runtime.patch", "process-wide-compat.patch", "keep-apple-transitive-includes.patch"}) do
