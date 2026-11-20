@@ -18,7 +18,7 @@ and the architectures. Which architecture runs which releases is the skill `proj
 
 | Part | Package |
 | --- | --- |
-| compiler | `revenant@llvm` 23.1.3 in the checkout, 23.1.2 at the 0.8.10 pin: clang built from source, with Revenant's patches for emulated thread-locals and atomic library calls |
+| compiler | `revenant@llvm` 23.1.3 in the checkout, 23.1.2 at the 0.8.10 pin: clang built from source, with Revenant's patches for emulated thread-locals and atomic library calls, and for the order in which the SjLj preparation demotes the phis of a landing pad (the objects of lifted code come out the same on every run) |
 | linker | `revenant@ld64` 956.6: Apple's ld64 from cctools-port, the linker that still inserts branch islands for armv7 |
 | SDK | `revenant@iphoneos-sdk` 16.4, with the startup objects (`crt1.o`, `crt1.3.1.o`, `dylib1.o`, `bundle1.o`), `libgcc_s.1.tbd`, the blocks runtime and arclite added for old releases |
 | signing | `revenant@ldid` |
