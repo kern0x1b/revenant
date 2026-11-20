@@ -964,6 +964,8 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         add_tests("coretext_fallback_cascade")
         add_tests("avfoundation_display_layer")
         add_tests("avfoundation_timebase_probe")
+        add_tests("avfoundation_display_layer_formats")
+        add_tests("avfoundation_synchronizer_observers")
         add_tests("caspring_animation_cast")
         add_tests("caspring_animation_coding")
         add_tests("protocol_uimutabletraits")

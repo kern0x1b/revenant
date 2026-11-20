@@ -1,7 +1,6 @@
 #import "RevenantAVSampleBufferRender.h"
 
 #import <AVFoundation/AVFoundation.h>
-#import <CoreImage/CoreImage.h>
 #import <CoreMedia/CoreMedia.h>
 #import <CoreVideo/CoreVideo.h>
 #import <QuartzCore/QuartzCore.h>
@@ -70,7 +69,6 @@ static void revenant_resolve_notifications(void)
     BOOL _readyForDisplay;
     BOOL _preventsCapture;
     BOOL _preventsDisplaySleep;
-    CIContext *_context;
     dispatch_queue_t _workQueue;
     dispatch_source_t _displaySource;
     NSMutableArray *_pending;
@@ -110,7 +108,75 @@ static BOOL revenant_attachment(CMSampleBufferRef sample, CFStringRef key)
     return CFDictionaryGetValue(values, key) == kCFBooleanTrue;
 }
 
-static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *(^context)(void))
+static void revenant_release_pixels(void *info, const void *data, size_t size)
+{
+    free((void *)data);
+}
+
+static int revenant_clamp_byte(int value)
+{
+    return value < 0 ? 0 : (value > 255 ? 255 : value);
+}
+
+static CGImageRef revenant_copy_planar_image(CVPixelBufferRef image, BOOL fullRange)
+{
+    size_t width = CVPixelBufferGetWidth(image);
+    size_t height = CVPixelBufferGetHeight(image);
+    if (!width || !height || CVPixelBufferGetPlaneCount(image) != 2)
+        return NULL;
+    CFTypeRef matrix = CVBufferGetAttachment(image, CFSTR("YCbCrMatrix"), NULL);
+    BOOL highDefinition = matrix && CFGetTypeID(matrix) == CFStringGetTypeID() && CFEqual(matrix, CFSTR("ITU_R_709_2"));
+    int redChroma = highDefinition ? (fullRange ? 403 : 459) : (fullRange ? 359 : 409);
+    int greenBlue = highDefinition ? (fullRange ? 48 : 55) : (fullRange ? 88 : 100);
+    int greenRed = highDefinition ? (fullRange ? 120 : 136) : (fullRange ? 183 : 208);
+    int blueChroma = highDefinition ? (fullRange ? 475 : 541) : (fullRange ? 454 : 516);
+    size_t stride = width * 4;
+    unsigned char *pixels = malloc(stride * height);
+    if (!pixels)
+        return NULL;
+    if (CVPixelBufferLockBaseAddress(image, kCVPixelBufferLock_ReadOnly) != kCVReturnSuccess) {
+        free(pixels);
+        return NULL;
+    }
+    const unsigned char *luma = CVPixelBufferGetBaseAddressOfPlane(image, 0);
+    const unsigned char *chroma = CVPixelBufferGetBaseAddressOfPlane(image, 1);
+    size_t lumaStride = CVPixelBufferGetBytesPerRowOfPlane(image, 0);
+    size_t chromaStride = CVPixelBufferGetBytesPerRowOfPlane(image, 1);
+    BOOL readable = luma && chroma;
+    for (size_t y = 0; readable && y < height; y++) {
+        const unsigned char *lumaRow = luma + y * lumaStride;
+        const unsigned char *chromaRow = chroma + (y / 2) * chromaStride;
+        unsigned char *out = pixels + y * stride;
+        for (size_t x = 0; x < width; x++) {
+            int cb = chromaRow[(x / 2) * 2] - 128;
+            int cr = chromaRow[(x / 2) * 2 + 1] - 128;
+            int scaled = fullRange ? lumaRow[x] * 256 : (lumaRow[x] - 16) * 298;
+            out[x * 4] = (unsigned char)revenant_clamp_byte((scaled + blueChroma * cb + 128) >> 8);
+            out[x * 4 + 1] = (unsigned char)revenant_clamp_byte((scaled - greenBlue * cb - greenRed * cr + 128) >> 8);
+            out[x * 4 + 2] = (unsigned char)revenant_clamp_byte((scaled + redChroma * cr + 128) >> 8);
+            out[x * 4 + 3] = 255;
+        }
+    }
+    CVPixelBufferUnlockBaseAddress(image, kCVPixelBufferLock_ReadOnly);
+    if (!readable) {
+        free(pixels);
+        return NULL;
+    }
+    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, pixels, stride * height, revenant_release_pixels);
+    if (!provider) {
+        free(pixels);
+        return NULL;
+    }
+    CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
+    CGImageRef frame = CGImageCreate(width, height, 8, 32, stride, space,
+                                     (CGBitmapInfo)(kCGBitmapByteOrder32Little | kCGImageAlphaNoneSkipFirst),
+                                     provider, NULL, false, kCGRenderingIntentDefault);
+    CGColorSpaceRelease(space);
+    CGDataProviderRelease(provider);
+    return frame;
+}
+
+static CGImageRef revenant_copy_image(CMSampleBufferRef sample)
 {
     CVPixelBufferRef image = CMSampleBufferGetImageBuffer(sample);
     if (!image)
@@ -140,11 +206,10 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample, CIContext *(^con
         CGColorSpaceRelease(space);
         CVPixelBufferUnlockBaseAddress(image, kCVPixelBufferLock_ReadOnly);
     }
-    if (!frame && context) {
-        CIImage *ci = [CIImage imageWithCVPixelBuffer:image];
-        CIContext *shared = ci ? context() : nil;
-        frame = shared ? [shared createCGImage:ci fromRect:ci.extent] : NULL;
-    }
+    if (!frame && format == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)
+        frame = revenant_copy_planar_image(image, NO);
+    else if (!frame && format == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)
+        frame = revenant_copy_planar_image(image, YES);
     return frame;
 }
 
@@ -368,13 +433,7 @@ static void revenant_time_jumped(RevenantNotificationCenter center, const void *
         if (generation != _generation || _status == AVQueuedSampleBufferRenderingStatusFailed)
             return;
     }
-    CGImageRef frame = revenant_copy_image(buffer->sample, ^CIContext *{
-        @synchronized (self) {
-            if (!_context)
-                _context = [CIContext contextWithOptions:nil];
-            return _context;
-        }
-    });
+    CGImageRef frame = revenant_copy_image(buffer->sample);
     if (!frame) {
         [self revenant_failWithDescription:@"AVSampleBufferDisplayLayer could not create an image from a sample buffer"];
         return;
