@@ -154,7 +154,7 @@ local MEMBERS = {
             directory = {"System", "Library", "Frameworks", "Foundation.framework", "Headers"},
             file = "NSURL.h",
             find = "NSURLUbiquitousItemDownloadingStatusKey      API_AVAILABLE(...);",
-            replace = "NSURLUbiquitousItemDownloadingStatusKey     ;",
+            replace = "NSURLUbiquitousItemDownloadingStatusKey __attribute__((weak_import));",
         },
     },
     {
