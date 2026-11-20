@@ -1,4 +1,5 @@
 #include "../revenant_impl.h"
+#include "revenant_deleted_glyphs.h"
 #import <CoreText/CoreText.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <Foundation/Foundation.h>
@@ -13,6 +14,10 @@ typedef CGRect (*LineImageBoundsFunction)(CTLineRef, CGContextRef);
 typedef void (*FrameOriginsFunction)(CTFrameRef, CFRange, CGPoint *);
 typedef CGSize (*SuggestSizeFunction)(CTFramesetterRef, CFRange, CFDictionaryRef, CGSize, CFRange *);
 typedef CGRect (*LineBoundsWithOptionsFunction)(CTLineRef, CTLineBoundsOptions);
+
+#ifndef NSFoundationVersionNumber_iOS_7_0
+#define NSFoundationVersionNumber_iOS_7_0 1047.20
+#endif
 
 static NSString *const revenant_baseline_offset_name = @"NSBaselineOffset";
 
@@ -90,11 +95,41 @@ static BOOL revenant_needs_model(void)
     return !revenant_system_honours_baseline_offset();
 }
 
+static BOOL revenant_leaves_deleted_glyphs(void)
+{
+    return NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_7_0;
+}
+
 static CGFloat revenant_run_offset(CTRunRef run)
 {
-    NSDictionary *attributes = (__bridge NSDictionary *)CTRunGetAttributes(run);
-    NSNumber *offset = attributes[revenant_baseline_offset_name];
-    return [offset isKindOfClass:[NSNumber class]] ? offset.doubleValue : 0;
+    CFTypeRef value = CFDictionaryGetValue(CTRunGetAttributes(run), (__bridge CFStringRef)revenant_baseline_offset_name);
+    double offset = 0;
+    if (value && CFGetTypeID(value) == CFNumberGetTypeID() && CFNumberGetValue((CFNumberRef)value, kCFNumberDoubleType, &offset))
+        return offset;
+    return 0;
+}
+
+static BOOL revenant_style_on(CFDictionaryRef attributes, CFStringRef key)
+{
+    CFTypeRef value = CFDictionaryGetValue(attributes, key);
+    int style = 0;
+    return value && CFGetTypeID(value) == CFNumberGetTypeID() && CFNumberGetValue((CFNumberRef)value, kCFNumberIntType, &style) && style != 0;
+}
+
+static BOOL revenant_line_is_underlined(CTLineRef line)
+{
+    CFArrayRef runs = CTLineGetGlyphRuns(line);
+    for (CFIndex index = 0; index < CFArrayGetCount(runs); index++) {
+        CFDictionaryRef attributes = CTRunGetAttributes((CTRunRef)CFArrayGetValueAtIndex(runs, index));
+        if (revenant_style_on(attributes, kCTUnderlineStyleAttributeName) || revenant_style_on(attributes, CFSTR("NSUnderline")))
+            return YES;
+    }
+    return NO;
+}
+
+static BOOL revenant_line_leaves_deleted_glyph(CTLineRef line)
+{
+    return revenant_leaves_deleted_glyphs() && revenant_line_has_deleted_glyph(line);
 }
 
 static BOOL revenant_line_has_offset(CTLineRef line)
@@ -112,6 +147,16 @@ static BOOL revenant_frame_has_offset(CTFrameRef frame)
     CFArrayRef lines = CTFrameGetLines(frame);
     for (CFIndex index = 0; index < CFArrayGetCount(lines); index++) {
         if (revenant_line_has_offset((CTLineRef)CFArrayGetValueAtIndex(lines, index)))
+            return YES;
+    }
+    return NO;
+}
+
+static BOOL revenant_frame_has_deleted_glyph(CTFrameRef frame)
+{
+    CFArrayRef lines = CTFrameGetLines(frame);
+    for (CFIndex index = 0; index < CFArrayGetCount(lines); index++) {
+        if (revenant_line_has_deleted_glyph((CTLineRef)CFArrayGetValueAtIndex(lines, index)))
             return YES;
     }
     return NO;
@@ -217,17 +262,30 @@ static CGFloat revenant_suggested_height(CTFrameRef base, CTFrameRef attributed)
 
 static void revenant_draw_run(CTRunRef run, CGFloat offset, CGContextRef context, CFRange range)
 {
-    if (offset == 0) {
-        system_run_draw(run, context, range);
+    revenant_draw_run_shifted(system_run_draw, run, offset, revenant_leaves_deleted_glyphs(), context, range);
+}
+
+static void revenant_draw_line_decorations(CTLineRef drawn, CTLineRef attributed, CGContextRef context)
+{
+    if (revenant_line_leaves_deleted_glyph(drawn) || !revenant_line_is_underlined(attributed))
         return;
+    CFArrayRef sources = CTLineGetGlyphRuns(attributed);
+    CGFloat offset = 0;
+    for (CFIndex index = 0; index < CFArrayGetCount(sources); index++) {
+        CGFloat each = revenant_run_offset((CTRunRef)CFArrayGetValueAtIndex(sources, index));
+        if (index == 0)
+            offset = each;
+        else if (each != offset)
+            return;
     }
-    CGAffineTransform matrix = CGContextGetTextMatrix(context);
-    CGSize move = CGSizeApplyAffineTransform(CGSizeMake(0, offset), matrix);
     CGPoint start = CGContextGetTextPosition(context);
-    CGContextSetTextPosition(context, start.x + move.width, start.y + move.height);
-    system_run_draw(run, context, range);
-    CGPoint end = CGContextGetTextPosition(context);
-    CGContextSetTextPosition(context, end.x - move.width, end.y - move.height);
+    CGContextSaveGState(context);
+    CGContextSetTextDrawingMode(context, kCGTextInvisible);
+    if (offset != 0)
+        revenant_move_text_position(context, offset);
+    system_line_draw(drawn, context);
+    CGContextRestoreGState(context);
+    CGContextSetTextPosition(context, start.x, start.y);
 }
 
 static void revenant_draw_line_runs(CTLineRef drawn, CTLineRef attributed, CGContextRef context)
@@ -239,9 +297,20 @@ static void revenant_draw_line_runs(CTLineRef drawn, CTLineRef attributed, CGCon
         CTRunRef source = (CTRunRef)CFArrayGetValueAtIndex(sources, index);
         revenant_draw_run(run, revenant_run_offset(source), context, CFRangeMake(0, CTRunGetGlyphCount(run)));
     }
+    revenant_draw_line_decorations(drawn, attributed, context);
 }
 
-static void revenant_draw_frame_lines(CTFrameRef drawn, CTFrameRef attributed, CGContextRef context)
+static void revenant_draw_line_routed(CTLineRef drawn, CTLineRef attributed, CGContextRef context, BOOL model)
+{
+    BOOL shifted = model && revenant_line_has_offset(attributed);
+    if (!shifted && (!revenant_line_leaves_deleted_glyph(drawn) || revenant_line_is_underlined(attributed))) {
+        system_line_draw(drawn, context);
+        return;
+    }
+    revenant_draw_line_runs(drawn, attributed, context);
+}
+
+static void revenant_draw_frame_lines(CTFrameRef drawn, CTFrameRef attributed, CGContextRef context, BOOL modelOrigins)
 {
     CFArrayRef lines = CTFrameGetLines(drawn);
     CFArrayRef sources = CTFrameGetLines(attributed);
@@ -249,26 +318,38 @@ static void revenant_draw_frame_lines(CTFrameRef drawn, CTFrameRef attributed, C
     if (count == 0)
         return;
     CGPoint *origins = calloc(count, sizeof(CGPoint));
-    revenant_frame_origins_model(drawn, attributed, origins);
+    if (modelOrigins)
+        revenant_frame_origins_model(drawn, attributed, origins);
+    else
+        system_frame_origins(drawn, CFRangeMake(0, 0), origins);
     CGRect box = CGPathGetPathBoundingBox(CTFrameGetPath(drawn));
     for (CFIndex index = 0; index < count; index++) {
         CGContextSetTextPosition(context, origins[index].x + box.origin.x, origins[index].y + box.origin.y);
-        revenant_draw_line_runs((CTLineRef)CFArrayGetValueAtIndex(lines, index),
-                                (CTLineRef)CFArrayGetValueAtIndex(sources, index), context);
+        revenant_draw_line_routed((CTLineRef)CFArrayGetValueAtIndex(lines, index),
+                                  (CTLineRef)CFArrayGetValueAtIndex(sources, index), context, modelOrigins);
     }
     free(origins);
 }
 
-// CTRunDraw and CTLineDraw are not here: CTDeletedGlyphs6.m defines them, in front of the system's. A BACKPORT_IMPL of the same name would make the
-// generated forwarder of the symbol a strong definition of its own (a fallback exists), and the library would define `_CTRunDraw` twice.
-
-void BACKPORT_IMPL(CTFrameDraw)(CTFrameRef frame, CGContextRef context)
+void CTRunDraw(CTRunRef run, CGContextRef context, CFRange range)
 {
-    if (!revenant_needs_model() || !revenant_frame_has_offset(frame)) {
+    revenant_draw_run(run, revenant_needs_model() ? revenant_run_offset(run) : 0, context, range);
+}
+
+void CTLineDraw(CTLineRef line, CGContextRef context)
+{
+    revenant_draw_line_routed(line, line, context, revenant_needs_model());
+}
+
+void CTFrameDraw(CTFrameRef frame, CGContextRef context)
+{
+    BOOL shifted = revenant_needs_model() && revenant_frame_has_offset(frame);
+    BOOL live = revenant_leaves_deleted_glyphs() && revenant_frame_has_deleted_glyph(frame);
+    if (!shifted && !live) {
         system_frame_draw(frame, context);
         return;
     }
-    revenant_draw_frame_lines(frame, frame, context);
+    revenant_draw_frame_lines(frame, frame, context, shifted);
 }
 
 double BACKPORT_IMPL(CTLineGetTypographicBounds)(CTLineRef line, CGFloat *ascent, CGFloat *descent, CGFloat *leading)
@@ -372,7 +453,7 @@ void revenant_coretext_draw_line_shifted(CTLineRef drawn, CTLineRef attributed, 
 
 void revenant_coretext_draw_frame_shifted(CTFrameRef drawn, CTFrameRef attributed, CGContextRef context)
 {
-    revenant_draw_frame_lines(drawn, attributed, context);
+    revenant_draw_frame_lines(drawn, attributed, context, YES);
 }
 
 #pragma GCC visibility pop

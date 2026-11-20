@@ -1,14 +1,3 @@
-// Emoji clusters typeset whole, as CoreText of iOS 9 and later does it.
-//
-// CoreText of iOS 6.1.3 cuts a text into runs by the coverage of the primary font, so the joiner of a ZWJ sequence, a variation selector or a
-// tag lands in another font than the emoji and the `morx` ligatures of AppleColorEmoji never see the whole cluster (revenant_emoji_clusters.h).
-// The typesetter creators below find the clusters (UAX #29 rules over the emoji font's own cmap, no list of sequences) and put the emoji font
-// over each one in a copy of the attributed string; the caller's string is not touched, nor the characters or their indices: only the font
-// attribute of the cluster's range changes. A text without a joiner, a mark, a regional indicator or a keycap is handed to CoreText as it is,
-// after a scan that reads the UTF-16 once.
-//
-// iOS 7 and later do their own clustering and get the system's answer unchanged.
-
 #include "revenant_emoji_clusters.h"
 #import <CoreText/CoreText.h>
 #import <Foundation/Foundation.h>
@@ -30,8 +19,6 @@ static BOOL revenant_emoji_clusters_apply(void)
     return NSFoundationVersionNumber < NSFoundationVersionNumber_iOS_7_0;
 }
 
-// The emoji font at a size, made once per size. NULL when the device has no AppleColorEmoji (CTFontCreateWithName answers its default font for a
-// name it does not know, so the name of the answer is checked).
 static pthread_mutex_t revenant_emoji_fonts_lock = PTHREAD_MUTEX_INITIALIZER;
 static CFMutableDictionaryRef revenant_emoji_fonts;
 static const CGFloat revenant_emoji_reference_size = 17.0;
@@ -52,7 +39,6 @@ static CTFontRef revenant_emoji_font_made(CGFloat size)
     return font;
 }
 
-// Retained; NULL when there is no emoji font.
 static CTFontRef revenant_emoji_font(CGFloat size)
 {
     double keyed = (double)size;
@@ -77,15 +63,11 @@ static CTFontRef revenant_emoji_font(CGFloat size)
     return font;
 }
 
-// The lookup of one text: the emoji font is made when the first code point needs it, not before. Making it maps the font file (+64 MiB of address
-// space on the 4S, measured), which a text of Arabic or Indic letters with a joiner must not cost.
 typedef struct {
     CTFontRef font;
     BOOL made;
 } RevenantEmojiLookup;
 
-// The emoji font's cmap is the Extended_Pictographic of this module: a code point it covers (and a joiner or mark asks about) is a pictographic.
-// A letter or a mark of any script is never one (UAX #29 keeps Extended_Pictographic apart from them), so those are answered without the font.
 static BOOL revenant_emoji_covers(UTF32Char character, void *context)
 {
     static CFCharacterSetRef letters;
@@ -144,8 +126,6 @@ static void revenant_cluster_list_add(CFRange cluster, void *context)
 - (CGFloat)pointSize;
 @end
 
-// The size of the font an attribute holds: a CTFont, or a UIFont of iOS 6 (UICFFont, which is not a CTFont and answers pointSize). CoreText's own
-// default font is 12 points.
 static CGFloat revenant_attribute_font_size(CFTypeRef font)
 {
     if (font == NULL)
@@ -158,7 +138,6 @@ static CGFloat revenant_attribute_font_size(CFTypeRef font)
     return 12.0;
 }
 
-// +1: the attributed string itself when there is nothing to change, else a mutable copy with the emoji font over every cluster.
 static CFAttributedStringRef revenant_emoji_clustered(CFAttributedStringRef attributed)
 {
     if (attributed == NULL)
@@ -173,7 +152,6 @@ static CFAttributedStringRef revenant_emoji_clustered(CFAttributedStringRef attr
     UniChar stack[256];
     UniChar *owned = NULL;
     const UniChar *chars = CFStringGetCharactersPtr(string);
-    // A string CoreFoundation keeps as eight-bit ASCII (every Latin text) has no code unit of a joiner, a mark or a surrogate: nothing to scan, and no copy to widen it.
     if (chars == NULL && CFStringGetCStringPtr(string, kCFStringEncodingASCII) != NULL)
         return (CFAttributedStringRef)CFRetain(attributed);
     if (chars == NULL) {

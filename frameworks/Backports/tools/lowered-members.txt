@@ -4556,12 +4556,16 @@ function CTFontCreateWithGraphicsFont
 function CTFontCreateWithName
 function CTFrameDraw
 function CTFrameGetLineOrigins
+function CTFramesetterCreateWithAttributedString
 function CTFramesetterSuggestFrameSizeWithConstraints
+function CTLineCreateWithAttributedString
 function CTLineDraw
 function CTLineGetBoundsWithOptions
 function CTLineGetImageBounds
 function CTLineGetTypographicBounds
 function CTRunDraw
+function CTTypesetterCreateWithAttributedString
+function CTTypesetterCreateWithAttributedStringAndOptions
 function CVBufferCopyAttachment
 function CVBufferCopyAttachments
 function CVBufferHasAttachment
@@ -36903,6 +36907,7 @@ protocol RevenantMetalResident
 protocol RevenantMetalTextureName
 protocol RevenantOverlayView
 protocol RevenantPhotosChange
+protocol RevenantPointSized
 protocol RevenantPolicyListener
 protocol RevenantRootLayerHandler
 protocol RevenantSCNAnimatable

@@ -66,6 +66,13 @@ static NSAttributedString *styled(NSString *string, NSRange range, CGFloat offse
     return result;
 }
 
+static NSAttributedString *underlined(NSAttributedString *text)
+{
+    NSMutableAttributedString *result = [text mutableCopy];
+    [result addAttribute:(__bridge NSString *)kCTUnderlineStyleAttributeName value:@(kCTUnderlineStyleSingle) range:NSMakeRange(0, result.length)];
+    return result;
+}
+
 static CTLineRef line_of(NSAttributedString *text)
 {
     return CTLineCreateWithAttributedString((__bridge CFAttributedStringRef)text);
@@ -281,7 +288,14 @@ int main(void)
         BOOL flippedAppKitUnmoved = top_row(appKitRaised) == top_row(appKitPlain);
         printf("CT-ORACLE line-equal=%d run-equal=%d frame-equal=%d negative-differs=%d flipped-lowered=%d flipped-model-raises=%d flipped-appkit-unmoved=%d\n",
                lineEqual, runEqual, frameEqual, negativeDiffers, flippedLowered, flippedModelRaises, flippedAppKitUnmoved);
-        BOOL oracle = lineEqual && runEqual && frameEqual && negativeDiffers && flippedLowered && flippedModelRaises && flippedAppKitUnmoved;
+        NSAttributedString *plainUnder = underlined(plain);
+        NSAttributedString *lowered = styled(@"Hxg", NSMakeRange(0, 3), -4);
+        BOOL underlineDrawn = ![system_line(plainUnder, native.line, NO) isEqualToData:system_line(plain, native.line, NO)];
+        BOOL underlineEqual = [system_line(plainUnder, native.line, NO) isEqualToData:model_line(plainUnder, plainUnder, NO)]
+            && [system_line(underlined(lowered), native.line, NO) isEqualToData:model_line(plainUnder, underlined(lowered), NO)];
+        printf("CT-UNDERLINE underline-drawn=%d underline-equal=%d\n", underlineDrawn, underlineEqual);
+        BOOL oracle = lineEqual && runEqual && frameEqual && negativeDiffers && flippedLowered && flippedModelRaises && flippedAppKitUnmoved
+            && underlineDrawn && underlineEqual;
 
         BOOL layoutEqual = YES;
         layoutEqual = layout_check("one-raised", styled(@"Hxg", NSMakeRange(0, 3), 0), styled(@"Hxg", NSMakeRange(0, 3), 6), native) && layoutEqual;

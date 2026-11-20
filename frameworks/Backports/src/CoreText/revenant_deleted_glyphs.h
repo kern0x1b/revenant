@@ -1,14 +1,3 @@
-// The deleted glyph of a run, and how the draw entry points of the backports leave it out.
-//
-// A font whose `morx` table has a delete action (the current AppleColorEmoji: a variation selector after a text-default emoji, the tail of a
-// ligature) leaves the glyph 0xFFFF in the glyph array of a run: AAT's "deleted glyph". CoreText of iOS 6.1.3 keeps it there and hands it to
-// the rasteriser, where FreeType answers FT_Err_Invalid_Argument (6) for a glyph index past the font's glyph count and libCGFreetype logs two
-// <Error> lines, "AppleColorEmoji: FT_Load_Glyph failed: error 6.", for every drawing of the run (measured on the 4S: "Hi " and U+2764 U+FE0F
-// gives a run of the glyphs 338 and 65535; Telegram's first chat list logs 6 lines for three such runs). The glyph has no ink and no advance,
-// so leaving it out of the drawing changes no pixel; only the log and the FreeType call go.
-//
-// The helpers are static inline so that a host test can compile them without the library.
-
 #import <CoreText/CoreText.h>
 #import <CoreGraphics/CoreGraphics.h>
 #include <stdlib.h>
@@ -27,8 +16,6 @@ static inline BOOL revenant_glyphs_have_deleted(const CGGlyph *glyphs, CFIndex c
     return NO;
 }
 
-// Calls `stretch` once for every stretch of live glyphs in glyphs[from ..< from + length], in order, and answers YES. Answers NO and calls
-// nothing when the range holds no deleted glyph: the caller then handles the range as it is, in one piece.
 static inline BOOL revenant_live_stretches(const CGGlyph *glyphs, CFIndex from, CFIndex length, RevenantStretchFunction stretch, void *context)
 {
     if (!revenant_glyphs_have_deleted(glyphs + from, length))
@@ -49,7 +36,6 @@ static inline BOOL revenant_live_stretches(const CGGlyph *glyphs, CFIndex from, 
     return YES;
 }
 
-// The glyphs of a run: the run's own array when it has one, else a copy (freed by the caller through *owned).
 static inline const CGGlyph *revenant_run_glyphs(CTRunRef run, CFIndex count, CGGlyph *stack, CFIndex stack_count, CGGlyph **owned)
 {
     *owned = NULL;
@@ -100,24 +86,43 @@ static inline void revenant_draw_stretch(CFRange stretch, void *context)
     target->draw(target->run, target->context, stretch);
 }
 
-// CTRunDraw's contract with a range of length 0: from the start of the range to the end of the run. A run without a deleted glyph in the
-// range goes to `draw` unchanged, one call with the caller's range; otherwise every stretch of live glyphs is drawn by its own call. The glyphs
-// keep their own positions (CTRunDraw places glyph i at the text position plus its position in the run), so the stretches fall where the whole
-// run would have drawn them.
-static inline void revenant_draw_run_live(RevenantRunDrawFunction draw, CTRunRef run, CGContextRef context, CFRange range)
+static inline CGSize revenant_move_text_position(CGContextRef context, CGFloat offset)
 {
-    CFIndex count = CTRunGetGlyphCount(run);
+    CGSize move = CGSizeApplyAffineTransform(CGSizeMake(0, offset), CGContextGetTextMatrix(context));
+    CGPoint start = CGContextGetTextPosition(context);
+    CGContextSetTextPosition(context, start.x + move.width, start.y + move.height);
+    return move;
+}
+
+static inline void revenant_move_back_text_position(CGContextRef context, CGSize move)
+{
+    CGPoint end = CGContextGetTextPosition(context);
+    CGContextSetTextPosition(context, end.x - move.width, end.y - move.height);
+}
+
+static inline void revenant_draw_run_glyphs(RevenantRunDrawFunction draw, CTRunRef run, const CGGlyph *glyphs, CFIndex count,
+                                            CGFloat offset, CGContextRef context, CFRange range)
+{
+    CGSize move = CGSizeZero;
+    if (offset != 0)
+        move = revenant_move_text_position(context, offset);
     CFIndex from = range.location;
     CFIndex length = range.length > 0 ? range.length : count - from;
-    if (from < 0 || length <= 0 || from + length > count) {
+    RevenantRunStretch target = {draw, run, context};
+    if (glyphs == NULL || from < 0 || length <= 0 || from + length > count
+        || !revenant_live_stretches(glyphs, from, length, revenant_draw_stretch, &target))
         draw(run, context, range);
-        return;
-    }
+    if (offset != 0)
+        revenant_move_back_text_position(context, move);
+}
+
+static inline void revenant_draw_run_shifted(RevenantRunDrawFunction draw, CTRunRef run, CGFloat offset, BOOL live,
+                                             CGContextRef context, CFRange range)
+{
+    CFIndex count = live ? CTRunGetGlyphCount(run) : 0;
     CGGlyph stack[64];
     CGGlyph *owned = NULL;
-    const CGGlyph *glyphs = revenant_run_glyphs(run, count, stack, 64, &owned);
-    RevenantRunStretch target = {draw, run, context};
-    if (!glyphs || !revenant_live_stretches(glyphs, from, length, revenant_draw_stretch, &target))
-        draw(run, context, range);
+    const CGGlyph *glyphs = count > 0 ? revenant_run_glyphs(run, count, stack, 64, &owned) : NULL;
+    revenant_draw_run_glyphs(draw, run, glyphs, count, offset, context, range);
     free(owned);
 }

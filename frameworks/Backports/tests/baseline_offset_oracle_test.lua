@@ -26,6 +26,8 @@ function main()
     io.write(drawn)
     assert(drawn:find("line-equal=1 run-equal=1 frame-equal=1 negative-differs=1 flipped-lowered=1 flipped-model-raises=1 flipped-appkit-unmoved=1", 1, true),
         "the CoreText backport does not draw what the host's CoreText draws:\n" .. drawn)
+    assert(drawn:find("CT-UNDERLINE underline-drawn=1 underline-equal=1", 1, true),
+        "the CoreText backport does not draw the underline of a raised line as the host's CoreText does:\n" .. drawn)
     assert(drawn:find("CT-LAYOUT all-equal=1", 1, true),
         "the CoreText backport's layout model does not match the host's CoreText:\n" .. drawn)
     assert(drawn:find("CT-BOUNDS all-equal=1", 1, true),

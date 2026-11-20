@@ -1,6 +1,3 @@
-// The emoji clusters of a text: the stretches the emoji font typesets whole (UAX #29 extended grapheme clusters over a pictographic), found
-// without a list of sequences. The emoji font's cmap is replaced by a coverage predicate that, like the real font, also covers the joiner, the
-// variation selectors, the modifiers, the tags, the regional indicators and the keycap base characters.
 #import "../Foundation/check.h"
 #import "revenant_emoji_clusters.h"
 
@@ -27,7 +24,6 @@ static void record(CFRange cluster, void *context)
     found->count++;
 }
 
-// A text from code points (UTF-16 encoded), the clusters found as "[at+length]..." or "none".
 static NSString *clusters(const UTF32Char *points, int count)
 {
     UniChar chars[64];
@@ -55,7 +51,6 @@ static NSString *clusters(const UTF32Char *points, int count)
 
 static void expect(const char *name, NSString *seen, NSString *expected)
 {
-    // The red run: the unfixed library finds no cluster, whatever the text.
     NSString *answer = revenant_negative ? @"none" : seen;
     revenant_check([answer isEqualToString:expected], name, [NSString stringWithFormat:@"%@, expected %@", answer, expected]);
 }
@@ -82,7 +77,6 @@ int main(int argc, char **argv)
     expect("a cluster after a cluster, no gap", CLUSTERS(0x2764, 0xFE0F, 0x1F468, 0x200D, 0x1F4BB), @"[0+2][2+5]");
     expect("a sequence of three joiners", CLUSTERS(0x1F469, 0x200D, 0x2764, 0xFE0F, 0x200D, 0x1F48B, 0x200D, 0x1F468), @"[0+11]");
 
-    // What stays as it is.
     expect("Latin text has no cluster", CLUSTERS('H', 'e', 'l', 'l', 'o'), @"none");
     expect("Cyrillic text has no cluster", CLUSTERS(0x041F, 0x0440, 0x0438, 0x0432, 0x0435, 0x0442), @"none");
     expect("an Arabic joiner stays with the Arabic text", CLUSTERS(0x0628, 0x200D, 0x0627), @"none");
@@ -106,7 +100,6 @@ int main(int argc, char **argv)
     expect("a keycap mark alone stays", CLUSTERS(0x20E3), @"none");
     expect("a regional indicator alone stays", CLUSTERS(0x1F1FA, ' ', 0x1F1F8), @"none");
 
-    // A text that ends in half a surrogate pair is not read past its end.
     UniChar broken[] = {0x2764, 0xFE0F, 0xD83D};
     Found found = {0};
     revenant_emoji_clusters(broken, 3, covered, NULL, record, &found);
@@ -117,7 +110,6 @@ int main(int argc, char **argv)
     revenant_emoji_clusters(broken_start, 3, covered, NULL, record, &found);
     revenant_check(found.count == 0 || revenant_negative, "an unpaired surrogate starts no cluster", [NSString stringWithFormat:@"%d clusters", found.count]);
 
-    // The lookup is asked next to a joiner or a mark only: a text without them never reaches it.
     lookups = 0;
     UniChar plain[] = {'H', 'i', ' ', 0x041F, 0x0440, 0x0438, 0x0432, 0x0435, 0x0442, ' ', 0xD83D, 0xDE00, 0xD83D, 0xDE00};
     revenant_emoji_clusters(plain, 14, covered, NULL, record, &found);
