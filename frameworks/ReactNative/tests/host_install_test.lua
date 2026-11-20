@@ -163,7 +163,7 @@ function main()
     local base = os.iorunv("mktemp", {"-d"}):trim()
     local names = {"libFoundationBackports", "libCoreTextBackports", "libUIKitBackports", "libUserNotificationsBackports", "libCoreGraphicsBackports",
                    "libGraphicsBackports", "libCoreFoundationBackports", "libSystemBackports", "libIOSurfaceBackports", "libWebKitBackports", "libMapKitBackports",
-                   "libCoreLocationBackports", "libSecurityBackports", "libCoreMotionBackports", "libCoreTelephonyBackports", "libContactsBackports", "libLocalAuthenticationBackports", "libTLSBackports"}
+                   "libCoreLocationBackports", "libSecurityBackports", "libCoreMotionBackports", "libCoreTelephonyBackports", "libAVKitBackports", "libContactsBackports", "libLocalAuthenticationBackports", "libTLSBackports"}
     local partial = path.join(base, "partial")
     os.mkdir(partial)
     for _, name in ipairs(names) do
@@ -171,7 +171,7 @@ function main()
             io.writefile(path.join(partial, name .. ".dylib"), "")
         end
     end
-    expect("a folder's Backports libraries are read as they are", #host.backports_libraries(partial) == 16,
+    expect("a folder's Backports libraries are read as they are", #host.backports_libraries(partial) == 17,
         "got " .. #host.backports_libraries(partial))
 
     local otool = "\t/usr/lib/revenant/org.revenant.backports/libMapKitBackports.dylib (compatibility version 1.0.0, current version 1.0.0)\n"
