@@ -38,24 +38,24 @@ bridging use public members (`objectAtIndexedSubscript:` and `setObject:atIndexe
 
 ## Why the Backports carry the dictionary selectors although the overlay defines them
 
-A translated library carries the overlay's categories, and libobjc attaches them to the class that the category names. With
-`BACKPORTS_DIR` the library is linked with the Backports before the system frameworks, and the Backports export a proxy class for
-about sixty Foundation classes, `NSMutableDictionary` among them, as `_OBJC_CLASS_$_NSMutableDictionary`. The category's class
-pointer is then the proxy and not the system class, so the methods land on a class that no `NSMutableDictionary` instance
-belongs to (the probe saw `-[__NSDictionaryM __swift_setObject:forKeyedSubscript:]: unrecognized selector`, and
-`+instancesRespondToSelector:` answered no on the system class while the categories of `NSDictionary`, `NSKeyedUnarchiver`,
-`NSObject` and `NSBundle`, whose classes have no proxy, answered yes). The category of the Backports is attached by `attach.c` to the
-system class, so the selector is answered whichever class the library bound.
+A translated library carries the overlay's categories, and libobjc attaches them to the class that the category names.
+With `BACKPORTS_DIR` the library is linked with the Backports before the system frameworks. The Backports export a proxy
+class `_OBJC_CLASS_$_X` only for a class the device's own cache does not export; `NSMutableDictionary` is exported by the
+device's Foundation, so the Backports no longer carry a proxy for it, and the library's category binds the system class
+and its methods land on the instances (until 2026-11-15 the proxy was bound instead, and the probe saw
+`-[__NSDictionaryM __swift_setObject:forKeyedSubscript:]: unrecognized selector`). The category of the Backports
+(`NSDictionary+SwiftOverlay.m`) is attached by `attach.c` to the system class, so the selector is answered whichever
+class the library bound.
 
 A source that implements a class takes the class out of the generated skeleton, and with it the export of
-`_OBJC_CLASS_$_<class>`. The category of `NSMutableDictionary` did that, and a library translated before (`ABFixture.dylib`
-of the probe) stopped at load with `Symbol not found: _OBJC_CLASS_$_NSMutableDictionary` (measured). `NSMutableDictionaryAlias.m`
-declares the proxy explicitly, so the export stays.
+`_OBJC_CLASS_$_<class>`. For a class the device exports that is the intended result: no source declares the proxy for
+`NSMutableDictionary` any more, and a library translated against such a proxy needs to be translated again (the
+translator reads the `shadowed-classes.txt` of the Backports, or the file `XL_SHADOWED_CLASSES` names).
 
 ## Tests
 
 `frameworks/Backports/tests/Foundation/swift_overlay_dictionary_test.m` runs the categories on the host (a mutable dictionary
 answers the setter, sixteen keys are set, a nil value removes a key, the getter answers for both classes, the initialiser copies a
 dictionary); with `--negative` it expects the wrong count after the removal and must fail.
-`frameworks/Backports/tests/alias_adoption_test.lua` checks that the built `libFoundationBackports.dylib` still exports
-`_OBJC_CLASS_$_NSMutableDictionary`.
+`frameworks/Backports/tests/alias_adoption_test.lua` checks that the built `libFoundationBackports.dylib` does not export
+`_OBJC_CLASS_$_NSMutableDictionary`, a class the device exports.

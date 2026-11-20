@@ -75,7 +75,13 @@ int main(int argc, char **argv)
 {
     @autoreleasepool {
         revenant_failed_checks = [NSMutableArray array];
+        const char *only = getenv("REVENANT_ONLY_CASE");
         for (int index = 0; index < revenant_count; index++) {
+            if (only) {
+                if (strcmp(only, revenant_names[index]) == 0)
+                    revenant_run(revenant_names[index], revenant_functions[index], 0);
+                continue;
+            }
             revenant_run(revenant_names[index], revenant_functions[index], 0);
             revenant_run(revenant_names[index], revenant_functions[index], 1);
         }

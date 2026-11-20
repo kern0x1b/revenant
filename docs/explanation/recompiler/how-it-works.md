@@ -56,9 +56,11 @@ instructions for 2.10 million different ones to 2.11 million, and the library fr
 - OneBusAway 2.3.2, the official arm64 App Store IPA, recompiles to armv7 and iOS 6 and reaches its full, interactive
   main screen: map view, search bar, tab bar, a native `UIAlertView`, and touch input. It has no app-specific rules
   and no source changes.
-- On an iPhone 4S (A5) the translated compute kernels run at a geometric mean of about 1.9 times native armv7 (1.05
-  times for memory-bound hashes, up to about 2.9 times for pointer-chasing). The translation machinery adds a few
-  hundred KB resident.
+- Measured by the number of instructions executed in an emulated Cortex-A9 (`tests/perf/`), the translated compute
+  kernels execute 1.22 to 3.59 times the instructions of the native armv7 build of the same source (1.22 to 1.40 times
+  for the hashes, 3.4 to 3.6 times for pointer-chasing and geometry). That is an estimate of 1.2 to 3.6 times slower on
+  an A4 or A5; no CPU cycles were measured on a device ([the table](research.md#6-performance)). The translation
+  machinery adds a few hundred KB resident.
 - A second app, an xkcd reader that statically links Realm and a crash reporter, drove out several universal
   translator fixes: resilient lifting, floating-point data-symbol bridging and automatic long-call fallback for large
   binaries. They are described under [decisions in the translator](#decisions-in-the-translator).
@@ -138,6 +140,34 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
   the block bridge), an `id *` buffer whose length is another argument (`count`, or the `length` of an `NSRange`), a
   record such as `NSFastEnumerationState`. A method with a block and no typed IMP stops with a message when it is called.
 
+- **A `for … in` of the guest over a host collection keeps everything in the guest's own loop.** The guest's
+  `NSFastEnumerationState` is 64 bytes and its items are 64-bit words; the host's is 32 bytes and its items are 32-bit.
+  `xl_manual_fast_enumeration` keeps the host's state in four of the five `extra` words of the guest's, asks the host
+  collection for a batch, and hands the batch over through the buffer the guest's loop passed (16 items at most a call),
+  remembering in the guest's `state` word how many of the batch it has handed: the loop's own frame holds every byte
+  of the enumeration, so any number of loops, nested or on any number of threads, are independent, and a loop that is
+  left early leaves nothing behind. A host collection may answer with more items than the buffer holds, in its own
+  storage: the arrays of Foundation give all of theirs at once (100 for a buffer of 16, mutable or not, on the 4S with
+  iOS 6.1.3 as on macOS 27; the sets and the dictionaries fill the buffer; a probe of 2026-11-19), so for an array the bridge is called once for every 16 items of one answer of the host,
+  and that is its usual path, not a rare one. A collection that changes under a loop raises as the host's loop does
+  (`objc_enumerationMutation`), but later: the loop the compiler emits compares the mutations word before every item,
+  and the guest's loop reads the copy of that word that the bridge wrote, which changes only when the bridge runs. The
+  bridge compares the host's word with the copy each time it hands on more of an answer, and writes a new copy with each
+  new answer, where the guest's own comparison then fails. So the exception comes when the guest asks for more, at most
+  15 items after the item at which the host's loop would have raised it, and a body that has released items of the
+  collection meets those of them that are left in its 16. Handing one item a call would raise at the same item as the
+  host and cost a call of the bridge for every item of every loop; before 2026-11-19 a change of an array was not
+  noticed at all, because the whole array was one answer. Before 2026-11-19 the converted items of a batch were
+  in one of 32 lists shared by the process, given out in turn: the thirty-third loop that started while another was
+  still running freed that one's list, and the first loop read its next item from freed memory. In the reCAPTCHA SDK
+  that was `xlate: objc_msgSend argument 0 value 0x300002483d7b0 does not fit the host type` at guest `0x2e0d7e34`
+  (the receiver was two 32-bit words of whatever `malloc` had put there since), in 2 of 3 launches of the M4
+  acceptance after the answer had arrived. One case is not served, and never was: a host caller that enumerates a
+  guest collection which forwards the call to a host collection. The typed IMP gives the guest a 64-byte copy of the
+  host's state for the one call and narrows it back word by word, and the host collection's state that the bridge
+  keeps in the `extra` words does not fit that way, so the call stops with `… does not fit the host type` and names
+  `xl_g_NSFastEnumerationState`.
+
 - **The guest runtime tells a host class from its own by the address.** A class of the host's libobjc is a 20-byte
   `objc_class` (isa, superclass, cache, vtable, bits), so the word that Swift's `ClassMetadata` keeps its `Data` in
   (offset 32) is whatever follows the class in the host's memory, and `ClassMetadata::isTypeMetadata()` read it. For a
@@ -146,11 +176,12 @@ argument, a result). Nothing writes to the guest object, so what Swift reads fro
   (`xl_guest_image_low`, `xl_guest_image_high`) nor in an arena the host reserved for the metadata the runtime builds
   (`xl_guest_arena_low`, `xl_guest_arena_high`), and reads `Data` only in them
   (`patches/a-class-outside-the-guest-images-is-not-class-metadata.patch`). The runtime defines the four words
-  (`runtime.c`), fills them when a library attaches (`library.c`, which reserves 64 MiB of address space with `vm_allocate`
-  for the arena; nothing is committed until a page is touched), and the generated bridge copies them into the guest like
+  (`runtime.c`), fills them when a library attaches (`library.c`: the arena is the part of the loader's reservation
+  right after the guest images, of the size the guest image's header states, so a process without room for it learns
+  that from `xl_load`; nothing is committed until a page is touched), and the generated bridge copies them into the guest like
   any host data the guest imports (`common-includes.h` and `uikit-includes.h` declare them, the runtime's link allows the
-  undefined symbols). Until they are set, in a program that is not a library, and when the arena could not be
-  reserved, the runtime reads `Data` as before and allocates as before. A class the Swift runtime builds at run time
+  undefined symbols). Until they are set, and in a program that is not a library, the runtime reads `Data` as before and
+  allocates as before. A class the Swift runtime builds at run time
   (`_ContiguousArrayStorage<T>`, a generic class of the program) lies in the arena, because the runtime's metadata
   allocator takes everything beyond its first 64 KiB (the pool in `libswiftCore`'s image), and every allocation too
   large for a pool page, from there instead of from the host's heap

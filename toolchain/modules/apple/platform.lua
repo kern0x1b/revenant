@@ -155,6 +155,7 @@ function backport_libraries(target)
     return libraries
 end
 
+local RUNTIME = {"swift-runtime", "libcxx", "backports"}
 local SHARED = {"swift-runtime", "libcxx", "backports", "swift-crypto", "cryptokit", "uniformtypeidentifiers"}
 local LINKED = "ffmpeg-hevc"
 
@@ -445,7 +446,7 @@ function carried_folder(target)
 end
 
 local function carries_runtime(library)
-    return library.package ~= nil and table.contains(SHARED, library.package)
+    return library.package ~= nil and table.contains(RUNTIME, library.package)
 end
 
 local function carries_guarded(library)

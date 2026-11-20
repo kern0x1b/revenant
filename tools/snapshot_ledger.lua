@@ -14,9 +14,9 @@ local BOOTED = path.join(root, "emulator", "src", "kernel", "test", "kernel_snap
 
 local USAGE = [[usage: ./xmakew l tools/snapshot_ledger.lua [check]
 
-Reads the kernel snapshot ledger in kernel_snapshot_probe_test.cpp, the names the probe
-emits and the booted-state list, then prints how the ledger covers them. With check, the
-exit status is 1 when a name populated at boot is still open, or a probe name is in no
+Reads the kernel snapshot ledger in kernel/include/kernel/snapshot_ledger.hpp, the names the
+probe emits and the booted-state list, then prints how the ledger covers them. With check,
+the exit status is 1 when a name populated at boot is still open, or a probe name is in no
 list.]]
 
 local function names_in(text)

@@ -1,0 +1,95 @@
+local CONTROLS = {
+    {name = "stdout-kept", number = 1, scenario = "noise", line = "a line the library printed reached the answer pipe", what = "descriptor 1 left where the library prints"},
+    {name = "no-deadline", number = 2, scenario = "errors", line = "where the deadline of the request was due", what = "no deadline of the helper's own"},
+    {name = "answered-twice", number = 3, scenario = "pending", line = "was answered 2 times", what = "an id that stays pending after its answer"},
+    {name = "no-escapes", number = 4, scenario = "errors", line = "a line that is not of the protocol reached the answer pipe", what = "fields written without escapes"},
+    {name = "end-ignored", number = 5, scenario = "closed", line = "the helper did not end: its answer pipe was still open", what = "the end of the request pipe ignored"},
+    {name = "no-idle-exit", number = 6, scenario = "idle", line = "the helper did not end after its idle time", what = "no exit after the idle time"},
+    {name = "duplicate-taken", number = 7, scenario = "pending", line = "the second request with a pending id was not rejected", what = "a pending id taken a second time"},
+    {name = "pipe-signal", number = 8, scenario = "closed", line = "a helper whose answer pipe was closed ended with status 0xd", what = "an answer pipe that may raise SIGPIPE"},
+    {name = "left-twice", number = 9, scenario = "quitclose", line = "a helper left twice", what = "two threads free to leave at once"},
+    {name = "cookies-elsewhere", number = 10, scenario = "closed", line = "its line of leaving does not say cookies own=1", what = "the shared cookie store pointed at another store than the helper's own"},
+    {name = "home-kept", number = 11, scenario = "closed", line = "the file the library wrote in its caches folder is not in the helper's own home", what = "the process's home left where it was given"},
+    {name = "cookies-reentrant", number = 12, scenario = "ready", line = "the answer pipe ended where the ready line was due", what = "the helper's cookie store made on first use, inside its own replacement"},
+    {name = "long-not-counted", number = 13, scenario = "idle", line = "a line that was too long did not keep the helper alive", what = "a line that is too long not counted as a request for the idle time"}
+}
+
+local REFUSALS = {
+    {name = "stdout-refused", number = 14, failed = "STDOUT", what = "descriptor 1 cannot be pointed at the log"},
+    {name = "nosigpipe-refused", number = 15, failed = "NOSIGPIPE", what = "the answer pipe cannot be told not to raise SIGPIPE"},
+    {name = "reader-refused", number = 16, failed = "NO_READER", what = "the thread that reads the request pipe cannot be made"},
+    {name = "home-refused", number = 17, failed = "NO_HOME", what = "CFFIXED_USER_HOME cannot be set"}
+}
+
+function main(out, ...)
+    local corpus = import("corpus", {rootdir = path.join(os.scriptdir(), "..", "..", "tools"), anonymous = true})
+    local e
+    e, out = corpus.setup("recaptchahelper", out)
+    local here = os.scriptdir()
+    local function o(file)
+        return path.join(out, file)
+    end
+    local function helper(name, control)
+        os.tryrm(o(name))
+        os.execv("cc", table.join({"-O1", "-Wall", "-fobjc-arc", "-DRCHELPER_NATIVE"}, control and {"-DCONTROL=" .. control} or {},
+                                  {"-framework", "Foundation", path.join(here, "helper.m"), "-o", o(name)}))
+        return o(name)
+    end
+    local function drive(program, name, scenario)
+        local state, log, said, given = o("state-" .. name), o("stderr-" .. name .. ".txt"), o("driver-" .. name .. ".txt"), o("given-" .. name)
+        os.tryrm(state)
+        os.tryrm(log)
+        os.tryrm(said)
+        os.tryrm(given)
+        os.mkdir(state)
+        os.mkdir(given)
+        local code = os.execv(o("driver"), table.join({program, o("fixture.dylib"), state, log}, scenario and {scenario} or {}),
+                              {stdout = said, stderr = said, try = true, timeout = 120000, envs = {CFFIXED_USER_HOME = given, RCHELPER_INSERT = o("standin.dylib")}})
+        return code, os.isfile(said) and io.readfile(said) or "", state
+    end
+
+    os.execv("cc", {"-O1", "-Wall", "-fobjc-arc", "-dynamiclib", "-framework", "Foundation", path.join(here, "fixture.m"), "-o", o("fixture.dylib")})
+    os.execv("cc", {"-O1", "-Wall", "-fobjc-arc", "-dynamiclib", "-framework", "Foundation", path.join(here, "standin.m"), "-o", o("standin.dylib")})
+    os.execv("cc", {"-O1", "-Wall", path.join(here, "driver.c"), "-o", o("driver")})
+    local code, text, state = drive(helper("rchelper"), "rchelper", nil)
+    if code ~= 0 or not text:find("\nok: 14 scenarios\n", 1, true) then
+        corpus.fail("the helper did not keep the protocol against the fixture library (exit %s):\n%s", tostring(code), text:sub(-2000))
+    end
+    local kept = os.iorunv("plutil", {"-p", path.join(state, "preferences.plist")})
+    if not kept:find("RCA_client_events_fixture", 1, true) then
+        corpus.fail("what the library stored in standardUserDefaults is not in the helper's own preferences file:\n%s", kept)
+    end
+    if not os.isfile(path.join(state, "cache", "Cache.db")) then
+        corpus.fail("what the library stored in the shared URL cache is not in the helper's own cache folder %s", path.join(state, "cache"))
+    end
+    for _, control in ipairs(CONTROLS) do
+        local control_code, said = drive(helper("control-" .. control.name, control.number), control.name, control.scenario)
+        if control_code == 0 then
+            corpus.fail("the control with %s passed: the check does not need that part", control.what)
+        end
+        if not said:find(control.line, 1, true) then
+            corpus.fail("the control with %s failed, but not at '%s':\n%s", control.what, control.line, said:sub(-2000))
+        end
+    end
+
+    for _, refusal in ipairs(REFUSALS) do
+        local refusal_code, said = drive(helper("refusal-" .. refusal.name, refusal.number), refusal.name, refusal.name)
+        if refusal_code ~= 0 or not said:find("\nok: 1 scenarios\n", 1, true) then
+            corpus.fail("when %s the helper did not say failed %s before ready, and exit 3 (exit %s):\n%s", refusal.what, refusal.failed, tostring(refusal_code), said:sub(-2000))
+        end
+    end
+
+    local runtime = corpus.swift_armv7()
+    corpus.armv7(e, {"-O2", "-w", "-fobjc-arc", "-I", path.join(e.recompiler, "include"), "-I", here,
+                     "-L", path.join(runtime, "lib", "swift", "iphoneos"), "-lswiftFoundation", "-lswiftCore", "-framework", "Foundation", "-Wl,-rpath,@executable_path",
+                     path.join(here, "helper.m"), path.join(e.recompiler, "src", "loader", "xl_loader.c"), "-o", o("rchelper-armv7")})
+    corpus.sign(e, o("rchelper-armv7"))
+    local imports = os.iorunv("nm", {"-u", o("rchelper-armv7")})
+    for _, symbol in ipairs({"_posix_spawn", "_fork", "_system", "_popen"}) do
+        if imports:find(symbol .. "\n", 1, true) then
+            corpus.fail("the armv7 helper imports %s: it starts no process of its own", symbol)
+        end
+    end
+    print("ok: the helper keeps the protocol in fourteen scenarios against the fixture library, the library's preferences, URL cache, cookies and caches folder land in the helper's own state, " ..
+          "thirteen controls each fail at their own line, four refused system calls each end in their own failed line before ready, and the armv7 helper links with the loader")
+end

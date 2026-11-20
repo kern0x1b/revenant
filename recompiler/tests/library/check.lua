@@ -37,7 +37,8 @@ local function guest_header(file, list)
                 local data = io.readfile(file, {encoding = "binary"})
                 local at = section.offset + 1
                 return {offset = section.offset, size = section.size, magic = word(data, at), version = word(data, at + 4), low = word(data, at + 8),
-                        high = word(data, at + 12), count = word(data, at + 16), data = data}
+                        high = word(data, at + 12), count = word(data, at + 16), images_high = word(data, at + 20), arena = word(data, at + 24),
+                        word_slots = word(data, at + 28), aliases = word(data, at + 32), data = data}
             end
         end
     end
@@ -74,7 +75,7 @@ local function map_phases(text)
         local phase, rest = line:match("^xl%-map (%S+) (.+)$")
         if phase then
             local entry = phases[phase]
-            if not entry then
+            if not entry or rest == "begin" then
                 entry = {regions = {}, holes = 0}
                 phases[phase] = entry
             end
@@ -141,14 +142,19 @@ end
 local EXPECTED = {"reserve", "load", "class", "create", "methods", "describe", "bundle", "bundle.path", "token", "category", "completion", "completion.thread"}
 local SWIFT_HOST_EXPECTED = {"host.bridge.before", "host.names", "names.disjoint", "host.bridge.after", "find.swift", "find.host", "block.generic"}
 local HOOK_EXPECTED = {"find.before", "hook.absent", "hook.old", "hook.guest", "hook.exact", "hook.unknown", "find.hook"}
+local FLOAT_EXPECTED = {"float.scale", "float.negative", "float.mix", "float.integer.after", "float.property", "double.property", "float.four", "double.three", "float.object",
+                        "float.host.scale", "float.host.mix", "float.host.integer.after", "float.host.property", "double.host.property", "float.host.four", "double.host.three", "float.host.object"}
 local FIND_EXPECTED = {"find.unloaded", "find.exact", "find.unknown", "find.thread"}
 
 local function build_objc(e, corpus, o, here)
+    corpus.ios(e, {"-fuse-ld=" .. e.ld, "-O2", "-w", "-fobjc-arc", "-dynamiclib", "-install_name", "@rpath/RCSecond.dylib", "-framework", "Foundation", "-I", here,
+                   path.join(here, "second.m"), "-o", o("RCSecond.dylib")})
     corpus.ios(e, {"-fuse-ld=" .. e.ld, "-Wl,-no_objc_category_merging", "-O2", "-w", "-fobjc-arc", "-dynamiclib", "-install_name", "@rpath/RCFixture.dylib", "-framework", "Foundation", "-I", here,
-                   path.join(here, "fixture.m"), "-o", o("RCFixture.dylib")})
-    io.writefile(o("includes.h"), string.format('#include "%s"\n#include "%s"\n', path.join(e.recompiler, "include", "uikit-includes.h"), path.join(here, "RCFixture.h")))
+                   path.join(here, "fixture.m"), o("RCSecond.dylib"), "-o", o("RCFixture.dylib")})
+    io.writefile(o("includes.h"), string.format('#include "%s"\n#include "%s"\n#include "%s"\n', path.join(e.recompiler, "include", "uikit-includes.h"), path.join(here, "RCFixture.h"),
+                                                path.join(here, "RCSecond.h")))
     local install = os.getenv("XL_LIBRARY_INSTALL_NAME") == "executable" and "@executable_path/RCFixture.dylib" or nil
-    return {XL_LIBRARY = "1", XL_INSTALL_NAME = install}, {}
+    return {XL_LIBRARY = "1", XL_INSTALL_NAME = install}, {o("RCSecond.dylib")}
 end
 
 local function build_swift(e, corpus, o, here)
@@ -191,6 +197,10 @@ function main(out, ...)
         return path.join(out, file)
     end
 
+    os.mkdir(o("loader"))
+    os.execv("cc", {"-O0", "-Wall", "-I", path.join(e.recompiler, "include"), "-o", o("loader/loader"), path.join(here, "loader.c")})
+    os.execv(o("loader/loader"), {o("loader")}, {timeout = 60000})
+
     local options, images = build(e, corpus, o, here)
     translate.translate(o("RCFixture.dylib"), o("includes.h"), o("xl"), images, options)
     local library = o("xl/RCFixture.dylib")
@@ -215,11 +225,42 @@ function main(out, ...)
     end
     local base = tonumber(os.getenv("XL_BASE") or "0x10000000")
     local guest = guest_header(library, list)
-    if not guest or guest.magic ~= 0x49474c58 or guest.version ~= 1 or guest.count == 0 then
-        corpus.fail("the section __XGUEST,__image does not start with a version 1 header with segments")
+    if not guest or guest.magic ~= 0x49474c58 or guest.version ~= 2 or guest.count == 0 then
+        corpus.fail("the section __XGUEST,__image does not start with a version 2 header with segments")
     end
     if guest.low % 0x4000 ~= 0 or guest.high % 0x4000 ~= 0 or guest.low < base or guest.low >= guest.high then
         corpus.fail("the guest image range 0x%x-0x%x is not whole 16 KiB granules from the base 0x%x up", guest.low, guest.high, base)
+    end
+    local writable, previous_end, mapped = 0, guest.low, 0
+    local records = {}
+    for index = 0, guest.count - 1 do
+        local at = guest.offset + 1 + 36 + index * 20
+        table.insert(records, {address = word(guest.data, at), size = word(guest.data, at + 4), protection = word(guest.data, at + 16)})
+    end
+    table.sort(records, function(a, b) return a.address < b.address end)
+    for _, record in ipairs(records) do
+        if record.protection % 4 >= 2 then
+            writable = writable + record.size
+        end
+        previous_end = math.max(previous_end, record.address + record.size)
+        mapped = mapped + record.size
+    end
+    if previous_end ~= guest.images_high then
+        corpus.fail("the header says the guest images end at 0x%x and the last segment ends at 0x%x", guest.images_high, previous_end)
+    end
+    if mapped ~= guest.images_high - guest.low then
+        corpus.fail("the guest images of a library lie one after another, and 0x%x bytes of 0x%x-0x%x belong to no segment", guest.images_high - guest.low - mapped,
+                    guest.low, guest.images_high)
+    end
+    if guest.arena ~= writable then
+        corpus.fail("the metadata arena of a library that states none is as large as the writable segments of its guest images (0x%x bytes), and the header says 0x%x",
+                    writable, guest.arena)
+    end
+    if guest.word_slots ~= 262144 or guest.aliases ~= 4 * 1048576 then
+        corpus.fail("a library that states neither has 262144 opaque words and 4 MiB of aliases, and the header says %d and 0x%x", guest.word_slots, guest.aliases)
+    end
+    if guest.high ~= guest.images_high + guest.arena + guest.word_slots * 32 + guest.aliases then
+        corpus.fail("the range the loader reserves ends at 0x%x, not where the images, the arena, the words and the aliases end", guest.high)
     end
     local symbols = {}
     local categories = 0
@@ -254,7 +295,7 @@ function main(out, ...)
 
     local host_sources = {path.join(here, "host.m"), path.join(e.recompiler, "src", "loader", "xl_loader.c")}
     local host_flags = {"-O2", "-w", "-fobjc-arc", "-I", path.join(e.recompiler, "include"), "-framework", "Foundation", "-framework", "UIKit"}
-    local expected = table.join(EXPECTED, FIND_EXPECTED, HOOK_EXPECTED)
+    local expected = table.join(EXPECTED, FIND_EXPECTED, HOOK_EXPECTED, FLOAT_EXPECTED)
     local runtime
     local bridging = (os.getenv("XL_LIBRARY_HOST_BRIDGING") or "") ~= ""
     local host_runtime = os.getenv("XL_LIBRARY_HOST_RUNTIME")
@@ -312,10 +353,18 @@ function main(out, ...)
     if os.getenv("XL_LIBRARY_INSTALL_NAME") == "executable" and variant == "objc" then
         environment = "XL_LIBRARY_NO_FALLBACK=1"
     end
+    local record = o("device.txt")
+    io.writefile(record, "")
+    local function recorded(title, text)
+        local file = io.open(record, "a")
+        file:write("== " .. title .. "\n" .. text .. (text:sub(-1) == "\n" and "" or "\n"))
+        file:close()
+        return text
+    end
     local function launch(arguments, extra)
-        return try { function ()
+        return recorded((extra or "") .. "xl-library-host " .. arguments, try { function ()
             return device.run("chmod +x " .. remote .. "/xl-library-host && cd " .. remote .. " && " .. (extra or "") .. environment .. " ./xl-library-host " .. arguments .. " 2>&1; echo exit=$?")
-        end } or ""
+        end } or "")
     end
     local function verify(output, names, what)
         local text = "\n" .. output:gsub("\r", "")
@@ -336,16 +385,16 @@ function main(out, ...)
     end
 
     local range = string.format("%x-%x", guest.low, guest.high)
-    local newer = o("RCFixtureV2.dylib")
-    local patched = guest.data:sub(1, guest.offset + 4) .. "\2\0\0\0" .. guest.data:sub(guest.offset + 9)
+    local newer = o("RCFixtureNewer.dylib")
+    local patched = guest.data:sub(1, guest.offset + 4) .. "\3\0\0\0" .. guest.data:sub(guest.offset + 9)
     io.writefile(newer, patched, {encoding = "binary"})
     os.runv("chmod", {"u+w", newer})
     corpus.sign(e, newer)
-    device.copy(newer, remote .. "/RCFixtureV2.dylib")
+    device.copy(newer, remote .. "/RCFixtureNewer.dylib")
 
     local controls = {
         {"a guest range another mapping holds", remote .. "/RCFixture.dylib 20 @" .. range .. " --expect=busy", {"occupy", "reserve.refused", "load.refused", "class.absent", "occupant.intact"}},
-        {"a library with a guest image format this loader does not read", remote .. "/RCFixtureV2.dylib 20 --expect=image", {"reserve.refused", "load.refused", "class.absent"}},
+        {"a library with a guest image format this loader does not read", remote .. "/RCFixtureNewer.dylib 20 --expect=image", {"reserve.refused", "load.refused", "class.absent"}},
         {"a library whose registry is not next to it", remote .. "/alone/RCFixture.dylib 20 --expect=registry", {"reserve.refused", "load.refused", "class.absent"}},
         {"an init without a reservation, over a mapping with data", remote .. "/RCFixture.dylib 20 +" .. range .. " --expect=direct", {"occupy", "dlopen", "init.refused", "init.final", "occupant.intact"}},
     }
@@ -428,6 +477,33 @@ function main(out, ...)
         corpus.fail("the map after xl_load shows no readable guest segment, or the library's own image is not where it should be (reserve: %s, load: %s)",
                     tostring(names_library(found.reserve)), tostring(names_library(found.load)))
     end
+    local lazy_expected = {"lazy.free"}
+    for _, name in ipairs(expected) do
+        if name ~= "reserve" then
+            table.insert(lazy_expected, name)
+        end
+    end
+    local lazy = launch(remote .. "/RCFixture.dylib " .. resident .. " --lazy=" .. range, "XL_LOADER_MAP=1 ")
+    verify(lazy, lazy_expected, "launch without a reservation")
+    local late = check_map(corpus, lazy, {"before-dlopen", "load"}, "a load without a reservation")
+    local _, late_guest = map_overlap(late.load, guest.low, guest.high)
+    if map_phases(lazy).reserve or #late_guest == 0 or not names_library(late.load) then
+        io.write(lazy)
+        corpus.fail("a host that never called xl_reserve printed the map of a reservation, or its xl_load did not take the guest range and load the library")
+    end
+    local released = launch(remote .. "/RCFixture.dylib " .. resident .. " --release=" .. range, "XL_LOADER_MAP=1 ")
+    verify(released, table.join({"release.held", "release.free"}, expected), "launch with a release between two reservations")
+    local given = check_map(corpus, released, {"before-reserve", "reserve", "release", "before-dlopen", "load"}, "a release between two reservations")
+    local given_room = false
+    for _, region in ipairs(given.release.regions) do
+        if region.protection == "---" and region.size >= host_size and (region.last <= guest.low or region.first >= guest.high) then
+            given_room = true
+        end
+    end
+    if map_overlap(given.release, guest.low, guest.high) ~= 0 or given_room then
+        io.write(released)
+        corpus.fail("the map after xl_release still shows a mapping inside the guest range 0x%x-0x%x or an inaccessible region of the host part's %d bytes", guest.low, guest.high, host_size)
+    end
     local unreserved = launch(remote .. "/RCFixture.dylib " .. resident, "XL_LOADER_MAP=1 XL_LOADER_HOST_RESERVE=0 ")
     verify(unreserved, expected, "launch with XL_LOADER_HOST_RESERVE=0")
     local bare = check_map(corpus, unreserved, {"before-reserve", "reserve", "before-dlopen", "load"}, "XL_LOADER_HOST_RESERVE=0")
@@ -443,11 +519,43 @@ function main(out, ...)
         io.write(unreserved)
         corpus.fail("with XL_LOADER_HOST_RESERVE=0 the loader still holds room for the host part, lost the guest reservation, or the library did not load")
     end
+    local mark = guest.images_high + guest.arena // 2
+    local marked = guest.arena > 0 and (guest.arena // 2 // 4096 + 1) * 4096 // 1024 or 0
+    local counted = launch(remote .. "/RCFixture.dylib " .. resident .. " --linger=6" .. (guest.arena > 0 and string.format(" --mark=%x", mark) or ""), "XL_STATS=1 ")
+    verify(counted, expected, "launch with XL_STATS=1")
+    local stacks_live, stacks_mapped, arena_touched, arena_size, words_used, words_slots, aliases_used, aliases_size
+    for live, mapped in counted:gmatch("\nxlate: guest stacks: (%d+) live, (%d+) KiB mapped; the deepest live one has used %d+ KiB of %d+ KiB, the deepest ever %d+ KiB") do
+        stacks_live, stacks_mapped = live, mapped
+    end
+    for touched, size, used, slots, alias_used, alias_size in
+        counted:gmatch("\nxlate: budget: metadata arena (%d+) of (%d+) KiB touched, opaque words (%d+) of (%d+), aliases (%d+) of (%d+) KiB") do
+        arena_touched, arena_size, words_used, words_slots, aliases_used, aliases_size = touched, size, used, slots, alias_used, alias_size
+    end
+    if not stacks_live or tonumber(stacks_live) < 1 or tonumber(stacks_mapped) < 512 then
+        io.write(counted)
+        corpus.fail("a launch with XL_STATS=1 that stays for a window of the statistics has no line of the guest stacks, or one without a live stack of a thread's size")
+    end
+    if not counted:find("\nxlate: pair stores: %d+ stored and %d+ failed in this window, %d+ stored and %d+ failed since the start [^\n]*; 0 of 64 locks held now\n") then
+        io.write(counted)
+        corpus.fail("a launch with XL_STATS=1 that stays for a window of the statistics has no line of the pair stores, or one with a lock held while nothing stores")
+    end
+    if arena_touched and tonumber(arena_touched) ~= marked then
+        io.write(counted)
+        corpus.fail("the host wrote one byte at 0x%x, in the middle of an arena nothing else writes to, and the budget line counts %s KiB of the arena as touched, not %d: the line a drop's arena is sized from does not measure",
+                    mark, arena_touched, marked)
+    end
+    if not arena_touched or tonumber(arena_size) ~= guest.arena // 1024 or tonumber(arena_touched) > tonumber(arena_size) or
+       tonumber(words_slots) ~= guest.word_slots or tonumber(words_used) > guest.word_slots or
+       (tonumber(aliases_size) ~= 0 and tonumber(aliases_size) ~= guest.aliases // 1024) or tonumber(aliases_used) > guest.aliases // 1024 then
+        io.write(counted)
+        corpus.fail("a launch with XL_STATS=1 has no budget line, or one whose arena (%d KiB), words (%d) and aliases (%d KiB, or 0 before their first use) are not the header's",
+                    guest.arena // 1024, guest.word_slots, guest.aliases // 1024)
+    end
     local crash_log = "/private/var/revenant/xlate-crash.log"
-    local function crash(extra, logged)
+    local function crash(extra, logged, where)
         device.run("rm -f " .. crash_log)
-        local text = launch(remote .. "/RCFixture.dylib " .. resident .. " --abort", (logged and "XL_LOG=1 " or "") .. extra)
-        return text .. "\n" .. (try { function ()
+        local text = launch(remote .. "/RCFixture.dylib " .. resident .. " " .. (where or "--abort"), (logged and "XL_LOG=1 " or "") .. extra)
+        return text .. "\n" .. recorded(crash_log .. " after it", try { function ()
             return device.run("cat " .. crash_log .. " 2>/dev/null; true")
         end } or "")
     end
@@ -456,6 +564,20 @@ function main(out, ...)
         io.write(crashed)
         corpus.fail("the host that aborts did not reach the crash handler of the runtime")
     end
+    local function crash_budget(text, what)
+        if not text:find("\nxlate: pair stores: %d+ stored and %d+ failed since the start [^\n]*; 0 of 64 locks held now\n") then
+            io.write(text)
+            corpus.fail("%s: the crash report has no line of the pair stores, or one with a lock held in a crash that is not inside a pair store", what)
+        end
+        local live, mapped = text:match("\nxlate: guest stacks: (%d+) live, (%d+) KiB mapped; the deepest live one has used %d+ KiB of %d+ KiB, the deepest ever %d+ KiB\n")
+        local size, slots = text:match("\nxlate: budget: metadata arena %d+ of (%d+) KiB touched, opaque words %d+ of (%d+), aliases %d+ of %d+ KiB")
+        if not live or tonumber(live) < 1 or tonumber(mapped) < 512 or not size or tonumber(size) ~= guest.arena // 1024 or tonumber(slots) ~= guest.word_slots then
+            io.write(text)
+            corpus.fail("%s: the crash report has no line of the guest stacks with a live stack of a thread's size, or no budget line with the header's arena (%d KiB) and words (%d). " ..
+                        "A launch that dies before its first window of the statistics then says nothing of what its address space held", what, guest.arena // 1024, guest.word_slots)
+        end
+    end
+    crash_budget(crashed, "a crash with XL_LOG=1")
     local crash_found = check_map(corpus, crashed, {"crash"}, "a crash with XL_LOADER_MAP=1")
     local _, crash_guest = map_overlap(crash_found.crash, guest.low, guest.high)
     local crash_readable = false
@@ -477,11 +599,19 @@ function main(out, ...)
         io.write(unlogged)
         corpus.fail("without XL_LOG the crash handler did not print to stderr, or it wrote %s on the phone (%s)", crash_log, written:trim())
     end
+    crash_budget(unlogged, "a crash without XL_LOG")
     local by_switch = crash("XL_CRASH=1 XL_HOST_SKIPS_DIAGNOSTICS=1 ", false)
     if not by_switch:find("xlate: signal 6", 1, true) or not by_switch:find("xlate: guest pc=", 1, true) then
         io.write(by_switch)
         corpus.fail("with XL_CRASH and a host that never calls xl_library_diagnostics the crash handler did not run or printed no guest frame")
     end
+    local foreign = crash("", false, "--abort-thread")
+    if not foreign:find("xlate: signal 6", 1, true) or not foreign:find("xlate: this thread has not run translated code", 1, true) or
+       foreign:find("xlate: guest pc=", 1, true) or foreign:find("the guest stack of a thread", 1, true) then
+        io.write(foreign)
+        corpus.fail("a crash on a thread that never ran translated code did not say so, or the crash handler made a guest state and a guest stack for it")
+    end
+    crash_budget(foreign, "a crash on a thread that never ran translated code")
     local without_switch = crash("XL_HOST_SKIPS_DIAGNOSTICS=1 ", false)
     if without_switch:find("xlate: signal 6", 1, true) then
         io.write(without_switch)

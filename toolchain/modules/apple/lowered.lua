@@ -154,7 +154,7 @@ local MEMBERS = {
             directory = {"System", "Library", "Frameworks", "Foundation.framework", "Headers"},
             file = "NSURL.h",
             find = "NSURLUbiquitousItemDownloadingStatusKey      API_AVAILABLE(...);",
-            replace = "NSURLUbiquitousItemDownloadingStatusKey     ;",
+            replace = "NSURLUbiquitousItemDownloadingStatusKey;",
         },
     },
     {
@@ -641,6 +641,53 @@ local MEMBERS = {
 
 local MODULE_DIR = os.scriptdir()
 
+local DEVICE_EXPORTS
+
+local function device_exports()
+    if not DEVICE_EXPORTS then
+        DEVICE_EXPORTS = {}
+        for _, file in ipairs({"device-globals.txt", "device-unlisted.txt"}) do
+            local path_to = path.absolute(path.join(MODULE_DIR, "..", "..", "..", "frameworks", "Backports", "tools", file))
+            for line in io.lines(path_to) do
+                if line ~= "" and line:sub(1, 1) ~= "#" then
+                    local symbol = line:match("^([^\t]+)")
+                    if symbol then
+                        DEVICE_EXPORTS[symbol] = true
+                    end
+                end
+            end
+        end
+    end
+    return DEVICE_EXPORTS
+end
+
+local function weakify(replacement, lowering, member)
+    if type(lowering.file) ~= "string" or type(member) ~= "string" or not member:match("^[%a_][%w_]*$") then
+        return replacement
+    end
+    if device_exports()[member] or not replacement:match(member .. "%s*;%s*$") then
+        return replacement
+    end
+    if replacement:find("weak_import", 1, true) or replacement:find("__asm", 1, true) then
+        return replacement
+    end
+    return (replacement:gsub(";%s*$", " __attribute__((weak_import));"))
+end
+
+function weak_absence()
+    local exports, found = device_exports(), {}
+    for _, entry in ipairs(MEMBERS) do
+        local header, member = entry.header, entry.member
+        if header and type(member) == "string" and member:match("^[%a_][%w_]*$") and not exports[member]
+           and type(header.find) == "string" and (header.find:find("API_AVAILABLE", 1, true) or header.find:find("API_DEPRECATED", 1, true))
+           and type(header.replace) == "string" and header.replace:match(member .. "%s*;%s*$")
+           and not header.replace:find("weak_import", 1, true) and not header.replace:find("__asm", 1, true) then
+            table.insert(found, member)
+        end
+    end
+    return found
+end
+
 local BOUNDARIES = {";", "*/", "}", "@end"}
 local WINDOW = 8192
 
@@ -673,7 +720,7 @@ local function replaced(text, lowering, where, member)
             break
         end
         table.insert(parts, text:sub(position, start - 1))
-        table.insert(parts, lowering.replace)
+        table.insert(parts, weakify(lowering.replace, lowering, member))
         position = stop + 1
     until not lowering.every
     if #parts == 0 then

@@ -1,4 +1,5 @@
 #import <AVFAudio/AVSpeechSynthesis.h>
+#import "RevenantVoiceServices.h"
 #include <dlfcn.h>
 
 @protocol RevenantVoiceServicesSpeaking <NSObject>
@@ -16,8 +17,6 @@
 - (float)minimumRate;
 - (float)maximumRate;
 @end
-
-static NSString *const RevenantVoiceServicesPath = @"/System/Library/PrivateFrameworks/VoiceServices.framework/VoiceServices";
 
 static int RevenantVSBoundary(AVSpeechBoundary boundary)
 {

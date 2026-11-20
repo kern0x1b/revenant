@@ -1,0 +1,22 @@
+package("expo-calendar")
+    set_kind("library", {headeronly = true})
+    set_homepage("https://github.com/expo/expo/tree/main/packages/expo-calendar")
+    set_description("expo-calendar 57.0.5, the calendar and reminders module of the Expo SDK, from its npm tarball: the iOS module sources the host builds from, using the EventKit present on iOS 6")
+    set_license("MIT")
+    set_policy("package.strict_compatibility", true)
+
+    add_urls("https://registry.npmjs.org/expo-calendar/-/expo-calendar-$(version).tgz")
+    add_versions("57.0.5", "3efd94eb64d291a0082416c636eccd2bfe1ab66566b17c5c9995a2e9c49caead")
+    add_patches("57.0.5", path.join(os.scriptdir(), "patches", "calendar-names-ios6.patch"), "490eab59528bb4316c24d67c1a3161b43330365b13913b1311391f04af58df9d")
+
+    on_install(function (package)
+        os.cp("*", package:installdir() .. "/")
+    end)
+
+    on_test(function (package)
+        local json = import("core.base.json")
+        local manifest = json.decode(io.readfile(path.join(package:installdir(), "package.json")))
+        assert(manifest.name == "expo-calendar" and manifest.version == "57.0.5", "the package is " .. manifest.name .. " " .. manifest.version)
+        assert(os.isfile(path.join(package:installdir(), "ios", "CalendarModule.swift")), "expo-calendar has no iOS module")
+        assert(os.isfile(path.join(package:installdir(), "expo-module.config.json")), "expo-calendar has no expo-module.config.json")
+    end)

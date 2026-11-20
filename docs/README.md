@@ -17,6 +17,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [The Network framework surface Telegram 13.0.0 uses](explanation/backports/network-framework-surface.md) | the `Network` members Telegram calls, what the backport must answer, and why Reachability cannot find `NWPathMonitor` yet |
 | [Google reCAPTCHA Enterprise SDK on iOS 6](explanation/recaptcha-sdk-on-ios6.md) | whether Google's original SDK can run on iOS 6: its measured imports and gates, what revenant already provides, the variants with their blockers, and the decisions for the owner |
 | [The reCAPTCHA SDK work split](explanation/recaptcha-work-split.md) | the remaining work on the SDK as parallel blocks: how to build the arm64 guest runtime, and for each block its goal, measurable criterion, code and test |
+| [The reCAPTCHA SDK in a helper process: design](explanation/recaptcha-helper-process.md) | the translated SDK in a process of its own that Telegram starts: the program, the pipe protocol and its timeouts, lifetime, identity, memory, signing, what is measured and what is not, and the measurements in order with what ends the route |
 | [What iOS 6.1.3 can reach over TLS](explanation/backports/tls-reach-ios-6.md) | the firmware's SecureTransport versions and ciphers, the hosts it reaches, and the proposed BoringSSL fix |
 | [Metal on iOS 6](explanation/backports/metal-on-ios6.md) | the Metal render path and the fragment-pass compute that ship in v1 through air2es, the driver-level backlog for v2, the device findings, and the licence rules for both |
 | [Nested frameworks in the lowered overlay](explanation/backports/lowered-nested-frameworks.md) | why the overlay copies the headers of a framework nested in a mapped framework, such as MPSCore in MetalPerformanceShaders |
@@ -75,7 +76,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Contributor guide](guides/emulator/contributing.md) | the layout, what bites, the conventions |
 | [How it works](explanation/emulator/how-it-works.md) | what is emulated and how the pieces fit |
 | [Where the time goes](explanation/emulator/performance.md) | why the emulator is as slow as it is, and why not another emulator |
-| [Snapshot and restore](explanation/emulator/snapshot.md) | what a booted machine holds, what a snapshot would save and restore, and the measured costs |
+| [Snapshot and restore](explanation/emulator/snapshot.md) | the implemented save and restore of a booted machine, what it holds, and the measured costs |
 | [Performance measurements](reference/emulator/performance.md) | the measured runs and the counters of a boot |
 | [Shared translation](explanation/emulator/shared-translation.md) | the design for translating the shared cache once |
 | [Guest memory under parallel execution](explanation/emulator/memory-model.md) | the design for two-core guests to use the page tables, the exclusive monitor, and what is still open |
@@ -203,10 +204,13 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [UIKit: contentsMultiplyColor](reference/backports/UIKit/ContentsMultiplyColor.md) | the private layer tint that applications set by key, drawn on iOS 6 with QuartzCore's `multiplyColor` filter, its measurement and cost |
 | [UIKit: CASpringAnimation](reference/backports/UIKit/CASpringAnimation.md) | the iOS 9 spring class on iOS 6, its curve and its keyframe delivery |
 | [UIKit: keyboard notification for a new input](reference/backports/UIKit/KeyboardInputSwitch.md) | why an application that lays out above the keyboard missed the focus of a new input on iOS 6, and the frame change the backports post |
+| [UIKit: gesture failure requirements](reference/backports/UIKit/GestureFailure.md) | the private names UIKit 6 uses for the iOS 7 delegate and recognizer hooks, the capability cache and the dynamic arbitration, and the bridge onto them |
 | [UIKit: UILabel background](reference/backports/UIKit/UILabelBackground.md) | the opaque white default of a code-made label on iOS 6 and the later default the backports give it |
 | [UIKit: UISwitch appearance](reference/backports/UIKit/UISwitchAppearance.md) | the 79 by 27 switch of iOS 6, and the 51 by 31 switch of iOS 13 to 18 that the backports draw in its place |
 | [UIKit: UITextField alignment](reference/backports/UIKit/UITextFieldAlignment.md) | the top vertical alignment a code-made text field starts with on iOS 6 and the centered start the backports give it |
+| [UIKit: UITextView typingAttributes](reference/backports/UIKit/UITextViewTypingAttributes.md) | the WebCore fault of `typingAttributes` on a text view with no selection on iOS 6.1.3, what a later UIKit answers, and the answer the backports give |
 | [UIKit: UICornerConfiguration](reference/backports/UIKit/CornerConfiguration.md) | per-corner radii, concentric corners and how a view is clipped to them on iOS 6 |
+| [CoreText: the font fallback cascade](reference/backports/CoreText/FontFallbackCascade.md) | the whole-database font walk on iOS 6.1.3 for a code point no font covers, the cascade ending in `LastResort` that every font gets, where it is attached (CoreText creators, UIFont), what is not done, and the runtime case |
 | [Vision](reference/backports/Vision/README.md) | the Swift forms of the landmark, recognised-text and contour accessors, and the missing landmark detector |
 | [WeatherKit: CompassDirection](reference/backports/WeatherKit/CompassDirection.md) | `Wind.CompassDirection`, measured |
 | [WeatherKit: WeatherCondition](reference/backports/WeatherKit/WeatherCondition.md) | `WeatherCondition`, measured |
@@ -278,6 +282,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Research](explanation/recompiler/research.md) | the research behind it |
 | [Corpus and benchmark](reference/recompiler/corpus.md) | what each check proves |
 | [Extra inhabitants of a pointer](reference/recompiler/extra-inhabitants.md) | the 4 GB rule of arm64 Swift against 32-bit host pointers: the contract (get, store, count), the idiom the lift rewrites, an inventory of every guest image, the limit of 4096, what the phone measured |
+| [The reCAPTCHA helper: the app side's contract](reference/recompiler/recaptcha-helper.md) | how an app starts the helper process of the translated reCAPTCHA SDK and talks to it: the spawn, the lines of the protocol with their names, what the app side must do on each end of the pipe, where the helper's output and a crash go, its state |
 | [Runtime helpers of the lifted code](reference/recompiler/lifted-helpers.md) | the C helpers that the AES, SHA-1, SHA-256, PMULL and half-precision FCVT instructions are lifted to: symbols, prototypes, the buffer contract, what is left unlifted and why |
 
 ## Agent skills

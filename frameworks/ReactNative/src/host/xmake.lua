@@ -15,7 +15,7 @@ if os.getenv("RN_EXPO") then
     add_requires("revenant@swift-crypto", {alias = "swift-crypto"})
 end
 
-local BACKPORTS_LIBRARIES = "FoundationBackports,CoreTextBackports,UIKitBackports,UserNotificationsBackports,CoreGraphicsBackports,GraphicsBackports,CoreFoundationBackports,SystemBackports,IOSurfaceBackports,WebKitBackports,MapKitBackports,CoreLocationBackports,SecurityBackports,CoreMotionBackports,CoreTelephonyBackports"
+local BACKPORTS_LIBRARIES = "FoundationBackports,CoreTextBackports,UIKitBackports,UserNotificationsBackports,CoreGraphicsBackports,GraphicsBackports,CoreFoundationBackports,SystemBackports,IOSurfaceBackports,WebKitBackports,MapKitBackports,CoreLocationBackports,SecurityBackports,CoreMotionBackports,CoreTelephonyBackports,AVKitBackports"
 local RETARGETED_BY_STAGE = {UserNotificationsBackports = true, ContactsBackports = true, LocalAuthenticationBackports = true}
 
 if os.getenv("RN_LINK_ALL") and os.getenv("RN_BACKPORTS") then
@@ -141,6 +141,10 @@ target("RNHost")
         if ("," .. expo_real .. ","):find(",expo-image-picker,", 1, true) then
             target:add("ldflags", "-Wl,-weak_framework,Photos", {force = true})
             target:add("ldflags", "-Wl,-weak_framework,PhotosUI", {force = true})
+        end
+        if ("," .. expo_real .. ","):find(",expo-media-library,", 1, true) then
+            target:add("ldflags", "-Wl,-weak_framework,Photos", {force = true})
+            target:add("links", "swiftPhotos", {force = true})
         end
         local file = path.join(os.projectdir(), "build", "app-manifest", "host.json")
         local text = os.isfile(file) and io.readfile(file) or ""

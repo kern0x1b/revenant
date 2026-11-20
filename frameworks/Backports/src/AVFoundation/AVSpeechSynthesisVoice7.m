@@ -1,12 +1,11 @@
 #import <AVFAudio/AVSpeechSynthesis.h>
+#import "RevenantVoiceServices.h"
 #include <dlfcn.h>
 
 @protocol RevenantVoiceServicesListing <NSObject>
 + (NSArray *)availableLanguageCodes;
 + (NSArray *)availableVoicesForLanguageCode:(NSString *)languageCode;
 @end
-
-static NSString *const RevenantVoiceServicesPath = @"/System/Library/PrivateFrameworks/VoiceServices.framework/VoiceServices";
 
 static NSDictionary *RevenantHostIdentifiers(void)
 {
@@ -133,6 +132,20 @@ static NSString *RevenantIdentifierForVoice(NSString *language, NSString *name)
         if ([voice->_identifier caseInsensitiveCompare:identifier] == NSOrderedSame) return voice;
     }
     return nil;
+}
+
+- (instancetype)initWithIdentifier:(NSString *)identifier
+{
+    AVSpeechSynthesisVoice *voice = [AVSpeechSynthesisVoice voiceWithIdentifier:identifier];
+    if (!voice)
+        return nil;
+    if ((self = [super init])) {
+        _language = [voice->_language copy];
+        _identifier = [voice->_identifier copy];
+        _name = [voice->_name copy];
+        _quality = voice->_quality;
+    }
+    return self;
 }
 
 - (NSString *)language

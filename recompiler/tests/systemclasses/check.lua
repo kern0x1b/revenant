@@ -47,14 +47,15 @@ local function build_backports(e, corpus, o, here)
         corpus.armv7(e, table.join({"-dynamiclib", "-install_name", BACKPORTS .. "lib" .. name .. "Backports.dylib"}, objects,
                                    {"-framework", "Foundation", "-lobjc", "-o", path.join(folder, "lib" .. name .. "Backports.dylib")}))
     end
-    library("Foundation", {object(path.join(sources, "Foundation", "NSMutableDictionaryAlias.m"), "alias"), object(path.join(here, "absent.m"), "absent")})
+    library("Foundation", {object(path.join(here, "alias.m"), "alias"), object(path.join(here, "absent.m"), "absent")})
     library("UIKit", {object(path.join(here, "shadow.m"), "shadow")})
     library("System", {object(path.join(here, "dispatch.m"), "dispatch")})
     return folder
 end
 
 local function translated(corpus, translate, o, folder, backports, proxies)
-    local options = {XL_LIBRARY = "1", BACKPORTS_DIR = backports, XL_PROXY_CLASSES = proxies and "1" or nil}
+    local shadowed = path.join(os.scriptdir(), "..", "data", "systemclasses", "shadowed-classes.txt")
+    local options = {XL_LIBRARY = "1", BACKPORTS_DIR = backports, XL_PROXY_CLASSES = proxies and "1" or nil, XL_SHADOWED_CLASSES = shadowed}
     translate.translate(o("SCFixture.dylib"), o("includes.h"), o(folder), {}, options)
     return o(folder .. "/SCFixture.dylib")
 end

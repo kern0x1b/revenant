@@ -71,6 +71,38 @@ expo-mail-composer, expo-sms, expo-print, expo-sensors, expo-cellular and expo-v
 fails with "make the copy again" when a copy predates that. `src/expo/xmake.lua` writes each pod's module map and flags into
 `build/expo-core/implicit.rsp`.
 
+## Speech, symbols and video (Hy4)
+
+These modules are built into the isolated host from their npm tarballs; none has been exercised on the phone. A row is `real` when the platform supplies the real engine behind the API (speech goes through VoiceServices); it is `partial` when the platform can only approximate the result (symbols draws a fixed glyph set). Neither classification means the calls were exercised: every row here is `build` only, integrated and linked, not run on the phone.
+
+| Module | Removed or replaced | Why | What JS sees |
+| --- | --- | --- | --- |
+| expo-speech | nothing; the speech classes and the voice-by-identifier initializer come from the AVFoundation backport | AVSpeechSynthesizer and its voice API are iOS 7, absent from the iOS 6 cache; the backport speaks through VoiceServices' VSSpeechSynthesizer | the module as published: speak, getVoices, stop, pause, resume and isSpeaking are integrated and linked, not run on the phone; voice identifiers come from a hard-coded 22-entry table, not measured from VoiceServices or a device |
+| expo-symbols | nothing; `UIImage(systemName:)` and the four configuration factories come from the Backports' UIKit glyph renderer | SF Symbols are iOS 13; the backport's RevenantSymbolGlyphs.h holds 333 entries (296 drawn glyph scripts and 37 aliases) and implements the factories over them | monochrome renders as a tinted template; multicolor has no effect for a glyph set with no colour layers and stays monochrome; hierarchical uses the label-opacity steps of UIColorDynamic.m as an approximation; palette cycles the given colours per painted path; built and linked, not shown on the phone |
+| expo-video | `ContentType` and `MediaInfo` renamed with the module's prefix; iOS 15 async `load` calls replaced by the iOS 4 properties; the iOS 26 variant path falls back to the legacy HLS parser; fullscreen and picture-in-picture callbacks carry their real availability | the two type names collide inside ExpoAppModules; the async load API is iOS 15; no fullscreen or PiP presentation triggers those callbacks on iOS 6 | player, playlist and thumbnails use the backed AVFoundation and AVKit APIs; loading requests complete through the iOS 6 request and track selection uses the iOS 5 selectors. Six properties are stored without effect: configuredTimeOffsetFromLive, audiovisualBackgroundPlaybackPolicy, showsTimecodes, AVRoutePickerView.prioritizesVideoDevices, canStartPictureInPictureAutomaticallyFromInline and preferredForwardBufferDuration (playback buffering is unchanged). With no contentInformationRequest on iOS 6 the upstream onResponseReceived and onError side effects are not delivered, and the route picker's end event is not delivered on iPhone. Built and linked, not exercised on the phone |
+
+## Contacts and calendar (block 5)
+
+expo-calendar is a recipe with an iOS 6 patch (packages/e/expo-calendar/patches); it installs, its patch applies, and the host compiles and links it. It has not been exercised on the phone.
+
+| Module | Removed or replaced | Why | What JS sees |
+| --- | --- | --- | --- |
+| expo-calendar | nothing; `MissingCurrentViewControllerException` renamed `CalendarMissingCurrentViewControllerException` | the name collides with expo-sharing's inside the shared Swift module `ExpoAppModules` | the module as published: EventKit (`EKEventStore`, `EKEvent`, `EKCalendar`) and the EventKitUI event and edit view controllers are present on iOS 6; the iOS 17 write-only permission branches are behind `#available` and are not taken; built and linked, not exercised on the phone |
+
+expo-contacts is a recipe with one name patch (packages/e/expo-contacts/patches) and the later `CNLabel*` constants in the Contacts backport. Its host build is not green, so its coverage row is evaluate and its calls are not verified.
+
+| Module | Removed or replaced | Why | What JS sees |
+| --- | --- | --- | --- |
+| expo-contacts | `Image` renamed `ContactImageRecord`; three exceptions colliding with expo-file-system renamed; the ContactsUI form and picker sources are not built, pending a separate backport task | the first two are name collisions inside `ExpoAppModules`; `CNContactViewController` and `CNContactPickerViewController` are iOS 9 and have no backport yet, and the task forbids a throwing shim | contact data operations through the Contacts backport are compiled but not verified; `presentFormAsync`, `presentContactPickerAsync` and the next form functions are absent until a ContactsUI backport over `ABPersonViewController`, `ABNewPersonViewController` and `ABPeoplePickerNavigationController` lands |
+
+## Media library (block 5)
+
+expo-media-library is a recipe with an iOS 6 patch (packages/e/expo-media-library/patches); it installs, its patch applies, and the host compiles and links it. It has not been exercised on the phone.
+
+| Module | Removed or replaced | Why | What JS sees |
+| --- | --- | --- | --- |
+| expo-media-library | nothing removed; `AssetInfo`, `MediaType`, `PermissionsModuleNotFoundException` and the three permission requester classes renamed with an `ExpoML` prefix | their names collide with expo-image-picker's inside the shared Swift module `ExpoAppModules` | the module as published against the Photos backport over AssetsLibrary: moments are not available on iOS 6; `getMomentsAsync` returns the synced event albums. The audio media-type constant has its SDK value, and the Photos change-details extensions resolve through the backported `swiftPhotos` runtime; audio assets and all phone behaviour are not verified |
+
 ## How to check
 
 `./xmakew l -P . frameworks/ReactNative/tools/coverage.lua` regenerates `docs/reference/react-native/coverage.md`;

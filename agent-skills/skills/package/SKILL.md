@@ -43,8 +43,9 @@ one the build refuses to write the package. Raise the version for every package 
 install over an older one.
 
 Other values on the target, only when the app needs them: `revenant.maintainer-scripts` (a folder
-holding `preinst`, `postinst`, `prerm`, `postrm`, copied into the package), `revenant.licenses` (files
-copied to `/usr/share/doc/<Package>/`), `revenant.entitlements` (a plist `ldid` signs into the
+holding `preinst`, `postinst`, `prerm`, `postrm`, copied into the package), `revenant.restart` (process
+names; the tool writes a `postinst` that kills them, beside any copied scripts), `revenant.licenses`
+(files copied to `/usr/share/doc/<Package>/`), `revenant.entitlements` (a plist `ldid` signs into the
 executable), `revenant.install` (the folder the `.app` goes to instead of `/Applications`).
 
 ## 2. Write the package

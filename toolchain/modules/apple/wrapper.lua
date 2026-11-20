@@ -1,5 +1,7 @@
 import("core.package.addon")
 
+local timing = import("timing", {rootdir = os.scriptdir(), anonymous = true})
+
 local function built_library(project, name)
     local found = {}
     for _, extension in ipairs({"dylib", "a"}) do
@@ -39,9 +41,16 @@ function install(package, opt)
     table.join2(lines, {"set_defaultplat(\"iphoneos\")", "set_defaultarchs(\"iphoneos|" .. package:arch() .. "\")", ""})
     io.writefile(path.join(project, "xmake.lua"), table.concat(lines, "\n"))
     io.save(path.join(project, "xmake-addons.lock"), {__meta__ = {version = "1.0"}, revenant = {version = revenant.version}})
-    os.vrunv(os.programfile(), {"f", "-P", project, "-p", "iphoneos", "-a", package:arch(), "-m", "release", "-y"}, {curdir = project})
-    os.vrunv(os.programfile(), table.join({"build", "-P", project, "-y"}, opt.targets), {curdir = project, envs = {REVENANT_RELEASE = "1"}})
-    os.vrunv(os.programfile(), table.join({"install", "-P", project, "-y", "--libraries=n", "-o", package:installdir()}, opt.targets), {curdir = project})
+    local label = package:name() .. " (" .. #opt.targets .. " targets)"
+    timing.run("wrapper " .. label .. ": configure", function ()
+        os.vrunv(os.programfile(), {"f", "-P", project, "-p", "iphoneos", "-a", package:arch(), "-m", "release", "-y"}, {curdir = project})
+    end)
+    timing.run("wrapper " .. label .. ": build", function ()
+        os.vrunv(os.programfile(), table.join({"build", "-P", project, "-y"}, opt.targets), {curdir = project, envs = {REVENANT_RELEASE = "1"}})
+    end)
+    timing.run("wrapper " .. label .. ": install", function ()
+        os.vrunv(os.programfile(), table.join({"install", "-P", project, "-y", "--libraries=n", "-o", package:installdir()}, opt.targets), {curdir = project})
+    end)
     copy_own_libraries(project, package:installdir("lib"), opt.targets)
     if opt.modules then
         package:setenv("REVENANT_SWIFT_MODULES", path.join(package:installdir("lib"), "swift", "iphoneos"))

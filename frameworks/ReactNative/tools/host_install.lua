@@ -38,7 +38,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/host_install
 
 LIBRARIES = {"libFoundationBackports", "libCoreTextBackports", "libUIKitBackports", "libUserNotificationsBackports", "libCoreGraphicsBackports",
              "libGraphicsBackports", "libCoreFoundationBackports", "libSystemBackports", "libIOSurfaceBackports", "libWebKitBackports", "libMapKitBackports",
-             "libCoreLocationBackports", "libSecurityBackports", "libCoreMotionBackports", "libCoreTelephonyBackports", "libContactsBackports", "libLocalAuthenticationBackports", "libTLSBackports"}
+             "libCoreLocationBackports", "libSecurityBackports", "libCoreMotionBackports", "libCoreTelephonyBackports", "libAVKitBackports", "libContactsBackports", "libLocalAuthenticationBackports", "libTLSBackports"}
 
 local BACKPORTS_SUBDIR = path.join("share", "root", "usr", "lib", "revenant", "org.revenant.backports")
 

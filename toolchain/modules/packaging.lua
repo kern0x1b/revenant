@@ -53,13 +53,21 @@ function packages()
         local control = target:values("revenant.control")
         if control then
             control = path.absolute(control, target:scriptdir())
-            grouped[control] = grouped[control] or {targets = {}, scripts = nil, licenses = {}}
+            grouped[control] = grouped[control] or {targets = {}, scripts = nil, licenses = {}, restart = nil}
             local declared = target:values("revenant.version")
             if declared then
                 if grouped[control].version and grouped[control].version ~= declared then
                     raise("%s is packaged at versions %s and %s by different targets", control, grouped[control].version, declared)
                 end
                 grouped[control].version = declared
+            end
+            local restart = table.wrap(target:values("revenant.restart"))
+            if #restart > 0 then
+                local list = table.concat(restart, ",")
+                if grouped[control].restart and table.concat(grouped[control].restart, ",") ~= list then
+                    raise("%s restarts different processes in different targets", control)
+                end
+                grouped[control].restart = restart
             end
             table.insert(grouped[control].targets, target)
             for _, license in ipairs(table.wrap(target:values("revenant.licenses"))) do
@@ -145,7 +153,8 @@ function write(opt)
                 end
             end
             local output = debian.write({control = control, version = version, root = stage,
-                                         scripts = described.scripts, depends = table.unique(depends),
+                                         scripts = described.scripts, restart = described.restart,
+                                         depends = table.unique(depends),
                                          outputdir = opt.outputdir or config.builddir()})
             cprint("${bright green}deb${clear} %s", output)
             table.insert(written, {deb = output, stage = stage})

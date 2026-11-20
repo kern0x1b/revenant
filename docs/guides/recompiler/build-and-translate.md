@@ -132,9 +132,10 @@ folder; the registry depends on the library by the library's install name, which
 
 - `XL_BASE` is the address where the loader maps the guest image (default `0x10000000`). Only the guest image
   (9.1 MB for the Swift library) is at a fixed address; the host part, the lifted code, is placed by dyld in any hole.
-  The base has to be above the app's images and below the heap's random start; for Telegram13 that is `XL_BASE=0x18000000`
-  ([the rule](../../reference/recompiler/library-mode.md#choosing-xl_base)). A host that holds the range gets
-  `XL_LOAD_RANGE_BUSY` from `xl_reserve`, with the name of the holder.
+  For a library that an app loads when it first needs it, the guest range goes right under the main thread's stack, where it
+  ends at `0x2fc00000` or below: the reCAPTCHA SDK is translated with `XL_BASE=0x2e000000`
+  ([the rule](../../reference/recompiler/library-mode.md#choosing-xl_base)). `xlate` refuses a library whose guest range ends
+  above `0x2fc00000`. A host that holds the range gets `XL_LOAD_RANGE_BUSY`, with the name of the holder.
 - `XL_NAMESPACE` is the prefix of the Objective-C class names of every guest image but the first (default `XLG.`; `none`
   leaves the names). It keeps the guest's Swift runtime from taking the names of a Swift runtime the host has loaded; the
   guest still sees its own names. [What it changes](../../explanation/recompiler/library-mode.md).
@@ -143,19 +144,20 @@ folder; the registry depends on the library by the library's install name, which
   faulting host address (`xlate: host pc in … image … base 0x… offset 0x…`), and the offset looked up in that file names the
   lifted function (`sub_<guest address>`). `XL_KEEP_LOCALS=1` keeps the symbols in the library.
 - The app links `recompiler/src/loader/xl_loader.c` (headers `recompiler/include/xl_loader.h` and
-  `recompiler/include/xl_guest_image.h`), reserves the guest range as early as it can, and loads the library when it first
-  needs it:
+  `recompiler/include/xl_guest_image.h`) and loads the library when it first needs it. Until then the library holds none of
+  the process's address space:
 
 ```objc
-xl_reserve(path);
-...
 if (xl_load(path) == XL_LOAD_OK) {
     Class client = NSClassFromString(@"RCFClient");
 }
 ```
 
   `xl_load_error()` says why a load failed. The classes of the library are found by name only after `xl_load`
-  succeeded; before that `NSClassFromString` answers `Nil`.
+  succeeded; before that `NSClassFromString` answers `Nil`. A load that failed holds nothing and can be tried again.
+  `xl_reserve(path)` takes the library's ranges ahead of the load and `xl_release()` gives them back; a constructor that
+  calls `xl_reserve` holds the guest range and room for the host part (85 MB for the reCAPTCHA SDK) in every launch, also
+  in those that never load the library, so it is only for a library whose guest range is not under the main stack.
 - `void *xl_find_class(const char *name)` returns the class of a name that the library answers to, or `NULL`. It finds
   what `NSClassFromString` finds and a Swift class by `"Module.Class"` (and its mangled name), which the host's own
   `NSClassFromString` does not on iOS 6 ([the contract](../../reference/recompiler/library-mode.md#the-class-of-a-name-xl_find_class-xl_library_class-objc_sethook_getclass)).

@@ -78,18 +78,44 @@ static void regions(const char *tag, unsigned long low, unsigned long high)
     fflush(stdout);
 }
 
+static unsigned long mapped(unsigned long low, unsigned long high)
+{
+    unsigned long total = 0;
+    vm_address_t address = low;
+    natural_t depth = 0;
+    for (;;) {
+        vm_size_t size = 0;
+        struct vm_region_submap_info_64 info;
+        mach_msg_type_number_t count = VM_REGION_SUBMAP_INFO_COUNT_64;
+        if (vm_region_recurse_64(mach_task_self(), &address, &size, &depth, (vm_region_recurse_info_t)&info, &count) != KERN_SUCCESS || address >= high)
+            break;
+        if (info.is_submap) {
+            depth++;
+            continue;
+        }
+        total += (address + size < high ? address + size : high) - (address > low ? address : low);
+        address += size;
+    }
+    return total;
+}
+
+static BOOL range(const char *text, unsigned long *low, unsigned long *high)
+{
+    return sscanf(text, "%lx-%lx", low, high) == 2 && *low < *high;
+}
+
 static unsigned long occupied_low, occupied_high;
 
-static void occupy(const char *range)
+static void occupy(const char *text)
 {
     unsigned long low = 0, high = 0;
-    BOOL parsed = sscanf(range + 1, "%lx-%lx", &low, &high) == 2 && low < high;
+    BOOL parsed = range(text + 1, &low, &high);
     vm_address_t address = low;
     BOOL held = parsed && vm_allocate(mach_task_self(), &address, high - low, VM_FLAGS_FIXED) == KERN_SUCCESS;
     if (held) {
         occupied_low = low;
         occupied_high = high;
-        if (range[0] == '@')
+        if (text[0] == '@')
             vm_protect(mach_task_self(), low, high - low, FALSE, VM_PROT_NONE);
         else
             *(volatile uint32_t *)low = 0x5a5a5a5au;
@@ -258,21 +284,50 @@ static void grow(size_t target_kilobytes)
     }
 }
 
+static void *abort_alone(void *unused)
+{
+    (void)unused;
+    abort();
+}
+
 int main(int argc, char **argv)
 {
     alarm(180);
     @autoreleasepool {
         if (argc < 2) {
-            fprintf(stderr, "usage: host LIBRARY [RESIDENT-MB [@LOW-HIGH | +LOW-HIGH | --expect=busy|image|registry|direct | PRELOADED-DYLIB]...]\n");
+            fprintf(stderr, "usage: host LIBRARY [RESIDENT-MB [@LOW-HIGH | +LOW-HIGH | --expect=busy|image|registry|direct | --lazy=LOW-HIGH | --release=LOW-HIGH | --abort | --abort-thread | --linger=SECONDS | --mark=ADDRESS | PRELOADED-DYLIB]...]\n");
             return 2;
         }
         const char *path = argv[1];
         size_t target = argc > 2 ? (size_t)atoi(argv[2]) : 85;
         const char *expect = NULL;
-        BOOL abort_at_end = NO;
+        BOOL abort_at_end = NO, abort_on_thread = NO, lazy = NO, release = NO;
+        unsigned linger = 0;
+        unsigned long mark = 0;
+        unsigned long guest_low = 0, guest_high = 0;
         for (int index = 3; index < argc; index++) {
             if (strcmp(argv[index], "--abort") == 0) {
                 abort_at_end = YES;
+                continue;
+            }
+            if (strcmp(argv[index], "--abort-thread") == 0) {
+                abort_at_end = abort_on_thread = YES;
+                continue;
+            }
+            if (strncmp(argv[index], "--linger=", 9) == 0) {
+                linger = (unsigned)atoi(argv[index] + 9);
+                continue;
+            }
+            if (strncmp(argv[index], "--mark=", 7) == 0) {
+                mark = strtoul(argv[index] + 7, NULL, 16);
+                continue;
+            }
+            if (strncmp(argv[index], "--lazy=", 7) == 0 && range(argv[index] + 7, &guest_low, &guest_high)) {
+                lazy = YES;
+                continue;
+            }
+            if (strncmp(argv[index], "--release=", 10) == 0 && range(argv[index] + 10, &guest_low, &guest_high)) {
+                release = YES;
                 continue;
             }
             if (strncmp(argv[index], "--expect=", 9) == 0) {
@@ -290,7 +345,15 @@ int main(int argc, char **argv)
         }
         if (expect)
             return refusals(expect, path);
-        xl_load_status reserved = xl_reserve(path);
+        xl_load_status reserved = lazy ? XL_LOAD_OK : xl_reserve(path);
+        if (release) {
+            report("release.held", reserved == XL_LOAD_OK && mapped(guest_low, guest_high) == guest_high - guest_low);
+            measure("held");
+            xl_release();
+            report("release.free", mapped(guest_low, guest_high) == 0);
+            measure("released");
+            reserved = xl_reserve(path);
+        }
         grow(target << 10);
         measure("host");
         regions("host", 0x1000, 0xfffff000);
@@ -299,9 +362,13 @@ int main(int argc, char **argv)
         report("host.bridge.before", hostBridges(YES));
 #endif
 
-        report("reserve", reserved == XL_LOAD_OK);
-        if (reserved != XL_LOAD_OK)
-            line([NSString stringWithFormat:@"error %s", xl_load_error()]);
+        if (lazy) {
+            report("lazy.free", mapped(guest_low, guest_high) == 0);
+        } else {
+            report("reserve", reserved == XL_LOAD_OK);
+            if (reserved != XL_LOAD_OK)
+                line([NSString stringWithFormat:@"error %s", xl_load_error()]);
+        }
         measure("reserved");
         report("find.unloaded", xl_find_class("RCFClient") == NULL);
 
@@ -332,6 +399,21 @@ int main(int argc, char **argv)
             line(result);
         Class hooked = NSClassFromString(@"RCFHooked");
         report("find.hook", hooked != Nil && xl_find_class("RCFixture.Hooked") == (__bridge void *)hooked && NSClassFromString(@"RCFixture.Hooked") == Nil);
+        for (NSString *result in [NSClassFromString(@"RCFFloat") performSelector:@selector(run)])
+            line(result);
+        id floating = [[NSClassFromString(@"RCFFloat") alloc] init];
+        report("float.host.scale", ((float (*)(id, SEL, float, double))objc_msgSend)(floating, sel_registerName("scaleFloat:by:"), 1.5f, 4.0) == 6.0f &&
+                                   ((float (*)(id, SEL, float, double))objc_msgSend)(floating, sel_registerName("scaleFloat:by:"), -2.5f, 2.0) == -5.0f);
+        report("float.host.mix", ((double (*)(id, SEL, int, float, double))objc_msgSend)(floating, sel_registerName("mixInt:float:double:"), 3, 0.5f, 0.25) == 3.75);
+        report("float.host.integer.after", ((int (*)(id, SEL, float, int))objc_msgSend)(floating, sel_registerName("tagFloat:int:"), 2.0f, 7) == 11);
+        ((void (*)(id, SEL, float))objc_msgSend)(floating, sel_registerName("setLevel:"), 0.3f);
+        report("float.host.property", ((float (*)(id, SEL))objc_msgSend)(floating, sel_registerName("level")) == 0.3f);
+        ((void (*)(id, SEL, double))objc_msgSend)(floating, sel_registerName("setRatio:"), -1.0e-300);
+        report("double.host.property", ((double (*)(id, SEL))objc_msgSend)(floating, sel_registerName("ratio")) == -1.0e-300);
+        report("float.host.four", ((float (*)(id, SEL, float, float, float, float))objc_msgSend)(floating, sel_registerName("sumFloats:b:c:d:"), 1.0f, 2.0f, 4.0f, 8.0f) == 15.0f);
+        report("double.host.three", ((double (*)(id, SEL, double, double, double))objc_msgSend)(floating, sel_registerName("sumDoubles:b:c:"), 0.5, 0.25, 0.125) == 0.875);
+        report("float.host.object", ((id (*)(id, SEL, id, float))objc_msgSend)(floating, sel_registerName("objectAfter:float:"), floating, 1.0f) == floating &&
+                                    ((id (*)(id, SEL, id, float))objc_msgSend)(floating, sel_registerName("objectAfter:float:"), floating, -1.0f) == nil);
 #endif
 #ifdef RC_SWIFT_HOST
         const char *threadName = "RCFixture.Client";
@@ -387,6 +469,10 @@ int main(int argc, char **argv)
         report("host.bridge.after", hostBridges(NO) && hostNamesUnchanged());
 #endif
         regions("end", 0x1000, 0xfffff000);
+        if (mark)
+            *(volatile char *)mark = 1;
+        for (unsigned left = linger; left; left = sleep(left)) {
+        }
         if (abort_at_end) {
             void *handle = dlopen(path, RTLD_NOW | RTLD_NOLOAD);
             void (*diagnostics)(void) = handle ? (void (*)(void))dlsym(handle, "xl_library_diagnostics") : NULL;
@@ -394,6 +480,9 @@ int main(int argc, char **argv)
             if (diagnostics && !getenv("XL_HOST_SKIPS_DIAGNOSTICS"))
                 diagnostics();
             fflush(stdout);
+            pthread_t alone;
+            if (abort_on_thread && pthread_create(&alone, NULL, abort_alone, NULL) == 0)
+                pthread_join(alone, NULL);
             abort();
         }
         line(@"done");
