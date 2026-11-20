@@ -2108,6 +2108,7 @@ class RevenantTablePrefetchEnabled15Installer
 class RevenantTablePrefetchInstaller
 class RevenantTableSeparatorInstaller
 class RevenantTableSeparatorView
+class RevenantTapPump
 class RevenantTermOfAddressState
 class RevenantTestDropSession
 class RevenantTextContainer7
@@ -4854,6 +4855,7 @@ function RevenantHomeKitUUIDString
 function RevenantHomeKitUser
 function RevenantHomeKitZone
 function RevenantIOSurfaceLayersRefresh
+function RevenantInputRenderCallback
 function RevenantInstallNSBundleAdditions
 function RevenantIsAppleProRAWPixelFormat
 function RevenantIsBayerRAWPixelFormat
@@ -5044,6 +5046,7 @@ function RevenantTLSOptionsHasServerCredentials
 function RevenantTagDeviceMotion
 function RevenantTagForChannelCount
 function RevenantTagFromName
+function RevenantTapRenderNotify
 function RevenantTargetAllows
 function RevenantTextFieldInitialAlignment
 function RevenantTypedNode
@@ -6982,6 +6985,7 @@ global AVAudioApplicationInputMuteStateChangeNotification
 global AVAudioApplicationMuteStateKey
 global AVAudioEngineConfigurationChangeNotification
 global AVAudioSessionMediaServicesWereLostNotification
+global AVAudioSessionMediaServicesWereResetNotification
 global AVAudioSessionModeDualRoute
 global AVAudioSessionModeShortFormVideo
 global AVAudioSessionModeSpokenAudio
@@ -12264,7 +12268,13 @@ member AVAudioEngine -pause
 member AVAudioEngine -prepare
 member AVAudioEngine -renderOffline:toBuffer:error:
 member AVAudioEngine -reset
+member AVAudioEngine -revenant_applyVoiceProcessing
+member AVAudioEngine -revenant_configureInput
+member AVAudioEngine -revenant_inputChanged
 member AVAudioEngine -revenant_replaceOutputWithGeneric
+member AVAudioEngine -revenant_resume:
+member AVAudioEngine -revenant_setVoiceProcessingEnabled:error:
+member AVAudioEngine -revenant_suspend
 member AVAudioEngine -setAutoShutdownEnabled:
 member AVAudioEngine -setManualRenderingBlock:
 member AVAudioEngine -startAndReturnError:
@@ -12367,6 +12377,19 @@ member AVAudioFormat -isStandard
 member AVAudioFormat -sampleRate
 member AVAudioFormat -settings
 member AVAudioFormat -streamDescription
+member AVAudioInputNode -dealloc
+member AVAudioInputNode -init
+member AVAudioInputNode -inputFormatForBus:
+member AVAudioInputNode -isVoiceProcessingAGCEnabled
+member AVAudioInputNode -isVoiceProcessingBypassed
+member AVAudioInputNode -isVoiceProcessingEnabled
+member AVAudioInputNode -isVoiceProcessingInputMuted
+member AVAudioInputNode -outputFormatForBus:
+member AVAudioInputNode -revenant_inputState
+member AVAudioInputNode -setVoiceProcessingAGCEnabled:
+member AVAudioInputNode -setVoiceProcessingBypassed:
+member AVAudioInputNode -setVoiceProcessingEnabled:error:
+member AVAudioInputNode -setVoiceProcessingInputMuted:
 member AVAudioMixingDestination -connectionPoint
 member AVAudioMixingDestination -initWithRevenantNode:mixer:bus:
 member AVAudioMixingDestination -obstruction
@@ -12402,7 +12425,9 @@ member AVAudioNode -outputFormatForBus:
 member AVAudioNode -removeTapOnBus:
 member AVAudioNode -reset
 member AVAudioNode -revenant_impl
+member AVAudioNode -revenant_pump
 member AVAudioNode -revenant_queue
+member AVAudioNode -revenant_retirePump
 member AVAudioNode -revenant_setEngine:auNode:audioUnit:
 member AVAudioNode -revenant_setFormat:
 member AVAudioNode -revenant_tapBlock
@@ -12423,6 +12448,7 @@ member AVAudioPlayer -initWithData:fileTypeHint:error:
 member AVAudioPlayerNode -isPlaying
 member AVAudioPlayerNode -pause
 member AVAudioPlayerNode -play
+member AVAudioPlayerNode -scheduleBuffer:atTime:options:completionCallbackType:completionHandler:
 member AVAudioPlayerNode -scheduleBuffer:atTime:options:completionHandler:
 member AVAudioPlayerNode -scheduleBuffer:completionHandler:
 member AVAudioPlayerNode -stop
@@ -29647,6 +29673,18 @@ member RevenantTableSeparatorView -color
 member RevenantTableSeparatorView -drawRect:
 member RevenantTableSeparatorView -lineWidth
 member RevenantTableSeparatorView -style
+member RevenantTapPump -dealloc
+member RevenantTapPump -drain
+member RevenantTapPump -format
+member RevenantTapPump -initWithFormat:bufferSize:block:
+member RevenantTapPump -pushFrames:count:
+member RevenantTapPump -pushSample:
+member RevenantTapPump -setSourceRate:
+member RevenantTapPump -sourceRate
+member RevenantTapPump -stop
+member RevenantTapPump -wake
+member RevenantTapPump -writeFloat:frames:stride:
+member RevenantTapPump -writeInt16:frames:stride:muted:
 member RevenantTermOfAddressState -currentUser
 member RevenantTermOfAddressState -languageIdentifier
 member RevenantTermOfAddressState -origin
@@ -37875,6 +37913,7 @@ type AVAudioEngineManualRenderingStatus
 type AVAudioEnvironmentDistanceAttenuationModel
 type AVAudioEnvironmentOutputType
 type AVAudioIONodeInputBlock
+type AVAudioPlayerNodeCompletionHandler
 type AVAudioSessionCategoryOptions
 type AVAudioSessionRecordPermission
 type AVAudioSessionRouteSharingPolicy

@@ -133,11 +133,15 @@ static OSStatus RevenantAddUnit(AUGraph graph, OSType type, OSType subtype, AUNo
         AudioUnitSetProperty(destImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, bus2, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
 
     if (node2 == _revenant_mainMixer && useFormat) {
-        AudioUnitSetProperty(destImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
+        OSStatus mixerOut = AudioUnitSetProperty(destImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
         RevenantAudioNodeImpl *outImpl = [_revenant_output revenant_impl];
         if (outImpl->audioUnit) {
-            AudioUnitSetProperty(outImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
-            AudioUnitSetProperty(outImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
+            OSStatus outIn = AudioUnitSetProperty(outImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
+            OSStatus outOut = AudioUnitSetProperty(outImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
+            // The output scope of the output unit is the hardware side and not writable (-10865); the other two are.
+            (void)outOut;
+            if (mixerOut != noErr || outIn != noErr)
+                NSLog(@"AVAudioEngine: the mixer's output format (%d) or the output unit's input format (%d) could not be set", (int)mixerOut, (int)outIn);
         }
         [_revenant_output revenant_setFormat:useFormat];
     }
@@ -210,7 +214,9 @@ static OSStatus RevenantAddUnit(AUGraph graph, OSType type, OSType subtype, AUNo
 {
     if (!_revenant_initialized) {
         [self revenant_configureInput];
-        AUGraphInitialize(_revenant_graph);
+        OSStatus initialized = AUGraphInitialize(_revenant_graph);
+        if (initialized != noErr)
+            NSLog(@"AVAudioEngine: the graph did not initialize (%d)", (int)initialized);
         _revenant_initialized = YES;
         [self revenant_applyVoiceProcessing];
     }
@@ -284,9 +290,9 @@ static OSStatus RevenantAddUnit(AUGraph graph, OSType type, OSType subtype, AUNo
 }
 
 // Stops and uninitializes the graph so that its units can be reconfigured, and says whether it was running.
-- (BOOL)revenant_suspend
+- (NSUInteger)revenant_suspend
 {
-    BOOL running = _revenant_running;
+    NSUInteger state = (_revenant_initialized ? 1 : 0) | (_revenant_running ? 2 : 0);
     if (_revenant_initialized) {
         if (!_revenant_offline)
             AUGraphStop(_revenant_graph);
@@ -295,13 +301,16 @@ static OSStatus RevenantAddUnit(AUGraph graph, OSType type, OSType subtype, AUNo
         _revenant_running = NO;
     }
     _revenant_inputConfigured = NO;
-    return running;
+    return state;
 }
 
-- (void)revenant_resume:(BOOL)running
+- (void)revenant_resume:(NSUInteger)state
 {
-    [self prepare];
-    if (running)
+    // Only a graph that was initialized is initialized again: one that was not is still being built, and its units
+    // must stay open for their formats until prepare or start.
+    if (state & 1)
+        [self prepare];
+    if (state & 2)
         [self startAndReturnError:NULL];
 }
 
@@ -315,8 +324,8 @@ static OSStatus RevenantAddUnit(AUGraph graph, OSType type, OSType subtype, AUNo
         return;
     if (_revenant_inputConfigured)
         return;
-    BOOL running = [self revenant_suspend];
-    [self revenant_resume:running];
+    NSUInteger state = [self revenant_suspend];
+    [self revenant_resume:state];
 }
 
 - (BOOL)revenant_setVoiceProcessingEnabled:(BOOL)enabled error:(NSError **)outError
@@ -327,21 +336,24 @@ static OSStatus RevenantAddUnit(AUGraph graph, OSType type, OSType subtype, AUNo
         _revenant_voiceProcessing = enabled;
         return YES;
     }
-    BOOL running = [self revenant_suspend];
+    NSUInteger state = [self revenant_suspend];
     AUNode previous = _revenant_outputAUNode;
     AUNode output = 0;
     AudioComponentDescription description = {0};
     description.componentType = kAudioUnitType_Output;
     description.componentSubType = enabled ? kAudioUnitSubType_VoiceProcessingIO : kAudioUnitSubType_RemoteIO;
     description.componentManufacturer = kAudioUnitManufacturer_Apple;
+    // A graph holds one output node, so the old one goes first (and takes its connection with it).
+    AUGraphRemoveNode(_revenant_graph, previous);
     OSStatus status = AUGraphAddNode(_revenant_graph, &description, &output);
-    if (status != noErr || output == 0) {
+    BOOL added = status == noErr && output != 0;
+    if (!added) {
         if (outError)
             *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
-        [self revenant_resume:running];
-        return NO;
+        // Put an output node of the previous kind back so the engine stays usable.
+        description.componentSubType = enabled ? kAudioUnitSubType_RemoteIO : kAudioUnitSubType_VoiceProcessingIO;
+        AUGraphAddNode(_revenant_graph, &description, &output);
     }
-    AUGraphRemoveNode(_revenant_graph, previous);
     AUGraphConnectNodeInput(_revenant_graph, _revenant_mainMixerAUNode, 0, output, 0);
     AudioUnit unit = NULL;
     AUGraphNodeInfo(_revenant_graph, output, NULL, &unit);
@@ -354,9 +366,10 @@ static OSStatus RevenantAddUnit(AUGraph graph, OSType type, OSType subtype, AUNo
     if (carried != nil) {
         AudioUnitSetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, carried.streamDescription, sizeof(AudioStreamBasicDescription));
     }
-    _revenant_voiceProcessing = enabled;
-    [self revenant_resume:running];
-    return YES;
+    if (added)
+        _revenant_voiceProcessing = enabled;
+    [self revenant_resume:state];
+    return added;
 }
 
 - (BOOL)startAndReturnError:(NSError **)outError
