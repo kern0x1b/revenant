@@ -5,6 +5,8 @@ package("expo-task-manager")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
 
+    add_deps("unimodules-app-loader")
+
     add_urls("https://registry.npmjs.org/expo-task-manager/-/expo-task-manager-$(version).tgz")
     add_versions("57.0.21", "c5742c062555e6a0d847fcaafcf4ccbdd94c272341401499dc17fdad0265b350")
 
