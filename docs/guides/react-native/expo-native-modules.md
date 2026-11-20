@@ -42,8 +42,9 @@ exercised, so the rows are `partial`, `phone`.
 
 ## MessageUI and printing (block 4)
 
-These packages are recipes with iOS 6 patches; each installs, its patch applies, and the host compiles and links it. None has been
-exercised on the phone, so their coverage rows are `real`, verified `build`.
+These packages are recipes; each installs, and the host compiles and links it. expo-mail-composer, expo-sms, expo-print and expo-video-thumbnails carry
+iOS 6 patches that apply; expo-sensors, expo-cellular and expo-task-manager build unpatched, and expo-location carries a patch. None has been exercised on the phone:
+expo-mail-composer, expo-sms, expo-print, expo-sensors, expo-cellular and expo-video-thumbnails are `real`, verified `build`; expo-location and expo-task-manager are `partial`, verified `build`.
 
 | Module | Removed or replaced | Why | What JS sees |
 | --- | --- | --- | --- |
