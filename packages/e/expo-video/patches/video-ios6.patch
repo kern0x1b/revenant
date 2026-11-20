@@ -1,0 +1,286 @@
+diff -ru a/ios/Cache/CacheVideoAssetTransportProvider.swift b/ios/Cache/CacheVideoAssetTransportProvider.swift
+--- a/ios/Cache/CacheVideoAssetTransportProvider.swift	2026-11-20 00:45:49
++++ b/ios/Cache/CacheVideoAssetTransportProvider.swift	2026-11-20 00:46:00
+@@ -9,7 +9,7 @@
+       return nil
+     }
+ 
+-    let cachedMimeType = MediaInfo(forResourceUrl: source.url)?.mimeType
++    let cachedMimeType = VideoMediaInfo(forResourceUrl: source.url)?.mimeType
+     let cachedExtension = mimeTypeToExtension(mimeType: cachedMimeType) ?? ""
+     let fileExtension = source.url.pathExtension.isEmpty ? cachedExtension : source.url.pathExtension
+     guard let saveFilePath = VideoAsset.pathForUrl(url: source.url, fileExtension: fileExtension) else {
+diff -ru a/ios/Cache/CachedResource.swift b/ios/Cache/CachedResource.swift
+--- a/ios/Cache/CachedResource.swift	2026-11-20 00:45:49
++++ b/ios/Cache/CachedResource.swift	2026-11-20 00:46:00
+@@ -12,7 +12,7 @@
+     data: Data,
+     offset: Int64,
+     fileHandle: MediaFileHandle,
+-    mediaInfo: MediaInfo?
++    mediaInfo: VideoMediaInfo?
+   ) throws {
+     try fileHandle.write(data: data, atOffset: offset)
+ 
+@@ -31,7 +31,7 @@
+   private let url: URL
+   private let dataPath: String
+   private let fileHandle: MediaFileHandle
+-  private(set) var mediaInfo: MediaInfo?
++  private(set) var mediaInfo: VideoMediaInfo?
+ 
+   private let writeCoordinator = WriteCoordinator()
+ 
+@@ -39,7 +39,7 @@
+     self.dataPath = dataPath
+     self.url = resourceUrl
+     self.fileHandle = MediaFileHandle(filePath: dataFileUrl)
+-    self.mediaInfo = MediaInfo(forResourceUrl: resourceUrl)
++    self.mediaInfo = VideoMediaInfo(forResourceUrl: resourceUrl)
+   }
+ 
+   func onResponseReceived(response: HTTPURLResponse) {
+@@ -47,7 +47,7 @@
+       return
+     }
+ 
+-    mediaInfo = MediaInfo(
++    mediaInfo = VideoMediaInfo(
+       expectedContentLength: response.expectedContentLength,
+       mimeType: response.mimeType,
+       supportsByteRangeAccess: urlResponseSupportsByteRangeAcces(response),
+diff -ru a/ios/Cache/MediaInfo.swift b/ios/Cache/MediaInfo.swift
+--- a/ios/Cache/MediaInfo.swift	2026-11-20 00:45:49
++++ b/ios/Cache/MediaInfo.swift	2026-11-20 00:46:00
+@@ -1,7 +1,7 @@
+ import Foundation
+ import ExpoModulesCore
+ 
+-class MediaInfo: Codable {
++class VideoMediaInfo: Codable {
+   var expectedContentLength: Int64
+   var supportsByteRangeAccess: Bool
+   var mimeType: String?
+@@ -51,7 +51,7 @@
+ 
+   convenience init?(data: Data, dataPath: String) {
+     do {
+-      let mediaInfo = try JSONDecoder().decode(MediaInfo.self, from: data)
++      let mediaInfo = try JSONDecoder().decode(VideoMediaInfo.self, from: data)
+       self.init(
+         expectedContentLength: mediaInfo.expectedContentLength,
+         mimeType: mediaInfo.mimeType,
+diff -ru a/ios/Enums/ContentType.swift b/ios/Enums/ContentType.swift
+--- a/ios/Enums/ContentType.swift	2026-11-20 00:45:49
++++ b/ios/Enums/ContentType.swift	2026-11-20 00:46:00
+@@ -2,7 +2,7 @@
+ 
+ import ExpoModulesCore
+ 
+-public enum ContentType: String, Enumerable {
++public enum VideoContentType: String, Enumerable {
+   case auto
+   case progressive
+   case hls
+diff -ru a/ios/Records/Tracks.swift b/ios/Records/Tracks.swift
+--- a/ios/Records/Tracks.swift	2026-11-20 00:45:49
++++ b/ios/Records/Tracks.swift	2026-11-20 00:56:57
+@@ -85,19 +85,21 @@
+   static func from(assetTrack: AVAssetTrack) async -> VideoTrack {
+     var averageBitrate: Int?
+     var size: VideoSize?
+-    let supported = (try? await assetTrack.load(.isPlayable)) ?? true
++    let supported = assetTrack.isPlayable
+     let mediaFormat = try? await assetTrack.mediaFormat
+-    let frameRate = try? await assetTrack.load(.nominalFrameRate)
++    let frameRate: Double? = assetTrack.nominalFrameRate
+     let safeFrameRate = (frameRate?.isFinite == true) ? frameRate : nil
+ 
+-    if let bitrateFloat = try? await assetTrack.load(.estimatedDataRate), bitrateFloat.isFinite {
++    let bitrateFloat = assetTrack.estimatedDataRate
++    if bitrateFloat.isFinite {
+       averageBitrate = Int(bitrateFloat)
+     }
+ 
+     let videoRange = VideoRange.from(videoRange: await assetTrack.avVideoRange)
+     let peakBitrate = await assetTrack.getPeakBitrate()
+ 
+-    if let cgSize = try? await assetTrack.load(.naturalSize), cgSize.width.isFinite, cgSize.height.isFinite {
++    let cgSize = assetTrack.naturalSize
++    if cgSize.width.isFinite, cgSize.height.isFinite {
+       size = VideoSize.from(cgSize)
+     }
+ 
+diff -ru a/ios/Records/VideoSource.swift b/ios/Records/VideoSource.swift
+--- a/ios/Records/VideoSource.swift	2026-11-20 00:45:49
++++ b/ios/Records/VideoSource.swift	2026-11-20 00:46:00
+@@ -20,6 +20,6 @@
+   var useCaching: Bool = false
+ 
+   @Field
+-  var contentType: ContentType = .auto
++  var contentType: VideoContentType = .auto
+ }
+ // swiftlint:enable redundant_optional_initialization
+diff -ru a/ios/Utils/AvAssetTrack+VideoTracks.swift b/ios/Utils/AvAssetTrack+VideoTracks.swift
+--- a/ios/Utils/AvAssetTrack+VideoTracks.swift	2026-11-20 00:45:49
++++ b/ios/Utils/AvAssetTrack+VideoTracks.swift	2026-11-20 00:56:57
+@@ -4,7 +4,7 @@
+   var mediaFormat: String {
+     get async throws {
+       var format = ""
+-      let descriptions = try await load(.formatDescriptions)
++      let descriptions = formatDescriptions as? [CMFormatDescription] ?? []
+       for (index, formatDesc) in descriptions.enumerated() {
+         let subType = CMFormatDescriptionGetMediaSubType(formatDesc).toCorrectedString()
+ 
+@@ -20,9 +20,7 @@
+ 
+   var avVideoRange: AVVideoRange {
+     get async {
+-      guard let formatDescriptions = try? await self.load(.formatDescriptions) else {
+-        return .sdr
+-      }
++      let formatDescriptions = self.formatDescriptions as? [CMFormatDescription] ?? []
+ 
+       for formatDesc in formatDescriptions {
+         guard let transferFunction = CMFormatDescriptionGetExtension(
+@@ -48,7 +46,7 @@
+   // Decently reliable way to extract peak bitrate from MP4 containers
+   // Unlike for average bitrate, we can't get this information from AVKit API
+   func getPeakBitrate() async -> Int? {
+-    guard let videoDescriptions = try? await self.load(.formatDescriptions),
++    guard let videoDescriptions = self.formatDescriptions as? [CMFormatDescription],
+       let videoDescription = (videoDescriptions.first { $0.mediaType == .video }),
+       let extensions = getBitrateParentExtension(from: videoDescription),
+       // If the container publishes the peak bitrate at all, it should be declared in this box
+diff -ru a/ios/VideoAsset.swift b/ios/VideoAsset.swift
+--- a/ios/VideoAsset.swift	2026-11-20 00:45:49
++++ b/ios/VideoAsset.swift	2026-11-20 00:46:00
+@@ -7,7 +7,7 @@
+ internal class VideoAsset: AVURLAsset, @unchecked Sendable {
+   internal let videoSource: VideoSource
+   internal let effectivePlaybackURL: URL
+-  internal let effectiveContentType: ContentType
++  internal let effectiveContentType: VideoContentType
+   private var resourceLoaderDelegateRef: (any AVAssetResourceLoaderDelegate)?
+   private var retainedTransportObjects: [AnyObject] = []
+   private let preAssetLoadCallback: ((AVURLAsset) async throws -> Void)?
+diff -ru a/ios/VideoAssetTransport/VideoAssetLoadPlan.swift b/ios/VideoAssetTransport/VideoAssetLoadPlan.swift
+--- a/ios/VideoAssetTransport/VideoAssetLoadPlan.swift	2026-11-20 00:45:49
++++ b/ios/VideoAssetTransport/VideoAssetLoadPlan.swift	2026-11-20 00:46:00
+@@ -14,7 +14,7 @@
+ public struct VideoAssetLoadPlan {
+   public let assetURL: URL
+   public let assetOptions: [String: Any]?
+-  public let reportedContentTypeHint: ContentType?
++  public let reportedContentTypeHint: VideoContentType?
+   public let resourceLoaderDelegate: (any AVAssetResourceLoaderDelegate)?
+   public let resourceLoaderQueue: DispatchQueue?
+   public let prepareAsset: ((AVURLAsset) async throws -> Void)?
+@@ -48,7 +48,7 @@
+   public init(
+     assetURL: URL,
+     assetOptions: [String: Any]? = nil,
+-    reportedContentTypeHint: ContentType? = nil,
++    reportedContentTypeHint: VideoContentType? = nil,
+     resourceLoaderDelegate: (any AVAssetResourceLoaderDelegate)? = nil,
+     resourceLoaderQueue: DispatchQueue? = nil,
+     prepareAsset: ((AVURLAsset) async throws -> Void)? = nil,
+diff -ru a/ios/VideoAssetTransport/VideoAssetSourceDescriptor.swift b/ios/VideoAssetTransport/VideoAssetSourceDescriptor.swift
+--- a/ios/VideoAssetTransport/VideoAssetSourceDescriptor.swift	2026-11-20 00:45:49
++++ b/ios/VideoAssetTransport/VideoAssetSourceDescriptor.swift	2026-11-20 00:46:00
+@@ -17,7 +17,7 @@
+   /// Indicates whether the source includes DRM configuration.
+   public let hasDRM: Bool
+   /// A best-effort content type hint derived from the source configuration.
+-  public let contentTypeHint: ContentType
++  public let contentTypeHint: VideoContentType
+ 
+   internal init(videoSource: VideoSource, url: URL) {
+     self.url = url
+diff -ru a/ios/VideoPlayerAudioTracks.swift b/ios/VideoPlayerAudioTracks.swift
+--- a/ios/VideoPlayerAudioTracks.swift	2026-11-20 00:45:49
++++ b/ios/VideoPlayerAudioTracks.swift	2026-11-20 00:56:57
+@@ -57,7 +57,7 @@
+       return availableAudioTracks
+     }
+ 
+-    let mediaSelectionCharacteristics = try await asset.load(.availableMediaCharacteristicsWithMediaSelectionOptions)
++    let mediaSelectionCharacteristics = asset.availableMediaCharacteristicsWithMediaSelectionOptions
+ 
+     for characteristic in mediaSelectionCharacteristics {
+       guard characteristic == .audible else {
+@@ -83,7 +83,7 @@
+       return
+     }
+ 
+-    let currentSelection = await playerItem.currentMediaSelection
++    let currentSelection = playerItem.currentMediaSelection
+     guard currentSelection.selectedMediaOption(in: audioGroup) == nil else {
+       return
+     }
+@@ -99,7 +99,7 @@
+     guard
+       let currentItem = playerItem,
+       let mediaSelectionGroup = try? await currentItem.asset.loadMediaSelectionGroup(for: .audible),
+-      let selectedMediaOption = await currentItem.currentMediaSelection.selectedMediaOption(in: mediaSelectionGroup)
++      let selectedMediaOption = currentItem.currentMediaSelection.selectedMediaOption(in: mediaSelectionGroup)
+     else {
+       return nil
+     }
+diff -ru a/ios/VideoPlayerItem.swift b/ios/VideoPlayerItem.swift
+--- a/ios/VideoPlayerItem.swift	2026-11-20 00:45:49
++++ b/ios/VideoPlayerItem.swift	2026-11-20 00:56:57
+@@ -41,7 +41,7 @@
+     // and cause it to go into .error state triggering the `onStatusChange` event.
+     do {
+       try await asset.prepareForLoadingIfNeeded()
+-      _ = try await asset.load(.duration, .preferredTransform, .isPlayable)
++      _ = (asset.duration, asset.preferredTransform, asset.isPlayable)
+     } catch {
+         // Catch block is intentionally left empty
+     }
+@@ -102,10 +102,8 @@
+ 
+   @available(iOS 26.0, tvOS 26, *)
+   private func loadModernHlsTracks(mainUrl: URL) async -> [VideoTrack] {
+-    guard let variants = try? await urlAsset.load(.variants) else {
+-      return []
+-    }
+-    let isPlayable = (try? await urlAsset.load(.isPlayable)) ?? false
++    let variants: [AVAssetVariant] = []
++    let isPlayable = urlAsset.isPlayable
+ 
+     return variants.compactMap { variant in
+       VideoTrack.from(assetVariant: variant, isPlayable: isPlayable, mainUrl: mainUrl)
+@@ -132,7 +130,7 @@
+       }
+     }
+ 
+-    let (data, _) = try await URLSession.shared.data(for: request)
++    let data = try NSURLConnection.sendSynchronousRequest(request, returning: nil)
+     let content = String(data: data, encoding: .utf8) ?? ""
+     return parseM3U8(content, mainUrl: uri)
+   }
+diff -ru a/ios/VideoPlayerSubtitles.swift b/ios/VideoPlayerSubtitles.swift
+--- a/ios/VideoPlayerSubtitles.swift	2026-11-20 00:45:49
++++ b/ios/VideoPlayerSubtitles.swift	2026-11-20 00:56:57
+@@ -54,7 +54,7 @@
+     guard let asset = await playerItem?.asset else {
+       return availableSubtitleTracks
+     }
+-    let mediaSelectionCharacteristics = try await asset.load(.availableMediaCharacteristicsWithMediaSelectionOptions)
++    let mediaSelectionCharacteristics = asset.availableMediaCharacteristicsWithMediaSelectionOptions
+ 
+     for characteristic in mediaSelectionCharacteristics {
+       guard characteristic == .legible else {
+@@ -78,7 +78,7 @@
+     guard
+       let currentItem = playerItem,
+       let mediaSelectionGroup = try? await currentItem.asset.loadMediaSelectionGroup(for: .legible),
+-      let selectedMediaOption = await currentItem.currentMediaSelection.selectedMediaOption(in: mediaSelectionGroup)
++      let selectedMediaOption = currentItem.currentMediaSelection.selectedMediaOption(in: mediaSelectionGroup)
+     else {
+       return nil
+     }

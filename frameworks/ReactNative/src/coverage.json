@@ -864,9 +864,9 @@
    "group": "sdk",
    "version": "~57.0.5",
    "native": true,
-   "status": "evaluate",
+   "status": "partial",
    "verified": "none",
-   "note": "Not built; package packages/e/expo-video (57.0.5, unpatched). Uses AVPlayer and AVPlayerItem (iOS 4), AVPlayerViewController and AVPictureInPictureController (frameworks/Backports/src/AVKit), AVContentKey (AVFoundation backports AVContentKey145 and AVContentKeySession103), and MPNowPlayingInfoCenter and MPRemoteCommandCenter (MediaPlayer backports). Measured: 5961 Swift lines, no Objective-C; its availability checks are iOS 16 and iOS 26 (#available), which are false on iOS 6, so the fallback paths must compile. No patch is written before a build shows one is needed. Blocked on ExpoModulesCore, which the tree does not package."
+   "note": "Recipe packages/e/expo-video (npm 57.0.5) and patch video-ios6.patch are committed. The patch renames the ContentType and MediaInfo types that collide with expo-clipboard and expo-image-picker inside ExpoAppModules, and replaces the iOS 15 Swift async load calls with the iOS 4 properties they read. The port is in progress: isolated builds still fail on about 20 post-iOS-6 APIs whose Backports implementations and lowering metadata are being added in batches. Nothing here is verified as built or running on the phone."
   },
   {
    "id": "expo-web-browser",

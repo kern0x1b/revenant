@@ -7,11 +7,11 @@ React Native 0.86.3, Expo SDK 57.0.30, measured on an iPhone 4S, iOS 6.1.3, armv
 | Status | Meaning | Count |
 | --- | --- | --- |
 | real | built from the module's own sources, with no stub and no substitute | 53 |
-| partial | built and running, with a named part left out or rewritten | 31 |
+| partial | built and running, with a named part left out or rewritten | 32 |
 | js | no native code of its own, so it runs with the bundle | 12 |
 | stub | a name-only module or a plain-view replacement: the application loads and the feature is absent | 0 |
 | missing | native code that is not built yet | 21 |
-| evaluate | not attempted; the note says what iOS 6 offers | 25 |
+| evaluate | not attempted; the note says what iOS 6 offers | 24 |
 | impossible | the system service does not exist before the iOS release the note names | 7 |
 | n/a | build, web or Android only: nothing to run on the phone | 11 |
 | total | | 160 |
@@ -156,7 +156,7 @@ Checked: phone: seen working on the phone; build: compiles and links; not exerci
 | expo-tracking-transparency | ~57.0.2 | yes | partial | none | ATTrackingManager (iOS 14) is absent from the iOS 6.1.3 cache, and no iOS 6 prompt exists. The analog is the Limit Ad Tracking setting, read by ASIdentifierManager.advertisingTrackingEnabled (AdSupport is in the cache). The AppTrackingTransparency backport answers NotDetermined and does not read it yet. Not built. |
 | expo-updates | ~57.0.26 | yes | evaluate | none | Needs the manifests module and a download path; no network scheme is decided. |
 | expo-video-thumbnails | ~57.0.2 | yes | real | build | Recipe packages/e/expo-video-thumbnails (npm 57.0.2, patch video-thumbnails-ios6.patch) installs and its patch applies; compiled into the host and linked (not exercised on the phone). The only change renames the three exception classes that collide with expo-image-manipulator's inside the shared ExpoAppModules Swift module. AVAssetImageGenerator.copyCGImage, AVURLAsset and UIImage jpegData are iOS 4 APIs; the HTTP-headers asset option is passed as a plain string key; whether iOS 6 honours it for http sources was not checked. |
-| expo-video | ~57.0.5 | yes | evaluate | none | Not built; package packages/e/expo-video (57.0.5, unpatched). Uses AVPlayer and AVPlayerItem (iOS 4), AVPlayerViewController and AVPictureInPictureController (frameworks/Backports/src/AVKit), AVContentKey (AVFoundation backports AVContentKey145 and AVContentKeySession103), and MPNowPlayingInfoCenter and MPRemoteCommandCenter (MediaPlayer backports). Measured: 5961 Swift lines, no Objective-C; its availability checks are iOS 16 and iOS 26 (#available), which are false on iOS 6, so the fallback paths must compile. No patch is written before a build shows one is needed. Blocked on ExpoModulesCore, which the tree does not package. |
+| expo-video | ~57.0.5 | yes | partial | none | Recipe packages/e/expo-video (npm 57.0.5) and patch video-ios6.patch are committed. The patch renames the ContentType and MediaInfo types that collide with expo-clipboard and expo-image-picker inside ExpoAppModules, and replaces the iOS 15 Swift async load calls with the iOS 4 properties they read. The port is in progress: isolated builds still fail on about 20 post-iOS-6 APIs whose Backports implementations and lowering metadata are being added in batches. Nothing here is verified as built or running on the phone. |
 | expo-web-browser | ~57.0.3 | yes | partial | phone | Recipe packages/e/expo-web-browser (npm 57.0.3, patch web-browser-ios6.patch), built into the host. SFSafariViewController (iOS 9) is replaced by opening the URL in Safari: openBrowserAsync resolves {type: opened} and leaves the app; dismissBrowser always raises WebBrowserNotOpenException (there is no browser to dismiss); the toolbar, reader and presentation options are accepted and have no effect. ASWebAuthenticationSession (iOS 12) has no replacement: openAuthSessionAsync rejects with WebAuthSessionUnavailableException. On the iPhone 4S (2026-11-17) the module is registered with its exports; the calls were not exercised. |
 | expo-widgets | ~57.0.26 | yes | impossible | none | WidgetKit, iOS 14. |
 | jest-expo | ~57.0.6 | yes | n/a | none | A test-runner preset; no native code. |
