@@ -118,14 +118,24 @@ static int revenant_clamp_byte(int value)
     return value < 0 ? 0 : (value > 255 ? 255 : value);
 }
 
-static CGImageRef revenant_copy_planar_image(CVPixelBufferRef image, BOOL fullRange)
+static CGImageRef revenant_copy_planar_image(CVPixelBufferRef image, CMFormatDescriptionRef description, BOOL fullRange)
 {
     size_t width = CVPixelBufferGetWidth(image);
     size_t height = CVPixelBufferGetHeight(image);
     if (!width || !height || CVPixelBufferGetPlaneCount(image) != 2)
         return NULL;
     CFTypeRef matrix = CVBufferGetAttachment(image, CFSTR("YCbCrMatrix"), NULL);
-    BOOL highDefinition = matrix && CFGetTypeID(matrix) == CFStringGetTypeID() && CFEqual(matrix, CFSTR("ITU_R_709_2"));
+    if (!matrix && description)
+        matrix = CMFormatDescriptionGetExtension(description, CFSTR("YCbCrMatrix"));
+    BOOL highDefinition = YES;
+    if (matrix) {
+        if (CFGetTypeID(matrix) != CFStringGetTypeID())
+            return NULL;
+        if (CFEqual(matrix, CFSTR("ITU_R_601_4")))
+            highDefinition = NO;
+        else if (!CFEqual(matrix, CFSTR("ITU_R_709_2")))
+            return NULL;
+    }
     int redChroma = highDefinition ? (fullRange ? 403 : 459) : (fullRange ? 359 : 409);
     int greenBlue = highDefinition ? (fullRange ? 48 : 55) : (fullRange ? 88 : 100);
     int greenRed = highDefinition ? (fullRange ? 120 : 136) : (fullRange ? 183 : 208);
@@ -207,9 +217,9 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample)
         CVPixelBufferUnlockBaseAddress(image, kCVPixelBufferLock_ReadOnly);
     }
     if (!frame && format == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)
-        frame = revenant_copy_planar_image(image, NO);
+        frame = revenant_copy_planar_image(image, CMSampleBufferGetFormatDescription(sample), NO);
     else if (!frame && format == kCVPixelFormatType_420YpCbCr8BiPlanarFullRange)
-        frame = revenant_copy_planar_image(image, YES);
+        frame = revenant_copy_planar_image(image, CMSampleBufferGetFormatDescription(sample), YES);
     return frame;
 }
 
