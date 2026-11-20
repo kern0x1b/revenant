@@ -1785,6 +1785,7 @@ class RevenantFileLocationsController
 class RevenantFindNavigator
 class RevenantFlashActiveWait
 class RevenantFlowModel
+class RevenantFontCascadeInstaller
 class RevenantFontDescriptorInstaller
 class RevenantFormattingContextInstaller
 class RevenantGCTables
@@ -4536,6 +4537,13 @@ function CMVideoFormatDescriptionCreateFromH264ParameterSets
 function CMVideoFormatDescriptionCreateFromHEVCParameterSets
 function CMVideoFormatDescriptionGetH264ParameterSetAtIndex
 function CMVideoFormatDescriptionGetHEVCParameterSetAtIndex
+function CTFontCreateCopyWithAttributes
+function CTFontCreateCopyWithFamily
+function CTFontCreateCopyWithSymbolicTraits
+function CTFontCreateUIFontForLanguage
+function CTFontCreateWithFontDescriptor
+function CTFontCreateWithGraphicsFont
+function CTFontCreateWithName
 function CTFrameDraw
 function CTFrameGetLineOrigins
 function CTFramesetterSuggestFrameSizeWithConstraints
@@ -27400,6 +27408,7 @@ member RevenantFlowModel -content
 member RevenantFlowModel -footers
 member RevenantFlowModel -headers
 member RevenantFlowModel -items
+member RevenantFontCascadeInstaller +load
 member RevenantFontDescriptorInstaller +load
 member RevenantFormattingContextInstaller +load
 member RevenantGCTables +extendedSpecs
@@ -37746,6 +37755,7 @@ type CPTimeRemainingColor
 type CPTrafficSide
 type CPTripPauseReason
 type CSSearchQuerySourceOptions
+type CTFontOptions
 type CXCallDirectoryEnabledStatus
 type CXCallEndedReason
 type CXHandleType

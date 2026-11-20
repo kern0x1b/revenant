@@ -210,6 +210,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [UIKit: UITextField alignment](reference/backports/UIKit/UITextFieldAlignment.md) | the top vertical alignment a code-made text field starts with on iOS 6 and the centered start the backports give it |
 | [UIKit: UITextView typingAttributes](reference/backports/UIKit/UITextViewTypingAttributes.md) | the WebCore fault of `typingAttributes` on a text view with no selection on iOS 6.1.3, what a later UIKit answers, and the answer the backports give |
 | [UIKit: UICornerConfiguration](reference/backports/UIKit/CornerConfiguration.md) | per-corner radii, concentric corners and how a view is clipped to them on iOS 6 |
+| [CoreText: the font fallback cascade](reference/backports/CoreText/FontFallbackCascade.md) | the whole-database font walk on iOS 6.1.3 for a code point no font covers, the cascade ending in `LastResort` that every font gets, where it is attached (CoreText creators, UIFont), what is not done, and the runtime case |
 | [Vision](reference/backports/Vision/README.md) | the Swift forms of the landmark, recognised-text and contour accessors, and the missing landmark detector |
 | [WeatherKit: CompassDirection](reference/backports/WeatherKit/CompassDirection.md) | `Wind.CompassDirection`, measured |
 | [WeatherKit: WeatherCondition](reference/backports/WeatherKit/WeatherCondition.md) | `WeatherCondition`, measured |

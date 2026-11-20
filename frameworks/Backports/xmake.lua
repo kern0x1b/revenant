@@ -874,7 +874,7 @@ option("backports_libs", {type = "string", default = "", showmenu = true,
 
 local RUNTIME = path.absolute(path.join(os.scriptdir(), "tests", "runtime"))
 local RUNTIME_LIBS = get_config("backports_libs")
-local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports", "PhotosBackports", "CloudKitBackports"}
+local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports", "PhotosBackports", "CloudKitBackports", "CoreTextBackports"}
 
 if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
     add_requires("revenant@emulator-guest", {alias = "emulator-guest"})
@@ -891,9 +891,9 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
             add_linkdirs(RUNTIME_LIBS)
             add_links(table.unpack(RUNTIME_LINKS))
         else
-            add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports", "IOSurfaceBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "PhotosBackports", "CloudKitBackports")
+            add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports", "IOSurfaceBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "PhotosBackports", "CloudKitBackports", "CoreTextBackports")
         end
-        add_frameworks("Foundation", "UIKit", "CoreGraphics", "QuartzCore", "OpenAL", "AudioToolbox", "AssetsLibrary")
+        add_frameworks("Foundation", "UIKit", "CoreGraphics", "CoreText", "QuartzCore", "OpenAL", "AudioToolbox", "AssetsLibrary")
         add_syslinks("objc")
     target_end()
 
@@ -956,6 +956,8 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         add_tests("cf_mutable_cast")
         add_tests("gesture_failure")
         add_tests("uitextview_typing_attributes")
+        add_tests("coretext_fallback_probe")
+        add_tests("coretext_fallback_cascade")
         add_tests("caspring_animation_cast")
         add_tests("caspring_animation_coding")
         add_tests("protocol_uimutabletraits")
