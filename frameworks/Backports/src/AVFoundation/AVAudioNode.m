@@ -15,7 +15,6 @@
     NSMutableArray<RevenantScheduledBuffer *> *_revenant_queue;
     AVAudioNodeTapBlock _revenant_tapBlock;
     RevenantTapPump *_revenant_pump;
-    // Pumps whose tap was removed or replaced. The audio thread may still be inside one, so they live until the node does.
     NSMutableArray<RevenantTapPump *> *_revenant_retired;
     BOOL _revenant_notifyInstalled;
 }
@@ -135,8 +134,6 @@
     if (tapFormat == nil || tapBlock == nil)
         return;
     _revenant_pump = [[RevenantTapPump alloc] initWithFormat:tapFormat bufferSize:bufferSize block:tapBlock];
-    // A node with an audio unit of its own (the mixer) is tapped on the unit's output; the input node's samples come from
-    // the microphone callback of the engine, which it sets up in prepare.
     if (![self isKindOfClass:[AVAudioInputNode class]] && _revenant->audioUnit) {
         AudioUnitAddRenderNotify(_revenant->audioUnit, RevenantTapRenderNotify, (__bridge void *)_revenant_pump);
         _revenant_notifyInstalled = YES;
@@ -198,7 +195,6 @@
         _revenant_state = calloc(1, sizeof(RevenantInputState));
         _revenant_state->scratchFrames = 4096;
         _revenant_state->scratch = calloc(_revenant_state->scratchFrames, sizeof(int16_t));
-        // As on iOS 13 and later, automatic gain control is on once voice processing is.
         _revenant_agc = YES;
     }
     return self;

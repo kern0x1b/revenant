@@ -66,7 +66,6 @@ function run(folder, cache, extra, execute)
     local arguments = {"l", "-P", ".", "tools/budget.lua", "run", "--class", "normal", "--jobs", "4", "--min", "1", "--",
         "./xmakew", "l", "-P", ".", "frameworks/ReactNative/tools/isolate.lua", "build", path.absolute(folder),
         "--cache", path.absolute(cache), "--target", "RNHost", "--real", real, "--log", path.absolute(folder) .. "-build.log"}
-    -- MODULE_BUILD_DEB=DIR also writes the debs of the shared packages the host links, which a phone window installs.
     if os.getenv("MODULE_BUILD_DEB") then
         table.join2(arguments, {"--deb", path.absolute(os.getenv("MODULE_BUILD_DEB"))})
     end

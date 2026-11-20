@@ -1048,10 +1048,7 @@ function app_optional_components(options)
     return names
 end
 
--- The application's own Expo modules: packages of its workspace or node_modules, not of the Expo SDK, that carry an
--- expo-module.config.json and are built into the host from the application's sources.
 function app_modules(options)
-    -- An application with no host.json has no modules of its own; a named manifest that is missing is still an error.
     if not options.manifest and not (options.project and os.isfile(path.join(options.project, "host.json"))) then
         return {}
     end

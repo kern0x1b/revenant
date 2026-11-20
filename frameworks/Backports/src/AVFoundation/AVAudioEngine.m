@@ -138,7 +138,6 @@ static OSStatus RevenantAddUnit(AUGraph graph, OSType type, OSType subtype, AUNo
         if (outImpl->audioUnit) {
             OSStatus outIn = AudioUnitSetProperty(outImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
             OSStatus outOut = AudioUnitSetProperty(outImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
-            // The output scope of the output unit is the hardware side and not writable (-10865); the other two are.
             (void)outOut;
             if (mixerOut != noErr || outIn != noErr)
                 NSLog(@"AVAudioEngine: the mixer's output format (%d) or the output unit's input format (%d) could not be set", (int)mixerOut, (int)outIn);
@@ -222,9 +221,6 @@ static OSStatus RevenantAddUnit(AUGraph graph, OSType type, OSType subtype, AUNo
     }
 }
 
-// The microphone side. The output unit of the graph (RemoteIO, or VoiceProcessingIO once voice processing is on) has the
-// microphone on bus 1; it is switched on, set to 16-bit mono at the tap's rate (the unit converts), and given an input
-// callback that renders the microphone into the tap's pump. It has to happen while the graph is not initialized.
 - (void)revenant_configureInput
 {
     if (_revenant_offline || _revenant_inputConfigured)
@@ -253,7 +249,6 @@ static OSStatus RevenantAddUnit(AUGraph graph, OSType type, OSType subtype, AUNo
     format.mBitsPerChannel = 16;
     status = AudioUnitSetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &format, sizeof(format));
     if (status != noErr) {
-        // The unit does not convert to that rate: take the rate it has and let the pump resample.
         AudioStreamBasicDescription current = {0};
         UInt32 size = sizeof(current);
         AudioUnitGetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &current, &size);
@@ -289,7 +284,6 @@ static OSStatus RevenantAddUnit(AUGraph graph, OSType type, OSType subtype, AUNo
     AudioUnitSetProperty(unit, kAUVoiceIOProperty_VoiceProcessingEnableAGC, kAudioUnitScope_Global, 0, &agc, sizeof(agc));
 }
 
-// Stops and uninitializes the graph so that its units can be reconfigured, and says whether it was running.
 - (NSUInteger)revenant_suspend
 {
     NSUInteger state = (_revenant_initialized ? 1 : 0) | (_revenant_running ? 2 : 0);
@@ -306,15 +300,12 @@ static OSStatus RevenantAddUnit(AUGraph graph, OSType type, OSType subtype, AUNo
 
 - (void)revenant_resume:(NSUInteger)state
 {
-    // Only a graph that was initialized is initialized again: one that was not is still being built, and its units
-    // must stay open for their formats until prepare or start.
     if (state & 1)
         [self prepare];
     if (state & 2)
         [self startAndReturnError:NULL];
 }
 
-// A tap on the input node, or voice processing, was added or removed: the microphone setup has to follow.
 - (void)revenant_inputChanged
 {
     if (!_revenant_initialized || _revenant_offline)
@@ -343,14 +334,12 @@ static OSStatus RevenantAddUnit(AUGraph graph, OSType type, OSType subtype, AUNo
     description.componentType = kAudioUnitType_Output;
     description.componentSubType = enabled ? kAudioUnitSubType_VoiceProcessingIO : kAudioUnitSubType_RemoteIO;
     description.componentManufacturer = kAudioUnitManufacturer_Apple;
-    // A graph holds one output node, so the old one goes first (and takes its connection with it).
     AUGraphRemoveNode(_revenant_graph, previous);
     OSStatus status = AUGraphAddNode(_revenant_graph, &description, &output);
     BOOL added = status == noErr && output != 0;
     if (!added) {
         if (outError)
             *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
-        // Put an output node of the previous kind back so the engine stays usable.
         description.componentSubType = enabled ? kAudioUnitSubType_RemoteIO : kAudioUnitSubType_VoiceProcessingIO;
         AUGraphAddNode(_revenant_graph, &description, &output);
     }

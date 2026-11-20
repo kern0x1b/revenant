@@ -275,7 +275,6 @@ function build_environment(options)
     if options.pkgdirs and options.pkgdirs ~= "" then
         env.RN_PKG_DIRS = options.pkgdirs
     end
-    -- The application's own Expo modules (the "modules" of its host.json) are built from its sources, with no recipe.
     local modules = options.folder and read_app_manifest(options.folder).modules
     if modules and #modules > 0 then
         env.RN_APP_MODULES = table.concat(modules, ",")
@@ -436,8 +435,6 @@ function clone_project(src, dst, new_cache, old_cache, old_checkout, bundle_id)
     for _, pair in ipairs(mapped) do
         table.join2(patterns, {"-e", pair[1]})
     end
-    -- The files that name a root are found in the source, once, before the copy; the copy is one clone of the tree and
-    -- only those files are opened in it, so the clone is neither walked nor searched.
     local named = try {
         function ()
             return os.iorunv("grep", table.join({"-rIlF", "--exclude-dir=ref"}, patterns, {src}))

@@ -82,8 +82,6 @@ local function modules(text)
             end
         end
     end
-    -- The application's own Expo modules (the host.json "modules" of the application, RN_APP_MODULES): packages of its
-    -- workspace or node_modules that are not part of the Expo SDK, built from the application's sources.
     for _, package in ipairs(string.split(os.getenv("RN_APP_MODULES") or "", ",", {plain = true})) do
         if package ~= "" then
             table.insert(candidates, package)
@@ -163,8 +161,6 @@ local EXPO_REWRITE = {
     ["FileSystemModule.swift"] = {package = "expo-file-system", replace = GATE14},
     ["FileSystemDownload.swift"] = {package = "expo-file-system", replace = GATE14},
     ["FileSystemFileHandle.swift"] = {package = "expo-file-system", replace = GATE14},
-    -- A top-level `let microphoneKey` that expo-camera's CameraPermissionsRequester.swift also declares: the two modules
-    -- share the Swift module ExpoAppModules, so the application module's constant takes the module's prefix (a name only).
     ["MicrophonePermissionRequester.swift"] = {package = "@getpaseo/expo-two-way-audio", replace = {{"let microphoneKey", "let twoWayAudioMicrophoneKey"}}},
 }
 local LOCAL_COPIES = {

@@ -1,7 +1,6 @@
 #import "RevenantAVAudioTap.h"
 #include <math.h>
 
-// The ring holds mono float samples in the tap's rate. A power of two, so the indexes wrap with a mask.
 static const uint32_t RevenantTapRingSize = 1 << 17;
 
 @implementation RevenantTapPump {
@@ -15,8 +14,6 @@ static const uint32_t RevenantTapRingSize = 1 << 17;
     volatile int32_t _draining;
     volatile int32_t _stopped;
     double _sourceRate;
-    // The linear resampler's state: the position of the next output sample in the current chunk (-1 is the previous chunk's
-    // last sample) and that last sample.
     double _position;
     float _previous;
 }
@@ -140,7 +137,6 @@ static const uint32_t RevenantTapRingSize = 1 << 17;
         uint32_t write = __atomic_load_n(&_write, __ATOMIC_ACQUIRE);
         if (write - read < _bufferSize) {
             __atomic_store_n(&_draining, 0, __ATOMIC_RELEASE);
-            // Samples that arrived between the check and the flag would wait for the next write, so look once more.
             if (__atomic_load_n(&_write, __ATOMIC_ACQUIRE) - read >= _bufferSize && __atomic_exchange_n(&_draining, 1, __ATOMIC_ACQ_REL) == 0)
                 continue;
             return;
@@ -192,7 +188,6 @@ OSStatus RevenantInputRenderCallback(void *refCon, AudioUnitRenderActionFlags *f
     return noErr;
 }
 
-// A post-render notify on a node's audio unit: hands the node's output to the pump that its tap installed.
 OSStatus RevenantTapRenderNotify(void *refCon, AudioUnitRenderActionFlags *flags, const AudioTimeStamp *timeStamp,
                                  UInt32 bus, UInt32 frames, AudioBufferList *data)
 {

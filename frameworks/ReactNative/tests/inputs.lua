@@ -244,9 +244,6 @@ check("a module the application does not have is an error", fails(function () ex
 os.mkdir(path.join(modules_app, "app", "node_modules", "@scope", "some-module"))
 os.mkdir(path.join(modules_app, "app", "node_modules", "plain-module"))
 check("the application's modules join the built packages", (function () local names = expo_packages(ctx_modules); return names[#names - 1] == "@scope/some-module" and names[#names] == "plain-module" end)())
--- A package that names its Swift side under "ios" (expo-module.config.json allows "apple", "ios" and "tvos") is listed in the
--- provider like one that names it under "apple": the application's @getpaseo/expo-two-way-audio does, and its module was
--- compiled but never registered (ExpoTwoWayAudio: "the module is not registered" on the iPad 2, 2026-11-20).
 for _, package in ipairs(expo_packages(ctx_modules)) do
     local dir = path.join(modules_app, "app", "node_modules", package)
     if not os.isdir(dir) then

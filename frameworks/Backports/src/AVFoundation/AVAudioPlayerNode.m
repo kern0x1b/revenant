@@ -78,7 +78,6 @@ OSStatus RevenantPlayerRenderCallback(void *inRefCon, AudioUnitRenderActionFlags
     AVAudioPlayerNodeCompletionHandler kept = [completionHandler copy];
     [self scheduleBuffer:buffer atTime:when options:options completionHandler:^{
         if (callbackType == AVAudioPlayerNodeCompletionDataPlayedBack) {
-            // The buffer has left the render callback; it is heard after the output latency of the session.
             NSTimeInterval latency = [AVAudioSession sharedInstance].outputLatency;
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(latency * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 kept(callbackType);

@@ -2,11 +2,6 @@
 #include <math.h>
 #import "check.h"
 
-// The microphone side of the AVAudioEngine backport on a phone: voice processing on the input node (a VoiceProcessingIO
-// unit behind the output node), an input tap fed by the microphone, a mixer tap fed by the player, the mute and bypass
-// flags, and the completion type of a scheduled buffer. What the microphone hears is not checked: the room decides it,
-// and the probe only needs the samples to flow in the format asked for.
-
 @interface Collector : NSObject
 @property (nonatomic) NSUInteger frames;
 @property (nonatomic) NSUInteger chunks;
@@ -112,7 +107,6 @@ int main(int argc, char **argv)
         [engine prepare];
         revenant_check(([engine startAndReturnError:&error] && engine.isRunning) != revenant_negative, "the engine starts with the microphone and voice processing", error.description ?: @"");
 
-        // A 440 Hz tone at 0.5 for one second, scheduled with the played-back completion type.
         AVAudioFrameCount count = 16000;
         AVAudioPCMBuffer *tone = [[AVAudioPCMBuffer alloc] initWithPCMFormat:format frameCapacity:count];
         tone.frameLength = count;
@@ -135,7 +129,6 @@ int main(int argc, char **argv)
         revenant_check((speaker.peak > 0.4 && speaker.peak < 0.6) != revenant_negative, "the mixer tap carries the tone at its level", [NSString stringWithFormat:@"peak %.3f", speaker.peak]);
         revenant_check((microphone.chunks > 10 && microphone.rate == 16000 && microphone.channels == 1 && microphone.chunkFrames == 2048) != revenant_negative, "the input tap delivers 2048-frame mono chunks at 16 kHz",
                        [NSString stringWithFormat:@"%lu chunks, %.0f Hz, %lu channels, %lu frames", (unsigned long)microphone.chunks, microphone.rate, (unsigned long)microphone.channels, (unsigned long)microphone.chunkFrames]);
-        // 2.5 s of microphone at 16 kHz is 40000 frames; allow for the start-up and the last partial chunk.
         revenant_check((microphone.frames > 28000 && microphone.frames < 42000) != revenant_negative, "the input tap's frame count matches the time", [NSString stringWithFormat:@"%lu frames", (unsigned long)microphone.frames]);
 
         [microphone reset];
