@@ -380,21 +380,22 @@ one pool, kept in `.cache/budget` of the main checkout whatever `REVENANT_CACHE`
     ./xmakew l -P . tools/budget.lua status
     ./xmakew l -P . tools/budget.lua test
 
-- Size. The pool holds at most the cores less two. Room is recomputed on every poll, from what the machine is doing now,
-  never from a sample taken once at admission or from a patience timeout. CPU headroom is the runnable load of the last
-  minute (`sysctl vm.loadavg`) less the tokens this pool holds: each holder is one runnable thread, so only load from outside
-  the pool counts against a new request. Memory headroom comes from pressure, not from idle pages: the pressure level
-  (`kern.memorystatus_vm_pressure_level`), the growth in compressor pages and the pageouts per second between successive
-  `vm_stat` samples. Inactive pages are never counted as free. At normal pressure with a stable compressor and no pageouts,
-  memory headroom is the free and speculative pages less 2 GB, in tokens, but at least one; at warning pressure, or while
-  the compressor grows or pages page out, it is one token; at critical pressure it is none. Memory decides whether a request
-  can start: one that fits by memory starts even when its `--min` is not available, with one job if that is all the room
-  there is. CPU headroom (the runnable load outside the pool) decides how many more jobs it gets, up to `--jobs`. A busy
-  machine therefore runs it with fewer jobs instead of keeping it idle for five
-  minutes. A request that does not fit by memory waits and re-checks, and there is no patience after which the CPU stops
-  mattering.
+- Size. The pool holds at most the cores less two. Room is recomputed on every poll, never from a sample taken once at
+  admission or from a patience timeout. CPU headroom uses the larger of two measurements: the one-minute runnable load
+  (`sysctl vm.loadavg`) plus the tokens granted in the last minute, which a slow average has not caught up with yet, and
+  the runnable threads of the pool's own holders, read from `ps` state `R` over each holder's process tree. Tokens are not
+  assumed to be runnable threads: a holder blocked on I/O contributes nothing, and a holder whose build spawns many
+  compilers contributes all of them, so neither subtracts a guess from the system load. Memory headroom comes from
+  pressure, not from idle pages: the pressure level (`kern.memorystatus_vm_pressure_level`), the growth in compressor pages
+  and the pageouts per second between successive `vm_stat` samples. Inactive pages are never counted as free. At normal
+  pressure with a stable compressor and no pageouts, memory headroom is the free and speculative pages less 2 GB, in
+  tokens, but at least one; at warning pressure, or while the compressor grows or pages page out, it is one token; at
+  critical pressure it is none. A request gets no fewer tokens than its `--min`: if the room cannot hold the minimum it
+  waits and re-checks, with no patience after which the load stops mattering. When the minimum fits but the room is smaller
+  than `--jobs`, it starts with fewer jobs, up to what memory and CPU allow.
 - Need. A command asks for `--min` tokens (one by default), or for the tokens its `--mb` needs when that is more (a 2.5 GB class
-  takes two), and for up to `--jobs`. It runs with `XMAKE_MAX_JOBS` set to the tokens it got.
+  takes two), and for up to `--jobs`; the minimum is a hard floor and a request that cannot meet it is never started short.
+  It runs with `XMAKE_MAX_JOBS` set to the tokens it got.
 - Order. Waiting commands queue by class: `critical` (the checks before a push), `normal` (the default, which every `./xmakew`
   build, test, configure, install, run, package and deb uses) and `background`. Within a class the first to wait goes first.
   A small request backfills past an earlier one whose minimum does not fit the current headroom, so a large request that
