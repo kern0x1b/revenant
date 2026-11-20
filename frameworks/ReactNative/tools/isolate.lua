@@ -1,9 +1,14 @@
 local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua copy <project> <folder> --cache <private cache> [--bundle-id org.revenant.rnhost.<name>]
-       ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua build <folder> --cache <private cache> [--target RNHost] [--real a,b] [--pods pkg:module,...] [--jobs N] [--log file] [--configure-only 1]
+       ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua clone <warm copy> <folder> --cache <own clone of the private cache> [--src-cache <its cache>] [--src-checkout <its checkout>] [--bundle-id org.revenant.rnhost.<name>]
+       ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua build <folder> --cache <private cache> [--target RNHost] [--real a,b] [--pods pkg:module,...] [--jobs N] [--log file] [--configure-only 1] [--deb DIR]
   copy   makes a private copy of the host project in <folder>: the hand-made inputs of its build/ with every absolute path rewritten to
          the folder, build/ref linked read only, and the react-native package with all its patches installed into the private cache
          and linked as build/rn-src. The path of <folder> must not contain "test" or "Example". The copy's app gets its own bundle id,
          --bundle-id or org.revenant.rnhost.<folder name>, written as bundleId into the copy's build/app-manifest/host.json, so that installs of different workers do not overwrite each other.
+  clone  makes an APFS clone of a warm copy (one that built) in <folder>, for another worktree whose private cache is an APFS clone of the copy's cache: the
+         files that name the old copy, checkout and cache (recorded in build/isolate-roots.txt by copy and build) are rewritten and the links under build/ (rn-headers,
+         rn-src, the package probes) are retargeted. The clone's probes answer from their recorded install folders without installing again, nothing in it reaches
+         into the copy it came from, and a build in it compiles only what changed.
   build  builds the host (or another target, for example expo-jsi-probe) from that copy with this checkout's toolchain. Expo packages
          named in --real and community libraries named in --pods, or in the pods of the app manifest, are built as real modules; the rest are the stubs of the host.
          The react-native-enriched-markdown sources are the installed package of its recipe (packages/r, patches included), not the application's node_modules copy.]]
@@ -189,7 +194,7 @@ function default_patched(folder, real)
     if real and real ~= "" then
         return {}
     end
-    local ref = path.join(folder, "build", "ref", "paseo")
+    local ref = path.join(folder, "build", "ref", "app")
     local found = {}
     for _, name in ipairs(DEFAULT_PATCHED) do
         if os.isdir(path.join(ref, "packages", "app", "node_modules", name)) or os.isdir(path.join(ref, "node_modules", name)) then
@@ -345,58 +350,208 @@ local function checkout()
     return path.absolute(os.projectdir())
 end
 
-function install_react_native(folder, cache)
-    local probe = path.join(folder, "build", "pkg-probe")
-    os.mkdir(probe)
-    io.writefile(path.join(probe, "xmake.lua"), table.concat(table.join({
-        'set_project("rnsrc")',
+function roots_file(folder)
+    return path.join(folder, "build", "isolate-roots.txt")
+end
+
+function write_roots(folder, cache)
+    io.writefile(roots_file(folder), table.concat({path.absolute(folder), checkout(), path.absolute(cache)}, "\n") .. "\n")
+end
+
+function read_roots(folder)
+    local file = roots_file(folder)
+    if not os.isfile(file) then
+        return nil
+    end
+    local found = {}
+    for line in io.readfile(file):gmatch("[^\n]+") do
+        table.insert(found, line)
+    end
+    return {folder = found[1], checkout = found[2], cache = found[3]}
+end
+
+function root_pairs(old, new)
+    local pairs_ = {}
+    for _, key in ipairs({"folder", "checkout", "cache"}) do
+        if old[key] and new[key] and old[key] ~= new[key] then
+            table.insert(pairs_, {old[key], new[key]})
+        end
+    end
+    table.sort(pairs_, function (a, b) return #a[1] > #b[1] end)
+    return pairs_
+end
+
+function rewrite_roots(text, mapped)
+    for _, pair in ipairs(mapped) do
+        text = replace(text, pair[1], pair[2])
+    end
+    return text
+end
+
+function retarget_link(target, mapped)
+    for _, pair in ipairs(mapped) do
+        local new = link_target(target, pair[1], pair[2])
+        if new then
+            return new
+        end
+    end
+end
+
+function lexical_path(value)
+    local parts = {}
+    for segment in path.absolute(value):gmatch("[^/]+") do
+        if segment == ".." then
+            table.remove(parts)
+        elseif segment ~= "." then
+            table.insert(parts, segment)
+        end
+    end
+    return "/" .. table.concat(parts, "/")
+end
+
+function clone_project(src, dst, new_cache, old_cache, old_checkout, bundle_id)
+    src, dst = lexical_path(src), lexical_path(dst)
+    if not folder_is_valid(dst) then
+        raise("%s contains test or Example, which the pod source filter of the host build skips", dst)
+    end
+    if os.exists(dst) then
+        raise("%s exists; remove it first", dst)
+    end
+    local old = read_roots(src) or {folder = src}
+    old.folder = src
+    old.cache = old_cache and lexical_path(old_cache) or old.cache
+    old.checkout = old_checkout and lexical_path(old_checkout) or old.checkout
+    if not (old.cache and old.checkout) then
+        raise("%s has no build/isolate-roots.txt: pass --src-cache and --src-checkout", src)
+    end
+    local new = {folder = dst, checkout = checkout(), cache = lexical_path(new_cache)}
+    local mapped = root_pairs(old, new)
+    os.mkdir(path.directory(dst))
+    os.vrunv("cp", {"-cR", src, dst})
+    local patterns = {}
+    for _, pair in ipairs(mapped) do
+        table.join2(patterns, {"-e", pair[1]})
+    end
+    local rewritten = 0
+    local named = try {
+        function ()
+            return os.iorunv("grep", table.join({"-rIlF", "--exclude-dir=ref"}, patterns, {dst}))
+        end,
+        catch {
+            function ()
+                return ""
+            end
+        }
+    }
+    for _, file in ipairs(lines(named)) do
+        local text = io.readfile(file)
+        local changed = rewrite_roots(text, mapped)
+        if changed ~= text then
+            io.writefile(file, changed)
+            rewritten = rewritten + 1
+        end
+    end
+    local relinked = 0
+    for _, link in ipairs(lines(os.iorunv("find", {path.join(dst, "build"), "-type", "l", "-not", "-path", path.join(dst, "build", "ref")}))) do
+        local retargeted = retarget_link(os.iorunv("readlink", {link}):trim(), mapped)
+        if retargeted then
+            os.vrunv("ln", {"-sfn", retargeted, link})
+            relinked = relinked + 1
+        end
+    end
+    local left = try {
+        function ()
+            return os.iorunv("grep", table.join({"-rIlF", "--exclude-dir=ref"}, patterns, {dst}))
+        end,
+        catch {
+            function ()
+                return ""
+            end
+        }
+    }
+    local first = lines(left or "")[1]
+    if first then
+        raise("the clone %s still names a root of the copy it came from, for example in %s", dst, first)
+    end
+    write_roots(dst, new.cache)
+    local id = bundle_id and write_bundle_id(dst, bundle_id) or nil
+    return {rewritten = rewritten, relinked = relinked, bundle_id = id}
+end
+
+function probe_header(root)
+    return {
         'set_xmakever("3.1.2")',
         'add_rules("mode.release")',
-        string.format('add_repositories("revenant %s")', checkout()),
-        string.format('add_addons("revenant", {sourcedir = "%s"})', path.join(checkout(), "toolchain")),
+        string.format('add_repositories("revenant %s")', root),
+        string.format('add_addons("revenant", {sourcedir = "%s"})', path.join(root, "toolchain")),
         'set_config("apple_minimum", "6.0")',
-        'includes("@addon/revenant/apple-ios")'}, WHOLE_PROBE, {
+        'includes("@addon/revenant/apple-ios")'}
+end
+
+function react_native_probe_text(root)
+    return table.concat(table.join({'set_project("rnsrc")'}, probe_header(root), WHOLE_PROBE, {
         'add_requires("revenant@react-native 0.86.3", {alias = "react-native"})',
         'target("t")',
         '    set_kind("phony")',
         '    add_packages("react-native")',
         '    on_config(function (target)',
         '        io.writefile(path.join(os.projectdir(), "installdir.txt"), target:pkg("react-native"):installdir())',
-        '    end)', ""}), "\n"))
-    local installed = path.join(probe, "installdir.txt")
-    os.tryrm(installed)
-    os.vrunv(path.join(checkout(), "xmakew"), {"f", "-P", probe, "-p", "iphoneos", "-a", "armv7", "-y"}, {envs = {REVENANT_CACHE = cache}})
-    if not os.isfile(installed) then
-        raise("react-native 0.86.3 is not installed from its recipe")
-    end
-    return link_react_native(folder, io.readfile(installed):trim())
+        '    end)', ""}), "\n")
 end
 
-function install_recipe(folder, cache, name, version)
-    local probe = path.join(folder, "build", "pkg-probe-" .. name)
-    os.mkdir(probe)
-    local installed = path.join(probe, "installdir.txt")
-    os.tryrm(installed)
-    io.writefile(path.join(probe, "xmake.lua"), table.concat(table.join({
-        'set_project("pkgprobe")',
-        'set_xmakever("3.1.2")',
-        'add_rules("mode.release")',
-        string.format('add_repositories("revenant %s")', checkout()),
-        string.format('add_addons("revenant", {sourcedir = "%s"})', path.join(checkout(), "toolchain")),
-        'set_config("apple_minimum", "6.0")',
-        'includes("@addon/revenant/apple-ios")'}, WHOLE_PROBE, {
+function recipe_probe_text(root, name, version)
+    return table.concat(table.join({'set_project("pkgprobe")'}, probe_header(root), WHOLE_PROBE, {
         string.format('add_requires("revenant@%s %s", {alias = "%s"})', name, version, name),
         'target("t")',
         '    set_kind("phony")',
         string.format('    add_packages("%s")', name),
         '    on_config(function (target)',
         string.format('        io.writefile(path.join(os.projectdir(), "installdir.txt"), target:pkg("%s"):installdir())', name),
-        '    end)', ""}), "\n"))
+        '    end)', ""}), "\n")
+end
+
+function reusable_answer(probe, text, recipe)
+    local script, installed = path.join(probe, "xmake.lua"), path.join(probe, "installdir.txt")
+    if not (os.isfile(script) and os.isfile(installed) and io.readfile(script) == text) then
+        return nil
+    end
+    local previous = io.readfile(installed):trim()
+    local stamp, newest_recipe = os.mtime(installed), 0
+    for _, file in ipairs(os.files(path.join(recipe, "**"))) do
+        newest_recipe = math.max(newest_recipe, os.mtime(file))
+    end
+    if os.isdir(previous) and newest_recipe < stamp then
+        return previous
+    end
+    return nil
+end
+
+function run_probe(probe, text, cache, what)
+    local installed = path.join(probe, "installdir.txt")
+    os.tryrm(installed)
+    io.writefile(path.join(probe, "xmake.lua"), text)
     os.vrunv(path.join(checkout(), "xmakew"), {"f", "-P", probe, "-p", "iphoneos", "-a", "armv7", "-y"}, {envs = {REVENANT_CACHE = cache}})
     if not os.isfile(installed) then
-        raise("%s %s is not installed from its recipe", name, version)
+        raise("%s is not installed from its recipe", what)
     end
     return io.readfile(installed):trim()
+end
+
+function install_react_native(folder, cache)
+    local probe = path.join(folder, "build", "pkg-probe")
+    os.mkdir(probe)
+    local text = react_native_probe_text(checkout())
+    local installdir = reusable_answer(probe, text, path.join(checkout(), "packages", "r", "react-native"))
+        or run_probe(probe, text, cache, "react-native 0.86.3")
+    return link_react_native(folder, installdir)
+end
+
+function install_recipe(folder, cache, name, version)
+    local probe = path.join(folder, "build", "pkg-probe-" .. name)
+    os.mkdir(probe)
+    local text = recipe_probe_text(checkout(), name, version)
+    return reusable_answer(probe, text, path.join(checkout(), "packages", name:sub(1, 1), name))
+        or run_probe(probe, text, cache, name .. " " .. version)
 end
 
 function link_react_native(folder, installdir)
@@ -451,9 +606,39 @@ function recipe_version(name)
     return version
 end
 
+function application_version(folder, name)
+    for _, base in ipairs({{"packages", "app", "node_modules"}, {"node_modules"}}) do
+        local file = path.join(folder, "build", "ref", "app", path.join(table.unpack(base)), name, "package.json")
+        if os.isfile(file) then
+            return json.decode(io.readfile(file)).version
+        end
+    end
+    return nil
+end
+
+function patched_pods(folder, cache, manifest, taken)
+    local found = {}
+    for _, entry in ipairs(manifest.pods or {}) do
+        local package = entry:match("^(.-):") or entry
+        local name = package:gsub("^@[^/]+/", "")
+        local recipe = path.join(checkout(), "packages", name:sub(1, 1), name, "xmake.lua")
+        if os.isfile(recipe) and not taken[name] then
+            local version = recipe_version(name)
+            local used = application_version(folder, package)
+            if used == version then
+                table.insert(found, name .. "=" .. install_recipe(folder, cache, name, version))
+            else
+                print(string.format("%s: the application has %s, the patched package is %s; the application's own unpatched copy is built", package, tostring(used), version))
+            end
+        end
+    end
+    return found
+end
+
 function build(folder, cache, options)
     folder = path.absolute(folder)
     check_copy(folder)
+    write_roots(folder, cache)
     local carried = io.readfile(path.join(folder, "xmake.lua"))
     for _, pod in ipairs(POD_REQUIRES) do
         if not carried:find(pod_requirement(pod), 1, true) then
@@ -469,8 +654,16 @@ function build(folder, cache, options)
     for _, name in ipairs(default_patched(folder, options.real)) do
         table.insert(pkgdirs, name .. "=" .. install_recipe(folder, path.absolute(cache), name, recipe_version(name)))
     end
+    local taken = {[ENRICHED_MARKDOWN.name] = true}
+    for _, entry in ipairs(pkgdirs) do
+        taken[entry:match("^([^=]+)=")] = true
+    end
+    for _, entry in ipairs(patched_pods(folder, path.absolute(cache), read_app_manifest(folder), taken)) do
+        table.insert(pkgdirs, entry)
+        taken[entry:match("^([^=]+)=")] = true
+    end
     local hermes = os.getenv("RN_HERMES") and true or nil
-    if hermes then
+    if hermes and not taken["react-native-worklets"] then
         table.insert(pkgdirs, "react-native-worklets=" .. install_recipe(folder, path.absolute(cache), "react-native-worklets", recipe_version("react-native-worklets")))
     end
     local env = build_environment({
@@ -488,6 +681,9 @@ function build(folder, cache, options)
     local built = configured
     if configured == 0 and not options.configure_only then
         built = command_status({"-c", "\"$1\" build -P \"$2\" -j \"$5\" -y -v \"$3\" >> \"$4\" 2>&1", "sh", xmakew, folder, options.target or "RNHost", log, options.jobs or "4"}, {envs = env})
+    end
+    if built == 0 and options.deb then
+        built = command_status({"-c", "\"$1\" deb -P \"$2\" -y -o \"$3\" \"$5\" >> \"$4\" 2>&1", "sh", xmakew, folder, path.absolute(options.deb), log, options.target or "RNHost"}, {envs = env})
     end
     return built or 1, log
 end
@@ -510,9 +706,13 @@ function main(...)
     if command == "copy" and #positional == 2 and options.cache then
         local result = copy_project(positional[1], positional[2], options["bundle-id"])
         local sources = install_react_native(path.absolute(positional[2]), path.absolute(options.cache))
+        write_roots(positional[2], options.cache)
         print(string.format("isolated %s: %d files rewritten, %d links retargeted, rn-src %s, bundle id %s", positional[2], result.rewritten, result.relinked, sources, result.bundle_id))
+    elseif command == "clone" and #positional == 2 and options.cache then
+        local result = clone_project(positional[1], positional[2], options.cache, options["src-cache"], options["src-checkout"], options["bundle-id"])
+        print(string.format("cloned %s to %s: %d files rewritten, %d links retargeted", positional[1], positional[2], result.rewritten, result.relinked))
     elseif command == "build" and #positional == 1 and options.cache then
-        local code, log = build(positional[1], options.cache, {target = options.target, real = options.real, pods = options.pods, log = options.log, engine = options.engine, swiftui = options.swiftui, backports = options.backports, shared = options.shared, jobs = options.jobs, configure_only = options["configure-only"]})
+        local code, log = build(positional[1], options.cache, {target = options.target, real = options.real, pods = options.pods, log = options.log, deb = options.deb, engine = options.engine, swiftui = options.swiftui, backports = options.backports, shared = options.shared, jobs = options.jobs, configure_only = options["configure-only"]})
         print(string.format("exit %d, log %s", code, log))
         local errors = try {
             function ()

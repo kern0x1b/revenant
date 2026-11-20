@@ -48,14 +48,47 @@ var CHECKS = {
   ExpoStoreReview: function (module) {
     return module.isAvailableAsync();
   },
+  ExpoSQLite: function (module) {
+    var database = new module.NativeDatabase(':memory:', {});
+    function query(source) {
+      var statement = new module.NativeStatement();
+      return database.prepareAsync(statement, source).then(function () {
+        return statement.runAsync(database, {}, {}, true);
+      }).then(function (result) {
+        return statement.finalizeAsync(database).then(function () { return result.firstRowValues; });
+      });
+    }
+    return database.initAsync()
+      .then(function () { return database.execAsync('CREATE TABLE t (a INTEGER); INSERT INTO t VALUES (2), (3);'); })
+      .then(function () { return query('SELECT SUM(a) FROM t'); })
+      .then(function (sum) {
+        return query('SELECT sqlite_version()').then(function (version) { return {sum: sum, version: version}; });
+      });
+  },
   ExpoScreenOrientation: function (module) {
     return Promise.all([module.getOrientationAsync(), module.getOrientationLockAsync()]).then(function (answers) {
-      return {orientation: answers[0], lock: answers[1]};
+      var result = {orientation: answers[0], lock: answers[1]};
+      return module.lockAsync(6).then(function () {
+        return new Promise(function (resolve) { setTimeout(resolve, 1500); });
+      }).then(function () {
+        return Promise.all([module.getOrientationAsync(), module.getOrientationLockAsync()]);
+      }).then(function (locked) {
+        result.landscapeOrientation = locked[0];
+        result.landscapeLock = locked[1];
+        return module.lockAsync(3);
+      }).then(function () {
+        return new Promise(function (resolve) { setTimeout(resolve, 1500); });
+      }).then(function () {
+        return module.getOrientationAsync();
+      }).then(function (back) {
+        result.portraitOrientation = back;
+        return result;
+      });
     });
   }
 };
 
-var NAMES = ['FileSystem', 'ExpoDocumentPicker', 'ExpoImageManipulator', 'ExpoImage', 'ExpoCamera', 'ExpoSecureStore', 'ExpoNetwork', 'ExpoDevice', 'ExpoBrightness', 'ExpoLinearGradient', 'ExpoStoreReview', 'ExpoWebBrowser', 'ExpoBlur', 'ExpoScreenOrientation'];
+var NAMES = ['FileSystem', 'ExpoDocumentPicker', 'ExpoImageManipulator', 'ExpoImage', 'ExpoCamera', 'ExpoSecureStore', 'ExpoNetwork', 'ExpoDevice', 'ExpoBrightness', 'ExpoLinearGradient', 'ExpoStoreReview', 'ExpoWebBrowser', 'ExpoBlur', 'ExpoScreenOrientation', 'ExpoSQLite'];
 
 NAMES.forEach(function (name) {
   var found = present(name);

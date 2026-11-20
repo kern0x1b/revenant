@@ -1,0 +1,4 @@
+Package: space.kern0x1b.paseo-ios6.rnhost
+Name: RNHost
+Architecture: iphoneos-arm
+Description: React Native host probe: the RN core and the prefixed JavaScriptCore running a test bundle.

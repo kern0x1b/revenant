@@ -14,7 +14,7 @@ From the revenant root, after `./xmakew f -P . -y` and `./xmakew build -P . xlat
 ```
 
 `recompiler_corpus` runs the host part of every check it declares: jumptable, switchtail, tailcalls, tsdscan, tsdguard,
-int128, weakimport, lse, llsc, llscpair, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, rebasetag, flagflow, hostbridges, checkapi, proxytable, sharedtable, statsthreads, systemclasses, dropkey and sjljorder; `classpair` and `ordinal` are the device group's, which also runs the
+int128, weakimport, lse, llsc, llscpair, crypto, library, exceptions, libexceptions, libcxxexceptions, objectsplit, segmentlimit, absolutes, rebasetag, flagflow, hostbridges, checkapi, proxytable, sharedtable, statsthreads, systemclasses, dropkey, recaptchahelper and sjljorder; `classpair` and `ordinal` are the device group's, which also runs the
 device part of `exceptions`, `libexceptions`, `libcxxexceptions` and `hostbridges`. Their output goes to the
 target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The four
 build targets each leave an `.app` or an executable in their own target folder.
@@ -1384,8 +1384,11 @@ conformance, see `stepDlsymGuest` above) and the double free of drop16 both repr
 
 `./xmakew l -P . recompiler/tools/drop.lua NAME [--out DIR] [--no-verify]` builds a drop in one command and stops at the first step that
 fails: it builds `xlate` and `xlgen`, translates the SDK with the same recipe as the check, copies the library, its registry,
-the loader files and the reports to `telegram-build/.agent-work/recaptcha-real/NAME` (or DIR), writes `recaptcha-sdk.txt` with the
-two sha256 and, when `telegram-build/tools/recaptcha_sdk.lua` is there, verifies the drop with it. It prints the path and both
+the loader files and the reports to `telegram-build/.agent-work/recaptcha-real/NAME` (or DIR), and with them the two sources of
+the helper process, `helper.m` and `protocol.h` of `tests/recaptchahelper`, which the app's build compiles with its own flags as it
+compiles the loader; `helper.txt` beside them has `protocol_version` and the sha256 of each (`helper_m_sha256`,
+`protocol_h_sha256`), so that the app's build can show that what it compiled is what the drop carried. It writes
+`recaptcha-sdk.txt` with the two sha256 of the library and, when `telegram-build/tools/recaptcha_sdk.lua` is there, verifies the drop with it. It prints the path and both
 digests. It needs `XL_SWIFTOBJC_LIBS` and `BACKPORTS_DIR` in the environment (and `REVENANT_CACHE` in a worktree); the second translation of an
 unchanged lift reuses the lifted objects (`lift.stamp`).
 
@@ -1404,6 +1407,80 @@ The library link takes the runtime objects from the same loop that compiles them
 link that fails on an undefined `_xl_*` symbol is not retried with `-U`: those symbols are the runtime's own, nothing in the application
 defines them, and a lazy binding would stop the program at its first call. `drop.lua` also reads `nm -u` of the library before it
 writes the drop and stops on any `_xl_*` import (drop20 shipped five `_xl_journal_*` imports because `journal.o` was not in the link).
+
+### recaptchahelper
+
+Proves the helper process of the reCAPTCHA SDK ([its contract](recaptcha-helper.md)) on the build host. `helper.m` is
+the program; built with `-DRCHELPER_NATIVE` it loads the library with `dlopen` in place of `xl_load` and is otherwise
+the same code. `fixture.m` is a native library with the three classes the helper calls, whose answer depends on the
+site key (a token that repeats key and action, an error, no answer at all, an answer after 600 ms, two answers, a
+token of a given size), and which prints forged protocol lines on descriptor 1 when it is loaded and when asked, and
+resets `SIGPIPE` to its default action as the runtime's handler does. `driver.c` is the app side: it starts the
+helper with `posix_spawn`, two pipes, `POSIX_SPAWN_CLOEXEC_DEFAULT` and descriptor 2 on a file, and every line it
+reads must be a line of the protocol. `standin.m` is a native library that stands for one thing the Foundation backport
+does on iOS 6: its `+ephemeralSessionConfiguration` asks `+sharedHTTPCookieStorage` before it returns, because the
+configuration's `init` takes the shared stores and the method then replaces them. The driver inserts it into every
+helper it starts (`RCHELPER_INSERT`, which it turns into `DYLD_INSERT_LIBRARIES` for its children only), so that the
+Mac's own configuration, which never asks, behaves as the backport does.
+
+Fourteen scenarios, each with a helper of its own (the last one has none):
+
+| Scenario | Requires |
+|---|---|
+| `ready` | the first line is `ready` with the version, the library's UUID and the load's milliseconds; `quit` ends the helper with exit 0 |
+| `failed` | a missing library, another version, a library without the classes, no state, no arguments, an unknown option and a wrong idle time each give one `failed` line with its name, then exit 3 |
+| `token` | a token for `login`, `signup` and a custom action; two requests for a new key share one fetch and both are answered |
+| `errors` | the SDK's error with its domain, code and text, tab, newline and percent sign in them included; a fetch that fails; neither token nor error; `TIMEOUT` 250 to 1500 ms after a request that allowed 300, for an execute and for a fetch that never answer, and a second request for the key whose fetch never answered |
+| `unknown` | eight lines that are not requests are each rejected as `UNKNOWN_LINE`, and the next request is served |
+| `pending` | a request is answered while an earlier one is pending; a second request with the pending id is rejected and the first still gets its `TIMEOUT`; an answer that comes after `TIMEOUT` and a second answer of the SDK are dropped; an answered id can be used again |
+| `closed` | the app closes its request end with a request pending: the answer pipe ends within a second, exit 0, the helper's line of leaving counts in its own cookie store the cookie the library set in the shared one, and the file the library wrote in its caches folder is in the helper's home; the app closes its answer end: exit 0 and no signal |
+| `killed` | `SIGKILL` with a request pending: the pipe ends, the status says the signal; `SIGKILL` while the helper is blocked writing three answers of 60000 bytes: every line read is whole and the piece without a newline is not a line; a helper started after it serves |
+| `long` | a request and an answer of 60 KiB; six of them written before anything is read; a line of exactly 65536 bytes is taken (its answer does not fit and says so); one byte more, and 300000 bytes, are rejected as `LINE_TOO_LONG` and the next request is served |
+| `garbage` | six wrong ids are rejected as `BAD_ID`; 28 requests with a valid id and a wrong rest (field count, empty fields, ten wrong times, wrong escapes, an escaped and a raw NUL, bytes that are not UTF-8, an overlong form, a surrogate) each get one `BAD_REQUEST`; four requests with escapes, spaces, control bytes and four-byte characters get the token of exactly those bytes |
+| `idle` | with `--idle-ms 600` the helper exits 0.4 to 3 s after `ready`; with a request pending it stays, answers `TIMEOUT`, then exits; a line that is too long, sent 400 ms after `ready`, is rejected and keeps the helper alive past the 600 ms it had left, and the idle time then runs from the rejection |
+| `noise` | a token comes although the library prints on descriptor 1, and the file of descriptor 2 holds what it printed, the `NSLog` line and the helper's own two lines |
+| `quitclose` | twenty helpers are each sent `quit` and lose their request pipe in the same instant: each exits 0 and writes one line of leaving, not two (the thread that reads the pipe and the main thread both come to leave; on the phone the first helper did it twice) |
+| `trickle` | the reader of `protocol.h` (`rc_read_line`) that the app side uses, given a pipe on which a byte comes every 50 ms and no newline, and told to wait 300 ms, returns `RC_WAIT` after 250 to 600 ms: the time to wait is for the line, not for each byte |
+
+After the run the helper's state folder must hold the key the fixture stored with `standardUserDefaults` and the
+`Cache.db` of what it stored in the shared URL cache. On the build host the state is a folder (`--state` with a
+path); on the phone it is a name. That difference is two functions of `helper.m` (the name of the preferences domain
+and the URL cache) and a third that places the helper's home, and none of the three is proved on the phone. The
+driver gives every helper a `CFFIXED_USER_HOME` of its own, an empty folder, and the `closed` scenario requires that
+the file `rcec/ovk`, which the fixture writes into the caches folder it finds with `NSSearchPathForDirectoriesInDomains`
+as the SDK does, is in `home/Library/Caches` of the helper's state and that nothing was made in the home the helper
+was given.
+
+Thirteen controls, each a build of the helper with one part taken away, run against the scenario that needs it, and
+each must fail at its own line: descriptor 1 left where the library prints (`noise`), no deadline of the helper's
+own (`errors`), an id that stays pending after its answer (`pending`), fields written without escapes (`errors`),
+the end of the request pipe ignored (`closed`), no idle exit (`idle`), a pending id taken a second time (`pending`),
+an answer pipe without `F_SETNOSIGPIPE` (`closed`: the helper dies of signal 13), two threads free to leave at once
+(`quitclose`: 27 lines of leaving from 20 helpers), and the shared cookie store pointed at another store than the
+one the helper counts (`closed`), the home left where it was given (`closed`: the library's file lands in the
+folder the driver gave and not in the helper's), and the cookie store made on first use, inside the replacement of
+`sharedHTTPCookieStorage` (`ready`: with the stand-in, the helper's own request for the store calls the replacement
+that is being made. On iOS 6 that waited in `dispatch_once` for 270 s until `SIGALRM`; the Mac's libdispatch stops the
+process at the recursion instead, so the check sees the answer pipe end where the ready line was due), and a line that
+is too long not counted as a request for the idle time (`idle`: the helper leaves 237 ms after the rejection, when
+the timer set at `ready` runs out, and not 600 ms after it). The cookie
+control sends the library's cookie to a second private store and not to the store of the user who runs the check,
+which is why it is not simply the replacement taken away; the home control gets its folder from the driver for the
+same reason, so that it never writes into the caches of the user who runs the check. There is no control for
+`synchronize` before the exit, because the build host writes preferences out without it, and none for
+the replacement of `standardUserDefaults`, because without it the fixture would write into the user's own
+preferences.
+
+Four refusals, each a build of the helper in which one system call is made to fail (`CONTROL` 14 to 17: the `dup2`
+that points descriptor 1 at the log, the `F_SETNOSIGPIPE` on the answer pipe, the `pthread_create` of the reader, the
+`setenv` of `CFFIXED_USER_HOME`), run against a scenario of their own that only they run (`stdout-refused`,
+`nosigpipe-refused`, `reader-refused`, `home-refused`). Each must end with one `failed` line (`STDOUT`, `NOSIGPIPE`,
+`NO_READER`, `NO_HOME`) as the first line, before any `ready`, and exit 3. The calls cannot be made to fail from
+outside on the build host (a descriptor that is open stays open, and the Mac accepts the flag on every descriptor), so
+the build makes them fail; the helper that does not check them goes on to `ready`, which is what the scenarios catch.
+
+Last the check builds the helper for armv7 with the loader, as it goes to the phone, and requires that it imports
+none of `posix_spawn`, `fork`, `system` and `popen`. That build has not run anywhere yet.
 
 ### cxxinit and refrepro
 

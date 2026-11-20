@@ -4,7 +4,7 @@ local rn = os.getenv("RN_SRC") or path.join(inputs, "rn-src")
 local rc = path.join(rn, "ReactCommon")
 local generated = path.join(inputs, "codegen", "build", "generated", "ios")
 local rn_headers = os.getenv("RN_HEADERS") or path.join(inputs, "rn-headers")
-local ref = path.join(inputs, "ref", "paseo")
+local ref = path.join(inputs, "ref", "app")
 local dispatch = path.join(src, "ios6", "RNHostDispatch.h")
 local RN_FLAGS = {"-faligned-allocation", "-DFOLLY_MOBILE=1", "-DFOLLY_USE_LIBCPP=1", "-DFOLLY_CFG_NO_COROUTINES=1", "-DUSE_HERMES=0", "-DUSE_THIRD_PARTY_JSC=1", "-DRCT_NEW_ARCH_ENABLED=1"}
 
@@ -244,7 +244,7 @@ target("rn-pods-objc")
                     for _, f in ipairs(os.files(path.join(base, ext))) do
                         local key = f:lower()
                         local rel = path.relative(f, root)
-                        if not added[key] and not test_path(rel) and not rel:find("Example") and (os.getenv("RN_HERMES") or not f:find("WorkletHermesRuntime")) and not f:find("react-native-screens/ios/gamma/", 1, true) and not f:find("UIImage+ImageEffects", 1, true) then
+                        if not added[key] and not test_path(rel) and not rel:find("Example") and (os.getenv("RN_HERMES") or not f:find("WorkletHermesRuntime")) and not (pod.package == "react-native-screens" and rel:startswith("ios/gamma/")) and not f:find("UIImage+ImageEffects", 1, true) then
                             added[key] = true
                             add_files(f)
                         end
@@ -282,7 +282,7 @@ target("rn-keyboard-swift")
     set_default(false)
     set_values("swift.module", "react_native_keyboard_controller")
     add_packages("swift-runtime", "libcxx")
-    add_files(path.join(inputs, "ref", "paseo", "packages", "app", "node_modules", "react-native-keyboard-controller", "ios", "**.swift"))
+    add_files(path.join(inputs, "ref", "app", "packages", "app", "node_modules", "react-native-keyboard-controller", "ios", "**.swift"))
     local keyboard = path.join(inputs, "keyboard")
     add_values("swift.flags", "-swift-version", "5", "-cxx-interoperability-mode=off", "@" .. path.join(keyboard, "flags.rsp"), "-import-objc-header", path.join(keyboard, "Bridge.h"))
     set_languages("c++20")

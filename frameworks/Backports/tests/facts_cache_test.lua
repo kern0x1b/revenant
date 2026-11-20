@@ -32,9 +32,11 @@ function main()
     assert(computed.FixtureValue and computed.FixtureValue.kind == "extern", "the fixture's extern constant is not listed")
     assert(os.isfile(cache), "the constant intros were not cached")
 
-    header(sdk, "extern const int FixtureValue;\n")
+    io.writefile(cache, io.readfile(cache) .. "OnlyInTheCache\t1000\textern\n")
     local cached = facts.constant_intros(sdk)
-    assert(describe(cached) == describe(computed), "the cached constant intros differ from the ones computed, so the cache is not read:\n" .. describe(cached))
+    assert(cached.OnlyInTheCache and cached.OnlyInTheCache.intro == 1000, "the constant intros were computed again, so the cache is not read")
+    cached.OnlyInTheCache = nil
+    assert(describe(cached) == describe(computed), "the cached constant intros differ from the ones computed:\n" .. describe(cached))
 
     local other = workspace.fresh("facts-cache-sdk-other")
     os.mkdir(path.join(other, "System", "Library", "Frameworks", "Fixture.framework", "Headers"))

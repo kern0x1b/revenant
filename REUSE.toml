@@ -86,3 +86,15 @@ path = "frameworks/Backports/src/CoreML/proto/LICENSE.txt"
 precedence = "closest"
 SPDX-FileCopyrightText = "2020-2023 Apple Inc."
 SPDX-License-Identifier = "BSD-3-Clause"
+
+[[annotations]]
+path = "frameworks/ReactNative/examples/paseo/packaging/brand/paseo-icon.png"
+precedence = "closest"
+SPDX-FileCopyrightText = "2025-present Mohamed Boudra"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "frameworks/ReactNative/examples/paseo/overlay/node_modules/react-native-unistyles/**"
+precedence = "closest"
+SPDX-FileCopyrightText = ["Jan Szewczyk", "2026 kern0x1b"]
+SPDX-License-Identifier = "MIT"

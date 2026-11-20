@@ -1,4 +1,5 @@
 #import "RevenantSymbols.h"
+#import "RevenantSymbolRendering.h"
 #import "RevenantSymbolMetrics.h"
 #import "RevenantSymbolGlyphs.h"
 #include <math.h>
@@ -11,6 +12,9 @@ typedef struct {
     BOOL clear;
     int depth;
     CGRect *bounds;
+    NSArray<UIColor *> *colors;
+    RevenantSymbolRendering rendering;
+    int *layer;
 } RevenantScene;
 
 static NSArray<NSString *> *revenant_tokens(NSString *script)
@@ -224,8 +228,19 @@ static void revenant_draw_path(RevenantScene *scene, CGMutablePathRef path, unic
     CGContextRef context = scene->context;
     CGContextSaveGState(context);
     CGContextSetBlendMode(context, scene->clear ? kCGBlendModeClear : kCGBlendModeNormal);
-    CGContextSetGrayFillColor(context, 0, 1);
-    CGContextSetGrayStrokeColor(context, 0, 1);
+    int layer = scene->layer ? *scene->layer : 0;
+    if (scene->colors.count) {
+        NSUInteger index = (NSUInteger)revenant_symbol_color_index(scene->rendering, layer, (int)scene->colors.count);
+        CGColorRef color = scene->colors[index].CGColor;
+        CGContextSetFillColorWithColor(context, color);
+        CGContextSetStrokeColorWithColor(context, color);
+        CGContextSetAlpha(context, revenant_symbol_layer_alpha(scene->rendering, layer));
+    } else {
+        CGContextSetGrayFillColor(context, 0, 1);
+        CGContextSetGrayStrokeColor(context, 0, 1);
+    }
+    if (scene->layer)
+        (*scene->layer)++;
     CGContextSetLineWidth(context, scene->line * multiplier);
     CGContextSetLineCap(context, kCGLineCapRound);
     CGContextSetLineJoin(context, kCGLineJoinRound);
@@ -479,7 +494,7 @@ static CGRect revenant_glyph_bounds(NSString *name, NSString *script)
         if (stored)
             return [stored CGRectValue];
         CGRect bounds = CGRectNull;
-        RevenantScene scene = {NULL, CGAffineTransformIdentity, 1, NO, NO, 0, &bounds};
+        RevenantScene scene = {NULL, CGAffineTransformIdentity, 1, NO, NO, 0, &bounds, nil, RevenantSymbolRenderingAutomatic, NULL};
         revenant_run(script, scene);
         if (CGRectIsNull(bounds) || bounds.size.width < 1 || bounds.size.height < 1)
             bounds = CGRectMake(0, 0, 100, 100);
@@ -488,7 +503,8 @@ static CGRect revenant_glyph_bounds(NSString *name, NSString *script)
     }
 }
 
-UIImage *revenant_symbol_bitmap(NSString *name, double pointSize, NSInteger weight, NSInteger scale, CGFloat displayScale)
+UIImage *revenant_symbol_bitmap(NSString *name, double pointSize, NSInteger weight, NSInteger scale, CGFloat displayScale,
+                                RevenantSymbolRendering rendering, NSArray<UIColor *> *colors)
 {
     NSInteger index = revenant_symbol_index(name);
     NSString *script = revenant_glyph_script(name);
@@ -505,7 +521,8 @@ UIImage *revenant_symbol_bitmap(NSString *name, double pointSize, NSInteger weig
     double line = pointSize * RevenantLineWeights[weight];
     CGRect box = CGRectInset(ink, MIN(line / 2, ink.size.width / 2.2), MIN(line / 2, ink.size.height / 2.2));
     UIGraphicsBeginImageContextWithOptions(size, NO, displayScale);
-    RevenantScene scene = {UIGraphicsGetCurrentContext(), CGAffineTransformIdentity, (CGFloat)line, NO, NO, 0, NULL};
+    int layer = 0;
+    RevenantScene scene = {UIGraphicsGetCurrentContext(), CGAffineTransformIdentity, (CGFloat)line, NO, NO, 0, NULL, colors, rendering, &layer};
     CGRect extent = revenant_glyph_bounds(name, script);
     scene.map = CGAffineTransformScale(CGAffineTransformMakeTranslation(box.origin.x, box.origin.y), box.size.width / extent.size.width, box.size.height / extent.size.height);
     scene.map = CGAffineTransformTranslate(scene.map, -extent.origin.x, -extent.origin.y);

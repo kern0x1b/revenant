@@ -60,6 +60,13 @@ static NSArray *revenant_no_collections(void)
     NSUInteger _estimatedAssetCount;
 }
 
++ (PHFetchResult<PHAssetCollection *> *)fetchMomentsWithOptions:(PHFetchOptions *)options
+{
+    return revenant_collections(^{
+        return [RevenantPhotosStore collectionsOfGroupTypes:ALAssetsGroupEvent];
+    }, options);
+}
+
 - (instancetype)initWithRevenantGroup:(ALAssetsGroup *)group
 {
     NSString *identifier = [[group valueForProperty:ALAssetsGroupPropertyURL] absoluteString];

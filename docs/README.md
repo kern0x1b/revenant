@@ -210,6 +210,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [UIKit: UITextField alignment](reference/backports/UIKit/UITextFieldAlignment.md) | the top vertical alignment a code-made text field starts with on iOS 6 and the centered start the backports give it |
 | [UIKit: UITextView typingAttributes](reference/backports/UIKit/UITextViewTypingAttributes.md) | the WebCore fault of `typingAttributes` on a text view with no selection on iOS 6.1.3, what a later UIKit answers, and the answer the backports give |
 | [UIKit: UICornerConfiguration](reference/backports/UIKit/CornerConfiguration.md) | per-corner radii, concentric corners and how a view is clipped to them on iOS 6 |
+| [CoreText: the font fallback cascade](reference/backports/CoreText/FontFallbackCascade.md) | the whole-database font walk on iOS 6.1.3 for a code point no font covers, the cascade ending in `LastResort` that every font gets, where it is attached (CoreText creators, UIFont), what is not done, and the runtime case |
 | [Vision](reference/backports/Vision/README.md) | the Swift forms of the landmark, recognised-text and contour accessors, and the missing landmark detector |
 | [WeatherKit: CompassDirection](reference/backports/WeatherKit/CompassDirection.md) | `Wind.CompassDirection`, measured |
 | [WeatherKit: WeatherCondition](reference/backports/WeatherKit/WeatherCondition.md) | `WeatherCondition`, measured |
@@ -229,12 +230,13 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [The JavaScript bundle for the JavaScriptCore host](guides/react-native/jsc-bundle.md) | exporting an Expo application's bundle without Hermes |
 | [Driving a host by touch](guides/react-native/touch.md) | the touch injector and its command line for a phone without XCUITest |
 | [The icon and launch image](guides/react-native/app-assets.md) | making them from the application's Expo configuration |
+| [An application and its overlay](guides/react-native/app-overlay.md) | the read-only application checkout, the overlay folder that carries our changes to it, and the Paseo example |
 | [Isolated host build](guides/react-native/isolated-build.md) | building the React Native host in your own folder and private cache |
 | [Hermes](reference/react-native/hermes.md) | the Hermes 250829098.0.17 package for armv7 iOS 6.0: its pin, flags and measurements on the iPhone 4S |
 | [Running Hermes bytecode on the phone](guides/react-native/hermes-probe.md) | building the probe, compiling its bytecode, staging, claiming the phone and running it |
 | [Using Hermes as the engine](guides/react-native/use-hermes.md) | selecting Hermes beside JSC, the bytecode bundle, the Promise check and the first-run numbers on the iPhone 4S |
 | [Why Hermes is built this way](explanation/react-native/hermes-engine.md) | the version, the JSI copy, no Boost.Context on ARM32, and the 32-bit heap encoding |
-| [Build inputs](guides/react-native/build-inputs.md) | making the host's `build/` inputs from the packages, and comparing them with the spike |
+| [Build inputs](guides/react-native/build-inputs.md) | making the host's `build/` inputs from the packages, and comparing them with a reference build |
 | [Expo manifest for the host](guides/react-native/app-config.md) | giving the host the application's own `EXConstants.bundle/app.config` |
 | [Expo native modules for iOS 6](guides/react-native/expo-native-modules.md) | what the patches of expo-file-system, expo-image, expo-camera and the others remove, what JavaScript sees instead, and the AVIF and SVG decision |
 | [Installing the host](guides/react-native/install-the-host.md) | staging a built host and putting it on the claimed phone under its own bundle id |
@@ -280,6 +282,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [Research](explanation/recompiler/research.md) | the research behind it |
 | [Corpus and benchmark](reference/recompiler/corpus.md) | what each check proves |
 | [Extra inhabitants of a pointer](reference/recompiler/extra-inhabitants.md) | the 4 GB rule of arm64 Swift against 32-bit host pointers: the contract (get, store, count), the idiom the lift rewrites, an inventory of every guest image, the limit of 4096, what the phone measured |
+| [The reCAPTCHA helper: the app side's contract](reference/recompiler/recaptcha-helper.md) | how an app starts the helper process of the translated reCAPTCHA SDK and talks to it: the spawn, the lines of the protocol with their names, what the app side must do on each end of the pipe, where the helper's output and a crash go, its state |
 | [Runtime helpers of the lifted code](reference/recompiler/lifted-helpers.md) | the C helpers that the AES, SHA-1, SHA-256, PMULL and half-precision FCVT instructions are lifted to: symbols, prototypes, the buffer contract, what is left unlifted and why |
 
 ## Agent skills

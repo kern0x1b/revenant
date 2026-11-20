@@ -58,12 +58,18 @@ The rebind refuses an image, and leaves the file untouched, when:
 - the image is not a thin 32-bit armv7 Mach-O, or it is a flat-namespace image: a flat image names no library for an import;
 - it has no `LC_DYLD_INFO`, no `__LINKEDIT` or no symbol table;
 - `__LINKEDIT` does not run to the end of the file, or the code signature is not the last part of it;
-- its header has no room for the new load command: the error says so, and the fix is to relink the image with `-Wl,-headerpad,0x1000` or a larger value;
+- its header has no room for the new load command: the error names the size the rebind needs and the header space the image has, and the fix is to relink it with `-Wl,-headerpad_max_install_names`;
 - the bytes between its load commands and its first section are not padding;
 - a moved import is not in the image's symbol table, or a bind to it is flat;
 - a lazy bind's stream does not end in DONE, so its entry cannot be found.
 
 The rebind changes only the armv7 slice of an image, so a universal image is refused until its slices are split. The arm64 slice is not exercised.
+
+## Header room
+
+A rebind adds an `LC_LOAD_DYLIB` for every provider it moves an import to, and `install_name_tool` lengthens the load commands it retargets. Both need space between the end of the load commands and the first section of the image. ld64 leaves a default amount of space that depends on how the image was linked: measured with the toolchain's ld64 956.6 on an armv7 dylib that loads 20 long-named libraries, the space was 10,202 bytes; linked with `-Wl,-headerpad_max_install_names` the same dylib had 26,586 bytes.
+
+The app rule therefore links every executable it builds, and the library rule links every dylib it builds, with `-Wl,-headerpad_max_install_names`, so a program's own images can be rebound and retargeted without a consumer adding the flag to its target. A prebuilt image linked elsewhere still has to bring that room itself; when it does not, the rebind refuses it, leaves the file untouched, and reports both the needed size and the space it found.
 
 ## Classicgram
 
@@ -78,4 +84,4 @@ target("Classicgram")
     set_values("revenant.rebind", "Frameworks/libTGCallsEngine.dylib")
 ```
 
-No waiver is set. The rebind of this image has been measured on a copy, not on a device.
+No waiver is set. The rebind of this image has been measured on a copy, not on a device. The `-Wl,-headerpad_max_install_names` flag that was added to this target by hand is now supplied by the library rule for every dylib the toolchain builds, so the app-side target no longer has to name it.

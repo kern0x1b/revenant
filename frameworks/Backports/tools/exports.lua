@@ -133,6 +133,21 @@ function analyse(keys, libs, public)
         end
     end
 
+    local std_lines, total_std = {}, 0
+    for _, library in ipairs(libs) do
+        local count = 0
+        for name in pairs(library.symbols) do
+            if name:find("St3__1", 1, true) then
+                count = count + 1
+            end
+        end
+        if count > 0 then
+            total_std = total_std + count
+            table.insert(std_lines, string.format("std::__1 export\t%s\t%d", library.name, count))
+        end
+    end
+    table.sort(std_lines)
+
     local summary = {}
     local total_missing, total_duplicated = 0, 0
     for _, kind in ipairs(KINDS) do
@@ -143,12 +158,14 @@ function analyse(keys, libs, public)
             kind, count.implemented, count.once, count.missing, #duplicated[kind], count.internal))
     end
     table.insert(summary, string.format("total: missing %d, duplicated %d", total_missing, total_duplicated))
+    table.insert(summary, string.format("std::__1 exports: %d", total_std))
 
     table.sort(missing_lines)
     table.sort(internal_lines)
+    table.join2(lines, std_lines)
     table.join2(lines, missing_lines)
     table.join2(lines, internal_lines)
-    return {keys = keys, summary = summary, lines = lines, missing = total_missing, duplicated = total_duplicated}
+    return {keys = keys, summary = summary, lines = lines, missing = total_missing, duplicated = total_duplicated, std = total_std}
 end
 
 local function reachable(row, symbol_owners, method_owners)
@@ -235,8 +252,8 @@ function main(libdir, report)
     io.writefile(status_report, table.concat(status, "\n") .. "\n")
     print("status " .. status_report)
 
-    if result.missing > 0 or result.duplicated > 0 then
-        raise("the export check failed: %d public symbol%s missing, %d duplicated", result.missing,
-              result.missing == 1 and "" or "s", result.duplicated)
+    if result.missing > 0 or result.duplicated > 0 or result.std > 0 then
+        raise("the export check failed: %d public symbol%s missing, %d duplicated, %d std::__1 export%s", result.missing,
+              result.missing == 1 and "" or "s", result.duplicated, result.std, result.std == 1 and "" or "s")
     end
 end

@@ -35,11 +35,16 @@ static UIImage *revenant_symbol_image(NSString *name, UIImageSymbolConfiguration
     CGSize size;
     UIEdgeInsets insets;
     CGFloat baseline;
-    UIImage *drawn = revenant_symbol_bitmap(name, pointSize, weight, scale, displayScale);
+    RevenantSymbolRendering rendering = [configuration revenant_symbolRendering];
+    NSArray<UIColor *> *colors = [configuration revenant_symbolColors];
+    UIImage *drawn = revenant_symbol_bitmap(name, pointSize, weight, scale, displayScale, rendering, colors);
     if (!drawn || !revenant_symbol_metrics(name, pointSize, weight, scale, &size, &insets, &baseline))
         return nil;
     UIImage *image = [drawn imageWithAlignmentRectInsets:insets];
-    image = [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+    UIImageRenderingMode mode = (rendering == RevenantSymbolRenderingMonochrome || rendering == RevenantSymbolRenderingMulticolor ||
+                                  rendering == RevenantSymbolRenderingAutomatic || !colors.count)
+        ? UIImageRenderingModeAlwaysTemplate : UIImageRenderingModeAlwaysOriginal;
+    image = [image imageWithRenderingMode:mode];
     objc_setAssociatedObject(image, &revenant_symbol_name_key, name, OBJC_ASSOCIATION_COPY_NONATOMIC);
     objc_setAssociatedObject(image, &revenant_symbol_configuration_key, configuration, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     revenant_set_image_baseline(image, @(baseline));
