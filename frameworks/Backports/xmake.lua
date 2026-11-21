@@ -879,7 +879,7 @@ else
                                   network = "network_test.lua", networkpath = "network_path_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", securetransport = "security_ssl_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua", facts_key = "facts_key_test.lua", ast_names = "ast_names_test.lua", facts_error = "facts_error_test.lua",
                                   device = "device_members_test.lua", compression = "compression_roundtrip_test.lua",
                                   presentation = "presentation_intent_test.lua", localelanguage = "locale_language_test.lua", attributedstringmarkdown = "attributed_string_markdown_test.lua", markdownparser = "markdown_parser_oracle_test.lua", dateformatstyle = "date_format_style_test.lua", urlpercentencoded = "url_percent_encoded_test.lua",pastematching = "paste_matching_test.lua", documentpickerrules = "document_picker_rules_test.lua",exports = "lowered_exports_test.lua", staleobjects = "stale_objects_test.lua", constants = "constants_test.lua", loadglobals = "load_globals_test.lua", deviceglobals = "device_globals_test.lua", devicereads = "device_reads_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
-                                  vfs = "lowered_vfs_test.lua", modules = "lowered_modules_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua", sec_access_control = "security_access_control_test.lua", sec_shared_web = "security_shared_web_test.lua", sec_items = "security_item_test.lua", sec_keys = "security_key_test.lua", la_passcode = "localauth_passcode_test.lua", air2es = "air2es_test.lua",
+                                  vfs = "lowered_vfs_test.lua", modules = "lowered_modules_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_dependencies = "runtime/dependency_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua", sec_access_control = "security_access_control_test.lua", sec_shared_web = "security_shared_web_test.lua", sec_items = "security_item_test.lua", sec_keys = "security_key_test.lua", la_passcode = "localauth_passcode_test.lua", air2es = "air2es_test.lua",
                                   webkitvalues = "webkit_values_test.lua", webkitmessage = "webkit_script_message_test.lua", webkittiling = "webkit_tiling_test.lua",
                                   webkitwindow = "webkit_window_test.lua", webkitdownload = "webkit_download_test.lua", webkithistoryplan = "webkit_history_plan_test.lua",
                                   clock = "clock_uptime_test.lua", coretelephony = "coretelephony_test.lua", swiftflags = "swift_flags_test.lua", reparent = "reparent_test.lua", typing_oracle = "uitextview_typing_oracle_test.lua"})
@@ -907,9 +907,9 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
             add_linkdirs(RUNTIME_LIBS)
             add_links(table.unpack(RUNTIME_LINKS))
         else
-            add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports", "IOSurfaceBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "PhotosBackports", "CloudKitBackports", "CoreTextBackports")
+            add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports", "IOSurfaceBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "PhotosBackports", "CloudKitBackports", "CoreTextBackports", "SecurityBackports", "CoreMediaBackports", "VideoToolboxBackports")
         end
-        add_frameworks("Foundation", "UIKit", "CoreGraphics", "CoreText", "QuartzCore", "OpenAL", "AudioToolbox", "AssetsLibrary", "CoreMedia")
+        add_frameworks("Foundation", "UIKit", "CoreGraphics", "CoreText", "QuartzCore", "OpenAL", "AudioToolbox", "AssetsLibrary", "Security", "CoreMedia", "VideoToolbox")
         add_syslinks("objc")
     target_end()
 
@@ -974,6 +974,8 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         add_tests("uitextview_typing_attributes")
         add_tests("coretext_fallback_probe")
         add_tests("coretext_fallback_cascade")
+        add_tests("backport_impl_video_toolbox")
+        add_tests("backport_impl_shadowed")
         add_tests("avfoundation_display_layer")
         add_tests("avfoundation_timebase_probe")
         add_tests("avfoundation_display_layer_formats")
@@ -1180,6 +1182,8 @@ local QUARTZCORE_TESTS = {
 local CORETEXT_TESTS = {
     open_type_feature = {"CTFontOpenTypeFeatureKeys8.m"},
     font_descriptors = {"RevenantFontDescriptors.m"},
+    deleted_glyphs = {},
+    emoji_clusters = {},
 }
 
 local SCENEKIT_TESTS = {

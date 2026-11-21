@@ -13,7 +13,7 @@
 typedef OSStatus (*RevenantVTSetPropertyFunction)(VTSessionRef, CFStringRef, CFTypeRef);
 typedef OSStatus (*RevenantVTCopyPropertyFunction)(VTSessionRef, CFStringRef, CFAllocatorRef, void *);
 
-OSStatus BACKPORT_IMPL(VTSessionSetProperty)(VTSessionRef session, CFStringRef propertyKey, CFTypeRef propertyValue)
+OSStatus VTSessionSetProperty(VTSessionRef session, CFStringRef propertyKey, CFTypeRef propertyValue)
 {
     if (RevenantVTSoftwareSessionOwns((VTDecompressionSessionRef)session))
         return RevenantVTSoftwareSessionSetProperty((VTDecompressionSessionRef)session, propertyKey, propertyValue);
@@ -21,7 +21,7 @@ OSStatus BACKPORT_IMPL(VTSessionSetProperty)(VTSessionRef session, CFStringRef p
     return set ? set(session, propertyKey, propertyValue) : kVTPropertyNotSupportedErr;
 }
 
-OSStatus BACKPORT_IMPL(VTSessionCopyProperty)(VTSessionRef session, CFStringRef propertyKey, CFAllocatorRef allocator, void *propertyValueOut)
+OSStatus VTSessionCopyProperty(VTSessionRef session, CFStringRef propertyKey, CFAllocatorRef allocator, void *propertyValueOut)
 {
     if (RevenantVTSoftwareSessionOwns((VTDecompressionSessionRef)session))
         return RevenantVTSoftwareSessionCopyProperty((VTDecompressionSessionRef)session, propertyKey, allocator, (CFTypeRef *)propertyValueOut);

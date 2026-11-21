@@ -2,11 +2,20 @@ local TOKEN_MB = 1536
 local RESERVE_MB = 2048
 local RESERVE_CORES = 2
 local DISK_FLOOR_GB = 100
-local PATIENCE_S = 300
 local POLL_MS = 1000
 local NICE = "/usr/bin/nice"
 local TASKPOLICY = "/usr/sbin/taskpolicy"
 local CLOSE_INHERITED = 'i=3; while [ $i -lt 256 ]; do eval "exec $i>&-" 2>/dev/null; i=$((i+1)); done; exec "$@"'
+local PRESSURE_WARN = 2
+local PRESSURE_CRITICAL = 4
+local COMPRESSOR_GROWTH = 1024
+local MB = 1024 * 1024
+local SYSCTL = "/usr/sbin/sysctl"
+local VMSTAT = "/usr/bin/vm_stat"
+local DF = "/bin/df"
+local PS = "/bin/ps"
+local LOAD_WINDOW_MS = 60000
+local AGING_S = 600
 
 local CLASSES = {
     critical = {rank = 1, nice = 0},
@@ -18,55 +27,133 @@ local function cache()
     return import("@addon.revenant.cache", {anonymous = true})
 end
 
+local function checkout_dir()
+    return try { function () return cache().checkout() end } or os.projectdir()
+end
+
 local function pool_folder()
-    return os.getenv("REVENANT_BUDGET_POOL") or path.join(cache().checkout(), ".cache", "budget")
+    return os.getenv("REVENANT_BUDGET_POOL") or path.join(checkout_dir(), ".cache", "budget")
 end
 
 local function slot_path(folder, index)
     return path.join(folder, string.format("slot-%02d.lock", index))
 end
 
-local function free_memory_mb()
-    local out = os.iorunv("vm_stat", {})
-    local size = tonumber(out:match("page size of (%d+) bytes")) or 4096
-    local pages = 0
-    for _, name in ipairs({"free", "inactive", "speculative"}) do
-        pages = pages + (tonumber(out:match("Pages " .. name .. ":%s+(%d+)")) or 0)
-    end
-    return math.floor(pages * size / (1024 * 1024))
+local function aged_path(folder, name)
+    return path.join(folder, "queue", "aged-" .. name)
 end
 
-local function idle_cores(cores)
-    local out = try { function () return os.iorunv("top", {"-l", "2", "-s", "1", "-n", "0"}) end } or ""
-    local idle
-    for value in out:gmatch("([%d%.]+)%% idle") do
-        idle = tonumber(value)
-    end
-    return cores * (idle or 0) / 100
+local function parse_loadavg(text)
+    return tonumber((text or ""):match("{%s*([%d%.]+)")) or 0
 end
 
-local function free_disk_gb()
-    local out = os.iorunv("df", {"-Pk", cache().checkout()})
-    local fields = {}
-    for field in out:match("[^\n]*\n([^\n]+)"):gmatch("%S+") do
-        table.insert(fields, field)
-    end
-    return tonumber(fields[4]) / (1024 * 1024)
+local function parse_pressure(text)
+    return tonumber((text or ""):match("(%d+)")) or 1
 end
 
-local function disk_refused(free_gb, floor)
-    return free_gb < floor
+local function parse_vmstat(text)
+    local size = tonumber(text:match("page size of (%d+) bytes")) or 4096
+    local function pages(label)
+        return tonumber(text:match(label .. ":%s+(%d+)")) or 0
+    end
+    return {size = size, free = pages("Pages free"), speculative = pages("Pages speculative"),
+            compressor = pages("Pages occupied by compressor"), pageouts = pages("Pageouts")}
 end
 
-local function capacity(opt)
-    local limit = opt.cores - RESERVE_CORES
-    local by_memory = opt.held + math.floor(math.max(0, opt.free_mb - RESERVE_MB) / TOKEN_MB)
-    local by_cpu = opt.waited and limit or (opt.held + math.floor(opt.idle))
-    local cap = math.min(limit, by_cpu, by_memory)
-    if opt.held == 0 then
-        cap = math.max(cap, 1)
+local previous
+
+local function read_grants(folder)
+    local now, window = os.time(), LOAD_WINDOW_MS / 1000
+    local total = 0
+    for _, file in ipairs(os.files(path.join(folder, "slot-*.lock"))) do
+        for at, count in (io.readfile(file) or ""):gmatch("g (%d+) (%d+)") do
+            local age = now - tonumber(at)
+            if age >= 0 and age < window then
+                total = total + tonumber(count) * math.max(0, 1 - age / window)
+            end
+        end
     end
-    return cap
+    return total
+end
+
+local function sample()
+    local loadavg = parse_loadavg(os.iorunv(SYSCTL, {"-n", "vm.loadavg"}))
+    local pressure = parse_pressure(os.iorunv(SYSCTL, {"-n", "kern.memorystatus_vm_pressure_level"}))
+    local vm = parse_vmstat(os.iorunv(VMSTAT, {}))
+    local reading = {loadavg = loadavg, load = math.max(loadavg, read_grants(pool_folder())),
+                     pressure = pressure, vm = vm, previous = previous}
+    previous = vm
+    return reading
+end
+
+local function own_runnable(pids)
+    if #pids == 0 then
+        return 0
+    end
+    local out = try { function () return os.iorunv(PS, {"-ax", "-o", "pid=,ppid=,state="}) end } or ""
+    local kids, states = {}, {}
+    for line in out:gmatch("[^\n]+") do
+        local pid, ppid, state = line:match("(%d+)%s+(%d+)%s+(%a)")
+        if pid then
+            pid, ppid = tonumber(pid), tonumber(ppid)
+            states[pid] = state
+            kids[ppid] = kids[ppid] or {}
+            table.insert(kids[ppid], pid)
+        end
+    end
+    local seen, total = {}, 0
+    local function walk(pid)
+        if not seen[pid] then
+            seen[pid] = true
+            if states[pid] == "R" then
+                total = total + 1
+            end
+            for _, child in ipairs(kids[pid] or {}) do
+                walk(child)
+            end
+        end
+    end
+    for _, pid in ipairs(pids) do
+        walk(pid)
+    end
+    return total
+end
+
+local function memory_headroom(reading)
+    local vm = reading.vm
+    local available = math.floor(math.max(0, ((vm.free + vm.speculative) * vm.size / MB) - RESERVE_MB) / TOKEN_MB)
+    if reading.pressure >= PRESSURE_CRITICAL then
+        return 0
+    end
+    local prev = reading.previous
+    local growing = prev ~= nil and (vm.compressor - prev.compressor) > COMPRESSOR_GROWTH
+    local pageouts = prev ~= nil and (vm.pageouts - prev.pageouts) > 0
+    if reading.pressure >= PRESSURE_WARN or growing or pageouts then
+        return 1
+    end
+    return math.max(1, available)
+end
+
+local function capacity(reading, held, own)
+    local limit = reading.cores - RESERVE_CORES
+    local headroom = memory_headroom(reading)
+    if headroom == 0 then
+        return held
+    end
+    local load = math.max(reading.load or reading.loadavg, own or 0)
+    local cpu = math.max(0, limit - load)
+    local fresh = math.min(headroom, limit - held)
+    if cpu < fresh then
+        fresh = math.max(1, cpu)
+    end
+    return held + fresh
+end
+
+local function progress_capacity(reading, held, minimum)
+    if memory_headroom(reading) < minimum then
+        return held
+    end
+    return held + minimum
 end
 
 local function grantable(cap, held, free, minimum, maximum)
@@ -84,18 +171,35 @@ local function tokens_wanted(opt, cores)
     return math.min(minimum, limit), math.min(maximum, limit)
 end
 
-local function enqueue(folder, rank)
+local function free_disk_gb()
+    local out = os.iorunv(DF, {"-Pk", checkout_dir()})
+    local fields = {}
+    for field in out:match("[^\n]*\n([^\n]+)"):gmatch("%S+") do
+        table.insert(fields, field)
+    end
+    return tonumber(fields[4]) / (1024 * 1024)
+end
+
+local function disk_refused(free_gb, floor)
+    return free_gb < floor
+end
+
+local function enqueue(folder, rank, minimum)
     local dir = path.join(folder, "queue")
     os.mkdir(dir)
     local name = string.format("%d-%013d-%08d.ticket", rank, os.time() * 1000 + math.random(0, 999), math.random(0, 99999999))
     local file = path.join(dir, name)
     local lock = io.openlock(file)
     lock:trylock()
+    io.writefile(file, tostring(minimum))
     return {name = name, file = file, lock = lock}
 end
 
-local function leave(ticket)
+local function leave(ticket, folder)
     os.tryrm(ticket.file)
+    if folder then
+        os.tryrm(aged_path(folder, ticket.name))
+    end
     ticket.lock:unlock()
     ticket.lock:close()
 end
@@ -112,67 +216,120 @@ local function holder_alive(file)
     lock:close()
     if free then
         os.tryrm(file)
+        os.tryrm(path.join(path.directory(file), "aged-" .. path.filename(file)))
     end
     return not free
 end
 
-local function ahead_of(folder, name)
+local function write_pid(file, pid)
+    local lines = {}
+    for line in (io.readfile(file) or ""):gmatch("[^\n]+") do
+        if not line:match("^%d+$") then
+            table.insert(lines, line)
+        end
+    end
+    table.insert(lines, 1, tostring(pid))
+    io.writefile(file, table.concat(lines, "\n") .. "\n")
+end
+
+local function ahead_of(folder, name, available)
+    for _, file in ipairs(os.files(path.join(folder, "queue", "aged-*.ticket"))) do
+        local other = path.filename(file):sub(6)
+        if other < name and holder_alive(path.join(folder, "queue", other)) then
+            local need = tonumber(io.readfile(file)) or 1
+            if need <= available then
+                return true
+            end
+        end
+    end
     for _, file in ipairs(os.files(path.join(folder, "queue", "*.ticket"))) do
         if path.filename(file) < name and holder_alive(file) then
-            return true
+            local need = tonumber(io.readfile(file)) or 1
+            if need <= available then
+                return true
+            end
         end
     end
     return false
 end
 
-local function try_grant(folder, minimum, maximum, waited)
-    local cores = os.cpuinfo("ncpu")
-    local free_locks, held = {}, 0
-    local snapshot = {cores = cores, idle = idle_cores(cores), free_mb = free_memory_mb(), waited = waited}
+local function snapshot_slots(folder, cores)
+    local free, held, pids = {}, 0, {}
     for index = 1, cores - RESERVE_CORES do
-        local lock = io.openlock(slot_path(folder, index))
+        local file = slot_path(folder, index)
+        local lock = io.openlock(file)
         if lock and lock:trylock() then
-            table.insert(free_locks, lock)
+            write_pid(file, os.getpid())
+            table.insert(free, {lock = lock, file = file})
         else
             held = held + 1
+            table.insert(pids, tonumber((io.readfile(file) or ""):match("%d+")) or -1)
             if lock then
                 lock:close()
             end
         end
     end
-    snapshot.held = held
-    local count = grantable(capacity(snapshot), held, #free_locks, minimum, maximum)
-    local grant = {}
-    for index, lock in ipairs(free_locks) do
-        if index <= count then
-            table.insert(grant, lock)
-        else
-            lock:unlock()
-            lock:close()
-        end
-    end
-    return grant
+    return free, held, pids
 end
 
-local function acquire(folder, class, minimum, maximum)
-    local ticket = enqueue(folder, CLASSES[class].rank)
+local function release_locks(entries)
+    for _, entry in ipairs(entries) do
+        entry.lock:unlock()
+        entry.lock:close()
+    end
+end
+
+local function publish_slot(entry, count)
+    local lines = {}
+    for line in (io.readfile(entry.file) or ""):gmatch("[^\n]+") do
+        if not line:match("^g ") then
+            table.insert(lines, line)
+        end
+    end
+    table.insert(lines, string.format("g %d %d", os.time(), count))
+    io.writefile(entry.file, table.concat(lines, "\n") .. "\n")
+end
+
+local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms)
+    reading_fn = reading_fn or sample
+    poll_ms = poll_ms or POLL_MS
+    local ticket = enqueue(folder, CLASSES[class].rank, minimum)
     local started = os.mclock()
-    local patience = (tonumber(os.getenv("REVENANT_BUDGET_PATIENCE")) or PATIENCE_S) * 1000
-    local announced
+    local aging = (tonumber(os.getenv("REVENANT_BUDGET_AGING_S")) or AGING_S) * 1000
+    local announced, marked
     while true do
-        local waited = os.mclock() - started >= patience
-        if not ahead_of(folder, ticket.name) then
-            local grant = try_grant(folder, minimum, maximum, waited)
-            if #grant > 0 then
-                leave(ticket)
-                return grant
+        local cores = os.cpuinfo("ncpu")
+        local reading = reading_fn()
+        reading.cores = cores
+        local free, held, pids = snapshot_slots(folder, cores)
+        local cap = capacity(reading, held, own_runnable(pids))
+        local headroom = memory_headroom(reading)
+        local progress = held == 0 and progress_capacity(reading, held, minimum) or held
+        local guarantee = progress > held
+        if guarantee then
+            cap = math.max(cap, progress)
+        end
+        local available = math.min(math.max(cap - held, 0), #free)
+        local count = grantable(cap, held, #free, minimum, maximum)
+        if count > 0 and not ahead_of(folder, ticket.name, guarantee and math.min(#free, headroom) or available) then
+            local grant = table.slice(free, 1, count)
+            release_locks(table.slice(free, count + 1))
+            for _, entry in ipairs(grant) do
+                publish_slot(entry, 1)
             end
+            leave(ticket, folder)
+            return grant
+        end
+        release_locks(free)
+        if not marked and os.mclock() - started > aging then
+            io.writefile(aged_path(folder, ticket.name), tostring(minimum))
+            marked = true
         end
         if not announced then
             print("budget: waiting for %d token(s), %s class", minimum, class)
             announced = true
         end
-        os.sleep(POLL_MS)
+        os.sleep(poll_ms)
     end
 end
 
@@ -206,10 +363,7 @@ local function run(opt)
     end
     local program, args = launch(class, opt.command)
     local status = os.execv(program, args, {envs = {XMAKE_MAX_JOBS = tostring(count), REVENANT_BUDGET_HELD = tostring(count)}, try = true})
-    for _, lock in ipairs(locks) do
-        lock:unlock()
-        lock:close()
-    end
+    release_locks(locks)
     return status or 1
 end
 
@@ -265,32 +419,88 @@ end
 local function status()
     local folder = pool_folder()
     local cores = os.cpuinfo("ncpu")
-    local held = held_slots(folder)
-    local snapshot = {cores = cores, held = held, idle = idle_cores(cores), free_mb = free_memory_mb(), waited = false}
+    local free, held, pids = snapshot_slots(folder, cores)
+    release_locks(free)
+    local own = own_runnable(pids)
+    local reading = sample()
+    reading.cores = cores
+    local load = math.max(reading.load, own)
     print("pool      %s", folder)
     print("cores     %d (reserve %d)", cores, RESERVE_CORES)
-    print("memory    %d MB free or inactive (reserve %d MB, one token %d MB)", snapshot.free_mb, RESERVE_MB, TOKEN_MB)
-    print("cpu       %.1f idle cores", snapshot.idle)
+    print("cpu       %.2f loadavg, %.2f effective load, %d runnable of holders, %d token(s) of headroom",
+          reading.loadavg, load, own, math.max(0, cores - RESERVE_CORES - load))
+    print("memory    pressure %d, %d MB free (inactive pages not counted), %d token(s) of headroom", reading.pressure,
+          math.floor((reading.vm.free + reading.vm.speculative) * reading.vm.size / MB), memory_headroom(reading))
     print("held      %d token(s)", held)
-    print("capacity  %d token(s) for a new request now", capacity(snapshot))
+    print("capacity  %d token(s) for a new request now", capacity(reading, held, own))
     print("queued    %d ticket file(s)", queued(folder))
     print("disk      %.0f GB free on the checkout's volume (floor %d GB)", free_disk_gb(), DISK_FLOOR_GB)
 end
 
+local function test_reading(loadavg, pressure, free_mb, opt)
+    opt = opt or {}
+    local size = 16384
+    local function pages(mb)
+        return math.floor(mb * MB / size)
+    end
+    return {loadavg = loadavg, load = opt.load or loadavg, pressure = pressure,
+            vm = {size = size, free = pages(free_mb), speculative = pages(opt.speculative or 0),
+                  compressor = opt.compressor or 0, pageouts = opt.pageouts or 0},
+            previous = opt.previous, cores = opt.cores or 12}
+end
+
 local function test_suite()
+    local process = import("core.base.process")
     local count = 0
     local function check(name, got, want)
         count = count + 1
         assert(got == want, string.format("budget test %s: got %s, want %s", name, tostring(got), tostring(want)))
     end
 
-    check("the cpu idle bounds a pool that memory allows", capacity({cores = 12, held = 0, idle = 6, free_mb = 20000, waited = false}), 6)
-    check("memory bounds a pool the cpu allows", capacity({cores = 12, held = 0, idle = 11, free_mb = 9000, waited = false}), 4)
-    check("held tokens count against memory and cpu", capacity({cores = 12, held = 3, idle = 2, free_mb = 3000, waited = false}), 3)
-    check("the pool never takes the reserved cores", capacity({cores = 12, held = 0, idle = 12, free_mb = 99999, waited = false}), 10)
-    check("an exhausted machine still grants one token when none is held", capacity({cores = 12, held = 0, idle = 0, free_mb = 0, waited = false}), 1)
-    check("a patient request ignores a busy cpu", capacity({cores = 12, held = 0, idle = 0, free_mb = 9000, waited = true}), 4)
+    check("the one-minute window is the cpu reading", parse_loadavg("{ 8.50 2.10 1.00 }\n"), 8.5)
+    check("a missing load average is zero", parse_loadavg(""), 0)
+    check("pressure is read from the sysctl", parse_pressure("2\n"), 2)
 
+    local vmtext = "Mach Virtual Memory Statistics: (page size of 16384 bytes)\n" ..
+                   "Pages free:                  65536.\n" ..
+                   "Pages inactive:            9999999.\n" ..
+                   "Pages speculative:          16384.\n" ..
+                   "Pages occupied by compressor: 1024.\n" ..
+                   "Pageouts:                       7.\n"
+    local vm = parse_vmstat(vmtext)
+    check("the page size is read", vm.size, 16384)
+    check("inactive pages are not part of the reading", vm.free, 65536)
+    check("speculative pages are part of the reading", vm.speculative, 16384)
+    check("compressor pages are read", vm.compressor, 1024)
+    check("pageouts are read", vm.pageouts, 7)
+
+    check("a normal machine counts free memory", memory_headroom(test_reading(0, 1, 11000)), 5)
+    check("warning pressure grants only one token", memory_headroom(test_reading(0, 2, 11000)), 1)
+    check("critical pressure grants none", memory_headroom(test_reading(0, 4, 11000)), 0)
+    local prev = test_reading(0, 1, 11000).vm
+    check("compressor growth grants only one token", memory_headroom(test_reading(0, 1, 11000, {previous = prev, compressor = prev.compressor + 2048})), 1)
+    check("pageouts grant only one token", memory_headroom(test_reading(0, 1, 11000, {previous = prev, pageouts = prev.pageouts + 3})), 1)
+    check("a stable compressor at normal pressure is not a limit", memory_headroom(test_reading(0, 1, 11000, {previous = prev, compressor = prev.compressor + 1})), 5)
+    check("a machine below the reserve still starts one token", memory_headroom(test_reading(0, 1, 100, {speculative = 100})), 1)
+
+    check("runnable load bounds the jobs", capacity(test_reading(8, 1, 11000), 3, 0), 5)
+    check("a holder with no runnable children does not add load", capacity(test_reading(8, 1, 11000), 0, 0), 2)
+    check("more runnable holders than load gives no extra headroom", capacity(test_reading(5, 1, 11000), 2, 9), 3)
+    check("grants since the last load sample stay counted as load", capacity(test_reading(1, 1, 11000, {load = 10}), 0, 0), 1)
+    check("warning pressure with no free memory still starts one token", capacity(test_reading(40, 2, 100), 0, 0), 1)
+    check("a memory-fitting request starts with fewer jobs on a busy cpu", capacity(test_reading(20, 1, 11000), 0, 0), 1)
+    check("critical pressure makes a request wait", capacity(test_reading(0, 4, 11000), 0, 0), 0)
+    check("critical pressure leaves no headroom for holders", capacity(test_reading(0, 4, 11000), 2, 0) - 2, 0)
+    check("the pool still takes no reserved cores", capacity(test_reading(0, 1, 99999, {cores = 12}), 0, 0), 10)
+
+    local raw_load = os.iorunv(SYSCTL, {"-n", "vm.loadavg"}):match("{%s*([%d%.]+)")
+    local live = sample()
+    check("sample reads the machine's load average", tostring(live.loadavg), tostring(tonumber(raw_load)))
+    local raw_pressure = os.iorunv(SYSCTL, {"-n", "kern.memorystatus_vm_pressure_level"}):match("(%d+)")
+    check("sample reads the machine's pressure", tostring(live.pressure), tostring(tonumber(raw_pressure)))
+    local raw_vm = os.iorunv(VMSTAT, {})
+    local raw_free = tonumber(raw_vm:match("Pages free:%s+(%d+)"))
+    check("sample reads the machine's free pages", math.abs(live.vm.free - raw_free) < 100000, true)
     check("a request gets what the room holds", grantable(6, 3, 5, 1, 6), 3)
     check("a request below its minimum gets nothing", grantable(6, 3, 5, 4, 6), 0)
     check("a grant stops at the free slots", grantable(10, 0, 2, 1, 6), 2)
@@ -308,45 +518,235 @@ local function test_suite()
     check("a 60 GB floor refuses a 50 GB volume", disk_refused(50, 100), true)
     check("a volume at the floor is not refused", disk_refused(100, 100), false)
 
-    local base = os.iorunv("mktemp", {"-d"}):trim()
+    local base = path.join(os.tmpdir(), string.format("revenant-budget-%d-%d", os.time(), math.random(0, 999999)))
+    os.mkdir(base)
     local pool = path.join(base, "pool")
     local queue = path.join(pool, "queue")
     os.mkdir(queue)
     local stale = path.join(queue, "1-0000000000001-00000001.ticket")
-    io.writefile(stale, "")
-    check("a ticket whose holder died does not block", ahead_of(pool, "2-0000000000002-00000002.ticket"), false)
+    io.writefile(stale, "1")
+    check("a ticket whose holder died does not block", ahead_of(pool, "2-0000000000002-00000002.ticket", 1), false)
     check("and is removed", os.isfile(stale), false)
-    check("a ticket behind the request does not block", ahead_of(pool, "1-0000000000000-00000000.ticket"), false)
 
-    local nested = os.iorunv("sh", {"-c", string.format("REVENANT_BUDGET_HELD=3 REVENANT_BUDGET_POOL=%s %s l -P %s %s run -- sh -c 'echo $XMAKE_MAX_JOBS'",
-        pool, os.programfile(), path.directory(os.scriptdir()), path.join(os.scriptdir(), "budget.lua"))}):trim()
+    local function ticket_at(name, need)
+        local file = path.join(queue, name)
+        local lock = io.openlock(file)
+        lock:trylock()
+        io.writefile(file, tostring(need))
+        return {name = name, file = file, lock = lock}
+    end
+    local large = ticket_at("2-0000000000001-00000001.ticket", 6)
+    check("a large ticket ahead does not block a small request that fits", ahead_of(pool, "2-0000000000002-00000002.ticket", 1), false)
+    check("and does block one when there is room for it", ahead_of(pool, "2-0000000000002-00000002.ticket", 6), true)
+    leave(large)
+    check("a ticket behind the request does not block", ahead_of(pool, "1-0000000000000-00000000.ticket", 1), false)
+
+    local name_a, name_b = "2-0000000000003-00000003.ticket", "2-0000000000004-00000004.ticket"
+    local aged_a, aged_b = ticket_at(name_a, 4), ticket_at(name_b, 4)
+    io.writefile(aged_path(pool, name_a), "4")
+    io.writefile(aged_path(pool, name_b), "4")
+    check("an earlier aged ticket blocks a later one", ahead_of(pool, name_b, 4), true)
+    check("a later aged ticket does not block the earlier one", ahead_of(pool, name_a, 4), false)
+    aged_a.lock:unlock()
+    aged_a.lock:close()
+    check("a dead aged holder stops blocking", ahead_of(pool, name_b, 4), false)
+    check("and its aged marker is removed with the dead ticket", os.isfile(aged_path(pool, name_a)), false)
+    leave(aged_b)
+
+    local stamp_pool = path.join(base, "stamppool")
+    os.mkdir(stamp_pool)
+    local stamp_log = path.join(base, "stamp.log")
+    local granter = process.openv(os.programfile(), {"l", "-P", path.directory(os.scriptdir()),
+        path.join(os.scriptdir(), "budget.lua"), "run", "--class", "normal", "--jobs", "1", "--min", "1", "--", "/bin/sleep", "30"},
+        {outpath = stamp_log, errpath = stamp_log, envs = {"REVENANT_BUDGET_POOL=" .. stamp_pool}})
+    local stamp_deadline = os.mclock() + 30000
+    while held_slots(stamp_pool) < 1 and os.mclock() < stamp_deadline do
+        os.sleep(500)
+    end
+    check("a second process sees the grant made by the first", read_grants(stamp_pool) >= 0.9, true)
+    check("the grant stamps the shared slot under the lock", (io.readfile(slot_path(stamp_pool, 1)) or ""):match("g %d+ %d+") ~= nil, true)
+    granter:kill()
+    os.tryrm(slot_path(stamp_pool, 1))
+    local slot = slot_path(stamp_pool, 1)
+    io.writefile(slot, string.format("12345\ng %d 4\n", os.time() - 30))
+    check("a grant's load decays across the window", math.abs(read_grants(stamp_pool) - 2) < 0.2, true)
+    io.writefile(slot, string.format("12345\ng %d 4\n", os.time() - 70))
+    check("a grant older than the window adds no load", read_grants(stamp_pool), 0)
+
+    local env_script = path.join(base, "env.lua")
+    io.writefile(env_script, "print(os.getenv('XMAKE_MAX_JOBS'))\n")
+    local nested = os.iorunv(os.programfile(), {"l", "-P", path.directory(os.scriptdir()), path.join(os.scriptdir(), "budget.lua"),
+        "run", "--", os.programfile(), "l", "-P", base, env_script}, {envs = {REVENANT_BUDGET_HELD = "3", REVENANT_BUDGET_POOL = pool}}):match("(%d+)")
     check("a command under a budget takes its parent's tokens without a pool", nested, "3")
     check("and holds no slot of its own", held_slots(pool), 0)
 
-    local started_anyway = true
+    local started_anyway = false
     try { function ()
-        os.iorunv("sh", {"-c", string.format("REVENANT_BUDGET_DISK_GB=100000000 REVENANT_BUDGET_POOL=%s %s l -P %s %s run -- true 2>&1",
-            pool, os.programfile(), path.directory(os.scriptdir()), path.join(os.scriptdir(), "budget.lua"))})
-    end, catch { function () started_anyway = false end } }
+        os.iorunv(os.programfile(), {"l", "-P", path.directory(os.scriptdir()), path.join(os.scriptdir(), "budget.lua"), "run", "--", "/usr/bin/true"},
+            {envs = {REVENANT_BUDGET_DISK_GB = "100000000", REVENANT_BUDGET_POOL = pool}})
+        started_anyway = true
+    end, catch { function () end } }
     check("a volume below the floor starts nothing", started_anyway, false)
+    check("and an empty pool stays empty below the floor", held_slots(pool), 0)
 
-    local marker = 600 + math.random(1, 99999)
-    local launcher = string.format("REVENANT_BUDGET_POOL=%s REVENANT_BUDGET_PATIENCE=0 %s l -P %s %s run --class normal --jobs 2 --min 2 -- sleep %d >/dev/null 2>&1 & echo $!",
-        pool, os.programfile(), path.directory(os.scriptdir()), path.join(os.scriptdir(), "budget.lua"), marker)
-    local pid = os.iorunv("sh", {"-c", launcher}):trim()
-    local deadline = os.mclock() + 90000
-    while held_slots(pool) < 2 and os.mclock() < deadline do
+    local fresh = path.join(base, "fresh")
+    local readings = {test_reading(0, 4, 11000), test_reading(0, 4, 11000), test_reading(0, 1, 11000)}
+    local calls = 0
+    local function changing()
+        calls = calls + 1
+        return readings[math.min(calls, #readings)]
+    end
+    local began = os.mclock()
+    local granted = acquire(fresh, "normal", 1, 1, changing, 1)
+    local elapsed = os.mclock() - began
+    check("a request that does not fit waits and is granted when it does", #granted, 1)
+    check("and the re-check happens without a fixed patience wait", calls >= 3 and elapsed < 10000, true)
+    release_locks(granted)
+
+    local multi_pool = path.join(base, "multi")
+    local multi = acquire(multi_pool, "normal", 4, 4, function () return test_reading(0, 1, 11000) end, 1)
+    check("a four-token request gets four slots", #multi, 4)
+    local stamped = read_grants(multi_pool)
+    check("four granted slots count as four tokens, not sixteen", stamped >= 3.9 and stamped <= 4.001, true)
+    release_locks(multi)
+
+    local keep_pool = path.join(base, "keep")
+    os.mkdir(keep_pool)
+    io.writefile(slot_path(keep_pool, 1), string.format("111\ng %d 2\n", os.time()))
+    local free_keep = snapshot_slots(keep_pool, os.cpuinfo("ncpu"))
+    release_locks(free_keep)
+    check("sampling a free slot keeps its grant stamp", read_grants(keep_pool) >= 1.9, true)
+
+    local short_calls = 0
+    local short_error
+    try { function ()
+        acquire(path.join(base, "short"), "normal", 2, 4, function ()
+            short_calls = short_calls + 1
+            if short_calls > 5 then
+                raise("stopped")
+            end
+            return test_reading(50, 1, 100)
+        end, 1)
+    end, catch { function (raised) short_error = tostring(raised) end } }
+    check("a memory-short empty pool waits instead of granting a degraded minimum", short_error ~= nil and short_calls > 5, true)
+
+    local short_pool = path.join(base, "short-held")
+    os.mkdir(short_pool)
+    local short_blocker = io.openlock(slot_path(short_pool, 1))
+    short_blocker:trylock()
+    local held_short_calls = 0
+    local held_short_error
+    try { function ()
+        acquire(short_pool, "normal", 2, 4, function ()
+            held_short_calls = held_short_calls + 1
+            if held_short_calls > 5 then
+                raise("stopped")
+            end
+            return test_reading(0, 1, 100)
+        end, 1)
+    end, catch { function (raised) held_short_error = tostring(raised) end } }
+    short_blocker:unlock()
+    short_blocker:close()
+    check("a non-empty pool with a memory shortfall waits and starts nothing", held_short_error ~= nil and held_short_calls > 5, true)
+
+    local full_grant = acquire(path.join(base, "fullmin"), "normal", 4, 4, function () return test_reading(50, 1, 11000) end, 1)
+    check("an empty pool under load grants the full minimum when memory fits", #full_grant, 4)
+    release_locks(full_grant)
+
+    local guarantee_pool = path.join(base, "guarantee")
+    local guarantee_queue = path.join(guarantee_pool, "queue")
+    os.mkdir(guarantee_queue)
+    local function waiting_ticket(queue, name, need)
+        local file = path.join(queue, name)
+        local lock = io.openlock(file)
+        lock:trylock()
+        io.writefile(file, tostring(need))
+        return {name = name, file = file, lock = lock}
+    end
+    local older = waiting_ticket(guarantee_queue, "1-0000000000001-00000001.ticket", 4)
+    local older_calls = 0
+    local function under_load()
+        older_calls = older_calls + 1
+        if older_calls == 4 then
+            leave(older, guarantee_pool)
+        end
+        return test_reading(50, 1, 11000)
+    end
+    local guaranteed = acquire(guarantee_pool, "normal", 4, 4, under_load, 1)
+    check("an empty pool grants the oldest ticket its minimum under outside load", #guaranteed, 4)
+    check("the guarantee waits for the older ticket to leave", older_calls >= 4, true)
+    local stamped = read_grants(guarantee_pool)
+    check("four guaranteed slots count as four tokens", stamped >= 3.9 and stamped <= 4.001, true)
+    local blocked_calls = 0
+    local blocked_error
+    try { function ()
+        acquire(guarantee_pool, "normal", 4, 4, function ()
+            blocked_calls = blocked_calls + 1
+            if blocked_calls > 5 then
+                raise("stopped")
+            end
+            return test_reading(50, 1, 11000)
+        end, 1)
+    end, catch { function (raised) blocked_error = tostring(raised) end } }
+    check("a second ticket cannot take the guarantee while the pool is held", blocked_error ~= nil and blocked_calls > 5, true)
+    release_locks(guaranteed)
+
+    local order_pool = path.join(base, "order")
+    local order_queue = path.join(order_pool, "queue")
+    os.mkdir(order_queue)
+    local older_critical = waiting_ticket(order_queue, "1-0000000000001-00000001.ticket", 6)
+    local younger_calls = 0
+    local younger_error
+    try { function ()
+        acquire(order_pool, "background", 2, 2, function ()
+            younger_calls = younger_calls + 1
+            if younger_calls > 5 then
+                raise("stopped")
+            end
+            return test_reading(50, 1, 20000)
+        end, 1)
+    end, catch { function (raised) younger_error = tostring(raised) end } }
+    check("a younger ticket cannot take the guarantee past an older large one", younger_error ~= nil and younger_calls > 5, true)
+    check("and it leaves no grant stamp", (io.readfile(slot_path(order_pool, 1)) or ""):match("g %d+ %d+") == nil, true)
+    leave(older_critical, order_pool)
+    local older_grant = acquire(order_pool, "critical", 6, 6, function () return test_reading(50, 1, 20000) end, 1)
+    check("the older critical ticket then gets its six tokens", #older_grant, 6)
+    release_locks(older_grant)
+
+    local backfill_pool = path.join(base, "backfill")
+    local backfill_queue = path.join(backfill_pool, "queue")
+    os.mkdir(backfill_queue)
+    local starved = waiting_ticket(backfill_queue, "1-0000000000001-00000001.ticket", 6)
+    local backfill_grant = acquire(backfill_pool, "normal", 2, 2, function () return test_reading(50, 1, 5120) end, 1)
+    check("a ticket whose minimum fits memory backfills past a memory-starved older one", #backfill_grant, 2)
+    release_locks(backfill_grant)
+    leave(starved, backfill_pool)
+    local starved_grant = acquire(backfill_pool, "critical", 6, 6, function () return test_reading(50, 1, 20000) end, 1)
+    check("the older ticket then gets its six tokens when headroom allows", #starved_grant, 6)
+    release_locks(starved_grant)
+
+    local dead_pool = path.join(base, "deadholder")
+    os.mkdir(dead_pool)
+    io.writefile(slot_path(dead_pool, 1), string.format("99999\ng %d 2\n", os.time() - 10))
+    local dead_grant = acquire(dead_pool, "normal", 3, 3, function () return test_reading(55, 1, 11000) end, 1)
+    check("a dead holder's slot and stamp do not stop the guarantee", #dead_grant, 3)
+    release_locks(dead_grant)
+
+    local holder_script = path.join(base, "holder.lua")
+    io.writefile(holder_script, "function main(file)\n local lock = io.openlock(file)\n lock:trylock()\n io.writefile(file, tostring(os.getpid()))\n os.sleep(120000)\nend\n")
+    local log = path.join(base, "holder.log")
+    local holder = process.openv(os.programfile(), {"l", holder_script, slot_path(pool, 1)}, {outpath = log, errpath = log})
+    local deadline = os.mclock() + 30000
+    while held_slots(pool) < 1 and os.mclock() < deadline do
         os.sleep(500)
     end
-    check("a running command holds the tokens it was granted", held_slots(pool), 2)
-    os.iorunv("kill", {"-9", pid})
+    check("a running command holds the tokens it was granted", held_slots(pool), 1)
+    holder:kill()
     deadline = os.mclock() + 10000
     while held_slots(pool) > 0 and os.mclock() < deadline do
         os.sleep(200)
     end
-    local released = held_slots(pool)
-    os.iorunv("sh", {"-c", string.format("pkill -f 'sleep %d$'; test $? -le 1", marker)})
-    check("a holder killed with SIGKILL releases its tokens", released, 0)
+    check("a holder killed with SIGKILL releases its tokens", held_slots(pool), 0)
 
     os.rm(base)
     print("budget: %d tests passed", count)
