@@ -453,27 +453,91 @@ A command run straight with `xmake`, and not through `./xmakew` or a budget run,
 
 ## Checks that remember their result
 
-`./xmakew l -P . tools/prepush.lua` remembers each check that passed, in `.cache/prepush`, under the key of the check's inputs:
-the commit `HEAD`, every tracked file and every untracked file that git does not ignore (its blob id, or its content when it
-differs from the index), the environment except the shell's bookkeeping (`PWD`, `OLDPWD`, `SHLVL`, `_`, `COLUMNS`, `LINES`,
-`TERM_SESSION_ID`, `SECURITYSESSIONID`), the xmake that runs the check, the host, and the check's name. A check runs again
-when any of them changes; a check that failed is never remembered. None of the checks reads a file that git ignores, so an
-ignored file is not part of a key; a check that starts to read one must say so in `tools/prepush.lua`.
+`./xmakew l -P . tools/prepush.lua` remembers each check that passed, in the shared store (`<store>/memo/<check>/<key>`, the 40
+newest of each check), under the key of what the check reads. Where it is in doubt whether something is an input it goes into the
+key, because a rerun costs seconds and a verdict that no longer holds costs a push; what stays out is listed after the key. The key is
+
+- the check's name and version, the xmake that runs it, the host, and the code that runs the checks: `tools/prepush.lua` and
+  `tools/budget.lua` are read by every check, so a change to how a check is run runs it again;
+- every `REVENANT_*` variable that is set and not empty, and `XMAKE_GLOBALDIR`, for every check, and the variables a check
+  names (`LC_COLLATE` for `layout`). Not part of a key: `REVENANT_CACHE`, which is the folder of one worktree, and the budget's
+  own `REVENANT_BUDGET_*` variables, which say when a command may start, not what it finds;
+- the content of every tracked file and every untracked file git does not ignore that the check reads (its blob id, or its
+  content when it differs from the index);
+- for `comments`, the content of the local `.git/info/attributes` and of the global attributes file, which `git check-attr` reads
+  to classify a file;
+- for `recipe digests`, `lowered members`, `lowered exports`, `light suites` and `backports build`, which run against what is
+  installed: the Xcode and SDK probes, where `git`, `rsync`, `cmake`, `ninja`, `xcrun`, `clang`, `cc`, `make` and `sh` resolve and the
+  first line of what each prints for `--version`, every install of `llvm`, `swift`, `swift-bootstrap`, `swift-runtime`, `libcxx`, `apple-compat`, `iphoneos-sdk`, `ld64` and
+  `ldid` in the store with the digest of its `manifest.txt`, and the content key of the iPhoneOS SDK (every file of it, with
+  the Xcode tools, about 6 s once per run).
+
+What a key does not see, and the remembered `ok` can therefore outlive a change that a fresh run would report: an install replaced in
+place with the same name and manifest, and a tool replaced in place with the same version line; the host's own frameworks and tools
+that a check calls without naming them in a key (`assets_extract_test` reads the host's CoreUI and runs `plutil` and `assetutil`,
+`emulator_source_test` runs `locale -a`); the wall clock (`credentials` reads `os.time()` against a fixture that expires in 2100, so it
+cannot change its answer before then); the external `find` that `copied_text` and `credentials` run; a file git ignores inside a
+folder a check reads (`agent-skills/tests/data/`: an ignored fixture that changes does not run those two again); the network. A
+change of the host's macOS or of any of those is the case for `--fresh`, which runs every check and records the verdicts.
+
+The commit, the folder and the rest of the environment are not part of a key, so a rebase, an amend, another worktree or another
+shell with the same files takes the verdict from the store, and a file a check does not read does not run it again. A check that
+failed is never remembered, and one that left no verdict (the process that runs the in-process checks was refused by the budget or
+died) fails. A run prints where each verdict came from, `ok layout memo (ran 3 s in xl-source-lock at 4825472b6, 12 min ago)`
+when it was remembered and `ok layout 3s` when it ran; `--fresh` runs every check regardless and records the verdicts.
+
+What a check reads is declared on the check in `tools/prepush.lua` (`reads`, a list of files, directories ending in `/`, and globs with
+`*` inside a directory and `**` across them, and `skips`, which takes files out). A check that declares nothing reads every file,
+so an undeclared check is slower, never stale. The narrow ones: `comments test` (`tools/comments.lua`, `tools/comments/`), the
+tests of `tools/private_cache.lua`, `tools/ci_errors.lua` and `tools/ci_swiftc_replay.lua` (the tool, its folder and the addon
+modules), `credentials` and `copied_text` (`agent-skills/tests/`), `negative shape` (the Backports tests and `emulator/`),
+`recipe digests` (the inputs the recipes list in `toolchain/modules/digest.lua`, the digest files and the addon modules), and
+`lowered members` and `lowered exports`, which skip `docs/`, Markdown files, `.agents/` and `agent-skills/`. `backports build` skips
+nothing, because the copy it builds in holds every file. A check that starts to read a file outside its declaration, or an ignored
+file, must say so there; an ignored file is not part of a key.
+
+The checks that run inside xmake (`comments`, `layout`, `docs_commands`, `recipe digests` and the rest of the cheap ones) and
+whose verdict is not remembered run together in one xmake process behind one admission of the budget: before, each took its
+own process and waited its own turn for a token (80 to 372 s each on a busy machine, 0 to 10 s when run directly). The checks that
+build or need their own process (`host install test`, `isolate test`, the heavy ones) keep their own.
 
 `backports build` configures the Backports component for iphoneos armv7 and builds every one of its libraries, with the flags
 of the package, so a source the `backports` package cannot compile (a `-Werror` of `frameworks/Backports/xmake.lua`, a missing
 header, a link error) stops the push and not the build of an application that requires the package. The check works in a copy of
 the checkout, `build/backports-gate/tree`, which `rsync -a --delete` brings up to date from the checkout on every run (git, `.xmake`,
-`build`, the caches and `.claude/worktrees` stay out), so the host configuration of the checkout stays what it was and
+`build`, the caches, `.claude/worktrees` and every file git ignores, `build/backports-gate/ignored.txt`, stay out, so that the tree holds
+the files the key covers and no others), so the host configuration of the checkout stays what it was and
 `./xmakew test -P .` still runs. The copy keeps its own `.xmake` and `build`, so a later run compiles only what changed. A shared
 `XMAKE_CONFIGDIR` would not do: the configure starts nested xmake processes that inherit it and wait on the project lock the
 configure holds. The check takes the prebuilt `llvm`, `swift` and `ld64` of `REVENANT_PREBUILT` and `REVENANT_PREBUILT_ONLY` when the
 environment names them (`kern0x1b/revenant` and `llvm,swift,ld64` otherwise), and fails rather than building them from source. It reads
-the package store and the lowered overlays of the store, and the iOS 6.0 shared cache of `REVENANT_CACHE`, which are caches and not part of its key. On
+the package store and the lowered overlays of the store, and the iOS 6.0 shared cache of `REVENANT_CACHE`, which are caches and not part of its key (the installs it builds against are). On
 a failure it prints the compiler's errors and the path of the whole log, `build/backports-gate/prepush.log`. The first run builds
 all libraries (about six minutes on a 12-core Mac), a later one only what changed, and a run on an unchanged tree is remembered like the
 others. `./xmakew l -P . tools/ci_local.lua backports` runs the same build from a fresh configuration and goes on to the Backports
-tests, the probe app and the exports check.
+tests, the probe app and the exports check. `ci_local` hands the light suites to the `checks` job when the memo already holds them: just before that job starts (after the quick job, in a
+serial run, so the prepush that job ran counts; right after it makes the job's clone, in a parallel one) it asks the memo
+(`prepush.lua --recall "light suites"`, which prints the line and `key <hash>`) and, when prepush holds the verdict, writes the line, the key, the path
+of the tree the job tests (the clone, or the checkout in a serial run), its own process number and start time and the folder of its run to
+`light-suites-<pid>-<nonce>.verdict` in that folder, under a nonce made for that run, and exports `REVENANT_LIGHT_SUITES_VERDICT=<nonce>@<that file>`.
+A suite of the light target takes its verdict from the file only when all of this holds: the nonce in the variable is the one in the file; the
+file is where it says it is and is named for the process and the nonce it says (a copy in another folder, or under another name, is not taken); the
+file names the checkout the suite is running in (by its real path); the process that wrote it is still running, started when the file says and is a
+`ci_local` (its command line says so; a run that was killed, a process number another process has taken and a shell of someone who typed the file
+are not trusted); and the memo store holds an `ok` verdict of `light suites` under the key in the file (a look at `<store>/memo/light-suites/<key>`,
+not the word of whoever wrote the file). It then prints the line that says where the verdict came from and runs the rest; anything else (a string
+typed into the variable, a leftover of another shell, a file of another run, folder or checkout, a key the memo does not hold) is no verdict and the
+suites run. Nothing is remembered between the suites: each looks again, with one `ps` and one `pwd -P` and two file reads, so a refused verdict is
+refused again and a verdict the memo has dropped stops being taken.
+
+
+What this does not do: it does not compute the key of the checkout again in the suite (that is the 11 seconds of prepush's key, once for each of the
+fifty-odd suites). The key in the file is the one the memo gave when `ci_local` asked, in the run that is alive, so an edit of the checkout between that
+moment and the start of the tests is not seen, and a file written by hand that satisfies every condition above, with a key the memo holds for some
+earlier inputs, is taken. The conditions keep out accidents (a stale file, a copied file, another checkout, a killed run, a typed value), and not a
+person who sets out to forge a verdict; anyone who can do that can also leave the tests out. `ci_local` deletes the file when its run ends (not when it is
+first read, because every suite reads it). `toolchain/modules/recalled.lua` holds the writing and the reading, `toolchain_light/recalled_test` its cases,
+and `prepush`'s own test that it reads the memo the way `prepush` writes it.
 
 Order and flags. The cheap checks run first and the heavy ones (`lowered members`, `lowered exports`, `light suites`,
 `backports build`) last, and the run stops at the first check that fails, so a two-second `layout` failure does not wait
@@ -492,7 +556,9 @@ Where a cold `backports build` spends its time (2026-11-16, 63 minutes by the in
 these have a prebuilt hook (`docs/guides/prebuilt.md`); the rest build from source on a machine without the cache, which is why a
 warm cache is kept.
 
-`recipe digests` is never remembered: it regenerates the digests and compares them with the committed ones, so it runs on
-every prepush, and a second prepush on the same tree runs only that check. `./xmakew l -P . tools/prepush.lua test` checks the
-keys: an edit, an untracked file, a deleted file, an environment variable and a new commit each change a key, restoring them
-restores it, and a failing check runs again.
+`recipe digests` is remembered like the others, by the files its recipes list, the digest files and the SDK facts, so a second
+prepush on the same tree runs no check, and an edit of a document runs only the checks that read documents. `./xmakew l -P . tools/prepush.lua test`
+checks the keys and the memo: an edit, an untracked file, a deleted file and a named environment variable each change the keys of the
+checks that read or name them, restoring them restores the keys, another folder or a new commit with the same files has the same
+key, a file a check does not read leaves its key, a failing check runs again, the checks of one process run in one batch, and
+`--fresh` runs them all.
