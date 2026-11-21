@@ -14,6 +14,8 @@ overlay/      files that replace the same path in the application's tree
 `overlay/` over the clone. The checkout is never written. A file in `overlay/` that the application does not have stops the
 command: the overlay is for another version.
 
+After the overlay, `apply` runs the application's own `scripts/postinstall-patches.mjs` in the clone, with the clone's `node_modules/.bin` first on PATH, as npm does after an install. The application is installed with `npm ci --ignore-scripts`, which skips it, and without its patches the bundle is not the application: on 2026-11-22 the bundle of the unpatched Paseo 0.16.2 had no `BottomSheetModalInternalProvider` export (all 11 patches were unapplied) and its root screen stopped at "Element type is invalid" on the iPad 2. The script leaves a patch that is already applied alone, and a patch that does not apply stops `apply`. `tests/overlay_test.lua` checks the place, the PATH, that the application folder is not written, and the failure.
+
 ```sh
 ./xmakew l -P . frameworks/ReactNative/tools/overlay.lua apply <checkout> frameworks/ReactNative/examples/<name> <project>/build/ref/app
 ./xmakew l -P . frameworks/ReactNative/tools/inputs.lua make <project> --manifest frameworks/ReactNative/examples/<name>/host.json
