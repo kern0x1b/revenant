@@ -1,6 +1,6 @@
 # 0010: xmake sorts with the collation `./xmakew` sets
 
-Status: accepted
+Status: superseded by [0017](0017-build-hash-sorts-by-byte.md)
 
 ## Context
 
