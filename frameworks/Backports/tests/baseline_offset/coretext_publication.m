@@ -5,6 +5,10 @@
 
 extern void revenant_note_baseline_offset(CFAttributedStringRef string);
 
+// A publication check, not a race test: the line is made and drawn on two queues, but one semaphore hands the flag from the
+// maker to the painter, and a semaphore orders the accesses by itself, so this passes with a plain BOOL as well. It shows that
+// a flag set on one thread is seen by a drawing on another, and that a line made before the flag passes through.
+
 typedef void (*LineDraw)(CTLineRef, CGContextRef);
 
 static NSAttributedString *text(double offset)
@@ -56,7 +60,7 @@ int main(void)
         });
         dispatch_semaphore_wait(drawn, DISPATCH_TIME_FOREVER);
         BOOL again = ![render(line, CTLineDraw) isEqualToData:native];
-        printf("CT-THREAD before-seen-passes-through=%d made-elsewhere-takes-model=%d model-everywhere-after=%d\n", passes, takesModel, again);
+        printf("CT-PUBLICATION before-seen-passes-through=%d made-elsewhere-takes-model=%d model-everywhere-after=%d\n", passes, takesModel, again);
         CFRelease(line);
         return passes && takesModel && again ? 0 : 1;
     }

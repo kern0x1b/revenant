@@ -44,7 +44,9 @@ it is to draw or measure and calls the system's function unchanged when the answ
   (`CFAttributedStringGetAttributes` and one dictionary lookup per run), for an `NSBaselineOffset` that is not 0 and sets a
   process-wide flag when it finds one. The flag is published with a release store and read with an acquire load
   (`__atomic_store_n`, `__atomic_load_n`; the scan's own early-out reads it relaxed), so a line made with an offset on a worker
-  thread is drawn by the model on the main thread (`tests/baseline_offset/coretext_threads.m`); a plain `volatile` is not that.
+  thread is drawn by the model on the main thread. `tests/baseline_offset/coretext_publication.m` checks that publication across two
+  queues; it is not a race test (a semaphore hands the flag over and orders it by itself, so it passes with a plain `BOOL` too): the
+  ordering of the stores and loads is the code's, by the atomics, not something the test would catch.
   Until the flag is set, no line of the process has an offset, so the five metrics entry points are one call of
   the system's, and the three draw entry points skip the lookup of the offset in the attributes of every run
   (`revenant_may_offset()`). Once it is set (the first string with an offset), every entry point looks at the runs of its line or
