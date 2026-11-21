@@ -41,11 +41,16 @@ it is to draw or measure and calls the system's function unchanged when the answ
   `CTEmojiClusters6.m` shadows (`CTLineCreateWithAttributedString`, `CTTypesetterCreateWithAttributedString`,
   `CTTypesetterCreateWithAttributedStringAndOptions`, `CTFramesetterCreateWithAttributedString`). Each one first calls
   `revenant_note_baseline_offset` (hidden, `revenant_baseline_offset_seen.h`), which looks through the attributed string, run by run
-  (`CFAttributedStringGetAttributeAndLongestEffectiveRange`), for an `NSBaselineOffset` that is not 0 and sets a process-wide flag
-  when it finds one. Until the flag is set, no line of the process has an offset, so the five metrics entry points are one call of
+  (`CFAttributedStringGetAttributes` and one dictionary lookup per run), for an `NSBaselineOffset` that is not 0 and sets a
+  process-wide flag when it finds one. The flag is published with a release store and read with an acquire load
+  (`__atomic_store_n`, `__atomic_load_n`; the scan's own early-out reads it relaxed), so a line made with an offset on a worker
+  thread is drawn by the model on the main thread (`tests/baseline_offset/coretext_threads.m`); a plain `volatile` is not that.
+  Until the flag is set, no line of the process has an offset, so the five metrics entry points are one call of
   the system's, and the three draw entry points skip the lookup of the offset in the attributes of every run
   (`revenant_may_offset()`). Once it is set (the first string with an offset), every entry point looks at the runs of its line or
-  frame, and a line or a frame without an offset still goes to the system whole.
+  frame, and a line or a frame without an offset still goes to the system whole. The scan cannot be avoided: Telegram sets
+  `.baselineOffset` in 81 files of release 13.2 (about 100 sites: the stars of the service messages, the sub- and superscripts
+  of the instant pages, the input panels, alerts, list headers), through `NSMutableAttributedString` methods that the backports do not wrap; its price is in Measured.
 - **A deleted glyph** (`revenant_deleted_glyphs.h`, only before iOS 7). The glyphs of the range are read, and the system's
   `CTRunDraw` draws each stretch of live glyphs by its own call with the range of the stretch, never an empty one. A range
   without the marker goes to the system as one unchanged call. The glyphs keep their positions, since `CTRunDraw` places glyph
@@ -90,8 +95,24 @@ Measured on the iPhone 4S, iOS 6.1.3, by drawing lines with the system's `CTLine
   a single bar is `max(1, ceil(thickness))` thick, centred on `round(position)` below the baseline, `ceil(width)` wide, starting at
   the run's position, drawn in the underline colour (`kCTUnderlineColorAttributeName`, `NSUnderlineColor`, else the foreground
   colour, else black);
-- a double underline (style value 9) is two bars, each `round(0.75 * thickness * 64) / 64` thick, centred at `centre + 0.5` and
-  `centre - 1.5`;
+- a double underline (style value 9) is two bars, each `each = round(0.75 * thickness * 64) / 64` thick, `2k` rows apart with
+  `k = max(1, ceil(each - 0.5))`, so 2 rows apart up to a 40 pt font (`each` up to 1.5), 4 from 44 to 66 pt, 6 from 70 to 90 pt and
+  8 at 100 and 120 pt; the pair is centred on `position - each / 2` snapped to the grid a bar of `k` rows sits on (the nearest whole
+  pixel when `k` is even, the nearest half pixel when `k` is odd), the upper bar `k` above the middle and the lower `k` below. For
+  17 to 40 pt this is the `centre + 0.5` and `centre - 1.5` of the first version, but not at 20 pt (`position` -2.5: the bars at
+  -1.5 and -3.5, not -2.5 and -4.5) and not above 40 pt, which the first version had not measured;
+- a dotted, dashed, dash-dot and dash-dot-dot underline (the style value's `0x0100`, `0x0200`, `0x0300`, `0x0400`; single, thick
+  and double) is the same bar cut by a pattern in units `u`: the single bar's thickness (the thick bar's half, the double's
+  `0.75 * thickness`, not the rounded `each`: at 24 pt the dash period is 11.70 px, `13 * 0.9`, not `13 * 0.906`), as
+  dot `[3u 3u]`, dash `[10u 3u]`, dash-dot `[10u 3u 3u 3u]`, dash-dot-dot `[10u 3u 3u 3u 3u 3u]` (on, off, on, ...). The lengths
+  are in the context's user space, not scaled by the text matrix. The pattern starts at the bar's own start (the underlined
+  stretch of a line, not the line) at the coordinate `phase = scale * (floor(ty) + centre)`, where `centre` is the bar's centre
+  below the baseline (`round(position)`, for a double underline the middle of the pair, `position - each / 2` snapped), `ty` the
+  text position's y and `scale` the context's scale (1 on a standard, 2 on a retina screen, 1.5 and 3 measured as well; the
+  device row of the bar for scale 1). The two bars of a double underline carry the same phase. The phase is the same in a
+  flipped context and for a text position moved by half a pixel (`floor`), and a text matrix that scales by 1.25 changes neither
+  the lengths nor the phase. The backports draw it with `CGContextSetLineDash` on the bar's centre line, butt caps, and the
+  system's CTLineDraw draws the same (below);
 - consecutive runs with the same style, colour and offset are one underline, from the first run's position to the end of the last
   one; at the end of the line the trailing whitespace is not underlined;
 - a raised or lowered run takes its underline with it, and a raised run's underline stops at the baseline (the centre is
@@ -100,8 +121,7 @@ Measured on the iPhone 4S, iOS 6.1.3, by drawing lines with the system's `CTLine
   not the identity, a text position whose `ty` is fractional snaps the bar by `floor(ty) - ty` through the matrix (in a flipped
   context the bar moves twice the distance of the text); the thickness is not scaled by the text matrix's scale (a bar is one pixel
   across under a matrix that scales by 1.25 and rotates), the centre offset is; the context's own scale (retina) scales both;
-- dotted, dashed and mixed patterns of the style value are drawn solid by the backports, and `NSStrikethrough` is drawn by neither
-  CoreText of 6.1.3 nor the backports (UIKit draws it).
+- `NSStrikethrough` is drawn by neither CoreText of 6.1.3 nor the backports (UIKit draws it).
 
 ## Why they are plain definitions
 
@@ -114,7 +134,15 @@ so on 6.1.3, where the system has them, the baseline-offset model never ran for 
 
 ## Not covered
 
-- A line with an offset or the marker whose underline has a pattern other than solid or double has it drawn solid.
+- The underline of a raised or lowered run has no oracle for a pattern or a double bar: the system draws no offset on 6.1.3. The
+  backports move the bars as a whole (a raised run's bar stops with its centre on the baseline) and take the phase from the bar
+  where it is drawn.
+- A double underline of a font under 14 pt (size 12 measured: the bars one row apart and 0.40 thick, not 0.45) is drawn as the
+  one of 14 pt: two rows apart. Not measured below 12 pt and not for a pattern.
+- A pattern under a text matrix that rotates is checked only for the cases of the `draw` item (17 pt: dot, dash, dash-dot, thick
+  dash, double dash, red dash, two fonts; 24 pt: dash-dot-dot, thick dot, double dot; 50 pt: dash), whose geometry equals the
+  system's; the rotated pixels differ by one level of alpha in a row of some of them (Measured). The phase of a pattern under any
+  other context scale than 1, 1.5, 2 and 3 is the same formula, not measured.
 - `NSStrikethrough` is drawn by neither CoreText of 6.1.3 nor the backports (UIKit draws it).
 - The system's rasterisation of a bar that covers a pixel partly differs from the backports' by one level of alpha at some
   fractional text positions, by two in the rows of a double underline, and by up to 12 at its edges under a rotated and scaled text
@@ -131,20 +159,26 @@ so on 6.1.3, where the system has them, the baseline-offset model never ran for 
 `tools/ctprobe` of the build repository links `CTFontCascade6.m`, `CTDrawBaselineOffset7.m` and `CTEmojiClusters6.m` into a tool and
 draws the same lines through the system's functions (taken with `dlsym`) and through the linked ones, as Telegram's `TextNode`
 does (a text position per line, `CTRunDraw` per run), through `CTLineDraw` and `CTFrameDraw`, and through a loop over the live
-runs. The `draw` item runs 474 configurations (texts with and without underline, colour, double underline, offset, the marker,
+runs. The `draw` item runs 762 configurations (texts with and without underline, colour, double underline, the four patterns
+single, thick and double, two fonts in one line, sizes 17 to 60, offset, the marker,
 two stretches in one line and wrapped frames, in line, runs, live-run and frame mode, under an identity, a flipped (CTM and text
 matrix) and a rotated and scaled text matrix, at whole and at fractional text positions). After every drawing a plain line is
 drawn by the system's `CTLineDraw` into the same bitmap, so a fill colour or a text matrix that the first drawing leaked changes
 the hash. On the 4S, iOS 6.1.3, 200x40 bitmaps, FNV hash of the pixels:
 
-- text position and text matrix after the drawing equal the system's in 465 of 474 (the nine are wrapped frames with a raised run,
-  whose lines the model lays out); stderr is 0 bytes in all 474 with the backports, 108 or 216 bytes in the 156 that hold the
-  marker with the system;
-- without an offset the bitmap is the system's, to the byte, at whole text positions, and the underline layer (the drawing
-  minus the same line drawn without underline) equals the system's in 124 of the 204 underline layers measured; the other 80
-  are the residue above: one level of alpha at partly covered pixels (the single bar at a fractional position, in all three
-  matrices), two levels in the rows of a double bar, and up to 12 levels at the edges of a double bar under the rotated matrix;
-  geometry (rows, columns, thickness) equal;
+- text position and text matrix after the drawing equal the system's in 753 of 762 (the nine are wrapped frames with a raised run,
+  whose lines the model lays out); stderr is 0 bytes in all 762 with the backports, 108 or 216 bytes in the 444 that hold the
+  marker with the system; the bitmap is the system's, to the byte, in 541 of the 762;
+- the underline layer (the drawing minus the same line drawn without underline) equals the system's in 278 of the 396 underline
+  layers measured; the other 118 are the residue above: one level of alpha at partly covered pixels (the single bar at a
+  fractional position), two levels in the rows of a double bar, and up to 12 levels at the edges of a double bar under the rotated
+  matrix; the rows of all 79 unequal layers of runs 31 and 32 are the system's, and the largest difference in the sampled column
+  is 6 levels;
+- the patterned underlines (run 32, the `draw` cases of dot, dash, dash-dot, dash-dot-dot, thick dot, thick dash, a red dash, two
+  fonts in a line, a dash at 50 pt, in line and live-run mode, under all three matrices): the layers of a single pattern are equal
+  to the byte in 118 of 120, the other two being a row of the rotated 50 pt dash that is one level off; the layers of a double
+  pattern (dash at 17 pt, dot at 24 pt) equal in 10 of 24, the others one or two levels off in the same rows, the same
+  residue as the solid double bar;
 - the system's own `CTRunDraw` loop over the runs of an underlined line draws no underline (its bitmap is the plain text's), so a
   line that is drawn run by run needs the backports' own underline; a first version that drew the runs of a line with the marker
   and then called the system's `CTLineDraw` with the text invisible painted the colour emoji twice and left the log lines;
@@ -170,12 +204,21 @@ the hash. On the 4S, iOS 6.1.3, 200x40 bitmaps, FNV hash of the pixels:
   seen, a line with a raised run answers `CTLineGetTypographicBounds` in 0.8 us (one run) to 2.8 us (three runs) and a frame
   `CTFrameGetLineOrigins` in 1.9 to 3.9 us: the model measures every run; a line without an offset still costs one system call
   and a lookup in the attributes of each of its runs;
-- creation (`create` item, A5, 2000 calls, best of five): `CTLineCreateWithAttributedString` 78.5 us system and 83.9 us linked
-  for a one-run string (+5.3 us, 6.8 %), 216.4 and 223.9 us for three runs (+7.5 us, 3.5 %); the typesetter and the framesetter
-  creation differ by the same amounts. The 5 to 7 us are the offset scan of the attributed string
-  (`CFAttributedStringGetAttributeAndLongestEffectiveRange`, an Objective-C message to the string on iOS 6; the same scan costs
-  42 ns of a 2.5 us line creation on the host) and the cluster check of `EmojiClusters.md` (about 2 us of them); once an offset
-  was seen the scan is skipped;
+- creation (`create` item, A5, 2000 calls, best of five, run 31; the system's function against the linked shadow, and against the
+  shadow with only the offset scan, which is what this change adds to the cluster check that was there): `CTLineCreateWithAttributedString`
+  of a `CFMutableAttributedString` of one run 77.6 us system, 79.5 us with the scan alone (+1.9 us, 2.5 %), 82.4 us linked (+4.9 us, 6.3 %);
+  of three runs 218.6, 224.4 (+2.6 %) and 226.0 us (+3.4 %); of an `NSMutableAttributedString`, the class Telegram makes, of one run
+  63.6, 67.2 (+5.8 %) and 70.8 us (+11.4 %); of three runs 173.8, 181.1 (+4.2 %) and 185.6 us (+6.8 %). The typesetter and the
+  framesetter creation differ by the same amounts (runs 28, 30 and 31 agree within 0.4 points). The scan reads the attributes of every run
+  (`CFAttributedStringGetAttributes`, an Objective-C message to the string on iOS 6, about 2 us for a `CF` string and 3 to 4 us for an `NS`
+  one, wherever the call is placed in the creation: before, after, or in the first of the four shadows only; the same scan costs 42 ns
+  of a 2.5 us line creation on the host) and the cluster check of `EmojiClusters.md` is the other 3 us. The first version of the scan
+  (`CFAttributedStringGetAttributeAndLongestEffectiveRange`) cost 2.7 to 3.2 % (`CF`) and 6.1 to 7.4 % (`NS`) of the one-run creation; the
+  per-run scan 2.4 to 2.5 % and 5.2 to 5.8 %. Once an offset was seen the scan is skipped. It does not reach 2 % for an `NS` string:
+  what is left is the message that returns the run's attributes, and a cheaper test (the string's length, its class, the first run
+  only) cannot tell a string that holds a raised run, which may be any run. The price is the cost of finding an attribute that the
+  system ignores without a hook at the place where `NSBaselineOffset` is written, which is 81 files of Telegram and about 100 sites
+  (see the offset paragraph above). It exceeds the 1 to 2 % that was asked for, and accepting it is the owner's decision;
 - time of a synthetic chat list, best of three, microseconds per round on the A5 (the third column is the cascade of
   `FontFallbackCascade.md` alone):
 
@@ -190,14 +233,17 @@ the hash. On the 4S, iOS 6.1.3, 200x40 bitmaps, FNV hash of the pixels:
 
   Plain text pays 5.5 us per line made (the offset scan and the cluster check) and 8.6 us per line made and drawn (the draw
   adds the typesetter check and, for every run, the glyph scan; a one-run line's drawing is about 50 us); a line with the marker is
-  cheaper than the system's because the drawing no longer logs.
+  cheaper than the system's because the drawing no longer logs. The table was taken with the first version of the offset scan; the
+  per-run scan of the creation bullet above costs 0.4 to 1 us less per line made, and the table has not been taken again.
 
 Tests: `frameworks/Backports/tests/CoreText/deleted_glyphs_test.m` (host, 20 checks: the stretches of a glyph array, the shift of the
 text position through an identity, a flipped and a scaled text matrix, the stretches drawn at the shifted position and the position
 put back; `--negative` is the unfixed answer, which draws every glyph in one piece and ignores the offset),
-`tests/CoreText/underline_test.m` (host, 24 checks: the bars of a single, thick, double, coloured, raised and lowered underline
+`tests/CoreText/underline_test.m` (host, 96 checks: the bars of a single, thick, double, coloured, raised and lowered underline
 against the measured values, the placement through an identity, a flipped and a rotated text matrix, a line with the marker whose
-underline is drawn once and whose runs are drawn through the live stretches, a line of mixed offsets keeping its underline; the
-`--negative` mode fills the unrounded bars and fails every geometry check) and the macOS oracle `baseline_offset_oracle_test.lua` (the
+underline is drawn once and whose runs are drawn through the live stretches, a line of mixed offsets keeping its underline, and
+about 70 taken from the 4S tables: the on and off runs of a dotted, dashed, dash-dot and dash-dot-dot bar at baselines 14 and 12, under
+the context scales 1, 1.5, 2 and 3, flipped, under a text matrix of 1.25, the rows of a double bar at 17 to 120 pt and the
+patterns of a partial underline; the `--negative` mode fills the unrounded solid bars and fails 80 of them) and the macOS oracle `baseline_offset_oracle_test.lua` (the
 model against the native CoreText of the host: a line, its runs and a frame with an offset, the layout, the bounds, and the
 underline of a plain, a lowered and a raised line).

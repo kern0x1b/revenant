@@ -84,7 +84,8 @@ On the 4S, iOS 6.1.3, FNV hash of 200x40 bitmaps:
 
 Plain text pays 5.5 us per line made (the scan of the UTF-16 for a cluster, about 2 us, and the scan of the attributed string for a
 baseline offset until one was seen, `DeletedGlyphs.md`) and 8.6 us per line made and drawn (that, and for every run drawn the
-scan of its glyphs); text with a cluster is cheaper than before because
+scan of its glyphs); these two figures were taken with the first version of the offset scan, which `DeletedGlyphs.md` (Measured,
+creation) replaced with a per-run scan that costs 0.4 to 1 us less per line made; text with a cluster is cheaper than before because
 its runs are fewer and the deleted glyph is not logged.
 
 ## Not covered

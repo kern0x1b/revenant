@@ -134,10 +134,10 @@ __attribute__((visibility("hidden"))) void revenant_note_baseline_offset(CFAttri
     if (__atomic_load_n(&revenant_offset_seen, __ATOMIC_RELAXED) || string == NULL || !revenant_needs_model())
         return;
     CFIndex length = CFAttributedStringGetLength(string);
-    CFRange whole = CFRangeMake(0, length);
     for (CFIndex index = 0; index < length;) {
         CFRange range = CFRangeMake(index, 1);
-        CFTypeRef value = CFAttributedStringGetAttributeAndLongestEffectiveRange(string, index, (__bridge CFStringRef)revenant_baseline_offset_name, whole, &range);
+        CFDictionaryRef attributes = CFAttributedStringGetAttributes(string, index, &range);
+        CFTypeRef value = attributes ? CFDictionaryGetValue(attributes, (__bridge CFStringRef)revenant_baseline_offset_name) : NULL;
         double offset = 0;
         if (value && CFGetTypeID(value) == CFNumberGetTypeID() && CFNumberGetValue((CFNumberRef)value, kCFNumberDoubleType, &offset) && offset != 0) {
             __atomic_store_n(&revenant_offset_seen, YES, __ATOMIC_RELEASE);
