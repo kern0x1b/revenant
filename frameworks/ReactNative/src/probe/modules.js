@@ -66,28 +66,95 @@ var CHECKS = {
       });
   },
   ExpoTwoWayAudio: function (module) {
-    // The application's own module (the host.json "modules" of an application): its engine, the microphone on a
-    // VoiceProcessingIO unit, starts, reports its recording state and delivers microphone chunks and levels.
     var counts = {micChunks: 0, micBytes: 0, inputLevels: 0, outputLevels: 0, recordingChanges: []};
+    var rate = 16000;
+    var levels = [];
+    var firstChunk = null;
+    var tone = 1000;
+    var control = 1700;
+    var phase = 'plain';
+    var samples = {plain: [], quiet: [], tone: []};
+    function toInt16(data) {
+      if (!data) { return []; }
+      var buffer = data.buffer && data.byteLength !== undefined && !(data instanceof ArrayBuffer) ? data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength) : data;
+      return new Int16Array(buffer);
+    }
+    function goertzel(values, frequency) {
+      var coefficient = 2 * Math.cos(2 * Math.PI * frequency / rate);
+      var previous = 0;
+      var before = 0;
+      for (var i = 0; i < values.length; i++) {
+        var current = values[i] + coefficient * previous - before;
+        before = previous;
+        previous = current;
+      }
+      var power = before * before + previous * previous - coefficient * previous * before;
+      return power / (values.length * values.length);
+    }
+    function rms(values) {
+      var sum = 0;
+      for (var i = 0; i < values.length; i++) { sum += values[i] * values[i]; }
+      return values.length ? Math.sqrt(sum / values.length) : 0;
+    }
+    function join(parts) {
+      var total = 0;
+      parts.forEach(function (part) { total += part.length; });
+      var all = new Float64Array(total);
+      var at = 0;
+      parts.forEach(function (part) { for (var i = 0; i < part.length; i++) { all[at + i] = part[i]; } at += part.length; });
+      return all;
+    }
+    function measure(parts) {
+      var values = join(parts);
+      return {samples: values.length, rms: Math.round(rms(values)), atTone: goertzel(values, tone), atControl: goertzel(values, control)};
+    }
     module.addListener('onMicrophoneData', function (event) {
       counts.micChunks += 1;
       counts.micBytes += event && event.data && event.data.byteLength || 0;
+      var chunk = toInt16(event && event.data);
+      if (!firstChunk) { firstChunk = {type: Object.prototype.toString.call(event && event.data), length: chunk.length, head: Array.prototype.slice.call(chunk, 0, 8)}; }
+      samples[phase].push(chunk);
     });
-    module.addListener('onInputVolumeLevelData', function () { counts.inputLevels += 1; });
+    module.addListener('onInputVolumeLevelData', function (event) { counts.inputLevels += 1; if (levels.length < 6) { levels.push(event && event.data); } });
     module.addListener('onOutputVolumeLevelData', function () { counts.outputLevels += 1; });
     module.addListener('onRecordingChange', function (event) { counts.recordingChanges.push(event && event.data); });
+    function wait(ms) { return new Promise(function (resolve) { setTimeout(resolve, ms); }); }
     var answers = {};
-    return module.initialize().then(function (initialized) {
+    return module.getMicrophonePermissionsAsync().then(function (permission) {
+      answers.permission = permission;
+      return module.initialize();
+    }).then(function (initialized) {
       answers.initialized = initialized;
       answers.recording = module.toggleRecording(true);
-      return new Promise(function (resolve) { setTimeout(resolve, 3000); });
+      return wait(3000);
     }).then(function () {
       answers.stillRecording = module.isRecording();
       answers.playing = module.isPlaying();
+      module.bypassVoiceProcessing(true);
+      phase = 'quiet';
+      return wait(1500);
+    }).then(function () {
+      var pcm = new Int16Array(rate * 2);
+      for (var i = 0; i < pcm.length; i++) { pcm[i] = Math.round(12000 * Math.sin(2 * Math.PI * tone * i / rate)); }
+      phase = 'tone';
+      module.playPCMData(new Uint8Array(pcm.buffer));
+      return wait(2600);
+    }).then(function () {
       module.toggleRecording(false);
       answers.recordingAfterStop = module.isRecording();
       module.tearDown();
       answers.counts = counts;
+      answers.levels = levels;
+      answers.firstChunk = firstChunk;
+      var quiet = measure(samples.quiet);
+      var heard = measure(samples.tone);
+      answers.tone = {
+        quiet: quiet,
+        heard: heard,
+        toneOverQuiet: quiet.atTone > 0 ? heard.atTone / quiet.atTone : null,
+        toneOverControl: heard.atControl > 0 ? heard.atTone / heard.atControl : null,
+        heardTheTone: heard.atTone > 10 * Math.max(quiet.atTone, 1e-9) && heard.atTone > 3 * heard.atControl
+      };
       return answers;
     });
   },
