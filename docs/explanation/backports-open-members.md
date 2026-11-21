@@ -620,6 +620,15 @@ change to the system's own origins and rounds each baseline. A suggested height 
 last line, whole points up. The model matches macOS's CoreText for raised, lowered and mixed runs, one and two lines
 (`tests/baseline_offset/coretext_oracle.m`, `CT-LAYOUT all-equal=1`).
 
+`tests/runtime/cases/coretext_baseline_offset.m` draws "H" at 24 pt in 6.1.3 on the emulator and checks lines, runs and the
+ascent against the system's, and prints the frame. Measured (emulator run of 2026-11-21): `CTLineDraw` and `CTRunDraw` put the
+ink top at 82 in the system with and without the offset and at 82 and 76 in the app; the ascent grows by 6.00 in the app and
+by 0.00 in the system. `CTFrameDraw` leaves the ink of one line at row 25 and the bottom of a two-line frame at row 71, with
+and without the offset, in the app and in the system alike. This is consistent with the macOS
+oracle's `frame-equal` (`tests/baseline_offset/coretext_oracle.m`), which compares macOS's own raised frame with the model's
+drawing of the same lines, so the case holds the frame as a printed fact and does not assert a shift of its own. The case does
+not separate the model's drawing from the pass-through to the system, so it does not show that the model ran for the frame.
+
 On the device, `tests/emulate/baseline` links the replacement into its own probe and prints `ct-line`, `ct-run`, `ct-frame`,
 `ct-metrics`, `ct-image`, `ct-origin`, `ct-line-flipped`, `draw-flipped`, `ct-bounds` and `ct-trailing` next to the system's
 answers. The numbers those lines print have not been recorded on this branch, so this section quotes none of them; the
