@@ -390,17 +390,19 @@ one pool, kept in `.cache/budget` of the main checkout whatever `REVENANT_CACHE`
   the largest of the three wins. Tokens are not assumed to be runnable threads: a holder blocked on I/O contributes
   nothing, and a holder whose build spawns many compilers contributes all of them. Memory headroom comes from the
   kernel's own measure of available memory and pressure. Available memory is `kern.memorystatus_level` percent of
-  `hw.memsize`, less the 2 GB reserve, in tokens of 1.5 GB but at least one. The 2026-11-21 budget memory measurement on
-  this Mac sampled `memory_pressure -Q`, the level sysctl and `vm_stat` every second for about five minutes: the level
-  equalled `memory_pressure`'s "System-wide memory free percentage" at every sample, while the `vm_stat` free +
-  speculative + inactive + purgeable sum was about half of it, so the level is the signal that tracks macOS's own view
-  of available memory and is the one used here. Inactive and purgeable pages are inside that share; active file-backed
-  pages are not subtracted separately because the level already discounts them, and the measurement shows it tracks
-  `memory_pressure`. Between successive samples a rate guard clamps to one token when pageouts exceed 64 pages per
-  second or compressor pages grow by more than 32768 per second (512 MB/s): the same measurement saw quiet pageouts peak
-  near 10 pages per second and background compression near 304 MB/s, so normal churn does not clamp, while the roughly
-  750 MB/s compressing state the load audit treated as pressure does. Critical pressure grants none, warning pressure
-  grants one token. A request gets no fewer tokens than its `--min`: if the room cannot hold the minimum it
+  `hw.memsize`, less the 2 GB reserve, in tokens of 1.5 GB but at least one. The 2026-11-21 budget memory measurement,
+  saved with its raw series and exact maxima in `coordination/measurements/budget-memory-2026-11-21.txt`, sampled
+  `memory_pressure -Q`, the level sysctl and `vm_stat` every second on this Mac: the level equalled `memory_pressure`'s
+  "System-wide memory free percentage" at every paired sample, while a `vm_stat` free + speculative + inactive +
+  purgeable sum was about half of it, so the level is the signal that tracks macOS's own view of available memory and
+  is the one used here. Inactive and purgeable pages are inside that share; active file-backed pages are not subtracted
+  separately because the level already accounts for them, and the measurement shows it tracks `memory_pressure`.
+  Between successive samples a rate guard clamps to one token when pageouts exceed 1 MB/s or compressor pages grow by
+  more than 512 MB/s: these are byte rates scaled by the page size read from `vm_stat`, so they do not assume 16 KB pages.
+  The measurement saw quiet pageouts peak near 10 pages/s and background compression near 304 MB/s, so normal churn does
+  not clamp, while the roughly 750 MB/s compressing state the load audit treated as pressure does. Critical pressure
+  grants none, warning pressure grants one token. A request gets no fewer tokens than its `--min`: if the room cannot
+  hold the minimum it
   waits and re-checks, with no patience after which the load stops mattering. When the minimum fits but the room is smaller
   than `--jobs`, it starts with fewer jobs, up to what memory and CPU allow. As a progress guarantee, when the pool has no
   live holder the oldest waiting ticket is granted its minimum in full even under high outside load, provided memory

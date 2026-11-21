@@ -6,11 +6,11 @@ local POLL_MS = 1000
 local NICE = "/usr/bin/nice"
 local TASKPOLICY = "/usr/sbin/taskpolicy"
 local CLOSE_INHERITED = 'i=3; while [ $i -lt 256 ]; do eval "exec $i>&-" 2>/dev/null; i=$((i+1)); done; exec "$@"'
+local MB = 1024 * 1024
 local PRESSURE_WARN = 2
 local PRESSURE_CRITICAL = 4
-local PAGEOUT_LIMIT = 64
-local COMPRESSOR_LIMIT = 32768
-local MB = 1024 * 1024
+local PAGEOUT_BYTES = 1 * MB
+local COMPRESSOR_BYTES = 512 * MB
 local SYSCTL = "/usr/sbin/sysctl"
 local VMSTAT = "/usr/bin/vm_stat"
 local DF = "/bin/df"
@@ -52,6 +52,18 @@ local function parse_pressure(text)
     return tonumber((text or ""):match("(%d+)")) or 1
 end
 
+local function parse_sysctl_number(key, out)
+    local value = tonumber((out:match("^%s*(%d+)%s*$")))
+    if not value then
+        raise("budget: cannot read %s: got %q", key, out:gsub("%s+$", ""))
+    end
+    return value
+end
+
+local function numeric_sysctl(key)
+    return parse_sysctl_number(key, os.iorunv(SYSCTL, {"-n", key}))
+end
+
 local function parse_vmstat(text)
     local size = tonumber(text:match("page size of (%d+) bytes")) or 4096
     local function pages(label)
@@ -80,11 +92,11 @@ end
 local function sample()
     local loadavg = parse_loadavg(os.iorunv(SYSCTL, {"-n", "vm.loadavg"}))
     local pressure = parse_pressure(os.iorunv(SYSCTL, {"-n", "kern.memorystatus_vm_pressure_level"}))
-    local level = tonumber((os.iorunv(SYSCTL, {"-n", "kern.memorystatus_level"})))
-    local memsize = tonumber((os.iorunv(SYSCTL, {"-n", "hw.memsize"})))
+    local level = numeric_sysctl("kern.memorystatus_level")
+    local memsize = numeric_sysctl("hw.memsize")
     local vm = parse_vmstat(os.iorunv(VMSTAT, {}))
     vm.at = os.mclock()
-    local available = level and memsize and level * memsize / (100 * MB) or 0
+    local available = level * memsize / (100 * MB)
     local reading = {loadavg = loadavg, load = math.max(loadavg, read_grants(pool_folder())),
                      pressure = pressure, available = available, level = level, memsize = memsize,
                      vm = vm, previous = previous}
@@ -134,8 +146,9 @@ local function memory_headroom(reading)
     if prev then
         local elapsed = (vm.at or 0) - (prev.at or 0)
         elapsed = elapsed > 0 and elapsed / 1000 or 1
-        if (vm.pageouts - prev.pageouts) / elapsed > PAGEOUT_LIMIT or
-           (vm.compressor - prev.compressor) / elapsed > COMPRESSOR_LIMIT then
+        local pageouts = (vm.pageouts - prev.pageouts) * vm.size / elapsed
+        local compressor = (vm.compressor - prev.compressor) * vm.size / elapsed
+        if pageouts > PAGEOUT_BYTES or compressor > COMPRESSOR_BYTES then
             return 1
         end
     end
@@ -451,7 +464,7 @@ end
 
 local function test_reading(loadavg, pressure, available_mb, opt)
     opt = opt or {}
-    local size = 16384
+    local size = opt.size or 16384
     local function pages(mb)
         return math.floor(mb * MB / size)
     end
@@ -474,6 +487,11 @@ local function test_suite()
     check("the one-minute window is the cpu reading", parse_loadavg("{ 8.50 2.10 1.00 }\n"), 8.5)
     check("a missing load average is zero", parse_loadavg(""), 0)
     check("pressure is read from the sysctl", parse_pressure("2\n"), 2)
+    check("a numeric sysctl answer is parsed", parse_sysctl_number("test", "77\n"), 77)
+    local bad_sysctl
+    try { function () parse_sysctl_number("test", "not a number\n") end,
+          catch { function (raised) bad_sysctl = tostring(raised) end } }
+    check("an unparseable sysctl answer raises instead of becoming zero", bad_sysctl ~= nil, true)
 
     local vmtext = "Mach Virtual Memory Statistics: (page size of 16384 bytes)\n" ..
                    "Pages free:                  65536.\n" ..
@@ -498,6 +516,9 @@ local function test_suite()
     check("a pageout burst above the rate clamps to one token", memory_headroom(test_reading(0, 1, 11000, {previous = prev, pageouts = prev.pageouts + 128, at = 1000})), 1)
     check("a compressor burst above the rate clamps to one token", memory_headroom(test_reading(0, 1, 11000, {previous = prev, compressor = prev.compressor + 65536, at = 1000})), 1)
     check("a stable compressor at normal pressure is not a limit", memory_headroom(test_reading(0, 1, 11000, {previous = prev, compressor = prev.compressor + 1, at = 1000})), 5)
+    local small_pages = test_reading(0, 1, 11000, {size = 4096}).vm
+    check("a 4 KB pageout burst below the byte rate does not clamp", memory_headroom(test_reading(0, 1, 11000, {size = 4096, previous = small_pages, pageouts = small_pages.pageouts + 128, at = 1000})), 5)
+    check("a 4 KB compressor burst below the byte rate does not clamp", memory_headroom(test_reading(0, 1, 11000, {size = 4096, previous = small_pages, compressor = small_pages.compressor + 65536, at = 1000})), 5)
     check("a machine below the reserve still starts one token", memory_headroom(test_reading(0, 1, 100, {speculative = 100})), 1)
 
     check("runnable load bounds the jobs", capacity(test_reading(8, 1, 11000), 3, 0), 5)
@@ -523,6 +544,18 @@ local function test_suite()
     local raw_vm = os.iorunv(VMSTAT, {})
     local raw_free = tonumber(raw_vm:match("Pages free:%s+(%d+)"))
     check("sample reads the machine's free pages", math.abs(live.vm.free - raw_free) < 100000, true)
+    local first, second = sample(), nil
+    os.sleep(1100)
+    second = sample()
+    check("a second sample chains the first as its previous", second.previous, first.vm)
+    check("the second sample stamps a later time", second.vm.at > first.vm.at, true)
+    local window = (second.vm.at - first.vm.at) / 1000
+    check("the sampling window is the elapsed seconds", window >= 1 and window < 10, true)
+    second.pressure, second.available = 1, 11000
+    second.vm.pageouts, second.vm.compressor = second.previous.pageouts, second.previous.compressor
+    check("two real samples at normal pressure have full headroom", memory_headroom(second), 5)
+    second.vm.pageouts = second.previous.pageouts + math.ceil(PAGEOUT_BYTES * window / second.vm.size) + 1
+    check("the real previous and at plumbing clamps an above-rate pageout burst", memory_headroom(second), 1)
     check("a request gets what the room holds", grantable(6, 3, 5, 1, 6), 3)
     check("a request below its minimum gets nothing", grantable(6, 3, 5, 4, 6), 0)
     check("a grant stops at the free slots", grantable(10, 0, 2, 1, 6), 2)
@@ -543,6 +576,13 @@ local function test_suite()
     local base = path.join(os.tmpdir(), string.format("revenant-budget-%d-%d", os.time(), math.random(0, 999999)))
     os.mkdir(base)
     local pool = path.join(base, "pool")
+    local loaded = try { function ()
+        os.iorunv(os.programfile(), {"l", "-P", path.directory(os.scriptdir()),
+            path.join(os.scriptdir(), "budget.lua"), "status"},
+            {envs = {"REVENANT_BUDGET_POOL=" .. path.join(base, "loadpool")}})
+        return true
+    end } or false
+    check("the tool loads as a module in a fresh process", loaded, true)
     local queue = path.join(pool, "queue")
     os.mkdir(queue)
     local stale = path.join(queue, "1-0000000000001-00000001.ticket")
