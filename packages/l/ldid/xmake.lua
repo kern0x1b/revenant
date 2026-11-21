@@ -15,17 +15,19 @@ package("ldid")
     on_install("@macosx", function (package)
         local cflags, ldflags = {}, {}
         for _, name in ipairs({"libplist", "openssl-host"}) do
-            local fetched = package:dep(name):fetch()
-            for _, folder in ipairs(fetched.includedirs or fetched.sysincludedirs or {}) do
+            local dep = package:dep(name)
+            local fetched = dep:fetch()
+            local root = dep:installdir()
+            for _, folder in ipairs(table.wrap(fetched and (fetched.includedirs or fetched.sysincludedirs) or path.join(root, "include"))) do
                 table.insert(cflags, "-I" .. folder)
             end
-            for _, define in ipairs(fetched.defines or {}) do
+            for _, define in ipairs(table.wrap(fetched and fetched.defines or dep:get("defines"))) do
                 table.insert(cflags, "-D" .. define)
             end
-            for _, folder in ipairs(fetched.linkdirs or {}) do
+            for _, folder in ipairs(table.wrap(fetched and fetched.linkdirs or path.join(root, "lib"))) do
                 table.insert(ldflags, "-L" .. folder)
             end
-            for _, link in ipairs(fetched.links or {}) do
+            for _, link in ipairs(table.wrap(fetched and fetched.links or dep:get("links"))) do
                 table.insert(ldflags, "-l" .. link)
             end
         end
