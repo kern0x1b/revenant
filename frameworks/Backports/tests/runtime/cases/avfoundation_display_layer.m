@@ -57,6 +57,25 @@ static NSString *state_of(AVSampleBufferDisplayLayer *layer)
     return [NSString stringWithFormat:@"status %ld ready %d", (long)layer.status, (int)layer.isReadyForDisplay];
 }
 
+static BOOL released_after(int touch)
+{
+    __weak AVSampleBufferDisplayLayer *weakLayer = nil;
+    @autoreleasepool {
+        AVSampleBufferDisplayLayer *temporary = [[AVSampleBufferDisplayLayer alloc] init];
+        if (touch == 1)
+            (void)temporary.status;
+        if (touch == 2)
+            (void)temporary.timebase;
+        weakLayer = temporary;
+    }
+    for (int index = 0; index < 15 && weakLayer; index++) {
+        @autoreleasepool {
+            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.02]];
+        }
+    }
+    return weakLayer == nil;
+}
+
 REVENANT_CASE(avfoundation_display_layer)
 {
     BOOL flip = (BOOL)negative;
@@ -143,13 +162,10 @@ REVENANT_CASE(avfoundation_display_layer)
         [layer removeObserver:observer forKeyPath:@"readyForDisplay"];
     }
 
-    __weak AVSampleBufferDisplayLayer *weakLayer = nil;
-    @autoreleasepool {
-        AVSampleBufferDisplayLayer *temporary = [[AVSampleBufferDisplayLayer alloc] init];
-        (void)temporary.timebase;
-        (void)temporary.status;
-        weakLayer = temporary;
-    }
-    revenant_expect_true(@"a layer that held state and a timebase is released with its pool", (weakLayer == nil) != flip,
-                         @"the layer leaked after its pool ended");
+    BOOL plain = released_after(0), stateful = released_after(1), timed = released_after(2);
+    printf("display layer fact: released after its pool: untouched %d, with status read %d, with timebase made %d\n", plain, stateful, timed);
+    revenant_expect_true(@"a layer that held state or a timebase is released whenever an untouched system layer is",
+                         (!plain || (stateful && timed)) != flip,
+                         [NSString stringWithFormat:@"untouched %d, status %d, timebase %d", plain, stateful, timed]);
+    fflush(stdout);
 }

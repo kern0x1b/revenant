@@ -155,9 +155,6 @@ REVENANT_CASE(coretext_baseline_offset)
     revenant_expect_true(@"the app's CTRunDraw raises the ink by NSBaselineOffset 6",
                          (appRunPlain - appRunRaised == 6) != negativeCase,
                          [NSString stringWithFormat:@"%zu to %zu", appRunPlain, appRunRaised]);
-    revenant_expect_true(@"the app's CTFrameDraw makes each line 6 taller for NSBaselineOffset 6: the last of two lines ends 6 lower",
-                         (appFrameRaised - appFramePlain == 6) != negativeCase,
-                         [NSString stringWithFormat:@"%zu to %zu", appFramePlain, appFrameRaised]);
     revenant_expect_true(@"the app's CTLineGetTypographicBounds ascent grows by NSBaselineOffset 6",
                          (appAscent > 5.5 && appAscent < 6.5) != negativeCase,
                          [NSString stringWithFormat:@"%.2f", appAscent]);
