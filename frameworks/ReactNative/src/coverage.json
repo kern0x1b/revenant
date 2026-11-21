@@ -550,8 +550,8 @@
    "version": "~57.0.2",
    "native": true,
    "status": "partial",
-   "verified": "build",
-   "note": "Built from a local copy of LocalizationModule.swift in src/expo, which replaces the package's file: the iOS 16 Locale branches are dropped and the temperature unit is taken from the region, since MeasurementFormatter is iOS 10. Compiled; not exercised."
+   "verified": "phone",
+   "note": "Built from a local copy of LocalizationModule.swift in src/expo, which replaces the package's file: the iOS 16 Locale branches are dropped and the temperature unit is taken from the region, since MeasurementFormatter is iOS 10. Compiled. On the iPad 2 (2026-11-21) getLocales returned the device's locales (the first with its language, region, currency, separators, measurement system and temperature unit) and getCalendars the calendar, time zone, first weekday and 24-hour flag; startObserving, stopObserving and a change of the device language while the app runs were not exercised."
   },
   {
    "id": "expo-location",
@@ -1451,7 +1451,7 @@
    "native": true,
    "status": "partial",
    "verified": "phone",
-   "note": "The Paseo application's own Expo module (a workspace package, not on npm), named in the host.json \"modules\" and built as it is, from the application's sources. Its Swift needs AVAudioEngine, which iOS 6 lacks: AVFoundationBackports (AVAudioEngine over an AUGraph, a live input node on a VoiceProcessingIO unit with setVoiceProcessingEnabled, bypass, AGC and input muting, mixer and input taps, scheduleBuffer completion callback types) supplies it, so the module compiles unchanged except that MicrophonePermissionRequester.swift's microphoneKey is renamed because expo-camera declares the same name. On the iPad 2 (2026-11-20) initialize returned true, toggleRecording(true) started a recording, in three seconds 23 microphone chunks (4096 bytes each) and 23 input and 23 output level events arrived, onRecordingChange fired once, and toggleRecording(false) stopped it. What the microphone recorded and what the speaker played were not checked: the chunks were counted, not listened to. playPCMData, restart, dictation mode and interruptions were not exercised."
+   "note": "The Paseo application's own Expo module (a workspace package, not on npm), named in the host.json \"modules\" and built as it is, from the application's sources. Its Swift needs AVAudioEngine, which iOS 6 lacks: AVFoundationBackports (AVAudioEngine over an AUGraph, a live input node on a VoiceProcessingIO unit with setVoiceProcessingEnabled, bypass, AGC and input muting, mixer and input taps, scheduleBuffer completion callback types) supplies it, so the module compiles unchanged except that MicrophonePermissionRequester.swift's microphoneKey is renamed because expo-camera declares the same name. On the iPad 2 (2026-11-20) initialize returned true, toggleRecording(true) started a recording, in three seconds 23 microphone chunks (4096 bytes each) and 23 input and 23 output level events arrived, onRecordingChange fired once, and toggleRecording(false) stopped it. On 2026-11-21 a tone probe (1000 Hz through playPCMData, microphone chunks analysed at 1000 and 1700 Hz) showed that those chunks are digital silence: getMicrophonePermissionsAsync reports denied (canAskAgain false) for the host's bundle id on that iPad, and every chunk is zeros, which is consistent with that denial (not confirmed against a run with the permission granted), so the content of the microphone path is NOT verified and needs the owner to allow the microphone for the host in Settings. The probe does detect a tone (checked on synthetic samples, both with and without it). playPCMData was called as the tone stimulus but whether the speaker played it was not checked; restart, dictation mode and interruptions were not exercised."
   }
  ]
 }
