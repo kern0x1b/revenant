@@ -35,6 +35,19 @@ package("loose")
     end)
 ]]
 
+local COLLATE = [[
+package("collate")
+    set_kind("library")
+    set_description("%s")
+    add_urls("https://example.invalid/collate.git")
+    add_versions("1.0", "%s")
+    add_configs("backports", {description = "a config whose name is the prefix of the next one", default = false, type = "boolean"})
+    add_configs("backports_uikit", {description = "a config whose name continues the one before", default = false, type = "boolean"})
+    add_configs("backports.app", {description = "a config whose name continues it with a dot", default = false, type = "boolean"})
+    on_install(function (package)
+    end)
+]]
+
 local PATCH_LINE = "    add_patches(\"1.0\", \"patches/fake.patch\", \"%s\")\n"
 
 local PROBE = [[
@@ -184,6 +197,10 @@ function failures(opt)
     io.writefile(path.join(loose, "patches", "loose.patch"), "first\n")
     io.writefile(path.join(loose, "xmake.lua"), LOOSE:format("the loose fixture", COMMIT))
 
+    local collate = path.join(repo, "packages", "f", "collate")
+    os.mkdir(collate)
+    io.writefile(path.join(collate, "xmake.lua"), COLLATE:format("the collation fixture", COMMIT))
+
     local store = path.join(folder, "store")
     os.mkdir(store)
     local envs = {XMAKE_GLOBALDIR = store}
@@ -276,6 +293,20 @@ function failures(opt)
 
     if fake_patched == fake_then then
         table.insert(found, "a package whose applied patch changed keeps its build hash: the patch set must be in the key")
+    end
+
+    local function collated(locale)
+        return key_of(program, {XMAKE_GLOBALDIR = store, LC_ALL = "", LC_COLLATE = locale}, repo, "collate")
+    end
+    local by_locale = {}
+    for _, locale in ipairs({"en_US.UTF-8", "C", "C.UTF-8", "de_DE.UTF-8"}) do
+        by_locale[locale] = collated(locale)
+        computed("the collation fixture under " .. locale, by_locale[locale])
+    end
+    for _, locale in ipairs({"C", "C.UTF-8", "de_DE.UTF-8"}) do
+        if by_locale[locale] ~= by_locale["en_US.UTF-8"] then
+            table.insert(found, "the collation fixture is keyed " .. tostring(by_locale[locale]) .. " under " .. locale .. " and " .. tostring(by_locale["en_US.UTF-8"]) .. " under en_US.UTF-8: the build hash depends on the locale's collation")
+        end
     end
 
     local source = path.join(folder, "srcaddon")

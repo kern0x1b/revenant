@@ -131,9 +131,8 @@ function main()
     end
     local files = os.iorunv("git", {"-C", root, "-c", "core.quotepath=false", "ls-files"})
     local launcher = io.readfile(path.join(root, "xmakew"))
-    if not launcher:find("LC_COLLATE=en_US.UTF-8", 1, true) or not launcher:find("export LC_COLLATE", 1, true) or
-       os.getenv("LC_COLLATE") ~= "en_US.UTF-8" then
-        wrong("xmakew", "sets the collation used to compute the prebuilt keys")
+    if launcher:find("LC_COLLATE", 1, true) then
+        wrong("xmakew", "pins a collation: the build hash sorts by byte (xmake patch 0025), so no locale may be needed to compute a key")
     end
     local indexed = {}
     local index = io.readfile(path.join(root, "docs", "README.md"))

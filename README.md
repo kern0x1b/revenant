@@ -45,7 +45,7 @@ a member uses another's target with `add_deps`. `./xmakew f -P . -y && ./xmakew`
 build -P . <target>` one target, `./xmakew test -P .` the tests.
 
 `xmakew` is the xmake of revenant: the first run builds the xmake pinned in `packages/x/xmake` (its url,
-commit and patches, read from that recipe) into `.cache/xmake/<key>`, the key being made of the commit and
+commit and patches, read from that recipe) into `<store>/xmake/<key>` once for the machine (the store is `REVENANT_STORE`, default `~/.revenant/store`), the key being made of the commit and
 the patches' checksums, and every run executes that build with its arguments. It needs only `sh`, `git`, `make` and
 a C compiler, and builds again when the recipe changes.
 
