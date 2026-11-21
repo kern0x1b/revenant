@@ -23,7 +23,7 @@ typedef OSStatus (*RevenantVTStatusFunction)(VTDecompressionSessionRef);
 typedef Boolean (*RevenantVTCanAcceptFunction)(VTDecompressionSessionRef, CMFormatDescriptionRef);
 typedef OSStatus (*RevenantVTCopySupportedFunction)(VTDecompressionSessionRef, CFDictionaryRef *);
 
-OSStatus BACKPORT_IMPL(VTDecompressionSessionCreate)(CFAllocatorRef allocator, CMVideoFormatDescriptionRef videoFormatDescription, CFDictionaryRef videoDecoderSpecification, CFDictionaryRef destinationImageBufferAttributes, const VTDecompressionOutputCallbackRecord *outputCallback, VTDecompressionSessionRef *decompressionSessionOut)
+OSStatus VTDecompressionSessionCreate(CFAllocatorRef allocator, CMVideoFormatDescriptionRef videoFormatDescription, CFDictionaryRef videoDecoderSpecification, CFDictionaryRef destinationImageBufferAttributes, const VTDecompressionOutputCallbackRecord *outputCallback, VTDecompressionSessionRef *decompressionSessionOut)
 {
     RevenantVTCreateFunction create = (RevenantVTCreateFunction)RevenantVTSystemSymbol("VTDecompressionSessionCreate");
     OSStatus status = create ? create(allocator, videoFormatDescription, videoDecoderSpecification, destinationImageBufferAttributes, outputCallback, decompressionSessionOut) : kVTVideoDecoderNotAvailableNowErr;
@@ -43,7 +43,7 @@ OSStatus BACKPORT_IMPL(VTDecompressionSessionCreate)(CFAllocatorRef allocator, C
     return noErr;
 }
 
-OSStatus BACKPORT_IMPL(VTDecompressionSessionDecodeFrame)(VTDecompressionSessionRef session, CMSampleBufferRef sampleBuffer, VTDecodeFrameFlags decodeFlags, void *sourceFrameRefCon, VTDecodeInfoFlags *infoFlagsOut)
+OSStatus VTDecompressionSessionDecodeFrame(VTDecompressionSessionRef session, CMSampleBufferRef sampleBuffer, VTDecodeFrameFlags decodeFlags, void *sourceFrameRefCon, VTDecodeInfoFlags *infoFlagsOut)
 {
     if (RevenantVTSoftwareSessionOwns(session))
         return RevenantVTSoftwareSessionDecode(session, sampleBuffer, decodeFlags, sourceFrameRefCon, infoFlagsOut, nil);
@@ -51,7 +51,7 @@ OSStatus BACKPORT_IMPL(VTDecompressionSessionDecodeFrame)(VTDecompressionSession
     return decode ? decode(session, sampleBuffer, decodeFlags, sourceFrameRefCon, infoFlagsOut) : kVTVideoDecoderNotAvailableNowErr;
 }
 
-void BACKPORT_IMPL(VTDecompressionSessionInvalidate)(VTDecompressionSessionRef session)
+void VTDecompressionSessionInvalidate(VTDecompressionSessionRef session)
 {
     if (RevenantVTSoftwareSessionOwns(session)) {
         RevenantVTSoftwareSessionInvalidate(session);
@@ -62,7 +62,7 @@ void BACKPORT_IMPL(VTDecompressionSessionInvalidate)(VTDecompressionSessionRef s
         invalidate(session);
 }
 
-OSStatus BACKPORT_IMPL(VTDecompressionSessionFinishDelayedFrames)(VTDecompressionSessionRef session)
+OSStatus VTDecompressionSessionFinishDelayedFrames(VTDecompressionSessionRef session)
 {
     if (RevenantVTSoftwareSessionOwns(session))
         return RevenantVTSoftwareSessionFinish(session);
@@ -70,7 +70,7 @@ OSStatus BACKPORT_IMPL(VTDecompressionSessionFinishDelayedFrames)(VTDecompressio
     return finish ? finish(session) : kVTVideoDecoderNotAvailableNowErr;
 }
 
-OSStatus BACKPORT_IMPL(VTDecompressionSessionWaitForAsynchronousFrames)(VTDecompressionSessionRef session)
+OSStatus VTDecompressionSessionWaitForAsynchronousFrames(VTDecompressionSessionRef session)
 {
     if (RevenantVTSoftwareSessionOwns(session))
         return RevenantVTSoftwareSessionWait(session);
@@ -78,7 +78,7 @@ OSStatus BACKPORT_IMPL(VTDecompressionSessionWaitForAsynchronousFrames)(VTDecomp
     return wait ? wait(session) : kVTVideoDecoderNotAvailableNowErr;
 }
 
-Boolean BACKPORT_IMPL(VTDecompressionSessionCanAcceptFormatDescription)(VTDecompressionSessionRef session, CMFormatDescriptionRef newFormatDesc)
+Boolean VTDecompressionSessionCanAcceptFormatDescription(VTDecompressionSessionRef session, CMFormatDescriptionRef newFormatDesc)
 {
     if (RevenantVTSoftwareSessionOwns(session))
         return RevenantVTSoftwareSessionCanAccept(session, newFormatDesc);
@@ -86,7 +86,7 @@ Boolean BACKPORT_IMPL(VTDecompressionSessionCanAcceptFormatDescription)(VTDecomp
     return canAccept ? canAccept(session, newFormatDesc) : false;
 }
 
-OSStatus BACKPORT_IMPL(VTDecompressionSessionCopySupportedPropertyDictionary)(VTDecompressionSessionRef session, CFDictionaryRef *supportedPropertiesOut)
+OSStatus VTDecompressionSessionCopySupportedPropertyDictionary(VTDecompressionSessionRef session, CFDictionaryRef *supportedPropertiesOut)
 {
     if (!supportedPropertiesOut)
         return kVTParameterErr;

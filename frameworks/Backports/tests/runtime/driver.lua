@@ -110,7 +110,60 @@ local function libraries_folder(app)
     return folder
 end
 
-local function execute(program, firmware, libraries, app, guest, folder, saved)
+local function packages_root()
+    return path.join(import("@addon.revenant.workspace", {anonymous = true}).home(), "xmake-global", ".xmake", "packages")
+end
+
+local function revenant_dependencies(file)
+    local found = {}
+    for line in os.iorunv("xcrun", {"otool", "-L", file}):gmatch("[^\n]+") do
+        local name = line:match("^%s+(/usr/lib/revenant/%S+)")
+        if name and not name:find("^/usr/lib/revenant/org%.revenant%.backports/") then
+            table.insert(found, name)
+        end
+    end
+    return found
+end
+
+local function locate_dependency(name, packages)
+    local folder, file = name:match("^/usr/lib/revenant/([^/]+)/(.+)$")
+    local package, version = (folder or ""):match("^org%.revenant%.(.+)%-(%x+)$")
+    if not package then
+        raise("%s is not an install name of a package: a Backports library depends on it", name)
+    end
+    for _, library_folder in ipairs(os.dirs(path.join(packages, "*", package, "*", version .. "*", "lib"))) do
+        local candidate = path.join(library_folder, file)
+        if os.isfile(candidate) then
+            return candidate
+        end
+    end
+    raise("%s is needed by a Backports library, and no installed package %s with the key %s holds it", name, package, version)
+end
+
+function dependency_closure(libraries, packages)
+    packages = packages or packages_root()
+    local result = {}
+    local seen = {}
+    local queue = {}
+    for _, library in ipairs(libraries) do
+        table.insert(queue, library)
+    end
+    while #queue > 0 do
+        local file = table.remove(queue)
+        for _, name in ipairs(revenant_dependencies(file)) do
+            if not seen[name] then
+                seen[name] = true
+                local source = locate_dependency(name, packages)
+                table.insert(result, {source = source, name = name})
+                table.insert(queue, source)
+            end
+        end
+    end
+    table.sort(result, function (a, b) return a.name < b.name end)
+    return result
+end
+
+local function execute(program, firmware, libraries, app, guest, folder, saved, dependencies)
     local started = os.mclock()
     local rootfs = path.join(folder, "rootfs")
     emulator.clone(firmware, rootfs)
@@ -118,6 +171,11 @@ local function execute(program, firmware, libraries, app, guest, folder, saved)
     os.mkdir(destination)
     for _, library in ipairs(libraries) do
         os.cp(library, path.join(destination, path.filename(library)))
+    end
+    for _, dependency in ipairs(dependencies or {}) do
+        local installed = emulator.guest_path(rootfs, dependency.name)
+        os.mkdir(path.directory(installed))
+        os.vrunv("cp", {"-L", dependency.source, installed})
     end
     local binary = emulator.guest_path(rootfs, BINARY)
     os.mkdir(path.directory(binary))
@@ -246,8 +304,9 @@ local function acquire(lock, key)
     end
 end
 
-function fingerprint(app, guest, libraries, program, firmware)
+function fingerprint(app, guest, libraries, program, firmware, dependencies)
     local identity = {
+        dependencies = {},
         program = file_hash(program),
         app = file_hash(app),
         guest = tree_hash(path.join(guest, "usr")),
@@ -259,8 +318,12 @@ function fingerprint(app, guest, libraries, program, firmware)
     for _, library in ipairs(libraries) do
         table.insert(identity.libraries, file_hash(library))
     end
+    for _, dependency in ipairs(dependencies or {}) do
+        table.insert(identity.dependencies, dependency.name .. "=" .. file_hash(dependency.source))
+    end
     local key = text_hash(table.concat({identity.program, identity.app, identity.guest, identity.driver,
-                                        identity.cases, identity.image, table.concat(identity.libraries, ";")}, ";"))
+                                        identity.cases, identity.image, table.concat(identity.libraries, ";"),
+                                        table.concat(identity.dependencies, ";")}, ";"))
     return {identity = identity, key = key}
 end
 
@@ -274,7 +337,8 @@ local function run(app, guest)
     if #libraries == 0 then
         raise("no lib*Backports.dylib in %s: build them with ./xmakew build -P . FoundationBackports UIKitBackports, or set --backports_libs to a folder of them", libs_dir)
     end
-    local fingerprinted = fingerprint(app, guest, libraries, program, firmware)
+    local dependencies = dependency_closure(libraries)
+    local fingerprinted = fingerprint(app, guest, libraries, program, firmware, dependencies)
     local identity, key = fingerprinted.identity, fingerprinted.key
     local folder = path.join(home_cache(), key)
     local saved = path.join(folder, "cases.json")
@@ -293,7 +357,7 @@ local function run(app, guest)
             if os.isfile(saved) then
                 return json.loadfile(saved), true, ""
             end
-            return execute(program, firmware, libraries, app, guest, folder, saved)
+            return execute(program, firmware, libraries, app, guest, folder, saved, dependencies)
         end)
         os.tryrm(holder)
         lock:unlock()
