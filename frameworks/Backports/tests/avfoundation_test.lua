@@ -61,19 +61,12 @@ local AREAS = {
         },
     },
     {
-        name = "time and rendering of a queued sample buffer display layer",
+        name = "state of the system's queued sample buffer display layer, added on the system class",
         sources = {"AVSampleBufferDisplayLayer8.m"},
         members = {
-            "-[AVSampleBufferDisplayLayer timebase]", "-[AVSampleBufferDisplayLayer controlTimebase]",
-            "-[AVSampleBufferDisplayLayer setControlTimebase:]", "-[AVSampleBufferDisplayLayer videoGravity]",
-            "-[AVSampleBufferDisplayLayer setVideoGravity:]", "-[AVSampleBufferDisplayLayer isReadyForDisplay]",
+            "-[AVSampleBufferDisplayLayer timebase]", "-[AVSampleBufferDisplayLayer isReadyForDisplay]",
             "-[AVSampleBufferDisplayLayer status]", "-[AVSampleBufferDisplayLayer error]",
-            "-[AVSampleBufferDisplayLayer enqueueSampleBuffer:]", "-[AVSampleBufferDisplayLayer flush]",
-            "-[AVSampleBufferDisplayLayer flushAndRemoveImage]",
             "-[AVSampleBufferDisplayLayer requiresFlushToResumeDecoding]",
-            "-[AVSampleBufferDisplayLayer isReadyForMoreMediaData]",
-            "-[AVSampleBufferDisplayLayer requestMediaDataWhenReadyOnQueue:usingBlock:]",
-            "-[AVSampleBufferDisplayLayer stopRequestingMediaData]",
             "-[AVSampleBufferDisplayLayer hasSufficientMediaDataForReliablePlaybackStart]",
             "-[AVSampleBufferDisplayLayer preventsCapture]", "-[AVSampleBufferDisplayLayer setPreventsCapture:]",
             "-[AVSampleBufferDisplayLayer preventsDisplaySleepDuringVideoPlayback]",
@@ -119,10 +112,10 @@ function main()
         end
     end
     assert(#missing == 0, "members not implemented by the compiled AVFoundation objects:\n" .. table.concat(missing, "\n"))
-    local undefined = os.iorunv("nm", {"-u", path.join(root, "AVFoundation", "src", "AVFoundation", "AVSampleBufferDisplayLayer8.m.o")})
-    for _, name in ipairs({"_CMTimebaseCreateWithMasterClock", "_CMTimebaseSetMasterTimebase", "_CMTimebaseAddTimerDispatchSource",
-        "_CMTimebaseSetTimerDispatchSourceNextFireTime", "_CMSampleBufferGetImageBuffer"}) do
-        assert(undefined:find(name, 1, true), "the display layer does not use " .. name .. ":\n" .. undefined)
+    assert(not keys["class||AVSampleBufferDisplayLayer"], "the Backports objects define a class named AVSampleBufferDisplayLayer: iOS 6 has one in AVFoundation, and a second makes the runtime pick one of the two")
+    for _, selector in ipairs({"enqueueSampleBuffer:", "flush", "flushAndRemoveImage", "isReadyForMoreMediaData", "controlTimebase",
+        "setControlTimebase:", "videoGravity", "setVideoGravity:", "requestMediaDataWhenReadyOnQueue:usingBlock:", "stopRequestingMediaData"}) do
+        assert(not keys[key_of("-[AVSampleBufferDisplayLayer " .. selector .. "]")], "the display layer file defines " .. selector .. " as a method: the system class has it, and a category would replace the system's")
     end
     os.tryrm(root)
     print("avfoundation tests passed: " .. total .. " members implemented by " .. objects .. " objects in " .. #AREAS .. " areas")
