@@ -1,0 +1,15 @@
+{
+  "bundleId": "space.kern0x1b.rn-probe.rnhost",
+  "pods": [
+    "@react-native-community/slider",
+    "@react-native-community/datetimepicker",
+    "@react-native-picker/picker",
+    "@react-native-segmented-control/segmented-control",
+    "@react-native-community/netinfo",
+    "@react-native-community/viewpager",
+    "react-native-bootsplash",
+    "react-native-view-shot"
+  ],
+  "modules": [],
+  "optionalComponents": []
+}
