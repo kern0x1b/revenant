@@ -150,7 +150,7 @@ local function capacity(reading, held, own)
 end
 
 local function progress_capacity(reading, held, minimum)
-    if memory_headroom(reading) == 0 then
+    if memory_headroom(reading) < minimum then
         return held
     end
     return held + minimum
@@ -303,12 +303,14 @@ local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms)
         reading.cores = cores
         local free, held, pids = snapshot_slots(folder, cores)
         local cap = capacity(reading, held, own_runnable(pids))
-        if held == 0 then
-            cap = math.max(cap, progress_capacity(reading, held, minimum))
+        local progress = held == 0 and progress_capacity(reading, held, minimum) or held
+        local guarantee = progress > held
+        if guarantee then
+            cap = math.max(cap, progress)
         end
         local available = math.min(math.max(cap - held, 0), #free)
         local count = grantable(cap, held, #free, minimum, maximum)
-        if count > 0 and not ahead_of(folder, ticket.name, available) then
+        if count > 0 and not ahead_of(folder, ticket.name, guarantee and #free or available) then
             local grant = table.slice(free, 1, count)
             release_locks(table.slice(free, count + 1))
             for _, entry in ipairs(grant) do
@@ -614,21 +616,53 @@ local function test_suite()
     release_locks(free_keep)
     check("sampling a free slot keeps its grant stamp", read_grants(keep_pool) >= 1.9, true)
 
-    local short_grant = acquire(path.join(base, "short"), "normal", 2, 4, function () return test_reading(50, 1, 100) end, 1)
-    check("an empty pool grants the full minimum under load with one token of memory", #short_grant, 2)
-    release_locks(short_grant)
+    local short_calls = 0
+    local short_error
+    try { function ()
+        acquire(path.join(base, "short"), "normal", 2, 4, function ()
+            short_calls = short_calls + 1
+            if short_calls > 5 then
+                raise("stopped")
+            end
+            return test_reading(50, 1, 100)
+        end, 1)
+    end, catch { function (raised) short_error = tostring(raised) end } }
+    check("a memory-short empty pool waits instead of granting a degraded minimum", short_error ~= nil and short_calls > 5, true)
+
+    local short_pool = path.join(base, "short-held")
+    os.mkdir(short_pool)
+    local short_blocker = io.openlock(slot_path(short_pool, 1))
+    short_blocker:trylock()
+    local held_short_calls = 0
+    local held_short_error
+    try { function ()
+        acquire(short_pool, "normal", 2, 4, function ()
+            held_short_calls = held_short_calls + 1
+            if held_short_calls > 5 then
+                raise("stopped")
+            end
+            return test_reading(0, 1, 100)
+        end, 1)
+    end, catch { function (raised) held_short_error = tostring(raised) end } }
+    short_blocker:unlock()
+    short_blocker:close()
+    check("a non-empty pool with a memory shortfall waits and starts nothing", held_short_error ~= nil and held_short_calls > 5, true)
+
+    local full_grant = acquire(path.join(base, "fullmin"), "normal", 4, 4, function () return test_reading(50, 1, 11000) end, 1)
+    check("an empty pool under load grants the full minimum when memory fits", #full_grant, 4)
+    release_locks(full_grant)
 
     local guarantee_pool = path.join(base, "guarantee")
     local guarantee_queue = path.join(guarantee_pool, "queue")
     os.mkdir(guarantee_queue)
-    local function waiting_ticket(name, need)
-        local file = path.join(guarantee_queue, name)
+    local function waiting_ticket(queue, name, need)
+        local file = path.join(queue, name)
         local lock = io.openlock(file)
         lock:trylock()
         io.writefile(file, tostring(need))
         return {name = name, file = file, lock = lock}
     end
-    local older = waiting_ticket("1-0000000000001-00000001.ticket", 4)
+    local older = waiting_ticket(guarantee_queue, "1-0000000000001-00000001.ticket", 4)
     local older_calls = 0
     local function under_load()
         older_calls = older_calls + 1
@@ -655,6 +689,28 @@ local function test_suite()
     end, catch { function (raised) blocked_error = tostring(raised) end } }
     check("a second ticket cannot take the guarantee while the pool is held", blocked_error ~= nil and blocked_calls > 5, true)
     release_locks(guaranteed)
+
+    local order_pool = path.join(base, "order")
+    local order_queue = path.join(order_pool, "queue")
+    os.mkdir(order_queue)
+    local older_critical = waiting_ticket(order_queue, "1-0000000000001-00000001.ticket", 6)
+    local younger_calls = 0
+    local younger_error
+    try { function ()
+        acquire(order_pool, "background", 2, 2, function ()
+            younger_calls = younger_calls + 1
+            if younger_calls > 5 then
+                raise("stopped")
+            end
+            return test_reading(50, 1, 20000)
+        end, 1)
+    end, catch { function (raised) younger_error = tostring(raised) end } }
+    check("a younger ticket cannot take the guarantee past an older large one", younger_error ~= nil and younger_calls > 5, true)
+    check("and it leaves no grant stamp", (io.readfile(slot_path(order_pool, 1)) or ""):match("g %d+ %d+") == nil, true)
+    leave(older_critical, order_pool)
+    local older_grant = acquire(order_pool, "critical", 6, 6, function () return test_reading(50, 1, 20000) end, 1)
+    check("the older critical ticket then gets its six tokens", #older_grant, 6)
+    release_locks(older_grant)
 
     local dead_pool = path.join(base, "deadholder")
     os.mkdir(dead_pool)
