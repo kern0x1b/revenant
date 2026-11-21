@@ -550,8 +550,8 @@
    "version": "~57.0.2",
    "native": true,
    "status": "partial",
-   "verified": "build",
-   "note": "Built from a local copy of LocalizationModule.swift in src/expo, which replaces the package's file: the iOS 16 Locale branches are dropped and the temperature unit is taken from the region, since MeasurementFormatter is iOS 10. Compiled; not exercised."
+   "verified": "phone",
+   "note": "Built from a local copy of LocalizationModule.swift in src/expo, which replaces the package's file: the iOS 16 Locale branches are dropped and the temperature unit is taken from the region, since MeasurementFormatter is iOS 10. Compiled. On the iPad 2 (2026-11-21) getLocales returned the device's locales (the first with its language, region, currency, separators, measurement system and temperature unit) and getCalendars the calendar, time zone, first weekday and 24-hour flag; startObserving, stopObserving and a change of the device language while the app runs were not exercised."
   },
   {
    "id": "expo-location",

@@ -158,6 +158,16 @@ var CHECKS = {
       return answers;
     });
   },
+  ExpoLocalization: function (module) {
+    var locales = module.getLocales();
+    var calendars = module.getCalendars();
+    return {
+      localeCount: locales.length,
+      firstLocale: locales[0],
+      calendarCount: calendars.length,
+      firstCalendar: calendars[0]
+    };
+  },
   ExpoScreenOrientation: function (module) {
     return Promise.all([module.getOrientationAsync(), module.getOrientationLockAsync()]).then(function (answers) {
       var result = {orientation: answers[0], lock: answers[1]};
@@ -181,7 +191,7 @@ var CHECKS = {
   }
 };
 
-var NAMES = ['FileSystem', 'ExpoDocumentPicker', 'ExpoImageManipulator', 'ExpoImage', 'ExpoCamera', 'ExpoSecureStore', 'ExpoNetwork', 'ExpoDevice', 'ExpoBrightness', 'ExpoLinearGradient', 'ExpoStoreReview', 'ExpoWebBrowser', 'ExpoBlur', 'ExpoScreenOrientation', 'ExpoSQLite', 'ExpoTwoWayAudio'];
+var NAMES = ['FileSystem', 'ExpoDocumentPicker', 'ExpoImageManipulator', 'ExpoImage', 'ExpoCamera', 'ExpoSecureStore', 'ExpoNetwork', 'ExpoDevice', 'ExpoBrightness', 'ExpoLinearGradient', 'ExpoStoreReview', 'ExpoWebBrowser', 'ExpoBlur', 'ExpoScreenOrientation', 'ExpoSQLite', 'ExpoTwoWayAudio', 'ExpoLocalization'];
 
 NAMES.forEach(function (name) {
   var found = present(name);
