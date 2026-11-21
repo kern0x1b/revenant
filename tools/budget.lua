@@ -8,7 +8,8 @@ local TASKPOLICY = "/usr/sbin/taskpolicy"
 local CLOSE_INHERITED = 'i=3; while [ $i -lt 256 ]; do eval "exec $i>&-" 2>/dev/null; i=$((i+1)); done; exec "$@"'
 local PRESSURE_WARN = 2
 local PRESSURE_CRITICAL = 4
-local COMPRESSOR_GROWTH = 1024
+local PAGEOUT_LIMIT = 64
+local COMPRESSOR_LIMIT = 32768
 local MB = 1024 * 1024
 local SYSCTL = "/usr/sbin/sysctl"
 local VMSTAT = "/usr/bin/vm_stat"
@@ -79,9 +80,14 @@ end
 local function sample()
     local loadavg = parse_loadavg(os.iorunv(SYSCTL, {"-n", "vm.loadavg"}))
     local pressure = parse_pressure(os.iorunv(SYSCTL, {"-n", "kern.memorystatus_vm_pressure_level"}))
+    local level = tonumber((os.iorunv(SYSCTL, {"-n", "kern.memorystatus_level"})))
+    local memsize = tonumber((os.iorunv(SYSCTL, {"-n", "hw.memsize"})))
     local vm = parse_vmstat(os.iorunv(VMSTAT, {}))
+    vm.at = os.mclock()
+    local available = level and memsize and level * memsize / (100 * MB) or 0
     local reading = {loadavg = loadavg, load = math.max(loadavg, read_grants(pool_folder())),
-                     pressure = pressure, vm = vm, previous = previous}
+                     pressure = pressure, available = available, level = level, memsize = memsize,
+                     vm = vm, previous = previous}
     previous = vm
     return reading
 end
@@ -120,17 +126,23 @@ local function own_runnable(pids)
 end
 
 local function memory_headroom(reading)
-    local vm = reading.vm
-    local available = math.floor(math.max(0, ((vm.free + vm.speculative) * vm.size / MB) - RESERVE_MB) / TOKEN_MB)
     if reading.pressure >= PRESSURE_CRITICAL then
         return 0
     end
+    local vm = reading.vm
     local prev = reading.previous
-    local growing = prev ~= nil and (vm.compressor - prev.compressor) > COMPRESSOR_GROWTH
-    local pageouts = prev ~= nil and (vm.pageouts - prev.pageouts) > 0
-    if reading.pressure >= PRESSURE_WARN or growing or pageouts then
+    if prev then
+        local elapsed = (vm.at or 0) - (prev.at or 0)
+        elapsed = elapsed > 0 and elapsed / 1000 or 1
+        if (vm.pageouts - prev.pageouts) / elapsed > PAGEOUT_LIMIT or
+           (vm.compressor - prev.compressor) / elapsed > COMPRESSOR_LIMIT then
+            return 1
+        end
+    end
+    if reading.pressure >= PRESSURE_WARN then
         return 1
     end
+    local available = math.floor(math.max(0, (reading.available or 0) - RESERVE_MB) / TOKEN_MB)
     return math.max(1, available)
 end
 
@@ -429,23 +441,25 @@ local function status()
     print("cores     %d (reserve %d)", cores, RESERVE_CORES)
     print("cpu       %.2f loadavg, %.2f effective load, %d runnable of holders, %d token(s) of headroom",
           reading.loadavg, load, own, math.max(0, cores - RESERVE_CORES - load))
-    print("memory    pressure %d, %d MB free (inactive pages not counted), %d token(s) of headroom", reading.pressure,
-          math.floor((reading.vm.free + reading.vm.speculative) * reading.vm.size / MB), memory_headroom(reading))
+    print("memory    pressure %d, %d MB available (memorystatus %d%%), %d token(s) of headroom", reading.pressure,
+          math.floor(reading.available), reading.level or 0, memory_headroom(reading))
     print("held      %d token(s)", held)
     print("capacity  %d token(s) for a new request now", capacity(reading, held, own))
     print("queued    %d ticket file(s)", queued(folder))
     print("disk      %.0f GB free on the checkout's volume (floor %d GB)", free_disk_gb(), DISK_FLOOR_GB)
 end
 
-local function test_reading(loadavg, pressure, free_mb, opt)
+local function test_reading(loadavg, pressure, available_mb, opt)
     opt = opt or {}
     local size = 16384
     local function pages(mb)
         return math.floor(mb * MB / size)
     end
     return {loadavg = loadavg, load = opt.load or loadavg, pressure = pressure,
-            vm = {size = size, free = pages(free_mb), speculative = pages(opt.speculative or 0),
-                  compressor = opt.compressor or 0, pageouts = opt.pageouts or 0},
+            available = opt.available or available_mb,
+            vm = {size = size, free = pages(opt.free or available_mb), speculative = pages(opt.speculative or 0),
+                  inactive = pages(opt.inactive or 0), purgeable = pages(opt.purgeable or 0),
+                  compressor = opt.compressor or 0, pageouts = opt.pageouts or 0, at = opt.at or 0},
             previous = opt.previous, cores = opt.cores or 12}
 end
 
@@ -469,18 +483,21 @@ local function test_suite()
                    "Pageouts:                       7.\n"
     local vm = parse_vmstat(vmtext)
     check("the page size is read", vm.size, 16384)
-    check("inactive pages are not part of the reading", vm.free, 65536)
+    check("inactive pages are not read from vm_stat", vm.free, 65536)
     check("speculative pages are part of the reading", vm.speculative, 16384)
     check("compressor pages are read", vm.compressor, 1024)
     check("pageouts are read", vm.pageouts, 7)
 
-    check("a normal machine counts free memory", memory_headroom(test_reading(0, 1, 11000)), 5)
+    check("a normal machine counts available memory", memory_headroom(test_reading(0, 1, 11000)), 5)
+    check("much inactive memory gives tokens with little free", memory_headroom(test_reading(0, 1, 17203, {free = 135, inactive = 458752})), 9)
     check("warning pressure grants only one token", memory_headroom(test_reading(0, 2, 11000)), 1)
     check("critical pressure grants none", memory_headroom(test_reading(0, 4, 11000)), 0)
     local prev = test_reading(0, 1, 11000).vm
-    check("compressor growth grants only one token", memory_headroom(test_reading(0, 1, 11000, {previous = prev, compressor = prev.compressor + 2048})), 1)
-    check("pageouts grant only one token", memory_headroom(test_reading(0, 1, 11000, {previous = prev, pageouts = prev.pageouts + 3})), 1)
-    check("a stable compressor at normal pressure is not a limit", memory_headroom(test_reading(0, 1, 11000, {previous = prev, compressor = prev.compressor + 1})), 5)
+    check("a single pageout does not clamp", memory_headroom(test_reading(0, 1, 11000, {previous = prev, pageouts = prev.pageouts + 1, at = 1000})), 5)
+    check("a pageout trickle below the rate does not clamp", memory_headroom(test_reading(0, 1, 11000, {previous = prev, pageouts = prev.pageouts + 8, at = 1000})), 5)
+    check("a pageout burst above the rate clamps to one token", memory_headroom(test_reading(0, 1, 11000, {previous = prev, pageouts = prev.pageouts + 128, at = 1000})), 1)
+    check("a compressor burst above the rate clamps to one token", memory_headroom(test_reading(0, 1, 11000, {previous = prev, compressor = prev.compressor + 65536, at = 1000})), 1)
+    check("a stable compressor at normal pressure is not a limit", memory_headroom(test_reading(0, 1, 11000, {previous = prev, compressor = prev.compressor + 1, at = 1000})), 5)
     check("a machine below the reserve still starts one token", memory_headroom(test_reading(0, 1, 100, {speculative = 100})), 1)
 
     check("runnable load bounds the jobs", capacity(test_reading(8, 1, 11000), 3, 0), 5)
@@ -498,6 +515,11 @@ local function test_suite()
     check("sample reads the machine's load average", tostring(live.loadavg), tostring(tonumber(raw_load)))
     local raw_pressure = os.iorunv(SYSCTL, {"-n", "kern.memorystatus_vm_pressure_level"}):match("(%d+)")
     check("sample reads the machine's pressure", tostring(live.pressure), tostring(tonumber(raw_pressure)))
+    local raw_level = tonumber((os.iorunv(SYSCTL, {"-n", "kern.memorystatus_level"})))
+    check("sample reads the machine's memorystatus level", math.abs(live.level - raw_level) <= 1, true)
+    local raw_memsize = tonumber((os.iorunv(SYSCTL, {"-n", "hw.memsize"})))
+    check("sample reads the machine's memory size", live.memsize, raw_memsize)
+    check("available memory is the kernel's free share of physical memory", math.abs(live.available - live.level * live.memsize / (100 * MB)) < 1, true)
     local raw_vm = os.iorunv(VMSTAT, {})
     local raw_free = tonumber(raw_vm:match("Pages free:%s+(%d+)"))
     check("sample reads the machine's free pages", math.abs(live.vm.free - raw_free) < 100000, true)

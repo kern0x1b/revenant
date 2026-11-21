@@ -388,12 +388,19 @@ one pool, kept in `.cache/budget` of the main checkout whatever `REVENANT_CACHE`
   published and read by every later request. A stamp contributes one token times the share of the minute still left, so
   an N-token grant counts as N, never N squared, and is never added on top of a load average that already reflects it —
   the largest of the three wins. Tokens are not assumed to be runnable threads: a holder blocked on I/O contributes
-  nothing, and a holder whose build spawns many compilers contributes all of them. Memory headroom comes from
-  pressure, not from idle pages: the pressure level (`kern.memorystatus_vm_pressure_level`), the growth in compressor pages
-  and the pageouts per second between successive `vm_stat` samples. Inactive pages are never counted as free. At normal
-  pressure with a stable compressor and no pageouts, memory headroom is the free and speculative pages less 2 GB, in
-  tokens, but at least one; at warning pressure, or while the compressor grows or pages page out, it is one token; at
-  critical pressure it is none. A request gets no fewer tokens than its `--min`: if the room cannot hold the minimum it
+  nothing, and a holder whose build spawns many compilers contributes all of them. Memory headroom comes from the
+  kernel's own measure of available memory and pressure. Available memory is `kern.memorystatus_level` percent of
+  `hw.memsize`, less the 2 GB reserve, in tokens of 1.5 GB but at least one. The 2026-11-21 budget memory measurement on
+  this Mac sampled `memory_pressure -Q`, the level sysctl and `vm_stat` every second for about five minutes: the level
+  equalled `memory_pressure`'s "System-wide memory free percentage" at every sample, while the `vm_stat` free +
+  speculative + inactive + purgeable sum was about half of it, so the level is the signal that tracks macOS's own view
+  of available memory and is the one used here. Inactive and purgeable pages are inside that share; active file-backed
+  pages are not subtracted separately because the level already discounts them, and the measurement shows it tracks
+  `memory_pressure`. Between successive samples a rate guard clamps to one token when pageouts exceed 64 pages per
+  second or compressor pages grow by more than 32768 per second (512 MB/s): the same measurement saw quiet pageouts peak
+  near 10 pages per second and background compression near 304 MB/s, so normal churn does not clamp, while the roughly
+  750 MB/s compressing state the load audit treated as pressure does. Critical pressure grants none, warning pressure
+  grants one token. A request gets no fewer tokens than its `--min`: if the room cannot hold the minimum it
   waits and re-checks, with no patience after which the load stops mattering. When the minimum fits but the room is smaller
   than `--jobs`, it starts with fewer jobs, up to what memory and CPU allow. As a progress guarantee, when the pool has no
   live holder the oldest waiting ticket is granted its minimum in full even under high outside load, provided memory
