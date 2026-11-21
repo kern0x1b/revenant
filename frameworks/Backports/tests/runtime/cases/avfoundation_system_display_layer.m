@@ -61,7 +61,7 @@ static void describe(const char *label, Class cls)
 static CMSampleBufferRef sample_of(OSType format)
 {
     CVPixelBufferRef pixel = NULL;
-    NSDictionary *attributes = @{(__bridge id)kCVPixelBufferIOSurfacePropertiesKey: @{}};
+    NSDictionary *attributes = @{@"IOSurfaceProperties": @{}};
     if (CVPixelBufferCreate(kCFAllocatorDefault, 64, 64, format, (__bridge CFDictionaryRef)attributes, &pixel) != kCVReturnSuccess || !pixel)
         return NULL;
     CVPixelBufferLockBaseAddress(pixel, 0);
