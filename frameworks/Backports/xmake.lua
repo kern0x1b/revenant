@@ -909,7 +909,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         else
             add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports", "IOSurfaceBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "PhotosBackports", "CloudKitBackports", "CoreTextBackports", "SecurityBackports", "CoreMediaBackports", "VideoToolboxBackports")
         end
-        add_frameworks("Foundation", "UIKit", "CoreGraphics", "CoreText", "QuartzCore", "OpenAL", "AudioToolbox", "AssetsLibrary", "Security", "CoreMedia", "CoreVideo", "VideoToolbox")
+        add_frameworks("Foundation", "UIKit", "CoreGraphics", "CoreText", "QuartzCore", "OpenAL", "AudioToolbox", "AssetsLibrary", "Security", "AVFoundation", "CoreMedia", "CoreVideo", "VideoToolbox")
         add_syslinks("objc")
     target_end()
 
