@@ -26,8 +26,12 @@ for llvm. The sources are the same for both builds; only what a build does to th
   pristine shared folder. A clone shares its blocks with the shared folder, so it costs a few seconds and almost no
   disk (llvm's 180,000-file checkout: 18 s under load average 25, 45 MB).
 - A copy that exists and was made from the same pinned sources (their stamp, `revenant-sources.txt`, is equal) is reset
-  with `git checkout -- .` and `git clean -fd`, which keeps an ignored build directory, so a build that was interrupted
-  resumes where it stopped, as it did in the shared folder. A copy of other sources is made again.
+  with `git checkout -- .` and `git clean -fd -e revenant-sources.txt`, which keeps an ignored build directory, so a build
+  that was interrupted resumes where it stopped, as it did in the shared folder. A copy of other sources is made again.
+  The stamp is an untracked file of the repository when a repository has no `name` (libcxx), so a plain `git clean -fd`
+  took it: a second download of the same sources, before the first build took its copy, left `keyed` nothing to read, and
+  the armv7 libcxx of the Backports gate stopped on 2026-11-21 with "holds no pinned sources". The `-e` keeps it, and
+  `checkout_test` asks twice for a repository without a name and takes a copy after that.
 - The lock is `toolchain/modules/exclusive.lua`: an flock that a waiting coroutine retries with `os.sleep`, so one
   xmake process holding the lock in one coroutine does not stop the other coroutines of the process.
 

@@ -86,6 +86,25 @@ function failures(opt)
         table.insert(found, "the grown list, asked again, keeps the clone it made")
     end
 
+    local plain = path.join(folder, "plain")
+    local whole = {{url = url, tag = "release-1", commit = commit}}
+    if not checkout.pinned(plain, whole) then
+        table.insert(found, "a repository that is the source folder itself is cloned")
+    end
+    if checkout.pinned(plain, whole) then
+        table.insert(found, "that repository, asked again, keeps its clone")
+    end
+    if not os.isfile(path.join(plain, "revenant-sources.txt")) then
+        table.insert(found, "asking again for a repository that is the source folder itself leaves the record of the pinned sources in it, which git clean takes for an untracked file")
+    end
+    local flat = try { function () return checkout.keyed(plain, "dddd") end }
+    if not flat or not os.isfile(path.join(flat, "first", "one.txt")) then
+        table.insert(found, "a build takes its copy of that source after a second download of it (two builds of one package), which is how a build died on 2026-11-21 with: holds no pinned sources")
+    end
+    if not os.isfile(path.join(plain, "revenant-sources.txt")) then
+        table.insert(found, "taking a copy keeps the record of the pinned sources in the shared source")
+    end
+
     os.tryrm(folder)
     return found
 end

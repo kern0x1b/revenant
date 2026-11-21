@@ -19,7 +19,7 @@ local function reset(folder, text)
         local name = line:match("^(%S+)")
         local into = name == "." and folder or path.join(folder, name)
         os.vrunv("git", {"-C", into, "checkout", "--", "."})
-        os.vrunv("git", {"-C", into, "clean", "-fd"})
+        os.vrunv("git", {"-C", into, "clean", "-fd", "-e", STAMP})
     end
 end
 
