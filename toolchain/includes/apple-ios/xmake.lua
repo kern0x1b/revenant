@@ -16,10 +16,10 @@ end
 
 add_requireconfs("**.iphoneos-sdk", {override = true, version = sdk.version})
 
-local backports_selected = (os.getenv("REVENANT_BACKPORTS_LIBRARIES") or "") ~= ""
+includes(path.join(os.scriptdir(), "..", "..", "modules", "apple", "requirements.lua"))
 if not compat_only then
     add_requires("revenant@firmware-tools", {alias = "firmware-tools"})
-    if not backports_selected then
+    if backports_package_required(get_config("component"), os.getenv("REVENANT_BACKPORTS_LIBRARIES")) then
         add_requires("revenant@backports", {alias = "backports"})
     end
 end
