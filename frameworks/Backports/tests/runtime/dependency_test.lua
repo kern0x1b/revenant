@@ -82,7 +82,8 @@ function main()
 
     local relative = compile(root, "relativelib", "@rpath/librelative.dylib")
     local loader = compile(root, "loaderlib", "@loader_path/libloader.dylib")
-    for _, case in ipairs({{relative, "@rpath/librelative.dylib"}, {loader, "@loader_path/libloader.dylib"}}) do
+    local executable = compile(root, "executablelib", "@executable_path/libexecutable.dylib")
+    for _, case in ipairs({{relative, "@rpath/librelative.dylib"}, {loader, "@loader_path/libloader.dylib"}, {executable, "@executable_path/libexecutable.dylib"}}) do
         local user = compile(root, "user" .. path.basename(case[1]), "/usr/lib/revenant/org.revenant.backports/lib" .. path.basename(case[1]) .. "Backports.dylib", nil, {case[1]}, {"-Wl,-not_for_dyld_shared_cache"})
         local refusal
         try {
