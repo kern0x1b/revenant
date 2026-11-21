@@ -12,6 +12,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/inputs.lua m
 
 local app_config = import("app_config", {rootdir = os.scriptdir(), anonymous = true})
 local json = import("core.base.json")
+local expo_json = import("expo_json", {rootdir = os.scriptdir(), anonymous = true})
 
 local INPUTS = {"codegen", "rn-codegen", "rn-src", "rn-headers", "lib-headers", "expo-jsi", "expo-pods", "expo-core", "expo-src", "nitro", "unistyles", "keyboard", "screens", "app-assets", "app-components", "app-manifest"}
 
@@ -772,8 +773,7 @@ function expo_classes(ctx)
     local real = expo_real(ctx)
     for _, package in ipairs(expo_packages(ctx)) do
         local config = io.readfile(path.join(expo_dir(ctx, package), "expo-module.config.json"))
-        local apple = (config:match('"apple"%s*:%s*(%b{})') or config:match('"ios"%s*:%s*(%b{})') or ""):match('"modules"%s*:%s*%[(.-)%]')
-        for name in (apple or ""):gmatch('"([^"]+)"') do
+        for _, name in ipairs(expo_json.apple_config(config).modules) do
             if not EXPO_SKIP_MODULES[name] then
                 table.insert(classes, string.format("      (module: %s.self, name: nil),", name))
             end
@@ -791,9 +791,7 @@ function expo_subscribers(ctx)
     local subscribers = {}
     for _, package in ipairs(expo_packages(ctx)) do
         local config = io.readfile(path.join(expo_dir(ctx, package), "expo-module.config.json"))
-        local apple = config:match('"apple"%s*:%s*(%b{})') or config:match('"ios"%s*:%s*(%b{})') or ""
-        local names = apple:match('"appDelegateSubscribers"%s*:%s*%[(.-)%]') or ""
-        for name in names:gmatch('"([^"]+)"') do
+        for _, name in ipairs(expo_json.apple_config(config).subscribers) do
             table.insert(subscribers, string.format("      %s.self,", name))
         end
     end

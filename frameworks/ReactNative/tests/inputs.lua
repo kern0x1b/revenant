@@ -283,15 +283,24 @@ try {
 }
 check("a component name with a quote is refused", refused)
 
-local coverage_text = io.readfile(path.join(os.scriptdir(), "..", "src", "coverage.json"))
-local coverage_rows = 0
-for object in coverage_text:gmatch("{([^{}]-)}") do
-    if object:match('"id":%s*"([^"]*)"') then
-        coverage_rows = coverage_rows + 1
-    end
-end
-local _, coverage_ids = coverage_text:gsub('"id":', "")
-check("every row of coverage.json is read by the Expo provider's reader, which splits on braces, so no row's text has one", coverage_rows == coverage_ids, coverage_ids .. " ids, " .. coverage_rows .. " rows")
+local expo_json = import("expo_json", {rootdir = path.join(os.scriptdir(), "..", "tools"), anonymous = true})
+local hard_rows = '{"rows": [{"id": "expo-a", "group": "expo", "native": true, "status": "real", "note": "resolves {type: opened}, says \\"quoted\\" and {\\"nested\\": {\\"id\\": \\"x\\"}}"}, {"id": "plain", "group": "community", "native": false, "status": "stub", "extra": {"deep": {"id": "inner"}}}]}'
+local read_rows = expo_json.coverage_rows(hard_rows)
+check("a coverage row whose note has braces, quotes and a nested object with an id is read, and nothing nested is taken for a row", #read_rows == 2 and read_rows[1].id == "expo-a" and read_rows[1].native == true and read_rows[1].status == "real"
+    and read_rows[2].id == "plain" and read_rows[2].native == false, #read_rows .. " rows")
+local read_names, read_owners = expo_json.stub_entries('{"stubs": [{"file": "src/expo/StubModules.swift", "name": "A{1}", "owner": "expo-a", "note": "{\\"x\\": 1}"}, {"file": "other.swift", "name": "B"}]}')
+check("a stub entry with braces in its text is read, and only the entries of StubModules.swift are listed", #read_names == 1 and read_names[1] == "A{1}" and read_owners["A{1}"] == "expo-a", table.concat(read_names, ","))
+local nested = expo_json.apple_config('{"platforms": ["apple", "android"], "apple": {"modules": ["One", "Two"], "appDelegateSubscribers": ["Sub"], "info": {"modules": ["NotMine"]}}, "android": {"modules": ["x.Y"]}}')
+check("an expo-module.config.json with nested platforms and a nested modules key reads the apple block's own modules and subscribers", table.concat(nested.modules, ",") == "One,Two" and table.concat(nested.subscribers, ",") == "Sub", table.concat(nested.modules, ","))
+local legacy = expo_json.apple_config('{"ios": {"modules": ["Legacy"]}}')
+check("the ios block is read when there is no apple block", table.concat(legacy.modules, ",") == "Legacy", table.concat(legacy.modules, ","))
+local both = expo_json.apple_config('{"ios": {"modules": ["Legacy"]}, "apple": {"modules": ["Current"]}}')
+check("the apple block wins when both are present", table.concat(both.modules, ",") == "Current", table.concat(both.modules, ","))
+local neither = expo_json.apple_config('{"android": {"modules": ["x.Y"]}}')
+check("a config with no apple or ios block has no modules", #neither.modules == 0 and #neither.subscribers == 0, #neither.modules)
+local real_rows = expo_json.coverage_rows(io.readfile(path.join(os.scriptdir(), "..", "src", "coverage.json")))
+local _, real_ids = io.readfile(path.join(os.scriptdir(), "..", "src", "coverage.json")):gsub('\n   "id":', "")
+check("every row of coverage.json is read", #real_rows == real_ids, #real_rows .. " rows, " .. real_ids .. " ids")
 if failures > 0 then
     raise("%d react-native inputs test(s) failed", failures)
 end
