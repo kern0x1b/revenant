@@ -14,7 +14,9 @@
     "react-native-enriched-markdown"
   ],
   "modules": [
-    "@getpaseo/expo-two-way-audio"
+    "@getpaseo/expo-two-way-audio",
+    "paseo-hardware-keyboard",
+    "paseo-window-layout"
   ],
   "optionalComponents": []
 }
