@@ -431,7 +431,13 @@ one pool, kept in `.cache/budget` of the main checkout whatever `REVENANT_CACHE`
   tokens, but at least one; at warning pressure, or while the compressor grows or pages page out, it is one token; at
   critical pressure it is none. A request gets no fewer tokens than its `--min`: if the room cannot hold the minimum it
   waits and re-checks, with no patience after which the load stops mattering. When the minimum fits but the room is smaller
-  than `--jobs`, it starts with fewer jobs, up to what memory and CPU allow.
+  than `--jobs`, it starts with fewer jobs, up to what memory and CPU allow. As a progress guarantee, when the pool has no
+  live holder the oldest waiting ticket is granted its minimum in full even under high outside load, provided memory
+  headroom is at least that minimum; less than the minimum of memory headroom, including critical pressure, makes it wait
+  rather than start short, and the disk floor still stops it. In guarantee mode an older live ticket blocks the grant only
+  when its minimum fits the available memory headroom, so class order and age pick the first eligible ticket and a ticket
+  that cannot fit its own memory minimum does not hold up the queue; in ordinary mode a small request can still backfill.
+  The slot locks give the guarantee to one ticket at a time, and once it holds, later tickets wait for headroom again.
 - Need. A command asks for `--min` tokens (one by default), or for the tokens its `--mb` needs when that is more (a 2.5 GB class
   takes two), and for up to `--jobs`; the minimum is a hard floor and a request that cannot meet it is never started short.
   It runs with `XMAKE_MAX_JOBS` set to the tokens it got.
