@@ -193,7 +193,10 @@ static IMP revenant_wrap(Class cls, SEL selector, IMP replacement)
 
 - (BOOL)hasSufficientMediaDataForReliablePlaybackStart
 {
-    return self.isReadyForDisplay;
+    RevenantDisplayLayerState *state = revenant_state(self);
+    @synchronized (state) {
+        return state->readyForDisplay;
+    }
 }
 
 - (BOOL)requiresFlushToResumeDecoding
