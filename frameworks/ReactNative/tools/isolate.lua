@@ -314,6 +314,7 @@ function copy_project(project, folder, bundle_id)
     end
     os.mkdir(folder)
     os.vrunv("rsync", {"-a", "--exclude", "build", "--exclude", "*.log", project .. "/", folder .. "/"})
+    os.vrunv("rsync", {"-aL", path.join(project, "xmake.lua"), folder .. "/"})
     os.mkdir(path.join(folder, "build"))
     for _, item in ipairs(INPUTS) do
         if os.exists(path.join(project, "build", item)) then

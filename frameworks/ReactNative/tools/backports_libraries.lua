@@ -28,8 +28,12 @@ end
 
 function check()
     local names = declared(io.readfile(os.projectfile()))
+    local manifest = path.join(os.projectdir(), "host.json")
+    if not names and os.isfile(manifest) then
+        names = import("core.base.json").loadfile(manifest).backports
+    end
     if not names then
-        raise("the application's xmake.lua does not name the libraries of its revenant@backports requirement; the host takes the list from the application and has none of its own")
+        raise("the application's xmake.lua names no libraries for its revenant@backports requirement, neither in xmake.lua nor as backports in host.json; the host takes the list from the application and has none of its own")
     end
     local lacking = missing(names)
     if #lacking > 0 then

@@ -1,4 +1,6 @@
-set_project("paseo-ios6")
+-- One xmake.lua for the examples (rn-probe/xmake.lua is a link to this file): host.json names the project ("project") and the Backports libraries ("backports").
+local host = import("core.base.json").loadfile(path.join(os.projectdir(), "host.json"))
+set_project(host.project)
 set_version("0.1.0")
 local revenant = os.getenv("REVENANT_PATH")
 if not revenant or revenant == "" then
@@ -19,7 +21,7 @@ if os.getenv("RN_JSC_ENGINE") then
 end
 if os.getenv("RN_DEPS_REPO") then
     if os.getenv("RN_BACKPORTS") then
-        add_requires("revenant@backports", {alias = "backports", configs = {libraries = "FoundationBackports,CoreTextBackports,UIKitBackports,UserNotificationsBackports,CoreGraphicsBackports,GraphicsBackports,CoreFoundationBackports,SystemBackports,IOSurfaceBackports,WebKitBackports,MapKitBackports,CoreLocationBackports,SecurityBackports,CoreMotionBackports,CoreTelephonyBackports,AVKitBackports,AccelerateBackports,CoreMediaBackports,AVFoundationBackports"}})
+        add_requires("revenant@backports", {alias = "backports", configs = {libraries = table.concat(host.backports, ",")}})
     end
     add_requires("revenant@folly 2024.11.18.00", {alias = "folly"})
     add_requires("revenant@socketrocket 0.7.1", {alias = "socketrocket"})
