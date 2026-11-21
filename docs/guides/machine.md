@@ -398,8 +398,9 @@ one pool, kept in `.cache/budget` of the main checkout whatever `REVENANT_CACHE`
   than `--jobs`, it starts with fewer jobs, up to what memory and CPU allow. As a progress guarantee, when the pool has no
   live holder the oldest waiting ticket is granted its minimum in full even under high outside load, provided memory
   headroom is at least that minimum; less than the minimum of memory headroom, including critical pressure, makes it wait
-  rather than start short, and the disk floor still stops it. In guarantee mode any older live ticket blocks the grant
-  whatever its need, so class order and age decide who goes first; in ordinary mode a small request can still backfill.
+  rather than start short, and the disk floor still stops it. In guarantee mode an older live ticket blocks the grant only
+  when its minimum fits the available memory headroom, so class order and age pick the first eligible ticket and a ticket
+  that cannot fit its own memory minimum does not hold up the queue; in ordinary mode a small request can still backfill.
   The slot locks give the guarantee to one ticket at a time, and once it holds, later tickets wait for headroom again.
 - Need. A command asks for `--min` tokens (one by default), or for the tokens its `--mb` needs when that is more (a 2.5 GB class
   takes two), and for up to `--jobs`; the minimum is a hard floor and a request that cannot meet it is never started short.

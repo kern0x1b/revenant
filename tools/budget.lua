@@ -303,6 +303,7 @@ local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms)
         reading.cores = cores
         local free, held, pids = snapshot_slots(folder, cores)
         local cap = capacity(reading, held, own_runnable(pids))
+        local headroom = memory_headroom(reading)
         local progress = held == 0 and progress_capacity(reading, held, minimum) or held
         local guarantee = progress > held
         if guarantee then
@@ -310,7 +311,7 @@ local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms)
         end
         local available = math.min(math.max(cap - held, 0), #free)
         local count = grantable(cap, held, #free, minimum, maximum)
-        if count > 0 and not ahead_of(folder, ticket.name, guarantee and #free or available) then
+        if count > 0 and not ahead_of(folder, ticket.name, guarantee and math.min(#free, headroom) or available) then
             local grant = table.slice(free, 1, count)
             release_locks(table.slice(free, count + 1))
             for _, entry in ipairs(grant) do
@@ -711,6 +712,18 @@ local function test_suite()
     local older_grant = acquire(order_pool, "critical", 6, 6, function () return test_reading(50, 1, 20000) end, 1)
     check("the older critical ticket then gets its six tokens", #older_grant, 6)
     release_locks(older_grant)
+
+    local backfill_pool = path.join(base, "backfill")
+    local backfill_queue = path.join(backfill_pool, "queue")
+    os.mkdir(backfill_queue)
+    local starved = waiting_ticket(backfill_queue, "1-0000000000001-00000001.ticket", 6)
+    local backfill_grant = acquire(backfill_pool, "normal", 2, 2, function () return test_reading(50, 1, 5120) end, 1)
+    check("a ticket whose minimum fits memory backfills past a memory-starved older one", #backfill_grant, 2)
+    release_locks(backfill_grant)
+    leave(starved, backfill_pool)
+    local starved_grant = acquire(backfill_pool, "critical", 6, 6, function () return test_reading(50, 1, 20000) end, 1)
+    check("the older ticket then gets its six tokens when headroom allows", #starved_grant, 6)
+    release_locks(starved_grant)
 
     local dead_pool = path.join(base, "deadholder")
     os.mkdir(dead_pool)
