@@ -110,11 +110,10 @@ An application that has an Expo module of its own, outside the SDK, names its pa
 module's `expo-module.config.json` may name its Swift classes under `apple` or under `ios`; the provider reads both (a package that
 used `ios` was compiled and never registered until 2026-11-20). What the module needs from iOS 7 and later comes from the Backports,
 not from a patch of the application: `@getpaseo/expo-two-way-audio` needs `AVAudioEngine`, which `AVFoundationBackports` supplies, so the
-host's Backports library list (`frameworks/ReactNative/src/host/xmake.lua`) holds `AVFoundationBackports`, `CoreMediaBackports` and
+application's Backports library list (`frameworks/ReactNative/examples/paseo/xmake.lua` for Paseo; the host takes the list from the application and only checks that it holds what the host links) holds `AVFoundationBackports`, `CoreMediaBackports` and
 `AccelerateBackports`. Without `AVFoundationBackports` in the list the module's `AVAudioFormat` is nil on iOS 6 and `initialize`
 answers `false`. Only a name that collides inside the shared Swift module is renamed (`MicrophonePermissionRequester.swift`, in
-`src/expo/xmake.lua`). On the iPad 2 the probe's `ExpoTwoWayAudio` check initialises it, records for three seconds and counts the microphone
-chunks and level events; it does not listen to what was recorded.
+`src/expo/xmake.lua`). On the iPad 2 the probe's `ExpoTwoWayAudio` check initialises it, records and counts the microphone chunks and level events, calls `playPCMData` with a 1000 Hz tone as a stimulus and analyses the recorded chunks at the tone and at a control frequency. On 2026-11-21 every chunk was zeros and the level events were zero, which is consistent with the microphone permission being denied for the host (`getMicrophonePermissionsAsync` answers `denied`); that was not confirmed against a run with the permission granted, so the content of the microphone path is not verified. Whether the speaker played the tone was not checked.
 
 ## How to check
 
