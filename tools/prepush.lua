@@ -4,12 +4,11 @@ local root = path.absolute(path.directory(os.scriptdir()))
 
 local CODE = {m = true, mm = true, c = true, cpp = true}
 
-local VOLATILE = {PWD = true, OLDPWD = true, SHLVL = true, ["_"] = true, TERM_SESSION_ID = true,
-                  SECURITYSESSIONID = true, COLUMNS = true, LINES = true}
-
 local function cache()
     return import("@addon.revenant.cache", {anonymous = true})
 end
+
+local byteorder = import("@addon.revenant.byteorder", {anonymous = true})
 
 local function digest(text)
     return hash.sha256(bytes(text))
@@ -59,10 +58,21 @@ local function gate_environment()
     }
 end
 
-local function gate_sync_arguments(tree)
+local function gate_ignored(folder)
+    local lines = {}
+    for entry in git(folder, {"ls-files", "--others", "--ignored", "--exclude-standard", "--directory", "-z"}):gmatch("[^\0]+") do
+        table.insert(lines, "/" .. entry:gsub("([%*%?%[\\])", "\\%1"))
+    end
+    return table.concat(lines, "\n") .. "\n"
+end
+
+local function gate_sync_arguments(tree, ignored)
     local args = {"-a", "--delete"}
     for _, pattern in ipairs(GATE_EXCLUDES) do
         table.insert(args, "--exclude=" .. pattern)
+    end
+    if ignored then
+        table.insert(args, "--exclude-from=" .. ignored)
     end
     table.insert(args, root .. "/")
     table.insert(args, tree .. "/")
@@ -120,10 +130,12 @@ local function backports_build()
     local logfile = path.join(folder, "prepush.log")
     os.mkdir(folder)
     local output = io.open(logfile, "w")
+    local ignored = path.join(folder, "ignored.txt")
+    io.writefile(ignored, gate_ignored(root))
     local ok = budgeted(gate_preflight(), {output = output})
     if ok then
         os.mkdir(tree)
-        ok = os.execv("rsync", gate_sync_arguments(tree), {try = true, stdout = output, stderr = output}) == 0
+        ok = os.execv("rsync", gate_sync_arguments(tree, ignored), {try = true, stdout = output, stderr = output}) == 0
     end
     if ok then
         for _, command in ipairs(gate_commands(tree)) do
@@ -202,8 +214,35 @@ local function negative_shape()
     return #errors == 0
 end
 
-local function digests_stable()
-    if not lua("toolchain/tools/recipe_digests.lua") then
+local MEMO_VERSION = "prepush memo 3"
+local MEMO_KEEP = 40
+local TOOLS = {"toolchain/modules/", "toolchain/addon.lua", "xmake.lua"}
+local UNBUILT = {"docs/**", "**/*.md", ".agents/**", "agent-skills/**"}
+local PREBUILT_ENV = {"REVENANT_PREBUILT", "REVENANT_PREBUILT_ONLY"}
+local ALWAYS = {"tools/prepush.lua", "tools/budget.lua"}
+local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true, REVENANT_LIGHT_SUITES_VERDICT = true}
+local STORE_PACKAGES = {"llvm", "swift", "swift-bootstrap", "swift-runtime", "libcxx", "apple-compat", "iphoneos-sdk", "ld64", "ldid"}
+local TOOL_NAMES = {"git", "rsync", "cmake", "ninja", "xcrun", "clang", "cc", "make", "sh"}
+
+local function call(script, ...)
+    local arguments = table.pack(...)
+    local ok = true
+    try {
+        function ()
+            import(path.basename(script), {rootdir = path.join(root, path.directory(script)), anonymous = true}).main(table.unpack(arguments, 1, arguments.n))
+        end,
+        catch {
+            function (errors)
+                print("%s", tostring(errors))
+                ok = false
+            end
+        }
+    }
+    return ok
+end
+
+local function digests_stable(runner)
+    if not runner("toolchain/tools/recipe_digests.lua") then
         return false
     end
     local stable = true
@@ -214,6 +253,112 @@ local function digests_stable()
         end
     end
     return stable
+end
+
+local function digest_reads()
+    local reads = {"toolchain/tools/recipe_digests.lua", "packages/*/*/port/digest.lua"}
+    table.join2(reads, TOOLS)
+    for _, recipe in ipairs(import("@addon.revenant.digest", {anonymous = true}).recipes()) do
+        table.join2(reads, recipe.inputs)
+    end
+    return reads
+end
+
+local facts_text
+
+local function toolchain_facts()
+    if not facts_text then
+        local facts = {}
+        for _, probe in ipairs({{"xcode-select", {"-p"}}, {"xcodebuild", {"-version"}}, {"xcrun", {"--show-sdk-path"}}, {"xcrun", {"--show-sdk-version"}}}) do
+            table.insert(facts, try { function () return (os.iorunv(probe[1], probe[2]):gsub("%s+", " ")) end } or "none")
+        end
+        facts_text = table.concat(facts, "\n")
+    end
+    return facts_text
+end
+
+local function sorted(lines)
+    byteorder.sort(lines)
+    return lines
+end
+
+local function ambient_environment()
+    local lines = {}
+    for name, value in pairs(os.getenvs()) do
+        if (name:find("^REVENANT_") or name == "XMAKE_GLOBALDIR") and not AMBIENT_SKIPS[name] and value ~= "" then
+            table.insert(lines, name .. "=" .. value)
+        end
+    end
+    return table.concat(sorted(lines), "\n")
+end
+
+local function attributes_facts(folder)
+    local locations = {path.join(folder, (git(folder, {"rev-parse", "--git-path", "info/attributes"}):trim()))}
+    local configured = try { function () return git(folder, {"config", "--get", "core.attributesFile"}):trim() end }
+    if configured and configured ~= "" then
+        table.insert(locations, (configured:gsub("^~/", (os.getenv("HOME") or "") .. "/")))
+    else
+        table.insert(locations, path.join(os.getenv("XDG_CONFIG_HOME") or path.join(os.getenv("HOME") or "", ".config"), "git", "attributes"))
+    end
+    local lines = {}
+    for index, file in ipairs(locations) do
+        table.insert(lines, (index == 1 and "local " or "global ") .. (os.isfile(file) and hash.sha256(file) or "none"))
+    end
+    return table.concat(lines, "\n")
+end
+
+local function packages_folder()
+    return path.join(cache().store(), "xmake-global", ".xmake", "packages")
+end
+
+local function store_installs()
+    local lines = {}
+    local packages = packages_folder()
+    for _, name in ipairs(STORE_PACKAGES) do
+        for _, install in ipairs(os.filedirs(path.join(packages, name:sub(1, 1), name, "*", "*"))) do
+            local line = path.relative(install, packages)
+            if os.islink(install) then
+                line = line .. " -> " .. path.filename(os.readlink(install))
+            end
+            local manifest = path.join(install, "manifest.txt")
+            table.insert(lines, line .. " " .. (os.isfile(manifest) and hash.sha256(manifest) or "no manifest"))
+        end
+    end
+    return table.concat(sorted(lines), "\n")
+end
+
+local function sdk_content()
+    local sdk = import("sdk", {rootdir = path.join(root, "frameworks", "Backports", "tools"), anonymous = true})
+    local pattern = path.join(packages_folder(), "i", "iphoneos-sdk", "*", "*", "Developer.app", "Contents", "Developer", "Platforms",
+                              "iPhoneOS.platform", "Developer", "SDKs", "iPhoneOS*.sdk")
+    local seen, lines = {}, {}
+    for _, folder in ipairs(os.dirs(pattern)) do
+        local real = os.iorunv("sh", {"-c", "cd \"$1\" && pwd -P", "sh", folder}):trim()
+        if not seen[real] then
+            seen[real] = true
+            table.insert(lines, try { function () return sdk.cache_key(real) end } or "unreadable")
+        end
+    end
+    return table.concat(sorted(lines), "\n")
+end
+
+local function resolved_tools()
+    local lines = {}
+    for _, name in ipairs(TOOL_NAMES) do
+        local found = try { function () return os.iorunv("sh", {"-c", "command -v " .. name}):trim() end } or "none"
+        local version = try { function () return os.iorunv("sh", {"-c", name .. " --version 2>&1 | head -n 1"}):trim() end } or ""
+        table.insert(lines, name .. "=" .. found .. " " .. version)
+    end
+    return table.concat(lines, "\n")
+end
+
+local installed_text
+
+local function installed_facts()
+    if not installed_text then
+        installed_text = table.concat({toolchain_facts(), resolved_tools(), store_installs(), sdk_content()}, "\n--\n")
+    end
+    return installed_text
 end
 
 local function dirty_entries(folder)
@@ -259,67 +404,218 @@ local function manifest(folder)
             current[file] = "file " .. digests[index]
         end
     end
-    local lines = {}
-    for file, value in pairs(current) do
-        table.insert(lines, file .. " " .. value)
+    return current
+end
+
+local compiled = {}
+
+local function pattern_of(glob)
+    local found = compiled[glob]
+    if not found then
+        local escaped = glob:gsub("[%^%$%(%)%%%.%[%]%+%-%?]", "%%%0")
+        if escaped:endswith("/") then
+            found = "^" .. escaped .. ".*$"
+        else
+            local wide = escaped:gsub("%*%*/", "\1"):gsub("%*%*", "\1"):gsub("%*", "[^/]*")
+            found = "^" .. wide:gsub("\1", ".*") .. "$"
+        end
+        compiled[glob] = found
     end
-    table.sort(lines)
-    return table.concat(lines, "\n")
+    return found
+end
+
+local function matches(file, globs)
+    for _, glob in ipairs(globs) do
+        if file:match(pattern_of(glob)) then
+            return true
+        end
+    end
+    return false
+end
+
+local function reads_of(step)
+    local reads = step.reads
+    if type(reads) == "function" then
+        reads = reads()
+    end
+    return reads or {"**"}
+end
+
+local function selected(files, step)
+    local reads = reads_of(step)
+    local lines = {}
+    for file, value in pairs(files) do
+        if (matches(file, reads) and not matches(file, step.skips or {})) or matches(file, ALWAYS) then
+            table.insert(lines, file .. " " .. value)
+        end
+    end
+    return sorted(lines)
+end
+
+local function environment_of(step)
+    local values = {}
+    for _, name in ipairs(step.env or {}) do
+        table.insert(values, name .. "=" .. (os.getenv(name) or ""))
+    end
+    return table.concat(values, "\n")
 end
 
 local function inputs(folder)
-    local environment = {}
-    for name, value in pairs(os.getenvs()) do
-        if not VOLATILE[name] then
-            table.insert(environment, name .. "=" .. value)
-        end
-    end
-    table.sort(environment)
     return {
-        folder = folder,
-        head = git(folder, {"rev-parse", "HEAD"}):trim(),
-        tree = digest(manifest(folder)),
-        environment = digest(table.concat(environment, "\n")),
+        files = manifest(folder),
         tool = digest(os.iorunv(os.programfile(), {"--version"})),
         host = os.host() .. "/" .. os.arch(),
     }
 end
 
-local function key_of(input, name)
-    return digest(table.concat({"prepush 1", name, input.folder, input.head, input.tree, input.environment, input.tool, input.host}, "\n"))
+local function key_of(input, step)
+    local facts = step.facts and step.facts() or ""
+    return digest(table.concat({MEMO_VERSION, step.name, step.version or "1", input.tool, input.host, ambient_environment(), environment_of(step), facts,
+                                table.concat(selected(input.files, step), "\n")}, "\n"))
 end
 
-local function remembered(store, name)
-    local file = path.join(store, (name:gsub("%s+", "-")))
-    return os.isfile(file) and io.readfile(file):trim() or nil
+local function slug(step)
+    return (step.name:gsub("%s+", "-"))
 end
 
-local function remember(store, name, key)
-    os.mkdir(store)
-    io.writefile(path.join(store, (name:gsub("%s+", "-"))), key .. "\n")
+local function recalled(store, step, key)
+    local file = path.join(store, slug(step), key)
+    if not os.isfile(file) then
+        return nil
+    end
+    local record = {}
+    for line in io.readfile(file):gmatch("[^\n]+") do
+        local name, value = line:match("^(%S+) (.*)$")
+        if name then
+            record[name] = value
+        end
+    end
+    return record.verdict == "ok" and record or nil
+end
+
+local function remembered(store, step, key, record)
+    local folder = path.join(store, slug(step))
+    os.mkdir(folder)
+    local lines = {"verdict ok"}
+    for _, name in ipairs({"seconds", "worktree", "head", "at"}) do
+        table.insert(lines, name .. " " .. tostring(record[name]))
+    end
+    local temporary = path.join(folder, key .. ".tmp." .. hash.uuid())
+    io.writefile(temporary, table.concat(lines, "\n") .. "\n")
+    os.mv(temporary, path.join(folder, key))
+    local kept = {}
+    for _, file in ipairs(os.files(path.join(folder, "*"))) do
+        if not file:find(".tmp.", 1, true) then
+            table.insert(kept, {file = file, at = os.mtime(file)})
+        end
+    end
+    table.sort(kept, function (a, b) return a.at > b.at end)
+    for index = MEMO_KEEP + 1, #kept do
+        os.tryrm(kept[index].file)
+    end
+end
+
+local function age_of(at)
+    local seconds = os.time() - (tonumber(at) or os.time())
+    if seconds < 90 then
+        return string.format("%d s ago", seconds)
+    elseif seconds < 5400 then
+        return string.format("%d min ago", seconds // 60)
+    end
+    return string.format("%.1f h ago", seconds / 3600)
+end
+
+local function provenance(record)
+    return string.format("ran %s s in %s at %s, %s", record.seconds, record.worktree, (record.head or ""):sub(1, 9), age_of(record.at))
+end
+
+local function recall_line(store, step, key)
+    local record = recalled(store, step, key)
+    if record then
+        return string.format("recalled %s memo (%s)", step.name, provenance(record))
+    end
+end
+
+local function recall_report(store, step, key)
+    local line = recall_line(store, step, key)
+    if line then
+        return line .. "\nkey " .. key
+    end
+end
+
+local function batch(steps, keep_going)
+    local results = {}
+    for _, step in ipairs(steps) do
+        local started = os.time()
+        local ok = step.inline()
+        print("%s %s %ds", ok and "ok" or "FAIL", step.name, os.time() - started)
+        table.insert(results, {name = step.name, ok = ok, seconds = os.time() - started})
+        if not ok and not keep_going then
+            break
+        end
+    end
+    return results
 end
 
 local function run_steps(steps, opt)
     local failed = {}
+    local keys, hits, misses = {}, {}, {}
     for _, step in ipairs(steps) do
-        local started = os.time()
-        local key = step.cache ~= false and opt.key(step.name) or nil
-        if key and remembered(opt.store, step.name) == key then
-            print("ok %s cached", step.name)
+        keys[step.name] = opt.key and opt.key(step) or nil
+        local record = keys[step.name] and not opt.fresh and recalled(opt.store, step, keys[step.name])
+        if record then
+            hits[step.name] = record
         else
+            table.insert(misses, step)
+        end
+    end
+    local record_of = function (step, seconds)
+        if keys[step.name] then
+            remembered(opt.store, step, keys[step.name], {seconds = seconds, worktree = opt.worktree or "", head = opt.head or "", at = os.time()})
+        end
+    end
+    local grouped = {}
+    for _, step in ipairs(misses) do
+        if step.inline then
+            table.insert(grouped, step)
+        end
+    end
+    local verdicts = {}
+    local stopped = false
+    for _, step in ipairs(steps) do
+        local hit = hits[step.name]
+        if stopped then
+            break
+        elseif hit then
+            print("ok %s memo (%s)", step.name, provenance(hit))
+        elseif step.inline then
+            if not verdicts[step.name] then
+                for _, result in ipairs((opt.batch or batch)(grouped, opt.keep_going)) do
+                    verdicts[result.name] = result
+                end
+            end
+            end
+            local result = verdicts[step.name]
+            if result and result.ok then
+                record_of(step, result.seconds)
+            else
+                if not result then
+                    print("FAIL %s: the process that runs the checks left no verdict for it", step.name)
+                end
+                table.insert(failed, step.name)
+                stopped = not opt.keep_going
+            end
+        else
+            local started = os.time()
             local ok = step.run()
-            if not ok and opt.refused and opt.refused() then
-                return failed, true
+            local seconds = os.time() - started
+            if ok then
+                record_of(step, seconds)
             end
-            if ok and key then
-                remember(opt.store, step.name, key)
-            end
-            print("%s %s %ds", ok and "ok" or "FAIL", step.name, os.time() - started)
+            print("%s %s %ds", ok and "ok" or "FAIL", step.name, seconds)
             if not ok then
                 table.insert(failed, step.name)
-                if not opt.keep_going then
-                    break
-                end
+                stopped = not opt.keep_going
             end
         end
     end
@@ -327,24 +623,24 @@ local function run_steps(steps, opt)
 end
 
 local STEPS = {
-    {name = "comments", run = function () return lua("tools/comments.lua", "check") end},
-    {name = "comments test", run = function () return lua("tools/comments.lua", "test") end},
-    {name = "private cache test", run = function () return lua("tools/private_cache.lua", "test") end},
-    {name = "layout", run = function () return lua("tools/layout.lua") end},
-    {name = "docs_commands", run = function () return lua("tools/docs_commands.lua") end},
-    {name = "open_gaps", run = function () return lua("tools/open_gaps.lua") end},
-    {name = "credentials", run = function () return lua("agent-skills/tests/credentials.lua", "test") end},
-    {name = "copied_text", run = function () return lua("agent-skills/tests/copied_text.lua", "test") end},
-    {name = "recipe digests", cache = false, run = digests_stable},
-    {name = "negative shape", run = negative_shape},
-    {name = "ci errors test", run = function () return lua("tools/ci_errors.lua", "test") end},
-    {name = "ci replay test", run = function () return lua("tools/ci_swiftc_replay.lua", "test") end},
+    {name = "comments", facts = function () return attributes_facts(root) end, inline = function () return call("tools/comments.lua", "check") end},
+    {name = "comments test", reads = {"tools/comments.lua", "tools/comments/"}, inline = function () return call("tools/comments.lua", "test") end},
+    {name = "private cache test", reads = table.join({"tools/private_cache.lua"}, TOOLS), inline = function () return call("tools/private_cache.lua", "test") end},
+    {name = "layout", env = {"LC_COLLATE"}, inline = function () return call("tools/layout.lua") end},
+    {name = "docs_commands", inline = function () return call("tools/docs_commands.lua") end},
+    {name = "open_gaps", inline = function () return call("tools/open_gaps.lua") end},
+    {name = "credentials", reads = {"agent-skills/tests/"}, inline = function () return call("agent-skills/tests/credentials.lua", "test") end},
+    {name = "copied_text", reads = {"agent-skills/tests/"}, inline = function () return call("agent-skills/tests/copied_text.lua", "test") end},
+    {name = "recipe digests", reads = digest_reads, facts = installed_facts, inline = function () return digests_stable(call) end},
+    {name = "negative shape", reads = {"frameworks/Backports/xmake.lua", "frameworks/Backports/tests/", "emulator/"}, inline = negative_shape},
+    {name = "ci errors test", reads = table.join({"tools/ci_errors.lua", "tools/ci/"}, TOOLS), inline = function () return call("tools/ci_errors.lua", "test") end},
+    {name = "ci replay test", reads = table.join({"tools/ci_swiftc_replay.lua", "tools/ci/"}, TOOLS), inline = function () return call("tools/ci_swiftc_replay.lua", "test") end},
     {name = "host install test", run = function () return lua("frameworks/ReactNative/tests/host_install_test.lua") end},
     {name = "isolate test", run = function () return lua("frameworks/ReactNative/tests/isolate_test.lua") end},
-    {name = "lowered members", heavy = true, run = function () return lua("frameworks/Backports/tests/lowered_members_test.lua") end},
-    {name = "lowered exports", heavy = true, run = function () return lua("frameworks/Backports/tests/lowered_exports_test.lua") end},
-    {name = "light suites", heavy = true, run = function () return lua("toolchain/tests/light_suites.lua") end},
-    {name = "backports build", heavy = true, run = backports_build},
+    {name = "lowered members", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_members_test.lua") end},
+    {name = "lowered exports", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_exports_test.lua") end},
+    {name = "light suites", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("toolchain/tests/light_suites.lua") end},
+    {name = "backports build", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = backports_build},
 }
 
 local function test_suite()
@@ -371,6 +667,9 @@ local function test_suite()
     check("the gate copies the checkout into its own tree and deletes what the checkout dropped", table.concat(sync, " ", 1, 2), "-a --delete")
     check("the gate copies from the checkout's folder to its tree", table.concat(sync, " ", #sync - 1), root .. "/ /g/tree/")
     check("the gate leaves out git, the configuration, the build and the caches", table.concat(sync, " "):find("--exclude=/.git --exclude=/.xmake --exclude=/build --exclude=/.cache ", 1, true) ~= nil, true)
+    local ignoring = gate_sync_arguments("/g/tree", "/g/ignored.txt")
+    check("the gate leaves out what git ignores, so that it builds what the key covers", table.concat(ignoring, " "):find("--exclude-from=/g/ignored.txt", 1, true) ~= nil, true)
+    check("the gate's source and tree stay last", table.concat(ignoring, " ", #ignoring - 1), root .. "/ /g/tree/")
     check("the gate leaves out a private cache of any name that starts with .cache-, so a worktree's own cache is not copied into the tree", table.concat(sync, " "):find("--exclude=/.cache-* ", 1, true) ~= nil, true)
     check("the gate asks the budget before it creates its tree", gate_preflight()[1], "true")
     local commands = gate_commands("/g/tree")
@@ -396,65 +695,229 @@ local function test_cache()
         git(folder, {"-c", "user.name=prepush", "-c", "user.email=prepush@localhost", "-c", "commit.gpgsign=false", "commit", "-q", "--allow-empty", "-m", message})
     end
 
+    check("a directory glob takes what is under it", matches("docs/a/b.md", {"docs/**"}), true)
+    check("a trailing slash takes what is under the directory", matches("tools/ci/log.lua", {"tools/"}), true)
+    check("a directory name is not a prefix of another directory", matches("toolsx/y", {"tools/"}), false)
+    check("**/*.md takes a file at the top", matches("README.md", {"**/*.md"}), true)
+    check("**/*.md takes a file at any depth", matches("a/b/c.md", {"**/*.md"}), true)
+    check("**/*.md leaves a longer extension", matches("a.mdx", {"**/*.md"}), false)
+    check("* stays inside one directory", matches("src/b/a.c", {"src/*"}), false)
+    check("* takes a file of the directory", matches("src/a.c", {"src/*"}), true)
+    check("a plain name is that file", matches("xmake.lua", {"xmake.lua"}), true)
+    check("a plain name is not a longer name", matches("xmake.luax", {"xmake.lua"}), false)
+
     local base = os.iorunv("mktemp", {"-d"}):trim()
     local repo = path.join(base, "repo")
     local store = path.join(base, "store")
-    os.mkdir(repo)
+    os.mkdir(path.join(repo, "docs"))
+    os.mkdir(path.join(repo, "tools"))
     git(repo, {"init", "-q"})
+    io.writefile(path.join(repo, "tools", "prepush.lua"), "one\n")
+    io.writefile(path.join(repo, "tools", "budget.lua"), "one\n")
     io.writefile(path.join(repo, "a.txt"), "one\n")
-    git(repo, {"add", "a.txt"})
+    io.writefile(path.join(repo, "docs", "d.md"), "doc\n")
+    io.writefile(path.join(repo, "b.txt"), "other\n")
+    git(repo, {"add", "-A"})
     commit(repo, "one")
     os.setenv("PREPUSH_TEST_KEY", "0")
 
-    local function key(name)
-        return key_of(inputs(repo), name)
+    local everything = {name = "everything"}
+    local code = {name = "code", skips = {"docs/**", "**/*.md"}}
+    local narrow = {name = "narrow", reads = {"a.txt"}}
+    local with_env = {name = "with env", reads = {"a.txt"}, env = {"PREPUSH_TEST_KEY"}}
+    local function key(step, folder)
+        return key_of(inputs(folder or repo), step)
     end
-    local base_key = key("step")
-    check("the same inputs give the same key", key("step"), base_key)
-    check("the step's name is part of the key", key("other") ~= base_key, true)
-    io.writefile(path.join(repo, "a.txt"), "two\n")
-    check("a changed tracked file changes the key", key("step") ~= base_key, true)
-    io.writefile(path.join(repo, "a.txt"), "one\n")
-    check("the same content again gives the same key", key("step"), base_key)
-    io.writefile(path.join(repo, "b.txt"), "new\n")
-    check("an untracked file changes the key", key("step") ~= base_key, true)
-    os.rm(path.join(repo, "b.txt"))
-    check("removing the untracked file restores the key", key("step"), base_key)
-    os.rm(path.join(repo, "a.txt"))
-    check("a deleted tracked file changes the key", key("step") ~= base_key, true)
-    io.writefile(path.join(repo, "a.txt"), "one\n")
-    check("restoring the deleted file restores the key", key("step"), base_key)
-    os.setenv("PREPUSH_TEST_KEY", "1")
-    check("an environment variable changes the key", key("step") ~= base_key, true)
-    os.setenv("PREPUSH_TEST_KEY", "0")
-    check("restoring the variable restores the key", key("step"), base_key)
-    commit(repo, "empty")
-    check("a new commit changes the key", key("step") ~= base_key, true)
+    local base_keys = {everything = key(everything), code = key(code), narrow = key(narrow), with_env = key(with_env)}
+    check("the same inputs give the same key", key(everything), base_keys.everything)
+    check("the step's name is part of the key", key({name = "other"}) ~= base_keys.everything, true)
+    check("the step's version is part of the key", key({name = "everything", version = "2"}) ~= base_keys.everything, true)
 
-    local runs = {a = 0, b = 0, c = 0}
+    io.writefile(path.join(repo, "tools", "prepush.lua"), "two\n")
+    check("the code of prepush is part of the key of a step that reads one file", key(narrow) ~= base_keys.narrow, true)
+    check("the code of prepush is part of the key of a step that skips documents", key(code) ~= base_keys.code, true)
+    io.writefile(path.join(repo, "tools", "prepush.lua"), "one\n")
+    io.writefile(path.join(repo, "tools", "budget.lua"), "two\n")
+    check("the code of the budget is part of every key", key(narrow) ~= base_keys.narrow, true)
+    io.writefile(path.join(repo, "tools", "budget.lua"), "one\n")
+    check("restoring the code restores the keys", key(narrow), base_keys.narrow)
+
+    local saved_catalogue = os.getenv("REVENANT_TEST_ASSET_CATALOGUE")
+    os.setenv("REVENANT_TEST_ASSET_CATALOGUE", "elsewhere")
+    check("a REVENANT_ variable that nothing declares changes every key", key(narrow) ~= base_keys.narrow, true)
+    os.setenv("REVENANT_TEST_ASSET_CATALOGUE", saved_catalogue or "")
+    check("a REVENANT_ variable that is emptied is as good as unset", key(narrow), base_keys.narrow)
+    local saved_cache, saved_held = os.getenv("REVENANT_CACHE"), os.getenv("REVENANT_BUDGET_HELD")
+    os.setenv("REVENANT_CACHE", "/another/worktree/.cache")
+    os.setenv("REVENANT_BUDGET_HELD", "1")
+    check("the cache folder of a worktree and the budget's own variables change no key", key(narrow), base_keys.narrow)
+    os.setenv("REVENANT_CACHE", saved_cache or "")
+    os.setenv("REVENANT_BUDGET_HELD", saved_held or "")
+    local saved_verdict = os.getenv("REVENANT_LIGHT_SUITES_VERDICT")
+    os.setenv("REVENANT_LIGHT_SUITES_VERDICT", "0123456789abcdef@/a/run/light-suites.verdict")
+    check("the hand-off of a verdict from ci_local to its tests is not an input of the verdict", key(narrow), base_keys.narrow)
+    os.setenv("REVENANT_LIGHT_SUITES_VERDICT", saved_verdict or "")
+    check("a tool is keyed by its version and not only by where it resolves", resolved_tools():find("git=%S*git git version") ~= nil, true)
+    local saved_global = os.getenv("XMAKE_GLOBALDIR")
+    os.setenv("XMAKE_GLOBALDIR", "/another/store")
+    check("the package store xmake reads changes every key", key(narrow) ~= base_keys.narrow, true)
+    os.setenv("XMAKE_GLOBALDIR", saved_global or "")
+
+    io.writefile(path.join(repo, "docs", "d.md"), "changed\n")
+    check("a changed document changes the key of a step that reads everything", key(everything) ~= base_keys.everything, true)
+    check("a changed document leaves the key of a step that skips documents", key(code), base_keys.code)
+    check("a changed document leaves the key of a step that reads one file", key(narrow), base_keys.narrow)
+    io.writefile(path.join(repo, "docs", "d.md"), "doc\n")
+    check("the same content again gives the same key", key(everything), base_keys.everything)
+
+    io.writefile(path.join(repo, "b.txt"), "changed\n")
+    check("a file outside what a step reads leaves its key", key(narrow), base_keys.narrow)
+    check("a file a step skips documents is read by the code step", key(code) ~= base_keys.code, true)
+    io.writefile(path.join(repo, "b.txt"), "other\n")
+
+    io.writefile(path.join(repo, "a.txt"), "two\n")
+    check("a changed file that a step reads changes its key", key(narrow) ~= base_keys.narrow, true)
+    io.writefile(path.join(repo, "a.txt"), "one\n")
+    check("restoring the file restores the key", key(narrow), base_keys.narrow)
+    io.writefile(path.join(repo, "c.txt"), "new\n")
+    check("an untracked file changes the key of a step that reads everything", key(everything) ~= base_keys.everything, true)
+    os.rm(path.join(repo, "c.txt"))
+    check("removing the untracked file restores the key", key(everything), base_keys.everything)
+    os.rm(path.join(repo, "a.txt"))
+    check("a deleted tracked file changes the key of a step that reads it", key(narrow) ~= base_keys.narrow, true)
+    io.writefile(path.join(repo, "a.txt"), "one\n")
+    check("restoring the deleted file restores the key", key(narrow), base_keys.narrow)
+
+    os.setenv("PREPUSH_TEST_KEY", "1")
+    check("a variable a step names changes its key", key(with_env) ~= base_keys.with_env, true)
+    check("a variable no step names changes no key", key(everything), base_keys.everything)
+    os.setenv("PREPUSH_TEST_KEY", "0")
+    check("restoring the variable restores the key", key(with_env), base_keys.with_env)
+
+    commit(repo, "empty")
+    check("a new commit with the same content leaves the key", key(everything), base_keys.everything)
+    local copy = path.join(base, "copy")
+    os.cp(repo, copy)
+    check("another folder with the same content has the same key", key(everything, copy), base_keys.everything)
+
+    local fixture_store = path.join(base, "fixture-store")
+    local packages = path.join(fixture_store, "xmake-global", ".xmake", "packages")
+    local install = path.join(packages, "l", "llvm", "1.0", "abc")
+    os.mkdir(install)
+    io.writefile(path.join(install, "manifest.txt"), "one\n")
+    local function installs()
+        local saved = os.getenv("REVENANT_STORE")
+        os.setenv("REVENANT_STORE", fixture_store)
+        local text = store_installs()
+        os.setenv("REVENANT_STORE", saved or "")
+        return text
+    end
+    local installed = installs()
+    check("an install of a package the checks run against is listed with its manifest", installed:find("l/llvm/1.0/abc ", 1, true) ~= nil, true)
+    io.writefile(path.join(install, "manifest.txt"), "two\n")
+    check("an install that is made again under the same name changes the digest", installs() ~= installed, true)
+    os.mkdir(path.join(packages, "o", "other", "1.0", "x"))
+    check("a package the checks do not run against changes nothing", installs():find("other", 1, true), nil)
+
+    local attributes = attributes_facts(repo)
+    io.writefile(path.join(repo, ".git", "info", "attributes"), "*.m comments=upstream\n")
+    check("a local attribute file changes what the comments check is keyed on", attributes_facts(repo) ~= attributes, true)
+    os.rm(path.join(repo, ".git", "info", "attributes"))
+    check("removing the local attribute file restores it", attributes_facts(repo), attributes)
+
+    local runs = {a = 0, b = 0, c = 0, d = 0, e = 0}
+    local batches = 0
     local steps = {
-        {name = "a", run = function () runs.a = runs.a + 1; return true end},
-        {name = "b", run = function () runs.b = runs.b + 1; return false end},
-        {name = "c", cache = false, run = function () runs.c = runs.c + 1; return true end},
+        {name = "a", inline = function () runs.a = runs.a + 1; return true end},
+        {name = "b", inline = function () runs.b = runs.b + 1; return false end},
+        {name = "c", run = function () runs.c = runs.c + 1; return true end},
+        {name = "d", reads = {"b.txt"}, inline = function () runs.d = runs.d + 1; return true end},
+        {name = "e", reads = {"a.txt"}, inline = function () runs.e = runs.e + 1; return true end},
     }
-    local function pass()
-        return run_steps(steps, {keep_going = true, store = store, key = function (name) return key_of(inputs(repo), name) end})
+    local function counting(grouped, keep_going)
+        batches = batches + 1
+        return batch(grouped, keep_going)
+    end
+    local function pass(folder, extra)
+        local input = inputs(folder or repo)
+        return run_steps(steps, table.join({keep_going = true, store = store, worktree = "w", head = "h", batch = counting,
+                                            key = function (step) return key_of(input, step) end}, extra or {}))
     end
     check("a failing step is reported", table.concat(pass(), ","), "b")
+    check("the steps that can run in one process run in one batch", batches, 1)
+    check("a step that passed ran once", runs.a + runs.c + runs.d + runs.e, 4)
+    check("a failing step is not remembered", recalled(store, steps[2], key(steps[2])), nil)
+    check("a passing step is remembered with where it ran", recalled(store, steps[1], key(steps[1])).worktree, "w")
+    local reader = import("@addon.revenant.recalled", {anonymous = true})
+    check("the reader that ci_local's tests use agrees that a passed step is remembered", reader.holds(store, steps[1].name, key(steps[1])), true)
+    check("the reader agrees that a failed step is not", reader.holds(store, steps[2].name, key(steps[2])), false)
+    check("the reader agrees that another key is not", reader.holds(store, steps[1].name, "0000"), false)
+    check("a recall says where the verdict came from", (recall_line(store, steps[1], key(steps[1])) or ""):find("^recalled a memo %(ran %d+ s in w at h, ") ~= nil, true)
+    check("a step that failed has no recall", recall_line(store, steps[2], key(steps[2])), nil)
+    check("a recall asks for the inputs it is given", recall_line(store, steps[1], "0000"), nil)
+    local report = recall_report(store, steps[1], key(steps[1])) or ""
+    check("a recall report is the line and then the key it was found under", report:find("^recalled a memo %(.-%)\nkey " .. key(steps[1]) .. "$") ~= nil, true)
+    check("a step that failed has no recall report", recall_report(store, steps[2], key(steps[2])), nil)
     pass()
     check("a passing step is not run again on unchanged inputs", runs.a, 1)
+    check("a spawned step is not run again on unchanged inputs", runs.c, 1)
     check("a failing step is run again, since it is not remembered", runs.b, 2)
-    check("a step outside the cache runs every time", runs.c, 2)
-    io.writefile(path.join(repo, "a.txt"), "two\n")
+    check("the failing step alone goes to the second batch", batches, 2)
+    pass(copy)
+    check("another folder with the same content takes the verdict from the store", runs.a, 1)
+    pass(nil, {fresh = true})
+    check("a fresh run ignores the memo", runs.a, 2)
+    check("a fresh run runs every step again", runs.a + runs.c + runs.d + runs.e, 8)
+    io.writefile(path.join(repo, "b.txt"), "changed\n")
     pass()
-    check("a changed input runs the step again", runs.a, 2)
+    check("a changed file runs the steps that read it", runs.d, 3)
+    check("a changed file runs the steps that read everything", runs.a, 3)
+    check("a changed file leaves the steps that read other files", runs.e, 2)
+
+    local silent = {{name = "p", inline = function () return true end}, {name = "q", inline = function () return true end}}
+    local lost_store = path.join(base, "lost-store")
+    local function by_name(step) return step.name end
+    local lost = run_steps(silent, {keep_going = true, store = lost_store, key = by_name, batch = function () return {} end})
+    check("checks that run in one process and leave no verdict are failures", table.concat(lost, ","), "p,q")
+    check("a check that left no verdict is not remembered", recalled(lost_store, silent[1], "p"), nil)
+    local partial = run_steps(silent, {keep_going = true, store = lost_store, key = by_name, batch = function () return {{name = "p", ok = true, seconds = 0}} end})
+    check("a check missing from the verdicts fails and the one present passes", table.concat(partial, ","), "q")
+    local stopped = run_steps(silent, {keep_going = false, store = path.join(base, "stop-store"), key = by_name, batch = function () return {} end})
+    check("a lost verdict stops the run like a failure", table.concat(stopped, ","), "p")
+
+    local gate
+    for _, step in ipairs(STEPS) do
+        if step.name == "backports build" then
+            gate = step
+        end
+    end
+    check("the Backports gate skips no file, since its tree is a copy of the checkout", #(gate.skips or {}), 0)
+
+    io.writefile(path.join(repo, ".gitignore"), "scratch/\n*.o\n")
+    io.writefile(path.join(repo, "junk.o"), "x\n")
+    os.mkdir(path.join(repo, "scratch"))
+    io.writefile(path.join(repo, "scratch", "x"), "x\n")
+    local ignored = gate_ignored(repo)
+    check("what git ignores is listed for the gate, anchored at the root", ignored:find("/junk.o", 1, true) ~= nil and ignored:find("/scratch/", 1, true) ~= nil, true)
+    check("what git tracks is not listed", ignored:find("a.txt", 1, true), nil)
+
+    local record = {seconds = "12", worktree = "w", head = "0123456789abcdef", at = os.time() - 120}
+    check("a verdict names where and when it was made", provenance(record), "ran 12 s in w at 012345678, 2 min ago")
 
     os.rm(base)
     print("prepush cache: %d tests passed", count)
 end
 
 local function parse_arguments(arguments)
-    local parsed = {keep_going = false, list = false, only = nil}
+    local parsed = {keep_going = false, list = false, only = nil, fresh = false, inline = nil, results = nil, recall = nil}
+    local function names(argument, value)
+        assert(value, argument .. " needs a comma-separated list of check names; --list prints them")
+        local found = {}
+        for name in value:gmatch("[^,]+") do
+            table.insert(found, name)
+        end
+        return found
+    end
     local index = 1
     while index <= #arguments do
         local argument = arguments[index]
@@ -462,15 +925,24 @@ local function parse_arguments(arguments)
             parsed.keep_going = true
         elseif argument == "--list" then
             parsed.list = true
+        elseif argument == "--fresh" then
+            parsed.fresh = true
         elseif argument == "--only" then
             index = index + 1
-            assert(arguments[index], "--only needs a comma-separated list of check names; --list prints them")
-            parsed.only = {}
-            for name in arguments[index]:gmatch("[^,]+") do
-                table.insert(parsed.only, name)
-            end
+            parsed.only = names(argument, arguments[index])
+        elseif argument == "--inline" then
+            index = index + 1
+            parsed.inline = names(argument, arguments[index])
+        elseif argument == "--recall" then
+            index = index + 1
+            parsed.recall = arguments[index]
+            assert(parsed.recall, "--recall needs the name of one check; --list prints them")
+        elseif argument == "--results" then
+            index = index + 1
+            parsed.results = arguments[index]
+            assert(parsed.results, "--results needs the file the verdicts are written to")
         else
-            raise("unknown argument %s; the arguments are test, --list, --only <check,...> and --keep-going", argument)
+            raise("unknown argument %s; the arguments are test, --list, --only <check,...>, --recall <check>, --keep-going and --fresh", argument)
         end
         index = index + 1
     end
@@ -510,8 +982,16 @@ local function test_arguments()
     check("no argument stops at the first failure", parse_arguments({}).keep_going, false)
     check("--keep-going keeps going", parse_arguments({"--keep-going"}).keep_going, true)
     check("--list lists", parse_arguments({"--list"}).list, true)
+    check("--fresh ignores the memo", parse_arguments({"--fresh"}).fresh, true)
+    check("a run without --fresh reads the memo", parse_arguments({}).fresh, false)
+    check("--inline names the checks one process runs", table.concat(parse_arguments({"--inline", "layout,comments"}).inline, "|"), "layout|comments")
+    check("--results names the file of the verdicts", parse_arguments({"--inline", "layout", "--results", "/tmp/v"}).results, "/tmp/v")
+    check("--inline without a value is an error", raises({"--inline"}), true)
+    check("--results without a value is an error", raises({"--results"}), true)
     check("--only splits on commas and keeps the spaces of a name", table.concat(parse_arguments({"--only", "layout,light suites"}).only, "|"), "layout|light suites")
     check("--only without a value is an error", raises({"--only"}), true)
+    check("--recall names one check", parse_arguments({"--recall", "light suites"}).recall, "light suites")
+    check("--recall without a value is an error", raises({"--recall"}), true)
     check("an unknown argument is an error", raises({"--fast"}), true)
 
     local steps = {{name = "a"}, {name = "b"}, {name = "c"}}
@@ -555,6 +1035,30 @@ local function test_arguments()
     print("prepush arguments: %d tests passed", count)
 end
 
+local function spawned_batch(steps, keep_going)
+    local names = {}
+    for _, step in ipairs(steps) do
+        table.insert(names, step.name)
+    end
+    local results = os.tmpfile() .. ".verdicts"
+    local command = {os.programfile(), "l", "-P", root, path.join(root, "tools", "prepush.lua"), "--inline", table.concat(names, ","), "--results", results}
+    if keep_going then
+        table.insert(command, "--keep-going")
+    end
+    budgeted(command)
+    local verdicts = {}
+    if os.isfile(results) then
+        for line in io.readfile(results):gmatch("[^\n]+") do
+            local name, status, seconds = line:match("^(.-)\t(%a+)\t(%d+)$")
+            if name then
+                table.insert(verdicts, {name = name, ok = status == "ok", seconds = tonumber(seconds)})
+            end
+        end
+        os.tryrm(results)
+    end
+    return verdicts
+end
+
 function main(command, ...)
     if command == "test" then
         test_suite()
@@ -570,13 +1074,43 @@ function main(command, ...)
         end
         return
     end
+    if parsed.recall then
+        local step = select_steps(STEPS, {parsed.recall})[1]
+        local report = recall_report(path.join(cache().store(), "memo"), step, key_of(inputs(root), step))
+        if not report then
+            raise("no verdict of %s is remembered for these inputs", step.name)
+        end
+        print("%s", report)
+        return
+    end
+    if parsed.inline then
+        local results = batch(select_steps(STEPS, parsed.inline), parsed.keep_going)
+        local lines, failed = {}, {}
+        for _, result in ipairs(results) do
+            table.insert(lines, string.format("%s\t%s\t%d", result.name, result.ok and "ok" or "FAIL", result.seconds))
+            if not result.ok then
+                table.insert(failed, result.name)
+            end
+        end
+        if parsed.results then
+            io.writefile(parsed.results, table.concat(lines, "\n") .. "\n")
+        end
+        if #failed > 0 then
+            raise("%d of %d checks failed: %s", #failed, #results, table.concat(failed, ", "))
+        end
+        return
+    end
     local steps = select_steps(STEPS, parsed.only)
     local input = inputs(root)
-    local failed, refused = run_steps(steps, {keep_going = parsed.keep_going, store = path.join(cache().root(), "prepush"), key = function (name) return key_of(input, name) end, refused = budget_refused})
-    if refused then
-        print("prepush: budget refused; this is not a failed check, free the space and rerun")
-        os.exit(REFUSAL_EXIT)
-    end
+    local failed = run_steps(steps, {
+        keep_going = parsed.keep_going,
+        fresh = parsed.fresh,
+        store = path.join(cache().store(), "memo"),
+        worktree = path.filename(root),
+        head = git(root, {"rev-parse", "HEAD"}):trim(),
+        key = function (step) return key_of(input, step) end,
+        batch = spawned_batch,
+    })
     if #failed > 0 then
         raise("%d of %d checks failed: %s", #failed, #steps, table.concat(failed, ", "))
     end

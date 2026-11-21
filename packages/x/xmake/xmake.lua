@@ -31,7 +31,8 @@ package("xmake")
         {"0021-Put-each-package-s-applied-patch-sha256-list-into-it.patch", "f7a636db5a95804ddf50dc56fd126142c4957b22e2942d7ebddd6e096aa50b07"},
         {"0022-Put-the-addons-a-project-pins-into-a-package-s-hash.patch", "eacf01e49585dc1eeeefd5c83787a0b39165bf779f72b76af3e460683d7750f2"},
         {"0023-Recheck-the-requires-when-a-required-package-s-recipe-or-patch-changes.patch", "f5432c5eb8b10a3760d505c74f972adf92d6157d7c5feaaff950fa1ae8bc3941"},
-        {"0024-Recheck-the-requires-when-any-recipe-file-changes.patch", "c5c8e497277e5e9e8aaffe4d13d9c99825471a6cfbe77b788f6cfa7c4e522b08"}}) do
+        {"0024-Recheck-the-requires-when-any-recipe-file-changes.patch", "c5c8e497277e5e9e8aaffe4d13d9c99825471a6cfbe77b788f6cfa7c4e522b08"},
+        {"0025-Sort-the-strings-of-a-build-hash-by-byte-not-by-collation.patch", "7bc2e5d849a7eb4d4e8756299916fbb914651aec75d2ad1d17d7d0862af43f37"}}) do
         add_patches("2026.10.17", path.join(os.scriptdir(), "patches", patch[1]), patch[2])
     end
 
