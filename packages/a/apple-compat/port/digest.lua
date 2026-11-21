@@ -1,1 +1,1 @@
-apple_compat_sources_digest = "3fd3b2d2df4863948b27fcfda2959b8b"
+apple_compat_sources_digest = "66ac619bf675f71b6b25b8f7d3fbfe8f"
