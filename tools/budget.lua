@@ -149,6 +149,15 @@ local function capacity(reading, held, own)
     return held + fresh
 end
 
+local function progress_capacity(reading, held, minimum)
+    local headroom = memory_headroom(reading)
+    if headroom == 0 then
+        return held
+    end
+    local limit = reading.cores - RESERVE_CORES
+    return held + math.min(headroom, limit - held, minimum)
+end
+
 local function grantable(cap, held, free, minimum, maximum)
     local count = math.min(math.max(cap - held, 0), free, maximum)
     if count < minimum then
@@ -296,6 +305,9 @@ local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms)
         reading.cores = cores
         local free, held, pids = snapshot_slots(folder, cores)
         local cap = capacity(reading, held, own_runnable(pids))
+        if held == 0 then
+            cap = math.max(cap, progress_capacity(reading, held, minimum))
+        end
         local available = math.min(math.max(cap - held, 0), #free)
         local count = grantable(cap, held, #free, minimum, maximum)
         if count > 0 and not ahead_of(folder, ticket.name, available) then
@@ -574,6 +586,7 @@ local function test_suite()
         started_anyway = true
     end, catch { function () end } }
     check("a volume below the floor starts nothing", started_anyway, false)
+    check("and an empty pool stays empty below the floor", held_slots(pool), 0)
 
     local fresh = path.join(base, "fresh")
     local readings = {test_reading(0, 4, 11000), test_reading(0, 4, 11000), test_reading(0, 1, 11000)}
@@ -615,6 +628,51 @@ local function test_suite()
         end, 1)
     end, catch { function (raised) short_error = tostring(raised) end } }
     check("a minimum that does not fit never starts short", short_error ~= nil and short_calls > 3, true)
+
+    local guarantee_pool = path.join(base, "guarantee")
+    local guarantee_queue = path.join(guarantee_pool, "queue")
+    os.mkdir(guarantee_queue)
+    local function waiting_ticket(name, need)
+        local file = path.join(guarantee_queue, name)
+        local lock = io.openlock(file)
+        lock:trylock()
+        io.writefile(file, tostring(need))
+        return {name = name, file = file, lock = lock}
+    end
+    local older = waiting_ticket("1-0000000000001-00000001.ticket", 4)
+    local older_calls = 0
+    local function under_load()
+        older_calls = older_calls + 1
+        if older_calls == 4 then
+            leave(older, guarantee_pool)
+        end
+        return test_reading(50, 1, 11000)
+    end
+    local guaranteed = acquire(guarantee_pool, "normal", 4, 4, under_load, 1)
+    check("an empty pool grants the oldest ticket its minimum under outside load", #guaranteed, 4)
+    check("the guarantee waits for the older ticket to leave", older_calls >= 4, true)
+    local stamped = read_grants(guarantee_pool)
+    check("four guaranteed slots count as four tokens", stamped >= 3.9 and stamped <= 4.001, true)
+    local blocked_calls = 0
+    local blocked_error
+    try { function ()
+        acquire(guarantee_pool, "normal", 4, 4, function ()
+            blocked_calls = blocked_calls + 1
+            if blocked_calls > 5 then
+                raise("stopped")
+            end
+            return test_reading(50, 1, 11000)
+        end, 1)
+    end, catch { function (raised) blocked_error = tostring(raised) end } }
+    check("a second ticket cannot take the guarantee while the pool is held", blocked_error ~= nil and blocked_calls > 5, true)
+    release_locks(guaranteed)
+
+    local dead_pool = path.join(base, "deadholder")
+    os.mkdir(dead_pool)
+    io.writefile(slot_path(dead_pool, 1), string.format("99999\ng %d 2\n", os.time() - 10))
+    local dead_grant = acquire(dead_pool, "normal", 3, 3, function () return test_reading(55, 1, 11000) end, 1)
+    check("a dead holder's slot and stamp do not stop the guarantee", #dead_grant, 3)
+    release_locks(dead_grant)
 
     local holder_script = path.join(base, "holder.lua")
     io.writefile(holder_script, "function main(file)\n local lock = io.openlock(file)\n lock:trylock()\n io.writefile(file, tostring(os.getpid()))\n os.sleep(120000)\nend\n")
