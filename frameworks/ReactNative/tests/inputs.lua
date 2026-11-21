@@ -301,6 +301,10 @@ check("a config with no apple or ios block has no modules", #neither.modules == 
 local real_rows = expo_json.coverage_rows(io.readfile(path.join(os.scriptdir(), "..", "src", "coverage.json")))
 local _, real_ids = io.readfile(path.join(os.scriptdir(), "..", "src", "coverage.json")):gsub('\n   "id":', "")
 check("every row of coverage.json is read", #real_rows == real_ids, #real_rows .. " rows, " .. real_ids .. " ids")
+local noisy = 'warn {not json} at "x {y}"\n{"name": "App", "extra": {"a": "}{", "list": [{"b": 1}]}, "scheme": "s"}\n'
+local printed_text, printed_value = expo_json.printed_object(noisy)
+check("the configuration object is found after log lines with braces, and braces inside its strings do not end it", printed_value ~= nil and printed_value.name == "App" and printed_value.extra.a == "}{" and printed_value.extra.list[1].b == 1 and printed_text:find('^{"name"') ~= nil, tostring(printed_text))
+check("text with no JSON object has no configuration", expo_json.printed_object("nothing {here}\n") == nil, "a non-JSON brace pair was taken for a configuration")
 if failures > 0 then
     raise("%d react-native inputs test(s) failed", failures)
 end

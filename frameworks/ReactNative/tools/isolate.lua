@@ -588,6 +588,20 @@ end
 
 local AMBIENT_NAMES = {"DEVELOPER_DIR", "SDKROOT", "TOOLCHAINS", "MACOSX_DEPLOYMENT_TARGET", "IPHONEOS_DEPLOYMENT_TARGET", "CC", "CXX", "LD", "AR", "CFLAGS", "CXXFLAGS", "CPPFLAGS", "LDFLAGS", "OBJCFLAGS", "PATH"}
 
+local AMBIENT_SKIPPED = {"^REVENANT_DEVICE", "^REVENANT_BUDGET"}
+
+local function ambient_masked(name)
+    if name:find("^XMAKE_") or name:find("^REVENANT_") then
+        for _, skipped in ipairs(AMBIENT_SKIPPED) do
+            if name:find(skipped) then
+                return false
+            end
+        end
+        return true
+    end
+    return false
+end
+
 function ambient_environment()
     local seen = {}
     local names = {}
@@ -596,7 +610,7 @@ function ambient_environment()
         table.insert(names, name)
     end
     for name, _ in pairs(os.getenvs()) do
-        if name:find("^XMAKE_") and not seen[name] then
+        if ambient_masked(name) and not seen[name] and (os.getenv(name) or "") ~= "" then
             table.insert(names, name)
         end
     end
