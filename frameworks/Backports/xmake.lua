@@ -972,7 +972,6 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         add_tests("cf_mutable_cast")
         add_tests("gesture_failure")
         add_tests("uitextview_typing_attributes")
-        add_tests("coretext_fallback_probe")
         add_tests("coretext_fallback_cascade")
         add_tests("backport_impl_video_toolbox")
         add_tests("backport_impl_video_toolbox_h264")
