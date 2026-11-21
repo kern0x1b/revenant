@@ -564,5 +564,8 @@ print on the iPad 2 what objc4 printed.
   landing pad in the order of their addresses once there are more than eight, so the stack-slot order, and with it the
   frame layout and the size of the object, differ from run to run for a function with such a landing pad. Two builds of
   the same reCAPTCHA Enterprise SDK image differed by 448 bytes of `__text` (36,007,928 and 36,007,480) and behaved
-  the same. Compare two builds by what they do, not by their hashes, until the llvm package carries a fix. The fix is a
-  one-function patch to LLVM; it moves the package's key, so it waits for a prebuilt release of the new key.
+  the same. The llvm package now carries the fix (`packages/l/llvm/patches/llvm-sjlj-demote-phis-in-block-order.patch`:
+  the phis are demoted in block order, from a vector, in place of a pointer set; upstream main still has the set), and
+  `recompiler/tests/sjljorder` compiles a function with such landing pads six times and requires one object. The patch
+  moves the package's key, so a build that still uses an earlier llvm key (a prebuilt of before the patch) has the old
+  behaviour: compare two builds by what they do, not by their hashes, until every build uses the new key.

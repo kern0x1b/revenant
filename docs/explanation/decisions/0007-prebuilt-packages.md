@@ -22,7 +22,7 @@ prints the key of each package, which is how a key is checked.
 - A change to a recipe's inputs moves its key; the old release stays where it is.
 - There is no CI: no workflow makes a release. Existing releases are still fetched; a package whose key moved is built locally.
 - Keys in use are listed in `docs/guides/prebuilt.md`; a package with no release is said so there.
-- The keys depend on the collation `./xmakew` sets; see [0010](0010-collation-of-xmake.md).
+- The keys do not depend on the locale, since xmake's build hash sorts by byte; see [0017](0017-build-hash-sorts-by-byte.md).
 
 ## Enforced by
 
