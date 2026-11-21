@@ -49,6 +49,7 @@ if whole or component == "emulator" then
         set_kind("phony")
         set_default(false)
         add_tests("layout")
+        add_tests("budget")
         add_tests("comments_check")
         add_tests("comments_test")
         add_tests("copied_text")
@@ -62,6 +63,7 @@ if whole or component == "emulator" then
         on_test(function (target, opt)
             local root = os.projectdir()
             local commands = {layout = {path.join(root, "tools", "layout.lua")},
+                              budget = {path.join(root, "tools", "budget.lua"), "test"},
                               comments_check = {path.join(root, "tools", "comments.lua"), "check"},
                               comments_test = {path.join(root, "tools", "comments.lua"), "test"},
                               open_gaps = {path.join(root, "tools", "open_gaps.lua")},
