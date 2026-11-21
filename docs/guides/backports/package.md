@@ -2,7 +2,7 @@
 
 `org.revenant.backports` holds every Backports library of the checkout. It is written by the root project only, and the root project has to be configured as a whole for iPhoneOS armv7: the package carries WebKit's engine (`WebKitBackports` names it, so the writer needs `WebKitEngine`), which it names in `Depends` together with the libc++ package that engine needs. The Backports libraries themselves do not link the Swift runtime, so `org.revenant.swift-runtime-*` is not in its `Depends`. A configuration with `--component=Backports` builds every library but cannot write the package, because it has no `WebKitEngine` target to hold the engine.
 
-Run every command from the top of the checkout. In a linked worktree first make its private cache as [the machine guide](../machine.md#a-private-cache) says, and set `REVENANT_CACHE` to that folder for each command below.
+Run every command from the top of the checkout. A linked worktree needs no setup: its packages are in the shared store ([the machine guide](../machine.md#the-shared-store)).
 
 ## Sequence
 
