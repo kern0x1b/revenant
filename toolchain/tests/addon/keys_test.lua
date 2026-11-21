@@ -26,6 +26,11 @@ local PUBLISHED = {
      key = "1a5028df2bf1f1142752c150ff1959e3"},
 }
 
+local GUEST_KEYS = {
+    "libcxx 23.1.1 16275d93e5207fb2816f7df65041e1e3 iphoneos-arm64",
+    "swift-runtime 6.4.0 9270db935ebdfe3712b22fb75ddc037d iphoneos-arm64",
+}
+
 local function package(row)
     local deps = {}
     for _, dep in ipairs(row.deps or {}) do
@@ -61,6 +66,20 @@ function failures(arguments)
     end
     if not tool:find("prebuilt.key(", 1, true) then
         table.insert(found, "tools/keys.lua does not print prebuilt.key, the key the archive is released under")
+    end
+
+    local root = path.directory(path.directory(arguments.modules))
+    local printed = try { function ()
+        return os.iorunv(os.programfile(), {"l", "-P", root, path.join(root, "tools", "keys.lua"), "guest"}, {curdir = root})
+    end, catch { function (errors)
+        table.insert(found, "tools/keys.lua guest stopped: " .. tostring(errors))
+    end } }
+    if printed then
+        for _, line in ipairs(GUEST_KEYS) do
+            if not (printed .. "\n"):find(line .. "\n", 1, true) then
+                table.insert(found, string.format("tools/keys.lua guest does not print \"%s\"; the key of a package the iphoneos guest installs moved: build and publish it again (docs/guides/prebuilt.md), then change this line. It printed:\n%s", line, printed))
+            end
+        end
     end
     return found
 end

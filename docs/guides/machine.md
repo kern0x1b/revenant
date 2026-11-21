@@ -300,6 +300,14 @@ version and the key its prebuilt archive is released under, `prebuilt-<package>-
 `prebuilt.key` in `toolchain/modules/prebuilt.lua`, the function that fetches and archives the package, and it follows
 the project's configuration: configure as CI does before asking for `swift-runtime` or `libcxx`, with
 `./xmakew f -P . -p iphoneos -a armv7 --component=Swift -y`. Run it before and after a change to see what the change rebuilds.
+`libcxx` and `swift-runtime` are installed by the iphoneos guest, so when the project is not configured for iphoneos `keys.lua`
+prints their guest keys, marked `iphoneos-arm64` (`apple_minimum 7.0`, `library_evolution` for `swift-runtime`, the packages
+`XL_SWIFTOBJC_LIBS` names), and not a host key that no archive is released under. It configures a scratch project for them in
+`<cache>/scratch/<task>/keys-guest`, in that folder's own `.xmake` (a configure with `-P` writes the `.xmake` of the folder it is
+run from), requires only what the `apple-ios` include does with `apple_compat_only` (the SDK, `ld64` and `llvm`, taken prebuilt
+and never built from source, so nothing when they are installed) and not the two packages, and takes about two seconds on a
+machine that has them; `keys.lua guest` prints the keys for any configuration. `toolchain/tests/addon/keys_test.lua` holds the two keys measured on 2026-11-21 (`libcxx` 16275d93,
+`swift-runtime` 9270db93), so a change that moves them fails there until the new archives are published.
 
 `swift` is outside `swift-runtime`'s key, although `swift-runtime` is built with it. `swift-runtime` takes `swift` as a
 host, private dependency (`packages/s/swift-runtime/xmake.lua`), and the key hashes only library dependencies, which for
