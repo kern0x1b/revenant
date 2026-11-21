@@ -150,12 +150,10 @@ local function capacity(reading, held, own)
 end
 
 local function progress_capacity(reading, held, minimum)
-    local headroom = memory_headroom(reading)
-    if headroom == 0 then
+    if memory_headroom(reading) == 0 then
         return held
     end
-    local limit = reading.cores - RESERVE_CORES
-    return held + math.min(headroom, limit - held, minimum)
+    return held + minimum
 end
 
 local function grantable(cap, held, free, minimum, maximum)
@@ -616,18 +614,9 @@ local function test_suite()
     release_locks(free_keep)
     check("sampling a free slot keeps its grant stamp", read_grants(keep_pool) >= 1.9, true)
 
-    local short_calls = 0
-    local short_error
-    try { function ()
-        acquire(path.join(base, "short"), "normal", 2, 4, function ()
-            short_calls = short_calls + 1
-            if short_calls > 3 then
-                raise("stopped")
-            end
-            return test_reading(0, 1, 100)
-        end, 1)
-    end, catch { function (raised) short_error = tostring(raised) end } }
-    check("a minimum that does not fit never starts short", short_error ~= nil and short_calls > 3, true)
+    local short_grant = acquire(path.join(base, "short"), "normal", 2, 4, function () return test_reading(50, 1, 100) end, 1)
+    check("an empty pool grants the full minimum under load with one token of memory", #short_grant, 2)
+    release_locks(short_grant)
 
     local guarantee_pool = path.join(base, "guarantee")
     local guarantee_queue = path.join(guarantee_pool, "queue")
