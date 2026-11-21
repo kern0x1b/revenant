@@ -79,11 +79,19 @@ change the state and post the key-value notifications for `status` and `readyFor
 `isReadyForMoreMediaData`, `requestMediaDataWhenReadyOnQueue:usingBlock:`, `controlTimebase` and `videoGravity`, is the
 system's own.
 
+The wrapped `enqueueSampleBuffer:` also draws what the system queue does not (measured on the iPhone 4S, below): a frame
+that holds an uncompressed image buffer (`32BGRA`, `32ARGB`, `420v`, `420f`) and is not `DoNotDisplay` is converted on the
+CPU (the matrix table and the ranges of `cee944be1`; `YCbCrMatrix` 601 or 709, 709 when absent, anything else is not
+drawn) and becomes the layer's own `contents`, with `contentsGravity` from `videoGravity`. It is shown at once when the
+frame is `DisplayImmediately`, has no timestamp or the layer has no control timebase, and otherwise when its timestamp is
+reached on the control timebase (a dispatch after the wait divided by the rate). `flush` cancels the frames not yet
+shown and keeps the image on the layer; `flushAndRemoveImage` cancels them and removes the image. Compressed frames
+(H.264) are left to the system queue alone.
+
 What this does not give: the system reports no failure on iOS 6, so `status` never becomes `Failed` and `error` stays nil;
-`isReadyForDisplay` turns on at the enqueue, not when the frame's timestamp is reached; and a frame the Fig queue cannot
-draw is not drawn. The CPU conversion of `420v` and `420f` frames that the earlier class had (commit `cee944be1`, with
-the matrix table and the case that checked each channel) was removed with the class; whether the system queue needs it is
-the open question below.
+`isReadyForDisplay` turns on at the enqueue, not when the frame's timestamp is reached; a frame is not dropped when a
+later one is due too (each is shown in turn); a timebase with rate 0 never shows a frame whose time is ahead, and a rate
+change does not move the frames already waiting; and the conversion runs on the thread that enqueues.
 
 `tests/runtime/cases/avfoundation_display_layer.m` checks the state machine on the system class, `tests/avfoundation_test.lua`
 checks that the Backports objects define no class of the name and none of the system's own members.
@@ -103,11 +111,27 @@ its three checks as it should. Numbers, identical for `32BGRA`, `420v` and `420f
   frame: the in-process numbers do not say whether it is drawn.
 - The syslog during the runs holds no line from mediaserverd or the Fig queue about the frames.
 
-So the system queue accepts uncompressed frames and builds a remote context for each; that it paints them is not
-shown. Showing it takes the screen, and the phone's screen holds other apps, so no screenshot was taken. A pixel
-wrapper of `enqueueSampleBuffer:` would set the layer's own `contents` while the remote host also draws, with nothing
-measured that needs it; it is not added. If someone sees an empty layer on the phone, the code of `cee944be1` is the
-starting point.
+### Does the queue draw them? The screen says no
+
+The in-process numbers cannot say, so the screen was read. `AVFDrawProbe` (`tests/device_probe/avfoundation_draw_main.m`,
+a device app, bundle id `space.kern0x1b.backports.avfdrawprobe`) puts known-colour 80x80 frames into layers of the
+system class beside a plain magenta view and a black reference, and `UIGetScreenImage` (what `revenant-shot` calls)
+was read for the middle 40x40 points of each block, with the probe the front application. The image was compared by a
+program, not by eye, and deleted on the Mac and the phone after the comparison. Mean red/green/blue of each block:
+
+| Block | Expected | System queue alone | With the Backports wrapper |
+| --- | --- | --- | --- |
+| `32BGRA` red | 255/0/0 | 0/0/0 | 255/0/0 |
+| `420v` green (601) | 0/255/0 | 0/0/0 | 0/255/1 |
+| `420f` blue (601) | 0/0/255 | 0/0/0 | 0/0/254 |
+| `32BGRA` red, control timebase, frame time now | 255/0/0 | 0/0/0 | 255/0/0 |
+| H.264 green (compressed, from `VTCompressionSession` on the Mac) | 0/255/0 | 20/255/9 | 20/255/9 |
+| plain magenta view (control) | 255/0/255 | 255/0/255 | 255/0/255 |
+| black reference | 0/0/0 | 0/0/0 | 0/0/0 |
+
+The H.264 row shows the capture sees what the system queue draws, so the black rows are the queue's, not the
+capture's: the iOS 6.1.3 video queue accepts uncompressed frames (ready, no error, no log line) and draws nothing for
+them. The wrapper's rows are the layer's own `contents` and match to within one level.
 
 The release of a layer after its pool (emulator, 2026-11-21): a layer that was never touched, one whose `status` was
 read and one that made a `timebase` are all released by the end of the run loop spin, 1 of 1 each; five cases of the

@@ -52,6 +52,15 @@ static CMSampleBufferRef revenant_sample(BOOL display)
     return sample;
 }
 
+static void spin_run_loop(void)
+{
+    for (int index = 0; index < 10; index++) {
+        @autoreleasepool {
+            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.02]];
+        }
+    }
+}
+
 static NSString *state_of(AVSampleBufferDisplayLayer *layer)
 {
     return [NSString stringWithFormat:@"status %ld ready %d", (long)layer.status, (int)layer.isReadyForDisplay];
@@ -127,6 +136,34 @@ REVENANT_CASE(avfoundation_display_layer)
                                  state_of(layer));
             CFRelease(hidden);
         }
+
+        AVSampleBufferDisplayLayer *drawn = [[AVSampleBufferDisplayLayer alloc] init];
+        CMSampleBufferRef frame = revenant_sample(YES);
+        CMSampleBufferRef skipped = revenant_sample(NO);
+        if (frame && skipped) {
+            [drawn enqueueSampleBuffer:skipped];
+            spin_run_loop();
+            BOOL skippedDraws = drawn.contents != nil;
+            [drawn enqueueSampleBuffer:frame];
+            spin_run_loop();
+            BOOL drawsFrame = drawn.contents != nil;
+            [drawn flush];
+            spin_run_loop();
+            BOOL keepsAfterFlush = drawn.contents != nil;
+            [drawn flushAndRemoveImage];
+            spin_run_loop();
+            BOOL clearsAfterRemove = drawn.contents == nil;
+            printf("display layer fact: uncompressed frame drawn %d, skipped frame drawn %d, kept after flush %d, cleared by flushAndRemoveImage %d\n",
+                   drawsFrame, skippedDraws, keepsAfterFlush, clearsAfterRemove);
+            revenant_expect_true(@"an uncompressed frame to display becomes the layer's contents and a DoNotDisplay frame does not",
+                                 (drawsFrame && !skippedDraws) != flip, @"the contents did not follow the frames");
+            revenant_expect_true(@"flush keeps the image and flushAndRemoveImage removes it",
+                                 (keepsAfterFlush && clearsAfterRemove) != flip, @"the image outlived flushAndRemoveImage or went at flush");
+        }
+        if (frame)
+            CFRelease(frame);
+        if (skipped)
+            CFRelease(skipped);
 
         BOOL raised = NO;
         @try {
