@@ -427,6 +427,18 @@ if is_plat("iphoneos") and not SELECTED then
         set_values("revenant.version", "1.0.0")
     target_end()
 
+    target("AVFDrawProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_files("tests/device_probe/avfoundation_draw_main.m")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "AVFoundation", "CoreMedia", "CoreVideo")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.avfdrawprobe", "CFBundleDisplayName=AVFDrawProbe")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
     target("MetalInstanceProbe")
         set_kind("binary")
         set_default(false)
