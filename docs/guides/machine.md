@@ -7,11 +7,12 @@ How a build uses this machine's disk, what the cache holds and how it is capped,
 Everything revenant writes outside its sources goes into two folders.
 
 The **store** holds the packages: the pinned and patched xmake binaries and the package store (`XMAKE_GLOBALDIR`, with the
-installs, the sources and the build folders of every package). It is one folder for the whole machine, `~/.revenant/store`
+installs, the sources and the build folders of every package), and the lowered SDK overlays (`lowered/<digest>`, one per
+input, built once for the machine, so the packages that link one all point at the same absolute path). It is one folder for the whole machine, `~/.revenant/store`
 (`REVENANT_STORE` names another, as an absolute path), and every checkout and worktree reads and writes it, so a package
 key is built once per machine and the absolute paths in an install never move (the section "The shared store" below).
 
-The **cache** holds the rest: the shared caches of the firmware, the lowered caches, the emulator images, the token pool,
+The **cache** holds the rest: the shared caches of the firmware, the emulator images, the token pool,
 the scratch of each task. It is `.cache` in the main checkout and `.cache` in a linked worktree (git ignores both,
 `.gitignore`); `REVENANT_CACHE` names another folder. `toolchain/modules/cache.lua` finds the checkout from any worktree
 with `git rev-parse --git-common-dir`. `./xmakew` exports both folders it uses, so each tool and test it runs reads the
@@ -33,6 +34,7 @@ others of the cache. Only the package, generation, source, scratch and build cla
 | `xmake/<key>.build.*`, `xmake/<key>.log` | xmake's build folders and logs from `xmakew` | scratch |
 | `xmake-global/.xmake/packages` | the package store: a package's folder, its link `<hash>`, and its install generations `<hash>.g<token>` | package, generation |
 | `xmake-global/.xmake/cache/packages/<yymm>/<letter>/<package>` | the package sources and build folders, one folder per package | source |
+| `lowered/<digest>` and `lowered/<digest>.lock` of the store | the lowered SDK overlay of one input and the lock held while it is built; an overlay that is gone is built again by the next call | scratch |
 | the rest of `xmake-global/.xmake/cache` | xmake's other caches | scratch |
 | the rest of `xmake-global/.xmake` | the repositories and xmake's state, through `XMAKE_GLOBALDIR`, which `xmakew` sets to the store's `xmake-global` | kept |
 | `roots/*.txt` of the store | the installs that other tools build against and that must stay (below) | kept |
@@ -184,11 +186,14 @@ pkg-config file) are the same for every worktree and never need to be rewritten.
 `<store>/xmake/<key>` once for the machine (under a lock on `<store>/xmake/<key>.lock`, so launchers that ask at once wait for
 one build and use it), runs it with `XMAKE_GLOBALDIR=<store>/xmake-global`, and links `xmake` and
 `xmake-global` of the cache to those. A launcher that waits for another's build says so every 30 seconds (`REVENANT_XMAKE_BUILD_POLL`),
-naming the process that holds the lock (the builder records it in `<store>/xmake/<key>.holder`), how long it has held it and
+naming the process that holds the lock (the builder records its number, the time it began and the time that process
+started in `<store>/xmake/<key>.holder`, written whole and moved into place, so a number that another process has taken since is
+not taken for the builder), how long it has held it and
 where its log is, and stops with an error after 1800 seconds (`REVENANT_XMAKE_BUILD_WAIT`), so a hung build does not block
-every launcher of that key without a word; stop the process it names and its children (`make`, the compiler) and run it again. A linked worktree takes `<worktree>/.cache` for its cache when `REVENANT_CACHE` is
+every launcher of that key without a word; both variables take whole seconds of at least 1. Stop the process it names and its
+children (`make`, the compiler) and run it again. A linked worktree takes `<worktree>/.cache` for its cache when `REVENANT_CACHE` is
 unset, and any folder `REVENANT_CACHE` names, empty or not, with no marker. What it holds is small: the token pool, the
-scratch of its tasks, the lowered caches, and (when a task needs them) `dyld` and `firmware`.
+scratch of its tasks, and (when a task needs them) `dyld` and `firmware`.
 
 Two builds of one package key never run at once, because the install is locked by its folder (`<installdir>.lock`); two
 different keys of one package, built at once by two processes, each patch and build in their own copy of the sources
@@ -464,7 +469,7 @@ the checkout, `build/backports-gate/tree`, which `rsync -a --delete` brings up t
 `XMAKE_CONFIGDIR` would not do: the configure starts nested xmake processes that inherit it and wait on the project lock the
 configure holds. The check takes the prebuilt `llvm`, `swift` and `ld64` of `REVENANT_PREBUILT` and `REVENANT_PREBUILT_ONLY` when the
 environment names them (`kern0x1b/revenant` and `llvm,swift,ld64` otherwise), and fails rather than building them from source. It reads
-the package store, the iOS 6.0 shared cache and the lowered cache of `REVENANT_CACHE`, which are caches and not part of its key. On
+the package store and the lowered overlays of the store, and the iOS 6.0 shared cache of `REVENANT_CACHE`, which are caches and not part of its key. On
 a failure it prints the compiler's errors and the path of the whole log, `build/backports-gate/prepush.log`. The first run builds
 all libraries (about six minutes on a 12-core Mac), a later one only what changed, and a run on an unchanged tree is remembered like the
 others. `./xmakew l -P . tools/ci_local.lua backports` runs the same build from a fresh configuration and goes on to the Backports

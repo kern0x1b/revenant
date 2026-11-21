@@ -93,18 +93,23 @@ prefix=$xmakes/$key
 
 holder=$xmakes/$key.holder
 
+start_of() {
+    echo $(ps -o lstart= -p "$1" 2>/dev/null)
+}
+
 holder_of() {
     pid=""
     started=""
+    began=""
     if [ -r "$holder" ]; then
-        read -r pid started < "$holder" || true
+        read -r pid started began < "$holder" || true
     fi
-    if [ -z "$pid" ] || [ -z "$started" ]; then
+    if [ -z "$pid" ] || [ -z "$started" ] || [ -z "$began" ]; then
         echo "whose holder recorded no process (it has only just started, or it is an older xmakew)"
-    elif kill -0 "$pid" 2>/dev/null; then
+    elif [ "$(start_of "$pid")" = "$began" ]; then
         echo "which process $pid has held for $(( $(date +%s) - started )) s (its log is $xmakes/$key.log)"
     else
-        echo "which process $pid held for $(( $(date +%s) - started )) s and which has ended, while a process it started still holds the lock (its log is $xmakes/$key.log)"
+        echo "which process $pid held for $(( $(date +%s) - started )) s and which has ended (its number is free or another process has it now), while a process it started still holds the lock (its log is $xmakes/$key.log)"
     fi
 }
 
@@ -118,7 +123,10 @@ exclusively() {
             echo "xmakew: REVENANT_XMAKE_BUILD_WAIT is $limit and REVENANT_XMAKE_BUILD_POLL is $poll; both are whole numbers of seconds" >&2
             return 1 ;;
     esac
-    [ "$poll" -ge 1 ] || poll=1
+    if [ "$limit" -lt 1 ] || [ "$poll" -lt 1 ]; then
+        echo "xmakew: REVENANT_XMAKE_BUILD_WAIT is $limit and REVENANT_XMAKE_BUILD_POLL is $poll; both must be at least 1 second" >&2
+        return 1
+    fi
     if command -v flock >/dev/null 2>&1; then
         locker=flock
     elif command -v lockf >/dev/null 2>&1; then
@@ -154,8 +162,9 @@ build_xmake() {
     work=$xmakes/$key.build.$$
     log=$xmakes/$key.log
     mkdir -p "$work/src"
-    printf '%s %s\n' "$$" "$(date +%s)" > "$holder"
-    trap 'rm -rf "$work" "$holder"' EXIT INT TERM
+    trap 'rm -rf "$work" "$holder" "$holder.$$"' EXIT INT TERM
+    printf '%s %s %s\n' "$$" "$(date +%s)" "$(start_of "$$")" > "$holder.$$"
+    mv "$holder.$$" "$holder"
     echo "xmakew: building xmake $commit with its patches into $prefix, log in $log" >&2
     {
         git -C "$work/src" init -q

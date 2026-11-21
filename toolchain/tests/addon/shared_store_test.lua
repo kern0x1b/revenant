@@ -183,6 +183,11 @@ local function hung_build(folder, repository, found)
     if not pid then
         table.insert(found, "a launcher that builds the xmake records its process and its start where the others can read them: " .. holder)
     end
+    local recorded_start = holder:match("^%d+ %d+ (.+)$")
+    local actual_start = pid and (os.iorunv("ps", {"-o", "lstart=", "-p", pid}) or ""):gsub("%s+", " "):trim() or nil
+    if not recorded_start or recorded_start:trim() ~= actual_start then
+        table.insert(found, "the holder file records when the process started, so a number that another process has taken later is told from the builder: " .. holder .. " against " .. tostring(actual_start))
+    end
     local waiter = spawn(hung, root, table.join(envs, {REVENANT_CACHE = path.join(hung, "cache-b"), REVENANT_XMAKE_BUILD_WAIT = "4", REVENANT_XMAKE_BUILD_POLL = "2"}), "b")
     local status, output = finish(waiter, 9000)
     if not status or status == "0" then
@@ -201,8 +206,60 @@ local function hung_build(folder, repository, found)
     if count_lines(counter) ~= 1 then
         table.insert(found, "the launcher that gave up built nothing: " .. count_lines(counter) .. " builds")
     end
-    if exists(holder_file) then
-        table.insert(found, "a finished build leaves no record of a holder behind")
+    if exists(holder_file) or #os.files(path.join(store, "xmake", "*.holder.*")) > 0 then
+        table.insert(found, "a finished build leaves no record of a holder behind, and none half written")
+    end
+    if not output:find("has held for", 1, true) or output:find("has ended", 1, true) then
+        table.insert(found, "a builder that is running is not reported as ended: " .. output)
+    end
+end
+
+local function stale_holder(folder, repository, found)
+    local stale = path.join(folder, "stale")
+    os.mkdir(stale)
+    local launcher = path.join(repository, "xmakew")
+    local root = checkout_of(stale, repository)
+    local store = path.join(stale, "store")
+    local xmakes = path.join(store, "xmake")
+    os.mkdir(xmakes)
+    local key = key_of(COMMIT, launcher)
+    local lockfile = path.join(xmakes, key .. ".lock")
+    local holding = process.openv("sh", {"-c", "if command -v flock >/dev/null 2>&1; then exec flock \"$1\" sleep 8; else exec lockf -k \"$1\" sleep 8; fi", "sh", lockfile},
+                                  {stdout = path.join(stale, "holding.log"), stderr = path.join(stale, "holding.log")})
+    local waited = 0
+    while waited < 5000 do
+        local probe = io.openlock(lockfile)
+        local free = probe and probe:trylock()
+        if probe then
+            if free then
+                probe:unlock()
+            end
+            probe:close()
+        end
+        if not free then
+            break
+        end
+        os.sleep(100)
+        waited = waited + 100
+    end
+    io.writefile(path.join(xmakes, key .. ".holder"), "1 " .. os.time() .. " Thu Jan 1 00:00:00 1970\n")
+    local status, output = launch(root, {REVENANT_STORE = store, REVENANT_CACHE = path.join(stale, "cache"), REVENANT_XMAKE_BUILD_WAIT = "2", REVENANT_XMAKE_BUILD_POLL = "1"}, path.join(stale, "launch.log"))
+    holding:close()
+    if status == 0 or not output:find("process 1 held", 1, true) or not output:find("has ended", 1, true) then
+        table.insert(found, "a holder file whose process number is alive but started at another time is told from the builder, and the wait still ends: " .. tostring(status) .. "\n" .. output)
+    end
+end
+
+local function wait_limits(folder, repository, found)
+    local limits = path.join(folder, "limits")
+    os.mkdir(limits)
+    local root = checkout_of(limits, repository)
+    for index, setting in ipairs({{"0", "30", "REVENANT_XMAKE_BUILD_WAIT"}, {"1800", "0", "REVENANT_XMAKE_BUILD_POLL"}, {"many", "30", "whole numbers"}}) do
+        local store = path.join(limits, "store" .. index)
+        local status, output = launch(root, {REVENANT_STORE = store, REVENANT_CACHE = path.join(limits, "cache" .. index), REVENANT_XMAKE_BUILD_WAIT = setting[1], REVENANT_XMAKE_BUILD_POLL = setting[2]}, path.join(limits, "launch.log"))
+        if status == 0 or not output:find(setting[3], 1, true) or #os.dirs(path.join(store, "xmake", "*.build.*")) > 0 then
+            table.insert(found, "a wait of " .. setting[1] .. " s with a poll of " .. setting[2] .. " s is refused by name before anything is built: " .. tostring(status) .. "\n" .. output)
+        end
     end
 end
 
@@ -313,6 +370,8 @@ function failures(opt)
 
     concurrent_builds(folder, repository, found)
     hung_build(folder, repository, found)
+    stale_holder(folder, repository, found)
+    wait_limits(folder, repository, found)
 
     os.tryrm(folder)
     return found

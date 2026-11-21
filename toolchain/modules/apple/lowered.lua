@@ -2790,8 +2790,8 @@ local function built_into(sdk, folder, digest, set, mapped, modules, target, rea
     return vfs
 end
 
-local function shared_folder(digest)
-    return path.join(import("@addon.revenant.cache", {anonymous = true}).root(), "lowered", digest)
+function shared_overlay_folder(digest)
+    return path.join(import("@addon.revenant.cache", {anonymous = true}).store(), "lowered", digest)
 end
 
 local function linked(out, shared)
@@ -2815,9 +2815,9 @@ function overlay(sdk, out, set, subtrees, modules, target, reads)
         return built[key]
     end
     local digest = input_digest(sdk, text .. table.concat(table.orderkeys(mapped), ",") .. placed .. (target or "") .. closed)
-    local shared = shared_folder(digest)
+    local shared = shared_overlay_folder(digest)
     os.mkdir(path.directory(shared))
-    local lock = io.openlock(path.join(path.directory(shared), "overlay.lock"))
+    local lock = io.openlock(shared .. ".lock")
     if not lock then
         raise("cannot lock the shared overlay folder %s", shared)
     end
