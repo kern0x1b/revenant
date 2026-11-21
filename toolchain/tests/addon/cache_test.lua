@@ -337,6 +337,192 @@ function failures(arguments)
         table.insert(found, "an evicted package leaves no published path, generation, lock or empty folder: " .. classes(gone) .. " " .. table.concat(remnants, ","))
     end
 
+    local named_store = path.join(folder, "named-store")
+    local shared_root = with_env("REVENANT_STORE", named_store, function () return cache.store() end)
+    if shared_root ~= named_store then
+        table.insert(found, "REVENANT_STORE names the shared store: " .. tostring(shared_root))
+    end
+    shared_root = with_env("REVENANT_STORE", "", function () return cache.store() end)
+    if shared_root ~= path.join(os.getenv("HOME"), ".revenant", "store") then
+        table.insert(found, "without REVENANT_STORE the shared store is ~/.revenant/store: " .. tostring(shared_root))
+    end
+    local relative = fixtures.refusal(function () with_env("REVENANT_STORE", "relative/store", function () return cache.store() end) end)
+    if not relative or not relative:find("REVENANT_STORE", 1, true) then
+        table.insert(found, "a relative REVENANT_STORE is refused by name: " .. tostring(relative))
+    end
+    if with_env("REVENANT_STORE_GB", "", function () return cache.store_limit() end) ~= 80 * 1000 * 1000 * 1000
+       or with_env("REVENANT_STORE_GB", "0.5", function () return cache.store_limit() end) ~= 500 * 1000 * 1000 then
+        table.insert(found, "the store's cap is 80 GB by default and REVENANT_STORE_GB sets it")
+    end
+
+    local shared = path.join(folder, "shared")
+    local pinned_package = package_of(shared, "ppp")
+    folder_of(pinned_package .. ".g1", MEGABYTE, OLDEST)
+    folder_of(pinned_package .. ".g2", MEGABYTE, OLDER)
+    folder_of(pinned_package .. ".g3", MEGABYTE, OLD)
+    folder_of(pinned_package .. ".g4", MEGABYTE, RECENT)
+    os.execv("ln", {"-s", "ppp.g4", pinned_package})
+    local roots = path.join(shared, "roots")
+    os.mkdir(roots)
+    io.writefile(path.join(roots, "telegram-build.txt"), "# the installs the Bazel build links\n\nt/ppp/1.0/ppp.g1  \n")
+    local kept = cache.prune_generations(shared)
+    if #kept ~= 1 or exists(pinned_package .. ".g2") or not exists(pinned_package .. ".g1") or not exists(pinned_package .. ".g3") or not exists(pinned_package .. ".g4") then
+        table.insert(found, "pruning generations keeps the oldest one a roots file names, and removes the others: " .. #kept .. " pruned")
+    end
+
+    local fixed = package_of(shared, "qqq")
+    folder_of(fixed .. ".g1", 2 * MEGABYTE, OLDEST)
+    os.execv("ln", {"-s", "qqq.g1", fixed})
+    local loose = package_of(shared, "rrr")
+    folder_of(loose .. ".g1", 2 * MEGABYTE, OLD)
+    os.execv("ln", {"-s", "rrr.g1", loose})
+    io.writefile(path.join(roots, "another-checkout.txt"), "t/qqq/1.0/qqq\n")
+    local pinned_rows = cache.status(shared, {builds = {}})
+    local pinned_names = {}
+    for _, row in ipairs(pinned_rows) do
+        if row.pinned then
+            table.insert(pinned_names, row.name)
+        end
+    end
+    table.sort(pinned_names)
+    if table.concat(pinned_names, ",") ~= "xmake-global/.xmake/packages/t/ppp/1.0/ppp.g1,xmake-global/.xmake/packages/t/qqq/1.0/qqq" then
+        table.insert(found, "status marks what the roots files pin, a generation by its name and a package by its published path: " .. table.concat(pinned_names, ","))
+    end
+    local trimmed = cache.reserve(3.5 * MEGABYTE, "a write into the shared store", {root = shared, limit = 8 * MEGABYTE, builds = {}})
+    if classes(trimmed) ~= "generation,package" or exists(loose) or not exists(fixed) or not exists(pinned_package .. ".g1") then
+        table.insert(found, "an eviction from the store takes the install no roots file names, and keeps the pinned ones: " .. classes(trimmed))
+    end
+    local blocked = fixtures.refusal(function () cache.reserve(20 * MEGABYTE, "a write that needs the pinned installs", {root = shared, limit = 8 * MEGABYTE, builds = {}}) end)
+    if not blocked or not exists(fixed) or not exists(pinned_package .. ".g1") then
+        table.insert(found, "a write that would need a pinned install fails and removes nothing of it: " .. tostring(blocked))
+    end
+
+    local overlays = path.join(folder, "overlay-store")
+    local stale = folder_of(path.join(overlays, "lowered", "aaaa"), 2 * MEGABYTE, OLDEST)
+    local fresh = folder_of(path.join(overlays, "lowered", "bbbb"), 2 * MEGABYTE, RECENT)
+    local stale_lock = file_of(path.join(overlays, "lowered", "aaaa.lock"), 0)
+    local unpinned = package_of(overlays, "sss")
+    folder_of(unpinned, 2 * MEGABYTE, OLD)
+    local overlay_rows = {}
+    for _, row in ipairs(cache.status(overlays, {builds = {}})) do
+        overlay_rows[row.name] = row.class
+    end
+    if overlay_rows["lowered/aaaa"] ~= "scratch" or overlay_rows["lowered/bbbb"] ~= "scratch" or overlay_rows["lowered/aaaa.lock"] then
+        table.insert(found, "each overlay folder under the store's lowered/ is an entry that can be evicted, and its lock file is a member of it, not an entry: " .. tostring(overlay_rows["lowered/aaaa"]) .. ", " .. tostring(overlay_rows["lowered/aaaa.lock"]))
+    end
+    local made_room
+    local not_made = fixtures.refusal(function ()
+        made_room = cache.reserve(3.5 * MEGABYTE, "a write into the shared store", {root = overlays, limit = 6 * MEGABYTE, builds = {}})
+    end)
+    if not_made or classes(made_room) ~= "scratch,scratch" or exists(stale) or exists(fresh) or not exists(unpinned) or exists(stale_lock) then
+        table.insert(found, "an eviction from the store takes the overlays, oldest first, with their locks, before any installed package: " .. tostring(not_made or classes(made_room)))
+    end
+
+    stale = folder_of(path.join(overlays, "lowered", "aaaa"), 2 * MEGABYTE, OLDEST)
+    fresh = folder_of(path.join(overlays, "lowered", "bbbb"), 2 * MEGABYTE, OLD)
+    stale_lock = file_of(path.join(overlays, "lowered", "aaaa.lock"), 0)
+    local building = io.openlock(stale_lock)
+    if not building or not building:trylock() then
+        table.insert(found, "the test could not take the lock of an overlay that is being built")
+    else
+        local kept_building
+        local failed = fixtures.refusal(function ()
+            kept_building = cache.reserve(3.5 * MEGABYTE, "a write into the shared store", {root = overlays, limit = 6 * MEGABYTE, builds = {}})
+        end)
+        building:unlock()
+        building:close()
+        if failed or classes(kept_building) ~= "scratch,package" or not exists(stale) or exists(fresh) or exists(unpinned) then
+            table.insert(found, "an eviction from the store leaves the overlay whose lock another process holds, and takes the next entries: " .. tostring(failed or classes(kept_building)))
+        end
+    end
+
+    local home = path.join(folder, "linking-cache")
+    os.mkdir(home)
+    file_of(path.join(home, "dyld", "6.0", "dyld_shared_cache_armv7"), MEGABYTE)
+    os.vrunv("ln", {"-s", path.join(shared, "xmake-global"), path.join(home, "xmake-global")})
+    os.vrunv("ln", {"-s", path.join(shared, "xmake"), path.join(home, "xmake")})
+    for _, row in ipairs(cache.status(home, {builds = {}})) do
+        if row.name:find("xmake", 1, true) then
+            table.insert(found, "a cache that links to the shared store does not list or count its packages as its own: " .. row.name)
+        end
+    end
+    local _, own_total = cache.status(home, {builds = {}})
+    if own_total > 2 * MEGABYTE then
+        table.insert(found, "the size of a cache that links to the shared store is its own: " .. own_total)
+    end
+
+    local guarded = fixtures.empty_repository(path.join(folder, "guarded"))
+    cache.record(guarded, {root = home, builds = {}})
+    local early = cache.guard(guarded, {root = home, limit = CAP, builds = {}, store = shared, store_limit = 3.5 * MEGABYTE, store_interval = 3600})
+    local store_trimmed = #early.evicted > 0
+    if not store_trimmed or not exists(path.join(shared, cache.store_stamp())) then
+        table.insert(found, "guard keeps the shared store within its cap and records when it did")
+    end
+    folder_of(package_of(shared, "sss") .. ".g1", 6 * MEGABYTE, OLD)
+    os.execv("ln", {"-s", "sss.g1", package_of(shared, "sss")})
+    local again = cache.guard(guarded, {root = home, limit = CAP, builds = {}, store = shared, store_limit = 3.5 * MEGABYTE, store_interval = 3600})
+    if #again.evicted > 0 or not exists(package_of(shared, "sss")) then
+        table.insert(found, "guard looks at the shared store once in its interval, not before every build")
+    end
+    local after = cache.guard(guarded, {root = home, limit = CAP, builds = {}, store = shared, store_limit = 3.5 * MEGABYTE, store_interval = 0})
+    if #after.evicted == 0 then
+        table.insert(found, "guard looks at the shared store again when the interval has passed")
+    end
+
+    local capped = path.join(folder, "capped-store")
+    folder_of(package_of(capped, "aaa"), 6 * MEGABYTE, OLD)
+    file_of(path.join(capped, "roots", "all.txt"), 10)
+    io.writefile(path.join(capped, "roots", "all.txt"), "t/aaa/1.0/aaa\n")
+    local unbound
+    local stopped = fixtures.refusal(function ()
+        unbound = cache.guard(guarded, {root = home, limit = CAP, builds = {}, store = capped, store_limit = 3 * MEGABYTE, store_interval = 0})
+    end)
+    if stopped then
+        table.insert(found, "a store that nothing in it can be evicted from does not stop the build of a worktree that has room: " .. stopped)
+    elseif not unbound.store_error or not unbound.store_error:find("REVENANT_STORE_GB", 1, true) or unbound.store_error:find("REVENANT_CACHE_GB", 1, true) then
+        table.insert(found, "the store's own cap is the one the report names: " .. tostring(unbound.store_error))
+    end
+    if not exists(package_of(capped, "aaa")) then
+        table.insert(found, "the pinned install stays when the store cannot be brought under its cap")
+    end
+
+    local leased = path.join(folder, "leased-store")
+    for _, name in ipairs({"bbb", "ccc", "ddd"}) do
+        folder_of(package_of(leased, name), 3 * MEGABYTE, name == "ccc" and OLDER or OLD)
+    end
+    local installing = io.openlock(file_of(package_of(leased, "ccc") .. ".lock", 1))
+    installing:lock()
+    local stale_snapshot = function () return {} end
+    cache.reserve(3.5 * MEGABYTE, "a write while ccc is being installed", {root = leased, limit = 8 * MEGABYTE, builds = {}, open_paths = stale_snapshot})
+    if not exists(package_of(leased, "ccc")) then
+        table.insert(found, "an install that holds its lock is not evicted, even when the list of open files was taken before it took the lock")
+    end
+    if exists(package_of(leased, "bbb")) or exists(package_of(leased, "ddd")) then
+        table.insert(found, "the entries nobody holds are evicted instead of the one that is held")
+    end
+    installing:unlock()
+    installing:close()
+    folder_of(package_of(leased, "eee"), 3 * MEGABYTE, OLD)
+    cache.reserve(3.5 * MEGABYTE, "a write after ccc was installed", {root = leased, limit = 8 * MEGABYTE, builds = {}, open_paths = stale_snapshot})
+    if exists(package_of(leased, "ccc")) then
+        table.insert(found, "an install whose lock is free is evicted again")
+    end
+
+    local trimming = path.join(folder, "trimming-store")
+    folder_of(package_of(trimming, "fff"), 6 * MEGABYTE, OLD)
+    local other = io.openlock(file_of(path.join(trimming, ".trim.lock"), 1))
+    other:lock()
+    local skipped = cache.guard(guarded, {root = home, limit = CAP, builds = {}, store = trimming, store_limit = 3 * MEGABYTE, store_interval = 0})
+    if #skipped.evicted > 0 or not exists(package_of(trimming, "fff")) or exists(path.join(trimming, cache.store_stamp())) then
+        table.insert(found, "a process that finds another trimming the store leaves the trim to it and does not record one")
+    end
+    other:unlock()
+    other:close()
+    local trimmed_here = cache.guard(guarded, {root = home, limit = CAP, builds = {}, store = trimming, store_limit = 3 * MEGABYTE, store_interval = 0})
+    if #trimmed_here.evicted == 0 or exists(package_of(trimming, "fff")) then
+        table.insert(found, "the trim runs once the other process has finished")
+    end
+
     os.tryrm(folder)
     return found
 end

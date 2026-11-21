@@ -87,6 +87,7 @@ package("swift-runtime")
         if not package:config("shared") and import("@addon.revenant.prebuilt", {anonymous = true}).install(package) then
             return
         end
+        os.cd(import("@addon.revenant.checkout", {anonymous = true}).keyed(os.curdir(), package:buildhash()))
         local parallel = import("@addon.revenant.parallel", {anonymous = true})
 
         local marked = os.getenv("SWIFTRT_PROFILE") and {} or nil

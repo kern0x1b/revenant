@@ -58,6 +58,7 @@ package("swift")
         if prebuilt.install(package) then
             return
         end
+        os.cd(import("@addon.revenant.checkout", {anonymous = true}).keyed(os.curdir(), package:buildhash()))
         local swift = import("@addon.revenant.apple.swift", {anonymous = true})
         local bootstrap = assert(package:dep("swift-bootstrap"), "revenant@swift is built with the swift.org toolchain of the same release")
         local build = path.absolute("build")

@@ -1,5 +1,7 @@
 local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
 local lowered = import("lowered", {rootdir = path.join(os.scriptdir(), "..", "..", "modules", "apple"), anonymous = true})
+local cache = import("cache", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
+local json = import("core.base.json")
 
 function failures(arguments)
     local found = {}
@@ -15,6 +17,30 @@ function failures(arguments)
         shared_vfs = path.join(os.readlink(first), "vfs.yaml")
     else
         table.insert(found, "the first overlay is not a link into the shared overlay folder")
+    end
+    if shared_vfs and os.isfile(shared_vfs) then
+        local lowered_folder = path.join(cache.store(), "lowered") .. "/"
+        if path.directory(shared_vfs):sub(1, #lowered_folder) ~= lowered_folder then
+            table.insert(found, "the shared overlay is a folder of the store's lowered/, not of a cache: " .. shared_vfs)
+        end
+        local missing, total = {}, 0
+        local function visit(node)
+            if node["external-contents"] then
+                total = total + 1
+                if not os.isfile(node["external-contents"]) and #missing < 5 then
+                    table.insert(missing, node["external-contents"])
+                end
+            end
+            for _, child in ipairs(node.contents or {}) do
+                visit(child)
+            end
+        end
+        for _, root in ipairs(json.decode(io.readfile(shared_vfs)).roots) do
+            visit(root)
+        end
+        if total == 0 or #missing > 0 then
+            table.insert(found, "every file the built vfs.yaml names resolves (" .. total .. " named), and some do not: " .. table.concat(missing, ", "))
+        end
     end
     local built_at = shared_vfs and os.isfile(shared_vfs) and os.mtime(shared_vfs)
     if shared_vfs and not os.isfile(shared_vfs) then
