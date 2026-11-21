@@ -491,19 +491,26 @@ others. `./xmakew l -P . tools/ci_local.lua backports` runs the same build from 
 tests, the probe app and the exports check. `ci_local` hands the light suites to the `checks` job when the memo already holds them: just before that job starts (after the quick job, in a
 serial run, so the prepush that job ran counts; right after it makes the job's clone, in a parallel one) it asks the memo
 (`prepush.lua --recall "light suites"`, which prints the line and `key <hash>`) and, when prepush holds the verdict, writes the line, the key, the path
-of the tree the job tests (the clone, or the checkout in a serial run) and its own process number and start time to `light-suites.verdict` in the
-folder of its run, under a nonce made for that run, and exports `REVENANT_LIGHT_SUITES_VERDICT=<nonce>@<that file>`. A suite of the light target
-takes its verdict from the file only when all of this holds: the nonce in the variable is the one in the file; the file names the checkout the
-suite is running in (by its real path); the process that wrote it is still running and started when the file says (a run that was killed, or a
-process number another process has taken, is not trusted); and the memo store holds an `ok` verdict of `light suites` under the key in the file
-(a look at `<store>/memo/light-suites/<key>`, not the word of whoever wrote the file). It then prints the line that says where the verdict came from
-and runs the rest; anything else (a string typed into the variable, a leftover of another shell, a file of another run or another checkout, a key the memo
-does not hold) is no verdict and the suites run. Nothing is remembered between the suites: each looks again, which costs two small
-commands and a file read, so a refused verdict is refused again and a verdict the memo has dropped stops being taken. The key in the file is the one the memo gave
-when `ci_local` asked, so an edit of the checkout between that moment and the start of the tests is not seen; the file keeps out an accident, and
-not someone who writes the file by hand with a key the memo holds. `ci_local` deletes the file when its run ends (not when it is first read,
-because every suite reads it). `toolchain/modules/recalled.lua` holds the writing and the reading, `toolchain_light/recalled_test` its cases, and
-`prepush`'s own test that it reads the memo the way `prepush` writes it.
+of the tree the job tests (the clone, or the checkout in a serial run), its own process number and start time and the folder of its run to
+`light-suites-<pid>-<nonce>.verdict` in that folder, under a nonce made for that run, and exports `REVENANT_LIGHT_SUITES_VERDICT=<nonce>@<that file>`.
+A suite of the light target takes its verdict from the file only when all of this holds: the nonce in the variable is the one in the file; the
+file is where it says it is and is named for the process and the nonce it says (a copy in another folder, or under another name, is not taken); the
+file names the checkout the suite is running in (by its real path); the process that wrote it is still running, started when the file says and is a
+`ci_local` (its command line says so; a run that was killed, a process number another process has taken and a shell of someone who typed the file
+are not trusted); and the memo store holds an `ok` verdict of `light suites` under the key in the file (a look at `<store>/memo/light-suites/<key>`,
+not the word of whoever wrote the file). It then prints the line that says where the verdict came from and runs the rest; anything else (a string
+typed into the variable, a leftover of another shell, a file of another run, folder or checkout, a key the memo does not hold) is no verdict and the
+suites run. Nothing is remembered between the suites: each looks again, with one `ps` and one `pwd -P` and two file reads, so a refused verdict is
+refused again and a verdict the memo has dropped stops being taken.
+
+
+What this does not do: it does not compute the key of the checkout again in the suite (that is the 11 seconds of prepush's key, once for each of the
+fifty-odd suites). The key in the file is the one the memo gave when `ci_local` asked, in the run that is alive, so an edit of the checkout between that
+moment and the start of the tests is not seen, and a file written by hand that satisfies every condition above, with a key the memo holds for some
+earlier inputs, is taken. The conditions keep out accidents (a stale file, a copied file, another checkout, a killed run, a typed value), and not a
+person who sets out to forge a verdict; anyone who can do that can also leave the tests out. `ci_local` deletes the file when its run ends (not when it is
+first read, because every suite reads it). `toolchain/modules/recalled.lua` holds the writing and the reading, `toolchain_light/recalled_test` its cases,
+and `prepush`'s own test that it reads the memo the way `prepush` writes it.
 
 Order and flags. The cheap checks run first and the heavy ones (`lowered members`, `lowered exports`, `light suites`,
 `backports build`) last, and the run stops at the first check that fails, so a two-second `layout` failure does not wait

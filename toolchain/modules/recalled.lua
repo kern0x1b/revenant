@@ -1,7 +1,8 @@
 import("cache")
 
-local FILE = "light-suites.verdict"
 local STEP = "light suites"
+local OWNER = "ci_local.lua"
+local reals = {}
 
 local function split(value)
     local nonce, file = (value or ""):match("^(%x+)@(.+)$")
@@ -23,12 +24,23 @@ local function written(file, text)
 end
 
 local function real(folder)
-    return try { function () return os.iorunv("sh", {"-c", "cd \"$1\" && pwd -P", "sh", folder}):trim() end }
+    if reals[folder] == nil then
+        reals[folder] = try { function () return os.iorunv("sh", {"-c", "cd \"$1\" && pwd -P", "sh", folder}):trim() end } or false
+    end
+    return reals[folder] or nil
 end
 
-local function started(pid)
-    local text = try { function () return os.iorunv("ps", {"-o", "lstart=", "-p", tostring(pid)}) end } or ""
-    return (text:gsub("%s+", " "):gsub("^ ", ""):gsub(" $", ""))
+local function process(pid)
+    local text = try { function () return os.iorunv("ps", {"-ww", "-o", "lstart=,command=", "-p", tostring(pid)}) end } or ""
+    local began, command = text:match("^%s*(%a+%s+%a+%s+%d+%s+%d+:%d+:%d+%s+%d+)%s+(.-)%s*$")
+    if not began then
+        return "", ""
+    end
+    return (began:gsub("%s+", " ")), command
+end
+
+local function named(pid, nonce)
+    return string.format("light-suites-%s-%s.verdict", pid, nonce)
 end
 
 function parse(output)
@@ -53,15 +65,16 @@ function holds(memo, name, key)
     return false
 end
 
-function issue(folder, key, tree, line)
+function issue(folder, key, tree, line, owner)
     local nonce = (hash.uuid4():gsub("-", ""))
-    local pid = os.getpid()
-    local began = started(pid)
+    local pid = owner or os.getpid()
+    local began = process(pid)
     if began == "" then
         return nil
     end
-    local file = path.join(folder, FILE)
-    written(file, table.concat({nonce, key, real(tree) or tree, tostring(pid), began, line}, "\n") .. "\n")
+    local where = path.normalize(path.absolute(folder))
+    local file = path.join(where, named(pid, nonce))
+    written(file, table.concat({nonce, key, real(tree) or tree, tostring(pid), began, where, line}, "\n") .. "\n")
     return nonce .. "@" .. file
 end
 
@@ -71,14 +84,18 @@ function read(value, tree, memo)
         return nil
     end
     local record = fields(file)
-    local key, folder, pid, began, line = record[2], record[3], record[4], record[5], record[6]
-    if record[1] ~= nonce or not key or not folder or not pid or not began or not line then
+    local key, folder, pid, began, where, line = record[2], record[3], record[4], record[5], record[6], record[7]
+    if record[1] ~= nonce or not key or not folder or not pid or not began or not where or not line then
+        return nil
+    end
+    if path.filename(file) ~= named(pid, nonce) or path.normalize(path.directory(file)) ~= where then
         return nil
     end
     if real(tree) ~= folder then
         return nil
     end
-    if started(pid) ~= began then
+    local started, command = process(pid)
+    if started ~= began or not (" " .. command):find("[%s/]" .. OWNER:gsub("%p", "%%%0")) then
         return nil
     end
     if not holds(memo or path.join(cache.store(), "memo"), STEP, key) then
