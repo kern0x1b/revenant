@@ -16,14 +16,43 @@ typedef struct {
     CGFloat x;
     CGFloat top;
     BOOL timed;
+    BOOL h264;
 } Block;
+
+#include "avfoundation_draw_h264.inc"
 
 static const Block kBlocks[] = {
     {kCVPixelFormatType_32BGRA, "32BGRA red", 0, 0, 255, 20, 80, NO},
     {kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, "420v green", 145, 54, 34, 120, 80, NO},
     {kCVPixelFormatType_420YpCbCr8BiPlanarFullRange, "420f blue", 29, 255, 107, 220, 80, NO},
-    {kCVPixelFormatType_32BGRA, "32BGRA red with a control timebase", 0, 0, 255, 120, 190, YES},
+    {kCVPixelFormatType_32BGRA, "32BGRA red with a control timebase", 0, 0, 255, 120, 190, YES, NO},
+    {0, "H.264 green (compressed control)", 0, 0, 0, 20, 190, NO, YES},
 };
+
+static CMSampleBufferRef h264_sample(void)
+{
+    NSData *avcc = [NSData dataWithBytes:kH264Avcc length:sizeof kH264Avcc];
+    NSDictionary *extensions = @{(__bridge id)kCMFormatDescriptionExtension_SampleDescriptionExtensionAtoms: @{@"avcC": avcc}};
+    CMVideoFormatDescriptionRef description = NULL;
+    if (CMVideoFormatDescriptionCreate(kCFAllocatorDefault, kCMVideoCodecType_H264, kSide, kSide, (__bridge CFDictionaryRef)extensions, &description) != noErr)
+        return NULL;
+    CMBlockBufferRef block = NULL;
+    CMBlockBufferCreateWithMemoryBlock(kCFAllocatorDefault, NULL, sizeof kH264Frame, kCFAllocatorDefault, NULL, 0, sizeof kH264Frame, kCMBlockBufferAssureMemoryNowFlag, &block);
+    CMBlockBufferReplaceDataBytes(kH264Frame, block, 0, sizeof kH264Frame);
+    CMSampleBufferRef sample = NULL;
+    CMSampleTimingInfo timing = {kCMTimeInvalid, kCMTimeZero, kCMTimeInvalid};
+    size_t size = sizeof kH264Frame;
+    OSStatus status = CMSampleBufferCreate(kCFAllocatorDefault, block, true, NULL, NULL, description, 1, 1, &timing, 1, &size, &sample);
+    printf("draw probe: H.264 sample status %d\n", (int)status);
+    CFRelease(description);
+    CFRelease(block);
+    if (sample) {
+        CFArrayRef attachments = CMSampleBufferGetSampleAttachmentsArray(sample, true);
+        if (attachments && CFArrayGetCount(attachments) > 0)
+            CFDictionarySetValue((CFMutableDictionaryRef)CFArrayGetValueAtIndex(attachments, 0), kCMSampleAttachmentKey_DisplayImmediately, kCFBooleanTrue);
+    }
+    return sample;
+}
 
 static CMSampleBufferRef sample_of(const Block *block)
 {
@@ -33,6 +62,7 @@ static CMSampleBufferRef sample_of(const Block *block)
         return NULL;
     CVPixelBufferLockBaseAddress(pixel, 0);
     if (CVPixelBufferIsPlanar(pixel)) {
+        CVBufferSetAttachment(pixel, CFSTR("YCbCrMatrix"), CFSTR("ITU_R_601_4"), kCVAttachmentMode_ShouldPropagate);
         uint8_t *luma = CVPixelBufferGetBaseAddressOfPlane(pixel, 0);
         size_t lumaStride = CVPixelBufferGetBytesPerRowOfPlane(pixel, 0);
         for (size_t row = 0; row < CVPixelBufferGetHeightOfPlane(pixel, 0); row++)
@@ -119,7 +149,7 @@ static CMSampleBufferRef sample_of(const Block *block)
 {
     for (size_t index = 0; index < sizeof kBlocks / sizeof kBlocks[0]; index++) {
         AVSampleBufferDisplayLayer *layer = self.layers[index];
-        CMSampleBufferRef sample = sample_of(&kBlocks[index]);
+        CMSampleBufferRef sample = kBlocks[index].h264 ? h264_sample() : sample_of(&kBlocks[index]);
         BOOL ready = layer.isReadyForMoreMediaData;
         if (sample) {
             [layer enqueueSampleBuffer:sample];

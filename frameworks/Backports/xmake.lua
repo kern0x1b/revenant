@@ -431,6 +431,7 @@ if is_plat("iphoneos") and not SELECTED then
         set_kind("binary")
         set_default(false)
         add_rules("@addon/revenant/app")
+        add_deps("AVFoundationBackports")
         add_files("tests/device_probe/avfoundation_draw_main.m")
         add_mflags("-fobjc-arc")
         add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "AVFoundation", "CoreMedia", "CoreVideo")
