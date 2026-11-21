@@ -88,9 +88,27 @@ the open question below.
 `tests/runtime/cases/avfoundation_display_layer.m` checks the state machine on the system class, `tests/avfoundation_test.lua`
 checks that the Backports objects define no class of the name and none of the system's own members.
 
-## Not yet measured
+## Measured on the iPhone 4S (iPhone4,1, 6.1.3, 2026-11-21)
 
-Whether the system Fig queue draws an uncompressed `32BGRA`, `420v` or `420f` frame. The case prints, for each, how many
-layers in the layer's tree hold `contents` after the enqueue; the emulator may not say (no hardware queue), and then the
-answer comes from the iPhone 4S. If the system does not draw them, a pixel path for uncompressed frames returns, as a
-wrapper of `enqueueSampleBuffer:` that sets the layer's own `contents`, from the code of `cee944be1`.
+The runtime app of this checkout ran on the phone from a scratch folder, with `DYLD_LIBRARY_PATH` pointing at this
+build's libraries, and only the case `avfoundation_system_display_layer`. Positive pass; the negative control fails on
+its three checks as it should. Numbers, identical for `32BGRA`, `420v` and `420f` (64x64, `DisplayImmediately`):
+
+- `isReadyForMoreMediaData` is 1 before and after the enqueue; the system's `enqueueSampleBuffer:` raises nothing.
+- Layers with `contents` in the layer's tree: 0, as on the emulator, and `renderInContext:` into a 64x64 bitmap draws 0
+  pixels.
+- The tree is `AVSampleBufferDisplayLayer` > `AVSampleBufferDisplayLayerContentLayer` > `CALayerHost`. The host holds a
+  non-zero context id (a different one for each layer and format). The queue creates a remote Core Animation context
+  and the video is composited by the render server, so a layer's `contents` and `renderInContext:` can never show the
+  frame: the in-process numbers do not say whether it is drawn.
+- The syslog during the runs holds no line from mediaserverd or the Fig queue about the frames.
+
+So the system queue accepts uncompressed frames and builds a remote context for each; that it paints them is not
+shown. Showing it takes the screen, and the phone's screen holds other apps, so no screenshot was taken. A pixel
+wrapper of `enqueueSampleBuffer:` would set the layer's own `contents` while the remote host also draws, with nothing
+measured that needs it; it is not added. If someone sees an empty layer on the phone, the code of `cee944be1` is the
+starting point.
+
+The release of a layer after its pool (emulator, 2026-11-21): a layer that was never touched, one whose `status` was
+read and one that made a `timebase` are all released by the end of the run loop spin, 1 of 1 each; five cases of the
+selection passed.

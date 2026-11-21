@@ -4,6 +4,7 @@
 #import <CoreVideo/CoreVideo.h>
 #import <QuartzCore/QuartzCore.h>
 #import <dlfcn.h>
+#import <objc/message.h>
 
 static NSString *const kSystemImage = @"/System/Library/Frameworks/AVFoundation.framework/AVFoundation";
 static NSString *const kBackportImage = @"/usr/lib/revenant/org.revenant.backports/libAVFoundationBackports.dylib";
@@ -97,6 +98,36 @@ static NSUInteger layers_with_contents(CALayer *layer)
     return found;
 }
 
+static NSString *layer_tree(CALayer *layer)
+{
+    NSMutableString *tree = [NSMutableString stringWithFormat:@"%s(contents %s", class_getName(object_getClass(layer)),
+                                                              layer.contents ? class_getName(object_getClass(layer.contents)) : "nil"];
+    SEL contextSelector = sel_registerName("contextId");
+    if ([layer respondsToSelector:contextSelector])
+        [tree appendFormat:@", context id %u", ((unsigned (*)(id, SEL))objc_msgSend)(layer, contextSelector)];
+    for (CALayer *child in layer.sublayers)
+        [tree appendFormat:@" %@", layer_tree(child)];
+    [tree appendString:@")"];
+    return tree;
+}
+
+static size_t drawn_pixels(CALayer *layer, unsigned char *center)
+{
+    const size_t size = 64;
+    unsigned char *pixels = calloc(size * size * 4, 1);
+    CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
+    CGContextRef context = CGBitmapContextCreate(pixels, size, size, 8, size * 4, space, (CGBitmapInfo)kCGImageAlphaPremultipliedLast);
+    CGColorSpaceRelease(space);
+    [layer renderInContext:context];
+    size_t drawn = 0;
+    for (size_t index = 0; index < size * size; index++)
+        drawn += (pixels[index * 4] | pixels[index * 4 + 1] | pixels[index * 4 + 2] | pixels[index * 4 + 3]) != 0;
+    memcpy(center, pixels + ((size / 2) * size + size / 2) * 4, 4);
+    CGContextRelease(context);
+    free(pixels);
+    return drawn;
+}
+
 static void spin(void)
 {
     for (int index = 0; index < 60; index++) {
@@ -126,6 +157,10 @@ static void render(const char *label, Class cls, OSType format, const char *form
         spin();
         printf("display layer fact: %s %s ready before %d after %d, layers with contents %lu\n", label, formatName,
                readyBefore, [(AVSampleBufferDisplayLayer *)layer isReadyForMoreMediaData], (unsigned long)layers_with_contents(layer));
+        unsigned char center[4] = {0, 0, 0, 0};
+        size_t drawn = drawn_pixels(layer, center);
+        printf("display layer fact: %s %s layer tree %s, renderInContext drew %zu of 4096 pixels, center rgba %u %u %u %u\n", label, formatName,
+               [layer_tree(layer) UTF8String], drawn, center[0], center[1], center[2], center[3]);
         [(AVSampleBufferDisplayLayer *)layer flushAndRemoveImage];
     }
 }
