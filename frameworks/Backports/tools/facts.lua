@@ -258,7 +258,7 @@ function constant_intros(sdk)
 end
 
 function swift_facts(sdk, name, version, scratch)
-    local output = path.join(scratch, name .. ".json")
+    local output = path.join(scratch, name .. "." .. tostring(os.getpid()) .. "." .. hash.strhash128(tostring({}) .. name .. tostring(os.mclock())) .. ".json")
     os.execv(sdkfiles.digester(), {"-dump-sdk", "-module", name, "-sdk", sdk, "-target", target_of(version), "-avoid-location",
         "-avoid-tool-args", "-swift-only", "-module-cache-path", sdkfiles.model_cache(sdk), "-o", output})
     local document = json.loadfile(output)
