@@ -42,6 +42,14 @@ function main()
     expect("the same payload in another install folder gives the same key", key(moved, app) == base)
     expect("a changed runner in the guest payload gives another key", key(changed, app) ~= base)
 
+    local function selected(selection)
+        return driver.fingerprint(app, first, libraries, program, firmware, nil, selection).key
+    end
+    expect("no selection and an empty selection give one key", selected(nil) == base and selected({}) == base)
+    expect("a selection gives another key than the whole app", selected({"photos_assets"}) ~= base)
+    expect("two different selections give two keys", selected({"photos_assets"}) ~= selected({"scenekit_render"}))
+    expect("the same selection gives the same key", selected({"photos_assets"}) == selected({"photos_assets"}))
+
     write(app, "app bytes rebuilt")
     expect("a rebuilt app gives another key", key(first, app) ~= base)
     write(app, "app bytes")

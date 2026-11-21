@@ -79,11 +79,21 @@ function once(key, body)
     if not entry.values then
         raise("%s", entry.failure)
     end
-    return entry.values[1], entry.values[2], entry.values[3]
+    return entry.values[1], entry.values[2], entry.values[3], entry.values[4]
 end
 
-function judge(case, cases, finished, description)
+function judge(case, cases, finished, description, selection)
     local found = {}
+    if selection and #selection > 0 then
+        local chosen = false
+        for _, name in ipairs(selection) do
+            chosen = chosen or name == case
+        end
+        if not chosen then
+            table.insert(found, string.format("%s is not in REVENANT_RUNTIME_CASES (%s), so this run did not execute it", case, table.concat(selection, ",")))
+            return found
+        end
+    end
     if not finished then
         table.insert(found, string.format("the runtime app did not finish on %s %s (%s): %s", DEVICE, RELEASE, BUILD, description))
         return found
@@ -117,6 +127,10 @@ end
 local function revenant_dependencies(file)
     local found = {}
     for line in os.iorunv("xcrun", {"otool", "-L", file}):gmatch("[^\n]+") do
+        local relative = line:match("^%s+(@%a+_?%a*/%S+)")
+        if relative then
+            raise("%s links %s, a path the guest resolves against the loading image, which the harness cannot place in the rootfs: link it by its /usr/lib/revenant install name", path.filename(file), relative)
+        end
         local name = line:match("^%s+(/usr/lib/revenant/%S+)")
         if name and not name:find("^/usr/lib/revenant/org%.revenant%.backports/") then
             table.insert(found, name)
@@ -163,7 +177,7 @@ function dependency_closure(libraries, packages)
     return result
 end
 
-local function execute(program, firmware, libraries, app, guest, folder, saved, dependencies)
+local function execute(program, firmware, libraries, app, guest, folder, saved, dependencies, selection)
     local started = os.mclock()
     local rootfs = path.join(folder, "rootfs")
     emulator.clone(firmware, rootfs)
@@ -181,7 +195,12 @@ local function execute(program, firmware, libraries, app, guest, folder, saved, 
     os.mkdir(path.directory(binary))
     os.cp(app, binary)
     os.vrunv("chmod", {"0755", binary})
-    emulator.install_runner(rootfs, guest, {"/" .. BINARY}, 60, RELEASE)
+    local arguments = {"/" .. BINARY}
+    if selection and #selection > 0 then
+        table.insert(arguments, "--cases")
+        table.insert(arguments, table.concat(selection, ","))
+    end
+    emulator.install_runner(rootfs, guest, arguments, 60, RELEASE)
     local results = emulator.results(rootfs)
     local verdict_file = path.join(results, "verdict.json")
     local perf_ready = emulator.guest_path(rootfs, "/var/mobile/Library/Caches/revenant-photos-perf-ready")
@@ -288,6 +307,27 @@ local function case_names()
     return names
 end
 
+function parse_selection(text, known)
+    local chosen, seen = {}, {}
+    for name in (text or ""):gmatch("[^,%s]+") do
+        if not seen[name] then
+            seen[name] = true
+            table.insert(chosen, name)
+        end
+    end
+    local present = {}
+    for _, name in ipairs(known) do
+        present[name] = true
+    end
+    for _, name in ipairs(chosen) do
+        if not present[name] then
+            raise("REVENANT_RUNTIME_CASES names %s, which is not a runtime case", name)
+        end
+    end
+    table.sort(chosen)
+    return chosen
+end
+
 local function acquire(lock, key)
     local started = os.mclock()
     local announced
@@ -304,7 +344,7 @@ local function acquire(lock, key)
     end
 end
 
-function fingerprint(app, guest, libraries, program, firmware, dependencies)
+function fingerprint(app, guest, libraries, program, firmware, dependencies, selection)
     local identity = {
         dependencies = {},
         program = file_hash(program),
@@ -312,6 +352,7 @@ function fingerprint(app, guest, libraries, program, firmware, dependencies)
         guest = tree_hash(path.join(guest, "usr")),
         driver = file_hash(DRIVER),
         cases = text_hash(table.concat(case_names(), "\n")),
+        selection = table.concat(selection or {}, ","),
         image = image_hash(firmware),
         libraries = {},
     }
@@ -322,7 +363,7 @@ function fingerprint(app, guest, libraries, program, firmware, dependencies)
         table.insert(identity.dependencies, dependency.name .. "=" .. file_hash(dependency.source))
     end
     local key = text_hash(table.concat({identity.program, identity.app, identity.guest, identity.driver,
-                                        identity.cases, identity.image, table.concat(identity.libraries, ";"),
+                                        identity.cases, identity.selection, identity.image, table.concat(identity.libraries, ";"),
                                         table.concat(identity.dependencies, ";")}, ";"))
     return {identity = identity, key = key}
 end
@@ -338,12 +379,13 @@ local function run(app, guest)
         raise("no lib*Backports.dylib in %s: build them with ./xmakew build -P . FoundationBackports UIKitBackports, or set --backports_libs to a folder of them", libs_dir)
     end
     local dependencies = dependency_closure(libraries)
-    local fingerprinted = fingerprint(app, guest, libraries, program, firmware, dependencies)
+    local selection = parse_selection(os.getenv("REVENANT_RUNTIME_CASES"), case_names())
+    local fingerprinted = fingerprint(app, guest, libraries, program, firmware, dependencies, selection)
     local identity, key = fingerprinted.identity, fingerprinted.key
     local folder = path.join(home_cache(), key)
     local saved = path.join(folder, "cases.json")
     if os.isfile(saved) then
-        return json.loadfile(saved), true, ""
+        return json.loadfile(saved), true, "", selection
     end
     os.mkdir(folder)
     json.savefile(path.join(folder, "identity.json"), identity)
@@ -357,7 +399,7 @@ local function run(app, guest)
             if os.isfile(saved) then
                 return json.loadfile(saved), true, ""
             end
-            return execute(program, firmware, libraries, app, guest, folder, saved, dependencies)
+            return execute(program, firmware, libraries, app, guest, folder, saved, dependencies, selection)
         end)
         os.tryrm(holder)
         lock:unlock()
@@ -365,7 +407,7 @@ local function run(app, guest)
         if not values then
             raise(failure)
         end
-        return values[1], values[2], values[3]
+        return values[1], values[2], values[3], selection
     end)
 end
 
@@ -387,5 +429,5 @@ function failures(case, target)
         table.insert(found, failure or "the runtime run returned no results")
         return found
     end
-    return judge(case, values[1], values[2], values[3])
+    return judge(case, values[1], values[2], values[3], values[4])
 end

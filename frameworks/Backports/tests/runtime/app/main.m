@@ -71,21 +71,37 @@ static void revenant_run(const char *name, revenant_case_function function, int 
     fflush(stdout);
 }
 
+static int revenant_selected(const char *selection, const char *name)
+{
+    size_t length = strlen(name);
+    for (const char *cursor = selection; *cursor;) {
+        const char *end = strchr(cursor, ',');
+        size_t span = end ? (size_t)(end - cursor) : strlen(cursor);
+        if (span == length && strncmp(cursor, name, length) == 0)
+            return 1;
+        cursor += span + (end ? 1 : 0);
+    }
+    return 0;
+}
+
 int main(int argc, char **argv)
 {
     @autoreleasepool {
         revenant_failed_checks = [NSMutableArray array];
-        const char *only = getenv("REVENANT_ONLY_CASE");
+        const char *selection = NULL;
+        for (int index = 1; index + 1 < argc; index++) {
+            if (strcmp(argv[index], "--cases") == 0)
+                selection = argv[index + 1];
+        }
+        int ran = 0;
         for (int index = 0; index < revenant_count; index++) {
-            if (only) {
-                if (strcmp(only, revenant_names[index]) == 0)
-                    revenant_run(revenant_names[index], revenant_functions[index], 0);
+            if (selection && !revenant_selected(selection, revenant_names[index]))
                 continue;
-            }
             revenant_run(revenant_names[index], revenant_functions[index], 0);
             revenant_run(revenant_names[index], revenant_functions[index], 1);
+            ran++;
         }
-        printf("REVENANT-DONE cases=%d\n", revenant_count);
+        printf("REVENANT-DONE cases=%d\n", ran);
         fflush(stdout);
     }
     return 0;
