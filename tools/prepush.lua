@@ -31,10 +31,17 @@ local GATE_JOBS = 6
 local GATE_LINES = 30
 local GATE_EXCLUDES = {"/.git", "/.xmake", "/build", "/.cache", "/.cache-private", "/.cache-boot", "/.cache-*", "/.claude/worktrees"}
 
+local REFUSAL_EXIT = 3
+
 local function budgeted(command, opt)
     opt = opt or {}
     local args = table.join({"l", "-P", root, path.join(root, "tools", "budget.lua"), "run", "--class", "critical", "--jobs", tostring(opt.jobs or 2), "--"}, command)
     return os.execv(os.programfile(), args, {try = true, curdir = opt.curdir or root, envs = opt.envs, stdout = opt.output, stderr = opt.output}) == 0
+end
+
+local function budget_refused()
+    local args = {"l", "-P", root, path.join(root, "tools", "budget.lua"), "refused"}
+    return os.execv(os.programfile(), args, {try = true}) == REFUSAL_EXIT
 end
 
 local function gate_folder()
@@ -301,6 +308,9 @@ local function run_steps(steps, opt)
             print("ok %s cached", step.name)
         else
             local ok = step.run()
+            if not ok and opt.refused and opt.refused() then
+                return failed, true
+            end
             if ok and key then
                 remember(opt.store, step.name, key)
             end
@@ -313,7 +323,7 @@ local function run_steps(steps, opt)
             end
         end
     end
-    return failed
+    return failed, false
 end
 
 local STEPS = {
@@ -525,11 +535,23 @@ local function test_arguments()
         return {name = name, cache = false, run = function () table.insert(runs, name); return ok end}
     end
     local plan = {recording("cheap", false), recording("heavy", true)}
-    local failed = run_steps(plan, {keep_going = false})
+    local failed, refused = run_steps(plan, {keep_going = false})
     check("a failed check stops the run before the next one", table.concat(runs, ",") .. "/" .. table.concat(failed, ","), "cheap/cheap")
     runs = {}
     failed = run_steps(plan, {keep_going = true})
     check("--keep-going runs the next check after a failure", table.concat(runs, ",") .. "/" .. table.concat(failed, ","), "cheap,heavy/cheap")
+
+    runs = {}
+    local none_refused = function () return false end
+    failed, refused = run_steps(plan, {keep_going = true, refused = none_refused})
+    check("a real failure is still a failed check", table.concat(runs, ",") .. "/" .. table.concat(failed, ","), "cheap,heavy/cheap")
+    check("a real failure is not a budget refusal", refused, false)
+
+    runs = {}
+    failed, refused = run_steps(plan, {keep_going = true, refused = function () return true end})
+    check("a budget refusal is not counted as a failed check", table.concat(failed, ","), "")
+    check("a budget refusal is reported as a refusal", refused, true)
+    check("a budget refusal stops before the next check", table.concat(runs, ","), "cheap")
     print("prepush arguments: %d tests passed", count)
 end
 
@@ -550,7 +572,11 @@ function main(command, ...)
     end
     local steps = select_steps(STEPS, parsed.only)
     local input = inputs(root)
-    local failed = run_steps(steps, {keep_going = parsed.keep_going, store = path.join(cache().root(), "prepush"), key = function (name) return key_of(input, name) end})
+    local failed, refused = run_steps(steps, {keep_going = parsed.keep_going, store = path.join(cache().root(), "prepush"), key = function (name) return key_of(input, name) end, refused = budget_refused})
+    if refused then
+        print("prepush: budget refused; this is not a failed check, free the space and rerun")
+        os.exit(REFUSAL_EXIT)
+    end
     if #failed > 0 then
         raise("%d of %d checks failed: %s", #failed, #steps, table.concat(failed, ", "))
     end
