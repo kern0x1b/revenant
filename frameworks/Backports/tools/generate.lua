@@ -7,6 +7,7 @@ local facts = import("facts", {rootdir = os.scriptdir(), anonymous = true})
 local skeleton = import("skeleton", {rootdir = os.scriptdir(), anonymous = true})
 local markers = import("markers", {rootdir = os.scriptdir(), anonymous = true})
 local libraries = import("library_list", {rootdir = os.scriptdir(), anonymous = true}).backports_libraries()
+local exclusive = import("@addon.revenant.exclusive", {anonymous = true})
 local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
 local timing = import("@addon.revenant.apple.timing", {anonymous = true})
 
@@ -24,13 +25,13 @@ local DEVICE_GLOBALS_HEADER = {
     "# frameworks/Backports/tests/device_globals_test.lua checks this file against the cache where the cache is present.",
 }
 
-local function failure_file(logs, name)
-    return path.join(logs, name .. ".failed")
+local function failure_file(logs, name, token)
+    return path.join(logs, name .. "." .. token .. ".failed")
 end
 
 local function worker(args)
-    local sdk, version, cache, logs = args[2], args[3], args[4], args[5]
-    for index = 6, #args do
+    local sdk, version, cache, logs, token = args[2], args[3], args[4], args[5], args[6]
+    for index = 7, #args do
         local name = args[index]
         try
         {
@@ -40,7 +41,10 @@ local function worker(args)
             catch
             {
                 function (errors)
-                    io.writefile(failure_file(logs, name), tostring(errors))
+                    local file = failure_file(logs, name, token)
+                    local temp = file .. "." .. tostring(os.getpid()) .. ".part"
+                    io.writefile(temp, tostring(errors))
+                    os.mv(temp, file)
                     raise("%s: %s", name, tostring(errors))
                 end
             }
@@ -48,11 +52,12 @@ local function worker(args)
     end
 end
 
-local function shard_failure(logs, list, errors)
+local function shard_failure(logs, list, token, errors)
     local reports = {}
     for _, name in ipairs(list) do
-        if os.isfile(failure_file(logs, name)) then
-            table.insert(reports, name .. ": " .. string.sub(io.readfile(failure_file(logs, name)), -1500))
+        local file = failure_file(logs, name, token)
+        if os.isfile(file) then
+            table.insert(reports, name .. ": " .. string.sub(io.readfile(file), -1500))
         end
     end
     if #reports == 0 then
@@ -72,11 +77,12 @@ function extract_all(sdk, version, cache, logs, names)
     if #shards == 0 then
         return
     end
+    local token = tostring(os.getpid()) .. "." .. hash.strhash128(tostring({}) .. tostring(os.mclock()))
     runjobs("backports/facts", function (index)
         local list = shards[index]
-        local argv = {"l", "-P", sdkfiles.root(), path.join(os.scriptdir(), "generate.lua"), "facts", sdk, version, cache, logs}
+        local argv = {"l", "-P", sdkfiles.root(), path.join(os.scriptdir(), "generate.lua"), "facts", sdk, version, cache, logs, token}
         for _, name in ipairs(list) do
-            os.tryrm(failure_file(logs, name))
+            os.tryrm(failure_file(logs, name, token))
             table.insert(argv, name)
         end
         try
@@ -87,37 +93,46 @@ function extract_all(sdk, version, cache, logs, names)
             catch
             {
                 function (errors)
-                    raise("facts failed:\n%s", shard_failure(logs, list, errors))
+                    raise("facts failed:\n%s", shard_failure(logs, list, token, errors))
                 end
             }
         }
     end, {total = #shards, comax = #shards})
 end
 
-local function ready(sdk, version, logs, names)
-    local cache = sdkfiles.cache_folder(sdk)
-    os.mkdir(cache)
-    local missing = {}
-    for _, name in ipairs(names) do
-        if not os.isfile(path.join(cache, name .. ".tsv")) then
-            table.insert(missing, name)
+function ready(sdk, version, logs, names)
+    local root = sdkfiles.shared_root()
+    local key = sdkfiles.cache_key(sdk)
+    return exclusive.run(path.join(root, key .. ".lock"), "the facts of " .. key, function ()
+        local cache = path.join(root, key)
+        os.mkdir(cache)
+        local missing = {}
+        for _, name in ipairs(names) do
+            if not os.isfile(path.join(cache, name .. ".tsv")) then
+                table.insert(missing, name)
+            end
         end
-    end
-    os.tryrm(path.join(sdkfiles.build_root(), "cache"))
-    local cutoff = os.time() - 14 * 24 * 3600
-    for _, other in ipairs(os.dirs(path.join(sdkfiles.shared_root(), "*"))) do
-        if path.filename(other) ~= sdkfiles.cache_key(sdk) and os.mtime(other) < cutoff then
-            os.tryrm(other)
+        os.tryrm(path.join(sdkfiles.build_root(), "cache"))
+        local cutoff = os.time() - 14 * 24 * 3600
+        for _, other in ipairs(os.dirs(path.join(root, "*"))) do
+            local otherkey = path.filename(other)
+            if otherkey ~= key and os.mtime(other) < cutoff then
+                exclusive.attempt(path.join(root, otherkey .. ".lock"), function ()
+                    if os.isdir(other) and os.mtime(other) < cutoff then
+                        os.tryrm(other)
+                    end
+                end)
+            end
         end
-    end
-    os.vrunv("touch", {cache})
-    if #missing > 0 then
-        os.mkdir(logs)
-        timing.run("generate: facts extraction of " .. #missing .. " of " .. #names .. " frameworks (cache " .. path.filename(cache) .. ")", function ()
-            extract_all(sdk, version, cache, logs, missing)
-        end)
-    end
-    return cache
+        os.vrunv("touch", {cache})
+        if #missing > 0 then
+            os.mkdir(logs)
+            timing.run("generate: facts extraction of " .. #missing .. " of " .. #names .. " frameworks (cache " .. key .. ")", function ()
+                extract_all(sdk, version, cache, logs, missing)
+            end)
+        end
+        return cache
+    end)
 end
 
 local function frameworks_of(cache, names, sdk)
