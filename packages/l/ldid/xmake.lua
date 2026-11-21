@@ -13,21 +13,20 @@ package("ldid")
     add_deps("revenant@openssl-host 4.0.2", {host = true})
 
     on_install("@macosx", function (package)
+        local recipes = import("@addon.revenant.package_recipes", {anonymous = true})
         local cflags, ldflags = {}, {}
         for _, name in ipairs({"libplist", "openssl-host"}) do
-            local dep = package:dep(name)
-            local fetched = dep:fetch()
-            local root = dep:installdir()
-            for _, folder in ipairs(table.wrap(fetched and (fetched.includedirs or fetched.sysincludedirs) or path.join(root, "include"))) do
+            local flags = recipes.dependency_flags(package:dep(name))
+            for _, folder in ipairs(flags.includedirs) do
                 table.insert(cflags, "-I" .. folder)
             end
-            for _, define in ipairs(table.wrap(fetched and fetched.defines or dep:get("defines"))) do
+            for _, define in ipairs(flags.defines) do
                 table.insert(cflags, "-D" .. define)
             end
-            for _, folder in ipairs(table.wrap(fetched and fetched.linkdirs or path.join(root, "lib"))) do
+            for _, folder in ipairs(flags.linkdirs) do
                 table.insert(ldflags, "-L" .. folder)
             end
-            for _, link in ipairs(table.wrap(fetched and fetched.links or dep:get("links"))) do
+            for _, link in ipairs(flags.links) do
                 table.insert(ldflags, "-l" .. link)
             end
         end
