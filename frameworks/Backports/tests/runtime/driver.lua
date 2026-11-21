@@ -126,12 +126,21 @@ end
 
 local function revenant_dependencies(file)
     local found = {}
+    local own = os.iorunv("xcrun", {"otool", "-D", file}):match("\n(%S+)%s*$")
     for line in os.iorunv("xcrun", {"otool", "-L", file}):gmatch("[^\n]+") do
         local relative = line:match("^%s+(@%a+_?%a*/%S+)")
+        if relative == own then
+            own = nil
+            relative = nil
+        end
         if relative then
             raise("%s links %s, a path the guest resolves against the loading image, which the harness cannot place in the rootfs: link it by its /usr/lib/revenant install name", path.filename(file), relative)
         end
         local name = line:match("^%s+(/usr/lib/revenant/%S+)")
+        if name == own then
+            own = nil
+            name = nil
+        end
         if name and not name:find("^/usr/lib/revenant/org%.revenant%.backports/") then
             table.insert(found, name)
         end
