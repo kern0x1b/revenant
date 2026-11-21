@@ -158,6 +158,55 @@ var CHECKS = {
       return answers;
     });
   },
+  FileSystem: function (module) {
+    var base = module.cacheDirectory + 'rn-probe-fs/';
+    var steps = {};
+    function step(name, run) {
+      try { steps[name] = run(); } catch (error) { steps[name] = 'error: ' + String(error && error.message || error); }
+    }
+    var directory = new module.FileSystemDirectory(base);
+    step('directoryCreate', function () { directory.create({intermediates: true, overwrite: true}); return directory.exists; });
+    var file = new module.FileSystemFile(base + 'a.txt');
+    step('fileCreateWrite', function () { file.create({}); file.write('hello, iOS 6'); return file.exists; });
+    step('textSync', function () { return file.textSync(); });
+    step('size', function () { return file.size; });
+    step('md5', function () { return file.md5; });
+    step('base64Sync', function () { return file.base64Sync(); });
+    step('bytesSync', function () { return Array.prototype.slice.call(file.bytesSync(), 0, 5); });
+    step('append', function () { file.write('!', {append: true}); return file.textSync(); });
+    step('info', function () { var info = file.info({md5: true}); return {exists: info.exists, size: info.size, md5: info.md5, hasModification: info.modificationTime > 0}; });
+    var copy = new module.FileSystemFile(base + 'b.txt');
+    step('copySync', function () { file.copySync(copy); return copy.textSync(); });
+    step('renameMoveSync', function () { copy.rename('c.txt'); var moved = new module.FileSystemFile(base + 'd.txt'); new module.FileSystemFile(base + 'c.txt').moveSync(moved); return moved.textSync(); });
+    step('handle', function () {
+      var data = new module.FileSystemFile(base + 'h.bin');
+      data.create({});
+      var handle = data.open('rw');
+      handle.writeBytes(new Uint8Array([1, 2, 3, 4, 5, 6]));
+      var size = handle.size;
+      handle.close();
+      var reader = data.open('r');
+      var first = Array.prototype.slice.call(reader.readBytes(4));
+      var offset = reader.offset;
+      reader.close();
+      return {size: size, first: first, offset: offset};
+    });
+    step('createFileIn', function () { directory.createFile('e.txt', 'in directory'); directory.createDirectory('sub'); return directory.listAsRecords().map(function (entry) { return entry.uri.replace(/^.*rn-probe-fs\//, ''); }).sort(); });
+    step('directorySize', function () { return directory.size; });
+    step('disk', function () { return {total: module.totalDiskSpace > 0, available: module.availableDiskSpace > 0}; });
+    step('writeBase64', function () { var b = new module.FileSystemFile(base + 'b64.bin'); b.create({}); b.write('AQID', {encoding: 'base64'}); return Array.prototype.slice.call(b.bytesSync()); });
+    function cleanup() {
+      step('cleanup', function () { directory.delete(); return !directory.exists; });
+      return steps;
+    }
+    return new module.FileSystemFile(base + 'a.txt').text().then(function (text) {
+      steps.asyncText = text;
+      return cleanup();
+    }, function (error) {
+      steps.asyncText = 'error: ' + String(error && error.message || error);
+      return cleanup();
+    });
+  },
   ExpoLocalization: function (module) {
     var locales = module.getLocales();
     var calendars = module.getCalendars();
