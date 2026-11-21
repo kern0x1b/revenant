@@ -12,6 +12,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/inputs.lua m
 
 local app_config = import("app_config", {rootdir = os.scriptdir(), anonymous = true})
 local json = import("core.base.json")
+local expo_json = import("expo_json", {rootdir = os.scriptdir(), anonymous = true})
 
 local INPUTS = {"codegen", "rn-codegen", "rn-src", "rn-headers", "lib-headers", "expo-jsi", "expo-pods", "expo-core", "expo-src", "nitro", "unistyles", "keyboard", "screens", "app-assets", "app-components", "app-manifest"}
 
@@ -305,16 +306,24 @@ function covered_packages(ctx)
 end
 
 function expo_packages(ctx)
+    local packages
     if ctx.options.real then
-        local packages = table.clone(EXPO_PARITY_BASE)
+        packages = table.clone(EXPO_PARITY_BASE)
         for _, package in ipairs(string.split(ctx.options.real, ",", {plain = true})) do
             if package ~= "" then
                 table.insert(packages, package)
             end
         end
-        return packages
+    else
+        packages = covered_packages(ctx)
     end
-    return covered_packages(ctx)
+    for _, package in ipairs(app_modules(ctx.options)) do
+        if not installed_in_application(ctx, package) then
+            raise("the app manifest names the module %s, which is not in the application's node_modules", package)
+        end
+        table.insert(packages, package)
+    end
+    return packages
 end
 
 function expo_dir(ctx, package)
@@ -764,8 +773,7 @@ function expo_classes(ctx)
     local real = expo_real(ctx)
     for _, package in ipairs(expo_packages(ctx)) do
         local config = io.readfile(path.join(expo_dir(ctx, package), "expo-module.config.json"))
-        local apple = config:match('"apple"%s*:%s*{.-"modules"%s*:%s*%[(.-)%]')
-        for name in (apple or ""):gmatch('"([^"]+)"') do
+        for _, name in ipairs(expo_json.apple_config(config).modules) do
             if not EXPO_SKIP_MODULES[name] then
                 table.insert(classes, string.format("      (module: %s.self, name: nil),", name))
             end
@@ -783,9 +791,7 @@ function expo_subscribers(ctx)
     local subscribers = {}
     for _, package in ipairs(expo_packages(ctx)) do
         local config = io.readfile(path.join(expo_dir(ctx, package), "expo-module.config.json"))
-        local apple = config:match('"apple"%s*:%s*(%b{})') or ""
-        local names = apple:match('"appDelegateSubscribers"%s*:%s*%[(.-)%]') or ""
-        for name in names:gmatch('"([^"]+)"') do
+        for _, name in ipairs(expo_json.apple_config(config).subscribers) do
             table.insert(subscribers, string.format("      %s.self,", name))
         end
     end
@@ -1035,6 +1041,19 @@ function app_optional_components(options)
     for _, name in ipairs(names) do
         if type(name) ~= "string" or name == "" or name:find('[",]') then
             raise("optionalComponents of the app manifest takes component names, not %s", tostring(name))
+        end
+    end
+    return names
+end
+
+function app_modules(options)
+    if not options.manifest and not (options.project and os.isfile(path.join(options.project, "host.json"))) then
+        return {}
+    end
+    local names = app_manifest(options).modules or {}
+    for _, name in ipairs(names) do
+        if type(name) ~= "string" or name == "" or name:find('[",\\\\ ]') or name:find("%.%.", 1) then
+            raise("modules of the app manifest takes package names, not %s", tostring(name))
         end
     end
     return names

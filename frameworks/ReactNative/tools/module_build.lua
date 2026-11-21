@@ -63,10 +63,13 @@ function run(folder, cache, extra, execute)
         RN_HERMES = "1",
     }
     say("build start")
-    local status = execute("./xmakew", {"l", "-P", ".", "tools/budget.lua", "run", "--class", "normal", "--jobs", "4", "--min", "1", "--",
+    local arguments = {"l", "-P", ".", "tools/budget.lua", "run", "--class", "normal", "--jobs", "4", "--min", "1", "--",
         "./xmakew", "l", "-P", ".", "frameworks/ReactNative/tools/isolate.lua", "build", path.absolute(folder),
-        "--cache", path.absolute(cache), "--target", "RNHost", "--real", real, "--log", path.absolute(folder) .. "-build.log"},
-        {envs = envs, try = true})
+        "--cache", path.absolute(cache), "--target", "RNHost", "--real", real, "--log", path.absolute(folder) .. "-build.log"}
+    if os.getenv("MODULE_BUILD_DEB") then
+        table.join2(arguments, {"--deb", path.absolute(os.getenv("MODULE_BUILD_DEB"))})
+    end
+    local status = execute("./xmakew", arguments, {envs = envs, try = true})
     say("build end, status " .. tostring(status))
     return status
 end

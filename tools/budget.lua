@@ -6,10 +6,11 @@ local POLL_MS = 1000
 local NICE = "/usr/bin/nice"
 local TASKPOLICY = "/usr/sbin/taskpolicy"
 local CLOSE_INHERITED = 'i=3; while [ $i -lt 256 ]; do eval "exec $i>&-" 2>/dev/null; i=$((i+1)); done; exec "$@"'
+local MB = 1024 * 1024
 local PRESSURE_WARN = 2
 local PRESSURE_CRITICAL = 4
-local COMPRESSOR_GROWTH = 1024
-local MB = 1024 * 1024
+local PAGEOUT_BYTES = 1 * MB
+local COMPRESSOR_BYTES = 512 * MB
 local SYSCTL = "/usr/sbin/sysctl"
 local VMSTAT = "/usr/bin/vm_stat"
 local DF = "/bin/df"
@@ -51,6 +52,18 @@ local function parse_pressure(text)
     return tonumber((text or ""):match("(%d+)")) or 1
 end
 
+local function parse_sysctl_number(key, out)
+    local value = tonumber((out:match("^%s*(%d+)%s*$")))
+    if not value then
+        raise("budget: cannot read %s: got %q", key, out:gsub("%s+$", ""))
+    end
+    return value
+end
+
+local function numeric_sysctl(key)
+    return parse_sysctl_number(key, os.iorunv(SYSCTL, {"-n", key}))
+end
+
 local function parse_vmstat(text)
     local size = tonumber(text:match("page size of (%d+) bytes")) or 4096
     local function pages(label)
@@ -79,9 +92,14 @@ end
 local function sample()
     local loadavg = parse_loadavg(os.iorunv(SYSCTL, {"-n", "vm.loadavg"}))
     local pressure = parse_pressure(os.iorunv(SYSCTL, {"-n", "kern.memorystatus_vm_pressure_level"}))
+    local level = numeric_sysctl("kern.memorystatus_level")
+    local memsize = numeric_sysctl("hw.memsize")
     local vm = parse_vmstat(os.iorunv(VMSTAT, {}))
+    vm.at = os.mclock()
+    local available = level * memsize / (100 * MB)
     local reading = {loadavg = loadavg, load = math.max(loadavg, read_grants(pool_folder())),
-                     pressure = pressure, vm = vm, previous = previous}
+                     pressure = pressure, available = available, level = level, memsize = memsize,
+                     vm = vm, previous = previous}
     previous = vm
     return reading
 end
@@ -120,17 +138,24 @@ local function own_runnable(pids)
 end
 
 local function memory_headroom(reading)
-    local vm = reading.vm
-    local available = math.floor(math.max(0, ((vm.free + vm.speculative) * vm.size / MB) - RESERVE_MB) / TOKEN_MB)
     if reading.pressure >= PRESSURE_CRITICAL then
         return 0
     end
+    local vm = reading.vm
     local prev = reading.previous
-    local growing = prev ~= nil and (vm.compressor - prev.compressor) > COMPRESSOR_GROWTH
-    local pageouts = prev ~= nil and (vm.pageouts - prev.pageouts) > 0
-    if reading.pressure >= PRESSURE_WARN or growing or pageouts then
+    if prev then
+        local elapsed = (vm.at or 0) - (prev.at or 0)
+        elapsed = elapsed > 0 and elapsed / 1000 or 1
+        local pageouts = (vm.pageouts - prev.pageouts) * vm.size / elapsed
+        local compressor = (vm.compressor - prev.compressor) * vm.size / elapsed
+        if pageouts > PAGEOUT_BYTES or compressor > COMPRESSOR_BYTES then
+            return 1
+        end
+    end
+    if reading.pressure >= PRESSURE_WARN then
         return 1
     end
+    local available = math.floor(math.max(0, (reading.available or 0) - RESERVE_MB) / TOKEN_MB)
     return math.max(1, available)
 end
 
@@ -147,6 +172,13 @@ local function capacity(reading, held, own)
         fresh = math.max(1, cpu)
     end
     return held + fresh
+end
+
+local function progress_capacity(reading, held, minimum)
+    if memory_headroom(reading) < minimum then
+        return held
+    end
+    return held + minimum
 end
 
 local function grantable(cap, held, free, minimum, maximum)
@@ -296,9 +328,15 @@ local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms)
         reading.cores = cores
         local free, held, pids = snapshot_slots(folder, cores)
         local cap = capacity(reading, held, own_runnable(pids))
+        local headroom = memory_headroom(reading)
+        local progress = held == 0 and progress_capacity(reading, held, minimum) or held
+        local guarantee = progress > held
+        if guarantee then
+            cap = math.max(cap, progress)
+        end
         local available = math.min(math.max(cap - held, 0), #free)
         local count = grantable(cap, held, #free, minimum, maximum)
-        if count > 0 and not ahead_of(folder, ticket.name, available) then
+        if count > 0 and not ahead_of(folder, ticket.name, guarantee and math.min(#free, headroom) or available) then
             local grant = table.slice(free, 1, count)
             release_locks(table.slice(free, count + 1))
             for _, entry in ipairs(grant) do
@@ -416,23 +454,25 @@ local function status()
     print("cores     %d (reserve %d)", cores, RESERVE_CORES)
     print("cpu       %.2f loadavg, %.2f effective load, %d runnable of holders, %d token(s) of headroom",
           reading.loadavg, load, own, math.max(0, cores - RESERVE_CORES - load))
-    print("memory    pressure %d, %d MB free (inactive pages not counted), %d token(s) of headroom", reading.pressure,
-          math.floor((reading.vm.free + reading.vm.speculative) * reading.vm.size / MB), memory_headroom(reading))
+    print("memory    pressure %d, %d MB available (memorystatus %d%%), %d token(s) of headroom", reading.pressure,
+          math.floor(reading.available), reading.level or 0, memory_headroom(reading))
     print("held      %d token(s)", held)
     print("capacity  %d token(s) for a new request now", capacity(reading, held, own))
     print("queued    %d ticket file(s)", queued(folder))
     print("disk      %.0f GB free on the checkout's volume (floor %d GB)", free_disk_gb(), DISK_FLOOR_GB)
 end
 
-local function test_reading(loadavg, pressure, free_mb, opt)
+local function test_reading(loadavg, pressure, available_mb, opt)
     opt = opt or {}
-    local size = 16384
+    local size = opt.size or 16384
     local function pages(mb)
         return math.floor(mb * MB / size)
     end
     return {loadavg = loadavg, load = opt.load or loadavg, pressure = pressure,
-            vm = {size = size, free = pages(free_mb), speculative = pages(opt.speculative or 0),
-                  compressor = opt.compressor or 0, pageouts = opt.pageouts or 0},
+            available = opt.available or available_mb,
+            vm = {size = size, free = pages(opt.free or available_mb), speculative = pages(opt.speculative or 0),
+                  inactive = pages(opt.inactive or 0), purgeable = pages(opt.purgeable or 0),
+                  compressor = opt.compressor or 0, pageouts = opt.pageouts or 0, at = opt.at or 0},
             previous = opt.previous, cores = opt.cores or 12}
 end
 
@@ -447,6 +487,11 @@ local function test_suite()
     check("the one-minute window is the cpu reading", parse_loadavg("{ 8.50 2.10 1.00 }\n"), 8.5)
     check("a missing load average is zero", parse_loadavg(""), 0)
     check("pressure is read from the sysctl", parse_pressure("2\n"), 2)
+    check("a numeric sysctl answer is parsed", parse_sysctl_number("test", "77\n"), 77)
+    local bad_sysctl
+    try { function () parse_sysctl_number("test", "not a number\n") end,
+          catch { function (raised) bad_sysctl = tostring(raised) end } }
+    check("an unparseable sysctl answer raises instead of becoming zero", bad_sysctl ~= nil, true)
 
     local vmtext = "Mach Virtual Memory Statistics: (page size of 16384 bytes)\n" ..
                    "Pages free:                  65536.\n" ..
@@ -456,18 +501,24 @@ local function test_suite()
                    "Pageouts:                       7.\n"
     local vm = parse_vmstat(vmtext)
     check("the page size is read", vm.size, 16384)
-    check("inactive pages are not part of the reading", vm.free, 65536)
+    check("inactive pages are not read from vm_stat", vm.free, 65536)
     check("speculative pages are part of the reading", vm.speculative, 16384)
     check("compressor pages are read", vm.compressor, 1024)
     check("pageouts are read", vm.pageouts, 7)
 
-    check("a normal machine counts free memory", memory_headroom(test_reading(0, 1, 11000)), 5)
+    check("a normal machine counts available memory", memory_headroom(test_reading(0, 1, 11000)), 5)
+    check("much inactive memory gives tokens with little free", memory_headroom(test_reading(0, 1, 17203, {free = 135, inactive = 458752})), 9)
     check("warning pressure grants only one token", memory_headroom(test_reading(0, 2, 11000)), 1)
     check("critical pressure grants none", memory_headroom(test_reading(0, 4, 11000)), 0)
     local prev = test_reading(0, 1, 11000).vm
-    check("compressor growth grants only one token", memory_headroom(test_reading(0, 1, 11000, {previous = prev, compressor = prev.compressor + 2048})), 1)
-    check("pageouts grant only one token", memory_headroom(test_reading(0, 1, 11000, {previous = prev, pageouts = prev.pageouts + 3})), 1)
-    check("a stable compressor at normal pressure is not a limit", memory_headroom(test_reading(0, 1, 11000, {previous = prev, compressor = prev.compressor + 1})), 5)
+    check("a single pageout does not clamp", memory_headroom(test_reading(0, 1, 11000, {previous = prev, pageouts = prev.pageouts + 1, at = 1000})), 5)
+    check("a pageout trickle below the rate does not clamp", memory_headroom(test_reading(0, 1, 11000, {previous = prev, pageouts = prev.pageouts + 8, at = 1000})), 5)
+    check("a pageout burst above the rate clamps to one token", memory_headroom(test_reading(0, 1, 11000, {previous = prev, pageouts = prev.pageouts + 128, at = 1000})), 1)
+    check("a compressor burst above the rate clamps to one token", memory_headroom(test_reading(0, 1, 11000, {previous = prev, compressor = prev.compressor + 65536, at = 1000})), 1)
+    check("a stable compressor at normal pressure is not a limit", memory_headroom(test_reading(0, 1, 11000, {previous = prev, compressor = prev.compressor + 1, at = 1000})), 5)
+    local small_pages = test_reading(0, 1, 11000, {size = 4096}).vm
+    check("a 4 KB pageout burst below the byte rate does not clamp", memory_headroom(test_reading(0, 1, 11000, {size = 4096, previous = small_pages, pageouts = small_pages.pageouts + 128, at = 1000})), 5)
+    check("a 4 KB compressor burst below the byte rate does not clamp", memory_headroom(test_reading(0, 1, 11000, {size = 4096, previous = small_pages, compressor = small_pages.compressor + 65536, at = 1000})), 5)
     check("a machine below the reserve still starts one token", memory_headroom(test_reading(0, 1, 100, {speculative = 100})), 1)
 
     check("runnable load bounds the jobs", capacity(test_reading(8, 1, 11000), 3, 0), 5)
@@ -485,9 +536,26 @@ local function test_suite()
     check("sample reads the machine's load average", tostring(live.loadavg), tostring(tonumber(raw_load)))
     local raw_pressure = os.iorunv(SYSCTL, {"-n", "kern.memorystatus_vm_pressure_level"}):match("(%d+)")
     check("sample reads the machine's pressure", tostring(live.pressure), tostring(tonumber(raw_pressure)))
+    local raw_level = tonumber((os.iorunv(SYSCTL, {"-n", "kern.memorystatus_level"})))
+    check("sample reads the machine's memorystatus level", math.abs(live.level - raw_level) <= 1, true)
+    local raw_memsize = tonumber((os.iorunv(SYSCTL, {"-n", "hw.memsize"})))
+    check("sample reads the machine's memory size", live.memsize, raw_memsize)
+    check("available memory is the kernel's free share of physical memory", math.abs(live.available - live.level * live.memsize / (100 * MB)) < 1, true)
     local raw_vm = os.iorunv(VMSTAT, {})
     local raw_free = tonumber(raw_vm:match("Pages free:%s+(%d+)"))
     check("sample reads the machine's free pages", math.abs(live.vm.free - raw_free) < 100000, true)
+    local first, second = sample(), nil
+    os.sleep(1100)
+    second = sample()
+    check("a second sample chains the first as its previous", second.previous, first.vm)
+    check("the second sample stamps a later time", second.vm.at > first.vm.at, true)
+    local window = (second.vm.at - first.vm.at) / 1000
+    check("the sampling window is the elapsed seconds", window >= 1 and window < 10, true)
+    second.pressure, second.available = 1, 11000
+    second.vm.pageouts, second.vm.compressor = second.previous.pageouts, second.previous.compressor
+    check("two real samples at normal pressure have full headroom", memory_headroom(second), 5)
+    second.vm.pageouts = second.previous.pageouts + math.ceil(PAGEOUT_BYTES * window / second.vm.size) + 1
+    check("the real previous and at plumbing clamps an above-rate pageout burst", memory_headroom(second), 1)
     check("a request gets what the room holds", grantable(6, 3, 5, 1, 6), 3)
     check("a request below its minimum gets nothing", grantable(6, 3, 5, 4, 6), 0)
     check("a grant stops at the free slots", grantable(10, 0, 2, 1, 6), 2)
@@ -508,6 +576,13 @@ local function test_suite()
     local base = path.join(os.tmpdir(), string.format("revenant-budget-%d-%d", os.time(), math.random(0, 999999)))
     os.mkdir(base)
     local pool = path.join(base, "pool")
+    local loaded = try { function ()
+        os.iorunv(os.programfile(), {"l", "-P", path.directory(os.scriptdir()),
+            path.join(os.scriptdir(), "budget.lua"), "status"},
+            {envs = {"REVENANT_BUDGET_POOL=" .. path.join(base, "loadpool")}})
+        return true
+    end } or false
+    check("the tool loads as a module in a fresh process", loaded, true)
     local queue = path.join(pool, "queue")
     os.mkdir(queue)
     local stale = path.join(queue, "1-0000000000001-00000001.ticket")
@@ -574,6 +649,7 @@ local function test_suite()
         started_anyway = true
     end, catch { function () end } }
     check("a volume below the floor starts nothing", started_anyway, false)
+    check("and an empty pool stays empty below the floor", held_slots(pool), 0)
 
     local fresh = path.join(base, "fresh")
     local readings = {test_reading(0, 4, 11000), test_reading(0, 4, 11000), test_reading(0, 1, 11000)}
@@ -608,13 +684,115 @@ local function test_suite()
     try { function ()
         acquire(path.join(base, "short"), "normal", 2, 4, function ()
             short_calls = short_calls + 1
-            if short_calls > 3 then
+            if short_calls > 5 then
+                raise("stopped")
+            end
+            return test_reading(50, 1, 100)
+        end, 1)
+    end, catch { function (raised) short_error = tostring(raised) end } }
+    check("a memory-short empty pool waits instead of granting a degraded minimum", short_error ~= nil and short_calls > 5, true)
+
+    local short_pool = path.join(base, "short-held")
+    os.mkdir(short_pool)
+    local short_blocker = io.openlock(slot_path(short_pool, 1))
+    short_blocker:trylock()
+    local held_short_calls = 0
+    local held_short_error
+    try { function ()
+        acquire(short_pool, "normal", 2, 4, function ()
+            held_short_calls = held_short_calls + 1
+            if held_short_calls > 5 then
                 raise("stopped")
             end
             return test_reading(0, 1, 100)
         end, 1)
-    end, catch { function (raised) short_error = tostring(raised) end } }
-    check("a minimum that does not fit never starts short", short_error ~= nil and short_calls > 3, true)
+    end, catch { function (raised) held_short_error = tostring(raised) end } }
+    short_blocker:unlock()
+    short_blocker:close()
+    check("a non-empty pool with a memory shortfall waits and starts nothing", held_short_error ~= nil and held_short_calls > 5, true)
+
+    local full_grant = acquire(path.join(base, "fullmin"), "normal", 4, 4, function () return test_reading(50, 1, 11000) end, 1)
+    check("an empty pool under load grants the full minimum when memory fits", #full_grant, 4)
+    release_locks(full_grant)
+
+    local guarantee_pool = path.join(base, "guarantee")
+    local guarantee_queue = path.join(guarantee_pool, "queue")
+    os.mkdir(guarantee_queue)
+    local function waiting_ticket(queue, name, need)
+        local file = path.join(queue, name)
+        local lock = io.openlock(file)
+        lock:trylock()
+        io.writefile(file, tostring(need))
+        return {name = name, file = file, lock = lock}
+    end
+    local older = waiting_ticket(guarantee_queue, "1-0000000000001-00000001.ticket", 4)
+    local older_calls = 0
+    local function under_load()
+        older_calls = older_calls + 1
+        if older_calls == 4 then
+            leave(older, guarantee_pool)
+        end
+        return test_reading(50, 1, 11000)
+    end
+    local guaranteed = acquire(guarantee_pool, "normal", 4, 4, under_load, 1)
+    check("an empty pool grants the oldest ticket its minimum under outside load", #guaranteed, 4)
+    check("the guarantee waits for the older ticket to leave", older_calls >= 4, true)
+    local stamped = read_grants(guarantee_pool)
+    check("four guaranteed slots count as four tokens", stamped >= 3.9 and stamped <= 4.001, true)
+    local blocked_calls = 0
+    local blocked_error
+    try { function ()
+        acquire(guarantee_pool, "normal", 4, 4, function ()
+            blocked_calls = blocked_calls + 1
+            if blocked_calls > 5 then
+                raise("stopped")
+            end
+            return test_reading(50, 1, 11000)
+        end, 1)
+    end, catch { function (raised) blocked_error = tostring(raised) end } }
+    check("a second ticket cannot take the guarantee while the pool is held", blocked_error ~= nil and blocked_calls > 5, true)
+    release_locks(guaranteed)
+
+    local order_pool = path.join(base, "order")
+    local order_queue = path.join(order_pool, "queue")
+    os.mkdir(order_queue)
+    local older_critical = waiting_ticket(order_queue, "1-0000000000001-00000001.ticket", 6)
+    local younger_calls = 0
+    local younger_error
+    try { function ()
+        acquire(order_pool, "background", 2, 2, function ()
+            younger_calls = younger_calls + 1
+            if younger_calls > 5 then
+                raise("stopped")
+            end
+            return test_reading(50, 1, 20000)
+        end, 1)
+    end, catch { function (raised) younger_error = tostring(raised) end } }
+    check("a younger ticket cannot take the guarantee past an older large one", younger_error ~= nil and younger_calls > 5, true)
+    check("and it leaves no grant stamp", (io.readfile(slot_path(order_pool, 1)) or ""):match("g %d+ %d+") == nil, true)
+    leave(older_critical, order_pool)
+    local older_grant = acquire(order_pool, "critical", 6, 6, function () return test_reading(50, 1, 20000) end, 1)
+    check("the older critical ticket then gets its six tokens", #older_grant, 6)
+    release_locks(older_grant)
+
+    local backfill_pool = path.join(base, "backfill")
+    local backfill_queue = path.join(backfill_pool, "queue")
+    os.mkdir(backfill_queue)
+    local starved = waiting_ticket(backfill_queue, "1-0000000000001-00000001.ticket", 6)
+    local backfill_grant = acquire(backfill_pool, "normal", 2, 2, function () return test_reading(50, 1, 5120) end, 1)
+    check("a ticket whose minimum fits memory backfills past a memory-starved older one", #backfill_grant, 2)
+    release_locks(backfill_grant)
+    leave(starved, backfill_pool)
+    local starved_grant = acquire(backfill_pool, "critical", 6, 6, function () return test_reading(50, 1, 20000) end, 1)
+    check("the older ticket then gets its six tokens when headroom allows", #starved_grant, 6)
+    release_locks(starved_grant)
+
+    local dead_pool = path.join(base, "deadholder")
+    os.mkdir(dead_pool)
+    io.writefile(slot_path(dead_pool, 1), string.format("99999\ng %d 2\n", os.time() - 10))
+    local dead_grant = acquire(dead_pool, "normal", 3, 3, function () return test_reading(55, 1, 11000) end, 1)
+    check("a dead holder's slot and stamp do not stop the guarantee", #dead_grant, 3)
+    release_locks(dead_grant)
 
     local holder_script = path.join(base, "holder.lua")
     io.writefile(holder_script, "function main(file)\n local lock = io.openlock(file)\n lock:trylock()\n io.writefile(file, tostring(os.getpid()))\n os.sleep(120000)\nend\n")

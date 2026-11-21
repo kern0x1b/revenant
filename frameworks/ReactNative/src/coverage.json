@@ -713,7 +713,7 @@
    "native": true,
    "status": "partial",
    "verified": "phone",
-   "note": "Recipe packages\/e\/expo-screen-orientation (npm 57.0.3, patch screen-orientation-ios6.patch), built into the host. Trait collections, window scenes, requestGeometryUpdate and the notch test are replaced by the status-bar orientation and the size classes of the device idiom. On the iPhone 4S (2026-11-17) getOrientationAsync returned 0 (unknown) and getOrientationLockAsync 1, so the initial orientation is not yet set at start; a lock and a rotation were not exercised."
+   "note": "Recipe packages\/e\/expo-screen-orientation (npm 57.0.3, patch screen-orientation-ios6.patch), built into the host. Trait collections, window scenes, requestGeometryUpdate and the notch test are replaced by the status-bar orientation and the size classes of the device idiom. On the iPhone 4S (2026-11-17) getOrientationAsync returned 0 (unknown) and getOrientationLockAsync 1, so the initial orientation is not yet set at start; a lock and a rotation were not exercised. The intersection with the Info.plist orientations was checked on the iPad 2 (2026-11-20): portrait holds. A rotation into landscape was not checked, because that needs a host with landscape in its plist."
   },
   {
    "id": "expo-secure-store",
@@ -875,7 +875,7 @@
    "native": true,
    "status": "partial",
    "verified": "phone",
-   "note": "Recipe packages\/e\/expo-web-browser (npm 57.0.3, patch web-browser-ios6.patch), built into the host. SFSafariViewController (iOS 9) is replaced by opening the URL in Safari: openBrowserAsync resolves {type: opened} and leaves the app; dismissBrowser always raises WebBrowserNotOpenException (there is no browser to dismiss); the toolbar, reader and presentation options are accepted and have no effect. ASWebAuthenticationSession (iOS 12) has no replacement: openAuthSessionAsync rejects with WebAuthSessionUnavailableException. On the iPhone 4S (2026-11-17) the module is registered with its exports; the calls were not exercised."
+   "note": "Recipe packages\/e\/expo-web-browser (npm 57.0.3, patch web-browser-ios6.patch), built into the host. SFSafariViewController (iOS 9) is replaced by opening the URL in Safari: openBrowserAsync resolves an object whose type is opened and leaves the app; dismissBrowser always raises WebBrowserNotOpenException (there is no browser to dismiss); the toolbar, reader and presentation options are accepted and have no effect. ASWebAuthenticationSession (iOS 12) has no replacement: openAuthSessionAsync rejects with WebAuthSessionUnavailableException. On the iPhone 4S (2026-11-17) the module is registered with its exports; the calls were not exercised."
   },
   {
    "id": "expo-widgets",
@@ -1443,6 +1443,15 @@
    "status": "partial",
    "verified": "build",
    "note": "Package packages/r/react-native-paste-input (npm 2.0.1) with patch 0001 (@import UIKit and Accelerate as #import). Compiles for armv7 iOS 6 with the real flags (library probe, build ok), so the ImageEffects category is in. The earlier phone check predates it and is not repeated; the iOS 11 UITextSmartDashesType use is a warning, not an error."
+  },
+  {
+   "id": "@getpaseo/expo-two-way-audio",
+   "group": "community",
+   "version": "0.16.2",
+   "native": true,
+   "status": "partial",
+   "verified": "phone",
+   "note": "The Paseo application's own Expo module (a workspace package, not on npm), named in the host.json \"modules\" and built as it is, from the application's sources. Its Swift needs AVAudioEngine, which iOS 6 lacks: AVFoundationBackports (AVAudioEngine over an AUGraph, a live input node on a VoiceProcessingIO unit with setVoiceProcessingEnabled, bypass, AGC and input muting, mixer and input taps, scheduleBuffer completion callback types) supplies it, so the module compiles unchanged except that MicrophonePermissionRequester.swift's microphoneKey is renamed because expo-camera declares the same name. On the iPad 2 (2026-11-20) initialize returned true, toggleRecording(true) started a recording, in three seconds 23 microphone chunks (4096 bytes each) and 23 input and 23 output level events arrived, onRecordingChange fired once, and toggleRecording(false) stopped it. What the microphone recorded and what the speaker played were not checked: the chunks were counted, not listened to. playPCMData, restart, dictation mode and interruptions were not exercised."
   }
  ]
 }

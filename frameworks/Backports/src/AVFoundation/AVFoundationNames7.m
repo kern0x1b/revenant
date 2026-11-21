@@ -2,6 +2,7 @@
 #import <AVFoundation/AVFoundation.h>
 
 NSString *const BACKPORT_IMPL(AVAudioSessionMediaServicesWereLostNotification) = @"AVAudioSessionMediaServicesWereLostNotification";
+NSString *const BACKPORT_IMPL(AVAudioSessionMediaServicesWereResetNotification) = @"AVAudioSessionMediaServicesWereResetNotification";
 NSString *const BACKPORT_IMPL(AVAudioSessionModeVideoChat) = @"AVAudioSessionModeVideoChat";
 NSString *const BACKPORT_IMPL(AVAudioSessionPortBluetoothLE) = @"BluetoothLE";
 NSString *const BACKPORT_IMPL(AVCaptureSessionPresetInputPriority) = @"AVCaptureSessionPresetInputPriority";

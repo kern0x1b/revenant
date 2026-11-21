@@ -15,12 +15,8 @@ if os.getenv("RN_EXPO") then
     add_requires("revenant@swift-crypto", {alias = "swift-crypto"})
 end
 
-local BACKPORTS_LIBRARIES = "FoundationBackports,CoreTextBackports,UIKitBackports,UserNotificationsBackports,CoreGraphicsBackports,GraphicsBackports,CoreFoundationBackports,SystemBackports,IOSurfaceBackports,WebKitBackports,MapKitBackports,CoreLocationBackports,SecurityBackports,CoreMotionBackports,CoreTelephonyBackports,AVKitBackports"
 local RETARGETED_BY_STAGE = {UserNotificationsBackports = true, ContactsBackports = true, LocalAuthenticationBackports = true}
 
-if os.getenv("RN_LINK_ALL") and os.getenv("RN_BACKPORTS") then
-    add_requireconfs("backports", {configs = {libraries = BACKPORTS_LIBRARIES}})
-end
 
 target("RNHost")
     add_rules("@addon/revenant/app")
@@ -118,6 +114,7 @@ target("RNHost")
     set_optimize("fastest")
     on_load(function (target)
         if os.getenv("RN_LINK_ALL") and os.getenv("RN_BACKPORTS") then
+            import("backports_libraries", {rootdir = path.join(os.scriptdir(), "..", "..", "tools"), anonymous = true}).check()
             local package = target:pkg("backports")
             local links = {}
             for _, name in ipairs(table.wrap(package:get("links"))) do

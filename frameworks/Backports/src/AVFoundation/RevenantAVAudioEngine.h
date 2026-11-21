@@ -39,6 +39,8 @@ typedef struct {
 @end
 
 @interface AVAudioIONode : AVAudioNode
+- (BOOL)setVoiceProcessingEnabled:(BOOL)enabled error:(NSError **)outError;
+@property (nonatomic, readonly, getter=isVoiceProcessingEnabled) BOOL voiceProcessingEnabled;
 @end
 
 @interface AVAudioMixerNode : AVAudioNode
@@ -48,9 +50,21 @@ typedef struct {
 @end
 
 @interface AVAudioInputNode : AVAudioIONode
+@property (nonatomic, getter=isVoiceProcessingBypassed) BOOL voiceProcessingBypassed;
+@property (nonatomic, getter=isVoiceProcessingAGCEnabled) BOOL voiceProcessingAGCEnabled;
+@property (nonatomic, getter=isVoiceProcessingInputMuted) BOOL voiceProcessingInputMuted;
 @end
 
+typedef NS_ENUM(NSInteger, AVAudioPlayerNodeCompletionCallbackType) {
+    AVAudioPlayerNodeCompletionDataConsumed = 0,
+    AVAudioPlayerNodeCompletionDataRendered = 1,
+    AVAudioPlayerNodeCompletionDataPlayedBack = 2,
+};
+typedef void (^AVAudioPlayerNodeCompletionHandler)(AVAudioPlayerNodeCompletionCallbackType callbackType);
+
 @interface AVAudioPlayerNode : AVAudioNode
+- (void)scheduleBuffer:(AVAudioPCMBuffer *)buffer atTime:(nullable AVAudioTime *)when options:(NSUInteger)options completionCallbackType:(AVAudioPlayerNodeCompletionCallbackType)callbackType completionHandler:(nullable AVAudioPlayerNodeCompletionHandler)completionHandler;
+- (void)scheduleBuffer:(AVAudioPCMBuffer *)buffer completionCallbackType:(AVAudioPlayerNodeCompletionCallbackType)callbackType completionHandler:(nullable AVAudioPlayerNodeCompletionHandler)completionHandler;
 - (void)scheduleBuffer:(AVAudioPCMBuffer *)buffer completionHandler:(nullable void (^)(void))completionHandler;
 - (void)scheduleBuffer:(AVAudioPCMBuffer *)buffer atTime:(nullable AVAudioTime *)when options:(NSUInteger)options completionHandler:(nullable void (^)(void))completionHandler;
 - (void)play;

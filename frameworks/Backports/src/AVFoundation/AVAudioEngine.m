@@ -2,6 +2,8 @@
 #import "RevenantAVAudioEngineManual.h"
 #import "RevenantAVAudioBuffer.h"
 #import "RevenantAVAudioUnit.h"
+#import "RevenantAVAudioTap.h"
+#import <AVFoundation/AVAudioSession.h>
 #import <AVFAudio/AVAudioConnectionPoint.h>
 
 extern OSStatus RevenantPlayerRenderCallback(void *inRefCon, AudioUnitRenderActionFlags *ioActionFlags, const AudioTimeStamp *inTimeStamp,
@@ -20,6 +22,8 @@ static BOOL RevenantOfflineOutput = NO;
     NSMutableSet<AVAudioNode *> *_revenant_attached;
     NSMutableDictionary<NSValue *, NSArray *> *_revenant_playerRoutes;
     BOOL _revenant_offline;
+    BOOL _revenant_voiceProcessing;
+    BOOL _revenant_inputConfigured;
     AUNode _revenant_outputAUNode;
     AUNode _revenant_mainMixerAUNode;
     AudioUnit _revenant_outputUnit;
@@ -73,6 +77,7 @@ static OSStatus RevenantAddUnit(AUGraph graph, OSType type, OSType subtype, AUNo
         [_revenant_mainMixer revenant_setEngine:self auNode:mixerAUNode audioUnit:mixerUnit];
 
         _revenant_input = [AVAudioInputNode new];
+        [_revenant_input revenant_setEngine:self auNode:0 audioUnit:NULL];
     }
     return self;
 }
@@ -128,11 +133,14 @@ static OSStatus RevenantAddUnit(AUGraph graph, OSType type, OSType subtype, AUNo
         AudioUnitSetProperty(destImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, bus2, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
 
     if (node2 == _revenant_mainMixer && useFormat) {
-        AudioUnitSetProperty(destImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
+        OSStatus mixerOut = AudioUnitSetProperty(destImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
         RevenantAudioNodeImpl *outImpl = [_revenant_output revenant_impl];
         if (outImpl->audioUnit) {
-            AudioUnitSetProperty(outImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
-            AudioUnitSetProperty(outImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
+            OSStatus outIn = AudioUnitSetProperty(outImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
+            OSStatus outOut = AudioUnitSetProperty(outImpl->audioUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, [useFormat streamDescription], sizeof(AudioStreamBasicDescription));
+            (void)outOut;
+            if (mixerOut != noErr || outIn != noErr)
+                NSLog(@"AVAudioEngine: the mixer's output format (%d) or the output unit's input format (%d) could not be set", (int)mixerOut, (int)outIn);
         }
         [_revenant_output revenant_setFormat:useFormat];
     }
@@ -204,9 +212,153 @@ static OSStatus RevenantAddUnit(AUGraph graph, OSType type, OSType subtype, AUNo
 - (void)prepare
 {
     if (!_revenant_initialized) {
-        AUGraphInitialize(_revenant_graph);
+        [self revenant_configureInput];
+        OSStatus initialized = AUGraphInitialize(_revenant_graph);
+        if (initialized != noErr)
+            NSLog(@"AVAudioEngine: the graph did not initialize (%d)", (int)initialized);
         _revenant_initialized = YES;
+        [self revenant_applyVoiceProcessing];
     }
+}
+
+- (void)revenant_configureInput
+{
+    if (_revenant_offline || _revenant_inputConfigured)
+        return;
+    RevenantTapPump *pump = [_revenant_input revenant_pump];
+    if (pump == nil && !_revenant_voiceProcessing)
+        return;
+    AudioUnit unit = [_revenant_output revenant_impl]->audioUnit;
+    if (unit == NULL)
+        return;
+    RevenantInputState *state = [_revenant_input revenant_inputState];
+    UInt32 on = 1;
+    OSStatus status = AudioUnitSetProperty(unit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, 1, &on, sizeof(on));
+    if (status != noErr) {
+        NSLog(@"AVAudioEngine: the microphone could not be switched on (%d)", (int)status);
+        return;
+    }
+    double rate = pump ? pump.format.sampleRate : [AVAudioSession sharedInstance].sampleRate;
+    AudioStreamBasicDescription format = {0};
+    format.mSampleRate = rate;
+    format.mFormatID = kAudioFormatLinearPCM;
+    format.mFormatFlags = kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked;
+    format.mBytesPerPacket = format.mBytesPerFrame = 2;
+    format.mFramesPerPacket = 1;
+    format.mChannelsPerFrame = 1;
+    format.mBitsPerChannel = 16;
+    status = AudioUnitSetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &format, sizeof(format));
+    if (status != noErr) {
+        AudioStreamBasicDescription current = {0};
+        UInt32 size = sizeof(current);
+        AudioUnitGetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &current, &size);
+        format.mSampleRate = current.mSampleRate > 0 ? current.mSampleRate : [AVAudioSession sharedInstance].sampleRate;
+        status = AudioUnitSetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1, &format, sizeof(format));
+        if (status != noErr) {
+            NSLog(@"AVAudioEngine: the microphone format could not be set (%d)", (int)status);
+            return;
+        }
+    }
+    pump.sourceRate = format.mSampleRate;
+    state->unit = unit;
+    state->rate = format.mSampleRate;
+    AURenderCallbackStruct callback = {.inputProc = RevenantInputRenderCallback, .inputProcRefCon = state};
+    status = AudioUnitSetProperty(unit, kAudioOutputUnitProperty_SetInputCallback, kAudioUnitScope_Global, 0, &callback, sizeof(callback));
+    if (status != noErr) {
+        NSLog(@"AVAudioEngine: the microphone callback could not be set (%d)", (int)status);
+        return;
+    }
+    _revenant_inputConfigured = YES;
+}
+
+- (void)revenant_applyVoiceProcessing
+{
+    if (!_revenant_voiceProcessing || !_revenant_initialized)
+        return;
+    AudioUnit unit = [_revenant_output revenant_impl]->audioUnit;
+    if (unit == NULL)
+        return;
+    UInt32 bypass = _revenant_input.voiceProcessingBypassed ? 1 : 0;
+    AudioUnitSetProperty(unit, kAUVoiceIOProperty_BypassVoiceProcessing, kAudioUnitScope_Global, 0, &bypass, sizeof(bypass));
+    UInt32 agc = _revenant_input.voiceProcessingAGCEnabled ? 1 : 0;
+    AudioUnitSetProperty(unit, kAUVoiceIOProperty_VoiceProcessingEnableAGC, kAudioUnitScope_Global, 0, &agc, sizeof(agc));
+}
+
+- (NSUInteger)revenant_suspend
+{
+    NSUInteger state = (_revenant_initialized ? 1 : 0) | (_revenant_running ? 2 : 0);
+    if (_revenant_initialized) {
+        if (!_revenant_offline)
+            AUGraphStop(_revenant_graph);
+        AUGraphUninitialize(_revenant_graph);
+        _revenant_initialized = NO;
+        _revenant_running = NO;
+    }
+    _revenant_inputConfigured = NO;
+    return state;
+}
+
+- (void)revenant_resume:(NSUInteger)state
+{
+    if (state & 1)
+        [self prepare];
+    if (state & 2)
+        [self startAndReturnError:NULL];
+}
+
+- (void)revenant_inputChanged
+{
+    if (!_revenant_initialized || _revenant_offline)
+        return;
+    RevenantTapPump *pump = [_revenant_input revenant_pump];
+    if (pump == nil && !_revenant_voiceProcessing)
+        return;
+    if (_revenant_inputConfigured)
+        return;
+    NSUInteger state = [self revenant_suspend];
+    [self revenant_resume:state];
+}
+
+- (BOOL)revenant_setVoiceProcessingEnabled:(BOOL)enabled error:(NSError **)outError
+{
+    if (enabled == _revenant_voiceProcessing)
+        return YES;
+    if (_revenant_offline) {
+        _revenant_voiceProcessing = enabled;
+        return YES;
+    }
+    NSUInteger state = [self revenant_suspend];
+    AUNode previous = _revenant_outputAUNode;
+    AUNode output = 0;
+    AudioComponentDescription description = {0};
+    description.componentType = kAudioUnitType_Output;
+    description.componentSubType = enabled ? kAudioUnitSubType_VoiceProcessingIO : kAudioUnitSubType_RemoteIO;
+    description.componentManufacturer = kAudioUnitManufacturer_Apple;
+    AUGraphRemoveNode(_revenant_graph, previous);
+    OSStatus status = AUGraphAddNode(_revenant_graph, &description, &output);
+    BOOL added = status == noErr && output != 0;
+    if (!added) {
+        if (outError)
+            *outError = [NSError errorWithDomain:NSOSStatusErrorDomain code:status userInfo:nil];
+        description.componentSubType = enabled ? kAudioUnitSubType_RemoteIO : kAudioUnitSubType_VoiceProcessingIO;
+        AUGraphAddNode(_revenant_graph, &description, &output);
+    }
+    AUGraphConnectNodeInput(_revenant_graph, _revenant_mainMixerAUNode, 0, output, 0);
+    AudioUnit unit = NULL;
+    AUGraphNodeInfo(_revenant_graph, output, NULL, &unit);
+    UInt32 maxFrames = 4096;
+    AudioUnitSetProperty(unit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, 0, &maxFrames, sizeof(maxFrames));
+    _revenant_outputAUNode = output;
+    _revenant_outputUnit = unit;
+    [_revenant_output revenant_setEngine:self auNode:output audioUnit:unit];
+    AVAudioFormat *carried = [_revenant_mainMixer outputFormatForBus:0];
+    if (carried != nil) {
+        AudioUnitSetProperty(unit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, carried.streamDescription, sizeof(AudioStreamBasicDescription));
+    }
+    if (added)
+        _revenant_voiceProcessing = enabled;
+    [self revenant_resume:state];
+    return added;
 }
 
 - (BOOL)startAndReturnError:(NSError **)outError

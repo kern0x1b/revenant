@@ -7,7 +7,7 @@ local facts = import("facts", {rootdir = os.scriptdir(), anonymous = true})
 local skeleton = import("skeleton", {rootdir = os.scriptdir(), anonymous = true})
 local markers = import("markers", {rootdir = os.scriptdir(), anonymous = true})
 local libraries = import("library_list", {rootdir = os.scriptdir(), anonymous = true}).backports_libraries()
-local lock = import("lock", {rootdir = os.scriptdir(), anonymous = true})
+local exclusive = import("@addon.revenant.exclusive", {anonymous = true})
 local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
 local timing = import("@addon.revenant.apple.timing", {anonymous = true})
 
@@ -103,7 +103,7 @@ end
 function ready(sdk, version, logs, names)
     local root = sdkfiles.shared_root()
     local key = sdkfiles.cache_key(sdk)
-    return lock.run(root, key, function ()
+    return exclusive.run(path.join(root, key .. ".lock"), "the facts of " .. key, function ()
         local cache = path.join(root, key)
         os.mkdir(cache)
         local missing = {}
@@ -117,7 +117,7 @@ function ready(sdk, version, logs, names)
         for _, other in ipairs(os.dirs(path.join(root, "*"))) do
             local otherkey = path.filename(other)
             if otherkey ~= key and os.mtime(other) < cutoff then
-                lock.attempt(root, otherkey, function ()
+                exclusive.attempt(path.join(root, otherkey .. ".lock"), function ()
                     if os.isdir(other) and os.mtime(other) < cutoff then
                         os.tryrm(other)
                         os.tryrm(path.join(root, otherkey .. ".holder"))

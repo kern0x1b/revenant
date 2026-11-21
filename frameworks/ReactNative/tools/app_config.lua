@@ -7,7 +7,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/app_config.l
 
 function public_json(app)
     local text = os.iorunv("npx", {"expo", "config", "--type", "public", "--json"}, {curdir = app, envs = {CI = "1", EXPO_NO_TELEMETRY = "1"}})
-    local json = text:match("(%b{})%s*$")
+    local json = import("expo_json", {rootdir = os.scriptdir(), anonymous = true}).printed_object(text)
     if not json or not json:find('"scheme"', 1, true) and not json:find('"name"', 1, true) then
         raise("expo config printed no configuration:\n%s", text)
     end

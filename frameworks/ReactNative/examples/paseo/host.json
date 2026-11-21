@@ -13,5 +13,8 @@
     "@react-native-masked-view/masked-view",
     "react-native-enriched-markdown"
   ],
+  "modules": [
+    "@getpaseo/expo-two-way-audio"
+  ],
   "optionalComponents": []
 }

@@ -1,7 +1,7 @@
 local tools = path.join(os.scriptdir(), "..", "tools")
 local generate = import("generate", {rootdir = tools, anonymous = true})
 local sdkfiles = import("sdk", {rootdir = tools, anonymous = true})
-local lock = import("lock", {rootdir = tools, anonymous = true})
+local exclusive = import("@addon.revenant.exclusive", {anonymous = true})
 local workspace = import("@addon.revenant.workspace", {anonymous = true})
 
 local function fixture(folder)
@@ -38,7 +38,7 @@ function main()
 
     assert(os.isdir(held), "the stale folder of a key a live process holds was deleted")
     assert(not os.isdir(free), "the stale folder of an unheld key was kept")
-    assert(lock.held(root, "held-by-live"), "the held key is not reported as held")
+    assert(exclusive.held(path.join(root, "held-by-live.lock")), "the held key is not reported as held")
 
     heldlock:unlock()
     heldlock:close()

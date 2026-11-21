@@ -98,3 +98,21 @@ id the build puts into `CFBundleIdentifier`.
   only tool that writes into the scratch folder (the archive, removed after unpacking); `release` erases the rest.
 * Two copies with the same bundle id share one `.app` and one `/var/tmp/<last part of the id>/`. The default id comes from the
   folder's name, so give a second folder of that name its own `--bundle-id`.
+
+## Where a host build's time goes, and what the next one costs
+
+Measured on the Paseo host (`module_build.lua`, copy `iso-paseo`, 2026-11-19/20). Times are wall clock, one process, load 24–30.
+
+| Run | Time | What it was |
+| --- | --- | --- |
+| Cold, merged toolchain | 4176 s | libcxx source build ≈ 240 s; Backports wrapper install 1075 s + its configure 307 s (both slowed by the load); the rest is the other shared packages and the final build |
+| Pre-merge toolchain, warm | 1833 s | Backports wrappers (15 + 3 libraries) ≈ 270 s; cryptokit wrapper configure 183 s; uniformtypeidentifiers wrapper configure 327 s; final build 331 s |
+| Nothing changed, `--deb` | 665 s | no compile; the time is `xmake f -c`, package resolution and the wrapper configures |
+| One provider file changed | 701 s | one swift compile of `expo-app-modules` 77 s and the link; the other ≈ 620 s is the fixed overhead above |
+| Three libraries added to the link list | 486 s | Backports 19-library wrapper install 179 s, one swift compile, link |
+
+Repeated work on the same code: of the 4176 s only the first-time builds (libcxx, the package installs keyed by a new content key) are unavoidable on a cold store, ≈ 1500 s. The rest, ≈ 2600 s, was waiting under load (the same installs ran at load 26–30) and the fixed overhead that every run pays again with unchanged inputs: a full `xmake f -c` reconfigure, package resolution, and the wrapper configures of cryptokit, uniformtypeidentifiers and Backports (≈ 500–600 s together). A run with no change costs 665 s only because of that overhead.
+
+What the next build after a one-file edit costs with the isolated copy: the compile is one file (≈ 80 s for Swift) plus link, and the overhead is ≈ 400–600 s, so 8–12 min, which is inside the 20-minute rule but not "minutes". The cuts, in order of size: do not run `xmake f -c` when the configuration is unchanged (≈ 200–300 s); do not configure the wrappers whose key is unchanged (cryptokit 183 s, uniformtypeidentifiers 327 s in the pre-merge run); one Backports install per key (179 s when the library list changes). These are not done yet; each is a change to the build tools of its own.
+
+`isolate.lua clone_project`: the clone is one `cp -cR` (APFS clone, 9600 files, ≈ 7.5 s, of which the copy is nearly all). The old order copied first and then walked the copy twice with `grep -rIlF` (find the files that name an old root, then check nothing is left): ≈ 0.4–1 s per pass on this tree. The new order searches the source once, clones, opens only the files found, and verifies only those; the symlink search skips `build/ref`. On this copy no file names an old root any more, so the measured gain is the second whole-tree pass (≈ 0.5–1 s of 7.5 s) and, for a tree that names roots in a few files, the rewrite and the verification touch those files only. The clone itself stays the cost; it is not on the minute scale.
