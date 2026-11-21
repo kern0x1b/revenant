@@ -28,7 +28,8 @@ function failures(opt)
 
     local first = recipes.compat_project({builddir = function() return "build_one" end})
     local second = recipes.compat_project({builddir = function() return "build_two" end})
-    if first == second or not first:find("build_one", 1, true) or not second:find("build_two", 1, true) then
+    if first == second or path.filename(first) ~= "compat" or path.filename(path.directory(first)) ~= "build_one" or
+       path.filename(second) ~= "compat" or path.filename(path.directory(second)) ~= "build_two" then
         table.insert(found, "two apple-compat installs share one generated project: " .. tostring(first) .. " and " .. tostring(second))
     end
 

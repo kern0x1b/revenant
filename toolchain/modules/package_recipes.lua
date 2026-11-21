@@ -10,7 +10,7 @@ function dependency_flags(dep)
 end
 
 function compat_project(package)
-    return path.absolute(package:builddir(), "compat")
+    return path.absolute(path.join(package:builddir(), "compat"))
 end
 
 function missing_inventory_error(release, file)
