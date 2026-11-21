@@ -19,7 +19,7 @@ local function coverage_rows(text)
     end
     local _, keys = text:gsub('"id":', "")
     if keys ~= #rows then
-        raise("coverage.json: %d ids but %d rows were read", keys, #rows)
+        error(string.format("coverage.json: %d ids but %d rows were read; a row's text must not contain braces, the reader splits on them", keys, #rows), 0)
     end
     return rows
 end
@@ -319,7 +319,7 @@ target("expo-core-objc")
         for _, package in ipairs(expo) do
             local ios = path.join(expo_dir(package), "ios")
             if not os.isdir(ios) then
-                raise("%s is listed as a built Expo module in coverage.json, but %s has no ios folder", package, ios)
+                os.raise("%s is listed as a built Expo module in coverage.json, but %s has no ios folder", package, ios)
             end
             local pod = POD_DIR_NAMES[package]
             for _, spec in ipairs(os.files(path.join(ios, "*.podspec"))) do

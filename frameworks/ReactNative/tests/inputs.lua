@@ -283,6 +283,15 @@ try {
 }
 check("a component name with a quote is refused", refused)
 
+local coverage_text = io.readfile(path.join(os.scriptdir(), "..", "src", "coverage.json"))
+local coverage_rows = 0
+for object in coverage_text:gmatch("{([^{}]-)}") do
+    if object:match('"id":%s*"([^"]*)"') then
+        coverage_rows = coverage_rows + 1
+    end
+end
+local _, coverage_ids = coverage_text:gsub('"id":', "")
+check("every row of coverage.json is read by the Expo provider's reader, which splits on braces, so no row's text has one", coverage_rows == coverage_ids, coverage_ids .. " ids, " .. coverage_rows .. " rows")
 if failures > 0 then
     raise("%d react-native inputs test(s) failed", failures)
 end

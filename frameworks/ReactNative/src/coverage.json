@@ -875,7 +875,7 @@
    "native": true,
    "status": "partial",
    "verified": "phone",
-   "note": "Recipe packages\/e\/expo-web-browser (npm 57.0.3, patch web-browser-ios6.patch), built into the host. SFSafariViewController (iOS 9) is replaced by opening the URL in Safari: openBrowserAsync resolves {type: opened} and leaves the app; dismissBrowser always raises WebBrowserNotOpenException (there is no browser to dismiss); the toolbar, reader and presentation options are accepted and have no effect. ASWebAuthenticationSession (iOS 12) has no replacement: openAuthSessionAsync rejects with WebAuthSessionUnavailableException. On the iPhone 4S (2026-11-17) the module is registered with its exports; the calls were not exercised."
+   "note": "Recipe packages\/e\/expo-web-browser (npm 57.0.3, patch web-browser-ios6.patch), built into the host. SFSafariViewController (iOS 9) is replaced by opening the URL in Safari: openBrowserAsync resolves an object whose type is opened and leaves the app; dismissBrowser always raises WebBrowserNotOpenException (there is no browser to dismiss); the toolbar, reader and presentation options are accepted and have no effect. ASWebAuthenticationSession (iOS 12) has no replacement: openAuthSessionAsync rejects with WebAuthSessionUnavailableException. On the iPhone 4S (2026-11-17) the module is registered with its exports; the calls were not exercised."
   },
   {
    "id": "expo-widgets",
