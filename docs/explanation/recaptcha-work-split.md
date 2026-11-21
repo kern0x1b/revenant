@@ -53,7 +53,7 @@ target("guest")
 ```
 
 ```sh
-REVENANT_CACHE=<worktree>/.cache-private ./xmakew f -P <scratch>/guest -p iphoneos -a arm64 -y -c
+./xmakew f -P <scratch>/guest -p iphoneos -a arm64 -y -c
 ```
 
 With the prebuilt LLVM, Swift and ld64 (`REVENANT_PREBUILT=kern0x1b/revenant`, `REVENANT_PREBUILT_ONLY=llvm,swift,ld64`) it

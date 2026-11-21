@@ -1,0 +1,17 @@
+diff --git a/llvm-project/llvm/lib/CodeGen/SjLjEHPrepare.cpp b/llvm-project/llvm/lib/CodeGen/SjLjEHPrepare.cpp
+--- a/llvm-project/llvm/lib/CodeGen/SjLjEHPrepare.cpp
++++ b/llvm-project/llvm/lib/CodeGen/SjLjEHPrepare.cpp
+@@ -355,10 +355,10 @@
+     BasicBlock *UnwindBlock = Invoke->getUnwindDest();
+     LandingPadInst *LPI = UnwindBlock->getLandingPadInst();
+
+-    // Place PHIs into a set to avoid invalidating the iterator.
+-    SmallPtrSet<PHINode *, 8> PHIsToDemote;
++    // Place PHIs into a vector to avoid invalidating the iterator.
++    SmallVector<PHINode *, 8> PHIsToDemote;
+     for (BasicBlock::iterator PN = UnwindBlock->begin(); isa<PHINode>(PN); ++PN)
+-      PHIsToDemote.insert(cast<PHINode>(PN));
++      PHIsToDemote.push_back(cast<PHINode>(PN));
+     if (PHIsToDemote.empty())
+       continue;
+

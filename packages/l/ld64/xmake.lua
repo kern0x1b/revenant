@@ -17,13 +17,12 @@ package("ld64")
         end
     end)
 
-    local inputs = os.files(path.join(os.scriptdir(), "patches", "*.patch"))
-    table.sort(inputs)
-    local digests = {}
-    for _, file in ipairs(inputs) do
+    local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}
+    for _, file in ipairs(os.files(path.join(os.scriptdir(), "patches", "*.patch"))) do
         table.insert(digests, path.filename(file) .. "=" .. hash.sha256(file))
     end
-    add_configs("patches", {description = "The digest of this package's patches, so a changed linker is a different package: every armv7 link in the fleet links with it, and a rebuild in place would change all of them at once.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
+    table.sort(digests)
+    add_configs("recipe", {description = "The digest of this recipe and its patches, so a changed linker is a different package: every armv7 link in the fleet links with it, and a rebuild in place would change all of them at once.", default = hash.strhash128(table.concat(digests, ";")), type = "string", readonly = true})
 
     on_fetch(function (package, opt)
         if opt.system then

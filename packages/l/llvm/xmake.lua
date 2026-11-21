@@ -13,7 +13,7 @@ package("llvm")
     add_configs("recipe", {description = "The digest of this recipe, so a changed install is a different llvm.", default = hash.strhash128(hash.sha256(path.join(os.scriptdir(), "xmake.lua"))), type = "string", readonly = true})
 
     local patches = {"clang-emulated-tls-without-dyld.patch", "builtins-leave-emutls-to-the-runtime.patch", "clang-atomic-libcalls-from-the-runtime.patch",
-                     "configure-and-build-without-python.patch"}
+                     "configure-and-build-without-python.patch", "llvm-sjlj-demote-phis-in-block-order.patch"}
     local digests = {"xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))}
     for _, patch in ipairs(patches) do
         table.insert(digests, patch .. "=" .. hash.sha256(path.join(os.scriptdir(), "patches", patch)))
@@ -45,6 +45,7 @@ package("llvm")
         if prebuilt.install(package) then
             return
         end
+        os.cd(import("@addon.revenant.checkout", {anonymous = true}).keyed(os.curdir(), package:buildhash()))
         for _, patch in ipairs(patches) do
             os.vrunv("git", {"apply", path.join(package:scriptdir(), "patches", patch), "-p2"})
         end

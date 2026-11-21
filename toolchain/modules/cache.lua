@@ -1,11 +1,18 @@
 import("retention")
 import("generations")
+import("exclusive")
 
 local GIGABYTE = 1000 * 1000 * 1000
 local DEFAULT_GIGABYTES = 50
 local DEFAULT_GROWTH = 2 * GIGABYTE
 local ROOT_VARIABLE = "REVENANT_CACHE"
 local LIMIT_VARIABLE = "REVENANT_CACHE_GB"
+local STORE_VARIABLE = "REVENANT_STORE"
+local STORE_LIMIT_VARIABLE = "REVENANT_STORE_GB"
+local DEFAULT_STORE_GIGABYTES = 80
+local STORE_STAMP = ".cap-checked"
+local STORE_TRIM_LOCK = ".trim.lock"
+local STORE_CHECK_SECONDS = 600
 local ARCHITECTURE = "armv7"
 local RELEASES = {"6.1.3", "6.0"}
 local BUILD_OUTPUTS = {".xmake", "build"}
@@ -36,16 +43,65 @@ function root()
     return path.join(checkout(), ".cache")
 end
 
-function limit()
-    local text = os.getenv(LIMIT_VARIABLE)
+function store()
+    local named = os.getenv(STORE_VARIABLE)
+    if named and named ~= "" then
+        if not path.is_absolute(named) then
+            raise("%s is %q, which is not an absolute path", STORE_VARIABLE, named)
+        end
+        return path.normalize(named)
+    end
+    local home = os.getenv("HOME")
+    if not home or home == "" then
+        raise("HOME is unset, so the shared store has no default place: set %s", STORE_VARIABLE)
+    end
+    return path.join(home, ".revenant", "store")
+end
+
+local function gigabytes_of(variable, default)
+    local text = os.getenv(variable)
     if not text or text == "" then
-        return DEFAULT_GIGABYTES * GIGABYTE
+        return default * GIGABYTE
     end
     local gigabytes = tonumber(text)
     if not gigabytes or gigabytes <= 0 then
-        raise("%s is %q, which is not a positive number of gigabytes", LIMIT_VARIABLE, text)
+        raise("%s is %q, which is not a positive number of gigabytes", variable, text)
     end
     return math.floor(gigabytes * GIGABYTE)
+end
+
+function limit()
+    return gigabytes_of(LIMIT_VARIABLE, DEFAULT_GIGABYTES)
+end
+
+function store_limit()
+    return gigabytes_of(STORE_LIMIT_VARIABLE, DEFAULT_STORE_GIGABYTES)
+end
+
+function store_stamp()
+    return STORE_STAMP
+end
+
+function pins(base)
+    local pinned = {}
+    for _, file in ipairs(os.files(path.join(base, "roots", "*.txt"))) do
+        for line in io.readfile(file):gmatch("[^\n]+") do
+            local named = line:match("^%s*([^#%s][^%s]*)")
+            if named then
+                pinned[path.join(base, "xmake-global", ".xmake", "packages", named)] = true
+            end
+        end
+    end
+    return pinned
+end
+
+local function pinned_by(members, fixed)
+    for _, member in ipairs(members) do
+        if fixed[member] then
+            return true
+        end
+    end
+    return false
 end
 
 function human(bytes)
@@ -115,6 +171,32 @@ local function remove(members)
         end
         prune_empty(member)
     end
+end
+
+local function unlock_members(held)
+    for _, lock in ipairs(held) do
+        lock:unlock()
+        lock:close()
+    end
+end
+
+local function lock_members(members)
+    local held = {}
+    for _, member in ipairs(members) do
+        if member:endswith(".lock") and os.isfile(member) then
+            local lock = io.openlock(member)
+            if lock and lock:trylock() then
+                table.insert(held, lock)
+            else
+                if lock then
+                    lock:close()
+                end
+                unlock_members(held)
+                return nil
+            end
+        end
+    end
+    return held
 end
 
 local function with_locks(members)
@@ -233,9 +315,28 @@ local function modcache_entries(base, found)
     end
 end
 
-function entries(base)
+local function lowered_entries(base, found)
+    for _, folder in ipairs(children(path.join(base, "lowered"))) do
+        if not folder:endswith(".lock") then
+            table.insert(found, entry(base, folder, "scratch"))
+        end
+    end
+end
+
+local function own_children(base)
     local found = {}
     for _, folder in ipairs(children(base)) do
+        local name = path.filename(folder)
+        if not (os.islink(folder) and (name == "xmake" or name == "xmake-global")) then
+            table.insert(found, folder)
+        end
+    end
+    return found
+end
+
+function entries(base)
+    local found = {}
+    for _, folder in ipairs(own_children(base)) do
         local name = path.filename(folder)
         if name == "scratch" then
             for _, task in ipairs(children(folder)) do
@@ -243,6 +344,8 @@ function entries(base)
             end
         elseif name == "modcache" then
             modcache_entries(base, found)
+        elseif name == "lowered" then
+            lowered_entries(base, found)
         elseif name == "device-baselines" then
             for _, device in ipairs(children(folder)) do
                 table.insert(found, entry(base, device, "kept"))
@@ -260,6 +363,10 @@ function entries(base)
         else
             table.insert(found, entry(base, folder, "kept"))
         end
+    end
+    local fixed = pins(base)
+    for _, listed in ipairs(found) do
+        listed.pinned = pinned_by(listed.members, fixed)
     end
     return found
 end
@@ -363,12 +470,14 @@ function reserve(bytes, what, opt)
     if used + bytes <= cap then
         return {evicted = {}, used = used, limit = cap}
     end
-    local paths = retention.open_paths()
+    local paths = (opt.open_paths or retention.open_paths)()
+    local variable = opt.variable or LIMIT_VARIABLE
+    local label = opt.label or "cache"
     local all = table.join(entries(base), build_entries(builds))
     local candidates, freeable = {}, 0
     for _, listed in ipairs(all) do
         listed.bytes = entry_bytes(listed)
-        if ORDER[listed.class] and not held_by(listed.members, paths) then
+        if ORDER[listed.class] and not listed.pinned and not held_by(listed.members, paths) then
             table.insert(candidates, listed)
             freeable = freeable + listed.bytes
         end
@@ -379,8 +488,8 @@ function reserve(bytes, what, opt)
         for index = 1, math.min(5, #all) do
             table.insert(lines, string.format("  %10s  %-10s %s", human(all[index].bytes), all[index].class, all[index].name))
         end
-        raise("cache: %s needs %s, which would take the cache at %s and the build outputs of its worktrees past its %s cap (%s); no entry that is not in use can be evicted to make room, so nothing was removed. Biggest entries:\n%s",
-              what, human(bytes), base, human(cap), LIMIT_VARIABLE, table.concat(lines, "\n"))
+        raise("cache: %s needs %s, which would take the %s at %s and the build outputs of its worktrees past its %s cap (%s); no entry that is not in use can be evicted to make room, so nothing was removed. Biggest entries:\n%s",
+              what, human(bytes), label, base, human(cap), variable, table.concat(lines, "\n"))
     end
     for _, listed in ipairs(candidates) do
         listed.used = last_used(listed.touched or listed.folder)
@@ -396,9 +505,17 @@ function reserve(bytes, what, opt)
         if used + bytes <= cap then
             break
         end
-        remove(listed.members)
-        used = used - listed.bytes
-        table.insert(evicted, listed)
+        local held = lock_members(listed.members)
+        if held then
+            remove(listed.members)
+            unlock_members(held)
+            used = used - listed.bytes
+            table.insert(evicted, listed)
+        end
+    end
+    if used + bytes > cap then
+        raise("cache: %s needs %s, which would take the %s at %s past its %s cap (%s); the entries that can go were evicted and the rest is being installed or built by another process",
+              what, human(bytes), label, base, human(cap), variable)
     end
     return {evicted = evicted, used = used, limit = cap}
 end
@@ -452,7 +569,35 @@ function guard(from, opt)
     local worktree = real(from)
     local builds = opt.builds or build_outputs(worktree)
     local expected = growth(worktree, {root = opt.root, builds = builds})
-    return reserve(expected, "the build in " .. worktree, {root = opt.root, limit = opt.limit, builds = builds})
+    local result = reserve(expected, "the build in " .. worktree, {root = opt.root, limit = opt.limit, builds = builds})
+    local shared = opt.store or store()
+    local stamp = path.join(shared, STORE_STAMP)
+    local interval = opt.store_interval or STORE_CHECK_SECONDS
+    local function due()
+        return not os.isfile(stamp) or os.time() - os.mtime(stamp) >= interval
+    end
+    if due() then
+        exclusive.attempt(path.join(shared, STORE_TRIM_LOCK), function ()
+            if not due() then
+                return
+            end
+            try {
+                function ()
+                    local trimmed = reserve(0, "keeping the shared store within its cap",
+                                            {root = shared, limit = opt.store_limit or store_limit(), builds = {}, variable = STORE_LIMIT_VARIABLE, label = "shared store"})
+                    result.evicted = table.join(result.evicted, trimmed.evicted)
+                end,
+                catch {
+                    function (errors)
+                        result.store_error = tostring(errors)
+                        print("%s", result.store_error)
+                    end
+                }
+            }
+            io.writefile(stamp, tostring(os.time()))
+        end)
+    end
+    return result
 end
 
 local function drop(members, removed, dry, paths)
@@ -460,7 +605,12 @@ local function drop(members, removed, dry, paths)
         return
     end
     if not dry then
+        local held = lock_members(members)
+        if not held then
+            return
+        end
         remove(members)
+        unlock_members(held)
     end
     table.insert(removed, members[1])
 end
@@ -471,7 +621,7 @@ function prune_generations(base, opt)
     local paths = retention.open_paths()
     local byname = {}
     for _, listed in ipairs(entries(base)) do
-        if listed.class == "generation" and not held_by(listed.members, paths) then
+        if listed.class == "generation" and not listed.pinned and not held_by(listed.members, paths) then
             byname[listed.published] = byname[listed.published] or {}
             table.insert(byname[listed.published], listed)
         end
