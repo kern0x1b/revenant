@@ -209,6 +209,16 @@ local function disk_refused(free_gb, floor)
     return free_gb < floor
 end
 
+local REFUSAL_EXIT = 3
+
+local function budget_floor()
+    return tonumber(os.getenv("REVENANT_BUDGET_DISK_GB")) or DISK_FLOOR_GB
+end
+
+local function refusal_text(free, floor)
+    return string.format("budget: %.0f GB free on the checkout's volume, below the %d GB floor, so no heavy command starts", free, floor)
+end
+
 local function enqueue(folder, rank, minimum)
     local dir = path.join(folder, "queue")
     os.mkdir(dir)
@@ -378,9 +388,10 @@ local function run(opt)
     local count = inherited
     if not inherited then
         local free = free_disk_gb()
-        local floor = tonumber(os.getenv("REVENANT_BUDGET_DISK_GB")) or DISK_FLOOR_GB
+        local floor = budget_floor()
         if disk_refused(free, floor) then
-            raise("budget: %.0f GB free on the checkout's volume, below the %d GB floor, so no heavy command starts", free, floor)
+            print(refusal_text(free, floor))
+            os.exit(REFUSAL_EXIT)
         end
         local minimum, maximum = tokens_wanted(opt, os.cpuinfo("ncpu"))
         locks = acquire(pool_folder(), opt.class, minimum, maximum)
@@ -390,17 +401,6 @@ local function run(opt)
     local status = os.execv(program, args, {envs = {XMAKE_MAX_JOBS = tostring(count), REVENANT_BUDGET_HELD = tostring(count)}, try = true})
     release_locks(locks)
     return status or 1
-end
-
-local REFUSAL_EXIT = 3
-
-local function refused()
-    local free = free_disk_gb()
-    local floor = tonumber(os.getenv("REVENANT_BUDGET_DISK_GB")) or DISK_FLOOR_GB
-    if disk_refused(free, floor) then
-        print("budget: %.0f GB free on the checkout's volume, below the %d GB floor, so no heavy command starts", free, floor)
-        os.exit(REFUSAL_EXIT)
-    end
 end
 
 local function parse_run(args)
@@ -661,12 +661,6 @@ local function test_suite()
     end, catch { function () end } }
     check("a volume below the floor starts nothing", started_anyway, false)
     check("and an empty pool stays empty below the floor", held_slots(pool), 0)
-    local budget = path.join(os.scriptdir(), "budget.lua")
-    local project = path.directory(os.scriptdir())
-    local below = os.execv(os.programfile(), {"l", "-P", project, budget, "refused"}, {try = true, envs = {REVENANT_BUDGET_DISK_GB = "100000000"}})
-    check("refused reports a distinct exit below the floor", below, 3)
-    local above = os.execv(os.programfile(), {"l", "-P", project, budget, "refused"}, {try = true, envs = {REVENANT_BUDGET_DISK_GB = "1"}})
-    check("refused exits cleanly above the floor", above, 0)
 
     local fresh = path.join(base, "fresh")
     local readings = {test_reading(0, 4, 11000), test_reading(0, 4, 11000), test_reading(0, 1, 11000)}
@@ -840,11 +834,9 @@ function main(command, ...)
         end
     elseif command == "status" then
         status()
-    elseif command == "refused" then
-        refused()
     elseif command == "test" then
         test_suite()
     else
-        raise("usage: ./xmakew l -P . tools/budget.lua run [--class critical|normal|background] [--jobs N] [--min N] [--mb M] -- <command> [args...] | status | refused | test")
+        raise("usage: ./xmakew l -P . tools/budget.lua run [--class critical|normal|background] [--jobs N] [--min N] [--mb M] -- <command> [args...] | status | test")
     end
 end
