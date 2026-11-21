@@ -29,10 +29,6 @@ function main()
 
     local heldlock = io.openlock(path.join(root, "held-by-live.lock"))
     assert(heldlock:trylock(), "could not take the stale key's lock")
-    local pid = os.getpid()
-    local began = os.time()
-    local lstart = (os.iorunv("/bin/ps", {"-o", "lstart=", "-p", tostring(pid)}, {try = true}) or ""):trim()
-    io.writefile(path.join(root, "held-by-live.holder"), string.format("%d %d %s\n", pid, began, lstart))
 
     generate.ready(sdk, version, logs, {})
 
@@ -42,13 +38,11 @@ function main()
 
     heldlock:unlock()
     heldlock:close()
-    os.tryrm(path.join(root, "held-by-live.holder"))
     os.tryrm(path.join(root, "held-by-live.lock"))
     os.tryrm(path.join(root, "free-to-go.lock"))
     os.tryrm(held)
     os.tryrm(path.join(root, key))
     os.tryrm(path.join(root, key .. ".lock"))
-    os.tryrm(path.join(root, key .. ".holder"))
     os.tryrm(base)
     print("FACTS_LOCK_STALE_TEST passed")
 end

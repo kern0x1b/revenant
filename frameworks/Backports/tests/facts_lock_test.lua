@@ -60,6 +60,5 @@ function main()
     os.tryrm(base)
     os.tryrm(path.join(root, key))
     os.tryrm(path.join(root, key .. ".lock"))
-    os.tryrm(path.join(root, key .. ".holder"))
     print("FACTS_LOCK_TEST passed")
 end

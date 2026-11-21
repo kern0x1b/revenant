@@ -120,7 +120,6 @@ function ready(sdk, version, logs, names)
                 exclusive.attempt(path.join(root, otherkey .. ".lock"), function ()
                     if os.isdir(other) and os.mtime(other) < cutoff then
                         os.tryrm(other)
-                        os.tryrm(path.join(root, otherkey .. ".holder"))
                     end
                 end)
             end
