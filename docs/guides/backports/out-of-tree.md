@@ -25,7 +25,7 @@ target("App")
   [the backports loading explanation](../../explanation/backports-loading.md).
 
 The `apple-ios` include adds `revenant@backports` on its own, with the default `FoundationBackports`, unless
-`REVENANT_BACKPORTS_LIBRARIES` is set. Checked with a throwaway app configured for `iphoneos` (armv7) on this change:
+`REVENANT_BACKPORTS_LIBRARIES` is set or the project is configured with `--component=Backports`. Checked with a throwaway app configured for `iphoneos` (armv7) on this change:
 with the app's requirement declared after the include, and again before it, the project recorded one backports
 instance, and its wrapper build produced the seven dylibs of the `UIKitBackports` closure (`UIKitBackports`,
 `GraphicsBackports`, `CoreGraphicsBackports`, `IOSurfaceBackports`, `FoundationBackports`, `CoreFoundationBackports`,
