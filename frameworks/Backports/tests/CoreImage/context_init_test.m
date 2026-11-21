@@ -1,5 +1,8 @@
 #import "../Foundation/check.h"
 #import <CoreImage/CoreImage.h>
+#import <objc/runtime.h>
+
+BOOL revenant_install_context_init(Class target, SEL selector);
 
 @interface CIContext (RevenantHostTest)
 - (instancetype)initWithRevenantOptions:(NSDictionary *)options;
@@ -16,6 +19,11 @@ static BOOL revenant_renders_red(CIContext *context)
 int main(int argc, char **argv)
 {
     revenant_read_arguments(argc, argv);
+
+    IMP system = class_getMethodImplementation([CIContext class], @selector(initWithOptions:));
+    BOOL replaced = revenant_install_context_init([CIContext class], @selector(initWithOptions:));
+    BOOL kept = class_getMethodImplementation([CIContext class], @selector(initWithOptions:)) == system;
+    revenant_check((!replaced && kept) != revenant_negative, "a system that has initWithOptions: keeps its own implementation", @"the backport replaced or added over the system method");
 
     CIContext *plain = [[CIContext alloc] initWithRevenantOptions:nil];
     revenant_check((plain != nil && [plain isKindOfClass:[CIContext class]]) != revenant_negative, "a context made without options is a CIContext", @"the initialiser returned nil or another class");
