@@ -100,5 +100,8 @@ function main()
         expect("the error names " .. case[2] .. ": " .. tostring(refusal), refusal:find(case[2], 1, true) ~= nil)
     end
 
+    local own = compile(root, "ownrpath", "@rpath/libownrpath.dylib", nil, nil, {"-Wl,-not_for_dyld_shared_cache"})
+    expect("a library whose own install name is @rpath, and which links nothing relative, is not refused", #driver.dependency_closure({own}, packages) == 0)
+
     os.tryrm(root)
 end
