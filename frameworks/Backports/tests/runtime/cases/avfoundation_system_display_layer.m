@@ -3,6 +3,7 @@
 #import <CoreMedia/CoreMedia.h>
 #import <CoreVideo/CoreVideo.h>
 #import <QuartzCore/QuartzCore.h>
+#import <dlfcn.h>
 
 static NSString *const kSystemImage = @"/System/Library/Frameworks/AVFoundation.framework/AVFoundation";
 static NSString *const kBackportImage = @"/usr/lib/revenant/org.revenant.backports/libAVFoundationBackports.dylib";
@@ -123,10 +124,8 @@ static void render(const char *label, Class cls, OSType format, const char *form
         [(AVSampleBufferDisplayLayer *)layer enqueueSampleBuffer:sample];
         CFRelease(sample);
         spin();
-        id status = [layer respondsToSelector:@selector(status)] ? @((long long)[(AVSampleBufferDisplayLayer *)layer status]) : @"unanswered";
-        printf("display layer fact: %s %s ready before %d after %d, layers with contents %lu, status %s\n", label, formatName,
-               readyBefore, [(AVSampleBufferDisplayLayer *)layer isReadyForMoreMediaData], (unsigned long)layers_with_contents(layer),
-               [[status description] UTF8String]);
+        printf("display layer fact: %s %s ready before %d after %d, layers with contents %lu\n", label, formatName,
+               readyBefore, [(AVSampleBufferDisplayLayer *)layer isReadyForMoreMediaData], (unsigned long)layers_with_contents(layer));
         [(AVSampleBufferDisplayLayer *)layer flushAndRemoveImage];
     }
 }
@@ -162,8 +161,16 @@ REVENANT_CASE(avfoundation_system_display_layer)
                              "requestMediaDataWhenReadyOnQueue:usingBlock:", "stopRequestingMediaData"};
     NSMutableArray *missing = [NSMutableArray array];
     for (size_t index = 0; index < sizeof members / sizeof members[0]; index++) {
-        if (!class_getInstanceMethod(named, sel_registerName(members[index])))
+        Method method = class_getInstanceMethod(named, sel_registerName(members[index]));
+        if (!method) {
             [missing addObject:[NSString stringWithUTF8String:members[index]]];
+            printf("display layer fact: member %s none\n", members[index]);
+            continue;
+        }
+        Dl_info where;
+        memset(&where, 0, sizeof where);
+        dladdr((void *)method_getImplementation(method), &where);
+        printf("display layer fact: member %s implemented in %s\n", members[index], where.dli_fname ?: "unknown");
     }
     revenant_expect_true(@"the class that objc_getClass names answers every member of the SDK's AVSampleBufferDisplayLayer",
                          (missing.count == 0) != flip, [missing componentsJoinedByString:@" "]);

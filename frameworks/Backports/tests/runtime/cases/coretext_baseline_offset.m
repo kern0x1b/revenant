@@ -9,7 +9,7 @@ typedef void (*FrameDrawFunction)(CTFrameRef, CGContextRef);
 typedef double (*LineBoundsFunction)(CTLineRef, CGFloat *, CGFloat *, CGFloat *);
 
 static const size_t kWidth = 80;
-static const size_t kHeight = 80;
+static const size_t kHeight = 120;
 
 static size_t ink_top(const unsigned char *pixels)
 {
@@ -22,12 +22,28 @@ static size_t ink_top(const unsigned char *pixels)
     return kHeight;
 }
 
-static NSAttributedString *text_with(CTFontRef font, NSNumber *offset)
+static size_t ink_bottom(const unsigned char *pixels)
+{
+    for (size_t y = kHeight; y > 0; y--) {
+        for (size_t x = 0; x < kWidth; x++) {
+            if (pixels[((y - 1) * kWidth + x) * 4 + 3] != 0)
+                return y - 1;
+        }
+    }
+    return 0;
+}
+
+static NSAttributedString *text_of(NSString *string, CTFontRef font, NSNumber *offset)
 {
     NSMutableDictionary *attributes = [NSMutableDictionary dictionaryWithObject:(__bridge id)font forKey:(__bridge NSString *)kCTFontAttributeName];
     if (offset)
         attributes[@"NSBaselineOffset"] = offset;
-    return [[NSAttributedString alloc] initWithString:@"H" attributes:attributes];
+    return [[NSAttributedString alloc] initWithString:string attributes:attributes];
+}
+
+static NSAttributedString *text_with(CTFontRef font, NSNumber *offset)
+{
+    return text_of(@"H", font, offset);
 }
 
 static CGContextRef new_context(unsigned char **pixels)
@@ -69,15 +85,15 @@ static size_t run_top(CTFontRef font, NSNumber *offset, RunDrawFunction draw)
     return top;
 }
 
-static size_t frame_top(CTFontRef font, NSNumber *offset, FrameDrawFunction draw)
+static size_t frame_bottom(CTFontRef font, NSNumber *offset, FrameDrawFunction draw)
 {
     unsigned char *pixels;
     CGContextRef context = new_context(&pixels);
-    CTFramesetterRef setter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)text_with(font, offset));
-    CGPathRef path = CGPathCreateWithRect(CGRectMake(10, 0, 60, 60), NULL);
+    CTFramesetterRef setter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)text_of(@"H\nH", font, offset));
+    CGPathRef path = CGPathCreateWithRect(CGRectMake(10, 0, 60, 100), NULL);
     CTFrameRef frame = CTFramesetterCreateFrame(setter, CFRangeMake(0, 0), path, NULL);
     draw(frame, context);
-    size_t top = ink_top(pixels);
+    size_t top = ink_bottom(pixels);
     CFRelease(frame);
     CGPathRelease(path);
     CFRelease(setter);
@@ -117,8 +133,8 @@ REVENANT_CASE(coretext_baseline_offset)
     size_t appLinePlain = line_top(font, nil, CTLineDraw), appLineRaised = line_top(font, raised, CTLineDraw);
     size_t systemRunPlain = run_top(font, nil, systemRun), systemRunRaised = run_top(font, raised, systemRun);
     size_t appRunPlain = run_top(font, nil, CTRunDraw), appRunRaised = run_top(font, raised, CTRunDraw);
-    size_t systemFramePlain = frame_top(font, nil, systemFrame), systemFrameRaised = frame_top(font, raised, systemFrame);
-    size_t appFramePlain = frame_top(font, nil, CTFrameDraw), appFrameRaised = frame_top(font, raised, CTFrameDraw);
+    size_t systemFramePlain = frame_bottom(font, nil, systemFrame), systemFrameRaised = frame_bottom(font, raised, systemFrame);
+    size_t appFramePlain = frame_bottom(font, nil, CTFrameDraw), appFrameRaised = frame_bottom(font, raised, CTFrameDraw);
     double systemAscent = ascent_of(font, raised, systemBounds) - ascent_of(font, nil, systemBounds);
     double appAscent = ascent_of(font, raised, CTLineGetTypographicBounds) - ascent_of(font, nil, CTLineGetTypographicBounds);
     CFRelease(font);
@@ -128,7 +144,7 @@ REVENANT_CASE(coretext_baseline_offset)
     printf("baseline fact: CTFrameDraw image %s\n", [image_of("CTFrameDraw") UTF8String]);
     printf("baseline fact: line top system %zu -> %zu, app %zu -> %zu\n", systemLinePlain, systemLineRaised, appLinePlain, appLineRaised);
     printf("baseline fact: run top system %zu -> %zu, app %zu -> %zu\n", systemRunPlain, systemRunRaised, appRunPlain, appRunRaised);
-    printf("baseline fact: frame top system %zu -> %zu, app %zu -> %zu\n", systemFramePlain, systemFrameRaised, appFramePlain, appFrameRaised);
+    printf("baseline fact: two-line frame ink bottom system %zu -> %zu, app %zu -> %zu\n", systemFramePlain, systemFrameRaised, appFramePlain, appFrameRaised);
     printf("baseline fact: ascent change system %.2f, app %.2f\n", systemAscent, appAscent);
     fflush(stdout);
 
@@ -139,8 +155,8 @@ REVENANT_CASE(coretext_baseline_offset)
     revenant_expect_true(@"the app's CTRunDraw raises the ink by NSBaselineOffset 6",
                          (appRunPlain - appRunRaised == 6) != negativeCase,
                          [NSString stringWithFormat:@"%zu to %zu", appRunPlain, appRunRaised]);
-    revenant_expect_true(@"the app's CTFrameDraw raises the ink by NSBaselineOffset 6",
-                         (appFramePlain - appFrameRaised == 6) != negativeCase,
+    revenant_expect_true(@"the app's CTFrameDraw makes each line 6 taller for NSBaselineOffset 6: the last of two lines ends 6 lower",
+                         (appFrameRaised - appFramePlain == 6) != negativeCase,
                          [NSString stringWithFormat:@"%zu to %zu", appFramePlain, appFrameRaised]);
     revenant_expect_true(@"the app's CTLineGetTypographicBounds ascent grows by NSBaselineOffset 6",
                          (appAscent > 5.5 && appAscent < 6.5) != negativeCase,
