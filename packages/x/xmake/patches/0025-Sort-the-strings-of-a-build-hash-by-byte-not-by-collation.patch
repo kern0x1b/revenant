@@ -1,0 +1,72 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: revenant <revenant@example.invalid>
+Date: Fri, 20 Nov 2026 11:00:00 +0200
+Subject: [PATCH] Sort the strings of a build hash by byte, not by the locale's
+ collation
+
+A package's build hash sorts the strings it hashes with table.sort, and Lua compares strings with strcoll, so the order, and with it the hash, depended on the process locale: the configs backports and backports_uikit sorted one way under en_US.UTF-8 and the other under C.UTF-8, and a shell in the second looked for a key that nobody had released. The launcher worked around it by pinning LC_COLLATE.
+
+The configuration strings, the source hashes, the toolchain names and the addon terms of the build hash are now sorted with a comparison of their bytes, which is the same in every locale. Every build hash moves once, so the patch is marked as one that changes the build output, and the launcher no longer pins the collation.
+
+Changes-build-output: yes
+---
+ xmake/core/package/package.lua | 19 +++++++++++++++----
+ 1 file changed, 15 insertions(+), 4 deletions(-)
+
+diff --git a/xmake/core/package/package.lua b/xmake/core/package/package.lua
+index e95e0df..08755e0 100644
+--- a/xmake/core/package/package.lua
++++ b/xmake/core/package/package.lua
+@@ -1829,6 +1829,17 @@ local function _patchset_digest()
+     return digest ~= "" and digest or nil
+ end
+ 
++local function _bytes_less(a, b)
++    local length = math.min(#a, #b)
++    for index = 1, length do
++        local x, y = a:byte(index), b:byte(index)
++        if x ~= y then
++            return x < y
++        end
++    end
++    return #a < #b
++end
++
+ local function _addons_for_buildhash()
+     local addons = addon.addons()
+     local terms = {}
+@@ -1838,7 +1849,7 @@ local function _addons_for_buildhash()
+             table.insert(terms, dirname .. "@" .. addoninfo.version)
+         end
+     end
+-    table.sort(terms)
++    table.sort(terms, _bytes_less)
+     return terms
+ end
+ 
+@@ -1876,7 +1887,7 @@ function _instance:buildhash()
+                     end
+                     table.insert(configs_order, k .. "=" .. tostring(v))
+                 end
+-                table.sort(configs_order)
++                table.sort(configs_order, _bytes_less)
+ 
+                 -- we need to be compatible with the hash value string for the previous luajit version
+                 local configs_str = string.serialize(configs_order, true)
+@@ -1894,14 +1905,14 @@ function _instance:buildhash()
+                 end
+                 if not sourcehashs:empty() then
+                     local hashs = sourcehashs:to_array()
+-                    table.sort(hashs)
++                    table.sort(hashs, _bytes_less)
+                     str = str .. "_" .. table.concat(hashs, "_")
+                 end
+             end
+             local toolchains = self:_config_for_buildhash("toolchains")
+             if opt.toolchains ~= false and toolchains then
+                 toolchains = table.copy(table.wrap(toolchains))
+-                table.sort(toolchains)
++                table.sort(toolchains, _bytes_less)
+                 str = str .. "_" .. table.concat(toolchains, "_")
+             end
+             local patchset = _patchset_digest()

@@ -34,14 +34,32 @@ local function plan(level)
         table.insert(targets, root)
         return targets
     end
-    table.join2(targets, os.dirs(path.join(root, "scratch", "*")), os.dirs(path.join(root, "xmake", "*.build.*")),
-                os.files(path.join(root, "xmake", "*.log")))
+    local shared = os.islink(path.join(root, "xmake-global"))
+    table.join2(targets, os.dirs(path.join(root, "scratch", "*")))
+    if not os.islink(path.join(root, "xmake")) then
+        table.join2(targets, os.dirs(path.join(root, "xmake", "*.build.*")), os.files(path.join(root, "xmake", "*.log")))
+    end
+    if shared then
+        return targets
+    end
     if level == "packages" then
         table.insert(targets, path.join(root, "xmake-global"))
     elseif os.isdir(path.join(root, "xmake-global", ".xmake", "cache")) then
         table.insert(targets, path.join(root, "xmake-global", ".xmake", "cache"))
     end
     return targets
+end
+
+local function unlink_shared(root, dry)
+    for _, name in ipairs({"xmake", "xmake-global"}) do
+        local link = path.join(root, name)
+        if os.islink(link) then
+            print("%s the link %s to the shared store, which stays", dry and "would remove" or "removing", link)
+            if not dry then
+                os.vrunv("rm", {"-f", link})
+            end
+        end
+    end
 end
 
 local function prune(dry)
@@ -115,6 +133,9 @@ function main(...)
         return scratch(dry)
     end
     local total = 0
+    if level == "all" then
+        unlink_shared(cache().root(), dry)
+    end
     for _, target in ipairs(plan(level)) do
         local kib = size(target)
         total = total + kib
