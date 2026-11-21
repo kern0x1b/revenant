@@ -27,7 +27,7 @@ package("apple-compat")
         import("core.package.addon")
         local revenant = addon.addons()[addon.dirname("revenant")] or raise("apple-compat is built with the revenant addon's rules, and no revenant addon is installed")
         local root = path.translate(path.join(package:scriptdir(), "..", "..", ".."))
-        local project = path.absolute("compat")
+        local project = path.absolute(package:builddir(), "compat")
         os.mkdir(project)
         io.writefile(path.join(project, "xmake.lua"), table.concat({
             "add_repositories(\"revenant " .. root .. "\")",
