@@ -964,6 +964,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         add_tests("coretext_fallback_cascade")
         add_tests("backport_impl_video_toolbox")
         add_tests("backport_impl_video_toolbox_h264")
+        add_tests("coretext_baseline_offset")
         add_tests("backport_impl_shadowed")
         add_tests("avfoundation_display_layer")
         add_tests("avfoundation_timebase_probe")
