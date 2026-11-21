@@ -68,6 +68,15 @@ function failures(opt)
         table.insert(found, "--real must reach RN_EXPO_REAL")
     end
 
+    local app_folder = path.join(os.tmpdir(), "isolate-app-modules")
+    os.tryrm(app_folder)
+    os.mkdir(path.join(app_folder, "build", "app-manifest"))
+    io.writefile(path.join(app_folder, "build", "app-manifest", "host.json"), '{"modules":["@scope/one","two"]}')
+    if isolate.build_environment({folder = app_folder}).RN_APP_MODULES ~= "@scope/one,two" or isolate.build_environment({folder = "/f"}).RN_APP_MODULES ~= nil then
+        table.insert(found, "the modules of the app manifest must reach RN_APP_MODULES, and a copy without any must set none")
+    end
+    os.tryrm(app_folder)
+
     if isolate.build_environment({folder = "/f", pkgdirs = "a=/d"}).RN_PKG_DIRS ~= "a=/d" then
         table.insert(found, "--pkgdirs must reach RN_PKG_DIRS")
     end

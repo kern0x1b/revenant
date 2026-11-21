@@ -38,7 +38,7 @@ exercised, so the rows are `partial`, `phone`.
 | --- | --- | --- | --- |
 | expo-web-browser | `SFSafariViewController`, `ASWebAuthenticationSession`; `PresentationStyle` renamed `WebBrowserPresentationStyle` | iOS 9, iOS 12; name collision inside `ExpoAppModules` | `openBrowserAsync` opens the URL in Safari and resolves `{type: "opened"}`; the style options are accepted and ignored; `dismissBrowser` raises "no web browser to dismiss"; `openAuthSessionAsync` rejects naming iOS 12 |
 | expo-blur | `UIVisualEffectView` | iOS 8 | a Core Image Gaussian blur of a snapshot of the view behind, with a white or black tint; it is taken when the view is added, resized or its intensity changes and does not follow later changes behind it |
-| expo-screen-orientation | trait collections, window scenes, `requestGeometryUpdate`, the safe-area notch test; the `RNSScreenWindowTraits` protocol is declared in Swift | iOS 8, 13, 16, 11 | the status-bar orientation and the size classes of the device idiom (iPhone: portrait regular/compact, landscape compact/compact); on the 4S `getOrientationAsync` answered unknown at start; the host's orientation mask is the intersection of every subscriber's answer and, with no subscriber answering, the Info.plist orientations, as `ExpoAppDelegateSubscriberManager.swift` (expo-modules-core 57.0.23, line 464) does |
+| expo-screen-orientation | trait collections, window scenes, `requestGeometryUpdate`, the safe-area notch test; the `RNSScreenWindowTraits` protocol is declared in Swift | iOS 8, 13, 16, 11 | the status-bar orientation and the size classes of the device idiom (iPhone: portrait regular/compact, landscape compact/compact); on the 4S `getOrientationAsync` answered unknown at start; the host's orientation mask is the intersection of every subscriber's answer and, with no subscriber answering, the Info.plist orientations, as `ExpoAppDelegateSubscriberManager.swift` (expo-modules-core 57.0.23, line 464) does; the intersection with the Info.plist orientations was checked on the iPad 2 (portrait holds), a rotation into landscape was not, because that needs a host with landscape in its plist |
 
 ## MessageUI and printing (block 4)
 
@@ -102,6 +102,19 @@ expo-media-library is a recipe with an iOS 6 patch (packages/e/expo-media-librar
 | Module | Removed or replaced | Why | What JS sees |
 | --- | --- | --- | --- |
 | expo-media-library | nothing removed; `AssetInfo`, `MediaType`, `PermissionsModuleNotFoundException` and the three permission requester classes renamed with an `ExpoML` prefix | their names collide with expo-image-picker's inside the shared Swift module `ExpoAppModules` | the module as published against the Photos backport over AssetsLibrary: moments are not available on iOS 6; `getMomentsAsync` returns the synced event albums. The audio media-type constant has its SDK value, and the Photos change-details extensions resolve through the backported `swiftPhotos` runtime; audio assets and all phone behaviour are not verified |
+
+## The application's own modules (host.json `modules`)
+
+An application that has an Expo module of its own, outside the SDK, names its package in the `modules` list of `host.json`
+(`frameworks/ReactNative/examples/paseo/host.json`); the host compiles it as published, from the application's `node_modules`. The
+module's `expo-module.config.json` may name its Swift classes under `apple` or under `ios`; the provider reads both (a package that
+used `ios` was compiled and never registered until 2026-11-20). What the module needs from iOS 7 and later comes from the Backports,
+not from a patch of the application: `@getpaseo/expo-two-way-audio` needs `AVAudioEngine`, which `AVFoundationBackports` supplies, so the
+host's Backports library list (`frameworks/ReactNative/src/host/xmake.lua`) holds `AVFoundationBackports`, `CoreMediaBackports` and
+`AccelerateBackports`. Without `AVFoundationBackports` in the list the module's `AVAudioFormat` is nil on iOS 6 and `initialize`
+answers `false`. Only a name that collides inside the shared Swift module is renamed (`MicrophonePermissionRequester.swift`, in
+`src/expo/xmake.lua`). On the iPad 2 the probe's `ExpoTwoWayAudio` check initialises it, records for three seconds and counts the microphone
+chunks and level events; it does not listen to what was recorded.
 
 ## How to check
 

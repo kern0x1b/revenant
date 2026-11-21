@@ -5,6 +5,7 @@ local byte_less = tool.byte_less
 local xml_text, splash_options = tool.xml_text, tool.splash_options
 local expo_packages, expo_real, expo_subscribers = tool.expo_packages, tool.expo_real, tool.expo_subscribers
 local expo_classes, stub_entries, component_provider, app_optional_components = tool.expo_classes, tool.stub_entries, tool.component_provider, tool.app_optional_components
+local app_modules = tool.app_modules
 local make_app_manifest = tool.make_app_manifest
 
 local DATA = path.join(os.scriptdir(), "data")
@@ -228,6 +229,40 @@ io.writefile(path.join(manifest_app, "host.json"), '{"optionalComponents": ["RNC
 check("the app manifest gives the optional components", same_list(app_optional_components({project = manifest_app}), {"RNCWebView", "RNSVGPath"}))
 check("a project without host.json is an error, not an empty manifest", fails(function () app_optional_components({project = fresh("no-manifest")}) end))
 check("a named manifest that does not exist is an error", fails(function () app_optional_components({project = manifest_app, manifest = path.join(manifest_app, "missing.json")}) end))
+local modules_app = fresh("app-modules")
+io.writefile(path.join(modules_app, "host.json"), '{"modules": ["@scope/some-module", "plain-module"]}')
+check("the app manifest gives the application's own Expo modules", same_list(app_modules({project = modules_app}), {"@scope/some-module", "plain-module"}))
+check("an application without host.json has no modules of its own", same_list(app_modules({project = fresh("no-modules")}), {}))
+check("a manifest without modules gives none", same_list(app_modules({project = manifest_app}), {}))
+check("a named manifest that does not exist is an error for the modules too", fails(function () app_modules({project = modules_app, manifest = path.join(modules_app, "missing.json")}) end))
+local bad_modules = fresh("bad-modules")
+io.writefile(path.join(bad_modules, "host.json"), '{"modules": ["a,b"]}')
+check("a module name with a comma is refused", fails(function () app_modules({project = bad_modules}) end))
+local ctx_modules = {options = {}, app = path.join(modules_app, "app"), ref = path.join(modules_app, "ref")}
+ctx_modules.options.project = modules_app
+check("a module the application does not have is an error", fails(function () expo_packages(ctx_modules) end))
+os.mkdir(path.join(modules_app, "app", "node_modules", "@scope", "some-module"))
+os.mkdir(path.join(modules_app, "app", "node_modules", "plain-module"))
+check("the application's modules join the built packages", (function () local names = expo_packages(ctx_modules); return names[#names - 1] == "@scope/some-module" and names[#names] == "plain-module" end)())
+for _, package in ipairs(expo_packages(ctx_modules)) do
+    local dir = path.join(modules_app, "app", "node_modules", package)
+    if not os.isdir(dir) then
+        dir = path.join(modules_app, "ref", "node_modules", package)
+    end
+    os.mkdir(dir)
+    local config = package == "@scope/some-module"
+        and '{"platforms": ["ios", "android"], "ios": {"modules": ["SomeModule"], "appDelegateSubscribers": ["SomeSubscriber"]}, "android": {"modules": ["expo.modules.Some"], "appDelegateSubscribers": ["AndroidOnly"]}}'
+        or (package == "plain-module" and '{"apple": {"modules": ["PlainModule"]}, "ios": {"modules": ["LegacyModule"]}}' or '{"apple": {"modules": []}}')
+    io.writefile(path.join(dir, "expo-module.config.json"), config)
+end
+local ios_classes = table.concat(expo_classes(ctx_modules), "|")
+check("a module under the ios key is in the provider", ios_classes:find("(module: SomeModule.self, name: nil)", 1, true) ~= nil, ios_classes)
+check("a module under the apple key still is", ios_classes:find("(module: PlainModule.self, name: nil)", 1, true) ~= nil, ios_classes)
+check("the android modules are not", ios_classes:find("expo.modules.Some", 1, true) == nil, ios_classes)
+check("a package with both keys registers the apple key and not the ios one", ios_classes:find("LegacyModule", 1, true) == nil, ios_classes)
+local ios_subscribers = table.concat(expo_subscribers(ctx_modules), "|")
+check("the app delegate subscribers of the ios key are listed, those of android are not", ios_subscribers:find("SomeSubscriber.self", 1, true) ~= nil
+    and ios_subscribers:find("AndroidOnly", 1, true) == nil, ios_subscribers)
 local named_manifest = fresh("named-manifest")
 io.writefile(path.join(named_manifest, "elsewhere.json"), '{"optionalComponents": ["RNSVGPath"]}')
 check("the named manifest is read instead of the project's host.json", same_list(app_optional_components({project = fresh("no-manifest-2"), manifest = path.join(named_manifest, "elsewhere.json")}), {"RNSVGPath"}))
@@ -248,6 +283,28 @@ try {
 }
 check("a component name with a quote is refused", refused)
 
+local expo_json = import("expo_json", {rootdir = path.join(os.scriptdir(), "..", "tools"), anonymous = true})
+local hard_rows = '{"rows": [{"id": "expo-a", "group": "expo", "native": true, "status": "real", "note": "resolves {type: opened}, says \\"quoted\\" and {\\"nested\\": {\\"id\\": \\"x\\"}}"}, {"id": "plain", "group": "community", "native": false, "status": "stub", "extra": {"deep": {"id": "inner"}}}]}'
+local read_rows = expo_json.coverage_rows(hard_rows)
+check("a coverage row whose note has braces, quotes and a nested object with an id is read, and nothing nested is taken for a row", #read_rows == 2 and read_rows[1].id == "expo-a" and read_rows[1].native == true and read_rows[1].status == "real"
+    and read_rows[2].id == "plain" and read_rows[2].native == false, #read_rows .. " rows")
+local read_names, read_owners = expo_json.stub_entries('{"stubs": [{"file": "src/expo/StubModules.swift", "name": "A{1}", "owner": "expo-a", "note": "{\\"x\\": 1}"}, {"file": "other.swift", "name": "B"}]}')
+check("a stub entry with braces in its text is read, and only the entries of StubModules.swift are listed", #read_names == 1 and read_names[1] == "A{1}" and read_owners["A{1}"] == "expo-a", table.concat(read_names, ","))
+local nested = expo_json.apple_config('{"platforms": ["apple", "android"], "apple": {"modules": ["One", "Two"], "appDelegateSubscribers": ["Sub"], "info": {"modules": ["NotMine"]}}, "android": {"modules": ["x.Y"]}}')
+check("an expo-module.config.json with nested platforms and a nested modules key reads the apple block's own modules and subscribers", table.concat(nested.modules, ",") == "One,Two" and table.concat(nested.subscribers, ",") == "Sub", table.concat(nested.modules, ","))
+local legacy = expo_json.apple_config('{"ios": {"modules": ["Legacy"]}}')
+check("the ios block is read when there is no apple block", table.concat(legacy.modules, ",") == "Legacy", table.concat(legacy.modules, ","))
+local both = expo_json.apple_config('{"ios": {"modules": ["Legacy"]}, "apple": {"modules": ["Current"]}}')
+check("the apple block wins when both are present", table.concat(both.modules, ",") == "Current", table.concat(both.modules, ","))
+local neither = expo_json.apple_config('{"android": {"modules": ["x.Y"]}}')
+check("a config with no apple or ios block has no modules", #neither.modules == 0 and #neither.subscribers == 0, #neither.modules)
+local real_rows = expo_json.coverage_rows(io.readfile(path.join(os.scriptdir(), "..", "src", "coverage.json")))
+local _, real_ids = io.readfile(path.join(os.scriptdir(), "..", "src", "coverage.json")):gsub('\n   "id":', "")
+check("every row of coverage.json is read", #real_rows == real_ids, #real_rows .. " rows, " .. real_ids .. " ids")
+local noisy = 'warn {not json} at "x {y}"\n{"name": "App", "extra": {"a": "}{", "list": [{"b": 1}]}, "scheme": "s"}\n'
+local printed_text, printed_value = expo_json.printed_object(noisy)
+check("the configuration object is found after log lines with braces, and braces inside its strings do not end it", printed_value ~= nil and printed_value.name == "App" and printed_value.extra.a == "}{" and printed_value.extra.list[1].b == 1 and printed_text:find('^{"name"') ~= nil, tostring(printed_text))
+check("text with no JSON object has no configuration", expo_json.printed_object("nothing {here}\n") == nil, "a non-JSON brace pair was taken for a configuration")
 if failures > 0 then
     raise("%d react-native inputs test(s) failed", failures)
 end

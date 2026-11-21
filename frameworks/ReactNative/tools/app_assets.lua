@@ -51,7 +51,10 @@ function main(...)
     local app = path.absolute(words[1])
     local output = path.absolute(given.output or path.join(app, "dist-assets"))
     local text = os.iorunv("npx", {"expo", "config", "--json", "--type", "public"}, {curdir = app, envs = {CI = "1", EXPO_NO_TELEMETRY = "1"}})
-    local config = json.decode(text:match("%b{}"))
+    local printed, config = import("expo_json", {rootdir = os.scriptdir(), anonymous = true}).printed_object(text)
+    if not printed then
+        raise("expo config printed no configuration:\n%s", text)
+    end
     local made = plan(config)
     local icon = path.join(app, made.icon)
     if not os.isfile(icon) then

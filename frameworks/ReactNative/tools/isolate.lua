@@ -275,6 +275,10 @@ function build_environment(options)
     if options.pkgdirs and options.pkgdirs ~= "" then
         env.RN_PKG_DIRS = options.pkgdirs
     end
+    local modules = options.folder and read_app_manifest(options.folder).modules
+    if modules and #modules > 0 then
+        env.RN_APP_MODULES = table.concat(modules, ",")
+    end
     return env
 end
 
@@ -286,6 +290,15 @@ local function lines(output)
     return found
 end
 
+function reference_gap(project)
+    local link = path.join(project, "build", "ref", "app")
+    if os.exists(link) then
+        return nil
+    end
+    local target = try { function () return os.iorunv("readlink", {link}):trim() end } or "nothing"
+    return string.format("%s links to %s, which is not there. The reference application lives in the cache, not in scratch: restore it with `cp -cR <paseo checkout> <cache>/reference/paseo-<version>`, `npm ci --ignore-scripts` in it, `./xmakew l -P . frameworks/ReactNative/tools/overlay.lua apply <that folder> frameworks/ReactNative/examples/paseo <cache>/reference/paseo-<version>-app`, and `ln -sfn <cache>/reference/paseo-<version>-app %s`", link, target, link)
+end
+
 function copy_project(project, folder, bundle_id)
     project = path.absolute(project)
     folder = path.absolute(folder)
@@ -294,6 +307,10 @@ function copy_project(project, folder, bundle_id)
     end
     if folder == project then
         raise("%s is the original project", folder)
+    end
+    local gap = reference_gap(project)
+    if gap then
+        raise("%s", gap)
     end
     os.mkdir(folder)
     os.vrunv("rsync", {"-a", "--exclude", "build", "--exclude", "*.log", project .. "/", folder .. "/"})
@@ -427,15 +444,13 @@ function clone_project(src, dst, new_cache, old_cache, old_checkout, bundle_id)
     local new = {folder = dst, checkout = checkout(), cache = lexical_path(new_cache)}
     local mapped = root_pairs(old, new)
     os.mkdir(path.directory(dst))
-    os.vrunv("cp", {"-cR", src, dst})
     local patterns = {}
     for _, pair in ipairs(mapped) do
         table.join2(patterns, {"-e", pair[1]})
     end
-    local rewritten = 0
     local named = try {
         function ()
-            return os.iorunv("grep", table.join({"-rIlF", "--exclude-dir=ref"}, patterns, {dst}))
+            return os.iorunv("grep", table.join({"-rIlF", "--exclude-dir=ref"}, patterns, {src}))
         end,
         catch {
             function ()
@@ -443,7 +458,12 @@ function clone_project(src, dst, new_cache, old_cache, old_checkout, bundle_id)
             end
         }
     }
-    for _, file in ipairs(lines(named)) do
+    os.vrunv("cp", {"-cR", src, dst})
+    local rewritten = 0
+    local touched = {}
+    for _, source_file in ipairs(lines(named)) do
+        local file = path.join(dst, path.relative(source_file, src))
+        table.insert(touched, file)
         local text = io.readfile(file)
         local changed = rewrite_roots(text, mapped)
         if changed ~= text then
@@ -452,16 +472,16 @@ function clone_project(src, dst, new_cache, old_cache, old_checkout, bundle_id)
         end
     end
     local relinked = 0
-    for _, link in ipairs(lines(os.iorunv("find", {path.join(dst, "build"), "-type", "l", "-not", "-path", path.join(dst, "build", "ref")}))) do
+    for _, link in ipairs(lines(os.iorunv("find", {path.join(dst, "build"), "-path", path.join(dst, "build", "ref"), "-prune", "-o", "-type", "l", "-print"}))) do
         local retargeted = retarget_link(os.iorunv("readlink", {link}):trim(), mapped)
         if retargeted then
             os.vrunv("ln", {"-sfn", retargeted, link})
             relinked = relinked + 1
         end
     end
-    local left = try {
+    local left = #touched == 0 and "" or try {
         function ()
-            return os.iorunv("grep", table.join({"-rIlF", "--exclude-dir=ref"}, patterns, {dst}))
+            return os.iorunv("grep", table.join({"-IlF"}, patterns, touched))
         end,
         catch {
             function ()
@@ -564,6 +584,83 @@ function link_react_native(folder, installdir)
     end
     os.vrunv("ln", {"-sfn", found, path.join(folder, "build", "rn-src")})
     return found
+end
+
+local AMBIENT_NAMES = {"DEVELOPER_DIR", "SDKROOT", "TOOLCHAINS", "MACOSX_DEPLOYMENT_TARGET", "IPHONEOS_DEPLOYMENT_TARGET", "CC", "CXX", "LD", "AR", "CFLAGS", "CXXFLAGS", "CPPFLAGS", "LDFLAGS", "OBJCFLAGS", "PATH"}
+
+local AMBIENT_SKIPPED = {"^REVENANT_DEVICE", "^REVENANT_BUDGET"}
+
+local function ambient_masked(name)
+    if name:find("^XMAKE_") or name:find("^REVENANT_") then
+        for _, skipped in ipairs(AMBIENT_SKIPPED) do
+            if name:find(skipped) then
+                return false
+            end
+        end
+        return true
+    end
+    return false
+end
+
+function ambient_environment()
+    local seen = {}
+    local names = {}
+    for _, name in ipairs(AMBIENT_NAMES) do
+        seen[name] = true
+        table.insert(names, name)
+    end
+    for name, _ in pairs(os.getenvs()) do
+        if ambient_masked(name) and not seen[name] and (os.getenv(name) or "") ~= "" then
+            table.insert(names, name)
+        end
+    end
+    table.sort(names)
+    local ambient = {}
+    for _, name in ipairs(names) do
+        ambient[name] = os.getenv(name)
+    end
+    return ambient
+end
+
+function config_key(folder, env, tree, ambient)
+    local explicit = table.clone(env)
+    for name, value in pairs(ambient or ambient_environment()) do
+        if explicit[name] == nil then
+            explicit[name] = value
+        end
+    end
+    local names = table.keys(explicit)
+    table.sort(names)
+    local parts = {}
+    for _, name in ipairs(names) do
+        table.insert(parts, name .. "=" .. tostring(explicit[name]))
+    end
+    table.insert(parts, io.readfile(path.join(folder, "xmake.lua")))
+    table.insert(parts, tree)
+    return hash.strhash128(table.concat(parts, "\0"))
+end
+
+local CONFIG_EXTENSIONS = {lua = true, json = true, toml = true, txt = true, cmake = true, sh = true, plist = true, patch = true, yaml = true}
+
+function checkout_state(root)
+    local listed = lines(os.iorunv("git", {"-C", root, "ls-files", "-co", "--exclude-standard", "--", "toolchain", "packages", "frameworks"}))
+    local inputs = {}
+    for _, file in ipairs(listed) do
+        local extension = file:match("%.([%w]+)$")
+        if extension and CONFIG_EXTENSIONS[extension:lower()] and os.isfile(path.join(root, file)) then
+            table.insert(inputs, file)
+        end
+    end
+    local listing = path.join(os.tmpdir(), "config-inputs-" .. hash.strhash128(root))
+    io.writefile(listing, table.concat(inputs, "\n") .. "\n")
+    local contents = os.iorunv("sh", {"-c", "cd \"$1\" && git hash-object --stdin-paths < \"$2\"", "sh", root, listing})
+    os.rm(listing)
+    return hash.strhash128(table.concat(listed, "\n")) .. "\0" .. hash.strhash128(contents)
+end
+
+function configured_before(folder, key)
+    local file = path.join(folder, "build", "config-key")
+    return os.isfile(file) and io.readfile(file):trim() == key and os.isdir(path.join(folder, ".xmake"))
 end
 
 function command_status(arguments, options)
@@ -677,7 +774,17 @@ function build(folder, cache, options)
     install_react_native(folder, path.absolute(cache))
     os.cd(folder)
     local xmakew = path.join(checkout(), "xmakew")
-    local configured = command_status({"-c", "\"$1\" f -c -y -p iphoneos -a armv7 -P \"$2\" > \"$3\" 2>&1", "sh", xmakew, folder, log}, {envs = env})
+    local key = config_key(folder, env, checkout_state(checkout()))
+    local configured = 0
+    if configured_before(folder, key) then
+        io.writefile(log, "configuration unchanged (key " .. key:sub(1, 12) .. "), not configured again\n")
+    else
+        os.rm(path.join(folder, "build", "config-key"))
+        configured = command_status({"-c", "\"$1\" f -c -y -p iphoneos -a armv7 -P \"$2\" > \"$3\" 2>&1", "sh", xmakew, folder, log}, {envs = env})
+        if configured == 0 then
+            io.writefile(path.join(folder, "build", "config-key"), key .. "\n")
+        end
+    end
     local built = configured
     if configured == 0 and not options.configure_only then
         built = command_status({"-c", "\"$1\" build -P \"$2\" -j \"$5\" -y -v \"$3\" >> \"$4\" 2>&1", "sh", xmakew, folder, options.target or "RNHost", log, options.jobs or "4"}, {envs = env})

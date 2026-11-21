@@ -4,25 +4,6 @@ local EXPO_BUILT = {real = true, partial = true}
 
 local COVERAGE = path.join(SOURCES, "coverage.json")
 
-local function coverage_rows(text)
-    local rows = {}
-    for object in text:gmatch("{([^{}]-)}") do
-        local id = object:match('"id":%s*"([^"]*)"')
-        if id then
-            table.insert(rows, {
-                id = id,
-                group = object:match('"group":%s*"([^"]*)"'),
-                native = object:match('"native":%s*(%a+)') == "true",
-                status = object:match('"status":%s*"([^"]*)"'),
-            })
-        end
-    end
-    local _, keys = text:gsub('"id":', "")
-    if keys ~= #rows then
-        raise("coverage.json: %d ids but %d rows were read", keys, #rows)
-    end
-    return rows
-end
 
 local PKG_DIRS = {}
 for _, pair in ipairs(string.split(os.getenv("RN_PKG_DIRS") or "", ",", {plain = true})) do
@@ -66,7 +47,7 @@ end
 
 local EXPO_PARITY_BASE = {"expo-asset", "expo-constants", "expo", "expo-crypto", "expo-keep-awake", "expo-linking", "expo-system-ui", "expo-application", "expo-glass-effect", "expo-localization"}
 
-local function modules(text)
+local function modules(text, reads)
     local candidates = {}
     if os.getenv("RN_EXPO_REAL") then
         candidates = table.copy(EXPO_PARITY_BASE)
@@ -76,10 +57,15 @@ local function modules(text)
             end
         end
     else
-        for _, row in ipairs(coverage_rows(text)) do
+        for _, row in ipairs(reads.coverage_rows(text)) do
             if row.native and (row.id == "expo" or row.id:startswith("expo-")) and EXPO_BUILT[row.status] and row.id ~= "expo-modules-core" then
                 table.insert(candidates, row.id)
             end
+        end
+    end
+    for _, package in ipairs(string.split(os.getenv("RN_APP_MODULES") or "", ",", {plain = true})) do
+        if package ~= "" then
+            table.insert(candidates, package)
         end
     end
     local expo, real = {}, {}
@@ -156,22 +142,12 @@ local EXPO_REWRITE = {
     ["FileSystemModule.swift"] = {package = "expo-file-system", replace = GATE14},
     ["FileSystemDownload.swift"] = {package = "expo-file-system", replace = GATE14},
     ["FileSystemFileHandle.swift"] = {package = "expo-file-system", replace = GATE14},
+    ["MicrophonePermissionRequester.swift"] = {package = "@getpaseo/expo-two-way-audio", replace = {{"let microphoneKey", "let twoWayAudioMicrophoneKey"}}},
 }
 local LOCAL_COPIES = {
     ["expo-glass-effect"] = "GlassView.swift",
     ["expo-localization"] = "LocalizationModule.swift",
 }
-local function stub_registry(text)
-    local names, owners = {}, {}
-    for object in text:gmatch("{([^{}]-)}") do
-        if object:match('"file":%s*"([^"]*)"') == "src/expo/StubModules.swift" then
-            local name = object:match('"name":%s*"([^"]*)"')
-            table.insert(names, name)
-            owners[name] = object:match('"owner":%s*"([^"]*)"')
-        end
-    end
-    return names, owners
-end
 
 if is_plat("iphoneos") then
 
@@ -295,7 +271,8 @@ target("expo-core-objc")
     local podinclude = path.join(proj, "build", "expo-pods")
     local POD_DIR_NAMES = {["expo-constants"] = "EXConstants"}
     on_load(function (target)
-        local expo = modules(io.readfile(COVERAGE))
+        local reads = import("expo_json", {rootdir = path.join(os.scriptdir(), "..", "..", "tools"), anonymous = true})
+        local expo = modules(io.readfile(COVERAGE), reads)
         for _, package in ipairs(expo) do
             local only = EXPO_ONLY[package]
             local base = path.join(expo_dir(package), "ios", only or "")
@@ -305,7 +282,8 @@ target("expo-core-objc")
         end
     end)
     on_config(function (target)
-        local expo = modules(io.readfile(COVERAGE))
+        local reads = import("expo_json", {rootdir = path.join(os.scriptdir(), "..", "..", "tools"), anonymous = true})
+        local expo = modules(io.readfile(COVERAGE), reads)
         os.mkdir(jsiinclude)
         os.tryrm(path.join(jsiinclude, "ExpoModulesJSI"))
         os.ln(path.join(jsisrc, "Public"), path.join(jsiinclude, "ExpoModulesJSI"))
@@ -313,7 +291,7 @@ target("expo-core-objc")
         for _, package in ipairs(expo) do
             local ios = path.join(expo_dir(package), "ios")
             if not os.isdir(ios) then
-                raise("%s is listed as a built Expo module in coverage.json, but %s has no ios folder", package, ios)
+                os.raise("%s is listed as a built Expo module in coverage.json, but %s has no ios folder", package, ios)
             end
             local pod = POD_DIR_NAMES[package]
             for _, spec in ipairs(os.files(path.join(ios, "*.podspec"))) do
@@ -369,8 +347,9 @@ target("expo-app-modules")
     local provider = path.join(ecore, "ExpoModulesProvider.swift")
     add_files(provider, path.join(SOURCES, "expo", "InsecureMD5Shim.swift"), path.join(SOURCES, "expo", "RevenantFontBackport.swift"))
     on_load(function (target)
-        local expo, real = modules(io.readfile(COVERAGE))
-        local STUB_NAMES, STUB_OWNERS = stub_registry(io.readfile(path.join(SOURCES, "stubs.json")))
+        local reads = import("expo_json", {rootdir = path.join(os.scriptdir(), "..", "..", "tools"), anonymous = true})
+        local expo, real = modules(io.readfile(COVERAGE), reads)
+        local STUB_NAMES, STUB_OWNERS = reads.stub_entries(io.readfile(path.join(SOURCES, "stubs.json")))
         local seen, duplicates = {}, {}
         for _, package in ipairs(expo) do
             for _, f in ipairs(os.files(path.join(expo_dir(package), "ios", EXPO_ONLY[package] or "", "**.swift"))) do
@@ -378,9 +357,9 @@ target("expo-app-modules")
                 if expo_skip(f, package) or LOCAL_COPIES[package] == name then
                 elseif EXPO_REWRITE[name] and EXPO_REWRITE[name].package == package then
                     seen[name] = true
-                    table.insert(duplicates, {f, path.join(staged, package .. "-" .. name), EXPO_REWRITE[name].replace})
+                    table.insert(duplicates, {f, path.join(staged, package:gsub("[^%w%-]", "_") .. "-" .. name), EXPO_REWRITE[name].replace})
                 elseif seen[name] then
-                    table.insert(duplicates, {f, path.join(staged, package .. "-" .. name)})
+                    table.insert(duplicates, {f, path.join(staged, package:gsub("[^%w%-]", "_") .. "-" .. name)})
                 else
                     seen[name] = true
                     target:add("files", f)
@@ -432,8 +411,7 @@ target("expo-app-modules")
         local classes = {}
         for _, package in ipairs(expo) do
             local config = io.readfile(path.join(expo_dir(package), "expo-module.config.json"))
-            local apple = config:match('"apple"%s*:%s*{.-"modules"%s*:%s*%[(.-)%]')
-            for name in (apple or ""):gmatch('"([^"]+)"') do
+            for _, name in ipairs(reads.apple_config(config).modules) do
                 if not EXPO_SKIP_MODULES[name] then
                     table.insert(classes, string.format("      (module: %s.self, name: nil),", name))
                 end
@@ -448,9 +426,7 @@ target("expo-app-modules")
         local subscribers = {}
         for _, package in ipairs(expo) do
             local config = io.readfile(path.join(expo_dir(package), "expo-module.config.json"))
-            local apple = config:match('"apple"%s*:%s*(%b{})') or ""
-            local names = apple:match('"appDelegateSubscribers"%s*:%s*%[(.-)%]') or ""
-            for name in names:gmatch('"([^"]+)"') do
+            for _, name in ipairs(reads.apple_config(config).subscribers) do
                 table.insert(subscribers, string.format("      %s.self,", name))
             end
         end

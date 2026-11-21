@@ -5,7 +5,7 @@ is an overlay folder in `frameworks/ReactNative/examples/<name>/`:
 
 ```
 xmake.lua     the project's root: it includes the host from the revenant checkout (`REVENANT_PATH`)
-host.json     the manifest: bundleId, pods, optionalComponents (the --manifest of inputs.lua)
+host.json     the manifest: bundleId, pods, modules, optionalComponents (the --manifest of inputs.lua)
 packaging/    the project's Info.plist, control-rnhost and brand files
 overlay/      files that replace the same path in the application's tree
 ```
@@ -40,6 +40,17 @@ revenant names an application; `examples/paseo` is the first one.
 - `npm ci` runs in a clone of the checkout, never in the checkout.
 - `overlay/node_modules/react-native-unistyles/lib/module/core/useProxifiedUnistyles/listener.native.js` coalesces the theme and
   runtime events of Unistyles per microtask, so a theme change costs one `setState` per subscriber instead of one per event.
-- `host.json` carries the bundle id `space.kern0x1b.paseo-ios6.rnhost` and the community pods the application needs.
-- The Paseo-specific native modules (`@getpaseo/expo-two-way-audio`, `PaseoHardwareKeyboard`) are not in the host's scope: the
-  host has no stub for them, and an application that needs them gets the loud missing-module error.
+- `host.json` carries the bundle id `space.kern0x1b.paseo-ios6.rnhost`, the community pods the application needs and its own
+  Expo modules (`modules`: packages of its workspace or `node_modules` that are not part of the Expo SDK and carry an
+  `expo-module.config.json`). Those are built from the application's sources, with no recipe and no change to them: `inputs.lua`
+  adds them to the Expo inputs and `isolate.lua` passes them to the build as `RN_APP_MODULES`. `@getpaseo/expo-two-way-audio` is
+  the one the Paseo example names; its iOS 13 voice-processing audio engine is the Backports' (`AVAudioEngine` on a
+  VoiceProcessingIO unit, crutch C12), not a change to the module.
+- `PaseoHardwareKeyboard` is not in the host's scope: the host has no stub for it, and an application that needs it gets the loud
+  missing-module error.
+
+## The application names its Backports libraries
+
+The libraries of the `revenant@backports` requirement are the application's: its own `xmake.lua` lists them (`configs = {libraries = "..."}`), and the host takes that list as it stands, with none of its own and no override. A module that needs another framework on the phone (for example the audio engine of `@getpaseo/expo-two-way-audio`) adds that library to the application's list only. The host's `on_load` checks the list against the libraries the host itself links (`tools/backports_libraries.lua`, `HOST_REQUIRED`) and refuses a build whose list lacks one, naming it; an `xmake.lua` that gives no list is refused too.
+
+The Expo provider reads the `apple` block of a package's `expo-module.config.json` and, when there is none, the `ios` block, as Expo's own `getAppleConfig` does (`apple` wins when both are present). It does not read the `platforms` array: a package the application lists is one the application means to build for iOS, and a module whose `platforms` omit iOS has no Apple block to read.

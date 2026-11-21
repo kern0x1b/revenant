@@ -28,7 +28,7 @@ end
 
 local GATE_JOBS = 6
 local GATE_LINES = 30
-local GATE_EXCLUDES = {"/.git", "/.xmake", "/build", "/.cache", "/.cache-private", "/.cache-boot", "/.claude/worktrees"}
+local GATE_EXCLUDES = {"/.git", "/.xmake", "/build", "/.cache", "/.cache-private", "/.cache-boot", "/.cache-*", "/.claude/worktrees"}
 
 local function budgeted(command, opt)
     opt = opt or {}
@@ -79,6 +79,10 @@ local function gate_commands(tree)
     }
 end
 
+local function gate_preflight()
+    return {"true"}
+end
+
 local function failure_lines(text)
     local report = import("ci.log", {rootdir = os.scriptdir()}).report(text)
     local lines = {}
@@ -117,11 +121,15 @@ local function backports_build()
     local folder = gate_folder()
     local tree = gate_tree(folder)
     local logfile = path.join(folder, "prepush.log")
-    os.mkdir(tree)
+    os.mkdir(folder)
     local output = io.open(logfile, "w")
     local ignored = path.join(folder, "ignored.txt")
     io.writefile(ignored, gate_ignored(root))
-    local ok = os.execv("rsync", gate_sync_arguments(tree, ignored), {try = true, stdout = output, stderr = output}) == 0
+    local ok = budgeted(gate_preflight(), {output = output})
+    if ok then
+        os.mkdir(tree)
+        ok = os.execv("rsync", gate_sync_arguments(tree, ignored), {try = true, stdout = output, stderr = output}) == 0
+    end
     if ok then
         for _, command in ipairs(gate_commands(tree)) do
             if not budgeted(command, {jobs = GATE_JOBS, curdir = tree, envs = gate_environment(), output = output}) then
@@ -654,6 +662,8 @@ local function test_suite()
     local ignoring = gate_sync_arguments("/g/tree", "/g/ignored.txt")
     check("the gate leaves out what git ignores, so that it builds what the key covers", table.concat(ignoring, " "):find("--exclude-from=/g/ignored.txt", 1, true) ~= nil, true)
     check("the gate's source and tree stay last", table.concat(ignoring, " ", #ignoring - 1), root .. "/ /g/tree/")
+    check("the gate leaves out a private cache of any name that starts with .cache-, so a worktree's own cache is not copied into the tree", table.concat(sync, " "):find("--exclude=/.cache-* ", 1, true) ~= nil, true)
+    check("the gate asks the budget before it creates its tree", gate_preflight()[1], "true")
     local commands = gate_commands("/g/tree")
     check("the gate configures the armv7 device build of the Backports component in its own tree",
           table.concat(commands[1], " ", 2), "f -P /g/tree -p iphoneos -a armv7 --component=Backports -y")
