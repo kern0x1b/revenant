@@ -232,3 +232,13 @@ expect("the libraries of an application's backports requirement are read from it
 expect("an application with another set keeps its own list and is checked against what the host links", table.concat(libraries.missing(libraries.declared(own), {"FoundationBackports", "MyOwnBackports"}), ",") == "", "an own library was reported missing")
 expect("a library the host links and the application lacks is named", table.concat(libraries.missing(libraries.declared(own)), ","):find("CoreTextBackports", 1, true) ~= nil, "a missing host library was not named")
 expect("an xmake.lua with no list is not read as one", libraries.declared('add_requires("revenant@backports")\n') == nil, "a requirement without libraries gave a list")
+
+local gapped = path.join(os.tmpdir(), "rn-ref-gap")
+os.tryrm(gapped)
+os.mkdir(path.join(gapped, "build", "ref"))
+os.execv("ln", {"-s", path.join(gapped, "nowhere"), path.join(gapped, "build", "ref", "app")})
+local gap = isolate.reference_gap(gapped)
+expect("a project whose reference application is gone is refused with how to restore it", gap ~= nil and gap:find("npm ci", 1, true) ~= nil and gap:find("reference/paseo", 1, true) ~= nil, tostring(gap))
+os.mkdir(path.join(gapped, "nowhere"))
+expect("a project whose reference application is there is not refused", isolate.reference_gap(gapped) == nil, "a present reference was refused")
+os.tryrm(gapped)

@@ -290,6 +290,15 @@ local function lines(output)
     return found
 end
 
+function reference_gap(project)
+    local link = path.join(project, "build", "ref", "app")
+    if os.exists(link) then
+        return nil
+    end
+    local target = try { function () return os.iorunv("readlink", {link}):trim() end } or "nothing"
+    return string.format("%s links to %s, which is not there. The reference application lives in the cache, not in scratch: restore it with `cp -cR <paseo checkout> <cache>/reference/paseo-<version>`, `npm ci --ignore-scripts` in it, `./xmakew l -P . frameworks/ReactNative/tools/overlay.lua apply <that folder> frameworks/ReactNative/examples/paseo <cache>/reference/paseo-<version>-app`, and `ln -sfn <cache>/reference/paseo-<version>-app %s`", link, target, link)
+end
+
 function copy_project(project, folder, bundle_id)
     project = path.absolute(project)
     folder = path.absolute(folder)
@@ -298,6 +307,10 @@ function copy_project(project, folder, bundle_id)
     end
     if folder == project then
         raise("%s is the original project", folder)
+    end
+    local gap = reference_gap(project)
+    if gap then
+        raise("%s", gap)
     end
     os.mkdir(folder)
     os.vrunv("rsync", {"-a", "--exclude", "build", "--exclude", "*.log", project .. "/", folder .. "/"})
