@@ -734,4 +734,7 @@ quotes and a tab and a staged rename that is edited again keep their own digests
 keeps every entry): an edit, an untracked file, a deleted file and a named environment variable each change the keys of the
 checks that read or name them, restoring them restores the keys, another folder or a new commit with the same files has the same
 key, a file a check does not read leaves its key, a failing check runs again, the checks of one process run in one batch, and
-`--fresh` runs them all.
+`--fresh` runs them all. Its live tests start real prepush runs that hold budget tokens and are then signalled with TERM, INT
+and KILL; they pin the budget's disk floor (`REVENANT_BUDGET_DISK_GB`) to 0 for those runs, because below the floor (100 GB)
+the budget refuses every heavy command and the run would hold nothing (this made the TERM case fail on every run while the
+disk was under 100 GB, 2026-11-22: it was the disk, not timing). A run with a floor no disk meets is checked to be refused.

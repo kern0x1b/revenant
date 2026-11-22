@@ -1476,6 +1476,22 @@ local function test_live()
     kill("KILL", matching(function (text) return ends_with(text, "prepush.lua probe-say " .. live_tag) end))
     check("a line is in the log file while the process that wrote it still runs", seen and still_running == 1, true)
 
+    local function hold_environment(pool, floor)
+        return {"REVENANT_BUDGET_POOL=" .. pool, "REVENANT_BUDGET_HELD=", "REVENANT_BUDGET_DISK_GB=" .. floor}
+    end
+
+    local refused_seconds = tostring(unique + 1)
+    local refused_pool = path.join(base, "poolRefused")
+    os.mkdir(refused_pool)
+    local refused_log = path.join(base, "hold-refused.log")
+    local refused = process.openv(os.programfile(), {"l", "-P", root, script, "probe-hold", refused_seconds},
+                                  {outpath = refused_log, errpath = refused_log, envs = hold_environment(refused_pool, "100000000")})
+    local refusal_said = wait_until(function () return (io.readfile(refused_log) or ""):find("GB floor, so no heavy command starts", 1, true) ~= nil end, 90000)
+    local refused_sleepers = #matching(function (text) return text == "/bin/sleep " .. refused_seconds end)
+    refused:kill()
+    kill("KILL", matching(function (text) return ends_with(text, "prepush.lua probe-hold " .. refused_seconds) or text == "/bin/sleep " .. refused_seconds end))
+    check("a run whose disk is below the budget's floor is refused and starts no command, so the runs below pin the floor to 0", refusal_said and refused_sleepers == 0, true)
+
     for round, signal in ipairs({"TERM", "INT", "KILL"}) do
         local seconds = tostring(unique + round * 7)
         local sleeping = "/bin/sleep " .. seconds
@@ -1483,17 +1499,21 @@ local function test_live()
         os.mkdir(pool)
         local log = path.join(base, "hold-" .. signal .. ".log")
         local run = process.openv(os.programfile(), {"l", "-P", root, script, "probe-hold", seconds},
-                                  {outpath = log, errpath = log, envs = {"REVENANT_BUDGET_POOL=" .. pool, "REVENANT_BUDGET_HELD="}})
+                                  {outpath = log, errpath = log, envs = hold_environment(pool, "0")})
         local function held_text()
             return try { function () return os.iorunv(os.programfile(), {"l", "-P", root, budget_script, "status"}, {envs = {REVENANT_BUDGET_POOL = pool, REVENANT_BUDGET_HELD = ""}}) end } or ""
         end
-        local running = wait_until(function ()
-            return #matching(function (text) return text == sleeping end) > 0 and held_text():find(" holds 1 token(s)", 1, true) ~= nil
+        local running = false
+        wait_until(function ()
+            running = #matching(function (text) return text == sleeping end) > 0 and held_text():find(" holds 1 token(s)", 1, true) ~= nil
+            return running or (io.readfile(log) or ""):find("budget:", 1, true) ~= nil
         end, 90000)
         local mains = matching(function (text) return ends_with(text, "prepush.lua probe-hold " .. seconds) end)
         local runs = matching(function (text) return text:find("budget.lua run", 1, true) ~= nil and ends_with(text, "-- " .. sleeping) end)
         local sleepers = matching(function (text) return text == sleeping end)
-        check("a run that holds its tokens has its prepush, its budget run and its command (" .. signal .. ")", running and #mains == 1 and #runs == 1 and #sleepers == 1, true)
+        check("a run that holds its tokens has its prepush, its budget run and its command (" .. signal .. ")",
+              string.format("held and listed %s, prepush %d, budget run %d, command %d, first line of its log %q", tostring(running), #mains, #runs, #sleepers, (io.readfile(log) or ""):match("[^\n]*")),
+              "held and listed true, prepush 1, budget run 1, command 1, first line of its log \"\"")
         kill(signal, mains)
         local function all_gone()
             return #matching(function (text) return text == sleeping or ends_with(text, "-- " .. sleeping) or ends_with(text, "prepush.lua probe-hold " .. seconds) end) == 0
