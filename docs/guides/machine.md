@@ -222,6 +222,19 @@ package is installed. xmake's description scope has no `raise`, so the load ends
 the printed reason. An install that applied fewer patches than its recipe lists cannot be detected afterwards without
 patching xmake, which would move the xmake key of every checkout, so the check removes the condition instead.
 
+**A project's `xmake-requires.lock` names the revenant repository of the `xmakew` that builds it.** With
+`set_policy("package.requires_lock", true)` xmake takes the recipes of every `revenant@...` package from the repository and
+commit the lock records, not from `REVENANT_PATH`. Classicgram's lock named the main checkout at 198a8d1ee (2026-10-27)
+while its `REVENANT_PATH` was a pin of 2026-11-22: the toolchain was the pin's and the recipes October's, the October ld64
+was not in the store, `apple-compat` raised "the ld64 956.6 package is required but has no install folder", and one
+worker compiled the October llvm for an hour for nothing. `./xmakew` now reads the `xmake-requires.lock` of the project
+it is asked to build (`-P`, `--project`, else the checkout itself) and refuses, before anything starts, when a `revenant@`
+entry names a local repository other than this checkout (paths compared after resolving links) or any repository at a
+commit other than the checkout's `HEAD`; an entry that names the published repository by address is held to the commit
+only. The message names the lock's repository and commit and this checkout. The fix is the same each time the pin moves:
+delete the lock, run the build once so that xmake writes a new one with this checkout as the repository, commit it with
+the pin. A lock without `revenant@` entries is not read further, and `--patchset` and `--build-xmake` do not check it.
+
 Two builds of one package key never run at once, because the install is locked by its folder (`<installdir>.lock`); two
 different keys of one package, built at once by two processes, each patch and build in their own copy of the sources
 (`checkout.keyed`, [ADR 0018](../explanation/decisions/0018-source-folder-per-build.md)).

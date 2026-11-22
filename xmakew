@@ -231,6 +231,54 @@ if [ "${1:-}" = --build-xmake ]; then
     exit 0
 fi
 
+project=$root
+previous=""
+for argument in "$@"; do
+    case $previous in
+        -P | --project) project=$argument ;;
+    esac
+    case $argument in
+        --project=*) project=${argument#--project=} ;;
+        -P?*) project=${argument#-P} ;;
+    esac
+    previous=$argument
+done
+case $project in
+    /*) ;;
+    *) project=$(pwd)/$project ;;
+esac
+lock=$project/xmake-requires.lock
+if [ -f "$lock" ]; then
+    here=$(physical "$root")
+    head=$(git -C "$root" rev-parse HEAD 2>/dev/null || true)
+    pins=$(awk '
+        /^[ \t]*\["/ { inside = ($0 ~ /^[ \t]*\["revenant@/); commit = ""; next }
+        inside && /^[ \t]*commit = "/ { value = $0; sub(/^[^"]*"/, "", value); sub(/".*$/, "", value); commit = value }
+        inside && /^[ \t]*url = "/ { value = $0; sub(/^[^"]*"/, "", value); sub(/".*$/, "", value); print commit " " value; inside = 0 }
+    ' "$lock" | sort | uniq -c)
+    stale=""
+    while read -r count pinned address; do
+        [ -n "$count" ] || continue
+        case $address in
+            /*) [ "$(physical "$address")" = "$here" ] || stale="$stale$count $pinned $address
+" ;;
+        esac
+        if [ -z "$stale" ] && [ -n "$head" ] && [ "$pinned" != "$head" ]; then
+            stale="$count $pinned $address
+"
+        fi
+    done <<EOF
+$pins
+EOF
+    if [ -n "$stale" ]; then
+        read -r count pinned address <<EOF
+$stale
+EOF
+        echo "xmakew: $lock names the revenant package repository $address at commit $pinned for $count package entries (more may differ), but this xmakew is the checkout $here at commit ${head:-unknown}: with package.requires_lock xmake reads the package recipes from the locked repository and commit, not from this checkout, so the build would run this checkout's toolchain over the recipes of another pin and install what that pin asks for (hours of compiling for packages nothing here uses). Nothing was started. Refresh the lock for this checkout: delete $lock, run the build once (xmakew build -P $project -y <target>) so that xmake writes a new lock with this checkout as the repository, look at its diff and commit it together with the pin." >&2
+        exit 1
+    fi
+fi
+
 for part in xmake xmake-global; do
     if [ ! -L "$cache/$part" ] && [ -e "$cache/$part" ]; then
         seeder=""
