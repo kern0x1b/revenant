@@ -530,6 +530,17 @@ it at all. A refusal prints the disk reading and the floor; the command was neve
 - Nice. `critical` keeps its priority, `normal` runs under `nice -n 5`, `background` under `taskpolicy -b` and `nice -n 15`.
 - Release. A token is a lock on a slot file, and the kernel releases it when its process ends, `kill -9` included. The command
   is started with the descriptors of the slot files closed, since a child that kept one would keep the token after its parent died.
+  A budget run also ends with the process that started it: a small shell watcher, started with the run, checks once a second that
+  the run is still the child of the process that started it (a process that is reparented to launchd has lost its parent, whether
+  or not anybody has reaped the dead one yet), and when the parent is gone (a `kill`, a closed terminal, a crash; `kill -9` included, where no handler can run) it
+  sends TERM to the budget run and everything below it, and KILL two seconds later. So prepush killed in the middle of a heavy
+  step, or of its batch of light checks, leaves no `budget run` and no command holding tokens at ppid 1. The watcher is a shell
+  and not a signal handler because xmake runs a Lua handler only between two Lua instructions, never while it waits for a child.
+- Who holds. A held token names its holder: the pid of the budget run, its worktree and its command, written into the slot file
+  with the grant, and a waiting request's ticket names the same about itself. `status` prints a line for each holder
+  (`pid 123 holds 2 token(s) for 4m in <worktree>: <command>`) and for each waiting request, and a request that has to wait
+  says so at once, `budget: waiting for N token(s), <class> class; held by:` with the holders' lines (or that nobody holds
+  a token, so the machine's load or memory is the limit), and again every five minutes (`REVENANT_BUDGET_ANNOUNCE_S`) while it waits.
 - Nesting. A command under a budget gets its count in `REVENANT_BUDGET_HELD`. A budget run below it takes no tokens of its own,
   so a `./xmakew` started by a build waits for nothing and is bounded by the build's tokens.
 - Disk. No command starts while the volume of the checkout has less than 100 GB free (`REVENANT_BUDGET_DISK_GB`). The
@@ -542,6 +553,17 @@ A command run straight with `xmake`, and not through `./xmakew` or a budget run,
 `prepush: budget refused; this is not a failed check, free the space and rerun` and exits 3, without counting any check
 as failed and without remembering a refusal as a pass. Exit 0 means every check passed, a failed check makes the tool
 raise, and exit 3 means the disk stopped it; a caller scripting prepush can tell the three apart.
+
+Prepush writes each line as it happens and flushes it (`say` in `tools/prepush.lua`), so a run redirected to a log
+(`> prepush.log 2>&1 &`) shows each line when it is written and does not depend on how the output is buffered; the 2026-11-22
+probe saw this xmake write a short `print` line to a redirected file or a pipe at once, and the flush keeps it so. A check
+prints `start <name>` when it begins and `ok <name> <n>s` or `FAIL <name> <n>s` when it ends, and the line is in the file at that
+moment. What kept an earlier run silent for two hours was the wait, not the buffer: the batch of light checks is a budgeted
+child that queued behind the holders and printed nothing; it now says who holds the tokens. The light checks (comments, layout, digests and the like) run first; when one is red the run stops there, before any
+heavy check is queued on the budget, names the check (`prepush: <name> failed; the run stops here, and no heavy check was
+started`) and fails; `--keep-going` runs on and says so. When every light check is green it says `the light checks are green;
+starting the heavy ones` before the first heavy one. Anything that waits on the budget, the batch of light checks included
+(it is a budgeted child of its own), says who holds the tokens (the lines of `budget status`) instead of waiting in silence.
 
 ## Checks that remember their result
 

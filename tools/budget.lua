@@ -1,3 +1,5 @@
+local process = import("core.base.process")
+
 local TOKEN_MB = 1536
 local RESERVE_MB = 2048
 local RESERVE_CORES = 2
@@ -17,6 +19,22 @@ local DF = "/bin/df"
 local PS = "/bin/ps"
 local LOAD_WINDOW_MS = 60000
 local AGING_S = 600
+local ANNOUNCE_S = 300
+
+local function say(format, ...)
+    print(format, ...)
+    io.flush()
+end
+
+local function duration(seconds)
+    seconds = math.max(0, seconds)
+    if seconds < 90 then
+        return string.format("%d s", seconds)
+    elseif seconds < 5400 then
+        return string.format("%d min", seconds // 60)
+    end
+    return string.format("%.1f h", seconds / 3600)
+end
 
 local CLASSES = {
     critical = {rank = 1, nice = 0},
@@ -219,14 +237,31 @@ local function refusal_text(free, floor)
     return string.format("budget: %.0f GB free on the checkout's volume, below the %d GB floor, so no heavy command starts", free, floor)
 end
 
-local function enqueue(folder, rank, minimum)
+local function who_line(who)
+    local command = (who.command or ""):gsub("%s+", " ")
+    if #command > 160 then
+        command = command:sub(1, 157) .. "..."
+    end
+    return string.format("h %d\t%s\t%s", who.at or os.time(), ((who.worktree or ""):gsub("[\t\n]", " ")), command)
+end
+
+local function who_of(text)
+    local at, worktree, command = (text or ""):match("\nh (%d+)\t([^\t\n]*)\t([^\n]*)")
+    return {at = tonumber(at), worktree = worktree or "", command = command or ""}
+end
+
+local function ticket_need(file)
+    return tonumber((io.readfile(file) or ""):match("^%d+")) or 1
+end
+
+local function enqueue(folder, rank, minimum, who)
     local dir = path.join(folder, "queue")
     os.mkdir(dir)
     local name = string.format("%d-%013d-%08d.ticket", rank, os.time() * 1000 + math.random(0, 999), math.random(0, 99999999))
     local file = path.join(dir, name)
     local lock = io.openlock(file)
     lock:trylock()
-    io.writefile(file, tostring(minimum))
+    io.writefile(file, tostring(minimum) .. (who and string.format("\np %d\n%s\n", who.pid, who_line(who)) or ""))
     return {name = name, file = file, lock = lock}
 end
 
@@ -271,7 +306,7 @@ local function ahead_of(folder, name, available)
     for _, file in ipairs(os.files(path.join(folder, "queue", "aged-*.ticket"))) do
         local other = path.filename(file):sub(6)
         if other < name and holder_alive(path.join(folder, "queue", other)) then
-            local need = tonumber(io.readfile(file)) or 1
+            local need = ticket_need(file)
             if need <= available then
                 return true
             end
@@ -279,7 +314,7 @@ local function ahead_of(folder, name, available)
     end
     for _, file in ipairs(os.files(path.join(folder, "queue", "*.ticket"))) do
         if path.filename(file) < name and holder_alive(file) then
-            local need = tonumber(io.readfile(file)) or 1
+            local need = ticket_need(file)
             if need <= available then
                 return true
             end
@@ -314,23 +349,123 @@ local function release_locks(entries)
     end
 end
 
-local function publish_slot(entry, count)
+local function publish_slot(entry, count, who)
     local lines = {}
     for line in (io.readfile(entry.file) or ""):gmatch("[^\n]+") do
-        if not line:match("^g ") then
+        if not line:match("^g ") and not line:match("^h ") then
             table.insert(lines, line)
         end
+    end
+    if who then
+        table.insert(lines, who_line(who))
     end
     table.insert(lines, string.format("g %d %d", os.time(), count))
     io.writefile(entry.file, table.concat(lines, "\n") .. "\n")
 end
 
-local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms)
+local function process_command(pid)
+    return try { function () return os.iorunv(PS, {"-o", "command=", "-p", tostring(pid)}):trim() end } or ""
+end
+
+local function holders(folder)
+    local found = {}
+    for index = 1, os.cpuinfo("ncpu") - RESERVE_CORES do
+        local file = slot_path(folder, index)
+        local lock = io.openlock(file)
+        if lock then
+            if lock:trylock() then
+                lock:unlock()
+            else
+                local text = io.readfile(file) or ""
+                local held = who_of(text)
+                held.slot = index
+                held.pid = tonumber(text:match("^%d+"))
+                if held.command == "" and held.pid then
+                    held.command = process_command(held.pid)
+                    held.worktree = held.command:match("%-P (%S+)") or ""
+                end
+                table.insert(found, held)
+            end
+            lock:close()
+        end
+    end
+    return found
+end
+
+local function waiters(folder)
+    local names = {}
+    for _, file in ipairs(os.files(path.join(folder, "queue", "*.ticket"))) do
+        table.insert(names, file)
+    end
+    table.sort(names)
+    local found = {}
+    for _, file in ipairs(names) do
+        if holder_alive(file) then
+            local text = io.readfile(file) or ""
+            local waiting = who_of(text)
+            waiting.name = path.filename(file)
+            waiting.need = ticket_need(file)
+            waiting.pid = tonumber(text:match("\np (%d+)"))
+            local rank = tonumber(waiting.name:match("^(%d+)%-"))
+            for name, class in pairs(CLASSES) do
+                if class.rank == rank then
+                    waiting.class = name
+                end
+            end
+            table.insert(found, waiting)
+        end
+    end
+    return found
+end
+
+local function holder_lines(folder, indent)
+    local groups, order = {}, {}
+    for _, held in ipairs(holders(folder)) do
+        local key = tostring(held.pid)
+        if not groups[key] then
+            groups[key] = {holder = held, count = 0}
+            table.insert(order, key)
+        end
+        groups[key].count = groups[key].count + 1
+    end
+    local lines = {}
+    for _, key in ipairs(order) do
+        local held = groups[key].holder
+        table.insert(lines, string.format("%spid %s holds %d token(s)%s in %s: %s", indent, key, groups[key].count,
+                                          held.at and " for " .. duration(os.time() - held.at) or "",
+                                          held.worktree ~= "" and held.worktree or "an unknown worktree",
+                                          held.command ~= "" and held.command or "an unknown command"))
+    end
+    return lines
+end
+
+local function waiter_lines(folder, indent)
+    local lines = {}
+    for _, waiting in ipairs(waiters(folder)) do
+        table.insert(lines, string.format("%spid %s waits%s for %d token(s), %s class, in %s: %s", indent, tostring(waiting.pid),
+                                          waiting.at and " " .. duration(os.time() - waiting.at) or "", waiting.need, waiting.class or "unknown",
+                                          waiting.worktree ~= "" and waiting.worktree or "an unknown worktree",
+                                          waiting.command ~= "" and waiting.command or "an unknown command"))
+    end
+    return lines
+end
+
+local function waiting_text(folder, minimum, class, again)
+    local lines = holder_lines(folder, "  ")
+    local head = string.format("budget: %s for %d token(s), %s class", again and "still waiting" or "waiting", minimum, class)
+    if #lines == 0 then
+        return head .. "; no process holds a token, so the machine's own load or memory is the limit"
+    end
+    return head .. "; held by:\n" .. table.concat(lines, "\n")
+end
+
+local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms, who)
     reading_fn = reading_fn or sample
     poll_ms = poll_ms or POLL_MS
-    local ticket = enqueue(folder, CLASSES[class].rank, minimum)
+    local ticket = enqueue(folder, CLASSES[class].rank, minimum, who)
     local started = os.mclock()
     local aging = (tonumber(os.getenv("REVENANT_BUDGET_AGING_S")) or AGING_S) * 1000
+    local announce = (tonumber(os.getenv("REVENANT_BUDGET_ANNOUNCE_S")) or ANNOUNCE_S) * 1000
     local announced, marked
     while true do
         local cores = os.cpuinfo("ncpu")
@@ -350,7 +485,7 @@ local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms)
             local grant = table.slice(free, 1, count)
             release_locks(table.slice(free, count + 1))
             for _, entry in ipairs(grant) do
-                publish_slot(entry, 1)
+                publish_slot(entry, 1, who)
             end
             leave(ticket, folder)
             return grant
@@ -360,9 +495,9 @@ local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms)
             io.writefile(aged_path(folder, ticket.name), tostring(minimum))
             marked = true
         end
-        if not announced then
-            print("budget: waiting for %d token(s), %s class", minimum, class)
-            announced = true
+        if not announced or os.mclock() - announced > announce then
+            say("%s", waiting_text(folder, minimum, class, announced ~= nil))
+            announced = os.mclock()
         end
         os.sleep(poll_ms)
     end
@@ -381,24 +516,53 @@ local function launch(class, command)
     return "/bin/sh", table.join({"-c", CLOSE_INHERITED, "budget", program}, args)
 end
 
+local WATCHER = [[parent=$1; target=$2; me=$$
+tree() { for child in $(pgrep -P "$1"); do tree "$child"; done; echo "$1"; }
+while [ "$(ps -o ppid= -p "$target" 2>/dev/null | tr -d ' ')" = "$parent" ]; do sleep 1; done
+kill -0 "$target" 2>/dev/null || exit 0
+pids=$(tree "$target" | grep -v "^$me\$")
+kill -TERM $pids 2>/dev/null
+sleep 2
+kill -KILL $pids 2>/dev/null
+exit 0]]
+
+local function parent_of(pid)
+    return tonumber(try { function () return os.iorunv(PS, {"-o", "ppid=", "-p", tostring(pid)}):trim() end })
+end
+
+local function watch_parent()
+    local parent = parent_of(os.getpid())
+    if not parent or parent <= 1 then
+        return nil
+    end
+    return process.openv("/bin/sh", {"-c", CLOSE_INHERITED, "budget", "/bin/sh", "-c", WATCHER, "watcher", tostring(parent), tostring(os.getpid())},
+                         {outpath = "/dev/null", errpath = "/dev/null"})
+end
+
 local function run(opt)
     local class = CLASSES[opt.class]
     local inherited = tonumber(os.getenv("REVENANT_BUDGET_HELD"))
+    local watcher = watch_parent()
     local locks = {}
     local count = inherited
     if not inherited then
         local free = free_disk_gb()
         local floor = budget_floor()
         if disk_refused(free, floor) then
-            print(refusal_text(free, floor))
+            say("%s", refusal_text(free, floor))
             os.exit(REFUSAL_EXIT)
         end
         local minimum, maximum = tokens_wanted(opt, os.cpuinfo("ncpu"))
-        locks = acquire(pool_folder(), opt.class, minimum, maximum)
+        locks = acquire(pool_folder(), opt.class, minimum, maximum, nil, nil,
+                        {pid = os.getpid(), worktree = os.projectdir(), command = table.concat(opt.command, " "), at = os.time()})
         count = #locks
     end
     local program, args = launch(class, opt.command)
     local status = os.execv(program, args, {envs = {XMAKE_MAX_JOBS = tostring(count), REVENANT_BUDGET_HELD = tostring(count)}, try = true})
+    if watcher then
+        watcher:kill()
+        watcher:close()
+    end
     release_locks(locks)
     return status or 1
 end
@@ -448,10 +612,6 @@ local function held_slots(folder)
     return count
 end
 
-local function queued(folder)
-    return #os.files(path.join(folder, "queue", "*.ticket"))
-end
-
 local function status()
     local folder = pool_folder()
     local cores = os.cpuinfo("ncpu")
@@ -461,16 +621,23 @@ local function status()
     local reading = sample()
     reading.cores = cores
     local load = math.max(reading.load, own)
-    print("pool      %s", folder)
-    print("cores     %d (reserve %d)", cores, RESERVE_CORES)
-    print("cpu       %.2f loadavg, %.2f effective load, %d runnable of holders, %d token(s) of headroom",
-          reading.loadavg, load, own, math.max(0, cores - RESERVE_CORES - load))
-    print("memory    pressure %d, %d MB available (memorystatus %d%%), %d token(s) of headroom", reading.pressure,
-          math.floor(reading.available), reading.level or 0, memory_headroom(reading))
-    print("held      %d token(s)", held)
-    print("capacity  %d token(s) for a new request now", capacity(reading, held, own))
-    print("queued    %d ticket file(s)", queued(folder))
-    print("disk      %.0f GB free on the checkout's volume (floor %d GB)", free_disk_gb(), DISK_FLOOR_GB)
+    say("pool      %s", folder)
+    say("cores     %d (reserve %d)", cores, RESERVE_CORES)
+    say("cpu       %.2f loadavg, %.2f effective load, %d runnable of holders, %d token(s) of headroom",
+        reading.loadavg, load, own, math.max(0, cores - RESERVE_CORES - load))
+    say("memory    pressure %d, %d MB available (memorystatus %d%%), %d token(s) of headroom", reading.pressure,
+        math.floor(reading.available), reading.level or 0, memory_headroom(reading))
+    say("held      %d token(s)", held)
+    for _, line in ipairs(holder_lines(folder, "          ")) do
+        say("%s", line)
+    end
+    say("capacity  %d token(s) for a new request now", capacity(reading, held, own))
+    local waiting = waiter_lines(folder, "          ")
+    say("queued    %d ticket(s) with a live holder", #waiting)
+    for _, line in ipairs(waiting) do
+        say("%s", line)
+    end
+    say("disk      %.0f GB free on the checkout's volume (floor %d GB)", free_disk_gb(), DISK_FLOOR_GB)
 end
 
 local function test_reading(loadavg, pressure, available_mb, opt)
@@ -488,7 +655,6 @@ local function test_reading(loadavg, pressure, available_mb, opt)
 end
 
 local function test_suite()
-    local process = import("core.base.process")
     local count = 0
     local function check(name, got, want)
         count = count + 1
@@ -633,7 +799,7 @@ local function test_suite()
         path.join(os.scriptdir(), "budget.lua"), "run", "--class", "normal", "--jobs", "1", "--min", "1", "--", "/bin/sleep", "30"},
         {outpath = stamp_log, errpath = stamp_log, envs = {"REVENANT_BUDGET_POOL=" .. stamp_pool}})
     local stamp_deadline = os.mclock() + 30000
-    while held_slots(stamp_pool) < 1 and os.mclock() < stamp_deadline do
+    while not (held_slots(stamp_pool) >= 1 and read_grants(stamp_pool) >= 0.9) and os.mclock() < stamp_deadline do
         os.sleep(500)
     end
     check("a second process sees the grant made by the first", read_grants(stamp_pool) >= 0.9, true)
@@ -820,6 +986,115 @@ local function test_suite()
         os.sleep(200)
     end
     check("a holder killed with SIGKILL releases its tokens", held_slots(pool), 0)
+
+    do
+        local project = path.absolute(path.directory(os.scriptdir()))
+        local script = path.join(os.scriptdir(), "budget.lua")
+        local who_pool = path.join(base, "whopool")
+        os.mkdir(who_pool)
+        local who_log = path.join(base, "who.log")
+        local who_holder = process.openv(os.programfile(), {"l", "-P", project, script, "run", "--class", "normal", "--jobs", "1", "--min", "1", "--", "/bin/sleep", "40"},
+            {outpath = who_log, errpath = who_log, envs = {"REVENANT_BUDGET_POOL=" .. who_pool}})
+        deadline = os.mclock() + 30000
+        while not (holders(who_pool)[1] and holders(who_pool)[1].command == "/bin/sleep 40") and os.mclock() < deadline do
+            os.sleep(300)
+        end
+        local named = holders(who_pool)
+        check("a held token is named: one holder", #named, 1)
+        check("by the pid of the budget process that holds it", named[1] ~= nil and named[1].pid ~= nil and process_command(named[1].pid):find("budget.lua", 1, true) ~= nil, true)
+        check("by its worktree", named[1] and path.absolute(named[1].worktree), project)
+        check("and by its command", named[1] and named[1].command, "/bin/sleep 40")
+        local holder_text = holder_lines(who_pool, "")[1] or ""
+        check("the line for a holder has its pid, worktree and command", holder_text:find("pid " .. tostring(named[1] and named[1].pid), 1, true) ~= nil
+              and holder_text:find(project, 1, true) ~= nil and holder_text:find("/bin/sleep 40", 1, true) ~= nil, true)
+        local shown = os.iorunv(os.programfile(), {"l", "-P", project, script, "status"}, {envs = {REVENANT_BUDGET_POOL = who_pool}})
+        check("status names the holder", shown:find("pid " .. tostring(named[1] and named[1].pid) .. " holds 1 token(s)", 1, true) ~= nil and shown:find("/bin/sleep 40", 1, true) ~= nil, true)
+
+        local everything = tostring(math.max(1, os.cpuinfo("ncpu") - RESERVE_CORES))
+        local waiter_log = path.join(base, "waiter.log")
+        local who_waiter = process.openv(os.programfile(), {"l", "-P", project, script, "run", "--class", "critical", "--jobs", everything, "--min", everything, "--", "/usr/bin/true"},
+            {outpath = waiter_log, errpath = waiter_log, envs = {"REVENANT_BUDGET_POOL=" .. who_pool}})
+        deadline = os.mclock() + 30000
+        while #waiters(who_pool) < 1 and os.mclock() < deadline do
+            os.sleep(300)
+        end
+        local waiting = waiters(who_pool)
+        check("a request that waits has a ticket with a live holder", #waiting, 1)
+        check("whose class is the request's", waiting[1] and waiting[1].class, "critical")
+        check("whose pid is the budget process that waits", waiting[1] ~= nil and waiting[1].pid ~= nil and process_command(waiting[1].pid):find("budget.lua", 1, true) ~= nil, true)
+        check("whose command is the one it will run", waiting[1] and waiting[1].command, "/usr/bin/true")
+        local waiting_line = waiter_lines(who_pool, "")[1] or ""
+        check("the line for a waiter has its pid, class, worktree and command", waiting_line:find("pid " .. tostring(waiting[1] and waiting[1].pid), 1, true) ~= nil
+              and waiting_line:find("critical class", 1, true) ~= nil and waiting_line:find(project, 1, true) ~= nil and waiting_line:find("/usr/bin/true", 1, true) ~= nil, true)
+        deadline = os.mclock() + 30000
+        while not (io.readfile(waiter_log) or ""):find("held by:", 1, true) and os.mclock() < deadline do
+            os.sleep(300)
+        end
+        local announced = io.readfile(waiter_log) or ""
+        check("a request that waits has said so in its log while it still waits, naming the holder's pid and command", announced:find("budget: waiting for", 1, true) ~= nil
+              and announced:find("pid " .. tostring(named[1] and named[1].pid) .. " holds", 1, true) ~= nil and announced:find("/bin/sleep 40", 1, true) ~= nil, true)
+        who_waiter:kill()
+        who_holder:kill()
+        deadline = os.mclock() + 10000
+        while (#waiters(who_pool) > 0 or held_slots(who_pool) > 0) and os.mclock() < deadline do
+            os.sleep(200)
+        end
+        check("a waiter that was killed leaves no ticket in the list", #waiters(who_pool), 0)
+        check("and a holder that was killed no token", #holders(who_pool), 0)
+        local sized = enqueue(who_pool, 2, 6, {pid = os.getpid(), worktree = project, command = "x", at = os.time()})
+        check("a ticket that names its holder still carries the tokens it needs", ahead_of(who_pool, "9-9999999999999-99999999.ticket", 1), false)
+        check("and blocks a later request that fits it", ahead_of(who_pool, "9-9999999999999-99999999.ticket", 6), true)
+        leave(sized, who_pool)
+
+        local function matching(command)
+            local listing = try { function () return os.iorunv(PS, {"-ax", "-o", "pid=,command="}) end } or ""
+            local pids = {}
+            for line in listing:gmatch("[^\n]+") do
+                local pid, text = line:match("^%s*(%d+)%s+(.-)%s*$")
+                if text == command then
+                    table.insert(pids, tonumber(pid))
+                end
+            end
+            return pids
+        end
+        local function alive(pid)
+            return process_command(pid) ~= ""
+        end
+        local orphan_pool = path.join(base, "orphanpool")
+        os.mkdir(orphan_pool)
+        local sleeping = "/bin/sleep 4711"
+        local parent_log = path.join(base, "parent.log")
+        local parent = process.openv("/bin/sh", {"-c", '"$0" l -P "$1" "$2" run --class normal --jobs 1 --min 1 -- /bin/sleep 4711; true', os.programfile(), project, script},
+            {outpath = parent_log, errpath = parent_log, envs = {"REVENANT_BUDGET_POOL=" .. orphan_pool}})
+        deadline = os.mclock() + 30000
+        while (held_slots(orphan_pool) < 1 or #matching(sleeping) < 1) and os.mclock() < deadline do
+            os.sleep(300)
+        end
+        local orphan_holders = holders(orphan_pool)
+        local budget_pid = orphan_holders[1] and orphan_holders[1].pid
+        local shell_pid = budget_pid and parent_of(budget_pid)
+        check("a run under a parent shell holds its token and runs its command", held_slots(orphan_pool) == 1 and #matching(sleeping) == 1 and shell_pid ~= nil and shell_pid > 1, true)
+        local command_pids = matching(sleeping)
+        if shell_pid and shell_pid > 1 then
+            try { function () os.iorunv("/bin/kill", {"-9", tostring(shell_pid)}) end }
+        end
+        deadline = os.mclock() + 20000
+        while (held_slots(orphan_pool) > 0 or #matching(sleeping) > 0 or (budget_pid and alive(budget_pid))) and os.mclock() < deadline do
+            os.sleep(300)
+        end
+        local tokens_left, budget_alive, commands_left, holders_left = held_slots(orphan_pool), budget_pid ~= nil and alive(budget_pid), #matching(sleeping), #holders(orphan_pool)
+        for _, pid in ipairs(command_pids) do
+            try { function () os.iorunv("/bin/kill", {"-9", tostring(pid)}) end }
+        end
+        if budget_pid then
+            try { function () os.iorunv("/bin/kill", {"-9", tostring(budget_pid)}) end }
+        end
+        parent:close()
+        check("a parent killed with SIGKILL leaves no token held by its budget run", tokens_left, 0)
+        check("nor the budget run itself", budget_alive, false)
+        check("nor the command it ran", commands_left, 0)
+        check("nor a holder in the list", holders_left, 0)
+    end
 
     os.rm(base)
     print("budget: %d tests passed", count)
