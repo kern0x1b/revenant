@@ -99,7 +99,7 @@ local RECIPES = {
      inputs = {"packages/s/swift-data/xmake.lua", "frameworks/Backports/src/Swift/xmake.lua", "toolchain/modules/apple/wrapper.lua", "frameworks/Backports/src/SwiftData/*"}},
     {folder = "packages/a/apple-compat", variable = "apple_compat_sources_digest",
      inputs = {"packages/a/apple-compat/xmake.lua", "toolchain/src/apple-compat/xmake.lua", "toolchain/src/apple-compat/src/*",
-               "toolchain/src/apple-compat/include/revenant/*", "toolchain/modules/apple/compat.lua"}},
+               "toolchain/src/apple-compat/include/revenant/*", "toolchain/modules/apple/compat.lua", "toolchain/modules/package_recipes.lua"}},
     {folder = "packages/s/swift-embedded", variable = "swift_embedded_sources_digest",
      inputs = {"packages/s/swift-embedded/xmake.lua", "toolchain/src/swift-embedded/xmake.lua", "toolchain/modules/apple/swift.lua", "toolchain/modules/apple/wrapper.lua",
                "packages/s/swift/xmake.lua", "packages/s/swift/patches/**.patch"}},
@@ -149,7 +149,7 @@ local RECIPES = {
     {folder = "packages/b/backports", variable = "backports_sources_digest",
      inputs = {"packages/b/backports/xmake.lua", "toolchain/modules/apple/wrapper.lua", "toolchain/modules/apple/backports_package.lua",
                "toolchain/modules/apple/webkit_engine_package.lua",
-               "frameworks/Backports/xmake.lua", "frameworks/Backports/tools/**", "frameworks/Backports/src/**"}}
+               "frameworks/Backports/xmake.lua", "frameworks/Backports/tools/**", "frameworks/Backports/src/**", "toolchain/modules/package_recipes.lua"}}
 }
 
 function recipes()
