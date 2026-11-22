@@ -116,6 +116,8 @@ The catalogue lookup, the archive range reads and the Keys page need the network
 | --- | --- | --- |
 | `REVENANT_CACHE` | `toolchain/modules/cache.lua`, and `./xmakew` for the xmake folders | the one folder of everything revenant keeps outside its sources, default `.cache` of the main checkout; see `docs/guides/machine.md` |
 | `REVENANT_CACHE_GB` | `toolchain/modules/cache.lua` | the cap on that folder, in decimal gigabytes, default 50 |
+| `REVENANT_CCACHE` | `toolchain/modules/apple/ccache.lua` | `off` compiles the Backports libraries without ccache, the compile cache of the Backports build; any other value, or none, uses ccache when it is installed |
+| `REVENANT_CCACHE_GB` | `toolchain/modules/apple/ccache.lua` | the cap of ccache's folder in the store, `<store>/ccache/cache`, in decimal gigabytes, default 4 |
 | `REVENANT_RELEASE` | the import check | pins the release, so weak imports the release lacks are refused |
 | `REVENANT_DEVICE` | `xmake device` | the `device.NAME.env` of the whole shell |
 | `REVENANT_DEVICE_HOLDER` | `xmake device` | the holder the whole shell claims as |

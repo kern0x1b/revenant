@@ -51,13 +51,19 @@ if is_plat("iphoneos") then
         end)
     rule_end()
 
+    rule("backports.cached")
+        on_config(function (target)
+            import("@addon.revenant.apple.ccache", {anonymous = true}).enter(target)
+        end)
+    rule_end()
+
     local CODING = path.join(SRC, "Intents", "coding")
     local WEBAUTH = path.join(SRC, "CloudKit", "webauth")
     local TWEAK = path.join(SRC, "CallKit", "tweak")
 
     target("RevenantCoding")
         set_kind("static")
-        add_rules("@addon/revenant/apple-ios")
+        add_rules("@addon/revenant/apple-ios", "backports.cached")
         set_optimize("smallest")
         add_cflags("-Os", "-fvisibility=hidden")
         add_mflags("-fobjc-arc")
@@ -68,7 +74,7 @@ if is_plat("iphoneos") then
     if backports_uses(LIBRARIES, "RevenantCKWebAuth") then
         target("RevenantCKWebAuth")
             set_kind("static")
-            add_rules("@addon/revenant/apple-ios")
+            add_rules("@addon/revenant/apple-ios", "backports.cached")
             set_optimize("smallest")
             add_cflags("-Os", "-fvisibility=hidden", "-fno-strict-aliasing")
             add_files(path.join(WEBAUTH, "RevenantCKWebAuth.c"))
@@ -100,7 +106,7 @@ if is_plat("iphoneos") then
     for _, library in ipairs(LIBRARIES) do
         target(library.name)
             set_kind("shared")
-            add_rules("@addon/revenant/apple-ios")
+            add_rules("@addon/revenant/apple-ios", "backports.cached")
             if library.gap then
                 open_gap(table.unpack(library.gap))
             end
