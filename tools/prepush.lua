@@ -1293,12 +1293,13 @@ local function dirty_tests(base)
     local real_tmpfile = os.tmpfile
     local fixed = path.join(base, "fixed-name")
     os.tmpfile = function () return fixed end
-    refusal(function () dirty_entries(broken) end)
-    dirty_entries(repository("fine"))
-    os.tmpfile = real_tmpfile
     local lists = path.join(cache().root(), "scratch", "prepush-lists")
+    refusal(function () dirty_entries(broken) end)
     check("no list file stays in the scratch folder after a failed read", os.isfile(path.join(lists, "list-fixed-name")), false)
     check("no list of errors stays there either", os.isfile(path.join(lists, "list-fixed-name.errors")), false)
+    dirty_entries(repository("fine"))
+    check("no list file stays in the scratch folder after a good read", os.isfile(path.join(lists, "list-fixed-name")), false)
+    os.tmpfile = real_tmpfile
     local saved_cache = os.getenv("REVENANT_CACHE")
     os.setenv("REVENANT_CACHE", path.join(base, "named-cache"))
     dirty_entries(repository("located"))
