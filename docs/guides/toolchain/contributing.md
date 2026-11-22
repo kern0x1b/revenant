@@ -87,8 +87,11 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
   `packages/l/llvm/port/inputs.lua`, which the build code expands (`{install}`, `{arch}` and the other braces are filled in
   by the build). Reason: llvm's key is the digest of that table and of the patches' bytes, not of the recipe text, so an
   edit of the build code's layout keeps the key and so keeps the one-hour build, and a value written in the code would
-  change the compiler without changing the key; `llvm_inputs_test` fails on such a literal. A change to what the build
-  installs that is no flag (a step added, removed or reordered) raises `procedure` in the table by hand.
+  change the compiler without changing the key; `llvm_inputs_test` fails on such a literal, and on a second Lua file in the
+  recipe's folder or a module the recipe names beyond `port/inputs.lua`, since a flag from a helper file would escape the
+  digest too. Run it alone, without llvm installed, with `./xmakew l -P . toolchain/tests/light_suites.lua llvm_inputs_test`.
+  A change to what the build installs that is no flag (a step added, removed or reordered) raises `procedure` in the table
+  by hand.
 
 - **Device-side binaries.** Wrong: building a device binary, even a throwaway probe, with the host's `cc` or `clang`.
   Right: a `target()` using `@addon/revenant/daemon` (or `app`, `tweak`), built by the `apple-ios` toolchain like any

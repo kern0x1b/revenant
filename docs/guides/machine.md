@@ -320,7 +320,13 @@ such as `frameworks/Backports/tools/lowered-members.txt`) leaves it stale, and `
 `llvm`'s digest is of what its build reads, so an edit that only lays the build code out differently keeps the key, and
 the one-hour build with it. The recipe's `on_download` and `on_install` take every value from `port/inputs.lua` and only
 expand it, and `toolchain/tests/addon/llvm_inputs_test.lua` fails on a flag, a cmake target, a url or a commit written
-in them, so none can change the compiler without moving the key. A change to what the build installs that is no flag (a
+in them, so none can change the compiler without moving the key. The test reads the end of each of those functions by
+counting `function`, `if`, `do`, `repeat` and `end`, `until` outside strings and comments, so a nested block or another
+indent hides nothing, and it fails on a second Lua file in the recipe's folder or on a module the recipe names beyond
+`port/inputs.lua` (a flag read from a helper file would not be in the digest). It reads files only: run it alone, without
+any package installed, with `./xmakew l -P . toolchain/tests/light_suites.lua llvm_inputs_test` (the one argument names a
+light suite; `./xmakew test` configures every requirement of `toolchain/tests/xmake.lua`, `llvm` with `libraries = true`
+among them, first). A change to what the build installs that is no flag (a
 step added, removed or reordered) raises `procedure` in the table by hand. The values in braces are filled in by the
 build: `{build}` (the cmake build folder), `{install}`, `{arch}` (the host's), `{link_jobs}`, `{patch}` (one patch's
 file), `{clang}` (the clang just built), `{host_linker}`, `{llvm_cmake_dir}`, `{resource_install}` (where the iOS
@@ -332,7 +338,10 @@ value, and it is used only when the digest of the inputs is exactly that key. To
 `4c6acdde` (installed as `82efc6d6`, the `libraries = false` build that `apple-ios` programs use), so those programs
 build and fetch no llvm after the change. Delete the entry, and do not edit its key, in the change that first alters an
 input: a flag, a patch, the url, the version, `procedure`. That llvm is a new key then, and the test fails until the
-entry is gone. The `libraries = true` build has no alias: it was never built for these inputs.
+entry is gone. The alias does not look at the `libraries` config: the `recipe` config's default is computed when the
+recipe is read, before any config is known, so a `libraries = true` build of these inputs gets recipe `4c6acdde` too. That
+is harmless, since `libraries` is part of the build hash as well, so the `true` install is a different directory with its
+own key, but no `libraries = true` install was ever made under the old key, and the alias says nothing about one.
 
 `swift-runtime`'s digest does not take the whole member set (`lowered-members.txt`, `device-members.txt`). The runtime
 builds against the SDK headers lowered for iOS 6, and most members lower headers it never reads, so a member of an
