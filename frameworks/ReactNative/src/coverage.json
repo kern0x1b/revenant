@@ -261,9 +261,9 @@
    "group": "sdk",
    "version": "~57.0.3",
    "native": true,
-   "status": "partial",
-   "verified": "phone",
-   "note": "Recipe packages\/e\/expo-blur (npm 57.0.3, patch blur-ios6.patch), built into the host. UIVisualEffectView (iOS 8) is replaced by a Core Image Gaussian blur of a snapshot of the view behind, taken when the view is added or resized or the intensity changes (it does not follow later changes behind it), with a white or black tint overlay for the tint style. On the iPhone 4S (2026-11-17) the module is registered; the view was not shown."
+   "status": "missing",
+   "verified": "none",
+   "note": "Built and registered, but mounting the view crashes the host on -[CIContext initWithOptions:], which iOS 6 does not have (the fix belongs in the Backports, which add that initialiser). Recipe packages\/e\/expo-blur (npm 57.0.3, patch blur-ios6.patch), built into the host. UIVisualEffectView (iOS 8) is replaced by a Core Image Gaussian blur of a snapshot of the view behind, taken when the view is added or resized or the intensity changes (it does not follow later changes behind it), with a white or black tint overlay for the tint style. On the iPhone 4S (2026-11-17) the module is registered; the view was not shown. On the iPad 2 (iOS 6.1.3, 2026-11-21) mounting the view crashes the host: the patch creates its Core Image context with `CIContext(options: nil)`, which Swift compiles to `-initWithOptions:`, a method iOS 6 does not have (iOS 6 has the factory `+contextWithOptions:`), so the app dies with `-[CIContext initWithOptions:]: unrecognized selector` as soon as the view is added. The patch is right for iOS 8 and later and stays as it is; the SDK declares `initWithOptions:` as iOS 5, and the iOS 6.1.3 CoreImage inventory has only `+contextWithOptions:`, so the missing initialiser is a Backports gap. Until it is added the module is unusable, and the blur itself has never been seen working."
   },
   {
    "id": "expo-brightness",
@@ -522,9 +522,9 @@
    "group": "sdk",
    "version": "~57.0.2",
    "native": true,
-   "status": "partial",
+   "status": "real",
    "verified": "phone",
-   "note": "Recipe packages\/e\/expo-linear-gradient (npm 57.0.2, no patch) installs; the sources are CAGradientLayer and UIKit and are compiled into the host (links, not yet exercised on the phone). On the iPhone 4S (2026-11-16) the module is registered in the host with its exports; its calls were not exercised."
+   "note": "Recipe packages\/e\/expo-linear-gradient (npm 57.0.2, no patch): the sources are CAGradientLayer and UIKit, built into the host unchanged. On the iPad 2 (iOS 6.1.3, 2026-11-21) a probe app drew three gradient views in the host's own window, and the screenshot was compared pixel by pixel with the expected colours: red to blue (horizontal, 5 columns), black to green at 0.25 to white (three stops with locations, 5 columns) and white to black (vertical, 5 rows) all lie within one level of the linear interpolation (largest difference 0.6 of 255). The diagonal case and start and end points outside the unit square are not exercised."
   },
   {
    "id": "expo-linking",
