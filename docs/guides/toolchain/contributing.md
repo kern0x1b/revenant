@@ -70,6 +70,18 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
   it was installed from (`port/digest.lua` is one such file), and then installs each package against the current
   build; with no changed file it does nothing.
 
+- **Two libc++ builds in one program.** Wrong: a project that includes `frameworks/Backports` with no `--component` and
+  requires `revenant@libcxx` plain, or whose own `package()` recipes `add_deps("revenant@libcxx", {alias = "libcxx"})`
+  plain. Right: the same configs everywhere, `add_requires("revenant@libcxx 23.1.1", {alias = "libcxx", configs = {packaged = true}})`
+  for the project's own requirement and `add_requireconfs("**.libcxx", {configs = {packaged = true}})` after its
+  `add_requires` lines, so that the packages' libc++ is the program's. Reason: Backports requires libc++ packaged, the
+  packages default to the plain build, and the compile line then holds two libc++ header trees ahead of the SDK; their
+  `math.h` and `string.h` wrappers share one guard, so the second wrapper is empty, the system header is never opened and
+  a call such as `pow` is undeclared (seen in Classicgram's `TGPaymentsDerivation.m`). Two `add_requires` with the alias
+  `libcxx` leave it to xmake which one the target gets, so both must carry the configs. The `apple-ios` rule refuses such
+  a target when it is configured, before any compile: `links 2 builds of libcxx at once`, naming each build and the
+  packages that ask for it.
+
 - **Device-side binaries.** Wrong: building a device binary, even a throwaway probe, with the host's `cc` or `clang`.
   Right: a `target()` using `@addon/revenant/daemon` (or `app`, `tweak`), built by the `apple-ios` toolchain like any
   port. Reason: a Mach-O built for the wrong target dies with `Bad system call: 12` (SIGSYS) before its own code runs

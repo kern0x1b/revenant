@@ -86,6 +86,10 @@ rule("apple-ios")
         end
     end)
 
+    on_config(function (target)
+        import("@self.apple.platform").verify_one_runtime(target)
+    end)
+
     after_config(function (target)
         if target:data("revenant.strip.unset") and target:get("strip") == "all" then
             target:set("strip", "none")

@@ -122,6 +122,23 @@ local function one_runtime_step(platform, folder, found)
     if not refused:find("2 builds of libcxx", 1, true) or not refused:find("(combine)", 1, true) then
         table.insert(found, "two builds of libc++ in one link must be refused: " .. refused)
     end
+    if not refused:find("add_requireconfs(\"**.libcxx\", {configs = {packaged = true}})", 1, true) or not refused:find("add_requires(\"revenant@libcxx\"", 1, true) then
+        table.insert(found, "the refusal of two builds of libc++ must name the add_requireconfs line and the add_requires of the project that give them one build: " .. refused)
+    end
+    refused = fixtures.refusal(function () platform.verify_one_runtime(target(package("swift-runtime", "revenant_swift_runtime_one", none), package("combine", "revenant_swift_runtime_two", none))) end) or ""
+    if refused:find("libcxx", 1, true) then
+        table.insert(found, "the refusal of two Swift runtimes must not give the libc++ advice: " .. refused)
+    end
+end
+
+local function wiring_step(root, found)
+    local rule = io.readfile(path.join(root, "toolchain", "rules", "apple-ios", "xmake.lua"))
+    local start = rule:find("    on_config(function (target)", 1, true)
+    local finish = start and rule:find("\n    end)", start, true)
+    local body = start and finish and rule:sub(start, finish) or ""
+    if not body:find("import(\"@self.apple.platform\").verify_one_runtime(target)", 1, true) then
+        table.insert(found, "the apple-ios rule must refuse a target that links two builds of the C++ runtime when the target is configured, before any compile: its on_config calls platform.verify_one_runtime, and a target with no Swift sources, Objective-C and C only, never reaches the check in the swift rule")
+    end
 end
 
 function failures(opt)
@@ -130,6 +147,7 @@ function failures(opt)
     local found = {}
     packages_step(platform, found)
     one_runtime_step(platform, fixtures.scratch(), found)
+    wiring_step(path.join(opt.modules, "..", ".."), found)
     waivers_step(platform, found)
     bundled_step(bundle, found)
     framework_step(bundle, platform, fixtures.scratch(), found)
