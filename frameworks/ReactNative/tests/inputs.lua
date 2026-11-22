@@ -5,7 +5,7 @@ local byte_less = tool.byte_less
 local xml_text, splash_options = tool.xml_text, tool.splash_options
 local expo_packages, expo_real, expo_subscribers = tool.expo_packages, tool.expo_real, tool.expo_subscribers
 local expo_classes, stub_entries, component_provider, app_optional_components = tool.expo_classes, tool.stub_entries, tool.component_provider, tool.app_optional_components
-local app_modules = tool.app_modules
+local app_modules, installed_in_application, expo_dir = tool.app_modules, tool.installed_in_application, tool.expo_dir
 local make_app_manifest = tool.make_app_manifest
 
 local DATA = path.join(os.scriptdir(), "data")
@@ -243,6 +243,10 @@ ctx_modules.options.project = modules_app
 check("a module the application does not have is an error", fails(function () expo_packages(ctx_modules) end))
 os.mkdir(path.join(modules_app, "app", "node_modules", "@scope", "some-module"))
 os.mkdir(path.join(modules_app, "app", "node_modules", "plain-module"))
+os.mkdir(path.join(modules_app, "app", "modules", "local-module"))
+io.writefile(path.join(modules_app, "host.json"), '{"modules": ["@scope/some-module", "plain-module", "local-module"]}')
+check("a module in the application's own modules folder is accepted and resolved there", installed_in_application(ctx_modules, "local-module") and expo_packages(ctx_modules)[#expo_packages(ctx_modules)] == "local-module" and expo_dir(ctx_modules, "local-module"):endswith("/app/modules/local-module"))
+io.writefile(path.join(modules_app, "host.json"), '{"modules": ["@scope/some-module", "plain-module"]}')
 check("the application's modules join the built packages", (function () local names = expo_packages(ctx_modules); return names[#names - 1] == "@scope/some-module" and names[#names] == "plain-module" end)())
 for _, package in ipairs(expo_packages(ctx_modules)) do
     local dir = path.join(modules_app, "app", "node_modules", package)

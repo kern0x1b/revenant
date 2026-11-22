@@ -364,8 +364,7 @@ static NSMutableDictionary *results_of_children(void)
         for (int item = 0; item < count; item++)
             env[item] = environ[item];
         env[count] = flag;
-        env[count + 1] = (char *)"REVENANT_ONLY_CASE=coretext_fallback_cascade";
-        char *argv[] = {executable, NULL};
+        char *argv[] = {executable, (char *)"--cases", (char *)"coretext_fallback_cascade", NULL};
         pid_t pid = 0;
         int status = 0;
         int spawned = posix_spawn(&pid, executable, NULL, NULL, argv, env);
@@ -402,6 +401,8 @@ REVENANT_CASE(coretext_fallback_cascade)
 {
     const char *variant = getenv("FONTCASCADE_VARIANT");
     if (variant) {
+        if (negative)
+            return;
         freopen([output_path(variant) UTF8String], "w", stdout);
         setvbuf(stdout, NULL, _IONBF, 0);
         printf("RESULT %s step=child started\n", variant);

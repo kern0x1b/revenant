@@ -70,6 +70,29 @@ Each entry: the wrong pattern, the right one, and the mechanical reason.
   it was installed from (`port/digest.lua` is one such file), and then installs each package against the current
   build; with no changed file it does nothing.
 
+- **Two libc++ builds in one program.** Wrong: a project that includes `frameworks/Backports` with no `--component` and
+  requires `revenant@libcxx` plain, or whose own `package()` recipes `add_deps("revenant@libcxx", {alias = "libcxx"})`
+  plain. Right: the same configs everywhere, `add_requires("revenant@libcxx 23.1.1", {alias = "libcxx", configs = {packaged = true}})`
+  for the project's own requirement and `add_requireconfs("**.libcxx", {configs = {packaged = true}})` after its
+  `add_requires` lines, so that the packages' libc++ is the program's. Reason: Backports requires libc++ packaged, the
+  packages default to the plain build, and the compile line then holds two libc++ header trees ahead of the SDK; their
+  `math.h` and `string.h` wrappers share one guard, so the second wrapper is empty, the system header is never opened and
+  a call such as `pow` is undeclared (seen in Classicgram's `TGPaymentsDerivation.m`). Two `add_requires` with the alias
+  `libcxx` leave it to xmake which one the target gets, so both must carry the configs. The `apple-ios` rule refuses such
+  a target when it is configured, before any compile: `links 2 builds of libcxx at once`, naming each build and the
+  packages that ask for it.
+
+- **A flag, a cmake target, a url or a commit written in the llvm build code.** Wrong: a literal `"-DLLVM_...=ON"`, an
+  `install-...` target or a url in the `on_install` or `on_download` of `packages/l/llvm/xmake.lua`. Right: the value in
+  `packages/l/llvm/port/inputs.lua`, which the build code expands (`{install}`, `{arch}` and the other braces are filled in
+  by the build). Reason: llvm's key is the digest of that table and of the patches' bytes, not of the recipe text, so an
+  edit of the build code's layout keeps the key and so keeps the one-hour build, and a value written in the code would
+  change the compiler without changing the key; `llvm_inputs_test` fails on such a literal, and on a second Lua file in the
+  recipe's folder or a module the recipe names beyond `port/inputs.lua`, since a flag from a helper file would escape the
+  digest too. Run it alone, without llvm installed, with `./xmakew l -P . toolchain/tests/light_suites.lua llvm_inputs_test`.
+  A change to what the build installs that is no flag (a step added, removed or reordered) raises `procedure` in the table
+  by hand.
+
 - **Device-side binaries.** Wrong: building a device binary, even a throwaway probe, with the host's `cc` or `clang`.
   Right: a `target()` using `@addon/revenant/daemon` (or `app`, `tweak`), built by the `apple-ios` toolchain like any
   port. Reason: a Mach-O built for the wrong target dies with `Bad system call: 12` (SIGSYS) before its own code runs

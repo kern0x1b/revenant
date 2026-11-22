@@ -122,8 +122,8 @@ REVENANT_CASE(avfoundation_display_layer_formats)
         if (sample)
             CFRelease(sample);
         spin();
-        revenant_expect_true(@"a 420v frame in an unsupported matrix is refused and fails the layer",
-                             (layer.contents == nil && layer.status == AVQueuedSampleBufferRenderingStatusFailed) != flip,
+        revenant_expect_true(@"a 420v frame in an unsupported matrix is not drawn, and the system reports no failure for it",
+                             (layer.contents == nil && layer.status == AVQueuedSampleBufferRenderingStatusRendering) != flip,
                              [NSString stringWithFormat:@"contents %d status %ld", layer.contents != nil, (long)layer.status]);
     }
 }

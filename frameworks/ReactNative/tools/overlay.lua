@@ -6,7 +6,11 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/overlay.lua 
   apply   makes TARGET_DIR, an APFS clone of the application APP_DIR (read only, never written), and copies every file of
           OVERLAY_DIR/overlay over the same path in the clone. A file the clone does not have is an error: the overlay was made
           for another version of the application. TARGET_DIR is what build/ref/app links to. OVERLAY_DIR also holds the
-          application's host.json (the manifest passed to inputs.lua --manifest) and packaging/.]]
+          application's host.json (the manifest passed to inputs.lua --manifest) and packaging/.
+          Then the clone gets the application's own patches: when it has scripts/postinstall-patches.mjs, that script runs in the clone with
+          node_modules/.bin first on PATH, as npm runs a postinstall. The application is installed with --ignore-scripts, which skips it; the
+          patches (bottom-sheet exports, enriched-markdown, gesture-handler and others) are part of what the application is. The script
+          applies a patch once and leaves an applied one alone, and a patch that does not apply stops apply with its output.]]
 
 function git(checkout, args)
     local argv = {"-C", checkout}
@@ -68,6 +72,18 @@ function files(root)
     return found
 end
 
+function patch_application(target)
+    local script = path.join(target, "scripts", "postinstall-patches.mjs")
+    if not os.isfile(script) then
+        print(target .. ": no scripts/postinstall-patches.mjs, no patches applied")
+        return
+    end
+    local bin = path.join(target, "node_modules", ".bin")
+    local env = {PATH = bin .. ":" .. (os.getenv("PATH") or "")}
+    os.vrunv("node", {path.join("scripts", "postinstall-patches.mjs")}, {curdir = target, envs = env})
+    print(target .. ": the application's patches applied")
+end
+
 function apply(app, overlay, target)
     local source = path.join(overlay, "overlay")
     if not os.isdir(app) or not os.isdir(source) then
@@ -89,6 +105,7 @@ function apply(app, overlay, target)
         os.cp(path.join(source, relative), path.join(target, relative))
     end
     print(string.format("%s: %d files replaced", target, #changes))
+    patch_application(target)
 end
 
 function main(...)

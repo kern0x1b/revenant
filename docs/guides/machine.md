@@ -195,6 +195,46 @@ children (`make`, the compiler) and run it again. A linked worktree takes `<work
 unset, and any folder `REVENANT_CACHE` names, empty or not, with no marker. What it holds is small: the token pool, the
 scratch of its tasks, and (when a task needs them) `dyld` and `firmware`.
 
+**The cache and the store are two folders, and the cache is never the store or inside it.** The cache is trimmed to
+`REVENANT_CACHE_GB` (50), and a trim that takes the store for the cache evicts the store's installs, oldest generations
+first. On 2026-11-22 a worker set `REVENANT_CACHE=~/.revenant/store` for one lint, after reading the xmakew of an older
+checkout that kept the packages in the cache, and the trim removed five old generations (boringssl, leptonica, tesseract,
+zxing-cpp, libcxx) from the shared store. `./xmakew` now refuses to start when `REVENANT_CACHE` is the store, a folder
+inside it, or a link into it (the paths are compared after resolving links, also for folders that do not exist yet), and
+`cache.root()` and `cache.reserve()` raise in the same case, naming `REVENANT_CACHE`, the store and `REVENANT_STORE`, before
+anything is evicted. The one trim that may name the store is the store's own (`cache.guard` marks it `shared`). A store
+somewhere else than `~/.revenant/store` is `REVENANT_STORE`, never `REVENANT_CACHE`.
+
+**Start every build with the `xmakew` of the checkout whose recipes it builds** (`$REVENANT_PATH/xmakew`), not with one found
+on `PATH` or in another checkout. On 2026-11-22 two Classicgram workers ran the `xmakew` of the main checkout, a detached
+head of 2026-10-27, with `REVENANT_PATH` naming the pinned checkout: the recipes were the pin's, the launcher and its xmake
+were October's, so the packages went into a private store inside Classicgram's own git work tree, and xmake's `git apply`
+of the recipe patches ran inside that repository, where git skips every patch without an error (`Skipped patch`, exit 0,
+"install ok"). glslang, spirv-cross and apple-compat then failed with `'absolute' is unavailable: introduced in iOS 13.0`
+because the patch that removes `std::filesystem` never applied, and the same run built libcxx from source and fetched
+SuiteSparse again, which the shared store already held. Two things now keep that from looking like a platform defect.
+`./xmakew` sets `GIT_CEILING_DIRECTORIES` to the cache and the store, so git never looks above them. And
+`@addon/revenant/apple-ios` checks at load (`toolchain/modules/launch.lua`) that `REVENANT_STORE` is set, which only the
+launcher of the shared store does, and that the package sources under `XMAKE_GLOBALDIR` do not lie inside a git work tree
+that a ceiling does not hide (it walks up looking for `.git`, the way git does, without starting a process, because xmake's
+description scope has none); otherwise it prints the reason, naming the `xmakew` to use, and ends the load before any
+package is installed. xmake's description scope has no `raise`, so the load ends with an `unknown interface` error after
+the printed reason. An install that applied fewer patches than its recipe lists cannot be detected afterwards without
+patching xmake, which would move the xmake key of every checkout, so the check removes the condition instead.
+
+**A project's `xmake-requires.lock` names the revenant repository of the `xmakew` that builds it.** With
+`set_policy("package.requires_lock", true)` xmake takes the recipes of every `revenant@...` package from the repository and
+commit the lock records, not from `REVENANT_PATH`. Classicgram's lock named the main checkout at 198a8d1ee (2026-10-27)
+while its `REVENANT_PATH` was a pin of 2026-11-22: the toolchain was the pin's and the recipes October's, the October ld64
+was not in the store, `apple-compat` raised "the ld64 956.6 package is required but has no install folder", and one
+worker compiled the October llvm for an hour for nothing. `./xmakew` now reads the `xmake-requires.lock` of the project
+it is asked to build (`-P`, `--project`, else the checkout itself) and refuses, before anything starts, when a `revenant@`
+entry names a local repository other than this checkout (paths compared after resolving links) or any repository at a
+commit other than the checkout's `HEAD`; an entry that names the published repository by address is held to the commit
+only. The message names the lock's repository and commit and this checkout. The fix is the same each time the pin moves:
+delete the lock, run the build once so that xmake writes a new one with this checkout as the repository, commit it with
+the pin. A lock without `revenant@` entries is not read further, and `--patchset` and `--build-xmake` do not check it.
+
 Two builds of one package key never run at once, because the install is locked by its folder (`<installdir>.lock`); two
 different keys of one package, built at once by two processes, each patch and build in their own copy of the sources
 (`checkout.keyed`, [ADR 0018](../explanation/decisions/0018-source-folder-per-build.md)).
@@ -271,10 +311,37 @@ such as `frameworks/Backports/tools/lowered-members.txt`) leaves it stale, and `
 | Package | Digest config | Made from |
 | --- | --- | --- |
 | `swift-runtime`, `libcxx` | `recipe` | `port/digest.lua` in each recipe folder, which `toolchain/tools/recipe_digests.lua` writes from the recipe and the modules it runs |
-| `llvm`, `swift` | `recipe` | the recipe and its patches |
+| `llvm` | `recipe` | `packages/l/llvm/port/inputs.lua` (the url, version, commit, every flag of git and cmake, the cmake targets) and the bytes of the patches it lists; not the recipe text |
+| `swift` | `recipe` | the recipe and its patches |
 | `dynarmic` | `recipe` | the recipe; its patches are in the build hash, see below |
 | `swift-bootstrap` | `recipe` | the recipe; the swift.org package is held by the version's sha256, outside the digest |
 | `iphoneos-sdk` | `additions` | what the recipe adds to the SDK |
+
+`llvm`'s digest is of what its build reads, so an edit that only lays the build code out differently keeps the key, and
+the one-hour build with it. The recipe's `on_download` and `on_install` take every value from `port/inputs.lua` and only
+expand it, and `toolchain/tests/addon/llvm_inputs_test.lua` fails on a flag, a cmake target, a url or a commit written
+in them, so none can change the compiler without moving the key. The test reads the end of each of those functions by
+counting `function`, `if`, `do`, `repeat` and `end`, `until` outside strings and comments, so a nested block or another
+indent hides nothing, and it fails on a second Lua file in the recipe's folder or on a module the recipe names beyond
+`port/inputs.lua` (a flag read from a helper file would not be in the digest). It reads files only: run it alone, without
+any package installed, with `./xmakew l -P . toolchain/tests/light_suites.lua llvm_inputs_test` (the one argument names a
+light suite; `./xmakew test -P .` configures every requirement of `toolchain/tests/xmake.lua`, `llvm` with `libraries = true`
+among them, first). A change to what the build installs that is no flag (a
+step added, removed or reordered) raises `procedure` in the table by hand. The values in braces are filled in by the
+build: `{build}` (the cmake build folder), `{install}`, `{arch}` (the host's), `{link_jobs}`, `{patch}` (one patch's
+file), `{clang}` (the clang just built), `{host_linker}`, `{llvm_cmake_dir}`, `{resource_install}` (where the iOS
+builtins go) and `{sysroot}` and `{sdk_version}` (the iPhoneOS SDK).
+
+`llvm_recipe_aliases` in `port/inputs.lua` keeps the installs that were made before the digest came from the table: an
+entry is a statement that the inputs whose digest is the entry's key produced the install whose `recipe` config is its
+value, and it is used only when the digest of the inputs is exactly that key. Today it names the llvm of recipe
+`4c6acdde` (installed as `82efc6d6`, the `libraries = false` build that `apple-ios` programs use), so those programs
+build and fetch no llvm after the change. Delete the entry, and do not edit its key, in the change that first alters an
+input: a flag, a patch, the url, the version, `procedure`. That llvm is a new key then, and the test fails until the
+entry is gone. The alias does not look at the `libraries` config: the `recipe` config's default is computed when the
+recipe is read, before any config is known, so a `libraries = true` build of these inputs gets recipe `4c6acdde` too. That
+is harmless, since `libraries` is part of the build hash as well, so the `true` install is a different directory with its
+own key, but no `libraries = true` install was ever made under the old key, and the alias says nothing about one.
 
 `swift-runtime`'s digest does not take the whole member set (`lowered-members.txt`, `device-members.txt`). The runtime
 builds against the SDK headers lowered for iOS 6, and most members lower headers it never reads, so a member of an
@@ -424,6 +491,10 @@ one pool, kept in `.cache/budget` of the main checkout whatever `REVENANT_CACHE`
     ./xmakew l -P . tools/budget.lua status
     ./xmakew l -P . tools/budget.lua test
 
+`run` exits 0 when the command it starts passes, the command's status when it fails, and 3 when the budget refuses to start
+it at all. A refusal prints the disk reading and the floor; the command was never run, so its status is not a failed check.
+`status` and `test` do not take tokens and never refuse.
+
 - Size. The pool holds at most the cores less two. Room is recomputed on every poll, never from a sample taken once at
   admission or from a patience timeout. CPU headroom uses the largest of three measurements: the one-minute runnable load
   (`sysctl vm.loadavg`); the runnable threads of the pool's own holders, read from `ps` state `R` over the descendant tree
@@ -468,11 +539,40 @@ one pool, kept in `.cache/budget` of the main checkout whatever `REVENANT_CACHE`
 - Nice. `critical` keeps its priority, `normal` runs under `nice -n 5`, `background` under `taskpolicy -b` and `nice -n 15`.
 - Release. A token is a lock on a slot file, and the kernel releases it when its process ends, `kill -9` included. The command
   is started with the descriptors of the slot files closed, since a child that kept one would keep the token after its parent died.
+  A budget run also ends with the process that started it: a small shell watcher, started with the run, checks once a second that
+  the run is still the child of the process that started it (a process that is reparented to launchd has lost its parent, whether
+  or not anybody has reaped the dead one yet), and when the parent is gone (a `kill`, a closed terminal, a crash; `kill -9` included, where no handler can run) it
+  sends TERM to the budget run and everything below it, and KILL two seconds later. So prepush killed in the middle of a heavy
+  step, or of its batch of light checks, leaves no `budget run` and no command holding tokens at ppid 1. The watcher is a shell
+  and not a signal handler because xmake runs a Lua handler only between two Lua instructions, never while it waits for a child.
+- Who holds. A held token names its holder: the pid of the budget run, its worktree and its command, written into the slot file
+  with the grant, and a waiting request's ticket names the same about itself. `status` prints a line for each holder
+  (`pid 123 holds 2 token(s) for 4m in <worktree>: <command>`) and for each waiting request, and a request that has to wait
+  says so at once, `budget: waiting for N token(s), <class> class; held by:` with the holders' lines (or that nobody holds
+  a token, so the machine's load or memory is the limit), and again every five minutes (`REVENANT_BUDGET_ANNOUNCE_S`) while it waits.
 - Nesting. A command under a budget gets its count in `REVENANT_BUDGET_HELD`. A budget run below it takes no tokens of its own,
   so a `./xmakew` started by a build waits for nothing and is bounded by the build's tokens.
-- Disk. No command starts while the volume of the checkout has less than 100 GB free (`REVENANT_BUDGET_DISK_GB`).
+- Disk. No command starts while the volume of the checkout has less than 100 GB free (`REVENANT_BUDGET_DISK_GB`). The
+  refusal is per command: `run` exits 3 and prints the reading before the command starts. A command already admitted can
+  fail for its own reasons even if the disk drops below the floor while it runs, and that failure is not a refusal.
 
 A command run straight with `xmake`, and not through `./xmakew` or a budget run, takes no tokens.
+
+`./xmakew l -P . tools/prepush.lua` reports a refusal from any budgeted step as its third outcome: it prints
+`prepush: budget refused; this is not a failed check, free the space and rerun` and exits 3, without counting any check
+as failed and without remembering a refusal as a pass. Exit 0 means every check passed, a failed check makes the tool
+raise, and exit 3 means the disk stopped it; a caller scripting prepush can tell the three apart.
+
+Prepush writes each line as it happens and flushes it (`say` in `tools/prepush.lua`), so a run redirected to a log
+(`> prepush.log 2>&1 &`) shows each line when it is written and does not depend on how the output is buffered; the 2026-11-22
+probe saw this xmake write a short `print` line to a redirected file or a pipe at once, and the flush keeps it so. A check
+prints `start <name>` when it begins and `ok <name> <n>s` or `FAIL <name> <n>s` when it ends, and the line is in the file at that
+moment. What kept an earlier run silent for two hours was the wait, not the buffer: the batch of light checks is a budgeted
+child that queued behind the holders and printed nothing; it now says who holds the tokens. The light checks (comments, layout, digests and the like) run first; when one is red the run stops there, before any
+heavy check is queued on the budget, names the check (`prepush: <name> failed; the run stops here, and no heavy check was
+started`) and fails; `--keep-going` runs on and says so. When every light check is green it says `the light checks are green;
+starting the heavy ones` before the first heavy one. Anything that waits on the budget, the batch of light checks included
+(it is a budgeted child of its own), says who holds the tokens (the lines of `budget status`) instead of waiting in silence.
 
 ## Checks that remember their result
 
@@ -572,6 +672,37 @@ took 48 minutes on 2026-11-16 and a warm one 58 seconds, and a deleted cache lea
 that make a later check fail, so remove `.xmake` together with a cache it names. The gate's copy stays per checkout: its
 own `.xmake` records the cache paths of the run that configured it, so a copy shared between checkouts would point at another
 checkout's cache.
+
+The compile cache. A fresh worktree has no `build` folder, so its first `backports build` compiled every source again (2954 of them: 27 minutes
+on a loaded machine, six on an idle one) although another worktree had compiled the same files an hour before. xmake's builtin cache (the
+`cache compiling` lines of the log) could not help: it lives in the tree's own `build/.build_cache`, and its key is the compiler's flags and
+the preprocessed text, both of which carry the absolute path of the tree (`-I<tree>/...`, `-ffile-prefix-map=<tree>=/port`, the `# 1 "<tree>/..."`
+line markers). Another tree at another path, seeded with 2776 objects of the first one, hit none of them. So the Backports targets (the rule
+`backports.cached` of `frameworks/Backports/xmake.lua`) compile through ccache when it is installed. `toolchain/modules/apple/ccache.lua` gives
+each target a generated shim in place of its four compilers, `<store>/ccache/shim/<key>/clang`, which execs `ccache <the clang of the llvm
+package>` with its settings in its own environment: `CCACHE_BASEDIR` the parent of the main checkout, so that every worktree under it hashes the
+same paths, `CCACHE_NOHASHDIR`, `CCACHE_COMPILERCHECK=content`, the folder `<store>/ccache/cache` capped by `REVENANT_CCACHE_GB` (4 by default),
+and a `CCACHE_CONFIGPATH` of its own, so the user's `ccache.conf` is neither read nor edited and a machine without one behaves the same. The shim also clears every other
+`CCACHE_*` variable of the invoking shell, except `CCACHE_LOGFILE`, `CCACHE_DEBUG`, `CCACHE_DEBUGDIR` and `CCACHE_DISABLE`, which only observe or
+switch off: an ambient `CCACHE_IGNOREOPTIONS=-D*`, which a user may keep for another project, would otherwise answer a compile with another `-D`
+from the cache. It turns
+xmake's builtin cache off for the target, so that one cache owns the compile and nothing is wrapped twice. The only sloppiness is
+`include_file_ctime,include_file_mtime`, which a fresh checkout needs because its files are younger than the compile: `system_headers` would let
+an edit of `neon/include`, which the toolchain passes as `-isystem`, leave a stale hit, and `time_macros` would cache what depends on the clock.
+Measured on 14 recorded compiles, each run at two paths: all 13 that ccache accepts hit from the other path (direct mode), in 1.1 s against 7.1 s
+of compiling, and the objects were the same bytes at both paths and held no path of either tree. xmake gives the compiler its sources relative to the
+project, so an object ccache made equals one clang made on its own here (a source named by an absolute path would differ, because ccache hands clang
+the source relative to its working directory and `__FILE__` then reads differently). The 5% of the compiles that pass `-ivfsoverlay` (the generated `build/generated/backports/overlay/vfs.yaml`) are not cached:
+ccache refuses them without the `ivfsoverlay` sloppiness, which would make it ignore the overlay's content; the overlay is content-keyed
+(`lowered/<digest>`), so putting its digest into the key would let them be cached safely, and that is left to a later change. Measured on the
+whole gate (2954 compiles, one machine under other jobs): a first tree at a fresh path took 49 minutes (configure 251 s, build 2928 s; 2750 misses,
+87 hits), and a second tree at another path, with the cache warm, 6 minutes (configure 74 s, build 286 s of which 244 s is the compiling): all 2837
+compiles ccache accepts hit, 2747 in direct mode and 90 through the preprocessed text, and the 117 compiles that pass `-ivfsoverlay` ran.
+All 2954 objects of the second tree are the same bytes as the first tree's. A tree compiled with `REVENANT_CCACHE=off` (xmake's builtin cache) differs in
+one place: the `sdk` field of the version load command of its objects reads `n/a` where ccache's reads `26.2` (702 objects of 30 targets
+compared, 2 bytes each); the linked dylibs of those targets are the same bytes as the ccache tree's, so the difference does not survive the link.
+After that gate the ccache folder held 131 MB. The store trim counts `<store>/ccache/cache` as scratch, the only part of the `ccache` folder the cap can evict, and keeps the
+shims and the settings, which a running build executes. `REVENANT_CCACHE=off` compiles without ccache; without ccache installed nothing changes.
 
 Where a cold `backports build` spends its time (2026-11-16, 63 minutes by the install times of the packages): the packages
 46 minutes (`libcxx` 10, `tessdata` with every language 12, `openssl-host` 5, `tesseract`, `leptonica`, `zxing-cpp`,

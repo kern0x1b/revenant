@@ -37,7 +37,7 @@ local function expo_dir(package)
         return PKG_DIRS[package]
     end
     local ref = path.join(os.projectdir(), "build", "ref", "app")
-    for _, base in ipairs({path.join(ref, "packages", "app", "node_modules"), path.join(ref, "node_modules")}) do
+    for _, base in ipairs({path.join(ref, "packages", "app", "node_modules"), path.join(ref, "node_modules"), path.join(ref, "packages", "app", "modules")}) do
         if os.isdir(path.join(base, package)) then
             return path.join(base, package)
         end

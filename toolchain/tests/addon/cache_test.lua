@@ -280,6 +280,18 @@ function failures(arguments)
         table.insert(found, "a module cache of one SDK is scratch, so the cap can evict it")
     end
 
+    local compiled = path.join(folder, "compiled")
+    folder_of(path.join(compiled, "ccache", "cache"), MEGABYTE, OLDER)
+    folder_of(path.join(compiled, "ccache", "shim", "0123"), 1, OLDER)
+    local compiled_classes = {}
+    for _, row in ipairs(cache.status(compiled, {builds = {}})) do
+        compiled_classes[row.name] = row.class
+    end
+    if compiled_classes[path.join("ccache", "cache")] ~= "scratch" or compiled_classes[path.join("ccache", "shim")] ~= "kept" then
+        table.insert(found, "the objects of the compile cache are scratch, so the cap can evict them, and its shims are kept, because a running build executes them: "
+                            .. tostring(compiled_classes[path.join("ccache", "cache")]) .. ", " .. tostring(compiled_classes[path.join("ccache", "shim")]))
+    end
+
     local sources = path.join(folder, "sources")
     file_of(path.join(sources, "dyld", "6.0", "dyld_shared_cache_armv7"), 2 * MEGABYTE)
     local installed = folder_of(package_of(sources, "bbb"), MEGABYTE, OLDEST)
@@ -521,6 +533,52 @@ function failures(arguments)
     local trimmed_here = cache.guard(guarded, {root = home, limit = CAP, builds = {}, store = trimming, store_limit = 3 * MEGABYTE, store_interval = 0})
     if #trimmed_here.evicted == 0 or exists(package_of(trimming, "fff")) then
         table.insert(found, "the trim runs once the other process has finished")
+    end
+
+    local vault = path.join(folder, "vault-store")
+    local victim = package_of(vault, "vvv")
+    folder_of(victim .. ".g1", 3 * MEGABYTE, OLDEST)
+    folder_of(victim .. ".g2", 3 * MEGABYTE, RECENT)
+    os.execv("ln", {"-s", "vvv.g2", victim})
+    local through = path.join(folder, "link-to-vault")
+    os.execv("ln", {"-s", vault, through})
+    local spared = function () return exists(victim .. ".g1") and exists(victim .. ".g2") and exists(victim) end
+    for label, named in pairs({["the store itself"] = vault, ["a folder inside the store"] = path.join(vault, "inner", "cache"),
+                               ["a link to the store"] = through, ["a folder inside the store through a link"] = path.join(through, "inner")}) do
+        with_env("REVENANT_STORE", vault, function ()
+            with_env(ROOT_VARIABLE, named, function ()
+                local message = fixtures.refusal(function () return cache.root() end)
+                if not message or not message:find(ROOT_VARIABLE, 1, true) or not message:find(vault, 1, true) then
+                    table.insert(found, ROOT_VARIABLE .. " that is " .. label .. " is refused by name, with the store: " .. tostring(message))
+                end
+                for action, run in pairs({reserve = function () cache.reserve(1, "a write", {limit = 1, builds = {}}) end,
+                                          enforce = function () cache.enforce({limit = 1, builds = {}}) end,
+                                          guard = function () cache.guard(guarded, {limit = 1, builds = {}, store = path.join(folder, "other-store")}) end}) do
+                    local refused = fixtures.refusal(run)
+                    if not refused or not refused:find(ROOT_VARIABLE, 1, true) then
+                        table.insert(found, "a " .. action .. " of a cache that is " .. label .. " is refused, not run: " .. tostring(refused))
+                    end
+                end
+            end)
+        end)
+        if not spared() then
+            table.insert(found, "nothing in the store is evicted by a cache that is " .. label .. ": " .. tostring(exists(victim .. ".g1")) .. " " .. tostring(exists(victim)))
+        end
+    end
+    local direct = fixtures.refusal(function () with_env("REVENANT_STORE", vault, function () cache.reserve(1, "a write", {root = vault, limit = 1, builds = {}}) end) end)
+    if not direct or not spared() then
+        table.insert(found, "the cache to trim, named by a caller, is refused when it is the store, and nothing is evicted: " .. tostring(direct))
+    end
+    with_env("REVENANT_STORE", vault, function ()
+        with_env(ROOT_VARIABLE, vault .. "-cache", function ()
+            if cache.root() ~= vault .. "-cache" then
+                table.insert(found, "a cache beside the store, whose name starts with the store's, is a cache: " .. cache.root())
+            end
+        end)
+        cache.reserve(0, "keeping the shared store within its cap", {root = vault, limit = 4 * MEGABYTE, builds = {}, shared = true})
+    end)
+    if exists(victim .. ".g1") or not exists(victim .. ".g2") then
+        table.insert(found, "the trim of the store itself still evicts its old generations")
     end
 
     os.tryrm(folder)

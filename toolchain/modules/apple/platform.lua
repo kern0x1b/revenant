@@ -413,8 +413,9 @@ function verify_one_runtime(target)
             for _, name in ipairs(names) do
                 table.insert(described, string.format("%s (%s)", name:match("packages/(.*)$") or name, table.concat(table.unique(builds[name]), ", ")))
             end
-            raise("target(%s) links %d builds of %s at once: %s; a package compiled against it must ask for the same configs as the program does, so that there is one build: require it with the program's configs, or give its recipe the configs to pass on; when the builds differ in the recipe digest only, a package installed before the other build was still names the older one: run ./xmakew f again, which installs it against the current build",
-                  target:name(), #names, what, table.concat(described, " and "))
+            local remedy = what == "libcxx" and "; for libc++ write add_requireconfs(\"**.libcxx\", {configs = {packaged = true}}) after the project's add_requires lines, with the configs of the program's own libcxx, and give every add_requires(\"revenant@libcxx\", ...) of the project the same configs (includes of frameworks/Backports with no --component requires it with packaged = true); two libc++ builds put two header trees ahead of the SDK, and their math.h and string.h wrappers share a guard, so the second hides the system header and a call such as pow is undeclared" or ""
+            raise("target(%s) links %d builds of %s at once: %s; a package compiled against it must ask for the same configs as the program does, so that there is one build: require it with the program's configs, or give its recipe the configs to pass on%s; when the builds differ in the recipe digest only, a package installed before the other build was still names the older one: run ./xmakew f again, which installs it against the current build",
+                  target:name(), #names, what, table.concat(described, " and "), remedy)
         end
     end
 end

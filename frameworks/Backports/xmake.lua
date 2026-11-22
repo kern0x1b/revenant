@@ -51,13 +51,19 @@ if is_plat("iphoneos") then
         end)
     rule_end()
 
+    rule("backports.cached")
+        on_config(function (target)
+            import("@addon.revenant.apple.ccache", {anonymous = true}).enter(target)
+        end)
+    rule_end()
+
     local CODING = path.join(SRC, "Intents", "coding")
     local WEBAUTH = path.join(SRC, "CloudKit", "webauth")
     local TWEAK = path.join(SRC, "CallKit", "tweak")
 
     target("RevenantCoding")
         set_kind("static")
-        add_rules("@addon/revenant/apple-ios")
+        add_rules("@addon/revenant/apple-ios", "backports.cached")
         set_optimize("smallest")
         add_cflags("-Os", "-fvisibility=hidden")
         add_mflags("-fobjc-arc")
@@ -68,7 +74,7 @@ if is_plat("iphoneos") then
     if backports_uses(LIBRARIES, "RevenantCKWebAuth") then
         target("RevenantCKWebAuth")
             set_kind("static")
-            add_rules("@addon/revenant/apple-ios")
+            add_rules("@addon/revenant/apple-ios", "backports.cached")
             set_optimize("smallest")
             add_cflags("-Os", "-fvisibility=hidden", "-fno-strict-aliasing")
             add_files(path.join(WEBAUTH, "RevenantCKWebAuth.c"))
@@ -100,7 +106,7 @@ if is_plat("iphoneos") then
     for _, library in ipairs(LIBRARIES) do
         target(library.name)
             set_kind("shared")
-            add_rules("@addon/revenant/apple-ios")
+            add_rules("@addon/revenant/apple-ios", "backports.cached")
             if library.gap then
                 open_gap(table.unpack(library.gap))
             end
@@ -424,6 +430,19 @@ if is_plat("iphoneos") and not SELECTED then
         add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "OpenGLES")
         set_values("app.plist-file", "tests/device_probe/Info.plist")
         set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.gllockprobe", "CFBundleDisplayName=GLLockProbe")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
+    target("AVFDrawProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_deps("AVFoundationBackports")
+        add_files("tests/device_probe/avfoundation_draw_main.m")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "AVFoundation", "CoreMedia", "CoreVideo")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.avfdrawprobe", "CFBundleDisplayName=AVFDrawProbe")
         set_values("revenant.version", "1.0.0")
     target_end()
 
@@ -876,7 +895,7 @@ if is_plat("iphoneos") and not SELECTED then
 else
     backports_tests("backports", {alias_protocols = "alias_protocols_test.lua", generator = "backports_test.lua",forwarders = "forwarders_test.lua", markers = "markers_test.lua", srcimage = "skeleton_src_image_test.lua", device_probe = "device_probe_test.lua", libsystem = "libsystem_test.lua", libsystem_at = "libsystem_at_test.lua", libsystem_dispatch = "libsystem_dispatch_test.lua", libsystem_unfair = "libsystem_unfair_test.lua", foundation_base64 = "foundation_base64_test.lua", webauth = "webauth_test.lua", demand = "demand_test.lua",
                                   uti = "uti_test.lua", cryptokit = "cryptokit_test.lua", naturallanguage = "nl_test.lua", naturallanguageoverlay = "natural_language_overlay_test.lua", usernotifications = "user_notifications_test.lua",
-                                  network = "network_test.lua", networkpath = "network_path_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", securetransport = "security_ssl_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua", facts_key = "facts_key_test.lua", ast_names = "ast_names_test.lua", facts_error = "facts_error_test.lua",
+                                  network = "network_test.lua", networkpath = "network_path_test.lua", networktls = "network_tls_test.lua", networktlslistener = "network_tls_listener_test.lua", securetransport = "security_ssl_test.lua", storekit = "storekit_test.lua", contracts = "contracts_test.lua", ios6members = "ios6_members_test.lua", attachment = "attachment_bounds_test.lua", protocols = "protocols_test.lua", lowering = "lowering_test.lua", modcache = "model_cache_test.lua", facts_cache = "facts_cache_test.lua", facts_key = "facts_key_test.lua", ast_names = "ast_names_test.lua", facts_error = "facts_error_test.lua", factslock = "facts_lock_test.lua", factslockstale = "facts_lock_stale_test.lua",
                                   device = "device_members_test.lua", compression = "compression_roundtrip_test.lua",
                                   presentation = "presentation_intent_test.lua", localelanguage = "locale_language_test.lua", attributedstringmarkdown = "attributed_string_markdown_test.lua", markdownparser = "markdown_parser_oracle_test.lua", dateformatstyle = "date_format_style_test.lua", urlpercentencoded = "url_percent_encoded_test.lua",pastematching = "paste_matching_test.lua", documentpickerrules = "document_picker_rules_test.lua",exports = "lowered_exports_test.lua", staleobjects = "stale_objects_test.lua", constants = "constants_test.lua", loadglobals = "load_globals_test.lua", deviceglobals = "device_globals_test.lua", devicereads = "device_reads_test.lua", passkitbutton = "passkit_button_test.lua", iosurface = "iosurface_test.lua",
                                   vfs = "lowered_vfs_test.lua", modules = "lowered_modules_test.lua", runtime_judge = "runtime/judge_test.lua", runtime_once = "runtime/once_test.lua", runtime_dependencies = "runtime/dependency_test.lua", runtime_fingerprint = "runtime/fingerprint_test.lua", baseline_offset = "baseline_offset_oracle_test.lua", sec_access_control = "security_access_control_test.lua", sec_shared_web = "security_shared_web_test.lua", sec_items = "security_item_test.lua", sec_keys = "security_key_test.lua", la_passcode = "localauth_passcode_test.lua", air2es = "air2es_test.lua",
@@ -909,7 +928,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         else
             add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports", "IOSurfaceBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "PhotosBackports", "CloudKitBackports", "CoreTextBackports", "SecurityBackports", "CoreMediaBackports", "VideoToolboxBackports")
         end
-        add_frameworks("Foundation", "UIKit", "CoreGraphics", "CoreText", "QuartzCore", "OpenAL", "AudioToolbox", "AssetsLibrary", "Security", "CoreMedia", "VideoToolbox")
+        add_frameworks("Foundation", "UIKit", "CoreGraphics", "CoreText", "QuartzCore", "OpenAL", "AudioToolbox", "AssetsLibrary", "Security", "AVFoundation", "CoreMedia", "CoreVideo", "VideoToolbox")
         add_syslinks("objc")
     target_end()
 
@@ -972,11 +991,13 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         add_tests("cf_mutable_cast")
         add_tests("gesture_failure")
         add_tests("uitextview_typing_attributes")
-        add_tests("coretext_fallback_probe")
         add_tests("coretext_fallback_cascade")
         add_tests("backport_impl_video_toolbox")
+        add_tests("backport_impl_video_toolbox_h264")
+        add_tests("coretext_baseline_offset")
         add_tests("backport_impl_shadowed")
         add_tests("avfoundation_display_layer")
+        add_tests("avfoundation_system_display_layer")
         add_tests("avfoundation_timebase_probe")
         add_tests("avfoundation_display_layer_formats")
         add_tests("avfoundation_synchronizer_observers")
@@ -1318,6 +1339,7 @@ if not is_plat("iphoneos") then
     host_tests("CoreImage", {render_destination = {"CIRenderDestination11.m"}}, "Graphics", {"Foundation", "CoreImage", "CoreGraphics", "CoreVideo", "IOSurface", "Metal", "OpenGL"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("CoreImage", {orientation = {}}, "Graphics", {"Foundation", "CoreImage", "CoreGraphics"})
     host_tests("CoreImage", {color = {"CIColor10.m"}}, "Graphics", {"Foundation", "CoreImage", "CoreGraphics"})
+    host_tests("CoreImage", {context_init = {"CIContextInitWithOptions.m"}}, "Graphics", {"Foundation", "CoreImage", "CoreGraphics"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("VideoToolbox", {conversion = {"VTCreateCGImage9_0.m", "VTConvertBiPlanar.c"}, hardware = {"VTIsHardwareDecodeSupported11_0.m"}}, nil, {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreGraphics", "Foundation"}, {defines = {"REVENANT_HOST_BUILD"}})
     host_tests("VideoToolbox", {hevc = {"VTDecompressionSession8_0.m", "VTSession8_0.m", "VTDecompressionSessionHEVC.m", "VTDecodeHEVC.c", "VTConvertBiPlanar.c", "VTInterleave.c", "VTSystem.c"}}, nil, {"VideoToolbox", "CoreMedia", "CoreVideo", "CoreGraphics", "CoreFoundation", "Foundation"}, {defines = {"REVENANT_HOST_BUILD", "REVENANT_VT_FIXTURE_DIR=\"" .. path.join(os.scriptdir(), "tests", "data", "VideoToolbox") .. "\""}, packages = {"ffmpeg"}, syslinks = {"iconv"}})
     host_tests("LinkPresentation", {metadata = {"RevenantLinkPresentation.m", "RevenantLinkFetch.m", "LPLinkMetadata.m", "LPMetadataProvider.m"}}, nil, {"Foundation", "LinkPresentation"}, {defines = {"REVENANT_HOST_BUILD"}})

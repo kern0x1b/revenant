@@ -14,6 +14,8 @@ overlay/      files that replace the same path in the application's tree
 `overlay/` over the clone. The checkout is never written. A file in `overlay/` that the application does not have stops the
 command: the overlay is for another version.
 
+After the overlay, `apply` runs the application's own `scripts/postinstall-patches.mjs` in the clone, with the clone's `node_modules/.bin` first on PATH, as npm does after an install. The application is installed with `npm ci --ignore-scripts`, which skips it, and without its patches the bundle is not the application: on 2026-11-22 the bundle of the unpatched Paseo 0.16.2 had no `BottomSheetModalInternalProvider` export (all 11 patches were unapplied) and its root screen stopped at "Element type is invalid" on the iPad 2. The script leaves a patch that is already applied alone, and a patch that does not apply stops `apply`. `tests/overlay_test.lua` checks the place, the PATH, that the application folder is not written, and the failure.
+
 ```sh
 ./xmakew l -P . frameworks/ReactNative/tools/overlay.lua apply <checkout> frameworks/ReactNative/examples/<name> <project>/build/ref/app
 ./xmakew l -P . frameworks/ReactNative/tools/inputs.lua make <project> --manifest frameworks/ReactNative/examples/<name>/host.json
@@ -41,13 +43,14 @@ revenant names an application; `examples/paseo` is the first one.
 - `overlay/node_modules/react-native-unistyles/lib/module/core/useProxifiedUnistyles/listener.native.js` coalesces the theme and
   runtime events of Unistyles per microtask, so a theme change costs one `setState` per subscriber instead of one per event.
 - `host.json` carries the bundle id `space.kern0x1b.paseo-ios6.rnhost`, the community pods the application needs and its own
-  Expo modules (`modules`: packages of its workspace or `node_modules` that are not part of the Expo SDK and carry an
-  `expo-module.config.json`). Those are built from the application's sources, with no recipe and no change to them: `inputs.lua`
+  Expo modules (`modules`: packages of its workspace or `node_modules`, or folders of its own `packages/app/modules`, that are not part of the Expo SDK
+  and carry an `expo-module.config.json`). Those are built from the application's sources, with no recipe and no change to them: `inputs.lua`
   adds them to the Expo inputs and `isolate.lua` passes them to the build as `RN_APP_MODULES`. `@getpaseo/expo-two-way-audio` is
   the one the Paseo example names; its iOS 13 voice-processing audio engine is the Backports' (`AVAudioEngine` on a
   VoiceProcessingIO unit, crutch C12), not a change to the module.
-- `PaseoHardwareKeyboard` is not in the host's scope: the host has no stub for it, and an application that needs it gets the loud
-  missing-module error.
+- The Paseo example names two of the application's local iOS modules, `paseo-hardware-keyboard` and `paseo-window-layout`, and the pod
+  `paseo-scroll`: they live in `packages/app/modules` and are built from their sources by the host. Without the first two the application
+  stops at start (`Cannot find native module 'PaseoHardwareKeyboard'`, measured on the iPad 2 on 2026-11-22). `paseo-terminal` is not built.
 
 ## The application names its Backports libraries
 

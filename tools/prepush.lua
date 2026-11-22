@@ -2,6 +2,18 @@ local bytes = import("core.base.bytes")
 
 local root = path.absolute(path.directory(os.scriptdir()))
 
+local output = {}
+
+function output.write(text)
+    print("%s", text)
+    io.flush()
+end
+
+local function say(format, ...)
+    local values = {...}
+    output.write(#values > 0 and string.format(format, ...) or format)
+end
+
 local CODE = {m = true, mm = true, c = true, cpp = true}
 
 local function cache()
@@ -30,10 +42,17 @@ local GATE_JOBS = 6
 local GATE_LINES = 30
 local GATE_EXCLUDES = {"/.git", "/.xmake", "/build", "/.cache", "/.cache-private", "/.cache-boot", "/.cache-*", "/.claude/worktrees"}
 
+local REFUSAL_EXIT = 3
+local REFUSED = {}
+
 local function budgeted(command, opt)
     opt = opt or {}
     local args = table.join({"l", "-P", root, path.join(root, "tools", "budget.lua"), "run", "--class", "critical", "--jobs", tostring(opt.jobs or 2), "--"}, command)
-    return os.execv(os.programfile(), args, {try = true, curdir = opt.curdir or root, envs = opt.envs, stdout = opt.output, stderr = opt.output}) == 0
+    local status = os.execv(os.programfile(), args, {try = true, curdir = opt.curdir or root, envs = opt.envs, stdout = opt.output, stderr = opt.output})
+    if status == REFUSAL_EXIT then
+        return REFUSED
+    end
+    return status == 0
 end
 
 local function gate_folder()
@@ -109,12 +128,12 @@ end
 local function explain_failure(logfile)
     local lines = failure_lines(io.readfile(logfile))
     for index = 1, math.min(#lines, GATE_LINES) do
-        print("%s", lines[index])
+        say("%s", lines[index])
     end
     if #lines > GATE_LINES then
-        print("... %d more", #lines - GATE_LINES)
+        say("... %d more", #lines - GATE_LINES)
     end
-    print("the Backports build failed; the whole log is %s", logfile)
+    say("the Backports build failed; the whole log is %s", logfile)
 end
 
 local function backports_build()
@@ -125,14 +144,24 @@ local function backports_build()
     local output = io.open(logfile, "w")
     local ignored = path.join(folder, "ignored.txt")
     io.writefile(ignored, gate_ignored(root))
-    local ok = budgeted(gate_preflight(), {output = output})
+    local result = budgeted(gate_preflight(), {output = output})
+    if result == REFUSED then
+        output:close()
+        return REFUSED
+    end
+    local ok = result == true
     if ok then
         os.mkdir(tree)
         ok = os.execv("rsync", gate_sync_arguments(tree, ignored), {try = true, stdout = output, stderr = output}) == 0
     end
     if ok then
         for _, command in ipairs(gate_commands(tree)) do
-            if not budgeted(command, {jobs = GATE_JOBS, curdir = tree, envs = gate_environment(), output = output}) then
+            result = budgeted(command, {jobs = GATE_JOBS, curdir = tree, envs = gate_environment(), output = output})
+            if result == REFUSED then
+                output:close()
+                return REFUSED
+            end
+            if not result then
                 ok = false
                 break
             end
@@ -202,7 +231,7 @@ end
 local function negative_shape()
     local errors = negative_errors()
     for _, message in ipairs(errors) do
-        print(message)
+        say("%s", message)
     end
     return #errors == 0
 end
@@ -226,7 +255,7 @@ local function call(script, ...)
         end,
         catch {
             function (errors)
-                print("%s", tostring(errors))
+                say("%s", tostring(errors))
                 ok = false
             end
         }
@@ -241,7 +270,7 @@ local function digests_stable(runner)
     local stable = true
     for line in git(root, {"status", "--porcelain", "--untracked-files=no", "--", "packages"}):gmatch("[^\n]+") do
         if line:find("/port/digest.lua$") then
-            print("regenerated digest differs from the committed one: %s", line:sub(4))
+            say("regenerated digest differs from the committed one: %s", line:sub(4))
             stable = false
         end
     end
@@ -540,8 +569,9 @@ local function batch(steps, keep_going)
     local results = {}
     for _, step in ipairs(steps) do
         local started = os.time()
+        say("start %s", step.name)
         local ok = step.inline()
-        print("%s %s %ds", ok and "ok" or "FAIL", step.name, os.time() - started)
+        say("%s %s %ds", ok and "ok" or "FAIL", step.name, os.time() - started)
         table.insert(results, {name = step.name, ok = ok, seconds = os.time() - started})
         if not ok and not keep_going then
             break
@@ -575,15 +605,26 @@ local function run_steps(steps, opt)
     end
     local verdicts = {}
     local stopped = false
+    local heavy_started = false
+    local function stop_at(name)
+        stopped = not opt.keep_going
+        if stopped then
+            say("prepush: %s failed; the run stops here%s", name, heavy_started and "" or ", and no heavy check was started")
+        end
+    end
     for _, step in ipairs(steps) do
         local hit = hits[step.name]
         if stopped then
             break
         elseif hit then
-            print("ok %s memo (%s)", step.name, provenance(hit))
+            say("ok %s memo (%s)", step.name, provenance(hit))
         elseif step.inline then
             if not verdicts[step.name] then
-                for _, result in ipairs((opt.batch or batch)(grouped, opt.keep_going)) do
+                local produced = (opt.batch or batch)(grouped, opt.keep_going)
+                if produced == REFUSED then
+                    return failed, true
+                end
+                for _, result in ipairs(produced) do
                     verdicts[result.name] = result
                 end
             end
@@ -592,26 +633,38 @@ local function run_steps(steps, opt)
                 record_of(step, result.seconds)
             else
                 if not result then
-                    print("FAIL %s: the process that runs the checks left no verdict for it", step.name)
+                    say("FAIL %s: the process that runs the checks left no verdict for it", step.name)
                 end
                 table.insert(failed, step.name)
-                stopped = not opt.keep_going
+                stop_at(step.name)
             end
         else
+            if step.heavy and not heavy_started then
+                heavy_started = true
+                if #failed == 0 then
+                    say("prepush: the light checks are green; starting the heavy ones")
+                else
+                    say("prepush: starting the heavy checks although %s failed (--keep-going)", table.concat(failed, ", "))
+                end
+            end
             local started = os.time()
+            say("start %s", step.name)
             local ok = step.run()
+            if ok == REFUSED then
+                return failed, true
+            end
             local seconds = os.time() - started
             if ok then
                 record_of(step, seconds)
             end
-            print("%s %s %ds", ok and "ok" or "FAIL", step.name, seconds)
+            say("%s %s %ds", ok and "ok" or "FAIL", step.name, seconds)
             if not ok then
                 table.insert(failed, step.name)
-                stopped = not opt.keep_going
+                stop_at(step.name)
             end
         end
     end
-    return failed
+    return failed, false
 end
 
 local STEPS = {
@@ -629,6 +682,7 @@ local STEPS = {
     {name = "ci replay test", reads = table.join({"tools/ci_swiftc_replay.lua", "tools/ci/"}, TOOLS), inline = function () return call("tools/ci_swiftc_replay.lua", "test") end},
     {name = "host install test", run = function () return lua("frameworks/ReactNative/tests/host_install_test.lua") end},
     {name = "isolate test", run = function () return lua("frameworks/ReactNative/tests/isolate_test.lua") end},
+    {name = "overlay test", reads = {"frameworks/ReactNative/tools/overlay.lua", "frameworks/ReactNative/tests/overlay_test.lua"}, run = function () return lua("frameworks/ReactNative/tests/overlay_test.lua") end},
     {name = "lowered members", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_members_test.lua") end},
     {name = "lowered exports", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_exports_test.lua") end},
     {name = "light suites", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("toolchain/tests/light_suites.lua") end},
@@ -1007,12 +1061,183 @@ local function test_arguments()
         return {name = name, cache = false, run = function () table.insert(runs, name); return ok end}
     end
     local plan = {recording("cheap", false), recording("heavy", true)}
-    local failed = run_steps(plan, {keep_going = false})
+    local failed, refused = run_steps(plan, {keep_going = false})
     check("a failed check stops the run before the next one", table.concat(runs, ",") .. "/" .. table.concat(failed, ","), "cheap/cheap")
     runs = {}
     failed = run_steps(plan, {keep_going = true})
     check("--keep-going runs the next check after a failure", table.concat(runs, ",") .. "/" .. table.concat(failed, ","), "cheap,heavy/cheap")
+
+    runs = {}
+    failed, refused = run_steps(plan, {keep_going = true})
+    check("a real failure is still a failed check", table.concat(runs, ",") .. "/" .. table.concat(failed, ","), "cheap,heavy/cheap")
+    check("a real failure is not a budget refusal", refused, false)
+
+    runs = {}
+    local refusing = {name = "refused", cache = false, run = function () table.insert(runs, "refused"); return REFUSED end}
+    local refused_plan = {recording("cheap", true), refusing, recording("heavy", true)}
+    failed, refused = run_steps(refused_plan, {keep_going = true})
+    check("a budget refusal is not counted as a failed check", table.concat(failed, ","), "")
+    check("a budget refusal is reported as a refusal", refused, true)
+    check("a budget refusal stops before the next check", table.concat(runs, ","), "cheap,refused")
+
+    local inline_plan = {
+        {name = "a", inline = function () return true end},
+        {name = "b", inline = function () return true end}
+    }
+    failed, refused = run_steps(inline_plan, {keep_going = true, batch = function () return REFUSED end})
+    check("a refused check batch is not counted as failed checks", table.concat(failed, ","), "")
+    check("a refused check batch is reported as a refusal", refused, true)
     print("prepush arguments: %d tests passed", count)
+end
+
+local function test_live()
+    local process = import("core.base.process")
+    local count = 0
+    local function check(name, got, want)
+        count = count + 1
+        assert(got == want, string.format("prepush live test %s: got %s, want %s", name, tostring(got), tostring(want)))
+    end
+    local function captured(run, ...)
+        local lines = {}
+        local saved = output.write
+        output.write = function (text) table.insert(lines, text) end
+        local failed
+        local result = try { function (...) return run(...) end, catch { function (raised) failed = raised end } }
+        output.write = saved
+        assert(failed == nil, tostring(failed))
+        return lines, result
+    end
+    local function index_of(lines, text)
+        for index, line in ipairs(lines) do
+            if line:find(text, 1, true) then
+                return index
+            end
+        end
+    end
+    local function ran_steps(red, ran)
+        return {
+            {name = "light green", inline = function () table.insert(ran, "light green") return true end},
+            {name = "light " .. (red and "red" or "other"), inline = function () table.insert(ran, "light other") return not red end},
+            {name = "light after", inline = function () table.insert(ran, "light after") return true end},
+            {name = "plain", run = function () table.insert(ran, "plain") return true end},
+            {name = "heavy", heavy = true, run = function () table.insert(ran, "heavy") return true end},
+        }
+    end
+
+    local ran = {}
+    local lines, results = captured(function () local failed, refused = run_steps(ran_steps(true, ran), {}) return {failed = failed, refused = refused} end)
+    check("a red light check fails the run and is named", table.concat(results.failed, ","), "light red")
+    check("it stops the light checks after it", table.concat(ran, ","), "light green,light other")
+    check("so that no check that is not light starts", index_of(lines, "start plain") == nil and index_of(lines, "start heavy") == nil, true)
+    check("the red check is reported at once, as a line of its own", index_of(lines, "FAIL light red") ~= nil, true)
+    check("the stop is named with the check and says that no heavy check was started",
+          lines[#lines], "prepush: light red failed; the run stops here, and no heavy check was started")
+    check("the stop comes after the red line", index_of(lines, "FAIL light red") < index_of(lines, "run stops here"), true)
+
+    ran = {}
+    lines, results = captured(function () local failed = run_steps(ran_steps(true, ran), {keep_going = true}) return {failed = failed} end)
+    check("with --keep-going the run goes on past a red light check", table.concat(ran, ","), "light green,light other,light after,plain,heavy")
+    check("and says so before the first heavy check", index_of(lines, "starting the heavy checks although light red failed (--keep-going)") ~= nil
+          and index_of(lines, "starting the heavy checks although") < index_of(lines, "start heavy"), true)
+    check("and does not report a stop", index_of(lines, "run stops here"), nil)
+
+    ran = {}
+    lines, results = captured(function () local failed = run_steps(ran_steps(false, ran), {}) return {failed = failed} end)
+    check("a green run starts every check", table.concat(ran, ","), "light green,light other,light after,plain,heavy")
+    check("it says that the light checks are green before the first heavy check", index_of(lines, "the light checks are green; starting the heavy ones") ~= nil
+          and index_of(lines, "the light checks are green") < index_of(lines, "start heavy"), true)
+    check("each check says that it starts, then how it ended", index_of(lines, "start heavy") < index_of(lines, "ok heavy"), true)
+
+    local failing = {{name = "light green", inline = function () return true end}, {name = "heavy red", heavy = true, run = function () return false end},
+                     {name = "heavy later", heavy = true, run = function () error("must not run") end}}
+    lines, results = captured(function () local failed = run_steps(failing, {}) return {failed = failed} end)
+    check("a red heavy check stops the run and is named", table.concat(results.failed, ","), "heavy red")
+    check("the stop line of a heavy check does not claim that no heavy check was started", lines[#lines], "prepush: heavy red failed; the run stops here")
+
+    local flushes = 0
+    local real_flush = io.flush
+    io.flush = function (...) flushes = flushes + 1 return real_flush(...) end
+    say("prepush test: a line is flushed as it is written")
+    io.flush = real_flush
+    check("every line written through say is flushed at once, not left to the buffer", flushes, 1)
+
+    local function listing()
+        return try { function () return os.iorunv("/bin/ps", {"-ax", "-o", "pid=,command="}) end } or ""
+    end
+    local function matching(predicate)
+        local pids = {}
+        for line in listing():gmatch("[^\n]+") do
+            local pid, text = line:match("^%s*(%d+)%s+(.-)%s*$")
+            if pid and predicate(text) then
+                table.insert(pids, tonumber(pid))
+            end
+        end
+        return pids
+    end
+    local function ends_with(text, suffix)
+        return #text >= #suffix and text:sub(-#suffix) == suffix
+    end
+    local function wait_until(condition, milliseconds)
+        local deadline = os.mclock() + milliseconds
+        while not condition() and os.mclock() < deadline do
+            os.sleep(300)
+        end
+        return condition()
+    end
+    local function kill(signal, pids)
+        for _, pid in ipairs(pids) do
+            try { function () os.iorunv("/bin/kill", {"-" .. signal, tostring(pid)}) end }
+        end
+    end
+    local base = os.iorunv("mktemp", {"-d"}):trim()
+    local script = path.join(root, "tools", "prepush.lua")
+    local budget_script = path.join(root, "tools", "budget.lua")
+    local unique = 3000 + os.getpid() % 2000
+
+    local live_log = path.join(base, "live.log")
+    local live_tag = tostring(unique)
+    local live = process.openv(os.programfile(), {"l", "-P", root, script, "probe-say", live_tag}, {outpath = live_log, errpath = live_log, envs = {"REVENANT_BUDGET_HELD="}})
+    local seen = wait_until(function () return (io.readfile(live_log) or ""):find("probe line", 1, true) ~= nil end, 60000)
+    local still_running = #matching(function (text) return ends_with(text, "prepush.lua probe-say " .. live_tag) end)
+    live:kill()
+    kill("KILL", matching(function (text) return ends_with(text, "prepush.lua probe-say " .. live_tag) end))
+    check("a line is in the log file while the process that wrote it still runs", seen and still_running == 1, true)
+
+    for round, signal in ipairs({"TERM", "INT", "KILL"}) do
+        local seconds = tostring(unique + round * 7)
+        local sleeping = "/bin/sleep " .. seconds
+        local pool = path.join(base, "pool" .. signal)
+        os.mkdir(pool)
+        local log = path.join(base, "hold-" .. signal .. ".log")
+        local run = process.openv(os.programfile(), {"l", "-P", root, script, "probe-hold", seconds},
+                                  {outpath = log, errpath = log, envs = {"REVENANT_BUDGET_POOL=" .. pool, "REVENANT_BUDGET_HELD="}})
+        local function held_text()
+            return try { function () return os.iorunv(os.programfile(), {"l", "-P", root, budget_script, "status"}, {envs = {REVENANT_BUDGET_POOL = pool, REVENANT_BUDGET_HELD = ""}}) end } or ""
+        end
+        local running = wait_until(function ()
+            return #matching(function (text) return text == sleeping end) > 0 and held_text():find(" holds 1 token(s)", 1, true) ~= nil
+        end, 90000)
+        local mains = matching(function (text) return ends_with(text, "prepush.lua probe-hold " .. seconds) end)
+        local runs = matching(function (text) return text:find("budget.lua run", 1, true) ~= nil and ends_with(text, "-- " .. sleeping) end)
+        local sleepers = matching(function (text) return text == sleeping end)
+        check("a run that holds its tokens has its prepush, its budget run and its command (" .. signal .. ")", running and #mains == 1 and #runs == 1 and #sleepers == 1, true)
+        kill(signal, mains)
+        local function all_gone()
+            return #matching(function (text) return text == sleeping or ends_with(text, "-- " .. sleeping) or ends_with(text, "prepush.lua probe-hold " .. seconds) end) == 0
+        end
+        local gone = wait_until(all_gone, 30000)
+        local leftovers = matching(function (text) return text == sleeping or ends_with(text, "-- " .. sleeping) end)
+        local held_after = held_text()
+        kill("KILL", leftovers)
+        kill("KILL", mains)
+        run:kill()
+        check("after SIG" .. signal .. " to prepush no budget run and no command is left", #leftovers, 0)
+        check("and the process that was signalled is gone", gone, true)
+        check("and no token is held", held_after:find("held      0 token(s)", 1, true) ~= nil and not held_after:find(" holds ", 1, true), true)
+    end
+
+    os.rm(base)
+    print("prepush: %d live tests passed", count)
 end
 
 local function spawned_batch(steps, keep_going)
@@ -1025,7 +1250,10 @@ local function spawned_batch(steps, keep_going)
     if keep_going then
         table.insert(command, "--keep-going")
     end
-    budgeted(command)
+    if budgeted(command) == REFUSED then
+        os.tryrm(results)
+        return REFUSED
+    end
     local verdicts = {}
     if os.isfile(results) then
         for line in io.readfile(results):gmatch("[^\n]+") do
@@ -1044,6 +1272,16 @@ function main(command, ...)
         test_suite()
         test_cache()
         test_arguments()
+        test_live()
+        return
+    end
+    if command == "probe-say" then
+        say("probe line")
+        os.sleep(600000)
+        return
+    end
+    if command == "probe-hold" then
+        budgeted({"/bin/sleep", ...}, {jobs = 1})
         return
     end
     local arguments = command and table.join({command}, {...}) or {}
@@ -1060,7 +1298,7 @@ function main(command, ...)
         if not report then
             raise("no verdict of %s is remembered for these inputs", step.name)
         end
-        print("%s", report)
+        say("%s", report)
         return
     end
     if parsed.inline then
@@ -1082,7 +1320,7 @@ function main(command, ...)
     end
     local steps = select_steps(STEPS, parsed.only)
     local input = inputs(root)
-    local failed = run_steps(steps, {
+    local failed, refused = run_steps(steps, {
         keep_going = parsed.keep_going,
         fresh = parsed.fresh,
         store = path.join(cache().store(), "memo"),
@@ -1091,12 +1329,16 @@ function main(command, ...)
         key = function (step) return key_of(input, step) end,
         batch = spawned_batch,
     })
+    if refused then
+        say("prepush: budget refused; this is not a failed check, free the space and rerun")
+        os.exit(REFUSAL_EXIT)
+    end
     if #failed > 0 then
         raise("%d of %d checks failed: %s", #failed, #steps, table.concat(failed, ", "))
     end
     if parsed.only then
-        print("prepush: %d of %d checks passed (--only); a push needs all of them", #steps, #STEPS)
+        say("prepush: %d of %d checks passed (--only); a push needs all of them", #steps, #STEPS)
     else
-        print("prepush: %d checks passed", #steps)
+        say("prepush: %d checks passed", #steps)
     end
 end
