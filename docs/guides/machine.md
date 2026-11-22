@@ -594,9 +594,12 @@ key, because a rerun costs seconds and a verdict that no longer holds costs a pu
   content when it differs from the index). The uncommitted files are read with `git status -z` into a file and read back as
   bytes, not through `os.iorunv`: xmake decodes an output that holds NULs as UTF-16, so anything longer than two entries came
   back as one record without its boundaries (2026-11-22: a 3.5 MB list became one 5.3 MB "path", the glob `**/*.md` took hours on
-  it, and the content of the uncommitted files was in no key). The list is checked, and a list that does not end at a boundary,
-  holds an empty record or a record longer than a path, a record that is no status line, or whose digests do not match the files
-  fails the run at once with `could not be read cleanly`, before any key is computed or any remembered verdict is looked at.
+  it, and the content of the uncommitted files was in no key). The list goes to a file under `.cache/scratch/prepush-lists/` (the
+  checkout's cache, not the system temp folder), which is removed on every path, errors included. The list is checked: a git
+  that exits non-zero (a corrupt index, a folder it cannot enter, a bad `GIT_*`), a list whose records and boundaries do not
+  match, a record longer than a path, a record that is no status line, or digests that do not match the files fail the run at
+  once with `could not be read cleanly`, before any key is computed or any remembered verdict is looked at; an empty list is
+  believed only when git exited zero.
   The private folders of a worktree (`.cache*`, `build`, `.xmake`, `.claude/worktrees`) are left out of the list by pathspec,
   so a private cache of any name never enters a key (`.gitignore` has `/.cache-*/` for the same reason);
 - for `comments`, the content of the local `.git/info/attributes` and of the global attributes file, which `git check-attr` reads
@@ -726,7 +729,9 @@ warm cache is kept.
 prepush on the same tree runs no check, and an edit of a document runs only the checks that read documents. `./xmakew l -P . tools/prepush.lua test`
 checks the keys and the memo (3, 10, 1,000 and 30,000 untracked files are all in the manifest with git's own digests, a changed
 one changes the key of a check that reads everything, a file of a private folder changes none, a list git's output cannot give
-cleanly is refused, and the ignored list of the Backports gate keeps every entry): an edit, an untracked file, a deleted file and a named environment variable each change the keys of the
+cleanly and a git that fails are refused and leave no list file behind, names with a space, a newline, Cyrillic, a leading dash,
+quotes and a tab and a staged rename that is edited again keep their own digests, and the ignored list of the Backports gate
+keeps every entry): an edit, an untracked file, a deleted file and a named environment variable each change the keys of the
 checks that read or name them, restoring them restores the keys, another folder or a new commit with the same files has the same
 key, a file a check does not read leaves its key, a failing check runs again, the checks of one process run in one batch, and
 `--fresh` runs them all.
