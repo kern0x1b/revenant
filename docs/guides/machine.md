@@ -567,7 +567,12 @@ Prepush writes each line as it happens and flushes it (`say` in `tools/prepush.l
 (`> prepush.log 2>&1 &`) shows each line when it is written and does not depend on how the output is buffered; the 2026-11-22
 probe saw this xmake write a short `print` line to a redirected file or a pipe at once, and the flush keeps it so. A check
 prints `start <name>` when it begins and `ok <name> <n>s` or `FAIL <name> <n>s` when it ends, and the line is in the file at that
-moment. What kept an earlier run silent for two hours was the wait, not the buffer: the batch of light checks is a budgeted
+moment. The work before the first check says what it is doing too, so a log is never empty while prepush is only reading:
+`prepush: reading the state of the tree` and `prepush: <n> files, <m> of them uncommitted or untracked (<s>s)`, then
+`prepush: reading the installed toolchain …` (once, when a key needs it) and `prepush: computing the keys of <n> checks`
+and `prepush: keys done in <s>s, <k> of <n> checks have a remembered verdict`; the first line of the log is one of these,
+and a `start` line never comes before the keys line. A log that stays at 0 bytes for more than a few seconds means prepush
+itself is stuck, not that it is working quietly. What kept an earlier run silent for two hours was the wait, not the buffer: the batch of light checks is a budgeted
 child that queued behind the holders and printed nothing; it now says who holds the tokens. The light checks (comments, layout, digests and the like) run first; when one is red the run stops there, before any
 heavy check is queued on the budget, names the check (`prepush: <name> failed; the run stops here, and no heavy check was
 started`) and fails; `--keep-going` runs on and says so. When every light check is green it says `the light checks are green;
@@ -586,7 +591,17 @@ key, because a rerun costs seconds and a verdict that no longer holds costs a pu
   names (`LC_COLLATE` for `layout`). Not part of a key: `REVENANT_CACHE`, which is the folder of one worktree, and the budget's
   own `REVENANT_BUDGET_*` variables, which say when a command may start, not what it finds;
 - the content of every tracked file and every untracked file git does not ignore that the check reads (its blob id, or its
-  content when it differs from the index);
+  content when it differs from the index). The uncommitted files are read with `git status -z` into a file and read back as
+  bytes, not through `os.iorunv`: xmake decodes an output that holds NULs as UTF-16, so anything longer than two entries came
+  back as one record without its boundaries (2026-11-22: a 3.5 MB list became one 5.3 MB "path", the glob `**/*.md` took hours on
+  it, and the content of the uncommitted files was in no key). The list goes to a file under `.cache/scratch/prepush-lists/` (the
+  checkout's cache, not the system temp folder), which is removed on every path, errors included. The list is checked: a git
+  that exits non-zero (a corrupt index, a folder it cannot enter, a bad `GIT_*`), a list whose records and boundaries do not
+  match, a record longer than a path, a record that is no status line, or digests that do not match the files fail the run at
+  once with `could not be read cleanly`, before any key is computed or any remembered verdict is looked at; an empty list is
+  believed only when git exited zero.
+  The private folders of a worktree (`.cache*`, `build`, `.xmake`, `.claude/worktrees`) are left out of the list by pathspec,
+  so a private cache of any name never enters a key (`.gitignore` has `/.cache-*/` for the same reason);
 - for `comments`, the content of the local `.git/info/attributes` and of the global attributes file, which `git check-attr` reads
   to classify a file;
 - for `recipe digests`, `lowered members`, `lowered exports`, `light suites` and `backports build`, which run against what is
@@ -712,7 +727,11 @@ warm cache is kept.
 
 `recipe digests` is remembered like the others, by the files its recipes list, the digest files and the SDK facts, so a second
 prepush on the same tree runs no check, and an edit of a document runs only the checks that read documents. `./xmakew l -P . tools/prepush.lua test`
-checks the keys and the memo: an edit, an untracked file, a deleted file and a named environment variable each change the keys of the
+checks the keys and the memo (3, 10, 1,000 and 30,000 untracked files are all in the manifest with git's own digests, a changed
+one changes the key of a check that reads everything, a file of a private folder changes none, a list git's output cannot give
+cleanly and a git that fails are refused and leave no list file behind, names with a space, a newline, Cyrillic, a leading dash,
+quotes and a tab and a staged rename that is edited again keep their own digests, and the ignored list of the Backports gate
+keeps every entry): an edit, an untracked file, a deleted file and a named environment variable each change the keys of the
 checks that read or name them, restoring them restores the keys, another folder or a new commit with the same files has the same
 key, a file a check does not read leaves its key, a failing check runs again, the checks of one process run in one batch, and
 `--fresh` runs them all.

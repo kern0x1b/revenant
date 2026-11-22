@@ -70,9 +70,64 @@ local function gate_environment()
     }
 end
 
+local RECORD_LIMIT = 4100
+
+local function git_records(folder, args, what)
+    local scratch = path.join(cache().root(), "scratch", "prepush-lists")
+    os.mkdir(scratch)
+    local file = path.join(scratch, "list-" .. path.filename(os.tmpfile()))
+    local text, failure
+    try {
+        function ()
+            local status = os.execv("git", table.join({"-C", folder}, args), {stdout = file, stderr = file .. ".errors", try = true})
+            if status ~= 0 then
+                failure = string.format("git exited with status %s (%s)", tostring(status), (io.readfile(file .. ".errors") or ""):trim():sub(1, 200))
+            else
+                local handle = io.open(file, "rb")
+                text = handle:read("*all")
+                handle:close()
+            end
+        end,
+        catch {
+            function (raised)
+                failure = tostring(raised):sub(1, 200)
+            end
+        },
+        finally {
+            function ()
+                os.tryrm(file)
+                os.tryrm(file .. ".errors")
+            end
+        }
+    }
+    if failure then
+        raise("prepush: %s could not be read cleanly: %s; nothing was run and no remembered verdict was used", what or "a list of git", failure)
+    end
+    return text
+end
+
+local function split_records(text, what)
+    local records = {}
+    if text == "" then
+        return records
+    end
+    for record in text:gmatch("[^\0]+") do
+        if #record > RECORD_LIMIT then
+            raise("prepush: %s could not be read cleanly: a record of %d bytes is no path; nothing was run and no remembered verdict was used", what, #record)
+        end
+        table.insert(records, record)
+    end
+    local _, boundaries = text:gsub("%z", "")
+    if boundaries ~= #records then
+        raise("prepush: %s could not be read cleanly: the output of git is not a list of records that each end at a boundary (%d records, %d boundaries); nothing was run and no remembered verdict was used", what, #records, boundaries)
+    end
+    return records
+end
+
 local function gate_ignored(folder)
     local lines = {}
-    for entry in git(folder, {"ls-files", "--others", "--ignored", "--exclude-standard", "--directory", "-z"}):gmatch("[^\0]+") do
+    local what = "the list of what git ignores"
+    for _, entry in ipairs(split_records(git_records(folder, {"ls-files", "--others", "--ignored", "--exclude-standard", "--directory", "-z"}, what), what)) do
         table.insert(lines, "/" .. entry:gsub("([%*%?%[\\])", "\\%1"))
     end
     return table.concat(lines, "\n") .. "\n"
@@ -378,37 +433,57 @@ local installed_text
 
 local function installed_facts()
     if not installed_text then
+        local began = os.time()
+        say("prepush: reading the installed toolchain (xcode, the tools on the path, the store's packages, the SDK), once")
         installed_text = table.concat({toolchain_facts(), resolved_tools(), store_installs(), sdk_content()}, "\n--\n")
+        say("prepush: the installed toolchain is read, %ds", os.time() - began)
     end
     return installed_text
 end
 
-local function dirty_entries(folder)
-    local tokens, entries = {}, {}
-    for token in git(folder, {"status", "--porcelain=v1", "--untracked-files=all", "-z"}):gmatch("[^\0]+") do
-        table.insert(tokens, token)
+local PRIVATE_FOLDERS = {".cache*/**", "build/**", ".xmake/**", ".claude/worktrees/**"}
+
+local function dirty_pathspec()
+    local spec = {"--", "."}
+    for _, folder in ipairs(PRIVATE_FOLDERS) do
+        table.insert(spec, ":(exclude,glob)" .. folder)
     end
+    return spec
+end
+
+local function dirty_entries(folder, reader)
+    local what = "the list of uncommitted files"
+    local tokens, entries = split_records((reader or git_records)(folder, table.join({"status", "--porcelain=v1", "--untracked-files=all", "-z"}, dirty_pathspec()), what), what), {}
     local index = 1
     while index <= #tokens do
+        if not tokens[index]:find("^[ MTADRCU%?!][ MTADRCU%?!] ") then
+            raise("prepush: %s could not be read cleanly: a record that is no status line (%d bytes, starts with %q); nothing was run and no remembered verdict was used", what, #tokens[index], tokens[index]:sub(1, 12))
+        end
         local status = tokens[index]:sub(1, 2)
         table.insert(entries, {status = status, file = tokens[index]:sub(4)})
         if status:find("[RC]") then
             index = index + 1
+            if index > #tokens then
+                raise("prepush: %s could not be read cleanly: a rename or copy without its source; nothing was run and no remembered verdict was used", what)
+            end
         end
         index = index + 1
     end
     return entries
 end
 
-local function manifest(folder)
+local HASH_CHUNK = 1000
+
+local function manifest(folder, reader, hasher)
     local current = {}
     for line in git(folder, {"ls-files", "-s"}):gmatch("[^\n]+") do
         local mode, sha, file = line:match("^(%d+) (%x+) %d\t(.+)$")
         current[file] = mode .. " " .. sha
     end
-    local pending = {}
-    for _, entry in ipairs(dirty_entries(folder)) do
+    local pending, dirty = {}, 0
+    for _, entry in ipairs(dirty_entries(folder, reader)) do
         local full = path.join(folder, entry.file)
+        dirty = dirty + 1
         if os.islink(full) then
             current[entry.file] = "link " .. os.readlink(full)
         elseif os.isfile(full) then
@@ -417,16 +492,20 @@ local function manifest(folder)
             current[entry.file] = "deleted"
         end
     end
-    if #pending > 0 then
-        local digests = {}
-        for line in git(folder, table.join({"hash-object", "--"}, pending)):gmatch("[^\n]+") do
+    local digests = {}
+    for from = 1, #pending, HASH_CHUNK do
+        local chunk = table.slice(pending, from, math.min(from + HASH_CHUNK - 1, #pending))
+        for line in (hasher or git)(folder, table.join({"hash-object", "--"}, chunk)):gmatch("[^\n]+") do
             table.insert(digests, line)
         end
-        for index, file in ipairs(pending) do
-            current[file] = "file " .. digests[index]
-        end
     end
-    return current
+    if #digests ~= #pending then
+        raise("prepush: the content of the uncommitted files could not be read cleanly: %d files, %d digests; nothing was run and no remembered verdict was used", #pending, #digests)
+    end
+    for index, file in ipairs(pending) do
+        current[file] = "file " .. digests[index]
+    end
+    return current, dirty
 end
 
 local compiled = {}
@@ -482,9 +561,11 @@ local function environment_of(step)
     return table.concat(values, "\n")
 end
 
-local function inputs(folder)
+local function inputs(folder, reader, hasher)
+    local files, dirty = manifest(folder, reader, hasher)
     return {
-        files = manifest(folder),
+        files = files,
+        dirty = dirty,
         tool = digest(os.iorunv(os.programfile(), {"--version"})),
         host = os.host() .. "/" .. os.arch(),
     }
@@ -583,6 +664,10 @@ end
 local function run_steps(steps, opt)
     local failed = {}
     local keys, hits, misses = {}, {}, {}
+    local keyed = os.time()
+    if opt.key then
+        say("prepush: computing the keys of %d checks", #steps)
+    end
     for _, step in ipairs(steps) do
         keys[step.name] = opt.key and opt.key(step) or nil
         local record = keys[step.name] and not opt.fresh and recalled(opt.store, step, keys[step.name])
@@ -591,6 +676,9 @@ local function run_steps(steps, opt)
         else
             table.insert(misses, step)
         end
+    end
+    if opt.key then
+        say("prepush: keys done in %ds, %d of %d checks have a remembered verdict%s", os.time() - keyed, #steps - #misses, #steps, opt.fresh and " (not used, --fresh)" or "")
     end
     local record_of = function (step, seconds)
         if keys[step.name] then
@@ -794,7 +882,7 @@ local function test_cache()
     os.setenv("REVENANT_TEST_ASSET_CATALOGUE", saved_catalogue or "")
     check("a REVENANT_ variable that is emptied is as good as unset", key(narrow), base_keys.narrow)
     local saved_cache, saved_held = os.getenv("REVENANT_CACHE"), os.getenv("REVENANT_BUDGET_HELD")
-    os.setenv("REVENANT_CACHE", "/another/worktree/.cache")
+    os.setenv("REVENANT_CACHE", path.join(base, "another-worktree", ".cache"))
     os.setenv("REVENANT_BUDGET_HELD", "1")
     check("the cache folder of a worktree and the budget's own variables change no key", key(narrow), base_keys.narrow)
     os.setenv("REVENANT_CACHE", saved_cache or "")
@@ -1090,6 +1178,180 @@ local function test_arguments()
     print("prepush arguments: %d tests passed", count)
 end
 
+local function dirty_tests(base)
+    local count = 0
+    local function check(name, got, want)
+        count = count + 1
+        assert(got == want, string.format("prepush dirty test %s: got %s, want %s", name, tostring(got), tostring(want)))
+    end
+    local function refusal(run)
+        local message
+        try { run, catch { function (raised) message = tostring(raised) end } }
+        return message
+    end
+    local function reader_of(text)
+        return function () return text end
+    end
+    local function repository(name)
+        local folder = path.join(base, name)
+        os.mkdir(folder)
+        git(folder, {"init", "-q"})
+        io.writefile(path.join(folder, "tracked.txt"), "one\n")
+        git(folder, {"add", "-A"})
+        git(folder, {"-c", "user.name=prepush", "-c", "user.email=prepush@localhost", "-c", "commit.gpgsign=false", "commit", "-q", "-m", "one"})
+        return folder
+    end
+    local function fill(folder, subfolder, amount, extension)
+        os.mkdir(path.join(folder, subfolder))
+        os.vrunv("sh", {"-c", 'i=0; while [ $i -lt $1 ]; do printf "%s\\n" "$i" > "$2/file-with-a-longer-name-$i.$3"; i=$((i + 1)); done', "sh",
+                        tostring(amount), path.join(folder, subfolder), extension or "txt"})
+    end
+    local function listed(files)
+        local found = 0
+        for _, value in pairs(files) do
+            if value:find("^file ") then
+                found = found + 1
+            end
+        end
+        return found
+    end
+
+    check("a list that ends at a boundary splits at it", #split_records("a\0b\0", "x"), 2)
+    check("an empty answer is an empty list", #split_records("", "x"), 0)
+    check("an answer that does not end at a boundary is refused", (refusal(function () split_records("M  a", "x") end) or ""):find("could not be read cleanly", 1, true) ~= nil, true)
+    check("an empty record is refused", (refusal(function () split_records("a\0\0b\0", "x") end) or ""):find("could not be read cleanly", 1, true) ~= nil, true)
+    check("a record that is no path is refused", (refusal(function () split_records(string.rep("x", 5000) .. "\0", "x") end) or ""):find("could not be read cleanly", 1, true) ~= nil, true)
+    check("a status list is read", #dirty_entries(base, reader_of(" M a.txt\0?? b.txt\0")), 2)
+    check("a rename takes the record of its source with it", #dirty_entries(base, reader_of("R  new.txt\0old.txt\0 M a.txt\0")), 2)
+    check("a rename without its source is refused", (refusal(function () dirty_entries(base, reader_of("R  new.txt\0")) end) or ""):find("could not be read cleanly", 1, true) ~= nil, true)
+    check("a record that is no status line is refused", (refusal(function () dirty_entries(base, reader_of("no status line here\0")) end) or ""):find("no status line", 1, true) ~= nil, true)
+    check("a list without its boundaries, as xmake decodes a long one, is refused", (refusal(function () dirty_entries(base, reader_of(string.rep("?? file.txt", 60))) end) or ""):find("could not be read cleanly", 1, true) ~= nil, true)
+    local unreadable = refusal(function () inputs(repository("unreadable"), reader_of(string.rep("?? file.txt", 60))) end)
+    check("the inputs of the checks are refused when the list could not be read, so no key and no remembered verdict follows", (unreadable or ""):find("no remembered verdict was used", 1, true) ~= nil, true)
+    local short = repository("short")
+    io.writefile(path.join(short, "a.txt"), "a\n")
+    io.writefile(path.join(short, "b.txt"), "b\n")
+    local lost = refusal(function () manifest(short, nil, function () return "0123456789012345678901234567890123456789\n" end) end)
+    check("a digest missing for an uncommitted file is refused, never a key without its content", (lost or ""):find("no remembered verdict was used", 1, true) ~= nil, true)
+
+    for _, amount in ipairs({3, 10, 1000, 30000}) do
+        local folder = repository("n" .. amount)
+        fill(folder, "src", amount)
+        local files, dirty = manifest(folder)
+        check(amount .. " untracked files are all dirty entries", dirty, amount)
+        check(amount .. " untracked files each have a digest in the manifest", listed(files), amount)
+        local name = "src/file-with-a-longer-name-1.txt"
+        check("a digest of the manifest is git's own (" .. amount .. ")", files[name], "file " .. git(folder, {"hash-object", "--", name}):trim())
+        local step = {name = "everything"}
+        local before = key_of(inputs(folder), step)
+        io.writefile(path.join(folder, name), "changed\n")
+        check("a changed untracked file changes the key of a check that reads everything (" .. amount .. ")", key_of(inputs(folder), step) ~= before, true)
+        io.writefile(path.join(folder, name), "1\n")
+        check("and restoring it restores the key (" .. amount .. ")", key_of(inputs(folder), step), before)
+        io.writefile(path.join(folder, "tracked.txt"), "two\n")
+        check("a modified tracked file beside them changes the key (" .. amount .. ")", key_of(inputs(folder), step) ~= before, true)
+        os.rm(folder)
+    end
+
+    local folder = repository("private")
+    fill(folder, ".cache-x", 3000)
+    fill(folder, "build", 500)
+    fill(folder, ".xmake", 500)
+    fill(folder, "real", 4)
+    local files, dirty = manifest(folder)
+    check("only the files outside the private folders are dirty entries", dirty, 4)
+    check("and only those have a digest", listed(files), 4)
+    local step = {name = "everything"}
+    local before = key_of(inputs(folder), step)
+    io.writefile(path.join(folder, ".cache-x", "file-with-a-longer-name-1.txt"), "changed\n")
+    io.writefile(path.join(folder, "build", "file-with-a-longer-name-1.txt"), "changed\n")
+    check("a file in a private cache or a build folder changes no key", key_of(inputs(folder), step), before)
+    os.rm(folder)
+
+    folder = repository("ignored")
+    io.writefile(path.join(folder, ".gitignore"), "*.o\n")
+    fill(folder, "obj", 1000, "o")
+    io.writefile(path.join(folder, "obj", "keep.txt"), "kept\n")
+    local excludes = 0
+    for line in gate_ignored(folder):gmatch("[^\n]+") do
+        if line:find("^/obj/file%-with%-a%-longer%-name%-%d+%.o$") then
+            excludes = excludes + 1
+        end
+    end
+    check("what git ignores is listed one by one for the gate's copy (1000 ignored files)", excludes, 1000)
+
+    local broken = repository("broken")
+    io.writefile(path.join(broken, "uncommitted.txt"), "uncommitted\n")
+    io.writefile(path.join(broken, ".git", "index"), "this is not an index")
+    local failed = refusal(function () dirty_entries(broken) end)
+    check("a git that fails on the status is refused, never read as an empty tree", (failed or ""):find("could not be read cleanly: git exited with status", 1, true) ~= nil, true)
+    check("and the refusal says that no remembered verdict was used", (failed or ""):find("no remembered verdict was used", 1, true) ~= nil, true)
+    check("the inputs of the checks fail on it too, so no key follows", refusal(function () inputs(broken) end) ~= nil, true)
+    check("a folder git cannot enter is refused the same way", (refusal(function () dirty_entries(path.join(base, "nowhere")) end) or ""):find("git exited with status", 1, true) ~= nil, true)
+    check("a git that fails on the ignored list is refused too", (refusal(function () gate_ignored(path.join(base, "nowhere")) end) or ""):find("could not be read cleanly: git exited with status", 1, true) ~= nil, true)
+
+    local real_tmpfile = os.tmpfile
+    local fixed = path.join(base, "fixed-name")
+    os.tmpfile = function () return fixed end
+    local lists = path.join(cache().root(), "scratch", "prepush-lists")
+    refusal(function () dirty_entries(broken) end)
+    check("no list file stays in the scratch folder after a failed read", os.isfile(path.join(lists, "list-fixed-name")), false)
+    check("no list of errors stays there either", os.isfile(path.join(lists, "list-fixed-name.errors")), false)
+    dirty_entries(repository("fine"))
+    check("no list file stays in the scratch folder after a good read", os.isfile(path.join(lists, "list-fixed-name")), false)
+    os.tmpfile = real_tmpfile
+    local saved_cache = os.getenv("REVENANT_CACHE")
+    os.setenv("REVENANT_CACHE", path.join(base, "named-cache"))
+    dirty_entries(repository("located"))
+    os.setenv("REVENANT_CACHE", saved_cache or "")
+    check("the list file is made under the scratch folder of the checkout's cache", os.isdir(path.join(base, "named-cache", "scratch", "prepush-lists")), true)
+
+    local special = repository("special")
+    local names = {
+        "with space.txt",
+        "new\nline.txt",
+        "\208\159\209\128\208\184\208\178\208\181\209\130.txt",
+        "-dash.txt",
+        "quote'\"d.txt",
+        "tab\there.txt",
+    }
+    for index, name in ipairs(names) do
+        io.writefile(path.join(special, name), "content " .. index .. "\n")
+    end
+    git(special, {"mv", "tracked.txt", "renamed.txt"})
+    io.writefile(path.join(special, "renamed.txt"), "two\n")
+    local files, dirty = manifest(special)
+    check("every special name and the renamed file is a dirty entry", dirty, #names + 1)
+    for index, name in ipairs(names) do
+        check("the manifest has the digest of " .. string.format("%q", name), files[name], "file " .. git(special, {"hash-object", "--", name}):trim())
+    end
+    check("a staged rename that is edited again has the digest of its new content", files["renamed.txt"], "file " .. git(special, {"hash-object", "--", "renamed.txt"}):trim())
+    check("and the name it left is not in the manifest", files["tracked.txt"], nil)
+    local special_step = {name = "everything"}
+    local special_before = key_of(inputs(special), special_step)
+    for index, name in ipairs(names) do
+        io.writefile(path.join(special, name), "changed " .. index .. "\n")
+        check("a changed file changes the key (" .. string.format("%q", name) .. ")", key_of(inputs(special), special_step) ~= special_before, true)
+        io.writefile(path.join(special, name), "content " .. index .. "\n")
+    end
+    check("restoring them restores the key", key_of(inputs(special), special_step), special_before)
+    print("prepush: %d dirty tests passed", count)
+end
+
+local function test_dirty()
+    local base = path.join(cache().root(), "scratch", "prepush-dirty-test-" .. path.filename(os.tmpfile()))
+    os.mkdir(base)
+    local failure
+    try {
+        function () dirty_tests(base) end,
+        catch { function (raised) failure = tostring(raised) end },
+        finally { function () os.tryrm(base) end },
+    }
+    if failure then
+        raise("%s", failure)
+    end
+end
+
 local function test_live()
     local process = import("core.base.process")
     local count = 0
@@ -1153,6 +1415,17 @@ local function test_live()
     lines, results = captured(function () local failed = run_steps(failing, {}) return {failed = failed} end)
     check("a red heavy check stops the run and is named", table.concat(results.failed, ","), "heavy red")
     check("the stop line of a heavy check does not claim that no heavy check was started", lines[#lines], "prepush: heavy red failed; the run stops here")
+
+    local memo_store = os.iorunv("mktemp", {"-d"}):trim()
+    lines = captured(function ()
+        return run_steps({{name = "alpha", inline = function () return true end}, {name = "beta", run = function () return true end}},
+                         {store = memo_store, key = function (step) output.write("computing the key of " .. step.name) return "key-" .. step.name end})
+    end)
+    check("the first line of a run says that the keys are being computed", lines[1], "prepush: computing the keys of 2 checks")
+    check("every key is computed after that line", index_of(lines, "computing the key of alpha") == 2 and index_of(lines, "computing the key of beta") == 3, true)
+    check("a line says when the keys are done, with the number of remembered verdicts", lines[4], "prepush: keys done in 0s, 0 of 2 checks have a remembered verdict")
+    check("no check starts before the keys are done", index_of(lines, "start alpha") > 4 and index_of(lines, "start beta") > 4, true)
+    os.rm(memo_store)
 
     local flushes = 0
     local real_flush = io.flush
@@ -1272,6 +1545,7 @@ function main(command, ...)
         test_suite()
         test_cache()
         test_arguments()
+        test_dirty()
         test_live()
         return
     end
@@ -1319,7 +1593,14 @@ function main(command, ...)
         return
     end
     local steps = select_steps(STEPS, parsed.only)
+    say("prepush: reading the state of the tree")
+    local read_at = os.time()
     local input = inputs(root)
+    local tracked_count = 0
+    for _ in pairs(input.files) do
+        tracked_count = tracked_count + 1
+    end
+    say("prepush: %d files, %d of them uncommitted or untracked (%ds)", tracked_count, input.dirty, os.time() - read_at)
     local failed, refused = run_steps(steps, {
         keep_going = parsed.keep_going,
         fresh = parsed.fresh,
