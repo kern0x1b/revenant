@@ -653,6 +653,7 @@ local STEPS = {
     {name = "ci replay test", reads = table.join({"tools/ci_swiftc_replay.lua", "tools/ci/"}, TOOLS), inline = function () return call("tools/ci_swiftc_replay.lua", "test") end},
     {name = "host install test", run = function () return lua("frameworks/ReactNative/tests/host_install_test.lua") end},
     {name = "isolate test", run = function () return lua("frameworks/ReactNative/tests/isolate_test.lua") end},
+    {name = "overlay test", run = function () return lua("frameworks/ReactNative/tests/overlay_test.lua") end},
     {name = "lowered members", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_members_test.lua") end},
     {name = "lowered exports", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_exports_test.lua") end},
     {name = "light suites", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("toolchain/tests/light_suites.lua") end},
