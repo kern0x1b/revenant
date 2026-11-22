@@ -81,8 +81,8 @@ system's own.
 
 The wrapped `enqueueSampleBuffer:` also draws what the system queue does not (measured on the iPhone 4S, below): a frame
 that holds an uncompressed image buffer (`32BGRA`, `32ARGB`, `420v`, `420f`) and is not `DoNotDisplay` is converted on the
-CPU (the matrix table and the ranges of `cee944be1`; `YCbCrMatrix` 601 or 709, 709 when absent, anything else is not
-drawn) and becomes the layer's own `contents`, with `contentsGravity` from `videoGravity`. It is shown at once when the
+CPU (the formats, the matrix table and the ranges are in [the formats page](SampleBufferDisplayLayerFormats.md);
+`YCbCrMatrix` 601 or 709, 709 when absent, anything else is not drawn) and becomes the layer's own `contents`, with `contentsGravity` from `videoGravity`. It is shown at once when the
 frame is `DisplayImmediately`, has no timestamp or the layer has no control timebase, and otherwise when its timestamp is
 reached on the control timebase (a dispatch after the wait divided by the rate). `flush` cancels the frames not yet
 shown and keeps the image on the layer; `flushAndRemoveImage` cancels them and removes the image. Compressed frames
@@ -104,8 +104,10 @@ What this does not give: the system reports no failure on iOS 6, so `status` nev
 later one is due too (each is shown in turn); a timebase with rate 0 never shows a frame whose time is ahead, and a rate
 change does not move the frames already waiting; and the conversion runs on the thread that enqueues.
 
-`tests/runtime/cases/avfoundation_display_layer.m` checks the state machine on the system class, `tests/avfoundation_test.lua`
-checks that the Backports objects define no class of the name and none of the system's own members.
+`tests/runtime/cases/avfoundation_display_layer.m` checks the state machine on the system class,
+`tests/runtime/cases/avfoundation_display_layer_formats.m` checks the colour channels the conversion draws for each format
+and matrix, and `tests/avfoundation_test.lua` checks that the Backports objects define no class of the name and none of
+the system's own members.
 
 ## Measured on the iPhone 4S (iPhone4,1, 6.1.3, 2026-11-21)
 
