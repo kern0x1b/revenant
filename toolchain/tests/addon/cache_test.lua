@@ -280,6 +280,18 @@ function failures(arguments)
         table.insert(found, "a module cache of one SDK is scratch, so the cap can evict it")
     end
 
+    local compiled = path.join(folder, "compiled")
+    folder_of(path.join(compiled, "ccache", "cache"), MEGABYTE, OLDER)
+    folder_of(path.join(compiled, "ccache", "shim", "0123"), 1, OLDER)
+    local compiled_classes = {}
+    for _, row in ipairs(cache.status(compiled, {builds = {}})) do
+        compiled_classes[row.name] = row.class
+    end
+    if compiled_classes[path.join("ccache", "cache")] ~= "scratch" or compiled_classes[path.join("ccache", "shim")] ~= "kept" then
+        table.insert(found, "the objects of the compile cache are scratch, so the cap can evict them, and its shims are kept, because a running build executes them: "
+                            .. tostring(compiled_classes[path.join("ccache", "cache")]) .. ", " .. tostring(compiled_classes[path.join("ccache", "shim")]))
+    end
+
     local sources = path.join(folder, "sources")
     file_of(path.join(sources, "dyld", "6.0", "dyld_shared_cache_armv7"), 2 * MEGABYTE)
     local installed = folder_of(package_of(sources, "bbb"), MEGABYTE, OLDEST)

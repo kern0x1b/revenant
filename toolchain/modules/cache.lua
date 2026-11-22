@@ -315,6 +315,12 @@ local function modcache_entries(base, found)
     end
 end
 
+local function ccache_entries(base, found)
+    for _, folder in ipairs(children(path.join(base, "ccache"))) do
+        table.insert(found, entry(base, folder, path.filename(folder) == "cache" and "scratch" or "kept"))
+    end
+end
+
 local function lowered_entries(base, found)
     for _, folder in ipairs(children(path.join(base, "lowered"))) do
         if not folder:endswith(".lock") then
@@ -346,6 +352,8 @@ function entries(base)
             modcache_entries(base, found)
         elseif name == "lowered" then
             lowered_entries(base, found)
+        elseif name == "ccache" then
+            ccache_entries(base, found)
         elseif name == "device-baselines" then
             for _, device in ipairs(children(folder)) do
                 table.insert(found, entry(base, device, "kept"))
