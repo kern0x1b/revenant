@@ -18,7 +18,7 @@ patches in `packages/e/<name>/patches/`, into the one Swift module `ExpoAppModul
 
 These packages are recipes with their iOS 6 patches (`packages/e/<name>/patches/`); each installs, its patch applies, and the host
 (Swift module `ExpoAppModules`) compiles and links them, and the phone window of 2026-11-16 ran a probe in it (`frameworks/ReactNative/src/probe/modules.js`). expo-brightness,
-expo-device, expo-network and expo-store-review answered their calls (`real`, `phone`); expo-linear-gradient drew gradients that match the expected pixels (`real`, `phone`); expo-blur is registered, but mounting its view crashes the host (see the coverage table);
+expo-device, expo-network and expo-store-review answered their calls (`real`, `phone`); expo-linear-gradient is registered (`partial`, `phone`);
 expo-secure-store is registered but the keychain refuses every write with errSecInteractionNotAllowed (-25308), with or without
 `keychain-access-groups` in the signature: the iPad 2 and the iPhone 4S return it for every keychain call (see
 `docs/reference/backports/Security/README.md`), so the row is `partial`, `phone`.

@@ -95,7 +95,7 @@ while 4 by 4 and 2 by 2 do. The probe uses 4 by 4 and 2 by 2. The cause is in th
 The SDK declares `-[CIContext initWithOptions:]` as `NS_AVAILABLE(10_4, 5_0)`, so the lowering treats it as a device member and lists nothing for it. The iOS 6.1.3 CoreImage
 has only the factory `+[CIContext contextWithOptions:]` (`.cache/dyld/6.1.3/classes_armv7.json`: `init`, `initWithEAGLContext:`, `initWithEAGLContext:options:` and the
 class methods `context`, `contextWithOptions:`, `contextWithEAGLContext:`, `contextWithEAGLContext:options:`), and Swift's `CIContext(options:)` compiles to the initialiser.
-A call on the phone stops the app with `-[CIContext initWithOptions:]: unrecognized selector`. expo-blur's patched `BlurEffectView` hit it on the iPad 2 on 2026-11-21.
+A call on the phone raises `unrecognized selector` for `-[CIContext initWithOptions:]`, since the class has no such method (the 6.1.3 inventory, above). expo-blur's patched `BlurEffectView` calls it; a crash of that view on the iPad 2 was seen on 2026-11-21, but its log was not kept, so it is not a measurement of this document. A device run with the backport in place is still to be done.
 
 `frameworks/Backports/src/Graphics/CIContextInitWithOptions.m` adds the selector in `+load`, only when `class_getInstanceMethod` finds none on `CIContext` (the pattern of `NSBundle+ReceiptURL.m`), so a later iOS that has the real
 `-initWithOptions:` keeps it; a category would replace it, and on macOS its body recursed through `+contextWithOptions:`. The method replaces the allocated object with the result of
