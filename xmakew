@@ -40,6 +40,23 @@ case $store in
         exit 1
         ;;
 esac
+physical() {
+    head=${1%/}
+    rest=""
+    while [ -n "$head" ] && [ ! -d "$head" ]; do
+        rest=/$(basename "$head")$rest
+        head=$(dirname "$head")
+    done
+    real=$(cd "${head:-/}" && pwd -P)
+    [ "$real" != / ] || real=""
+    printf '%s%s\n' "$real" "$rest"
+}
+case "$(physical "$cache")/" in
+    "$(physical "$store")"/*)
+        echo "xmakew: REVENANT_CACHE is $cache, which is the shared store $store or lies inside it: the cache is trimmed to REVENANT_CACHE_GB and would evict the installs of the store, so nothing was started. REVENANT_CACHE is the cache of one checkout (by default <checkout>/.cache); the store is REVENANT_STORE, and the two are different folders" >&2
+        exit 1
+        ;;
+esac
 REVENANT_STORE=$store
 export REVENANT_STORE
 GIT_CEILING_DIRECTORIES=$cache:$store${GIT_CEILING_DIRECTORIES:+:$GIT_CEILING_DIRECTORIES}
@@ -223,7 +240,7 @@ for part in xmake xmake-global; do
                 break
             fi
         done
-        echo "xmakew: $cache/$part is a package store of its own, made before the shared store $store, and nothing reads it any more: remove $cache/xmake and $cache/xmake-global (the installs come again from the prebuilt releases or are built once), or keep the installs by making the cache the shared store, once, while $store does not exist (docs/guides/machine.md, 'The shared store')" >&2
+        echo "xmakew: $cache/$part is a package store of its own, made before the shared store $store, and nothing reads it any more: remove $cache/xmake and $cache/xmake-global (the installs come again from the prebuilt releases or are built once), or keep the installs by seeding the shared store from this cache, once, while $store does not exist, with the seed command below; never point REVENANT_CACHE or REVENANT_STORE at the other one's folder (docs/guides/machine.md, 'The shared store')" >&2
         if [ -n "$seeder" ]; then
             echo "xmakew: seed: cd '$root' && '$seeder' l -P . tools/private_cache.lua '$store' --from '$cache' --only xmake,xmake-global" >&2
         else

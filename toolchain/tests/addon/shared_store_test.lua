@@ -368,6 +368,33 @@ function failures(opt)
         table.insert(found, "a relative REVENANT_STORE is refused and makes no folder: " .. output)
     end
 
+    local function listing(base)
+        local names = {}
+        for _, entry in ipairs(os.filedirs(path.join(base, "**"))) do
+            table.insert(names, path.relative(entry, base))
+        end
+        table.sort(names)
+        return table.concat(names, "\n")
+    end
+    local before = listing(store)
+    local through_link = path.join(folder, "link-to-store")
+    os.ln(store, through_link)
+    for label, cache in pairs({["the shared store itself"] = store, ["a folder inside it"] = path.join(store, "inner", "cache"), ["a link to it"] = through_link,
+                               ["a folder inside it through a link"] = path.join(through_link, "inner")}) do
+        status, output = launch(linked, envs(cache), log)
+        if status == 0 or not output:find("REVENANT_CACHE", 1, true) or not output:find("shared store", 1, true) then
+            table.insert(found, "REVENANT_CACHE that is " .. label .. " is refused, naming REVENANT_CACHE and the shared store: " .. tostring(status) .. "\n" .. output)
+        end
+        if listing(store) ~= before or exists(path.join(store, "xmake", "xmake")) then
+            table.insert(found, "the refusal of REVENANT_CACHE that is " .. label .. " leaves the store as it was: " .. listing(store))
+        end
+    end
+    local sibling = path.join(folder, "store-sibling")
+    status, output = launch(linked, envs(sibling), log)
+    if status ~= 0 then
+        table.insert(found, "a cache beside the store, whose name starts with the store's, is not mistaken for a folder inside it: " .. output)
+    end
+
     concurrent_builds(folder, repository, found)
     hung_build(folder, repository, found)
     stale_holder(folder, repository, found)
