@@ -88,6 +88,17 @@ reached on the control timebase (a dispatch after the wait divided by the rate).
 shown and keeps the image on the layer; `flushAndRemoveImage` cancels them and removes the image. Compressed frames
 (H.264) are left to the system queue alone.
 
+The notifications for `status` and `readyForDisplay` are posted on the main queue, whatever queue called the wrapped
+method: from the main thread they are posted before the call returns, from any other thread (the queue of
+`requestMediaDataWhenReadyOnQueue:usingBlock:`, for one) they are posted shortly after, in the order of the calls, and
+a call made from inside an observer is posted after the observer returns. Each is decided and posted in one step, so
+every change notifies once; `status` and `isReadyForDisplay` themselves change when that step runs. The pixels of a frame
+are copied into memory the image owns at the enqueue, so the frame does not depend on the sample buffer afterwards.
+
+The category is for iOS 6 only. On iOS 7 and later every one of its members is a real system member and the category
+would replace it, so the library must not be loaded there; the app that links it runs on the iOS 6 devices the package
+installs on.
+
 What this does not give: the system reports no failure on iOS 6, so `status` never becomes `Failed` and `error` stays nil;
 `isReadyForDisplay` turns on at the enqueue, not when the frame's timestamp is reached; a frame is not dropped when a
 later one is due too (each is shown in turn); a timebase with rate 0 never shows a frame whose time is ahead, and a rate

@@ -2,12 +2,18 @@
 #import <AVFoundation/AVFoundation.h>
 #import <CoreMedia/CoreMedia.h>
 #import <CoreVideo/CoreVideo.h>
+#import <CoreGraphics/CoreGraphics.h>
+#import <QuartzCore/QuartzCore.h>
 
 @interface RevenantDisplayLayerObserver : NSObject
 {
 @public
     int status;
     int ready;
+    int offMain;
+    BOOL reentered;
+    AVSampleBufferDisplayLayer *reenterLayer;
+    CMSampleBufferRef reenterSample;
 }
 @end
 
@@ -15,6 +21,12 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
+    if (![NSThread isMainThread])
+        offMain++;
+    if (reenterLayer && !reentered) {
+        reentered = YES;
+        [reenterLayer enqueueSampleBuffer:reenterSample];
+    }
     if ([keyPath isEqualToString:@"status"])
         status++;
     else if ([keyPath isEqualToString:@"readyForDisplay"])
@@ -164,6 +176,93 @@ REVENANT_CASE(avfoundation_display_layer)
             CFRelease(frame);
         if (skipped)
             CFRelease(skipped);
+
+        AVSampleBufferDisplayLayer *busy = [[AVSampleBufferDisplayLayer alloc] init];
+        RevenantDisplayLayerObserver *busyObserver = [[RevenantDisplayLayerObserver alloc] init];
+        CMSampleBufferRef busySample = revenant_sample(YES);
+        if (busySample) {
+            [busy addObserver:busyObserver forKeyPath:@"status" options:0 context:NULL];
+            [busy addObserver:busyObserver forKeyPath:@"readyForDisplay" options:0 context:NULL];
+            busyObserver->reenterLayer = busy;
+            busyObserver->reenterSample = busySample;
+            dispatch_group_t group = dispatch_group_create();
+            for (int worker = 0; worker < 4; worker++) {
+                dispatch_group_async(group, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                    for (int count = 0; count < 20; count++)
+                        [busy enqueueSampleBuffer:busySample];
+                });
+            }
+            dispatch_group_wait(group, DISPATCH_TIME_FOREVER);
+            for (int index = 0; index < 5; index++)
+                spin_run_loop();
+            printf("display layer fact: four queues enqueued, observer saw status %d ready %d off the main thread %d\n",
+                   busyObserver->status, busyObserver->ready, busyObserver->offMain);
+            revenant_expect_true(@"enqueues from four queues, one of them from inside an observer, notify status and readyForDisplay once each, on the main thread",
+                                 (busyObserver->status == 1 && busyObserver->ready == 1 && busyObserver->offMain == 0) != flip,
+                                 [NSString stringWithFormat:@"status %d ready %d off main %d", busyObserver->status, busyObserver->ready, busyObserver->offMain]);
+            [busy removeObserver:busyObserver forKeyPath:@"status"];
+            [busy removeObserver:busyObserver forKeyPath:@"readyForDisplay"];
+            busyObserver->reenterLayer = nil;
+            CFRelease(busySample);
+        }
+
+        AVSampleBufferDisplayLayer *later = [[AVSampleBufferDisplayLayer alloc] init];
+        later.frame = CGRectMake(0, 0, 16, 16);
+        CMTimebaseRef clock = NULL;
+        CMTimebaseCreateWithMasterClock(kCFAllocatorDefault, CMClockGetHostTimeClock(), &clock);
+        CMTimebaseSetTime(clock, CMClockGetTime(CMClockGetHostTimeClock()));
+        CMTimebaseSetRate(clock, 1.0);
+        later.controlTimebase = clock;
+        CVPixelBufferRef pixel = NULL;
+        NSDictionary *attributes = @{(__bridge id)kCVPixelBufferIOSurfacePropertiesKey: @{}};
+        CVPixelBufferCreate(kCFAllocatorDefault, 16, 16, kCVPixelFormatType_32BGRA, (__bridge CFDictionaryRef)attributes, &pixel);
+        CMSampleBufferRef timed = NULL;
+        if (pixel) {
+            CVPixelBufferLockBaseAddress(pixel, 0);
+            uint8_t *bytes = CVPixelBufferGetBaseAddress(pixel);
+            for (size_t offset = 0; offset < CVPixelBufferGetDataSize(pixel); offset += 4) {
+                bytes[offset] = 0;
+                bytes[offset + 1] = 0;
+                bytes[offset + 2] = 255;
+                bytes[offset + 3] = 255;
+            }
+            CVPixelBufferUnlockBaseAddress(pixel, 0);
+            CMVideoFormatDescriptionRef description = NULL;
+            CMVideoFormatDescriptionCreateForImageBuffer(kCFAllocatorDefault, pixel, &description);
+            CMSampleTimingInfo timing = {kCMTimeInvalid, CMTimeAdd(CMClockGetTime(CMClockGetHostTimeClock()), CMTimeMake(3, 10)), kCMTimeInvalid};
+            CMSampleBufferCreateForImageBuffer(kCFAllocatorDefault, pixel, true, NULL, NULL, description, &timing, &timed);
+            if (description)
+                CFRelease(description);
+        }
+        if (timed) {
+            [later enqueueSampleBuffer:timed];
+            CVPixelBufferLockBaseAddress(pixel, 0);
+            memset(CVPixelBufferGetBaseAddress(pixel), 0xFF, CVPixelBufferGetDataSize(pixel));
+            CVPixelBufferUnlockBaseAddress(pixel, 0);
+            CFRelease(timed);
+            CVPixelBufferRelease(pixel);
+            spin_run_loop();
+            BOOL waits = later.contents == nil;
+            for (int index = 0; index < 40 && later.contents == nil; index++)
+                spin_run_loop();
+            BOOL arrived = later.contents != nil;
+            unsigned char shown[4] = {0, 0, 0, 0};
+            if (arrived) {
+                CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
+                CGContextRef context = CGBitmapContextCreate(shown, 1, 1, 8, 4, space, (CGBitmapInfo)kCGImageAlphaPremultipliedLast);
+                CGContextTranslateCTM(context, -8, -8);
+                [later renderInContext:context];
+                CGContextRelease(context);
+                CGColorSpaceRelease(space);
+            }
+            printf("display layer fact: timed frame waited %d, arrived %d, centre rgba %u %u %u %u after its buffer was overwritten and released\n",
+                   waits, arrived, shown[0], shown[1], shown[2], shown[3]);
+            revenant_expect_true(@"a frame due later waits, and shows the colour it had when it was enqueued after its pixel buffer was overwritten and released",
+                                 (waits && arrived && shown[0] > 200 && shown[1] < 50 && shown[2] < 50) != flip,
+                                 [NSString stringWithFormat:@"waits %d arrived %d rgb %u %u %u", waits, arrived, shown[0], shown[1], shown[2]]);
+        }
+        if (clock)
+            CFRelease(clock);
 
         BOOL raised = NO;
         @try {

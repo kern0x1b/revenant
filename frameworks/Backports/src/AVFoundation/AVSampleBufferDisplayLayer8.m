@@ -15,6 +15,7 @@
     CMTimebaseRef ownTimebase;
     NSUInteger generation;
     BOOL showsPixels;
+    BOOL posting;
 }
 @end
 
@@ -149,18 +150,24 @@ static CGImageRef revenant_copy_image(CMSampleBufferRef sample)
         direct = YES;
     }
     if (direct && CVPixelBufferLockBaseAddress(image, kCVPixelBufferLock_ReadOnly) == kCVReturnSuccess) {
-        void *base = CVPixelBufferGetBaseAddress(image);
+        const unsigned char *base = CVPixelBufferGetBaseAddress(image);
         size_t width = CVPixelBufferGetWidth(image);
         size_t height = CVPixelBufferGetHeight(image);
-        size_t stride = CVPixelBufferGetBytesPerRow(image);
-        CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
-        CGContextRef bitmap = base ? CGBitmapContextCreate(base, width, height, 8, stride, space, info) : NULL;
-        if (bitmap) {
-            frame = CGBitmapContextCreateImage(bitmap);
-            CGContextRelease(bitmap);
-        }
-        CGColorSpaceRelease(space);
+        size_t source = CVPixelBufferGetBytesPerRow(image);
+        size_t stride = width * 4;
+        unsigned char *owned = (base && width && height) ? malloc(stride * height) : NULL;
+        for (size_t y = 0; owned && y < height; y++)
+            memcpy(owned + y * stride, base + y * source, stride);
         CVPixelBufferUnlockBaseAddress(image, kCVPixelBufferLock_ReadOnly);
+        CGDataProviderRef provider = owned ? CGDataProviderCreateWithData(NULL, owned, stride * height, revenant_release_pixels) : NULL;
+        if (owned && !provider)
+            free(owned);
+        if (provider) {
+            CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
+            frame = CGImageCreate(width, height, 8, 32, stride, space, info, provider, NULL, false, kCGRenderingIntentDefault);
+            CGColorSpaceRelease(space);
+            CGDataProviderRelease(provider);
+        }
     }
     if (!frame && format == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange)
         frame = revenant_copy_planar_image(image, CMSampleBufferGetFormatDescription(sample), NO);
@@ -178,52 +185,73 @@ static BOOL revenant_attachment(CMSampleBufferRef sample, CFStringRef key)
     return CFDictionaryGetValue(values, key) == kCFBooleanTrue;
 }
 
+static void revenant_on_main(AVSampleBufferDisplayLayer *layer, void (^work)(void))
+{
+    RevenantDisplayLayerState *state = revenant_state(layer);
+    if ([NSThread isMainThread] && !state->posting) {
+        state->posting = YES;
+        work();
+        state->posting = NO;
+        return;
+    }
+    void (^kept)(void) = [work copy];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        revenant_on_main(layer, kept);
+    });
+}
+
 static void revenant_note_enqueued(AVSampleBufferDisplayLayer *layer, BOOL displayable)
 {
     RevenantDisplayLayerState *state = revenant_state(layer);
-    BOOL statusChanges, readyChanges;
-    @synchronized (state) {
-        statusChanges = state->status == AVQueuedSampleBufferRenderingStatusUnknown;
-        readyChanges = displayable && !state->readyForDisplay;
-    }
-    if (statusChanges)
-        [layer willChangeValueForKey:@"status"];
-    if (readyChanges)
-        [layer willChangeValueForKey:@"readyForDisplay"];
-    @synchronized (state) {
+    revenant_on_main(layer, ^{
+        BOOL statusChanges, readyChanges;
+        @synchronized (state) {
+            statusChanges = state->status == AVQueuedSampleBufferRenderingStatusUnknown;
+            readyChanges = displayable && !state->readyForDisplay;
+        }
         if (statusChanges)
-            state->status = AVQueuedSampleBufferRenderingStatusRendering;
+            [layer willChangeValueForKey:@"status"];
         if (readyChanges)
-            state->readyForDisplay = YES;
-    }
-    if (readyChanges)
-        [layer didChangeValueForKey:@"readyForDisplay"];
-    if (statusChanges)
-        [layer didChangeValueForKey:@"status"];
+            [layer willChangeValueForKey:@"readyForDisplay"];
+        @synchronized (state) {
+            if (statusChanges)
+                state->status = AVQueuedSampleBufferRenderingStatusRendering;
+            if (readyChanges)
+                state->readyForDisplay = YES;
+        }
+        if (readyChanges)
+            [layer didChangeValueForKey:@"readyForDisplay"];
+        if (statusChanges)
+            [layer didChangeValueForKey:@"status"];
+    });
 }
 
 static void revenant_note_flushed(AVSampleBufferDisplayLayer *layer)
 {
     RevenantDisplayLayerState *state = revenant_state(layer);
-    BOOL statusChanges, readyChanges;
     @synchronized (state) {
-        statusChanges = state->status != AVQueuedSampleBufferRenderingStatusUnknown;
-        readyChanges = state->readyForDisplay;
         state->generation++;
     }
-    if (statusChanges)
-        [layer willChangeValueForKey:@"status"];
-    if (readyChanges)
-        [layer willChangeValueForKey:@"readyForDisplay"];
-    @synchronized (state) {
-        state->status = AVQueuedSampleBufferRenderingStatusUnknown;
-        state->error = nil;
-        state->readyForDisplay = NO;
-    }
-    if (readyChanges)
-        [layer didChangeValueForKey:@"readyForDisplay"];
-    if (statusChanges)
-        [layer didChangeValueForKey:@"status"];
+    revenant_on_main(layer, ^{
+        BOOL statusChanges, readyChanges;
+        @synchronized (state) {
+            statusChanges = state->status != AVQueuedSampleBufferRenderingStatusUnknown;
+            readyChanges = state->readyForDisplay;
+        }
+        if (statusChanges)
+            [layer willChangeValueForKey:@"status"];
+        if (readyChanges)
+            [layer willChangeValueForKey:@"readyForDisplay"];
+        @synchronized (state) {
+            state->status = AVQueuedSampleBufferRenderingStatusUnknown;
+            state->error = nil;
+            state->readyForDisplay = NO;
+        }
+        if (readyChanges)
+            [layer didChangeValueForKey:@"readyForDisplay"];
+        if (statusChanges)
+            [layer didChangeValueForKey:@"status"];
+    });
 }
 
 static void revenant_show(AVSampleBufferDisplayLayer *layer, CGImageRef image, NSUInteger generation)
@@ -328,8 +356,10 @@ static void revenant_flush_and_remove_image(AVSampleBufferDisplayLayer *self, SE
 static IMP revenant_wrap(Class cls, SEL selector, IMP replacement)
 {
     Method method = class_getInstanceMethod(cls, selector);
-    if (!method)
+    if (!method) {
+        NSLog(@"backports: AVSampleBufferDisplayLayer has no %@, so its state and pixels are not followed for it", NSStringFromSelector(selector));
         return NULL;
+    }
     IMP original = method_getImplementation(method);
     method_setImplementation(method, replacement);
     return original;
