@@ -291,7 +291,7 @@ local EXPO_CORE_PACKAGE = "expo-modules-core"
 local EXPO_PARITY_BASE = {"expo-asset", "expo-constants", "expo", "expo-crypto", "expo-keep-awake", "expo-linking", "expo-system-ui", "expo-application", "expo-glass-effect", "expo-localization"}
 
 function installed_in_application(ctx, package)
-    return os.isdir(path.join(ctx.app, "node_modules", package)) or os.isdir(path.join(ctx.ref, "node_modules", package))
+    return os.isdir(path.join(ctx.app, "node_modules", package)) or os.isdir(path.join(ctx.ref, "node_modules", package)) or os.isdir(path.join(ctx.app, "modules", package))
 end
 
 function covered_packages(ctx)
@@ -319,7 +319,7 @@ function expo_packages(ctx)
     end
     for _, package in ipairs(app_modules(ctx.options)) do
         if not installed_in_application(ctx, package) then
-            raise("the app manifest names the module %s, which is not in the application's node_modules", package)
+            raise("the app manifest names the module %s, which is in neither the application's node_modules nor its modules folder", package)
         end
         table.insert(packages, package)
     end
@@ -327,7 +327,7 @@ function expo_packages(ctx)
 end
 
 function expo_dir(ctx, package)
-    for _, base in ipairs({path.join(ctx.app, "node_modules"), path.join(ctx.ref, "node_modules")}) do
+    for _, base in ipairs({path.join(ctx.app, "node_modules"), path.join(ctx.ref, "node_modules"), path.join(ctx.app, "modules")}) do
         if os.isdir(path.join(base, package)) then
             return path.join(base, package)
         end
