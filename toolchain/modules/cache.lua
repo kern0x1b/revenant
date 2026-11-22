@@ -35,10 +35,40 @@ function checkout(from)
     return resolved.checkout
 end
 
+local function physical(folder)
+    local absolute = path.normalize(path.absolute(folder))
+    local rest = {}
+    local head = absolute
+    while #head > 1 and not os.isdir(head) do
+        table.insert(rest, 1, path.filename(head))
+        head = path.directory(head)
+    end
+    local real = try { function () return os.iorunv("sh", {"-c", "cd \"$1\" && pwd -P", "sh", head}):trim() end }
+    return path.join(real ~= nil and real ~= "" and real or head, table.unpack(rest))
+end
+
+function inside_store(folder)
+    local shared = try { function () return store() end }
+    if not shared then
+        return false
+    end
+    local prefix = physical(shared) .. "/"
+    return (physical(folder) .. "/"):sub(1, #prefix) == prefix
+end
+
+local function refuse_store(folder, how)
+    if inside_store(folder) then
+        raise("%s is %s, which is the shared store %s or lies inside it: the cache is trimmed to %s, and that would evict the installs of the store. %s is the cache of one checkout (by default <checkout>/.cache); the store is %s, and the two are different folders",
+              how, folder, store(), LIMIT_VARIABLE, ROOT_VARIABLE, STORE_VARIABLE)
+    end
+end
+
 function root()
     local named = os.getenv(ROOT_VARIABLE)
     if named and named ~= "" then
-        return path.absolute(named)
+        local folder = path.absolute(named)
+        refuse_store(folder, ROOT_VARIABLE)
+        return folder
     end
     return path.join(checkout(), ".cache")
 end
@@ -471,6 +501,9 @@ end
 function reserve(bytes, what, opt)
     opt = opt or {}
     local base = opt.root or root()
+    if not opt.shared then
+        refuse_store(base, "the cache to trim")
+    end
     local cap = opt.limit or limit()
     local builds = opt.builds or build_outputs()
     os.mkdir(base)
@@ -592,7 +625,7 @@ function guard(from, opt)
             try {
                 function ()
                     local trimmed = reserve(0, "keeping the shared store within its cap",
-                                            {root = shared, limit = opt.store_limit or store_limit(), builds = {}, variable = STORE_LIMIT_VARIABLE, label = "shared store"})
+                                            {root = shared, limit = opt.store_limit or store_limit(), builds = {}, variable = STORE_LIMIT_VARIABLE, label = "shared store", shared = true})
                     result.evicted = table.join(result.evicted, trimmed.evicted)
                 end,
                 catch {
