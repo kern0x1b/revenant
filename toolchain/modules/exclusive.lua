@@ -31,6 +31,21 @@ function attempt(file, work)
     return true, finished(lock, results, failure)
 end
 
+function held(file)
+    os.mkdir(path.directory(file))
+    local lock = io.openlock(file)
+    if not lock then
+        raise("cannot open the lock %s", file)
+    end
+    if lock:trylock() then
+        lock:unlock()
+        lock:close()
+        return false
+    end
+    lock:close()
+    return true
+end
+
 function run(file, label, work)
     os.mkdir(path.directory(file))
     local lock = io.openlock(file)
