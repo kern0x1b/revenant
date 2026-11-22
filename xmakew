@@ -254,7 +254,7 @@ if [ -f "$lock" ]; then
     pins=$(awk '
         /^[ \t]*\["/ { inside = ($0 ~ /^[ \t]*\["revenant@/); commit = ""; next }
         inside && /^[ \t]*commit = "/ { value = $0; sub(/^[^"]*"/, "", value); sub(/".*$/, "", value); commit = value }
-        inside && /^[ \t]*url = "/ { value = $0; sub(/^[^"]*"/, "", value); sub(/".*$/, "", value); print commit " " value; inside = 0 }
+        inside && /^[ \t]*url = "/ { value = $0; sub(/^[^"]*"/, "", value); sub(/".*$/, "", value); print (commit == "" ? "-" : commit) " " value; inside = 0 }
     ' "$lock" | sort | uniq -c)
     stale=""
     while read -r count pinned address; do
@@ -263,7 +263,7 @@ if [ -f "$lock" ]; then
             /*) [ "$(physical "$address")" = "$here" ] || stale="$stale$count $pinned $address
 " ;;
         esac
-        if [ -z "$stale" ] && [ -n "$head" ] && [ "$pinned" != "$head" ]; then
+        if [ -z "$stale" ] && [ -n "$head" ] && [ "$pinned" != - ] && [ "$pinned" != "$head" ]; then
             stale="$count $pinned $address
 "
         fi
@@ -274,7 +274,9 @@ EOF
         read -r count pinned address <<EOF
 $stale
 EOF
-        echo "xmakew: $lock names the revenant package repository $address at commit $pinned for $count package entries (more may differ), but this xmakew is the checkout $here at commit ${head:-unknown}: with package.requires_lock xmake reads the package recipes from the locked repository and commit, not from this checkout, so the build would run this checkout's toolchain over the recipes of another pin and install what that pin asks for (hours of compiling for packages nothing here uses). Nothing was started. Refresh the lock for this checkout: delete $lock, run the build once (xmakew build -P $project -y <target>) so that xmake writes a new lock with this checkout as the repository, look at its diff and commit it together with the pin." >&2
+        where=" at commit $pinned"
+        [ "$pinned" != - ] || where=" with no commit recorded"
+        echo "xmakew: $lock names the revenant package repository $address$where for $count package entries (more may differ), but this xmakew is the checkout $here at commit ${head:-unknown}: with package.requires_lock xmake reads the package recipes from the locked repository and commit, not from this checkout, so the build would run this checkout's toolchain over the recipes of another pin and install what that pin asks for (hours of compiling for packages nothing here uses). Nothing was started. Refresh the lock for this checkout: delete $lock, run the build once (xmakew build -P $project -y <target>) so that xmake writes a new lock with this checkout as the repository, look at its diff and commit it together with the pin." >&2
         exit 1
     fi
 fi
