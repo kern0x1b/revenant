@@ -582,17 +582,21 @@ line markers). Another tree at another path, seeded with 2776 objects of the fir
 each target a generated shim in place of its four compilers, `<store>/ccache/shim/<key>/clang`, which execs `ccache <the clang of the llvm
 package>` with its settings in its own environment: `CCACHE_BASEDIR` the parent of the main checkout, so that every worktree under it hashes the
 same paths, `CCACHE_NOHASHDIR`, `CCACHE_COMPILERCHECK=content`, the folder `<store>/ccache/cache` capped by `REVENANT_CCACHE_GB` (4 by default),
-and a `CCACHE_CONFIGPATH` of its own, so the user's `ccache.conf` is neither read nor edited and a machine without one behaves the same. It turns
+and a `CCACHE_CONFIGPATH` of its own, so the user's `ccache.conf` is neither read nor edited and a machine without one behaves the same. The shim also clears every other
+`CCACHE_*` variable of the invoking shell, except `CCACHE_LOGFILE`, `CCACHE_DEBUG`, `CCACHE_DEBUGDIR` and `CCACHE_DISABLE`, which only observe or
+switch off: an ambient `CCACHE_IGNOREOPTIONS=-D*`, which a user may keep for another project, would otherwise answer a compile with another `-D`
+from the cache. It turns
 xmake's builtin cache off for the target, so that one cache owns the compile and nothing is wrapped twice. The only sloppiness is
 `include_file_ctime,include_file_mtime`, which a fresh checkout needs because its files are younger than the compile: `system_headers` would let
 an edit of `neon/include`, which the toolchain passes as `-isystem`, leave a stale hit, and `time_macros` would cache what depends on the clock.
 Measured on 14 recorded compiles, each run at two paths: all 13 that ccache accepts hit from the other path (direct mode), in 1.1 s against 7.1 s
-of compiling, and the objects were byte for byte what clang makes at that path, so `-ffile-prefix-map` and `-fmacro-prefix-map` keep the paths out
-of the object. The 5% of the compiles that pass `-ivfsoverlay` (the generated `build/generated/backports/overlay/vfs.yaml`) are not cached:
+of compiling, and the objects were the same bytes at both paths and held no path of either tree. xmake gives the compiler its sources relative to the
+project, so an object ccache made equals one clang made on its own here (a source named by an absolute path would differ, because ccache hands clang
+the source relative to its working directory and `__FILE__` then reads differently). The 5% of the compiles that pass `-ivfsoverlay` (the generated `build/generated/backports/overlay/vfs.yaml`) are not cached:
 ccache refuses them without the `ivfsoverlay` sloppiness, which would make it ignore the overlay's content; the overlay is content-keyed
 (`lowered/<digest>`), so putting its digest into the key would let them be cached safely, and that is left to a later change. A full set of
-objects is about 60 MB. The store trim counts `<store>/ccache/cache` as scratch, the first thing the cap evicts, and keeps the shims, which a
-running build executes. `REVENANT_CCACHE=off` compiles without ccache; without ccache installed nothing changes.
+objects is about 60 MB. The store trim counts `<store>/ccache/cache` as scratch, the only part of the `ccache` folder the cap can evict, and keeps the
+shims and the settings, which a running build executes. `REVENANT_CCACHE=off` compiles without ccache; without ccache installed nothing changes.
 
 Where a cold `backports build` spends its time (2026-11-16, 63 minutes by the install times of the packages): the packages
 46 minutes (`libcxx` 10, `tessdata` with every language 12, `openssl-host` 5, `tesseract`, `leptonica`, `zxing-cpp`,

@@ -1,6 +1,7 @@
 local DEFAULT_GIGABYTES = 4
 local SLOPPINESS = "include_file_ctime,include_file_mtime"
 local KINDS = {"cc", "cxx", "mm", "mxx"}
+local KEPT = {"CCACHE_LOGFILE", "CCACHE_DEBUG", "CCACHE_DEBUGDIR", "CCACHE_DISABLE"}
 local CONFIG = "# Written by toolchain/modules/apple/ccache.lua. Every setting comes from the environment of the shim next to it,\n"
                .. "# so this file only keeps the user's own ccache.conf from being read.\n"
 
@@ -44,6 +45,12 @@ local function script(ccache, real, settings)
     return table.concat({
         "#!/bin/sh",
         "# Written by toolchain/modules/apple/ccache.lua: " .. real:gsub("[\r\n]", " ") .. " through ccache, with its own settings and cache folder.",
+        "for name in $(env | sed -n 's/^\\(CCACHE_[A-Za-z0-9_]*\\)=.*/\\1/p'); do",
+        "    case \"$name\" in",
+        "        " .. table.concat(KEPT, "|") .. ") ;;",
+        "        *) unset \"$name\" ;;",
+        "    esac",
+        "done",
         "export CCACHE_CONFIGPATH=" .. quoted(settings.config),
         "export CCACHE_DIR=" .. quoted(settings.directory),
         "export CCACHE_BASEDIR=" .. quoted(settings.basedir),
@@ -56,11 +63,13 @@ local function script(ccache, real, settings)
     }, "\n")
 end
 
-local function write_executable(file, text)
+local function write_atomically(file, text, executable)
     os.mkdir(path.directory(file))
     local temporary = file .. "." .. hash.uuid():sub(1, 8) .. ".tmp"
     io.writefile(temporary, text)
-    os.vrunv("chmod", {"+x", temporary})
+    if executable then
+        os.vrunv("chmod", {"+x", temporary})
+    end
     os.mv(temporary, file)
 end
 
@@ -80,11 +89,10 @@ function shim(real, opt)
     local text = script(ccache, real, settings)
     local file = path.join(root, "shim", hash.strhash128(text), path.filename(real))
     if not os.isfile(file) or io.readfile(file) ~= text then
-        write_executable(file, text)
+        write_atomically(file, text, true)
     end
-    if not os.isfile(settings.config) then
-        os.mkdir(root)
-        io.writefile(settings.config, CONFIG)
+    if not os.isfile(settings.config) or io.readfile(settings.config) ~= CONFIG then
+        write_atomically(settings.config, CONFIG, false)
     end
     return file
 end

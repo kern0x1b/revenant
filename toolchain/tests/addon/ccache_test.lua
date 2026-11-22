@@ -89,6 +89,9 @@ function failures(opt)
     if not os.isfile(config) or not io.readfile(config):find("Written by", 1, true) then
         table.insert(found, "the shim's own ccache.conf is written beside it, so that the user's is not read")
     end
+    if #os.files(path.join(store, "**.tmp")) ~= 0 then
+        table.insert(found, "the shim and the conf are written through a temporary file that is renamed, and none is left behind: " .. table.concat(os.files(path.join(store, "**.tmp")), ", "))
+    end
 
     local output = os.iorunv(shim, {"-c", "a b.c", "$HOME", "it's"}):trim()
     if output ~= "clang ran with 4 arguments" then
@@ -110,6 +113,43 @@ function failures(opt)
     for _, forbidden in ipairs({"system_headers", "time_macros", "DEPEND"}) do
         if calls:find(forbidden, 1, true) then
             table.insert(found, "the shim must not set " .. forbidden .. ": system_headers would stop an edit of the repository's own -isystem headers from changing a result, time_macros would cache what changes with the clock")
+        end
+    end
+
+    os.rm(log)
+    local hostile = {CCACHE_IGNOREOPTIONS = "-D*", CCACHE_PREFIX = "distcc", CCACHE_EXTRAFILES = "/nonexistent", CCACHE_COMPILER = "gcc", CCACHE_NOCPP2 = "1",
+                     CCACHE_SLOPPINESS = "system_headers,time_macros", CCACHE_LOGFILE = path.join(root, "ccache.log")}
+    os.iorunv(shim, {"-c", "x.c"}, {envs = hostile})
+    local scrubbed = {}
+    for line in io.readfile(log):gmatch("[^\n]+") do
+        scrubbed[line] = true
+    end
+    for name, _ in pairs(hostile) do
+        if name ~= "CCACHE_LOGFILE" and name ~= "CCACHE_SLOPPINESS" and scrubbed[name .. "=" .. hostile[name]] then
+            table.insert(found, name .. " of the invoking shell reaches ccache through the shim: it could take options out of the key, or run another compiler")
+        end
+    end
+    if scrubbed["CCACHE_SLOPPINESS=system_headers,time_macros"] or not scrubbed["CCACHE_SLOPPINESS=include_file_ctime,include_file_mtime"] then
+        table.insert(found, "the sloppiness of the shim is its own whatever the invoking shell sets")
+    end
+    if not scrubbed["CCACHE_LOGFILE=" .. hostile.CCACHE_LOGFILE] then
+        table.insert(found, "CCACHE_LOGFILE of the invoking shell still reaches ccache, so that a build can be measured")
+    end
+
+    local real_ccache = ccache.program()
+    if real_ccache then
+        local host = os.iorunv("xcrun", {"-f", "clang"}):trim()
+        local real_shim = ccache.shim(host, {folder = path.join(root, "real"), basedir = root, gigabytes = 0.1})
+        local source = path.join(root, "real-source.c")
+        io.writefile(source, "int value(void) { return V; }\n")
+        local objects = {}
+        for index, value in ipairs({"1", "2"}) do
+            local object = path.join(root, "real-" .. index .. ".o")
+            os.iorunv(real_shim, {"-c", "-DV=" .. value, source, "-o", object}, {envs = {CCACHE_IGNOREOPTIONS = "-D*"}, curdir = root})
+            objects[index] = io.readfile(object, {encoding = "binary"})
+        end
+        if objects[1] == objects[2] then
+            table.insert(found, "with CCACHE_IGNOREOPTIONS=-D* in the invoking shell, a compile with another -D was answered from the cache: the object for -DV=2 holds the code of -DV=1")
         end
     end
 
