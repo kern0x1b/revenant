@@ -1,0 +1,213 @@
+#import "../app/revenant_check.h"
+#import <AVFoundation/AVFoundation.h>
+#import <CoreMedia/CoreMedia.h>
+#import <CoreVideo/CoreVideo.h>
+#import <QuartzCore/QuartzCore.h>
+#import <dlfcn.h>
+#import <objc/message.h>
+
+static NSString *const kSystemImage = @"/System/Library/Frameworks/AVFoundation.framework/AVFoundation";
+static NSString *const kBackportImage = @"/usr/lib/revenant/org.revenant.backports/libAVFoundationBackports.dylib";
+
+static BOOL image_defines(NSString *image, const char *name)
+{
+    unsigned int count = 0;
+    const char **names = objc_copyClassNamesForImage([image UTF8String], &count);
+    BOOL found = NO;
+    for (unsigned int index = 0; index < count; index++)
+        found = found || strcmp(names[index], name) == 0;
+    free(names);
+    return found;
+}
+
+static NSString *join_sorted(NSMutableArray<NSString *> *items)
+{
+    [items sortUsingSelector:@selector(compare:)];
+    return [items componentsJoinedByString:@" "];
+}
+
+static NSString *instance_methods(Class cls)
+{
+    unsigned int count = 0;
+    Method *methods = class_copyMethodList(cls, &count);
+    NSMutableArray *names = [NSMutableArray array];
+    for (unsigned int index = 0; index < count; index++)
+        [names addObject:NSStringFromSelector(method_getName(methods[index]))];
+    free(methods);
+    return join_sorted(names);
+}
+
+static NSString *instance_variables(Class cls)
+{
+    unsigned int count = 0;
+    Ivar *ivars = class_copyIvarList(cls, &count);
+    NSMutableArray *names = [NSMutableArray array];
+    for (unsigned int index = 0; index < count; index++)
+        [names addObject:[NSString stringWithFormat:@"%s@%td", ivar_getName(ivars[index]), ivar_getOffset(ivars[index])]];
+    free(ivars);
+    return join_sorted(names);
+}
+
+static void describe(const char *label, Class cls)
+{
+    if (!cls) {
+        printf("display layer fact: %s class none\n", label);
+        return;
+    }
+    printf("display layer fact: %s class image %s superclass %s instance size %zu\n", label, class_getImageName(cls) ?: "none",
+           class_getName(class_getSuperclass(cls)), class_getInstanceSize(cls));
+    printf("display layer fact: %s ivars %s\n", label, [instance_variables(cls) UTF8String]);
+    printf("display layer fact: %s methods %s\n", label, [instance_methods(cls) UTF8String]);
+}
+
+static CMSampleBufferRef sample_of(OSType format)
+{
+    CVPixelBufferRef pixel = NULL;
+    NSDictionary *attributes = @{(__bridge id)kCVPixelBufferIOSurfacePropertiesKey: @{}};
+    if (CVPixelBufferCreate(kCFAllocatorDefault, 64, 64, format, (__bridge CFDictionaryRef)attributes, &pixel) != kCVReturnSuccess || !pixel)
+        return NULL;
+    CVPixelBufferLockBaseAddress(pixel, 0);
+    if (CVPixelBufferIsPlanar(pixel)) {
+        for (size_t plane = 0; plane < CVPixelBufferGetPlaneCount(pixel); plane++)
+            memset(CVPixelBufferGetBaseAddressOfPlane(pixel, plane), 0x80, CVPixelBufferGetBytesPerRowOfPlane(pixel, plane) * CVPixelBufferGetHeightOfPlane(pixel, plane));
+    } else {
+        memset(CVPixelBufferGetBaseAddress(pixel), 0x80, CVPixelBufferGetDataSize(pixel));
+    }
+    CVPixelBufferUnlockBaseAddress(pixel, 0);
+    CMSampleBufferRef sample = NULL;
+    CMVideoFormatDescriptionRef description = NULL;
+    if (CMVideoFormatDescriptionCreateForImageBuffer(kCFAllocatorDefault, pixel, &description) == noErr) {
+        CMSampleTimingInfo timing = {kCMTimeInvalid, kCMTimeZero, kCMTimeInvalid};
+        CMSampleBufferCreateForImageBuffer(kCFAllocatorDefault, pixel, true, NULL, NULL, description, &timing, &sample);
+        CFRelease(description);
+    }
+    CVPixelBufferRelease(pixel);
+    if (sample) {
+        CFArrayRef attachments = CMSampleBufferGetSampleAttachmentsArray(sample, true);
+        if (attachments && CFArrayGetCount(attachments) > 0)
+            CFDictionarySetValue((CFMutableDictionaryRef)CFArrayGetValueAtIndex(attachments, 0), kCMSampleAttachmentKey_DisplayImmediately, kCFBooleanTrue);
+    }
+    return sample;
+}
+
+static NSUInteger layers_with_contents(CALayer *layer)
+{
+    NSUInteger found = layer.contents ? 1 : 0;
+    for (CALayer *child in layer.sublayers)
+        found += layers_with_contents(child);
+    return found;
+}
+
+static NSString *layer_tree(CALayer *layer)
+{
+    NSMutableString *tree = [NSMutableString stringWithFormat:@"%s(contents %s", class_getName(object_getClass(layer)),
+                                                              layer.contents ? class_getName(object_getClass(layer.contents)) : "nil"];
+    SEL contextSelector = sel_registerName("contextId");
+    if ([layer respondsToSelector:contextSelector])
+        [tree appendFormat:@", context id %u", ((unsigned (*)(id, SEL))objc_msgSend)(layer, contextSelector)];
+    for (CALayer *child in layer.sublayers)
+        [tree appendFormat:@" %@", layer_tree(child)];
+    [tree appendString:@")"];
+    return tree;
+}
+
+static size_t drawn_pixels(CALayer *layer, unsigned char *center)
+{
+    const size_t size = 64;
+    unsigned char *pixels = calloc(size * size * 4, 1);
+    CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
+    CGContextRef context = CGBitmapContextCreate(pixels, size, size, 8, size * 4, space, (CGBitmapInfo)kCGImageAlphaPremultipliedLast);
+    CGColorSpaceRelease(space);
+    [layer renderInContext:context];
+    size_t drawn = 0;
+    for (size_t index = 0; index < size * size; index++)
+        drawn += (pixels[index * 4] | pixels[index * 4 + 1] | pixels[index * 4 + 2] | pixels[index * 4 + 3]) != 0;
+    memcpy(center, pixels + ((size / 2) * size + size / 2) * 4, 4);
+    CGContextRelease(context);
+    free(pixels);
+    return drawn;
+}
+
+static void spin(void)
+{
+    for (int index = 0; index < 60; index++) {
+        @autoreleasepool {
+            [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.02]];
+        }
+    }
+}
+
+static void render(const char *label, Class cls, OSType format, const char *formatName)
+{
+    @autoreleasepool {
+        CALayer *layer = cls ? [[cls alloc] init] : nil;
+        if (!layer) {
+            printf("display layer fact: %s %s no instance\n", label, formatName);
+            return;
+        }
+        layer.frame = CGRectMake(0, 0, 64, 64);
+        CMSampleBufferRef sample = sample_of(format);
+        if (!sample) {
+            printf("display layer fact: %s %s no sample buffer\n", label, formatName);
+            return;
+        }
+        BOOL readyBefore = [(AVSampleBufferDisplayLayer *)layer isReadyForMoreMediaData];
+        [(AVSampleBufferDisplayLayer *)layer enqueueSampleBuffer:sample];
+        CFRelease(sample);
+        spin();
+        printf("display layer fact: %s %s ready before %d after %d, layers with contents %lu\n", label, formatName,
+               readyBefore, [(AVSampleBufferDisplayLayer *)layer isReadyForMoreMediaData], (unsigned long)layers_with_contents(layer));
+        unsigned char center[4] = {0, 0, 0, 0};
+        size_t drawn = drawn_pixels(layer, center);
+        printf("display layer fact: %s %s layer tree %s, renderInContext drew %zu of 4096 pixels, center rgba %u %u %u %u\n", label, formatName,
+               [layer_tree(layer) UTF8String], drawn, center[0], center[1], center[2], center[3]);
+        [(AVSampleBufferDisplayLayer *)layer flushAndRemoveImage];
+    }
+}
+
+REVENANT_CASE(avfoundation_system_display_layer)
+{
+    BOOL flip = (BOOL)negative;
+    const char *name = "AVSampleBufferDisplayLayer";
+    Class named = objc_getClass(name);
+    Class system = revenant_backport_class("AVFoundation", name);
+    BOOL backportDefines = image_defines(kBackportImage, name);
+    BOOL systemDefines = image_defines(kSystemImage, name);
+    printf("display layer fact: system image defines it %d, backport image defines it %d, registered by name %lu\n",
+           systemDefines, backportDefines, (unsigned long)revenant_registered_count(name));
+    describe("named", named);
+    if (system != named)
+        describe("exported by the backports", system);
+
+    render("named", named, kCVPixelFormatType_32BGRA, "32BGRA");
+    render("named", named, kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange, "420v");
+    render("named", named, kCVPixelFormatType_420YpCbCr8BiPlanarFullRange, "420f");
+
+    NSString *image = named ? [NSString stringWithUTF8String:class_getImageName(named) ?: ""] : @"";
+    revenant_expect_true(@"the Backports image defines no class named AVSampleBufferDisplayLayer", !backportDefines != flip,
+                         @"libAVFoundationBackports carries a second class with the system's name");
+    revenant_expect_true(@"the class that objc_getClass names comes from the system's AVFoundation",
+                         [image isEqualToString:kSystemImage] != flip, image);
+
+    const char *members[] = {"status", "error", "isReadyForDisplay", "requiresFlushToResumeDecoding", "outputObscuredDueToInsufficientExternalProtection",
+                             "preventsCapture", "setPreventsCapture:", "preventsDisplaySleepDuringVideoPlayback", "setPreventsDisplaySleepDuringVideoPlayback:",
+                             "sampleBufferRenderer", "hasSufficientMediaDataForReliablePlaybackStart", "isReadyForMoreMediaData", "controlTimebase",
+                             "setControlTimebase:", "videoGravity", "setVideoGravity:", "enqueueSampleBuffer:", "flush", "flushAndRemoveImage",
+                             "requestMediaDataWhenReadyOnQueue:usingBlock:", "stopRequestingMediaData"};
+    NSMutableArray *missing = [NSMutableArray array];
+    for (size_t index = 0; index < sizeof members / sizeof members[0]; index++) {
+        Method method = class_getInstanceMethod(named, sel_registerName(members[index]));
+        if (!method) {
+            [missing addObject:[NSString stringWithUTF8String:members[index]]];
+            printf("display layer fact: member %s none\n", members[index]);
+            continue;
+        }
+        Dl_info where;
+        memset(&where, 0, sizeof where);
+        dladdr((void *)method_getImplementation(method), &where);
+        printf("display layer fact: member %s implemented in %s\n", members[index], where.dli_fname ?: "unknown");
+    }
+    revenant_expect_true(@"the class that objc_getClass names answers every member of the SDK's AVSampleBufferDisplayLayer",
+                         (missing.count == 0) != flip, [missing componentsJoinedByString:@" "]);
+    fflush(stdout);
+}

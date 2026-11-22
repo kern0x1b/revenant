@@ -1683,7 +1683,6 @@ class RevenantARTracker
 class RevenantARValue
 class RevenantAUParameterImpl
 class RevenantAVAssetWriterInputMultiPass8Installer
-class RevenantAVDisplayBuffer
 class RevenantAVPendingBuffer
 class RevenantAVPlayerFrameTicker
 class RevenantAVPlayerFullScreenViewController
@@ -1764,6 +1763,8 @@ class RevenantControlProxy
 class RevenantCtxContext
 class RevenantDataDeallocation
 class RevenantDeferral
+class RevenantDisplayLayerInstall
+class RevenantDisplayLayerState
 class RevenantDisplayLinkRate
 class RevenantDocumentMenuOption
 class RevenantDocumentPage
@@ -2126,7 +2127,6 @@ class RevenantTextStack
 class RevenantTextViewSelectable7
 class RevenantTextViewTypingAttributes6
 class RevenantTileCache
-class RevenantTimeJumpBox
 class RevenantTimerBlockTarget
 class RevenantTokenState
 class RevenantTouchTypeInstaller
@@ -13629,40 +13629,18 @@ member AVSampleBufferAudioRenderer -status
 member AVSampleBufferAudioRenderer -stopRequestingMediaData
 member AVSampleBufferAudioRenderer -timebase
 member AVSampleBufferAudioRenderer -volume
-member AVSampleBufferDisplayLayer -controlTimebase
-member AVSampleBufferDisplayLayer -dealloc
-member AVSampleBufferDisplayLayer -enqueueSampleBuffer:
 member AVSampleBufferDisplayLayer -error
-member AVSampleBufferDisplayLayer -flush
-member AVSampleBufferDisplayLayer -flushAndRemoveImage
 member AVSampleBufferDisplayLayer -hasSufficientMediaDataForReliablePlaybackStart
-member AVSampleBufferDisplayLayer -init
-member AVSampleBufferDisplayLayer -initWithLayer:
 member AVSampleBufferDisplayLayer -isReadyForDisplay
-member AVSampleBufferDisplayLayer -isReadyForMoreMediaData
 member AVSampleBufferDisplayLayer -outputObscuredDueToInsufficientExternalProtection
 member AVSampleBufferDisplayLayer -preventsCapture
 member AVSampleBufferDisplayLayer -preventsDisplaySleepDuringVideoPlayback
-member AVSampleBufferDisplayLayer -requestMediaDataWhenReadyOnQueue:usingBlock:
 member AVSampleBufferDisplayLayer -requiresFlushToResumeDecoding
-member AVSampleBufferDisplayLayer -revenant_armDisplayTimer
-member AVSampleBufferDisplayLayer -revenant_failWithDescription:
-member AVSampleBufferDisplayLayer -revenant_invokeRequestIfNeeded
-member AVSampleBufferDisplayLayer -revenant_prepareBuffer:generation:
-member AVSampleBufferDisplayLayer -revenant_presentDueFrames
-member AVSampleBufferDisplayLayer -revenant_setupFromLayer:
-member AVSampleBufferDisplayLayer -revenant_timeJumped
-member AVSampleBufferDisplayLayer -revenant_unwatchJumpsOf:
-member AVSampleBufferDisplayLayer -revenant_watchJumpsOf:
 member AVSampleBufferDisplayLayer -sampleBufferRenderer
-member AVSampleBufferDisplayLayer -setControlTimebase:
 member AVSampleBufferDisplayLayer -setPreventsCapture:
 member AVSampleBufferDisplayLayer -setPreventsDisplaySleepDuringVideoPlayback:
-member AVSampleBufferDisplayLayer -setVideoGravity:
 member AVSampleBufferDisplayLayer -status
-member AVSampleBufferDisplayLayer -stopRequestingMediaData
 member AVSampleBufferDisplayLayer -timebase
-member AVSampleBufferDisplayLayer -videoGravity
 member AVSampleBufferRenderSynchronizer -addBoundaryTimeObserverForTimes:queue:usingBlock:
 member AVSampleBufferRenderSynchronizer -addPeriodicTimeObserverForInterval:queue:usingBlock:
 member AVSampleBufferRenderSynchronizer -addRenderer:
@@ -27113,7 +27091,6 @@ member RevenantAUParameterImpl -unit
 member RevenantAUParameterImpl -unitName
 member RevenantAUParameterImpl -valueStrings
 member RevenantAVAssetWriterInputMultiPass8Installer +load
-member RevenantAVDisplayBuffer -dealloc
 member RevenantAVPlayerFrameTicker -target
 member RevenantAVPlayerFrameTicker -tick:
 member RevenantAVPlayerFullScreenViewController -loadView
@@ -27564,6 +27541,8 @@ member RevenantDeferral -mode
 member RevenantDeferral -original
 member RevenantDeferral -owners
 member RevenantDeferral -pending
+member RevenantDisplayLayerInstall +load
+member RevenantDisplayLayerState -dealloc
 member RevenantDocumentMenuOption -handler
 member RevenantDocumentMenuOption -order
 member RevenantDocumentMenuOption -title

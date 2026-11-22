@@ -433,6 +433,19 @@ if is_plat("iphoneos") and not SELECTED then
         set_values("revenant.version", "1.0.0")
     target_end()
 
+    target("AVFDrawProbe")
+        set_kind("binary")
+        set_default(false)
+        add_rules("@addon/revenant/app")
+        add_deps("AVFoundationBackports")
+        add_files("tests/device_probe/avfoundation_draw_main.m")
+        add_mflags("-fobjc-arc")
+        add_frameworks("UIKit", "Foundation", "CoreGraphics", "QuartzCore", "AVFoundation", "CoreMedia", "CoreVideo")
+        set_values("app.plist-file", "tests/device_probe/Info.plist")
+        set_values("app.plist", "CFBundleIdentifier=space.kern0x1b.backports.avfdrawprobe", "CFBundleDisplayName=AVFDrawProbe")
+        set_values("revenant.version", "1.0.0")
+    target_end()
+
     target("MetalInstanceProbe")
         set_kind("binary")
         set_default(false)
@@ -915,7 +928,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         else
             add_deps("RevenantSystemProbe", "FoundationBackports", "UIKitBackports", "IOSurfaceBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "PhotosBackports", "CloudKitBackports", "CoreTextBackports", "SecurityBackports", "CoreMediaBackports", "VideoToolboxBackports")
         end
-        add_frameworks("Foundation", "UIKit", "CoreGraphics", "CoreText", "QuartzCore", "OpenAL", "AudioToolbox", "AssetsLibrary", "Security", "CoreMedia", "VideoToolbox")
+        add_frameworks("Foundation", "UIKit", "CoreGraphics", "CoreText", "QuartzCore", "OpenAL", "AudioToolbox", "AssetsLibrary", "Security", "AVFoundation", "CoreMedia", "CoreVideo", "VideoToolbox")
         add_syslinks("objc")
     target_end()
 
@@ -978,11 +991,13 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         add_tests("cf_mutable_cast")
         add_tests("gesture_failure")
         add_tests("uitextview_typing_attributes")
-        add_tests("coretext_fallback_probe")
         add_tests("coretext_fallback_cascade")
         add_tests("backport_impl_video_toolbox")
+        add_tests("backport_impl_video_toolbox_h264")
+        add_tests("coretext_baseline_offset")
         add_tests("backport_impl_shadowed")
         add_tests("avfoundation_display_layer")
+        add_tests("avfoundation_system_display_layer")
         add_tests("avfoundation_timebase_probe")
         add_tests("avfoundation_display_layer_formats")
         add_tests("avfoundation_synchronizer_observers")

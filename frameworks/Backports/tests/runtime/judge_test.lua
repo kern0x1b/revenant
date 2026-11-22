@@ -33,6 +33,23 @@ function main()
     cases, finished = driver.parse(negativePasses)
     expect("a negative control that passes is a failure", #driver.judge(CASE, cases, finished, "") == 1)
 
+    cases, finished = driver.parse(passing)
+    expect("a case inside the selection is judged by its results",
+           #driver.judge(CASE, cases, finished, "", {"photos_assets", "scenekit_render"}) == 0)
+    found = driver.judge("scenekit_render", cases, finished, "", {CASE})
+    expect("a case outside the selection fails instead of passing on no results", #found == 1)
+    expect("the failure names the selection variable", found[1]:find("REVENANT_RUNTIME_CASES", 1, true) ~= nil)
+    expect("an empty selection means every case", #driver.judge(CASE, cases, finished, "", {}) == 0)
+
+    local known = {"alias_public_name", "photos_assets", "scenekit_render"}
+    local chosen = driver.parse_selection("scenekit_render, photos_assets,scenekit_render", known)
+    expect("a selection is sorted without duplicates", #chosen == 2 and chosen[1] == "photos_assets" and chosen[2] == "scenekit_render")
+    expect("no text selects nothing in particular", #driver.parse_selection(nil, known) == 0 and #driver.parse_selection("", known) == 0)
+    local unknown = driver.guarded(function ()
+        return driver.parse_selection("photos_assets,no_such_case", known)
+    end)
+    expect("a name that is not a case is refused", unknown == nil)
+
     local values, failure = driver.guarded(function ()
         raise("the app raised %s", "inside the run")
     end)

@@ -272,6 +272,8 @@ REVENANT_CASE(coretext_fallback_probe)
 {
     const char *variant = getenv("FONTPROBE_VARIANT");
     if (variant) {
+        if (negative)
+            return;
         freopen([output_path(variant) UTF8String], "w", stdout);
         child(variant);
         fflush(stdout);
@@ -293,8 +295,7 @@ REVENANT_CASE(coretext_fallback_probe)
         for (int i = 0; i < count; i++)
             env[i] = environ[i];
         env[count] = flag;
-        env[count + 1] = (char *)"REVENANT_ONLY_CASE=coretext_fallback_probe";
-        char *argv[] = {executable, NULL};
+        char *argv[] = {executable, (char *)"--cases", (char *)"coretext_fallback_probe", NULL};
         pid_t pid = 0;
         int status = 0;
         int result = posix_spawn(&pid, executable, NULL, NULL, argv, env);
