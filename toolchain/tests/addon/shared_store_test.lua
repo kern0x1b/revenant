@@ -271,10 +271,12 @@ local function lock_of(entries)
         if entry.branch then
             table.insert(lines, "                branch = \"" .. entry.branch .. "\",")
         end
-        table.insert(lines, "                commit = \"" .. entry.commit .. "\",")
+        if entry.commit then
+            table.insert(lines, "                commit = \"" .. entry.commit .. "\",")
+        end
         table.insert(lines, "                url = \"" .. entry.url .. "\"")
         table.insert(lines, "            },")
-        table.insert(lines, "            version = \"1.0\"")
+        table.insert(lines, "            version = \"" .. (entry.version or "1.0") .. "\"")
         table.insert(lines, "        },")
     end
     table.insert(lines, "    }")
@@ -297,6 +299,13 @@ local function pinned_lock(folder, repository, found)
     local gitlab = {name = "cmake#f56260b5", branch = "master", commit = other_commit, url = "https://gitlab.com/tboox/xmake-repo.git"}
     local function revenant(url, commit)
         return {name = "revenant@llvm 23.1.3#f56260b5", commit = commit, url = url}
+    end
+    local function local_entries(url, count)
+        local entries = {}
+        for index = 1, count or 1 do
+            table.insert(entries, {name = string.format("revenant@package%02d#f56260b5", index), url = url, version = "latest"})
+        end
+        return entries
     end
     local function run(label, entries, arguments)
         local project = path.join(locked, "project-" .. label)
@@ -326,18 +335,45 @@ local function pinned_lock(folder, repository, found)
                          .. tostring(status) .. " started=" .. tostring(started) .. "\n" .. output)
         end
     end
+    local elsewhere = path.join(locked, "elsewhere")
+    local uncommitted_refused = {
+        {"another checkout by its path", local_entries(elsewhere, 1), 1},
+        {"28 packages of another checkout", local_entries(elsewhere, 28), 28},
+        {"one stale entry beside a good one", table.join(local_entries(real(root), 1), {{name = "revenant@openssl#f56260b5", url = elsewhere, version = "latest"}}), 1}
+    }
+    for index, case in ipairs(uncommitted_refused) do
+        local status, output, started = run("uncommitted-refused" .. index, case[2])
+        if status == 0 or started or not output:find("names the revenant package repository " .. elsewhere .. " with no commit recorded for " .. case[3] .. " package entries", 1, true)
+           or not output:find("Nothing was started", 1, true) or not output:find("delete ", 1, true) or not output:find(real(root), 1, true) then
+            table.insert(found, "a project whose lock names " .. case[1] .. " with no commit recorded is refused by its path, naming the lock's repository and this checkout, before xmake starts: "
+                         .. tostring(status) .. " started=" .. tostring(started) .. "\n" .. output)
+        end
+    end
     local accepted = {
         {"this checkout", {revenant(real(root), head)}},
         {"this checkout through a link", {revenant(through_link, head)}},
         {"the published repository at this commit", {revenant(remote, head)}},
         {"no revenant package", {gitlab}},
-        {"no package", {}}
+        {"no package", {}},
+        {"this checkout by its path with no commit recorded, as xmake writes it for a local repository", local_entries(real(root), 1)},
+        {"this checkout through a link with no commit recorded", local_entries(through_link, 1)},
+        {"the shape of a real lock: 28 local entries with no commit beside entries of the xmake repository that have one", table.join(local_entries(real(root), 28), {gitlab})},
+        {"an entry with no commit beside one with this checkout's commit", table.join(local_entries(real(root), 1), {revenant(real(root), head)})}
     }
     for index, case in ipairs(accepted) do
         local status, output, started = run("accepted" .. index, case[2])
         if status ~= 0 or not started then
             table.insert(found, "a project whose lock names " .. case[1] .. " starts: " .. tostring(status) .. "\n" .. output)
         end
+    end
+    local status, output, started, project = run("loop", local_entries(elsewhere, 3))
+    if status == 0 or started or not output:find("delete " .. path.join(project, "xmake-requires.lock"), 1, true) then
+        table.insert(found, "the lock of another checkout is refused with the advice to delete it: " .. tostring(status) .. "\n" .. output)
+    end
+    os.rm(path.join(project, "xmake-requires.lock"))
+    status, output, started = run("loop", table.join(local_entries(real(root), 3), {gitlab}))
+    if status ~= 0 or not started then
+        table.insert(found, "after the advice (the lock deleted and the lock xmake writes for this checkout, a local path with no commit, in its place) the project starts and is not refused again: " .. tostring(status) .. "\n" .. output)
     end
     local forms = {
         ["--project=DIR"] = function (project) return {"l", "--project=" .. project, "probe.lua"} end,
