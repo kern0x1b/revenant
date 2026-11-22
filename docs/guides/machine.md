@@ -424,6 +424,10 @@ one pool, kept in `.cache/budget` of the main checkout whatever `REVENANT_CACHE`
     ./xmakew l -P . tools/budget.lua status
     ./xmakew l -P . tools/budget.lua test
 
+`run` exits 0 when the command it starts passes, the command's status when it fails, and 3 when the budget refuses to start
+it at all. A refusal prints the disk reading and the floor; the command was never run, so its status is not a failed check.
+`status` and `test` do not take tokens and never refuse.
+
 - Size. The pool holds at most the cores less two. Room is recomputed on every poll, never from a sample taken once at
   admission or from a patience timeout. CPU headroom uses the largest of three measurements: the one-minute runnable load
   (`sysctl vm.loadavg`); the runnable threads of the pool's own holders, read from `ps` state `R` over the descendant tree
@@ -470,9 +474,16 @@ one pool, kept in `.cache/budget` of the main checkout whatever `REVENANT_CACHE`
   is started with the descriptors of the slot files closed, since a child that kept one would keep the token after its parent died.
 - Nesting. A command under a budget gets its count in `REVENANT_BUDGET_HELD`. A budget run below it takes no tokens of its own,
   so a `./xmakew` started by a build waits for nothing and is bounded by the build's tokens.
-- Disk. No command starts while the volume of the checkout has less than 100 GB free (`REVENANT_BUDGET_DISK_GB`).
+- Disk. No command starts while the volume of the checkout has less than 100 GB free (`REVENANT_BUDGET_DISK_GB`). The
+  refusal is per command: `run` exits 3 and prints the reading before the command starts. A command already admitted can
+  fail for its own reasons even if the disk drops below the floor while it runs, and that failure is not a refusal.
 
 A command run straight with `xmake`, and not through `./xmakew` or a budget run, takes no tokens.
+
+`./xmakew l -P . tools/prepush.lua` reports a refusal from any budgeted step as its third outcome: it prints
+`prepush: budget refused; this is not a failed check, free the space and rerun` and exits 3, without counting any check
+as failed and without remembering a refusal as a pass. Exit 0 means every check passed, a failed check makes the tool
+raise, and exit 3 means the disk stopped it; a caller scripting prepush can tell the three apart.
 
 ## Checks that remember their result
 

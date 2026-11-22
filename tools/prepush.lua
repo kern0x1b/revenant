@@ -30,10 +30,17 @@ local GATE_JOBS = 6
 local GATE_LINES = 30
 local GATE_EXCLUDES = {"/.git", "/.xmake", "/build", "/.cache", "/.cache-private", "/.cache-boot", "/.cache-*", "/.claude/worktrees"}
 
+local REFUSAL_EXIT = 3
+local REFUSED = {}
+
 local function budgeted(command, opt)
     opt = opt or {}
     local args = table.join({"l", "-P", root, path.join(root, "tools", "budget.lua"), "run", "--class", "critical", "--jobs", tostring(opt.jobs or 2), "--"}, command)
-    return os.execv(os.programfile(), args, {try = true, curdir = opt.curdir or root, envs = opt.envs, stdout = opt.output, stderr = opt.output}) == 0
+    local status = os.execv(os.programfile(), args, {try = true, curdir = opt.curdir or root, envs = opt.envs, stdout = opt.output, stderr = opt.output})
+    if status == REFUSAL_EXIT then
+        return REFUSED
+    end
+    return status == 0
 end
 
 local function gate_folder()
@@ -125,14 +132,24 @@ local function backports_build()
     local output = io.open(logfile, "w")
     local ignored = path.join(folder, "ignored.txt")
     io.writefile(ignored, gate_ignored(root))
-    local ok = budgeted(gate_preflight(), {output = output})
+    local result = budgeted(gate_preflight(), {output = output})
+    if result == REFUSED then
+        output:close()
+        return REFUSED
+    end
+    local ok = result == true
     if ok then
         os.mkdir(tree)
         ok = os.execv("rsync", gate_sync_arguments(tree, ignored), {try = true, stdout = output, stderr = output}) == 0
     end
     if ok then
         for _, command in ipairs(gate_commands(tree)) do
-            if not budgeted(command, {jobs = GATE_JOBS, curdir = tree, envs = gate_environment(), output = output}) then
+            result = budgeted(command, {jobs = GATE_JOBS, curdir = tree, envs = gate_environment(), output = output})
+            if result == REFUSED then
+                output:close()
+                return REFUSED
+            end
+            if not result then
                 ok = false
                 break
             end
@@ -583,7 +600,11 @@ local function run_steps(steps, opt)
             print("ok %s memo (%s)", step.name, provenance(hit))
         elseif step.inline then
             if not verdicts[step.name] then
-                for _, result in ipairs((opt.batch or batch)(grouped, opt.keep_going)) do
+                local produced = (opt.batch or batch)(grouped, opt.keep_going)
+                if produced == REFUSED then
+                    return failed, true
+                end
+                for _, result in ipairs(produced) do
                     verdicts[result.name] = result
                 end
             end
@@ -600,6 +621,9 @@ local function run_steps(steps, opt)
         else
             local started = os.time()
             local ok = step.run()
+            if ok == REFUSED then
+                return failed, true
+            end
             local seconds = os.time() - started
             if ok then
                 record_of(step, seconds)
@@ -611,7 +635,7 @@ local function run_steps(steps, opt)
             end
         end
     end
-    return failed
+    return failed, false
 end
 
 local STEPS = {
@@ -1007,11 +1031,32 @@ local function test_arguments()
         return {name = name, cache = false, run = function () table.insert(runs, name); return ok end}
     end
     local plan = {recording("cheap", false), recording("heavy", true)}
-    local failed = run_steps(plan, {keep_going = false})
+    local failed, refused = run_steps(plan, {keep_going = false})
     check("a failed check stops the run before the next one", table.concat(runs, ",") .. "/" .. table.concat(failed, ","), "cheap/cheap")
     runs = {}
     failed = run_steps(plan, {keep_going = true})
     check("--keep-going runs the next check after a failure", table.concat(runs, ",") .. "/" .. table.concat(failed, ","), "cheap,heavy/cheap")
+
+    runs = {}
+    failed, refused = run_steps(plan, {keep_going = true})
+    check("a real failure is still a failed check", table.concat(runs, ",") .. "/" .. table.concat(failed, ","), "cheap,heavy/cheap")
+    check("a real failure is not a budget refusal", refused, false)
+
+    runs = {}
+    local refusing = {name = "refused", cache = false, run = function () table.insert(runs, "refused"); return REFUSED end}
+    local refused_plan = {recording("cheap", true), refusing, recording("heavy", true)}
+    failed, refused = run_steps(refused_plan, {keep_going = true})
+    check("a budget refusal is not counted as a failed check", table.concat(failed, ","), "")
+    check("a budget refusal is reported as a refusal", refused, true)
+    check("a budget refusal stops before the next check", table.concat(runs, ","), "cheap,refused")
+
+    local inline_plan = {
+        {name = "a", inline = function () return true end},
+        {name = "b", inline = function () return true end}
+    }
+    failed, refused = run_steps(inline_plan, {keep_going = true, batch = function () return REFUSED end})
+    check("a refused check batch is not counted as failed checks", table.concat(failed, ","), "")
+    check("a refused check batch is reported as a refusal", refused, true)
     print("prepush arguments: %d tests passed", count)
 end
 
@@ -1025,7 +1070,10 @@ local function spawned_batch(steps, keep_going)
     if keep_going then
         table.insert(command, "--keep-going")
     end
-    budgeted(command)
+    if budgeted(command) == REFUSED then
+        os.tryrm(results)
+        return REFUSED
+    end
     local verdicts = {}
     if os.isfile(results) then
         for line in io.readfile(results):gmatch("[^\n]+") do
@@ -1082,7 +1130,7 @@ function main(command, ...)
     end
     local steps = select_steps(STEPS, parsed.only)
     local input = inputs(root)
-    local failed = run_steps(steps, {
+    local failed, refused = run_steps(steps, {
         keep_going = parsed.keep_going,
         fresh = parsed.fresh,
         store = path.join(cache().store(), "memo"),
@@ -1091,6 +1139,10 @@ function main(command, ...)
         key = function (step) return key_of(input, step) end,
         batch = spawned_batch,
     })
+    if refused then
+        print("prepush: budget refused; this is not a failed check, free the space and rerun")
+        os.exit(REFUSAL_EXIT)
+    end
     if #failed > 0 then
         raise("%d of %d checks failed: %s", #failed, #steps, table.concat(failed, ", "))
     end
