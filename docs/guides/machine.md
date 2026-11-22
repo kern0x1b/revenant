@@ -311,10 +311,28 @@ such as `frameworks/Backports/tools/lowered-members.txt`) leaves it stale, and `
 | Package | Digest config | Made from |
 | --- | --- | --- |
 | `swift-runtime`, `libcxx` | `recipe` | `port/digest.lua` in each recipe folder, which `toolchain/tools/recipe_digests.lua` writes from the recipe and the modules it runs |
-| `llvm`, `swift` | `recipe` | the recipe and its patches |
+| `llvm` | `recipe` | `packages/l/llvm/port/inputs.lua` (the url, version, commit, every flag of git and cmake, the cmake targets) and the bytes of the patches it lists; not the recipe text |
+| `swift` | `recipe` | the recipe and its patches |
 | `dynarmic` | `recipe` | the recipe; its patches are in the build hash, see below |
 | `swift-bootstrap` | `recipe` | the recipe; the swift.org package is held by the version's sha256, outside the digest |
 | `iphoneos-sdk` | `additions` | what the recipe adds to the SDK |
+
+`llvm`'s digest is of what its build reads, so an edit that only lays the build code out differently keeps the key, and
+the one-hour build with it. The recipe's `on_download` and `on_install` take every value from `port/inputs.lua` and only
+expand it, and `toolchain/tests/addon/llvm_inputs_test.lua` fails on a flag, a cmake target, a url or a commit written
+in them, so none can change the compiler without moving the key. A change to what the build installs that is no flag (a
+step added, removed or reordered) raises `procedure` in the table by hand. The values in braces are filled in by the
+build: `{build}` (the cmake build folder), `{install}`, `{arch}` (the host's), `{link_jobs}`, `{patch}` (one patch's
+file), `{clang}` (the clang just built), `{host_linker}`, `{llvm_cmake_dir}`, `{resource_install}` (where the iOS
+builtins go) and `{sysroot}` and `{sdk_version}` (the iPhoneOS SDK).
+
+`llvm_recipe_aliases` in `port/inputs.lua` keeps the installs that were made before the digest came from the table: an
+entry is a statement that the inputs whose digest is the entry's key produced the install whose `recipe` config is its
+value, and it is used only when the digest of the inputs is exactly that key. Today it names the llvm of recipe
+`4c6acdde` (installed as `82efc6d6`, the `libraries = false` build that `apple-ios` programs use), so those programs
+build and fetch no llvm after the change. Delete the entry, and do not edit its key, in the change that first alters an
+input: a flag, a patch, the url, the version, `procedure`. That llvm is a new key then, and the test fails until the
+entry is gone. The `libraries = true` build has no alias: it was never built for these inputs.
 
 `swift-runtime`'s digest does not take the whole member set (`lowered-members.txt`, `device-members.txt`). The runtime
 builds against the SDK headers lowered for iOS 6, and most members lower headers it never reads, so a member of an

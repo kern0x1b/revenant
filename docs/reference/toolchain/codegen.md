@@ -23,7 +23,7 @@ set by a recipe or a rule and never compared with an alternative on a workload.
 | Backports | `set_optimize("smallest")`, `-Os -fvisibility=hidden`, ARC on the Objective-C libraries | `frameworks/Backports/xmake.lua:118-157` | no |
 | Combine | `set_optimize("fastest")` for C and `-O` for Swift | `frameworks/Combine/xmake.lua:18,29`, `packages/c/combine/xmake.lua:94` | no |
 | WebKit | `faster` (`-O2`) and `smallest` per target; WebCore `-Oz` behind `WEBKIT_IOS6_SIZE_OPTIMIZED`; the interpreter `-O3` | `frameworks/WebKit/xmake.lua:34-73`, [WebKit measurements](../webkit/measurements.md) | size only, see that document |
-| llvm, the compiler (host build) | `CMAKE_BUILD_TYPE=Release`, targets `ARM;AArch64`, no `LLVM_ENABLE_LTO`, libLTO not in the distribution | `packages/l/llvm/xmake.lua:48-60`, [prebuilt](../../guides/prebuilt.md) | n/a (the compiler's own build) |
+| llvm, the compiler (host build) | `CMAKE_BUILD_TYPE=Release`, targets `ARM;AArch64`, no `LLVM_ENABLE_LTO`, libLTO not in the distribution | `packages/l/llvm/port/inputs.lua` (`compiler.configure`), [prebuilt](../../guides/prebuilt.md) | n/a (the compiler's own build) |
 | libcxx | `-mllvm -hot-cold-split=false`, `-D_LIBCPP_NO_UTIMENSAT`, CMake Release | `packages/l/libcxx/xmake.lua:54,85` | no |
 | ICU | `-O2`, with `-femulated-tls` where the toolchain asks for emulated TLS | `packages/i/icu/xmake.lua:54` | no |
 | libvpx | `-O2` | `packages/v/vpx/xmake.lua:17` | no |
