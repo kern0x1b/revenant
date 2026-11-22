@@ -594,8 +594,14 @@ of compiling, and the objects were the same bytes at both paths and held no path
 project, so an object ccache made equals one clang made on its own here (a source named by an absolute path would differ, because ccache hands clang
 the source relative to its working directory and `__FILE__` then reads differently). The 5% of the compiles that pass `-ivfsoverlay` (the generated `build/generated/backports/overlay/vfs.yaml`) are not cached:
 ccache refuses them without the `ivfsoverlay` sloppiness, which would make it ignore the overlay's content; the overlay is content-keyed
-(`lowered/<digest>`), so putting its digest into the key would let them be cached safely, and that is left to a later change. A full set of
-objects is about 60 MB. The store trim counts `<store>/ccache/cache` as scratch, the only part of the `ccache` folder the cap can evict, and keeps the
+(`lowered/<digest>`), so putting its digest into the key would let them be cached safely, and that is left to a later change. Measured on the
+whole gate (2954 compiles, one machine under other jobs): a first tree at a fresh path took 49 minutes (configure 251 s, build 2928 s; 2750 misses,
+87 hits), and a second tree at another path, with the cache warm, 6 minutes (configure 74 s, build 286 s of which 244 s is the compiling): all 2837
+compiles ccache accepts hit, 2747 in direct mode and 90 through the preprocessed text, and the 117 compiles that pass `-ivfsoverlay` ran.
+All 2954 objects of the second tree are the same bytes as the first tree's. A tree compiled with `REVENANT_CCACHE=off` (xmake's builtin cache) differs in
+one place: the `sdk` field of the version load command of its objects reads `n/a` where ccache's reads `26.2` (702 objects of 30 targets
+compared, 2 bytes each); the linked dylibs of those targets are the same bytes as the ccache tree's, so the difference does not survive the link.
+After that gate the ccache folder held 131 MB. The store trim counts `<store>/ccache/cache` as scratch, the only part of the `ccache` folder the cap can evict, and keeps the
 shims and the settings, which a running build executes. `REVENANT_CCACHE=off` compiles without ccache; without ccache installed nothing changes.
 
 Where a cold `backports build` spends its time (2026-11-16, 63 minutes by the install times of the packages): the packages
