@@ -322,7 +322,7 @@ local function device_class_inventory()
     if device_classes == nil then
         local file = device_class_inventory_file()
         if not os.isfile(file) then
-            raise("the iOS %s class inventory %s is missing: the generator decides which SDK classes get a proxy from exactly that release's inventory and does not fall back to another one; clone a cache that holds it (docs/guides/machine.md, \"Which cache to clone\")", DEVICE_GLOBALS_RELEASE, file)
+            raise(import("@addon.revenant.package_recipes", {anonymous = true}).missing_inventory_error(DEVICE_GLOBALS_RELEASE, file))
         end
         device_classes = json.decode(io.readfile(file)).classes or {}
     end
