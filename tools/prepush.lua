@@ -1299,6 +1299,11 @@ local function dirty_tests(base)
     local lists = path.join(cache().root(), "scratch", "prepush-lists")
     check("no list file stays in the scratch folder after a failed read", os.isfile(path.join(lists, "list-fixed-name")), false)
     check("no list of errors stays there either", os.isfile(path.join(lists, "list-fixed-name.errors")), false)
+    local saved_cache = os.getenv("REVENANT_CACHE")
+    os.setenv("REVENANT_CACHE", path.join(base, "named-cache"))
+    dirty_entries(repository("located"))
+    os.setenv("REVENANT_CACHE", saved_cache or "")
+    check("the list file is made under the scratch folder of the checkout's cache", os.isdir(path.join(base, "named-cache", "scratch", "prepush-lists")), true)
 
     local special = repository("special")
     local names = {
