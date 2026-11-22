@@ -600,7 +600,11 @@ local function run_steps(steps, opt)
             print("ok %s memo (%s)", step.name, provenance(hit))
         elseif step.inline then
             if not verdicts[step.name] then
-                for _, result in ipairs((opt.batch or batch)(grouped, opt.keep_going)) do
+                local produced = (opt.batch or batch)(grouped, opt.keep_going)
+                if produced == REFUSED then
+                    return failed, true
+                end
+                for _, result in ipairs(produced) do
                     verdicts[result.name] = result
                 end
             end
@@ -1045,6 +1049,14 @@ local function test_arguments()
     check("a budget refusal is not counted as a failed check", table.concat(failed, ","), "")
     check("a budget refusal is reported as a refusal", refused, true)
     check("a budget refusal stops before the next check", table.concat(runs, ","), "cheap,refused")
+
+    local inline_plan = {
+        {name = "a", inline = function () return true end},
+        {name = "b", inline = function () return true end}
+    }
+    failed, refused = run_steps(inline_plan, {keep_going = true, batch = function () return REFUSED end})
+    check("a refused check batch is not counted as failed checks", table.concat(failed, ","), "")
+    check("a refused check batch is reported as a refusal", refused, true)
     print("prepush arguments: %d tests passed", count)
 end
 
@@ -1058,7 +1070,10 @@ local function spawned_batch(steps, keep_going)
     if keep_going then
         table.insert(command, "--keep-going")
     end
-    budgeted(command)
+    if budgeted(command) == REFUSED then
+        os.tryrm(results)
+        return REFUSED
+    end
     local verdicts = {}
     if os.isfile(results) then
         for line in io.readfile(results):gmatch("[^\n]+") do
