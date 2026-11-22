@@ -209,6 +209,16 @@ local function disk_refused(free_gb, floor)
     return free_gb < floor
 end
 
+local REFUSAL_EXIT = 3
+
+local function budget_floor()
+    return tonumber(os.getenv("REVENANT_BUDGET_DISK_GB")) or DISK_FLOOR_GB
+end
+
+local function refusal_text(free, floor)
+    return string.format("budget: %.0f GB free on the checkout's volume, below the %d GB floor, so no heavy command starts", free, floor)
+end
+
 local function enqueue(folder, rank, minimum)
     local dir = path.join(folder, "queue")
     os.mkdir(dir)
@@ -378,9 +388,10 @@ local function run(opt)
     local count = inherited
     if not inherited then
         local free = free_disk_gb()
-        local floor = tonumber(os.getenv("REVENANT_BUDGET_DISK_GB")) or DISK_FLOOR_GB
+        local floor = budget_floor()
         if disk_refused(free, floor) then
-            raise("budget: %.0f GB free on the checkout's volume, below the %d GB floor, so no heavy command starts", free, floor)
+            print(refusal_text(free, floor))
+            os.exit(REFUSAL_EXIT)
         end
         local minimum, maximum = tokens_wanted(opt, os.cpuinfo("ncpu"))
         locks = acquire(pool_folder(), opt.class, minimum, maximum)
