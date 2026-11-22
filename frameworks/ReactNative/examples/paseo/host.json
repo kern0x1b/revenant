@@ -1,5 +1,27 @@
 {
   "bundleId": "space.kern0x1b.paseo-ios6.rnhost",
+  "project": "paseo-ios6",
+  "backports": [
+    "FoundationBackports",
+    "CoreTextBackports",
+    "UIKitBackports",
+    "UserNotificationsBackports",
+    "CoreGraphicsBackports",
+    "GraphicsBackports",
+    "CoreFoundationBackports",
+    "SystemBackports",
+    "IOSurfaceBackports",
+    "WebKitBackports",
+    "MapKitBackports",
+    "CoreLocationBackports",
+    "SecurityBackports",
+    "CoreMotionBackports",
+    "CoreTelephonyBackports",
+    "AVKitBackports",
+    "AccelerateBackports",
+    "CoreMediaBackports",
+    "AVFoundationBackports"
+  ],
   "pods": [
     "react-native-worklets:rnworklets",
     "react-native-webview:RNCWebViewSpec",
