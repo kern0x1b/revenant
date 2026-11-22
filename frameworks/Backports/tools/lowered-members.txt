@@ -1756,6 +1756,7 @@ class RevenantContactsHistory
 class RevenantContactsKeyDescriptor
 class RevenantContentScrollView
 class RevenantContentUnavailable17
+class RevenantContextInit
 class RevenantContextMenuAnimator
 class RevenantContextMenuSheet
 class RevenantContextMerger
@@ -6066,6 +6067,7 @@ function revenant_host_update_handler
 function revenant_image_baseline
 function revenant_image_copy
 function revenant_image_set_asset
+function revenant_install_context_init
 function revenant_install_list_swipe
 function revenant_install_user_info_value_provider
 function revenant_intents_allowed_classes
@@ -27512,6 +27514,8 @@ member RevenantContentScrollView -touchesCancelled:withEvent:
 member RevenantContentScrollView -touchesEnded:withEvent:
 member RevenantContentScrollView -touchesMoved:withEvent:
 member RevenantContentUnavailable17 +load
+member RevenantContextInit +load
+member RevenantContextInit -initWithRevenantImplementation:
 member RevenantContextMenuAnimator -addAnimations:
 member RevenantContextMenuAnimator -addCompletion:
 member RevenantContextMenuAnimator -finish
