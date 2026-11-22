@@ -493,7 +493,10 @@ one pool, kept in `.cache/budget` of the main checkout whatever `REVENANT_CACHE`
 
 `run` exits 0 when the command it starts passes, the command's status when it fails, and 3 when the budget refuses to start
 it at all. A refusal prints the disk reading and the floor; the command was never run, so its status is not a failed check.
-`status` and `test` do not take tokens and never refuse.
+`status` and `test` do not take tokens and never refuse. The runs that `test` and prepush's own tests start pin
+`REVENANT_BUDGET_DISK_GB=0` in their environment, so the tests pass at any free space; a list of `envs` given to
+`process.openv` replaces the whole environment of the child, so the pin has to be in that list, and a floor set in the
+environment of the test does not reach it.
 
 - Size. The pool holds at most the cores less two. Room is recomputed on every poll, never from a sample taken once at
   admission or from a patience timeout. CPU headroom uses the largest of three measurements: the one-minute runnable load

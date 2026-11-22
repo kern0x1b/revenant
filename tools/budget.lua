@@ -752,6 +752,7 @@ local function test_suite()
 
     local base = path.join(os.tmpdir(), string.format("revenant-budget-%d-%d", os.time(), math.random(0, 999999)))
     os.mkdir(base)
+    local no_floor = "REVENANT_BUDGET_DISK_GB=0"
     local pool = path.join(base, "pool")
     local loaded = try { function ()
         os.iorunv(os.programfile(), {"l", "-P", path.directory(os.scriptdir()),
@@ -797,7 +798,7 @@ local function test_suite()
     local stamp_log = path.join(base, "stamp.log")
     local granter = process.openv(os.programfile(), {"l", "-P", path.directory(os.scriptdir()),
         path.join(os.scriptdir(), "budget.lua"), "run", "--class", "normal", "--jobs", "1", "--min", "1", "--", "/bin/sleep", "30"},
-        {outpath = stamp_log, errpath = stamp_log, envs = {"REVENANT_BUDGET_POOL=" .. stamp_pool}})
+        {outpath = stamp_log, errpath = stamp_log, envs = {"REVENANT_BUDGET_POOL=" .. stamp_pool, no_floor}})
     local stamp_deadline = os.mclock() + 30000
     while not (held_slots(stamp_pool) >= 1 and read_grants(stamp_pool) >= 0.9) and os.mclock() < stamp_deadline do
         os.sleep(500)
@@ -994,7 +995,7 @@ local function test_suite()
         os.mkdir(who_pool)
         local who_log = path.join(base, "who.log")
         local who_holder = process.openv(os.programfile(), {"l", "-P", project, script, "run", "--class", "normal", "--jobs", "1", "--min", "1", "--", "/bin/sleep", "40"},
-            {outpath = who_log, errpath = who_log, envs = {"REVENANT_BUDGET_POOL=" .. who_pool}})
+            {outpath = who_log, errpath = who_log, envs = {"REVENANT_BUDGET_POOL=" .. who_pool, no_floor}})
         deadline = os.mclock() + 30000
         while not (holders(who_pool)[1] and holders(who_pool)[1].command == "/bin/sleep 40") and os.mclock() < deadline do
             os.sleep(300)
@@ -1013,7 +1014,7 @@ local function test_suite()
         local everything = tostring(math.max(1, os.cpuinfo("ncpu") - RESERVE_CORES))
         local waiter_log = path.join(base, "waiter.log")
         local who_waiter = process.openv(os.programfile(), {"l", "-P", project, script, "run", "--class", "critical", "--jobs", everything, "--min", everything, "--", "/usr/bin/true"},
-            {outpath = waiter_log, errpath = waiter_log, envs = {"REVENANT_BUDGET_POOL=" .. who_pool}})
+            {outpath = waiter_log, errpath = waiter_log, envs = {"REVENANT_BUDGET_POOL=" .. who_pool, no_floor}})
         deadline = os.mclock() + 30000
         while #waiters(who_pool) < 1 and os.mclock() < deadline do
             os.sleep(300)
@@ -1065,7 +1066,7 @@ local function test_suite()
         local sleeping = "/bin/sleep 4711"
         local parent_log = path.join(base, "parent.log")
         local parent = process.openv("/bin/sh", {"-c", '"$0" l -P "$1" "$2" run --class normal --jobs 1 --min 1 -- /bin/sleep 4711; true', os.programfile(), project, script},
-            {outpath = parent_log, errpath = parent_log, envs = {"REVENANT_BUDGET_POOL=" .. orphan_pool}})
+            {outpath = parent_log, errpath = parent_log, envs = {"REVENANT_BUDGET_POOL=" .. orphan_pool, no_floor}})
         deadline = os.mclock() + 30000
         while (held_slots(orphan_pool) < 1 or #matching(sleeping) < 1) and os.mclock() < deadline do
             os.sleep(300)
