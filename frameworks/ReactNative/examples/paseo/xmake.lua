@@ -1,4 +1,3 @@
--- One xmake.lua for the examples (rn-probe/xmake.lua is a link to this file): host.json names the project ("project") and the Backports libraries ("backports").
 local host = import("core.base.json").loadfile(path.join(os.projectdir(), "host.json"))
 set_project(host.project)
 set_version("0.1.0")
