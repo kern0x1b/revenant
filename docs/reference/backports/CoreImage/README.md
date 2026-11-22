@@ -89,3 +89,26 @@ same framebuffer); MediaEditor's own frames.
 
 Found while measuring, not caused by this change: a Metal texture of 4 by 2 or 8 by 2 texels does not give back what `replaceRegion:` wrote when read with `getBytes:`,
 while 4 by 4 and 2 by 2 do. The probe uses 4 by 4 and 2 by 2. The cause is in the texture backport or the driver and is not investigated here.
+
+# CIContext initWithOptions: on iOS 6
+
+The SDK declares `-[CIContext initWithOptions:]` as `NS_AVAILABLE(10_4, 5_0)`, so the lowering treats it as a device member and lists nothing for it. The iOS 6.1.3 CoreImage
+has only the factory `+[CIContext contextWithOptions:]` (`.cache/dyld/6.1.3/classes_armv7.json`: `init`, `initWithEAGLContext:`, `initWithEAGLContext:options:` and the
+class methods `context`, `contextWithOptions:`, `contextWithEAGLContext:`, `contextWithEAGLContext:options:`), and Swift's `CIContext(options:)` compiles to the initialiser.
+A call on the phone stops the app with `-[CIContext initWithOptions:]: unrecognized selector`. expo-blur's patched `BlurEffectView` hit it on the iPad 2 on 2026-11-21.
+
+`frameworks/Backports/src/Graphics/CIContextInitWithOptions.m` adds the selector in `+load`, only when `class_getInstanceMethod` finds none on `CIContext` (the pattern of `NSBundle+ReceiptURL.m`), so a later iOS that has the real
+`-initWithOptions:` keeps it; a category would replace it, and on macOS its body recursed through `+contextWithOptions:`. The method replaces the allocated object with the result of
+`+contextWithOptions:` of the object's own class (the class that factory makes, Apple's concrete `CIContext`, not a subclass of the receiver; `CIContext` is not a subclassing API). An initialiser consumes `self` and returns one owned reference; under ARC the assignment to `self` releases the allocation and the
+return retains the factory's autoreleased context, so the caller owns exactly one reference.
+
+The same comparison of the SDK's CoreImage headers (`CIContext`, `CIImage`, `CIFilter`, `CIColor`, `CIVector`, `CIDetector`, `CIFeature`) with the 6.1.3 inventory found no other member
+that the SDK marks as iOS 6 or earlier and the release lacks.
+
+## Checked
+
+- `frameworks/Backports/tests/CoreImage/context_init_test.m` (host, `CoreImageBackports_context_init_test`, `--negative` fails) checks that the initialiser gives a `CIContext` with and
+  without options, that the context renders a red image to red pixels, that each call gives its own context, that dropping the only reference frees it, and that installing for `initWithOptions:` on a system that has it adds nothing and leaves the system implementation unchanged. On the host the method has the
+  selector `initWithRevenantOptions:` (`REVENANT_HOST_BUILD`), because macOS already has `initWithOptions:`.
+
+Not run on a device: the selector name `initWithOptions:` itself, and expo-blur's view with it.
