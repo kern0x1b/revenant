@@ -192,8 +192,9 @@ function failures(opt)
     reported("a flag read through a second module that the recipe includes",
              inserted(recipe, "port\", \"inputs.lua\"))", "\n    includes(path.join(os.scriptdir(), \"port\", \"extra.lua\"))"), files, "extra.lua")
     reported("a second file in the recipe's folder", recipe, table.join(files, {path.join("port", "extra.lua")}), path.join("port", "extra.lua"))
-    reported("an addon module imported at the top of the recipe", inserted(recipe, "local inputs = llvm_build_inputs", "\n    local extra = import(\"@addon.revenant.flags\", {anonymous = true})"),
-             files, "@addon.revenant.flags")
+    local helper = "@addon.revenant." .. "flags"
+    reported("an addon module imported at the top of the recipe", inserted(recipe, "local inputs = llvm_build_inputs", "\n    local extra = import(\"" .. helper .. "\", {anonymous = true})"),
+             files, helper)
     reported("a literal after a nested block that closes at the indent of the build function's end",
              inserted(recipe, "on_install(\"@macosx\", function (package)\n", "        table.sort({}, function (a, b)\n            return a < b\n    end)\n" .. evil), files, "evil-flag")
     local reindented = recipe:gsub("\n    end%)", "\n  end)")
