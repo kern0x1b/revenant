@@ -325,7 +325,7 @@ counting `function`, `if`, `do`, `repeat` and `end`, `until` outside strings and
 indent hides nothing, and it fails on a second Lua file in the recipe's folder or on a module the recipe names beyond
 `port/inputs.lua` (a flag read from a helper file would not be in the digest). It reads files only: run it alone, without
 any package installed, with `./xmakew l -P . toolchain/tests/light_suites.lua llvm_inputs_test` (the one argument names a
-light suite; `./xmakew test` configures every requirement of `toolchain/tests/xmake.lua`, `llvm` with `libraries = true`
+light suite; `./xmakew test -P .` configures every requirement of `toolchain/tests/xmake.lua`, `llvm` with `libraries = true`
 among them, first). A change to what the build installs that is no flag (a
 step added, removed or reordered) raises `procedure` in the table by hand. The values in braces are filled in by the
 build: `{build}` (the cmake build folder), `{install}`, `{arch}` (the host's), `{link_jobs}`, `{patch}` (one patch's
