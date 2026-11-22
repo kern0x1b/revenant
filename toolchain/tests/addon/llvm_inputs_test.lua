@@ -12,10 +12,15 @@ local ALLOWED = {
     ["llvm: the inputs name {%s}, which the build does not give"] = true
 }
 
+local MODULES = {["inputs.lua"] = true, ["xmake.lua"] = true, ["digest.lua"] = true}
+
 local PROVIDED = {"build", "install", "arch", "link_jobs", "patch", "clang", "host_linker", "llvm_cmake_dir", "resource_install", "sysroot", "sdk_version"}
 
-local function literals(source)
-    local found = {}
+local OPENERS = {["function"] = true, ["if"] = true, ["do"] = true, ["repeat"] = true}
+local CLOSERS = {["end"] = true, ["until"] = true}
+
+local function lex(source)
+    local tokens = {}
     local at, size = 1, #source
     while at <= size do
         local char = source:sub(at, at)
@@ -40,16 +45,30 @@ local function literals(source)
                     cursor = cursor + 1
                 end
             end
-            table.insert(found, source:sub(at + 1, cursor - 1))
+            table.insert(tokens, {kind = "string", text = source:sub(at + 1, cursor - 1), first = at, last = cursor})
             at = cursor + 1
         elseif char == "[" and source:match("^%[(=*)%[", at) then
             local close = "]" .. source:match("^%[(=*)%[", at) .. "]"
             local stop = source:find(close, at, true)
             local last = stop and stop + #close - 1 or size
-            table.insert(found, source:sub(at, last))
+            table.insert(tokens, {kind = "string", text = source:sub(at, last), first = at, last = last})
             at = last + 1
+        elseif char:match("[%a_]") then
+            local word = source:match("^[%w_]+", at)
+            table.insert(tokens, {kind = "word", text = word, first = at, last = at + #word - 1})
+            at = at + #word
         else
             at = at + 1
+        end
+    end
+    return tokens
+end
+
+local function literals(source)
+    local found = {}
+    for _, token in ipairs(lex(source)) do
+        if token.kind == "string" then
+            table.insert(found, token.text)
         end
     end
     return found
@@ -61,8 +80,63 @@ local function body(source, header)
         return nil
     end
     local start = source:find("\n", first, true)
-    local stop = source:find("\n    end)", start, true)
-    return source:sub(start, stop)
+    local depth = 0
+    for _, token in ipairs(lex(source)) do
+        if token.kind == "word" and token.first >= first then
+            if OPENERS[token.text] then
+                depth = depth + 1
+            elseif CLOSERS[token.text] then
+                depth = depth - 1
+                if depth == 0 then
+                    return source:sub(start, token.last)
+                end
+            end
+        end
+    end
+    return source:sub(start)
+end
+
+local function lua_files(folder)
+    local found = {}
+    for _, file in ipairs(os.files(path.join(folder, "**.lua"))) do
+        table.insert(found, path.relative(file, folder))
+    end
+    table.sort(found)
+    return found
+end
+
+local function problems(recipe, files)
+    local found = {}
+    for _, header in ipairs({"on_download(function", "on_install(\"@macosx\", function"}) do
+        local text = body(recipe, header)
+        if not text then
+            table.insert(found, "llvm/xmake.lua has no " .. header .. " to check")
+        else
+            for _, literal in ipairs(literals(text)) do
+                if not ALLOWED[literal] then
+                    table.insert(found, string.format("llvm/xmake.lua writes \"%s\" in its build code: put it in packages/l/llvm/port/inputs.lua so the recipe digest reads it (or add it to ALLOWED in llvm_inputs_test.lua if it only names a program, a folder or a module)", literal))
+                end
+            end
+        end
+    end
+    local before_test = recipe:sub(1, (recipe:find("\n    on_test(", 1, true) or #recipe))
+    for _, literal in ipairs(literals(before_test)) do
+        if (literal:find("^https?://") and literal ~= "https://llvm.org") or literal:find("^%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x$") or literal:find("%.patch$") or literal:find("^llvmorg") then
+            table.insert(found, string.format("llvm/xmake.lua writes \"%s\": a url, a commit or a patch belongs in packages/l/llvm/port/inputs.lua", literal))
+        end
+        if (literal:find("%.lua$") or literal:find("^@addon")) and not ALLOWED[literal] and not MODULES[literal] then
+            table.insert(found, string.format("llvm/xmake.lua names the module \"%s\": a flag or a step that comes from another file escapes the recipe digest; put it in packages/l/llvm/port/inputs.lua (or add the module to ALLOWED or MODULES in llvm_inputs_test.lua if it can change no output)", literal))
+        end
+    end
+    for _, file in ipairs(files) do
+        if file ~= "xmake.lua" and file ~= path.join("port", "inputs.lua") then
+            table.insert(found, string.format("packages/l/llvm/%s is a file of the recipe that the digest does not read: put what the build reads in port/inputs.lua", file))
+        end
+    end
+    if not recipe:find("default = llvm_recipe_key(os.scriptdir())", 1, true) then
+        table.insert(found, "llvm/xmake.lua's recipe config is not llvm_recipe_key(os.scriptdir()), the digest of port/inputs.lua")
+    end
+    return found
 end
 
 local function copy(value)
@@ -96,28 +170,40 @@ function failures(opt)
     local module = import("inputs", {rootdir = path.join(folder, "port"), anonymous = true})
     local inputs = module.llvm_inputs()
     local recipe = io.readfile(path.join(folder, "xmake.lua"))
+    local files = lua_files(folder)
 
-    for _, header in ipairs({"on_download(function", "on_install(\"@macosx\", function"}) do
-        local text = body(recipe, header)
-        if not text then
-            table.insert(found, "llvm/xmake.lua has no " .. header .. " to check")
-        else
-            for _, literal in ipairs(literals(text)) do
-                if not ALLOWED[literal] then
-                    table.insert(found, string.format("llvm/xmake.lua writes \"%s\" in its build code: put it in packages/l/llvm/port/inputs.lua so the recipe digest reads it (or add it to ALLOWED in llvm_inputs_test.lua if it only names a program, a folder or a module)", literal))
-                end
+    for _, problem in ipairs(problems(recipe, files)) do
+        table.insert(found, problem)
+    end
+
+    local function reported(name, text, listed, fragment)
+        for _, problem in ipairs(problems(text, listed)) do
+            if problem:find(fragment, 1, true) then
+                return
             end
         end
+        table.insert(found, name .. ": the check does not report it")
     end
-    local before_test = recipe:sub(1, (recipe:find("\n    on_test(", 1, true) or #recipe))
-    for _, literal in ipairs(literals(before_test)) do
-        if (literal:find("^https?://") and literal ~= "https://llvm.org") or literal:find("^%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x%x$") or literal:find("%.patch$") or literal:find("^llvmorg") then
-            table.insert(found, string.format("llvm/xmake.lua writes \"%s\": a url, a commit or a patch belongs in packages/l/llvm/port/inputs.lua", literal))
-        end
+    local function inserted(text, after, added)
+        local first, last = text:find(after, 1, true)
+        return text:sub(1, last) .. added .. text:sub(last + 1)
     end
-    if not recipe:find("default = llvm_recipe_key(os.scriptdir())", 1, true) then
-        table.insert(found, "llvm/xmake.lua's recipe config is not llvm_recipe_key(os.scriptdir()), the digest of port/inputs.lua")
+    local evil = "        os.vrunv(\"sh\", {\"-c\", \"evil-flag\"})\n"
+    reported("a flag read through a second module that the recipe includes",
+             inserted(recipe, "port\", \"inputs.lua\"))", "\n    includes(path.join(os.scriptdir(), \"port\", \"extra.lua\"))"), files, "extra.lua")
+    reported("a second file in the recipe's folder", recipe, table.join(files, {path.join("port", "extra.lua")}), path.join("port", "extra.lua"))
+    local helper = "@addon.revenant." .. "flags"
+    reported("an addon module imported at the top of the recipe", inserted(recipe, "local inputs = llvm_build_inputs", "\n    local extra = import(\"" .. helper .. "\", {anonymous = true})"),
+             files, helper)
+    reported("a literal after a nested block that closes at the indent of the build function's end",
+             inserted(recipe, "on_install(\"@macosx\", function (package)\n", "        table.sort({}, function (a, b)\n            return a < b\n    end)\n" .. evil), files, "evil-flag")
+    local reindented = recipe:gsub("\n    end%)", "\n  end)")
+    if #problems(reindented, files) > 0 then
+        table.insert(found, "a recipe whose blocks end at another indent reports a problem that the original does not have")
     end
+    reported("a literal in a recipe whose blocks end at another indent", inserted(reindented, "on_download(function (package, opt)\n", evil), files, "evil-flag")
+
+    local install = body(recipe, "on_install(\"@macosx\", function")
     local provided = {}
     for _, name in ipairs(PROVIDED) do
         provided[name] = true
@@ -127,7 +213,6 @@ function failures(opt)
             table.insert(found, string.format("port/inputs.lua uses {%s}, which the build does not give (llvm_inputs_test.lua lists what it gives)", name))
         end
     end
-    local install = body(recipe, "on_install(\"@macosx\", function")
     for _, name in ipairs(PROVIDED) do
         if install and name ~= "patch" and not install:find(name, 1, true) then
             table.insert(found, string.format("the build does not give {%s}, which llvm_inputs_test.lua says it gives", name))
