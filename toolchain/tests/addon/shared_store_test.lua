@@ -263,6 +263,110 @@ local function wait_limits(folder, repository, found)
     end
 end
 
+local function lock_of(entries)
+    local lines = {"{", "    __meta__ = {", "        version = \"1.0\"", "    },", "    [\"iphoneos|arm64\"] = {"}
+    for _, entry in ipairs(entries) do
+        table.insert(lines, "        [\"" .. entry.name .. "\"] = {")
+        table.insert(lines, "            repo = {")
+        if entry.branch then
+            table.insert(lines, "                branch = \"" .. entry.branch .. "\",")
+        end
+        table.insert(lines, "                commit = \"" .. entry.commit .. "\",")
+        table.insert(lines, "                url = \"" .. entry.url .. "\"")
+        table.insert(lines, "            },")
+        table.insert(lines, "            version = \"1.0\"")
+        table.insert(lines, "        },")
+    end
+    table.insert(lines, "    }")
+    table.insert(lines, "}")
+    return table.concat(lines, "\n") .. "\n"
+end
+
+local function pinned_lock(folder, repository, found)
+    local locked = path.join(folder, "locked")
+    os.mkdir(locked)
+    local root = checkout_of(locked, repository)
+    local launcher = path.join(repository, "xmakew")
+    local store = stub_into(path.join(locked, "store"), COMMIT, launcher)
+    local trail = path.join(locked, "trail.txt")
+    local head = os.iorunv("git", {"-C", root, "rev-parse", "HEAD"}):trim()
+    local other_commit = string.rep("0", 40)
+    local through_link = path.join(locked, "link-to-checkout")
+    os.ln(root, through_link)
+    local remote = "https://example.invalid/revenant.git"
+    local gitlab = {name = "cmake#f56260b5", branch = "master", commit = other_commit, url = "https://gitlab.com/tboox/xmake-repo.git"}
+    local function revenant(url, commit)
+        return {name = "revenant@llvm 23.1.3#f56260b5", commit = commit, url = url}
+    end
+    local function run(label, entries, arguments)
+        local project = path.join(locked, "project-" .. label)
+        os.mkdir(project)
+        io.writefile(path.join(project, "xmake-requires.lock"), lock_of(entries))
+        local before = os.isfile(trail) and io.readfile(trail) or ""
+        local invoked = arguments and arguments(project) or {"l", "-P", project, "probe.lua"}
+        local status = os.execv(path.join(root, "xmakew"), invoked,
+                                {try = true, curdir = root, stdout = path.join(locked, "out.log"), stderr = path.join(locked, "out.log"),
+                                 envs = {REVENANT_STORE = store, REVENANT_CACHE = path.join(locked, "cache"), STUB_LOG = trail}})
+        local output = io.readfile(path.join(locked, "out.log")) or ""
+        local after = os.isfile(trail) and io.readfile(trail) or ""
+        return status, output, after ~= before, project
+    end
+    local refused = {
+        {"another checkout", {revenant(path.join(locked, "elsewhere"), head)}, {path.join(locked, "elsewhere"), head}},
+        {"this checkout at another commit", {revenant(real(root), other_commit)}, {real(root), other_commit}},
+        {"the published repository at another commit", {revenant(remote, other_commit)}, {remote, other_commit}},
+        {"one good entry beside a stale one", {revenant(real(root), head), {name = "revenant@openssl#f56260b5", commit = head, url = path.join(locked, "elsewhere")}},
+         {path.join(locked, "elsewhere"), head}}
+    }
+    for index, case in ipairs(refused) do
+        local status, output, started = run("refused" .. index, case[2])
+        if status == 0 or started or not output:find("names the revenant package repository " .. case[3][1] .. " at commit " .. case[3][2], 1, true)
+           or not output:find("Nothing was started", 1, true) or not output:find("delete ", 1, true) or not output:find(real(root), 1, true) then
+            table.insert(found, "a project whose lock names " .. case[1] .. " is refused, naming the lock's repository and commit and this checkout, before xmake starts: "
+                         .. tostring(status) .. " started=" .. tostring(started) .. "\n" .. output)
+        end
+    end
+    local accepted = {
+        {"this checkout", {revenant(real(root), head)}},
+        {"this checkout through a link", {revenant(through_link, head)}},
+        {"the published repository at this commit", {revenant(remote, head)}},
+        {"no revenant package", {gitlab}},
+        {"no package", {}}
+    }
+    for index, case in ipairs(accepted) do
+        local status, output, started = run("accepted" .. index, case[2])
+        if status ~= 0 or not started then
+            table.insert(found, "a project whose lock names " .. case[1] .. " starts: " .. tostring(status) .. "\n" .. output)
+        end
+    end
+    local forms = {
+        ["--project=DIR"] = function (project) return {"l", "--project=" .. project, "probe.lua"} end,
+        ["--project DIR"] = function (project) return {"l", "--project", project, "probe.lua"} end,
+        ["-PDIR"] = function (project) return {"l", "-P" .. project, "probe.lua"} end
+    }
+    for form, arguments in pairs(forms) do
+        local status, output, started = run("form-" .. form:gsub("[^%w]", ""), {revenant(path.join(locked, "elsewhere"), head)}, arguments)
+        if status == 0 or started or not output:find("Nothing was started", 1, true) then
+            table.insert(found, "the project named as " .. form .. " has its lock checked: " .. tostring(status) .. "\n" .. output)
+        end
+    end
+    local stale_cwd = path.join(locked, "stale-cwd")
+    os.mkdir(stale_cwd)
+    io.writefile(path.join(stale_cwd, "xmake-requires.lock"), lock_of({revenant(path.join(locked, "elsewhere"), head)}))
+    local clean = path.join(locked, "clean-project")
+    os.mkdir(clean)
+    local before = os.isfile(trail) and io.readfile(trail) or ""
+    local status = os.execv(path.join(root, "xmakew"), {"l", "-P", clean, "probe.lua"},
+                            {try = true, curdir = stale_cwd, stdout = path.join(locked, "out.log"), stderr = path.join(locked, "out.log"),
+                             envs = {REVENANT_STORE = store, REVENANT_CACHE = path.join(locked, "cache"), STUB_LOG = trail}})
+    if status ~= 0 or (os.isfile(trail) and io.readfile(trail) or "") == before then
+        table.insert(found, "only the lock of the project that is built is read, not one in the folder the command runs in: " .. tostring(status) .. "\n" .. (io.readfile(path.join(locked, "out.log")) or ""))
+    end
+    if #os.dirs(path.join(store, "xmake", "*.build.*")) > 0 then
+        table.insert(found, "the refusals leave no build of xmake behind")
+    end
+end
+
 function failures(opt)
     local found = {}
     local folder = fixtures.scratch()
@@ -368,10 +472,38 @@ function failures(opt)
         table.insert(found, "a relative REVENANT_STORE is refused and makes no folder: " .. output)
     end
 
+    local function listing(base)
+        local names = {}
+        for _, entry in ipairs(os.filedirs(path.join(base, "**"))) do
+            table.insert(names, path.relative(entry, base))
+        end
+        table.sort(names)
+        return table.concat(names, "\n")
+    end
+    local before = listing(store)
+    local through_link = path.join(folder, "link-to-store")
+    os.ln(store, through_link)
+    for label, cache in pairs({["the shared store itself"] = store, ["a folder inside it"] = path.join(store, "inner", "cache"), ["a link to it"] = through_link,
+                               ["a folder inside it through a link"] = path.join(through_link, "inner")}) do
+        status, output = launch(linked, envs(cache), log)
+        if status == 0 or not output:find("REVENANT_CACHE", 1, true) or not output:find("shared store", 1, true) then
+            table.insert(found, "REVENANT_CACHE that is " .. label .. " is refused, naming REVENANT_CACHE and the shared store: " .. tostring(status) .. "\n" .. output)
+        end
+        if listing(store) ~= before or exists(path.join(store, "xmake", "xmake")) then
+            table.insert(found, "the refusal of REVENANT_CACHE that is " .. label .. " leaves the store as it was: " .. listing(store))
+        end
+    end
+    local sibling = path.join(folder, "store-sibling")
+    status, output = launch(linked, envs(sibling), log)
+    if status ~= 0 then
+        table.insert(found, "a cache beside the store, whose name starts with the store's, is not mistaken for a folder inside it: " .. output)
+    end
+
     concurrent_builds(folder, repository, found)
     hung_build(folder, repository, found)
     stale_holder(folder, repository, found)
     wait_limits(folder, repository, found)
+    pinned_lock(folder, repository, found)
 
     os.tryrm(folder)
     return found
