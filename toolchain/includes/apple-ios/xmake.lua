@@ -1,3 +1,10 @@
+includes(path.join(os.scriptdir(), "..", "..", "modules", "launch.lua"))
+local problem = launch_problem({checkout = path.normalize(path.absolute(path.join(os.scriptdir(), "..", "..", ".."))), store = os.getenv("REVENANT_STORE"),
+                                globaldir = os.getenv("XMAKE_GLOBALDIR"), ceilings = os.getenv("GIT_CEILING_DIRECTORIES")})
+if problem then
+    printf("error: %s\n", problem)
+    start_the_build_with_the_xmakew_of_the_revenant_checkout_named_above()
+end
 includes(path.join(os.scriptdir(), "..", "..", "modules", "apple", "sdk.lua"))
 local named = get_config("apple_sdk") or ""
 local sdk = {name = "iphoneos-sdk", version = named ~= "" and named or apple_sdk_release()}

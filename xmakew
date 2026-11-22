@@ -40,6 +40,23 @@ case $store in
         exit 1
         ;;
 esac
+physical() {
+    head=${1%/}
+    rest=""
+    while [ -n "$head" ] && [ ! -d "$head" ]; do
+        rest=/$(basename "$head")$rest
+        head=$(dirname "$head")
+    done
+    real=$(cd "${head:-/}" && pwd -P)
+    [ "$real" != / ] || real=""
+    printf '%s%s\n' "$real" "$rest"
+}
+case "$(physical "$cache")/" in
+    "$(physical "$store")"/*)
+        echo "xmakew: REVENANT_CACHE is $cache, which is the shared store $store or lies inside it: the cache is trimmed to REVENANT_CACHE_GB and would evict the installs of the store, so nothing was started. REVENANT_CACHE is the cache of one checkout (by default <checkout>/.cache); the store is REVENANT_STORE, and the two are different folders" >&2
+        exit 1
+        ;;
+esac
 REVENANT_STORE=$store
 export REVENANT_STORE
 GIT_CEILING_DIRECTORIES=$cache:$store${GIT_CEILING_DIRECTORIES:+:$GIT_CEILING_DIRECTORIES}
@@ -214,6 +231,54 @@ if [ "${1:-}" = --build-xmake ]; then
     exit 0
 fi
 
+project=$root
+previous=""
+for argument in "$@"; do
+    case $previous in
+        -P | --project) project=$argument ;;
+    esac
+    case $argument in
+        --project=*) project=${argument#--project=} ;;
+        -P?*) project=${argument#-P} ;;
+    esac
+    previous=$argument
+done
+case $project in
+    /*) ;;
+    *) project=$(pwd)/$project ;;
+esac
+lock=$project/xmake-requires.lock
+if [ -f "$lock" ]; then
+    here=$(physical "$root")
+    head=$(git -C "$root" rev-parse HEAD 2>/dev/null || true)
+    pins=$(awk '
+        /^[ \t]*\["/ { inside = ($0 ~ /^[ \t]*\["revenant@/); commit = ""; next }
+        inside && /^[ \t]*commit = "/ { value = $0; sub(/^[^"]*"/, "", value); sub(/".*$/, "", value); commit = value }
+        inside && /^[ \t]*url = "/ { value = $0; sub(/^[^"]*"/, "", value); sub(/".*$/, "", value); print commit " " value; inside = 0 }
+    ' "$lock" | sort | uniq -c)
+    stale=""
+    while read -r count pinned address; do
+        [ -n "$count" ] || continue
+        case $address in
+            /*) [ "$(physical "$address")" = "$here" ] || stale="$stale$count $pinned $address
+" ;;
+        esac
+        if [ -z "$stale" ] && [ -n "$head" ] && [ "$pinned" != "$head" ]; then
+            stale="$count $pinned $address
+"
+        fi
+    done <<EOF
+$pins
+EOF
+    if [ -n "$stale" ]; then
+        read -r count pinned address <<EOF
+$stale
+EOF
+        echo "xmakew: $lock names the revenant package repository $address at commit $pinned for $count package entries (more may differ), but this xmakew is the checkout $here at commit ${head:-unknown}: with package.requires_lock xmake reads the package recipes from the locked repository and commit, not from this checkout, so the build would run this checkout's toolchain over the recipes of another pin and install what that pin asks for (hours of compiling for packages nothing here uses). Nothing was started. Refresh the lock for this checkout: delete $lock, run the build once (xmakew build -P $project -y <target>) so that xmake writes a new lock with this checkout as the repository, look at its diff and commit it together with the pin." >&2
+        exit 1
+    fi
+fi
+
 for part in xmake xmake-global; do
     if [ ! -L "$cache/$part" ] && [ -e "$cache/$part" ]; then
         seeder=""
@@ -223,7 +288,7 @@ for part in xmake xmake-global; do
                 break
             fi
         done
-        echo "xmakew: $cache/$part is a package store of its own, made before the shared store $store, and nothing reads it any more: remove $cache/xmake and $cache/xmake-global (the installs come again from the prebuilt releases or are built once), or keep the installs by making the cache the shared store, once, while $store does not exist (docs/guides/machine.md, 'The shared store')" >&2
+        echo "xmakew: $cache/$part is a package store of its own, made before the shared store $store, and nothing reads it any more: remove $cache/xmake and $cache/xmake-global (the installs come again from the prebuilt releases or are built once), or keep the installs by seeding the shared store from this cache, once, while $store does not exist, with the seed command below; never point REVENANT_CACHE or REVENANT_STORE at the other one's folder (docs/guides/machine.md, 'The shared store')" >&2
         if [ -n "$seeder" ]; then
             echo "xmakew: seed: cd '$root' && '$seeder' l -P . tools/private_cache.lua '$store' --from '$cache' --only xmake,xmake-global" >&2
         else

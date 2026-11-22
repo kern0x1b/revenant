@@ -195,6 +195,46 @@ children (`make`, the compiler) and run it again. A linked worktree takes `<work
 unset, and any folder `REVENANT_CACHE` names, empty or not, with no marker. What it holds is small: the token pool, the
 scratch of its tasks, and (when a task needs them) `dyld` and `firmware`.
 
+**The cache and the store are two folders, and the cache is never the store or inside it.** The cache is trimmed to
+`REVENANT_CACHE_GB` (50), and a trim that takes the store for the cache evicts the store's installs, oldest generations
+first. On 2026-11-22 a worker set `REVENANT_CACHE=~/.revenant/store` for one lint, after reading the xmakew of an older
+checkout that kept the packages in the cache, and the trim removed five old generations (boringssl, leptonica, tesseract,
+zxing-cpp, libcxx) from the shared store. `./xmakew` now refuses to start when `REVENANT_CACHE` is the store, a folder
+inside it, or a link into it (the paths are compared after resolving links, also for folders that do not exist yet), and
+`cache.root()` and `cache.reserve()` raise in the same case, naming `REVENANT_CACHE`, the store and `REVENANT_STORE`, before
+anything is evicted. The one trim that may name the store is the store's own (`cache.guard` marks it `shared`). A store
+somewhere else than `~/.revenant/store` is `REVENANT_STORE`, never `REVENANT_CACHE`.
+
+**Start every build with the `xmakew` of the checkout whose recipes it builds** (`$REVENANT_PATH/xmakew`), not with one found
+on `PATH` or in another checkout. On 2026-11-22 two Classicgram workers ran the `xmakew` of the main checkout, a detached
+head of 2026-10-27, with `REVENANT_PATH` naming the pinned checkout: the recipes were the pin's, the launcher and its xmake
+were October's, so the packages went into a private store inside Classicgram's own git work tree, and xmake's `git apply`
+of the recipe patches ran inside that repository, where git skips every patch without an error (`Skipped patch`, exit 0,
+"install ok"). glslang, spirv-cross and apple-compat then failed with `'absolute' is unavailable: introduced in iOS 13.0`
+because the patch that removes `std::filesystem` never applied, and the same run built libcxx from source and fetched
+SuiteSparse again, which the shared store already held. Two things now keep that from looking like a platform defect.
+`./xmakew` sets `GIT_CEILING_DIRECTORIES` to the cache and the store, so git never looks above them. And
+`@addon/revenant/apple-ios` checks at load (`toolchain/modules/launch.lua`) that `REVENANT_STORE` is set, which only the
+launcher of the shared store does, and that the package sources under `XMAKE_GLOBALDIR` do not lie inside a git work tree
+that a ceiling does not hide (it walks up looking for `.git`, the way git does, without starting a process, because xmake's
+description scope has none); otherwise it prints the reason, naming the `xmakew` to use, and ends the load before any
+package is installed. xmake's description scope has no `raise`, so the load ends with an `unknown interface` error after
+the printed reason. An install that applied fewer patches than its recipe lists cannot be detected afterwards without
+patching xmake, which would move the xmake key of every checkout, so the check removes the condition instead.
+
+**A project's `xmake-requires.lock` names the revenant repository of the `xmakew` that builds it.** With
+`set_policy("package.requires_lock", true)` xmake takes the recipes of every `revenant@...` package from the repository and
+commit the lock records, not from `REVENANT_PATH`. Classicgram's lock named the main checkout at 198a8d1ee (2026-10-27)
+while its `REVENANT_PATH` was a pin of 2026-11-22: the toolchain was the pin's and the recipes October's, the October ld64
+was not in the store, `apple-compat` raised "the ld64 956.6 package is required but has no install folder", and one
+worker compiled the October llvm for an hour for nothing. `./xmakew` now reads the `xmake-requires.lock` of the project
+it is asked to build (`-P`, `--project`, else the checkout itself) and refuses, before anything starts, when a `revenant@`
+entry names a local repository other than this checkout (paths compared after resolving links) or any repository at a
+commit other than the checkout's `HEAD`; an entry that names the published repository by address is held to the commit
+only. The message names the lock's repository and commit and this checkout. The fix is the same each time the pin moves:
+delete the lock, run the build once so that xmake writes a new one with this checkout as the repository, commit it with
+the pin. A lock without `revenant@` entries is not read further, and `--patchset` and `--build-xmake` do not check it.
+
 Two builds of one package key never run at once, because the install is locked by its folder (`<installdir>.lock`); two
 different keys of one package, built at once by two processes, each patch and build in their own copy of the sources
 (`checkout.keyed`, [ADR 0018](../explanation/decisions/0018-source-folder-per-build.md)).
