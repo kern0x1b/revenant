@@ -327,7 +327,7 @@ function expo_packages(ctx)
 end
 
 function expo_dir(ctx, package)
-    for _, base in ipairs({path.join(ctx.app, "node_modules"), path.join(ctx.ref, "node_modules")}) do
+    for _, base in ipairs({path.join(ctx.app, "node_modules"), path.join(ctx.ref, "node_modules"), path.join(ctx.app, "modules")}) do
         if os.isdir(path.join(base, package)) then
             return path.join(base, package)
         end
