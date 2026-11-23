@@ -691,6 +691,12 @@ environment of the test does not reach it.
   a token, so the machine's load or memory is the limit), and again every five minutes (`REVENANT_BUDGET_ANNOUNCE_S`) while it waits.
 - Nesting. A command under a budget gets its count in `REVENANT_BUDGET_HELD`. A budget run below it takes no tokens of its own,
   so a `./xmakew` started by a build waits for nothing and is bounded by the build's tokens.
+  A prepush run takes its tokens once: `./xmakew l -P . tools/prepush.lua` starts itself again under one `budget run`
+  (up to six tokens, the class of `REVENANT_PREPUSH_BUDGET_CLASS`, `normal` when it is unset), and the batch of light
+  checks and every heavy check run below that grant and inherit it instead of queueing once each, so the wait journal shows
+  one grant for the run. `--list`, `--recall`, `--inline` (the part of a run that its parent started), `test` and the probes
+  take none, and neither does a run that already has `REVENANT_BUDGET_HELD`. A run whose checks are all remembered also
+  waits for that one grant, and the disk floor below refuses it too.
 - Disk. No command starts while the volume of the checkout has less than 100 GB free (`REVENANT_BUDGET_DISK_GB`). The
   refusal is per command: `run` exits 3 and prints the reading before the command starts. A command already admitted can
   fail for its own reasons even if the disk drops below the floor while it runs, and that failure is not a refusal.
