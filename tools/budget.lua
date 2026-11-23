@@ -257,9 +257,7 @@ local function journal_path(folder)
     return path.join(folder, WAIT_JOURNAL)
 end
 
-local function record_wait(folder, class, tokens, seconds, who)
-    local at = os.time()
-    local entry = string.format("at %d\tclass %s\ttokens %d\twait %d\tpid %d\t%s", at, class, tokens, seconds, who.pid or 0, who_line(who))
+local function append_journal(folder, at, entry)
     exclusive.run(journal_path(folder) .. ".lock", "the budget wait journal", function ()
         local lines = {}
         local previous = os.isfile(journal_path(folder)) and io.readfile(journal_path(folder)) or ""
@@ -272,6 +270,21 @@ local function record_wait(folder, class, tokens, seconds, who)
         table.insert(lines, entry)
         io.writefile(journal_path(folder), table.concat(lines, "\n") .. "\n")
     end)
+end
+
+local function record_wait(folder, class, tokens, seconds, who)
+    local at = os.time()
+    append_journal(folder, at, string.format("at %d\tclass %s\ttokens %d\twait %d\tpid %d\t%s", at, class, tokens, seconds, who.pid or 0, who_line(who)))
+end
+
+local function record_stops(folder, kind, parent, run, listing)
+    local at = os.time()
+    for line in listing:gmatch("[^\n]+") do
+        local pid, command = line:match("^%s*(%d+)%s+(.-)%s*$")
+        if pid then
+            append_journal(folder, at, string.format("at %d\tstopped %s\tpid %s\tparent %s\trun %s\t%s", at, kind, pid, parent, run, command))
+        end
+    end
 end
 
 local function wait_summary(folder)
@@ -594,22 +607,24 @@ local function launch(class, command)
     return "/bin/sh", table.join({"-c", CLOSE_INHERITED, "budget", program}, args)
 end
 
-local WATCHER = [[parent=$1; target=$2; journal=$3; me=$$
-tab=$(printf '\t')
+local WATCHER = [[parent=$1; target=$2; program=$3; project=$4; script=$5; me=$$
 tree() { for child in $(pgrep -P "$1"); do tree "$child"; done; echo "$1"; }
-note() {
-    line="at $(date +%s)${tab}stopped $1${tab}pid $2${tab}parent $parent${tab}run $target${tab}$(ps -o command= -p "$2" 2>/dev/null)"
-    lockf -t 5 "$journal.lock" /bin/sh -c 'echo "$1" >> "$2"' sh "$line" "$journal" 2>/dev/null || echo "$line" >> "$journal"
-}
+journal() { "$program" l -P "$project" "$script" stopped "$1" "$parent" "$target" "$2" >/dev/null 2>&1; }
+listing() { ps -o pid=,command= -p "$(echo $1 | tr ' ' ',')" 2>/dev/null; }
 while [ "$(ps -o ppid= -p "$target" 2>/dev/null | tr -d ' ')" = "$parent" ]; do sleep 1; done
 kill -0 "$target" 2>/dev/null || exit 0
 pids=$(tree "$target" | grep -v "^$me\$")
-mkdir -p "$(dirname "$journal")"
-for pid in $pids; do note TERM "$pid"; done
+seen=$(listing "$pids")
+journal TERM "$seen"
 kill -TERM $pids 2>/dev/null
 sleep 2
-for pid in $pids; do kill -0 "$pid" 2>/dev/null && note KILL "$pid"; done
-kill -KILL $pids 2>/dev/null
+alive=""
+for pid in $pids; do kill -0 "$pid" 2>/dev/null && alive="$alive $pid"; done
+if [ -n "$alive" ]; then
+    seen=$(listing "$alive")
+    journal KILL "$seen"
+    kill -KILL $alive 2>/dev/null
+fi
 exit 0]]
 
 local function parent_of(pid)
@@ -621,7 +636,7 @@ local function watch_parent()
     if not parent or parent <= 1 then
         return nil
     end
-    return process.openv("/bin/sh", {"-c", CLOSE_INHERITED, "budget", "/bin/sh", "-c", WATCHER, "watcher", tostring(parent), tostring(os.getpid()), journal_path(pool_folder())},
+    return process.openv("/bin/sh", {"-c", CLOSE_INHERITED, "budget", "/bin/sh", "-c", WATCHER, "watcher", tostring(parent), tostring(os.getpid()), os.programfile(), os.projectdir(), path.join(os.scriptdir(), "budget.lua")},
                          {outpath = "/dev/null", errpath = "/dev/null"})
 end
 
@@ -1208,15 +1223,31 @@ local function test_suite()
         check("nor the command it ran", commands_left, 0)
         check("nor a holder in the list", holders_left, 0)
         local stops = {}
-        for line in (io.readfile(journal_path(orphan_pool)) or ""):gmatch("[^\n]+") do
-            if line:find("\tstopped ", 1, true) then
-                table.insert(stops, line)
+        local function read_stops()
+            stops = {}
+            for line in (io.readfile(journal_path(orphan_pool)) or ""):gmatch("[^\n]+") do
+                if line:find("\tstopped ", 1, true) then
+                    table.insert(stops, line)
+                end
             end
         end
-        local first = stops[1] or ""
-        check("the watcher journaled the command it stopped, with the pid, the dead parent and the budget run, in the wait journal", first:find("\tstopped TERM\tpid " .. tostring(command_pids[1]) .. "\t", 1, true) ~= nil
-            and first:find("\tparent " .. tostring(shell_pid) .. "\trun " .. tostring(budget_pid) .. "\t", 1, true) ~= nil and first:find("/bin/sleep 4711", 1, true) ~= nil
-            and first:find("^at %d+\t") ~= nil, true)
+        deadline = os.mclock() + 30000
+        read_stops()
+        while #stops == 0 and os.mclock() < deadline do
+            os.sleep(300)
+            read_stops()
+        end
+        local stopped_sleep, stopped_run = "", ""
+        for _, line in ipairs(stops) do
+            if line:find("\t/bin/sleep 4711$") then
+                stopped_sleep = line
+            elseif line:find("\tpid " .. tostring(budget_pid) .. "\t", 1, true) then
+                stopped_run = line
+            end
+        end
+        local tail = "\tparent " .. tostring(shell_pid) .. "\trun " .. tostring(budget_pid) .. "\t"
+        check("the watcher journaled the command it stopped, with the pid, the dead parent and the budget run, in the wait journal", stopped_sleep:find("^at %d+\tstopped TERM\tpid " .. tostring(command_pids[1]) .. tail:gsub("%p", "%%%0")) ~= nil
+            and stopped_run:find("\tstopped TERM\t", 1, true) ~= nil and stopped_run:find(tail, 1, true) ~= nil, true)
     end
 
     os.rm(base)
@@ -1230,6 +1261,8 @@ function main(command, ...)
         if status ~= 0 then
             os.exit(status)
         end
+    elseif command == "stopped" then
+        record_stops(pool_folder(), args[1], args[2], args[3], args[4] or "")
     elseif command == "status" then
         status()
     elseif command == "test" then

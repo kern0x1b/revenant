@@ -655,9 +655,10 @@ environment of the test does not reach it.
   prints the sum of the last day's waits and one line per holder, with its seconds, number of waits, tokens and classes;
   a wait that ended because its process died is not a grant and is not journaled. The journal is a cache-day record, not
   an input to admission, so it is kept in the pool folder and is never a key. The same file records what the watcher stopped (a budget
-  run's parent died): one line before each signal, `at <time>`, `stopped TERM` or `stopped KILL` (KILL only for a process still alive two
+  run's parent died): one line for each process, written by `budget.lua stopped`, which the watcher runs just before the signal
+  (the watcher's shell writes nothing itself; the signal can end the watcher, so the write comes first), `at <time>`, `stopped TERM` or `stopped KILL` (KILL only for a process still alive two
   seconds after TERM), the pid, the dead parent's pid, the budget run's pid and the process's command, tab-separated like the grants and
-  written under the same `wait-journal.lock`, so a command that vanished can be traced to the watcher or ruled out. `status` prints how many
+  under the same `wait-journal.lock` as the grants, so a command that vanished can be traced to the watcher or ruled out. `status` prints how many
   processes the watcher stopped in the last day and the newest one.
 - Who holds. A held token names its holder: the pid of the budget run, its worktree and its command, written into the slot file
   with the grant, and a waiting request's ticket names the same about itself. `status` prints a line for each holder
