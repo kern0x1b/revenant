@@ -296,8 +296,6 @@ local UNBUILT = {"docs/**", "**/*.md", ".agents/**", "agent-skills/**"}
 local PREBUILT_ENV = {"REVENANT_PREBUILT", "REVENANT_PREBUILT_ONLY"}
 local ALWAYS = {"tools/prepush.lua", "tools/budget.lua"}
 local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true, REVENANT_LIGHT_SUITES_VERDICT = true}
-local STORE_PACKAGES = {"llvm", "swift", "swift-bootstrap", "swift-runtime", "libcxx", "apple-compat", "iphoneos-sdk", "ld64", "ldid"}
-local TOOL_NAMES = {"git", "rsync", "cmake", "ninja", "xcrun", "clang", "cc", "make", "sh"}
 
 local function call(script, ...)
     local arguments = table.pack(...)
@@ -339,19 +337,6 @@ local function digest_reads()
     return reads
 end
 
-local facts_text
-
-local function toolchain_facts()
-    if not facts_text then
-        local facts = {}
-        for _, probe in ipairs({{"xcode-select", {"-p"}}, {"xcodebuild", {"-version"}}, {"xcrun", {"--show-sdk-path"}}, {"xcrun", {"--show-sdk-version"}}}) do
-            table.insert(facts, try { function () return (os.iorunv(probe[1], probe[2]):gsub("%s+", " ")) end } or "none")
-        end
-        facts_text = table.concat(facts, "\n")
-    end
-    return facts_text
-end
-
 local function sorted(lines)
     byteorder.sort(lines)
     return lines
@@ -376,26 +361,6 @@ local function attributes_facts(folder)
     return table.concat(lines, "\n")
 end
 
-local function packages_folder()
-    return path.join(cache().store(), "xmake-global", ".xmake", "packages")
-end
-
-local function store_installs()
-    local lines = {}
-    local packages = packages_folder()
-    for _, name in ipairs(STORE_PACKAGES) do
-        for _, install in ipairs(os.filedirs(path.join(packages, name:sub(1, 1), name, "*", "*"))) do
-            local line = path.relative(install, packages)
-            if os.islink(install) then
-                line = line .. " -> " .. path.filename(os.readlink(install))
-            end
-            local manifest = path.join(install, "manifest.txt")
-            table.insert(lines, line .. " " .. (os.isfile(manifest) and hash.sha256(manifest) or "no manifest"))
-        end
-    end
-    return table.concat(sorted(lines), "\n")
-end
-
 local function analysis_cache()
     return import("@addon.revenant.analysis_cache", {anonymous = true})
 end
@@ -404,15 +369,17 @@ local function backports_sdk()
     return import("sdk", {rootdir = path.join(root, "frameworks", "Backports", "tools"), anonymous = true})
 end
 
-local function sdk_content()
-    local sdk = backports_sdk()
-    local lines = {}
-    for _, real in ipairs(analysis_cache().sdk_paths()) do
-        table.insert(lines, try { function () return sdk.cache_key(real) end } or "unreadable")
-    end
-    return table.concat(sorted(lines), "\n")
+local function resolved_tools()
+    return memo.resolved_tools()
 end
 
+local function store_installs()
+    return memo.store_installs()
+end
+
+local function installed_facts()
+    return memo.installed_facts(function (text) say("prepush: %s", text) end)
+end
 local function restore_analysis()
     local analysis = analysis_cache()
     try {
@@ -443,28 +410,6 @@ local function publish_analysis()
             end
         }
     }
-end
-
-local function resolved_tools()
-    local lines = {}
-    for _, name in ipairs(TOOL_NAMES) do
-        local found = try { function () return os.iorunv("sh", {"-c", "command -v " .. name}):trim() end } or "none"
-        local version = try { function () return os.iorunv("sh", {"-c", name .. " --version 2>&1 | head -n 1"}):trim() end } or ""
-        table.insert(lines, name .. "=" .. found .. " " .. version)
-    end
-    return table.concat(lines, "\n")
-end
-
-local installed_text
-
-local function installed_facts()
-    if not installed_text then
-        local began = os.time()
-        say("prepush: reading the installed toolchain (xcode, the tools on the path, the store's packages, the SDK), once")
-        installed_text = table.concat({toolchain_facts(), resolved_tools(), store_installs(), sdk_content()}, "\n--\n")
-        say("prepush: the installed toolchain is read, %ds", os.time() - began)
-    end
-    return installed_text
 end
 
 local function dyld_caches()
