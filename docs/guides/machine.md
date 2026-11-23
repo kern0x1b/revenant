@@ -332,8 +332,15 @@ other checkout computes: the facts of each framework (`.cache/backports/<key>`: 
 (`.cache/modcache/<key>`). Each folder is keyed by content: the module cache by the SDK and the digester, the facts by the SDK, the
 compiler, the digester and the four tools that write them (`ast.lua`, `facts.lua`, `public.lua`, `sdk.lua` of
 `frameworks/Backports/tools`), so a file under a key is the file every checkout would write there. A cold `lowered members` spent 585 to 784 s on `constant_intros.tsv` alone
-(measured 2026-11-23: one `clang -ast-dump` per umbrella header, one after another), and a cold `backports build` about 100 s
-on the facts of the frameworks.
+(measured 2026-11-23: one `clang -ast-dump` per umbrella header, one after another; 583 s alone in one process at a load of 17 to 25),
+and a cold `backports build` about 100 s on the facts of the frameworks. `facts.lua` now makes `constant_intros.tsv` in four shard
+processes (`facts.lua constant-intros`, one `runjobs` job per shard, all four at once whatever the load): each shard takes every
+fourth framework, keeps for each name its first introduction and its last kind, and the parent merges the shards in the order of the
+frameworks, so the file does not depend on the shard count. Measured 2026-11-23 on the same SDK at a load of 24: 168 s instead of 583 s,
+35,571 names, the file byte for byte the one the sequential code wrote (`tests/facts_parallel_test.lua` compares the bytes of none to sixteen
+requested shards on a fixture SDK of seven frameworks, where at most seven processes start, checks that each shard process wrote
+its own pid (distinct, none of them the pid of the process that asked, none at all for one shard or for a read of the cache), and
+checks a header that does not compile).
 
 The store keeps one copy of each, `<store>/backports/<key>` and `<store>/modcache/<key>`, and `prepush` moves files between it
 and the checkout, with APFS clones (no second copy on disk; where the volume cannot clone, `cp` copies): before the first heavy
@@ -367,9 +374,9 @@ Measured 2026-11-23 on a machine at a load of 21 on 12 cores, in a worktree that
 `.cache/modcache` and no `build/backports-gate`, with the store holding the key: a full `prepush --fresh` took 413 s
 (`lowered members` 9 s instead of 585 to 784 s, `lowered exports` 4 s, `light suites` 196 s on one token, `backports build`
 167 s instead of 372 to 407 s, the rest under 25 s together). The one run that is still long is the first after a key
-moves, because the store holds nothing under the new key: it computes `constant_intros.tsv` itself (about 10 minutes of
-`clang -ast-dump`, one framework after another, in `facts.lua`) and the facts of the build (about 100 s), about 20 minutes
-in all, and publishes them when its heavy checks end.
+moves, because the store holds nothing under the new key: it computes `constant_intros.tsv` itself (about 3 minutes of
+`clang -ast-dump` in four shards of `facts.lua`) and the facts of the build (about 100 s), about 5 minutes for the two
+(it was about 12 with `constant_intros.tsv` in one process), and publishes them when its heavy checks end.
 
 The gate's copy (`build/backports-gate/tree`) is not shared in the same way: its `.xmake` records the paths of the checkout
 that configured it, and a clone would take the objects of another tree at face value. The compile cache (`ccache` of the
@@ -718,7 +725,7 @@ so an undeclared check is slower, never stale. The narrow ones: `comments test` 
 tests of `tools/private_cache.lua`, `tools/ci_errors.lua` and `tools/ci_swiftc_replay.lua` (the tool, its folder and the addon
 modules), `credentials` and `copied_text` (`agent-skills/tests/`), `negative shape` (the Backports tests and `emulator/`),
 `dyld caches test` (`tools/dyld_caches.lua`, `toolchain/modules/apple/dyld_caches.lua` and the addon modules), `analysis cache test`
-(`tools/analysis_cache.lua` and the addon modules),
+(`tools/analysis_cache.lua` and the addon modules), `skeleton publish test` (`frameworks/Backports/tools/`, its test and the addon modules),
 `recipe digests` (the inputs the recipes list in `toolchain/modules/digest.lua`, the digest files and the addon modules), and
 `lowered members` and `lowered exports`, which skip `docs/`, Markdown files, `.agents/` and `agent-skills/`. `example projects test` declares nothing, because its configure reads the root `xmake.lua`, the ReactNative graph, the addon and the recipes. `backports build` skips
 nothing, because the copy it builds in holds every file, and `backports exports` and `backports device imports` skip nothing because they read that copy's build (and the baseline data, or the device caches). A check that starts to read a file outside its declaration, or an ignored
@@ -781,8 +788,9 @@ it looks at the caller, so it is not an interception of every write; xmake's own
 of the suites and of the tests that prepush runs, and the orchestrator of `light suites` runs every suite, named on the command
 line or not, in child processes, and `prepush` starts each `lua()` step, with `XMAKE_TMPDIR` and `TMPDIR` set to a folder of its
 own in that scratch (one folder per run of the suites, shared by its groups: xmake reads the variables once, so a process
-cannot move its own), so the writes of xmake and of the compilers are
-there too and two prepush runs of two worktrees share no `/tmp` path (measured 2026-11-23: no new entry of ours in `/tmp` or
+cannot move its own; the same folder holds the scratch of the children, `REVENANT_TASK` naming a task inside it, so the
+`tests.<hex>` folders that each suite made and left, 68 after a few runs, are removed at the end of the run), so the writes of
+xmake and of the compilers are there too and two prepush runs of two worktrees share no `/tmp` path (measured 2026-11-23: no new entry of ours in `/tmp` or
 the user's `$TMPDIR` during a run of the 67 suites; the folder path is about 125 characters in a worktree and 90 in the main checkout, a Unix
 socket path may not exceed 104 bytes, and no light suite opens a socket there). Keep the caches
 (`.cache`/`REVENANT_CACHE`, `build/backports-gate`) between runs: a cold `backports build`
@@ -842,3 +850,8 @@ key, a file a check does not read leaves its key, a failing check runs again, th
 and KILL; they pin the budget's disk floor (`REVENANT_BUDGET_DISK_GB`) to 0 for those runs, because below the floor (100 GB)
 the budget refuses every heavy command and the run would hold nothing (this made the TERM case fail on every run while the
 disk was under 100 GB, 2026-11-22: it was the disk, not timing). A run with a floor no disk meets is checked to be refused.
+The live tests find their own probes by the root of their checkout in the command line and by a random number (100000 to 9099999),
+not by the end of the command line and a number made from the pid, which could count and kill the probes of a test running in
+another checkout; the processes of a run are the descendants of its own prepush, taken while it holds its tokens, and in each
+round a probe of an imaginary other checkout with the same number must be neither counted nor killed. Every probe is removed
+when a check fails too.

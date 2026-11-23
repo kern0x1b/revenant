@@ -1,3 +1,4 @@
+import("async.runjobs")
 import("core.base.json")
 
 local ast = import("ast", {rootdir = os.scriptdir(), anonymous = true})
@@ -213,7 +214,158 @@ function extract(sdk, version, cache, logs, name)
     sdkfiles.write_rows(path.join(cache, name .. ".tsv"), name, rows)
 end
 
-function constant_intros(sdk)
+local CONSTANT_SHARDS = 4
+
+local function constant_summary(sdk, names, indexes)
+    local summary = {}
+    local function note(index, name, intro, kind)
+        if name and string.find(name, "^[%a_][%w_]*$") then
+            local seen = summary[name]
+            if seen == nil then
+                seen = {}
+                summary[name] = seen
+            end
+            if intro ~= nil and seen.first == nil then
+                seen.first = {index, intro, kind}
+            end
+            seen.last = {index, kind}
+        end
+    end
+    for _, index in ipairs(indexes) do
+        local umbrella = sdkfiles.umbrella_header(sdk, names[index])
+        if umbrella ~= nil then
+            local text = ast_dump(sdk, sdkfiles.sdk_version(sdk), umbrella)
+            ast.scan(lines_of(text), function (top)
+                if top.kind == "VarDecl" and top.name and top.flags.extern then
+                    note(index, top.name, ast.ios_intro(top), "extern")
+                elseif top.kind == "EnumDecl" then
+                    for _, child in ipairs(ast.children_of(top, "EnumConstantDecl")) do
+                        note(index, child.name, ast.ios_intro(child) or ast.ios_intro(top), "enum")
+                    end
+                end
+            end)
+        end
+    end
+    return summary
+end
+
+local function write_summary(file, summary)
+    local lines = {}
+    for name, seen in pairs(summary) do
+        local first = seen.first or {"", "", ""}
+        table.insert(lines, table.concat({name, tostring(first[1]), tostring(first[2]), first[3], tostring(seen.last[1]), seen.last[2]}, "\t"))
+    end
+    table.sort(lines)
+    local temp = file .. ".part"
+    io.writefile(temp, table.concat(lines, "\n") .. (#lines > 0 and "\n" or ""))
+    os.mv(temp, file)
+end
+
+local function read_summary(file)
+    local summary = {}
+    for line in io.lines(file) do
+        local name, first_index, first_intro, first_kind, last_index, last_kind = string.match(line, "^([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)\t([^\t]*)$")
+        assert(name, "a malformed constant intro summary row in " .. file .. ": " .. line)
+        summary[name] = {first = first_index ~= "" and {tonumber(first_index), tonumber(first_intro), first_kind} or nil, last = {tonumber(last_index), last_kind}}
+    end
+    return summary
+end
+
+local function merge_summaries(summaries)
+    local intros = {}
+    local firsts, lasts = {}, {}
+    for _, summary in ipairs(summaries) do
+        for name, seen in pairs(summary) do
+            if seen.first ~= nil and (firsts[name] == nil or seen.first[1] < firsts[name][1]) then
+                firsts[name] = seen.first
+            end
+            if lasts[name] == nil or seen.last[1] > lasts[name][1] then
+                lasts[name] = seen.last
+            end
+        end
+    end
+    for name, last in pairs(lasts) do
+        local first = firsts[name]
+        intros[name] = first and {intro = first[2], kind = first[3]} or {intro = nil, kind = last[2]}
+    end
+    return intros
+end
+
+local function shard_failure(folder, errors)
+    local reports = {}
+    for _, file in ipairs(os.files(path.join(folder, "*.failed"))) do
+        table.insert(reports, io.readfile(file))
+    end
+    table.sort(reports)
+    if #reports == 0 then
+        reports = {tostring(errors)}
+    end
+    return table.concat(reports, "\n")
+end
+
+local function sharded_summaries(sdk, names, shards, pids)
+    local folder = sdkfiles.workspace().fresh("constant-intros")
+    local summaries, failure = {}, nil
+    try {
+        function ()
+            runjobs("backports/constant-intros", function (shard)
+                local argv = {"l", "-P", sdkfiles.root(), path.join(os.scriptdir(), "facts.lua"), "constant-intros", sdk, path.join(folder, shard .. ".tsv")}
+                for _, index in ipairs(shards[shard]) do
+                    table.insert(argv, tostring(index))
+                end
+                os.execv(os.programfile(), argv, {stdout = path.join(folder, shard .. ".out"), stderr = path.join(folder, shard .. ".err")})
+            end, {total = #shards, comax = #shards})
+            for shard = 1, #shards do
+                table.insert(summaries, read_summary(path.join(folder, shard .. ".tsv")))
+                table.insert(pids, tonumber(io.readfile(path.join(folder, shard .. ".tsv.pid"))))
+            end
+        end,
+        catch {
+            function (errors)
+                failure = shard_failure(folder, errors)
+            end
+        },
+        finally {
+            function ()
+                os.tryrm(folder)
+            end
+        }
+    }
+    if failure ~= nil then
+        raise("%s", failure)
+    end
+    return summaries
+end
+
+function main(command, sdk, output, ...)
+    assert(command == "constant-intros", "usage: facts.lua constant-intros <sdk> <summary file> <framework index>...")
+    local indexes = {}
+    for _, index in ipairs({...}) do
+        table.insert(indexes, tonumber(index))
+    end
+    local failure
+    try {
+        function ()
+            io.writefile(output .. ".pid", tostring(os.getpid()))
+            write_summary(output, constant_summary(sdk, sdkfiles.framework_names(sdk), indexes))
+        end,
+        catch {
+            function (errors)
+                failure = tostring(errors)
+            end
+        }
+    }
+    if failure ~= nil then
+        io.writefile(output .. ".failed", failure)
+        raise("%s", failure)
+    end
+end
+
+function constant_intros(sdk, opt)
+    local pids = {}
+    if opt and opt.report then
+        opt.report.pids = pids
+    end
     local file = path.join(sdkfiles.cache_folder(sdk), "constant_intros.tsv")
     if os.isfile(file) then
         local cached = {}
@@ -224,27 +376,21 @@ function constant_intros(sdk)
         end
         return cached
     end
-    local intros = {}
-    local function note(name, intro, kind)
-        if name and string.find(name, "^[%a_][%w_]*$") and (intros[name] == nil or intros[name].intro == nil) then
-            intros[name] = {intro = intro, kind = kind}
-        end
+    local names = sdkfiles.framework_names(sdk)
+    local shards = {}
+    for index = 1, math.max(1, math.min((opt and opt.shards) or CONSTANT_SHARDS, #names)) do
+        shards[index] = {}
     end
-    for _, name in ipairs(sdkfiles.framework_names(sdk)) do
-        local umbrella = sdkfiles.umbrella_header(sdk, name)
-        if umbrella ~= nil then
-            local text = ast_dump(sdk, sdkfiles.sdk_version(sdk), umbrella)
-            ast.scan(lines_of(text), function (top)
-                if top.kind == "VarDecl" and top.name and top.flags.extern then
-                    note(top.name, ast.ios_intro(top), "extern")
-                elseif top.kind == "EnumDecl" then
-                    for _, child in ipairs(ast.children_of(top, "EnumConstantDecl")) do
-                        note(child.name, ast.ios_intro(child) or ast.ios_intro(top), "enum")
-                    end
-                end
-            end)
-        end
+    for index = 1, #names do
+        table.insert(shards[(index - 1) % #shards + 1], index)
     end
+    local summaries
+    if #shards > 1 then
+        summaries = sharded_summaries(sdk, names, shards, pids)
+    else
+        summaries = {constant_summary(sdk, names, shards[1])}
+    end
+    local intros = merge_summaries(summaries)
     local rows = {}
     for name, found in pairs(intros) do
         table.insert(rows, string.format("%s\t%s\t%s", name, found.intro and tostring(found.intro) or "", found.kind))

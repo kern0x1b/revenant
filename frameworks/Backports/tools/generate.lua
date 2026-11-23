@@ -630,6 +630,62 @@ function references_of_src(device)
     return refs
 end
 
+local function differs(live, staged)
+    local errfile = path.join(path.directory(staged), "skeleton.diff-err")
+    os.tryrm(errfile)
+    local code = os.execv("diff", {"-rq", live, staged}, {try = true, stdout = os.nuldev(), stderrpath = errfile})
+    local detail = os.isfile(errfile) and io.readfile(errfile) or ""
+    os.tryrm(errfile)
+    if code == 0 then
+        return false
+    elseif code == 1 then
+        return true
+    end
+    raise("publish_skeleton: diff of %s and %s failed (%s): %s", live, staged, tostring(code), detail)
+end
+
+local function prune_versions(root, keep)
+    for _, folder in ipairs(os.dirs(path.join(root, "skeleton.*"))) do
+        local name = path.filename(folder)
+        if name:match("^skeleton%.%d+$") and not keep[name] then
+            os.rm(folder)
+        end
+    end
+end
+
+function publish_skeleton(root, write)
+    local live = path.join(root, "skeleton")
+    local staged = path.join(root, "skeleton.staged")
+    return exclusive.run(path.join(root, "skeleton.lock"), "the skeleton folder", function ()
+        os.tryrm(staged)
+        local totals = write(staged)
+        local previous
+        if os.islink(live) then
+            previous = path.filename(os.readlink(live) or "")
+        end
+        if os.islink(live) and not differs(live, staged) then
+            os.tryrm(staged)
+            return totals
+        end
+        local stamp = os.time() * 1000
+        local version = path.join(root, "skeleton." .. stamp)
+        while os.exists(version) do
+            stamp = stamp + 1
+            version = path.join(root, "skeleton." .. stamp)
+        end
+        os.vrunv("mv", {staged, version})
+        local pointer = path.join(root, "skeleton.pointer")
+        os.tryrm(pointer)
+        os.vrunv("ln", {"-s", path.filename(version), pointer})
+        if os.isdir(live) and not os.islink(live) then
+            os.rm(live)
+        end
+        os.vrunv("mv", {"-fh", pointer, live})
+        prune_versions(root, {[path.filename(version)] = true, [previous or ""] = true})
+        return totals
+    end)
+end
+
 function main(...)
     local args = {...}
     if args[1] == "facts" then
@@ -655,7 +711,6 @@ function main(...)
     local pending = timing.run("generate: pending rows (device image, owners)", function ()
         return pending_of(state)
     end)
-    os.tryrm(path.join(sdkfiles.build_root(), "skeleton"))
     local owners, definitions, device, implemented, references
     timing.run("generate: src scan (markers, device globals, implemented names, references)", function ()
         owners, definitions = markers_of_src()
@@ -664,7 +719,9 @@ function main(...)
         references = references_of_src(device)
     end)
     local totals = timing.run("generate: skeleton.write", function ()
-        return skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented, state.images, owners, definitions, device, references)
+        return publish_skeleton(sdkfiles.build_root(), function (staged)
+            return skeleton.write(staged, pending, implemented, state.images, owners, definitions, device, references)
+        end)
     end)
     local skipped = 0
     for _, framework in ipairs(pending) do
