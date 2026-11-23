@@ -7,7 +7,8 @@ framework instead, so it gets the system class and not the proxy. `CASpringAnima
 iOS 6.1.3 has a `CASpringAnimation` without `initialVelocity` or `settlingDuration`.
 
 A class that the device itself exports never gets a proxy, whatever the SDK's availability table says, except a
-stranger: a private class that only shares the name. The generator reads the iOS 6.1.3 release's measured Objective-C
+stranger (an image linked against a build that did give it a proxy still binds the symbol to the Backports library, which
+re-exports the system's class: [class re-exports](class-reexports.md)): a private class that only shares the name. The generator reads the iOS 6.1.3 release's measured Objective-C
 class inventory (name, exporting image, members) and does not fall back to another release's file or to an empty one:
 without `dyld/6.1.3/classes_armv7.json` in the cache it stops and says so. It drops the class row from the skeleton when
 the device has the class and one of these holds: the exporting image is a public framework (`/System/Library/Frameworks`),

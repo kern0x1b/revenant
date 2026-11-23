@@ -5,7 +5,9 @@ Backports used to define a class of that name too (`src/AVFoundation/AVSampleBuf
 loaded both printed `objc: Class AVSampleBufferDisplayLayer is implemented in both AVFoundation.framework and
 libAVFoundationBackports` (seen on the iPhone 4S in every run of Telegram13 pass137), and which of the two
 `objc_getClass` answers was not defined by the runtime. `docs/explanation/backports/shadowed-classes.md` states the rule
-for a class the device exports: it never gets a proxy; the members a later SDK added live on the real class.
+for a class the device exports: it never gets a proxy; the members a later SDK added live on the real class. An image linked
+against the earlier library still binds the class symbol to `libAVFoundationBackports.dylib`, which now re-exports it from
+AVFoundation, so the image loads and gets the system's class (`docs/explanation/backports/class-reexports.md`).
 
 ## What the system class is
 
