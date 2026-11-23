@@ -65,8 +65,8 @@ diff -ru a/ios/BlurEffectView.swift b/ios/BlurEffectView.swift
 +    overlay.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 +    overlay.backgroundColor = tint.toOverlayColor()
 +    overlay.alpha = CGFloat(intensity)
-+    NotificationCenter.default.addObserver(self, selector: #selector(applicationDidEnterBackground), name: UIApplicationDidEnterBackground, object: nil)
-+    NotificationCenter.default.addObserver(self, selector: #selector(applicationDidBecomeActive), name: UIApplicationDidBecomeActive, object: nil)
++    NotificationCenter.default.addObserver(self, selector: #selector(applicationDidEnterBackground), name: Notification.Name("UIApplicationDidEnterBackground"), object: nil)
++    NotificationCenter.default.addObserver(self, selector: #selector(applicationDidBecomeActive), name: Notification.Name("UIApplicationDidBecomeActive"), object: nil)
 +    addSubview(snapshot)
 +    addSubview(overlay)
    }

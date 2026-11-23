@@ -7,7 +7,7 @@ package("expo-blur")
 
     add_urls("https://registry.npmjs.org/expo-blur/-/expo-blur-$(version).tgz")
     add_versions("57.0.3", "b9e528965684e8e7fc90cae2e06399088091b89c84ab05eb3e809f69f82f29df")
-    add_patches("57.0.3", path.join(os.scriptdir(), "patches", "blur-ios6.patch"), "00d76b4940b2a9ed635725bb7b66752457d72a4d36adcca56833ec712f5d16c3")
+    add_patches("57.0.3", path.join(os.scriptdir(), "patches", "blur-ios6.patch"), "b7c6d3c1cc60f1e3473e7742dd32718f3ae296ff312922bd1f174ea4bb3f90bb")
 
     on_install(function (package)
         os.cp("*", package:installdir() .. "/")
