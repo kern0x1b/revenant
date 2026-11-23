@@ -1,4 +1,10 @@
-local bytes = import("core.base.bytes")
+local memo = import("@addon.revenant.memo", {anonymous = true})
+
+local NAMES = memo.names()
+
+local function lists_folder()
+    return memo.lists_folder()
+end
 
 local root = path.absolute(path.directory(os.scriptdir()))
 
@@ -23,19 +29,15 @@ end
 local byteorder = import("@addon.revenant.byteorder", {anonymous = true})
 
 local function digest(text)
-    return hash.sha256(bytes(text))
+    return memo.digest(text)
 end
 
 local function git(folder, args)
-    return os.iorunv("git", table.join({"-C", folder}, args))
+    return memo.git(folder, args)
 end
 
 local function tracked(pattern)
-    local files = {}
-    for file in git(root, {"ls-files", "--", pattern}):gmatch("[^\n]+") do
-        table.insert(files, file)
-    end
-    return files
+    return memo.tracked(root, pattern)
 end
 
 local GATE_JOBS = 6
@@ -84,65 +86,12 @@ local function gate_environment()
     }
 end
 
-local RECORD_LIMIT = 4100
-
-local NAMES = {next = function () return hash.uuid() end}
-
-local function lists_folder()
-    local folder = path.join(cache().root(), "scratch", "prepush-lists")
-    os.mkdir(folder)
-    return folder
-end
-
 local function git_records(folder, args, what)
-    local scratch = lists_folder()
-    local file = path.join(scratch, "list-" .. NAMES.next())
-    local text, failure
-    try {
-        function ()
-            local status = os.execv("git", table.join({"-C", folder}, args), {stdout = file, stderr = file .. ".errors", try = true})
-            if status ~= 0 then
-                failure = string.format("git exited with status %s (%s)", tostring(status), (io.readfile(file .. ".errors") or ""):trim():sub(1, 200))
-            else
-                local handle = io.open(file, "rb")
-                text = handle:read("*all")
-                handle:close()
-            end
-        end,
-        catch {
-            function (raised)
-                failure = tostring(raised):sub(1, 200)
-            end
-        },
-        finally {
-            function ()
-                os.tryrm(file)
-                os.tryrm(file .. ".errors")
-            end
-        }
-    }
-    if failure then
-        raise("prepush: %s could not be read cleanly: %s; nothing was run and no remembered verdict was used", what or "a list of git", failure)
-    end
-    return text
+    return memo.git_records(folder, args, what)
 end
 
 local function split_records(text, what)
-    local records = {}
-    if text == "" then
-        return records
-    end
-    for record in text:gmatch("[^\0]+") do
-        if #record > RECORD_LIMIT then
-            raise("prepush: %s could not be read cleanly: a record of %d bytes is no path; nothing was run and no remembered verdict was used", what, #record)
-        end
-        table.insert(records, record)
-    end
-    local _, boundaries = text:gsub("%z", "")
-    if boundaries ~= #records then
-        raise("prepush: %s could not be read cleanly: the output of git is not a list of records that each end at a boundary (%d records, %d boundaries); nothing was run and no remembered verdict was used", what, #records, boundaries)
-    end
-    return records
+    return memo.split_records(text, what)
 end
 
 local function gate_ignored(folder)
@@ -360,8 +309,6 @@ local UNBUILT = {"docs/**", "**/*.md", ".agents/**", "agent-skills/**"}
 local PREBUILT_ENV = {"REVENANT_PREBUILT", "REVENANT_PREBUILT_ONLY"}
 local ALWAYS = {"tools/prepush.lua", "tools/budget.lua"}
 local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true, REVENANT_PREPUSH_BUDGET_CLASS = true, REVENANT_LIGHT_SUITES_VERDICT = true}
-local STORE_PACKAGES = {"llvm", "swift", "swift-bootstrap", "swift-runtime", "libcxx", "apple-compat", "iphoneos-sdk", "ld64", "ldid"}
-local TOOL_NAMES = {"git", "rsync", "cmake", "ninja", "xcrun", "clang", "cc", "make", "sh"}
 
 local function call(script, ...)
     local arguments = table.pack(...)
@@ -403,32 +350,13 @@ local function digest_reads()
     return reads
 end
 
-local facts_text
-
-local function toolchain_facts()
-    if not facts_text then
-        local facts = {}
-        for _, probe in ipairs({{"xcode-select", {"-p"}}, {"xcodebuild", {"-version"}}, {"xcrun", {"--show-sdk-path"}}, {"xcrun", {"--show-sdk-version"}}}) do
-            table.insert(facts, try { function () return (os.iorunv(probe[1], probe[2]):gsub("%s+", " ")) end } or "none")
-        end
-        facts_text = table.concat(facts, "\n")
-    end
-    return facts_text
-end
-
 local function sorted(lines)
     byteorder.sort(lines)
     return lines
 end
 
 local function ambient_environment()
-    local lines = {}
-    for name, value in pairs(os.getenvs()) do
-        if (name:find("^REVENANT_") or name == "XMAKE_GLOBALDIR") and not AMBIENT_SKIPS[name] and value ~= "" then
-            table.insert(lines, name .. "=" .. value)
-        end
-    end
-    return table.concat(sorted(lines), "\n")
+    return memo.ambient_environment(AMBIENT_SKIPS)
 end
 
 local function attributes_facts(folder)
@@ -446,26 +374,6 @@ local function attributes_facts(folder)
     return table.concat(lines, "\n")
 end
 
-local function packages_folder()
-    return path.join(cache().store(), "xmake-global", ".xmake", "packages")
-end
-
-local function store_installs()
-    local lines = {}
-    local packages = packages_folder()
-    for _, name in ipairs(STORE_PACKAGES) do
-        for _, install in ipairs(os.filedirs(path.join(packages, name:sub(1, 1), name, "*", "*"))) do
-            local line = path.relative(install, packages)
-            if os.islink(install) then
-                line = line .. " -> " .. path.filename(os.readlink(install))
-            end
-            local manifest = path.join(install, "manifest.txt")
-            table.insert(lines, line .. " " .. (os.isfile(manifest) and hash.sha256(manifest) or "no manifest"))
-        end
-    end
-    return table.concat(sorted(lines), "\n")
-end
-
 local function analysis_cache()
     return import("@addon.revenant.analysis_cache", {anonymous = true})
 end
@@ -474,15 +382,17 @@ local function backports_sdk()
     return import("sdk", {rootdir = path.join(root, "frameworks", "Backports", "tools"), anonymous = true})
 end
 
-local function sdk_content()
-    local sdk = backports_sdk()
-    local lines = {}
-    for _, real in ipairs(analysis_cache().sdk_paths()) do
-        table.insert(lines, try { function () return sdk.cache_key(real) end } or "unreadable")
-    end
-    return table.concat(sorted(lines), "\n")
+local function resolved_tools()
+    return memo.resolved_tools()
 end
 
+local function store_installs()
+    return memo.store_installs()
+end
+
+local function installed_facts()
+    return memo.installed_facts(function (text) say("prepush: %s", text) end)
+end
 local function restore_analysis()
     local analysis = analysis_cache()
     try {
@@ -515,28 +425,6 @@ local function publish_analysis()
     }
 end
 
-local function resolved_tools()
-    local lines = {}
-    for _, name in ipairs(TOOL_NAMES) do
-        local found = try { function () return os.iorunv("sh", {"-c", "command -v " .. name}):trim() end } or "none"
-        local version = try { function () return os.iorunv("sh", {"-c", name .. " --version 2>&1 | head -n 1"}):trim() end } or ""
-        table.insert(lines, name .. "=" .. found .. " " .. version)
-    end
-    return table.concat(lines, "\n")
-end
-
-local installed_text
-
-local function installed_facts()
-    if not installed_text then
-        local began = os.time()
-        say("prepush: reading the installed toolchain (xcode, the tools on the path, the store's packages, the SDK), once")
-        installed_text = table.concat({toolchain_facts(), resolved_tools(), store_installs(), sdk_content()}, "\n--\n")
-        say("prepush: the installed toolchain is read, %ds", os.time() - began)
-    end
-    return installed_text
-end
-
 local function dyld_caches()
     return import("@addon.revenant.apple.dyld_caches", {anonymous = true})
 end
@@ -560,183 +448,41 @@ local function provide_device_caches()
     end
 end
 
-local PRIVATE_FOLDERS = {".cache*/**", "build/**", ".xmake/**", ".claude/worktrees/**"}
-
-local function dirty_pathspec()
-    local spec = {"--", "."}
-    for _, folder in ipairs(PRIVATE_FOLDERS) do
-        table.insert(spec, ":(exclude,glob)" .. folder)
-    end
-    return spec
-end
-
 local function dirty_entries(folder, reader)
-    local what = "the list of uncommitted files"
-    local tokens, entries = split_records((reader or git_records)(folder, table.join({"status", "--porcelain=v1", "--untracked-files=all", "-z"}, dirty_pathspec()), what), what), {}
-    local index = 1
-    while index <= #tokens do
-        if not tokens[index]:find("^[ MTADRCU%?!][ MTADRCU%?!] ") then
-            raise("prepush: %s could not be read cleanly: a record that is no status line (%d bytes, starts with %q); nothing was run and no remembered verdict was used", what, #tokens[index], tokens[index]:sub(1, 12))
-        end
-        local status = tokens[index]:sub(1, 2)
-        table.insert(entries, {status = status, file = tokens[index]:sub(4)})
-        if status:find("[RC]") then
-            index = index + 1
-            if index > #tokens then
-                raise("prepush: %s could not be read cleanly: a rename or copy without its source; nothing was run and no remembered verdict was used", what)
-            end
-        end
-        index = index + 1
-    end
-    return entries
+    return memo.dirty_entries(folder, reader)
 end
-
-local HASH_CHUNK = 1000
 
 local function manifest(folder, reader, hasher)
-    local current = {}
-    for line in git(folder, {"ls-files", "-s"}):gmatch("[^\n]+") do
-        local mode, sha, file = line:match("^(%d+) (%x+) %d\t(.+)$")
-        current[file] = mode .. " " .. sha
-    end
-    local pending, dirty = {}, 0
-    for _, entry in ipairs(dirty_entries(folder, reader)) do
-        local full = path.join(folder, entry.file)
-        dirty = dirty + 1
-        if os.islink(full) then
-            current[entry.file] = "link " .. os.readlink(full)
-        elseif os.isfile(full) then
-            table.insert(pending, entry.file)
-        else
-            current[entry.file] = "deleted"
-        end
-    end
-    local digests = {}
-    for from = 1, #pending, HASH_CHUNK do
-        local chunk = table.slice(pending, from, math.min(from + HASH_CHUNK - 1, #pending))
-        for line in (hasher or git)(folder, table.join({"hash-object", "--"}, chunk)):gmatch("[^\n]+") do
-            table.insert(digests, line)
-        end
-    end
-    if #digests ~= #pending then
-        raise("prepush: the content of the uncommitted files could not be read cleanly: %d files, %d digests; nothing was run and no remembered verdict was used", #pending, #digests)
-    end
-    for index, file in ipairs(pending) do
-        current[file] = "file " .. digests[index]
-    end
-    return current, dirty
-end
-
-local compiled = {}
-
-local function pattern_of(glob)
-    local found = compiled[glob]
-    if not found then
-        local escaped = glob:gsub("[%^%$%(%)%%%.%[%]%+%-%?]", "%%%0")
-        if escaped:endswith("/") then
-            found = "^" .. escaped .. ".*$"
-        else
-            local wide = escaped:gsub("%*%*/", "\1"):gsub("%*%*", "\1"):gsub("%*", "[^/]*")
-            found = "^" .. wide:gsub("\1", ".*") .. "$"
-        end
-        compiled[glob] = found
-    end
-    return found
+    return memo.manifest(folder, reader, hasher)
 end
 
 local function matches(file, globs)
-    for _, glob in ipairs(globs) do
-        if file:match(pattern_of(glob)) then
-            return true
-        end
-    end
-    return false
-end
-
-local function reads_of(step)
-    local reads = step.reads
-    if type(reads) == "function" then
-        reads = reads()
-    end
-    return reads or {"**"}
+    return memo.matches(file, globs)
 end
 
 local function selected(files, step)
-    local reads = reads_of(step)
-    local lines = {}
-    for file, value in pairs(files) do
-        if (matches(file, reads) and not matches(file, step.skips or {})) or matches(file, ALWAYS) then
-            table.insert(lines, file .. " " .. value)
-        end
-    end
-    return sorted(lines)
-end
-
-local function environment_of(step)
-    local values = {}
-    for _, name in ipairs(step.env or {}) do
-        table.insert(values, name .. "=" .. (os.getenv(name) or ""))
-    end
-    return table.concat(values, "\n")
+    return memo.selected(files, step, ALWAYS)
 end
 
 local function inputs(folder, reader, hasher)
-    local files, dirty = manifest(folder, reader, hasher)
-    return {
-        files = files,
-        dirty = dirty,
-        tool = digest(os.iorunv(os.programfile(), {"--version"})),
-        host = os.host() .. "/" .. os.arch(),
-    }
+    return memo.inputs(folder, reader, hasher)
 end
 
 local function key_of(input, step)
-    local facts = step.facts and step.facts() or ""
-    return digest(table.concat({MEMO_VERSION, step.name, step.version or "1", input.tool, input.host, ambient_environment(), environment_of(step), facts,
-                                table.concat(selected(input.files, step), "\n")}, "\n"))
+    return memo.key_of(input, step, MEMO_VERSION, ALWAYS, AMBIENT_SKIPS)
 end
 
 local function slug(step)
-    return (step.name:gsub("%s+", "-"))
+    return memo.slug(step.name)
 end
 
 local function recalled(store, step, key)
-    local file = path.join(store, slug(step), key)
-    if not os.isfile(file) then
-        return nil
-    end
-    local record = {}
-    for line in io.readfile(file):gmatch("[^\n]+") do
-        local name, value = line:match("^(%S+) (.*)$")
-        if name then
-            record[name] = value
-        end
-    end
-    return record.verdict == "ok" and record or nil
+    return memo.recalled(store, step.name, key)
 end
 
 local function remembered(store, step, key, record)
-    local folder = path.join(store, slug(step))
-    os.mkdir(folder)
-    local lines = {"verdict ok"}
-    for _, name in ipairs({"seconds", "worktree", "head", "at"}) do
-        table.insert(lines, name .. " " .. tostring(record[name]))
-    end
-    local temporary = path.join(folder, key .. ".tmp." .. hash.uuid())
-    io.writefile(temporary, table.concat(lines, "\n") .. "\n")
-    os.mv(temporary, path.join(folder, key))
-    local kept = {}
-    for _, file in ipairs(os.files(path.join(folder, "*"))) do
-        if not file:find(".tmp.", 1, true) then
-            table.insert(kept, {file = file, at = os.mtime(file)})
-        end
-    end
-    table.sort(kept, function (a, b) return a.at > b.at end)
-    for index = MEMO_KEEP + 1, #kept do
-        os.tryrm(kept[index].file)
-    end
+    return memo.remembered(store, step.name, key, record, MEMO_KEEP)
 end
-
 local function age_of(at)
     local seconds = os.time() - (tonumber(at) or os.time())
     if seconds < 90 then
