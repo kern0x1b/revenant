@@ -664,7 +664,9 @@ environment of the test does not reach it.
   seconds after TERM), the pid, the dead parent's pid, the budget run's pid and the process's command, tab-separated like the grants and
   under the same `wait-journal.lock` as the grants, so a command that vanished can be traced to the watcher or ruled out. `status` prints how many
   processes the watcher stopped in the last day and the newest one. When `budget.lua stopped` fails (the journal is unwritable), the
-  watcher still sends the signal and appends the reason to `wait-journal.errors` in the pool; `status` counts its lines.
+  watcher still sends the signal and appends the reason to `wait-journal.errors` in the pool; `status` counts its lines. A grant whose
+  journal line cannot be written is not lost either: the run keeps its tokens and starts its command, and the failure goes to stderr and the same
+  `wait-journal.errors` file.
 - Who holds. A held token names its holder: the pid of the budget run, its worktree and its command, written into the slot file
   with the grant, and a waiting request's ticket names the same about itself. `status` prints a line for each holder
   (`pid 123 holds 2 token(s) for 4m in <worktree>: <command>`) and for each waiting request, and a request that has to wait

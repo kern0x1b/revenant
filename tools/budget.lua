@@ -272,7 +272,22 @@ end
 
 local function record_wait(folder, class, tokens, seconds, who)
     local at = os.time()
-    append_journal(folder, at, string.format("at %d\tclass %s\ttokens %d\twait %d\tpid %d\t%s", at, class, tokens, seconds, who.pid or 0, who_line(who)))
+    local failure
+    try {
+        function ()
+            append_journal(folder, at, string.format("at %d\tclass %s\ttokens %d\twait %d\tpid %d\t%s", at, class, tokens, seconds, who.pid or 0, who_line(who)))
+        end,
+        catch {
+            function (errors)
+                failure = tostring(errors):gsub("%s+", " ")
+            end
+        }
+    }
+    if failure then
+        local note = string.format("at %d granted %d token(s) to pid %d: the journal write failed: %s", at, tokens, who.pid or 0, failure)
+        io.stderr:write("budget: " .. note .. "\n")
+        try { function () local file = io.open(journal_path(folder) .. ".errors", "a"); file:write(note .. "\n"); file:close() end }
+    end
 end
 
 local function record_stops(folder, kind, parent, run, listing)
@@ -736,7 +751,7 @@ local function status()
         failures = failures + 1
     end
     if failures > 0 then
-        say("stopped   %d journal write(s) of the watcher failed, see %s", failures, journal_path(folder) .. ".errors")
+        say("stopped   %d journal write(s) failed (watcher stops or grants), see %s", failures, journal_path(folder) .. ".errors")
     end
     say("disk      %.0f GB free on the checkout's volume (floor %d GB)", free_disk_gb(), DISK_FLOOR_GB)
 end
@@ -1376,6 +1391,18 @@ local function test_suite()
         local errors_text = os.isfile(errors_file) and io.readfile(errors_file) or ""
         check("a journal that cannot be written does not keep the watcher from stopping the command", broken_left, 0)
         check("and the failure is recorded beside the journal, naming the signal, the dead parent and the run", errors_text:find("stopped TERM parent " .. tostring(broken_shell) .. " run " .. tostring(broken_run and broken_run.pid) .. ": the journal write failed", 1, true) ~= nil, true)
+
+        local unwritable = path.join(base, "unwritablepool")
+        os.mkdir(path.join(unwritable, "wait-journal"))
+        local unwritable_log = path.join(base, "unwritable.log")
+        local unwritable_run = process.openv(os.programfile(), {"l", "-P", project, script, "run", "--class", "normal", "--jobs", "1", "--min", "1", "--", "/usr/bin/true"},
+            {outpath = unwritable_log, errpath = unwritable_log, envs = {"REVENANT_BUDGET_POOL=" .. unwritable, no_floor}})
+        local finished, unwritable_status = unwritable_run:wait(30000)
+        unwritable_run:close()
+        local unwritable_errors = path.join(unwritable, "wait-journal.errors")
+        check("a run whose wait journal cannot be written still gets its token and runs its command", finished == 1 and unwritable_status == 0, true)
+        check("and the failed write is on stderr and in wait-journal.errors", (io.readfile(unwritable_log) or ""):find("the journal write failed", 1, true) ~= nil
+            and os.isfile(unwritable_errors) and io.readfile(unwritable_errors):find("granted 1 token(s) to pid", 1, true) ~= nil, true)
 
         local stubborn_pool = path.join(base, "stubbornpool")
         os.mkdir(stubborn_pool)
