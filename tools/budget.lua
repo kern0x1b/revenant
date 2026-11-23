@@ -501,7 +501,7 @@ end
 local function write_pid(file, pid)
     local lines = {}
     for line in (io.readfile(file) or ""):gmatch("[^\n]+") do
-        if not line:match("^%d+$") then
+        if not line:match("^%d+$") and not line:match("^h ") then
             table.insert(lines, line)
         end
     end
@@ -563,6 +563,62 @@ local function release_locks(entries)
     end
 end
 
+local function deciding(folder, work)
+    os.mkdir(folder)
+    local lock = io.openlock(path.join(folder, "decide.lock"))
+    if not lock then
+        return work()
+    end
+    while not lock:trylock() do
+        os.sleep(20)
+    end
+    local results, failure
+    try {
+        function ()
+            results = table.pack(work())
+        end,
+        catch {
+            function (errors)
+                failure = tostring(errors)
+            end
+        }
+    }
+    lock:unlock()
+    lock:close()
+    if failure then
+        raise("%s", failure)
+    end
+    return table.unpack(results, 1, results.n)
+end
+
+local function polled_slots(folder, cores, hold_ms)
+    local free, held, pids = snapshot_slots(folder, cores)
+    own_runnable(pids)
+    os.sleep(hold_ms)
+    local count = #free
+    release_locks(free)
+    return count
+end
+
+function slot_polls(polls, poll_ms, hold_ms, guarded)
+    local folder = pool_folder()
+    local cores = os.cpuinfo("ncpu")
+    local empty = 0
+    for _ = 1, polls do
+        local free
+        if guarded then
+            free = deciding(folder, function () return polled_slots(folder, cores, hold_ms) end)
+        else
+            free = polled_slots(folder, cores, hold_ms)
+        end
+        if free == 0 then
+            empty = empty + 1
+        end
+        os.sleep(poll_ms)
+    end
+    return empty
+end
+
 local function publish_slot(entry, count, who)
     local lines = {}
     for line in (io.readfile(entry.file) or ""):gmatch("[^\n]+") do
@@ -582,28 +638,30 @@ local function process_command(pid)
 end
 
 local function holders(folder)
-    local found = {}
-    for index = 1, os.cpuinfo("ncpu") - RESERVE_CORES do
-        local file = slot_path(folder, index)
-        local lock = io.openlock(file)
-        if lock then
-            if lock:trylock() then
-                lock:unlock()
-            else
-                local text = io.readfile(file) or ""
-                local held = who_of(text)
-                held.slot = index
-                held.pid = tonumber(text:match("^%d+"))
-                if held.command == "" and held.pid then
-                    held.command = process_command(held.pid)
-                    held.worktree = held.command:match("%-P (%S+)") or ""
+    return deciding(folder, function ()
+        local found = {}
+        for index = 1, os.cpuinfo("ncpu") - RESERVE_CORES do
+            local file = slot_path(folder, index)
+            local lock = io.openlock(file)
+            if lock then
+                if lock:trylock() then
+                    lock:unlock()
+                else
+                    local text = io.readfile(file) or ""
+                    local held = who_of(text)
+                    held.slot = index
+                    held.pid = tonumber(text:match("^%d+"))
+                    if held.command == "" and held.pid then
+                        held.command = process_command(held.pid)
+                        held.worktree = held.command:match("%-P (%S+)") or ""
+                    end
+                    table.insert(found, held)
                 end
-                table.insert(found, held)
+                lock:close()
             end
-            lock:close()
         end
-    end
-    return found
+        return found
+    end)
 end
 
 local function waiters(folder)
@@ -686,27 +744,32 @@ local function await_grant(folder, ticket, class, minimum, maximum, reading_fn, 
         local cores = os.cpuinfo("ncpu")
         local reading = reading_fn()
         reading.cores = cores
-        local free, held, pids = snapshot_slots(folder, cores)
-        local cap = capacity(reading, held, own_runnable(pids))
-        local headroom, measured = memory_headroom(reading)
-        local progress = held == 0 and progress_capacity(reading, held, minimum, marked) or held
-        local guarantee = progress > held
-        if guarantee then
-            cap = math.max(cap, progress)
-        end
-        local count = grantable(cap, held, #free, minimum, maximum)
-        local reach = math.min(measured and headroom + held or headroom, cores - RESERVE_CORES)
-        if count > 0 and not ahead_of(folder, ticket.name, reach, cores - RESERVE_CORES) then
-            local grant = table.slice(free, 1, count)
-            release_locks(table.slice(free, count + 1))
-            for _, entry in ipairs(grant) do
-                publish_slot(entry, 1, who)
+        local grant = deciding(folder, function ()
+            local free, held, pids = snapshot_slots(folder, cores)
+            local cap = capacity(reading, held, own_runnable(pids))
+            local headroom, measured = memory_headroom(reading)
+            local progress = held == 0 and progress_capacity(reading, held, minimum, marked) or held
+            local guarantee = progress > held
+            if guarantee then
+                cap = math.max(cap, progress)
             end
-            record_wait(folder, class, count, math.max(0, (os.mclock() - started) // 1000), who or {pid = os.getpid(), worktree = checkout_dir(), command = "", at = os.time()})
-            leave(ticket)
+            local count = grantable(cap, held, #free, minimum, maximum)
+            local reach = math.min(measured and headroom + held or headroom, cores - RESERVE_CORES)
+            if count > 0 and not ahead_of(folder, ticket.name, reach, cores - RESERVE_CORES) then
+                local taken = table.slice(free, 1, count)
+                release_locks(table.slice(free, count + 1))
+                for _, entry in ipairs(taken) do
+                    publish_slot(entry, 1, who)
+                end
+                record_wait(folder, class, count, math.max(0, (os.mclock() - started) // 1000), who or {pid = os.getpid(), worktree = checkout_dir(), command = "", at = os.time()})
+                leave(ticket)
+                return taken
+            end
+            release_locks(free)
+        end)
+        if grant then
             return grant
         end
-        release_locks(free)
         if not marked and os.mclock() - started > aging then
             io.writefile(aged_path(folder, ticket.name), tostring(minimum))
             marked = true
@@ -863,8 +926,11 @@ end
 local function status()
     local folder = pool_folder()
     local cores = os.cpuinfo("ncpu")
-    local free, held, pids = snapshot_slots(folder, cores)
-    release_locks(free)
+    local held, pids = deciding(folder, function ()
+        local free, count, running = snapshot_slots(folder, cores)
+        release_locks(free)
+        return count, running
+    end)
     local own = own_runnable(pids)
     local reading = sample()
     reading.cores = cores
@@ -1526,6 +1592,72 @@ local function test_suite()
         check("but not under critical memory pressure", #under_pressure, 0)
     end
 
+    do
+        local slots_pool = path.join(base, "slots")
+        os.mkdir(slots_pool)
+        local slots_total = os.cpuinfo("ncpu") - RESERVE_CORES
+        local function plenty()
+            return test_reading(0, 1, 100000)
+        end
+        local kept = acquire(slots_pool, "normal", slots_total - 1, slots_total - 1, plenty, 1)
+        check("the pool is full but for one slot", #kept, slots_total - 1)
+        local slots_project = path.directory(os.scriptdir())
+        local slots_script = path.join(os.scriptdir(), "budget.lua")
+        local function polling(mode, polls, hold_ms, tag)
+            local log = path.join(base, string.format("polls-%s-%s.log", mode, tag))
+            return {log = log, process = process.openv(os.programfile(), {"l", "-P", slots_project, slots_script, "polls", tostring(polls), "100", tostring(hold_ms), mode},
+                {outpath = log, errpath = log, envs = {"REVENANT_BUDGET_POOL=" .. slots_pool, no_floor}})}
+        end
+        local function counted(mode)
+            local children = {}
+            for index = 1, 4 do
+                table.insert(children, polling(mode, 25, 40, tostring(index)))
+            end
+            local empty, total = 0, 0
+            for _, child in ipairs(children) do
+                child.process:wait(120000)
+                child.process:close()
+                local seen, polls = (io.readfile(child.log) or ""):match("empty (%d+) of (%d+)")
+                empty = empty + (tonumber(seen) or 1000)
+                total = total + (tonumber(polls) or 0)
+            end
+            return empty, total
+        end
+        local unguarded_empty, unguarded_total = counted("unguarded")
+        local guarded_empty, guarded_total = counted("guarded")
+        say("budget: four waiters polling for one free slot, each poll holding it for 40 ms: %d of %d polls found none without the decision lock, %d of %d with it",
+            unguarded_empty, unguarded_total, guarded_empty, guarded_total)
+        check("every waiter ran its polls", guarded_total, 100)
+        check("with the decision lock no poll finds the free slot taken by another waiter's poll", guarded_empty, 0)
+
+        local long = polling("guarded", 1, 4000, "long")
+        local seen_taken = os.mclock() + 30000
+        while held_slots(slots_pool) < slots_total and os.mclock() < seen_taken do
+            os.sleep(50)
+        end
+        local listed = holders(slots_pool)
+        long.process:wait(60000)
+        long.process:close()
+        local foreign = 0
+        for _, held in ipairs(listed) do
+            if held.pid ~= os.getpid() then
+                foreign = foreign + 1
+            end
+        end
+        check("the listing of holders does not name a waiter whose poll has the free slot locked", foreign, 0)
+        check("and lists the slots that are held", #listed, slots_total - 1)
+
+        release_locks(kept)
+        local stale_file = slot_path(slots_pool, 3)
+        io.writefile(stale_file, string.format("4242\nh %d\t/old/worktree\t/old command\ng %d 1\n", os.time() - 25200, os.time() - 20))
+        local claimed = snapshot_slots(slots_pool, os.cpuinfo("ncpu"))
+        local claimed_text = io.readfile(stale_file) or ""
+        release_locks(claimed)
+        check("a poll that takes a free slot drops the who-line of the holder that left it", claimed_text:find("/old/worktree", 1, true), nil)
+        check("but keeps the stamp of that grant, which counts as load for a minute", claimed_text:find("g %d+ 1") ~= nil, true)
+        check("and names the poll's process", claimed_text:match("^(%d+)"), tostring(os.getpid()))
+    end
+
     local dead_pool = path.join(base, "deadholder")
     os.mkdir(dead_pool)
     io.writefile(slot_path(dead_pool, 1), string.format("99999\ng %d 2\n", os.time() - 10))
@@ -1819,7 +1951,10 @@ function main(command, ...)
         status()
     elseif command == "test" then
         test_suite()
+    elseif command == "polls" then
+        local polls = tonumber(args[1])
+        print(string.format("empty %d of %d", slot_polls(polls, tonumber(args[2]), tonumber(args[3]), args[4] == "guarded"), polls))
     else
-        raise("usage: ./xmakew l -P . tools/budget.lua run [--class critical|normal|background] [--jobs N] [--min N] [--mb M] -- <command> [args...] | status | test")
+        raise("usage: ./xmakew l -P . tools/budget.lua run [--class critical|normal|background] [--jobs N] [--min N] [--mb M] -- <command> [args...] | status | test | polls <count> <poll ms> <hold ms> guarded|unguarded")
     end
 end
