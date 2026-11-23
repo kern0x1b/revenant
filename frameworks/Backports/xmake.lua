@@ -127,6 +127,16 @@ if is_plat("iphoneos") then
             on_load(function (target)
                 target:add("shflags", table.unpack(import("@addon.revenant.apple.backports_versions", {anonymous = true}).flags()))
                 target:add("shflags", "-Wl,-unexported_symbols_list," .. STD_UNEXPORTED, {force = true})
+                local reexports = import("reexports", {rootdir = TOOLS, anonymous = true}).of(library)
+                if #reexports.symbols > 0 then
+                    -- Named by the content, so a changed list is a changed flag and relinks the library.
+                    local list = path.join(target:autogendir(), "reexported-" .. hash.strhash128(reexports.text) .. ".txt")
+                    io.writefile(list, reexports.text)
+                    target:add("shflags", "-Wl,-reexported_symbols_list," .. list, {force = true})
+                    for _, framework in ipairs(reexports.frameworks) do
+                        target:add("shflags", "-Wl,-weak_framework," .. framework, {force = true})
+                    end
+                end
             end)
             after_build(function (target)
                 import("@addon.revenant.apple.backports_versions", {anonymous = true}).check(target:targetfile())
@@ -966,11 +976,30 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         add_shflags("-install_name", INSTALL_FOLDER .. "/libRevenantSystemProbe.dylib", "-Wno-incompatible-sysroot", {force = true})
     target_end()
 
+    target("RevenantStaleAVFoundationProbe")
+        set_kind("shared")
+        set_default(false)
+        add_rules("@addon/revenant/apple-ios")
+        add_files(path.join(RUNTIME, "probe", "stale_avfoundation.m"))
+        add_frameworks("Foundation")
+        add_shflags("-install_name", INSTALL_FOLDER .. "/libAVFoundationBackports.dylib", "-Wno-incompatible-sysroot", {force = true})
+    target_end()
+
+    target("RevenantStaleUserProbe")
+        set_kind("shared")
+        set_default(false)
+        add_rules("@addon/revenant/apple-ios")
+        add_files(path.join(RUNTIME, "probe", "stale_user.m"))
+        add_deps("RevenantStaleAVFoundationProbe")
+        add_frameworks("Foundation")
+        add_shflags("-install_name", INSTALL_FOLDER .. "/libRevenantStaleUserProbe.dylib", "-Wno-incompatible-sysroot", {force = true})
+    target_end()
+
     target("backports_runtime")
         set_kind("phony")
         set_default(false)
         set_group("device")
-        add_deps("backports_runtime_app", "RevenantWeakProbe", "RevenantMissingProbe", "RevenantSystemProbe")
+        add_deps("backports_runtime_app", "RevenantWeakProbe", "RevenantMissingProbe", "RevenantSystemProbe", "RevenantStaleUserProbe")
         add_packages("emulator-guest")
         add_tests("foundation_url_components")
         add_tests("loader_class_backport")
@@ -998,6 +1027,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         add_tests("backport_impl_shadowed")
         add_tests("avfoundation_display_layer")
         add_tests("avfoundation_system_display_layer")
+        add_tests("avfoundation_class_reexport")
         add_tests("avfoundation_timebase_probe")
         add_tests("avfoundation_display_layer_formats")
         add_tests("avfoundation_synchronizer_observers")
