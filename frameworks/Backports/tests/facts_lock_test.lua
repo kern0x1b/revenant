@@ -17,14 +17,13 @@ local function fixture(folder)
     return folder
 end
 
-function main()
-    local base = workspace.fresh("facts-lock-test")
+local function check(base)
     local sdk = fixture(path.join(base, "sdk"))
     local version = sdkfiles.sdk_version(sdk)
     local logs = path.join(base, "logs")
     local cache = sdkfiles.cache_folder(sdk)
-    local key = sdkfiles.cache_key(sdk)
     local root = sdkfiles.shared_root()
+    print("FACTS_CACHE " .. root)
     local outputs = {path.join(base, "one.out"), path.join(base, "two.out")}
     local statuses = {}
 
@@ -34,9 +33,9 @@ function main()
     end, {total = 2, comax = 2})
 
     for _, index in ipairs({1, 2}) do
-        assert(statuses[index] == 0, "extraction " .. index .. " failed with " .. tostring(statuses[index]) .. ":\n" .. io.readfile(outputs[index]))
+        assert(statuses[index] == 0, "extraction " .. index .. " failed with " .. tostring(statuses[index]) .. ":\n" .. (io.readfile(outputs[index]) or ""))
     end
-    local text = io.readfile(outputs[1]) .. "\n" .. io.readfile(outputs[2])
+    local text = (io.readfile(outputs[1]) or "") .. "\n" .. (io.readfile(outputs[2]) or "")
     local extractions = 0
     for _ in text:gmatch("facts extraction") do
         extractions = extractions + 1
@@ -56,9 +55,22 @@ function main()
     for _, file in ipairs(os.files(path.join(logs, "*.failed"))) do
         assert(false, "a failed marker was left behind: " .. file)
     end
-
-    os.tryrm(base)
-    os.tryrm(path.join(root, key))
-    os.tryrm(path.join(root, key .. ".lock"))
     print("FACTS_LOCK_TEST passed")
+end
+
+function main()
+    local previous = os.getenv("REVENANT_CACHE")
+    local base = workspace.fresh("facts-lock-test")
+    os.setenv("REVENANT_CACHE", path.join(base, "cache"))
+    try {
+        function ()
+            check(base)
+        end,
+        finally {
+            function ()
+                os.setenv("REVENANT_CACHE", previous or "")
+                os.tryrm(base)
+            end
+        }
+    }
 end
