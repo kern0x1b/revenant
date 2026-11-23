@@ -48,8 +48,10 @@ function compute(opt)
     local modules = opt.modules or path.join(root, "toolchain/modules")
     local xmake = opt.xmake or path.join(root, "frameworks", "Backports", "xmake.lua")
     local inventory = opt.inventory
-    local facts = opt.facts or path.join(sdkfiles.shared_root(), opt.facts_key or sdkfiles.cache_key(sdk))
+    local facts_key = opt.facts_key or sdkfiles.cache_key(sdk)
+    local facts = opt.facts or path.join(sdkfiles.shared_root(), facts_key)
     local lines = {}
+    table.insert(lines, "facts-key=" .. facts_key)
     if not os.isdir(facts) or not os.isdir(tools) or not os.isdir(src) then
         return nil
     end

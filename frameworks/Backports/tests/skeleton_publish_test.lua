@@ -124,10 +124,13 @@ local function memo_test()
     io.writefile(path.join(facts, "install_names.tsv"), "Framework\t/System/Library/Frameworks/Framework.framework/Framework\n")
     io.writefile(xmake, "five\n")
     io.writefile(inventory, "six\n")
-    local opt = {root = root, tools = tools, src = src, modules = modules, facts = facts, xmake = xmake,
+    local opt = {root = root, tools = tools, src = src, modules = modules, facts = facts, facts_key = "fixture-key", xmake = xmake,
                  inventory = inventory, names = {"Framework"}, env = {REVENANT_GEN_SDK = "", REVENANT_BACKPORTS_LIBRARIES = ""}}
     local key = memo.compute(opt)
     expect("the memo key has a value", key ~= nil and #key == 32, tostring(key))
+    local other_sdk = table.clone(opt)
+    other_sdk.facts_key = "another-facts-key"
+    expect("a different facts key with byte-identical TSVs changes the memo key", memo.compute(other_sdk) ~= key, "the SDK identity is missing from the key")
     local function changed(file, text, field)
         io.writefile(file, text)
         local other = memo.compute(opt)
