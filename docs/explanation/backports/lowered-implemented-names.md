@@ -292,11 +292,13 @@ them declarations that regain their availability, among them `AVAudioSession.sec
 `sourceDeviceType` (iOS 13), `UITableView.fillerRowHeight` and `selfSizingInvalidation`, `CIContext.workingFormat` and the
 `AVError` codes after `AVErrorFailedToParse`. Telegram 13.0.0 uses three of them without a guard:
 `ManagedAudioSession.swift:623` (`secondaryAudioShouldBeSilencedHint`), `LocationUtils.swift:154` (`requestsAlternateRoutes`)
-and the `RTCAudioSession.mm` line that reads the same hint. `requestsAlternateRoutes` is implemented now
-(`MKDirectionsRequest7.m`), so that line no longer depends on the comment. The other two compile today only because the
-lowering removed an availability that nothing implements, and would be a compile error after the change (reasoned: on an iOS 6 device the
-selector is not there, so the call would raise "unrecognized selector" if it ran; no device run). The change is
-therefore not made here: it needs those three names implemented or guarded first.
+and the `RTCAudioSession.mm` line that reads the same hint. `requestsAlternateRoutes` is implemented
+(`MKDirectionsRequest7.m`), and so is `secondaryAudioShouldBeSilencedHint` (`AVAudioSession+SecondaryAudioHint8.m`: the
+call in `ManagedAudioSession.swift` runs once a second while a chat shows playable items, and with only the stub behind it
+it aborted Telegram13 on the 4S), so those lines no longer depend on the comment. The change is still not made here:
+other names of the measured set, `sourceDevicePosition` among them, are implemented by nothing, so a source that calls them
+unguarded would stop compiling (reasoned: on an iOS 6 device the selector is not there, so the call would raise
+"unrecognized selector" if it ran; no device run). It needs those names implemented or guarded first.
 
 ## A framework's own availability macro
 

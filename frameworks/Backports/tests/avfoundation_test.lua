@@ -61,6 +61,23 @@ local AREAS = {
         },
     },
     {
+        name = "the hint that another application's audio should silence this one's secondary audio, read from the other-audio flag that iOS 6 has",
+        folder = "AVFAudio",
+        sources = {"AVAudioSession+SecondaryAudioHint8.m"},
+        members = {
+            "-[AVAudioSession secondaryAudioShouldBeSilencedHint]",
+        },
+    },
+    {
+        name = "maximum and preferred channel counts of the audio session, read from the channel counts that iOS 6 has",
+        folder = "AVFAudio",
+        sources = {"AVAudioSession+Channels7.m"},
+        members = {
+            "-[AVAudioSession maximumInputNumberOfChannels]", "-[AVAudioSession maximumOutputNumberOfChannels]",
+            "-[AVAudioSession setPreferredInputNumberOfChannels:error:]", "-[AVAudioSession setPreferredOutputNumberOfChannels:error:]",
+        },
+    },
+    {
         name = "state of the system's queued sample buffer display layer, added on the system class",
         sources = {"AVSampleBufferDisplayLayer8.m"},
         members = {
@@ -88,25 +105,27 @@ function main()
     if not sdk or sdk == "" then
         sdk = sdkfiles.sdk_folder()
     end
-    local sources = path.absolute(path.join(os.scriptdir(), "..", "src", "AVFoundation"))
+    local source_root = path.absolute(path.join(os.scriptdir(), "..", "src"))
     local root = path.join(workspace.scratch(), "avfoundation-test")
     os.tryrm(root)
     local objects, total = 0, 0
     for _, area in ipairs(AREAS) do
+        local folder = area.folder or "AVFoundation"
         for _, name in ipairs(area.sources) do
-            local object = path.join(root, "AVFoundation", "src", "AVFoundation", name .. ".o")
+            local object = path.join(root, folder, "src", folder, name .. ".o")
             os.mkdir(path.directory(object))
             os.vrunv("clang", {"-target", "armv7-apple-ios6.0", "-isysroot", sdk, "-fobjc-arc", "-Os", "-w", "-c", "-o", object,
-                path.join(sources, name)})
+                path.join(source_root, folder, name)})
             objects = objects + 1
         end
     end
-    local keys = implemented.from_objects(root).AVFoundation or {}
+    local found = implemented.from_objects(root)
+    local keys = found.AVFoundation or {}
     local missing = {}
     for _, area in ipairs(AREAS) do
         for _, member in ipairs(area.members) do
             total = total + 1
-            if not keys[key_of(member)] then
+            if not (found[area.folder or "AVFoundation"] or {})[key_of(member)] then
                 table.insert(missing, area.name .. ": " .. member)
             end
         end

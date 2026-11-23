@@ -79,6 +79,14 @@ local AREAS = {
         },
     },
     {
+        name = "iOS 7 and 8 accessibility path and navigation style",
+        sources = {"NSObject+AccessibilityPath7.m"},
+        members = {
+            "-[NSObject accessibilityPath]", "-[NSObject setAccessibilityPath:]",
+            "-[NSObject accessibilityNavigationStyle]", "-[NSObject setAccessibilityNavigationStyle:]",
+        },
+    },
+    {
         name = "iOS 8 accessibility container elements",
         sources = {"NSObject+AccessibilityElements8.m"},
         members = {"-[NSObject accessibilityElements]", "-[NSObject setAccessibilityElements:]"},

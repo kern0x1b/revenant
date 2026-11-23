@@ -3935,6 +3935,7 @@ enum SRErrorDataInaccessible
 enum SSReadingListErrorURLSchemeNotAllowed
 enum UIAccessibilityContrastHigh
 enum UIAccessibilityHearingDeviceEarNone
+enum UIAccessibilityNavigationStyleAutomatic
 enum UIActivityCategoryAction
 enum UIActivityIndicatorViewStyleLarge
 enum UIActivityIndicatorViewStyleMedium
@@ -12464,12 +12465,17 @@ member AVAudioPlayerNode -scheduleBuffer:completionHandler:
 member AVAudioPlayerNode -stop
 member AVAudioSession -allowHapticsAndSystemSoundsDuringRecording
 member AVAudioSession -availableInputs
+member AVAudioSession -maximumInputNumberOfChannels
+member AVAudioSession -maximumOutputNumberOfChannels
 member AVAudioSession -preferredInput
 member AVAudioSession -recordPermission
 member AVAudioSession -requestRecordPermission:
+member AVAudioSession -secondaryAudioShouldBeSilencedHint
 member AVAudioSession -setAllowHapticsAndSystemSoundsDuringRecording:error:
 member AVAudioSession -setCategory:mode:options:error:
 member AVAudioSession -setPreferredInput:error:
+member AVAudioSession -setPreferredInputNumberOfChannels:error:
+member AVAudioSession -setPreferredOutputNumberOfChannels:error:
 member AVAudioSessionCapability -initWithRevenantSupported:
 member AVAudioSessionCapability -isEnabled
 member AVAudioSessionCapability -isSupported
@@ -24719,6 +24725,8 @@ member NSObject -accessibilityAttributedUserInputLabels
 member NSObject -accessibilityAttributedValue
 member NSObject -accessibilityCustomActions
 member NSObject -accessibilityElements
+member NSObject -accessibilityNavigationStyle
+member NSObject -accessibilityPath
 member NSObject -accessibilityRespondsToUserInteraction
 member NSObject -accessibilityTextualContext
 member NSObject -accessibilityUserInputLabels
@@ -24733,6 +24741,8 @@ member NSObject -setAccessibilityAttributedUserInputLabels:
 member NSObject -setAccessibilityAttributedValue:
 member NSObject -setAccessibilityCustomActions:
 member NSObject -setAccessibilityElements:
+member NSObject -setAccessibilityNavigationStyle:
+member NSObject -setAccessibilityPath:
 member NSObject -setAccessibilityRespondsToUserInteraction:
 member NSObject -setAccessibilityTextualContext:
 member NSObject -setAccessibilityUserInputLabels:
@@ -38545,6 +38555,7 @@ type SecTrustResultType
 type UIAccessibilityAssistiveTechnologyIdentifier
 type UIAccessibilityContrast
 type UIAccessibilityHearingDeviceEar
+type UIAccessibilityNavigationStyle
 type UIAccessibilityNotifications
 type UIAccessibilityTextualContext
 type UIAccessibilityTraits
