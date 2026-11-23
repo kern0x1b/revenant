@@ -324,12 +324,15 @@ end
 
 local function stop_summary(folder)
     local cutoff = os.time() - WAIT_DAY_S
-    local count, newest = 0, nil
+    local processes, count, newest = {}, 0, nil
     for line in (io.readfile(journal_path(folder)) or ""):gmatch("[^\n]+") do
-        local at, what = line:match("^at (%d+)\tstopped (%a+)\t")
+        local at, what, pid, run, command = line:match("^at (%d+)\tstopped (%a+)\tpid (%d+)\tparent %d+\trun (%d+)\t(.*)$")
         if at and tonumber(at) >= cutoff then
-            count = count + 1
-            newest = os.date("%Y-%m-%d %H:%M:%S", tonumber(at)) .. " " .. line:match("\tpid (%d+)\t") .. " " .. what .. " " .. line:match("\trun %d+\t(.*)$")
+            if not processes[pid .. "\t" .. run] then
+                processes[pid .. "\t" .. run] = true
+                count = count + 1
+            end
+            newest = os.date("%Y-%m-%d %H:%M:%S", tonumber(at)) .. " " .. pid .. " " .. what .. " " .. command
         end
     end
     return count, newest
@@ -1248,6 +1251,72 @@ local function test_suite()
         local tail = "\tparent " .. tostring(shell_pid) .. "\trun " .. tostring(budget_pid) .. "\t"
         check("the watcher journaled the command it stopped, with the pid, the dead parent and the budget run, in the wait journal", stopped_sleep:find("^at %d+\tstopped TERM\tpid " .. tostring(command_pids[1]) .. tail:gsub("%p", "%%%0")) ~= nil
             and stopped_run:find("\tstopped TERM\t", 1, true) ~= nil and stopped_run:find(tail, 1, true) ~= nil, true)
+
+        local now = os.time()
+        local counted = path.join(base, "countpool")
+        os.mkdir(counted)
+        io.writefile(journal_path(counted), table.concat({
+            string.format("at %d\tstopped TERM\tpid 11\tparent 4\trun 5\tone", now - 30),
+            string.format("at %d\tstopped KILL\tpid 11\tparent 4\trun 5\tone", now - 28),
+            string.format("at %d\tstopped TERM\tpid 12\tparent 4\trun 5\ttwo words", now - 20),
+            string.format("at %d\tstopped TERM\tpid 13\tparent 4\trun 5\told", now - WAIT_DAY_S - 100),
+            string.format("at %d\tstopped TERM\tpid x", now - 10),
+            string.format("at %d\tclass normal\ttokens 1\twait 3\tpid 9\th %d\t/w\tcmd", now - 10, now - 10),
+            "torn"}, "\n") .. "\n")
+        local number, newest = stop_summary(counted)
+        check("a process stopped by TERM and then KILL counts once, an old line and torn lines not at all", number, 2)
+        check("the newest stop is the last whole line in the last day", newest ~= nil and newest:find(" 12 TERM two words", 1, true) ~= nil, true)
+        local report_log = path.join(base, "report.log")
+        local reporter = process.openv(os.programfile(), {"l", "-P", project, script, "status"},
+            {outpath = report_log, errpath = report_log, envs = {"REVENANT_BUDGET_POOL=" .. counted, no_floor}})
+        reporter:wait(30000)
+        reporter:close()
+        local report = io.readfile(report_log) or ""
+        check("status prints the count of processes and survives a torn journal", report:find("stopped   2 process(es) by the watcher over the last 24 h; newest: ", 1, true) ~= nil, true)
+
+        local held_pool = path.join(base, "heldpool")
+        os.mkdir(held_pool)
+        local lock = io.openlock(journal_path(held_pool) .. ".lock")
+        lock:trylock()
+        local late_log = path.join(base, "late.log")
+        local late = process.openv(os.programfile(), {"l", "-P", project, script, "stopped", "TERM", "7", "8", "9 /bin/late"},
+            {outpath = late_log, errpath = late_log, envs = {"REVENANT_BUDGET_POOL=" .. held_pool, no_floor}})
+        os.sleep(2500)
+        local early = os.isfile(journal_path(held_pool)) and io.readfile(journal_path(held_pool)) or nil
+        lock:unlock()
+        lock:close()
+        late:wait(20000)
+        late:close()
+        check("a stop line waits for the journal lock and is neither written without it nor lost", early == nil and (io.readfile(journal_path(held_pool)) or ""):find("\tstopped TERM\tpid 9\tparent 7\trun 8\t/bin/late", 1, true) ~= nil, true)
+
+        local stubborn_pool = path.join(base, "stubbornpool")
+        os.mkdir(stubborn_pool)
+        local stubborn_log = path.join(base, "stubborn.log")
+        local stubborn = process.openv("/bin/sh", {"-c", [[ "$0" l -P "$1" "$2" run --class normal --jobs 1 --min 1 -- /bin/sh -c 'trap "" TERM; exec /bin/sleep 4712'; true ]], os.programfile(), project, script},
+            {outpath = stubborn_log, errpath = stubborn_log, envs = {"REVENANT_BUDGET_POOL=" .. stubborn_pool, no_floor}})
+        deadline = os.mclock() + 30000
+        while (held_slots(stubborn_pool) < 1 or #matching("/bin/sleep 4712") < 1) and os.mclock() < deadline do
+            os.sleep(300)
+        end
+        local stubborn_run = holders(stubborn_pool)[1]
+        local stubborn_shell = stubborn_run and parent_of(stubborn_run.pid)
+        local stubborn_pids = matching("/bin/sleep 4712")
+        if stubborn_shell and stubborn_shell > 1 then
+            try { function () os.iorunv("/bin/kill", {"-9", tostring(stubborn_shell)}) end }
+        end
+        deadline = os.mclock() + 30000
+        while (#matching("/bin/sleep 4712") > 0 or held_slots(stubborn_pool) > 0) and os.mclock() < deadline do
+            os.sleep(300)
+        end
+        local stubborn_left = #matching("/bin/sleep 4712")
+        for _, pid in ipairs(stubborn_pids) do
+            try { function () os.iorunv("/bin/kill", {"-9", tostring(pid)}) end }
+        end
+        stubborn:close()
+        local stubborn_journal = io.readfile(journal_path(stubborn_pool)) or ""
+        check("a command that ignores TERM is ended by KILL two seconds later", stubborn_left, 0)
+        check("and the journal has a TERM line and a KILL line for it", #stubborn_pids == 1 and stubborn_journal:find("\tstopped TERM\tpid " .. tostring(stubborn_pids[1]) .. "\t", 1, true) ~= nil
+            and stubborn_journal:find("\tstopped KILL\tpid " .. tostring(stubborn_pids[1]) .. "\t", 1, true) ~= nil, true)
     end
 
     os.rm(base)
