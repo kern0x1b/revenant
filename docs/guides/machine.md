@@ -607,7 +607,7 @@ key, because a rerun costs seconds and a verdict that no longer holds costs a pu
   so a private cache of any name never enters a key (`.gitignore` has `/.cache-*/` for the same reason);
 - for `comments`, the content of the local `.git/info/attributes` and of the global attributes file, which `git check-attr` reads
   to classify a file;
-- for `recipe digests`, `lowered members`, `lowered exports`, `light suites` and `backports build`, which run against what is
+- for `recipe digests`, `lowered members`, `lowered exports`, `light suites`, `backports build` and `backports exports`, which run against what is
   installed: the Xcode and SDK probes, where `git`, `rsync`, `cmake`, `ninja`, `xcrun`, `clang`, `cc`, `make` and `sh` resolve and the
   first line of what each prints for `--version`, every install of `llvm`, `swift`, `swift-bootstrap`, `swift-runtime`, `libcxx`, `apple-compat`, `iphoneos-sdk`, `ld64` and
   `ldid` in the store with the digest of its `manifest.txt`, and the content key of the iPhoneOS SDK (every file of it, with
@@ -633,8 +633,8 @@ so an undeclared check is slower, never stale. The narrow ones: `comments test` 
 tests of `tools/private_cache.lua`, `tools/ci_errors.lua` and `tools/ci_swiftc_replay.lua` (the tool, its folder and the addon
 modules), `credentials` and `copied_text` (`agent-skills/tests/`), `negative shape` (the Backports tests and `emulator/`),
 `recipe digests` (the inputs the recipes list in `toolchain/modules/digest.lua`, the digest files and the addon modules), and
-`lowered members` and `lowered exports`, which skip `docs/`, Markdown files, `.agents/` and `agent-skills/`. `backports build` skips
-nothing, because the copy it builds in holds every file. A check that starts to read a file outside its declaration, or an ignored
+`lowered members` and `lowered exports`, which skip `docs/`, Markdown files, `.agents/` and `agent-skills/`. `backports build` and `backports exports` skip
+nothing, because the copy they build in holds every file. A check that starts to read a file outside its declaration, or an ignored
 file, must say so there; an ignored file is not part of a key.
 
 The checks that run inside xmake (`comments`, `layout`, `docs_commands`, `recipe digests` and the rest of the cheap ones) and
@@ -681,7 +681,7 @@ first read, because every suite reads it). `toolchain/modules/recalled.lua` hold
 and `prepush`'s own test that it reads the memo the way `prepush` writes it.
 
 Order and flags. The cheap checks run first and the heavy ones (`lowered members`, `lowered exports`, `light suites`,
-`backports build`) last, and the run stops at the first check that fails, so a two-second `layout` failure does not wait
+`backports build`, `backports exports`) last, and the run stops at the first check that fails, so a two-second `layout` failure does not wait
 behind a build. `--keep-going` runs every check regardless (the old behaviour), `--list` prints the names with the heavy ones
 marked, and `--only <check,...>` runs just those (names with a space are quoted: `--only "layout,light suites"`) for iterations;
 an unknown name is an error, and a run with `--only` says that a push needs all checks. The full run before a push stays

@@ -233,6 +233,11 @@ local function lua(script, ...)
     return budgeted(table.join({os.programfile(), "l", "-P", root, path.join(root, script)}, {...}))
 end
 
+local function backports_exports()
+    local built = path.join(gate_tree(gate_folder()), "build", "iphoneos", "armv7", "release")
+    return lua("frameworks/Backports/tests/export_baseline_test.lua", "check", built)
+end
+
 local function declared(xmake, name)
     return xmake:find("[%s{,]" .. name .. " = {") ~= nil
 end
@@ -771,10 +776,12 @@ local STEPS = {
     {name = "host install test", run = function () return lua("frameworks/ReactNative/tests/host_install_test.lua") end},
     {name = "isolate test", run = function () return lua("frameworks/ReactNative/tests/isolate_test.lua") end},
     {name = "overlay test", reads = {"frameworks/ReactNative/tools/overlay.lua", "frameworks/ReactNative/tests/overlay_test.lua"}, run = function () return lua("frameworks/ReactNative/tests/overlay_test.lua") end},
+    {name = "export baseline test", reads = {"frameworks/Backports/tests/export_baseline_test.lua", "toolchain/modules/apple/", "toolchain/modules/byteorder.lua"}, run = function () return lua("frameworks/Backports/tests/export_baseline_test.lua", "test") end},
     {name = "lowered members", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_members_test.lua") end},
     {name = "lowered exports", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_exports_test.lua") end},
     {name = "light suites", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("toolchain/tests/light_suites.lua") end},
     {name = "backports build", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = backports_build},
+    {name = "backports exports", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = backports_exports},
 }
 
 local function test_suite()
