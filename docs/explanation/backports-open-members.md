@@ -355,6 +355,21 @@ member stands on something weaker than a host oracle, or on an assumption a devi
   `API_UNAVAILABLE(macos)`. The test is a contract check of the SDK declarations and the backport source
   (`tests/ios6_members_test.lua`). The iOS 6 behaviour is not run on a device. It rests on the SDK's `ios(6.0)` annotation
   of `AVAudioSession.inputDataSource`, and on the port answering for the current input only.
+- AVAudioSession secondary-audio hint (`src/AVFAudio/AVAudioSession+SecondaryAudioHint8.m`): Apple's
+  `secondaryAudioShouldBeSilencedHint` is true while another application plays audio whose session does not mix (QA1882).
+  iOS 6 reports only `otherAudioPlaying`, whether any other application plays, so the backport returns that: it is wider
+  than Apple's, and it is also true for another application's mixable audio. No open implementation was found to compare
+  with: WebRTC's `RTCAudioSession.mm` only forwards the property. Tests: the contract check
+  (`tests/avfoundation_test.lua`) and the runtime case `avfoundation_audio_session_hint` on the iOS 6.1.3 emulator, which
+  compares the hint with `otherAudioPlaying`. Not run with another application playing on a device.
+- AVAudioSession channel counts (`src/AVFAudio/AVAudioSession+Channels7.m`): `maximumInputNumberOfChannels` and
+  `maximumOutputNumberOfChannels` answer the route's current `inputNumberOfChannels` and `outputNumberOfChannels`, which are
+  the only counts iOS 6 offers. `setPreferredInputNumberOfChannels:error:` and its output twin answer YES for that same
+  count and NO with `AVAudioSessionErrorCodeBadParam` for any other: iOS 6 has no call that changes it. Reasoned from the
+  iOS 6.1.3 inventory (the four counts exist, no preferred-count member does); not run on a device with a multichannel route.
+- NSObject accessibility path and navigation style (`src/UIKit/NSObject+AccessibilityPath7.m`): the two values are stored
+  on the object, as `accessibilityElements` is. Nothing in iOS 6 reads them, so they change nothing on screen (reasoned
+  from the iOS 6.1.3 inventory, which has no consumer; not run with VoiceOver on).
 - CLGeocoder postal address (`src/CoreLocation/CLGeocoder+PostalAddress11.m`): a contract test only. Geocoding needs the
   network, so there is no offline behavioural oracle. The mapping is the existing `RevenantContacts` one, reached through
   a forward declaration and a link dependency on `ContactsBackports`. The locale is ignored, as in
