@@ -419,7 +419,7 @@ end
 function exported_symbols(nm_text)
     local exported = {}
     for line in nm_text:gmatch("[^\n]+") do
-        local symbol = line:match("^%x+ %a (%S+)$")
+        local symbol = line:match("^%x+ %a (%S+)$") or line:match("^%s+I (%S+) %(indirect for %S+%)$")
         if symbol then
             exported[symbol] = true
         end
