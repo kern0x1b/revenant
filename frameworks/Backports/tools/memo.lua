@@ -65,11 +65,14 @@ function compute(opt)
         return nil
     end
     add_files(lines, facts, "facts")
-    for _, name in ipairs(opt.names or sdkfiles.framework_names(sdk)) do
+    local names = opt.names or sdkfiles.framework_names(sdk)
+    for _, name in ipairs(names) do
+        table.insert(lines, "framework/" .. name)
         if not os.isfile(path.join(facts, name .. ".tsv")) or not os.isfile(path.join(facts, "install_names.tsv")) then
             return nil
         end
     end
+    table.insert(lines, "grep=" .. hash.sha256("/usr/bin/grep"))
     for _, name in ipairs(ENVIRONMENT) do
         local value = opt.env and opt.env[name] or os.getenv(name)
         table.insert(lines, "env/" .. name .. "=" .. tostring(value or ""))

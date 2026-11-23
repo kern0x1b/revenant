@@ -140,6 +140,12 @@ local function memo_test()
     changed(path.join(modules, "dyld.lua"), "ten\n", "an addon module")
     changed(xmake, "eleven\n", "the configuration")
     changed(inventory, "twelve\n", "the device inventory")
+    opt.names = {"Other"}
+    io.writefile(path.join(facts, "Other.tsv"), "thirteen\n")
+    local names_key = memo.compute(opt)
+    expect("a change of the framework list changes the key", names_key ~= key, tostring(names_key))
+    key = names_key
+    opt.names = {"Framework"}
     opt.env.REVENANT_GEN_SDK = "/another/sdk"
     local environment_key = memo.compute(opt)
     expect("a change of the SDK selection changes the key", environment_key ~= key, tostring(environment_key))
