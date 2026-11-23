@@ -49,7 +49,8 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
 - Nothing but the project lives in the revenant folder: no scratch, logs, notes or run output. Apart from the root
   `build/`, `.xmake/` and `.cache/`, the checkout holds nothing that is not the project, except worktrees, which live in one place
   only, `.claude/worktrees/<task>/`; git ignores that folder (`.gitignore`). Scratch goes to
-  `.cache/scratch/<task>/` of the main checkout, which every worktree shares, and is deleted when the task ends.
+  `.cache/scratch/<task>/` of the cache the run uses (`xmakew` takes `<worktree>/.cache` in a worktree, `<checkout>/.cache` in the
+  main checkout, and `REVENANT_CACHE` when it is set, so a worktree does not share its scratch), and is deleted when the task ends.
 - A test or a check does not use the system temporary folder (`/tmp`, `os.tmpdir()`, `os.tmpfile()`): it makes a folder of its
   own under the scratch of the checkout, `fixtures.scratch()` in a light suite and `workspace.fresh(name)` in any other
   script, so two runs from two worktrees never meet on one path. Two checks keep it so, and neither intercepts every write:
