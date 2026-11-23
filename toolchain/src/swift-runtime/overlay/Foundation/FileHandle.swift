@@ -15,7 +15,7 @@ extension FileHandle {
             return nil
         }
         var error: NSError?
-        let data = revenant_file_handle_read(self, UInt(count), &error)
+        let data = revenant_file_handle_read(self, count, &error)
         if let failure = error {
             throw failure
         }
