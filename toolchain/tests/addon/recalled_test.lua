@@ -27,16 +27,17 @@ function failures(opt)
     local function forget(key)
         os.tryrm(path.join(memo, "light-suites", key))
     end
-    local function process(pid)
-        local text = try { function () return os.iorunv("ps", {"-ww", "-o", "lstart=", "-p", tostring(pid)}) end } or ""
-        return (text:gsub("%s+", " "):gsub("^ ", ""):gsub(" $", ""))
+    local function alive(pid)
+        return os.execv("/bin/kill", {"-0", tostring(pid)}, {try = true}) == 0
     end
     local function real(folder)
         return os.iorunv("sh", {"-c", "cd \"$1\" && pwd -P", "sh", folder}):trim()
     end
-    local function forged(folder, nonce, key, tree, pid, began, where)
+    local function forged(folder, nonce, key, tree, pid, began, where, owner)
         local file = path.join(folder, string.format("light-suites-%s-%s.verdict", pid, nonce))
         io.writefile(file, table.concat({nonce, key, tree, tostring(pid), began, where or folder, LINE}, "\n") .. "\n")
+        io.writefile(path.join(folder, string.format("light-suites-%s-%s.started", pid, nonce)),
+                     table.concat({tostring(pid), began, owner or "ci_local.lua"}, "\n") .. "\n")
         return nonce .. "@" .. file
     end
 
@@ -49,7 +50,7 @@ function failures(opt)
         os.sleep(100)
     end
     local owner = tonumber(io.readfile(pidfile):trim())
-    local began = process(owner)
+    local began = tostring(os.time())
     local me = os.getpid()
 
     local tree = folder_of("tree")
@@ -62,7 +63,7 @@ function failures(opt)
     check("the value is not the line", (value or ""):find(LINE, 1, true), nil)
     check("a verdict the memo holds, for this checkout, from a live ci_local, is read", recalled.read(value, tree, memo), LINE)
     check("it is read again by the next suite", recalled.read(value, tree, memo), LINE)
-    check("reading writes nothing beside the verdict file", #os.files(path.join(folder, "*")), 1)
+    check("reading writes nothing beside the verdict and its start note", #os.files(path.join(folder, "*")), 2)
 
     local link = path.join(home, "tree-link")
     os.ln(tree, link)
@@ -102,13 +103,16 @@ function failures(opt)
     forget(OTHER_KEY)
     check("a verdict the memo no longer holds is refused again", recalled.read(refused, tree, memo), nil)
 
-    local mine = process(me)
-    check("a live process that is not ci_local is no owner", recalled.read(forged(folder_of("not-ci"), "0123456789abcdef", KEY, real(tree), me, mine), tree, memo), nil)
+    local mine = tostring(os.time())
+    check("a live process that is not ci_local is no owner", recalled.read(forged(folder_of("not-ci"), "0123456789abcdef", KEY, real(tree), me, mine, nil, "other.lua"), tree, memo), nil)
     check("a hand-off cannot be issued for a process that is not running", recalled.issue(folder_of("none"), KEY, tree, LINE, 999999), nil)
     local finished = os.iorunv("sh", {"-c", "echo $$"}):trim()
-    check("the process that made the file is gone", process(finished), "")
+    check("the process that made the file is gone", alive(finished), false)
     check("a run that has ended is no verdict", recalled.read(forged(folder_of("dead"), "0123456789abcdef", KEY, real(tree), finished, began), tree, memo), nil)
-    check("a process number that another process has taken is no verdict", recalled.read(forged(folder_of("reused"), "0123456789abcdef", KEY, real(tree), owner, "Mon Jan 1 00:00:00 2001"), tree, memo), nil)
+    local reused = forged(folder_of("reused"), "0123456789abcdef", KEY, real(tree), owner, began)
+    local reused_note = path.join(folder_of("reused"), string.format("light-suites-%s-0123456789abcdef.started", owner))
+    io.writefile(reused_note, tostring(me) .. "\n" .. began .. "\nci_local.lua\n")
+    check("a start note naming another process is no verdict", recalled.read(reused, tree, memo), nil)
 
     local tampered = recalled.issue(folder_of("tampered"), KEY, tree, LINE, owner)
     local tampered_file = tampered:match("^%x+@(.+)$")
