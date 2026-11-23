@@ -62,7 +62,9 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   groups), so the temporary files of xmake and of the compilers land there and are removed with it. The same folder holds
   the scratch of the suites' children (`REVENANT_TASK` names a task inside it), so the `tests.<hex>` folders of a run go with it
   when the run ends, pass or fail.
-- A worker stops only a process it started: it keeps the pid from the launch and checks that the process's working directory is its own worktree (`lsof -a -d cwd -p <pid>`) before `kill`; a process found by its command line (`ps | grep`, `pgrep -f`, `pkill -f`) may be another checkout's or another session's.
+- A worker stops only a process it started: it keeps the pid from the launch and checks that the process's working
+  directory is its own checkout (`lsof -a -d cwd -p <pid>`) before `kill`; a process found by its command line
+  (`ps | grep`, `pgrep -f`, `pkill -f`) may be another checkout's or another session's.
 - No comments in code, scripts or recipes; a licence header a licence requires is the only exception. What a change
   does and why goes in its commit message; knowledge a reader of the code needs goes in `docs/`.
   `./xmakew l tools/comments.lua check [path ...]` finds comments, `strip` removes them, and `verify [rev]` proves that

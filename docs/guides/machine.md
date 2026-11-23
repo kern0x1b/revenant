@@ -338,7 +338,8 @@ processes (`facts.lua constant-intros`, one `runjobs` job per shard, all four at
 fourth framework, keeps for each name its first introduction and its last kind, and the parent merges the shards in the order of the
 frameworks, so the file does not depend on the shard count. Measured 2026-11-23 on the same SDK at a load of 24: 168 s instead of 583 s,
 35,571 names, the file byte for byte the one the sequential code wrote (`tests/facts_parallel_test.lua` compares the bytes of none to sixteen
-requested shards on a fixture SDK of seven frameworks, where at most seven processes start, checks that the processes started, and
+requested shards on a fixture SDK of seven frameworks, where at most seven processes start, checks that each shard process wrote
+its own pid (distinct, none of them the pid of the process that asked, none at all for one shard or for a read of the cache), and
 checks a header that does not compile).
 
 The store keeps one copy of each, `<store>/backports/<key>` and `<store>/modcache/<key>`, and `prepush` moves files between it
@@ -849,3 +850,8 @@ key, a file a check does not read leaves its key, a failing check runs again, th
 and KILL; they pin the budget's disk floor (`REVENANT_BUDGET_DISK_GB`) to 0 for those runs, because below the floor (100 GB)
 the budget refuses every heavy command and the run would hold nothing (this made the TERM case fail on every run while the
 disk was under 100 GB, 2026-11-22: it was the disk, not timing). A run with a floor no disk meets is checked to be refused.
+The live tests find their own probes by the root of their checkout in the command line and by a random number (100000 to 9099999),
+not by the end of the command line and a number made from the pid, which could count and kill the probes of a test running in
+another checkout; the processes of a run are the descendants of its own prepush, taken while it holds its tokens, and in each
+round a probe of an imaginary other checkout with the same number must be neither counted nor killed. Every probe is removed
+when a check fails too.

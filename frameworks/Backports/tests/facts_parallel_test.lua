@@ -74,7 +74,17 @@ local function computed(sdk, shards)
     assert(os.isfile(file), "the constant intros of " .. tostring(shards) .. " shards were not cached")
     local bytes = io.readfile(file, {encoding = "binary"})
     os.tryrm(file)
-    return intros, bytes, report.processes
+    return intros, bytes, report.pids
+end
+
+local function assert_children(pids, count, what)
+    assert(#pids == count, what .. " started " .. #pids .. " shard processes, wanted " .. count)
+    local seen = {}
+    for _, pid in ipairs(pids) do
+        assert(pid ~= nil and pid > 0 and pid ~= os.getpid(), what .. " ran a shard in the process that asked (pid " .. tostring(pid) .. ")")
+        assert(not seen[pid], what .. " ran two shards in the process " .. pid)
+        seen[pid] = true
+    end
 end
 
 local function failure_of(action)
@@ -98,8 +108,8 @@ function main()
         before[folder] = true
     end
     local sdk = fixture("facts-parallel-sdk")
-    local sequential, reference, processes = computed(sdk, 1)
-    assert(processes == 0, "one shard started " .. tostring(processes) .. " processes, wanted none: it scans in the process that asked")
+    local sequential, reference, pids = computed(sdk, 1)
+    assert_children(pids, 0, "one shard")
     local want = {
         Both = {intro = 7000, kind = "extern"}, EarlyIntro = {intro = 8000, kind = "extern"}, GGOnly = {intro = 13000, kind = "extern"},
         InEveryFramework = {intro = 3000, kind = "extern"}, LastKind = {intro = nil, kind = "extern"}, LateIntro = {intro = 9000, kind = "extern"},
@@ -118,26 +128,32 @@ function main()
 
     local FRAMEWORKS = 7
     for _, shards in ipairs({0, 2, 3, 4, 7, 16}) do
-        local intros, bytes, started = computed(sdk, shards)
-        local wanted = math.min(shards, FRAMEWORKS) > 1 and math.min(shards, FRAMEWORKS) or 0
-        assert(started == wanted, shards .. " shards requested started " .. tostring(started) .. " shard processes, wanted " .. wanted)
+        local intros, bytes, children = computed(sdk, shards)
+        assert_children(children, math.min(shards, FRAMEWORKS) > 1 and math.min(shards, FRAMEWORKS) or 0, shards .. " shards requested")
         assert(bytes == reference, shards .. " shards wrote another constant_intros.tsv than one shard:\n" .. bytes .. "\n---\n" .. reference)
         assert(describe(intros) == describe(sequential), shards .. " shards returned other constant intros than one shard:\n" .. describe(intros))
     end
 
-    local default_intros, default_bytes, default_started = computed(sdk, nil)
-    assert(default_started == 4, "the default is four shard processes, got " .. tostring(default_started))
+    local default_intros, default_bytes, default_children = computed(sdk, nil)
+    assert_children(default_children, 4, "the default shard count")
     assert(default_bytes == reference, "the default shard count wrote another constant_intros.tsv than one shard")
     assert(describe(default_intros) == describe(sequential), "the default shard count returned other constant intros than one shard")
+
+    local cached_file = path.join(sdkfiles.cache_folder(sdk), "constant_intros.tsv")
+    os.tryrm(cached_file)
+    facts.constant_intros(sdk, {shards = 3})
+    local cached_report = {pids = {1, 2, 3}}
+    local from_cache = facts.constant_intros(sdk, {shards = 3, report = cached_report})
+    assert_children(cached_report.pids, 0, "a read of the cache")
+    assert(describe(from_cache) == describe(sequential), "the cached constant intros differ from the computed ones")
+    os.tryrm(cached_file)
 
     local broken = fixture("facts-parallel-broken-sdk", nil, "DDFixture")
     local umbrella = path.join(broken, "System", "Library", "Frameworks", "DDFixture.framework", "Headers", "DDFixture.h")
     local cache = path.join(sdkfiles.cache_folder(broken), "constant_intros.tsv")
     for _, shards in ipairs({1, 3}) do
-        local report = {}
-        local failure = failure_of(function () facts.constant_intros(broken, {shards = shards, report = report}) end)
+        local failure = failure_of(function () facts.constant_intros(broken, {shards = shards}) end)
         assert(failure ~= nil, shards .. " shards did not fail for a header that does not compile")
-        assert(report.processes == (shards > 1 and shards or 0), shards .. " shards requested started " .. tostring(report.processes) .. " shard processes before they failed")
         for _, part in ipairs({"clang failed to dump the declarations of " .. umbrella, "the broken fixture header", "-ast-dump"}) do
             assert(failure:find(part, 1, true), shards .. " shards failed without naming " .. part .. ":\n" .. failure)
         end

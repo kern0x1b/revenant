@@ -303,7 +303,7 @@ local function shard_failure(folder, errors)
     return table.concat(reports, "\n")
 end
 
-local function sharded_summaries(sdk, names, shards)
+local function sharded_summaries(sdk, names, shards, pids)
     local folder = sdkfiles.workspace().fresh("constant-intros")
     local summaries, failure = {}, nil
     try {
@@ -317,6 +317,7 @@ local function sharded_summaries(sdk, names, shards)
             end, {total = #shards, comax = #shards})
             for shard = 1, #shards do
                 table.insert(summaries, read_summary(path.join(folder, shard .. ".tsv")))
+                table.insert(pids, tonumber(io.readfile(path.join(folder, shard .. ".tsv.pid"))))
             end
         end,
         catch {
@@ -345,6 +346,7 @@ function main(command, sdk, output, ...)
     local failure
     try {
         function ()
+            io.writefile(output .. ".pid", tostring(os.getpid()))
             write_summary(output, constant_summary(sdk, sdkfiles.framework_names(sdk), indexes))
         end,
         catch {
@@ -360,6 +362,10 @@ function main(command, sdk, output, ...)
 end
 
 function constant_intros(sdk, opt)
+    local pids = {}
+    if opt and opt.report then
+        opt.report.pids = pids
+    end
     local file = path.join(sdkfiles.cache_folder(sdk), "constant_intros.tsv")
     if os.isfile(file) then
         local cached = {}
@@ -378,12 +384,9 @@ function constant_intros(sdk, opt)
     for index = 1, #names do
         table.insert(shards[(index - 1) % #shards + 1], index)
     end
-    if opt and opt.report then
-        opt.report.processes = #shards > 1 and #shards or 0
-    end
     local summaries
     if #shards > 1 then
-        summaries = sharded_summaries(sdk, names, shards)
+        summaries = sharded_summaries(sdk, names, shards, pids)
     else
         summaries = {constant_summary(sdk, names, shards[1])}
     end

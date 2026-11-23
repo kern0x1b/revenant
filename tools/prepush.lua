@@ -1663,83 +1663,126 @@ local function test_live()
         return alive
     end
 
-    local live_log = path.join(base, "live.log")
-    local live_tag = tostring(unique)
-    local live_other = other_probe("probe-say", live_tag)
-    local live = process.openv(os.programfile(), {"l", "-P", root, script, "probe-say", live_tag}, {outpath = live_log, errpath = live_log, envs = {"REVENANT_BUDGET_HELD="}})
-    local seen = wait_until(function () return (io.readfile(live_log) or ""):find("probe line", 1, true) ~= nil end, 60000)
-    local still_running = #probe_mains("probe-say", live_tag)
-    live:kill()
-    kill("KILL", probe_mains("probe-say", live_tag))
-    local other_live_left = #other_probes()
-    remove_other_probes(live_other)
-    check("a line is in the log file while the process that wrote it still runs", seen and still_running == 1, true)
-    check("a probe of another checkout that has the same number is neither counted nor killed", other_live_left, 1)
-
-    local function hold_environment(pool, floor)
-        return {"REVENANT_BUDGET_POOL=" .. pool, "REVENANT_BUDGET_HELD=", "REVENANT_BUDGET_DISK_GB=" .. floor}
+    local handles = {}
+    local function cleanup()
+        local numbers = {}
+        for _, offset in ipairs({0, 1, 7, 14, 21}) do
+            table.insert(numbers, tostring(unique + offset))
+        end
+        local mains = matching(function (text)
+            if text:find(root, 1, true) == nil then
+                return false
+            end
+            for _, number in ipairs(numbers) do
+                if ends_with(text, "prepush.lua probe-hold " .. number) or ends_with(text, "prepush.lua probe-say " .. number) then
+                    return true
+                end
+            end
+            return false
+        end)
+        kill("KILL", with_descendants(mains))
+        kill("KILL", with_descendants(other_probes()))
+        for _, handle in ipairs(handles) do
+            try { function () handle:kill() end }
+            try { function () handle:close() end }
+        end
+        os.tryrm(base)
+    end
+    local function started(handle)
+        table.insert(handles, handle)
+        return handle
     end
 
-    local refused_seconds = tostring(unique + 1)
-    local refused_pool = path.join(base, "poolRefused")
-    os.mkdir(refused_pool)
-    local refused_log = path.join(base, "hold-refused.log")
-    local refused = process.openv(os.programfile(), {"l", "-P", root, script, "probe-hold", refused_seconds},
-                                  {outpath = refused_log, errpath = refused_log, envs = hold_environment(refused_pool, "100000000")})
-    local refusal_said = wait_until(function () return (io.readfile(refused_log) or ""):find("GB floor, so no heavy command starts", 1, true) ~= nil end, 90000)
-    local refused_sleepers = #matching(function (text) return text == "/bin/sleep " .. refused_seconds end)
-    refused:kill()
-    kill("KILL", probe_mains("probe-hold", refused_seconds))
-    kill("KILL", matching(function (text) return text == "/bin/sleep " .. refused_seconds end))
-    check("a run whose disk is below the budget's floor is refused and starts no command, so the runs below pin the floor to 0", refusal_said and refused_sleepers == 0, true)
+    local failure
+    try {
+        function ()
+            local live_log = path.join(base, "live.log")
+            local live_tag = tostring(unique)
+            local live_other = started(other_probe("probe-say", live_tag))
+            local live = started(process.openv(os.programfile(), {"l", "-P", root, script, "probe-say", live_tag}, {outpath = live_log, errpath = live_log, envs = {"REVENANT_BUDGET_HELD="}}))
+            local seen = wait_until(function () return (io.readfile(live_log) or ""):find("probe line", 1, true) ~= nil end, 60000)
+            local still_running = #probe_mains("probe-say", live_tag)
+            live:kill()
+            kill("KILL", probe_mains("probe-say", live_tag))
+            local other_live_left = #other_probes()
+            remove_other_probes(live_other)
+            check("a line is in the log file while the process that wrote it still runs", seen and still_running == 1, true)
+            check("a probe of another checkout that has the same number is neither counted nor killed", other_live_left, 1)
 
-    for round, signal in ipairs({"TERM", "INT", "KILL"}) do
-        local seconds = tostring(unique + round * 7)
-        local sleeping = "/bin/sleep " .. seconds
-        local pool = path.join(base, "pool" .. signal)
-        os.mkdir(pool)
-        local log = path.join(base, "hold-" .. signal .. ".log")
-        local other = other_probe("probe-hold", seconds)
-        local run = process.openv(os.programfile(), {"l", "-P", root, script, "probe-hold", seconds},
-                                  {outpath = log, errpath = log, envs = hold_environment(pool, "0")})
-        local function held_text()
-            return try { function () return os.iorunv(os.programfile(), {"l", "-P", root, budget_script, "status"}, {envs = {REVENANT_BUDGET_POOL = pool, REVENANT_BUDGET_HELD = ""}}) end } or ""
-        end
-        local function commands()
-            return matching_among(with_descendants(probe_mains("probe-hold", seconds)), function (text) return text == sleeping end)
-        end
-        local running = false
-        wait_until(function ()
-            running = #commands() > 0 and held_text():find(" holds 1 token(s)", 1, true) ~= nil
-            return running or (io.readfile(log) or ""):find("budget:", 1, true) ~= nil
-        end, 90000)
-        local mains = probe_mains("probe-hold", seconds)
-        local family = with_descendants(mains)
-        local runs = matching_among(family, function (text) return text:find("budget.lua run", 1, true) ~= nil and ends_with(text, "-- " .. sleeping) end)
-        local sleepers = matching_among(family, function (text) return text == sleeping end)
-        check("a run that holds its tokens has its prepush, its budget run and its command (" .. signal .. ")",
-              string.format("held and listed %s, prepush %d, budget run %d, command %d, first line of its log %q", tostring(running), #mains, #runs, #sleepers, (io.readfile(log) or ""):match("[^\n]*")),
-              "held and listed true, prepush 1, budget run 1, command 1, first line of its log \"\"")
-        local taken = snapshot(family)
-        kill(signal, mains)
-        local function all_gone()
-            return #survivors(taken) == 0
-        end
-        local gone = wait_until(all_gone, 30000)
-        local leftovers = survivors(taken)
-        local held_after = held_text()
-        kill("KILL", leftovers)
-        kill("KILL", mains)
-        run:kill()
-        local other_left = #other_probes()
-        remove_other_probes(other)
-        check("after SIG" .. signal .. " to prepush no budget run and no command is left", #leftovers, 0)
-        check("and the process that was signalled is gone", gone, true)
-        check("and no token is held", held_after:find("held      0 token(s)", 1, true) ~= nil and not held_after:find(" holds ", 1, true), true)
-        check("and the probe of another checkout that has the same number is still there", other_left, 1)
+            local function hold_environment(pool, floor)
+                return {"REVENANT_BUDGET_POOL=" .. pool, "REVENANT_BUDGET_HELD=", "REVENANT_BUDGET_DISK_GB=" .. floor}
+            end
+
+            local refused_seconds = tostring(unique + 1)
+            local refused_pool = path.join(base, "poolRefused")
+            os.mkdir(refused_pool)
+            local refused_log = path.join(base, "hold-refused.log")
+            local refused = started(process.openv(os.programfile(), {"l", "-P", root, script, "probe-hold", refused_seconds},
+                                                  {outpath = refused_log, errpath = refused_log, envs = hold_environment(refused_pool, "100000000")}))
+            local refusal_said = wait_until(function () return (io.readfile(refused_log) or ""):find("GB floor, so no heavy command starts", 1, true) ~= nil end, 90000)
+            local refused_sleepers = #matching(function (text) return text == "/bin/sleep " .. refused_seconds end)
+            refused:kill()
+            kill("KILL", probe_mains("probe-hold", refused_seconds))
+            kill("KILL", matching(function (text) return text == "/bin/sleep " .. refused_seconds end))
+            check("a run whose disk is below the budget's floor is refused and starts no command, so the runs below pin the floor to 0", refusal_said and refused_sleepers == 0, true)
+
+            for round, signal in ipairs({"TERM", "INT", "KILL"}) do
+                local seconds = tostring(unique + round * 7)
+                local sleeping = "/bin/sleep " .. seconds
+                local pool = path.join(base, "pool" .. signal)
+                os.mkdir(pool)
+                local log = path.join(base, "hold-" .. signal .. ".log")
+                local other = started(other_probe("probe-hold", seconds))
+                local run = started(process.openv(os.programfile(), {"l", "-P", root, script, "probe-hold", seconds},
+                                                  {outpath = log, errpath = log, envs = hold_environment(pool, "0")}))
+                local function held_text()
+                    return try { function () return os.iorunv(os.programfile(), {"l", "-P", root, budget_script, "status"}, {envs = {REVENANT_BUDGET_POOL = pool, REVENANT_BUDGET_HELD = ""}}) end } or ""
+                end
+                local function commands()
+                    return matching_among(with_descendants(probe_mains("probe-hold", seconds)), function (text) return text == sleeping end)
+                end
+                local running = false
+                wait_until(function ()
+                    running = #commands() > 0 and held_text():find(" holds 1 token(s)", 1, true) ~= nil
+                    return running or (io.readfile(log) or ""):find("budget:", 1, true) ~= nil
+                end, 90000)
+                local mains = probe_mains("probe-hold", seconds)
+                local family = with_descendants(mains)
+                local runs = matching_among(family, function (text) return text:find("budget.lua run", 1, true) ~= nil and ends_with(text, "-- " .. sleeping) end)
+                local sleepers = matching_among(family, function (text) return text == sleeping end)
+                local taken = snapshot(with_descendants(mains))
+                kill(signal, mains)
+                local gone = wait_until(function () return #survivors(taken) == 0 end, 30000)
+                local leftovers = survivors(taken)
+                local held_after = held_text()
+                kill("KILL", leftovers)
+                kill("KILL", mains)
+                run:kill()
+                local other_left = #other_probes()
+                remove_other_probes(other)
+                check("a run that holds its tokens has its prepush, its budget run and its command (" .. signal .. ")",
+                      string.format("held and listed %s, prepush %d, budget run %d, command %d, first line of its log %q", tostring(running), #mains, #runs, #sleepers, (io.readfile(log) or ""):match("[^\n]*")),
+                      "held and listed true, prepush 1, budget run 1, command 1, first line of its log \"\"")
+                check("after SIG" .. signal .. " to prepush no budget run and no command is left", #leftovers, 0)
+                check("and the process that was signalled is gone", gone, true)
+                check("and no token is held", held_after:find("held      0 token(s)", 1, true) ~= nil and not held_after:find(" holds ", 1, true), true)
+                check("and the probe of another checkout that has the same number is still there", other_left, 1)
+            end
+        end,
+        catch {
+            function (raised)
+                failure = tostring(raised)
+            end
+        },
+        finally {
+            function ()
+                cleanup()
+            end
+        }
+    }
+    if failure then
+        raise("%s", failure)
     end
-
-    os.rm(base)
     print("prepush: %d live tests passed", count)
 end
 
