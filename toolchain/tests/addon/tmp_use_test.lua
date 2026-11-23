@@ -13,6 +13,7 @@ local SCANNED = {
     "frameworks/Backports/tests/export_baseline_test.lua",
     "frameworks/Backports/tests/lowered_exports_test.lua",
     "frameworks/Backports/tests/lowered_members_test.lua",
+    "frameworks/Backports/tools/generate.lua",
     "tools/analysis_cache.lua",
     "tools/budget.lua",
     "tools/dyld_caches.lua",
