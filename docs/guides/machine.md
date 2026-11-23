@@ -786,8 +786,9 @@ it looks at the caller, so it is not an interception of every write; xmake's own
 of the suites and of the tests that prepush runs, and the orchestrator of `light suites` runs every suite, named on the command
 line or not, in child processes, and `prepush` starts each `lua()` step, with `XMAKE_TMPDIR` and `TMPDIR` set to a folder of its
 own in that scratch (one folder per run of the suites, shared by its groups: xmake reads the variables once, so a process
-cannot move its own), so the writes of xmake and of the compilers are
-there too and two prepush runs of two worktrees share no `/tmp` path (measured 2026-11-23: no new entry of ours in `/tmp` or
+cannot move its own; the same folder holds the scratch of the children, `REVENANT_TASK` naming a task inside it, so the
+`tests.<hex>` folders that each suite made and left, 68 after a few runs, are removed at the end of the run), so the writes of
+xmake and of the compilers are there too and two prepush runs of two worktrees share no `/tmp` path (measured 2026-11-23: no new entry of ours in `/tmp` or
 the user's `$TMPDIR` during a run of the 67 suites; the folder path is about 125 characters in a worktree and 90 in the main checkout, a Unix
 socket path may not exceed 104 bytes, and no light suite opens a socket there). Keep the caches
 (`.cache`/`REVENANT_CACHE`, `build/backports-gate`) between runs: a cold `backports build`

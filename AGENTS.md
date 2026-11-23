@@ -59,7 +59,9 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   looks at the caller; xmake's own calls pass). What the checks do not see goes to the scratch anyway: the orchestrator of
   `light suites` runs every suite, named or not, in child processes, and `prepush` starts every `lua()` step, with
   `XMAKE_TMPDIR` and `TMPDIR` set to a folder of its own in that scratch (one folder per run of the suites, shared by its
-  groups), so the temporary files of xmake and of the compilers land there and are removed with it.
+  groups), so the temporary files of xmake and of the compilers land there and are removed with it. The same folder holds
+  the scratch of the suites' children (`REVENANT_TASK` names a task inside it), so the `tests.<hex>` folders of a run go with it
+  when the run ends, pass or fail.
 - No comments in code, scripts or recipes; a licence header a licence requires is the only exception. What a change
   does and why goes in its commit message; knowledge a reader of the code needs goes in `docs/`.
   `./xmakew l tools/comments.lua check [path ...]` finds comments, `strip` removes them, and `verify [rev]` proves that
