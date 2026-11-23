@@ -180,6 +180,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [CreateML: CSV reading](reference/backports/CreateML/TabularData/CSVReading.md) | CSV reading in TabularData, measured, and what is carried |
 | [CreateML: CSV writing](reference/backports/CreateML/TabularData/CSVWriting.md) | CSV writing in TabularData, measured, and what is carried |
 | [CreateML: date parsing](reference/backports/CreateML/TabularData/DateParsing.md) | date reading in TabularData, measured, and what is carried |
+| [Foundation: FileHandle](reference/backports/Foundation/FileHandle.md) | the iOS 13 Swift file-handle surface on the iOS 6 refined Objective-C members, and the layers and tests that carry it |
 | [Foundation: NSData base64](reference/backports/Foundation/NSData-base64.md) | the four iOS 7 base64 members, what the iOS 6.1.3 release has instead, how far its two members agree with macOS, and when the category is reachable |
 | [Foundation: private selectors of the Swift overlay](reference/backports/Foundation/SwiftOverlaySelectors.md) | which private selectors the Swift Foundation overlay and standard library use, which of them iOS 6.1.3 has, who supplies each, and why the dictionary ones are a category of the Backports |
 | [Foundation: tagged ASCII string factory](reference/backports/Foundation/TaggedASCIIString.md) | the private `NSString` class method the Swift runtime sends for a short ASCII string, why iOS 6 lacks it, and why returning nil is the right answer |
