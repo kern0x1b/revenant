@@ -918,7 +918,7 @@ option("backports_libs", {type = "string", default = "", showmenu = true,
 
 local RUNTIME = path.absolute(path.join(os.scriptdir(), "tests", "runtime"))
 local RUNTIME_LIBS = get_config("backports_libs")
-local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports", "PhotosBackports", "CloudKitBackports", "CoreTextBackports"}
+local RUNTIME_LINKS = {"FoundationBackports", "UIKitBackports", "AVFoundationBackports", "OpenGLESBackports", "SceneKitBackports", "IOSurfaceBackports", "CoreFoundationBackports", "CoreGraphicsBackports", "GraphicsBackports", "PhotosBackports", "CloudKitBackports", "CoreTextBackports"}
 
 if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
     add_requires("revenant@emulator-guest", {alias = "emulator-guest"})

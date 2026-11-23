@@ -15,15 +15,17 @@ REVENANT_CASE(avfoundation_class_reexport)
     revenant_stale_function bound_metaclass = probe ? (revenant_stale_function)dlsym(probe, "revenant_stale_user_metaclass") : NULL;
     Class bound = bound_class ? bound_class() : Nil;
     Class named = objc_getClass("AVSampleBufferDisplayLayer");
+    Class bound_meta = bound_metaclass ? bound_metaclass() : Nil;
+    Class named_meta = object_getClass(named);
     revenant_expect_true(@"an image bound to AVSampleBufferDisplayLayer in libAVFoundationBackports loads, so the library still exports it",
                          (probe != NULL) != (BOOL)negative,
                          [NSString stringWithFormat:@"%s", error ?: "loaded"]);
     revenant_expect_true(@"the class that image bound is the class the runtime names",
                          (bound != Nil && bound == named) != (BOOL)negative,
-                         [NSString stringWithFormat:@"bound %p, named %p", (void *)bound, (void *)named]);
+                         [NSString stringWithFormat:@"bound %p, named %p", (__bridge void *)bound, (__bridge void *)named]);
     revenant_expect_true(@"the metaclass it bound is the metaclass of that class",
-                         (bound_metaclass != NULL && bound_metaclass() == object_getClass(named)) != (BOOL)negative,
-                         [NSString stringWithFormat:@"bound %p, expected %p", bound_metaclass ? (void *)bound_metaclass() : NULL, (void *)object_getClass(named)]);
+                         (bound_meta != Nil && bound_meta == named_meta) != (BOOL)negative,
+                         [NSString stringWithFormat:@"bound %p, expected %p", (__bridge void *)bound_meta, (__bridge void *)named_meta]);
     const char *image = bound ? class_getImageName(bound) : NULL;
     revenant_expect_true(@"the class lives in the system's AVFoundation, not in a Backports library",
                          (image != NULL && strcmp(image, [kSystemImage UTF8String]) == 0) != (BOOL)negative,
