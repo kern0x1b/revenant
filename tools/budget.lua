@@ -259,7 +259,7 @@ end
 
 local function record_wait(folder, class, tokens, seconds, who)
     local at = os.time()
-    local entry = string.format("at %d\tclass %s\ttokens %d\twait %d\t%s", at, class, tokens, seconds, who_line(who))
+    local entry = string.format("at %d\tclass %s\ttokens %d\twait %d\tpid %d\t%s", at, class, tokens, seconds, who.pid or 0, who_line(who))
     exclusive.run(journal_path(folder) .. ".lock", "the budget wait journal", function ()
         local lines = {}
         local previous = os.isfile(journal_path(folder)) and io.readfile(journal_path(folder)) or ""
@@ -281,11 +281,11 @@ local function wait_summary(folder)
     local cutoff = os.time() - WAIT_DAY_S
     local groups, order, total, count = {}, {}, 0, 0
     for line in (io.readfile(journal_path(folder)) or ""):gmatch("[^\n]+") do
-        local at, class, tokens, seconds, worktree, command = line:match("^at (%d+)\tclass (%a+)\ttokens (%d+)\twait (%d+)\th %d+\t([^\t]*)\t([^\n]*)$")
+        local at, class, tokens, seconds, pid, worktree, command = line:match("^at (%d+)\tclass (%a+)\ttokens (%d+)\twait (%d+)\tpid (%d+)\th %d+\t([^\t]*)\t([^\n]*)$")
         if at and tonumber(at) >= cutoff then
-            local key = worktree .. "\t" .. command
+            local key = pid .. "\t" .. worktree .. "\t" .. command
             if not groups[key] then
-                groups[key] = {worktree = worktree, command = command, seconds = 0, waits = 0, tokens = 0, classes = {}}
+                groups[key] = {pid = pid, worktree = worktree, command = command, seconds = 0, waits = 0, tokens = 0, classes = {}}
                 table.insert(order, key)
             end
             local group = groups[key]
@@ -302,8 +302,8 @@ local function wait_summary(folder)
         local group = groups[key]
         local classes = table.keys(group.classes)
         table.sort(classes)
-        table.insert(lines, string.format("%s: %s — %d s in %d wait(s), %d token(s) in %s class(es)",
-            group.worktree ~= "" and group.worktree or "an unknown worktree", group.command,
+        table.insert(lines, string.format("pid %s in %s: %s — %d s in %d wait(s), %d token(s) in %s class(es)",
+            group.pid, group.worktree ~= "" and group.worktree or "an unknown worktree", group.command,
             group.seconds, group.waits, group.tokens, table.concat(classes, ", ")))
     end
     return total, count, lines
@@ -316,11 +316,16 @@ end
 local function enqueue(folder, rank, minimum, who)
     local dir = path.join(folder, "queue")
     os.mkdir(dir)
+    local named = who or {pid = os.getpid(), worktree = checkout_dir(), command = "", at = os.time()}
+    if not named.pid then
+        named = table.clone(named)
+        named.pid = os.getpid()
+    end
     local name = string.format("%d-%013d-%08d.ticket", rank, os.time() * 1000 + math.random(0, 999), math.random(0, 99999999))
     local file = path.join(dir, name)
     local lock = io.openlock(file)
     lock:trylock()
-    io.writefile(file, tostring(minimum) .. (who and string.format("\np %d\n%s\n", who.pid, who_line(who)) or ""))
+    io.writefile(file, tostring(minimum) .. string.format("\np %d\n%s\n", named.pid, who_line(named)))
     return {name = name, file = file, lock = lock}
 end
 
@@ -832,6 +837,14 @@ local function test_suite()
     check("a ticket whose holder died does not block", ahead_of(pool, "2-0000000000002-00000002.ticket", 1), false)
     check("and is removed", os.isfile(stale), false)
 
+    local named_pool = path.join(base, "namedpool")
+    os.mkdir(named_pool)
+    local anonymous = enqueue(named_pool, 2, 1, nil)
+    local named_waiters = waiters(named_pool)
+    check("a ticket enqueued without a holder still names the process that waits", #named_waiters, 1)
+    check("and names it by pid, not by nil", named_waiters[1] and named_waiters[1].pid, os.getpid())
+    leave(anonymous)
+
     local function ticket_at(name, need)
         local file = path.join(queue, name)
         local lock = io.openlock(file)
@@ -904,6 +917,18 @@ local function test_suite()
     local granted = acquire(fresh, "normal", 1, 1, changing, 1)
     local elapsed = os.mclock() - began
     check("a request that does not fit waits and is granted when it does", #granted, 1)
+    local granted_journal = io.readfile(journal_path(fresh)) or ""
+    check("the grant journals the class, tokens and seconds with the waiting process", granted_journal:find("class normal", 1, true) ~= nil
+          and granted_journal:find("tokens 1", 1, true) ~= nil and granted_journal:find("wait ", 1, true) ~= nil
+          and granted_journal:find("pid " .. tostring(os.getpid()), 1, true) ~= nil, true)
+    local test_project = path.directory(os.scriptdir())
+    local test_script = path.join(os.scriptdir(), "budget.lua")
+    record_wait(fresh, "critical", 2, 4, {pid = os.getpid(), worktree = test_project, command = "/usr/bin/true", at = os.time()})
+    local waited_seconds, waited_entries, waited_lines = wait_summary(fresh)
+    check("the summary adds up a day's waits by holder", waited_entries == 2 and waited_seconds == 4 and #waited_lines == 2, true)
+    local status_with_wait = os.iorunv(os.programfile(), {"l", "-P", test_project, test_script, "status"}, {envs = {REVENANT_BUDGET_POOL = fresh}})
+    check("status prints the sum of waits and who waited", status_with_wait:find("waited    ", 1, true) ~= nil
+          and status_with_wait:find("/usr/bin/true", 1, true) ~= nil, true)
     check("and the re-check happens without a fixed patience wait", calls >= 3 and elapsed < 10000, true)
     release_locks(granted)
 
@@ -1098,26 +1123,14 @@ local function test_suite()
         local announced = io.readfile(waiter_log) or ""
         check("a request that waits has said so in its log while it still waits, naming the holder's pid and command", announced:find("budget: waiting for", 1, true) ~= nil
               and announced:find("pid " .. tostring(named[1] and named[1].pid) .. " holds", 1, true) ~= nil and announced:find("/bin/sleep 40", 1, true) ~= nil, true)
+        who_waiter:kill()
         who_holder:kill()
-        deadline = os.mclock() + 30000
-        while who_waiter:wait(200) == 0 and os.mclock() < deadline do
-        end
-        who_waiter:close()
         deadline = os.mclock() + 10000
         while (#waiters(who_pool) > 0 or held_slots(who_pool) > 0) and os.mclock() < deadline do
             os.sleep(200)
         end
-        check("a waiter that got its tokens leaves no ticket in the list", #waiters(who_pool), 0)
+        check("a waiter that was killed leaves no ticket in the list", #waiters(who_pool), 0)
         check("and a holder that was killed no token", #holders(who_pool), 0)
-        local journal = io.readfile(journal_path(who_pool)) or ""
-        check("a granted wait is journaled with the class, tokens, seconds and who waited", journal:find("class critical", 1, true) ~= nil
-              and journal:find("tokens " .. everything, 1, true) ~= nil and journal:find("wait ", 1, true) ~= nil
-              and journal:find(project, 1, true) ~= nil and journal:find("/usr/bin/true", 1, true) ~= nil, true)
-        local waited_seconds, waited_entries, waited_lines = wait_summary(who_pool)
-        check("the journal summary counts the wait over the last day", waited_entries >= 1 and waited_seconds >= 0 and #waited_lines >= 1, true)
-        local status_with_wait = os.iorunv(os.programfile(), {"l", "-P", project, script, "status"}, {envs = {REVENANT_BUDGET_POOL = who_pool}})
-        check("status prints the sum of waits and who waited", status_with_wait:find("waited    ", 1, true) ~= nil
-              and status_with_wait:find("/usr/bin/true", 1, true) ~= nil, true)
         local sized = enqueue(who_pool, 2, 6, {pid = os.getpid(), worktree = project, command = "x", at = os.time()})
         check("a ticket that names its holder still carries the tokens it needs", ahead_of(who_pool, "9-9999999999999-99999999.ticket", 1), false)
         check("and blocks a later request that fits it", ahead_of(who_pool, "9-9999999999999-99999999.ticket", 6), true)

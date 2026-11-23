@@ -650,7 +650,8 @@ environment of the test does not reach it.
   step, or of its batch of light checks, leaves no `budget run` and no command holding tokens at ppid 1. The watcher is a shell
   and not a signal handler because xmake runs a Lua handler only between two Lua instructions, never while it waits for a child.
 - How long it waited. A grant appends one line to `wait-journal` in the pool: the time, class, tokens granted, whole
-  seconds waited and the holder's pid, worktree and command. Older than a day is dropped on the next grant. `status`
+  seconds waited and the holder's pid, worktree and command. A ticket is always written with the waiting process's pid,
+  so a request that died before its grant cannot leave an unnamed entry in the queue. Older than a day is dropped on the next grant. `status`
   prints the sum of the last day's waits and one line per holder, with its seconds, number of waits, tokens and classes;
   a wait that ended because its process died is not a grant and is not journaled. The journal is a cache-day record, not
   an input to admission, so it is kept in the pool folder and is never a key.
