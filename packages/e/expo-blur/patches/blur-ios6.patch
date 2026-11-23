@@ -1,24 +1,36 @@
 diff -ru a/ios/BlurEffectView.swift b/ios/BlurEffectView.swift
 --- a/ios/BlurEffectView.swift
 +++ b/ios/BlurEffectView.swift
-@@ -1,66 +1,87 @@
+@@ -1,66 +1,168 @@
  // Copyright 2015-present 650 Industries. All rights reserved.
  
  import UIKit
 +import CoreImage
++import QuartzCore
  import ExpoModulesCore
  
 -/**
 - This class is based on https://gist.github.com/darrarski/29a2a4515508e385c90b3ffe6f975df7
 - */
 -final class BlurEffectView: UIVisualEffectView {
++private final class WeakTarget: NSObject {
++  weak var view: BlurEffectView?
++
++  @objc func tick() {
++    view?.refresh()
++  }
++}
++
 +final class BlurEffectView: UIView {
 +  private static let maximumRadius = 20.0
++  private static let renderScale: CGFloat = 0.25
 +
    @Clamping(lowerBound: 0.01, upperBound: 1)
    var intensity: Double = 0.5 {
      didSet {
 -      setNeedsDisplay()
++      overlay.alpha = CGFloat(intensity)
++      lastBitmap = nil
 +      refresh()
      }
    }
@@ -39,37 +51,40 @@ diff -ru a/ios/BlurEffectView.swift b/ios/BlurEffectView.swift
 +  private let snapshot = UIImageView()
 +  private let overlay = UIView()
 +  private let context = CIContext(options: nil)
++  private let target = WeakTarget()
++  private var link: CADisplayLink?
 +  private var refreshing = false
-+  private var renderedBounds = CGRect.zero
++  private var lastBitmap: NSData?
++  private var lastRect = CGRect.zero
  
    init() {
 -    super.init(effect: nil)
 +    super.init(frame: .zero)
++    target.view = self
 +    snapshot.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 +    overlay.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 +    overlay.backgroundColor = tint.toOverlayColor()
++    overlay.alpha = CGFloat(intensity)
++    NotificationCenter.default.addObserver(self, selector: #selector(applicationDidEnterBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
++    NotificationCenter.default.addObserver(self, selector: #selector(applicationDidBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
 +    addSubview(snapshot)
 +    addSubview(overlay)
    }
  
    required init?(coder aDecoder: NSCoder) { nil }
  
--  deinit {
+   deinit {
 -    animator?.stopAnimation(true)
-+  override func layoutSubviews() {
-+    super.layoutSubviews()
-+    snapshot.frame = bounds
-+    overlay.frame = bounds
-+    if !refreshing && bounds != renderedBounds {
-+      refresh()
-+    }
++    NotificationCenter.default.removeObserver(self)
++    link?.invalidate()
    }
  
 -  override func draw(_ rect: CGRect) {
 -    super.draw(rect)
-+  override func didMoveToSuperview() {
-+    super.didMoveToSuperview()
-+    refresh()
++  override func layoutSubviews() {
++    super.layoutSubviews()
++    snapshot.frame = bounds
++    overlay.frame = bounds
 +  }
  
 -    // BlurView intensity relies on running an animation and making it partially complete. This means that there
@@ -77,42 +92,106 @@ diff -ru a/ios/BlurEffectView.swift b/ios/BlurEffectView.swift
 -    // We can detect if detoxServer is running and in that case replace smooth intensity value with an on/off behaviour.
 -    if isDetoxPresent() {
 -      effect = intensity > 0 ? visualEffect : nil
-+  private func refresh() {
-+    guard !refreshing, let host = superview, bounds.width > 0, bounds.height > 0 else {
++  override func didMoveToWindow() {
++    super.didMoveToWindow()
++    stopTimer()
++    guard window != nil else {
        return
      }
--
++    lastBitmap = nil
++    startTimer()
++  }
++
++  private func startTimer() {
++    guard window != nil, link == nil else {
++      return
++    }
++    let next = CADisplayLink(target: target, selector: #selector(WeakTarget.tick))
++    next.frameInterval = 6
++    next.add(to: .main, forMode: .common)
++    link = next
++    refresh()
++  }
++
++  private func stopTimer() {
++    link?.invalidate()
++    link = nil
++  }
++
++  @objc private func applicationDidEnterBackground() {
++    stopTimer()
++  }
++
++  @objc private func applicationDidBecomeActive() {
++    startTimer()
++  }
++
++  private static func transform(of layer: CALayer, to destination: CALayer) -> CGAffineTransform {
++    var result = CGAffineTransform.identity
++    var current: CALayer? = layer
++    while let item = current, item !== destination {
++      var step = CGAffineTransform(translationX: item.position.x, y: item.position.y)
++      step = step.concatenating(item.affineTransform())
++      step = step.concatenating(CGAffineTransform(translationX: -item.anchorPoint.x * item.bounds.width, y: -item.anchorPoint.y * item.bounds.height))
++      result = step.concatenating(result)
++      current = item.superlayer
++    }
++    return result
++  }
+ 
 -    effect = nil
 -    animator?.stopAnimation(true)
 -    animator = UIViewPropertyAnimator(duration: 1, curve: .linear) { [unowned self] in
 -      self.effect = visualEffect
-+    refreshing = true
-+    defer { refreshing = false }
-+    renderedBounds = bounds
-+    isHidden = true
-+    UIGraphicsBeginImageContextWithOptions(bounds.size, false, 0)
-+    guard let drawing = UIGraphicsGetCurrentContext() else {
-+      UIGraphicsEndImageContext()
-+      isHidden = false
++  fileprivate func refresh() {
++    guard !refreshing, let window = window, let host = superview, bounds.width > 0, bounds.height > 0 else {
 +      return
      }
 -    animator?.fractionComplete = CGFloat(intensity)
-+    drawing.translateBy(x: -frame.origin.x, y: -frame.origin.y)
-+    host.layer.render(in: drawing)
-+    let image = UIGraphicsGetImageFromCurrentImageContext()
-+    UIGraphicsEndImageContext()
-+    isHidden = false
-+    guard let input = image.flatMap({ CIImage(image: $0) }),
-+          let filter = CIFilter(name: "CIGaussianBlur") else {
++    refreshing = true
++    defer { refreshing = false }
++    let rect = host.convert(host.bounds, to: window)
++    CATransaction.begin()
++    CATransaction.setDisableActions(true)
++    defer {
++      host.isHidden = false
++      CATransaction.commit()
++    }
++    host.isHidden = true
++    UIGraphicsBeginImageContextWithOptions(bounds.size, false, BlurEffectView.renderScale)
++    guard let drawing = UIGraphicsGetCurrentContext() else {
++      UIGraphicsEndImageContext()
 +      return
 +    }
-+    filter.setValue(input, forKey: kCIInputImageKey)
-+    filter.setValue(intensity * BlurEffectView.maximumRadius * Double(UIScreen.main.scale), forKey: kCIInputRadiusKey)
-+    guard let output = filter.outputImage,
++    drawing.concatenate(BlurEffectView.transform(of: host.layer, to: window.layer).inverted())
++    drawing.translateBy(x: -bounds.origin.x, y: -bounds.origin.y)
++    window.layer.render(in: drawing)
++    let image = UIGraphicsGetImageFromCurrentImageContext()
++    UIGraphicsEndImageContext()
++    guard let image = image, let cgImage = image.cgImage, let data = cgImage.dataProvider?.data else {
++      return
++    }
++    let bitmap = data as NSData
++    if let previous = lastBitmap, previous.isEqual(to: bitmap as Data), rect == lastRect {
++      return
++    }
++    lastBitmap = bitmap
++    lastRect = rect
++    let radius = intensity * BlurEffectView.maximumRadius * Double(BlurEffectView.renderScale)
++    guard let clamp = CIFilter(name: "CIAffineClamp"),
++          let blur = CIFilter(name: "CIGaussianBlur") else {
++      return
++    }
++    let input = CIImage(cgImage: cgImage)
++    clamp.setValue(input, forKey: kCIInputImageKey)
++    clamp.setValue(NSValue(cgAffineTransform: .identity), forKey: kCIInputTransformKey)
++    blur.setValue(clamp.outputImage, forKey: kCIInputImageKey)
++    blur.setValue(radius, forKey: kCIInputRadiusKey)
++    guard let output = blur.outputImage,
 +          let blurred = context.createCGImage(output, from: input.extent) else {
 +      return
 +    }
-+    snapshot.image = UIImage(cgImage: blurred, scale: UIScreen.main.scale, orientation: .up)
++    snapshot.image = UIImage(cgImage: blurred, scale: BlurEffectView.renderScale, orientation: .up)
    }
 -}
 -

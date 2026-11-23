@@ -7,6 +7,7 @@ function failures(opt)
             failures = failures + 1
         end
     end
+    check("the orchestrator finds the checkout from its own file", light.checkout(), path.normalize(path.absolute(path.join(opt.modules, "..", ".."))))
     local function shape(groups)
         local lines = {}
         for _, group in ipairs(groups) do
@@ -42,7 +43,90 @@ function failures(opt)
     check("a grant of zero is one worker", light.workers("0"), 1)
     check("a grant that is no number is one worker", light.workers("many"), 1)
 
+    local memo = import("memo", {rootdir = opt.modules, anonymous = true})
+    local suite_reads = import("suite_reads", {rootdir = path.join(opt.modules, "..", "tests"), anonymous = true})
+    local input = {tool = "xmake", host = "host", files = {
+        ["toolchain/tests/addon/cache_test.lua"] = "file a",
+        ["toolchain/tests/addon/store_test.lua"] = "file b",
+        ["toolchain/modules/cache.lua"] = "file c",
+    }}
+    local cache_step = {name = "cache_test", reads = suite_reads.of("cache_test")}
+    local store_step = {name = "store_test", reads = suite_reads.of("store_test")}
+    local version = "light suite memo 1"
+    local cache_key = memo.key_of(input, cache_step, version)
+    local store_key = memo.key_of(input, store_step, version)
+    check("the declaration names its own suite", memo.matches("toolchain/tests/addon/cache_test.lua", cache_step.reads), true)
+    check("the same inputs give the same suite key", memo.key_of(input, cache_step, version), cache_key)
+    check("two suites have different keys", cache_key ~= store_key, true)
+    local only_cache = table.clone(input.files)
+    only_cache["toolchain/tests/addon/cache_test.lua"] = "file changed"
+    check("a file only one suite reads moves only that suite's key", memo.key_of({tool = input.tool, host = input.host, files = only_cache}, cache_step, version) ~= cache_key, true)
+    check("the other suite keeps its key", memo.key_of({tool = input.tool, host = input.host, files = only_cache}, store_step, version), store_key)
+    local shared = table.clone(input.files)
+    shared["toolchain/modules/cache.lua"] = "file changed"
+    check("a shared module moves every suite that reads it", memo.key_of({tool = input.tool, host = input.host, files = shared}, cache_step, version) ~= cache_key, true)
+    check("and the other suite too", memo.key_of({tool = input.tool, host = input.host, files = shared}, store_step, version) ~= store_key, true)
+    check("a suite without a declaration reads the whole tree", table.concat(memo.reads_of({name = "unknown"})), "**")
+
+    local host_input = {tool = "xmake", host = "host", files = {
+        ["xmake.lua"] = "file a",
+        ["toolchain/tests/addon/host_load_test.lua"] = "file b",
+        ["toolchain/modules/workspace.lua"] = "file c",
+        ["frameworks/Combine/xmake.lua"] = "file d",
+        ["packages/b/backports/xmake.lua"] = "file e",
+    }}
+    local host_key = light.key_for(host_input, "host_load_test")
+    local child_changed = table.clone(host_input.files)
+    child_changed["xmake.lua"] = "file changed"
+    check("the root xmake.lua that the child xmake loads is in the suite's key", light.key_for({tool = host_input.tool, host = host_input.host, files = child_changed}, "host_load_test") ~= host_key, true)
+    local nested_changed = table.clone(host_input.files)
+    nested_changed["toolchain/modules/workspace.lua"] = "file changed"
+    check("a module loaded through an import moves the suite's key", light.key_for({tool = host_input.tool, host = host_input.host, files = nested_changed}, "host_load_test") ~= host_key, true)
+    local loaded_changed = table.clone(host_input.files)
+    loaded_changed["frameworks/Combine/xmake.lua"] = "file changed"
+    check("a framework the child xmake loads moves the suite's key", light.key_for({tool = host_input.tool, host = host_input.host, files = loaded_changed}, "host_load_test") ~= host_key, true)
+    loaded_changed = table.clone(host_input.files)
+    loaded_changed["packages/b/backports/xmake.lua"] = "file changed"
+    check("a recipe the child xmake loads moves the suite's key", light.key_for({tool = host_input.tool, host = host_input.host, files = loaded_changed}, "host_load_test") ~= host_key, true)
+    check("an unchanged tree keeps the suite's key", light.key_for(host_input, "host_load_test"), host_key)
+
     local workspace = import("@addon.revenant.workspace", {anonymous = true})
+    local store = path.join(workspace.run(), "store-facts")
+    local packages = path.join(store, "xmake-global", ".xmake", "packages")
+    local generation = path.join(packages, "l", "llvm", "23.1.3")
+    os.mkdir(generation)
+    io.writefile(path.join(generation, "aaa.g1", "manifest.txt"), "same install")
+    local before = memo.store_installs(packages)
+    os.mv(path.join(generation, "aaa.g1"), path.join(generation, "aaa.g2"))
+    check("publishing another generation of one install leaves the store facts alone", memo.store_installs(packages), before)
+    io.writefile(path.join(generation, "aaa.g2", "manifest.txt"), "changed install")
+    check("a changed manifest moves the store facts", memo.store_installs(packages) ~= before, true)
+    os.rm(store)
+
+    local guard_script = path.join(workspace.run(), "guard-probe.lua")
+    io.writefile(guard_script, table.concat({
+        "local guard = import(\"suite_guard\", {rootdir = \"" .. (opt.modules:gsub("\\", "\\\\")) .. "\", anonymous = true})",
+        "local root = path.normalize(path.absolute(path.join(\"" .. (opt.modules:gsub("\\", "\\\\")) .. "\", \"..\", \"..\")))",
+        "guard.start(root, {\"xmake.lua\", \"toolchain/**\"}, {})",
+        "local function probe(name, action)",
+        "    local blocked = false",
+        "    try { function () action() end, catch { function () blocked = true end } }",
+        "    print(name .. \" \" .. (blocked and \"blocked\" or \"allowed\"))",
+        "end",
+        "probe(\"declared\", function () io.readfile(path.join(root, \"xmake.lua\")) end)",
+        "probe(\"absolute\", function () io.readfile(path.join(root, \"README.md\")) end)",
+        "probe(\"relative\", function () io.readfile(\"README.md\") end)",
+        "probe(\"shell\", function () os.iorunv(\"sh\", {\"-c\", \"cat README.md\"}) end)",
+        "probe(\"argument\", function () os.iorunv(\"sh\", {\"-c\", \"true\", path.join(root, \"README.md\")}) end)",
+        "probe(\"environment\", function () os.getenv(\"SUITE_UNDECLARED\") end)",
+    }, "\n"))
+    local guard_output = os.iorunv(os.programfile(), {"l", "-P", light.checkout(), guard_script}) or ""
+    for _, name in ipairs({"declared", "absolute", "relative", "shell", "argument", "environment"}) do
+        local want = name == "declared" and "allowed" or "blocked"
+        check("suite guard " .. name, guard_output:find(name .. " " .. want, 1, true) ~= nil, true)
+    end
+    os.rm(guard_script)
+
     local logs = path.join(workspace.run(), "light-suites.abcdef")
     local task = light.children_task(logs)
     check("the scratch of the children lies inside the folder of the run", task, path.join(workspace.task(), "light-suites.abcdef", "scratch"))

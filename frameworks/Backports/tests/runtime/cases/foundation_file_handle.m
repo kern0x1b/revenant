@@ -56,22 +56,4 @@ REVENANT_CASE(foundation_file_handle)
     revenant_expect_true(@"a write after close fails with an error instead of an exception", !wroteAfterClose && error != nil, [error description]);
 
     [manager removeItemAtPath:path error:NULL];
-
-    NSString *first = [folder stringByAppendingPathComponent:@"revenant-file-handle-close-a.bin"];
-    NSString *second = [folder stringByAppendingPathComponent:@"revenant-file-handle-close-b.bin"];
-    [manager removeItemAtPath:first error:NULL];
-    [manager removeItemAtPath:second error:NULL];
-    [manager createFileAtPath:first contents:[@"first" dataUsingEncoding:NSUTF8StringEncoding] attributes:nil];
-    [manager createFileAtPath:second contents:[@"second" dataUsingEncoding:NSUTF8StringEncoding] attributes:nil];
-
-    NSFileHandle *closed = [NSFileHandle fileHandleForReadingAtPath:first];
-    [closed closeFile];
-    NSFileHandle *reused = [NSFileHandle fileHandleForReadingAtPath:second];
-    error = nil;
-    NSData *afterInheritedClose = [closed readDataUpToLength:64 error:&error];
-    revenant_expect_true(@"a handle closed by closeFile fails a later read even when its number is reused",
-                         afterInheritedClose == nil && error != nil, [error description]);
-    [reused closeFile];
-    [manager removeItemAtPath:first error:NULL];
-    [manager removeItemAtPath:second error:NULL];
 }

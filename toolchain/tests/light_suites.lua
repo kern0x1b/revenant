@@ -1,11 +1,35 @@
 import("core.base.process")
 
-local root = path.absolute(path.directory(path.directory(os.scriptdir())))
+local source = debug.getinfo(1, "S").short_src or ""
+if source:startswith("@") then
+    source = source:sub(2)
+end
+local script = path.absolute(source)
+local root = path.directory(path.directory(path.directory(script)))
 
-local byteorder = import("byteorder", {rootdir = path.join(root, "toolchain", "modules"), anonymous = true})
-local workspace = import("workspace", {rootdir = path.join(root, "toolchain", "modules"), anonymous = true})
-local tmp_guard = import("tmp_guard", {rootdir = path.join(root, "toolchain", "modules"), anonymous = true})
+function checkout()
+    return root
+end
 
+local modules = path.join(root, "toolchain", "modules")
+local tests = path.join(root, "toolchain", "tests")
+local byteorder = import("byteorder", {rootdir = modules, anonymous = true})
+local workspace = import("workspace", {rootdir = modules, anonymous = true})
+local tmp_guard = import("tmp_guard", {rootdir = modules, anonymous = true})
+local memo = import("memo", {rootdir = modules, anonymous = true})
+local suite_guard = import("suite_guard", {rootdir = modules, anonymous = true})
+local suite_reads = import("suite_reads", {rootdir = tests, anonymous = true})
+local cache = import("cache", {rootdir = modules, anonymous = true})
+
+local VERSION = "light suite memo 1"
+local ALWAYS = {"xmake.lua", "xmakew", "toolchain/addon.lua", "toolchain/includes/**", "toolchain/rules/**", "toolchain/toolchains/**", "toolchain/plugins/**",
+                "toolchain/src/**/xmake.lua", "frameworks/**/xmake.lua", "packages/**/xmake.lua", "packages/*/*/port/digest.lua", "addons/**/xmake.lua",
+                "emulator/**", "recompiler/**", "neon/**", "toolchain/tests/**/xmake.lua",
+                "toolchain/tests/light_suites.lua", "toolchain/tests/suite_reads.lua", "toolchain/modules/byteorder.lua", "toolchain/modules/workspace.lua",
+                "toolchain/modules/tmp_guard.lua", "toolchain/modules/cache.lua", "toolchain/modules/retention.lua", "toolchain/modules/generations.lua",
+                "toolchain/modules/exclusive.lua", "toolchain/modules/apple/lowered.lua", "toolchain/modules/memo.lua", "toolchain/modules/suite_guard.lua"}
+local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_TASK = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true, REVENANT_PREPUSH_BUDGET_CLASS = true, REVENANT_LIGHT_SUITES_VERDICT = true, REVENANT_SUITE_TRACE = true, REVENANT_SUITE_ROOT = true}
+local ENV_NAMES = {"DEVELOPER_DIR", "DEVICE_HOST", "DEVICE_UDID", "FAKE_FAIL", "FAKE_GENERATION", "GIT_CEILING_DIRECTORIES", "HOME", "PATH", "RACE_MARKERS", "RACE_NAME", "RACE_SAME", "SOURCE_DATE_EPOCH", "TMPDIR", "XMAKE_GLOBALDIR", "XMAKE_MAX_JOBS"}
 local WORKERS = 4
 
 local WEIGHTS = {
@@ -26,11 +50,28 @@ local function declared()
     return suites
 end
 
+local function suite_facts()
+    return memo.installed_facts(function (text) print(text) end)
+end
+
+local function step_of(suite)
+    return {name = suite, reads = suite_reads.of(suite), env = ENV_NAMES, facts = suite_facts}
+end
+
+function key_for(input, suite)
+    return memo.key_of(input, step_of(suite), VERSION, ALWAYS, AMBIENT_SKIPS)
+end
+
+local function provenance(record)
+    return string.format("ran %s s in %s, at %s", record.seconds, record.worktree, record.head)
+end
+
 local function run_suite(suite)
     local addon = path.join(root, "toolchain", "tests", "addon")
     local arguments = {modules = path.join(root, "toolchain", "modules")}
     local failures = {}
     local restore = tmp_guard.forbid(suite)
+    suite_guard.start(root, table.join(suite_reads.of(suite) or {"**"}, ALWAYS), ENV_NAMES)
     try {
         function ()
             failures = import(suite, {rootdir = addon, anonymous = true}).failures(arguments)
@@ -116,7 +157,7 @@ function children_task(logs)
     return path.join(workspace.task(), path.filename(logs), "scratch")
 end
 
-local function run_in_children(groups)
+local function run_in_children(groups, recalled)
     local children = {}
     local logs = workspace.fresh("light-suites")
     local temporary = path.join(logs, "tmp")
@@ -168,14 +209,48 @@ local function run_in_children(groups)
     if failed > 0 then
         raise("%d of %d groups of light suites failed", failed, #children)
     end
-    print("light suites: %d passed", total)
+    print("light suites: %d passed, %d recalled", total, recalled or 0)
+end
+
+local function run_with_memo(suites, count)
+    local began = os.time()
+    local input = memo.inputs(root)
+    local store = path.join(cache.store(), "suite-memo")
+    local signature = memo.digest(table.concat({input.tool, input.host, memo.ambient_environment(AMBIENT_SKIPS), suite_facts(), memo.manifest_digest(input.files)}, "\n"))
+    local keys, pending, recalled = {}, {}, 0
+    for _, suite in ipairs(suites) do
+        local declaration = table.concat(suite_reads.of(suite) or {"**"}, "\n")
+        keys[suite] = memo.cached_value("keys", path.join(suite, memo.digest(signature .. "\n" .. declaration)), function ()
+            return key_for(input, suite)
+        end)
+        if os.getenv("SUITE_DEBUG_KEYS") then
+            print("suite key " .. suite .. " " .. keys[suite])
+        end
+        local record = memo.recalled(store, suite, keys[suite])
+        if record then
+            recalled = recalled + 1
+            print("ok %s memo (%s)", suite, provenance(record))
+        else
+            table.insert(pending, suite)
+        end
+    end
+    if #pending == 0 then
+        print("light suites: %d passed, %d recalled", #suites, recalled)
+        return
+    end
+    run_in_children(partition(pending, count), recalled)
+    local seconds = os.time() - began
+    local record = {seconds = seconds, worktree = path.filename(root), head = memo.git(root, {"rev-parse", "HEAD"}):trim(), at = os.time()}
+    for _, suite in ipairs(pending) do
+        memo.remembered(store, suite, keys[suite], record, 40)
+    end
 end
 
 function main(...)
     local names = {...}
     local suites = declared()
     if #names == 0 then
-        run_in_children(partition(suites, workers(os.getenv("REVENANT_BUDGET_HELD"))))
+        run_with_memo(suites, workers(os.getenv("REVENANT_BUDGET_HELD")))
         return
     end
     local known = {}

@@ -84,10 +84,22 @@ function stubbed_symbols()
     return symbols
 end
 
-local function cut(text, name)
-    text = text:gsub("'" .. name .. "',%s*", "")
-    text = text:gsub("([%s,%[])" .. name .. ",%s*", "%1")
-    return text
+function cut_all(text, names)
+    local quoted, bare = {}, {}
+    for _, name in ipairs(names) do
+        quoted[name] = true
+        bare[name] = true
+    end
+    local first = text:gsub("'([%w_]+)',", function (name)
+        if quoted[name] then
+            return ""
+        end
+    end)
+    return first:gsub("([%s,%[])([%w_]+),", function (prefix, name)
+        if bare[name] then
+            return prefix
+        end
+    end)
 end
 
 local function listed(text, name)
@@ -114,10 +126,15 @@ function stub_directory(sdk, out)
         local folder = path.join(out, entry.framework .. ".framework")
         os.mkdir(folder)
         local text = io.readfile(path.join(sdk, "System", "Library", "Frameworks", entry.framework .. ".framework", entry.framework .. ".tbd"))
+        local names, listed_as = {}, {}
         for _, name in ipairs(names_of(entry)) do
-            local listed_as = entry.functions and "_" .. name or name
-            text = cut(text, listed_as)
-            assert(not listed(text, listed_as), entry.framework .. ".tbd still lists " .. listed_as .. " after the stub cut it")
+            local symbol = entry.functions and "_" .. name or name
+            table.insert(names, symbol)
+            table.insert(listed_as, symbol)
+        end
+        text = cut_all(text, names)
+        for _, symbol in ipairs(listed_as) do
+            assert(not listed(text, symbol), entry.framework .. ".tbd still lists " .. symbol .. " after the stub cut it")
         end
         io.writefile(path.join(folder, entry.framework .. ".tbd"), text)
     end

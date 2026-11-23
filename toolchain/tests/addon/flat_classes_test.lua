@@ -84,8 +84,59 @@ local function shim_failures(arguments, output, stubs, overlay, include, found)
     end
 end
 
-function failures(arguments)
+local function cut_fixture_failures()
+    local fixture = table.concat({
+        "symbols: [ 'NSURLComponents', 'NSDateInterval', 'NSURLComponentsExtra', ],",
+        "    _CTLineDraw, _CTFrameDraw, _CTKeep,",
+        "    'NSKeep',",
+        "",
+    }, "\n")
+    local names = {"NSURLComponents", "NSDateInterval", "_CTLineDraw", "_CTFrameDraw"}
+    local cut = flat.cut_all(fixture, names)
     local found = {}
+    for _, name in ipairs(names) do
+        if cut:find("[%s,%[']" .. name .. "'?[,%]%s]") then
+            table.insert(found, "the one-pass cut left " .. name .. " in the .tbd text")
+        end
+    end
+    for _, name in ipairs({"NSURLComponentsExtra", "_CTKeep", "NSKeep"}) do
+        if not cut:find(name, 1, true) then
+            table.insert(found, "the one-pass cut removed " .. name .. ", which is not in its list")
+        end
+    end
+    return found
+end
+
+local function tbd_fixture_failures(sdk)
+    local names = flat.class_names()
+    for _, name in ipairs({"CTFrameDraw", "CTFrameGetLineOrigins", "CTFramesetterSuggestFrameSizeWithConstraints", "CTLineDraw",
+                           "CTLineGetBoundsWithOptions", "CTLineGetImageBounds", "CTLineGetTypographicBounds", "CTRunDraw"}) do
+        table.insert(names, "_" .. name)
+    end
+    local found = {}
+    for _, framework in ipairs({"Foundation", "CFNetwork", "UIKit", "Symbols", "CoreText"}) do
+        local file = path.join(sdk, "System", "Library", "Frameworks", framework .. ".framework", framework .. ".tbd")
+        local text = io.readfile(file)
+        if not text then
+            table.insert(found, "the SDK has no " .. framework .. ".tbd to compare the two cuts on")
+        else
+            local expected = text
+            for _, name in ipairs(names) do
+                expected = expected:gsub("'" .. name .. "',%s*", "")
+                expected = expected:gsub("([%s,%[])" .. name .. ",%s*", "%1")
+            end
+            local actual = flat.cut_all(text, names)
+            if (expected:gsub("%s+", " ")) ~= (actual:gsub("%s+", " ")) then
+                table.insert(found, "the one-pass cut of " .. framework .. ".tbd differs from the old cut beyond whitespace")
+            end
+        end
+    end
+    return found
+end
+
+function failures(arguments)
+    local found = cut_fixture_failures()
+    table.join2(found, tbd_fixture_failures(arguments.sdk))
     local output = workspace.run("flat-classes")
     os.rm(output)
     os.mkdir(output)
