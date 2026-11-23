@@ -1,4 +1,5 @@
 local process = import("core.base.process")
+local exclusive = import("@addon.revenant.exclusive", {anonymous = true})
 
 local TOKEN_MB = 1536
 local RESERVE_MB = 2048
@@ -18,8 +19,9 @@ local VMSTAT = "/usr/bin/vm_stat"
 local DF = "/bin/df"
 local PS = "/bin/ps"
 local LOAD_WINDOW_MS = 60000
-local AGING_S = 600
 local ANNOUNCE_S = 300
+local WAIT_JOURNAL = "wait-journal"
+local WAIT_DAY_S = 86400
 
 local function say(format, ...)
     print(format, ...)
@@ -56,10 +58,6 @@ end
 
 local function slot_path(folder, index)
     return path.join(folder, string.format("slot-%02d.lock", index))
-end
-
-local function aged_path(folder, name)
-    return path.join(folder, "queue", "aged-" .. name)
 end
 
 local function parse_loadavg(text)
@@ -174,7 +172,10 @@ local function memory_headroom(reading)
         return 1
     end
     local available = math.floor(math.max(0, (reading.available or 0) - RESERVE_MB) / TOKEN_MB)
-    return math.max(1, available)
+    if available < 1 then
+        return 1
+    end
+    return available, true
 end
 
 local function capacity(reading, held, own)
@@ -250,6 +251,106 @@ local function who_of(text)
     return {at = tonumber(at), worktree = worktree or "", command = command or ""}
 end
 
+local function journal_path(folder)
+    return path.join(folder, WAIT_JOURNAL)
+end
+
+local function append_journal(folder, at, entry)
+    exclusive.run(journal_path(folder) .. ".lock", "the budget wait journal", function ()
+        local lines = {}
+        local previous = os.isfile(journal_path(folder)) and io.readfile(journal_path(folder)) or ""
+        for line in previous:gmatch("[^\n]+") do
+            local stamped = tonumber(line:match("^at (%d+)"))
+            if stamped and stamped >= at - WAIT_DAY_S then
+                table.insert(lines, line)
+            end
+        end
+        table.insert(lines, entry)
+        io.writefile(journal_path(folder), table.concat(lines, "\n") .. "\n")
+    end)
+end
+
+local function record_wait(folder, class, tokens, seconds, who)
+    local at = os.time()
+    local failure
+    try {
+        function ()
+            append_journal(folder, at, string.format("at %d\tclass %s\ttokens %d\twait %d\tpid %d\t%s", at, class, tokens, seconds, who.pid or 0, who_line(who)))
+        end,
+        catch {
+            function (errors)
+                failure = tostring(errors):gsub("%s+", " ")
+            end
+        }
+    }
+    if failure then
+        local note = string.format("at %d granted %d token(s) to pid %d: the journal write failed: %s", at, tokens, who.pid or 0, failure)
+        io.stderr:write("budget: " .. note .. "\n")
+        try { function () local file = io.open(journal_path(folder) .. ".errors", "a"); file:write(note .. "\n"); file:close() end }
+    end
+end
+
+local function record_stops(folder, kind, parent, run, listing)
+    local at = os.time()
+    for line in listing:gmatch("[^\n]+") do
+        local pid, command = line:match("^%s*(%d+)%s+(.-)%s*$")
+        if pid then
+            append_journal(folder, at, string.format("at %d\tstopped %s\tpid %s\tparent %s\trun %s\t%s", at, kind, pid, parent, run, command))
+        end
+    end
+end
+
+local function wait_summary(folder)
+    if not os.isfile(journal_path(folder)) then
+        return 0, 0, {}
+    end
+    local cutoff = os.time() - WAIT_DAY_S
+    local groups, order, total, count = {}, {}, 0, 0
+    for line in (io.readfile(journal_path(folder)) or ""):gmatch("[^\n]+") do
+        local at, class, tokens, seconds, pid, worktree, command = line:match("^at (%d+)\tclass (%a+)\ttokens (%d+)\twait (%d+)\tpid (%d+)\th %d+\t([^\t]*)\t([^\n]*)$")
+        if at and tonumber(at) >= cutoff then
+            local key = pid .. "\t" .. worktree .. "\t" .. command
+            if not groups[key] then
+                groups[key] = {pid = pid, worktree = worktree, command = command, seconds = 0, waits = 0, tokens = 0, classes = {}}
+                table.insert(order, key)
+            end
+            local group = groups[key]
+            group.seconds = group.seconds + tonumber(seconds)
+            group.waits = group.waits + 1
+            group.tokens = group.tokens + tonumber(tokens)
+            group.classes[class] = true
+            total = total + tonumber(seconds)
+            count = count + 1
+        end
+    end
+    local lines = {}
+    for _, key in ipairs(order) do
+        local group = groups[key]
+        local classes = table.keys(group.classes)
+        table.sort(classes)
+        table.insert(lines, string.format("pid %s in %s: %s — %d s in %d wait(s), %d token(s) in %s class(es)",
+            group.pid, group.worktree ~= "" and group.worktree or "an unknown worktree", group.command,
+            group.seconds, group.waits, group.tokens, table.concat(classes, ", ")))
+    end
+    return total, count, lines
+end
+
+local function stop_summary(folder)
+    local cutoff = os.time() - WAIT_DAY_S
+    local processes, count, newest = {}, 0, nil
+    for line in (io.readfile(journal_path(folder)) or ""):gmatch("[^\n]+") do
+        local at, what, pid, run, command = line:match("^at (%d+)\tstopped (%a+)\tpid (%d+)\tparent %d+\trun (%d+)\t(.*)$")
+        if at and tonumber(at) >= cutoff then
+            if not processes[pid .. "\t" .. run] then
+                processes[pid .. "\t" .. run] = true
+                count = count + 1
+            end
+            newest = os.date("%Y-%m-%d %H:%M:%S", tonumber(at)) .. " " .. pid .. " " .. what .. " " .. command
+        end
+    end
+    return count, newest
+end
+
 local function ticket_need(file)
     return tonumber((io.readfile(file) or ""):match("^%d+")) or 1
 end
@@ -257,19 +358,21 @@ end
 local function enqueue(folder, rank, minimum, who)
     local dir = path.join(folder, "queue")
     os.mkdir(dir)
+    local named = who or {pid = os.getpid(), worktree = checkout_dir(), command = "", at = os.time()}
+    if not named.pid then
+        named = table.clone(named)
+        named.pid = os.getpid()
+    end
     local name = string.format("%d-%013d-%08d.ticket", rank, os.time() * 1000 + math.random(0, 999), math.random(0, 99999999))
     local file = path.join(dir, name)
     local lock = io.openlock(file)
     lock:trylock()
-    io.writefile(file, tostring(minimum) .. (who and string.format("\np %d\n%s\n", who.pid, who_line(who)) or ""))
+    io.writefile(file, tostring(minimum) .. string.format("\np %d\n%s\n", named.pid, who_line(named)))
     return {name = name, file = file, lock = lock}
 end
 
-local function leave(ticket, folder)
+local function leave(ticket)
     os.tryrm(ticket.file)
-    if folder then
-        os.tryrm(aged_path(folder, ticket.name))
-    end
     ticket.lock:unlock()
     ticket.lock:close()
 end
@@ -286,7 +389,6 @@ local function holder_alive(file)
     lock:close()
     if free then
         os.tryrm(file)
-        os.tryrm(path.join(path.directory(file), "aged-" .. path.filename(file)))
     end
     return not free
 end
@@ -302,20 +404,11 @@ local function write_pid(file, pid)
     io.writefile(file, table.concat(lines, "\n") .. "\n")
 end
 
-local function ahead_of(folder, name, available)
-    for _, file in ipairs(os.files(path.join(folder, "queue", "aged-*.ticket"))) do
-        local other = path.filename(file):sub(6)
-        if other < name and holder_alive(path.join(folder, "queue", other)) then
-            local need = ticket_need(file)
-            if need <= available then
-                return true
-            end
-        end
-    end
+local function ahead_of(folder, name, reach)
     for _, file in ipairs(os.files(path.join(folder, "queue", "*.ticket"))) do
         if path.filename(file) < name and holder_alive(file) then
             local need = ticket_need(file)
-            if need <= available then
+            if need <= reach then
                 return true
             end
         end
@@ -464,37 +557,33 @@ local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms, who
     poll_ms = poll_ms or POLL_MS
     local ticket = enqueue(folder, CLASSES[class].rank, minimum, who)
     local started = os.mclock()
-    local aging = (tonumber(os.getenv("REVENANT_BUDGET_AGING_S")) or AGING_S) * 1000
     local announce = (tonumber(os.getenv("REVENANT_BUDGET_ANNOUNCE_S")) or ANNOUNCE_S) * 1000
-    local announced, marked
+    local announced
     while true do
         local cores = os.cpuinfo("ncpu")
         local reading = reading_fn()
         reading.cores = cores
         local free, held, pids = snapshot_slots(folder, cores)
         local cap = capacity(reading, held, own_runnable(pids))
-        local headroom = memory_headroom(reading)
+        local headroom, measured = memory_headroom(reading)
         local progress = held == 0 and progress_capacity(reading, held, minimum) or held
         local guarantee = progress > held
         if guarantee then
             cap = math.max(cap, progress)
         end
-        local available = math.min(math.max(cap - held, 0), #free)
         local count = grantable(cap, held, #free, minimum, maximum)
-        if count > 0 and not ahead_of(folder, ticket.name, guarantee and math.min(#free, headroom) or available) then
+        local reach = math.min(measured and headroom + held or headroom, cores - RESERVE_CORES)
+        if count > 0 and not ahead_of(folder, ticket.name, reach) then
             local grant = table.slice(free, 1, count)
             release_locks(table.slice(free, count + 1))
             for _, entry in ipairs(grant) do
                 publish_slot(entry, 1, who)
             end
-            leave(ticket, folder)
+            record_wait(folder, class, count, math.max(0, (os.mclock() - started) // 1000), who or {pid = os.getpid(), worktree = checkout_dir(), command = "", at = os.time()})
+            leave(ticket)
             return grant
         end
         release_locks(free)
-        if not marked and os.mclock() - started > aging then
-            io.writefile(aged_path(folder, ticket.name), tostring(minimum))
-            marked = true
-        end
         if not announced or os.mclock() - announced > announce then
             say("%s", waiting_text(folder, minimum, class, announced ~= nil))
             announced = os.mclock()
@@ -516,14 +605,26 @@ local function launch(class, command)
     return "/bin/sh", table.join({"-c", CLOSE_INHERITED, "budget", program}, args)
 end
 
-local WATCHER = [[parent=$1; target=$2; me=$$
+local WATCHER = [[parent=$1; target=$2; program=$3; project=$4; script=$5; errors=$6; me=$
 tree() { for child in $(pgrep -P "$1"); do tree "$child"; done; echo "$1"; }
+journal() {
+    out=$("$program" l -P "$project" "$script" stopped "$1" "$parent" "$target" "$2" 2>&1) || echo "at $(date +%s) stopped $1 parent $parent run $target: the journal write failed: $(echo $out | tr '\n' ' ')" >> "$errors"
+}
+listing() { ps -o pid=,command= -p "$(echo $1 | tr ' ' ',')" 2>/dev/null; }
 while [ "$(ps -o ppid= -p "$target" 2>/dev/null | tr -d ' ')" = "$parent" ]; do sleep 1; done
 kill -0 "$target" 2>/dev/null || exit 0
 pids=$(tree "$target" | grep -v "^$me\$")
+seen=$(listing "$pids")
+journal TERM "$seen"
 kill -TERM $pids 2>/dev/null
 sleep 2
-kill -KILL $pids 2>/dev/null
+alive=""
+for pid in $pids; do kill -0 "$pid" 2>/dev/null && alive="$alive $pid"; done
+if [ -n "$alive" ]; then
+    seen=$(listing "$alive")
+    journal KILL "$seen"
+    kill -KILL $alive 2>/dev/null
+fi
 exit 0]]
 
 local function parent_of(pid)
@@ -535,7 +636,7 @@ local function watch_parent()
     if not parent or parent <= 1 then
         return nil
     end
-    return process.openv("/bin/sh", {"-c", CLOSE_INHERITED, "budget", "/bin/sh", "-c", WATCHER, "watcher", tostring(parent), tostring(os.getpid())},
+    return process.openv("/bin/sh", {"-c", CLOSE_INHERITED, "budget", "/bin/sh", "-c", WATCHER, "watcher", tostring(parent), tostring(os.getpid()), os.programfile(), os.projectdir(), path.join(os.scriptdir(), "budget.lua"), journal_path(pool_folder()) .. ".errors"},
                          {outpath = "/dev/null", errpath = "/dev/null"})
 end
 
@@ -626,7 +727,7 @@ local function status()
     say("cpu       %.2f loadavg, %.2f effective load, %d runnable of holders, %d token(s) of headroom",
         reading.loadavg, load, own, math.max(0, cores - RESERVE_CORES - load))
     say("memory    pressure %d, %d MB available (memorystatus %d%%), %d token(s) of headroom", reading.pressure,
-        math.floor(reading.available), reading.level or 0, memory_headroom(reading))
+        math.floor(reading.available), reading.level or 0, (memory_headroom(reading)))
     say("held      %d token(s)", held)
     for _, line in ipairs(holder_lines(folder, "          ")) do
         say("%s", line)
@@ -636,6 +737,21 @@ local function status()
     say("queued    %d ticket(s) with a live holder", #waiting)
     for _, line in ipairs(waiting) do
         say("%s", line)
+    end
+    local seconds, entries, waits = wait_summary(folder)
+    say("waited    %d s in %d grant(s) over the last 24 h", seconds, entries)
+    for _, line in ipairs(waits) do
+        say("waited    %s", line)
+    end
+    local stopped, newest = stop_summary(folder)
+    say("stopped   %d process(es) by the watcher over the last 24 h%s", stopped, newest and ("; newest: " .. newest) or "")
+    local failed = os.isfile(journal_path(folder) .. ".errors") and io.readfile(journal_path(folder) .. ".errors") or ""
+    local failures = 0
+    for _ in failed:gmatch("[^\n]+") do
+        failures = failures + 1
+    end
+    if failures > 0 then
+        say("stopped   %d journal write(s) failed (watcher stops or grants), see %s", failures, journal_path(folder) .. ".errors")
     end
     say("disk      %.0f GB free on the checkout's volume (floor %d GB)", free_disk_gb(), DISK_FLOOR_GB)
 end
@@ -767,6 +883,14 @@ local function test_suite()
     check("a ticket whose holder died does not block", ahead_of(pool, "2-0000000000002-00000002.ticket", 1), false)
     check("and is removed", os.isfile(stale), false)
 
+    local named_pool = path.join(base, "namedpool")
+    os.mkdir(named_pool)
+    local anonymous = enqueue(named_pool, 2, 1, nil)
+    local named_waiters = waiters(named_pool)
+    check("a ticket enqueued without a holder still names the process that waits", #named_waiters, 1)
+    check("and names it by pid, not by nil", named_waiters[1] and named_waiters[1].pid, os.getpid())
+    leave(anonymous)
+
     local function ticket_at(name, need)
         local file = path.join(queue, name)
         local lock = io.openlock(file)
@@ -775,22 +899,19 @@ local function test_suite()
         return {name = name, file = file, lock = lock}
     end
     local large = ticket_at("2-0000000000001-00000001.ticket", 6)
-    check("a large ticket ahead does not block a small request that fits", ahead_of(pool, "2-0000000000002-00000002.ticket", 1), false)
-    check("and does block one when there is room for it", ahead_of(pool, "2-0000000000002-00000002.ticket", 6), true)
+    check("a large ticket ahead does not block a small request when the pool could not hold it even empty", ahead_of(pool, "2-0000000000002-00000002.ticket", 1), false)
+    check("and does block one when the pool could hold it once its holders are done", ahead_of(pool, "2-0000000000002-00000002.ticket", 6), true)
     leave(large)
     check("a ticket behind the request does not block", ahead_of(pool, "1-0000000000000-00000000.ticket", 1), false)
 
     local name_a, name_b = "2-0000000000003-00000003.ticket", "2-0000000000004-00000004.ticket"
-    local aged_a, aged_b = ticket_at(name_a, 4), ticket_at(name_b, 4)
-    io.writefile(aged_path(pool, name_a), "4")
-    io.writefile(aged_path(pool, name_b), "4")
-    check("an earlier aged ticket blocks a later one", ahead_of(pool, name_b, 4), true)
-    check("a later aged ticket does not block the earlier one", ahead_of(pool, name_a, 4), false)
-    aged_a.lock:unlock()
-    aged_a.lock:close()
-    check("a dead aged holder stops blocking", ahead_of(pool, name_b, 4), false)
-    check("and its aged marker is removed with the dead ticket", os.isfile(aged_path(pool, name_a)), false)
-    leave(aged_b)
+    local early, late = ticket_at(name_a, 4), ticket_at(name_b, 4)
+    check("an earlier ticket blocks a later one", ahead_of(pool, name_b, 4), true)
+    check("a later ticket does not block the earlier one", ahead_of(pool, name_a, 4), false)
+    early.lock:unlock()
+    early.lock:close()
+    check("a dead holder stops blocking", ahead_of(pool, name_b, 4), false)
+    leave(late)
 
     local stamp_pool = path.join(base, "stamppool")
     os.mkdir(stamp_pool)
@@ -822,7 +943,7 @@ local function test_suite()
     local started_anyway = false
     try { function ()
         os.iorunv(os.programfile(), {"l", "-P", path.directory(os.scriptdir()), path.join(os.scriptdir(), "budget.lua"), "run", "--", "/usr/bin/true"},
-            {envs = {REVENANT_BUDGET_DISK_GB = "100000000", REVENANT_BUDGET_POOL = pool}})
+            {envs = {REVENANT_BUDGET_DISK_GB = "100000000", REVENANT_BUDGET_POOL = pool, REVENANT_BUDGET_HELD = ""}})
         started_anyway = true
     end, catch { function () end } }
     check("a volume below the floor starts nothing", started_anyway, false)
@@ -839,6 +960,18 @@ local function test_suite()
     local granted = acquire(fresh, "normal", 1, 1, changing, 1)
     local elapsed = os.mclock() - began
     check("a request that does not fit waits and is granted when it does", #granted, 1)
+    local granted_journal = io.readfile(journal_path(fresh)) or ""
+    check("the grant journals the class, tokens and seconds with the waiting process", granted_journal:find("class normal", 1, true) ~= nil
+          and granted_journal:find("tokens 1", 1, true) ~= nil and granted_journal:find("wait ", 1, true) ~= nil
+          and granted_journal:find("pid " .. tostring(os.getpid()), 1, true) ~= nil, true)
+    local test_project = path.directory(os.scriptdir())
+    local test_script = path.join(os.scriptdir(), "budget.lua")
+    record_wait(fresh, "critical", 2, 4, {pid = os.getpid(), worktree = test_project, command = "/usr/bin/true", at = os.time()})
+    local waited_seconds, waited_entries, waited_lines = wait_summary(fresh)
+    check("the summary adds up a day's waits by holder", waited_entries == 2 and waited_seconds == 4 and #waited_lines == 2, true)
+    local status_with_wait = os.iorunv(os.programfile(), {"l", "-P", test_project, test_script, "status"}, {envs = {REVENANT_BUDGET_POOL = fresh}})
+    check("status prints the sum of waits and who waited", status_with_wait:find("waited    ", 1, true) ~= nil
+          and status_with_wait:find("/usr/bin/true", 1, true) ~= nil, true)
     check("and the re-check happens without a fixed patience wait", calls >= 3 and elapsed < 10000, true)
     release_locks(granted)
 
@@ -907,7 +1040,7 @@ local function test_suite()
     local function under_load()
         older_calls = older_calls + 1
         if older_calls == 4 then
-            leave(older, guarantee_pool)
+            leave(older)
         end
         return test_reading(50, 1, 11000)
     end
@@ -947,7 +1080,7 @@ local function test_suite()
     end, catch { function (raised) younger_error = tostring(raised) end } }
     check("a younger ticket cannot take the guarantee past an older large one", younger_error ~= nil and younger_calls > 5, true)
     check("and it leaves no grant stamp", (io.readfile(slot_path(order_pool, 1)) or ""):match("g %d+ %d+") == nil, true)
-    leave(older_critical, order_pool)
+    leave(older_critical)
     local older_grant = acquire(order_pool, "critical", 6, 6, function () return test_reading(50, 1, 20000) end, 1)
     check("the older critical ticket then gets its six tokens", #older_grant, 6)
     release_locks(older_grant)
@@ -959,10 +1092,80 @@ local function test_suite()
     local backfill_grant = acquire(backfill_pool, "normal", 2, 2, function () return test_reading(50, 1, 5120) end, 1)
     check("a ticket whose minimum fits memory backfills past a memory-starved older one", #backfill_grant, 2)
     release_locks(backfill_grant)
-    leave(starved, backfill_pool)
+    leave(starved)
     local starved_grant = acquire(backfill_pool, "critical", 6, 6, function () return test_reading(50, 1, 20000) end, 1)
     check("the older ticket then gets its six tokens when headroom allows", #starved_grant, 6)
     release_locks(starved_grant)
+
+    local fair_pool = path.join(base, "fair")
+    local fair_queue = path.join(fair_pool, "queue")
+    os.mkdir(fair_queue)
+    local function overloaded()
+        return test_reading(50, 1, 20000)
+    end
+    local fair_first_name = "2-0000000000001-00000001.ticket"
+    local function clear_other_tickets()
+        for _, file in ipairs(os.files(path.join(fair_queue, "*.ticket"))) do
+            if path.filename(file) ~= fair_first_name then
+                os.tryrm(file)
+            end
+        end
+    end
+    local function polls_without_grant(class, minimum, reading_fn)
+        local calls = 0
+        local grant
+        try { function ()
+            grant = acquire(fair_pool, class, minimum, minimum, function ()
+                calls = calls + 1
+                if calls > 5 then
+                    raise("stopped")
+                end
+                return reading_fn()
+            end, 1)
+        end, catch { function () end } }
+        clear_other_tickets()
+        return grant or {}
+    end
+    local function waits_without_grant(class, minimum)
+        return #polls_without_grant(class, minimum, overloaded) == 0
+    end
+    local fair_holder = acquire(fair_pool, "normal", 1, 1, overloaded, 1)
+    check("a request for one token gets it under outside load with one holder", #fair_holder, 1)
+    local fair_first = waiting_ticket(fair_queue, fair_first_name, 2)
+    check("a request for one token does not overtake an older one for two under outside load", waits_without_grant("normal", 1), true)
+    check("and a request of the background class does not either", waits_without_grant("background", 1), true)
+    local critical_grant = acquire(fair_pool, "critical", 1, 1, overloaded, 1)
+    check("a critical request is not held back by an older normal one", #critical_grant, 1)
+    release_locks(critical_grant)
+    local function pressed()
+        return test_reading(50, 2, 20000)
+    end
+    local pressed_grant = polls_without_grant("normal", 1, pressed)
+    check("under memory pressure an older request for two tokens does not hold back one for one", #pressed_grant, 1)
+    release_locks(pressed_grant)
+    local function short_of_memory()
+        return test_reading(50, 1, 100)
+    end
+    local short_grant = polls_without_grant("normal", 1, short_of_memory)
+    check("with less free memory than the reserve an older request for two tokens does not hold back one for one", #short_grant, 1)
+    release_locks(short_grant)
+    leave(fair_first)
+    local after_grant = acquire(fair_pool, "normal", 1, 1, overloaded, 1)
+    check("the request for one token goes once the older one is gone", #after_grant, 1)
+    release_locks(after_grant)
+    release_locks(fair_holder)
+    local drain_holder = acquire(fair_pool, "normal", 1, 1, overloaded, 1)
+    local drain_calls = 0
+    local drained = acquire(fair_pool, "normal", 2, 2, function ()
+        drain_calls = drain_calls + 1
+        if drain_calls == 3 then
+            release_locks(drain_holder)
+        end
+        return overloaded()
+    end, 1)
+    check("a request for two tokens waits for its holder and then starts under outside load", #drained, 2)
+    check("and it did wait for the holder", drain_calls >= 3, true)
+    release_locks(drained)
 
     local dead_pool = path.join(base, "deadholder")
     os.mkdir(dead_pool)
@@ -1044,7 +1247,7 @@ local function test_suite()
         local sized = enqueue(who_pool, 2, 6, {pid = os.getpid(), worktree = project, command = "x", at = os.time()})
         check("a ticket that names its holder still carries the tokens it needs", ahead_of(who_pool, "9-9999999999999-99999999.ticket", 1), false)
         check("and blocks a later request that fits it", ahead_of(who_pool, "9-9999999999999-99999999.ticket", 6), true)
-        leave(sized, who_pool)
+        leave(sized)
 
         local function matching(command)
             local listing = try { function () return os.iorunv(PS, {"-ax", "-o", "pid=,command="}) end } or ""
@@ -1094,6 +1297,141 @@ local function test_suite()
         check("nor the budget run itself", budget_alive, false)
         check("nor the command it ran", commands_left, 0)
         check("nor a holder in the list", holders_left, 0)
+        local stops = {}
+        local function read_stops()
+            stops = {}
+            for line in (io.readfile(journal_path(orphan_pool)) or ""):gmatch("[^\n]+") do
+                if line:find("\tstopped ", 1, true) then
+                    table.insert(stops, line)
+                end
+            end
+        end
+        deadline = os.mclock() + 30000
+        read_stops()
+        while #stops == 0 and os.mclock() < deadline do
+            os.sleep(300)
+            read_stops()
+        end
+        local stopped_sleep, stopped_run = "", ""
+        for _, line in ipairs(stops) do
+            if line:find("\t/bin/sleep 4711$") then
+                stopped_sleep = line
+            elseif line:find("\tpid " .. tostring(budget_pid) .. "\t", 1, true) then
+                stopped_run = line
+            end
+        end
+        local tail = "\tparent " .. tostring(shell_pid) .. "\trun " .. tostring(budget_pid) .. "\t"
+        check("the watcher journaled the command it stopped, with the pid, the dead parent and the budget run, in the wait journal", stopped_sleep:find("^at %d+\tstopped TERM\tpid " .. tostring(command_pids[1]) .. tail:gsub("%p", "%%%0")) ~= nil
+            and stopped_run:find("\tstopped TERM\t", 1, true) ~= nil and stopped_run:find(tail, 1, true) ~= nil, true)
+
+        local now = os.time()
+        local counted = path.join(base, "countpool")
+        os.mkdir(counted)
+        io.writefile(journal_path(counted), table.concat({
+            string.format("at %d\tstopped TERM\tpid 11\tparent 4\trun 5\tone", now - 30),
+            string.format("at %d\tstopped KILL\tpid 11\tparent 4\trun 5\tone", now - 28),
+            string.format("at %d\tstopped TERM\tpid 12\tparent 4\trun 5\ttwo words", now - 20),
+            string.format("at %d\tstopped TERM\tpid 13\tparent 4\trun 5\told", now - WAIT_DAY_S - 100),
+            string.format("at %d\tstopped TERM\tpid x", now - 10),
+            string.format("at %d\tclass normal\ttokens 1\twait 3\tpid 9\th %d\t/w\tcmd", now - 10, now - 10),
+            "torn"}, "\n") .. "\n")
+        local number, newest = stop_summary(counted)
+        check("a process stopped by TERM and then KILL counts once, an old line and torn lines not at all", number, 2)
+        check("the newest stop is the last whole line in the last day", newest ~= nil and newest:find(" 12 TERM two words", 1, true) ~= nil, true)
+        local report_log = path.join(base, "report.log")
+        local reporter = process.openv(os.programfile(), {"l", "-P", project, script, "status"},
+            {outpath = report_log, errpath = report_log, envs = {"REVENANT_BUDGET_POOL=" .. counted, no_floor}})
+        reporter:wait(30000)
+        reporter:close()
+        local report = io.readfile(report_log) or ""
+        check("status prints the count of processes and survives a torn journal", report:find("stopped   2 process(es) by the watcher over the last 24 h; newest: ", 1, true) ~= nil, true)
+
+        local held_pool = path.join(base, "heldpool")
+        os.mkdir(held_pool)
+        local lock = io.openlock(journal_path(held_pool) .. ".lock")
+        lock:trylock()
+        local late_log = path.join(base, "late.log")
+        local late = process.openv(os.programfile(), {"l", "-P", project, script, "stopped", "TERM", "7", "8", "9 /bin/late"},
+            {outpath = late_log, errpath = late_log, envs = {"REVENANT_BUDGET_POOL=" .. held_pool, no_floor}})
+        os.sleep(2500)
+        local early = os.isfile(journal_path(held_pool)) and io.readfile(journal_path(held_pool)) or nil
+        lock:unlock()
+        lock:close()
+        late:wait(20000)
+        late:close()
+        check("a stop line waits for the journal lock and is neither written without it nor lost", early == nil and (io.readfile(journal_path(held_pool)) or ""):find("\tstopped TERM\tpid 9\tparent 7\trun 8\t/bin/late", 1, true) ~= nil, true)
+
+        local broken_pool = path.join(base, "brokenpool")
+        os.mkdir(broken_pool)
+        local broken_log = path.join(base, "broken.log")
+        local broken = process.openv("/bin/sh", {"-c", [[ "$0" l -P "$1" "$2" run --class normal --jobs 1 --min 1 -- /bin/sleep 4713; true ]], os.programfile(), project, script},
+            {outpath = broken_log, errpath = broken_log, envs = {"REVENANT_BUDGET_POOL=" .. broken_pool, no_floor}})
+        deadline = os.mclock() + 30000
+        while (held_slots(broken_pool) < 1 or #matching("/bin/sleep 4713") < 1) and os.mclock() < deadline do
+            os.sleep(300)
+        end
+        os.tryrm(journal_path(broken_pool))
+        os.mkdir(journal_path(broken_pool))
+        local broken_run = holders(broken_pool)[1]
+        local broken_shell = broken_run and parent_of(broken_run.pid)
+        local broken_pids = matching("/bin/sleep 4713")
+        if broken_shell and broken_shell > 1 then
+            try { function () os.iorunv("/bin/kill", {"-9", tostring(broken_shell)}) end }
+        end
+        local errors_file = path.join(broken_pool, "wait-journal.errors")
+        deadline = os.mclock() + 30000
+        while (not os.isfile(errors_file) or #matching("/bin/sleep 4713") > 0) and os.mclock() < deadline do
+            os.sleep(300)
+        end
+        local broken_left = #matching("/bin/sleep 4713")
+        for _, pid in ipairs(broken_pids) do
+            try { function () os.iorunv("/bin/kill", {"-9", tostring(pid)}) end }
+        end
+        broken:close()
+        local errors_text = os.isfile(errors_file) and io.readfile(errors_file) or ""
+        check("a journal that cannot be written does not keep the watcher from stopping the command", broken_left, 0)
+        check("and the failure is recorded beside the journal, naming the signal, the dead parent and the run", errors_text:find("stopped TERM parent " .. tostring(broken_shell) .. " run " .. tostring(broken_run and broken_run.pid) .. ": the journal write failed", 1, true) ~= nil, true)
+
+        local unwritable = path.join(base, "unwritablepool")
+        os.mkdir(path.join(unwritable, "wait-journal"))
+        local unwritable_log = path.join(base, "unwritable.log")
+        local unwritable_run = process.openv(os.programfile(), {"l", "-P", project, script, "run", "--class", "normal", "--jobs", "1", "--min", "1", "--", "/usr/bin/true"},
+            {outpath = unwritable_log, errpath = unwritable_log, envs = {"REVENANT_BUDGET_POOL=" .. unwritable, no_floor}})
+        local finished, unwritable_status = unwritable_run:wait(30000)
+        unwritable_run:close()
+        local unwritable_errors = path.join(unwritable, "wait-journal.errors")
+        check("a run whose wait journal cannot be written still gets its token and runs its command", finished == 1 and unwritable_status == 0, true)
+        check("and the failed write is on stderr and in wait-journal.errors", (io.readfile(unwritable_log) or ""):find("the journal write failed", 1, true) ~= nil
+            and os.isfile(unwritable_errors) and io.readfile(unwritable_errors):find("granted 1 token(s) to pid", 1, true) ~= nil, true)
+
+        local stubborn_pool = path.join(base, "stubbornpool")
+        os.mkdir(stubborn_pool)
+        local stubborn_log = path.join(base, "stubborn.log")
+        local stubborn = process.openv("/bin/sh", {"-c", [[ "$0" l -P "$1" "$2" run --class normal --jobs 1 --min 1 -- /bin/sh -c 'trap "" TERM; exec /bin/sleep 4712'; true ]], os.programfile(), project, script},
+            {outpath = stubborn_log, errpath = stubborn_log, envs = {"REVENANT_BUDGET_POOL=" .. stubborn_pool, no_floor}})
+        deadline = os.mclock() + 30000
+        while (held_slots(stubborn_pool) < 1 or #matching("/bin/sleep 4712") < 1) and os.mclock() < deadline do
+            os.sleep(300)
+        end
+        local stubborn_run = holders(stubborn_pool)[1]
+        local stubborn_shell = stubborn_run and parent_of(stubborn_run.pid)
+        local stubborn_pids = matching("/bin/sleep 4712")
+        if stubborn_shell and stubborn_shell > 1 then
+            try { function () os.iorunv("/bin/kill", {"-9", tostring(stubborn_shell)}) end }
+        end
+        deadline = os.mclock() + 30000
+        while (#matching("/bin/sleep 4712") > 0 or held_slots(stubborn_pool) > 0) and os.mclock() < deadline do
+            os.sleep(300)
+        end
+        local stubborn_left = #matching("/bin/sleep 4712")
+        for _, pid in ipairs(stubborn_pids) do
+            try { function () os.iorunv("/bin/kill", {"-9", tostring(pid)}) end }
+        end
+        stubborn:close()
+        local stubborn_journal = io.readfile(journal_path(stubborn_pool)) or ""
+        check("a command that ignores TERM is ended by KILL two seconds later", stubborn_left, 0)
+        check("and the journal has a TERM line and a KILL line for it", #stubborn_pids == 1 and stubborn_journal:find("\tstopped TERM\tpid " .. tostring(stubborn_pids[1]) .. "\t", 1, true) ~= nil
+            and stubborn_journal:find("\tstopped KILL\tpid " .. tostring(stubborn_pids[1]) .. "\t", 1, true) ~= nil, true)
     end
 
     os.rm(base)
@@ -1107,6 +1445,8 @@ function main(command, ...)
         if status ~= 0 then
             os.exit(status)
         end
+    elseif command == "stopped" then
+        record_stops(pool_folder(), args[1], args[2], args[3], args[4] or "")
     elseif command == "status" then
         status()
     elseif command == "test" then

@@ -361,6 +361,25 @@ The key sees clang by the text of `clang --version` and the digester by its size
 in place with one that prints the same version line does not move the key: remove `<store>/backports/<key>` and the folder in
 the checkout after such a change, as for the other things "What a key does not see" lists.
 
+### The skeleton's input key
+
+`frameworks/Backports/tools/generate.lua` publishes the skeleton under a versioned folder and keeps `skeleton` as a
+pointer to the current version. The input key lives in `.input-key` inside that version, so a reader of the pointer sees
+the skeleton and its key in one atomic step. A later generator whose key is the same stops before it reads any facts or
+scans `src/`: it prints `skeleton: inputs unchanged (<key>), generation skipped under <path>` and changes nothing. A
+changed key runs the full generation and publishes a new version. The key covers the content of every input the
+generator reads: all files under `frameworks/Backports/tools/` (including the generated `device-globals.txt`), all files
+under `frameworks/Backports/src/`, every file under `toolchain/modules/` that the tools import, the content of
+`frameworks/Backports/xmake.lua`, the iOS 6.1.3 device class inventory, the facts cache folder named by
+`sdkfiles.cache_key(sdk)` (the SDK's own content key, version, clang, digester and the four facts tools, and the digests
+of the TSVs in it), the list of framework names whose facts must be present, and `REVENANT_GEN_SDK` and
+`REVENANT_BACKPORTS_LIBRARIES`. A missing input yields no key, which runs the generation. The key is content-addressed:
+the folder of a worktree is not an input, so two worktrees with the same content share a verdict. The generated `.m`
+files include `revenant_alias.h` by a path relative to the skeleton folder, not by an absolute path of one worktree:
+ccache's direct-mode key includes the path of a header named in the source, so an absolute path made every generated
+compile of another worktree miss (measured: 0 hits in 2 compiles with an absolute include, 2 hits in 2 with a relative
+one).
+
 ```
 ./xmakew l -P . tools/analysis_cache.lua [sync | restore | publish]
 ```
@@ -607,20 +626,24 @@ environment of the test does not reach it.
   than `--jobs`, it starts with fewer jobs, up to what memory and CPU allow. As a progress guarantee, when the pool has no
   live holder the oldest waiting ticket is granted its minimum in full even under high outside load, provided memory
   headroom is at least that minimum; less than the minimum of memory headroom, including critical pressure, makes it wait
-  rather than start short, and the disk floor still stops it. In guarantee mode an older live ticket blocks the grant only
-  when its minimum fits the available memory headroom, so class order and age pick the first eligible ticket and a ticket
-  that cannot fit its own memory minimum does not hold up the queue; in ordinary mode a small request can still backfill.
+  rather than start short, and the disk floor still stops it. An older live ticket blocks a later request, in guarantee
+  mode and in ordinary mode alike, while its minimum fits what the pool could offer once the holders now in it are done:
+  the memory headroom plus the tokens held, or the headroom alone when it is the single token that memory pressure, a
+  pageout burst or free memory below the reserve grants, since that one does not grow when holders finish. Class order
+  and age pick the first eligible ticket, and a ticket that could not fit its minimum even then does not hold up the
+  queue.
   The slot locks give the guarantee to one ticket at a time, and once it holds, later tickets wait for headroom again.
 - Need. A command asks for `--min` tokens (one by default), or for the tokens its `--mb` needs when that is more (a 2.5 GB class
   takes two), and for up to `--jobs`; the minimum is a hard floor and a request that cannot meet it is never started short.
   It runs with `XMAKE_MAX_JOBS` set to the tokens it got.
 - Order. Waiting commands queue by class: `critical` (the checks before a push), `normal` (the default, which every `./xmakew`
   build, test, configure, install, run, package and deb uses) and `background`. Within a class the first to wait goes first.
-  A small request backfills past an earlier one whose minimum does not fit the current headroom, so a large request that
-  cannot be granted does not hold up the queue behind it. A request that has waited ten minutes (`REVENANT_BUDGET_AGING_S`)
-  marks itself aged in the queue; from then on it also blocks any *later* backfill whose minimum it could have used, so a
-  stream of small requests cannot starve it without two aged requests blocking each other. The marker is removed with a
-  dead ticket, so a crashed request cannot block the queue forever. A request whose process died is removed from the queue.
+  A later request takes no tokens past an earlier one that the pool could serve once its holders are done, so a stream of
+  requests for one token cannot keep a request for two waiting under outside load: the pool drains until the earlier
+  one starts, and the guarantee above gives it its minimum when the pool is empty. An earlier request whose minimum could
+  not fit even then is passed, so a request that can never be granted does not hold up the queue behind it. `critical`
+  sorts before the other classes, so a waiting `normal` or `background` request never holds a `critical` one back. A
+  request whose process died is removed from the queue, so a crashed request cannot block the queue forever.
 - Nice. `critical` keeps its priority, `normal` runs under `nice -n 5`, `background` under `taskpolicy -b` and `nice -n 15`.
 - Release. A token is a lock on a slot file, and the kernel releases it when its process ends, `kill -9` included. The command
   is started with the descriptors of the slot files closed, since a child that kept one would keep the token after its parent died.
@@ -630,6 +653,20 @@ environment of the test does not reach it.
   sends TERM to the budget run and everything below it, and KILL two seconds later. So prepush killed in the middle of a heavy
   step, or of its batch of light checks, leaves no `budget run` and no command holding tokens at ppid 1. The watcher is a shell
   and not a signal handler because xmake runs a Lua handler only between two Lua instructions, never while it waits for a child.
+- How long it waited. A grant appends one line to `wait-journal` in the pool: the time, class, tokens granted, whole
+  seconds waited and the holder's pid, worktree and command. A ticket is always written with the waiting process's pid,
+  so a request that died before its grant cannot leave an unnamed entry in the queue. Older than a day is dropped on the next grant. `status`
+  prints the sum of the last day's waits and one line per holder, with its seconds, number of waits, tokens and classes;
+  a wait that ended because its process died is not a grant and is not journaled. The journal is a cache-day record, not
+  an input to admission, so it is kept in the pool folder and is never a key. The same file records what the watcher stopped (a budget
+  run's parent died): one line for each process, written by `budget.lua stopped`, which the watcher runs just before the signal
+  (the watcher's shell writes nothing itself; the signal can end the watcher, so the write comes first), `at <time>`, `stopped TERM` or `stopped KILL` (KILL only for a process still alive two
+  seconds after TERM), the pid, the dead parent's pid, the budget run's pid and the process's command, tab-separated like the grants and
+  under the same `wait-journal.lock` as the grants, so a command that vanished can be traced to the watcher or ruled out. `status` prints how many
+  processes the watcher stopped in the last day and the newest one. When `budget.lua stopped` fails (the journal is unwritable), the
+  watcher still sends the signal and appends the reason to `wait-journal.errors` in the pool; `status` counts its lines. A grant whose
+  journal line cannot be written is not lost either: the run keeps its tokens and starts its command, and the failure goes to stderr and the same
+  `wait-journal.errors` file.
 - Who holds. A held token names its holder: the pid of the budget run, its worktree and its command, written into the slot file
   with the grant, and a waiting request's ticket names the same about itself. `status` prints a line for each holder
   (`pid 123 holds 2 token(s) for 4m in <worktree>: <command>`) and for each waiting request, and a request that has to wait

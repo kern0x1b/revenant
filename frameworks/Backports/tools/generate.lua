@@ -5,6 +5,7 @@ local publics = import("public", {rootdir = os.scriptdir(), anonymous = true})
 local sdkfiles = import("sdk", {rootdir = os.scriptdir(), anonymous = true})
 local facts = import("facts", {rootdir = os.scriptdir(), anonymous = true})
 local skeleton = import("skeleton", {rootdir = os.scriptdir(), anonymous = true})
+local memo = import("memo", {rootdir = os.scriptdir(), anonymous = true})
 local markers = import("markers", {rootdir = os.scriptdir(), anonymous = true})
 local libraries = import("library_list", {rootdir = os.scriptdir(), anonymous = true}).backports_libraries()
 local exclusive = import("@addon.revenant.exclusive", {anonymous = true})
@@ -653,11 +654,20 @@ local function prune_versions(root, keep)
     end
 end
 
-function publish_skeleton(root, write)
+function generate_if_changed(root, key, build)
+    if memo.unchanged(root, key) then
+        print(string.format("skeleton: inputs unchanged (%s), generation skipped under %s", key, path.join(root, "skeleton")))
+        return nil
+    end
+    return build()
+end
+
+function publish_skeleton(root, write, key)
     local live = path.join(root, "skeleton")
     local staged = path.join(root, "skeleton.staged")
     return exclusive.run(path.join(root, "skeleton.lock"), "the skeleton folder", function ()
         os.tryrm(staged)
+        memo.write(staged, key)
         local totals = write(staged)
         local previous
         if os.islink(live) then
@@ -691,8 +701,8 @@ function main(...)
     if args[1] == "facts" then
         return worker(args)
     end
-    local state = timing.run("generate: state (facts cache, rows, images)", everything)
     if args[1] == "device-globals" then
+        local state = timing.run("generate: state (facts cache, rows, images)", everything)
         local owner, definitions = markers_of_src()
         local set, unlisted = device_globals_of(state, owner, definitions)
         io.writefile(device_globals_file(), device_globals_text(set))
@@ -708,31 +718,37 @@ function main(...)
         print(string.format("device-globals: %d globals the cache exports from an SDK framework that the SDK lists nowhere, under %s", others, device_unlisted_file()))
         return
     end
-    local pending = timing.run("generate: pending rows (device image, owners)", function ()
-        return pending_of(state)
+    local key = timing.run("generate: input key", function ()
+        return memo.compute({inventory = device_class_inventory_file()})
     end)
-    local owners, definitions, device, implemented, references
-    timing.run("generate: src scan (markers, device globals, implemented names, references)", function ()
-        owners, definitions = markers_of_src()
-        device = read_device_globals()
-        implemented = implemented_names()
-        references = references_of_src(device)
-    end)
-    local totals = timing.run("generate: skeleton.write", function ()
-        return publish_skeleton(sdkfiles.build_root(), function (staged)
-            return skeleton.write(staged, pending, implemented, state.images, owners, definitions, device, references)
+    generate_if_changed(sdkfiles.build_root(), key, function ()
+        local state = timing.run("generate: state (facts cache, rows, images)", everything)
+        local pending = timing.run("generate: pending rows (device image, owners)", function ()
+            return pending_of(state)
         end)
+        local owners, definitions, device, implemented, references
+        timing.run("generate: src scan (markers, device globals, implemented names, references)", function ()
+            owners, definitions = markers_of_src()
+            device = read_device_globals()
+            implemented = implemented_names()
+            references = references_of_src(device)
+        end)
+        local totals = timing.run("generate: skeleton.write", function ()
+            return publish_skeleton(sdkfiles.build_root(), function (staged)
+                return skeleton.write(staged, pending, implemented, state.images, owners, definitions, device, references)
+            end, key)
+        end)
+        local skipped = 0
+        for _, framework in ipairs(pending) do
+            for _, stranger in ipairs(framework.strangers) do
+                print("device class refused, keeps its proxy: " .. stranger)
+            end
+            for _, count in pairs(framework.skipped) do
+                skipped = skipped + count
+            end
+        end
+        print(string.format("skeleton: %d ObjC methods, %d classes, %d protocols, %d globals (%d not copied, %d bound to the device image), %d C functions, %d trampolines, %d implemented in src (%d of them absent from the facts), %d Swift symbols, %d unavailable on iOS (not stubbed) under %s",
+            totals.objc, totals.classes, totals.protocols, totals.globals, totals.globals_uncopied, totals.device_bound, totals.c, totals.trampolines, totals.c_in_src, totals.src_only, totals.swift, skipped,
+            path.join(sdkfiles.build_root(), "skeleton")))
     end)
-    local skipped = 0
-    for _, framework in ipairs(pending) do
-        for _, stranger in ipairs(framework.strangers) do
-            print("device class refused, keeps its proxy: " .. stranger)
-        end
-        for _, count in pairs(framework.skipped) do
-            skipped = skipped + count
-        end
-    end
-    print(string.format("skeleton: %d ObjC methods, %d classes, %d protocols, %d globals (%d not copied, %d bound to the device image), %d C functions, %d trampolines, %d implemented in src (%d of them absent from the facts), %d Swift symbols, %d unavailable on iOS (not stubbed) under %s",
-        totals.objc, totals.classes, totals.protocols, totals.globals, totals.globals_uncopied, totals.device_bound, totals.c, totals.trampolines, totals.c_in_src, totals.src_only, totals.swift, skipped,
-        path.join(sdkfiles.build_root(), "skeleton")))
 end
