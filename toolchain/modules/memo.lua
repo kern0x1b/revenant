@@ -320,25 +320,6 @@ function sdk_content()
     return table.concat(lines, "\n")
 end
 
-local function inode(folder)
-    return try { function () return os.iorunv("stat", {"-f", "%i", folder}):trim() end } or ""
-end
-
-local function cached_facts(name, signature, compute)
-    local folder = path.join(cache().store(), "suite-memo", "facts", name)
-    local file = path.join(folder, digest(signature))
-    local value = try { function () return io.readfile(file) end }
-    if value then
-        return value
-    end
-    value = compute()
-    os.mkdir(folder)
-    local temporary = file .. ".tmp." .. hash.uuid()
-    io.writefile(temporary, value)
-    os.mv(temporary, file)
-    return value
-end
-
 function installed_facts(log)
     if not installed_text then
         local began = os.time()

@@ -252,6 +252,8 @@ local EXTRA = {
         "toolchain/tests/addon/cmake_debug_test.lua",
     },
     compat_test = {
+        "toolchain/tests/addon/compat/**",
+        "toolchain/tests/data/compat/**",
         "toolchain/src/apple-compat/src",
         "toolchain/src/apple-compat/include/**",
         "toolchain/src/apple-compat/src/**",
@@ -274,6 +276,11 @@ local EXTRA = {
         "toolchain/tools/deb_check.lua",
     },
     descriptions_test = {
+        "packages/**/patches/**",
+        "packages/l/llvm/port/inputs.lua",
+        "packages/x/xz/port/config.h",
+        "toolchain/src/firmware-tools/src/**",
+        "frameworks/WebKit/**",
         "toolchain/modules/**",
         "toolchain/modules/apple/sdk.lua",
         "toolchain/tests/light_suites.lua",
@@ -596,6 +603,7 @@ local EXTRA = {
         "toolchain/tests/addon/golden_generation_test.lua",
     },
     host_install_test = {
+        "frameworks/ReactNative/tools/**",
         "frameworks/ReactNative/src/host/**",
         "toolchain/modules/**",
         "toolchain/modules/apple/sdk.lua",
@@ -656,12 +664,17 @@ local EXTRA = {
         "toolchain/tests/addon/recalled_test.lua",
     },
     data_test = {
+        "toolchain/LICENSE",
+        "toolchain/src/apple-compat/**",
+        "toolchain/modules/apple/sdkstubs.lua",
         "toolchain/modules/data.lua",
         "toolchain/tests/light_suites.lua",
         "toolchain/tests/xmake.lua",
         "toolchain/tests/addon/data_test.lua",
     },
     keys_test = {
+        "packages/l/llvm/port/inputs.lua",
+        "packages/l/llvm/patches/**",
         "toolchain/modules/**",
         "toolchain/modules/apple/**",
         "toolchain/tests/light_suites.lua",
@@ -670,6 +683,8 @@ local EXTRA = {
         "tools/keys.lua",
     },
     launch_test = {
+        "packages/l/llvm/port/inputs.lua",
+        "packages/l/llvm/patches/**",
         "toolchain/modules/**",
         "toolchain/modules/apple/sdk.lua",
         "toolchain/tests/light_suites.lua",
@@ -678,6 +693,8 @@ local EXTRA = {
         "toolchain/tests/addon/launch_test.lua",
     },
     llvm_inputs_test = {
+        "packages/l/llvm/port/inputs.lua",
+        "packages/l/llvm/patches/**",
         "packages/l/llvm/xmake.lua",
         "toolchain/modules/**",
         "toolchain/modules/apple/sdk.lua",
@@ -687,6 +704,8 @@ local EXTRA = {
         "toolchain/tests/addon/llvm_inputs_test.lua",
     },
     locale_order_test = {
+        "addons/**",
+        "toolchain/tools/**",
         "toolchain/modules",
         "toolchain/tests/addon/locale_probe.lua",
         "toolchain/modules/**",
@@ -1109,6 +1128,7 @@ local EXTRA = {
         "toolchain/tests/addon/nsdata_fallback_test.lua",
     },
     os_log_fallback_test = {
+        "toolchain/src/swift-runtime/overlay/os/**",
         "toolchain/src/swift-runtime/overlay/os",
         "toolchain/modules/**",
         "toolchain/modules/apple/sdk.lua",
@@ -1118,6 +1138,7 @@ local EXTRA = {
         "toolchain/tests/addon/os_log_fallback_test.lua",
     },
     runtime_reads_test = {
+        "toolchain/src/swift-runtime/reads/**",
         "frameworks/Backports/tools/**",
         "toolchain/modules/**",
         "toolchain/modules/apple/**",
@@ -1168,6 +1189,7 @@ local EXTRA = {
         "toolchain/tests/addon/sdkstubs_test.lua",
     },
     sources_test = {
+        "toolchain/tests/data/sources/**",
         "toolchain/modules/**",
         "toolchain/modules/apple/**",
         "toolchain/tests/light_suites.lua",
@@ -1184,6 +1206,7 @@ local EXTRA = {
         "toolchain/tests/addon/swiftui_package_test.lua",
     },
     coverage_test = {
+        "frameworks/ReactNative/tools/**",
         "docs/reference/react-native/coverage.md",
         "frameworks/ReactNative/src/coverage.json",
         "frameworks/ReactNative/src/stubs.json",
@@ -1197,22 +1220,26 @@ local EXTRA = {
         "toolchain/tests/addon/fixtures.lua",
     },
     export_bundle_test = {
+        "frameworks/ReactNative/tools/**",
         "frameworks/ReactNative/src/jsc-prelude.js",
         "toolchain/tests/light_suites.lua",
         "toolchain/tests/xmake.lua",
         "toolchain/tests/addon/export_bundle_test.lua",
     },
     touch_test = {
+        "frameworks/ReactNative/tools/**",
         "toolchain/tests/light_suites.lua",
         "toolchain/tests/xmake.lua",
         "toolchain/tests/addon/touch_test.lua",
     },
     app_assets_test = {
+        "frameworks/ReactNative/tools/**",
         "toolchain/tests/light_suites.lua",
         "toolchain/tests/xmake.lua",
         "toolchain/tests/addon/app_assets_test.lua",
     },
     isolate_test = {
+        "frameworks/ReactNative/tools/**",
         "packages/e/expo-clipboard/xmake.lua",
         "toolchain/modules/**",
         "toolchain/modules/apple/sdk.lua",
@@ -1320,6 +1347,14 @@ local EXTRA = {
         "toolchain/tests/addon/light_suites_test.lua",
     },
     tmp_use_test = {
+        "toolchain/tests/addon/**",
+        "toolchain/tests/data/**",
+        "frameworks/ReactNative/tests/**",
+        "frameworks/Backports/tests/**",
+        "tools/**",
+        "toolchain/tools/**",
+        "toolchain/modules/**",
+        "frameworks/**/tools/**",
         "toolchain/modules/**",
         "toolchain/modules/apple/sdk.lua",
         "toolchain/tests/light_suites.lua",
