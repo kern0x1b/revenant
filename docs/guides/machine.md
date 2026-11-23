@@ -636,14 +636,21 @@ environment of the test does not reach it.
 - Need. A command asks for `--min` tokens (one by default), or for the tokens its `--mb` needs when that is more (a 2.5 GB class
   takes two), and for up to `--jobs`; the minimum is a hard floor and a request that cannot meet it is never started short.
   It runs with `XMAKE_MAX_JOBS` set to the tokens it got.
-- Order. Waiting commands queue by class: `critical` (the checks before a push), `normal` (the default, which every `./xmakew`
-  build, test, configure, install, run, package and deb uses) and `background`. Within a class the first to wait goes first.
+- Order. Waiting commands queue by class: `critical` (the gate that brings a branch into main, which the coordinator asks
+  for with `REVENANT_PREPUSH_BUDGET_CLASS=critical`; the prepush of a worker runs as `normal`), `normal` (the default, which
+  every `./xmakew` build, test, configure, install, run, package and deb uses) and `background`. Within a class the first to
+  wait goes first.
   A later request takes no tokens past an earlier one that the pool could serve once its holders are done, so a stream of
   requests for one token cannot keep a request for two waiting under outside load: the pool drains until the earlier
   one starts, and the guarantee above gives it its minimum when the pool is empty. An earlier request whose minimum could
   not fit even then is passed, so a request that can never be granted does not hold up the queue behind it. `critical`
-  sorts before the other classes, so a waiting `normal` or `background` request never holds a `critical` one back. A
-  request whose process died is removed from the queue, so a crashed request cannot block the queue forever.
+  sorts before the other classes, so a waiting `normal` or `background` request does not hold a `critical` one back until
+  it has aged. A request that has waited longer than `REVENANT_BUDGET_AGING_S` (300 s by default) marks its ticket aged
+  (`queue/aged-<ticket>`); an aged ticket stands before every ticket that has not aged, `critical` ones included, and
+  blocks them by the same rule as any earlier ticket, until it starts; among aged tickets the order above holds. This is
+  what keeps a stream of `critical` requests for one token from starving a request for two. The marker goes with its
+  ticket, also when the ticket's process died. A request whose process died is removed from the queue, so a crashed
+  request cannot block the queue forever.
 - Nice. `critical` keeps its priority, `normal` runs under `nice -n 5`, `background` under `taskpolicy -b` and `nice -n 15`.
 - Release. A token is a lock on a slot file, and the kernel releases it when its process ends, `kill -9` included. The command
   is started with the descriptors of the slot files closed, since a child that kept one would keep the token after its parent died.
