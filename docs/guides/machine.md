@@ -361,6 +361,25 @@ The key sees clang by the text of `clang --version` and the digester by its size
 in place with one that prints the same version line does not move the key: remove `<store>/backports/<key>` and the folder in
 the checkout after such a change, as for the other things "What a key does not see" lists.
 
+### The skeleton's input key
+
+`frameworks/Backports/tools/generate.lua` publishes the skeleton under a versioned folder and keeps `skeleton` as a
+pointer to the current version. The input key lives in `.input-key` inside that version, so a reader of the pointer sees
+the skeleton and its key in one atomic step. A later generator whose key is the same stops before it reads any facts or
+scans `src/`: it prints `skeleton: inputs unchanged (<key>), generation skipped under <path>` and changes nothing. A
+changed key runs the full generation and publishes a new version. The key covers the content of every input the
+generator reads: all files under `frameworks/Backports/tools/` (including the generated `device-globals.txt`), all files
+under `frameworks/Backports/src/`, every file under `toolchain/modules/` that the tools import, the content of
+`frameworks/Backports/xmake.lua`, the iOS 6.1.3 device class inventory, the facts cache folder named by
+`sdkfiles.cache_key(sdk)` (the SDK's own content key, version, clang, digester and the four facts tools, and the digests
+of the TSVs in it), the list of framework names whose facts must be present, and `REVENANT_GEN_SDK` and
+`REVENANT_BACKPORTS_LIBRARIES`. A missing input yields no key, which runs the generation. The key is content-addressed:
+the folder of a worktree is not an input, so two worktrees with the same content share a verdict. The generated `.m`
+files include `revenant_alias.h` by a path relative to the skeleton folder, not by an absolute path of one worktree:
+ccache's direct-mode key includes the path of a header named in the source, so an absolute path made every generated
+compile of another worktree miss (measured: 0 hits in 2 compiles with an absolute include, 2 hits in 2 with a relative
+one).
+
 ```
 ./xmakew l -P . tools/analysis_cache.lua [sync | restore | publish]
 ```
@@ -630,6 +649,11 @@ environment of the test does not reach it.
   sends TERM to the budget run and everything below it, and KILL two seconds later. So prepush killed in the middle of a heavy
   step, or of its batch of light checks, leaves no `budget run` and no command holding tokens at ppid 1. The watcher is a shell
   and not a signal handler because xmake runs a Lua handler only between two Lua instructions, never while it waits for a child.
+- How long it waited. A grant appends one line to `wait-journal` in the pool: the time, class, tokens granted, whole
+  seconds waited and the holder's pid, worktree and command. Older than a day is dropped on the next grant. `status`
+  prints the sum of the last day's waits and one line per holder, with its seconds, number of waits, tokens and classes;
+  a wait that ended because its process died is not a grant and is not journaled. The journal is a cache-day record, not
+  an input to admission, so it is kept in the pool folder and is never a key.
 - Who holds. A held token names its holder: the pid of the budget run, its worktree and its command, written into the slot file
   with the grant, and a waiting request's ticket names the same about itself. `status` prints a line for each holder
   (`pid 123 holds 2 token(s) for 4m in <worktree>: <command>`) and for each waiting request, and a request that has to wait
