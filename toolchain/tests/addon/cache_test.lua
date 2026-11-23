@@ -290,6 +290,14 @@ function failures(arguments)
         table.insert(found, "the facts of one SDK key are scratch, so the cap can evict them and the next run computes them again: "
                             .. tostring(facts_rows[path.join("backports", "26.2-0123456789abcdef")]))
     end
+    folder_of(path.join(models, "backports", ".analysis-abcd1234"), MEGABYTE, OLDER)
+    local staged = false
+    for _, row in ipairs(cache.status(models, {builds = {}})) do
+        staged = staged or row.name == path.join("backports", ".analysis-abcd1234")
+    end
+    if staged then
+        table.insert(found, "the staging folder of a merge into the analysis cache is no entry, so the cap cannot evict it in the middle of the merge")
+    end
     if facts_rows[path.join("backports", "26.2-0123456789abcdef.lock")] ~= nil then
         table.insert(found, "the lock of a facts key is not an entry of its own, it goes with the folder it guards")
     end

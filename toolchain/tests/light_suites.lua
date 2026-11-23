@@ -2,6 +2,8 @@ import("core.base.process")
 
 local root = path.absolute(path.directory(path.directory(os.scriptdir())))
 
+local byteorder = import("byteorder", {rootdir = path.join(root, "toolchain", "modules"), anonymous = true})
+
 local WORKERS = 4
 
 local WEIGHTS = {
@@ -46,7 +48,7 @@ function partition(suites, count)
         if a ~= b then
             return a > b
         end
-        return left < right
+        return byteorder.less(left, right)
     end)
     local buckets = {}
     for index = 1, count do
@@ -92,27 +94,48 @@ end
 local function run_parallel(groups)
     local children = {}
     local logs = os.tmpfile()
-    for index, names in ipairs(groups) do
-        local log = string.format("%s.%d.log", logs, index)
-        local child = process.openv(os.programfile(), table.join({"l", "-P", root, path.join(root, "toolchain", "tests", "light_suites.lua")}, names),
-                                    {outpath = log, errpath = log})
-        table.insert(children, {process = child, log = log, count = #names})
-    end
-    local failed, total = 0, 0
-    for _, child in ipairs(children) do
-        local _, status = child.process:wait(-1)
-        child.process:close()
-        local text = io.readfile(child.log) or ""
-        os.tryrm(child.log)
-        for line in text:gmatch("[^\n]*\n?") do
-            if line ~= "" and not line:match("^light suites: %d+ passed\n?$") then
-                io.write(line)
+    local failed, total, failure = 0, 0, nil
+    try {
+        function ()
+            for index, names in ipairs(groups) do
+                local log = string.format("%s.%d.log", logs, index)
+                local child = process.openv(os.programfile(), table.join({"l", "-P", root, path.join(root, "toolchain", "tests", "light_suites.lua")}, names),
+                                            {outpath = log, errpath = log})
+                table.insert(children, {process = child, log = log, count = #names, done = false})
             end
-        end
-        if status ~= 0 then
-            failed = failed + 1
-        end
-        total = total + child.count
+            for _, child in ipairs(children) do
+                local _, status = child.process:wait(-1)
+                child.done = true
+                for line in (io.readfile(child.log) or ""):gmatch("[^\n]*\n?") do
+                    if line ~= "" and not line:match("^light suites: %d+ passed\n?$") then
+                        io.write(line)
+                    end
+                end
+                if status ~= 0 then
+                    failed = failed + 1
+                end
+                total = total + child.count
+            end
+        end,
+        catch {
+            function (errors)
+                failure = tostring(errors)
+            end
+        },
+        finally {
+            function ()
+                for _, child in ipairs(children) do
+                    if not child.done then
+                        child.process:kill()
+                    end
+                    child.process:close()
+                    os.tryrm(child.log)
+                end
+            end
+        }
+    }
+    if failure then
+        raise("%s", failure)
     end
     if failed > 0 then
         raise("%d of %d groups of light suites failed", failed, #children)

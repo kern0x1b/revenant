@@ -78,29 +78,65 @@ local function adopt(staging, target, wanted)
     os.tryrm(staging)
 end
 
+function lock_files(source, target)
+    local files = {source .. ".lock", target .. ".lock"}
+    byteorder.sort(files)
+    return files
+end
+
+local function locked(files, work)
+    local function nest(index)
+        if index > #files then
+            return work()
+        end
+        return exclusive.run(files[index], "the analysis cache " .. path.filename(files[index]), function ()
+            return nest(index + 1)
+        end)
+    end
+    return nest(1)
+end
+
 local function merge(source, target)
-    local wanted = missing_files(source, target)
-    if #wanted == 0 then
+    if #missing_files(source, target) == 0 then
         return 0
     end
     local parent = path.directory(target)
     os.mkdir(parent)
     sweep(parent)
     local staging = path.join(parent, ".analysis-" .. hash.uuid():sub(1, 8))
-    return exclusive.run(target .. ".lock", "the analysis cache " .. path.filename(target), function ()
-        wanted = missing_files(source, target)
-        if #wanted == 0 then
-            return 0
-        end
-        clone(source, staging)
-        if os.isdir(target) then
-            adopt(staging, target, wanted)
-        else
-            os.mv(staging, target)
-        end
-        os.vrunv("touch", {target})
-        return #wanted
-    end)
+    local count, failure = 0, nil
+    try {
+        function ()
+            count = locked(lock_files(source, target), function ()
+                local wanted = missing_files(source, target)
+                if #wanted == 0 then
+                    return 0
+                end
+                clone(source, staging)
+                if os.isdir(target) then
+                    adopt(staging, target, wanted)
+                else
+                    os.mv(staging, target)
+                end
+                os.vrunv("touch", {target})
+                return #wanted
+            end)
+        end,
+        catch {
+            function (errors)
+                failure = tostring(errors)
+            end
+        },
+        finally {
+            function ()
+                os.tryrm(staging)
+            end
+        }
+    }
+    if failure then
+        raise("%s", failure)
+    end
+    return count
 end
 
 local function transfer(folders, from, to)

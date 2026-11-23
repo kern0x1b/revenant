@@ -341,7 +341,7 @@ end
 
 local function analysis_entries(base, found, name)
     for _, folder in ipairs(children(path.join(base, name))) do
-        if not folder:endswith(".lock") then
+        if not folder:endswith(".lock") and not path.filename(folder):startswith(".") then
             table.insert(found, entry(base, folder, "scratch"))
         end
     end

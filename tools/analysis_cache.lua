@@ -1,8 +1,10 @@
+import("core.base.process")
+
 local analysis = import("@addon.revenant.analysis_cache", {anonymous = true})
 
 local root = path.absolute(path.directory(os.scriptdir()))
 
-local USAGE = [=[usage: ./xmakew l -P . tools/analysis_cache.lua [sync | restore | publish | test]
+local USAGE = [=[usage: ./xmakew l -P . tools/analysis_cache.lua [sync | restore | publish | copy restore|publish <folder>... | test]
 
 restore  gives this checkout the Backports analysis it lacks: for each installed iPhoneOS SDK, the files of the facts folder
          (.cache/backports/<key>) and of the module cache (.cache/modcache/<key>) that the shared store holds under the same
@@ -10,6 +12,8 @@ restore  gives this checkout the Backports analysis it lacks: for each installed
 publish  is the other way round: what this checkout holds under a key and the store lacks is cloned into the store, so that
          the next checkout, or the next worktree of a worker, starts warm
 sync     (the default) is restore, then publish
+copy     does one of the two for the folders it names (backports/<key>, modcache/<key>, relative to the cache and the store),
+         without looking for an SDK; the tests start it twice at once
 test     runs the checks on fixtures
 
 A key is the content of the SDK, the toolchain and the facts tools (frameworks/Backports/tools/sdk.lua), so a file stored under
@@ -78,6 +82,39 @@ local function test_suite()
     check("a restored file has the stored content", text("two", "backports", "k1", "constant_intros.tsv"), "ci")
     check("restoring again moves nothing", names(analysis.restore(folders, opt("two"))), "")
 
+    check("the locks of a merge are taken in the order of their paths, whichever way the files go",
+          table.concat(analysis.lock_files("/b/y", "/a/x"), " ") .. "|" .. table.concat(analysis.lock_files("/a/x", "/b/y"), " "), "/a/x.lock /b/y.lock|/a/x.lock /b/y.lock")
+
+    local function copier(home, log)
+        return process.openv(os.programfile(), {"l", "-P", root, path.join(root, "tools", "analysis_cache.lua"), "copy", "restore", "backports/k1", "modcache/m1"},
+                             {outpath = log, errpath = log, envs = {"REVENANT_CACHE=" .. path.join(base, home), "REVENANT_STORE=" .. path.join(base, "store")}})
+    end
+    local first_log, second_log = path.join(base, "first.log"), path.join(base, "second.log")
+    local first, second = copier("race", first_log), copier("race", second_log)
+    first:wait(-1)
+    second:wait(-1)
+    first:close()
+    second:close()
+    local reported = 0
+    for _, log in ipairs({first_log, second_log}) do
+        for number in (io.readfile(log) or ""):gmatch("restored (%d+) files") do
+            reported = reported + tonumber(number)
+        end
+    end
+    check("two processes that restore into one checkout at once bring each file once", reported, 4)
+    check("and every file is there", #os.files(path.join(base, "race", "backports", "k1", "**")) + #os.files(path.join(base, "race", "modcache", "m1", "**")), 4)
+    check("and no staging folder is left", #os.dirs(path.join(base, "race", "backports", ".analysis-*")) + #os.dirs(path.join(base, "race", "modcache", ".analysis-*")), 0)
+
+    local secret = path.join(base, "seven", "backports", "k9", "secret.tsv")
+    write(secret, "unreadable")
+    os.vrunv("chmod", {"000", secret})
+    local refused = false
+    try { function () analysis.publish({"backports/k9"}, opt("seven")) end, catch { function () refused = true end } }
+    os.vrunv("chmod", {"644", secret})
+    check("a merge that cannot read its source fails", refused, true)
+    check("and leaves no staging folder in the store", #os.dirs(path.join(base, "store", "backports", ".analysis-*")), 0)
+    check("and no half-merged folder", os.exists(path.join(base, "store", "backports", "k9")), false)
+
     write(path.join(base, "three", "backports", "k1", "CoreFoundation.tsv"), "mine")
     write(path.join(base, "three", "backports", "k1", "Mine.tsv"), "only here")
     check("restoring into a partial folder adds only what is missing", names(analysis.restore(folders, opt("three"))), "backports/k1=2 modcache/m1=1")
@@ -110,9 +147,21 @@ local function test_suite()
     print("analysis_cache: %d tests passed", count)
 end
 
-function main(command)
+function main(command, direction, ...)
     if command == "test" then
         test_suite()
+        return
+    end
+    if command == "copy" then
+        local named = {...}
+        if (direction ~= "restore" and direction ~= "publish") or #named == 0 then
+            raise("%s", USAGE)
+        end
+        if direction == "restore" then
+            report("restored", analysis.restore(named), "from the store")
+        else
+            report("published", analysis.publish(named), "to the store")
+        end
         return
     end
     if command and command ~= "sync" and command ~= "restore" and command ~= "publish" then

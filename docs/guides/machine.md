@@ -336,14 +336,23 @@ compiler, the digester and the four tools that write them (`ast.lua`, `facts.lua
 on the facts of the frameworks.
 
 The store keeps one copy of each, `<store>/backports/<key>` and `<store>/modcache/<key>`, and `prepush` moves files between it
-and the checkout, with APFS clones (no second copy on disk): before the first heavy check that runs, the files the store holds
-under the keys of the installed SDKs and the checkout lacks are cloned in; after the heavy checks, also after a failed one,
-the files the store lacks are cloned out. A file is never overwritten (the same name under the same key is the same content),
-so a partial folder is as good as a full one and two worktrees that publish at once add up. Every file arrives by a rename out
-of a staging folder `.analysis-<id>` next to its destination, so no reader sees a half-written file, under `<key>.lock`, which
-is the lock the facts extraction holds, so a restore waits for an extraction that is running and the cap cannot evict a folder
-in the middle of a merge. A staging folder an aborted run left is removed an hour later. A failure of either direction is one
-line, not a failed check: the checks compute what they lack.
+and the checkout, with APFS clones (no second copy on disk; where the volume cannot clone, `cp` copies): before the first heavy
+check that runs, the files the store holds under the keys of the installed SDKs and the checkout lacks are cloned in; after
+the heavy checks, also after a failed one, the files the store lacks are cloned out. A file is never overwritten (the same
+name under the same key is the same content), so a partial folder is as good as a full one and two worktrees that publish at
+once add up. Every file arrives by a rename out of a staging folder `.analysis-<id>` next to its destination, so no reader
+sees a half-written file. A merge holds the `<key>.lock` of the folder it reads and of the folder it writes, taken in the
+order of their paths (two merges that go opposite ways cannot wait for each other), and the cap takes the same lock before it
+evicts a folder, so it cannot evict the source or the destination in the middle of a merge; the staging folder is no entry
+of the cache for the cap. For the facts, `<key>.lock` is the lock the facts extraction holds, so a restore waits for an
+extraction that is running; the module cache is written by the digester without it, which clang's module cache tolerates,
+because our files arrive whole and are never overwritten. A staging folder an aborted run left is removed an hour later, and a
+merge that fails removes its own. A failure of either direction is one line, not a failed check (the checks compute what they
+lack); a wait for a lock another process holds is one line of `exclusive`.
+
+The key sees clang by the text of `clang --version` and the digester by its size and sha256 (`sdk.lua`), so a clang replaced
+in place with one that prints the same version line does not move the key: remove `<store>/backports/<key>` and the folder in
+the checkout after such a change, as for the other things "What a key does not see" lists.
 
 ```
 ./xmakew l -P . tools/analysis_cache.lua [sync | restore | publish]
