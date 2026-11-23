@@ -57,7 +57,23 @@ static int revenant_file_descriptor(NSFileHandle *handle)
     return descriptor;
 }
 
+static BOOL revenant_close_handle(NSFileHandle *handle, NSError **error)
+{
+    if (objc_getAssociatedObject(handle, &RevenantFileHandleClosedKey))
+        return YES;
+    int descriptor = revenant_file_descriptor(handle);
+    if (descriptor >= 0 && close(descriptor) < 0)
+        return revenant_file_fail(error, errno, NO);
+    objc_setAssociatedObject(handle, &RevenantFileHandleClosedKey, @YES, OBJC_ASSOCIATION_RETAIN);
+    return YES;
+}
+
 @implementation NSFileHandle (RevenantErrors)
+
+- (void)closeFile
+{
+    revenant_close_handle(self, NULL);
+}
 
 - (NSData *)readDataToEndOfFileAndReturnError:(NSError **)error
 {
@@ -189,15 +205,7 @@ static int revenant_file_descriptor(NSFileHandle *handle)
 
 - (BOOL)closeAndReturnError:(NSError **)error
 {
-    if (revenant_file_descriptor(self) < 0)
-        return YES;
-    @try {
-        [self closeFile];
-    } @catch (NSException *exception) {
-        return revenant_file_fail(error, EBADF, NO);
-    }
-    objc_setAssociatedObject(self, &RevenantFileHandleClosedKey, @YES, OBJC_ASSOCIATION_RETAIN);
-    return YES;
+    return revenant_close_handle(self, error);
 }
 
 + (NSFileHandle *)fileHandleForWritingToURL:(NSURL *)url error:(NSError **)error
