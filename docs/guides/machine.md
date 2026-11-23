@@ -720,7 +720,7 @@ modules), `credentials` and `copied_text` (`agent-skills/tests/`), `negative sha
 `dyld caches test` (`tools/dyld_caches.lua`, `toolchain/modules/apple/dyld_caches.lua` and the addon modules), `analysis cache test`
 (`tools/analysis_cache.lua` and the addon modules),
 `recipe digests` (the inputs the recipes list in `toolchain/modules/digest.lua`, the digest files and the addon modules), and
-`lowered members` and `lowered exports`, which skip `docs/`, Markdown files, `.agents/` and `agent-skills/`. `backports build` skips
+`lowered members` and `lowered exports`, which skip `docs/`, Markdown files, `.agents/` and `agent-skills/`. `example projects test` declares nothing, because its configure reads the root `xmake.lua`, the ReactNative graph, the addon and the recipes. `backports build` skips
 nothing, because the copy it builds in holds every file, and `backports exports` and `backports device imports` skip nothing because they read that copy's build (and the baseline data, or the device caches). A check that starts to read a file outside its declaration, or an ignored
 file, must say so there; an ignored file is not part of a key.
 

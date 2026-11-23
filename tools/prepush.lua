@@ -885,6 +885,7 @@ local STEPS = {
     {name = "ci replay test", reads = table.join({"tools/ci_swiftc_replay.lua", "tools/ci/"}, TOOLS), inline = function () return call("tools/ci_swiftc_replay.lua", "test") end},
     {name = "host install test", run = function () return lua("frameworks/ReactNative/tests/host_install_test.lua") end},
     {name = "isolate test", run = function () return lua("frameworks/ReactNative/tests/isolate_test.lua") end},
+    {name = "example projects test", run = function () return lua("frameworks/ReactNative/tests/example_projects_test.lua") end},
     {name = "overlay test", reads = {"frameworks/ReactNative/tools/overlay.lua", "frameworks/ReactNative/tests/overlay_test.lua"}, run = function () return lua("frameworks/ReactNative/tests/overlay_test.lua") end},
     {name = "dyld caches test", reads = {"tools/dyld_caches.lua", "toolchain/modules/apple/dyld_caches.lua", "toolchain/modules/*.lua"}, inline = function () return call("tools/dyld_caches.lua", "test") end},
     {name = "analysis cache test", reads = {"tools/analysis_cache.lua", "toolchain/modules/*.lua"}, inline = function () return call("tools/analysis_cache.lua", "test") end},
