@@ -2,6 +2,8 @@ local ROOT = path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
 local TOOLS = path.join(ROOT, "frameworks", "Backports", "tools")
 import("core.base.process")
 local generate = import("generate", {rootdir = TOOLS, anonymous = true})
+local memo = import("memo", {rootdir = TOOLS, anonymous = true})
+local skeleton = import("skeleton", {rootdir = TOOLS, anonymous = true})
 local workspace = import("@addon.revenant.workspace", {anonymous = true})
 
 local function expect(name, condition, detail)
@@ -104,10 +106,71 @@ local function test()
     os.tryrm(root)
 end
 
+local function memo_test()
+    local root = workspace.fresh("rn-skeleton-memo")
+    local tools = path.join(root, "tools")
+    local src = path.join(root, "src")
+    local modules = path.join(root, "modules")
+    local facts = path.join(root, "facts")
+    local xmake = path.join(root, "xmake.lua")
+    local inventory = path.join(root, "classes.json")
+    for _, folder in ipairs({tools, src, modules, facts}) do
+        os.mkdir(folder)
+    end
+    io.writefile(path.join(tools, "generate.lua"), "one\n")
+    io.writefile(path.join(src, "revenant_alias.h"), "two\n")
+    io.writefile(path.join(modules, "dyld.lua"), "three\n")
+    io.writefile(path.join(facts, "Framework.tsv"), "four\n")
+    io.writefile(path.join(facts, "install_names.tsv"), "Framework\t/System/Library/Frameworks/Framework.framework/Framework\n")
+    io.writefile(xmake, "five\n")
+    io.writefile(inventory, "six\n")
+    local opt = {root = root, tools = tools, src = src, modules = modules, facts = facts, xmake = xmake,
+                 inventory = inventory, names = {"Framework"}, env = {REVENANT_GEN_SDK = "", REVENANT_BACKPORTS_LIBRARIES = ""}}
+    local key = memo.compute(opt)
+    expect("the memo key has a value", key ~= nil and #key == 32, tostring(key))
+    local function changed(file, text, field)
+        io.writefile(file, text)
+        local other = memo.compute(opt)
+        expect("a change of " .. field .. " changes the key", other ~= key, tostring(other))
+        key = other
+    end
+    changed(path.join(facts, "Framework.tsv"), "seven\n", "a facts file")
+    changed(path.join(src, "revenant_alias.h"), "eight\n", "a source")
+    changed(path.join(tools, "generate.lua"), "nine\n", "a tool")
+    changed(path.join(modules, "dyld.lua"), "ten\n", "an addon module")
+    changed(xmake, "eleven\n", "the configuration")
+    changed(inventory, "twelve\n", "the device inventory")
+    opt.env.REVENANT_GEN_SDK = "/another/sdk"
+    local environment_key = memo.compute(opt)
+    expect("a change of the SDK selection changes the key", environment_key ~= key, tostring(environment_key))
+    key = environment_key
+    local published = path.join(root, "published")
+    generate.publish_skeleton(published, writer({["a.m"] = "one\n"}), key)
+    local live = path.join(published, "skeleton")
+    expect("the published skeleton carries its input key", (io.readfile(memo.key_file(published)) or ""):trim() == key, tostring(io.readfile(memo.key_file(published))))
+    expect("a read of the key finds the published one", memo.read(published) == key and memo.unchanged(published, key), "the key was not read")
+    local calls = 0
+    local function build()
+        calls = calls + 1
+        return {built = true}
+    end
+    local skipped = generate.generate_if_changed(published, key, build)
+    expect("an unchanged key skips the build", skipped == nil and calls == 0, tostring(calls))
+    local result = generate.generate_if_changed(published, key .. "x", build)
+    expect("a moved key runs the build", result ~= nil and result.built and calls == 1, tostring(calls))
+    local generated = path.join(root, "generated")
+    skeleton.write(generated, {{name = "Framework", unavailable = {}, rows = {{kind = "class", name = "FWThing", container = "FWThing", signature = "", intro = nil, flags = ""}}}},
+        {}, {}, {}, {}, {}, {})
+    local source = io.readfile(path.join(generated, "Framework.m")) or ""
+    expect("the generated source includes the alias header by a relative path", source:find('#include "../..', 1, true) ~= nil and not source:find(root, 1, true), source:sub(1, 160))
+    os.tryrm(root)
+end
+
 function main(command, ...)
     if command == "loop" then
         loop(...)
     else
         test()
+        memo_test()
     end
 end
