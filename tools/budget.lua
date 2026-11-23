@@ -256,19 +256,28 @@ local function journal_path(folder)
     return path.join(folder, WAIT_JOURNAL)
 end
 
+local function write_journal(folder, at, entry)
+    local lines = {}
+    local previous = os.isfile(journal_path(folder)) and io.readfile(journal_path(folder)) or ""
+    for line in previous:gmatch("[^\n]+") do
+        local stamped = tonumber(line:match("^at (%d+)"))
+        if stamped and stamped >= at - WAIT_DAY_S then
+            table.insert(lines, line)
+        end
+    end
+    table.insert(lines, entry)
+    io.writefile(journal_path(folder), table.concat(lines, "\n") .. "\n")
+end
+
 local function append_journal(folder, at, entry)
     exclusive.run(journal_path(folder) .. ".lock", "the budget wait journal", function ()
-        local lines = {}
-        local previous = os.isfile(journal_path(folder)) and io.readfile(journal_path(folder)) or ""
-        for line in previous:gmatch("[^\n]+") do
-            local stamped = tonumber(line:match("^at (%d+)"))
-            if stamped and stamped >= at - WAIT_DAY_S then
-                table.insert(lines, line)
-            end
-        end
-        table.insert(lines, entry)
-        io.writefile(journal_path(folder), table.concat(lines, "\n") .. "\n")
+        write_journal(folder, at, entry)
     end)
+end
+
+local function journal_failure(folder, note)
+    io.stderr:write("budget: " .. note .. "\n")
+    try { function () local file = io.open(journal_path(folder) .. ".errors", "a"); file:write(note .. "\n"); file:close() end }
 end
 
 local function record_wait(folder, class, tokens, seconds, who)
@@ -285,9 +294,7 @@ local function record_wait(folder, class, tokens, seconds, who)
         }
     }
     if failure then
-        local note = string.format("at %d granted %d token(s) to pid %d: the journal write failed: %s", at, tokens, who.pid or 0, failure)
-        io.stderr:write("budget: " .. note .. "\n")
-        try { function () local file = io.open(journal_path(folder) .. ".errors", "a"); file:write(note .. "\n"); file:close() end }
+        journal_failure(folder, string.format("at %d granted %d token(s) to pid %d: the journal write failed: %s", at, tokens, who.pid or 0, failure))
     end
 end
 
@@ -336,6 +343,40 @@ local function wait_summary(folder)
     return total, count, lines
 end
 
+local function ungranted_summary(folder)
+    local cutoff = os.time() - WAIT_DAY_S
+    local groups, order, count = {}, {}, 0
+    for line in (os.isfile(journal_path(folder)) and io.readfile(journal_path(folder)) or ""):gmatch("[^\n]+") do
+        local at, tokens, seconds, pid, reason, worktree, command = line:match("^at (%d+)\tnot granted\tasked %a+\ttokens (%d+)\twait (%d+)\tpid (%d+)\treason (%a+)\th %d+\t([^\t]*)\t(.*)$")
+        if at and tonumber(at) >= cutoff then
+            local key = pid .. "\t" .. worktree .. "\t" .. command
+            if not groups[key] then
+                groups[key] = {pid = pid, worktree = worktree, command = command, seconds = 0, tokens = 0, reasons = {}, requests = 0}
+                table.insert(order, key)
+            end
+            local group = groups[key]
+            group.seconds = group.seconds + tonumber(seconds)
+            group.tokens = group.tokens + tonumber(tokens)
+            group.requests = group.requests + 1
+            group.reasons[reason] = (group.reasons[reason] or 0) + 1
+            count = count + 1
+        end
+    end
+    local lines = {}
+    for _, key in ipairs(order) do
+        local group = groups[key]
+        local reasons = {}
+        for reason, number in pairs(group.reasons) do
+            table.insert(reasons, string.format("%s %d", reason, number))
+        end
+        table.sort(reasons)
+        table.insert(lines, string.format("pid %s in %s: %s — %d request(s) never granted after %d s (%s), %d token(s) asked",
+            group.pid, group.worktree ~= "" and group.worktree or "an unknown worktree", group.command,
+            group.requests, group.seconds, table.concat(reasons, ", "), group.tokens))
+    end
+    return count, lines
+end
+
 local function stop_summary(folder)
     local cutoff = os.time() - WAIT_DAY_S
     local processes, count, newest = {}, 0, nil
@@ -376,9 +417,59 @@ local function enqueue(folder, rank, minimum, who)
     return {name = name, file = file, lock = lock}
 end
 
-local function leave(ticket)
-    os.tryrm(ticket.file)
-    os.tryrm(path.join(path.directory(ticket.file), "aged-" .. ticket.name))
+local function ungranted_entry(name, text, reason, at)
+    local rank = tonumber(name:match("^(%d+)%-"))
+    local class = "normal"
+    for known, definition in pairs(CLASSES) do
+        if definition.rank == rank then
+            class = known
+        end
+    end
+    local queued = tonumber(name:match("^%d+%-(%d+)%-")) or at * 1000
+    return string.format("at %d\tnot granted\tasked %s\ttokens %d\twait %d\tpid %s\treason %s\t%s", at, class, tonumber(text:match("^%d+")) or 1,
+                         math.max(0, at - queued // 1000), text:match("\np (%d+)") or "0", reason, who_line(who_of(text)))
+end
+
+-- Takes a ticket out of the queue. A ticket that names its process was a request that never got tokens, and the wait
+-- journal records it once: the journal lock covers the read, the removal and the line, so two processes that find the
+-- same dead ticket write one line. A file without that text (the empty one that opening a vanished ticket makes) is
+-- removed and not recorded.
+local function forget_ticket(file, reason)
+    local folder = path.directory(path.directory(file))
+    local marker = path.join(path.directory(file), "aged-" .. path.filename(file))
+    local failure
+    try {
+        function ()
+            exclusive.run(journal_path(folder) .. ".lock", "the budget wait journal", function ()
+                local text = os.isfile(file) and io.readfile(file) or ""
+                local at = os.time()
+                os.tryrm(file)
+                os.tryrm(marker)
+                if text:find("^%d+\np %d+\n") then
+                    write_journal(folder, at, ungranted_entry(path.filename(file), text, reason, at))
+                end
+            end)
+        end,
+        catch {
+            function (errors)
+                failure = tostring(errors):gsub("%s+", " ")
+            end
+        }
+    }
+    if failure then
+        os.tryrm(file)
+        os.tryrm(marker)
+        journal_failure(folder, string.format("at %d a request of %s was not granted (%s): the journal write failed: %s", os.time(), path.filename(file), reason, failure))
+    end
+end
+
+local function leave(ticket, reason)
+    if reason then
+        forget_ticket(ticket.file, reason)
+    else
+        os.tryrm(ticket.file)
+        os.tryrm(path.join(path.directory(ticket.file), "aged-" .. ticket.name))
+    end
     ticket.lock:unlock()
     ticket.lock:close()
 end
@@ -394,8 +485,7 @@ local function holder_alive(file)
     end
     lock:close()
     if free then
-        os.tryrm(file)
-        os.tryrm(path.join(path.directory(file), "aged-" .. path.filename(file)))
+        forget_ticket(file, "died")
     end
     return not free
 end
@@ -567,10 +657,9 @@ local function waiting_text(folder, minimum, class, again)
     return head .. "; held by:\n" .. table.concat(lines, "\n")
 end
 
-local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms, who)
+local function await_grant(folder, ticket, class, minimum, maximum, reading_fn, poll_ms, who)
     reading_fn = reading_fn or sample
     poll_ms = poll_ms or POLL_MS
-    local ticket = enqueue(folder, CLASSES[class].rank, minimum, who)
     local started = os.mclock()
     local announce = (tonumber(os.getenv("REVENANT_BUDGET_ANNOUNCE_S")) or ANNOUNCE_S) * 1000
     local aging = (tonumber(os.getenv("REVENANT_BUDGET_AGING_S")) or AGING_S) * 1000
@@ -610,6 +699,26 @@ local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms, who
         end
         os.sleep(poll_ms)
     end
+end
+
+local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms, who)
+    local ticket = enqueue(folder, CLASSES[class].rank, minimum, who)
+    local grant, failure
+    try {
+        function ()
+            grant = await_grant(folder, ticket, class, minimum, maximum, reading_fn, poll_ms, who)
+        end,
+        catch {
+            function (errors)
+                failure = errors
+            end
+        }
+    }
+    if failure then
+        leave(ticket, "left")
+        raise("%s", tostring(failure))
+    end
+    return grant
 end
 
 local function launch(class, command)
@@ -763,6 +872,11 @@ local function status()
     for _, line in ipairs(waits) do
         say("waited    %s", line)
     end
+    local abandoned, abandoned_lines = ungranted_summary(folder)
+    say("abandoned %d request(s) ended without tokens (died or left the queue) over the last 24 h", abandoned)
+    for _, line in ipairs(abandoned_lines) do
+        say("abandoned %s", line)
+    end
     local stopped, newest = stop_summary(folder)
     say("stopped   %d process(es) by the watcher over the last 24 h%s", stopped, newest and ("; newest: " .. newest) or "")
     local failed = os.isfile(journal_path(folder) .. ".errors") and io.readfile(journal_path(folder) .. ".errors") or ""
@@ -788,6 +902,87 @@ local function test_reading(loadavg, pressure, available_mb, opt)
                   inactive = pages(opt.inactive or 0), purgeable = pages(opt.purgeable or 0),
                   compressor = opt.compressor or 0, pageouts = opt.pageouts or 0, at = opt.at or 0},
             previous = opt.previous, cores = opt.cores or 12}
+end
+
+local function journaled(folder)
+    local lines = {}
+    local journal = path.join(folder, "wait-journal")
+    for line in (os.isfile(journal) and io.readfile(journal) or ""):gmatch("[^\n]+") do
+        if line:find("\tnot granted\t", 1, true) then
+            table.insert(lines, line)
+        end
+    end
+    return lines
+end
+
+local function parsed_gave(line)
+    local at, class, tokens, seconds, pid, reason, worktree, command = (line or ""):match("^at (%d+)\tnot granted\tasked (%a+)\ttokens (%d+)\twait (%d+)\tpid (%d+)\treason (%a+)\th %d+\t([^\t]*)\t(.*)$")
+    return {class = class, tokens = tonumber(tokens), wait = tonumber(seconds), pid = tonumber(pid), reason = reason, worktree = worktree, command = command}
+end
+
+local function test_ungranted(check, base)
+    local gave_pool = path.join(base, "gavepool")
+    os.mkdir(gave_pool)
+    local gone = enqueue(gave_pool, 2, 3, {pid = 4242, worktree = "/work/tree", command = "/bin/sleep 9", at = os.time()})
+    gone.lock:unlock()
+    gone.lock:close()
+    check("a ticket whose process died does not block", ahead_of(gave_pool, "9-9999999999999-99999999.ticket", 3), false)
+    local died = journaled(gave_pool)
+    check("a request that died in the queue is journaled once as never granted", #died, 1)
+    local died_entry = parsed_gave(died[1])
+    check("with the reason died", died_entry.reason, "died")
+    check("its class", died_entry.class, "normal")
+    check("the tokens it asked for", died_entry.tokens, 3)
+    check("its pid", died_entry.pid, 4242)
+    check("its worktree", died_entry.worktree, "/work/tree")
+    check("its command", died_entry.command, "/bin/sleep 9")
+    check("and the seconds it waited", died_entry.wait ~= nil and died_entry.wait <= 2, true)
+    ahead_of(gave_pool, "9-9999999999999-99999999.ticket", 3)
+    waiters(gave_pool)
+    check("a later look at the queue does not journal the same ticket again", #journaled(gave_pool), 1)
+
+    local old_name = string.format("1-%013d-00000007.ticket", (os.time() - 120) * 1000)
+    local old_file = path.join(gave_pool, "queue", old_name)
+    local old_lock = io.openlock(old_file)
+    old_lock:trylock()
+    io.writefile(old_file, "2\np 777\n" .. who_line({worktree = "/old/tree", command = "/usr/bin/true", at = os.time() - 120}) .. "\n")
+    old_lock:unlock()
+    old_lock:close()
+    waiters(gave_pool)
+    local old_entry = parsed_gave(journaled(gave_pool)[2])
+    check("the wait of a request that died counts from the time its ticket was written", old_entry.wait ~= nil and old_entry.wait >= 120 and old_entry.wait <= 122, true)
+    check("its class is read from the rank of its ticket", old_entry.class, "critical")
+    check("and its tokens from the ticket", old_entry.tokens, 2)
+
+    local not_a_request = path.join(gave_pool, "queue", "2-0000000000009-00000009.ticket")
+    check("a ticket file that does not exist is no live request", holder_alive(not_a_request), false)
+    check("and the empty file that opening it made writes no journal line", #journaled(gave_pool), 2)
+    check("and is removed", os.isfile(not_a_request), false)
+
+    local leaver = enqueue(gave_pool, 3, 1, {pid = 5151, worktree = "/work/leaver", command = "/bin/echo left", at = os.time()})
+    leave(leaver, "left")
+    local left_entry = parsed_gave(journaled(gave_pool)[3])
+    check("a request that leaves the queue without tokens is journaled with the reason left", left_entry.reason .. "/" .. left_entry.class .. "/" .. tostring(left_entry.pid), "left/background/5151")
+    check("and its ticket is gone", os.isfile(leaver.file), false)
+    local served = enqueue(gave_pool, 2, 1, {pid = 5252, worktree = "/work/served", command = "/bin/echo served", at = os.time()})
+    leave(served)
+    check("a ticket that leaves after its grant is not a request that never got tokens", #journaled(gave_pool), 3)
+
+    local raised
+    try { function ()
+        acquire(gave_pool, "normal", 1, 1, function () raise("reading failed on purpose") end, 1, {pid = 6262, worktree = "/work/raiser", command = "/bin/echo raised", at = os.time()})
+    end, catch { function (errors) raised = tostring(errors) end } }
+    check("an error while a request waits is not swallowed", raised ~= nil and raised:find("reading failed on purpose", 1, true) ~= nil, true)
+    local raised_entry = parsed_gave(journaled(gave_pool)[4])
+    check("and journals the request as one that left without tokens", raised_entry.reason .. "/" .. tostring(raised_entry.pid), "left/6262")
+    check("leaving no ticket in the queue", #os.files(path.join(gave_pool, "queue", "*.ticket")), 0)
+
+    local gave_count, gave_lines = ungranted_summary(gave_pool)
+    check("the summary counts the requests that never got tokens", gave_count, 4)
+    check("one line for each of the four holders", #gave_lines, 4)
+    check("a line names how the request ended and the command", gave_lines[1]:find("died", 1, true) ~= nil and gave_lines[1]:find("/bin/sleep 9", 1, true) ~= nil, true)
+    local _, grants = wait_summary(gave_pool)
+    check("the wait summary does not count them as grants", grants, 0)
 end
 
 local function test_suite()
@@ -932,6 +1127,8 @@ local function test_suite()
     early.lock:close()
     check("a dead holder stops blocking", ahead_of(pool, name_b, 4), false)
     leave(late)
+
+    test_ungranted(check, base)
 
     local stamp_pool = path.join(base, "stamppool")
     os.mkdir(stamp_pool)
@@ -1196,16 +1393,17 @@ local function test_suite()
     local function polls_in_age_pool(class, minimum)
         local calls = 0
         local grant
+        local markers = 0
         try { function ()
             grant = acquire(age_pool, class, minimum, minimum, function ()
                 calls = calls + 1
                 if calls > 5 then
+                    markers = #os.files(path.join(age_queue, "aged-*.ticket"))
                     raise("stopped")
                 end
                 return overloaded()
             end, 1)
         end, catch { function () end } }
-        local markers = #os.files(path.join(age_queue, "aged-*.ticket"))
         for _, file in ipairs(os.files(path.join(age_queue, "*.ticket"))) do
             if not path.filename(file):find(aged_name, 1, true) then
                 os.tryrm(file)
@@ -1309,6 +1507,15 @@ local function test_suite()
         end
         check("a waiter that was killed leaves no ticket in the list", #waiters(who_pool), 0)
         check("and a holder that was killed no token", #holders(who_pool), 0)
+        check("a waiter that was killed is journaled once as a request that died without tokens", #journaled(who_pool), 1)
+        check("with its class, its command and the tokens it wanted", (function ()
+            local entry = parsed_gave(journaled(who_pool)[1])
+            return entry.reason .. "/" .. entry.class .. "/" .. entry.command .. "/" .. tostring(entry.tokens)
+        end)(), "died/critical//usr/bin/true/" .. everything)
+        check("status says how many requests ended without tokens and names the command", (function ()
+            local shown = os.iorunv(os.programfile(), {"l", "-P", project, script, "status"}, {envs = {REVENANT_BUDGET_POOL = who_pool}})
+            return shown:find("abandoned 1 request(s)", 1, true) ~= nil and shown:find("/usr/bin/true", 1, true) ~= nil
+        end)(), true)
         local sized = enqueue(who_pool, 2, 6, {pid = os.getpid(), worktree = project, command = "x", at = os.time()})
         check("a ticket that names its holder still carries the tokens it needs", ahead_of(who_pool, "9-9999999999999-99999999.ticket", 1), false)
         check("and blocks a later request that fits it", ahead_of(who_pool, "9-9999999999999-99999999.ticket", 6), true)

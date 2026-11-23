@@ -674,7 +674,14 @@ environment of the test does not reach it.
   seconds waited and the holder's pid, worktree and command. A ticket is always written with the waiting process's pid,
   so a request that died before its grant cannot leave an unnamed entry in the queue. Older than a day is dropped on the next grant. `status`
   prints the sum of the last day's waits and one line per holder, with its seconds, number of waits, tokens and classes;
-  a wait that ended because its process died is not a grant and is not journaled. The journal is a cache-day record, not
+  a wait that ended without tokens is not a grant and is not counted there, but it has a line of its own: `at <time>`,
+  `not granted`, `asked <class>`, `tokens <asked>`, `wait <s>`, `pid`, `reason died` or `reason left`, then the holder's
+  time, worktree and command. `left` is a request that raised while it waited (its process told the queue), `died` one whose
+  ticket another process found without a holder (a `kill`, a crash, a closed terminal) and removed; the wait counts from the
+  time in the ticket's name, and the journal lock covers reading and removing the ticket and writing the line, so two
+  processes that find the same dead ticket write one line, and the empty file that opening a vanished ticket makes writes
+  none. `status` prints `abandoned`, the count over the last day, and a line for each holder with the seconds waited and
+  the reasons, so the requests that never got tokens (the ones the granted waits cannot show) are in the same record. The journal is a cache-day record, not
   an input to admission, so it is kept in the pool folder and is never a key. The same file records what the watcher stopped (a budget
   run's parent died): one line for each process, written by `budget.lua stopped`, which the watcher runs just before the signal
   (the watcher's shell writes nothing itself; the signal can end the watcher, so the write comes first), `at <time>`, `stopped TERM` or `stopped KILL` (KILL only for a process still alive two
