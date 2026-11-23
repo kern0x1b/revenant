@@ -353,15 +353,16 @@ local function cached_facts(name, signature, compute)
     return value
 end
 
-function store_facts()
-    local packages = path.join(cache().store(), "xmake-global", ".xmake", "packages")
-    local signature = {packages, tostring(os.mtime(packages)), inode(packages)}
+function store_facts(folder)
+    local packages = folder or path.join(cache().store(), "xmake-global", ".xmake", "packages")
+    local signature = {tostring(os.mtime(packages)), inode(packages)}
     local installs = {}
     for _, name in ipairs(STORE_PACKAGES) do
         for _, install in ipairs(os.filedirs(path.join(packages, name:sub(1, 1), name, "*", "*"))) do
             table.insert(installs, install)
             local manifest = path.join(install, "manifest.txt")
-            table.insert(signature, path.relative(install, packages) .. " " .. tostring(os.mtime(install)) .. " " ..
+            local key = path.relative(install, packages):gsub("%.g[^/]+$", "")
+            table.insert(signature, key .. " " ..
                                      (os.isfile(manifest) and (tostring(os.mtime(manifest)) .. " " .. tostring(os.filesize(manifest))) or "none"))
         end
     end
