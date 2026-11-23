@@ -455,8 +455,8 @@ prints their guest keys, marked `iphoneos-arm64` (`apple_minimum 7.0`, `library_
 `<cache>/scratch/<task>/keys-guest`, in that folder's own `.xmake` (a configure with `-P` writes the `.xmake` of the folder it is
 run from), requires only what the `apple-ios` include does with `apple_compat_only` (the SDK, `ld64` and `llvm`, taken prebuilt
 and never built from source, so nothing when they are installed) and not the two packages, and takes about two seconds on a
-machine that has them; `keys.lua guest` prints the keys for any configuration. `toolchain/tests/addon/keys_test.lua` holds the two keys measured on 2026-11-21 (`libcxx` 16275d93,
-`swift-runtime` 9270db93), so a change that moves them fails there until the new archives are published.
+machine that has them; `keys.lua guest` prints the keys for any configuration. `toolchain/tests/addon/keys_test.lua` holds the guest keys measured for the packages in the shared store, so a change that
+moves one fails there until the new key is built locally into the store and the expected line is updated.
 
 `swift` is outside `swift-runtime`'s key, although `swift-runtime` is built with it. `swift-runtime` takes `swift` as a
 host, private dependency (`packages/s/swift-runtime/xmake.lua`), and the key hashes only library dependencies, which for
