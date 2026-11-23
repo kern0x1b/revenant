@@ -42,6 +42,31 @@ function failures(opt)
     check("a grant of zero is one worker", light.workers("0"), 1)
     check("a grant that is no number is one worker", light.workers("many"), 1)
 
+    local memo = import("memo", {rootdir = opt.modules, anonymous = true})
+    local suite_reads = import("suite_reads", {rootdir = path.join(opt.modules, "..", "tests"), anonymous = true})
+    local input = {tool = "xmake", host = "host", files = {
+        ["toolchain/tests/addon/cache_test.lua"] = "file a",
+        ["toolchain/tests/addon/store_test.lua"] = "file b",
+        ["toolchain/modules/cache.lua"] = "file c",
+    }}
+    local cache_step = {name = "cache_test", reads = suite_reads.of("cache_test")}
+    local store_step = {name = "store_test", reads = suite_reads.of("store_test")}
+    local version = "light suite memo 1"
+    local cache_key = memo.key_of(input, cache_step, version)
+    local store_key = memo.key_of(input, store_step, version)
+    check("the declaration names its own suite", memo.matches("toolchain/tests/addon/cache_test.lua", cache_step.reads), true)
+    check("the same inputs give the same suite key", memo.key_of(input, cache_step, version), cache_key)
+    check("two suites have different keys", cache_key ~= store_key, true)
+    local only_cache = table.clone(input.files)
+    only_cache["toolchain/tests/addon/cache_test.lua"] = "file changed"
+    check("a file only one suite reads moves only that suite's key", memo.key_of({tool = input.tool, host = input.host, files = only_cache}, cache_step, version) ~= cache_key, true)
+    check("the other suite keeps its key", memo.key_of({tool = input.tool, host = input.host, files = only_cache}, store_step, version), store_key)
+    local shared = table.clone(input.files)
+    shared["toolchain/modules/cache.lua"] = "file changed"
+    check("a shared module moves every suite that reads it", memo.key_of({tool = input.tool, host = input.host, files = shared}, cache_step, version) ~= cache_key, true)
+    check("and the other suite too", memo.key_of({tool = input.tool, host = input.host, files = shared}, store_step, version) ~= store_key, true)
+    check("a suite without a declaration reads the whole tree", table.concat(memo.reads_of({name = "unknown"})), "**")
+
     local workspace = import("@addon.revenant.workspace", {anonymous = true})
     local logs = path.join(workspace.run(), "light-suites.abcdef")
     local task = light.children_task(logs)
