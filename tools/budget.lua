@@ -398,7 +398,14 @@ local function ticket_need(file)
 end
 
 local function aged_path(folder, name)
-    return path.join(folder, "queue", "aged-" .. name)
+    return path.join(folder, "queue", name .. ".aged")
+end
+
+local function remove_markers(file)
+    local queue = path.directory(file)
+    local name = path.filename(file)
+    os.tryrm(path.join(queue, name .. ".aged"))
+    os.tryrm(path.join(queue, "aged-" .. name))
 end
 
 local function enqueue(folder, rank, minimum, who)
@@ -437,7 +444,6 @@ end
 
 local function forget_ticket(file, reason)
     local folder = path.directory(path.directory(file))
-    local marker = path.join(path.directory(file), "aged-" .. path.filename(file))
     local failure
     try {
         function ()
@@ -445,7 +451,7 @@ local function forget_ticket(file, reason)
                 local text = os.isfile(file) and io.readfile(file) or ""
                 local at = os.time()
                 os.tryrm(file)
-                os.tryrm(marker)
+                remove_markers(file)
                 local named = tonumber(text:match("^%d+\np (%d+)\n"))
                 if named and (reason ~= "died" or not process_alive(named)) then
                     write_journal(folder, at, ungranted_entry(path.filename(file), text, reason, at))
@@ -460,7 +466,7 @@ local function forget_ticket(file, reason)
     }
     if failure then
         os.tryrm(file)
-        os.tryrm(marker)
+        remove_markers(file)
         journal_failure(folder, string.format("at %d a request of %s was not granted (%s): the journal write failed: %s", os.time(), path.filename(file), reason, failure))
     end
 end
@@ -470,7 +476,7 @@ local function leave(ticket, reason)
         forget_ticket(ticket.file, reason)
     else
         os.tryrm(ticket.file)
-        os.tryrm(path.join(path.directory(ticket.file), "aged-" .. ticket.name))
+        remove_markers(ticket.file)
     end
     ticket.lock:unlock()
     ticket.lock:close()
@@ -1416,7 +1422,7 @@ local function test_suite()
             grant = acquire(age_pool, class, minimum, minimum, function ()
                 calls = calls + 1
                 if calls > 5 then
-                    markers = #os.files(path.join(age_queue, "aged-*.ticket"))
+                    markers = #os.files(path.join(age_queue, "*.aged"))
                     raise("stopped")
                 end
                 return overloaded()
@@ -1436,12 +1442,21 @@ local function test_suite()
     local listed = waiters(age_pool)
     check("listing the queue shows the aged ticket once", #listed, 1)
     check("and does not take its marker for a ticket without a holder", os.isfile(aged_path(age_pool, aged_name)), true)
+    check("the marker is not a file that the walk of an older client over queue/*.ticket would meet", #os.files(path.join(age_queue, "*.ticket")), 1)
+    check("so that walk, which asks each file for a holder and removes the ones without, leaves it", (function ()
+        for _, file in ipairs(os.files(path.join(age_queue, "*.ticket"))) do
+            holder_alive(file)
+        end
+        return os.isfile(aged_path(age_pool, aged_name))
+    end)(), true)
     local held_critical = polls_in_age_pool("critical", 1)
     check("a critical request waits behind an older normal one that has aged", #held_critical, 0)
     local held_background = polls_in_age_pool("background", 1)
     check("and so does one of the background class", #held_background, 0)
+    io.writefile(path.join(age_queue, "aged-" .. aged_name), "2")
     leave(aged_ticket)
     check("the marker of an aged ticket is gone when the ticket leaves", os.isfile(aged_path(age_pool, aged_name)), false)
+    check("and so is the marker of the earlier name, aged-<ticket>", os.isfile(path.join(age_queue, "aged-" .. aged_name)), false)
     os.setenv("REVENANT_BUDGET_AGING_S", "0")
     local _, marked = polls_in_age_pool("normal", 2)
     os.setenv("REVENANT_BUDGET_AGING_S", "")
