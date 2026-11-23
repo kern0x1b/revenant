@@ -354,6 +354,14 @@ takes 13 minutes without it). Both folders are scratch in the cache and in the s
 uses and the next run computes it again; a key moves only when the SDK, the toolchain or one of the four tools changes, and
 the first checkout to run after that fills the store for the others.
 
+Measured 2026-11-23 on a machine at a load of 21 on 12 cores, in a worktree that held no `.cache/backports`, no
+`.cache/modcache` and no `build/backports-gate`, with the store holding the key: a full `prepush --fresh` took 413 s
+(`lowered members` 9 s instead of 585 to 784 s, `lowered exports` 4 s, `light suites` 196 s on one token, `backports build`
+167 s instead of 372 to 407 s, the rest under 25 s together). The one run that is still long is the first after a key
+moves, because the store holds nothing under the new key: it computes `constant_intros.tsv` itself (about 10 minutes of
+`clang -ast-dump`, one framework after another, in `facts.lua`) and the facts of the build (about 100 s), about 20 minutes
+in all, and publishes them when its heavy checks end.
+
 The gate's copy (`build/backports-gate/tree`) is not shared in the same way: its `.xmake` records the paths of the checkout
 that configured it, and a clone would take the objects of another tree at face value. The compile cache (`ccache` of the
 store) already gives a new copy its objects, and what the copy computes itself is the configure step.
