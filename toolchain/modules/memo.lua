@@ -186,6 +186,38 @@ function reads_of(step)
     return reads or {"**"}
 end
 
+function manifest_digest(files)
+    local lines = {}
+    for file, value in pairs(files) do
+        table.insert(lines, file .. " " .. value)
+    end
+    byteorder.sort(lines)
+    return digest(table.concat(lines, "\n"))
+end
+
+function cached_value(folder, key, compute)
+    local file = path.join(cache().store(), "suite-memo", folder, key)
+    local value = try { function () return io.readfile(file) end }
+    if value then
+        return value
+    end
+    value = compute()
+    os.mkdir(path.directory(file))
+    local temporary = file .. ".tmp." .. hash.uuid()
+    io.writefile(temporary, value)
+    os.mv(temporary, file)
+    local folder = path.directory(file)
+    local kept = {}
+    for _, entry in ipairs(os.files(path.join(folder, "*"))) do
+        table.insert(kept, string.format("%d %s", os.mtime(entry), entry))
+    end
+    byteorder.sort(kept)
+    for index = 1, #kept - 40 do
+        os.tryrm(kept[index]:match("^%d+ (.*)$"))
+    end
+    return value
+end
+
 function selected(files, step, always)
     local reads = reads_of(step)
     local lines = {}
@@ -295,6 +327,69 @@ function sdk_content()
     end
     byteorder.sort(lines)
     return table.concat(lines, "\n")
+end
+
+local function inode(folder)
+    return try { function () return os.iorunv("stat", {"-f", "%i", folder}):trim() end } or ""
+end
+
+local function cached_facts(name, signature, compute)
+    local folder = path.join(cache().store(), "suite-memo", "facts", name)
+    local file = path.join(folder, digest(signature))
+    local value = try { function () return io.readfile(file) end }
+    if value then
+        return value
+    end
+    value = compute()
+    os.mkdir(folder)
+    local temporary = file .. ".tmp." .. hash.uuid()
+    io.writefile(temporary, value)
+    os.mv(temporary, file)
+    return value
+end
+
+function store_facts()
+    local packages = path.join(cache().store(), "xmake-global", ".xmake", "packages")
+    local signature = {packages, tostring(os.mtime(packages)), inode(packages)}
+    local installs = {}
+    for _, name in ipairs(STORE_PACKAGES) do
+        for _, install in ipairs(os.filedirs(path.join(packages, name:sub(1, 1), name, "*", "*"))) do
+            table.insert(installs, install)
+            local manifest = path.join(install, "manifest.txt")
+            table.insert(signature, path.relative(install, packages) .. " " .. tostring(os.mtime(install)) .. " " ..
+                                     (os.isfile(manifest) and (tostring(os.mtime(manifest)) .. " " .. tostring(os.filesize(manifest))) or "none"))
+        end
+    end
+    byteorder.sort(signature)
+    return cached_facts("store", table.concat(signature, "\n"), function ()
+        local lines = {}
+        for _, install in ipairs(installs) do
+            local line = path.relative(install, packages):gsub("%.g[^/]+$", "")
+            local manifest = path.join(install, "manifest.txt")
+            table.insert(lines, line .. " " .. (os.isfile(manifest) and hash.sha256(manifest) or "no manifest"))
+        end
+        byteorder.sort(lines)
+        return table.concat(lines, "\n")
+    end)
+end
+
+function sdk_facts()
+    local sdk = import("sdk", {rootdir = path.join(checkout(), "frameworks", "Backports", "tools"), anonymous = true})
+    local analysis = import("analysis_cache", {rootdir = os.scriptdir(), anonymous = true})
+    local paths = analysis.sdk_paths()
+    local signature = {}
+    for _, real in ipairs(paths) do
+        table.insert(signature, real .. " " .. tostring(os.mtime(real)) .. " " .. tostring(os.filesize(real)) .. " " ..
+                                inode(real) .. " " .. tostring(sdk.sdk_version(real)))
+    end
+    return cached_facts("sdk", table.concat(signature, "\n"), function ()
+        local lines = {}
+        for _, real in ipairs(paths) do
+            table.insert(lines, try { function () return sdk.cache_key(real) end } or "unreadable")
+        end
+        byteorder.sort(lines)
+        return table.concat(lines, "\n")
+    end)
 end
 
 function installed_facts(log)

@@ -55,7 +55,7 @@ local function installed_tools()
 end
 
 local function suite_facts()
-    return installed_tools() .. "\n--\n" .. memo.store_content() .. "\n--\n" .. memo.sdk_content()
+    return installed_tools() .. "\n--\n" .. memo.store_facts() .. "\n--\n" .. memo.sdk_facts()
 end
 
 local function step_of(suite)
@@ -220,9 +220,13 @@ local function run_with_memo(suites, count)
     local began = os.time()
     local input = memo.inputs(root)
     local store = path.join(cache.store(), "suite-memo")
+    local signature = memo.digest(table.concat({input.tool, input.host, memo.ambient_environment(AMBIENT_SKIPS), suite_facts(), memo.manifest_digest(input.files)}, "\n"))
     local keys, pending, recalled = {}, {}, 0
     for _, suite in ipairs(suites) do
-        keys[suite] = key_for(input, suite)
+        local declaration = table.concat(suite_reads.of(suite) or {"**"}, "\n")
+        keys[suite] = memo.cached_value("keys", path.join(suite, memo.digest(signature .. "\n" .. declaration)), function ()
+            return key_for(input, suite)
+        end)
         local record = memo.recalled(store, suite, keys[suite])
         if record then
             recalled = recalled + 1
