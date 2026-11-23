@@ -1554,18 +1554,57 @@ local function test_live()
     io.flush = real_flush
     check("every line written through say is flushed at once, not left to the buffer", flushes, 1)
 
-    local function listing()
-        return try { function () return os.iorunv("/bin/ps", {"-ax", "-o", "pid=,command="}) end } or ""
+    local function processes()
+        local found = {}
+        local listing = try { function () return os.iorunv("/bin/ps", {"-ax", "-o", "pid=,ppid=,command="}) end } or ""
+        for line in listing:gmatch("[^\n]+") do
+            local pid, parent, text = line:match("^%s*(%d+)%s+(%d+)%s+(.-)%s*$")
+            if pid then
+                table.insert(found, {pid = tonumber(pid), parent = tonumber(parent), text = text})
+            end
+        end
+        return found
     end
     local function matching(predicate)
         local pids = {}
-        for line in listing():gmatch("[^\n]+") do
-            local pid, text = line:match("^%s*(%d+)%s+(.-)%s*$")
-            if pid and predicate(text) then
-                table.insert(pids, tonumber(pid))
+        for _, entry in ipairs(processes()) do
+            if predicate(entry.text) then
+                table.insert(pids, entry.pid)
             end
         end
         return pids
+    end
+    local function with_descendants(roots)
+        local inside, all = {}, {}
+        for _, pid in ipairs(roots) do
+            inside[pid] = true
+            table.insert(all, pid)
+        end
+        local grew = #roots > 0
+        while grew do
+            grew = false
+            for _, entry in ipairs(processes()) do
+                if inside[entry.parent] and not inside[entry.pid] then
+                    inside[entry.pid] = true
+                    table.insert(all, entry.pid)
+                    grew = true
+                end
+            end
+        end
+        return all
+    end
+    local function matching_among(pids, predicate)
+        local inside = {}
+        for _, pid in ipairs(pids) do
+            inside[pid] = true
+        end
+        local found = {}
+        for _, entry in ipairs(processes()) do
+            if inside[entry.pid] and predicate(entry.text) then
+                table.insert(found, entry.pid)
+            end
+        end
+        return found
     end
     local function ends_with(text, suffix)
         return #text >= #suffix and text:sub(-#suffix) == suffix
@@ -1585,16 +1624,57 @@ local function test_live()
     local base = os.iorunv("mktemp", {"-d"}):trim()
     local script = path.join(root, "tools", "prepush.lua")
     local budget_script = path.join(root, "tools", "budget.lua")
-    local unique = 3000 + os.getpid() % 2000
+    local unique = 100000 + tonumber((hash.uuid():gsub("-", "")):sub(1, 6), 16) % 9000000
+    local other_checkout = path.join(base, "other-checkout")
+
+    local function probe_mains(word, seconds)
+        return matching(function (text) return text:find(root, 1, true) ~= nil and ends_with(text, "prepush.lua " .. word .. " " .. seconds) end)
+    end
+    local function other_probe(word, seconds)
+        return process.openv("/bin/sh", {"-c", "/bin/sleep " .. seconds .. "; true", path.join(other_checkout, "tools", "prepush.lua"), word, seconds},
+                             {outpath = "/dev/null", errpath = "/dev/null"})
+    end
+    local function other_probes()
+        return matching(function (text) return text:find(other_checkout, 1, true) ~= nil end)
+    end
+    local function remove_other_probes(handle)
+        kill("KILL", with_descendants(other_probes()))
+        handle:kill()
+        handle:close()
+    end
+    local function snapshot(pids)
+        local texts = {}
+        for _, entry in ipairs(processes()) do
+            for _, pid in ipairs(pids) do
+                if entry.pid == pid then
+                    texts[pid] = entry.text
+                end
+            end
+        end
+        return texts
+    end
+    local function survivors(taken)
+        local alive = {}
+        for _, entry in ipairs(processes()) do
+            if taken[entry.pid] ~= nil and taken[entry.pid] == entry.text then
+                table.insert(alive, entry.pid)
+            end
+        end
+        return alive
+    end
 
     local live_log = path.join(base, "live.log")
     local live_tag = tostring(unique)
+    local live_other = other_probe("probe-say", live_tag)
     local live = process.openv(os.programfile(), {"l", "-P", root, script, "probe-say", live_tag}, {outpath = live_log, errpath = live_log, envs = {"REVENANT_BUDGET_HELD="}})
     local seen = wait_until(function () return (io.readfile(live_log) or ""):find("probe line", 1, true) ~= nil end, 60000)
-    local still_running = #matching(function (text) return ends_with(text, "prepush.lua probe-say " .. live_tag) end)
+    local still_running = #probe_mains("probe-say", live_tag)
     live:kill()
-    kill("KILL", matching(function (text) return ends_with(text, "prepush.lua probe-say " .. live_tag) end))
+    kill("KILL", probe_mains("probe-say", live_tag))
+    local other_live_left = #other_probes()
+    remove_other_probes(live_other)
     check("a line is in the log file while the process that wrote it still runs", seen and still_running == 1, true)
+    check("a probe of another checkout that has the same number is neither counted nor killed", other_live_left, 1)
 
     local function hold_environment(pool, floor)
         return {"REVENANT_BUDGET_POOL=" .. pool, "REVENANT_BUDGET_HELD=", "REVENANT_BUDGET_DISK_GB=" .. floor}
@@ -1609,7 +1689,8 @@ local function test_live()
     local refusal_said = wait_until(function () return (io.readfile(refused_log) or ""):find("GB floor, so no heavy command starts", 1, true) ~= nil end, 90000)
     local refused_sleepers = #matching(function (text) return text == "/bin/sleep " .. refused_seconds end)
     refused:kill()
-    kill("KILL", matching(function (text) return ends_with(text, "prepush.lua probe-hold " .. refused_seconds) or text == "/bin/sleep " .. refused_seconds end))
+    kill("KILL", probe_mains("probe-hold", refused_seconds))
+    kill("KILL", matching(function (text) return text == "/bin/sleep " .. refused_seconds end))
     check("a run whose disk is below the budget's floor is refused and starts no command, so the runs below pin the floor to 0", refusal_said and refused_sleepers == 0, true)
 
     for round, signal in ipairs({"TERM", "INT", "KILL"}) do
@@ -1618,35 +1699,44 @@ local function test_live()
         local pool = path.join(base, "pool" .. signal)
         os.mkdir(pool)
         local log = path.join(base, "hold-" .. signal .. ".log")
+        local other = other_probe("probe-hold", seconds)
         local run = process.openv(os.programfile(), {"l", "-P", root, script, "probe-hold", seconds},
                                   {outpath = log, errpath = log, envs = hold_environment(pool, "0")})
         local function held_text()
             return try { function () return os.iorunv(os.programfile(), {"l", "-P", root, budget_script, "status"}, {envs = {REVENANT_BUDGET_POOL = pool, REVENANT_BUDGET_HELD = ""}}) end } or ""
         end
+        local function commands()
+            return matching_among(with_descendants(probe_mains("probe-hold", seconds)), function (text) return text == sleeping end)
+        end
         local running = false
         wait_until(function ()
-            running = #matching(function (text) return text == sleeping end) > 0 and held_text():find(" holds 1 token(s)", 1, true) ~= nil
+            running = #commands() > 0 and held_text():find(" holds 1 token(s)", 1, true) ~= nil
             return running or (io.readfile(log) or ""):find("budget:", 1, true) ~= nil
         end, 90000)
-        local mains = matching(function (text) return ends_with(text, "prepush.lua probe-hold " .. seconds) end)
-        local runs = matching(function (text) return text:find("budget.lua run", 1, true) ~= nil and ends_with(text, "-- " .. sleeping) end)
-        local sleepers = matching(function (text) return text == sleeping end)
+        local mains = probe_mains("probe-hold", seconds)
+        local family = with_descendants(mains)
+        local runs = matching_among(family, function (text) return text:find("budget.lua run", 1, true) ~= nil and ends_with(text, "-- " .. sleeping) end)
+        local sleepers = matching_among(family, function (text) return text == sleeping end)
         check("a run that holds its tokens has its prepush, its budget run and its command (" .. signal .. ")",
               string.format("held and listed %s, prepush %d, budget run %d, command %d, first line of its log %q", tostring(running), #mains, #runs, #sleepers, (io.readfile(log) or ""):match("[^\n]*")),
               "held and listed true, prepush 1, budget run 1, command 1, first line of its log \"\"")
+        local taken = snapshot(family)
         kill(signal, mains)
         local function all_gone()
-            return #matching(function (text) return text == sleeping or ends_with(text, "-- " .. sleeping) or ends_with(text, "prepush.lua probe-hold " .. seconds) end) == 0
+            return #survivors(taken) == 0
         end
         local gone = wait_until(all_gone, 30000)
-        local leftovers = matching(function (text) return text == sleeping or ends_with(text, "-- " .. sleeping) end)
+        local leftovers = survivors(taken)
         local held_after = held_text()
         kill("KILL", leftovers)
         kill("KILL", mains)
         run:kill()
+        local other_left = #other_probes()
+        remove_other_probes(other)
         check("after SIG" .. signal .. " to prepush no budget run and no command is left", #leftovers, 0)
         check("and the process that was signalled is gone", gone, true)
         check("and no token is held", held_after:find("held      0 token(s)", 1, true) ~= nil and not held_after:find(" holds ", 1, true), true)
+        check("and the probe of another checkout that has the same number is still there", other_left, 1)
     end
 
     os.rm(base)
