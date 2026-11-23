@@ -110,9 +110,12 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   code of prepush, the `REVENANT_*` environment, and for the checks that run against installs the installs and the SDK; what a
   key does not see is listed in `docs/guides/machine.md`, and `--fresh` runs everything), so a
   second prepush on the same inputs, from any worktree, runs nothing and prints where each verdict came from; a check that
-  left no verdict fails. The host checks take about 15 seconds with the caches warm; the Backports build takes about six
-  minutes the first time and builds only what changed after that. It must print
-  `prepush: 23 checks passed`; `--list`, `--only <check,...>`, `--recall <check>` (prints the remembered verdict, runs nothing), `--keep-going` and `--fresh` select and order the run (it stops at the first
+  left no verdict fails. The host checks take about 15 seconds with the caches warm; a new worktree starts with the Backports
+  facts and module caches of the shared store (`docs/guides/machine.md`, "Which analysis to share"), so its full run took 413 s
+  on 2026-11-23 on a busy machine (a Backports build of 167 s, the light suites of 196 s in one process, which take 65 s in four),
+  and the build later builds only what changed. The first run after the SDK, the toolchain or the facts tools change computes
+  the analysis itself, about 20 minutes, and fills the store for the others. It must print
+  `prepush: 24 checks passed`; `--list`, `--only <check,...>`, `--recall <check>` (prints the remembered verdict, runs nothing), `--keep-going` and `--fresh` select and order the run (it stops at the first
   failure by default, the cheap checks first; see `docs/guides/machine.md`); `./xmakew l -P . tools/prepush.lua test` tests the tool itself.
 - Before handing a change over: `./xmakew test -P .`, then that component's gate (the backports gate is gone until
   `./xmakew test -P .` replaces it; for the emulator, the skill `emulator-session`).

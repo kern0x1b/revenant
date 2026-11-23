@@ -39,6 +39,7 @@ local function tracked(pattern)
 end
 
 local GATE_JOBS = 6
+local LIGHT_JOBS = 4
 local GATE_LINES = 30
 local GATE_EXCLUDES = {"/.git", "/.xmake", "/build", "/.cache", "/.cache-private", "/.cache-boot", "/.cache-*", "/.claude/worktrees"}
 
@@ -233,6 +234,10 @@ local function lua(script, ...)
     return budgeted(table.join({os.programfile(), "l", "-P", root, path.join(root, script)}, {...}))
 end
 
+local function light_suites()
+    return budgeted({os.programfile(), "l", "-P", root, path.join(root, "toolchain", "tests", "light_suites.lua")}, {jobs = LIGHT_JOBS})
+end
+
 local function backports_exports()
     local built = path.join(gate_tree(gate_folder()), "build", "iphoneos", "armv7", "release")
     return lua("frameworks/Backports/tests/export_baseline_test.lua", "check", built)
@@ -414,19 +419,53 @@ local function store_installs()
     return table.concat(sorted(lines), "\n")
 end
 
+local function analysis_cache()
+    return import("@addon.revenant.analysis_cache", {anonymous = true})
+end
+
+local function backports_sdk()
+    return import("sdk", {rootdir = path.join(root, "frameworks", "Backports", "tools"), anonymous = true})
+end
+
 local function sdk_content()
-    local sdk = import("sdk", {rootdir = path.join(root, "frameworks", "Backports", "tools"), anonymous = true})
-    local pattern = path.join(packages_folder(), "i", "iphoneos-sdk", "*", "*", "Developer.app", "Contents", "Developer", "Platforms",
-                              "iPhoneOS.platform", "Developer", "SDKs", "iPhoneOS*.sdk")
-    local seen, lines = {}, {}
-    for _, folder in ipairs(os.dirs(pattern)) do
-        local real = os.iorunv("sh", {"-c", "cd \"$1\" && pwd -P", "sh", folder}):trim()
-        if not seen[real] then
-            seen[real] = true
-            table.insert(lines, try { function () return sdk.cache_key(real) end } or "unreadable")
-        end
+    local sdk = backports_sdk()
+    local lines = {}
+    for _, real in ipairs(analysis_cache().sdk_paths()) do
+        table.insert(lines, try { function () return sdk.cache_key(real) end } or "unreadable")
     end
     return table.concat(sorted(lines), "\n")
+end
+
+local function restore_analysis()
+    local analysis = analysis_cache()
+    try {
+        function ()
+            for _, line in ipairs(analysis.lines_of("restored", analysis.restore(analysis.folders(backports_sdk())), "from the store")) do
+                say("prepush: %s", line)
+            end
+        end,
+        catch {
+            function (errors)
+                say("prepush: the shared analysis cache could not be restored (%s); the checks compute what they need", (tostring(errors):gsub("\n.*", "")))
+            end
+        }
+    }
+end
+
+local function publish_analysis()
+    local analysis = analysis_cache()
+    try {
+        function ()
+            for _, line in ipairs(analysis.lines_of("published", analysis.publish(analysis.folders(backports_sdk())), "to the store")) do
+                say("prepush: %s", line)
+            end
+        end,
+        catch {
+            function (errors)
+                say("prepush: the analysis could not be published to the shared store (%s); the next checkout computes it again", (tostring(errors):gsub("\n.*", "")))
+            end
+        }
+    }
 end
 
 local function resolved_tools()
@@ -767,11 +806,17 @@ local function run_steps(steps, opt)
                 else
                     say("prepush: starting the heavy checks although %s failed (--keep-going)", table.concat(failed, ", "))
                 end
+                if opt.before_heavy then
+                    opt.before_heavy()
+                end
             end
             local started = os.time()
             say("start %s", step.name)
             local ok = step.run()
             if ok == REFUSED then
+                if opt.after_heavy then
+                    opt.after_heavy()
+                end
                 return failed, true
             end
             local seconds = os.time() - started
@@ -784,6 +829,9 @@ local function run_steps(steps, opt)
                 stop_at(step.name)
             end
         end
+    end
+    if heavy_started and opt.after_heavy then
+        opt.after_heavy()
     end
     return failed, false
 end
@@ -806,10 +854,11 @@ local STEPS = {
     {name = "example projects test", run = function () return lua("frameworks/ReactNative/tests/example_projects_test.lua") end},
     {name = "overlay test", reads = {"frameworks/ReactNative/tools/overlay.lua", "frameworks/ReactNative/tests/overlay_test.lua"}, run = function () return lua("frameworks/ReactNative/tests/overlay_test.lua") end},
     {name = "dyld caches test", reads = {"tools/dyld_caches.lua", "toolchain/modules/apple/dyld_caches.lua", "toolchain/modules/*.lua"}, inline = function () return call("tools/dyld_caches.lua", "test") end},
+    {name = "analysis cache test", reads = {"tools/analysis_cache.lua", "toolchain/modules/*.lua"}, inline = function () return call("tools/analysis_cache.lua", "test") end},
     {name = "export baseline test", reads = {"frameworks/Backports/tests/export_baseline_test.lua", "toolchain/modules/apple/", "toolchain/modules/*.lua"}, run = function () return lua("frameworks/Backports/tests/export_baseline_test.lua", "test") end},
     {name = "lowered members", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_members_test.lua") end},
     {name = "lowered exports", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_exports_test.lua") end},
-    {name = "light suites", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("toolchain/tests/light_suites.lua") end},
+    {name = "light suites", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = light_suites},
     {name = "backports build", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_build},
     {name = "backports exports", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_exports},
     {name = "backports device imports", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_device_imports},
@@ -1670,6 +1719,8 @@ function main(command, ...)
         head = git(root, {"rev-parse", "HEAD"}):trim(),
         key = function (step) return key_of(input, step) end,
         batch = spawned_batch,
+        before_heavy = restore_analysis,
+        after_heavy = publish_analysis,
     })
     if refused then
         say("prepush: budget refused; this is not a failed check, free the space and rerun")
