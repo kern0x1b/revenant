@@ -20,6 +20,7 @@ local DF = "/bin/df"
 local PS = "/bin/ps"
 local LOAD_WINDOW_MS = 60000
 local ANNOUNCE_S = 300
+local AGING_S = 300
 local WAIT_JOURNAL = "wait-journal"
 local WAIT_DAY_S = 86400
 
@@ -355,6 +356,10 @@ local function ticket_need(file)
     return tonumber((io.readfile(file) or ""):match("^%d+")) or 1
 end
 
+local function aged_path(folder, name)
+    return path.join(folder, "queue", "aged-" .. name)
+end
+
 local function enqueue(folder, rank, minimum, who)
     local dir = path.join(folder, "queue")
     os.mkdir(dir)
@@ -373,6 +378,7 @@ end
 
 local function leave(ticket)
     os.tryrm(ticket.file)
+    os.tryrm(path.join(path.directory(ticket.file), "aged-" .. ticket.name))
     ticket.lock:unlock()
     ticket.lock:close()
 end
@@ -389,6 +395,7 @@ local function holder_alive(file)
     lock:close()
     if free then
         os.tryrm(file)
+        os.tryrm(path.join(path.directory(file), "aged-" .. path.filename(file)))
     end
     return not free
 end
@@ -405,10 +412,16 @@ local function write_pid(file, pid)
 end
 
 local function ahead_of(folder, name, reach)
+    local own_aged = os.isfile(aged_path(folder, name))
     for _, file in ipairs(os.files(path.join(folder, "queue", "*.ticket"))) do
-        if path.filename(file) < name and holder_alive(file) then
-            local need = ticket_need(file)
-            if need <= reach then
+        local other = path.filename(file)
+        if not other:find("^aged%-") then
+            local other_aged = os.isfile(aged_path(folder, other))
+            local first = other < name
+            if other_aged ~= own_aged then
+                first = other_aged
+            end
+            if first and holder_alive(file) and ticket_need(file) <= reach then
                 return true
             end
         end
@@ -558,7 +571,8 @@ local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms, who
     local ticket = enqueue(folder, CLASSES[class].rank, minimum, who)
     local started = os.mclock()
     local announce = (tonumber(os.getenv("REVENANT_BUDGET_ANNOUNCE_S")) or ANNOUNCE_S) * 1000
-    local announced
+    local aging = (tonumber(os.getenv("REVENANT_BUDGET_AGING_S")) or AGING_S) * 1000
+    local announced, marked
     while true do
         local cores = os.cpuinfo("ncpu")
         local reading = reading_fn()
@@ -584,6 +598,10 @@ local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms, who
             return grant
         end
         release_locks(free)
+        if not marked and os.mclock() - started > aging then
+            io.writefile(aged_path(folder, ticket.name), tostring(minimum))
+            marked = true
+        end
         if not announced or os.mclock() - announced > announce then
             say("%s", waiting_text(folder, minimum, class, announced ~= nil))
             announced = os.mclock()
@@ -1166,6 +1184,48 @@ local function test_suite()
     check("a request for two tokens waits for its holder and then starts under outside load", #drained, 2)
     check("and it did wait for the holder", drain_calls >= 3, true)
     release_locks(drained)
+
+    local age_pool = path.join(base, "age")
+    local age_queue = path.join(age_pool, "queue")
+    os.mkdir(age_queue)
+    local age_holder = acquire(age_pool, "normal", 1, 1, overloaded, 1)
+    local aged_name = "2-0000000000001-00000001.ticket"
+    local aged_ticket = waiting_ticket(age_queue, aged_name, 2)
+    local function polls_in_age_pool(class, minimum)
+        local calls = 0
+        local grant
+        try { function ()
+            grant = acquire(age_pool, class, minimum, minimum, function ()
+                calls = calls + 1
+                if calls > 5 then
+                    raise("stopped")
+                end
+                return overloaded()
+            end, 1)
+        end, catch { function () end } }
+        local markers = #os.files(path.join(age_queue, "aged-*.ticket"))
+        for _, file in ipairs(os.files(path.join(age_queue, "*.ticket"))) do
+            if not path.filename(file):find(aged_name, 1, true) then
+                os.tryrm(file)
+            end
+        end
+        return grant or {}, markers
+    end
+    local young_critical = polls_in_age_pool("critical", 1)
+    check("a critical request passes an older normal one that has not aged", #young_critical, 1)
+    release_locks(young_critical)
+    io.writefile(path.join(age_queue, "aged-" .. aged_name), "2")
+    local held_critical = polls_in_age_pool("critical", 1)
+    check("a critical request waits behind an older normal one that has aged", #held_critical, 0)
+    local held_background = polls_in_age_pool("background", 1)
+    check("and so does one of the background class", #held_background, 0)
+    leave(aged_ticket)
+    check("the marker of an aged ticket is gone when the ticket leaves", os.isfile(path.join(age_queue, "aged-" .. aged_name)), false)
+    os.setenv("REVENANT_BUDGET_AGING_S", "0")
+    local _, marked = polls_in_age_pool("normal", 2)
+    os.setenv("REVENANT_BUDGET_AGING_S", "")
+    check("a request that waited longer than the aging time marks its ticket aged", marked, 1)
+    release_locks(age_holder)
 
     local dead_pool = path.join(base, "deadholder")
     os.mkdir(dead_pool)
