@@ -174,7 +174,7 @@ local function memory_headroom(reading)
         return 1
     end
     local available = math.floor(math.max(0, (reading.available or 0) - RESERVE_MB) / TOKEN_MB)
-    return math.max(1, available)
+    return math.max(1, available), true
 end
 
 local function capacity(reading, held, own)
@@ -473,14 +473,15 @@ local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms, who
         reading.cores = cores
         local free, held, pids = snapshot_slots(folder, cores)
         local cap = capacity(reading, held, own_runnable(pids))
-        local headroom = memory_headroom(reading)
+        local headroom, measured = memory_headroom(reading)
         local progress = held == 0 and progress_capacity(reading, held, minimum) or held
         local guarantee = progress > held
         if guarantee then
             cap = math.max(cap, progress)
         end
         local count = grantable(cap, held, #free, minimum, maximum)
-        if count > 0 and not ahead_of(folder, ticket.name, math.min(headroom + held, cores - RESERVE_CORES)) then
+        local reach = math.min(measured and headroom + held or headroom, cores - RESERVE_CORES)
+        if count > 0 and not ahead_of(folder, ticket.name, reach) then
             local grant = table.slice(free, 1, count)
             release_locks(table.slice(free, count + 1))
             for _, entry in ipairs(grant) do
@@ -625,7 +626,7 @@ local function status()
     say("cpu       %.2f loadavg, %.2f effective load, %d runnable of holders, %d token(s) of headroom",
         reading.loadavg, load, own, math.max(0, cores - RESERVE_CORES - load))
     say("memory    pressure %d, %d MB available (memorystatus %d%%), %d token(s) of headroom", reading.pressure,
-        math.floor(reading.available), reading.level or 0, memory_headroom(reading))
+        math.floor(reading.available), reading.level or 0, (memory_headroom(reading)))
     say("held      %d token(s)", held)
     for _, line in ipairs(holder_lines(folder, "          ")) do
         say("%s", line)
@@ -970,24 +971,30 @@ local function test_suite()
         return test_reading(50, 1, 20000)
     end
     local fair_first_name = "2-0000000000001-00000001.ticket"
-    local function waits_without_grant(class, minimum)
-        local calls = 0
-        local stopped
-        try { function ()
-            acquire(fair_pool, class, minimum, minimum, function ()
-                calls = calls + 1
-                if calls > 5 then
-                    raise("stopped")
-                end
-                return overloaded()
-            end, 1)
-        end, catch { function (raised) stopped = tostring(raised) end } }
+    local function clear_other_tickets()
         for _, file in ipairs(os.files(path.join(fair_queue, "*.ticket"))) do
             if path.filename(file) ~= fair_first_name then
                 os.tryrm(file)
             end
         end
-        return stopped ~= nil and calls > 5
+    end
+    local function polls_without_grant(class, minimum, reading_fn)
+        local calls = 0
+        local grant
+        try { function ()
+            grant = acquire(fair_pool, class, minimum, minimum, function ()
+                calls = calls + 1
+                if calls > 5 then
+                    raise("stopped")
+                end
+                return reading_fn()
+            end, 1)
+        end, catch { function () end } }
+        clear_other_tickets()
+        return grant or {}
+    end
+    local function waits_without_grant(class, minimum)
+        return #polls_without_grant(class, minimum, overloaded) == 0
     end
     local fair_holder = acquire(fair_pool, "normal", 1, 1, overloaded, 1)
     check("a request for one token gets it under outside load with one holder", #fair_holder, 1)
@@ -997,6 +1004,12 @@ local function test_suite()
     local critical_grant = acquire(fair_pool, "critical", 1, 1, overloaded, 1)
     check("a critical request is not held back by an older normal one", #critical_grant, 1)
     release_locks(critical_grant)
+    local function pressed()
+        return test_reading(50, 2, 20000)
+    end
+    local pressed_grant = polls_without_grant("normal", 1, pressed)
+    check("under memory pressure an older request for two tokens does not hold back one for one", #pressed_grant, 1)
+    release_locks(pressed_grant)
     leave(fair_first, fair_pool)
     local after_grant = acquire(fair_pool, "normal", 1, 1, overloaded, 1)
     check("the request for one token goes once the older one is gone", #after_grant, 1)
