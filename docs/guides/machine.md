@@ -332,8 +332,13 @@ other checkout computes: the facts of each framework (`.cache/backports/<key>`: 
 (`.cache/modcache/<key>`). Each folder is keyed by content: the module cache by the SDK and the digester, the facts by the SDK, the
 compiler, the digester and the four tools that write them (`ast.lua`, `facts.lua`, `public.lua`, `sdk.lua` of
 `frameworks/Backports/tools`), so a file under a key is the file every checkout would write there. A cold `lowered members` spent 585 to 784 s on `constant_intros.tsv` alone
-(measured 2026-11-23: one `clang -ast-dump` per umbrella header, one after another), and a cold `backports build` about 100 s
-on the facts of the frameworks.
+(measured 2026-11-23: one `clang -ast-dump` per umbrella header, one after another; 583 s alone in one process at a load of 17 to 25),
+and a cold `backports build` about 100 s on the facts of the frameworks. `facts.lua` now makes `constant_intros.tsv` in four shard
+processes (`facts.lua constant-intros`, started with `runjobs`, so the job count follows the machine's budget): each shard takes every
+fourth framework, keeps for each name its first introduction and its last kind, and the parent merges the shards in the order of the
+frameworks, so the file does not depend on the shard count. Measured 2026-11-23 on the same SDK at a load of 24: 168 s instead of 583 s,
+35,571 names, the file byte for byte the one the sequential code wrote (`tests/facts_parallel_test.lua` compares one to sixteen
+shards on a fixture SDK, and its failures).
 
 The store keeps one copy of each, `<store>/backports/<key>` and `<store>/modcache/<key>`, and `prepush` moves files between it
 and the checkout, with APFS clones (no second copy on disk; where the volume cannot clone, `cp` copies): before the first heavy
@@ -367,9 +372,9 @@ Measured 2026-11-23 on a machine at a load of 21 on 12 cores, in a worktree that
 `.cache/modcache` and no `build/backports-gate`, with the store holding the key: a full `prepush --fresh` took 413 s
 (`lowered members` 9 s instead of 585 to 784 s, `lowered exports` 4 s, `light suites` 196 s on one token, `backports build`
 167 s instead of 372 to 407 s, the rest under 25 s together). The one run that is still long is the first after a key
-moves, because the store holds nothing under the new key: it computes `constant_intros.tsv` itself (about 10 minutes of
-`clang -ast-dump`, one framework after another, in `facts.lua`) and the facts of the build (about 100 s), about 20 minutes
-in all, and publishes them when its heavy checks end.
+moves, because the store holds nothing under the new key: it computes `constant_intros.tsv` itself (about 3 minutes of
+`clang -ast-dump` in four shards of `facts.lua`) and the facts of the build (about 100 s), about 5 minutes for the two
+(it was about 12 with `constant_intros.tsv` in one process), and publishes them when its heavy checks end.
 
 The gate's copy (`build/backports-gate/tree`) is not shared in the same way: its `.xmake` records the paths of the checkout
 that configured it, and a clone would take the objects of another tree at face value. The compile cache (`ccache` of the
