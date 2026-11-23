@@ -628,9 +628,10 @@ environment of the test does not reach it.
   headroom is at least that minimum; less than the minimum of memory headroom, including critical pressure, makes it wait
   rather than start short, and the disk floor still stops it. An older live ticket blocks a later request, in guarantee
   mode and in ordinary mode alike, while its minimum fits what the pool could offer once the holders now in it are done:
-  the memory headroom plus the tokens held, or the headroom alone when it is the single token that memory pressure or a
-  pageout burst grants, since that one does not grow when holders finish. Class order and age pick the first eligible
-  ticket, and a ticket that could not fit its minimum even then does not hold up the queue.
+  the memory headroom plus the tokens held, or the headroom alone when it is the single token that memory pressure, a
+  pageout burst or free memory below the reserve grants, since that one does not grow when holders finish. Class order
+  and age pick the first eligible ticket, and a ticket that could not fit its minimum even then does not hold up the
+  queue.
   The slot locks give the guarantee to one ticket at a time, and once it holds, later tickets wait for headroom again.
 - Need. A command asks for `--min` tokens (one by default), or for the tokens its `--mb` needs when that is more (a 2.5 GB class
   takes two), and for up to `--jobs`; the minimum is a hard floor and a request that cannot meet it is never started short.

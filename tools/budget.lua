@@ -172,7 +172,10 @@ local function memory_headroom(reading)
         return 1
     end
     local available = math.floor(math.max(0, (reading.available or 0) - RESERVE_MB) / TOKEN_MB)
-    return math.max(1, available), true
+    if available < 1 then
+        return 1
+    end
+    return available, true
 end
 
 local function capacity(reading, held, own)
@@ -1074,6 +1077,12 @@ local function test_suite()
     local pressed_grant = polls_without_grant("normal", 1, pressed)
     check("under memory pressure an older request for two tokens does not hold back one for one", #pressed_grant, 1)
     release_locks(pressed_grant)
+    local function short_of_memory()
+        return test_reading(50, 1, 100)
+    end
+    local short_grant = polls_without_grant("normal", 1, short_of_memory)
+    check("with less free memory than the reserve an older request for two tokens does not hold back one for one", #short_grant, 1)
+    release_locks(short_grant)
     leave(fair_first)
     local after_grant = acquire(fair_pool, "normal", 1, 1, overloaded, 1)
     check("the request for one token goes once the older one is gone", #after_grant, 1)
