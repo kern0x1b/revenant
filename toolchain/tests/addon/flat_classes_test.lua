@@ -84,8 +84,31 @@ local function shim_failures(arguments, output, stubs, overlay, include, found)
     end
 end
 
-function failures(arguments)
+local function cut_fixture_failures()
+    local fixture = table.concat({
+        "symbols: [ 'NSURLComponents', 'NSDateInterval', 'NSURLComponentsExtra', ],",
+        "    _CTLineDraw, _CTFrameDraw, _CTKeep,",
+        "    'NSKeep',",
+        "",
+    }, "\n")
+    local names = {"NSURLComponents", "NSDateInterval", "_CTLineDraw", "_CTFrameDraw"}
+    local cut = flat.cut_all(fixture, names)
     local found = {}
+    for _, name in ipairs(names) do
+        if cut:find("[%s,%[']" .. name .. "'?[,%]%s]") then
+            table.insert(found, "the one-pass cut left " .. name .. " in the .tbd text")
+        end
+    end
+    for _, name in ipairs({"NSURLComponentsExtra", "_CTKeep", "NSKeep"}) do
+        if not cut:find(name, 1, true) then
+            table.insert(found, "the one-pass cut removed " .. name .. ", which is not in its list")
+        end
+    end
+    return found
+end
+
+function failures(arguments)
+    local found = cut_fixture_failures()
     local output = workspace.run("flat-classes")
     os.rm(output)
     os.mkdir(output)
