@@ -28,7 +28,7 @@ local PUBLISHED = {
 
 local GUEST_KEYS = {
     "libcxx 23.1.1 c2878f695948b849cea836dfe2d8c140 iphoneos-arm64",
-    "swift-runtime 6.4.0 e03acef5e2f92324543c4034d42e5e20 iphoneos-arm64",
+    "swift-runtime 6.4.0 b0cb34644a4bbcb9d1d2fee5b8595e6c iphoneos-arm64",
 }
 
 local function package(row)
