@@ -48,9 +48,22 @@ local GATE_EXCLUDES = {"/.git", "/.xmake", "/build", "/.cache", "/.cache-private
 local REFUSAL_EXIT = 3
 local REFUSED = {}
 
+local BUDGET_CLASSES = {critical = true, normal = true, background = true}
+
+local function budget_class()
+    local named = os.getenv("REVENANT_PREPUSH_BUDGET_CLASS")
+    if not named or named == "" then
+        return "normal"
+    end
+    if not BUDGET_CLASSES[named] then
+        raise("REVENANT_PREPUSH_BUDGET_CLASS is %q: it must be critical, normal or background", named)
+    end
+    return named
+end
+
 local function budgeted(command, opt)
     opt = opt or {}
-    local args = table.join({"l", "-P", root, path.join(root, "tools", "budget.lua"), "run", "--class", "critical", "--jobs", tostring(opt.jobs or 2), "--"}, command)
+    local args = table.join({"l", "-P", root, path.join(root, "tools", "budget.lua"), "run", "--class", budget_class(), "--jobs", tostring(opt.jobs or 2), "--"}, command)
     local status = os.execv(os.programfile(), args, {try = true, curdir = opt.curdir or root, envs = opt.envs, stdout = opt.output, stderr = opt.output})
     if status == REFUSAL_EXIT then
         return REFUSED
@@ -295,7 +308,7 @@ local TOOLS = {"toolchain/modules/", "toolchain/addon.lua", "xmake.lua"}
 local UNBUILT = {"docs/**", "**/*.md", ".agents/**", "agent-skills/**"}
 local PREBUILT_ENV = {"REVENANT_PREBUILT", "REVENANT_PREBUILT_ONLY"}
 local ALWAYS = {"tools/prepush.lua", "tools/budget.lua"}
-local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true, REVENANT_LIGHT_SUITES_VERDICT = true}
+local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true, REVENANT_PREPUSH_BUDGET_CLASS = true, REVENANT_LIGHT_SUITES_VERDICT = true}
 
 local function call(script, ...)
     local arguments = table.pack(...)
@@ -755,6 +768,10 @@ local function test_cache()
     check("the cache folder of a worktree and the budget's own variables change no key", key(narrow), base_keys.narrow)
     os.setenv("REVENANT_CACHE", saved_cache or "")
     os.setenv("REVENANT_BUDGET_HELD", saved_held or "")
+    local saved_class = os.getenv("REVENANT_PREPUSH_BUDGET_CLASS")
+    os.setenv("REVENANT_PREPUSH_BUDGET_CLASS", "critical")
+    check("the class that prepush asks the budget for changes no key", key(narrow), base_keys.narrow)
+    os.setenv("REVENANT_PREPUSH_BUDGET_CLASS", saved_class or "")
     local saved_verdict = os.getenv("REVENANT_LIGHT_SUITES_VERDICT")
     os.setenv("REVENANT_LIGHT_SUITES_VERDICT", "0123456789abcdef@/a/run/light-suites.verdict")
     check("the hand-off of a verdict from ci_local to its tests is not an input of the verdict", key(narrow), base_keys.narrow)
@@ -951,6 +968,21 @@ local function parse_arguments(arguments)
     return parsed
 end
 
+local NO_TOKENS = {test = true, ["probe-say"] = true, ["probe-hold"] = true}
+
+local function hold_once(arguments, held)
+    if tonumber(held) or NO_TOKENS[arguments[1]] then
+        return nil
+    end
+    if arguments[1] ~= "probe-steps" then
+        local parsed = parse_arguments(arguments)
+        if parsed.list or parsed.recall or parsed.inline then
+            return nil
+        end
+    end
+    return table.join({os.programfile(), "l", "-P", root, path.join(root, "tools", "prepush.lua")}, arguments)
+end
+
 local function select_steps(steps, only)
     if not only then
         return steps
@@ -995,6 +1027,22 @@ local function test_arguments()
     check("--recall names one check", parse_arguments({"--recall", "light suites"}).recall, "light suites")
     check("--recall without a value is an error", raises({"--recall"}), true)
     check("an unknown argument is an error", raises({"--fast"}), true)
+
+    local function relaunch_of(arguments, held)
+        local command = hold_once(arguments, held)
+        return command and table.concat(command, " ", 6) or "none"
+    end
+    check("an ordinary run takes its tokens once, as a run of its own", relaunch_of({}, nil), "")
+    check("an empty REVENANT_BUDGET_HELD is no grant", relaunch_of({}, ""), "")
+    check("the run that holds tokens already does not ask again", relaunch_of({}, "6"), "none")
+    check("the arguments go to the run that holds the tokens, unchanged", relaunch_of({"--only", "layout,comments", "--keep-going"}, nil), "--only layout,comments --keep-going")
+    check("--list reads nothing and takes no tokens", relaunch_of({"--list"}, nil), "none")
+    check("--recall reads one remembered verdict and takes no tokens", relaunch_of({"--recall", "layout"}, nil), "none")
+    check("--inline runs inside a grant that its parent holds", relaunch_of({"--inline", "layout"}, nil), "none")
+    check("test takes no tokens", relaunch_of({"test"}, nil), "none")
+    check("probe-say takes no tokens", relaunch_of({"probe-say"}, nil), "none")
+    check("probe-hold asks for its own tokens", relaunch_of({"probe-hold", "1"}, nil), "none")
+    check("an unknown argument is refused before any wait for tokens", try {function () hold_once({"--fast"}, nil); return true end} == nil, true)
 
     local steps = {{name = "a"}, {name = "b"}, {name = "c"}}
     check("no selection keeps every check", #select_steps(steps, nil), 3)
@@ -1203,6 +1251,62 @@ local function dirty_tests(base)
     end
     check("restoring them restores the key", key_of(inputs(special), special_step), special_before)
     print("prepush: %d dirty tests passed", count)
+end
+
+local function test_budget_class()
+    local count = 0
+    local function check(name, got, want)
+        count = count + 1
+        assert(got == want, string.format("prepush budget class test %s: got %s, want %s", name, tostring(got), tostring(want)))
+    end
+    local base = path.join(cache().root(), "scratch", "prepush-class-test-" .. NAMES.next())
+    local pool = path.join(base, "pool")
+    os.mkdir(pool)
+    local saved = os.getenv("REVENANT_PREPUSH_BUDGET_CLASS")
+    local function granted_class(named)
+        os.setenv("REVENANT_PREPUSH_BUDGET_CLASS", named)
+        os.tryrm(path.join(pool, "wait-journal"))
+        local ok = budgeted({"/usr/bin/true"}, {envs = {REVENANT_BUDGET_POOL = pool, REVENANT_BUDGET_HELD = "", REVENANT_BUDGET_DISK_GB = "0"}})
+        return ok == true and (io.readfile(path.join(pool, "wait-journal")) or ""):match("\tclass (%a+)\t")
+    end
+    local failure
+    try {
+        function ()
+            check("a step of prepush asks for the normal class when nothing says otherwise", granted_class(""), "normal")
+            check("the gate that brings a branch into main asks for critical when told so", granted_class("critical"), "critical")
+            check("background is accepted too", granted_class("background"), "background")
+            os.setenv("REVENANT_PREPUSH_BUDGET_CLASS", "")
+            local script = path.join(root, "tools", "prepush.lua")
+            local function grants_of(held)
+                os.tryrm(path.join(pool, "wait-journal"))
+                local ran = try { function ()
+                    os.iorunv(os.programfile(), {"l", "-P", root, script, "probe-steps"}, {envs = {REVENANT_BUDGET_POOL = pool, REVENANT_BUDGET_HELD = held, REVENANT_BUDGET_DISK_GB = "0"}})
+                    return true
+                end }
+                local grants = 0
+                local journal = path.join(pool, "wait-journal")
+                for _ in (os.isfile(journal) and io.readfile(journal) or ""):gmatch("\tclass ") do
+                    grants = grants + 1
+                end
+                return ran == true and grants
+            end
+            check("a run with two steps that ask the budget takes its tokens once", grants_of(""), 1)
+            check("a run that inherits tokens takes none", grants_of("3"), 0)
+            os.setenv("REVENANT_PREPUSH_BUDGET_CLASS", "urgent")
+            local refused = false
+            try { function () budgeted({"/usr/bin/true"}, {}) end, catch { function () refused = true end } }
+            check("a class that does not exist is refused, not passed on", refused, true)
+        end,
+        catch { function (raised) failure = tostring(raised) end },
+        finally { function ()
+            os.setenv("REVENANT_PREPUSH_BUDGET_CLASS", saved or "")
+            os.tryrm(base)
+        end },
+    }
+    if failure then
+        raise("%s", failure)
+    end
+    print("prepush budget class test: %d checks passed", count)
 end
 
 local function test_dirty()
@@ -1565,6 +1669,7 @@ function main(command, ...)
         test_suite()
         test_cache()
         test_arguments()
+        test_budget_class()
         test_dirty()
         test_live()
         return
@@ -1579,6 +1684,23 @@ function main(command, ...)
         return
     end
     local arguments = command and table.join({command}, {...}) or {}
+    local relaunch = hold_once(arguments, os.getenv("REVENANT_BUDGET_HELD"))
+    if relaunch then
+        local status = budgeted(relaunch, {jobs = GATE_JOBS})
+        if status == REFUSED then
+            say("prepush: budget refused; this is not a failed check, free the space and rerun")
+            os.exit(REFUSAL_EXIT)
+        end
+        if not status then
+            os.exit(1)
+        end
+        return
+    end
+    if command == "probe-steps" then
+        budgeted({"/usr/bin/true"})
+        budgeted({"/usr/bin/true"})
+        return
+    end
     local parsed = parse_arguments(arguments)
     if parsed.list then
         for _, step in ipairs(STEPS) do

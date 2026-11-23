@@ -206,6 +206,16 @@ inside it, or a link into it (the paths are compared after resolving links, also
 anything is evicted. The one trim that may name the store is the store's own (`cache.guard` marks it `shared`). A store
 somewhere else than `~/.revenant/store` is `REVENANT_STORE`, never `REVENANT_CACHE`.
 
+**A cache that still holds an `xmake` or `xmake-global` folder of its own is refused, and `~/.revenant` itself can be such a
+cache.** On 2026-11-23 every `./xmakew` call with `REVENANT_CACHE=~/.revenant` (the home that holds the device lease table
+`devices/<udid>.lease` for every session: the table is `<REVENANT_CACHE>/devices`) ended with "is a package store of its
+own, made before the shared store" and a seed command, because `~/.revenant/xmake` (two keys of 2026-11-14) lay beside
+`~/.revenant/store`. A window that claimed the phone with that home stopped at its first call ("phone does not answer"),
+with no other message. Do not run the seed command (it copies into a store that exists). Remove `<cache>/xmake` and
+`<cache>/xmake-global` once every key is in the store: compare `ls <cache>/xmake` with `ls <store>/xmake` and `diff -rq` the
+trees (here the same 1919 files per key; only the ad hoc signature of `bin/xmake` differed); the next `./xmakew` makes the
+links to the store itself. Nothing was freed by `df`: the files were APFS clones.
+
 **Start every build with the `xmakew` of the checkout whose recipes it builds** (`$REVENANT_PATH/xmakew`), not with one found
 on `PATH` or in another checkout. On 2026-11-22 two Classicgram workers ran the `xmakew` of the main checkout, a detached
 head of 2026-10-27, with `REVENANT_PATH` naming the pinned checkout: the recipes were the pin's, the launcher and its xmake
@@ -636,14 +646,21 @@ environment of the test does not reach it.
 - Need. A command asks for `--min` tokens (one by default), or for the tokens its `--mb` needs when that is more (a 2.5 GB class
   takes two), and for up to `--jobs`; the minimum is a hard floor and a request that cannot meet it is never started short.
   It runs with `XMAKE_MAX_JOBS` set to the tokens it got.
-- Order. Waiting commands queue by class: `critical` (the checks before a push), `normal` (the default, which every `./xmakew`
-  build, test, configure, install, run, package and deb uses) and `background`. Within a class the first to wait goes first.
+- Order. Waiting commands queue by class: `critical` (the gate that brings a branch into main, which the coordinator asks
+  for with `REVENANT_PREPUSH_BUDGET_CLASS=critical`; the prepush of a worker runs as `normal`), `normal` (the default, which
+  every `./xmakew` build, test, configure, install, run, package and deb uses) and `background`. Within a class the first to
+  wait goes first.
   A later request takes no tokens past an earlier one that the pool could serve once its holders are done, so a stream of
   requests for one token cannot keep a request for two waiting under outside load: the pool drains until the earlier
   one starts, and the guarantee above gives it its minimum when the pool is empty. An earlier request whose minimum could
   not fit even then is passed, so a request that can never be granted does not hold up the queue behind it. `critical`
-  sorts before the other classes, so a waiting `normal` or `background` request never holds a `critical` one back. A
-  request whose process died is removed from the queue, so a crashed request cannot block the queue forever.
+  sorts before the other classes, so a waiting `normal` or `background` request does not hold a `critical` one back until
+  it has aged. A request that has waited longer than `REVENANT_BUDGET_AGING_S` (300 s by default) marks its ticket aged
+  (`queue/aged-<ticket>`); an aged ticket stands before every ticket that has not aged, `critical` ones included, and
+  blocks them by the same rule as any earlier ticket, until it starts; among aged tickets the order above holds. This is
+  what keeps a stream of `critical` requests for one token from starving a request for two. The marker goes with its
+  ticket, also when the ticket's process died. A request whose process died is removed from the queue, so a crashed
+  request cannot block the queue forever.
 - Nice. `critical` keeps its priority, `normal` runs under `nice -n 5`, `background` under `taskpolicy -b` and `nice -n 15`.
 - Release. A token is a lock on a slot file, and the kernel releases it when its process ends, `kill -9` included. The command
   is started with the descriptors of the slot files closed, since a child that kept one would keep the token after its parent died.
@@ -657,7 +674,15 @@ environment of the test does not reach it.
   seconds waited and the holder's pid, worktree and command. A ticket is always written with the waiting process's pid,
   so a request that died before its grant cannot leave an unnamed entry in the queue. Older than a day is dropped on the next grant. `status`
   prints the sum of the last day's waits and one line per holder, with its seconds, number of waits, tokens and classes;
-  a wait that ended because its process died is not a grant and is not journaled. The journal is a cache-day record, not
+  a wait that ended without tokens is not a grant and is not counted there, but it has a line of its own: `at <time>`,
+  `not granted`, `asked <class>`, `tokens <asked>`, `wait <s>`, `pid`, `reason died` or `reason left`, then the holder's
+  time, worktree and command. `left` is a request that raised while it waited (its process told the queue), `died` one whose
+  ticket another process found without a holder (a `kill`, a crash, a closed terminal) and removed; the wait counts from the
+  time in the ticket's name, and the journal lock covers reading and removing the ticket and writing the line, so two
+  processes that find the same dead ticket write one line, and the empty file that opening a vanished ticket makes writes
+  none; a ticket without a holder whose pid is still alive (its request is between creating the file and taking its lock) is
+  removed as before but not recorded as dead. `status` prints `abandoned`, the count over the last day, and a line for each holder with the seconds waited and
+  the reasons, so the requests that never got tokens (the ones the granted waits cannot show) are in the same record. The journal is a cache-day record, not
   an input to admission, so it is kept in the pool folder and is never a key. The same file records what the watcher stopped (a budget
   run's parent died): one line for each process, written by `budget.lua stopped`, which the watcher runs just before the signal
   (the watcher's shell writes nothing itself; the signal can end the watcher, so the write comes first), `at <time>`, `stopped TERM` or `stopped KILL` (KILL only for a process still alive two
@@ -674,6 +699,12 @@ environment of the test does not reach it.
   a token, so the machine's load or memory is the limit), and again every five minutes (`REVENANT_BUDGET_ANNOUNCE_S`) while it waits.
 - Nesting. A command under a budget gets its count in `REVENANT_BUDGET_HELD`. A budget run below it takes no tokens of its own,
   so a `./xmakew` started by a build waits for nothing and is bounded by the build's tokens.
+  A prepush run takes its tokens once: `./xmakew l -P . tools/prepush.lua` starts itself again under one `budget run`
+  (up to six tokens, the class of `REVENANT_PREPUSH_BUDGET_CLASS`, `normal` when it is unset), and the batch of light
+  checks and every heavy check run below that grant and inherit it instead of queueing once each, so the wait journal shows
+  one grant for the run. `--list`, `--recall`, `--inline` (the part of a run that its parent started), `test` and the probes
+  take none, and neither does a run that already has `REVENANT_BUDGET_HELD`. A run whose checks are all remembered also
+  waits for that one grant, and the disk floor below refuses it too.
 - Disk. No command starts while the volume of the checkout has less than 100 GB free (`REVENANT_BUDGET_DISK_GB`). The
   refusal is per command: `run` exits 3 and prints the reading before the command starts. A command already admitted can
   fail for its own reasons even if the disk drops below the floor while it runs, and that failure is not a refusal.
