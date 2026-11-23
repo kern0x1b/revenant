@@ -626,20 +626,24 @@ environment of the test does not reach it.
   than `--jobs`, it starts with fewer jobs, up to what memory and CPU allow. As a progress guarantee, when the pool has no
   live holder the oldest waiting ticket is granted its minimum in full even under high outside load, provided memory
   headroom is at least that minimum; less than the minimum of memory headroom, including critical pressure, makes it wait
-  rather than start short, and the disk floor still stops it. In guarantee mode an older live ticket blocks the grant only
-  when its minimum fits the available memory headroom, so class order and age pick the first eligible ticket and a ticket
-  that cannot fit its own memory minimum does not hold up the queue; in ordinary mode a small request can still backfill.
+  rather than start short, and the disk floor still stops it. An older live ticket blocks a later request, in guarantee
+  mode and in ordinary mode alike, while its minimum fits what the pool could offer once the holders now in it are done:
+  the memory headroom plus the tokens held, or the headroom alone when it is the single token that memory pressure, a
+  pageout burst or free memory below the reserve grants, since that one does not grow when holders finish. Class order
+  and age pick the first eligible ticket, and a ticket that could not fit its minimum even then does not hold up the
+  queue.
   The slot locks give the guarantee to one ticket at a time, and once it holds, later tickets wait for headroom again.
 - Need. A command asks for `--min` tokens (one by default), or for the tokens its `--mb` needs when that is more (a 2.5 GB class
   takes two), and for up to `--jobs`; the minimum is a hard floor and a request that cannot meet it is never started short.
   It runs with `XMAKE_MAX_JOBS` set to the tokens it got.
 - Order. Waiting commands queue by class: `critical` (the checks before a push), `normal` (the default, which every `./xmakew`
   build, test, configure, install, run, package and deb uses) and `background`. Within a class the first to wait goes first.
-  A small request backfills past an earlier one whose minimum does not fit the current headroom, so a large request that
-  cannot be granted does not hold up the queue behind it. A request that has waited ten minutes (`REVENANT_BUDGET_AGING_S`)
-  marks itself aged in the queue; from then on it also blocks any *later* backfill whose minimum it could have used, so a
-  stream of small requests cannot starve it without two aged requests blocking each other. The marker is removed with a
-  dead ticket, so a crashed request cannot block the queue forever. A request whose process died is removed from the queue.
+  A later request takes no tokens past an earlier one that the pool could serve once its holders are done, so a stream of
+  requests for one token cannot keep a request for two waiting under outside load: the pool drains until the earlier
+  one starts, and the guarantee above gives it its minimum when the pool is empty. An earlier request whose minimum could
+  not fit even then is passed, so a request that can never be granted does not hold up the queue behind it. `critical`
+  sorts before the other classes, so a waiting `normal` or `background` request never holds a `critical` one back. A
+  request whose process died is removed from the queue, so a crashed request cannot block the queue forever.
 - Nice. `critical` keeps its priority, `normal` runs under `nice -n 5`, `background` under `taskpolicy -b` and `nice -n 15`.
 - Release. A token is a lock on a slot file, and the kernel releases it when its process ends, `kill -9` included. The command
   is started with the descriptors of the slot files closed, since a child that kept one would keep the token after its parent died.
