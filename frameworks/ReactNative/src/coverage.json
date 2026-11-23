@@ -263,7 +263,7 @@
    "native": true,
    "status": "partial",
    "verified": "phone",
-   "note": "Recipe packages\/e\/expo-blur (npm 57.0.3, patch blur-ios6.patch), built into the host. UIVisualEffectView (iOS 8) is replaced by a Core Image Gaussian blur of a snapshot of the view behind, taken when the view is added or resized or the intensity changes (it does not follow later changes behind it), with a white or black tint overlay for the tint style. On the iPhone 4S (2026-11-17) the module is registered; the view was not shown."
+   "note": "Recipe packages/e/expo-blur (npm 57.0.3, patch blur-ios6.patch), built into the host. UIVisualEffectView (iOS 8) is replaced by a Core Image Gaussian blur of a snapshot of the window behind the view (the view hidden while it is taken), rendered at a quarter of the resolution ten times a second while the view is in a window and blurred again only when the bitmap changed, with a white or black tint overlay for the tint style. The first version took the snapshot of its own parent, which holds nothing behind the view, so it only tinted (measured on the iPhone 4S 2026-11-23: the edge of two colours behind it stayed a one-pixel step). Measured on the iPhone 4S 2026-11-23 (rn-probe host, intensity 100, light tint, backdrop of a green and a blue half that changes colour 3 s after start): across the view the edge between the halves spreads over 144 px (72 pt), against 0 px on the same backdrop outside the view, and the changed colour is the one blurred, so the snapshot follows the content; the tint adds 30 % white. Not measured: the cost of the ten refreshes a second on the 4S (CPU, frame rate), a backdrop that moves every frame, and rotation. Evidence: coordination/evidence/rn-probe-2026-11-23-blur-symbols.md."
   },
   {
    "id": "expo-brightness",
@@ -811,8 +811,8 @@
    "version": "~57.0.3",
    "native": true,
    "status": "partial",
-   "verified": "build",
-   "note": "Recipe packages/e/expo-symbols (npm 57.0.3, no patch) installs and compiles unchanged into the isolated RNHost and links (status 0, 391 s); the view was not shown on a phone. UIImage(systemName:) and the iOS 14/16 configuration factories come from the Backports' UIKit glyph renderer; RevenantSymbolGlyphs.h holds 333 entries (296 glyph scripts and 37 aliases), measured by counting its entry lines; monochrome is a tinted template, multicolor has no effect for this glyph set and stays monochrome as Apple documents for symbols without colour layers, hierarchical applies this checkout's label-opacity steps as an approximation because Apple publishes no numbers, and palette cycles the given colours per painted path. Built and linked; glyph appearance not exercised."
+   "verified": "phone",
+   "note": "Recipe packages/e/expo-symbols (npm 57.0.3, no patch) installs and compiles unchanged into the isolated RNHost and links (status 0, 391 s). On the iPhone 4S (2026-11-23, rn-probe host) the view with name star.fill, type monochrome and a black tint colour drew about 10,700 dark pixels in a 192x192 px window at its place on a white band (a 96x96 pt view), the host stayed up 25 s with no crash report; the shape was not compared with a reference image. UIImage(systemName:) and the iOS 14/16 configuration factories come from the Backports' UIKit glyph renderer; RevenantSymbolGlyphs.h holds 333 entries (296 glyph scripts and 37 aliases), measured by counting its entry lines; monochrome is a tinted template, multicolor has no effect for this glyph set and stays monochrome as Apple documents for symbols without colour layers, hierarchical applies this checkout's label-opacity steps as an approximation because Apple publishes no numbers, and palette cycles the given colours per painted path. Built, linked and drawn once on the phone; the other glyphs, weights, scales and colour types were not exercised."
   },
   {
    "id": "expo-system-ui",
