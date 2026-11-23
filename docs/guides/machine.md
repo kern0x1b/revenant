@@ -206,6 +206,16 @@ inside it, or a link into it (the paths are compared after resolving links, also
 anything is evicted. The one trim that may name the store is the store's own (`cache.guard` marks it `shared`). A store
 somewhere else than `~/.revenant/store` is `REVENANT_STORE`, never `REVENANT_CACHE`.
 
+**A cache that still holds an `xmake` or `xmake-global` folder of its own is refused, and `~/.revenant` itself can be such a
+cache.** On 2026-11-23 every `./xmakew` call with `REVENANT_CACHE=~/.revenant` (the home that holds the device lease table
+`devices/<udid>.lease` for every session: the table is `<REVENANT_CACHE>/devices`) ended with "is a package store of its
+own, made before the shared store" and a seed command, because `~/.revenant/xmake` (two keys of 2026-11-14) lay beside
+`~/.revenant/store`. A window that claimed the phone with that home stopped at its first call ("phone does not answer"),
+with no other message. Do not run the seed command (it copies into a store that exists). Remove `<cache>/xmake` and
+`<cache>/xmake-global` once every key is in the store: compare `ls <cache>/xmake` with `ls <store>/xmake` and `diff -rq` the
+trees (here the same 1919 files per key; only the ad hoc signature of `bin/xmake` differed); the next `./xmakew` makes the
+links to the store itself. Nothing was freed by `df`: the files were APFS clones.
+
 **Start every build with the `xmakew` of the checkout whose recipes it builds** (`$REVENANT_PATH/xmakew`), not with one found
 on `PATH` or in another checkout. On 2026-11-22 two Classicgram workers ran the `xmakew` of the main checkout, a detached
 head of 2026-10-27, with `REVENANT_PATH` naming the pinned checkout: the recipes were the pin's, the launcher and its xmake
