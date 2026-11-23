@@ -28,7 +28,7 @@ local PUBLISHED = {
 
 local GUEST_KEYS = {
     "libcxx 23.1.1 c2878f695948b849cea836dfe2d8c140 iphoneos-arm64",
-    "swift-runtime 6.4.0 4ba778c6e1d6ea733a18571d4560325d iphoneos-arm64",
+    "swift-runtime 6.4.0 59726c2e8d378a8758881cf9226d7fbd iphoneos-arm64",
 }
 
 local function package(row)
@@ -77,7 +77,7 @@ function failures(arguments)
     if printed then
         for _, line in ipairs(GUEST_KEYS) do
             if not (printed .. "\n"):find(line .. "\n", 1, true) then
-                table.insert(found, string.format("tools/keys.lua guest does not print \"%s\"; the key of a package the iphoneos guest installs moved: build and publish it again (docs/guides/prebuilt.md), then change this line. It printed:\n%s", line, printed))
+                table.insert(found, string.format("tools/keys.lua guest does not print \"%s\"; the key of a package the iphoneos guest installs moved: build it locally into the shared store (docs/guides/prebuilt.md), then change this line. It printed:\n%s", line, printed))
             end
         end
     end

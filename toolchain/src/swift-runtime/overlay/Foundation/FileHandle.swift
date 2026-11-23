@@ -29,6 +29,11 @@ extension FileHandle {
         guard self !== FileHandle.nullDevice else {
             return
         }
+        var checkError: NSError?
+        var position: UInt64 = 0
+        if !revenant_file_handle_get_offset(self, &position, &checkError) {
+            throw revenant_file_error(checkError, .fileWriteUnknown)
+        }
         for region in data.regions {
             try region.withUnsafeBytes { bytes in
                 guard let base = bytes.baseAddress, !bytes.isEmpty else {
