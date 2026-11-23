@@ -1,4 +1,4 @@
-Package: space.kern0x1b.rn-probe.rnhost
+Package: space.kern0x1b.rn-probe.rnprobe
 Name: RNProbe
 Architecture: iphoneos-arm
 Description: One React Native host with the Expo modules and community libraries that the Paseo host does not carry, for measuring their coverage rows.
