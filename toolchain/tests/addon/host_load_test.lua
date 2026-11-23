@@ -65,11 +65,18 @@ function failures(opt)
     local foreign = path.join(root, "foreign")
     os.mkdir(foreign)
     local copy = path.join(foreign, "checkout")
-    local copied = os.execv("rsync", {"-a", "--exclude", ".git", "--exclude", ".cache", "--exclude", "build", "--exclude", ".claude",
-        "--exclude", ".xmake", repository .. "/", copy .. "/"},
-        {try = true, stdout = path.join(foreign, "copy.log"), stderr = path.join(foreign, "copy.log")})
+    os.mkdir(copy)
+    local excluded = {[".git"] = true, [".cache"] = true, build = true, [".claude"] = true, [".xmake"] = true}
+    local sources = {}
+    for entry in (os.iorunv("ls", {"-A", repository}) or ""):gmatch("[^\n]+") do
+        if not excluded[entry] then
+            table.insert(sources, path.join(repository, entry))
+        end
+    end
+    local clone_log = path.join(foreign, "clone.log")
+    local copied = os.execv("cp", table.join({"-c", "-R", "-p"}, sources, {copy}), {try = true, stdout = clone_log, stderr = clone_log})
     if copied ~= 0 then
-        table.insert(found, "the checkout with a foreign configuration could not be copied: " .. (io.readfile(path.join(foreign, "copy.log")) or ""))
+        table.insert(found, "the checkout with a foreign configuration could not be cloned: " .. (io.readfile(clone_log) or ""))
         os.tryrm(root)
         return found
     end
