@@ -501,7 +501,9 @@ end
 local function waiters(folder)
     local names = {}
     for _, file in ipairs(os.files(path.join(folder, "queue", "*.ticket"))) do
-        table.insert(names, file)
+        if not path.filename(file):find("^aged%-") then
+            table.insert(names, file)
+        end
     end
     table.sort(names)
     local found = {}
@@ -1214,13 +1216,16 @@ local function test_suite()
     local young_critical = polls_in_age_pool("critical", 1)
     check("a critical request passes an older normal one that has not aged", #young_critical, 1)
     release_locks(young_critical)
-    io.writefile(path.join(age_queue, "aged-" .. aged_name), "2")
+    io.writefile(aged_path(age_pool, aged_name), "2")
+    local listed = waiters(age_pool)
+    check("listing the queue shows the aged ticket once", #listed, 1)
+    check("and does not take its marker for a ticket without a holder", os.isfile(aged_path(age_pool, aged_name)), true)
     local held_critical = polls_in_age_pool("critical", 1)
     check("a critical request waits behind an older normal one that has aged", #held_critical, 0)
     local held_background = polls_in_age_pool("background", 1)
     check("and so does one of the background class", #held_background, 0)
     leave(aged_ticket)
-    check("the marker of an aged ticket is gone when the ticket leaves", os.isfile(path.join(age_queue, "aged-" .. aged_name)), false)
+    check("the marker of an aged ticket is gone when the ticket leaves", os.isfile(aged_path(age_pool, aged_name)), false)
     os.setenv("REVENANT_BUDGET_AGING_S", "0")
     local _, marked = polls_in_age_pool("normal", 2)
     os.setenv("REVENANT_BUDGET_AGING_S", "")
