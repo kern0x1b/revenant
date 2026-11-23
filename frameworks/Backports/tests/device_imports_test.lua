@@ -1,5 +1,6 @@
 local byteorder = import("@addon.revenant.byteorder", {anonymous = true})
 local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
+local dyld_caches = import("@addon.revenant.apple.dyld_caches", {anonymous = true})
 local firmware = import("@addon.revenant.apple.firmware", {anonymous = true})
 local macho = import("@addon.revenant.apple.macho", {anonymous = true})
 
@@ -41,37 +42,13 @@ local function floor(files)
     return macho.version_text(lowest)
 end
 
-local function siblings()
-    local found = {}
-    for line in os.iorunv("git", {"-C", ROOT, "worktree", "list", "--porcelain"}):gmatch("[^\n]+") do
-        local folder = line:match("^worktree (.+)$")
-        if folder and path.absolute(folder) ~= ROOT then
-            table.insert(found, folder)
-        end
-    end
-    return found
-end
-
 local function floor_cache(minimum)
-    local name = "dyld_shared_cache_" .. ARCHITECTURE
-    local own = path.join(dyld.root(), minimum)
-    if not os.isfile(path.join(own, name)) then
-        for _, folder in ipairs(siblings()) do
-            local held = path.join(folder, ".cache", "dyld", minimum)
-            if os.isfile(path.join(held, name)) then
-                local partial = own .. ".partial"
-                os.mkdir(path.directory(own))
-                os.tryrm(partial)
-                os.vrunv("cp", {"-c", "-R", held, partial})
-                os.tryrm(own)
-                os.mv(partial, own)
-                print(string.format("device imports: cloned the iOS %s system libraries from %s (copy on write, no disk)", minimum, held))
-                break
-            end
-        end
+    for _, entry in ipairs((dyld_caches.provision())) do
+        print(string.format("device imports: cloned the iOS %s system libraries from %s (copy on write, no disk)", entry.release, entry.from))
     end
-    if os.isfile(path.join(own, name)) then
-        return path.join(own, name), minimum
+    local own = path.join(dyld.root(), minimum, "dyld_shared_cache_" .. ARCHITECTURE)
+    if os.isfile(own) then
+        return own, minimum
     end
     local cachefile, release = firmware.source(ARCHITECTURE, minimum)
     assert(os.exists(cachefile), string.format("the iOS %s system libraries are under %s and in no other checkout of this repository: the deb writer fetches the same folder, and so does ./xmakew firmware -P . --arch=%s fetch %s", release, dyld.root(), ARCHITECTURE, minimum))

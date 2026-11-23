@@ -451,14 +451,27 @@ local function installed_facts()
     return installed_text
 end
 
+local function dyld_caches()
+    return import("@addon.revenant.apple.dyld_caches", {anonymous = true})
+end
+
+local device_text
+
 local function device_facts()
-    local held = os.files(path.join(import("@addon.revenant.apple.dyld", {anonymous = true}).root(), "*", "dyld_shared_cache_armv7"))
-    local lines = {}
-    for _, file in ipairs(held) do
-        local source = file .. ".source"
-        table.insert(lines, string.format("%s %s %d", path.filename(path.directory(file)), os.isfile(source) and io.readfile(source):trim() or "no source", os.filesize(file)))
+    if not device_text then
+        device_text = table.concat({installed_facts(), dyld_caches().identity()}, "\n--\n")
     end
-    return table.concat({installed_facts(), table.concat(sorted(lines), "\n")}, "\n--\n")
+    return device_text
+end
+
+local function provide_device_caches()
+    local cloned, skipped = dyld_caches().provision()
+    for _, entry in ipairs(cloned) do
+        say("prepush: cloned the iOS %s device cache from %s (copy on write)", entry.release, entry.from)
+    end
+    for _, release in ipairs(table.orderkeys(skipped)) do
+        say("prepush: %s holds no cache, so iOS %s was not cloned over it", skipped[release], release)
+    end
 end
 
 local PRIVATE_FOLDERS = {".cache*/**", "build/**", ".xmake/**", ".claude/worktrees/**"}
@@ -791,12 +804,13 @@ local STEPS = {
     {name = "host install test", run = function () return lua("frameworks/ReactNative/tests/host_install_test.lua") end},
     {name = "isolate test", run = function () return lua("frameworks/ReactNative/tests/isolate_test.lua") end},
     {name = "overlay test", reads = {"frameworks/ReactNative/tools/overlay.lua", "frameworks/ReactNative/tests/overlay_test.lua"}, run = function () return lua("frameworks/ReactNative/tests/overlay_test.lua") end},
+    {name = "dyld caches test", reads = {"tools/dyld_caches.lua", "toolchain/modules/apple/dyld_caches.lua", "toolchain/modules/*.lua"}, inline = function () return call("tools/dyld_caches.lua", "test") end},
     {name = "export baseline test", reads = {"frameworks/Backports/tests/export_baseline_test.lua", "toolchain/modules/apple/", "toolchain/modules/*.lua"}, run = function () return lua("frameworks/Backports/tests/export_baseline_test.lua", "test") end},
     {name = "lowered members", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_members_test.lua") end},
     {name = "lowered exports", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_exports_test.lua") end},
     {name = "light suites", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("toolchain/tests/light_suites.lua") end},
-    {name = "backports build", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = backports_build},
-    {name = "backports exports", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = backports_exports},
+    {name = "backports build", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_build},
+    {name = "backports exports", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_exports},
     {name = "backports device imports", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_device_imports},
 }
 
@@ -1608,6 +1622,9 @@ function main(command, ...)
             print("%s%s", step.name, step.heavy and " (heavy)" or "")
         end
         return
+    end
+    if not parsed.inline then
+        provide_device_caches()
     end
     if parsed.recall then
         local step = select_steps(STEPS, {parsed.recall})[1]

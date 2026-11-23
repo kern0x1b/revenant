@@ -262,7 +262,8 @@ cache that holds the packages the pins and the tasks need, and read `status` of 
 ### What a new cache lacks
 
 A new cache has no `dyld` and no `firmware`; a task that reads them fetches them (the iOS 6.0 shared cache, the firmware
-catalogue), or the worker clones them from a cache that has them with `cp -c -R -p` (an APFS clone) before the first run:
+catalogue), or the worker clones them from a cache that has them with `cp -c -R -p` (an APFS clone) before the first run
+(`dyld` clones itself, see "Which cache to clone"):
 
 - `<source>/dyld/6.1.3/classes_armv7.json` exists. The Backports generator decides from that file which SDK classes get a
   proxy and stops without it; a cache that has only `dyld/6.0` once produced a skeleton from the wrong release's inventory
@@ -273,6 +274,28 @@ catalogue), or the worker clones them from a cache that has them with `cp -c -R 
   disk), before the first run.
 - `df -h /System/Volumes/Data` after a clone: a clone costs little until it is written to, and the floor of the disk rule
   holds.
+
+### Which cache to clone
+
+`dyld` is the one part of a new cache that clones itself. `tools/dyld_caches.lua`, and the first thing every prepush run does,
+gives the checkout each release folder it lacks: a folder of `.cache/dyld` of the main checkout, then of `.cache*/dyld` of
+every other worktree (`git worktree list`), that holds a `dyld_shared_cache_<arch>` with its `.source` note (the harvest writes
+the note right after the cache, so a folder whose harvest is still running does not count) or a `libraries_<arch>` folder is
+cloned into this checkout's `.cache/dyld` with an APFS clone (no second copy on disk, no network). The first source that holds a
+release wins. A release this checkout already holds is left as it is; a folder here that holds no cache, while a source holds
+that release, is reported and not overwritten (an unfinished fetch may be writing it); a source folder that holds no cache is
+not a release. The clone goes through a staging folder next to `dyld` and a lock: two runs that clone the same release at once
+put one clone in place and the other's copy is removed, and a staging folder an aborted run left is removed an hour later.
+
+```
+./xmakew l -P . tools/dyld_caches.lua
+```
+
+The whole release folder comes with the cache: `classes_<arch>.json` (the inventory the Backports generator reads), the
+selectors and the libraries outside the cache. A clone taken while another checkout is writing `classes_<arch>.json` (the
+`firmware classes` command writes it after the harvest) can hold a truncated file: remove the release folder here and clone it
+again. Nothing is fetched: a release no checkout holds is still fetched with
+`./xmakew firmware -P . --arch=armv7 fetch <release>`, and `firmware/rootfs` is cloned as the section above says.
 
 `tools/private_cache.lua` is now the way to seed the store once, and nothing a worktree does at its start. Without `--only` it
 takes the whole of the source cache except five folders that hold the state of the machine and of the tasks that were running in the source:
@@ -612,11 +635,14 @@ key, because a rerun costs seconds and a verdict that no longer holds costs a pu
   first line of what each prints for `--version`, every install of `llvm`, `swift`, `swift-bootstrap`, `swift-runtime`, `libcxx`, `apple-compat`, `iphoneos-sdk`, `ld64` and
   `ldid` in the store with the digest of its `manifest.txt`, and the content key of the iPhoneOS SDK (every file of it, with
   the Xcode tools, about 6 s once per run);
-- for `backports device imports`, besides the installed facts, each device cache under `.cache/dyld` as the release folder, the
-  firmware its `.source` names and the size of its `dyld_shared_cache_armv7`, because the verdict is the system libraries of the
-  oldest release the Backports libraries run on. A checkout that holds none clones the release folder from another checkout of the
-  repository with `cp -c -R` (no network, no disk), and when no checkout holds it the step fails with the command the deb writer's
-  fetch is (`./xmakew firmware -P . --arch=armv7 fetch <release>`); the step reads everything the build reads (`reads` is the whole tree).
+- for `backports build`, `backports exports` and `backports device imports`, besides the installed facts, the identity of every
+  complete device cache under `.cache/dyld`: for each file of each release folder its name, its size and its sha256 (the size
+  only from 32 MiB up, the shared cache itself). The generator reads the class inventory of iOS 6.1.3 and the import check reads
+  the system libraries of the oldest release the Backports libraries run on, so a build or a verdict is remembered only for the
+  caches it saw. The facts are read after prepush has cloned the caches this checkout lacked ("Which cache to clone"); when no
+  checkout holds a release, `backports device imports` fails with the command the deb writer's fetch is
+  (`./xmakew firmware -P . --arch=armv7 fetch <release>`). These steps read everything the build reads (`reads` is the whole tree);
+  `dyld caches test` reads the tool, its module and `toolchain/modules/*.lua`.
 
 What a key does not see, and the remembered `ok` can therefore outlive a change that a fresh run would report: an install replaced in
 place with the same name and manifest, and a tool replaced in place with the same version line; the host's own frameworks and tools
@@ -637,6 +663,7 @@ What a check reads is declared on the check in `tools/prepush.lua` (`reads`, a l
 so an undeclared check is slower, never stale. The narrow ones: `comments test` (`tools/comments.lua`, `tools/comments/`), the
 tests of `tools/private_cache.lua`, `tools/ci_errors.lua` and `tools/ci_swiftc_replay.lua` (the tool, its folder and the addon
 modules), `credentials` and `copied_text` (`agent-skills/tests/`), `negative shape` (the Backports tests and `emulator/`),
+`dyld caches test` (`tools/dyld_caches.lua`, `toolchain/modules/apple/dyld_caches.lua` and the addon modules),
 `recipe digests` (the inputs the recipes list in `toolchain/modules/digest.lua`, the digest files and the addon modules), and
 `lowered members` and `lowered exports`, which skip `docs/`, Markdown files, `.agents/` and `agent-skills/`. `backports build` skips
 nothing, because the copy it builds in holds every file, and `backports exports` and `backports device imports` skip nothing because they read that copy's build (and the baseline data, or the device caches). A check that starts to read a file outside its declaration, or an ignored

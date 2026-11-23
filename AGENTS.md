@@ -101,7 +101,10 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   patches on `llvm` and `swift`.
 - Before every push, a worker runs `./xmakew l -P . tools/prepush.lua`: the host checks that a push would otherwise
   break unnoticed (comments, layout, docs commands, open gaps, credentials, copied text, recipe
-  digests, lowered members, lowered exports, negative-test shape, the export baseline) and the build of every Backports library for armv7 with
+  digests, lowered members, lowered exports, negative-test shape, the export baseline, the cloning of device caches; every run, `--recall`
+  included, begins by cloning the `.cache/dyld` releases the checkout lacks from another checkout, because its keys name the caches:
+  `docs/guides/machine.md`, "Which cache to clone")
+  and the build of every Backports library for armv7 with
   the project's flags (`backports build`, in a configuration and a build folder of its own, so the checkout's host
   configuration stays) and the check that this build still exports every class an earlier build exported (`backports exports`) and the deb writer's import check on its libraries, against the system libraries of the oldest release they run on (`backports device imports`). A check that passed is remembered in the shared store by the content of what it reads (its files, the
   code of prepush, the `REVENANT_*` environment, and for the checks that run against installs the installs and the SDK; what a
@@ -109,7 +112,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   second prepush on the same inputs, from any worktree, runs nothing and prints where each verdict came from; a check that
   left no verdict fails. The host checks take about 15 seconds with the caches warm; the Backports build takes about six
   minutes the first time and builds only what changed after that. It must print
-  `prepush: 22 checks passed`; `--list`, `--only <check,...>`, `--recall <check>` (prints the remembered verdict, runs nothing), `--keep-going` and `--fresh` select and order the run (it stops at the first
+  `prepush: 23 checks passed`; `--list`, `--only <check,...>`, `--recall <check>` (prints the remembered verdict, runs nothing), `--keep-going` and `--fresh` select and order the run (it stops at the first
   failure by default, the cheap checks first; see `docs/guides/machine.md`); `./xmakew l -P . tools/prepush.lua test` tests the tool itself.
 - Before handing a change over: `./xmakew test -P .`, then that component's gate (the backports gate is gone until
   `./xmakew test -P .` replaces it; for the emulator, the skill `emulator-session`).
