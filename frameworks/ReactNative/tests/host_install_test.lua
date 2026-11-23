@@ -303,6 +303,36 @@ function main()
         expect("the install unpacks the archive from the scratch folder and removes it there", command:find("tar xzf " .. scratch .. "/rnhost.tgz -C unpack", 1, true) ~= nil
             and command:find("rm " .. scratch .. "/rnhost.tgz", 1, true) ~= nil, command)
         expect("the install leaves nothing in /var/tmp", command:find("/var/tmp", 1, true) == nil, command)
+        expect("the install starts with the guard against another install's app", command:find("refused:", 1, true) ~= nil and command:find("refused:", 1, true) < command:find("rm -rf", 1, true), command)
+    end
+    do
+        local base = workspace.fresh("rn-foreign-app")
+        local applications = path.join(base, "Applications")
+        local mine = path.join(base, "stash", "rn-holder", "rnhost")
+        local theirs = path.join(base, "stash", "other-holder", "rnhost")
+        os.mkdir(applications)
+        os.mkdir(path.join(mine, "rnhost.app"))
+        os.mkdir(path.join(theirs, "rnhost.app"))
+        local function run(guard)
+            local status = os.execv("/bin/sh", {"-c", guard .. " && echo went-on"}, {try = true, stdout = path.join(base, "out.txt"), stderr = path.join(base, "out.txt")})
+            return status, io.readfile(path.join(base, "out.txt")) or ""
+        end
+        local guard = host.foreign_app_guard(applications, mine, "rnhost.app")
+        local status, output = run(guard)
+        expect("an id with no app of that name in Applications goes on", status == 0 and output:find("went-on", 1, true) ~= nil, output)
+        os.vrunv("ln", {"-s", path.join(mine, "rnhost.app"), path.join(applications, "rnhost.app")})
+        status, output = run(guard)
+        expect("an id that finds its own link goes on", status == 0 and output:find("went-on", 1, true) ~= nil, output)
+        os.vrunv("rm", {path.join(applications, "rnhost.app")})
+        os.vrunv("ln", {"-s", path.join(theirs, "rnhost.app"), path.join(applications, "rnhost.app")})
+        status, output = run(guard)
+        expect("an id that finds another install's link stops and names where it points", status ~= 0 and output:find("refused:", 1, true) ~= nil
+            and output:find(theirs, 1, true) ~= nil and output:find("went-on", 1, true) == nil, tostring(status) .. " " .. output)
+        os.vrunv("rm", {path.join(applications, "rnhost.app")})
+        os.mkdir(path.join(applications, "rnhost.app"))
+        status, output = run(guard)
+        expect("an id that finds a real folder of that name stops", status ~= 0 and output:find("refused:", 1, true) ~= nil, tostring(status) .. " " .. output)
+        os.tryrm(base)
     end
     do
         local package = host.deb_package("/tmp/x/org.revenant.swift-crypto-91c43b24_0.8.18+91c43b24_iphoneos-arm.deb")
