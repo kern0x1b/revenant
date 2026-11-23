@@ -129,7 +129,6 @@ if is_plat("iphoneos") then
                 target:add("shflags", "-Wl,-unexported_symbols_list," .. STD_UNEXPORTED, {force = true})
                 local reexports = import("reexports", {rootdir = TOOLS, anonymous = true}).of(library)
                 if #reexports.symbols > 0 then
-                    -- Named by the content, so a changed list is a changed flag and relinks the library.
                     local list = path.join(target:autogendir(), "reexported-" .. hash.strhash128(reexports.text) .. ".txt")
                     io.writefile(list, reexports.text)
                     target:add("shflags", "-Wl,-reexported_symbols_list," .. list, {force = true})

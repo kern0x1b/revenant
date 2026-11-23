@@ -7,9 +7,6 @@ typedef Class (*revenant_stale_function)(void);
 static NSString *const kStaleUser = @"/usr/lib/revenant/org.revenant.backports/libRevenantStaleUserProbe.dylib";
 static NSString *const kSystemImage = @"/System/Library/Frameworks/AVFoundation.framework/AVFoundation";
 
-// An image linked against a Backports build that defined AVSampleBufferDisplayLayer binds the class by name to
-// libAVFoundationBackports. The library now leaves the class to the system and re-exports it, so that image still loads,
-// and what it bound is the system's class, not a second one.
 REVENANT_CASE(avfoundation_class_reexport)
 {
     void *probe = dlopen([kStaleUser UTF8String], RTLD_NOW);

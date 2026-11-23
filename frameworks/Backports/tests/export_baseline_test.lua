@@ -44,9 +44,6 @@ local function read_retired(file)
     return retired
 end
 
--- dyld.load reads a folder named libraries_<architecture>; a build's folder is named for its configuration, so the Backports
--- libraries are cloned (APFS, no copy) into one that is. (toolchain/modules/apple/dyld.lua is an input of the swift-runtime
--- recipe digest, so it is not changed for this.)
 local function staged(folder)
     local stage = path.join(os.tmpdir(), "export-baseline-" .. hash.uuid(), "libraries_" .. ARCHITECTURE)
     os.mkdir(stage)

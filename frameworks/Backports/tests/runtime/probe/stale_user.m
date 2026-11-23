@@ -1,6 +1,5 @@
 #import <objc/runtime.h>
 
-// Strong references to the class and its metaclass, bound by name to the library this probe was linked against.
 extern char OBJC_CLASS_$_AVSampleBufferDisplayLayer;
 extern char OBJC_METACLASS_$_AVSampleBufferDisplayLayer;
 
