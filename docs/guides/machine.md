@@ -633,8 +633,8 @@ so an undeclared check is slower, never stale. The narrow ones: `comments test` 
 tests of `tools/private_cache.lua`, `tools/ci_errors.lua` and `tools/ci_swiftc_replay.lua` (the tool, its folder and the addon
 modules), `credentials` and `copied_text` (`agent-skills/tests/`), `negative shape` (the Backports tests and `emulator/`),
 `recipe digests` (the inputs the recipes list in `toolchain/modules/digest.lua`, the digest files and the addon modules), and
-`lowered members` and `lowered exports`, which skip `docs/`, Markdown files, `.agents/` and `agent-skills/`. `backports build` and `backports exports` skip
-nothing, because the copy they build in holds every file. A check that starts to read a file outside its declaration, or an ignored
+`lowered members` and `lowered exports`, which skip `docs/`, Markdown files, `.agents/` and `agent-skills/`. `backports build` skips
+nothing, because the copy it builds in holds every file, and `backports exports` skips nothing because it reads that copy's build and the baseline data. A check that starts to read a file outside its declaration, or an ignored
 file, must say so there; an ignored file is not part of a key.
 
 The checks that run inside xmake (`comments`, `layout`, `docs_commands`, `recipe digests` and the rest of the cheap ones) and
