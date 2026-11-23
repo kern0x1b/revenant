@@ -35,8 +35,10 @@ The fourth condition is the narrow one, and the tool says what it cannot see:
 
 ## The snapshot, the allowed list and the check
 
-`frameworks/Backports/tools/app-stubs/<App>.snapshot` holds, for one application, every stub of conditions 1, 2 and 4, with
-the SDK introduction version of each (`7000` is iOS 7.0), whether or not a source now lowers it. Telegram13's holds the
+`frameworks/Backports/tools/app-stubs/<name>.snapshot` holds, for one application, every stub of conditions 1, 2 and 4, with
+the SDK introduction version of each (`7000` is iOS 7.0), whether or not a source now lowers it. The file name carries no
+application name, because `repository/layout` refuses a tracked path that names the test app (decision 0009); the `app`
+line inside the file names the application. `app13.snapshot`, the one there now, holds the
 union of Postbox, SwiftSignalKit, MtProtoKit, TelegramCore and TelegramUI. Conditions 1, 2 and 4 do not change until the
 application or the iOS 6.1.3 inventory does, so the snapshot is a fixed input, and the check applies the one condition that
 does change, number 3, to it.
@@ -76,7 +78,7 @@ Run it when a new application build is the one to protect, or when the iOS 6.1.3
 ```sh
 ./xmakew l -P . frameworks/Backports/tools/generate.lua
 ./xmakew l -P . frameworks/Backports/tools/stubs.lua snapshot --app Telegram13 \
-    --out frameworks/Backports/tools/app-stubs/Telegram13.snapshot \
+    --out frameworks/Backports/tools/app-stubs/app13.snapshot \
     --binary PostboxFramework --binary SwiftSignalKitFramework --binary MtProtoKitFramework \
     --binary TelegramCoreFramework --binary TelegramUIFramework --minimum 15
 ```
