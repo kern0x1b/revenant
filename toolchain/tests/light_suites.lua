@@ -24,7 +24,7 @@ local cache = import("cache", {rootdir = modules, anonymous = true})
 local VERSION = "light suite memo 1"
 local ALWAYS = {"xmake.lua", "xmakew", "toolchain/addon.lua", "toolchain/includes/**", "toolchain/rules/**", "toolchain/toolchains/**", "toolchain/plugins/**",
                 "toolchain/tests/light_suites.lua", "toolchain/tests/suite_reads.lua", "toolchain/modules/memo.lua", "toolchain/modules/suite_guard.lua"}
-local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true, REVENANT_LIGHT_SUITES_VERDICT = true, REVENANT_SUITE_TRACE = true, REVENANT_SUITE_ROOT = true}
+local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_TASK = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true, REVENANT_LIGHT_SUITES_VERDICT = true, REVENANT_SUITE_TRACE = true, REVENANT_SUITE_ROOT = true}
 local TOOL_NAMES = {"git", "rsync", "cmake", "ninja", "xcrun", "clang", "cc", "make", "sh"}
 local WORKERS = 4
 
