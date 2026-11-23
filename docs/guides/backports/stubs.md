@@ -92,6 +92,6 @@ its reason, and say in the commit what the new application build added.
 
 ## Cost
 
-The check reads the lowered list (25 thousand lines) and a snapshot (about two thousand), and takes about a second. A
+The check reads the lowered list (about 38 thousand lines, 25 thousand of them `member` lines, the only ones it uses) and a snapshot (about two thousand), and takes about a second. A
 refresh takes the skeleton generation (about three minutes on a cold facts cache) and, for TelegramUI, under ten seconds of
 reading.
