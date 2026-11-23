@@ -11,7 +11,7 @@ end
 
 local function fields(file)
     local found = {}
-    for line in (io.readfile(file) or ""):gmatch("[^\n]+") do
+    for line in io.readfile(file):gmatch("[^\n]+") do
         table.insert(found, line)
     end
     return found
@@ -30,16 +30,17 @@ local function real(folder)
     return reals[folder] or nil
 end
 
-local function alive(pid)
-    return os.execv("/bin/kill", {"-0", tostring(pid)}, {try = true}) == 0
+local function process(pid)
+    local text = try { function () return os.iorunv("ps", {"-ww", "-o", "lstart=,command=", "-p", tostring(pid)}) end } or ""
+    local began, command = text:match("^%s*(%a+%s+%a+%s+%d+%s+%d+:%d+:%d+%s+%d+)%s+(.-)%s*$")
+    if not began then
+        return "", ""
+    end
+    return (began:gsub("%s+", " ")), command
 end
 
 local function named(pid, nonce)
     return string.format("light-suites-%s-%s.verdict", pid, nonce)
-end
-
-local function started(pid, nonce)
-    return string.format("light-suites-%s-%s.started", pid, nonce)
 end
 
 function parse(output)
@@ -67,14 +68,13 @@ end
 function issue(folder, key, tree, line, owner)
     local nonce = (hash.uuid4():gsub("-", ""))
     local pid = owner or os.getpid()
-    if not alive(pid) then
+    local began = process(pid)
+    if began == "" then
         return nil
     end
-    local began = tostring(os.time())
     local where = path.normalize(path.absolute(folder))
     local file = path.join(where, named(pid, nonce))
     written(file, table.concat({nonce, key, real(tree) or tree, tostring(pid), began, where, line}, "\n") .. "\n")
-    written(path.join(where, started(pid, nonce)), table.concat({tostring(pid), began, OWNER}, "\n") .. "\n")
     return nonce .. "@" .. file
 end
 
@@ -94,8 +94,8 @@ function read(value, tree, memo)
     if real(tree) ~= folder then
         return nil
     end
-    local note = fields(path.join(where, started(pid, nonce)))
-    if note[1] ~= pid or note[2] ~= began or note[3] ~= OWNER or not alive(pid) then
+    local started, command = process(pid)
+    if started ~= began or not (" " .. command):find("[%s/]" .. OWNER:gsub("%p", "%%%0")) then
         return nil
     end
     if not holds(memo or path.join(cache.store(), "memo"), STEP, key) then
@@ -106,13 +106,7 @@ end
 
 function clear(value)
     local nonce, file = split(value)
-    if nonce and os.isfile(file) then
-        local record = fields(file)
-        if record[1] == nonce then
-            os.tryrm(file)
-            if record[4] then
-                os.tryrm(path.join(path.directory(file), started(record[4], nonce)))
-            end
-        end
+    if nonce and os.isfile(file) and fields(file)[1] == nonce then
+        os.tryrm(file)
     end
 end
