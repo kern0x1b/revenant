@@ -72,6 +72,8 @@ function failures(opt)
         ["xmake.lua"] = "file a",
         ["toolchain/tests/addon/host_load_test.lua"] = "file b",
         ["toolchain/modules/workspace.lua"] = "file c",
+        ["frameworks/Combine/xmake.lua"] = "file d",
+        ["packages/b/backports/xmake.lua"] = "file e",
     }}
     local host_key = light.key_for(host_input, "host_load_test")
     local child_changed = table.clone(host_input.files)
@@ -80,6 +82,12 @@ function failures(opt)
     local nested_changed = table.clone(host_input.files)
     nested_changed["toolchain/modules/workspace.lua"] = "file changed"
     check("a module loaded through an import moves the suite's key", light.key_for({tool = host_input.tool, host = host_input.host, files = nested_changed}, "host_load_test") ~= host_key, true)
+    local loaded_changed = table.clone(host_input.files)
+    loaded_changed["frameworks/Combine/xmake.lua"] = "file changed"
+    check("a framework the child xmake loads moves the suite's key", light.key_for({tool = host_input.tool, host = host_input.host, files = loaded_changed}, "host_load_test") ~= host_key, true)
+    loaded_changed = table.clone(host_input.files)
+    loaded_changed["packages/b/backports/xmake.lua"] = "file changed"
+    check("a recipe the child xmake loads moves the suite's key", light.key_for({tool = host_input.tool, host = host_input.host, files = loaded_changed}, "host_load_test") ~= host_key, true)
     check("an unchanged tree keeps the suite's key", light.key_for(host_input, "host_load_test"), host_key)
 
     local workspace = import("@addon.revenant.workspace", {anonymous = true})
@@ -88,12 +96,36 @@ function failures(opt)
     local generation = path.join(packages, "l", "llvm", "23.1.3")
     os.mkdir(generation)
     io.writefile(path.join(generation, "aaa.g1", "manifest.txt"), "same install")
-    local before = memo.store_facts(packages)
+    local before = memo.store_installs(packages)
     os.mv(path.join(generation, "aaa.g1"), path.join(generation, "aaa.g2"))
-    check("publishing another generation of one install leaves the store facts alone", memo.store_facts(packages), before)
+    check("publishing another generation of one install leaves the store facts alone", memo.store_installs(packages), before)
     io.writefile(path.join(generation, "aaa.g2", "manifest.txt"), "changed install")
-    check("a changed manifest moves the store facts", memo.store_facts(packages) ~= before, true)
+    check("a changed manifest moves the store facts", memo.store_installs(packages) ~= before, true)
     os.rm(store)
+
+    local guard_script = path.join(workspace.run(), "guard-probe.lua")
+    io.writefile(guard_script, table.concat({
+        "local guard = import(\"suite_guard\", {rootdir = \"" .. (opt.modules:gsub("\\", "\\\\")) .. "\", anonymous = true})",
+        "local root = path.normalize(path.absolute(path.join(\"" .. (opt.modules:gsub("\\", "\\\\")) .. "\", \"..\", \"..\")))",
+        "guard.start(root, {\"xmake.lua\", \"toolchain/**\"}, {})",
+        "local function probe(name, action)",
+        "    local blocked = false",
+        "    try { function () action() end, catch { function () blocked = true end } }",
+        "    print(name .. \" \" .. (blocked and \"blocked\" or \"allowed\"))",
+        "end",
+        "probe(\"declared\", function () io.readfile(path.join(root, \"xmake.lua\")) end)",
+        "probe(\"absolute\", function () io.readfile(path.join(root, \"README.md\")) end)",
+        "probe(\"relative\", function () io.readfile(\"README.md\") end)",
+        "probe(\"shell\", function () os.iorunv(\"sh\", {\"-c\", \"cat README.md\"}) end)",
+        "probe(\"argument\", function () os.iorunv(\"sh\", {\"-c\", \"true\", path.join(root, \"README.md\")}) end)",
+        "probe(\"environment\", function () os.getenv(\"SUITE_UNDECLARED\") end)",
+    }, "\n"))
+    local guard_output = os.iorunv(os.programfile(), {"l", "-P", light.checkout(), guard_script}) or ""
+    for _, name in ipairs({"declared", "absolute", "relative", "shell", "argument", "environment"}) do
+        local want = name == "declared" and "allowed" or "blocked"
+        check("suite guard " .. name, guard_output:find(name .. " " .. want, 1, true) ~= nil, true)
+    end
+    os.rm(guard_script)
 
     local logs = path.join(workspace.run(), "light-suites.abcdef")
     local task = light.children_task(logs)

@@ -292,28 +292,14 @@ function resolved_tools()
     return table.concat(lines, "\n")
 end
 
-function store_content()
+function store_installs(folder)
     local lines = {}
-    local packages = path.join(cache().store(), "xmake-global", ".xmake", "packages")
+    local packages = folder or path.join(cache().store(), "xmake-global", ".xmake", "packages")
     for _, name in ipairs(STORE_PACKAGES) do
         for _, install in ipairs(os.filedirs(path.join(packages, name:sub(1, 1), name, "*", "*"))) do
             local line = path.relative(install, packages):gsub("%.g[^/]+$", "")
-            local manifest = path.join(install, "manifest.txt")
-            table.insert(lines, line .. " " .. (os.isfile(manifest) and hash.sha256(manifest) or "no manifest"))
-        end
-    end
-    byteorder.sort(lines)
-    return table.concat(lines, "\n")
-end
-
-function store_installs()
-    local lines = {}
-    local packages = path.join(cache().store(), "xmake-global", ".xmake", "packages")
-    for _, name in ipairs(STORE_PACKAGES) do
-        for _, install in ipairs(os.filedirs(path.join(packages, name:sub(1, 1), name, "*", "*"))) do
-            local line = path.relative(install, packages)
             if os.islink(install) then
-                line = line .. " -> " .. path.filename(os.readlink(install))
+                line = line .. " -> " .. path.filename(os.readlink(install)):gsub("%.g[^/]+$", "")
             end
             local manifest = path.join(install, "manifest.txt")
             table.insert(lines, line .. " " .. (os.isfile(manifest) and hash.sha256(manifest) or "no manifest"))
@@ -351,51 +337,6 @@ local function cached_facts(name, signature, compute)
     io.writefile(temporary, value)
     os.mv(temporary, file)
     return value
-end
-
-function store_facts(folder)
-    local packages = folder or path.join(cache().store(), "xmake-global", ".xmake", "packages")
-    local signature = {tostring(os.mtime(packages)), inode(packages)}
-    local installs = {}
-    for _, name in ipairs(STORE_PACKAGES) do
-        for _, install in ipairs(os.filedirs(path.join(packages, name:sub(1, 1), name, "*", "*"))) do
-            table.insert(installs, install)
-            local manifest = path.join(install, "manifest.txt")
-            local key = path.relative(install, packages):gsub("%.g[^/]+$", "")
-            table.insert(signature, key .. " " ..
-                                     (os.isfile(manifest) and (tostring(os.mtime(manifest)) .. " " .. tostring(os.filesize(manifest))) or "none"))
-        end
-    end
-    byteorder.sort(signature)
-    return cached_facts("store", table.concat(signature, "\n"), function ()
-        local lines = {}
-        for _, install in ipairs(installs) do
-            local line = path.relative(install, packages):gsub("%.g[^/]+$", "")
-            local manifest = path.join(install, "manifest.txt")
-            table.insert(lines, line .. " " .. (os.isfile(manifest) and hash.sha256(manifest) or "no manifest"))
-        end
-        byteorder.sort(lines)
-        return table.concat(lines, "\n")
-    end)
-end
-
-function sdk_facts()
-    local sdk = import("sdk", {rootdir = path.join(checkout(), "frameworks", "Backports", "tools"), anonymous = true})
-    local analysis = import("analysis_cache", {rootdir = scriptdir, anonymous = true})
-    local paths = analysis.sdk_paths()
-    local signature = {}
-    for _, real in ipairs(paths) do
-        table.insert(signature, real .. " " .. tostring(os.mtime(real)) .. " " .. tostring(os.filesize(real)) .. " " ..
-                                inode(real) .. " " .. tostring(sdk.sdk_version(real)))
-    end
-    return cached_facts("sdk", table.concat(signature, "\n"), function ()
-        local lines = {}
-        for _, real in ipairs(paths) do
-            table.insert(lines, try { function () return sdk.cache_key(real) end } or "unreadable")
-        end
-        byteorder.sort(lines)
-        return table.concat(lines, "\n")
-    end)
 end
 
 function installed_facts(log)

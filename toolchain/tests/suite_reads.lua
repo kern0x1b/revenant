@@ -1,5 +1,6 @@
 local EXTRA = {
     assets_extract_test = {
+        "toolchain/src/assets-extract/assets-extract.m",
         "toolchain/modules/**",
         "toolchain/modules/apple/sdk.lua",
         "toolchain/tests/light_suites.lua",
@@ -38,6 +39,7 @@ local EXTRA = {
         "toolchain/tests/addon/binding_test.lua",
     },
     cache_test = {
+        ".gitignore",
         "toolchain/modules/**",
         "toolchain/modules/apple/sdk.lua",
         "toolchain/tests/light_suites.lua",
@@ -249,6 +251,10 @@ local EXTRA = {
         "toolchain/tests/addon/cmake_debug_test.lua",
     },
     compat_test = {
+        "toolchain/src/apple-compat/src",
+        "toolchain/src/apple-compat/include/**",
+        "toolchain/src/apple-compat/src/**",
+        "toolchain/src/apple-compat/src/aligned_alloc.c",
         "toolchain/modules/**",
         "toolchain/modules/apple/sdk.lua",
         "toolchain/tests/light_suites.lua",
@@ -551,6 +557,8 @@ local EXTRA = {
         "toolchain/tests/addon/fixtures.lua",
     },
     emulator_source_test = {
+        "emulator",
+        "emulator/**",
         "emulator/src/guest/revenant-sblaunch.c",
         "packages/e/emulator/xmake.lua",
         "packages/e/emulator/port/sources.lua",
@@ -596,6 +604,11 @@ local EXTRA = {
         "toolchain/tests/addon/host_install_test.lua",
     },
     host_load_test = {
+        "**",
+        ".claude-plugin",
+        ".claude-plugin/**",
+        ".agents",
+        ".agents/**",
         "toolchain/modules/**",
         "toolchain/modules/apple/sdk.lua",
         "toolchain/tests/light_suites.lua",
@@ -673,6 +686,8 @@ local EXTRA = {
         "toolchain/tests/addon/llvm_inputs_test.lua",
     },
     locale_order_test = {
+        "toolchain/modules",
+        "toolchain/tests/addon/locale_probe.lua",
         "toolchain/modules/**",
         "toolchain/modules/apple/sdk.lua",
         "toolchain/tests/light_suites.lua",
@@ -1093,6 +1108,7 @@ local EXTRA = {
         "toolchain/tests/addon/nsdata_fallback_test.lua",
     },
     os_log_fallback_test = {
+        "toolchain/src/swift-runtime/overlay/os",
         "toolchain/modules/**",
         "toolchain/modules/apple/sdk.lua",
         "toolchain/tests/light_suites.lua",
@@ -1132,6 +1148,7 @@ local EXTRA = {
         "toolchain/tests/addon/sdk_store_test.lua",
     },
     shared_store_test = {
+        "tools/private_cache.lua",
         "xmakew",
         "toolchain/modules/**",
         "toolchain/modules/apple/sdk.lua",

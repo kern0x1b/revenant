@@ -23,9 +23,10 @@ local cache = import("cache", {rootdir = modules, anonymous = true})
 
 local VERSION = "light suite memo 1"
 local ALWAYS = {"xmake.lua", "xmakew", "toolchain/addon.lua", "toolchain/includes/**", "toolchain/rules/**", "toolchain/toolchains/**", "toolchain/plugins/**",
+                "toolchain/src/**/xmake.lua", "frameworks/**/xmake.lua", "packages/**/xmake.lua", "addons/**/xmake.lua",
                 "toolchain/tests/light_suites.lua", "toolchain/tests/suite_reads.lua", "toolchain/modules/memo.lua", "toolchain/modules/suite_guard.lua"}
 local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_TASK = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true, REVENANT_LIGHT_SUITES_VERDICT = true, REVENANT_SUITE_TRACE = true, REVENANT_SUITE_ROOT = true}
-local TOOL_NAMES = {"git", "rsync", "cmake", "ninja", "xcrun", "clang", "cc", "make", "sh"}
+local ENV_NAMES = {"DEVELOPER_DIR", "DEVICE_HOST", "DEVICE_UDID", "FAKE_FAIL", "FAKE_GENERATION", "GIT_CEILING_DIRECTORIES", "HOME", "PATH", "RACE_MARKERS", "RACE_NAME", "RACE_SAME", "SOURCE_DATE_EPOCH", "TMPDIR", "XMAKE_GLOBALDIR", "XMAKE_MAX_JOBS"}
 local WORKERS = 4
 
 local WEIGHTS = {
@@ -46,31 +47,12 @@ local function declared()
     return suites
 end
 
-local function tools_facts()
-    local lines = {}
-    for _, name in ipairs(TOOL_NAMES) do
-        local found = try { function () return os.iorunv("sh", {"-c", "command -v " .. name}):trim() end } or "none"
-        local version = try { function () return os.iorunv("sh", {"-c", name .. " --version 2>&1 | head -n 1"}):trim() end } or ""
-        table.insert(lines, name .. "=" .. found .. " " .. version)
-    end
-    return table.concat(lines, "\n")
-end
-
-local tool_text
-
-local function installed_tools()
-    if not tool_text then
-        tool_text = tools_facts()
-    end
-    return tool_text
-end
-
 local function suite_facts()
-    return installed_tools() .. "\n--\n" .. memo.store_facts() .. "\n--\n" .. memo.sdk_facts()
+    return memo.installed_facts(function (text) print(text) end)
 end
 
 local function step_of(suite)
-    return {name = suite, reads = suite_reads.of(suite), facts = suite_facts}
+    return {name = suite, reads = suite_reads.of(suite), env = ENV_NAMES, facts = suite_facts}
 end
 
 function key_for(input, suite)
@@ -86,7 +68,7 @@ local function run_suite(suite)
     local arguments = {modules = path.join(root, "toolchain", "modules")}
     local failures = {}
     local restore = tmp_guard.forbid(suite)
-    suite_guard.start(root, table.join(suite_reads.of(suite) or {"**"}, ALWAYS))
+    suite_guard.start(root, table.join(suite_reads.of(suite) or {"**"}, ALWAYS), ENV_NAMES)
     try {
         function ()
             failures = import(suite, {rootdir = addon, anonymous = true}).failures(arguments)
