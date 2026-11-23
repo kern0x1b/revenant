@@ -516,13 +516,16 @@ local function launch(class, command)
     return "/bin/sh", table.join({"-c", CLOSE_INHERITED, "budget", program}, args)
 end
 
-local WATCHER = [[parent=$1; target=$2; me=$$
+local WATCHER = [[parent=$1; target=$2; log=$3; me=$$
 tree() { for child in $(pgrep -P "$1"); do tree "$child"; done; echo "$1"; }
+note() { mkdir -p "$(dirname "$log")" && echo "$(date '+%Y-%m-%d %H:%M:%S') $1" >> "$log"; }
 while [ "$(ps -o ppid= -p "$target" 2>/dev/null | tr -d ' ')" = "$parent" ]; do sleep 1; done
 kill -0 "$target" 2>/dev/null || exit 0
 pids=$(tree "$target" | grep -v "^$me\$")
+for pid in $pids; do note "TERM pid $pid: the parent $parent of budget run $target is gone; its command: $(ps -o command= -p "$pid" 2>/dev/null)"; done
 kill -TERM $pids 2>/dev/null
 sleep 2
+for pid in $pids; do kill -0 "$pid" 2>/dev/null && note "KILL pid $pid: still alive 2 s after TERM; its command: $(ps -o command= -p "$pid" 2>/dev/null)"; done
 kill -KILL $pids 2>/dev/null
 exit 0]]
 
@@ -535,7 +538,7 @@ local function watch_parent()
     if not parent or parent <= 1 then
         return nil
     end
-    return process.openv("/bin/sh", {"-c", CLOSE_INHERITED, "budget", "/bin/sh", "-c", WATCHER, "watcher", tostring(parent), tostring(os.getpid())},
+    return process.openv("/bin/sh", {"-c", CLOSE_INHERITED, "budget", "/bin/sh", "-c", WATCHER, "watcher", tostring(parent), tostring(os.getpid()), path.join(pool_folder(), "killed.log")},
                          {outpath = "/dev/null", errpath = "/dev/null"})
 end
 
@@ -1094,6 +1097,9 @@ local function test_suite()
         check("nor the budget run itself", budget_alive, false)
         check("nor the command it ran", commands_left, 0)
         check("nor a holder in the list", holders_left, 0)
+        local killed = io.readfile(path.join(orphan_pool, "killed.log")) or ""
+        check("the watcher logged the command it stopped, with the pid, the dead parent and the budget run", killed:find("TERM pid " .. tostring(command_pids[1]), 1, true) ~= nil
+            and killed:find("the parent " .. tostring(shell_pid) .. " of budget run " .. tostring(budget_pid) .. " is gone", 1, true) ~= nil and killed:find("/bin/sleep 4711", 1, true) ~= nil, true)
     end
 
     os.rm(base)

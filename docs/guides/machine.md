@@ -630,6 +630,9 @@ environment of the test does not reach it.
   sends TERM to the budget run and everything below it, and KILL two seconds later. So prepush killed in the middle of a heavy
   step, or of its batch of light checks, leaves no `budget run` and no command holding tokens at ppid 1. The watcher is a shell
   and not a signal handler because xmake runs a Lua handler only between two Lua instructions, never while it waits for a child.
+  Each process it stops is written to `killed.log` in the pool folder before the signal, one line with the time, TERM or KILL, the pid,
+  the dead parent's pid, the budget run's pid and the process's command (KILL only for one still alive after the two seconds), so a
+  command that vanished can be traced to the watcher or ruled out.
 - Who holds. A held token names its holder: the pid of the budget run, its worktree and its command, written into the slot file
   with the grant, and a waiting request's ticket names the same about itself. `status` prints a line for each holder
   (`pid 123 holds 2 token(s) for 4m in <worktree>: <command>`) and for each waiting request, and a request that has to wait
