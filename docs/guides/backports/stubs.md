@@ -16,8 +16,12 @@ A stub is dangerous when all four hold:
    replaces `+alloc` (a class cluster: `UILocalNotification`, `NSString`) also answers what its concrete subclasses answer,
    because the instance the app holds is one of them.
 3. No Backports source lowers it (`frameworks/Backports/tools/lowered-members.txt`). The setter of a lowered property
-   counts as lowered, because the list names a property by its getter. The skeleton still holds a stub for a member that a
-   source implements, and the registrar skips it when the class answers at load, so the skeleton alone cannot say.
+   counts as lowered, because the list names a property by its getter. Any lowered member without a colon is taken for a
+   getter, so a method that only reads, or a property that a source declares read-only while the SDK's is read-write, hides
+   the stub of the setter, and the check cannot see it; 70 of the snapshot's entries (2026-11-23) are covered only by this rule, and a
+   run on the emulator that asks the class for each of them is the way to confirm them. The skeleton still holds a stub for
+   a member that a source implements, and the registrar skips it when the class answers at load, so the skeleton alone
+   cannot say.
 4. The application names it: its class is imported by one of the application's images and its selector is in that image's
    `__objc_selrefs`. Swift emits a selref for every Objective-C call, property access included.
 
@@ -40,8 +44,10 @@ the SDK introduction version of each (`7000` is iOS 7.0), whether or not a sourc
 application name, because `repository/layout` refuses a tracked path that names the test app (decision 0009); the `app`
 line inside the file names the application. `app13.snapshot`, the one there now, holds the
 union of Postbox, SwiftSignalKit, MtProtoKit, TelegramCore and TelegramUI. Conditions 1, 2 and 4 do not change until the
-application or the iOS 6.1.3 inventory does, so the snapshot is a fixed input, and the check applies the one condition that
-does change, number 3, to it.
+application, the iOS 6.1.3 inventory or the SDK facts do (the skeleton is generated from them, so a new SDK can add a stub
+for a name the snapshot already holds without the snapshot showing it), so the snapshot is a fixed input between those
+changes, and the check applies the one condition that does change, number 3, to it. Refresh the snapshot after any of the
+three.
 
 `frameworks/Backports/tools/app-stubs/allowed.txt` lists the dangerous stubs that are known and not yet implemented, one
 per line, `<sign><Class>\t<selector>\t<reason>`:

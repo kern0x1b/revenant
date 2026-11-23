@@ -291,6 +291,9 @@ local function command_check(args)
         files = os.files(path.join(SNAPSHOT_FOLDER, "*.snapshot"))
         table.sort(files, bytes_less)
     end
+    if #files == 0 then
+        raise("no snapshot to check in %s; a check that reads nothing would pass for every stub", SNAPSHOT_FOLDER)
+    end
     local lowered = lowered_of(option(args, "--lowered", path.join(TOOLS, "lowered-members.txt")))
     local allowed = allowed_read(option(args, "--allowed", path.join(SNAPSHOT_FOLDER, "allowed.txt")))
     local snapshots = read_snapshots(files)

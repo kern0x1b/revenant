@@ -209,8 +209,7 @@ local function test_repository()
 end
 
 function main()
-    local root = path.join(workspace.scratch(), "stubs-test")
-    os.tryrm(root)
+    local root = workspace.fresh("stubs-test")
     local skeleton, facts = path.join(root, "skeleton"), path.join(root, "facts")
     os.mkdir(skeleton)
     os.mkdir(facts)
