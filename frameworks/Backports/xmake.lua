@@ -1002,6 +1002,7 @@ if is_plat("iphoneos") and get_config("tests") == "device" and not SELECTED then
         add_deps("backports_runtime_app", "RevenantWeakProbe", "RevenantMissingProbe", "RevenantSystemProbe", "RevenantStaleUserProbe")
         add_packages("emulator-guest")
         add_tests("foundation_url_components")
+        add_tests("foundation_file_handle")
         add_tests("loader_class_backport")
         add_tests("flat_class_launch")
         add_tests("screenshot_notification")
