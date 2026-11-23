@@ -18,7 +18,6 @@ local VMSTAT = "/usr/bin/vm_stat"
 local DF = "/bin/df"
 local PS = "/bin/ps"
 local LOAD_WINDOW_MS = 60000
-local AGING_S = 600
 local ANNOUNCE_S = 300
 
 local function say(format, ...)
@@ -56,10 +55,6 @@ end
 
 local function slot_path(folder, index)
     return path.join(folder, string.format("slot-%02d.lock", index))
-end
-
-local function aged_path(folder, name)
-    return path.join(folder, "queue", "aged-" .. name)
 end
 
 local function parse_loadavg(text)
@@ -265,11 +260,8 @@ local function enqueue(folder, rank, minimum, who)
     return {name = name, file = file, lock = lock}
 end
 
-local function leave(ticket, folder)
+local function leave(ticket)
     os.tryrm(ticket.file)
-    if folder then
-        os.tryrm(aged_path(folder, ticket.name))
-    end
     ticket.lock:unlock()
     ticket.lock:close()
 end
@@ -286,7 +278,6 @@ local function holder_alive(file)
     lock:close()
     if free then
         os.tryrm(file)
-        os.tryrm(path.join(path.directory(file), "aged-" .. path.filename(file)))
     end
     return not free
 end
@@ -303,15 +294,6 @@ local function write_pid(file, pid)
 end
 
 local function ahead_of(folder, name, reach)
-    for _, file in ipairs(os.files(path.join(folder, "queue", "aged-*.ticket"))) do
-        local other = path.filename(file):sub(6)
-        if other < name and holder_alive(path.join(folder, "queue", other)) then
-            local need = ticket_need(file)
-            if need <= reach then
-                return true
-            end
-        end
-    end
     for _, file in ipairs(os.files(path.join(folder, "queue", "*.ticket"))) do
         if path.filename(file) < name and holder_alive(file) then
             local need = ticket_need(file)
@@ -463,10 +445,8 @@ local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms, who
     reading_fn = reading_fn or sample
     poll_ms = poll_ms or POLL_MS
     local ticket = enqueue(folder, CLASSES[class].rank, minimum, who)
-    local started = os.mclock()
-    local aging = (tonumber(os.getenv("REVENANT_BUDGET_AGING_S")) or AGING_S) * 1000
     local announce = (tonumber(os.getenv("REVENANT_BUDGET_ANNOUNCE_S")) or ANNOUNCE_S) * 1000
-    local announced, marked
+    local announced
     while true do
         local cores = os.cpuinfo("ncpu")
         local reading = reading_fn()
@@ -487,14 +467,10 @@ local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms, who
             for _, entry in ipairs(grant) do
                 publish_slot(entry, 1, who)
             end
-            leave(ticket, folder)
+            leave(ticket)
             return grant
         end
         release_locks(free)
-        if not marked and os.mclock() - started > aging then
-            io.writefile(aged_path(folder, ticket.name), tostring(minimum))
-            marked = true
-        end
         if not announced or os.mclock() - announced > announce then
             say("%s", waiting_text(folder, minimum, class, announced ~= nil))
             announced = os.mclock()
@@ -781,16 +757,13 @@ local function test_suite()
     check("a ticket behind the request does not block", ahead_of(pool, "1-0000000000000-00000000.ticket", 1), false)
 
     local name_a, name_b = "2-0000000000003-00000003.ticket", "2-0000000000004-00000004.ticket"
-    local aged_a, aged_b = ticket_at(name_a, 4), ticket_at(name_b, 4)
-    io.writefile(aged_path(pool, name_a), "4")
-    io.writefile(aged_path(pool, name_b), "4")
-    check("an earlier aged ticket blocks a later one", ahead_of(pool, name_b, 4), true)
-    check("a later aged ticket does not block the earlier one", ahead_of(pool, name_a, 4), false)
-    aged_a.lock:unlock()
-    aged_a.lock:close()
-    check("a dead aged holder stops blocking", ahead_of(pool, name_b, 4), false)
-    check("and its aged marker is removed with the dead ticket", os.isfile(aged_path(pool, name_a)), false)
-    leave(aged_b)
+    local early, late = ticket_at(name_a, 4), ticket_at(name_b, 4)
+    check("an earlier ticket blocks a later one", ahead_of(pool, name_b, 4), true)
+    check("a later ticket does not block the earlier one", ahead_of(pool, name_a, 4), false)
+    early.lock:unlock()
+    early.lock:close()
+    check("a dead holder stops blocking", ahead_of(pool, name_b, 4), false)
+    leave(late)
 
     local stamp_pool = path.join(base, "stamppool")
     os.mkdir(stamp_pool)
@@ -907,7 +880,7 @@ local function test_suite()
     local function under_load()
         older_calls = older_calls + 1
         if older_calls == 4 then
-            leave(older, guarantee_pool)
+            leave(older)
         end
         return test_reading(50, 1, 11000)
     end
@@ -947,7 +920,7 @@ local function test_suite()
     end, catch { function (raised) younger_error = tostring(raised) end } }
     check("a younger ticket cannot take the guarantee past an older large one", younger_error ~= nil and younger_calls > 5, true)
     check("and it leaves no grant stamp", (io.readfile(slot_path(order_pool, 1)) or ""):match("g %d+ %d+") == nil, true)
-    leave(older_critical, order_pool)
+    leave(older_critical)
     local older_grant = acquire(order_pool, "critical", 6, 6, function () return test_reading(50, 1, 20000) end, 1)
     check("the older critical ticket then gets its six tokens", #older_grant, 6)
     release_locks(older_grant)
@@ -959,7 +932,7 @@ local function test_suite()
     local backfill_grant = acquire(backfill_pool, "normal", 2, 2, function () return test_reading(50, 1, 5120) end, 1)
     check("a ticket whose minimum fits memory backfills past a memory-starved older one", #backfill_grant, 2)
     release_locks(backfill_grant)
-    leave(starved, backfill_pool)
+    leave(starved)
     local starved_grant = acquire(backfill_pool, "critical", 6, 6, function () return test_reading(50, 1, 20000) end, 1)
     check("the older ticket then gets its six tokens when headroom allows", #starved_grant, 6)
     release_locks(starved_grant)
@@ -1010,7 +983,7 @@ local function test_suite()
     local pressed_grant = polls_without_grant("normal", 1, pressed)
     check("under memory pressure an older request for two tokens does not hold back one for one", #pressed_grant, 1)
     release_locks(pressed_grant)
-    leave(fair_first, fair_pool)
+    leave(fair_first)
     local after_grant = acquire(fair_pool, "normal", 1, 1, overloaded, 1)
     check("the request for one token goes once the older one is gone", #after_grant, 1)
     release_locks(after_grant)
@@ -1108,7 +1081,7 @@ local function test_suite()
         local sized = enqueue(who_pool, 2, 6, {pid = os.getpid(), worktree = project, command = "x", at = os.time()})
         check("a ticket that names its holder still carries the tokens it needs", ahead_of(who_pool, "9-9999999999999-99999999.ticket", 1), false)
         check("and blocks a later request that fits it", ahead_of(who_pool, "9-9999999999999-99999999.ticket", 6), true)
-        leave(sized, who_pool)
+        leave(sized)
 
         local function matching(command)
             local listing = try { function () return os.iorunv(PS, {"-ax", "-o", "pid=,command="}) end } or ""
