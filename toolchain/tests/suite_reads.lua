@@ -1362,6 +1362,16 @@ local EXTRA = {
         "toolchain/tests/addon/fixtures.lua",
         "toolchain/tests/addon/tmp_use_test.lua",
     },
+    sandbox_profile_test = {
+        "toolchain/tests/addon/sandbox_profile_test.lua",
+        "toolchain/tests/light_suites.lua",
+        "xmake.lua",
+        ".gitignore",
+    },
+    blur_lifecycle_test = {
+        "toolchain/tests/addon/blur_lifecycle_test.lua",
+        "packages/e/expo-blur/patches/blur-ios6.patch",
+    },
 }
 
 function of(name)

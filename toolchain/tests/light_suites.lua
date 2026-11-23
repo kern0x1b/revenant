@@ -22,13 +22,14 @@ local suite_reads = import("suite_reads", {rootdir = tests, anonymous = true})
 local cache = import("cache", {rootdir = modules, anonymous = true})
 
 local VERSION = "light suite memo 1"
-local ALWAYS = {"xmake.lua", "xmakew", "toolchain/addon.lua", "toolchain/includes/**", "toolchain/rules/**", "toolchain/toolchains/**", "toolchain/plugins/**",
-                "toolchain/src/**/xmake.lua", "frameworks/**/xmake.lua", "packages/**/xmake.lua", "packages/*/*/port/digest.lua", "addons/**/xmake.lua",
+local ALWAYS = {"xmake.lua", ".gitignore", "xmakew", "toolchain/addon.lua", "toolchain/includes/**", "toolchain/rules/**", "toolchain/toolchains/**", "toolchain/plugins/**",
+                "toolchain/src/**/xmake.lua", "frameworks/**/xmake.lua", "frameworks/Backports/tools/**", "packages/**/xmake.lua", "packages/**/patches/**", "packages/*/*/port/digest.lua", "addons/**/xmake.lua",
                 "emulator/**", "recompiler/**", "neon/**", "toolchain/tests/**/xmake.lua",
                 "toolchain/tests/light_suites.lua", "toolchain/tests/suite_reads.lua", "toolchain/modules/byteorder.lua", "toolchain/modules/workspace.lua",
                 "toolchain/modules/tmp_guard.lua", "toolchain/modules/cache.lua", "toolchain/modules/retention.lua", "toolchain/modules/generations.lua",
-                "toolchain/modules/exclusive.lua", "toolchain/modules/apple/lowered.lua", "toolchain/modules/memo.lua", "toolchain/modules/suite_guard.lua"}
-local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_TASK = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true, REVENANT_PREPUSH_BUDGET_CLASS = true, REVENANT_LIGHT_SUITES_VERDICT = true, REVENANT_SUITE_TRACE = true, REVENANT_SUITE_ROOT = true}
+                "toolchain/modules/exclusive.lua", "toolchain/modules/apple/lowered.lua", "toolchain/modules/apple/runtime_guards.lua", "toolchain/modules/apple/compat.lua", "toolchain/modules/apple/flat_classes.lua", "toolchain/modules/apple/architectures.lua",
+                "toolchain/modules/memo.lua", "toolchain/modules/suite_guard.lua"}
+local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_TASK = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true, REVENANT_PREPUSH_BUDGET_CLASS = true, REVENANT_LIGHT_SUITES_VERDICT = true, REVENANT_SUITE_TRACE = true, REVENANT_SUITE_ROOT = true, REVENANT_SUITE_SANDBOX = true}
 local ENV_NAMES = {"DEVELOPER_DIR", "DEVICE_HOST", "DEVICE_UDID", "FAKE_FAIL", "FAKE_GENERATION", "GIT_CEILING_DIRECTORIES", "HOME", "PATH", "RACE_MARKERS", "RACE_NAME", "RACE_SAME", "SOURCE_DATE_EPOCH", "TMPDIR", "XMAKE_GLOBALDIR", "XMAKE_MAX_JOBS"}
 local WORKERS = 4
 
@@ -48,6 +49,33 @@ local function declared()
         table.insert(suites, suite)
     end
     return suites
+end
+
+function profile(suite, file)
+    local reads = table.join(suite_reads.of(suite) or {"**"}, ALWAYS)
+    local patterns = {}
+    for _, glob in ipairs(reads) do
+        if glob == "**" then
+            table.insert(patterns, string.format("(subpath \"%s\")", root))
+        else
+        local prefix = (glob:match("^([^*]+)") or ""):gsub("/+$", "")
+        if glob:find("*") or glob:endswith("/") then
+            if prefix ~= "" then
+                table.insert(patterns, string.format("(subpath \"%s\")", path.join(root, prefix)))
+            end
+        else
+            table.insert(patterns, string.format("(literal \"%s\")", path.join(root, glob)))
+        end
+        end
+    end
+    local lines = {"(version 1)", "(allow default)", "(allow process-exec*)", "(allow process-info*)", "(allow sysctl*)",
+                   "(allow mach-lookup)", string.format("(deny file-read* (subpath \"%s\"))", root),
+                   string.format("(allow file-read-metadata (subpath \"%s\"))", root),
+                   string.format("(allow file-read* (literal \"%s\") (literal \"%s\") (literal \"%s\") (subpath \"%s\") (subpath \"%s\") (subpath \"%s\") (subpath \"%s\") (subpath \"%s\"))",
+                                 root, path.join(root, "toolchain"), path.join(root, "toolchain", "modules"), path.join(root, ".cache"),
+                                 path.join(root, "build"), path.join(root, ".xmake"), path.join(root, ".git"), cache.store()),
+                   "(allow file-read* " .. table.concat(patterns, " ") .. ")"}
+    io.writefile(file, table.concat(lines, "\n") .. "\n")
 end
 
 local function suite_facts()
@@ -157,33 +185,50 @@ function children_task(logs)
     return path.join(workspace.task(), path.filename(logs), "scratch")
 end
 
-local function run_in_children(groups, recalled)
+local function run_in_children(names, count, recalled)
     local children = {}
     local logs = workspace.fresh("light-suites")
     local temporary = path.join(logs, "tmp")
     os.mkdir(temporary)
-    local envs = environment({XMAKE_TMPDIR = temporary, TMPDIR = temporary, REVENANT_LIGHT_CHILD = "1", REVENANT_TASK = children_task(logs)})
+    local envs = environment({XMAKE_TMPDIR = temporary, TMPDIR = temporary, REVENANT_LIGHT_CHILD = "1", REVENANT_TASK = children_task(logs), REVENANT_SUITE_SANDBOX = "1"})
     local failed, total, failure = 0, 0, nil
+    local nested = os.getenv("REVENANT_SUITE_SANDBOX") == "1"
+    local function wait_first()
+        local child = table.remove(children, 1)
+        local _, status = child.process:wait(-1)
+        child.done = true
+        for line in (io.readfile(child.log) or ""):gmatch("[^\n]*\n?") do
+            if line ~= "" and not line:match("^light suites: %d+ passed\n?$") then
+                io.write(line)
+            end
+        end
+        if status ~= 0 then
+            failed = failed + 1
+        end
+        total = total + child.count
+    end
     try {
         function ()
-            for index, names in ipairs(groups) do
+            for index, suite in ipairs(names) do
+                local file = path.join(logs, string.format("%d.sb", index))
+                if not nested then
+                    profile(suite, file)
+                end
                 local log = path.join(logs, string.format("%d.log", index))
-                local child = process.openv(os.programfile(), table.join({"l", "-P", root, path.join(root, "toolchain", "tests", "light_suites.lua")}, names),
-                                            {outpath = log, errpath = log, envs = envs})
-                table.insert(children, {process = child, log = log, count = #names, done = false})
+                local arguments = {"l", "-P", root, path.join(root, "toolchain", "tests", "light_suites.lua"), suite}
+                local command = {os.programfile()}
+                if not nested then
+                    command = {"/usr/bin/sandbox-exec", "-f", file, os.programfile()}
+                end
+                table.join2(command, arguments)
+                local child = process.openv(command[1], table.slice(command, 2), {outpath = log, errpath = log, envs = envs})
+                table.insert(children, {process = child, log = log, count = 1, done = false})
+                if #children >= count then
+                    wait_first()
+                end
             end
-            for _, child in ipairs(children) do
-                local _, status = child.process:wait(-1)
-                child.done = true
-                for line in (io.readfile(child.log) or ""):gmatch("[^\n]*\n?") do
-                    if line ~= "" and not line:match("^light suites: %d+ passed\n?$") then
-                        io.write(line)
-                    end
-                end
-                if status ~= 0 then
-                    failed = failed + 1
-                end
-                total = total + child.count
+            while #children > 0 do
+                wait_first()
             end
         end,
         catch {
@@ -207,7 +252,7 @@ local function run_in_children(groups, recalled)
         raise("%s", failure)
     end
     if failed > 0 then
-        raise("%d of %d groups of light suites failed", failed, #children)
+        raise("%d of %d light suites failed", failed, #names)
     end
     print("light suites: %d passed, %d recalled", total, recalled or 0)
 end
@@ -238,7 +283,7 @@ local function run_with_memo(suites, count)
         print("light suites: %d passed, %d recalled", #suites, recalled)
         return
     end
-    run_in_children(partition(pending, count), recalled)
+    run_in_children(pending, count, recalled)
     local seconds = os.time() - began
     local record = {seconds = seconds, worktree = path.filename(root), head = memo.git(root, {"rev-parse", "HEAD"}):trim(), at = os.time()}
     for _, suite in ipairs(pending) do
@@ -266,5 +311,5 @@ function main(...)
         run_serial(names)
         return
     end
-    run_in_children({names})
+    run_in_children(names, 1, 0)
 end
