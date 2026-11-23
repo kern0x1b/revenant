@@ -509,7 +509,16 @@ local function write_pid(file, pid)
     io.writefile(file, table.concat(lines, "\n") .. "\n")
 end
 
+local function sweep_markers(folder)
+    for _, marker in ipairs(os.files(path.join(folder, "queue", "*.aged"))) do
+        if not os.isfile(marker:sub(1, -#".aged" - 1)) then
+            os.tryrm(marker)
+        end
+    end
+end
+
 local function ahead_of(folder, name, reach)
+    sweep_markers(folder)
     local own_aged = os.isfile(aged_path(folder, name))
     for _, file in ipairs(os.files(path.join(folder, "queue", "*.ticket"))) do
         local other = path.filename(file)
@@ -1453,6 +1462,11 @@ local function test_suite()
     check("a critical request waits behind an older normal one that has aged", #held_critical, 0)
     local held_background = polls_in_age_pool("background", 1)
     check("and so does one of the background class", #held_background, 0)
+    local orphan = aged_path(age_pool, "2-0000000000009-00000009.ticket")
+    io.writefile(orphan, "2")
+    ahead_of(age_pool, "2-0000000000010-00000010.ticket", 1)
+    check("a marker whose ticket is gone (an older client removed the ticket) is swept by the next look at the queue", os.isfile(orphan), false)
+    check("and a marker whose ticket is there is kept", os.isfile(aged_path(age_pool, aged_name)), true)
     io.writefile(path.join(age_queue, "aged-" .. aged_name), "2")
     leave(aged_ticket)
     check("the marker of an aged ticket is gone when the ticket leaves", os.isfile(aged_path(age_pool, aged_name)), false)

@@ -656,13 +656,14 @@ environment of the test does not reach it.
   not fit even then is passed, so a request that can never be granted does not hold up the queue behind it. `critical`
   sorts before the other classes, so a waiting `normal` or `background` request does not hold a `critical` one back until
   it has aged. A request that has waited longer than `REVENANT_BUDGET_AGING_S` (300 s by default) marks its ticket aged
-  (`queue/<ticket>.aged`); an aged ticket stands before every ticket that has not aged, `critical` ones included, and
+  (`queue/<ticket file>.aged`, for example `queue/2-1795448408073-26455490.ticket.aged`); an aged ticket stands before every ticket that has not aged, `critical` ones included, and
   blocks them by the same rule as any earlier ticket, until it starts; among aged tickets the order above holds. This is
   what keeps a stream of `critical` requests for one token from starving a request for two. The marker goes with its
   ticket, also when the ticket's process died. The marker's name does not end in `.ticket`, because a client of an earlier
   version walks `queue/*.ticket`, takes every file there for a ticket and removes the ones without a holder: it removed
-  the first name of the marker, `aged-<ticket>`, which is why aging did not work while such clients were polling, and its
-  `status` did the same. The first name is still removed with its ticket and is otherwise ignored. A request whose process died is removed from the queue, so a crashed
+  the first name of the marker, `aged-<ticket file>`, which is why aging did not work while such clients were polling, and its
+  `status` did the same. The first name is still removed with its ticket and is otherwise ignored. A marker whose ticket file is gone (an earlier client
+  removed the ticket and knew nothing of the marker) is swept by the next request that looks at the queue. A request whose process died is removed from the queue, so a crashed
   request cannot block the queue forever.
 - Nice. `critical` keeps its priority, `normal` runs under `nice -n 5`, `background` under `taskpolicy -b` and `nice -n 15`.
 - Release. A token is a lock on a slot file, and the kernel releases it when its process ends, `kill -9` included. The command
