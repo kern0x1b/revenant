@@ -46,9 +46,22 @@ local GATE_EXCLUDES = {"/.git", "/.xmake", "/build", "/.cache", "/.cache-private
 local REFUSAL_EXIT = 3
 local REFUSED = {}
 
+local BUDGET_CLASSES = {critical = true, normal = true, background = true}
+
+local function budget_class()
+    local named = os.getenv("REVENANT_PREPUSH_BUDGET_CLASS")
+    if not named or named == "" then
+        return "normal"
+    end
+    if not BUDGET_CLASSES[named] then
+        raise("REVENANT_PREPUSH_BUDGET_CLASS is %q: it must be critical, normal or background", named)
+    end
+    return named
+end
+
 local function budgeted(command, opt)
     opt = opt or {}
-    local args = table.join({"l", "-P", root, path.join(root, "tools", "budget.lua"), "run", "--class", "critical", "--jobs", tostring(opt.jobs or 2), "--"}, command)
+    local args = table.join({"l", "-P", root, path.join(root, "tools", "budget.lua"), "run", "--class", budget_class(), "--jobs", tostring(opt.jobs or 2), "--"}, command)
     local status = os.execv(os.programfile(), args, {try = true, curdir = opt.curdir or root, envs = opt.envs, stdout = opt.output, stderr = opt.output})
     if status == REFUSAL_EXIT then
         return REFUSED
@@ -346,7 +359,7 @@ local TOOLS = {"toolchain/modules/", "toolchain/addon.lua", "xmake.lua"}
 local UNBUILT = {"docs/**", "**/*.md", ".agents/**", "agent-skills/**"}
 local PREBUILT_ENV = {"REVENANT_PREBUILT", "REVENANT_PREBUILT_ONLY"}
 local ALWAYS = {"tools/prepush.lua", "tools/budget.lua"}
-local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true, REVENANT_LIGHT_SUITES_VERDICT = true}
+local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true, REVENANT_PREPUSH_BUDGET_CLASS = true, REVENANT_LIGHT_SUITES_VERDICT = true}
 local STORE_PACKAGES = {"llvm", "swift", "swift-bootstrap", "swift-runtime", "libcxx", "apple-compat", "iphoneos-sdk", "ld64", "ldid"}
 local TOOL_NAMES = {"git", "rsync", "cmake", "ninja", "xcrun", "clang", "cc", "make", "sh"}
 
@@ -1009,6 +1022,10 @@ local function test_cache()
     check("the cache folder of a worktree and the budget's own variables change no key", key(narrow), base_keys.narrow)
     os.setenv("REVENANT_CACHE", saved_cache or "")
     os.setenv("REVENANT_BUDGET_HELD", saved_held or "")
+    local saved_class = os.getenv("REVENANT_PREPUSH_BUDGET_CLASS")
+    os.setenv("REVENANT_PREPUSH_BUDGET_CLASS", "critical")
+    check("the class that prepush asks the budget for changes no key", key(narrow), base_keys.narrow)
+    os.setenv("REVENANT_PREPUSH_BUDGET_CLASS", saved_class or "")
     local saved_verdict = os.getenv("REVENANT_LIGHT_SUITES_VERDICT")
     os.setenv("REVENANT_LIGHT_SUITES_VERDICT", "0123456789abcdef@/a/run/light-suites.verdict")
     check("the hand-off of a verdict from ci_local to its tests is not an input of the verdict", key(narrow), base_keys.narrow)
@@ -1459,6 +1476,45 @@ local function dirty_tests(base)
     print("prepush: %d dirty tests passed", count)
 end
 
+local function test_budget_class()
+    local count = 0
+    local function check(name, got, want)
+        count = count + 1
+        assert(got == want, string.format("prepush budget class test %s: got %s, want %s", name, tostring(got), tostring(want)))
+    end
+    local base = path.join(cache().root(), "scratch", "prepush-class-test-" .. NAMES.next())
+    local pool = path.join(base, "pool")
+    os.mkdir(pool)
+    local saved = os.getenv("REVENANT_PREPUSH_BUDGET_CLASS")
+    local function granted_class(named)
+        os.setenv("REVENANT_PREPUSH_BUDGET_CLASS", named)
+        os.tryrm(path.join(pool, "wait-journal"))
+        local ok = budgeted({"/usr/bin/true"}, {envs = {REVENANT_BUDGET_POOL = pool, REVENANT_BUDGET_HELD = "", REVENANT_BUDGET_DISK_GB = "0"}})
+        return ok == true and (io.readfile(path.join(pool, "wait-journal")) or ""):match("\tclass (%a+)\t")
+    end
+    local failure
+    try {
+        function ()
+            check("a step of prepush asks for the normal class when nothing says otherwise", granted_class(""), "normal")
+            check("the gate that brings a branch into main asks for critical when told so", granted_class("critical"), "critical")
+            check("background is accepted too", granted_class("background"), "background")
+            os.setenv("REVENANT_PREPUSH_BUDGET_CLASS", "urgent")
+            local refused = false
+            try { function () budgeted({"/usr/bin/true"}, {}) end, catch { function () refused = true end } }
+            check("a class that does not exist is refused, not passed on", refused, true)
+        end,
+        catch { function (raised) failure = tostring(raised) end },
+        finally { function ()
+            os.setenv("REVENANT_PREPUSH_BUDGET_CLASS", saved or "")
+            os.tryrm(base)
+        end },
+    }
+    if failure then
+        raise("%s", failure)
+    end
+    print("prepush budget class test: %d checks passed", count)
+end
+
 local function test_dirty()
     local base = path.join(cache().root(), "scratch", "prepush-dirty-test-" .. NAMES.next())
     os.mkdir(base)
@@ -1819,6 +1875,7 @@ function main(command, ...)
         test_suite()
         test_cache()
         test_arguments()
+        test_budget_class()
         test_dirty()
         test_live()
         return
