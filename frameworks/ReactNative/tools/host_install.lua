@@ -314,11 +314,18 @@ function signing_arguments(entitlements, index, file)
     return {"-S", file}
 end
 
+function foreign_app_guard(applications, stash, app)
+    local link = applications .. "/" .. app
+    return string.format("{ { [ ! -e %s ] && [ ! -L %s ]; } || [ \"$(readlink %s)\" = %s/%s ] || { echo \"refused: %s is the app of another install ($(readlink %s)), and this id would take its place; give the host a bundle id whose last part is its own\"; exit 3; }; }",
+        link, link, link, stash, app, link, link)
+end
+
 function install_command(holder, bundle_id, archive)
     local stash = stash_folder(holder, bundle_id)
     local name = app_name(bundle_id)
     local app = name .. ".app"
     return table.concat({
+        foreign_app_guard("/Applications", stash, app),
         "mkdir -p " .. stash,
         "rm -rf " .. stash .. "/" .. app .. " /Applications/" .. app,
         "cd " .. stash,
@@ -412,7 +419,7 @@ end
 function exported_symbols(nm_text)
     local exported = {}
     for line in nm_text:gmatch("[^\n]+") do
-        local symbol = line:match("^%x+ %a (%S+)$")
+        local symbol = line:match("^%x+ %a (%S+)$") or line:match("^%s+I (%S+) %(indirect for %S+%)$")
         if symbol then
             exported[symbol] = true
         end

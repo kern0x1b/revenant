@@ -58,7 +58,7 @@ installed package. Remove the folder when the run is over.
 
 The phone must be claimed by your holder name. The app is installed by its bundle id, which `isolate.lua copy` gave your copy
 (see [the isolated build](isolated-build.md)): `/var/stash/<holder>/<last part of the id>/<last part of the id>.app`, linked from
-`/Applications`. Only the app of that id is removed, so a colleague's app stays. With `--bundle` the JavaScript bundle and the
+`/Applications`. Only the app of that id is removed, so a colleague's app stays. The app's name is the last part of the id, so two ids with the same last part would take the same link: `deploy` stops, naming where the existing link points, when `/Applications/<name>.app` is not this holder's own link (the 2026-11-23 probe host took the Paseo host's link this way), and the examples' ids end in names of their own. With `--bundle` the JavaScript bundle and the
 configuration (`module=main`, that bundle and the `--conf` lines) are written inside the app as root-owned files, which is where the
 host reads them. The host's output goes to `/var/tmp/<last part of the id>/` (it runs as `mobile` and cannot write the claim's scratch folder; the host
 caps each file there at 1 MiB). The archive travels through the claim's scratch folder `/var/root/revenant-scratch/<holder>/` and is removed after unpacking.

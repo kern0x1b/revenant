@@ -1,5 +1,5 @@
 {
-  "bundleId": "space.kern0x1b.rn-probe.rnhost",
+  "bundleId": "space.kern0x1b.rn-probe.rnprobe",
   "project": "rn-probe",
   "backports": [
     "FoundationBackports",
