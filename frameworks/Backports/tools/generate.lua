@@ -630,6 +630,23 @@ function references_of_src(device)
     return refs
 end
 
+function publish_skeleton(root, write)
+    local live = path.join(root, "skeleton")
+    local staged = path.join(root, "skeleton.staged")
+    return exclusive.run(path.join(root, "skeleton.lock"), "the skeleton folder", function ()
+        os.tryrm(staged)
+        local totals = write(staged)
+        local same = os.isdir(live) and os.execv("diff", {"-rq", live, staged}, {try = true, stdout = os.nuldev(), stderr = os.nuldev()}) == 0
+        if same then
+            os.tryrm(staged)
+        else
+            os.tryrm(live)
+            os.mv(staged, live)
+        end
+        return totals
+    end)
+end
+
 function main(...)
     local args = {...}
     if args[1] == "facts" then
@@ -655,7 +672,6 @@ function main(...)
     local pending = timing.run("generate: pending rows (device image, owners)", function ()
         return pending_of(state)
     end)
-    os.tryrm(path.join(sdkfiles.build_root(), "skeleton"))
     local owners, definitions, device, implemented, references
     timing.run("generate: src scan (markers, device globals, implemented names, references)", function ()
         owners, definitions = markers_of_src()
@@ -664,7 +680,9 @@ function main(...)
         references = references_of_src(device)
     end)
     local totals = timing.run("generate: skeleton.write", function ()
-        return skeleton.write(path.join(sdkfiles.build_root(), "skeleton"), pending, implemented, state.images, owners, definitions, device, references)
+        return publish_skeleton(sdkfiles.build_root(), function (staged)
+            return skeleton.write(staged, pending, implemented, state.images, owners, definitions, device, references)
+        end)
     end)
     local skipped = 0
     for _, framework in ipairs(pending) do

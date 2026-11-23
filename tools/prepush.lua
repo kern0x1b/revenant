@@ -889,6 +889,7 @@ local STEPS = {
     {name = "overlay test", reads = {"frameworks/ReactNative/tools/overlay.lua", "frameworks/ReactNative/tests/overlay_test.lua"}, run = function () return lua("frameworks/ReactNative/tests/overlay_test.lua") end},
     {name = "dyld caches test", reads = {"tools/dyld_caches.lua", "toolchain/modules/apple/dyld_caches.lua", "toolchain/modules/*.lua"}, inline = function () return call("tools/dyld_caches.lua", "test") end},
     {name = "analysis cache test", reads = {"tools/analysis_cache.lua", "toolchain/modules/*.lua"}, inline = function () return call("tools/analysis_cache.lua", "test") end},
+    {name = "skeleton publish test", reads = {"frameworks/Backports/tools/", "frameworks/Backports/tests/skeleton_publish_test.lua", "toolchain/modules/apple/", "toolchain/modules/*.lua"}, run = function () return lua("frameworks/Backports/tests/skeleton_publish_test.lua", "test") end},
     {name = "export baseline test", reads = {"frameworks/Backports/tests/export_baseline_test.lua", "toolchain/modules/apple/", "toolchain/modules/*.lua"}, run = function () return lua("frameworks/Backports/tests/export_baseline_test.lua", "test") end},
     {name = "lowered members", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_members_test.lua") end},
     {name = "lowered exports", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_exports_test.lua") end},
