@@ -23,7 +23,7 @@ local cache = import("cache", {rootdir = modules, anonymous = true})
 
 local VERSION = "light suite memo 1"
 local ALWAYS = {"xmake.lua", ".gitignore", "xmakew", "toolchain/addon.lua", "toolchain/includes/**", "toolchain/rules/**", "toolchain/toolchains/**", "toolchain/plugins/**",
-                "toolchain/src/**/xmake.lua", "frameworks/**/xmake.lua", "packages/**/xmake.lua", "packages/*/*/port/digest.lua", "addons/**/xmake.lua",
+                "toolchain/src/**/xmake.lua", "frameworks/**/xmake.lua", "frameworks/Backports/tools/**", "packages/**/xmake.lua", "packages/**/patches/**", "packages/*/*/port/digest.lua", "addons/**/xmake.lua",
                 "emulator/**", "recompiler/**", "neon/**", "toolchain/tests/**/xmake.lua",
                 "toolchain/tests/light_suites.lua", "toolchain/tests/suite_reads.lua", "toolchain/modules/byteorder.lua", "toolchain/modules/workspace.lua",
                 "toolchain/modules/tmp_guard.lua", "toolchain/modules/cache.lua", "toolchain/modules/retention.lua", "toolchain/modules/generations.lua",
@@ -56,9 +56,8 @@ function profile(suite, file)
     local patterns = {}
     for _, glob in ipairs(reads) do
         if glob == "**" then
-            io.writefile(file, "(version 1)\n(allow default)\n")
-            return
-        end
+            table.insert(patterns, string.format("(subpath \"%s\")", root))
+        else
         local prefix = (glob:match("^([^*]+)") or ""):gsub("/+$", "")
         if glob:find("*") or glob:endswith("/") then
             if prefix ~= "" then
@@ -66,6 +65,7 @@ function profile(suite, file)
             end
         else
             table.insert(patterns, string.format("(literal \"%s\")", path.join(root, glob)))
+        end
         end
     end
     local lines = {"(version 1)", "(allow default)", "(allow process-exec*)", "(allow process-info*)", "(allow sysctl*)",
