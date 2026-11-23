@@ -657,7 +657,7 @@ function write(skeleton, frameworks, implemented, images, markers, definitions, 
     os.mkdir(skeleton)
     emit(path.join(skeleton, "revenant_backports.h"), HEADER)
     emit(path.join(skeleton, "registrar.m"), REGISTRAR)
-    local alias = path.join(sdkfiles.src_root(), "revenant_alias.h")
+    local alias = path.relative(path.join(sdkfiles.src_root(), "revenant_alias.h"), path.join(sdkfiles.build_root(), "skeleton"))
     local totals = {objc = 0, classes = 0, protocols = 0, globals = 0, globals_uncopied = 0, device_bound = 0, c = 0, trampolines = 0, c_in_src = 0, src_only = 0, swift = 0}
     local outputs, seen_c, seen_global, imports_of = {}, {}, {}, {}
     local function output(name)
