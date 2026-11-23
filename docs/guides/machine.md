@@ -680,7 +680,8 @@ environment of the test does not reach it.
   ticket another process found without a holder (a `kill`, a crash, a closed terminal) and removed; the wait counts from the
   time in the ticket's name, and the journal lock covers reading and removing the ticket and writing the line, so two
   processes that find the same dead ticket write one line, and the empty file that opening a vanished ticket makes writes
-  none. `status` prints `abandoned`, the count over the last day, and a line for each holder with the seconds waited and
+  none; a ticket without a holder whose pid is still alive (its request is between creating the file and taking its lock) is
+  removed as before but not recorded as dead. `status` prints `abandoned`, the count over the last day, and a line for each holder with the seconds waited and
   the reasons, so the requests that never got tokens (the ones the granted waits cannot show) are in the same record. The journal is a cache-day record, not
   an input to admission, so it is kept in the pool folder and is never a key. The same file records what the watcher stopped (a budget
   run's parent died): one line for each process, written by `budget.lua stopped`, which the watcher runs just before the signal

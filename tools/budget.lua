@@ -417,6 +417,11 @@ local function enqueue(folder, rank, minimum, who)
     return {name = name, file = file, lock = lock}
 end
 
+local function process_alive(pid)
+    local state = try { function () return os.iorunv(PS, {"-o", "stat=", "-p", tostring(pid)}):trim() end } or ""
+    return state ~= "" and not state:find("^Z")
+end
+
 local function ungranted_entry(name, text, reason, at)
     local rank = tonumber(name:match("^(%d+)%-"))
     local class = "normal"
@@ -441,7 +446,8 @@ local function forget_ticket(file, reason)
                 local at = os.time()
                 os.tryrm(file)
                 os.tryrm(marker)
-                if text:find("^%d+\np %d+\n") then
+                local named = tonumber(text:match("^%d+\np (%d+)\n"))
+                if named and (reason ~= "died" or not process_alive(named)) then
                     write_journal(folder, at, ungranted_entry(path.filename(file), text, reason, at))
                 end
             end)
@@ -881,7 +887,7 @@ local function status()
         failures = failures + 1
     end
     if failures > 0 then
-        say("stopped   %d journal write(s) failed (watcher stops or grants), see %s", failures, journal_path(folder) .. ".errors")
+        say("stopped   %d journal write(s) failed (watcher stops, grants or requests that never got tokens), see %s", failures, journal_path(folder) .. ".errors")
     end
     say("disk      %.0f GB free on the checkout's volume (floor %d GB)", free_disk_gb(), DISK_FLOOR_GB)
 end
@@ -917,9 +923,18 @@ local function parsed_gave(line)
 end
 
 local function test_ungranted(check, base)
+    local function unused_pid(below)
+        for pid = below, 90000, -1 do
+            if not process_alive(pid) then
+                return pid
+            end
+        end
+    end
+    local first_pid = unused_pid(99999)
+    local second_pid = unused_pid(first_pid - 1)
     local gave_pool = path.join(base, "gavepool")
     os.mkdir(gave_pool)
-    local gone = enqueue(gave_pool, 2, 3, {pid = 4242, worktree = "/work/tree", command = "/bin/sleep 9", at = os.time()})
+    local gone = enqueue(gave_pool, 2, 3, {pid = first_pid, worktree = "/work/tree", command = "/bin/sleep 9", at = os.time()})
     gone.lock:unlock()
     gone.lock:close()
     check("a ticket whose process died does not block", ahead_of(gave_pool, "9-9999999999999-99999999.ticket", 3), false)
@@ -929,7 +944,7 @@ local function test_ungranted(check, base)
     check("with the reason died", died_entry.reason, "died")
     check("its class", died_entry.class, "normal")
     check("the tokens it asked for", died_entry.tokens, 3)
-    check("its pid", died_entry.pid, 4242)
+    check("its pid", died_entry.pid, first_pid)
     check("its worktree", died_entry.worktree, "/work/tree")
     check("its command", died_entry.command, "/bin/sleep 9")
     check("and the seconds it waited", died_entry.wait ~= nil and died_entry.wait <= 2, true)
@@ -941,7 +956,7 @@ local function test_ungranted(check, base)
     local old_file = path.join(gave_pool, "queue", old_name)
     local old_lock = io.openlock(old_file)
     old_lock:trylock()
-    io.writefile(old_file, "2\np 777\n" .. who_line({worktree = "/old/tree", command = "/usr/bin/true", at = os.time() - 120}) .. "\n")
+    io.writefile(old_file, "2\np " .. second_pid .. "\n" .. who_line({worktree = "/old/tree", command = "/usr/bin/true", at = os.time() - 120}) .. "\n")
     old_lock:unlock()
     old_lock:close()
     waiters(gave_pool)
@@ -954,6 +969,13 @@ local function test_ungranted(check, base)
     check("a ticket file that does not exist is no live request", holder_alive(not_a_request), false)
     check("and the empty file that opening it made writes no journal line", #journaled(gave_pool), 2)
     check("and is removed", os.isfile(not_a_request), false)
+
+    local racing = enqueue(gave_pool, 2, 1, {pid = os.getpid(), worktree = "/work/racing", command = "/bin/echo racing", at = os.time()})
+    racing.lock:unlock()
+    racing.lock:close()
+    check("a ticket without a holder is removed even when its process is alive", ahead_of(gave_pool, "9-9999999999999-99999999.ticket", 1), false)
+    check("its file is gone", os.isfile(racing.file), false)
+    check("but a process that is alive is not journaled as dead (the holder may be still taking its lock)", #journaled(gave_pool), 2)
 
     local leaver = enqueue(gave_pool, 3, 1, {pid = 5151, worktree = "/work/leaver", command = "/bin/echo left", at = os.time()})
     leave(leaver, "left")
