@@ -15,7 +15,14 @@ accepted and none of `failed STDOUT`, `NOSIGPIPE`, `NO_HOME` or `NO_READER` appe
 after the spawn (the library's load 1445 and 1418 ms), and the answer to an `execute` with a key the server refuses,
 `EXECUTE_FAILED com.google.recaptcha 2: Invalid Site Key.`, came 3.33 and 3.03 s after the spawn, so the helper, the
 library, Google and the SDK's error reached the app whole. (Those times and the lines are the Telegram session's
-record of its own run.) No run has returned a token. The last section says what is still open.
+record of its own run.) A fourth time, on 2026-11-23 (pass137 of Telegram's build), a shell script on the phone ran
+the helper with the two pipes of the protocol and the log on descriptor 2, with a clock of whole seconds only (the
+phone's shell has no finer one, so every time of that run is good to one second). A second `execute` on the same
+process, twelve seconds after the first, got the same `EXECUTE_FAILED` in under a second, and the process id was the
+same before the first request, before the second and before `quit`, which ended with exit 0 in the same second. With
+`--idle-ms 10000` and no request the helper left with status 0 ten seconds after `ready` and wrote `no request for
+the idle time` in its log. The files it keeps under its home are listed in [State](#state). No run has returned a
+token. The last section says what is still open.
 
 ## Starting it
 
@@ -204,23 +211,30 @@ The log line says `own store: separate from the shared store` or `the shared sto
 The cookie store is not kept between helpers: each helper starts with none. What the server sees of a repeated login
 is therefore what the SDK itself keeps in its preferences.
 
-On the phone before the home was moved, measured: the preferences file `<state>.plist` in `Library/Preferences` (5562
-bytes after one request with the refused key, 11345 bytes after the second part), and the URL cache as an SQLite file
-named by the state with its `-shm` and `-wal` files in `Library/Caches/<program>/`, no `Cache.db` among them. The
-same relative paths under the moved home are not measured.
+On the phone with the home moved, measured in pass137 (`<HOME>` is `/var/mobile`, the state is
+`ph.telegra.Telegraph.recaptcha`): the helper's home `<HOME>/Library/Caches/ph.telegra.Telegraph.recaptcha/` holds
+`Library/Preferences/ph.telegra.Telegraph.recaptcha.plist` (5694 bytes, mode 0600), the URL cache as an SQLite file
+`Library/Caches/ph.telegra.Telegraph/ph.telegra.Telegraph.recaptcha` (4096 bytes) with its `-shm` (32768) and `-wal`
+(168952) files, and `Library/Caches/rcec/ovk` (564 bytes). Outside the home nothing appeared: no
+`<HOME>/Library/Caches/rcec`, no file with `recaptcha` in its name in `<HOME>/Library/Preferences`, and the app's own
+preferences file did not change (1061 bytes, same time). The state survived a restart of the helper: its second start
+counted one key in its preferences, the first none. Before the home was moved the same files were found in
+`Library/Preferences` (5562 bytes after one request with the refused key, 11345 bytes after the second part) and in
+`Library/Caches/<program>/`, with no `Cache.db` among them.
 
 ## Not yet measured
 
-- The helper with the real library on the phone under Telegram's own build ran once (pass125b, above). Not yet run
-  there: a second request on the same helper, the helper's exit on idle, the pause after a `failed`, and a key the
-  server accepts. The helper's own virtual size on the phone was measured with a refused key (about 402 MB idle, 409 MB at
-  the peak, 21 MB resident; the table in [the design](../../explanation/recaptcha-helper-process.md), section Memory), not with a key the
-  server accepts.
-- The home move on the phone: in pass125b the helper's line named `caches=/var/mobile/Library/Caches/
-  ph.telegra.Telegraph.recaptcha/Library/Caches` and `own store: separate from the shared store`, and `NO_HOME` did not
-  appear, so iOS 6.1.3 honoured `CFFIXED_USER_HOME` for the caches folder and the languages and locale it reads
-  survived the move (the helper checks both before `ready`). The files under the moved home (the preferences and the
-  URL cache above) have not been looked at. On the build host the caches part is proved, with a control; the languages
-  part has no control, because the build host never changes them.
+- The helper with the real library on the phone under Telegram's own build ran twice (pass125b and pass137, above).
+  Not yet run there: a key the server accepts. The times of pass137 are good to one second only; the second request
+  and the idle exit have no milliseconds, which a driver in C on the phone would give. The helper's own virtual size on
+  the phone was measured with a refused key (about 402 MB idle, 409 MB at the peak, 21 MB resident; the table in
+  [the design](../../explanation/recaptcha-helper-process.md), section Memory), not with a key the server accepts.
+- The pause after a `failed` is the app's, not the helper's: `UNAVAILABLE_SECONDS` of 120 in Telegram's
+  `recaptcha_helper.c`, after which a helper that stopped with `failed`, or died twice in a row, makes every request
+  answer `HELPER_UNAVAILABLE` at once with no new spawn. Telegram's `tools/recaptcha_helper_test` checks it on the build
+  host; it has not run on the phone, and a probe inside the app that starts a helper made to fail is not planned, since
+  the rule is plain time arithmetic in C.
+- The guard of the home move for languages and locale has no control on the build host, which never changes them; on
+  the phone it passed in pass125b (no `NO_HOME`, `caches=` inside the helper's home).
 - The crash report of a child of Telegram, and the runtime's record under `XL_CRASH` in the helper.
 - Everything on the path that returns a token: no key that the server accepts has been used anywhere.
