@@ -1,7 +1,7 @@
 diff -ru a/ios/BlurEffectView.swift b/ios/BlurEffectView.swift
 --- a/ios/BlurEffectView.swift
 +++ b/ios/BlurEffectView.swift
-@@ -1,66 +1,126 @@
+@@ -1,66 +1,168 @@
  // Copyright 2015-present 650 Industries. All rights reserved.
  
  import UIKit
@@ -29,6 +29,7 @@ diff -ru a/ios/BlurEffectView.swift b/ios/BlurEffectView.swift
    var intensity: Double = 0.5 {
      didSet {
 -      setNeedsDisplay()
++      overlay.alpha = CGFloat(intensity)
 +      lastBitmap = nil
 +      refresh()
      }
@@ -63,6 +64,9 @@ diff -ru a/ios/BlurEffectView.swift b/ios/BlurEffectView.swift
 +    snapshot.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 +    overlay.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 +    overlay.backgroundColor = tint.toOverlayColor()
++    overlay.alpha = CGFloat(intensity)
++    NotificationCenter.default.addObserver(self, selector: #selector(applicationDidEnterBackground), name: UIApplicationDidEnterBackground, object: nil)
++    NotificationCenter.default.addObserver(self, selector: #selector(applicationDidBecomeActive), name: UIApplicationDidBecomeActive, object: nil)
 +    addSubview(snapshot)
 +    addSubview(overlay)
    }
@@ -71,6 +75,7 @@ diff -ru a/ios/BlurEffectView.swift b/ios/BlurEffectView.swift
  
    deinit {
 -    animator?.stopAnimation(true)
++    NotificationCenter.default.removeObserver(self)
 +    link?.invalidate()
    }
  
@@ -89,17 +94,49 @@ diff -ru a/ios/BlurEffectView.swift b/ios/BlurEffectView.swift
 -      effect = intensity > 0 ? visualEffect : nil
 +  override func didMoveToWindow() {
 +    super.didMoveToWindow()
-+    link?.invalidate()
-+    link = nil
++    stopTimer()
 +    guard window != nil else {
        return
      }
 +    lastBitmap = nil
++    startTimer()
++  }
++
++  private func startTimer() {
++    guard window != nil, link == nil else {
++      return
++    }
 +    let next = CADisplayLink(target: target, selector: #selector(WeakTarget.tick))
 +    next.frameInterval = 6
 +    next.add(to: .main, forMode: .common)
 +    link = next
 +    refresh()
++  }
++
++  private func stopTimer() {
++    link?.invalidate()
++    link = nil
++  }
++
++  @objc private func applicationDidEnterBackground() {
++    stopTimer()
++  }
++
++  @objc private func applicationDidBecomeActive() {
++    startTimer()
++  }
++
++  private static func transform(of layer: CALayer, to destination: CALayer) -> CGAffineTransform {
++    var result = CGAffineTransform.identity
++    var current: CALayer? = layer
++    while let item = current, item !== destination {
++      var step = CGAffineTransform(translationX: item.position.x, y: item.position.y)
++      step = step.concatenating(item.affineTransform())
++      step = step.concatenating(CGAffineTransform(translationX: -item.anchorPoint.x * item.bounds.width, y: -item.anchorPoint.y * item.bounds.height))
++      result = step.concatenating(result)
++      current = item.superlayer
++    }
++    return result
 +  }
  
 -    effect = nil
@@ -114,18 +151,23 @@ diff -ru a/ios/BlurEffectView.swift b/ios/BlurEffectView.swift
 +    refreshing = true
 +    defer { refreshing = false }
 +    let rect = host.convert(host.bounds, to: window)
++    CATransaction.begin()
++    CATransaction.setDisableActions(true)
++    defer {
++      host.isHidden = false
++      CATransaction.commit()
++    }
 +    host.isHidden = true
-+    UIGraphicsBeginImageContextWithOptions(rect.size, false, BlurEffectView.renderScale)
++    UIGraphicsBeginImageContextWithOptions(bounds.size, false, BlurEffectView.renderScale)
 +    guard let drawing = UIGraphicsGetCurrentContext() else {
 +      UIGraphicsEndImageContext()
-+      host.isHidden = false
 +      return
 +    }
-+    drawing.translateBy(x: -rect.origin.x, y: -rect.origin.y)
++    drawing.concatenate(BlurEffectView.transform(of: host.layer, to: window.layer).inverted())
++    drawing.translateBy(x: -bounds.origin.x, y: -bounds.origin.y)
 +    window.layer.render(in: drawing)
 +    let image = UIGraphicsGetImageFromCurrentImageContext()
 +    UIGraphicsEndImageContext()
-+    host.isHidden = false
 +    guard let image = image, let cgImage = image.cgImage, let data = cgImage.dataProvider?.data else {
 +      return
 +    }
