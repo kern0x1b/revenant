@@ -44,7 +44,7 @@ function compute(opt)
     local sdk = opt.sdk or sdkfiles.sdk_folder()
     local tools = opt.tools or path.join(root, "frameworks", "Backports", "tools")
     local src = opt.src or path.join(root, "frameworks", "Backports", "src")
-    local modules = opt.modules or path.join(root, "toolchain", "modules")
+    local modules = opt.modules or path.join(root, "toolchain/modules")
     local xmake = opt.xmake or path.join(root, "frameworks", "Backports", "xmake.lua")
     local inventory = opt.inventory
     local facts = opt.facts or path.join(sdkfiles.shared_root(), opt.facts_key or sdkfiles.cache_key(sdk))
