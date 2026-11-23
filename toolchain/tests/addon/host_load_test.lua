@@ -15,6 +15,27 @@ function main()
 end
 ]]
 
+local FOREIGN = [[
+{
+    __toolchains_iphoneos_armv7 = {
+        "xcode"
+    },
+    apple_minimum = "6.0",
+    apple_sdk = "",
+    arch = "armv7",
+    builddir = "build",
+    ccache = true,
+    component = "Combine",
+    host = "macosx",
+    kind = "static",
+    mode = "release",
+    ndk_stdcxx = true,
+    plat = "iphoneos",
+    tests = "host",
+    xcode = "/Applications/Xcode.app"
+}
+]]
+
 local function load(root, folder, curdir, envs)
     local listing = path.join(folder, "listing.lua")
     local log = path.join(folder, "load.log")
@@ -42,30 +63,31 @@ function failures(opt)
     end
 
     local foreign = path.join(root, "foreign")
-    local project = path.join(foreign, "project")
-    os.mkdir(project)
-    io.writefile(path.join(project, "xmake.lua"), 'set_project("foreign")\nset_xmakever("3.1.2")\n')
-    local configured = os.execv(os.programfile(), {"f", "-P", project, "-p", "iphoneos", "-a", "armv7", "-y", "--require=n"},
-        {try = true, stdout = path.join(foreign, "configure.log"), stderr = path.join(foreign, "configure.log"), curdir = project})
-    if configured ~= 0 then
-        table.insert(found, "a foreign iPhoneOS configuration must be made for the check, but xmake f exited with " .. tostring(configured) .. ": " .. (io.readfile(path.join(foreign, "configure.log")) or ""))
+    os.mkdir(foreign)
+    local copy = path.join(foreign, "checkout")
+    local copied = os.execv("rsync", {"-a", "--exclude", ".git", "--exclude", ".cache", "--exclude", "build", "--exclude", ".claude",
+        "--exclude", ".xmake", repository .. "/", copy .. "/"},
+        {try = true, stdout = path.join(foreign, "copy.log"), stderr = path.join(foreign, "copy.log")})
+    if copied ~= 0 then
+        table.insert(found, "the checkout with a foreign configuration could not be copied: " .. (io.readfile(path.join(foreign, "copy.log")) or ""))
+        os.tryrm(root)
+        return found
     end
+    local configdir = path.join(copy, ".xmake", "macosx", "arm64")
+    os.mkdir(configdir)
+    io.writefile(path.join(configdir, "xmake.conf"), FOREIGN)
 
     local isolated = path.join(foreign, "isolated")
     os.mkdir(isolated)
-    problem = load(repository, isolated, project, {XMAKE_CONFIGDIR = path.join(isolated, "config")})
+    problem = load(copy, isolated, copy, {XMAKE_CONFIGDIR = path.join(isolated, "config")})
     if problem then
-        table.insert(found, "with a foreign iPhoneOS configuration beside the checkout: " .. problem)
+        table.insert(found, "with a foreign iPhoneOS configuration in the checkout being loaded: " .. problem)
     end
 
     local shared = path.join(foreign, "shared")
     os.mkdir(shared)
-    io.writefile(path.join(shared, "listing.lua"), LISTING)
-    local sharedlog = path.join(shared, "load.log")
-    local status = os.execv(os.programfile(), {"l", "-P", repository, path.join(shared, "listing.lua")},
-        {try = true, stdout = sharedlog, stderr = sharedlog, curdir = project})
-    if status == 0 then
-        table.insert(found, "a foreign iPhoneOS configuration must break the load of the project that uses it, or the check of the isolated load proves nothing: " .. (io.readfile(sharedlog) or ""))
+    if not load(copy, shared, copy, nil) then
+        table.insert(found, "a foreign iPhoneOS configuration in the checkout being loaded must break the load when that checkout's own configuration is used, or the check of the isolated load proves nothing")
     end
 
     os.tryrm(root)
