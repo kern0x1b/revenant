@@ -287,6 +287,11 @@ function main()
         local indirect = host.exported_symbols("         I _OBJC_CLASS_$_NSUUID (indirect for _OBJC_CLASS_$_NSUUID)\n         U _other\n")
         expect("a class the library re-exports from the system (an indirect symbol of nm) is an export", indirect["_OBJC_CLASS_$_NSUUID"] and not indirect._other,
             "the indirect symbol was not read as an export")
+        local renamed = host.exported_symbols("         I _OBJC_CLASS_$_NSFirst (indirect for _OBJC_CLASS_$_NSSecond)\n")
+        expect("an indirect symbol is exported under its own name, not under the name it stands for", renamed["_OBJC_CLASS_$_NSFirst"] and not renamed["_OBJC_CLASS_$_NSSecond"],
+            "the name of an indirect symbol was read wrongly")
+        local forms = host.exported_symbols("0000b000 W _weak_one\n0000b010 D _data_one\n0000b020 T _text_one\n")
+        expect("weak definitions (W) and data (D) are exports like text (T)", forms._weak_one and forms._data_one and forms._text_one, "a form of a defined symbol was not read")
         expect("every import exported by the installed library raises no problem", #host.missing_exports(imports,
             {libFoundationBackports = exported, libUIKitBackports = exported}) == 0, "an exported symbol was reported")
         local missing = host.missing_exports(imports, {libFoundationBackports = exported, libUIKitBackports = host.exported_symbols("0000a000 T _x\n")})
