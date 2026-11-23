@@ -284,6 +284,9 @@ function main()
         local exported = host.exported_symbols("0000a000 T _revenant_probe\n0000a010 S _OBJC_CLASS_$_NSUserActivity\n         U _other\n")
         expect("a library's exports are read from the defined global symbols", exported._revenant_probe and exported["_OBJC_CLASS_$_NSUserActivity"] and not exported._other,
             "the exports are wrong")
+        local indirect = host.exported_symbols("         I _OBJC_CLASS_$_NSUUID (indirect for _OBJC_CLASS_$_NSUUID)\n         U _other\n")
+        expect("a class the library re-exports from the system (an indirect symbol of nm) is an export", indirect["_OBJC_CLASS_$_NSUUID"] and not indirect._other,
+            "the indirect symbol was not read as an export")
         expect("every import exported by the installed library raises no problem", #host.missing_exports(imports,
             {libFoundationBackports = exported, libUIKitBackports = exported}) == 0, "an exported symbol was reported")
         local missing = host.missing_exports(imports, {libFoundationBackports = exported, libUIKitBackports = host.exported_symbols("0000a000 T _x\n")})
