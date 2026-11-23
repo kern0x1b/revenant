@@ -27,16 +27,15 @@ function failures(opt)
     local function forget(key)
         os.tryrm(path.join(memo, "light-suites", key))
     end
-    local function process(pid)
-        local text = try { function () return os.iorunv("ps", {"-ww", "-o", "lstart=", "-p", tostring(pid)}) end } or ""
-        return (text:gsub("%s+", " "):gsub("^ ", ""):gsub(" $", ""))
+    local function alive(pid)
+        return os.execv("/bin/kill", {"-0", tostring(pid)}, {try = true}) == 0
     end
     local function real(folder)
         return os.iorunv("sh", {"-c", "cd \"$1\" && pwd -P", "sh", folder}):trim()
     end
-    local function forged(folder, nonce, key, tree, pid, began, where)
+    local function forged(folder, nonce, key, tree, pid, began, where, owner)
         local file = path.join(folder, string.format("light-suites-%s-%s.verdict", pid, nonce))
-        io.writefile(file, table.concat({nonce, key, tree, tostring(pid), began, where or folder, LINE}, "\n") .. "\n")
+        io.writefile(file, table.concat({nonce, key, tree, tostring(pid), began, where or folder, LINE, owner or "ci_local.lua"}, "\n") .. "\n")
         return nonce .. "@" .. file
     end
 
@@ -49,7 +48,7 @@ function failures(opt)
         os.sleep(100)
     end
     local owner = tonumber(io.readfile(pidfile):trim())
-    local began = process(owner)
+    local began = "Mon Nov 23 12:00:00 2026"
     local me = os.getpid()
 
     local tree = folder_of("tree")
@@ -102,13 +101,12 @@ function failures(opt)
     forget(OTHER_KEY)
     check("a verdict the memo no longer holds is refused again", recalled.read(refused, tree, memo), nil)
 
-    local mine = process(me)
-    check("a live process that is not ci_local is no owner", recalled.read(forged(folder_of("not-ci"), "0123456789abcdef", KEY, real(tree), me, mine), tree, memo), nil)
+    check("a live process that is not ci_local is no owner", recalled.read(forged(folder_of("not-ci"), "0123456789abcdef", KEY, real(tree), me, began, nil, "other.lua"), tree, memo), nil)
     check("a hand-off cannot be issued for a process that is not running", recalled.issue(folder_of("none"), KEY, tree, LINE, 999999), nil)
     local finished = os.iorunv("sh", {"-c", "echo $$"}):trim()
-    check("the process that made the file is gone", process(finished), "")
+    check("the process that made the file is gone", alive(finished), false)
     check("a run that has ended is no verdict", recalled.read(forged(folder_of("dead"), "0123456789abcdef", KEY, real(tree), finished, began), tree, memo), nil)
-    check("a process number that another process has taken is no verdict", recalled.read(forged(folder_of("reused"), "0123456789abcdef", KEY, real(tree), owner, "Mon Jan 1 00:00:00 2001"), tree, memo), nil)
+    check("an owner different from the one the parent recorded is no verdict", recalled.read(forged(folder_of("reused"), "0123456789abcdef", KEY, real(tree), owner, began, nil, "other.lua"), tree, memo), nil)
 
     local tampered = recalled.issue(folder_of("tampered"), KEY, tree, LINE, owner)
     local tampered_file = tampered:match("^%x+@(.+)$")

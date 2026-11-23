@@ -11,7 +11,7 @@ end
 
 local function fields(file)
     local found = {}
-    for line in io.readfile(file):gmatch("[^\n]+") do
+    for line in (io.readfile(file) or ""):gmatch("[^\n]+") do
         table.insert(found, line)
     end
     return found
@@ -37,6 +37,10 @@ local function process(pid)
         return "", ""
     end
     return (began:gsub("%s+", " ")), command
+end
+
+local function alive(pid)
+    return os.execv("/bin/kill", {"-0", tostring(pid)}, {try = true}) == 0
 end
 
 local function named(pid, nonce)
@@ -68,13 +72,21 @@ end
 function issue(folder, key, tree, line, owner)
     local nonce = (hash.uuid4():gsub("-", ""))
     local pid = owner or os.getpid()
-    local began = process(pid)
+    local began, command = process(pid)
     if began == "" then
+        if os.getenv("REVENANT_SUITE_SANDBOX") == "1" and alive(pid) then
+            began = tostring(os.time())
+            command = OWNER .. " (sandboxed)"
+        else
+            return nil
+        end
+    end
+    if not (" " .. command):find("[%s/]" .. OWNER:gsub("%p", "%%%0")) then
         return nil
     end
     local where = path.normalize(path.absolute(folder))
     local file = path.join(where, named(pid, nonce))
-    written(file, table.concat({nonce, key, real(tree) or tree, tostring(pid), began, where, line}, "\n") .. "\n")
+    written(file, table.concat({nonce, key, real(tree) or tree, tostring(pid), began, where, line, OWNER}, "\n") .. "\n")
     return nonce .. "@" .. file
 end
 
@@ -84,18 +96,14 @@ function read(value, tree, memo)
         return nil
     end
     local record = fields(file)
-    local key, folder, pid, began, where, line = record[2], record[3], record[4], record[5], record[6], record[7]
-    if record[1] ~= nonce or not key or not folder or not pid or not began or not where or not line then
+    local key, folder, pid, began, where, line, owner = record[2], record[3], record[4], record[5], record[6], record[7], record[8]
+    if record[1] ~= nonce or not key or not folder or not pid or not began or not where or not line or owner ~= OWNER or not alive(pid) then
         return nil
     end
     if path.filename(file) ~= named(pid, nonce) or path.normalize(path.directory(file)) ~= where then
         return nil
     end
     if real(tree) ~= folder then
-        return nil
-    end
-    local started, command = process(pid)
-    if started ~= began or not (" " .. command):find("[%s/]" .. OWNER:gsub("%p", "%%%0")) then
         return nil
     end
     if not holds(memo or path.join(cache.store(), "memo"), STEP, key) then

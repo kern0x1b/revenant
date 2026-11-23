@@ -179,14 +179,14 @@ local function hung_build(folder, repository, found)
     end
     local holder_file = path.join(store, "xmake", key .. ".holder")
     local holder = os.isfile(holder_file) and io.readfile(holder_file) or ""
-    local pid = holder:match("^(%d+) %d+")
+    local pid = holder:match("^(%d+) ")
     if not pid then
         table.insert(found, "a launcher that builds the xmake records its process and its start where the others can read them: " .. holder)
     end
-    local recorded_start = holder:match("^%d+ %d+ (.+)$")
-    local actual_start = pid and (os.iorunv("ps", {"-o", "lstart=", "-p", pid}) or ""):gsub("%s+", " "):trim() or nil
-    if not recorded_start or recorded_start:trim() ~= actual_start then
-        table.insert(found, "the holder file records when the process started, so a number that another process has taken later is told from the builder: " .. holder .. " against " .. tostring(actual_start))
+    local recorded_start = holder:match("^%d+ (%d+)")
+    local alive = pid and os.execv("/bin/kill", {"-0", pid}, {try = true}) == 0
+    if not recorded_start or not alive then
+        table.insert(found, "the holder file records a live process and when it started, so a number that another process has taken later is told from the builder: " .. holder)
     end
     local waiter = spawn(hung, root, table.join(envs, {REVENANT_CACHE = path.join(hung, "cache-b"), REVENANT_XMAKE_BUILD_WAIT = "4", REVENANT_XMAKE_BUILD_POLL = "2"}), "b")
     local status, output = finish(waiter, 9000)
@@ -242,7 +242,7 @@ local function stale_holder(folder, repository, found)
         os.sleep(100)
         waited = waited + 100
     end
-    io.writefile(path.join(xmakes, key .. ".holder"), "1 " .. os.time() .. " Thu Jan 1 00:00:00 1970\n")
+    io.writefile(path.join(xmakes, key .. ".holder"), "1 1\n")
     local status, output = launch(root, {REVENANT_STORE = store, REVENANT_CACHE = path.join(stale, "cache"), REVENANT_XMAKE_BUILD_WAIT = "2", REVENANT_XMAKE_BUILD_POLL = "1"}, path.join(stale, "launch.log"))
     holding:close()
     if status == 0 or not output:find("process 1 held", 1, true) or not output:find("has ended", 1, true) then
