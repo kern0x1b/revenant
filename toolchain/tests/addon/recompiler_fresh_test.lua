@@ -1,3 +1,5 @@
+import("fixtures")
+
 function failures(opts)
     local root = path.directory(path.directory(path.directory(os.scriptdir())))
     local fresh = import("fresh", {rootdir = path.join(root, "recompiler", "tools"), anonymous = true})
@@ -8,8 +10,7 @@ function failures(opts)
             failures = failures + 1
         end
     end
-    local dir = path.join(os.tmpdir(), "recompiler-fresh-" .. os.time() .. "-" .. math.random(100000))
-    os.mkdir(dir)
+    local dir = fixtures.scratch()
     local now = os.time()
     local function make(name, age)
         local file = path.join(dir, name)

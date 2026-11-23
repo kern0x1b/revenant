@@ -1,10 +1,11 @@
+import("fixtures")
+
 function failures(opt)
     local root = path.join(path.directory(opt.modules), "..")
     local coverage = import("coverage", {rootdir = path.join(root, "frameworks", "ReactNative", "tools"), anonymous = true})
     local json = import("core.base.json")
     local found = {}
-    local sample_root = path.join(os.tmpdir(), "rn-coverage-addon", "sample")
-    os.rm(sample_root)
+    local sample_root = path.join(fixtures.scratch(), "sample")
     os.mkdir(path.join(sample_root, "frameworks", "ReactNative", "src", "expo"))
     io.writefile(path.join(sample_root, "frameworks", "ReactNative", "src", "expo", "xmake.lua"), "local LOCAL_COPIES = {}\n")
     io.writefile(path.join(sample_root, "frameworks", "ReactNative", "src", "expo", "StubModules.swift"), "public final class StubSample: Module {}\n")

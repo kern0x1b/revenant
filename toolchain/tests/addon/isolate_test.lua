@@ -1,3 +1,5 @@
+import("fixtures")
+
 function failures(opt)
     local root = path.join(path.directory(opt.modules), "..")
     local isolate = import("isolate", {rootdir = path.join(root, "frameworks", "ReactNative", "tools"), anonymous = true})
@@ -33,9 +35,9 @@ function failures(opt)
         table.insert(found, "the install with all patches must be the one picked, got " .. tostring(picked))
     end
 
-    local manifest_folder = path.join(os.tmpdir(), "iso-bundle-id-test", "iso-with-manifest")
-    local plain_folder = path.join(os.tmpdir(), "iso-bundle-id-test", "iso-plain")
-    os.tryrm(path.directory(manifest_folder))
+    local bundle_ids = fixtures.scratch()
+    local manifest_folder = path.join(bundle_ids, "iso-with-manifest")
+    local plain_folder = path.join(bundle_ids, "iso-plain")
     os.mkdir(path.join(manifest_folder, "build", "app-manifest"))
     os.mkdir(path.join(plain_folder, "build"))
     io.writefile(path.join(manifest_folder, "build", "app-manifest", "host.json"), '{"bundleId":"org.example.manifest","pods":["a:b"]}')
@@ -68,8 +70,7 @@ function failures(opt)
         table.insert(found, "--real must reach RN_EXPO_REAL")
     end
 
-    local app_folder = path.join(os.tmpdir(), "isolate-app-modules")
-    os.tryrm(app_folder)
+    local app_folder = path.join(fixtures.scratch(), "app-modules")
     os.mkdir(path.join(app_folder, "build", "app-manifest"))
     io.writefile(path.join(app_folder, "build", "app-manifest", "host.json"), '{"modules":["@scope/one","two"]}')
     if isolate.build_environment({folder = app_folder}).RN_APP_MODULES ~= "@scope/one,two" or isolate.build_environment({folder = "/f"}).RN_APP_MODULES ~= nil then

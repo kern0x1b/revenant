@@ -774,7 +774,11 @@ marked, and `--only <check,...>` runs just those (names with a space are quoted:
 an unknown name is an error, and a run with `--only` says that a push needs all checks. The full run before a push stays
 without flags. `light suites` asks the budget for up to four tokens and runs its suites in as many processes
 (`toolchain/tests/light_suites.lua` splits them into groups of about equal time by the measured seconds of its slowest suites;
-a run with one token, or by hand, runs them one after another): 230 s one after another, 65 s in four. Keep the caches
+a run with one token, or by hand, runs them one after another): 230 s one after another, 65 s in four. The suites and the
+tools they start use no system temporary folder: each suite works in a folder of its own under the scratch of the checkout,
+a suite that calls `os.tmpdir()` or `os.tmpfile()` fails, and the step sets `XMAKE_TMPDIR` and `TMPDIR` to a folder there, so
+two prepush runs of two worktrees share no `/tmp` path (measured 2026-11-23: no new entry in `/tmp` or the user's `$TMPDIR`
+during a run of the 67 suites). Keep the caches
 (`.cache`/`REVENANT_CACHE`, `build/backports-gate`) between runs: a cold `backports build`
 took 48 minutes on 2026-11-16 and a warm one 58 seconds (a new worktree starts with the facts and the module cache of the
 store, "Which analysis to share"), and a deleted cache leaves references in the checkout's `.xmake`

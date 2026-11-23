@@ -750,8 +750,7 @@ local function test_suite()
     check("a 60 GB floor refuses a 50 GB volume", disk_refused(50, 100), true)
     check("a volume at the floor is not refused", disk_refused(100, 100), false)
 
-    local base = path.join(os.tmpdir(), string.format("revenant-budget-%d-%d", os.time(), math.random(0, 999999)))
-    os.mkdir(base)
+    local base = import("@addon.revenant.workspace", {anonymous = true}).fresh("revenant-budget")
     local no_floor = "REVENANT_BUDGET_DISK_GB=0"
     local pool = path.join(base, "pool")
     local loaded = try { function ()

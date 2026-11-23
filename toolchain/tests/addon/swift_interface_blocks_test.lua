@@ -1,7 +1,9 @@
+import("fixtures")
+
 function failures(opt)
     local interfaces = import("apple.swift_interface", {rootdir = opt.modules, anonymous = true})
     local found = {}
-    local interface = path.join(os.tmpdir(), "revenant-interface-blocks.swiftinterface")
+    local interface = path.join(fixtures.scratch(), "blocks.swiftinterface")
     io.writefile(interface, table.concat({
         "import Foundation",
         "extension Foundation.NSNotification.Name {",

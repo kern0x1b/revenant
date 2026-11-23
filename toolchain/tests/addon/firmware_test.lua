@@ -6,8 +6,11 @@ local function image(folder, name, bytes)
     return mount
 end
 
+local names
+
 local function output(program, argv)
-    local file = os.tmpfile()
+    names = names or fixtures.filenames()
+    local file = names()
     os.execv(program, argv, {try = true, stdout = file, stderr = file})
     local text = io.readfile(file) or ""
     os.tryrm(file)

@@ -1,3 +1,5 @@
+import("fixtures")
+
 local LOCALES = {
     {name = "C", envs = {LC_ALL = "C"}},
     {name = "en_NZ.UTF-8", envs = {LC_ALL = "", LANG = "en_NZ.UTF-8"}},
@@ -61,9 +63,7 @@ end
 function failures(opt)
     local found = {}
     local probe = path.join(opt.modules, "..", "tests", "addon", "locale_probe.lua")
-    local work = path.join(os.tmpdir(), "locale_order_test-" .. os.getpid())
-    os.tryrm(work)
-    os.mkdir(work)
+    local work = fixtures.scratch()
     local outputs = {}
     for _, locale in ipairs(LOCALES) do
         local log = path.join(work, locale.name:gsub("[^%w]", "_") .. ".out")

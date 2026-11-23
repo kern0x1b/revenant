@@ -3,6 +3,7 @@ import("core.base.process")
 local root = path.absolute(path.directory(path.directory(os.scriptdir())))
 
 local byteorder = import("byteorder", {rootdir = path.join(root, "toolchain", "modules"), anonymous = true})
+local workspace = import("workspace", {rootdir = path.join(root, "toolchain", "modules"), anonymous = true})
 
 local WORKERS = 4
 
@@ -24,10 +25,29 @@ local function declared()
     return suites
 end
 
+function forbid_system_tmp(suite)
+    local real_dir, real_file = os.tmpdir, os.tmpfile
+    local function guard(name, real)
+        return function (...)
+            local info = debug.getinfo(2, "S")
+            if info and info.short_src and info.short_src:startswith("@programdir") then
+                return real(...)
+            end
+            raise("%s calls %s, which is the system temporary folder: a suite works in a folder of its own under the scratch of the checkout (fixtures.scratch())", suite, name)
+        end
+    end
+    os.tmpdir = guard("os.tmpdir", real_dir)
+    os.tmpfile = guard("os.tmpfile", real_file)
+    return function ()
+        os.tmpdir, os.tmpfile = real_dir, real_file
+    end
+end
+
 local function run_suite(suite)
     local addon = path.join(root, "toolchain", "tests", "addon")
     local arguments = {modules = path.join(root, "toolchain", "modules")}
     local failures = {}
+    local restore = forbid_system_tmp(suite)
     try {
         function ()
             failures = import(suite, {rootdir = addon, anonymous = true}).failures(arguments)
@@ -35,6 +55,11 @@ local function run_suite(suite)
         catch {
             function (raised)
                 failures = {"the suite raised an error: " .. tostring(raised)}
+            end
+        },
+        finally {
+            function ()
+                restore()
             end
         }
     }
@@ -93,12 +118,12 @@ end
 
 local function run_parallel(groups)
     local children = {}
-    local logs = os.tmpfile()
+    local logs = workspace.fresh("light-suites")
     local failed, total, failure = 0, 0, nil
     try {
         function ()
             for index, names in ipairs(groups) do
-                local log = string.format("%s.%d.log", logs, index)
+                local log = path.join(logs, string.format("%d.log", index))
                 local child = process.openv(os.programfile(), table.join({"l", "-P", root, path.join(root, "toolchain", "tests", "light_suites.lua")}, names),
                                             {outpath = log, errpath = log})
                 table.insert(children, {process = child, log = log, count = #names, done = false})
@@ -129,8 +154,8 @@ local function run_parallel(groups)
                         child.process:kill()
                     end
                     child.process:close()
-                    os.tryrm(child.log)
                 end
+                os.tryrm(logs)
             end
         }
     }

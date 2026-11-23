@@ -50,6 +50,11 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   `build/`, `.xmake/` and `.cache/`, the checkout holds nothing that is not the project, except worktrees, which live in one place
   only, `.claude/worktrees/<task>/`; git ignores that folder (`.gitignore`). Scratch goes to
   `.cache/scratch/<task>/` of the main checkout, which every worktree shares, and is deleted when the task ends.
+- A test or a check does not use the system temporary folder (`/tmp`, `os.tmpdir()`, `os.tmpfile()`): it makes a folder of its
+  own under the scratch of the checkout, `fixtures.scratch()` in a light suite and `workspace.fresh(name)` in any other
+  script, so two runs from two worktrees never meet on one path. `light suites` refuses a suite that calls either function
+  (`toolchain/tests/light_suites.lua`) and runs with `XMAKE_TMPDIR` and `TMPDIR` in that scratch, so the temporary files of
+  xmake and of the compilers land there; `tmp_use_test` scans the sources of the suites and of the tests that `prepush` runs.
 - No comments in code, scripts or recipes; a licence header a licence requires is the only exception. What a change
   does and why goes in its commit message; knowledge a reader of the code needs goes in `docs/`.
   `./xmakew l tools/comments.lua check [path ...]` finds comments, `strip` removes them, and `verify [rev]` proves that
