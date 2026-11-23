@@ -607,11 +607,16 @@ key, because a rerun costs seconds and a verdict that no longer holds costs a pu
   so a private cache of any name never enters a key (`.gitignore` has `/.cache-*/` for the same reason);
 - for `comments`, the content of the local `.git/info/attributes` and of the global attributes file, which `git check-attr` reads
   to classify a file;
-- for `recipe digests`, `lowered members`, `lowered exports`, `light suites`, `backports build` and `backports exports`, which run against what is
+- for `recipe digests`, `lowered members`, `lowered exports`, `light suites`, `backports build`, `backports exports` and `backports device imports`, which run against what is
   installed: the Xcode and SDK probes, where `git`, `rsync`, `cmake`, `ninja`, `xcrun`, `clang`, `cc`, `make` and `sh` resolve and the
   first line of what each prints for `--version`, every install of `llvm`, `swift`, `swift-bootstrap`, `swift-runtime`, `libcxx`, `apple-compat`, `iphoneos-sdk`, `ld64` and
   `ldid` in the store with the digest of its `manifest.txt`, and the content key of the iPhoneOS SDK (every file of it, with
-  the Xcode tools, about 6 s once per run).
+  the Xcode tools, about 6 s once per run);
+- for `backports device imports`, besides the installed facts, each device cache under `.cache/dyld` as the release folder, the
+  firmware its `.source` names and the size of its `dyld_shared_cache_armv7`, because the verdict is the system libraries of the
+  oldest release the Backports libraries run on. A checkout that holds none clones the release folder from another checkout of the
+  repository with `cp -c -R` (no network, no disk), and when no checkout holds it the step fails with the command the deb writer's
+  fetch is (`./xmakew firmware -P . --arch=armv7 fetch <release>`); the step reads everything the build reads (`reads` is the whole tree).
 
 What a key does not see, and the remembered `ok` can therefore outlive a change that a fresh run would report: an install replaced in
 place with the same name and manifest, and a tool replaced in place with the same version line; the host's own frameworks and tools
@@ -634,7 +639,7 @@ tests of `tools/private_cache.lua`, `tools/ci_errors.lua` and `tools/ci_swiftc_r
 modules), `credentials` and `copied_text` (`agent-skills/tests/`), `negative shape` (the Backports tests and `emulator/`),
 `recipe digests` (the inputs the recipes list in `toolchain/modules/digest.lua`, the digest files and the addon modules), and
 `lowered members` and `lowered exports`, which skip `docs/`, Markdown files, `.agents/` and `agent-skills/`. `backports build` skips
-nothing, because the copy it builds in holds every file, and `backports exports` skips nothing because it reads that copy's build and the baseline data. A check that starts to read a file outside its declaration, or an ignored
+nothing, because the copy it builds in holds every file, and `backports exports` and `backports device imports` skip nothing because they read that copy's build (and the baseline data, or the device caches). A check that starts to read a file outside its declaration, or an ignored
 file, must say so there; an ignored file is not part of a key.
 
 The checks that run inside xmake (`comments`, `layout`, `docs_commands`, `recipe digests` and the rest of the cheap ones) and
@@ -681,7 +686,7 @@ first read, because every suite reads it). `toolchain/modules/recalled.lua` hold
 and `prepush`'s own test that it reads the memo the way `prepush` writes it.
 
 Order and flags. The cheap checks run first and the heavy ones (`lowered members`, `lowered exports`, `light suites`,
-`backports build`, `backports exports`) last, and the run stops at the first check that fails, so a two-second `layout` failure does not wait
+`backports build`, `backports exports`, `backports device imports`) last, and the run stops at the first check that fails, so a two-second `layout` failure does not wait
 behind a build. `--keep-going` runs every check regardless (the old behaviour), `--list` prints the names with the heavy ones
 marked, and `--only <check,...>` runs just those (names with a space are quoted: `--only "layout,light suites"`) for iterations;
 an unknown name is an error, and a run with `--only` says that a push needs all checks. The full run before a push stays

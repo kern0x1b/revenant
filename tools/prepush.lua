@@ -238,6 +238,11 @@ local function backports_exports()
     return lua("frameworks/Backports/tests/export_baseline_test.lua", "check", built)
 end
 
+local function backports_device_imports()
+    local built = path.join(gate_tree(gate_folder()), "build", "iphoneos", "armv7", "release")
+    return lua("frameworks/Backports/tests/device_imports_test.lua", built)
+end
+
 local function declared(xmake, name)
     return xmake:find("[%s{,]" .. name .. " = {") ~= nil
 end
@@ -444,6 +449,16 @@ local function installed_facts()
         say("prepush: the installed toolchain is read, %ds", os.time() - began)
     end
     return installed_text
+end
+
+local function device_facts()
+    local held = os.files(path.join(import("@addon.revenant.apple.dyld", {anonymous = true}).root(), "*", "dyld_shared_cache_armv7"))
+    local lines = {}
+    for _, file in ipairs(held) do
+        local source = file .. ".source"
+        table.insert(lines, string.format("%s %s %d", path.filename(path.directory(file)), os.isfile(source) and io.readfile(source):trim() or "no source", os.filesize(file)))
+    end
+    return table.concat({installed_facts(), table.concat(sorted(lines), "\n")}, "\n--\n")
 end
 
 local PRIVATE_FOLDERS = {".cache*/**", "build/**", ".xmake/**", ".claude/worktrees/**"}
@@ -782,6 +797,7 @@ local STEPS = {
     {name = "light suites", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("toolchain/tests/light_suites.lua") end},
     {name = "backports build", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = backports_build},
     {name = "backports exports", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = backports_exports},
+    {name = "backports device imports", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_device_imports},
 }
 
 local function test_suite()

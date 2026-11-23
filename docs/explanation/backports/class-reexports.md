@@ -37,7 +37,11 @@ symbol stopped with the message above.
 for example `AVFoundationBackports _OBJC_CLASS_$_AVSampleBufferDisplayLayer AVFoundation` and
 `FoundationBackports _OBJC_CLASS_$_NSAssertionHandler Foundation`. Every class and its metaclass are listed. The list was made
 from the export baseline below: every class symbol that some earlier build exported and the current one does not, where the
-iOS 6.1.3 shared cache shows that the system framework (the library's own, or one it links) exports it. `tools/reexports.lua`
+shared caches of iOS 6.1.3 and of the oldest release the libraries run on (6.0, the floor the deb writer checks imports
+against) show that the system framework (the library's own, or one it links) exports it. A symbol the floor release lacks
+is not re-exported, whatever 6.1.3 holds: the deb writer refuses a re-export its framework cannot resolve at the floor (see
+"The device import check" below). `MKLocalSearchResponse` is that case: MapKit of 6.1.3 has it, MapKit of 6.0 does not, so the
+first list that was merged (554 lines) failed every deb that packed `libMapKitBackports.dylib`; the list holds 552 lines now. `tools/reexports.lua`
 reads the file; `frameworks/Backports/xmake.lua` writes each library's lines to a file named by their content in the target's
 generated folder and passes it to the linker, so a changed list relinks the library. The file is an input of the package
 `backports` (`frameworks/Backports/tools/**` is in its digest).
@@ -58,14 +62,37 @@ symbol is gone for good only when it is listed in `frameworks/Backports/tests/da
     <library file> <symbol> <reason>
 
 A retired line must have a reason, must name a symbol of the baseline, and must not be exported any more (a symbol that
-comes back leaves the list). Today it holds four lines: `NSTextList` and `NSTextTab` and their metaclasses in
-`libUIKitBackports.dylib`, which iOS 6.1.3 keeps in a private image that exports no symbol, so no re-export reaches them; an
-image linked before 2026-11-19 needs a rebuild.
+comes back leaves the list). Today it holds six lines: `NSTextList` and `NSTextTab` and their metaclasses in
+`libUIKitBackports.dylib`, which iOS 6.1.3 keeps in a private image that exports no symbol, so no re-export reaches them, and
+`MKLocalSearchResponse` and its metaclass in `libMapKitBackports.dylib`, which the floor release lacks. An image linked before
+2026-11-19 that binds one of them needs a rebuild (no known image does: neither `rnhost` nor Telegram13 binds an `MKLocalSearch` symbol).
 
 The check is the prepush step `backports exports`, after `backports build`: it reads the libraries of the gate tree. The step
 `export baseline test` runs the judge on fixtures without a build. On the build of `e0c5f1b1e` (the main of 2026-11-21, with
-neither re-exports nor proxy exports) the check fails on 554 symbols (128 of them in `libFoundationBackports.dylib`), among them `AVSampleBufferDisplayLayer` and its
-metaclass and the Foundation classes `rnhost` binds; the four retired symbols are not counted. It would have stopped `avf-native-class`.
+neither re-exports nor proxy exports) the check fails on 552 symbols (128 of them in `libFoundationBackports.dylib`), among them `AVSampleBufferDisplayLayer` and its
+metaclass and the Foundation classes `rnhost` binds; the six retired symbols are not counted. It would have stopped `avf-native-class`.
+
+## The device import check
+
+The deb writer (`toolchain/modules/packaging.lua`, through `dyld.check`) judges every image it packs against the system
+libraries of the oldest release the target runs on, and refuses an image that imports a symbol that release does not export, or
+re-exports one from a framework that does not export it. The Backports libraries are packed by every deb that depends on them, so
+a fault in one of them stops the deb of an unrelated app: on 2026-11-23 the re-exports of `MKLocalSearchResponse` stopped the
+deb of the React Native host with
+
+    these imports are not exported by the device's iOS:
+      libMapKitBackports.dylib  _OBJC_CLASS_$_MKLocalSearchResponse (re-exported from /System/Library/Frameworks/MapKit.framework/MapKit, which does not export _OBJC_CLASS_$_MKLocalSearchResponse)
+
+although the 6.1.3 devices export the class: the deb writer reads the 6.0 cache, the floor of `apple_minimum`.
+
+`frameworks/Backports/tests/device_imports_test.lua` runs that check (`dyld.missing_imports`, the function `dyld.check` is built
+on) on the libraries of a build, against the cache `firmware.source` names for the lowest iOS minimum the libraries record, the
+cache the deb writer picks (a checkout without the release folder clones it from another checkout first). It leaves out the one kind of entry a tree of Backports libraries alone cannot answer: a library
+that loads another package's image (`libavcodec` of `ffmpeg-hevc`, `libc++`), which the deb that packs that package provides. It is
+the prepush step `backports device imports`, after `backports exports`, and takes a second. On the build of `315cb7020` (the
+merged main) it fails with the message above; on the fixed list it passes.
+
+    ./xmakew l -P . frameworks/Backports/tests/device_imports_test.lua [FOLDER]
 
 Adding a class to the baseline is `./xmakew l -P . frameworks/Backports/tests/export_baseline_test.lua update` on a build that
 exports it; the command never removes a line. Removing an export on purpose is a line in `export-retired.txt` with the reason,
