@@ -44,7 +44,7 @@ local function test_suite()
         count = count + 1
         assert(got == want, string.format("test %s: got %s, want %s", name, tostring(got), tostring(want)))
     end
-    local base = path.join(os.tmpdir(), "analysis-cache-" .. hash.uuid())
+    local base = import("@addon.revenant.workspace", {anonymous = true}).fresh("analysis-cache")
     local function opt(home)
         return {home = path.join(base, home), store = path.join(base, "store")}
     end

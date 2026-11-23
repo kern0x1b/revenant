@@ -62,6 +62,15 @@ function scratch()
     return import("@addon.revenant.workspace", {anonymous = true}).fresh("tests")
 end
 
+function filenames()
+    local folder = scratch()
+    local count = 0
+    return function ()
+        count = count + 1
+        return path.join(folder, string.format("%d.tmp", count))
+    end
+end
+
 function runtime_resources()
     local packages = path.join(os.getenv("XMAKE_GLOBALDIR"), ".xmake", "packages")
     local newest

@@ -1,3 +1,5 @@
+import("workspace", {rootdir = path.join(os.scriptdir(), "..")})
+
 local HEADER = 20
 local ELEMENT = 12
 local MAGIC = "3gmI"
@@ -33,11 +35,28 @@ function decrypt(payload, key, iv)
     if #payload % 16 ~= 0 then
         raise("the payload is %d bytes, which is not a whole number of AES blocks", #payload)
     end
-    local input, output = os.tmpfile(), os.tmpfile()
-    io.writefile(input, payload, {encoding = "binary"})
-    os.vrunv("openssl", {"enc", "-d", "-aes-" .. (#key * 4) .. "-cbc", "-K", key, "-iv", iv, "-nopad", "-in", input, "-out", output})
-    local plain = io.readfile(output, {encoding = "binary"})
-    os.tryrm(input)
-    os.tryrm(output)
+    local folder = workspace.fresh("img3")
+    local input, output = path.join(folder, "payload"), path.join(folder, "plain")
+    local plain, failure
+    try {
+        function ()
+            io.writefile(input, payload, {encoding = "binary"})
+            os.vrunv("openssl", {"enc", "-d", "-aes-" .. (#key * 4) .. "-cbc", "-K", key, "-iv", iv, "-nopad", "-in", input, "-out", output})
+            plain = io.readfile(output, {encoding = "binary"})
+        end,
+        catch {
+            function (raised)
+                failure = tostring(raised)
+            end
+        },
+        finally {
+            function ()
+                os.tryrm(folder)
+            end
+        }
+    }
+    if failure then
+        raise("%s", failure)
+    end
     return plain
 end

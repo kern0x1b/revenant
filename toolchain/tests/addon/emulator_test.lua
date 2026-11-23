@@ -353,12 +353,12 @@ local function load_step(emulator, found)
     end
     local slots = emulator.slots_folder()
     local prior = os.getenv("REVENANT_EMULATOR_ROOT")
-    os.setenv("REVENANT_EMULATOR_ROOT", path.join(os.tmpdir(), "revenant-slot-root-" .. os.getpid()))
+    os.setenv("REVENANT_EMULATOR_ROOT", fixtures.scratch())
     if emulator.slots_folder() ~= slots then
         table.insert(found, "the slots of the machine move with a scratch emulator root, so they are not the machine's")
     end
     os.setenv("REVENANT_EMULATOR_ROOT", prior or "")
-    local slot = emulator.acquire({folder = path.join(os.tmpdir(), "revenant-slot-test-" .. os.getpid()), count = 1, patience = 0})
+    local slot = emulator.acquire({folder = fixtures.scratch(), count = 1, patience = 0})
     if not slot then
         table.insert(found, "a run with no patience still takes a slot")
     else

@@ -73,10 +73,17 @@ end
 
 local RECORD_LIMIT = 4100
 
+local NAMES = {next = function () return hash.uuid() end}
+
+local function lists_folder()
+    local folder = path.join(cache().root(), "scratch", "prepush-lists")
+    os.mkdir(folder)
+    return folder
+end
+
 local function git_records(folder, args, what)
-    local scratch = path.join(cache().root(), "scratch", "prepush-lists")
-    os.mkdir(scratch)
-    local file = path.join(scratch, "list-" .. path.filename(os.tmpfile()))
+    local scratch = lists_folder()
+    local file = path.join(scratch, "list-" .. NAMES.next())
     local text, failure
     try {
         function ()
@@ -230,8 +237,35 @@ local function backports_build()
     return ok
 end
 
+local function in_own_temporary(name, run)
+    local folder = import("@addon.revenant.workspace", {anonymous = true}).fresh(name)
+    local result, failure
+    try {
+        function ()
+            result = run({XMAKE_TMPDIR = folder, TMPDIR = folder})
+        end,
+        catch {
+            function (raised)
+                failure = tostring(raised)
+            end
+        },
+        finally {
+            function ()
+                os.tryrm(folder)
+            end
+        }
+    }
+    if failure then
+        raise("%s", failure)
+    end
+    return result
+end
+
 local function lua(script, ...)
-    return budgeted(table.join({os.programfile(), "l", "-P", root, path.join(root, script)}, {...}))
+    local command = table.join({os.programfile(), "l", "-P", root, path.join(root, script)}, {...})
+    return in_own_temporary("step-tmp", function (envs)
+        return budgeted(command, {envs = envs})
+    end)
 end
 
 local function light_suites()
@@ -1206,7 +1240,7 @@ local function test_arguments()
     check("--fresh ignores the memo", parse_arguments({"--fresh"}).fresh, true)
     check("a run without --fresh reads the memo", parse_arguments({}).fresh, false)
     check("--inline names the checks one process runs", table.concat(parse_arguments({"--inline", "layout,comments"}).inline, "|"), "layout|comments")
-    check("--results names the file of the verdicts", parse_arguments({"--inline", "layout", "--results", "/tmp/v"}).results, "/tmp/v")
+    check("--results names the file of the verdicts", parse_arguments({"--inline", "layout", "--results", "verdicts.tsv"}).results, "verdicts.tsv")
     check("--inline without a value is an error", raises({"--inline"}), true)
     check("--results without a value is an error", raises({"--results"}), true)
     check("--only splits on commas and keeps the spaces of a name", table.concat(parse_arguments({"--only", "layout,light suites"}).only, "|"), "layout|light suites")
@@ -1377,16 +1411,15 @@ local function dirty_tests(base)
     check("a folder git cannot enter is refused the same way", (refusal(function () dirty_entries(path.join(base, "nowhere")) end) or ""):find("git exited with status", 1, true) ~= nil, true)
     check("a git that fails on the ignored list is refused too", (refusal(function () gate_ignored(path.join(base, "nowhere")) end) or ""):find("could not be read cleanly: git exited with status", 1, true) ~= nil, true)
 
-    local real_tmpfile = os.tmpfile
-    local fixed = path.join(base, "fixed-name")
-    os.tmpfile = function () return fixed end
+    local real_next = NAMES.next
+    NAMES.next = function () return "fixed-name" end
     local lists = path.join(cache().root(), "scratch", "prepush-lists")
     refusal(function () dirty_entries(broken) end)
     check("no list file stays in the scratch folder after a failed read", os.isfile(path.join(lists, "list-fixed-name")), false)
     check("no list of errors stays there either", os.isfile(path.join(lists, "list-fixed-name.errors")), false)
     dirty_entries(repository("fine"))
     check("no list file stays in the scratch folder after a good read", os.isfile(path.join(lists, "list-fixed-name")), false)
-    os.tmpfile = real_tmpfile
+    NAMES.next = real_next
     local saved_cache = os.getenv("REVENANT_CACHE")
     os.setenv("REVENANT_CACHE", path.join(base, "named-cache"))
     dirty_entries(repository("located"))
@@ -1426,7 +1459,7 @@ local function dirty_tests(base)
 end
 
 local function test_dirty()
-    local base = path.join(cache().root(), "scratch", "prepush-dirty-test-" .. path.filename(os.tmpfile()))
+    local base = path.join(cache().root(), "scratch", "prepush-dirty-test-" .. NAMES.next())
     os.mkdir(base)
     local failure
     try {
@@ -1625,7 +1658,7 @@ local function spawned_batch(steps, keep_going)
     for _, step in ipairs(steps) do
         table.insert(names, step.name)
     end
-    local results = os.tmpfile() .. ".verdicts"
+    local results = path.join(lists_folder(), "verdicts-" .. NAMES.next())
     local command = {os.programfile(), "l", "-P", root, path.join(root, "tools", "prepush.lua"), "--inline", table.concat(names, ","), "--results", results}
     if keep_going then
         table.insert(command, "--keep-going")

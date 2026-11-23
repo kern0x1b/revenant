@@ -2,6 +2,7 @@ local ROOT = path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
 local TOOLS = path.join(ROOT, "frameworks", "ReactNative", "tools")
 local ENTITLEMENTS = path.join(TOOLS, "data", "rnhost.entitlements")
 
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local host = import("host_install", {rootdir = TOOLS, anonymous = true})
 
 local function expect(name, condition, detail)
@@ -84,7 +85,7 @@ function main()
         "got " .. table.concat(reports, ","))
     expect("a listing without crash reports gives none", #host.crash_reports("", "RNHost-probe") == 0, "got a report")
 
-    local plist = path.join(os.tmpdir(), "host-install-test-" .. os.getpid() .. ".plist")
+    local plist = path.join(workspace.fresh("host-install-test"), "test.plist")
     io.writefile(plist, '<?xml version="1.0" encoding="UTF-8"?>\n<plist version="1.0"><dict>\n'
         .. '<key>CFBundleShortVersionString</key>\n<string>0.1.0</string>\n<key>CFBundleVersion</key>\n<string>42</string>\n</dict></plist>\n')
     local short = host.plist_value(plist, "CFBundleShortVersionString")
@@ -213,8 +214,7 @@ function main()
     os.vrunv("rm", {"-rf", base})
 
     do
-        local base = os.tmpfile() .. "-packages"
-        os.mkdir(base)
+        local base = workspace.fresh("host-install-packages")
         local json = import("core.base.json")
         json.savefile(path.join(base, "org.revenant.backports.json"), {name = "org.revenant.backports", version = "0.8.18+9772f8d3"})
         json.savefile(path.join(base, "org.revenant.swift-runtime-8e5fdec8.json"), {name = "org.revenant.swift-runtime-8e5fdec8", version = "0.8.18+8e5fdec8"})
@@ -324,9 +324,7 @@ function main()
         expect("packages install after the packages they depend on, each once", #ordered == 4 and position.runtime < position["swift-crypto"]
             and position["swift-crypto"] < position.cryptokit and position.other ~= nil, table.concat(table.imap(ordered, function (_, package) return package.name end), ","))
         expect("a dependency circle is refused naming a package", (refusal(function () host.install_order({{name = "a"}, {name = "b"}}, {a = {"b"}, b = {"a"}}) end) or ""):find("circle", 1, true) ~= nil, "no refusal")
-        local empty = path.join(os.tmpdir(), "rn-held-empty")
-        os.tryrm(empty)
-        os.mkdir(empty)
+        local empty = workspace.fresh("rn-held-empty")
         expect("a Backports folder with no libraries is refused naming the folder", (refusal(function () host.held_libraries(empty) end) or ""):find(empty, 1, true) ~= nil, "no refusal")
         os.tryrm(empty)
         expect("an archive with the recorded sha is not copied again", host.archive_unchanged("abc", "abc\n") == true, "copied")

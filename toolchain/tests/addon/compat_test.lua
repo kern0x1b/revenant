@@ -72,8 +72,11 @@ local LATE = "#include <math.h>\n#include <string.h>\n" ..
 
 local CALLER = "#include <cstdlib>\nvoid *call(unsigned long n) { return ::aligned_alloc(16, n); }\n"
 
+local names
+
 local function run(folder, program, argv)
-    local outfile, errfile = os.tmpfile(), os.tmpfile()
+    names = names or fixtures.filenames()
+    local outfile, errfile = names(), names()
     local code, errors = os.execv(program, argv or {}, {try = true, curdir = folder, stdout = outfile, stderr = errfile, timeout = 120000})
     local ran = {code = code or -1, stdout = io.readfile(outfile) or "", stderr = io.readfile(errfile) or ""}
     os.tryrm(outfile)

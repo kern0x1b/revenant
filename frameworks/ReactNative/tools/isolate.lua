@@ -16,6 +16,7 @@ local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua 
 local INPUTS = {"app-assets", "app-components", "app-manifest", "codegen", "expo-core", "expo-jsi", "expo-pods", "expo-src", "keyboard", "lib-headers", "nitro", "rn-codegen", "rn-headers", "screens", "unistyles"}
 
 local json = import("core.base.json")
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
 
 local PATCH_MARKERS = {
     {"React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputUtils.mm", 'attributedString.string ?: @""'},
@@ -652,10 +653,28 @@ function checkout_state(root)
             table.insert(inputs, file)
         end
     end
-    local listing = path.join(os.tmpdir(), "config-inputs-" .. hash.strhash128(root))
-    io.writefile(listing, table.concat(inputs, "\n") .. "\n")
-    local contents = os.iorunv("sh", {"-c", "cd \"$1\" && git hash-object --stdin-paths < \"$2\"", "sh", root, listing})
-    os.rm(listing)
+    local folder = workspace.fresh("checkout-state")
+    local listing = path.join(folder, "config-inputs")
+    local contents, failure
+    try {
+        function ()
+            io.writefile(listing, table.concat(inputs, "\n") .. "\n")
+            contents = os.iorunv("sh", {"-c", "cd \"$1\" && git hash-object --stdin-paths < \"$2\"", "sh", root, listing})
+        end,
+        catch {
+            function (raised)
+                failure = tostring(raised)
+            end
+        },
+        finally {
+            function ()
+                os.tryrm(folder)
+            end
+        }
+    }
+    if failure then
+        raise("%s", failure)
+    end
     return hash.strhash128(table.concat(listed, "\n")) .. "\0" .. hash.strhash128(contents)
 end
 

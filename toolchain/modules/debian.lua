@@ -1,5 +1,6 @@
 import("lib.detect.find_tool")
 import("byteorder")
+import("workspace")
 
 local function octal(value, width)
     return string.format("%0" .. (width - 1) .. "o", value) .. "\0"
@@ -57,11 +58,29 @@ end
 
 function gzip(content)
     local tool = assert(find_tool("gzip"), "gzip is part of macOS; a .deb cannot be written without it")
-    local input = os.tmpfile()
-    io.writefile(input, content, {encoding = "binary"})
-    os.vrunv(tool.program, {"-n", "-9", "-f", input})
-    local compressed = io.readfile(input .. ".gz", {encoding = "binary"})
-    os.rm(input .. ".gz")
+    local folder = workspace.fresh("gzip")
+    local input = path.join(folder, "content")
+    local compressed, failure
+    try {
+        function ()
+            io.writefile(input, content, {encoding = "binary"})
+            os.vrunv(tool.program, {"-n", "-9", "-f", input})
+            compressed = io.readfile(input .. ".gz", {encoding = "binary"})
+        end,
+        catch {
+            function (raised)
+                failure = tostring(raised)
+            end
+        },
+        finally {
+            function ()
+                os.tryrm(folder)
+            end
+        }
+    }
+    if failure then
+        raise("%s", failure)
+    end
     return compressed
 end
 

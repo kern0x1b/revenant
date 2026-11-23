@@ -45,7 +45,7 @@ local function read_retired(file)
 end
 
 local function staged(folder)
-    local stage = path.join(os.tmpdir(), "export-baseline-" .. hash.uuid(), "libraries_" .. ARCHITECTURE)
+    local stage = path.join(import("@addon.revenant.workspace", {anonymous = true}).fresh("export-baseline"), "libraries_" .. ARCHITECTURE)
     os.mkdir(stage)
     local count = 0
     for _, file in ipairs(os.files(path.join(folder, "lib*Backports.dylib"))) do

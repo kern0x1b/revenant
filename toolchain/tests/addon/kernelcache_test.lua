@@ -23,9 +23,12 @@ local function openssl(mode, key, input, output)
     os.vrunv("openssl", {"enc", mode, "-aes-256-cbc", "-K", key, "-iv", IV, "-nopad", "-in", input, "-out", output})
 end
 
+local names
+
 local function encrypt(bytes, key)
     local padded = bytes .. string.rep("\0", (16 - #bytes % 16) % 16)
-    local input, output = os.tmpfile(), os.tmpfile()
+    names = names or fixtures.filenames()
+    local input, output = names(), names()
     io.writefile(input, padded, {encoding = "binary"})
     openssl("-e", key, input, output)
     local encrypted = io.readfile(output, {encoding = "binary"})

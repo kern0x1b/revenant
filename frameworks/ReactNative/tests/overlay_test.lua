@@ -28,9 +28,7 @@ import { writeFileSync } from "node:fs";
 writeFileSync("patched.txt", process.cwd() + "\n" + process.env.PATH.split(":")[0] + "\n" + process.argv[1].split("/").slice(-2).join("/") + "\n");
 ]]
 
-local scratch = path.join(os.tmpdir(), "rn-overlay-test-" .. tostring(os.time()))
-os.rm(scratch)
-os.mkdir(scratch)
+local scratch = import("@addon.revenant.workspace", {anonymous = true}).fresh("rn-overlay-test")
 
 local app, kitdir = path.join(scratch, "app"), path.join(scratch, "kit")
 application(app, MARKER)

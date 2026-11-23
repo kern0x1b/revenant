@@ -1,6 +1,7 @@
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
 local TOOLS = path.join(ROOT, "frameworks", "ReactNative", "tools")
 
+local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local isolate = import("isolate", {rootdir = TOOLS, anonymous = true})
 local patch_wire = import("patch_wire", {rootdir = TOOLS, anonymous = true})
 local module_build = import("module_build", {rootdir = TOOLS, anonymous = true})
@@ -91,8 +92,7 @@ expect("the copy's host no longer carries the libc++ the shared package installs
        and hosted:find('name ~= "libcxx"', 1, true) ~= nil, "the app.frameworks filter is missing from the copy")
 expect("the host rule is carried once", isolate.host_libcxx(hosted) == hosted, "a second pass changed the copy")
 
-local base = path.join(os.tmpdir(), "rn-isolate-cloning")
-os.rm(base)
+local base = workspace.fresh("rn-isolate-cloning")
 local old_checkout, old_cache, old_folder = path.join(base, "old", "checkout"), path.join(base, "old", "checkout", ".cache-pp"), path.join(base, "old", "checkout", "iso-x")
 local new_cache, new_folder = path.join(base, "new", ".cache-pp"), path.join(base, "new", "iso-y")
 os.mkdir(path.join(old_cache, "pkg", "x"))
@@ -153,8 +153,7 @@ local twice = patch_wire.register(once, "1.0", "x-ios6.patch", "33")
 local _, count = twice:gsub("add_patches", "")
 expect("patch_wire replaces the registration of a patch whose name has a dash and does not add a second one", count == 1 and twice:find('"33"', 1, true) ~= nil and twice:find('"11"', 1, true) == nil,
        twice)
-local fixture = path.join(os.tmpdir(), "rn-closure-fixture")
-os.tryrm(fixture)
+local fixture = workspace.fresh("rn-closure-fixture")
 os.mkdir(path.join(fixture, "frameworks", "ReactNative", "src"))
 io.writefile(path.join(fixture, "frameworks", "ReactNative", "src", "coverage.json"), '{"rows": [{"id": "expo-a"}, {"id": "pod-b"}, {"id": "pod-c"}]}')
 for name, deps in pairs({["expo-a"] = 'add_deps("pod-b", "swift-runtime")', ["pod-b"] = 'add_deps("pod-c")', ["pod-c"] = 'add_deps("pod-b")'}) do
@@ -165,8 +164,7 @@ local closed = module_build.closure(fixture, {"expo-a"})
 expect("module_build closes a package list over the add_deps of the recipes that are coverage rows, once each", table.concat(closed, ",") == "expo-a,pod-b,pod-c", table.concat(closed, ","))
 os.tryrm(fixture)
 
-local keyed = path.join(os.tmpdir(), "rn-config-key")
-os.tryrm(keyed)
+local keyed = workspace.fresh("rn-config-key")
 os.mkdir(path.join(keyed, "build"))
 io.writefile(path.join(keyed, "xmake.lua"), "set_project('a')\n")
 local env = {A = "1", B = "2"}
@@ -184,8 +182,7 @@ expect("a folder configured with the same key is not configured again", isolate.
 expect("a folder configured with another key is configured again", not isolate.configured_before(keyed, isolate.config_key(keyed, env, "other")), "a stale key was accepted")
 os.tryrm(keyed)
 
-local tree = path.join(os.tmpdir(), "rn-config-tree")
-os.tryrm(tree)
+local tree = workspace.fresh("rn-config-tree")
 os.mkdir(path.join(tree, "frameworks", "X"))
 local function git(...) return os.iorunv("git", table.join({"-C", tree}, {...})) end
 git("init", "-q")
@@ -204,9 +201,7 @@ io.writefile(path.join(tree, "frameworks", "X", "b.swift"), "let b = 1\n")
 expect("adding a source file changes the checkout's configuration state", isolate.checkout_state(tree) ~= edited, "a new file kept the state")
 os.tryrm(tree)
 
-local ambient_dir = path.join(os.tmpdir(), "rn-config-ambient")
-os.tryrm(ambient_dir)
-os.mkdir(ambient_dir)
+local ambient_dir = workspace.fresh("rn-config-ambient")
 io.writefile(path.join(ambient_dir, "xmake.lua"), "set_project('a')\n")
 local aenv = {A = "1"}
 local base_key = isolate.config_key(ambient_dir, aenv, "tree", {DEVELOPER_DIR = "/Xcode-1"})
@@ -233,8 +228,7 @@ expect("an application with another set keeps its own list and is checked agains
 expect("a library the host links and the application lacks is named", table.concat(libraries.missing(libraries.declared(own)), ","):find("CoreTextBackports", 1, true) ~= nil, "a missing host library was not named")
 expect("an xmake.lua with no list is not read as one", libraries.declared('add_requires("revenant@backports")\n') == nil, "a requirement without libraries gave a list")
 
-local gapped = path.join(os.tmpdir(), "rn-ref-gap")
-os.tryrm(gapped)
+local gapped = workspace.fresh("rn-ref-gap")
 os.mkdir(path.join(gapped, "build", "ref"))
 os.execv("ln", {"-s", path.join(gapped, "nowhere"), path.join(gapped, "build", "ref", "app")})
 local gap = isolate.reference_gap(gapped)
@@ -243,9 +237,7 @@ os.mkdir(path.join(gapped, "nowhere"))
 expect("a project whose reference application is there is not refused", isolate.reference_gap(gapped) == nil, "a present reference was refused")
 os.tryrm(gapped)
 
-local slices_dir = path.join(os.tmpdir(), "rn-config-masked")
-os.tryrm(slices_dir)
-os.mkdir(slices_dir)
+local slices_dir = workspace.fresh("rn-config-masked")
 io.writefile(path.join(slices_dir, "xmake.lua"), "set_project('a')\n")
 local slices_saved = os.getenv("REVENANT_SLICES")
 os.setenv("REVENANT_SLICES", "armv7")

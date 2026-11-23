@@ -38,7 +38,7 @@ local function test_suite()
         count = count + 1
         assert(got == want, string.format("test %s: got %s, want %s", name, tostring(got), tostring(want)))
     end
-    local base = path.join(os.tmpdir(), "dyld-caches-" .. hash.uuid())
+    local base = import("@addon.revenant.workspace", {anonymous = true}).fresh("dyld-caches")
     os.mkdir(base)
     local function cache(folder, release, files)
         for name, text in pairs(files) do

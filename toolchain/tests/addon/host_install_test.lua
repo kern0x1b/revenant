@@ -1,3 +1,5 @@
+import("fixtures")
+
 function failures(opt)
     local root = path.join(path.directory(opt.modules), "..")
     local install = import("host_install", {rootdir = path.join(root, "frameworks", "ReactNative", "tools"), anonymous = true})
@@ -36,8 +38,7 @@ function failures(opt)
        table.concat(install.change_arguments(mapkit, install.backports_libraries()), " ") ~= "-change /usr/lib/revenant/org.revenant.backports/libMapKitBackports.dylib @executable_path/Frameworks/libMapKitBackports.dylib" then
         table.insert(found, "the MapKit backports library is packed and retargeted with the host")
     end
-    local folder = path.join(os.tmpdir(), "host-install-libraries")
-    os.tryrm(folder)
+    local folder = path.join(fixtures.scratch(), "libraries")
     os.mkdir(folder)
     for _, name in ipairs({"libTLSBackports.dylib", "libMapKitBackports.dylib", "README.txt"}) do
         io.writefile(path.join(folder, name), "")
