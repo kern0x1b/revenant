@@ -23,9 +23,14 @@ local function loads(example)
     return output
 end
 
+local lasts = {}
 for _, example in ipairs({"paseo", "rn-probe"}) do
     local source = io.readfile(path.join(EXAMPLES, example, "xmake.lua"))
     local host = json.loadfile(path.join(EXAMPLES, example, "host.json"))
+    local last = host.bundleId:match("([^%.]+)$")
+    expect("the " .. example .. " example's bundle id ends in a name no other example's id ends in (deploy names its app folder and link by it)", lasts[last] == nil, last .. " is also the end of the id of " .. tostring(lasts[last]))
+    lasts[last] = example
+    expect("the " .. example .. " example's package control file names its bundle id", io.readfile(path.join(EXAMPLES, example, "packaging", "control-rnhost")):match("^Package: ([^\n]+)") == host.bundleId, host.bundleId)
     expect("the " .. example .. " example's set_project names the project of its host.json", source:match('HOST_PROJECT = "([^"]*)"') == host.project, host.project)
     local listed = source:match('HOST_BACKPORTS = "([^"]*)"')
     expect("the " .. example .. " example's Backports list in xmake.lua is the backports of its host.json", listed == table.concat(host.backports, ","), tostring(listed) .. " against " .. table.concat(host.backports, ","))

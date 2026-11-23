@@ -84,7 +84,7 @@ end
 
 local FACTS = {"ast.lua", "facts.lua", "public.lua", "sdk.lua"}
 
-local FACTS_EXTERNAL = {["core.base.json"] = true, ["@addon.revenant.workspace"] = true, ["@addon.revenant.retention"] = true}
+local FACTS_EXTERNAL = {["async.runjobs"] = true, ["core.base.json"] = true, ["@addon.revenant.workspace"] = true, ["@addon.revenant.retention"] = true}
 
 function facts_files()
     return table.clone(FACTS)

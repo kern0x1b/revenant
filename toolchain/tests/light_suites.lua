@@ -112,12 +112,16 @@ function environment(overrides)
     return envs
 end
 
+function children_task(logs)
+    return path.join(workspace.task(), path.filename(logs), "scratch")
+end
+
 local function run_in_children(groups)
     local children = {}
     local logs = workspace.fresh("light-suites")
     local temporary = path.join(logs, "tmp")
     os.mkdir(temporary)
-    local envs = environment({XMAKE_TMPDIR = temporary, TMPDIR = temporary, REVENANT_LIGHT_CHILD = "1"})
+    local envs = environment({XMAKE_TMPDIR = temporary, TMPDIR = temporary, REVENANT_LIGHT_CHILD = "1", REVENANT_TASK = children_task(logs)})
     local failed, total, failure = 0, 0, nil
     try {
         function ()

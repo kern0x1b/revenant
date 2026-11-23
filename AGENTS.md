@@ -49,7 +49,8 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
 - Nothing but the project lives in the revenant folder: no scratch, logs, notes or run output. Apart from the root
   `build/`, `.xmake/` and `.cache/`, the checkout holds nothing that is not the project, except worktrees, which live in one place
   only, `.claude/worktrees/<task>/`; git ignores that folder (`.gitignore`). Scratch goes to
-  `.cache/scratch/<task>/` of the main checkout, which every worktree shares, and is deleted when the task ends.
+  `.cache/scratch/<task>/` of the cache the run uses (`xmakew` takes `<worktree>/.cache` in a worktree, `<checkout>/.cache` in the
+  main checkout, and `REVENANT_CACHE` when it is set, so a worktree does not share its scratch), and is deleted when the task ends.
 - A test or a check does not use the system temporary folder (`/tmp`, `os.tmpdir()`, `os.tmpfile()`): it makes a folder of its
   own under the scratch of the checkout, `fixtures.scratch()` in a light suite and `workspace.fresh(name)` in any other
   script, so two runs from two worktrees never meet on one path. Two checks keep it so, and neither intercepts every write:
@@ -58,7 +59,12 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   looks at the caller; xmake's own calls pass). What the checks do not see goes to the scratch anyway: the orchestrator of
   `light suites` runs every suite, named or not, in child processes, and `prepush` starts every `lua()` step, with
   `XMAKE_TMPDIR` and `TMPDIR` set to a folder of its own in that scratch (one folder per run of the suites, shared by its
-  groups), so the temporary files of xmake and of the compilers land there and are removed with it.
+  groups), so the temporary files of xmake and of the compilers land there and are removed with it. The same folder holds
+  the scratch of the suites' children (`REVENANT_TASK` names a task inside it), so the `tests.<hex>` folders of a run go with it
+  when the run ends, pass or fail.
+- A worker stops only a process it started: it keeps the pid from the launch and checks that the process's working
+  directory is its own checkout (`lsof -a -d cwd -p <pid>`) before `kill`; a process found by its command line
+  (`ps | grep`, `pgrep -f`, `pkill -f`) may be another checkout's or another session's.
 - No comments in code, scripts or recipes; a licence header a licence requires is the only exception. What a change
   does and why goes in its commit message; knowledge a reader of the code needs goes in `docs/`.
   `./xmakew l tools/comments.lua check [path ...]` finds comments, `strip` removes them, and `verify [rev]` proves that

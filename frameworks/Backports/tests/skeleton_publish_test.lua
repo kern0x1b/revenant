@@ -26,8 +26,12 @@ local function inode(file)
 end
 
 local function loop(root, count)
-    for _ = 1, tonumber(count) do
-        generate.publish_skeleton(root, writer({["a.m"] = "one\n", ["b.weak"] = "-Wl,-U,_x\n"}))
+    for round = 1, tonumber(count) do
+        if round % 2 == 1 then
+            generate.publish_skeleton(root, writer({["a.m"] = "one\n", ["b.weak"] = "-Wl,-U,_x\n"}))
+        else
+            generate.publish_skeleton(root, writer({["a.m"] = "two\n", ["b.weak"] = "-Wl,-U,_y\n"}))
+        end
     end
 end
 
@@ -45,21 +49,52 @@ local function test()
     expect("a publish of other content replaces the folder", io.readfile(path.join(live, "a.m")) == "two\n" and os.isfile(path.join(live, "c.m")), "the old content is still there")
     generate.publish_skeleton(root, writer({["a.m"] = "one\n", ["b.weak"] = "-Wl,-U,_x\n"}))
     local log = path.join(root, "loop.log")
-    local child = process.openv(os.programfile(), {"l", "-P", ROOT, path.join(os.scriptdir(), "skeleton_publish_test.lua"), "loop", root, "40"}, {outpath = log, errpath = log})
+    local child = process.openv(os.programfile(), {"l", "-P", ROOT, path.join(os.scriptdir(), "skeleton_publish_test.lua"), "loop", root, "300"}, {outpath = log, errpath = log})
     local missing = 0
+    local seen = {}
     local looked = 0
     local finished = 0
     while finished == 0 or looked == 0 do
-        finished = child:wait(20)
+        finished = child:wait(1)
         looked = looked + 1
-        if io.readfile(path.join(live, "a.m")) ~= "one\n" or not os.isfile(path.join(live, "b.weak")) then
+        local first = os.isfile(path.join(live, "a.m")) and io.readfile(path.join(live, "a.m"))
+        local second = os.isfile(path.join(live, "b.weak")) and io.readfile(path.join(live, "b.weak"))
+        local good = (first == "one\n" or first == "two\n") and (second == "-Wl,-U,_x\n" or second == "-Wl,-U,_y\n")
+        if not good then
             missing = missing + 1
         end
-        os.sleep(5)
+        seen[tostring(first)] = true
     end
     child:close()
-    expect("a reader never finds the live folder missing or partial while another process publishes the same content again and again", missing == 0 and looked > 1,
-        string.format("%d of %d looks found a missing file, wait gave %s; child log: %s", missing, looked, tostring(finished), io.readfile(log) or ""))
+    expect("a reader never finds the live folder missing or partial while another process replaces it with other content again and again", missing == 0 and looked > 1
+        and seen["one\n"] and seen["two\n"], string.format("%d of %d looks found a missing or partial folder, saw %s, wait gave %s; child log: %s", missing, looked,
+        table.concat(table.keys(seen), ","), tostring(finished), io.readfile(log) or ""))
+    expect("a replaced folder leaves no older folder behind", #os.dirs(path.join(root, "skeleton.*")) == 1, "older folders stay: " .. table.concat(os.dirs(path.join(root, "skeleton.*")), ", "))
+    local failing = path.join(root, "skeleton")
+    os.rm(failing)
+    os.mkdir(failing)
+    io.writefile(path.join(failing, "a.m"), "plain\n")
+    generate.publish_skeleton(root, writer({["a.m"] = "plain\n"}))
+    expect("a live folder that is a plain folder becomes the pointer to a version", os.islink(failing) and io.readfile(path.join(failing, "a.m")) == "plain\n", "the live folder is not a pointer")
+    local raised
+    try {
+        function ()
+            generate.publish_skeleton(root, function (folder)
+                os.mkdir(folder)
+                io.writefile(path.join(folder, "a.m"), "other\n")
+                os.vrunv("chmod", {"000", path.join(folder, "a.m")})
+                return {}
+            end)
+        end,
+        catch {
+            function (errors)
+                raised = tostring(errors)
+            end
+        }
+    }
+    os.vrunv("chmod", {"-R", "u+rwx", root})
+    expect("a diff that cannot read a file raises and keeps the live folder", raised and raised:find("diff", 1, true) and io.readfile(path.join(failing, "a.m")) == "plain\n",
+        "got " .. tostring(raised))
     os.tryrm(root)
 end
 

@@ -287,6 +287,11 @@ function main()
         local indirect = host.exported_symbols("         I _OBJC_CLASS_$_NSUUID (indirect for _OBJC_CLASS_$_NSUUID)\n         U _other\n")
         expect("a class the library re-exports from the system (an indirect symbol of nm) is an export", indirect["_OBJC_CLASS_$_NSUUID"] and not indirect._other,
             "the indirect symbol was not read as an export")
+        local renamed = host.exported_symbols("         I _OBJC_CLASS_$_NSFirst (indirect for _OBJC_CLASS_$_NSSecond)\n")
+        expect("an indirect symbol is exported under its own name, not under the name it stands for", renamed["_OBJC_CLASS_$_NSFirst"] and not renamed["_OBJC_CLASS_$_NSSecond"],
+            "the name of an indirect symbol was read wrongly")
+        local forms = host.exported_symbols("0000b000 W _weak_one\n0000b010 D _data_one\n0000b020 T _text_one\n")
+        expect("weak definitions (W) and data (D) are exports like text (T)", forms._weak_one and forms._data_one and forms._text_one, "a form of a defined symbol was not read")
         expect("every import exported by the installed library raises no problem", #host.missing_exports(imports,
             {libFoundationBackports = exported, libUIKitBackports = exported}) == 0, "an exported symbol was reported")
         local missing = host.missing_exports(imports, {libFoundationBackports = exported, libUIKitBackports = host.exported_symbols("0000a000 T _x\n")})
@@ -306,6 +311,36 @@ function main()
         expect("the install unpacks the archive from the scratch folder and removes it there", command:find("tar xzf " .. scratch .. "/rnhost.tgz -C unpack", 1, true) ~= nil
             and command:find("rm " .. scratch .. "/rnhost.tgz", 1, true) ~= nil, command)
         expect("the install leaves nothing in /var/tmp", command:find("/var/tmp", 1, true) == nil, command)
+        expect("the install starts with the guard against another install's app", command:find("refused:", 1, true) ~= nil and command:find("refused:", 1, true) < command:find("rm -rf", 1, true), command)
+    end
+    do
+        local base = workspace.fresh("rn-foreign-app")
+        local applications = path.join(base, "Applications")
+        local mine = path.join(base, "stash", "rn-holder", "rnhost")
+        local theirs = path.join(base, "stash", "other-holder", "rnhost")
+        os.mkdir(applications)
+        os.mkdir(path.join(mine, "rnhost.app"))
+        os.mkdir(path.join(theirs, "rnhost.app"))
+        local function run(guard)
+            local status = os.execv("/bin/sh", {"-c", guard .. " && echo went-on"}, {try = true, stdout = path.join(base, "out.txt"), stderr = path.join(base, "out.txt")})
+            return status, io.readfile(path.join(base, "out.txt")) or ""
+        end
+        local guard = host.foreign_app_guard(applications, mine, "rnhost.app")
+        local status, output = run(guard)
+        expect("an id with no app of that name in Applications goes on", status == 0 and output:find("went-on", 1, true) ~= nil, output)
+        os.vrunv("ln", {"-s", path.join(mine, "rnhost.app"), path.join(applications, "rnhost.app")})
+        status, output = run(guard)
+        expect("an id that finds its own link goes on", status == 0 and output:find("went-on", 1, true) ~= nil, output)
+        os.vrunv("rm", {path.join(applications, "rnhost.app")})
+        os.vrunv("ln", {"-s", path.join(theirs, "rnhost.app"), path.join(applications, "rnhost.app")})
+        status, output = run(guard)
+        expect("an id that finds another install's link stops and names where it points", status ~= 0 and output:find("refused:", 1, true) ~= nil
+            and output:find(theirs, 1, true) ~= nil and output:find("went-on", 1, true) == nil, tostring(status) .. " " .. output)
+        os.vrunv("rm", {path.join(applications, "rnhost.app")})
+        os.mkdir(path.join(applications, "rnhost.app"))
+        status, output = run(guard)
+        expect("an id that finds a real folder of that name stops", status ~= 0 and output:find("refused:", 1, true) ~= nil, tostring(status) .. " " .. output)
+        os.tryrm(base)
     end
     do
         local package = host.deb_package("/tmp/x/org.revenant.swift-crypto-91c43b24_0.8.18+91c43b24_iphoneos-arm.deb")

@@ -42,6 +42,24 @@ function failures(opt)
     check("a grant of zero is one worker", light.workers("0"), 1)
     check("a grant that is no number is one worker", light.workers("many"), 1)
 
+    local workspace = import("@addon.revenant.workspace", {anonymous = true})
+    local logs = path.join(workspace.run(), "light-suites.abcdef")
+    local task = light.children_task(logs)
+    check("the scratch of the children lies inside the folder of the run", task, path.join(workspace.task(), "light-suites.abcdef", "scratch"))
+    check("the scratch of the children is a task name under the scratch, not an absolute path", path.is_absolute(task), false)
+
+    local leaked = {}
+    for _, folder in ipairs(os.dirs(path.join(workspace.run(), "light-suites.*"))) do
+        leaked[folder] = true
+    end
+    local root = path.absolute(path.join(opt.modules, "..", ".."))
+    local nested = os.iorunv(os.programfile(), {"l", "-P", root, path.join(root, "toolchain", "tests", "light_suites.lua"), "tmp_use_test"},
+                             {envs = {REVENANT_LIGHT_CHILD = ""}})
+    check("a run of the orchestrator reports its suites", nested:find("light suites: 1 passed", 1, true) ~= nil, true)
+    for _, folder in ipairs(os.dirs(path.join(workspace.run(), "light-suites.*"))) do
+        check("the orchestrator removes its folder and the scratch of its children " .. path.filename(folder), leaked[folder], true)
+    end
+
     local merged = {}
     for _, entry in ipairs(light.environment({TMPDIR = "/own", XMAKE_TMPDIR = "/own-xmake", REVENANT_PROBE = "set"})) do
         local name, value = entry:match("^([^=]+)=(.*)$")
