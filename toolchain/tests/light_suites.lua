@@ -1,14 +1,25 @@
 import("core.base.process")
 
-local root = path.absolute(path.directory(path.directory(os.scriptdir())))
+local source = debug.getinfo(1, "S").short_src or ""
+if source:startswith("@") then
+    source = source:sub(2)
+end
+local script = path.absolute(source)
+local root = path.directory(path.directory(path.directory(script)))
 
-local byteorder = import("byteorder", {rootdir = path.join(root, "toolchain", "modules"), anonymous = true})
-local workspace = import("workspace", {rootdir = path.join(root, "toolchain", "modules"), anonymous = true})
-local tmp_guard = import("tmp_guard", {rootdir = path.join(root, "toolchain", "modules"), anonymous = true})
-local memo = import("memo", {rootdir = path.join(root, "toolchain", "modules"), anonymous = true})
-local suite_guard = import("suite_guard", {rootdir = path.join(root, "toolchain", "modules"), anonymous = true})
-local suite_reads = import("suite_reads", {rootdir = path.join(root, "toolchain", "tests"), anonymous = true})
-local cache = import("cache", {rootdir = path.join(root, "toolchain", "modules"), anonymous = true})
+function checkout()
+    return root
+end
+
+local modules = path.join(root, "toolchain", "modules")
+local tests = path.join(root, "toolchain", "tests")
+local byteorder = import("byteorder", {rootdir = modules, anonymous = true})
+local workspace = import("workspace", {rootdir = modules, anonymous = true})
+local tmp_guard = import("tmp_guard", {rootdir = modules, anonymous = true})
+local memo = import("memo", {rootdir = modules, anonymous = true})
+local suite_guard = import("suite_guard", {rootdir = modules, anonymous = true})
+local suite_reads = import("suite_reads", {rootdir = tests, anonymous = true})
+local cache = import("cache", {rootdir = modules, anonymous = true})
 
 local VERSION = "light suite memo 1"
 local ALWAYS = {"xmake.lua", "xmakew", "toolchain/addon.lua", "toolchain/includes/**", "toolchain/rules/**", "toolchain/toolchains/**", "toolchain/plugins/**",

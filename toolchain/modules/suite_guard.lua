@@ -1,4 +1,8 @@
-local memo = import("memo", {rootdir = os.scriptdir(), anonymous = true})
+local source = debug.getinfo(1, "S").short_src or ""
+if source:startswith("@") then
+    source = source:sub(2)
+end
+local memo = import("memo", {rootdir = path.absolute(path.directory(source)), anonymous = true})
 local real = {
     readfile = io.readfile,
     open = io.open,

@@ -7,6 +7,7 @@ function failures(opt)
             failures = failures + 1
         end
     end
+    check("the orchestrator finds the checkout from its own file", light.checkout(), path.normalize(path.absolute(path.join(opt.modules, "..", ".."))))
     local function shape(groups)
         local lines = {}
         for _, group in ipairs(groups) do

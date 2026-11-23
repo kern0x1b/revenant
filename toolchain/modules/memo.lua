@@ -1,6 +1,11 @@
 import("core.base.bytes")
 
-local byteorder = import("byteorder", {rootdir = os.scriptdir(), anonymous = true})
+local source = debug.getinfo(1, "S").short_src or ""
+if source:startswith("@") then
+    source = source:sub(2)
+end
+local scriptdir = path.absolute(path.directory(source))
+local byteorder = import("byteorder", {rootdir = scriptdir, anonymous = true})
 local RECORD_LIMIT = 4100
 local HASH_CHUNK = 1000
 local NAMES = {next = function () return hash.uuid() end}
@@ -15,7 +20,7 @@ local compiled = {}
 local installed_text
 
 local function cache()
-    return import("cache", {rootdir = os.scriptdir(), anonymous = true})
+    return import("cache", {rootdir = scriptdir, anonymous = true})
 end
 
 function digest(text)
@@ -266,7 +271,7 @@ function key_of(input, step, version, always, skips)
 end
 
 local function checkout()
-    return path.absolute(path.join(os.scriptdir(), "..", ".."))
+    return path.directory(path.directory(scriptdir))
 end
 
 local function toolchain_facts()
@@ -320,7 +325,7 @@ end
 
 function sdk_content()
     local sdk = import("sdk", {rootdir = path.join(checkout(), "frameworks", "Backports", "tools"), anonymous = true})
-    local analysis = import("analysis_cache", {rootdir = os.scriptdir(), anonymous = true})
+    local analysis = import("analysis_cache", {rootdir = scriptdir, anonymous = true})
     local lines = {}
     for _, real in ipairs(analysis.sdk_paths()) do
         table.insert(lines, try { function () return sdk.cache_key(real) end } or "unreadable")
@@ -375,7 +380,7 @@ end
 
 function sdk_facts()
     local sdk = import("sdk", {rootdir = path.join(checkout(), "frameworks", "Backports", "tools"), anonymous = true})
-    local analysis = import("analysis_cache", {rootdir = os.scriptdir(), anonymous = true})
+    local analysis = import("analysis_cache", {rootdir = scriptdir, anonymous = true})
     local paths = analysis.sdk_paths()
     local signature = {}
     for _, real in ipairs(paths) do
