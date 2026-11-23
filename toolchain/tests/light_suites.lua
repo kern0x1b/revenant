@@ -238,6 +238,9 @@ local function run_with_memo(suites, count)
         keys[suite] = memo.cached_value("keys", path.join(suite, memo.digest(signature .. "\n" .. declaration)), function ()
             return key_for(input, suite)
         end)
+        if os.getenv("SUITE_DEBUG_KEYS") then
+            print("suite key " .. suite .. " " .. keys[suite])
+        end
         local record = memo.recalled(store, suite, keys[suite])
         if record then
             recalled = recalled + 1
