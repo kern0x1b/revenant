@@ -4,6 +4,7 @@ local root = path.absolute(path.directory(path.directory(os.scriptdir())))
 
 local byteorder = import("byteorder", {rootdir = path.join(root, "toolchain", "modules"), anonymous = true})
 local workspace = import("workspace", {rootdir = path.join(root, "toolchain", "modules"), anonymous = true})
+local tmp_guard = import("tmp_guard", {rootdir = path.join(root, "toolchain", "modules"), anonymous = true})
 
 local WORKERS = 4
 
@@ -25,29 +26,11 @@ local function declared()
     return suites
 end
 
-function forbid_system_tmp(suite)
-    local real_dir, real_file = os.tmpdir, os.tmpfile
-    local function guard(name, real)
-        return function (...)
-            local info = debug.getinfo(2, "S")
-            if info and info.short_src and info.short_src:startswith("@programdir") then
-                return real(...)
-            end
-            raise("%s calls %s, which is the system temporary folder: a suite works in a folder of its own under the scratch of the checkout (fixtures.scratch())", suite, name)
-        end
-    end
-    os.tmpdir = guard("os.tmpdir", real_dir)
-    os.tmpfile = guard("os.tmpfile", real_file)
-    return function ()
-        os.tmpdir, os.tmpfile = real_dir, real_file
-    end
-end
-
 local function run_suite(suite)
     local addon = path.join(root, "toolchain", "tests", "addon")
     local arguments = {modules = path.join(root, "toolchain", "modules")}
     local failures = {}
-    local restore = forbid_system_tmp(suite)
+    local restore = tmp_guard.forbid(suite)
     try {
         function ()
             failures = import(suite, {rootdir = addon, anonymous = true}).failures(arguments)
@@ -116,16 +99,32 @@ local function run_serial(names)
     print("light suites: %d passed", #names)
 end
 
-local function run_parallel(groups)
+function environment(overrides)
+    local envs = {}
+    for name, value in pairs(os.getenvs()) do
+        if overrides[name] == nil then
+            table.insert(envs, name .. "=" .. value)
+        end
+    end
+    for name, value in pairs(overrides) do
+        table.insert(envs, name .. "=" .. value)
+    end
+    return envs
+end
+
+local function run_in_children(groups)
     local children = {}
     local logs = workspace.fresh("light-suites")
+    local temporary = path.join(logs, "tmp")
+    os.mkdir(temporary)
+    local envs = environment({XMAKE_TMPDIR = temporary, TMPDIR = temporary})
     local failed, total, failure = 0, 0, nil
     try {
         function ()
             for index, names in ipairs(groups) do
                 local log = path.join(logs, string.format("%d.log", index))
                 local child = process.openv(os.programfile(), table.join({"l", "-P", root, path.join(root, "toolchain", "tests", "light_suites.lua")}, names),
-                                            {outpath = log, errpath = log})
+                                            {outpath = log, errpath = log, envs = envs})
                 table.insert(children, {process = child, log = log, count = #names, done = false})
             end
             for _, child in ipairs(children) do
@@ -172,12 +171,7 @@ function main(...)
     local names = {...}
     local suites = declared()
     if #names == 0 then
-        local groups = partition(suites, workers(os.getenv("REVENANT_BUDGET_HELD")))
-        if #groups > 1 then
-            run_parallel(groups)
-            return
-        end
-        run_serial(suites)
+        run_in_children(partition(suites, workers(os.getenv("REVENANT_BUDGET_HELD"))))
         return
     end
     local known = {}

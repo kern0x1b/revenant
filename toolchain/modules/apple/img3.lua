@@ -37,9 +37,26 @@ function decrypt(payload, key, iv)
     end
     local folder = workspace.fresh("img3")
     local input, output = path.join(folder, "payload"), path.join(folder, "plain")
-    io.writefile(input, payload, {encoding = "binary"})
-    os.vrunv("openssl", {"enc", "-d", "-aes-" .. (#key * 4) .. "-cbc", "-K", key, "-iv", iv, "-nopad", "-in", input, "-out", output})
-    local plain = io.readfile(output, {encoding = "binary"})
-    os.tryrm(folder)
+    local plain, failure
+    try {
+        function ()
+            io.writefile(input, payload, {encoding = "binary"})
+            os.vrunv("openssl", {"enc", "-d", "-aes-" .. (#key * 4) .. "-cbc", "-K", key, "-iv", iv, "-nopad", "-in", input, "-out", output})
+            plain = io.readfile(output, {encoding = "binary"})
+        end,
+        catch {
+            function (raised)
+                failure = tostring(raised)
+            end
+        },
+        finally {
+            function ()
+                os.tryrm(folder)
+            end
+        }
+    }
+    if failure then
+        raise("%s", failure)
+    end
     return plain
 end

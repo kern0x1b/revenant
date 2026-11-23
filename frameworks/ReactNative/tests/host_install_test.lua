@@ -215,7 +215,6 @@ function main()
 
     do
         local base = workspace.fresh("host-install-packages")
-        os.mkdir(base)
         local json = import("core.base.json")
         json.savefile(path.join(base, "org.revenant.backports.json"), {name = "org.revenant.backports", version = "0.8.18+9772f8d3"})
         json.savefile(path.join(base, "org.revenant.swift-runtime-8e5fdec8.json"), {name = "org.revenant.swift-runtime-8e5fdec8", version = "0.8.18+8e5fdec8"})

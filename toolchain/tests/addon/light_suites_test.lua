@@ -41,5 +41,16 @@ function failures(opt)
     check("a grant above the limit is the limit", light.workers("12"), 4)
     check("a grant of zero is one worker", light.workers("0"), 1)
     check("a grant that is no number is one worker", light.workers("many"), 1)
+
+    local merged = {}
+    for _, entry in ipairs(light.environment({TMPDIR = "/own", REVENANT_PROBE = "set"})) do
+        local name, value = entry:match("^([^=]+)=(.*)$")
+        merged[name] = (merged[name] or 0) + 1
+        merged[name .. "="] = value
+    end
+    check("the environment of a child names TMPDIR once", merged.TMPDIR, 1)
+    check("the environment of a child gives TMPDIR the folder asked for", merged["TMPDIR="], "/own")
+    check("the environment of a child adds a new variable", merged["REVENANT_PROBE="], "set")
+    check("the environment of a child keeps PATH", merged["PATH="], os.getenv("PATH"))
     return failures == 0 and {} or {string.format("%d checks failed", failures)}
 end

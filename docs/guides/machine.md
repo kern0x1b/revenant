@@ -776,9 +776,13 @@ without flags. `light suites` asks the budget for up to four tokens and runs its
 (`toolchain/tests/light_suites.lua` splits them into groups of about equal time by the measured seconds of its slowest suites;
 a run with one token, or by hand, runs them one after another): 230 s one after another, 65 s in four. The suites and the
 tools they start use no system temporary folder: each suite works in a folder of its own under the scratch of the checkout,
-a suite that calls `os.tmpdir()` or `os.tmpfile()` fails, and the step sets `XMAKE_TMPDIR` and `TMPDIR` to a folder there, so
-two prepush runs of two worktrees share no `/tmp` path (measured 2026-11-23: no new entry in `/tmp` or the user's `$TMPDIR`
-during a run of the 67 suites). Keep the caches
+a suite whose own code calls `os.tmpdir()` or `os.tmpfile()` fails (`toolchain/modules/tmp_guard.lua`: it looks at the caller, so
+it is a check of the suite's code, not an interception of every write), `tmp_use_test` scans the sources of the suites and of the
+tests that prepush runs, and the orchestrator of `light suites` starts each group, and `prepush` each `lua()` step, with
+`XMAKE_TMPDIR` and `TMPDIR` set to a folder of its own in that scratch, so the writes of xmake and of the compilers are
+there too and two prepush runs of two worktrees share no `/tmp` path (measured 2026-11-23: no new entry of ours in `/tmp` or
+the user's `$TMPDIR` during a run of the 67 suites; the folder path is about 125 characters in a worktree and 90 in the main checkout, a Unix
+socket path may not exceed 104 bytes, and no light suite opens a socket there). Keep the caches
 (`.cache`/`REVENANT_CACHE`, `build/backports-gate`) between runs: a cold `backports build`
 took 48 minutes on 2026-11-16 and a warm one 58 seconds (a new worktree starts with the facts and the module cache of the
 store, "Which analysis to share"), and a deleted cache leaves references in the checkout's `.xmake`

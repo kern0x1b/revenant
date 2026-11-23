@@ -93,7 +93,6 @@ expect("the copy's host no longer carries the libc++ the shared package installs
 expect("the host rule is carried once", isolate.host_libcxx(hosted) == hosted, "a second pass changed the copy")
 
 local base = workspace.fresh("rn-isolate-cloning")
-os.rm(base)
 local old_checkout, old_cache, old_folder = path.join(base, "old", "checkout"), path.join(base, "old", "checkout", ".cache-pp"), path.join(base, "old", "checkout", "iso-x")
 local new_cache, new_folder = path.join(base, "new", ".cache-pp"), path.join(base, "new", "iso-y")
 os.mkdir(path.join(old_cache, "pkg", "x"))
@@ -155,7 +154,6 @@ local _, count = twice:gsub("add_patches", "")
 expect("patch_wire replaces the registration of a patch whose name has a dash and does not add a second one", count == 1 and twice:find('"33"', 1, true) ~= nil and twice:find('"11"', 1, true) == nil,
        twice)
 local fixture = workspace.fresh("rn-closure-fixture")
-os.tryrm(fixture)
 os.mkdir(path.join(fixture, "frameworks", "ReactNative", "src"))
 io.writefile(path.join(fixture, "frameworks", "ReactNative", "src", "coverage.json"), '{"rows": [{"id": "expo-a"}, {"id": "pod-b"}, {"id": "pod-c"}]}')
 for name, deps in pairs({["expo-a"] = 'add_deps("pod-b", "swift-runtime")', ["pod-b"] = 'add_deps("pod-c")', ["pod-c"] = 'add_deps("pod-b")'}) do
@@ -167,7 +165,6 @@ expect("module_build closes a package list over the add_deps of the recipes that
 os.tryrm(fixture)
 
 local keyed = workspace.fresh("rn-config-key")
-os.tryrm(keyed)
 os.mkdir(path.join(keyed, "build"))
 io.writefile(path.join(keyed, "xmake.lua"), "set_project('a')\n")
 local env = {A = "1", B = "2"}
@@ -186,7 +183,6 @@ expect("a folder configured with another key is configured again", not isolate.c
 os.tryrm(keyed)
 
 local tree = workspace.fresh("rn-config-tree")
-os.tryrm(tree)
 os.mkdir(path.join(tree, "frameworks", "X"))
 local function git(...) return os.iorunv("git", table.join({"-C", tree}, {...})) end
 git("init", "-q")
@@ -206,8 +202,6 @@ expect("adding a source file changes the checkout's configuration state", isolat
 os.tryrm(tree)
 
 local ambient_dir = workspace.fresh("rn-config-ambient")
-os.tryrm(ambient_dir)
-os.mkdir(ambient_dir)
 io.writefile(path.join(ambient_dir, "xmake.lua"), "set_project('a')\n")
 local aenv = {A = "1"}
 local base_key = isolate.config_key(ambient_dir, aenv, "tree", {DEVELOPER_DIR = "/Xcode-1"})
@@ -235,7 +229,6 @@ expect("a library the host links and the application lacks is named", table.conc
 expect("an xmake.lua with no list is not read as one", libraries.declared('add_requires("revenant@backports")\n') == nil, "a requirement without libraries gave a list")
 
 local gapped = workspace.fresh("rn-ref-gap")
-os.tryrm(gapped)
 os.mkdir(path.join(gapped, "build", "ref"))
 os.execv("ln", {"-s", path.join(gapped, "nowhere"), path.join(gapped, "build", "ref", "app")})
 local gap = isolate.reference_gap(gapped)
@@ -245,8 +238,6 @@ expect("a project whose reference application is there is not refused", isolate.
 os.tryrm(gapped)
 
 local slices_dir = workspace.fresh("rn-config-masked")
-os.tryrm(slices_dir)
-os.mkdir(slices_dir)
 io.writefile(path.join(slices_dir, "xmake.lua"), "set_project('a')\n")
 local slices_saved = os.getenv("REVENANT_SLICES")
 os.setenv("REVENANT_SLICES", "armv7")

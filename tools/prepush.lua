@@ -237,17 +237,39 @@ local function backports_build()
     return ok
 end
 
+local function in_own_temporary(name, run)
+    local folder = import("@addon.revenant.workspace", {anonymous = true}).fresh(name)
+    local result, failure
+    try {
+        function ()
+            result = run({XMAKE_TMPDIR = folder, TMPDIR = folder})
+        end,
+        catch {
+            function (raised)
+                failure = tostring(raised)
+            end
+        },
+        finally {
+            function ()
+                os.tryrm(folder)
+            end
+        }
+    }
+    if failure then
+        raise("%s", failure)
+    end
+    return result
+end
+
 local function lua(script, ...)
-    return budgeted(table.join({os.programfile(), "l", "-P", root, path.join(root, script)}, {...}))
+    local command = table.join({os.programfile(), "l", "-P", root, path.join(root, script)}, {...})
+    return in_own_temporary("step-tmp", function (envs)
+        return budgeted(command, {envs = envs})
+    end)
 end
 
 local function light_suites()
-    local temporary = path.join(lists_folder(), "tmp-" .. NAMES.next():sub(1, 8))
-    os.mkdir(temporary)
-    local result = budgeted({os.programfile(), "l", "-P", root, path.join(root, "toolchain", "tests", "light_suites.lua")},
-                            {jobs = LIGHT_JOBS, envs = {XMAKE_TMPDIR = temporary, TMPDIR = temporary}})
-    os.tryrm(temporary)
-    return result
+    return budgeted({os.programfile(), "l", "-P", root, path.join(root, "toolchain", "tests", "light_suites.lua")}, {jobs = LIGHT_JOBS})
 end
 
 local function backports_exports()

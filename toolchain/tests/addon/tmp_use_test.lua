@@ -8,6 +8,7 @@ local SCANNED = {
     "frameworks/ReactNative/tests/host_install_test.lua",
     "frameworks/ReactNative/tests/isolate_test.lua",
     "frameworks/ReactNative/tests/overlay_test.lua",
+    "frameworks/ReactNative/tools/isolate.lua",
     "frameworks/Backports/tests/export_baseline_test.lua",
     "tools/analysis_cache.lua",
     "tools/budget.lua",
@@ -15,7 +16,7 @@ local SCANNED = {
     "tools/prepush.lua",
 }
 
-local GUARDS = {["tmp_use_test.lua"] = true, ["light_suites.lua"] = true}
+local GUARDS = {["tmp_use_test.lua"] = true, ["light_suites.lua"] = true, ["tmp_guard.lua"] = true}
 
 local function uses_of(file)
     local found = {}
@@ -32,9 +33,19 @@ local function uses_of(file)
     return found
 end
 
+local function redirected(root, folder)
+    local script = path.join(folder, "probe.lua")
+    io.writefile(script, "function main()\n    print(os.tmp" .. "dir())\nend\n")
+    local own = path.join(folder, "own")
+    os.mkdir(own)
+    local text = os.iorunv(os.programfile(), {"l", "-P", root, script}, {envs = {XMAKE_TMPDIR = own, TMPDIR = own}})
+    return text:trim():startswith(own), own
+end
+
 function failures(opt)
-    local root = path.join(opt.modules, "..", "..")
-    local light = import("light_suites", {rootdir = path.join(opt.modules, "..", "tests"), anonymous = true})
+    local root = path.absolute(path.join(opt.modules, "..", ".."))
+    local guard = import("tmp_guard", {rootdir = opt.modules, anonymous = true})
+    local fixtures = import("fixtures", {rootdir = path.join(opt.modules, "..", "tests", "addon"), anonymous = true})
     local found = {}
     local scanned = 0
     for _, pattern in ipairs(SCANNED) do
@@ -53,7 +64,7 @@ function failures(opt)
     end
 
     local before_dir, before_file = os.tmpdir, os.tmpfile
-    local restore = light.forbid_system_tmp("probe_test")
+    local restore = guard.forbid("probe_test")
     local refused = {}
     for name, call in pairs({["os.tmpdir"] = function () return os.tmpdir() end, ["os.tmpfile"] = function () return os.tmpfile() end}) do
         try {
@@ -75,6 +86,11 @@ function failures(opt)
     end
     if os.tmpdir ~= before_dir or os.tmpfile ~= before_file then
         table.insert(found, "the guard must put os.tmpdir and os.tmpfile back")
+    end
+
+    local ok = redirected(root, fixtures.scratch())
+    if not ok then
+        table.insert(found, "a child process given XMAKE_TMPDIR and TMPDIR must answer os.tmpdir() with a folder under it")
     end
     return found
 end

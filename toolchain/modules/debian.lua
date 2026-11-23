@@ -60,10 +60,27 @@ function gzip(content)
     local tool = assert(find_tool("gzip"), "gzip is part of macOS; a .deb cannot be written without it")
     local folder = workspace.fresh("gzip")
     local input = path.join(folder, "content")
-    io.writefile(input, content, {encoding = "binary"})
-    os.vrunv(tool.program, {"-n", "-9", "-f", input})
-    local compressed = io.readfile(input .. ".gz", {encoding = "binary"})
-    os.tryrm(folder)
+    local compressed, failure
+    try {
+        function ()
+            io.writefile(input, content, {encoding = "binary"})
+            os.vrunv(tool.program, {"-n", "-9", "-f", input})
+            compressed = io.readfile(input .. ".gz", {encoding = "binary"})
+        end,
+        catch {
+            function (raised)
+                failure = tostring(raised)
+            end
+        },
+        finally {
+            function ()
+                os.tryrm(folder)
+            end
+        }
+    }
+    if failure then
+        raise("%s", failure)
+    end
     return compressed
 end
 
