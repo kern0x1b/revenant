@@ -339,9 +339,11 @@ local function emulator_entries(base, found)
     end
 end
 
-local function modcache_entries(base, found)
-    for _, folder in ipairs(children(path.join(base, "modcache"))) do
-        table.insert(found, entry(base, folder, "scratch"))
+local function analysis_entries(base, found, name)
+    for _, folder in ipairs(children(path.join(base, name))) do
+        if not folder:endswith(".lock") then
+            table.insert(found, entry(base, folder, "scratch"))
+        end
     end
 end
 
@@ -378,8 +380,8 @@ function entries(base)
             for _, task in ipairs(children(folder)) do
                 table.insert(found, entry(base, task, "scratch"))
             end
-        elseif name == "modcache" then
-            modcache_entries(base, found)
+        elseif name == "modcache" or name == "backports" then
+            analysis_entries(base, found, name)
         elseif name == "lowered" then
             lowered_entries(base, found)
         elseif name == "ccache" then

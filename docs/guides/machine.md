@@ -38,6 +38,7 @@ others of the cache. Only the package, generation, source, scratch and build cla
 | the rest of `xmake-global/.xmake/cache` | xmake's other caches | scratch |
 | the rest of `xmake-global/.xmake` | the repositories and xmake's state, through `XMAKE_GLOBALDIR`, which `xmakew` sets to the store's `xmake-global` | kept |
 | `roots/*.txt` of the store | the installs that other tools build against and that must stay (below) | kept |
+| `backports/<key>`, `modcache/<key>` (and `<key>.lock`) | the Backports facts of one SDK key and the digester's module cache; each is in the cache of a checkout and in the store, where `prepush` shares them between worktrees ("Which analysis to share"); a key that is gone is computed again | scratch |
 | `scratch/<task>` | the scratch of one task, written by the task and deleted when it ends | scratch |
 | `dyld/<release>` | the shared caches and libraries of each iOS release, taken out of decrypted firmware; 6.1.3 and 6.0 are kept, other releases are scratch | kept or scratch |
 | `firmware/rootfs/<device>/<release>_<build>` | root file systems; 6.1.3 and 6.0 are kept, other releases are scratch | kept or scratch |
@@ -322,6 +323,40 @@ removes a folder only when it holds the `.private-cache` marker that the tool wr
 checkout. Never run it on the store while a roots file names its installs: `tools/cache.lua` drops a part no root names when
 the cap is reached, and nothing else deletes from the store. Apple's directories are copied read-only, so removal makes the
 directories writable before it deletes them, and it does not follow links.
+
+### Which analysis to share
+
+The Backports analysis is what a new worktree would compute from nothing although no file of it differs from the file any
+other checkout computes: the facts of each framework (`.cache/backports/<key>`: one TSV per framework, `constant_intros.tsv`,
+`install_names.tsv`) and the clang module cache the digester fills while it reads the Swift frameworks
+(`.cache/modcache/<key>`). Each folder is keyed by content: the module cache by the SDK and the digester, the facts by the SDK, the
+compiler, the digester and the four tools that write them (`ast.lua`, `facts.lua`, `public.lua`, `sdk.lua` of
+`frameworks/Backports/tools`), so a file under a key is the file every checkout would write there. A cold `lowered members` spent 585 to 784 s on `constant_intros.tsv` alone
+(measured 2026-11-23: one `clang -ast-dump` per umbrella header, one after another), and a cold `backports build` about 100 s
+on the facts of the frameworks.
+
+The store keeps one copy of each, `<store>/backports/<key>` and `<store>/modcache/<key>`, and `prepush` moves files between it
+and the checkout, with APFS clones (no second copy on disk): before the first heavy check that runs, the files the store holds
+under the keys of the installed SDKs and the checkout lacks are cloned in; after the heavy checks, also after a failed one,
+the files the store lacks are cloned out. A file is never overwritten (the same name under the same key is the same content),
+so a partial folder is as good as a full one and two worktrees that publish at once add up. Every file arrives by a rename out
+of a staging folder `.analysis-<id>` next to its destination, so no reader sees a half-written file, under `<key>.lock`, which
+is the lock the facts extraction holds, so a restore waits for an extraction that is running and the cap cannot evict a folder
+in the middle of a merge. A staging folder an aborted run left is removed an hour later. A failure of either direction is one
+line, not a failed check: the checks compute what they lack.
+
+```
+./xmakew l -P . tools/analysis_cache.lua [sync | restore | publish]
+```
+
+does the same by hand, for a test run on its own (`frameworks/Backports/tests/lowered_members_test.lua` in a new worktree
+takes 13 minutes without it). Both folders are scratch in the cache and in the store, so the cap can evict a key that nothing
+uses and the next run computes it again; a key moves only when the SDK, the toolchain or one of the four tools changes, and
+the first checkout to run after that fills the store for the others.
+
+The gate's copy (`build/backports-gate/tree`) is not shared in the same way: its `.xmake` records the paths of the checkout
+that configured it, and a clone would take the objects of another tree at face value. The compile cache (`ccache` of the
+store) already gives a new copy its objects, and what the copy computes itself is the configure step.
 
 ## Build each package once
 
@@ -642,7 +677,9 @@ key, because a rerun costs seconds and a verdict that no longer holds costs a pu
   caches it saw. The facts are read after prepush has cloned the caches this checkout lacked ("Which cache to clone"); when no
   checkout holds a release, `backports device imports` fails with the command the deb writer's fetch is
   (`./xmakew firmware -P . --arch=armv7 fetch <release>`). These steps read everything the build reads (`reads` is the whole tree);
-  `dyld caches test` reads the tool, its module and `toolchain/modules/*.lua`.
+  `dyld caches test` reads the tool, its module and `toolchain/modules/*.lua`, and so does `analysis cache test`
+  (`tools/analysis_cache.lua`). The shared analysis ("Which analysis to share") is no part of a key: it is a cache of what a
+  check computes from the keyed inputs.
 
 What a key does not see, and the remembered `ok` can therefore outlive a change that a fresh run would report: an install replaced in
 place with the same name and manifest, and a tool replaced in place with the same version line; the host's own frameworks and tools
@@ -663,7 +700,8 @@ What a check reads is declared on the check in `tools/prepush.lua` (`reads`, a l
 so an undeclared check is slower, never stale. The narrow ones: `comments test` (`tools/comments.lua`, `tools/comments/`), the
 tests of `tools/private_cache.lua`, `tools/ci_errors.lua` and `tools/ci_swiftc_replay.lua` (the tool, its folder and the addon
 modules), `credentials` and `copied_text` (`agent-skills/tests/`), `negative shape` (the Backports tests and `emulator/`),
-`dyld caches test` (`tools/dyld_caches.lua`, `toolchain/modules/apple/dyld_caches.lua` and the addon modules),
+`dyld caches test` (`tools/dyld_caches.lua`, `toolchain/modules/apple/dyld_caches.lua` and the addon modules), `analysis cache test`
+(`tools/analysis_cache.lua` and the addon modules),
 `recipe digests` (the inputs the recipes list in `toolchain/modules/digest.lua`, the digest files and the addon modules), and
 `lowered members` and `lowered exports`, which skip `docs/`, Markdown files, `.agents/` and `agent-skills/`. `backports build` skips
 nothing, because the copy it builds in holds every file, and `backports exports` and `backports device imports` skip nothing because they read that copy's build (and the baseline data, or the device caches). A check that starts to read a file outside its declaration, or an ignored
@@ -717,8 +755,12 @@ Order and flags. The cheap checks run first and the heavy ones (`lowered members
 behind a build. `--keep-going` runs every check regardless (the old behaviour), `--list` prints the names with the heavy ones
 marked, and `--only <check,...>` runs just those (names with a space are quoted: `--only "layout,light suites"`) for iterations;
 an unknown name is an error, and a run with `--only` says that a push needs all checks. The full run before a push stays
-without flags. Keep the caches (`.cache`/`REVENANT_CACHE`, `build/backports-gate`) between runs: a cold `backports build`
-took 48 minutes on 2026-11-16 and a warm one 58 seconds, and a deleted cache leaves references in the checkout's `.xmake`
+without flags. `light suites` asks the budget for up to four tokens and runs its suites in as many processes
+(`toolchain/tests/light_suites.lua` splits them into groups of about equal time by the measured seconds of its slowest suites;
+a run with one token, or by hand, runs them one after another): 230 s one after another, 65 s in four. Keep the caches
+(`.cache`/`REVENANT_CACHE`, `build/backports-gate`) between runs: a cold `backports build`
+took 48 minutes on 2026-11-16 and a warm one 58 seconds (a new worktree starts with the facts and the module cache of the
+store, "Which analysis to share"), and a deleted cache leaves references in the checkout's `.xmake`
 that make a later check fail, so remove `.xmake` together with a cache it names. The gate's copy stays per checkout: its
 own `.xmake` records the cache paths of the run that configured it, so a copy shared between checkouts would point at another
 checkout's cache.

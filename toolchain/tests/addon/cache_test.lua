@@ -280,6 +280,20 @@ function failures(arguments)
         table.insert(found, "a module cache of one SDK is scratch, so the cap can evict it")
     end
 
+    folder_of(path.join(models, "backports", "26.2-0123456789abcdef"), MEGABYTE, OLDER)
+    io.writefile(path.join(models, "backports", "26.2-0123456789abcdef.lock"), "")
+    local facts_rows = {}
+    for _, row in ipairs(cache.status(models, {builds = {}})) do
+        facts_rows[row.name] = row.class
+    end
+    if facts_rows[path.join("backports", "26.2-0123456789abcdef")] ~= "scratch" then
+        table.insert(found, "the facts of one SDK key are scratch, so the cap can evict them and the next run computes them again: "
+                            .. tostring(facts_rows[path.join("backports", "26.2-0123456789abcdef")]))
+    end
+    if facts_rows[path.join("backports", "26.2-0123456789abcdef.lock")] ~= nil then
+        table.insert(found, "the lock of a facts key is not an entry of its own, it goes with the folder it guards")
+    end
+
     local compiled = path.join(folder, "compiled")
     folder_of(path.join(compiled, "ccache", "cache"), MEGABYTE, OLDER)
     folder_of(path.join(compiled, "ccache", "shim", "0123"), 1, OLDER)
