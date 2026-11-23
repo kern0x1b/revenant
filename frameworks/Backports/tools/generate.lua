@@ -631,7 +631,8 @@ function references_of_src(device)
 end
 
 local function differs(live, staged)
-    local errfile = os.tmpfile()
+    local errfile = path.join(path.directory(staged), "skeleton.diff-err")
+    os.tryrm(errfile)
     local code = os.execv("diff", {"-rq", live, staged}, {try = true, stdout = os.nuldev(), stderrpath = errfile})
     local detail = os.isfile(errfile) and io.readfile(errfile) or ""
     os.tryrm(errfile)
@@ -643,12 +644,25 @@ local function differs(live, staged)
     raise("publish_skeleton: diff of %s and %s failed (%s): %s", live, staged, tostring(code), detail)
 end
 
+local function prune_versions(root, keep)
+    for _, folder in ipairs(os.dirs(path.join(root, "skeleton.*"))) do
+        local name = path.filename(folder)
+        if name:match("^skeleton%.%d+$") and not keep[name] then
+            os.rm(folder)
+        end
+    end
+end
+
 function publish_skeleton(root, write)
     local live = path.join(root, "skeleton")
     local staged = path.join(root, "skeleton.staged")
     return exclusive.run(path.join(root, "skeleton.lock"), "the skeleton folder", function ()
         os.tryrm(staged)
         local totals = write(staged)
+        local previous
+        if os.islink(live) then
+            previous = path.filename(os.readlink(live) or "")
+        end
         if os.islink(live) and not differs(live, staged) then
             os.tryrm(staged)
             return totals
@@ -667,11 +681,7 @@ function publish_skeleton(root, write)
             os.rm(live)
         end
         os.vrunv("mv", {"-fh", pointer, live})
-        for _, old in ipairs(os.dirs(path.join(root, "skeleton.*"))) do
-            if old ~= version then
-                os.rm(old)
-            end
-        end
+        prune_versions(root, {[path.filename(version)] = true, [previous or ""] = true})
         return totals
     end)
 end

@@ -69,7 +69,13 @@ local function test()
     expect("a reader never finds the live folder missing or partial while another process replaces it with other content again and again", missing == 0 and looked > 1
         and seen["one\n"] and seen["two\n"], string.format("%d of %d looks found a missing or partial folder, saw %s, wait gave %s; child log: %s", missing, looked,
         table.concat(table.keys(seen), ","), tostring(finished), io.readfile(log) or ""))
-    expect("a replaced folder leaves no older folder behind", #os.dirs(path.join(root, "skeleton.*")) == 1, "older folders stay: " .. table.concat(os.dirs(path.join(root, "skeleton.*")), ", "))
+    expect("a replaced folder keeps the current and the previous version only", #os.dirs(path.join(root, "skeleton.*")) == 2, "wrong number of versions: " .. table.concat(os.dirs(path.join(root, "skeleton.*")), ", "))
+    local held = path.join(root, path.filename(os.readlink(live)))
+    local held_text = io.readfile(path.join(held, "a.m"))
+    generate.publish_skeleton(root, writer({["a.m"] = "four\n", ["c.m"] = "five\n"}))
+    expect("a reader holding the resolved path of the previous version keeps its files after the next publish",
+        io.readfile(path.join(held, "a.m")) == held_text and io.readfile(path.join(live, "a.m")) == "four\n" and #os.dirs(path.join(root, "skeleton.*")) == 2,
+        "the held version lost its files")
     local failing = path.join(root, "skeleton")
     os.rm(failing)
     os.mkdir(failing)
