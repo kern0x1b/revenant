@@ -334,11 +334,12 @@ compiler, the digester and the four tools that write them (`ast.lua`, `facts.lua
 `frameworks/Backports/tools`), so a file under a key is the file every checkout would write there. A cold `lowered members` spent 585 to 784 s on `constant_intros.tsv` alone
 (measured 2026-11-23: one `clang -ast-dump` per umbrella header, one after another; 583 s alone in one process at a load of 17 to 25),
 and a cold `backports build` about 100 s on the facts of the frameworks. `facts.lua` now makes `constant_intros.tsv` in four shard
-processes (`facts.lua constant-intros`, started with `runjobs`, so the job count follows the machine's budget): each shard takes every
+processes (`facts.lua constant-intros`, one `runjobs` job per shard, all four at once whatever the load): each shard takes every
 fourth framework, keeps for each name its first introduction and its last kind, and the parent merges the shards in the order of the
 frameworks, so the file does not depend on the shard count. Measured 2026-11-23 on the same SDK at a load of 24: 168 s instead of 583 s,
-35,571 names, the file byte for byte the one the sequential code wrote (`tests/facts_parallel_test.lua` compares one to sixteen
-shards on a fixture SDK, and its failures).
+35,571 names, the file byte for byte the one the sequential code wrote (`tests/facts_parallel_test.lua` compares the bytes of none to sixteen
+requested shards on a fixture SDK of seven frameworks, where at most seven processes start, checks that the processes started, and
+checks a header that does not compile).
 
 The store keeps one copy of each, `<store>/backports/<key>` and `<store>/modcache/<key>`, and `prepush` moves files between it
 and the checkout, with APFS clones (no second copy on disk; where the volume cannot clone, `cp` copies): before the first heavy

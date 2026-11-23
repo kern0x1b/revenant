@@ -372,17 +372,20 @@ function constant_intros(sdk, opt)
     end
     local names = sdkfiles.framework_names(sdk)
     local shards = {}
-    for index = 1, math.min((opt and opt.shards) or CONSTANT_SHARDS, #names) do
+    for index = 1, math.max(1, math.min((opt and opt.shards) or CONSTANT_SHARDS, #names)) do
         shards[index] = {}
     end
     for index = 1, #names do
         table.insert(shards[(index - 1) % #shards + 1], index)
     end
+    if opt and opt.report then
+        opt.report.processes = #shards > 1 and #shards or 0
+    end
     local summaries
     if #shards > 1 then
         summaries = sharded_summaries(sdk, names, shards)
     else
-        summaries = {constant_summary(sdk, names, shards[1] or {})}
+        summaries = {constant_summary(sdk, names, shards[1])}
     end
     local intros = merge_summaries(summaries)
     local rows = {}
