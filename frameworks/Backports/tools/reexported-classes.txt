@@ -393,7 +393,6 @@ GameKitBackports _OBJC_METACLASS_$_GKVoiceChatService GameKit
 MapKitBackports _OBJC_CLASS_$_MKCircle MapKit
 MapKitBackports _OBJC_CLASS_$_MKCircleView MapKit
 MapKitBackports _OBJC_CLASS_$_MKDirectionsRequest MapKit
-MapKitBackports _OBJC_CLASS_$_MKLocalSearchResponse MapKit
 MapKitBackports _OBJC_CLASS_$_MKOverlayPathView MapKit
 MapKitBackports _OBJC_CLASS_$_MKOverlayView MapKit
 MapKitBackports _OBJC_CLASS_$_MKPolygon MapKit
@@ -408,7 +407,6 @@ MapKitBackports _OBJC_CLASS_$_MKUserTrackingBarButtonItem MapKit
 MapKitBackports _OBJC_METACLASS_$_MKCircle MapKit
 MapKitBackports _OBJC_METACLASS_$_MKCircleView MapKit
 MapKitBackports _OBJC_METACLASS_$_MKDirectionsRequest MapKit
-MapKitBackports _OBJC_METACLASS_$_MKLocalSearchResponse MapKit
 MapKitBackports _OBJC_METACLASS_$_MKOverlayPathView MapKit
 MapKitBackports _OBJC_METACLASS_$_MKOverlayView MapKit
 MapKitBackports _OBJC_METACLASS_$_MKPolygon MapKit
