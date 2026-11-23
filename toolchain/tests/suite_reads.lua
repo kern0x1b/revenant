@@ -1,5 +1,6 @@
 local EXTRA = {
     assets_extract_test = {
+        "toolchain/tools/assets_extract/assets_extract.lua",
         "toolchain/src/assets-extract/assets-extract.m",
         "toolchain/modules/**",
         "toolchain/modules/apple/sdk.lua",
@@ -1311,6 +1312,7 @@ local EXTRA = {
         "toolchain/tests/addon/recompiler_fresh_test.lua",
     },
     light_suites_test = {
+        "**",
         "toolchain/modules/**",
         "toolchain/modules/apple/sdk.lua",
         "toolchain/tests/light_suites.lua",

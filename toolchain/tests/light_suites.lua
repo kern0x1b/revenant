@@ -23,8 +23,11 @@ local cache = import("cache", {rootdir = modules, anonymous = true})
 
 local VERSION = "light suite memo 1"
 local ALWAYS = {"xmake.lua", "xmakew", "toolchain/addon.lua", "toolchain/includes/**", "toolchain/rules/**", "toolchain/toolchains/**", "toolchain/plugins/**",
-                "toolchain/src/**/xmake.lua", "frameworks/**/xmake.lua", "packages/**/xmake.lua", "addons/**/xmake.lua",
-                "toolchain/tests/light_suites.lua", "toolchain/tests/suite_reads.lua", "toolchain/modules/memo.lua", "toolchain/modules/suite_guard.lua"}
+                "toolchain/src/**/xmake.lua", "frameworks/**/xmake.lua", "packages/**/xmake.lua", "packages/*/*/port/digest.lua", "addons/**/xmake.lua",
+                "emulator/**", "recompiler/**", "neon/**", "toolchain/tests/**/xmake.lua",
+                "toolchain/tests/light_suites.lua", "toolchain/tests/suite_reads.lua", "toolchain/modules/byteorder.lua", "toolchain/modules/workspace.lua",
+                "toolchain/modules/tmp_guard.lua", "toolchain/modules/cache.lua", "toolchain/modules/retention.lua", "toolchain/modules/generations.lua",
+                "toolchain/modules/exclusive.lua", "toolchain/modules/apple/lowered.lua", "toolchain/modules/memo.lua", "toolchain/modules/suite_guard.lua"}
 local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_TASK = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true, REVENANT_LIGHT_SUITES_VERDICT = true, REVENANT_SUITE_TRACE = true, REVENANT_SUITE_ROOT = true}
 local ENV_NAMES = {"DEVELOPER_DIR", "DEVICE_HOST", "DEVICE_UDID", "FAKE_FAIL", "FAKE_GENERATION", "GIT_CEILING_DIRECTORIES", "HOME", "PATH", "RACE_MARKERS", "RACE_NAME", "RACE_SAME", "SOURCE_DATE_EPOCH", "TMPDIR", "XMAKE_GLOBALDIR", "XMAKE_MAX_JOBS"}
 local WORKERS = 4
