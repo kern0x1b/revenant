@@ -117,7 +117,7 @@ local function run_in_children(groups)
     local logs = workspace.fresh("light-suites")
     local temporary = path.join(logs, "tmp")
     os.mkdir(temporary)
-    local envs = environment({XMAKE_TMPDIR = temporary, TMPDIR = temporary})
+    local envs = environment({XMAKE_TMPDIR = temporary, TMPDIR = temporary, REVENANT_LIGHT_CHILD = "1"})
     local failed, total, failure = 0, 0, nil
     try {
         function ()
@@ -183,5 +183,9 @@ function main(...)
             raise("toolchain/tests/xmake.lua declares no light suite named %s", name)
         end
     end
-    run_serial(names)
+    if os.getenv("REVENANT_LIGHT_CHILD") == "1" then
+        run_serial(names)
+        return
+    end
+    run_in_children({names})
 end

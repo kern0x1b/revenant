@@ -655,18 +655,26 @@ function checkout_state(root)
     end
     local folder = workspace.fresh("checkout-state")
     local listing = path.join(folder, "config-inputs")
-    local contents
+    local contents, failure
     try {
         function ()
             io.writefile(listing, table.concat(inputs, "\n") .. "\n")
             contents = os.iorunv("sh", {"-c", "cd \"$1\" && git hash-object --stdin-paths < \"$2\"", "sh", root, listing})
         end,
+        catch {
+            function (raised)
+                failure = tostring(raised)
+            end
+        },
         finally {
             function ()
                 os.tryrm(folder)
             end
         }
     }
+    if failure then
+        raise("%s", failure)
+    end
     return hash.strhash128(table.concat(listed, "\n")) .. "\0" .. hash.strhash128(contents)
 end
 

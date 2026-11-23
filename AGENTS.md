@@ -54,10 +54,11 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   own under the scratch of the checkout, `fixtures.scratch()` in a light suite and `workspace.fresh(name)` in any other
   script, so two runs from two worktrees never meet on one path. Two checks keep it so, and neither intercepts every write:
   `tmp_use_test` scans the sources of the suites and of the tests that `prepush` runs for `os.tmpdir()`, `os.tmpfile()` and
-  `TMPDIR`, and a suite whose own code calls either function fails (`toolchain/modules/tmp_guard.lua`; xmake's own calls pass).
-  What the checks do not see goes to the scratch anyway: the orchestrator of `light suites` starts every group of suites,
-  and `prepush` starts every `lua()` step, with `XMAKE_TMPDIR` and `TMPDIR` set to a folder of its own in that scratch, so
-  the temporary files of xmake and of the compilers land there and are removed with it.
+  `TMPDIR`, and a suite whose code or whose repository module calls either function fails (`toolchain/modules/tmp_guard.lua`
+  looks at the caller; xmake's own calls pass). What the checks do not see goes to the scratch anyway: the orchestrator of
+  `light suites` runs every suite, named or not, in child processes, and `prepush` starts every `lua()` step, with
+  `XMAKE_TMPDIR` and `TMPDIR` set to a folder of its own in that scratch (one folder per run of the suites, shared by its
+  groups), so the temporary files of xmake and of the compilers land there and are removed with it.
 - No comments in code, scripts or recipes; a licence header a licence requires is the only exception. What a change
   does and why goes in its commit message; knowledge a reader of the code needs goes in `docs/`.
   `./xmakew l tools/comments.lua check [path ...]` finds comments, `strip` removes them, and `verify [rev]` proves that
