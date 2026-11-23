@@ -17,7 +17,7 @@ Backports: the host's required set plus Accelerate, CoreMedia, AVFoundation, Pho
 Rows that need personal data (location, media-library, calendar) are "registered only": the probe checks that the module
 answers, never reads data. The probe bundle is built from `src/probe/modules.js` itself (no copy here); the UI cells are added there.
 
-`xmake.lua` is its own file, like the Paseo example's: xmake reads it without `import()` or `io`, so the project name and the Backports list are literals there, and `tests/example_projects_test.lua` keeps them equal to `project` and `backports` of `host.json`.
+`xmake.lua` holds the project name and the Backports list as literals and includes `examples/host.lua`, which the Paseo example shares; `tests/example_projects_test.lua` keeps the literals equal to `project` and `backports` of `host.json`.
 
 Status: step 0 only, nothing built. The `pods` entries are bare package names; the codegen module name after the colon
 (as in the Paseo host, `pkg:module`) is taken from each package's codegenConfig when its recipe is installed (step 2)

@@ -1,5 +1,3 @@
--- Each example's xmake.lua is read by xmake in the description scope, which has neither import() nor io: the file cannot read host.json, so it
--- repeats the project name and the Backports list as literals. This test keeps the two in agreement and has xmake read each file.
 import("core.base.json")
 
 local ROOT = path.absolute(path.join(os.scriptdir(), "..", "..", ".."))
@@ -28,10 +26,9 @@ end
 for _, example in ipairs({"paseo", "rn-probe"}) do
     local source = io.readfile(path.join(EXAMPLES, example, "xmake.lua"))
     local host = json.loadfile(path.join(EXAMPLES, example, "host.json"))
-    expect("the " .. example .. " example's set_project names the project of its host.json", source:find('set_project("' .. host.project .. '")', 1, true) ~= nil, host.project)
-    local listed = source:match('libraries = "([^"]*)"')
+    expect("the " .. example .. " example's set_project names the project of its host.json", source:match('HOST_PROJECT = "([^"]*)"') == host.project, host.project)
+    local listed = source:match('HOST_BACKPORTS = "([^"]*)"')
     expect("the " .. example .. " example's Backports list in xmake.lua is the backports of its host.json", listed == table.concat(host.backports, ","), tostring(listed) .. " against " .. table.concat(host.backports, ","))
     local output = loads(example)
-    -- the configure goes on to fail without the build inputs of a host (unknown target rn-yoga); only an error raised in the project file itself counts
-    expect("the " .. example .. " example's xmake.lua is read without an error of its own", output:find("xmake.lua:%d+:") == nil, output)
+    expect("the " .. example .. " example's project files are read without an error of their own", output:find("%.lua:%d+:") == nil, output)
 end
