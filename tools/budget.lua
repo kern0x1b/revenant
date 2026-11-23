@@ -194,8 +194,8 @@ local function capacity(reading, held, own)
     return held + fresh
 end
 
-local function progress_capacity(reading, held, minimum)
-    if memory_headroom(reading) < minimum then
+local function progress_capacity(reading, held, minimum, aged)
+    if memory_headroom(reading) < (aged and 1 or minimum) then
         return held
     end
     return held + minimum
@@ -517,7 +517,8 @@ local function sweep_markers(folder)
     end
 end
 
-local function ahead_of(folder, name, reach)
+local function ahead_of(folder, name, reach, ceiling)
+    ceiling = ceiling or reach
     sweep_markers(folder)
     local own_aged = os.isfile(aged_path(folder, name))
     for _, file in ipairs(os.files(path.join(folder, "queue", "*.ticket"))) do
@@ -528,7 +529,7 @@ local function ahead_of(folder, name, reach)
             if other_aged ~= own_aged then
                 first = other_aged
             end
-            if first and holder_alive(file) and ticket_need(file) <= reach then
+            if first and holder_alive(file) and ticket_need(file) <= (other_aged and ceiling or reach) then
                 return true
             end
         end
@@ -688,14 +689,14 @@ local function await_grant(folder, ticket, class, minimum, maximum, reading_fn, 
         local free, held, pids = snapshot_slots(folder, cores)
         local cap = capacity(reading, held, own_runnable(pids))
         local headroom, measured = memory_headroom(reading)
-        local progress = held == 0 and progress_capacity(reading, held, minimum) or held
+        local progress = held == 0 and progress_capacity(reading, held, minimum, marked) or held
         local guarantee = progress > held
         if guarantee then
             cap = math.max(cap, progress)
         end
         local count = grantable(cap, held, #free, minimum, maximum)
         local reach = math.min(measured and headroom + held or headroom, cores - RESERVE_CORES)
-        if count > 0 and not ahead_of(folder, ticket.name, reach) then
+        if count > 0 and not ahead_of(folder, ticket.name, reach, cores - RESERVE_CORES) then
             local grant = table.slice(free, 1, count)
             release_locks(table.slice(free, count + 1))
             for _, entry in ipairs(grant) do
@@ -1476,6 +1477,54 @@ local function test_suite()
     os.setenv("REVENANT_BUDGET_AGING_S", "")
     check("a request that waited longer than the aging time marks its ticket aged", marked, 1)
     release_locks(age_holder)
+
+    do
+        local reach_pool = path.join(base, "reach")
+        local reach_queue = path.join(reach_pool, "queue")
+        os.mkdir(reach_queue)
+        local reach_aged_name = "2-0000000000001-00000001.ticket"
+        local function short_of_memory_and_cpu()
+            return test_reading(50, 1, 3000)
+        end
+        local function polls_in_reach_pool(class, minimum, reading)
+            local calls = 0
+            local grant
+            try { function ()
+                grant = acquire(reach_pool, class, minimum, minimum, function ()
+                    calls = calls + 1
+                    if calls > 5 then
+                        raise("stopped")
+                    end
+                    return reading()
+                end, 1)
+            end, catch { function () end } }
+            for _, file in ipairs(os.files(path.join(reach_queue, "*.ticket"))) do
+                if not path.filename(file):find(reach_aged_name, 1, true) then
+                    os.tryrm(file)
+                end
+            end
+            return grant or {}
+        end
+        local stream = polls_in_reach_pool("critical", 1, short_of_memory_and_cpu)
+        check("a critical request for one token goes when memory and cores allow one", #stream, 1)
+        local reach_aged = waiting_ticket(reach_queue, reach_aged_name, 2)
+        io.writefile(aged_path(reach_pool, reach_aged_name), "2")
+        local streamed = polls_in_reach_pool("critical", 1, short_of_memory_and_cpu)
+        check("an aged ticket for two tokens holds back a critical request for one even when the free memory is below two tokens", #streamed, 0)
+        local streamed_normal = polls_in_reach_pool("normal", 1, short_of_memory_and_cpu)
+        check("and a normal one", #streamed_normal, 0)
+        leave(reach_aged)
+        release_locks(stream)
+        os.setenv("REVENANT_BUDGET_AGING_S", "0")
+        local after_wait = polls_in_reach_pool("normal", 2, short_of_memory_and_cpu)
+        check("a ticket for two tokens that has aged takes them on an empty pool even when the free memory is below two tokens", #after_wait, 2)
+        release_locks(after_wait)
+        local under_pressure = polls_in_reach_pool("normal", 2, function ()
+            return test_reading(50, 4, 11000)
+        end)
+        os.setenv("REVENANT_BUDGET_AGING_S", "")
+        check("but not under critical memory pressure", #under_pressure, 0)
+    end
 
     local dead_pool = path.join(base, "deadholder")
     os.mkdir(dead_pool)
