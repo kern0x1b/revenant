@@ -1,4 +1,5 @@
 local sdkfiles = import("sdk", {rootdir = os.scriptdir(), anonymous = true})
+local byteorder = import("byteorder", {rootdir = path.join(sdkfiles.root(), "toolchain/modules"), anonymous = true})
 
 local KEY_FILE = ".input-key"
 local ENVIRONMENT = {"REVENANT_GEN_SDK", "REVENANT_BACKPORTS_LIBRARIES"}
@@ -73,6 +74,6 @@ function compute(opt)
         local value = opt.env and opt.env[name] or os.getenv(name)
         table.insert(lines, "env/" .. name .. "=" .. tostring(value or ""))
     end
-    table.sort(lines)
+    byteorder.sort(lines)
     return string.sub(hash.strhash128(table.concat(lines, "\n")), 1, 32)
 end
