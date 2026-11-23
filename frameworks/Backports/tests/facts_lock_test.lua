@@ -68,7 +68,7 @@ function main()
         end,
         finally {
             function ()
-                os.setenv("REVENANT_CACHE", previous or "")
+                os.setenv("REVENANT_CACHE", previous)
                 os.tryrm(base)
             end
         }
