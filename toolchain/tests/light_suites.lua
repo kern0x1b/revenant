@@ -11,7 +11,8 @@ local suite_reads = import("suite_reads", {rootdir = path.join(root, "toolchain"
 local cache = import("cache", {rootdir = path.join(root, "toolchain", "modules"), anonymous = true})
 
 local VERSION = "light suite memo 1"
-local ALWAYS = {"toolchain/tests/light_suites.lua", "toolchain/tests/suite_reads.lua", "toolchain/modules/memo.lua", "toolchain/modules/suite_guard.lua", "xmakew"}
+local ALWAYS = {"xmake.lua", "xmakew", "toolchain/addon.lua", "toolchain/includes/**", "toolchain/rules/**", "toolchain/toolchains/**", "toolchain/plugins/**",
+                "toolchain/tests/light_suites.lua", "toolchain/tests/suite_reads.lua", "toolchain/modules/memo.lua", "toolchain/modules/suite_guard.lua"}
 local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true, REVENANT_LIGHT_SUITES_VERDICT = true, REVENANT_SUITE_TRACE = true, REVENANT_SUITE_ROOT = true}
 local TOOL_NAMES = {"git", "rsync", "cmake", "ninja", "xcrun", "clang", "cc", "make", "sh"}
 local WORKERS = 4
@@ -53,8 +54,16 @@ local function installed_tools()
     return tool_text
 end
 
+local function suite_facts()
+    return installed_tools() .. "\n--\n" .. memo.store_content() .. "\n--\n" .. memo.sdk_content()
+end
+
 local function step_of(suite)
-    return {name = suite, reads = suite_reads.of(suite), facts = installed_tools}
+    return {name = suite, reads = suite_reads.of(suite), facts = suite_facts}
+end
+
+function key_for(input, suite)
+    return memo.key_of(input, step_of(suite), VERSION, ALWAYS, AMBIENT_SKIPS)
 end
 
 local function provenance(record)
@@ -213,8 +222,7 @@ local function run_with_memo(suites, count)
     local store = path.join(cache.store(), "suite-memo")
     local keys, pending, recalled = {}, {}, 0
     for _, suite in ipairs(suites) do
-        local step = step_of(suite)
-        keys[suite] = memo.key_of(input, step, VERSION, ALWAYS, AMBIENT_SKIPS)
+        keys[suite] = key_for(input, suite)
         local record = memo.recalled(store, suite, keys[suite])
         if record then
             recalled = recalled + 1

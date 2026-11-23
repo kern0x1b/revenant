@@ -9,7 +9,10 @@ function names()
     return NAMES
 end
 local PRIVATE_FOLDERS = {".cache*/**", "build/**", ".xmake/**", ".claude/worktrees/**"}
+local STORE_PACKAGES = {"llvm", "swift", "swift-bootstrap", "swift-runtime", "libcxx", "apple-compat", "iphoneos-sdk", "ld64", "ldid"}
+local TOOL_NAMES = {"git", "rsync", "cmake", "ninja", "xcrun", "clang", "cc", "make", "sh"}
 local compiled = {}
+local installed_text
 
 local function cache()
     return import("cache", {rootdir = os.scriptdir(), anonymous = true})
@@ -228,6 +231,84 @@ function key_of(input, step, version, always, skips)
     local facts = step.facts and step.facts() or ""
     return digest(table.concat({version, step.name, step.version or "1", input.tool, input.host, ambient_environment(skips), environment_of(step), facts,
                                  table.concat(selected(input.files, step, always), "\n")}, "\n"))
+end
+
+local function checkout()
+    return path.absolute(path.join(os.scriptdir(), "..", ".."))
+end
+
+local function toolchain_facts()
+    local facts = {}
+    for _, probe in ipairs({{"xcode-select", {"-p"}}, {"xcodebuild", {"-version"}}, {"xcrun", {"--show-sdk-path"}}, {"xcrun", {"--show-sdk-version"}}}) do
+        table.insert(facts, try { function () return (os.iorunv(probe[1], probe[2]):gsub("%s+", " ")) end } or "none")
+    end
+    return table.concat(facts, "\n")
+end
+
+function resolved_tools()
+    local lines = {}
+    for _, name in ipairs(TOOL_NAMES) do
+        local found = try { function () return os.iorunv("sh", {"-c", "command -v " .. name}):trim() end } or "none"
+        local version = try { function () return os.iorunv("sh", {"-c", name .. " --version 2>&1 | head -n 1"}):trim() end } or ""
+        table.insert(lines, name .. "=" .. found .. " " .. version)
+    end
+    return table.concat(lines, "\n")
+end
+
+function store_content()
+    local lines = {}
+    local packages = path.join(cache().store(), "xmake-global", ".xmake", "packages")
+    for _, name in ipairs(STORE_PACKAGES) do
+        for _, install in ipairs(os.filedirs(path.join(packages, name:sub(1, 1), name, "*", "*"))) do
+            local line = path.relative(install, packages):gsub("%.g[^/]+$", "")
+            local manifest = path.join(install, "manifest.txt")
+            table.insert(lines, line .. " " .. (os.isfile(manifest) and hash.sha256(manifest) or "no manifest"))
+        end
+    end
+    byteorder.sort(lines)
+    return table.concat(lines, "\n")
+end
+
+function store_installs()
+    local lines = {}
+    local packages = path.join(cache().store(), "xmake-global", ".xmake", "packages")
+    for _, name in ipairs(STORE_PACKAGES) do
+        for _, install in ipairs(os.filedirs(path.join(packages, name:sub(1, 1), name, "*", "*"))) do
+            local line = path.relative(install, packages)
+            if os.islink(install) then
+                line = line .. " -> " .. path.filename(os.readlink(install))
+            end
+            local manifest = path.join(install, "manifest.txt")
+            table.insert(lines, line .. " " .. (os.isfile(manifest) and hash.sha256(manifest) or "no manifest"))
+        end
+    end
+    byteorder.sort(lines)
+    return table.concat(lines, "\n")
+end
+
+function sdk_content()
+    local sdk = import("sdk", {rootdir = path.join(checkout(), "frameworks", "Backports", "tools"), anonymous = true})
+    local analysis = import("analysis_cache", {rootdir = os.scriptdir(), anonymous = true})
+    local lines = {}
+    for _, real in ipairs(analysis.sdk_paths()) do
+        table.insert(lines, try { function () return sdk.cache_key(real) end } or "unreadable")
+    end
+    byteorder.sort(lines)
+    return table.concat(lines, "\n")
+end
+
+function installed_facts(log)
+    if not installed_text then
+        local began = os.time()
+        if log then
+            log("reading the installed toolchain (xcode, the tools on the path, the store's packages, the SDK), once")
+        end
+        installed_text = table.concat({toolchain_facts(), resolved_tools(), store_installs(), sdk_content()}, "\n--\n")
+        if log then
+            log(string.format("the installed toolchain is read, %ds", os.time() - began))
+        end
+    end
+    return installed_text
 end
 
 function slug(name)

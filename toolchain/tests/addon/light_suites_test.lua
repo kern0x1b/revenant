@@ -67,6 +67,20 @@ function failures(opt)
     check("and the other suite too", memo.key_of({tool = input.tool, host = input.host, files = shared}, store_step, version) ~= store_key, true)
     check("a suite without a declaration reads the whole tree", table.concat(memo.reads_of({name = "unknown"})), "**")
 
+    local host_input = {tool = "xmake", host = "host", files = {
+        ["xmake.lua"] = "file a",
+        ["toolchain/tests/addon/host_load_test.lua"] = "file b",
+        ["toolchain/modules/workspace.lua"] = "file c",
+    }}
+    local host_key = light.key_for(host_input, "host_load_test")
+    local child_changed = table.clone(host_input.files)
+    child_changed["xmake.lua"] = "file changed"
+    check("the root xmake.lua that the child xmake loads is in the suite's key", light.key_for({tool = host_input.tool, host = host_input.host, files = child_changed}, "host_load_test") ~= host_key, true)
+    local nested_changed = table.clone(host_input.files)
+    nested_changed["toolchain/modules/workspace.lua"] = "file changed"
+    check("a module loaded through an import moves the suite's key", light.key_for({tool = host_input.tool, host = host_input.host, files = nested_changed}, "host_load_test") ~= host_key, true)
+    check("an unchanged tree keeps the suite's key", light.key_for(host_input, "host_load_test"), host_key)
+
     local workspace = import("@addon.revenant.workspace", {anonymous = true})
     local logs = path.join(workspace.run(), "light-suites.abcdef")
     local task = light.children_task(logs)
