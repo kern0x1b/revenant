@@ -302,12 +302,12 @@ local function write_pid(file, pid)
     io.writefile(file, table.concat(lines, "\n") .. "\n")
 end
 
-local function ahead_of(folder, name, available)
+local function ahead_of(folder, name, reach)
     for _, file in ipairs(os.files(path.join(folder, "queue", "aged-*.ticket"))) do
         local other = path.filename(file):sub(6)
         if other < name and holder_alive(path.join(folder, "queue", other)) then
             local need = ticket_need(file)
-            if need <= available then
+            if need <= reach then
                 return true
             end
         end
@@ -315,7 +315,7 @@ local function ahead_of(folder, name, available)
     for _, file in ipairs(os.files(path.join(folder, "queue", "*.ticket"))) do
         if path.filename(file) < name and holder_alive(file) then
             local need = ticket_need(file)
-            if need <= available then
+            if need <= reach then
                 return true
             end
         end
@@ -479,9 +479,8 @@ local function acquire(folder, class, minimum, maximum, reading_fn, poll_ms, who
         if guarantee then
             cap = math.max(cap, progress)
         end
-        local available = math.min(math.max(cap - held, 0), #free)
         local count = grantable(cap, held, #free, minimum, maximum)
-        if count > 0 and not ahead_of(folder, ticket.name, guarantee and math.min(#free, headroom) or available) then
+        if count > 0 and not ahead_of(folder, ticket.name, math.min(headroom + held, cores - RESERVE_CORES)) then
             local grant = table.slice(free, 1, count)
             release_locks(table.slice(free, count + 1))
             for _, entry in ipairs(grant) do
@@ -775,8 +774,8 @@ local function test_suite()
         return {name = name, file = file, lock = lock}
     end
     local large = ticket_at("2-0000000000001-00000001.ticket", 6)
-    check("a large ticket ahead does not block a small request that fits", ahead_of(pool, "2-0000000000002-00000002.ticket", 1), false)
-    check("and does block one when there is room for it", ahead_of(pool, "2-0000000000002-00000002.ticket", 6), true)
+    check("a large ticket ahead does not block a small request when the pool could not hold it even empty", ahead_of(pool, "2-0000000000002-00000002.ticket", 1), false)
+    check("and does block one when the pool could hold it once its holders are done", ahead_of(pool, "2-0000000000002-00000002.ticket", 6), true)
     leave(large)
     check("a ticket behind the request does not block", ahead_of(pool, "1-0000000000000-00000000.ticket", 1), false)
 
@@ -963,6 +962,58 @@ local function test_suite()
     local starved_grant = acquire(backfill_pool, "critical", 6, 6, function () return test_reading(50, 1, 20000) end, 1)
     check("the older ticket then gets its six tokens when headroom allows", #starved_grant, 6)
     release_locks(starved_grant)
+
+    local fair_pool = path.join(base, "fair")
+    local fair_queue = path.join(fair_pool, "queue")
+    os.mkdir(fair_queue)
+    local function overloaded()
+        return test_reading(50, 1, 20000)
+    end
+    local fair_first_name = "2-0000000000001-00000001.ticket"
+    local function waits_without_grant(class, minimum)
+        local calls = 0
+        local stopped
+        try { function ()
+            acquire(fair_pool, class, minimum, minimum, function ()
+                calls = calls + 1
+                if calls > 5 then
+                    raise("stopped")
+                end
+                return overloaded()
+            end, 1)
+        end, catch { function (raised) stopped = tostring(raised) end } }
+        for _, file in ipairs(os.files(path.join(fair_queue, "*.ticket"))) do
+            if path.filename(file) ~= fair_first_name then
+                os.tryrm(file)
+            end
+        end
+        return stopped ~= nil and calls > 5
+    end
+    local fair_holder = acquire(fair_pool, "normal", 1, 1, overloaded, 1)
+    check("a request for one token gets it under outside load with one holder", #fair_holder, 1)
+    local fair_first = waiting_ticket(fair_queue, fair_first_name, 2)
+    check("a request for one token does not overtake an older one for two under outside load", waits_without_grant("normal", 1), true)
+    check("and a request of the background class does not either", waits_without_grant("background", 1), true)
+    local critical_grant = acquire(fair_pool, "critical", 1, 1, overloaded, 1)
+    check("a critical request is not held back by an older normal one", #critical_grant, 1)
+    release_locks(critical_grant)
+    leave(fair_first, fair_pool)
+    local after_grant = acquire(fair_pool, "normal", 1, 1, overloaded, 1)
+    check("the request for one token goes once the older one is gone", #after_grant, 1)
+    release_locks(after_grant)
+    release_locks(fair_holder)
+    local drain_holder = acquire(fair_pool, "normal", 1, 1, overloaded, 1)
+    local drain_calls = 0
+    local drained = acquire(fair_pool, "normal", 2, 2, function ()
+        drain_calls = drain_calls + 1
+        if drain_calls == 3 then
+            release_locks(drain_holder)
+        end
+        return overloaded()
+    end, 1)
+    check("a request for two tokens waits for its holder and then starts under outside load", #drained, 2)
+    check("and it did wait for the holder", drain_calls >= 3, true)
+    release_locks(drained)
 
     local dead_pool = path.join(base, "deadholder")
     os.mkdir(dead_pool)
