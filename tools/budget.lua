@@ -590,9 +590,11 @@ local function launch(class, command)
     return "/bin/sh", table.join({"-c", CLOSE_INHERITED, "budget", program}, args)
 end
 
-local WATCHER = [[parent=$1; target=$2; program=$3; project=$4; script=$5; me=$$
+local WATCHER = [[parent=$1; target=$2; program=$3; project=$4; script=$5; errors=$6; me=$
 tree() { for child in $(pgrep -P "$1"); do tree "$child"; done; echo "$1"; }
-journal() { "$program" l -P "$project" "$script" stopped "$1" "$parent" "$target" "$2" >/dev/null 2>&1; }
+journal() {
+    out=$("$program" l -P "$project" "$script" stopped "$1" "$parent" "$target" "$2" 2>&1) || echo "at $(date +%s) stopped $1 parent $parent run $target: the journal write failed: $(echo $out | tr '\n' ' ')" >> "$errors"
+}
 listing() { ps -o pid=,command= -p "$(echo $1 | tr ' ' ',')" 2>/dev/null; }
 while [ "$(ps -o ppid= -p "$target" 2>/dev/null | tr -d ' ')" = "$parent" ]; do sleep 1; done
 kill -0 "$target" 2>/dev/null || exit 0
@@ -619,7 +621,7 @@ local function watch_parent()
     if not parent or parent <= 1 then
         return nil
     end
-    return process.openv("/bin/sh", {"-c", CLOSE_INHERITED, "budget", "/bin/sh", "-c", WATCHER, "watcher", tostring(parent), tostring(os.getpid()), os.programfile(), os.projectdir(), path.join(os.scriptdir(), "budget.lua")},
+    return process.openv("/bin/sh", {"-c", CLOSE_INHERITED, "budget", "/bin/sh", "-c", WATCHER, "watcher", tostring(parent), tostring(os.getpid()), os.programfile(), os.projectdir(), path.join(os.scriptdir(), "budget.lua"), journal_path(pool_folder()) .. ".errors"},
                          {outpath = "/dev/null", errpath = "/dev/null"})
 end
 
@@ -728,6 +730,14 @@ local function status()
     end
     local stopped, newest = stop_summary(folder)
     say("stopped   %d process(es) by the watcher over the last 24 h%s", stopped, newest and ("; newest: " .. newest) or "")
+    local failed = os.isfile(journal_path(folder) .. ".errors") and io.readfile(journal_path(folder) .. ".errors") or ""
+    local failures = 0
+    for _ in failed:gmatch("[^\n]+") do
+        failures = failures + 1
+    end
+    if failures > 0 then
+        say("stopped   %d journal write(s) of the watcher failed, see %s", failures, journal_path(folder) .. ".errors")
+    end
     say("disk      %.0f GB free on the checkout's volume (floor %d GB)", free_disk_gb(), DISK_FLOOR_GB)
 end
 
@@ -1335,6 +1345,37 @@ local function test_suite()
         late:wait(20000)
         late:close()
         check("a stop line waits for the journal lock and is neither written without it nor lost", early == nil and (io.readfile(journal_path(held_pool)) or ""):find("\tstopped TERM\tpid 9\tparent 7\trun 8\t/bin/late", 1, true) ~= nil, true)
+
+        local broken_pool = path.join(base, "brokenpool")
+        os.mkdir(broken_pool)
+        local broken_log = path.join(base, "broken.log")
+        local broken = process.openv("/bin/sh", {"-c", [[ "$0" l -P "$1" "$2" run --class normal --jobs 1 --min 1 -- /bin/sleep 4713; true ]], os.programfile(), project, script},
+            {outpath = broken_log, errpath = broken_log, envs = {"REVENANT_BUDGET_POOL=" .. broken_pool, no_floor}})
+        deadline = os.mclock() + 30000
+        while (held_slots(broken_pool) < 1 or #matching("/bin/sleep 4713") < 1) and os.mclock() < deadline do
+            os.sleep(300)
+        end
+        os.tryrm(journal_path(broken_pool))
+        os.mkdir(journal_path(broken_pool))
+        local broken_run = holders(broken_pool)[1]
+        local broken_shell = broken_run and parent_of(broken_run.pid)
+        local broken_pids = matching("/bin/sleep 4713")
+        if broken_shell and broken_shell > 1 then
+            try { function () os.iorunv("/bin/kill", {"-9", tostring(broken_shell)}) end }
+        end
+        local errors_file = path.join(broken_pool, "wait-journal.errors")
+        deadline = os.mclock() + 30000
+        while (not os.isfile(errors_file) or #matching("/bin/sleep 4713") > 0) and os.mclock() < deadline do
+            os.sleep(300)
+        end
+        local broken_left = #matching("/bin/sleep 4713")
+        for _, pid in ipairs(broken_pids) do
+            try { function () os.iorunv("/bin/kill", {"-9", tostring(pid)}) end }
+        end
+        broken:close()
+        local errors_text = os.isfile(errors_file) and io.readfile(errors_file) or ""
+        check("a journal that cannot be written does not keep the watcher from stopping the command", broken_left, 0)
+        check("and the failure is recorded beside the journal, naming the signal, the dead parent and the run", errors_text:find("stopped TERM parent " .. tostring(broken_shell) .. " run " .. tostring(broken_run and broken_run.pid) .. ": the journal write failed", 1, true) ~= nil, true)
 
         local stubborn_pool = path.join(base, "stubbornpool")
         os.mkdir(stubborn_pool)
