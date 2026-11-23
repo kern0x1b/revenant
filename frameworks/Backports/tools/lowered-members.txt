@@ -24305,6 +24305,7 @@ member NSFileCoordinator -coordinateAccessWithIntents:queue:byAccessor:
 member NSFileCoordinator -revenant_coordinateIntents:index:queue:accessor:
 member NSFileHandle +fileHandleForWritingToURL:error:
 member NSFileHandle -closeAndReturnError:
+member NSFileHandle -closeFile
 member NSFileHandle -getOffset:error:
 member NSFileHandle -readDataToEndOfFileAndReturnError:
 member NSFileHandle -readDataUpToLength:error:
