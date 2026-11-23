@@ -18,7 +18,7 @@ A stub is dangerous when all four hold:
 3. No Backports source lowers it (`frameworks/Backports/tools/lowered-members.txt`). The setter of a lowered property
    counts as lowered, because the list names a property by its getter. Any lowered member without a colon is taken for a
    getter, so a method that only reads, or a property that a source declares read-only while the SDK's is read-write, hides
-   the stub of the setter, and the check cannot see it; 70 of the snapshot's entries (2026-11-23) are covered only by this rule, and a
+   the stub of the setter, and the check cannot see it; 74 of the snapshot's entries (2026-11-23) are covered only by this rule, and a
    run on the emulator that asks the class for each of them is the way to confirm them. The skeleton still holds a stub for
    a member that a source implements, and the registrar skips it when the class answers at load, so the skeleton alone
    cannot say.
