@@ -430,10 +430,6 @@ local function ungranted_entry(name, text, reason, at)
                          math.max(0, at - queued // 1000), text:match("\np (%d+)") or "0", reason, who_line(who_of(text)))
 end
 
--- Takes a ticket out of the queue. A ticket that names its process was a request that never got tokens, and the wait
--- journal records it once: the journal lock covers the read, the removal and the line, so two processes that find the
--- same dead ticket write one line. A file without that text (the empty one that opening a vanished ticket makes) is
--- removed and not recorded.
 local function forget_ticket(file, reason)
     local folder = path.directory(path.directory(file))
     local marker = path.join(path.directory(file), "aged-" .. path.filename(file))

@@ -1224,9 +1224,6 @@ end
 
 local NO_TOKENS = {test = true, ["probe-say"] = true, ["probe-hold"] = true}
 
--- The command that runs this same prepush under one grant of tokens, or nil when the run needs none of its own: it holds
--- a grant already (its parent took it), it reads or lists only, it is the part of a run that its parent started, or it is
--- a probe. Its steps inherit the grant through REVENANT_BUDGET_HELD instead of queueing once each.
 local function hold_once(arguments, held)
     if tonumber(held) or NO_TOKENS[arguments[1]] then
         return nil
