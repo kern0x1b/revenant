@@ -1368,6 +1368,10 @@ local EXTRA = {
         "xmake.lua",
         ".gitignore",
     },
+    blur_lifecycle_test = {
+        "toolchain/tests/addon/blur_lifecycle_test.lua",
+        "packages/e/expo-blur/patches/blur-ios6.patch",
+    },
 }
 
 function of(name)

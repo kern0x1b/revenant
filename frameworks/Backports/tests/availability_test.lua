@@ -19,6 +19,7 @@ local FAMILIES = {
     {fixture = "locale_language.swift", lowered = false},
     {fixture = "attributed_string_markdown.swift", lowered = false},
     {fixture = "date_format_style.swift", lowered = false},
+    {fixture = "file_handle.swift", lowered = false},
 }
 
 local function typecheck_flags(sdk, runtime, module, vfs, modules, fixture)

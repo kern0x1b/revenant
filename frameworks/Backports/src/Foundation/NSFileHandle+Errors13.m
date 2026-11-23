@@ -179,8 +179,11 @@ static int revenant_file_descriptor(NSFileHandle *handle)
     int descriptor = revenant_file_descriptor(self);
     if (descriptor < 0)
         return revenant_file_fail(error, EBADF, NO);
-    if (fsync(descriptor) < 0)
+    if (fsync(descriptor) < 0) {
+        if (errno == EINVAL || errno == EROFS)
+            return YES;
         return revenant_file_fail(error, errno, NO);
+    }
     return YES;
 }
 
