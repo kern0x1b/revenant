@@ -603,8 +603,8 @@ one pool, kept in `.cache/budget` of the main checkout whatever `REVENANT_CACHE`
     ./xmakew l -P . tools/budget.lua test
     ./xmakew l -P . tools/budget.lua polls <count> <poll ms> <hold ms> guarded|unguarded
 
-`polls` is the measurement the tests make and prints `empty N of M`: it polls the slots M times, `poll ms` apart, holds each
-poll for `hold ms` as a slow decision would, and counts the polls that found no free slot; `guarded` takes `decide.lock` like
+`polls` is the measurement the tests make and prints `empty N of M`: it polls the slots M times, holds each
+poll for `hold ms` as a slow decision would, sleeps `poll ms` between polls, and counts the polls that found no free slot; `guarded` takes `decide.lock` like
 a waiting request, `unguarded` does not.
 
 `run` exits 0 when the command it starts passes, the command's status when it fails, and 3 when the budget refuses to start

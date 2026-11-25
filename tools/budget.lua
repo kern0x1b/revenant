@@ -1635,9 +1635,11 @@ local function test_suite()
         while held_slots(slots_pool) < slots_total and os.mclock() < seen_taken do
             os.sleep(50)
         end
+        check("a waiter held the last slot before the listing was read", held_slots(slots_pool), slots_total)
         local listed = holders(slots_pool)
         long.process:wait(60000)
         long.process:close()
+        check("and finished its poll", (io.readfile(long.log) or ""):find("empty 0 of 1", 1, true) ~= nil, true)
         local foreign = 0
         for _, held in ipairs(listed) do
             if held.pid ~= os.getpid() then
@@ -1648,7 +1650,7 @@ local function test_suite()
         check("and lists the slots that are held", #listed, slots_total - 1)
 
         release_locks(kept)
-        local stale_file = slot_path(slots_pool, 3)
+        local stale_file = slot_path(slots_pool, 1)
         io.writefile(stale_file, string.format("4242\nh %d\t/old/worktree\t/old command\ng %d 1\n", os.time() - 25200, os.time() - 20))
         local claimed = snapshot_slots(slots_pool, os.cpuinfo("ncpu"))
         local claimed_text = io.readfile(stale_file) or ""
@@ -1952,8 +1954,11 @@ function main(command, ...)
     elseif command == "test" then
         test_suite()
     elseif command == "polls" then
-        local polls = tonumber(args[1])
-        print(string.format("empty %d of %d", slot_polls(polls, tonumber(args[2]), tonumber(args[3]), args[4] == "guarded"), polls))
+        local polls, poll_ms, hold_ms = tonumber(args[1]), tonumber(args[2]), tonumber(args[3])
+        if not (polls and poll_ms and hold_ms and (args[4] == "guarded" or args[4] == "unguarded")) then
+            raise("usage: ./xmakew l -P . tools/budget.lua polls <count> <poll ms> <hold ms> guarded|unguarded")
+        end
+        print(string.format("empty %d of %d", slot_polls(polls, poll_ms, hold_ms, args[4] == "guarded"), polls))
     else
         raise("usage: ./xmakew l -P . tools/budget.lua run [--class critical|normal|background] [--jobs N] [--min N] [--mb M] -- <command> [args...] | status | test | polls <count> <poll ms> <hold ms> guarded|unguarded")
     end
