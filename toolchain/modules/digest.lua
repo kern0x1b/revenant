@@ -4,12 +4,15 @@ local function long_bracket(source, at)
     return source:match("^%[(=*)%[", at)
 end
 
+local KEY_POLICY = "set_policy(\"package.links_dependencies\", true)"
+local KEY_MARK = "^,[ \t]*images_only[ \t]*=[ \t]*true"
+
 function stripped(source)
     local out, line = {}, {}
     local at, size = 1, #source
     local function flush()
         local text = table.concat(line):gsub("^%s+", ""):gsub("%s+$", "")
-        if text ~= "" then
+        if text ~= "" and text ~= KEY_POLICY then
             table.insert(out, text)
         end
         line = {}
@@ -45,6 +48,8 @@ function stripped(source)
             local last = found and found + #close - 1 or size
             table.insert(line, source:sub(at, last))
             at = last + 1
+        elseif char == "," and source:match(KEY_MARK .. "%f[^%w_]", at) then
+            at = at + #source:match(KEY_MARK, at)
         elseif char == "\n" then
             flush()
             at = at + 1

@@ -17,7 +17,9 @@ end
         ["a block comment"] = "--[[ one\ntwo ]]\n" .. base,
         ["a leveled block comment"] = "--[==[ one ]] two ]==]\n" .. base,
         ["blank lines and indentation of code"] = base:gsub("\n    print", "\n\n\n        print"),
-        ["trailing blanks"] = base:gsub('"%-%-flag"}\n', '"--flag"}   \n')
+        ["trailing blanks"] = base:gsub('"%-%-flag"}\n', '"--flag"}   \n'),
+        ["the policy which only composes a key"] = "    set_policy(\"package.links_dependencies\", true)\n" .. base,
+        ["the mark of a configuration which only composes a key"] = base:gsub('"a %-%- b"}', '"a -- b", images_only = true}')
     }
     local reference = digest.stripped(base)
     for name, changed in pairs(same) do
@@ -30,7 +32,10 @@ end
         ["a comment marker inside a string is a string"] = base:gsub('a %-%- b', 'a -- c'),
         ["a changed long string"] = base:gsub("not a comment", "no comment"),
         ["a blank line inside a long string"] = base:gsub("line %-%-", "\nline --"),
-        ["a comment made code"] = base:gsub("if #flags", "-- if #flags\nif #flags"):gsub("%-%- if", "if")
+        ["a comment made code"] = base:gsub("if #flags", "-- if #flags\nif #flags"):gsub("%-%- if", "if"),
+        ["another policy"] = "set_policy(\"package.strict_compatibility\", true)\n" .. base,
+        ["the mark inside a string"] = base:gsub('"a %-%- b"', '"a -- b, images_only = true"'),
+        ["a longer word than the mark's value"] = base:gsub('"a %-%- b"}', '"a -- b", images_only = trueish}')
     }
     for name, changed in pairs(different) do
         if digest.stripped(changed) == reference then

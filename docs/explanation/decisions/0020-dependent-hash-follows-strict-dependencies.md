@@ -38,6 +38,10 @@ configuration `shared`, and of a package with the policy `package.links_dependen
 values and is not installed again when only that configuration differs: its manifest records the dependency's key
 without such configurations, and a manifest written before that record is accepted under either value.
 
+The two declarations say how a key is composed and change nothing that is built, so the digest of a recipe
+(`toolchain/modules/digest.lua`) leaves them out as it leaves out comments: declaring them moves no key of `libcxx`,
+`boringssl` or `swift-runtime`, whose configuration holds that digest.
+
 A package whose dependencies are built as it asks keeps the key it had. The patch declares `Changes-build-output: no`,
 which keeps it out of the patch set digest.
 
@@ -69,6 +73,8 @@ configuration of a strict dependency. It requires separate keys for the dependen
 install for those that do not, the term of a configuration that shares its name with one of the dependent, the manifest
 and the environments of the variant, a build that reads the variant its project asked for, and the failure of an image
 that nothing declares.
+`toolchain/tests/addon/digest_test.lua` requires a recipe digest which the two declarations do not move and any
+other line does.
 `toolchain/tests/addon/dependency_images_test.lua` loads the recipes of the repository with the plain and the packaged
 `libcxx` and requires the five keys to differ and those of the static libraries to be the same.
 
