@@ -211,8 +211,8 @@ end
 
 local function tokens_wanted(opt, cores)
     local limit = cores - RESERVE_CORES
-    local minimum = math.max(math.floor(opt.min or 1), math.ceil((opt.mb or 0) / TOKEN_MB))
-    local maximum = math.max(math.floor(opt.jobs or minimum), minimum)
+    local minimum = math.max(1, math.floor(opt.min or 1), math.ceil((opt.mb or 0) / TOKEN_MB))
+    local maximum = math.max(1, math.floor(opt.jobs or minimum), minimum)
     return math.min(minimum, limit), math.min(maximum, limit)
 end
 
@@ -724,8 +724,7 @@ local function waiter_lines(folder, indent)
     return lines
 end
 
-local function waiting_text(folder, minimum, class, again)
-    local lines = holder_lines(folder, "  ")
+local function waiting_text(lines, minimum, class, again)
     local head = string.format("budget: %s for %d token(s), %s class", again and "still waiting" or "waiting", minimum, class)
     if #lines == 0 then
         return head .. "; no process holds a token, so the machine's own load or memory is the limit"
@@ -776,18 +775,16 @@ local function await_grant(folder, ticket, class, minimum, maximum, reading_fn, 
         end
         if not announced or os.mclock() - announced > announce then
             local again = announced ~= nil
-            local text, failure
+            local lines, failure
             try {
-                function () text = waiting_text(folder, minimum, class, again) end,
+                function () lines = holder_lines(folder, "  ") end,
                 catch { function (errors) failure = tostring(errors):gsub("%s+", " ") end }
             }
             if failure then
-                journal_failure(folder, string.format("at %d the waiting announcement failed: %s", os.time(), failure))
-                say("budget: %s for %s token(s), %s class; the holder details could not be read",
-                    again and "still waiting" or "waiting", tostring(minimum), tostring(class))
-            else
-                say("%s", text)
+                journal_failure(folder, string.format("at %d the holder listing for the waiting announcement failed: %s", os.time(), failure))
+                lines = {string.format("  the holder listing failed: %s", failure)}
             end
+            say("%s", waiting_text(lines, minimum, class, again))
             announced = os.mclock()
         end
         os.sleep(poll_ms)
@@ -981,7 +978,7 @@ local function status()
         failures = failures + 1
     end
     if failures > 0 then
-        say("stopped   %d journal write(s) failed (watcher stops, grants or requests that never got tokens), see %s", failures, journal_path(folder) .. ".errors")
+        say("errors    %d journal write(s) or waiting announcement(s) failed, see %s", failures, journal_path(folder) .. ".errors")
     end
     say("disk      %.0f GB free on the checkout's volume (floor %d GB)", free_disk_gb(), DISK_FLOOR_GB)
 end
@@ -1097,6 +1094,49 @@ local function test_ungranted(check, base)
     check("the wait summary does not count them as grants", grants, 0)
 end
 
+local function test_announcement_failure(check, base)
+    local pool = path.join(base, "announceerror")
+    os.mkdir(pool)
+    local listed = holders
+    holders = function () raise("the holder listing failed on purpose") end
+    local calls = 0
+    local granted
+    os.setenv("REVENANT_BUDGET_ANNOUNCE_S", "0")
+    try {
+        function ()
+            granted = acquire(pool, "normal", 1, 1, function ()
+                calls = calls + 1
+                if calls > 2 then
+                    return test_reading(0, 1, 11000)
+                end
+                return test_reading(0, 4, 11000)
+            end, 1)
+        end, catch { function () end }
+    }
+    os.setenv("REVENANT_BUDGET_ANNOUNCE_S", "")
+    holders = listed
+    check("a failed holder listing does not stop a request that can be granted", #granted, 1)
+    local errors_text = io.readfile(journal_path(pool) .. ".errors") or ""
+    check("and the failure of the waiting announcement is journaled", errors_text:find("the holder listing for the waiting announcement failed", 1, true) ~= nil, true)
+    local previous_pool = os.getenv("REVENANT_BUDGET_POOL") or ""
+    os.setenv("REVENANT_BUDGET_POOL", pool)
+    local shown = os.iorunv(os.programfile(), {"l", "-P", path.directory(os.scriptdir()), path.join(os.scriptdir(), "budget.lua"), "status"})
+    os.setenv("REVENANT_BUDGET_POOL", previous_pool)
+    check("status names the announcement failure among the errors", shown:find("waiting announcement(s) failed", 1, true) ~= nil, true)
+    release_locks(granted)
+
+    local real_text = waiting_text
+    waiting_text = function () raise("a real announcement error") end
+    local aborted
+    try {
+        function () acquire(pool, "normal", 1, 1, function () return test_reading(0, 4, 11000) end, 1) end,
+        catch { function (errors) aborted = tostring(errors) end }
+    }
+    waiting_text = real_text
+    check("a real error while building the announcement fails the request", aborted ~= nil and aborted:find("a real announcement error", 1, true) ~= nil, true)
+    check("and leaves no ticket behind", #os.files(path.join(pool, "queue", "*.ticket")), 0)
+end
+
 local function test_suite()
     local count = 0
     local function check(name, got, want)
@@ -1199,6 +1239,10 @@ local function test_suite()
     check("the request is clamped to the cores less the reserve", minimum .. "/" .. maximum, "1/10")
     minimum, maximum = tokens_wanted({min = 1.5, jobs = 3.7}, 12)
     check("a fractional request is rounded to whole tokens", minimum .. "/" .. maximum, "1/3")
+    minimum, maximum = tokens_wanted({min = 0.5}, 12)
+    check("a fraction of a token still asks for one", minimum .. "/" .. maximum, "1/1")
+    minimum, maximum = tokens_wanted({min = 0.5, jobs = 0.5}, 12)
+    check("a fractional maximum still asks for one", minimum .. "/" .. maximum, "1/1")
 
     check("a 60 GB floor refuses a 50 GB volume", disk_refused(50, 100), true)
     check("a volume at the floor is not refused", disk_refused(100, 100), false)
@@ -1251,6 +1295,7 @@ local function test_suite()
     leave(late)
 
     test_ungranted(check, base)
+    test_announcement_failure(check, base)
 
     local stamp_pool = path.join(base, "stamppool")
     os.mkdir(stamp_pool)
