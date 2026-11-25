@@ -314,10 +314,14 @@ local function negative_shape()
     return #errors == 0
 end
 
-local MEMO_VERSION = "prepush memo 3"
+local MEMO_VERSION = "prepush memo 4"
 local MEMO_KEEP = 40
 local TOOLS = {"toolchain/modules/", "toolchain/addon.lua", "xmake.lua"}
 local UNBUILT = {"docs/**", "**/*.md", ".agents/**", "agent-skills/**"}
+local CODE_READS = {"**/*.c", "**/*.cc", "**/*.cpp", "**/*.cxx", "**/*.h", "**/*.hh", "**/*.hpp", "**/*.inc",
+                    "**/*.lua", "**/*.m", "**/*.mm", "**/*.sh", "**/*.swift", "**/*.yml", "**/*.yaml"}
+local GRAPH = {"xmake.lua", "xmakew", ".gitattributes", ".gitignore", "toolchain/**", "frameworks/**",
+               "packages/**", "addons/**", "emulator/**", "recompiler/**", "neon/**", "tools/**"}
 local PREBUILT_ENV = {"REVENANT_PREBUILT", "REVENANT_PREBUILT_ONLY"}
 local ALWAYS = {"tools/prepush.lua", "tools/budget.lua"}
 local AMBIENT_SKIPS = {REVENANT_CACHE = true, REVENANT_BUDGET_POOL = true, REVENANT_BUDGET_PATIENCE = true, REVENANT_BUDGET_HELD = true, REVENANT_BUDGET_DISK_GB = true, REVENANT_PREPUSH_BUDGET_CLASS = true, REVENANT_LIGHT_SUITES_VERDICT = true}
@@ -496,11 +500,11 @@ local function remembered(store, step, key, record)
     return memo.remembered(store, step.name, key, record, MEMO_KEEP)
 end
 local function age_of(at)
-    local seconds = os.time() - (tonumber(at) or os.time())
+    local seconds = math.max(0, os.time() - (tonumber(at) or os.time()))
     if seconds < 90 then
-        return string.format("%d s ago", seconds)
+        return string.format("%.0f s ago", seconds)
     elseif seconds < 5400 then
-        return string.format("%d min ago", seconds // 60)
+        return string.format("%.0f min ago", seconds // 60)
     end
     return string.format("%.1f h ago", seconds / 3600)
 end
@@ -642,21 +646,21 @@ local function run_steps(steps, opt)
 end
 
 local STEPS = {
-    {name = "comments", facts = function () return attributes_facts(root) end, inline = function () return call("tools/comments.lua", "check") end},
+    {name = "comments", reads = table.join(CODE_READS, {"tools/comments.lua", "tools/comments/", ".gitattributes"}), facts = function () return attributes_facts(root) end, inline = function () return call("tools/comments.lua", "check") end},
     {name = "comments test", reads = {"tools/comments.lua", "tools/comments/"}, inline = function () return call("tools/comments.lua", "test") end},
     {name = "private cache test", reads = table.join({"tools/private_cache.lua"}, TOOLS), inline = function () return call("tools/private_cache.lua", "test") end},
     {name = "layout", env = {"LC_COLLATE"}, inline = function () return call("tools/layout.lua") end},
-    {name = "docs_commands", inline = function () return call("tools/docs_commands.lua") end},
-    {name = "open_gaps", inline = function () return call("tools/open_gaps.lua") end},
+    {name = "docs_commands", reads = table.join(CODE_READS, {"**/*.md", "toolchain/plugins/"}), inline = function () return call("tools/docs_commands.lua") end},
+    {name = "open_gaps", reads = {"tools/open_gaps.lua", "frameworks/Backports/src/Swift/xmake.lua", "frameworks/Backports/README.md"}, inline = function () return call("tools/open_gaps.lua") end},
     {name = "credentials", reads = {"agent-skills/tests/"}, inline = function () return call("agent-skills/tests/credentials.lua", "test") end},
     {name = "copied_text", reads = {"agent-skills/tests/"}, inline = function () return call("agent-skills/tests/copied_text.lua", "test") end},
     {name = "recipe digests", reads = digest_reads, facts = installed_facts, inline = function () return digests_stable(call) end},
     {name = "negative shape", reads = {"frameworks/Backports/xmake.lua", "frameworks/Backports/tests/", "emulator/"}, inline = negative_shape},
     {name = "ci errors test", reads = table.join({"tools/ci_errors.lua", "tools/ci/"}, TOOLS), inline = function () return call("tools/ci_errors.lua", "test") end},
     {name = "ci replay test", reads = table.join({"tools/ci_swiftc_replay.lua", "tools/ci/"}, TOOLS), inline = function () return call("tools/ci_swiftc_replay.lua", "test") end},
-    {name = "host install test", run = function () return lua("frameworks/ReactNative/tests/host_install_test.lua") end},
-    {name = "isolate test", run = function () return lua("frameworks/ReactNative/tests/isolate_test.lua") end},
-    {name = "example projects test", run = function () return lua("frameworks/ReactNative/tests/example_projects_test.lua") end},
+    {name = "host install test", reads = table.join(GRAPH, {"frameworks/ReactNative/src/**", "frameworks/ReactNative/tests/**"}), run = function () return lua("frameworks/ReactNative/tests/host_install_test.lua") end},
+    {name = "isolate test", reads = table.join(GRAPH, {"frameworks/ReactNative/tests/**"}), run = function () return lua("frameworks/ReactNative/tests/isolate_test.lua") end},
+    {name = "example projects test", reads = table.join(GRAPH, {"frameworks/ReactNative/examples/**"}), run = function () return lua("frameworks/ReactNative/tests/example_projects_test.lua") end},
     {name = "overlay test", reads = {"frameworks/ReactNative/tools/overlay.lua", "frameworks/ReactNative/tests/overlay_test.lua"}, run = function () return lua("frameworks/ReactNative/tests/overlay_test.lua") end},
     {name = "dyld caches test", reads = {"tools/dyld_caches.lua", "toolchain/modules/apple/dyld_caches.lua", "toolchain/modules/*.lua"}, inline = function () return call("tools/dyld_caches.lua", "test") end},
     {name = "analysis cache test", reads = {"tools/analysis_cache.lua", "toolchain/modules/*.lua"}, inline = function () return call("tools/analysis_cache.lua", "test") end},
@@ -665,11 +669,11 @@ local STEPS = {
     {name = "lowered members", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_members_test.lua") end},
     {name = "lowered exports", heavy = true, skips = UNBUILT, env = PREBUILT_ENV, facts = installed_facts, run = function () return lua("frameworks/Backports/tests/lowered_exports_test.lua") end},
     {name = "light suites", heavy = true, env = PREBUILT_ENV, facts = installed_facts, run = light_suites},
-    {name = "backports build", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_build},
-    {name = "backports exports", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_exports},
-    {name = "backports device imports", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_device_imports},
-    {name = "backports init order", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_init_order},
-    {name = "backports device globals", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_device_globals},
+    {name = "backports build", reads = GRAPH, heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_build},
+    {name = "backports exports", reads = GRAPH, heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_exports},
+    {name = "backports device imports", reads = GRAPH, heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_device_imports},
+    {name = "backports init order", reads = GRAPH, heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_init_order},
+    {name = "backports device globals", reads = GRAPH, heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_device_globals},
 }
 
 local function test_suite()
@@ -812,6 +816,43 @@ local function test_cache()
     check("a changed file that a step reads changes its key", key(narrow) ~= base_keys.narrow, true)
     io.writefile(path.join(repo, "a.txt"), "one\n")
     check("restoring the file restores the key", key(narrow), base_keys.narrow)
+
+    local function declared_step(name)
+        for _, step in ipairs(STEPS) do
+            if step.name == name then
+                return {name = step.name, reads = step.reads, skips = step.skips, env = step.env}
+            end
+        end
+    end
+    local function declared_key(name, files)
+        return key_of({files = files, tool = "tool", host = "host"}, declared_step(name))
+    end
+    local sample = {["tools/prepush.lua"] = "file 1", ["tools/budget.lua"] = "file 1",
+                    ["docs/d.md"] = "doc", ["tools/a.lua"] = "code",
+                    ["frameworks/Backports/src/CallKit/tweak/a.m"] = "source",
+                    [".gitattributes"] = "*.m comments=upstream"}
+    local moved_doc = table.clone(sample)
+    local moved_attributes = table.clone(sample)
+    moved_attributes[".gitattributes"] = "*.m comments=unspecified"
+    moved_doc["docs/d.md"] = "doc changed"
+    local moved_source = table.clone(sample)
+    moved_source["frameworks/Backports/src/CallKit/tweak/a.m"] = "source changed"
+    local moved_code = table.clone(sample)
+    moved_code["tools/a.lua"] = "code changed"
+    for _, name in ipairs({"comments", "open_gaps", "host install test", "isolate test", "example projects test",
+                           "backports build", "backports exports", "backports device imports", "backports init order"}) do
+        check(name .. " keeps its key when a document it does not read changes", declared_key(name, moved_doc), declared_key(name, sample))
+    end
+    for _, name in ipairs({"docs_commands", "layout"}) do
+        check(name .. " moves its key when a document it reads changes", declared_key(name, moved_doc) ~= declared_key(name, sample), true)
+    end
+    for _, name in ipairs({"backports build", "backports exports", "backports device imports", "backports init order"}) do
+        check(name .. " moves its key when a Backports source changes", declared_key(name, moved_source) ~= declared_key(name, sample), true)
+    end
+    check("comments moves its key when a source it scans changes", declared_key("comments", moved_code) ~= declared_key("comments", sample), true)
+    check("comments moves its key when the worktree attributes change", declared_key("comments", moved_attributes) ~= declared_key("comments", sample), true)
+    check("the attributes are not part of an unrelated check's key", declared_key("open_gaps", moved_attributes), declared_key("open_gaps", sample))
+
     io.writefile(path.join(repo, "c.txt"), "new\n")
     check("an untracked file changes the key of a step that reads everything", key(everything) ~= base_keys.everything, true)
     os.rm(path.join(repo, "c.txt"))
@@ -936,6 +977,15 @@ local function test_cache()
 
     local record = {seconds = "12", worktree = "w", head = "0123456789abcdef", at = os.time() - 120}
     check("a verdict names where and when it was made", provenance(record), "ran 12 s in w at 012345678, 2 min ago")
+    check("an age takes a fractional time", age_of(os.time() - 12.1), "12 s ago")
+    check("an age takes a time in the future", age_of(os.time() + 30), "0 s ago")
+    local fractional_store = path.join(base, "fractional-store")
+    local fractional_step = {name = "fractional"}
+    remembered(fractional_store, fractional_step, "key", {seconds = "1", worktree = "w", head = "h", at = os.time() - 12 + 0.5})
+    local fractional = recalled(fractional_store, fractional_step, "key")
+    check("a fractional time is stored as a whole second", fractional.at:find("%.", 1, true), nil)
+    check("a fractional time in a memo record is shown as an age", provenance(fractional), "ran 1 s in w at h, 12 s ago")
+    check("a fractional addition to a whole time is shown as an age", age_of(tonumber(fractional.at) + 0.1), "12 s ago")
 
     os.rm(base)
     print("prepush cache: %d tests passed", count)
