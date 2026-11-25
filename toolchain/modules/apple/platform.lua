@@ -10,6 +10,7 @@ import("objc")
 import("signing")
 import("bundle")
 import("runtime_guards")
+import("embedded", {alias = "carry"})
 import("shared_runtime", {alias = "staged"})
 import("backports_package")
 import("webkit_engine_package")
@@ -189,7 +190,7 @@ function shared_runtime(target)
     if #all == 0 then
         return nil
     end
-    local embedded, taken = staged.embed(all, table.wrap(target:values("revenant.embed")))
+    local embedded, taken = carry.libraries(all, table.wrap(target:values("revenant.embed")))
     for _, library in ipairs(embedded) do
         identities[library.name] = nil
     end
