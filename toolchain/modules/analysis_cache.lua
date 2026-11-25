@@ -153,6 +153,106 @@ local function transfer(folders, from, to)
     return moved
 end
 
+local function clone_file(source, destination)
+    local cloned = try { function () os.vrunv("cp", {"-c", source, destination}) return true end }
+    if not cloned then
+        os.vrunv("cp", {source, destination})
+    end
+end
+
+local function materialize(source, target)
+    if os.isfile(target) then
+        return 0
+    end
+    local parent = path.directory(target)
+    os.mkdir(parent)
+    sweep(parent)
+    local staging = path.join(parent, ".analysis-" .. hash.uuid():sub(1, 8))
+    local count, failure = 0, nil
+    try {
+        function ()
+            count = locked(lock_files(source, target), function ()
+                if os.isfile(target) then
+                    return 0
+                end
+                clone_file(source, staging)
+                os.mv(staging, target)
+                os.vrunv("touch", {target})
+                return 1
+            end)
+        end,
+        catch {
+            function (errors)
+                failure = tostring(errors)
+            end
+        },
+        finally {
+            function ()
+                os.tryrm(staging)
+            end
+        }
+    }
+    if failure then
+        raise("%s", failure)
+    end
+    return count
+end
+
+function shared_file(folder, name, opt)
+    local source = path.join(store_root(opt), folder, name)
+    local target = path.join(home_root(opt), folder, name)
+    if not os.isfile(source) then
+        locked({source .. ".lock"}, function () end)
+        if not os.isfile(source) then
+            return false
+        end
+    end
+    materialize(source, target)
+    return true
+end
+
+function write_shared(folder, name, text, opt)
+    local source = path.join(store_root(opt), folder, name)
+    local target = path.join(home_root(opt), folder, name)
+    if os.isfile(source) then
+        materialize(source, target)
+        return false
+    end
+    local parent = path.directory(source)
+    os.mkdir(parent)
+    sweep(parent)
+    local staging = path.join(parent, ".analysis-" .. hash.uuid():sub(1, 8))
+    local written, failure = false, nil
+    try {
+        function ()
+            written = locked({source .. ".lock"}, function ()
+                if os.isfile(source) then
+                    return false
+                end
+                io.writefile(staging, text)
+                os.mv(staging, source)
+                os.vrunv("touch", {source})
+                return true
+            end)
+        end,
+        catch {
+            function (errors)
+                failure = tostring(errors)
+            end
+        },
+        finally {
+            function ()
+                os.tryrm(staging)
+            end
+        }
+    }
+    if failure then
+        raise("%s", failure)
+    end
+    materialize(source, target)
+    return written
+end
+
 function restore(folders, opt)
     return transfer(folders, store_root(opt), home_root(opt))
 end

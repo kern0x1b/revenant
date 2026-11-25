@@ -136,7 +136,9 @@ local function scan_images(sdk)
 end
 
 function install_names(sdk)
-    local file = path.join(sdkfiles.cache_folder(sdk), "install_names.tsv")
+    local name = "install_names.tsv"
+    local file = path.join(sdkfiles.cache_folder(sdk), name)
+    sdkfiles.shared_file(sdk, name)
     local images = {}
     if os.isfile(file) then
         for line in io.lines(file) do
@@ -156,8 +158,6 @@ function install_names(sdk)
     for _, name in ipairs(names) do
         table.insert(rows, name .. "\t" .. images[name])
     end
-    os.mkdir(path.directory(file))
-    io.writefile(file .. ".part", table.concat(rows, "\n") .. (#rows > 0 and "\n" or ""))
-    os.mv(file .. ".part", file)
+    sdkfiles.write_shared(sdk, name, table.concat(rows, "\n") .. (#rows > 0 and "\n" or ""))
     return images
 end

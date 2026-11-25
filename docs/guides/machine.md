@@ -367,6 +367,14 @@ because our files arrive whole and are never overwritten. A staging folder an ab
 merge that fails removes its own. A failure of either direction is one line, not a failed check (the checks compute what they
 lack); a wait for a lock another process holds is one line of `exclusive`.
 
+The writer of a facts file does not write into the cache first: `sdk.lua` asks `analysis_cache` for
+`<store>/backports/<key>/<name>` and writes the text there only if that canonical file is absent, under its own lock, by
+a rename out of a staging file; every reader, in this checkout or another, gets an APFS clone of that one file in its
+`<cache>/backports/<key>`. `install_names.tsv`, `constant_intros.tsv` and every framework TSV go this way, so a second
+run with the same key writes no file at all and two worktrees hold the same physical blocks. `generate.ready` asks for
+the canonical files before it calls the extractor, so an already published framework is not computed again; the files
+a cache already holds are never replaced.
+
 The key sees clang by the text of `clang --version` and the digester by its size and sha256 (`sdk.lua`), so a clang replaced
 in place with one that prints the same version line does not move the key: remove `<store>/backports/<key>` and the folder in
 the checkout after such a change, as for the other things "What a key does not see" lists.
