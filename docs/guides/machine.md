@@ -780,12 +780,12 @@ key, because a rerun costs seconds and a verdict that no longer holds costs a pu
   so a private cache of any name never enters a key (`.gitignore` has `/.cache-*/` for the same reason);
 - for `comments`, the content of the local `.git/info/attributes` and of the global attributes file, which `git check-attr` reads
   to classify a file;
-- for `recipe digests`, `lowered members`, `lowered exports`, `light suites`, `backports build`, `backports exports` and `backports device imports`, which run against what is
+- for `recipe digests`, `lowered members`, `lowered exports`, `light suites`, `backports build`, `backports exports`, `backports device imports` and `backports init order`, which run against what is
   installed: the Xcode and SDK probes, where `git`, `rsync`, `cmake`, `ninja`, `xcrun`, `clang`, `cc`, `make` and `sh` resolve and the
   first line of what each prints for `--version`, every install of `llvm`, `swift`, `swift-bootstrap`, `swift-runtime`, `libcxx`, `apple-compat`, `iphoneos-sdk`, `ld64` and
   `ldid` in the store with the digest of its `manifest.txt`, and the content key of the iPhoneOS SDK (every file of it, with
   the Xcode tools, about 6 s once per run);
-- for `backports build`, `backports exports` and `backports device imports`, besides the installed facts, the identity of every
+- for `backports build`, `backports exports`, `backports device imports` and `backports init order`, besides the installed facts, the identity of every
   complete device cache under `.cache/dyld`: for each file of each release folder its name, its size and its sha256 (the size
   only from 32 MiB up, the shared cache itself). The generator reads the class inventory of iOS 6.1.3 and the import check reads
   the system libraries of the oldest release the Backports libraries run on, so a build or a verdict is remembered only for the
@@ -866,7 +866,7 @@ first read, because every suite reads it). `toolchain/modules/recalled.lua` hold
 and `prepush`'s own test that it reads the memo the way `prepush` writes it.
 
 Order and flags. The cheap checks run first and the heavy ones (`lowered members`, `lowered exports`, `light suites`,
-`backports build`, `backports exports`, `backports device imports`) last, and the run stops at the first check that fails, so a two-second `layout` failure does not wait
+`backports build`, `backports exports`, `backports device imports`, `backports init order`) last, and the run stops at the first check that fails, so a two-second `layout` failure does not wait
 behind a build. `--keep-going` runs every check regardless (the old behaviour), `--list` prints the names with the heavy ones
 marked, and `--only <check,...>` runs just those (names with a space are quoted: `--only "layout,light suites"`) for iterations;
 an unknown name is an error, and a run with `--only` says that a push needs all checks. The full run before a push stays

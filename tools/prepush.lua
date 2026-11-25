@@ -244,6 +244,11 @@ local function backports_device_imports()
     return lua("frameworks/Backports/tests/device_imports_test.lua", built)
 end
 
+local function backports_init_order()
+    local built = path.join(gate_tree(gate_folder()), "build", "iphoneos", "armv7", "release")
+    return lua("frameworks/Backports/tests/init_order_test.lua", "check", built)
+end
+
 local function declared(xmake, name)
     return xmake:find("[%s{,]" .. name .. " = {") ~= nil
 end
@@ -657,6 +662,7 @@ local STEPS = {
     {name = "backports build", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_build},
     {name = "backports exports", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_exports},
     {name = "backports device imports", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_device_imports},
+    {name = "backports init order", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_init_order},
 }
 
 local function test_suite()
