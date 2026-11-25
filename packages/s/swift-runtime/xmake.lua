@@ -6,6 +6,7 @@ package("swift-runtime")
         add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
     end
     set_policy("package.strict_compatibility", true)
+    set_policy("package.links_dependencies", true)
 
     add_urls("https://github.com/swiftlang/swift.git")
     add_versions("6.4.0", "b8189d766d86ad7fc8106787d6ce9e402f38dd72")
