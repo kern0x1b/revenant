@@ -70,7 +70,29 @@ function owner_loop(pidfile, name)
         end
         os.sleep(100)
     end
+    assert(os.isfile(pidfile), "the owner loop did not start")
     return tonumber(io.readfile(pidfile):trim())
+end
+
+function with_owner(pidfile, name, body)
+    local owner = owner_loop(pidfile, name)
+    local function stop()
+        os.execv("/bin/kill", {tostring(owner)}, {try = true})
+    end
+    try
+    {
+        function ()
+            body(owner)
+        end,
+        catch
+        {
+            function (errors)
+                stop()
+                raise(errors)
+            end
+        }
+    }
+    stop()
 end
 
 function filenames()

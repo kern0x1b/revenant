@@ -5,7 +5,7 @@ local LINE = "recalled light suites memo (ran 297 s in w at 0123456789, 3 min ag
 local KEY = "a1b2c3"
 local OTHER_KEY = "ffffff"
 
-function failures(opt)
+local function checks(opt, owner)
     local recalled = import("recalled", {rootdir = opt.modules, anonymous = true})
     local home = fixtures.scratch()
     local failures = 0
@@ -30,6 +30,11 @@ function failures(opt)
     end
     local function alive(pid)
         return os.execv("/bin/kill", {"-0", tostring(pid)}, {try = true}) == 0
+    end
+    local function running(pid)
+        local state = try { function () return os.iorunv("/bin/ps", {"-o", "stat=", "-p", tostring(pid)}) end }
+        state = state and state:trim() or ""
+        return state ~= "" and not state:startswith("Z")
     end
     local function real(folder)
         return os.iorunv("sh", {"-c", "cd \"$1\" && pwd -P", "sh", folder}):trim()
@@ -58,16 +63,36 @@ function failures(opt)
     child:close()
     if loop then
         for _ = 1, 50 do
-            if not alive(loop) then
+            if not running(loop) then
                 break
             end
             os.sleep(100)
         end
-        check("a test that was killed leaves no process", alive(loop), false)
+        check("a test that was killed leaves no process", running(loop), false)
         os.execv("/bin/kill", {tostring(loop)}, {try = true})
     end
 
-    local owner = fixtures.owner_loop(path.join(home, "owner.pid"), "ci_local.lua")
+    local raised, heard
+    try
+    {
+        function ()
+            fixtures.with_owner(path.join(home, "raised.pid"), "ci_local.lua", function (pid)
+                raised = pid
+                raise("a check that raises")
+            end)
+        end,
+        catch { function (errors) heard = tostring(errors) end }
+    }
+    check("the error of a test that raised is not swallowed", heard ~= nil and heard:find("a check that raises", 1, true) ~= nil, true)
+    for _ = 1, 50 do
+        if not running(raised) then
+            break
+        end
+        os.sleep(100)
+    end
+    check("a test that raised leaves no process", running(raised), false)
+    os.execv("/bin/kill", {tostring(raised)}, {try = true})
+
     local began = "Mon Nov 23 12:00:00 2026"
     local me = os.getpid()
 
@@ -160,11 +185,17 @@ function failures(opt)
     check("a line without a key is not a verdict", (recalled.parse(LINE .. "\n")), nil)
     check("no output is no verdict", (recalled.parse(nil)), nil)
 
-    os.execv("kill", {tostring(owner)}, {try = true})
-
     local out = {}
     if failures > 0 then
         out[#out + 1] = string.format("%d failures", failures)
     end
+    return out
+end
+
+function failures(opt)
+    local out
+    fixtures.with_owner(path.join(fixtures.scratch(), "owner.pid"), "ci_local.lua", function (owner)
+        out = checks(opt, owner)
+    end)
     return out
 end
