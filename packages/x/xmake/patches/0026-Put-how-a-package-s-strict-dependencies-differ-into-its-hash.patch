@@ -1,0 +1,146 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: revenant <revenant@example.invalid>
+Date: Wed, 25 Nov 2026 12:00:00 +0200
+Subject: [PATCH] Put how a package's strict dependencies differ from their
+ defaults into its hash
+
+A package's build hash holds nothing about its dependencies. A dependency with the policy package.strict_compatibility
+makes what depends on it be installed again when it changes, into the same folder: a project that asks a library to be
+built another way (add_requireconfs) rewrote the package of every other project that shares the store, and a build
+could read a package compiled against the other variant of the library.
+
+The configurations of a strict library dependency that differ from their declared defaults, and that neither the
+dependent itself asked for nor inherited from its own, are now a term of the dependent's hash, and so is the term of a
+dependency that has one. A configuration with no declared default adds nothing. A package whose dependencies are built
+as it asks keeps the hash it had. The hash is computed again after the dependencies are loaded, so what a recipe's
+on_load reads from package:buildhash() or package:installdir() is the value without the term.
+
+Changes-build-output: no
+---
+ xmake/core/package/package.lua                     | 20 +++++++++
+ .../private/action/require/impl/package.lua        | 47 ++++++++++++++++++++++
+ 2 files changed, 67 insertions(+)
+
+diff --git a/xmake/core/package/package.lua b/xmake/core/package/package.lua
+index 08755e0..93f8b2b 100644
+--- a/xmake/core/package/package.lua
++++ b/xmake/core/package/package.lua
+@@ -1803,6 +1803,17 @@ function _instance:_compute_buildhash()
+     self:buildhash()
+ end
+ 
++function _instance:_deps_variant()
++    return self._DEPS_VARIANT
++end
++
++function _instance:_deps_variant_set(terms)
++    self._DEPS_VARIANT = table.concat(terms, ";")
++    self._BUILDHASH = nil
++    self._INSTALLDIR = nil
++    self:_compute_buildhash()
++end
++
+ -- hash.strhash128 has been switched to xxhash.
+ -- For compatibility, the old hash algorithm is still used here.
+ function _instance:_strhash128(str)
+@@ -1840,6 +1851,12 @@ local function _bytes_less(a, b)
+     return #a < #b
+ end
+ 
++function _instance:_bytes_sorted(list)
++    local sorted = table.copy(list)
++    table.sort(sorted, _bytes_less)
++    return sorted
++end
++
+ local function _addons_for_buildhash()
+     local addons = addon.addons()
+     local terms = {}
+@@ -1931,6 +1948,9 @@ function _instance:buildhash()
+             if #addons > 0 then
+                 str = str .. "_" .. table.concat(addons, "_")
+             end
++            if self._DEPS_VARIANT then
++                str = str .. "_deps_" .. self._DEPS_VARIANT
++            end
+             return self:_strhash128(str)
+         end
+         local function _get_installdir(...)
+diff --git a/xmake/modules/private/action/require/impl/package.lua b/xmake/modules/private/action/require/impl/package.lua
+index 2425466..11b4494 100644
+--- a/xmake/modules/private/action/require/impl/package.lua
++++ b/xmake/modules/private/action/require/impl/package.lua
+@@ -1198,6 +1198,42 @@ function _load_package(packagename, requireinfo, opt)
+     return package
+ end
+ 
++function _serialized_config(value)
++    if type(value) == "table" then
++        return string.serialize(value, {strip = true, indent = false, orderkeys = true})
++    end
++    return tostring(value)
++end
++
++function _chosen_configs(dep, given, inherited)
++    local chosen = {}
++    for name, value in pairs(dep:_configs_for_buildhash() or {}) do
++        local text = _serialized_config(value)
++        local default = dep:extraconf("configs", name, "default")
++        if name ~= "toolchains" and default ~= nil and text ~= _serialized_config(default)
++            and text ~= _serialized_config(given[name]) and text ~= _serialized_config(inherited[name]) then
++            table.insert(chosen, name .. "=" .. text)
++        end
++    end
++    return dep:_bytes_sorted(chosen)
++end
++
++function _deps_variant_terms(package, edges)
++    local terms = {}
++    local inherited = package:requireinfo() and package:requireinfo().configs or {}
++    for _, edge in ipairs(edges) do
++        local dep = edge.dep
++        if dep:is_library() then
++            local chosen = dep:policy("package.strict_compatibility") and _chosen_configs(dep, edge.given, inherited) or {}
++            local below = dep:_deps_variant()
++            if #chosen > 0 or below then
++                table.insert(terms, dep:name() .. "[" .. table.concat(chosen, ",") .. "]" .. (below and ("(" .. below .. ")") or ""))
++            end
++        end
++    end
++    return package:_bytes_sorted(table.unique(terms))
++end
++
+ -- load all required packages and their dependent packages
+ --
+ -- @param requires  the package requires, e.g. {"zlib >=1.2.11", "libpng"}
+@@ -1226,12 +1262,19 @@ function _load_packages(requires, opt)
+         -- maybe package not found and optional
+         if package then
+ 
++            if opt.edges then
++                local extra = opt.requires_extra and opt.requires_extra[requireinfo.originstr]
++                table.insert(opt.edges, {dep = package, given = extra and extra.configs or {}})
++            end
++
+             -- load dependent packages and save them first of this package
+             if not package._DEPS then
+                 if package:get("deps") and opt.nodeps ~= true then
+ 
+                     -- load dependent packages and do not load system/3rd packages for package/deps()
++                    local edges = {}
+                     local _, plaindeps = _load_packages(package:get("deps"), {requirepath = requirepath,
++                                                        edges = edges,
+                                                         requires_extra = package:extraconf("deps") or {},
+                                                         parentinfo = requireinfo,
+                                                         nodeps = opt.nodeps,
+@@ -1252,6 +1295,10 @@ function _load_packages(requires, opt)
+                         packagedeps[dep:name()] = dep
+                     end
+                     package._DEPS = packagedeps
++                    local terms = _deps_variant_terms(package, edges)
++                    if #terms > 0 then
++                        package:_deps_variant_set(terms)
++                    end
+                 end
+             end
+ 
