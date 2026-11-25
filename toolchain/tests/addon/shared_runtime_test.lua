@@ -37,6 +37,22 @@ function failures(opt)
         table.insert(found, "staging writes no Debian package: that is the program's, which signs the libraries")
     end
 
+    local installed = {{name = first, alias = "swift-runtime", root = root}, {name = second, alias = "cryptokit", root = root, needs = first}}
+    local carried, taken = shared.embed(installed, {"swift-runtime", "cryptokit"})
+    if #carried ~= 2 or carried[1].name ~= "libbase.1.dylib" or carried[1].package ~= "swift-runtime" or carried[2].source ~= top or not (taken[first] and taken[second]) then
+        table.insert(found, "an application that embeds two packages carries the libraries of both, each under the package it came from")
+    end
+    local none, kept = shared.embed(installed, {})
+    if #none ~= 0 or kept[first] or kept[second] then
+        table.insert(found, "an application that embeds nothing carries nothing and leaves every package on the device")
+    end
+    if try {function () shared.embed(installed, {"swift-runtime"}) return true end, catch {function () return false end}} then
+        table.insert(found, "a package left on the device that is linked against an embedded one must be refused")
+    end
+    if try {function () shared.embed(installed, {"libcxx"}) return true end, catch {function () return false end}} then
+        table.insert(found, "a name that cannot be embedded must be refused")
+    end
+
     local outputs = path.join(folder, "debs")
     local written = shared.deb(description, root, opt.ldid, path.join(folder, "work"), outputs)
     local extracted = path.join(folder, "extracted")

@@ -232,6 +232,16 @@ function main()
             "the package list is " .. #packages .. " entries long or has other names or versions")
         expect("each shared package keeps the folder whose description named it", packages[1].store == path.absolute(base) and packages[2].store == path.absolute(base),
             "the stores are " .. tostring(packages[1].store) .. " and " .. tostring(packages[2].store))
+        local carrying = "\t@executable_path/Frameworks/libswiftCore.dylib (compatibility version 0.0.0, current version 0.0.0)\n"
+            .. "\t/usr/lib/revenant/org.revenant.libcxx-5fcbdd3a/libc++.1.dylib (compatibility version 1.0.0, current version 1.0.0)\n"
+        expect("a host that carries its Swift runtime and loads libc++ from the phone has no problem",
+            #host.carried_problems({"/a/Frameworks/libswiftCore.dylib"}, carrying) == 0, "a carried runtime was refused")
+        local twice = host.carried_problems({"/a/Frameworks/libswiftCore.dylib"}, listing)
+        expect("a library that is carried and also loaded from a shared package is refused by name",
+            #twice == 1 and twice[1]:find("swift-runtime-8e5fdec8/libswiftCore.dylib", 1, true) ~= nil, "the problems are " .. table.concat(twice, " | "))
+        local absent = host.carried_problems({}, carrying)
+        expect("a library the host loads from Frameworks and does not carry is refused by name",
+            #absent == 1 and absent[1]:find("Frameworks/libswiftCore.dylib", 1, true) ~= nil, "the problems are " .. table.concat(absent, " | "))
         local message = refusal(function () host.shared_packages(listing, {path.join(base, "none")}) end)
         expect("a package without a description is refused by name", message ~= nil and message:find("org.revenant.backports", 1, true) ~= nil,
             "a package with no description was accepted or the refusal does not name it")

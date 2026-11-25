@@ -478,15 +478,47 @@ function runtime_mixes(device, settings, packages, provided)
     return problems
 end
 
+function carried_problems(carried, linked)
+    local names, problems, seen = {}, {}, {}
+    for _, file in ipairs(carried) do
+        names[path.filename(file)] = true
+    end
+    for line in linked:gmatch("[^\n]+") do
+        local installed = line:match("^%s+(/usr/lib/revenant/%S+)")
+        local own = line:match("^%s+@executable_path/Frameworks/(%S+)")
+        local problem
+        if installed and names[path.filename(installed)] then
+            problem = installed .. " is also in the host's Frameworks, and two copies of a library in one process crash it at launch"
+        elseif own and not names[own] then
+            problem = "the host loads @executable_path/Frameworks/" .. own .. " and its Frameworks folder does not carry it"
+        end
+        if problem and not seen[problem] then
+            seen[problem] = true
+            table.insert(problems, problem)
+        end
+    end
+    return problems
+end
+
 local function stage_shared(options)
     local built = path.absolute(options.app)
     local binary = path.join(built, path.basename(built))
     local otool = os.iorunv("otool", {"-L", binary})
-    if otool:find("@executable_path/Frameworks/", 1, true) then
-        raise("%s loads a library from its own Frameworks folder, and without --backports stage keeps no Frameworks: a host that carries libraries is staged with --backports", built)
+    local carried = os.files(path.join(built, "Frameworks", "*.dylib"))
+    local listings = {otool}
+    for _, library in ipairs(carried) do
+        table.insert(listings, (os.iorunv("otool", {"-L", library})))
     end
-    local packages = shared_packages(otool, string.split(options.packages or "", ",", {plain = true}))
+    local linked = table.concat(listings, "\n")
+    local problems = carried_problems(carried, linked)
+    if #problems > 0 then
+        raise("%s cannot be staged without --backports: %s", built, table.concat(problems, "; "))
+    end
+    local packages = shared_packages(linked, string.split(options.packages or "", ",", {plain = true}))
     local imports = backport_imports((os.iorunv("nm", {"-m", "-arch", "armv7", binary})))
+    for _, library in ipairs(carried) do
+        backport_imports((os.iorunv("nm", {"-m", "-arch", "armv7", library})), imports)
+    end
     local backports_root
     for _, package in ipairs(packages) do
         if package.name == BACKPORTS then

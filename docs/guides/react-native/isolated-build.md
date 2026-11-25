@@ -45,6 +45,14 @@ The private cache is made with `./xmakew l -P . tools/private_cache.lua <your pr
 rewritten is repaired with `./xmakew l -P . tools/private_cache.lua --repair <your private cache>`; without it the Swift compile does not
 find the package modules such as Combine.
 
+### A host that carries its own Swift runtime
+
+`copy ... --embed-swift 1` sets `revenant.embed` on `RNHost`: the packages are built as for the shared host, and the step that writes the
+application copies the libraries of `swift-runtime`, `swift-crypto`, `cryptokit` and `uniformtypeidentifiers` that the host reaches into
+its `Frameworks` folder, names them `@executable_path/Frameworks/<name>` and signs them. libc++ and Backports are still loaded from the
+phone. Use it on a phone whose installed Swift packages are of another build than the host's and must not change: a package name does not
+say which runtime its libraries link.
+
 ## 2. Build
 
 ```sh

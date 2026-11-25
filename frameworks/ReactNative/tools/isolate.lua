@@ -1,10 +1,11 @@
-local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua copy <project> <folder> --cache <private cache> [--bundle-id org.revenant.rnhost.<name>]
+local USAGE = [[usage: ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua copy <project> <folder> --cache <private cache> [--bundle-id org.revenant.rnhost.<name>] [--embed-swift 1]
        ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua clone <warm copy> <folder> --cache <own clone of the private cache> [--src-cache <its cache>] [--src-checkout <its checkout>] [--bundle-id org.revenant.rnhost.<name>]
        ./xmakew l -P . frameworks/ReactNative/tools/isolate.lua build <folder> --cache <private cache> [--target RNHost] [--real a,b] [--pods pkg:module,...] [--jobs N] [--log file] [--configure-only 1] [--deb DIR]
   copy   makes a private copy of the host project in <folder>: the hand-made inputs of its build/ with every absolute path rewritten to
          the folder, build/ref linked read only, and the react-native package with all its patches installed into the private cache
          and linked as build/rn-src. The path of <folder> must not contain "test" or "Example". The copy's app gets its own bundle id,
          --bundle-id or org.revenant.rnhost.<folder name>, written as bundleId into the copy's build/app-manifest/host.json, so that installs of different workers do not overwrite each other.
+         With --embed-swift 1 the host carries the Swift runtime and the Swift packages in its own Frameworks folder instead of loading the shared packages of the phone.
   clone  makes an APFS clone of a warm copy (one that built) in <folder>, for another worktree whose private cache is an APFS clone of the copy's cache: the
          files that name the old copy, checkout and cache (recorded in build/isolate-roots.txt by copy and build) are rewritten and the links under build/ (rn-headers,
          rn-src, the package probes) are retargeted. The clone's probes answer from their recorded install folders without installing again, nothing in it reaches
@@ -101,6 +102,18 @@ function host_libcxx(text)
 end
 
 local WHOLE_PROBE = {WHOLE[1].line, WHOLE[2].line, WHOLE[3].line}
+
+local HOST_EMBED = table.concat({
+    'target("RNHost")',
+    '    set_values("revenant.embed", "swift-runtime", "swift-crypto", "cryptokit", "uniformtypeidentifiers")',
+    'target_end()'}, "\n")
+
+function host_embed(text)
+    if text:find(HOST_EMBED, 1, true) then
+        return text
+    end
+    return text .. "\n" .. HOST_EMBED .. "\n"
+end
 
 function declares(text, alias)
     return text:find('alias = "' .. alias .. '"', 1, true) ~= nil
@@ -300,7 +313,7 @@ function reference_gap(project)
     return string.format("%s links to %s, which is not there. The reference application lives in the cache, not in scratch: restore it with `cp -cR <paseo checkout> <cache>/reference/paseo-<version>`, `npm ci --ignore-scripts` in it, `./xmakew l -P . frameworks/ReactNative/tools/overlay.lua apply <that folder> frameworks/ReactNative/examples/paseo <cache>/reference/paseo-<version>-app`, and `ln -sfn <cache>/reference/paseo-<version>-app %s`", link, target, link)
 end
 
-function copy_project(project, folder, bundle_id)
+function copy_project(project, folder, bundle_id, embed)
     project = path.absolute(project)
     folder = path.absolute(folder)
     if not folder_is_valid(folder) then
@@ -358,6 +371,9 @@ function copy_project(project, folder, bundle_id)
     local xmake = path.join(folder, "xmake.lua")
     local text = io.readfile(xmake)
     local carried = pod_requirements(host_libcxx(shared_packages(whole_requirements(text))))
+    if embed then
+        carried = host_embed(carried)
+    end
     if carried ~= text then
         io.writefile(xmake, carried)
     end
@@ -831,7 +847,7 @@ function main(...)
         index = index + 1
     end
     if command == "copy" and #positional == 2 and options.cache then
-        local result = copy_project(positional[1], positional[2], options["bundle-id"])
+        local result = copy_project(positional[1], positional[2], options["bundle-id"], options["embed-swift"] == "1")
         local sources = install_react_native(path.absolute(positional[2]), path.absolute(options.cache))
         write_roots(positional[2], options.cache)
         print(string.format("isolated %s: %d files rewritten, %d links retargeted, rn-src %s, bundle id %s", positional[2], result.rewritten, result.relinked, sources, result.bundle_id))

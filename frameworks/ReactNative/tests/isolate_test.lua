@@ -87,6 +87,11 @@ expect("the copy asks the four packages, as the application requires them and as
        #missing == 0, "no shared rule for " .. table.concat(missing, ", "))
 expect("the shared rules are carried once", isolate.shared_packages(shared) == shared, "a second pass changed the copy")
 
+local embedding = isolate.host_embed(APPLICATION)
+expect("an embedding copy names the Swift packages that its host carries", embedding:find('set_values("revenant.embed", "swift-runtime", "swift-crypto", "cryptokit", "uniformtypeidentifiers")', 1, true) ~= nil
+       and not embedding:find('"libcxx", "swift', 1, true), "the revenant.embed values are missing from the copy")
+expect("the embedding rule is carried once", isolate.host_embed(embedding) == embedding, "a second pass changed the copy")
+
 local hosted = isolate.host_libcxx(APPLICATION)
 expect("the copy's host no longer carries the libc++ the shared package installs", hosted:find('target("RNHost")', 1, true) ~= nil
        and hosted:find('name ~= "libcxx"', 1, true) ~= nil, "the app.frameworks filter is missing from the copy")

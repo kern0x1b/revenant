@@ -177,7 +177,7 @@ function shared_packages(target, aliases)
                 identities[path.filename(file)] = folder .. "/" .. path.filename(file)
                 table.insert(libraries, file)
             end
-            table.insert(all, {meta = described, root = root, name = name, relation = "=",
+            table.insert(all, {meta = described, root = root, name = name, alias = alias, relation = "=",
                                version = described.version, needs = needs ~= "" and needs or nil, held = held})
         end
     end
@@ -188,6 +188,16 @@ function shared_runtime(target)
     local all, identities, libraries = shared_packages(target)
     if #all == 0 then
         return nil
+    end
+    local embedded, taken = staged.embed(all, table.wrap(target:values("revenant.embed")))
+    for _, library in ipairs(embedded) do
+        identities[library.name] = nil
+    end
+    local provided = {}
+    for _, file in ipairs(libraries) do
+        if identities[path.filename(file)] then
+            table.insert(provided, file)
+        end
     end
     local byname = {}
     for _, shared in ipairs(all) do
@@ -216,9 +226,11 @@ function shared_runtime(target)
     end
     local listed = {}
     for _, name in ipairs(table.orderkeys(packages)) do
-        table.insert(listed, packages[name])
+        if not taken[name] then
+            table.insert(listed, packages[name])
+        end
     end
-    return {packages = listed, identities = identities, libraries = libraries}
+    return {packages = listed, identities = identities, libraries = provided, embedded = embedded}
 end
 
 local PLATFORM_FOLDER = "/usr/lib/revenant/org.revenant.backports/"
@@ -523,6 +535,9 @@ function place_carried(target, root, binary)
     end
     local libraries = reached(bundle.carried_libraries(target, "revenant.libraries"), {binary})
     local shared = shared_runtime(target)
+    if shared and #shared.embedded > 0 then
+        raise("target(%s) names revenant.embed, which puts libraries into the Frameworks folder of an application; a tweak or daemon does not take it", target:name())
+    end
     if #libraries == 0 then
         if shared then
             bundle.retarget({binary}, {}, {provided = shared.identities})
@@ -668,13 +683,20 @@ function application(target)
     local binaries, runtime = {executable}, {}
     local carried, held, roots = {}, {}, {executable}
     local shared = shared_runtime(target)
+    local embedded = {}
+    for _, library in ipairs(shared and shared.embedded or {}) do
+        embedded[library.name] = true
+    end
     for _, library in ipairs(bundle.carried_libraries(target)) do
-        if not (shared and shared.identities[library.name]) then
+        if not (shared and shared.identities[library.name]) and not embedded[library.name] then
             table.insert(carries_runtime(library) and held or carried, library)
             if not carries_runtime(library) then
                 table.insert(roots, library.source)
             end
         end
+    end
+    for _, library in ipairs(shared and shared.embedded or {}) do
+        table.insert(held, library)
     end
     for _, library in ipairs(distinct(table.join(reached(held, roots), carried), frameworks)) do
         local destination = path.join(frameworks, library.name)

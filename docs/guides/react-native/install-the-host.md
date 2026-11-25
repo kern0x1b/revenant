@@ -32,8 +32,10 @@ A host built against the shared packages (`swift-runtime`, `libcxx`, `backports`
 ./xmakew l -P . frameworks/ReactNative/tools/host_install.lua deploy --archive OUT/host.tgz --packages OUT/host-packages.json --bundle-id ID ...
 ```
 
-`--packages` takes the `share/shared-packages` folders of the packages the host was linked against. Stage refuses a host that loads a
-library from its own `Frameworks` (two copies of a library in one process crash it at launch), refuses a package folder the host
+`--packages` takes the `share/shared-packages` folders of the packages the host was linked against. A host copied with
+`isolate.lua copy --embed-swift 1` carries the Swift runtime in `Frameworks` and takes the rest from the packages; it is staged the same
+way. Stage refuses a library that is both in `Frameworks` and loaded from a package (two copies of a library in one process crash it at
+launch) and one the host loads from `Frameworks` and does not carry, refuses a package folder the host
 loads and no description names, and writes `OUT/host-packages.json` with the version each description gives and every Backports
 symbol that the host and the packages it loads import, by library. `deploy --packages` asks the phone for each version with
 `dpkg-query` and stops, naming the package, when one is missing or another version; install the packages of the build first. The
