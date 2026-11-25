@@ -121,7 +121,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   `docs/guides/machine.md`, "Which cache to clone")
   and the build of every Backports library for armv7 with
   the project's flags (`backports build`, in a configuration and a build folder of its own, so the checkout's host
-  configuration stays) and the check that this build still exports every class an earlier build exported (`backports exports`) and the deb writer's import check on its libraries, against the system libraries of the oldest release they run on (`backports device imports`), and the check that every library adds its categories before it registers its stubs (`backports init order`). A check that passed is remembered in the shared store by the content of what it reads (its files, the
+  configuration stays) and the check that this build still exports every class an earlier build exported (`backports exports`) and the deb writer's import check on its libraries, against the system libraries of the oldest release they run on (`backports device imports`), and the check that every library adds its categories before it registers its stubs (`backports init order`), and the check that the skeleton copies no global the device exports (`backports device globals`). A check that passed is remembered in the shared store by the content of what it reads (its files, the
   code of prepush, the `REVENANT_*` environment, and for the checks that run against installs the installs and the SDK; what a
   key does not see is listed in `docs/guides/machine.md`, and `--fresh` runs everything), so a
   second prepush on the same inputs, from any worktree, runs nothing and prints where each verdict came from; a check that
@@ -130,7 +130,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside reve
   on 2026-11-23 on a busy machine (a Backports build of 167 s, the light suites of 196 s in one process, which take 65 s in four),
   and the build later builds only what changed. The first run after the SDK, the toolchain or the facts tools change computes
   the analysis itself, about 20 minutes, and fills the store for the others. It must print
-  `prepush: 27 checks passed`; `--list`, `--only <check,...>`, `--recall <check>` (prints the remembered verdict, runs nothing), `--keep-going` and `--fresh` select and order the run (it stops at the first
+  `prepush: 28 checks passed`; `--list`, `--only <check,...>`, `--recall <check>` (prints the remembered verdict, runs nothing), `--keep-going` and `--fresh` select and order the run (it stops at the first
   failure by default, the cheap checks first; see `docs/guides/machine.md`); `./xmakew l -P . tools/prepush.lua test` tests the tool itself.
 - Before handing a change over: `./xmakew test -P .`, then that component's gate (the backports gate is gone until
   `./xmakew test -P .` replaces it; for the emulator, the skill `emulator-session`).

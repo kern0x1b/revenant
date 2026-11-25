@@ -1,5 +1,6 @@
 package("boringssl")
     set_kind("library")
+    set_policy("package.links_dependencies", true)
     set_homepage("https://boringssl.googlesource.com/boringssl")
     set_description("BoringSSL at master-with-bazel commit cf686573 (2024-03-06), the snapshot Telegram vendors, as libcrypto and libssl for armv7 iOS 6 with its 32-bit ARM assembly: target.h keeps the assembly on Apple, the ios32 perlasm output is generated into apple-arm/ and listed by CMake, and the system random source reads /dev/urandom where CCRandomGenerateBytes is absent")
     set_license("OpenSSL")

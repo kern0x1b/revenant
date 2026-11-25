@@ -11,6 +11,7 @@ local libraries = import("library_list", {rootdir = os.scriptdir(), anonymous = 
 local exclusive = import("@addon.revenant.exclusive", {anonymous = true})
 local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
 local timing = import("@addon.revenant.apple.timing", {anonymous = true})
+local byteorder = import("@addon.revenant.byteorder", {anonymous = true})
 
 local SHARDS = 4
 local FIRST_IPHONE_OS = 2000
@@ -592,7 +593,7 @@ function device_globals_text(set, header)
     for name in pairs(set) do
         table.insert(names, name)
     end
-    table.sort(names)
+    byteorder.sort(names)
     for _, name in ipairs(names) do
         table.insert(lines, name .. "\t" .. set[name])
     end

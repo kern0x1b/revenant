@@ -3,6 +3,7 @@ package("webkit-engine")
     set_description("JavaScriptCore, WebCore and WebKitLegacy for armv7 and iOS 6, built from the webkit package's patched tree with CMake against the port's libraries: system stages the frameworks under usr/lib/rev-fw in place of the phone's own, prefixed lays them out for an application's Frameworks folder with every class renamed")
     set_license("LGPL-2.1-or-later AND BSD-2-Clause")
     set_policy("package.strict_compatibility", true)
+    set_policy("package.links_dependencies", true)
 
     local JSC_API = {"JSGlobalContextCreateInGroup", "JSGlobalContextRetain", "JSGlobalContextRelease", "JSContextGetGlobalObject",
                      "JSGlobalContextSetInspectable", "JSEvaluateScript", "JSClassCreate", "JSObjectMake", "JSValueIsObjectOfClass",
