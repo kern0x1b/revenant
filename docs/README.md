@@ -131,7 +131,6 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | Document | About |
 | --- | --- |
 | [Demand: the API an app needs](guides/backports/demand.md) | how the demand tool lists what an app references from the SDK, against iOS 6.1.3 and the Backports |
-| [Stubs: the Backports members an app can reach that abort](guides/backports/stubs.md) | how the stubs tool finds the stubs an app names that iOS 6.1.3 lacks and no source implements, and the snapshot that keeps a new one from passing |
 | [Out-of-tree apps: the Backports an app links](guides/backports/out-of-tree.md) | how an app built outside the checkout takes the Backports from its package |
 | [Write and install the Backports package](guides/backports/package.md) | the commands that write `org.revenant.backports` and the Swift runtime, and install them on the phone |
 | [libSystem compatibility calls](reference/backports/libSystem/README.md) | the missing `clock_getres` and `*at` file operations, host comparisons, iOS 6 timestamp precision and path snapshot limitation |
