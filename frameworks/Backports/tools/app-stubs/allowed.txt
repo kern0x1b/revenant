@@ -343,8 +343,6 @@
 -UILocalNotification	region	backlog
 -UILocalNotification	setRegion:	backlog
 -UINavigationBar	setPrefersLargeTitles:	backlog
--UIPopoverController	backgroundColor	backlog
--UIPopoverController	setBackgroundColor:	backlog
 -UIResponder	captureTextFromCamera:	backlog
 -UISearchBar	inputAssistantItem	backlog
 -UIWebView	setAllowsLinkPreview:	backlog

@@ -210,6 +210,7 @@ The documents of revenant, by kind ([Diátaxis](https://diataxis.fr)): tutorials
 | [UIKit: CASpringAnimation](reference/backports/UIKit/CASpringAnimation.md) | the iOS 9 spring class on iOS 6, its curve and its keyframe delivery |
 | [UIKit: keyboard notification for a new input](reference/backports/UIKit/KeyboardInputSwitch.md) | why an application that lays out above the keyboard missed the focus of a new input on iOS 6, and the frame change the backports post |
 | [UIKit: gesture failure requirements](reference/backports/UIKit/GestureFailure.md) | the private names UIKit 6 uses for the iOS 7 delegate and recognizer hooks, the capability cache and the dynamic arbitration, and the bridge onto them |
+| [UIKit: popover background color](reference/backports/UIKit/PopoverBackgroundColor.md) | the iOS 7 color of a `UIPopoverController` drawn on iOS 6 by a popover background view, and what differs |
 | [UIKit: UILabel background](reference/backports/UIKit/UILabelBackground.md) | the opaque white default of a code-made label on iOS 6 and the later default the backports give it |
 | [UIKit: UISwitch appearance](reference/backports/UIKit/UISwitchAppearance.md) | the 79 by 27 switch of iOS 6, and the 51 by 31 switch of iOS 13 to 18 that the backports draw in its place |
 | [UIKit: UITextField alignment](reference/backports/UIKit/UITextFieldAlignment.md) | the top vertical alignment a code-made text field starts with on iOS 6 and the centered start the backports give it |

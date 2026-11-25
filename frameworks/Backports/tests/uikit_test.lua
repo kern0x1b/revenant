@@ -13,6 +13,13 @@ local AREAS = {
         },
     },
     {
+        name = "iOS 7 popover background color",
+        sources = {"UIPopoverController+BackgroundColor7.m"},
+        members = {
+            "-[UIPopoverController backgroundColor]", "-[UIPopoverController setBackgroundColor:]",
+        },
+    },
+    {
         name = "text tabs, constraint identifiers and screen snapshots",
         sources = {"NSTextTab.m", "NSLayoutConstraint+Identifier7.m", "UIScreen+Snapshot7.m"},
         members = {

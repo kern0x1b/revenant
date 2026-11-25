@@ -1993,6 +1993,7 @@ class RevenantPhotosTransaction
 class RevenantPictureInPictureWindow
 class RevenantPlayerVolume
 class RevenantPlayerVolumeInstaller
+class RevenantPopoverColorBackground
 class RevenantPopoverState
 class RevenantPostOrderEnumerator
 class RevenantPostOrderInstaller
@@ -2453,6 +2454,7 @@ class UIPointerRegion
 class UIPointerRegionRequest
 class UIPointerShape
 class UIPointerStyle
+class UIPopoverController
 class UIPopoverPresentationController
 class UIPresentationController
 class UIPress
@@ -4980,6 +4982,7 @@ function RevenantPasscodeVerify
 function RevenantPhotoLongestIncreasingSubsequence
 function RevenantPhotosImageSourceForRequest
 function RevenantPlayerRenderCallback
+function RevenantPopoverShapeMake
 function RevenantQRDecode
 function RevenantSCNActionCubicProgress
 function RevenantSCNActionEase
@@ -28945,6 +28948,15 @@ member RevenantPlayerVolume -items
 member RevenantPlayerVolume -muted
 member RevenantPlayerVolume -volume
 member RevenantPlayerVolumeInstaller +load
+member RevenantPopoverColorBackground +arrowBase
+member RevenantPopoverColorBackground +arrowHeight
+member RevenantPopoverColorBackground +contentViewInsets
+member RevenantPopoverColorBackground -arrowDirection
+member RevenantPopoverColorBackground -arrowOffset
+member RevenantPopoverColorBackground -initWithFrame:
+member RevenantPopoverColorBackground -layoutSubviews
+member RevenantPopoverColorBackground -setArrowDirection:
+member RevenantPopoverColorBackground -setArrowOffset:
 member RevenantPopoverState -popover
 member RevenantPopoverState -popoverController:willRepositionPopoverToRect:inView:
 member RevenantPopoverState -popoverControllerDidDismissPopover:
@@ -33869,6 +33881,8 @@ member UIPointerStyle -revenant_axes
 member UIPointerStyle -revenant_effect
 member UIPointerStyle -revenant_shape
 member UIPointerStyle -setAccessories:
+member UIPopoverController -backgroundColor
+member UIPopoverController -setBackgroundColor:
 member UIPopoverPresentationController -arrowDirection
 member UIPopoverPresentationController -backgroundColor
 member UIPopoverPresentationController -barButtonItem
