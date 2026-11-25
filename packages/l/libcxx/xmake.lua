@@ -17,7 +17,7 @@ package("libcxx")
     add_configs("shared", {description = "The runtime is always the shared pair an application bundles.", default = true, type = "boolean", readonly = true})
     add_configs("operators", {description = "operator new and delete are ordinary definitions in libc++abi, so no image binds them weakly and dyld never coalesces them with another C++ runtime in the process.", default = "not-weak", type = "string", readonly = true})
 
-    add_configs("packaged", {description = "Install the libraries under absolute install names and leave what a Debian package holding them is written from, which what is linked against them depends on instead of carrying them: the program that depends on it writes and signs that package, so this package needs no host tool.", default = false, type = "boolean"})
+    add_configs("packaged", {description = "Install the libraries under absolute install names and leave what a Debian package holding them is written from, which what is linked against them depends on instead of carrying them: the program that depends on it writes and signs that package, so this package needs no host tool.", default = false, type = "boolean", images_only = true})
 
     add_includedirs("include/c++/v1")
     add_links("c++", "c++abi")

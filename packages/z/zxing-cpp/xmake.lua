@@ -7,6 +7,7 @@ package("zxing-cpp")
         add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
     end
     set_policy("package.strict_compatibility", true)
+    set_policy("package.links_dependencies", true)
 
     add_urls("https://github.com/zxing-cpp/zxing-cpp.git")
     add_versions("v3.1.1", "287c85df6f961c8efbfb5ffd736cd9457b8b890e")
