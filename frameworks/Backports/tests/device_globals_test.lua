@@ -1,5 +1,6 @@
 local workspace = import("@addon.revenant.workspace", {anonymous = true})
 local dyld = import("@addon.revenant.apple.dyld", {anonymous = true})
+local byteorder = import("@addon.revenant.byteorder", {anonymous = true})
 
 local TOOLS = path.absolute(path.join(os.scriptdir(), "..", "tools"))
 local SRC = path.absolute(path.join(os.scriptdir(), "..", "src"))
@@ -62,11 +63,13 @@ end
 local function table_of(file)
     local full = path.join(TOOLS, file)
     assert(os.isfile(full), file .. " is missing from tools: run ./xmakew l -P . frameworks/Backports/tools/generate.lua device-globals")
-    local set, count = {}, 0
+    local set, count, previous = {}, 0, nil
     for line in io.lines(full) do
         if string.sub(line, 1, 1) ~= "#" and line ~= "" then
             local name, install = string.match(line, "^([^\t]+)\t([^\t]+)$")
             assert(name, "a malformed row in tools/" .. file .. ": " .. line)
+            assert(not previous or byteorder.less(previous, name), "tools/" .. file .. " is not sorted by bytes, so it depends on the locale that generated it: " .. name .. " follows " .. tostring(previous))
+            previous = name
             set[name] = install
             count = count + 1
         end

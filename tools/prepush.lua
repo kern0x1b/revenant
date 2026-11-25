@@ -249,6 +249,13 @@ local function backports_init_order()
     return lua("frameworks/Backports/tests/init_order_test.lua", "check", built)
 end
 
+local function backports_device_globals()
+    local tree = gate_tree(gate_folder())
+    return in_own_temporary("step-tmp", function (envs)
+        return budgeted({os.programfile(), "l", "-P", tree, path.join(tree, "frameworks", "Backports", "tests", "device_globals_test.lua")}, {envs = envs})
+    end)
+end
+
 local function declared(xmake, name)
     return xmake:find("[%s{,]" .. name .. " = {") ~= nil
 end
@@ -493,11 +500,11 @@ local function remembered(store, step, key, record)
     return memo.remembered(store, step.name, key, record, MEMO_KEEP)
 end
 local function age_of(at)
-    local seconds = os.time() - (tonumber(at) or os.time())
+    local seconds = math.max(0, os.time() - (tonumber(at) or os.time()))
     if seconds < 90 then
-        return string.format("%d s ago", seconds)
+        return string.format("%.0f s ago", seconds)
     elseif seconds < 5400 then
-        return string.format("%d min ago", seconds // 60)
+        return string.format("%.0f min ago", seconds // 60)
     end
     return string.format("%.1f h ago", seconds / 3600)
 end
@@ -639,7 +646,7 @@ local function run_steps(steps, opt)
 end
 
 local STEPS = {
-    {name = "comments", reads = table.join(CODE_READS, {"tools/comments.lua", "tools/comments/"}), facts = function () return attributes_facts(root) end, inline = function () return call("tools/comments.lua", "check") end},
+    {name = "comments", reads = table.join(CODE_READS, {"tools/comments.lua", "tools/comments/", ".gitattributes"}), facts = function () return attributes_facts(root) end, inline = function () return call("tools/comments.lua", "check") end},
     {name = "comments test", reads = {"tools/comments.lua", "tools/comments/"}, inline = function () return call("tools/comments.lua", "test") end},
     {name = "private cache test", reads = table.join({"tools/private_cache.lua"}, TOOLS), inline = function () return call("tools/private_cache.lua", "test") end},
     {name = "layout", env = {"LC_COLLATE"}, inline = function () return call("tools/layout.lua") end},
@@ -666,6 +673,7 @@ local STEPS = {
     {name = "backports exports", reads = GRAPH, heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_exports},
     {name = "backports device imports", reads = GRAPH, heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_device_imports},
     {name = "backports init order", reads = GRAPH, heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_init_order},
+    {name = "backports device globals", reads = GRAPH, heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_device_globals},
 }
 
 local function test_suite()
@@ -821,8 +829,11 @@ local function test_cache()
     end
     local sample = {["tools/prepush.lua"] = "file 1", ["tools/budget.lua"] = "file 1",
                     ["docs/d.md"] = "doc", ["tools/a.lua"] = "code",
-                    ["frameworks/Backports/src/CallKit/tweak/a.m"] = "source"}
+                    ["frameworks/Backports/src/CallKit/tweak/a.m"] = "source",
+                    [".gitattributes"] = "*.m comments=upstream"}
     local moved_doc = table.clone(sample)
+    local moved_attributes = table.clone(sample)
+    moved_attributes[".gitattributes"] = "*.m comments=unspecified"
     moved_doc["docs/d.md"] = "doc changed"
     local moved_source = table.clone(sample)
     moved_source["frameworks/Backports/src/CallKit/tweak/a.m"] = "source changed"
@@ -839,6 +850,8 @@ local function test_cache()
         check(name .. " moves its key when a Backports source changes", declared_key(name, moved_source) ~= declared_key(name, sample), true)
     end
     check("comments moves its key when a source it scans changes", declared_key("comments", moved_code) ~= declared_key("comments", sample), true)
+    check("comments moves its key when the worktree attributes change", declared_key("comments", moved_attributes) ~= declared_key("comments", sample), true)
+    check("the attributes are not part of an unrelated check's key", declared_key("open_gaps", moved_attributes), declared_key("open_gaps", sample))
 
     io.writefile(path.join(repo, "c.txt"), "new\n")
     check("an untracked file changes the key of a step that reads everything", key(everything) ~= base_keys.everything, true)
@@ -964,6 +977,15 @@ local function test_cache()
 
     local record = {seconds = "12", worktree = "w", head = "0123456789abcdef", at = os.time() - 120}
     check("a verdict names where and when it was made", provenance(record), "ran 12 s in w at 012345678, 2 min ago")
+    check("an age takes a fractional time", age_of(os.time() - 12.1), "12 s ago")
+    check("an age takes a time in the future", age_of(os.time() + 30), "0 s ago")
+    local fractional_store = path.join(base, "fractional-store")
+    local fractional_step = {name = "fractional"}
+    remembered(fractional_store, fractional_step, "key", {seconds = "1", worktree = "w", head = "h", at = os.time() - 12 + 0.5})
+    local fractional = recalled(fractional_store, fractional_step, "key")
+    check("a fractional time is stored as a whole second", fractional.at:find("%.", 1, true), nil)
+    check("a fractional time in a memo record is shown as an age", provenance(fractional), "ran 1 s in w at h, 12 s ago")
+    check("a fractional addition to a whole time is shown as an age", age_of(tonumber(fractional.at) + 0.1), "12 s ago")
 
     os.rm(base)
     print("prepush cache: %d tests passed", count)

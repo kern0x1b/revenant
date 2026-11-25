@@ -357,8 +357,9 @@ function remembered(store, name, key, record, keep)
     local folder = path.join(store, slug(name))
     os.mkdir(folder)
     local lines = {"verdict ok"}
+    local at = math.floor(tonumber(record.at) or os.time())
     for _, field in ipairs({"seconds", "worktree", "head", "at"}) do
-        table.insert(lines, field .. " " .. tostring(record[field]))
+        table.insert(lines, field .. " " .. (field == "at" and tostring(at) or tostring(record[field])))
     end
     local temporary = path.join(folder, key .. ".tmp." .. hash.uuid())
     io.writefile(temporary, table.concat(lines, "\n") .. "\n")

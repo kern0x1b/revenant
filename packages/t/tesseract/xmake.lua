@@ -7,6 +7,7 @@ package("tesseract")
         add_configs("debug", {description = "Build in the Debug configuration, which the debug mode of the project asks for.", default = true, readonly = true})
     end
     set_policy("package.strict_compatibility", true)
+    set_policy("package.links_dependencies", true)
 
     add_urls("https://github.com/tesseract-ocr/tesseract.git")
     add_versions("5.5.3", "db0ec62f81b0737fbbe184d8fea40af5738f8eef")
