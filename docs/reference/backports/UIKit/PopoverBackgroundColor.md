@@ -17,6 +17,11 @@ own keeps it; the color is then only stored.
 - The color is drawn when a popover is next presented. A popover already on screen keeps the background it was presented with.
 - `popoverBackgroundViewClass` reads back the class the backports made, not `nil`.
 - The radius and the arrow's size are chosen, not measured on a later system.
+- The class does not override `+wantsDefaultContentAppearance`, so UIKit keeps drawing its own content inset and shadow inside the
+  popover, as the header of `UIPopoverBackgroundView` says.
+- The content view insets are zero: opaque content reaches the edges of the body and hides the color there.
+- A class and its color are kept for the life of the process, one for each different color; an application that animates the color
+  makes a class for every step.
 - `UIPopoverPresentationController.backgroundColor` (iOS 8) is stored and still not drawn.
 
 ## Tests
@@ -24,5 +29,6 @@ own keeps it; the color is then only stored.
 `frameworks/Backports/tests/UIKit/popover_arrow_test.m` (host, target `UIKitBackports_popover_arrow_test`) checks the shape for each
 arrow direction; the negative run fails. `frameworks/Backports/tests/runtime/cases/popover_controller_background_color.m` runs on
 the iOS 6.1.3 userland of an iPhone in the emulator, where a popover cannot be initialised: it sends the members to an allocated
-`UIPopoverController`, so UIKit's own setter takes the class, and lays out the background view itself. Before this change the run
-aborted on the stub. How the popover looks on an iPad has not been seen.
+`UIPopoverController`, so UIKit's own setter takes the class, and lays out the background view itself: the fill color, points inside
+and beside the arrow, and the arrow after a new offset and direction. Before this change the run aborted on the stub, and with the
+arrow left out of the path the arrow checks fail. How the popover looks on an iPad has not been seen.

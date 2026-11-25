@@ -37,24 +37,59 @@
 }
 @end
 
-static NSString *revenant_drawn(Class background, UIColor *color)
+static CAShapeLayer *revenant_shape(UIView *view)
+{
+    for (CALayer *layer in view.layer.sublayers) {
+        if ([layer isKindOfClass:[CAShapeLayer class]])
+            return (CAShapeLayer *)layer;
+    }
+    return nil;
+}
+
+static BOOL revenant_covers(UIView *view, CGFloat x, CGFloat y)
+{
+    CAShapeLayer *shape = revenant_shape(view);
+    return shape.path && CGPathContainsPoint(shape.path, NULL, CGPointMake(x, y), false);
+}
+
+static UIPopoverBackgroundView *revenant_laid_out(Class background)
 {
     UIPopoverBackgroundView *view = [[background alloc] initWithFrame:CGRectMake(0, 0, 320, 253)];
     view.arrowDirection = UIPopoverArrowDirectionUp;
     view.arrowOffset = 0;
     [view layoutIfNeeded];
-    for (CALayer *layer in view.layer.sublayers) {
-        if (![layer isKindOfClass:[CAShapeLayer class]])
-            continue;
-        CAShapeLayer *shape = (CAShapeLayer *)layer;
-        if (!CGColorEqualToColor(shape.fillColor, color.CGColor))
-            return @"filled with another color";
-        CGRect box = CGPathGetPathBoundingBox(shape.path);
-        if (fabs(box.origin.x) > 0.5 || fabs(box.origin.y) > 0.5 || fabs(box.size.width - 320) > 0.5 || fabs(box.size.height - 253) > 0.5)
-            return [NSString stringWithFormat:@"covers %@", NSStringFromCGRect(box)];
-        return @"drawn";
-    }
-    return @"no shape";
+    return view;
+}
+
+static NSString *revenant_drawn(Class background, UIColor *color)
+{
+    UIPopoverBackgroundView *view = revenant_laid_out(background);
+    CAShapeLayer *shape = revenant_shape(view);
+    if (!shape)
+        return @"no shape";
+    if (!CGColorEqualToColor(shape.fillColor, color.CGColor))
+        return @"filled with another color";
+    CGRect box = CGPathGetPathBoundingBox(shape.path);
+    if (fabs(box.origin.x) > 0.5 || fabs(box.origin.y) > 0.5 || fabs(box.size.width - 320) > 0.5 || fabs(box.size.height - 253) > 0.5)
+        return [NSString stringWithFormat:@"covers %@", NSStringFromCGRect(box)];
+    if (!revenant_covers(view, 160, 120) || !revenant_covers(view, 160, 2) || revenant_covers(view, 20, 2))
+        return @"no arrow in the middle of the top";
+    return @"drawn";
+}
+
+static NSString *revenant_moved(Class background)
+{
+    UIPopoverBackgroundView *view = revenant_laid_out(background);
+    view.arrowOffset = 40;
+    [view layoutIfNeeded];
+    if (!revenant_covers(view, 200, 2) || revenant_covers(view, 160, 2))
+        return @"the arrow did not follow the offset";
+    view.arrowDirection = UIPopoverArrowDirectionLeft;
+    view.arrowOffset = -30;
+    [view layoutIfNeeded];
+    if (!revenant_covers(view, 2, 96) || revenant_covers(view, 2, 20) || !revenant_covers(view, 200, 2))
+        return @"the arrow did not follow the direction";
+    return @"moved";
 }
 
 REVENANT_CASE(popover_controller_background_color)
@@ -75,6 +110,8 @@ REVENANT_CASE(popover_controller_background_color)
                          (first && [first arrowBase] > 0 && [first arrowHeight] > 0) != (BOOL)negative, @"no arrow");
     NSString *drawn = first ? revenant_drawn(first, red) : @"no class";
     revenant_expect_true(@"its view fills the body and the arrow with the color", [drawn isEqualToString:@"drawn"] != (BOOL)negative, drawn);
+    NSString *moved = first ? revenant_moved(first) : @"no class";
+    revenant_expect_true(@"the arrow follows a new offset and direction", [moved isEqualToString:@"moved"] != (BOOL)negative, moved);
 
     popover.backgroundColor = blue;
     Class second = popover.popoverBackgroundViewClass;
