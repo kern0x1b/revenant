@@ -32,7 +32,9 @@ moves. The patch declares `Changes-build-output: no`, which keeps it out of the 
 - Under `whole`, where the root project asks `libcxx` to be `packaged`, every dependent of `libcxx` gets a key of its
   own and is built once.
 - Two projects that name different iPhoneOS SDKs still share the keys of what depends on `apple-compat` and reinstall
-  it by turns, because `apple_sdk` has no default.
+  it by turns, because `apple_sdk` has no default. A machine builds with one SDK today. If a second SDK appears, the
+  term takes the configurations with no default as well; that moves the keys of what depends on `apple-compat` once
+  (45 of the 189 rows of the key snapshot of 2026-11-25).
 - The hash is computed again after the dependencies are loaded, which is after `on_load`. A recipe that reads
   `package:buildhash()` or `package:installdir()` in `on_load` sees the value without the term; `swift-runtime` takes
   its link mark there, so a runtime built against another `libcxx` than it asks for carries the mark of the plain one.
