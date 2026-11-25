@@ -32,9 +32,9 @@ end
 local function duration(seconds)
     seconds = math.max(0, seconds)
     if seconds < 90 then
-        return string.format("%d s", seconds)
+        return string.format("%.0f s", seconds)
     elseif seconds < 5400 then
-        return string.format("%d min", seconds // 60)
+        return string.format("%.0f min", seconds // 60)
     end
     return string.format("%.1f h", seconds / 3600)
 end
@@ -189,7 +189,7 @@ local function capacity(reading, held, own)
     local cpu = math.max(0, limit - load)
     local fresh = math.min(headroom, limit - held)
     if cpu < fresh then
-        fresh = math.max(1, cpu)
+        fresh = math.max(1, math.floor(cpu))
     end
     return held + fresh
 end
@@ -211,8 +211,8 @@ end
 
 local function tokens_wanted(opt, cores)
     local limit = cores - RESERVE_CORES
-    local minimum = math.max(opt.min or 1, math.ceil((opt.mb or 0) / TOKEN_MB))
-    local maximum = math.max(opt.jobs or minimum, minimum)
+    local minimum = math.max(math.floor(opt.min or 1), math.ceil((opt.mb or 0) / TOKEN_MB))
+    local maximum = math.max(math.floor(opt.jobs or minimum), minimum)
     return math.min(minimum, limit), math.min(maximum, limit)
 end
 
@@ -761,7 +761,7 @@ local function await_grant(folder, ticket, class, minimum, maximum, reading_fn, 
                 for _, entry in ipairs(taken) do
                     publish_slot(entry, 1, who)
                 end
-                record_wait(folder, class, count, math.max(0, (os.mclock() - started) // 1000), who or {pid = os.getpid(), worktree = checkout_dir(), command = "", at = os.time()})
+                record_wait(folder, class, count, math.max(0, math.floor((os.mclock() - started) / 1000)), who or {pid = os.getpid(), worktree = checkout_dir(), command = "", at = os.time()})
                 leave(ticket)
                 return taken
             end
@@ -775,7 +775,19 @@ local function await_grant(folder, ticket, class, minimum, maximum, reading_fn, 
             marked = true
         end
         if not announced or os.mclock() - announced > announce then
-            say("%s", waiting_text(folder, minimum, class, announced ~= nil))
+            local again = announced ~= nil
+            local text, failure
+            try {
+                function () text = waiting_text(folder, minimum, class, again) end,
+                catch { function (errors) failure = tostring(errors):gsub("%s+", " ") end }
+            }
+            if failure then
+                journal_failure(folder, string.format("at %d the waiting announcement failed: %s", os.time(), failure))
+                say("budget: %s for %s token(s), %s class; the holder details could not be read",
+                    again and "still waiting" or "waiting", tostring(minimum), tostring(class))
+            else
+                say("%s", text)
+            end
             announced = os.mclock()
         end
         os.sleep(poll_ms)
@@ -938,7 +950,7 @@ local function status()
     say("pool      %s", folder)
     say("cores     %d (reserve %d)", cores, RESERVE_CORES)
     say("cpu       %.2f loadavg, %.2f effective load, %d runnable of holders, %d token(s) of headroom",
-        reading.loadavg, load, own, math.max(0, cores - RESERVE_CORES - load))
+        reading.loadavg, load, own, math.max(0, math.floor(cores - RESERVE_CORES - load)))
     say("memory    pressure %d, %d MB available (memorystatus %d%%), %d token(s) of headroom", reading.pressure,
         math.floor(reading.available), reading.level or 0, (memory_headroom(reading)))
     say("held      %d token(s)", held)
@@ -1101,6 +1113,12 @@ local function test_suite()
           catch { function (raised) bad_sysctl = tostring(raised) end } }
     check("an unparseable sysctl answer raises instead of becoming zero", bad_sysctl ~= nil, true)
 
+    check("a fractional wait under a minute is shown in whole seconds", duration(12.5), "12 s")
+    check("a fractional wait over a minute is shown in whole minutes", duration(95.5), "1 min")
+    check("a fractional wait below the hour is still shown in minutes", duration(5399.9), "89 min")
+    check("a fractional wait past the hour is shown in hours", duration(7200.5), "2.0 h")
+    check("a negative wait is shown as none", duration(-12.5), "0 s")
+
     local vmtext = "Mach Virtual Memory Statistics: (page size of 16384 bytes)\n" ..
                    "Pages free:                  65536.\n" ..
                    "Pages inactive:            9999999.\n" ..
@@ -1129,6 +1147,8 @@ local function test_suite()
     check("a 4 KB compressor burst below the byte rate does not clamp", memory_headroom(test_reading(0, 1, 11000, {size = 4096, previous = small_pages, compressor = small_pages.compressor + 65536, at = 1000})), 5)
     check("a machine below the reserve still starts one token", memory_headroom(test_reading(0, 1, 100, {speculative = 100})), 1)
 
+    check("a fractional free cpu grants whole slots only", capacity(test_reading(0, 1, 11000, {load = 8.5}), 0, 0), 1)
+    check("a fractional free cpu cannot make a fractional grant", capacity(test_reading(0, 1, 11000, {load = 1.75}), 0, 0) % 1, 0)
     check("runnable load bounds the jobs", capacity(test_reading(8, 1, 11000), 3, 0), 5)
     check("a holder with no runnable children does not add load", capacity(test_reading(8, 1, 11000), 0, 0), 2)
     check("more runnable holders than load gives no extra headroom", capacity(test_reading(5, 1, 11000), 2, 9), 3)
@@ -1177,6 +1197,8 @@ local function test_suite()
     check("a 2.2 GB class takes two tokens and at most its jobs", minimum .. "/" .. maximum, "2/4")
     minimum, maximum = tokens_wanted({jobs = 14}, 12)
     check("the request is clamped to the cores less the reserve", minimum .. "/" .. maximum, "1/10")
+    minimum, maximum = tokens_wanted({min = 1.5, jobs = 3.7}, 12)
+    check("a fractional request is rounded to whole tokens", minimum .. "/" .. maximum, "1/3")
 
     check("a 60 GB floor refuses a 50 GB volume", disk_refused(50, 100), true)
     check("a volume at the floor is not refused", disk_refused(100, 100), false)
@@ -1709,7 +1731,7 @@ local function test_suite()
         local everything = tostring(math.max(1, os.cpuinfo("ncpu") - RESERVE_CORES))
         local waiter_log = path.join(base, "waiter.log")
         local who_waiter = process.openv(os.programfile(), {"l", "-P", project, script, "run", "--class", "critical", "--jobs", everything, "--min", everything, "--", "/usr/bin/true"},
-            {outpath = waiter_log, errpath = waiter_log, envs = {"REVENANT_BUDGET_POOL=" .. who_pool, no_floor}})
+            {outpath = waiter_log, errpath = waiter_log, envs = {"REVENANT_BUDGET_POOL=" .. who_pool, no_floor, "REVENANT_BUDGET_ANNOUNCE_S=0"}})
         deadline = os.mclock() + 30000
         while #waiters(who_pool) < 1 and os.mclock() < deadline do
             os.sleep(300)
@@ -1723,12 +1745,15 @@ local function test_suite()
         check("the line for a waiter has its pid, class, worktree and command", waiting_line:find("pid " .. tostring(waiting[1] and waiting[1].pid), 1, true) ~= nil
               and waiting_line:find("critical class", 1, true) ~= nil and waiting_line:find(project, 1, true) ~= nil and waiting_line:find("/usr/bin/true", 1, true) ~= nil, true)
         deadline = os.mclock() + 30000
-        while not (io.readfile(waiter_log) or ""):find("held by:", 1, true) and os.mclock() < deadline do
+        while not ((io.readfile(waiter_log) or ""):find("held by:", 1, true)
+                   and (io.readfile(waiter_log) or ""):find("budget: still waiting for", 1, true)) and os.mclock() < deadline do
             os.sleep(300)
         end
         local announced = io.readfile(waiter_log) or ""
         check("a request that waits has said so in its log while it still waits, naming the holder's pid and command", announced:find("budget: waiting for", 1, true) ~= nil
               and announced:find("pid " .. tostring(named[1] and named[1].pid) .. " holds", 1, true) ~= nil and announced:find("/bin/sleep 40", 1, true) ~= nil, true)
+        check("a request that keeps waiting says so again without dying", announced:find("budget: still waiting for", 1, true) ~= nil
+              and #waiters(who_pool) == 1, true)
         who_waiter:kill()
         who_holder:kill()
         deadline = os.mclock() + 10000
