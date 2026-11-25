@@ -657,7 +657,12 @@ environment of the test does not reach it.
   sorts before the other classes, so a waiting `normal` or `background` request does not hold a `critical` one back until
   it has aged. A request that has waited longer than `REVENANT_BUDGET_AGING_S` (300 s by default) marks its ticket aged
   (`queue/<ticket file>.aged`, for example `queue/2-1795448408073-26455490.ticket.aged`); an aged ticket stands before every ticket that has not aged, `critical` ones included, and
-  blocks them by the same rule as any earlier ticket, until it starts; among aged tickets the order above holds. This is
+  blocks them until it starts, whatever the memory headroom now is, as long as its minimum fits the cores of the pool
+  (the cores less the two reserved): the memory room that decides the rule above shrinks and grows with the very holders
+  the stream keeps starting, so with less than two tokens of free memory a stream of requests for one token passed an aged
+  request for two for 46 minutes (2026-11-23). On an empty pool an aged ticket is granted its minimum when memory headroom
+  is at least one token, short of the minimum the ordinary guarantee asks for; critical memory pressure still makes it
+  wait. Among aged tickets the order above holds. This is
   what keeps a stream of `critical` requests for one token from starving a request for two. The marker goes with its
   ticket, also when the ticket's process died. The marker's name does not end in `.ticket`, because a client of an earlier
   version walks `queue/*.ticket`, takes every file there for a ticket and removes the ones without a holder: it removed
