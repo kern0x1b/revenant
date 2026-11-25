@@ -1,11 +1,12 @@
 diff -ru a/ios/BlurEffectView.swift b/ios/BlurEffectView.swift
 --- a/ios/BlurEffectView.swift
 +++ b/ios/BlurEffectView.swift
-@@ -1,66 +1,168 @@
+@@ -1,66 +1,199 @@
  // Copyright 2015-present 650 Industries. All rights reserved.
  
  import UIKit
 +import CoreImage
++import OpenGLES
 +import QuartzCore
  import ExpoModulesCore
  
@@ -50,7 +51,8 @@ diff -ru a/ios/BlurEffectView.swift b/ios/BlurEffectView.swift
 -  private var animator: UIViewPropertyAnimator?
 +  private let snapshot = UIImageView()
 +  private let overlay = UIView()
-+  private let context = CIContext(options: nil)
++  private var renderer: (gl: EAGLContext, image: CIContext)?
++  private var inBackground = UIApplication.shared.applicationState == .background
 +  private let target = WeakTarget()
 +  private var link: CADisplayLink?
 +  private var refreshing = false
@@ -77,6 +79,7 @@ diff -ru a/ios/BlurEffectView.swift b/ios/BlurEffectView.swift
 -    animator?.stopAnimation(true)
 +    NotificationCenter.default.removeObserver(self)
 +    link?.invalidate()
++    releaseRenderer()
    }
  
 -  override func draw(_ rect: CGRect) {
@@ -101,29 +104,66 @@ diff -ru a/ios/BlurEffectView.swift b/ios/BlurEffectView.swift
 +    lastBitmap = nil
 +    startTimer()
 +  }
-+
+ 
+-    effect = nil
+-    animator?.stopAnimation(true)
+-    animator = UIViewPropertyAnimator(duration: 1, curve: .linear) { [unowned self] in
+-      self.effect = visualEffect
 +  private func startTimer() {
-+    guard window != nil, link == nil else {
++    guard window != nil, link == nil, !inBackground else {
 +      return
-+    }
+     }
+-    animator?.fractionComplete = CGFloat(intensity)
 +    let next = CADisplayLink(target: target, selector: #selector(WeakTarget.tick))
 +    next.frameInterval = 6
 +    next.add(to: .main, forMode: .common)
 +    link = next
 +    refresh()
-+  }
-+
+   }
+-}
+ 
+-private func isDetoxPresent() -> Bool {
+-  let args = ProcessInfo.processInfo.arguments
 +  private func stopTimer() {
 +    link?.invalidate()
 +    link = nil
 +  }
-+
+ 
+-  return args.contains("-detoxServer") && args.contains("-detoxSessionId")
 +  @objc private func applicationDidEnterBackground() {
++    inBackground = true
 +    stopTimer()
++    releaseRenderer()
 +  }
 +
 +  @objc private func applicationDidBecomeActive() {
++    inBackground = false
++    lastBitmap = nil
 +    startTimer()
++  }
++
++  // iOS kills an application that is suspended while its OpenGL work holds the shader cache (0xdead10cc).
++  private func releaseRenderer() {
++    guard let gl = renderer?.gl else {
++      return
++    }
++    let previous = EAGLContext.current()
++    EAGLContext.setCurrent(gl)
++    glFinish()
++    renderer = nil
++    EAGLContext.setCurrent(previous === gl ? nil : previous)
++  }
++
++  private func render(_ output: CIImage, from extent: CGRect) -> CGImage? {
++    if renderer == nil, let gl = EAGLContext(api: .openGLES2) {
++      renderer = (gl, CIContext(eaglContext: gl))
++    }
++    guard let renderer = renderer else {
++      return nil
++    }
++    let previous = EAGLContext.current()
++    defer { EAGLContext.setCurrent(previous) }
++    return renderer.image.createCGImage(output, from: extent)
 +  }
 +
 +  private static func transform(of layer: CALayer, to destination: CALayer) -> CGAffineTransform {
@@ -138,16 +178,11 @@ diff -ru a/ios/BlurEffectView.swift b/ios/BlurEffectView.swift
 +    }
 +    return result
 +  }
- 
--    effect = nil
--    animator?.stopAnimation(true)
--    animator = UIViewPropertyAnimator(duration: 1, curve: .linear) { [unowned self] in
--      self.effect = visualEffect
++
 +  fileprivate func refresh() {
-+    guard !refreshing, let window = window, let host = superview, bounds.width > 0, bounds.height > 0 else {
++    guard !refreshing, !inBackground, let window = window, let host = superview, bounds.width > 0, bounds.height > 0 else {
 +      return
-     }
--    animator?.fractionComplete = CGFloat(intensity)
++    }
 +    refreshing = true
 +    defer { refreshing = false }
 +    let rect = host.convert(host.bounds, to: window)
@@ -188,17 +223,11 @@ diff -ru a/ios/BlurEffectView.swift b/ios/BlurEffectView.swift
 +    blur.setValue(clamp.outputImage, forKey: kCIInputImageKey)
 +    blur.setValue(radius, forKey: kCIInputRadiusKey)
 +    guard let output = blur.outputImage,
-+          let blurred = context.createCGImage(output, from: input.extent) else {
++          let blurred = render(output, from: input.extent) else {
 +      return
 +    }
 +    snapshot.image = UIImage(cgImage: blurred, scale: BlurEffectView.renderScale, orientation: .up)
-   }
--}
--
--private func isDetoxPresent() -> Bool {
--  let args = ProcessInfo.processInfo.arguments
--
--  return args.contains("-detoxServer") && args.contains("-detoxSessionId")
++  }
  }
  
  /**
