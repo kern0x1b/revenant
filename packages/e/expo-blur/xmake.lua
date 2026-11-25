@@ -1,13 +1,13 @@
 package("expo-blur")
     set_kind("library", {headeronly = true})
     set_homepage("https://github.com/expo/expo/tree/main/packages/expo-blur")
-    set_description("expo-blur 57.0.3, the blur view of the Expo SDK, from its npm tarball: the Swift sources of its iOS half with UIVisualEffectView (iOS 8) replaced by a Core Image Gaussian blur of a snapshot of the window behind the view, taken at a quarter of the resolution and refreshed ten times a second while the view is on screen, so that they run on iOS 6")
+    set_description("expo-blur 57.0.3, the blur view of the Expo SDK, from its npm tarball: the Swift sources of its iOS half with UIVisualEffectView (iOS 8) replaced by a Core Image Gaussian blur of a snapshot of the window behind the view, taken at a quarter of the resolution and refreshed ten times a second while the view is on screen, with its OpenGL context finished and released while the application is in the background, so that they run on iOS 6")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
 
     add_urls("https://registry.npmjs.org/expo-blur/-/expo-blur-$(version).tgz")
     add_versions("57.0.3", "b9e528965684e8e7fc90cae2e06399088091b89c84ab05eb3e809f69f82f29df")
-    add_patches("57.0.3", path.join(os.scriptdir(), "patches", "blur-ios6.patch"), "7ef441bd684bf2540bc99695d1efc0314496f4b6dd7b6037e93dec42a80a0a9f")
+    add_patches("57.0.3", path.join(os.scriptdir(), "patches", "blur-ios6.patch"), "6fabf5082b9d434cd3891ad51943af7e3bd7a787759903b849c4fec76f3b3cbc")
 
     on_install(function (package)
         os.cp("*", package:installdir() .. "/")
