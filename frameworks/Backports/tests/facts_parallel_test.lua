@@ -69,6 +69,7 @@ end
 local function computed(sdk, shards)
     local file = path.join(sdkfiles.cache_folder(sdk), "constant_intros.tsv")
     os.tryrm(file)
+    os.tryrm(sdkfiles.shared_store_file(sdk, "constant_intros.tsv"))
     local report = {}
     local intros = facts.constant_intros(sdk, {shards = shards, report = report})
     assert(os.isfile(file), "the constant intros of " .. tostring(shards) .. " shards were not cached")

@@ -110,7 +110,10 @@ function ready(sdk, version, logs, names)
         local missing = {}
         for _, name in ipairs(names) do
             if not os.isfile(path.join(cache, name .. ".tsv")) then
-                table.insert(missing, name)
+                sdkfiles.shared_file(sdk, name .. ".tsv")
+                if not os.isfile(path.join(cache, name .. ".tsv")) then
+                    table.insert(missing, name)
+                end
             end
         end
         os.tryrm(path.join(sdkfiles.build_root(), "cache"))

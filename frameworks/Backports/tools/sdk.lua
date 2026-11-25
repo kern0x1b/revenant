@@ -84,7 +84,7 @@ end
 
 local FACTS = {"ast.lua", "facts.lua", "public.lua", "sdk.lua"}
 
-local FACTS_EXTERNAL = {["async.runjobs"] = true, ["core.base.json"] = true, ["@addon.revenant.workspace"] = true, ["@addon.revenant.retention"] = true}
+local FACTS_EXTERNAL = {["async.runjobs"] = true, ["core.base.json"] = true, ["@addon.revenant.workspace"] = true, ["@addon.revenant.retention"] = true, ["@addon.revenant.analysis_cache"] = true}
 
 function facts_files()
     return table.clone(FACTS)
@@ -250,20 +250,53 @@ function cache_folder(sdk)
     return path.join(shared_root(), cache_key(sdk))
 end
 
+local analysis = nil
+
+local function shared()
+    if analysis == nil then
+        analysis = import("@addon.revenant.analysis_cache", {anonymous = true})
+    end
+    return analysis
+end
+
+function shared_folder(sdk)
+    return path.join("backports", cache_key(sdk))
+end
+
+function shared_file(sdk, name)
+    return shared().shared_file(shared_folder(sdk), name)
+end
+
+function write_shared(sdk, name, text)
+    return shared().write_shared(shared_folder(sdk), name, text)
+end
+
+function shared_store_file(sdk, name)
+    return path.join(shared().store_root(), shared_folder(sdk), name)
+end
+
 function clean_field(value)
     return (tostring(value or ""):gsub("[\t\n]", " "))
 end
 
-function write_rows(file, module, rows)
+local function rows_text(module, rows)
     local lines = {}
     for _, row in ipairs(rows) do
         table.insert(lines, table.concat({clean_field(module), clean_field(row.kind), clean_field(row.container),
             clean_field(row.name), clean_field(row.symbol), clean_field(row.signature), row.intro and tostring(row.intro) or "",
             clean_field(row.flags)}, "\t"))
     end
+    return table.concat(lines, "\n") .. (#lines > 0 and "\n" or "")
+end
+
+function write_rows(file, module, rows)
     local temp = file .. "." .. hash.strhash128(tostring({}) .. file) .. ".part"
-    io.writefile(temp, table.concat(lines, "\n") .. (#lines > 0 and "\n" or ""))
+    io.writefile(temp, rows_text(module, rows))
     os.mv(temp, file)
+end
+
+function write_facts(sdk, name, rows)
+    return write_shared(sdk, name .. ".tsv", rows_text(name, rows))
 end
 
 function read_rows(file)

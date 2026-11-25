@@ -211,7 +211,7 @@ function extract(sdk, version, cache, logs, name)
             table.insert(rows, row)
         end
     end
-    sdkfiles.write_rows(path.join(cache, name .. ".tsv"), name, rows)
+    sdkfiles.write_facts(sdk, name, rows)
 end
 
 local CONSTANT_SHARDS = 4
@@ -367,6 +367,7 @@ function constant_intros(sdk, opt)
         opt.report.pids = pids
     end
     local file = path.join(sdkfiles.cache_folder(sdk), "constant_intros.tsv")
+    sdkfiles.shared_file(sdk, "constant_intros.tsv")
     if os.isfile(file) then
         local cached = {}
         for line in io.lines(file) do
@@ -396,10 +397,7 @@ function constant_intros(sdk, opt)
         table.insert(rows, string.format("%s\t%s\t%s", name, found.intro and tostring(found.intro) or "", found.kind))
     end
     table.sort(rows)
-    os.mkdir(path.directory(file))
-    local temp = file .. "." .. hash.strhash128(tostring({}) .. file) .. ".part"
-    io.writefile(temp, table.concat(rows, "\n") .. (#rows > 0 and "\n" or ""))
-    os.mv(temp, file)
+    sdkfiles.write_shared(sdk, "constant_intros.tsv", table.concat(rows, "\n") .. (#rows > 0 and "\n" or ""))
     return intros
 end
 

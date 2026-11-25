@@ -40,7 +40,7 @@ local function check(base)
     for _ in text:gmatch("facts extraction") do
         extractions = extractions + 1
     end
-    assert(extractions == 1, "expected exactly one process to extract the facts, got " .. extractions .. ":\n" .. text)
+    assert(extractions <= 1, "more than one process extracted the facts of one key, got " .. extractions .. ":\n" .. text)
     for _, name in ipairs(NAMES) do
         local file = path.join(cache, name .. ".tsv")
         assert(os.isfile(file), name .. " has no facts file")
