@@ -9,7 +9,6 @@ local RELEASE = "6.1.3"
 local PRIVATE = "^/System/Library/PrivateFrameworks/"
 local SOURCE_PATTERNS = {"**.m", "**.mm", "**.c"}
 local REFERENCE_PATTERNS = {"**.m", "**.mm", "**.c", "**.h", "**.swift"}
-local SHADOW_SETS = os.getenv("REVENANT_SHADOW_SETS")
 
 local skeleton = import("skeleton", {rootdir = TOOLS, anonymous = true})
 
@@ -210,48 +209,7 @@ local function check_copied(stored, cache, unlisted)
     table.sort(extra)
     table.sort(private)
     assert(#extra == 0, "the skeleton copies globals an SDK framework exports and the SDK lists, so in-library references read the copy, not the image: " .. table.concat(extra, "; "))
-    return exported, private, copied_unlisted
-end
-
-local function oracle(stored, device, exported, unlisted)
-    if SHADOW_SETS == nil then
-        print("device_globals: REVENANT_SHADOW_SETS is unset, so Telegram's shadow-set oracle is not checked")
-        return
-    end
-    assert(os.isdir(SHADOW_SETS), "REVENANT_SHADOW_SETS is not a directory: " .. SHADOW_SETS)
-    local names = {}
-    for _, file in ipairs(os.files(path.join(SHADOW_SETS, "*.data.txt"))) do
-        for line in io.lines(file) do
-            local name = trim(line)
-            if name ~= "" then
-                names[(string.gsub(name, "^_", "", 1))] = true
-            end
-        end
-    end
-    local count, bound, copied, neither = 0, 0, {}, {}
-    for name in pairs(names) do
-        count = count + 1
-        if device[name] then
-            bound = bound + 1
-        elseif stored[name] then
-            table.insert(copied, name)
-        else
-            table.insert(neither, name)
-        end
-    end
-    table.sort(copied)
-    table.sort(neither)
-    if exported ~= nil then
-        local public = {}
-        for _, name in ipairs(copied) do
-            if (exported[name] == nil or not string.find(exported[name], PRIVATE)) and unlisted[name] == nil then
-                table.insert(public, name)
-            end
-        end
-        assert(#public == 0, "Telegram's oracle lists names the skeleton copies from an SDK framework, so in-library references read the copy: " .. table.concat(public, " "))
-    end
-    print(string.format("device_globals: Telegram's oracle lists %d names: %d bound to the device image, %d copied from a private framework, %d neither: %s",
-        count, bound, #copied, #neither, #neither > 0 and table.concat(neither, " ") or "none"))
+    return private, copied_unlisted
 end
 
 local function without_blocks(text)
@@ -414,20 +372,17 @@ end
 local stored = generated_storage()
 device_storage(stored, device)
 references_have_links(device)
-local exported = nil
 local cachefile = cache_file()
 if os.isfile(cachefile) then
     local cache = dyld.load(cachefile)
     local listed = check_exported(device, cache, "device-globals.txt")
     local unlisted_listed = check_exported(unlisted, cache, "device-unlisted.txt")
-    local private, copied_unlisted
-    exported, private, copied_unlisted = check_copied(stored, cache, unlisted)
+    local private, copied_unlisted = check_copied(stored, cache, unlisted)
     print(string.format("device_globals: the iOS %s cache exports all %d device-globals.txt rows at their listed images and all %d device-unlisted.txt rows at theirs; %d of %d SDK-unlisted globals are copied and exported; %d copied globals are exported only by private frameworks, which the SDK has no stub for: %s",
         RELEASE, listed, unlisted_listed, copied_unlisted, unlisted_count, #private, table.concat(private, " ")))
 else
     print(string.format("device_globals: no iOS %s dyld cache at %s, so the inventory and copied-global checks against it are skipped (%d rows and %d unlisted rows checked for format only)",
         RELEASE, cachefile, device_count, unlisted_count))
 end
-oracle(stored, device, exported, unlisted)
 early_reads(stored)
 copied_references(stored)

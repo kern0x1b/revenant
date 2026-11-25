@@ -332,7 +332,7 @@ function main()
     local task_log = path.join(out, "task.log")
     io.writefile(task_file, task_consumer(declared_tasks[1].version, true))
     if not run(compiler, table.join(using, {"-typecheck", task_file}), task_log) then
-        raise("a use of translationTask and TranslationSession the way Telegram's translation view does it does not typecheck against the shim: %s", io.readfile(task_log) or "")
+        raise("a use of translationTask and TranslationSession from a translation view does not typecheck against the shim: %s", io.readfile(task_log) or "")
     end
     local task_unguarded = path.join(out, "task_unguarded.swift")
     local task_unguarded_log = path.join(out, "task_unguarded.log")

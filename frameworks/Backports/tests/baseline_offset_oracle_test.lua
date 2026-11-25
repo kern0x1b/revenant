@@ -32,7 +32,7 @@ function main()
     assert(drawn:find("CT-LAYOUT all-equal=1", 1, true),
         "the CoreText backport's layout model does not match the host's CoreText:\n" .. drawn)
     assert(drawn:find("CT-BOUNDS all-equal=1", 1, true),
-        "the CoreText backport's bounds do not match the host's CoreText for the options Telegram passes:\n" .. drawn)
+        "the CoreText backport's bounds do not match the host's CoreText for the options it is drawn with:\n" .. drawn)
     local publication = path.join(work, "coretext_publication")
     os.vrunv(clang(), {"-DREVENANT_ASSUME_OFFSET_IGNORED", "-isysroot", sdk, "-fobjc-arc", "-w", "-I", path.join(BACKPORTS, "src", "CoreText"),
                        "-framework", "Foundation", "-framework", "CoreText", "-framework", "CoreGraphics", "-o", publication, CORETEXT, CORETEXT_PUBLICATION})
