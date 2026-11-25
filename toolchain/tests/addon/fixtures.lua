@@ -62,6 +62,17 @@ function scratch()
     return import("@addon.revenant.workspace", {anonymous = true}).fresh("tests")
 end
 
+function owner_loop(pidfile, name)
+    os.execv("/bin/sh", {"-c", "echo $$ > \"$1\"; while kill -0 \"$2\" 2>/dev/null; do sleep 1; done", name, pidfile, tostring(os.getpid())}, {detach = true})
+    for _ = 1, 100 do
+        if os.isfile(pidfile) and #io.readfile(pidfile):trim() > 0 then
+            break
+        end
+        os.sleep(100)
+    end
+    return tonumber(io.readfile(pidfile):trim())
+end
+
 function filenames()
     local folder = scratch()
     local count = 0

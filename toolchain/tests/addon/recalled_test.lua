@@ -1,3 +1,4 @@
+import("core.base.process")
 import("fixtures")
 
 local LINE = "recalled light suites memo (ran 297 s in w at 0123456789, 3 min ago)"
@@ -39,15 +40,34 @@ function failures(opt)
         return nonce .. "@" .. file
     end
 
-    local pidfile = path.join(home, "owner.pid")
-    os.execv("/bin/sh", {"-c", "echo $$ > \"$1\"; while :; do sleep 1; done", "ci_local.lua", pidfile}, {detach = true})
-    for _ = 1, 100 do
-        if os.isfile(pidfile) and #io.readfile(pidfile):trim() > 0 then
+    local interrupted = path.join(home, "interrupted.pid")
+    local script = path.join(home, "interrupted.lua")
+    io.writefile(script, string.format("function main()\n    import(\"fixtures\", {rootdir = %q, anonymous = true}).owner_loop(%q, \"ci_local.lua\")\n    os.sleep(60000)\nend\n", os.scriptdir(), interrupted))
+    local child = process.openv(os.programfile(), {"l", script}, {stdout = os.nul, stderr = os.nul})
+    local loop
+    for _ = 1, 300 do
+        if os.isfile(interrupted) and #io.readfile(interrupted):trim() > 0 then
+            loop = tonumber(io.readfile(interrupted):trim())
             break
         end
         os.sleep(100)
     end
-    local owner = tonumber(io.readfile(pidfile):trim())
+    check("a test that is about to be killed has started its owner", loop ~= nil and alive(loop), true)
+    child:kill()
+    child:wait(-1)
+    child:close()
+    if loop then
+        for _ = 1, 50 do
+            if not alive(loop) then
+                break
+            end
+            os.sleep(100)
+        end
+        check("a test that was killed leaves no process", alive(loop), false)
+        os.execv("/bin/kill", {tostring(loop)}, {try = true})
+    end
+
+    local owner = fixtures.owner_loop(path.join(home, "owner.pid"), "ci_local.lua")
     local began = "Mon Nov 23 12:00:00 2026"
     local me = os.getpid()
 
