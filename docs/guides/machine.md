@@ -601,6 +601,11 @@ one pool, kept in `.cache/budget` of the main checkout whatever `REVENANT_CACHE`
     ./xmakew l -P . tools/budget.lua run [--class critical|normal|background] [--jobs N] [--min N] [--mb M] -- <command> [args...]
     ./xmakew l -P . tools/budget.lua status
     ./xmakew l -P . tools/budget.lua test
+    ./xmakew l -P . tools/budget.lua polls <count> <poll ms> <hold ms> guarded|unguarded
+
+`polls` is the measurement the tests make and prints `empty N of M`: it polls the slots M times, holds each
+poll for `hold ms` as a slow decision would, sleeps `poll ms` between polls, and counts the polls that found no free slot; `guarded` takes `decide.lock` like
+a waiting request, `unguarded` does not.
 
 `run` exits 0 when the command it starts passes, the command's status when it fails, and 3 when the budget refuses to start
 it at all. A refusal prints the disk reading and the floor; the command was never run, so its status is not a failed check.
@@ -643,6 +648,15 @@ environment of the test does not reach it.
   and age pick the first eligible ticket, and a ticket that could not fit its minimum even then does not hold up the
   queue.
   The slot locks give the guarantee to one ticket at a time, and once it holds, later tickets wait for headroom again.
+  A waiting request takes the locks of the free slots while it decides, so that two of them cannot grant the same slot. It
+  does so under one more lock, `decide.lock` of the pool, which it waits for in steps of 20 ms; the listing of holders and
+  `status` take the same lock. Without it each waiting request, once a second, locked every free slot for the time of its
+  decision (a `ps`, a walk over the queue, sometimes a journal write), and the others found those slots held: with four
+  waiters and one free slot 65 of 100 polls found none (the measurement `budget.lua polls 25 100 40 unguarded`, four at
+  once, 2026-11-23; 0 of 100 with `guarded`), and the listing named the waiter as the holder of tokens it never had, with
+  the who-line of the command that held the slot hours before (`pid 58783 holds 3 token(s) for 7.0 h in <a removed
+  worktree>: /bin/sleep 6`). Taking a free slot now also drops that old who-line, and keeps the stamp of the old grant, which
+  counts as load for a minute. A client without `decide.lock` still locks the free slots for its decision.
 - Need. A command asks for `--min` tokens (one by default), or for the tokens its `--mb` needs when that is more (a 2.5 GB class
   takes two), and for up to `--jobs`; the minimum is a hard floor and a request that cannot meet it is never started short.
   It runs with `XMAKE_MAX_JOBS` set to the tokens it got.
