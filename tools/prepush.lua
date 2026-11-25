@@ -249,6 +249,13 @@ local function backports_init_order()
     return lua("frameworks/Backports/tests/init_order_test.lua", "check", built)
 end
 
+local function backports_device_globals()
+    local tree = gate_tree(gate_folder())
+    return in_own_temporary("step-tmp", function (envs)
+        return budgeted({os.programfile(), "l", "-P", tree, path.join(tree, "frameworks", "Backports", "tests", "device_globals_test.lua")}, {envs = envs})
+    end)
+end
+
 local function declared(xmake, name)
     return xmake:find("[%s{,]" .. name .. " = {") ~= nil
 end
@@ -662,6 +669,7 @@ local STEPS = {
     {name = "backports exports", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_exports},
     {name = "backports device imports", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_device_imports},
     {name = "backports init order", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_init_order},
+    {name = "backports device globals", heavy = true, env = PREBUILT_ENV, facts = device_facts, run = backports_device_globals},
 }
 
 local function test_suite()
